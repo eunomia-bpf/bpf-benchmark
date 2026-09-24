@@ -4187,3 +4187,36 @@ framework leaves the original bytecode in place and continues.
   conditional compare, compiler/native bytes, multi-step traces, helpers,
   specialization preservation, or full O1--O4. The architecture rebuild is
   regression evidence, not whole-simulator semantic equivalence.
+
+### AArch64 conditional-compare handler composition, 2026-09-24
+
+- Gap and value: CCMP appears throughout the 29 workload-derived AArch64
+  programs, but its real handler still hand-composed the incoming-NZCV
+  condition, SUB flag transition, and immediate fallback NZCV. The earlier
+  condition and SUB theorems did not prove this two-path state transition.
+- Contract and C binding: `arm64_ccmp_handler_spec.json` states that the
+  incoming flags select between SUB-NZCV and fallback bits NZCV[3:0], with no
+  register write. Its generator validates the canonical 15-condition table and
+  emits `KPROG_ARM64_EXEC_CCMP` plus a typed Lean step. The real CCMP immediate
+  and register branch now captures operands, condition, and fallback before
+  calling this shared macro.
+- Lean bridge: `KProgFormal/Arm64CcmpHandler.lean` independently restates the
+  condition through `arm64CondSpec`, the true path through `arm64SubNzc`, and
+  fallback extraction through `BitVec.getLsbD`. The corresponding lemmas prove
+  each bridge, and `arm64_ccmp_handler_refines` proves that both paths preserve
+  the complete modeled GPR/SP state for every incoming flag state, all 15
+  supported conditions, every width, all operands, and every 8-bit fallback
+  (whose high nibble is ignored). Concrete theorems pin true SUB flags, false
+  fallback flags, 32-bit SUB overflow, and high-nibble irrelevance. There is no
+  `sorry` or `admit`.
+- Machine checks: `make -C native-sim/formal check` exits 0, including an
+  independent 122880-case C oracle that exhausts all incoming flag states,
+  conditions, widths, boundary operands, and 4-bit fallbacks. With the installed
+  Rust/Clang paths explicit, `make -C native-sim/arm64 micro-proofs-build` exits
+  0 for the negative artifact and all 29 workload-derived artifacts.
+- Preserved boundary: the theorem begins after operand/register selection and
+  AUX condition/fallback decoding are supplied. It does not prove those parser
+  and selector steps, the C register switch, C/Lean language correspondence,
+  compiler/native bytes, multi-step traces, helpers, specialization
+  preservation, or full O1--O4. The architecture rebuild is regression
+  evidence, not whole-simulator semantic equivalence.

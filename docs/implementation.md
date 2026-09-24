@@ -50,7 +50,9 @@ increment is committed and pushed immediately). Current state:
   NZCV without changing modeled register/SP state. The logical flag-handler
   theorem similarly composes the AND/BIC result and logical-NZCV primitives:
   ANDS/BICS perform scalarizing width-aware writeback, while TST/TST-BIC
-  preserve modeled register/SP state.
+  preserve modeled register/SP state. The CCMP theorem composes the incoming
+  condition decision with SUB-NZCV or immediate fallback NZCV and proves that
+  both paths preserve modeled register/SP state.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -66,8 +68,8 @@ increment is committed and pushed immediately). Current state:
   helpers (`x86_bswap`, `x86_popcount64`, `x86_sign_extend`,
   `x86_signed_abs_width`, `x86_shld`/`x86_shrd`, `x86_ror`, the BT/BZHI
   predicates) now delegate to generated contracts with proven refinements.
-- Open on the AArch64 side: conditional compare and
-  source-modifier/register-selection composition beyond typed operands. The
+- Open on the AArch64 side: source-modifier/register-selection composition
+  beyond typed operands, including CCMP AUX condition/fallback decoding. The
   generic immediate/register
   ALU handler is now composed by `arm64_alu_handler_refines`: it covers the
   pointer-preserving 64-bit ADD path, scalarized arithmetic writeback, width
@@ -76,7 +78,9 @@ increment is committed and pushed immediately). Current state:
   `arm64_sub_step_refines`, and `arm64_logic_step_refines`; the arithmetic
   handler theorem composes ADDS/SUBS writeback and CMN/CMP no-write behavior;
   `arm64_logic_flag_handler_refines` separately composes ANDS/BICS writeback
-  and TST/TST-BIC no-write behavior over the AND/BIC families.
+  and TST/TST-BIC no-write behavior over the AND/BIC families, and
+  `arm64_ccmp_handler_refines` composes all supported conditions with the
+  compare/fallback flag paths while preserving register/SP state.
   Remaining work also includes the load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

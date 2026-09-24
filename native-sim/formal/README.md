@@ -80,9 +80,15 @@ replace NZCV while preserving the complete modeled GPR/SP state. It covers
 both logical families, all modeled widths and destinations, arbitrary operands,
 and arbitrary incoming state. A separate 64-case host oracle checks the shared
 C step over boundary operands. Both handler theorems begin after typed operand,
-width, destination, and source-modifier selection; conditional compare,
-register-number selection, the C register switch, and native bytes remain
-separate obligations.
+width, destination, and source-modifier selection. Conditional compare now has
+its own composed contract: `arm64_ccmp_handler_refines` proves that all 15
+supported conditions inspect the incoming NZCV, choose SUB-produced flags on
+the true path or immediate NZCV[3:0] on the false path, and preserve the
+complete modeled GPR/SP state. Its 122880-case host oracle exhausts incoming
+flag combinations, supported conditions, widths, boundary operands, and all
+4-bit fallbacks. The theorem begins after operand/register selection and AUX
+condition/fallback decoding; those selections, the C register switch, and
+native bytes remain separate obligations.
 The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
@@ -347,8 +353,8 @@ mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
 load/store contract, and AArch64 width, generic ALU handler writeback/path
-selection, ADDS/SUBS/CMN/CMP and ANDS/BICS/TST/TST-BIC composition, plus
-ADD/SUB/logical NZCV production;
+selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, and CCMP composition,
+plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.

@@ -13,6 +13,7 @@
 #include "../formal/generated/arm64_alu_handler.h"
 #include "../formal/generated/arm64_flag_handler.h"
 #include "../formal/generated/arm64_logic_flag_handler.h"
+#include "../formal/generated/arm64_ccmp_handler.h"
 #include "../formal/generated/arm64_mod.h"
 #include "../formal/generated/arm64_bitfield.h"
 #include "../formal/generated/arm64_mul.h"
@@ -906,15 +907,15 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC) | ~ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_CCMP_IMM || (OP) == ARM64_OP_CCMP_REG) {\
-			if (ARM64_SIM_L_EVAL_COND((AUX) & 0xffU)) {          \
-				ARM64_SIM_L_SET_SUB_FLAGS(ARM64_SIM_L_READ_REG(DST), (OP) == ARM64_OP_CCMP_IMM ? (__u64)(IMM) : ARM64_SIM_L_READ_REG(SRC), __a64_l_width);\
-			} else {                                             \
-				__u8 __a64_l_nzcv = ARM64_SIM_L_CCMP_NZCV(AUX);\
-				__a64_n = (__a64_l_nzcv >> 3) & 1;           \
-				__a64_z = (__a64_l_nzcv >> 2) & 1;           \
-				__a64_c = (__a64_l_nzcv >> 1) & 1;           \
-				__a64_v = __a64_l_nzcv & 1;                  \
-			}                                                     \
+			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST);      \
+			__u64 __a64_l_rhs = (OP) == ARM64_OP_CCMP_IMM ? (__u64)(IMM) :\
+				ARM64_SIM_L_READ_REG(SRC);                     \
+			__u8 __a64_l_cond = (AUX) & 0xffU;                 \
+			__u8 __a64_l_nzcv = ARM64_SIM_L_CCMP_NZCV(AUX);   \
+			KPROG_ARM64_EXEC_CCMP(__a64_l_cond, __a64_l_nzcv,\
+				__a64_n, __a64_z, __a64_c, __a64_v,         \
+				__a64_l_lhs, __a64_l_rhs, __a64_l_width,    \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE());           \
 		} else if (KPROG_ARM64_CSEL_HANDLED(OP)) {                   \
 			int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0;\
 			if ((OP) == ARM64_OP_CSEL && __a64_l_width == ARM64_WIDTH_64) {\
