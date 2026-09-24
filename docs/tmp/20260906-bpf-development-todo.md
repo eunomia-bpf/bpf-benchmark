@@ -4090,3 +4090,36 @@ framework leaves the original bytecode in place and continues.
   demand** (the +45 B mean inflation documented above), not relax any limit.
 - Nothing is left uncommitted: `bpfopt/llvm/src/main.cpp` matches HEAD and the
   binary matches the HEAD build.
+
+### AArch64 generic ALU handler refinement, 2026-09-24
+
+- Gap: the generated AArch64 ALU result, width, and pointer-add primitives had
+  local refinement theorems, but the real `ARM64_SIM_L_EXEC_ALU` decision
+  between provenance-preserving pointer ADD and scalarizing arithmetic
+  writeback was still hand-written and not covered by a handler-state theorem.
+- Contract and C binding: `arm64_alu_handler_spec.json` now generates
+  `KPROG_ARM64_ALU_USE_POINTER` and
+  `GeneratedArm64AluHandler.usePointer`. The real C handler calls that predicate
+  for its unchanged condition: width 64, ADD, destination not SP, and source tag
+  non-scalar. The generator's `--check` mode is part of the formal gate.
+- Lean bridge: `KProgFormal/Arm64AluHandler.lean` independently enumerates the
+  path condition and models GPR, SP, XZR, and absent destinations.
+  `arm64_alu_handler_refines` composes path selection, all six generated ALU
+  results, pointer-add bits/tag preservation, width narrowing, discarded
+  XZR/NONE writes, SP writes, and scalarized GPR writes for every modeled width
+  and provenance tag. Concrete theorems pin tagged pointer ADD, tagged SUB
+  scalarization, SP ADD, and 32-bit zero extension. There is no `sorry` or
+  `admit`.
+- Machine checks: `make -C native-sim/formal check` exits 0, including the new
+  168-case independent C path oracle and the complete pre-existing Lean/C
+  suite. With the workspace's installed toolchains made explicit through
+  `RUSTUP_HOME=/usr/local/rustup`, `CARGO_HOME=/usr/local/cargo`, and
+  `PATH=/usr/lib/llvm-18/bin:$PATH`, `make -C native-sim/arm64
+  micro-proofs-build` exits 0: the negative proof artifact and all 29
+  workload-derived artifacts compile `ok`.
+- Preserved boundary: the theorem begins after instruction decoding,
+  register-number selection, and source-modifier evaluation. It does not prove
+  the C register switch, C/Lean language correspondence, compiler output,
+  native instruction bytes, multi-step traces, helpers, specialization
+  preservation, or full O1--O4. The artifact rebuild is regression evidence,
+  not whole-simulator semantic equivalence.

@@ -10,6 +10,7 @@
 #include "../formal/generated/ptr_add.h"
 #include "../formal/generated/arm64_flags.h"
 #include "../formal/generated/arm64_alu_result.h"
+#include "../formal/generated/arm64_alu_handler.h"
 #include "../formal/generated/arm64_mod.h"
 #include "../formal/generated/arm64_bitfield.h"
 #include "../formal/generated/arm64_mul.h"
@@ -741,9 +742,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			KPROG_ALU64_RESULT(__a64_alu_op, __a64_alu_lhs,   \
 				__a64_alu_rhs,                            \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());        \
-		if (__a64_alu_width == ARM64_WIDTH_64 &&                  \
-		    __a64_alu_op == ARM64_ALU_ADD && (DST) != ARM64_SP && \
-		    __a64_alu_src_tag != ARM64_SIM_TAG_SCALAR)            \
+		if (KPROG_ARM64_ALU_USE_POINTER(__a64_alu_width,           \
+			__a64_alu_op, (DST) == ARM64_SP,                    \
+			__a64_alu_src_tag == ARM64_SIM_TAG_SCALAR))         \
 			ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),              \
 				KPROG_PTR_ADD64_BITS(                      \
 					ARM64_SIM_L_READ_REG_PTR(SRC),       \

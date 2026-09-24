@@ -52,6 +52,18 @@ explicit boundary vectors and a fixed-seed 20000-case sweep of all four
 widths; `make check` runs it. Instruction decoding, condition-to-next-PC
 selection beyond the earlier condition contract, and native bytes remain
 boundaries.
+The generic AArch64 ALU handler now has a composed state-transition theorem as
+well. `arm64_alu_handler_spec.json` generates the exact C/Lean predicate that
+selects the provenance-preserving path only for 64-bit ADD from a non-scalar
+source into a non-SP destination. `arm64_alu_handler_refines` proves that this
+path, the generated ALU result, pointer-add bits/tag policy, width narrowing,
+GPR/SP/XZR/NONE write behavior, and scalarization on every other arithmetic
+path agree with an independently enumerated handler specification for all six
+ALU operations, four modeled widths, four destination classes, and all modeled
+provenance tags. The theorem starts after decoding, source-register selection,
+and source-modifier evaluation; those inputs, the C register switch itself,
+and native bytes remain boundaries. A host cross-check exhausts 168 numeric
+path-selection cases, including unsupported width/opcode values.
 The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
@@ -315,7 +327,8 @@ for the unary/ALU handlers is now shared with this primitive.
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
-load/store contract, and AArch64 width plus ADD/SUB/logical NZCV production;
+load/store contract, and AArch64 width, generic ALU handler writeback/path
+selection, plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
@@ -324,8 +337,10 @@ operations remains a trusted language-semantics premise; these theorems do not
 verify the C compiler or native instruction bytes.
 
 This is still a deliberately bounded proof. It does not establish full
-equivalence between the model and the C macro implementations, cover branches,
-helpers, or the full workload-derived instruction subsets, or prove
-the paper's complete O1--O4 obligations. In particular, the multiply model is
-x86-shaped, and the ABI-load model still abstracts away base-register identity,
-width checks, and memory-boundary checks.
+equivalence between the simulator and native instruction bytes, cover complete
+instruction decoding/dispatch, multi-step control-flow traces, helpers, or the
+full workload-derived instruction subsets, or prove the paper's complete
+O1--O4 obligations. The proved branch predicates and AArch64 emitted-shape
+bridge are local control-flow refinements, not a whole-program trace theorem.
+The ABI-load model still abstracts away base-register identity, width checks,
+and memory-boundary checks.

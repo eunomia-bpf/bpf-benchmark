@@ -43,7 +43,9 @@ increment is committed and pushed immediately). Current state:
   byte-ladder load contract, the eight-lane AArch64 byte-lane scatter
   contract (proved inverse to the load ladder), the four-space AArch64
   memory tag-dispatch contract, and the two-condition AArch64 stack slot-tag
-  contract.
+  contract. The generic AArch64 ALU handler additionally composes all six ALU
+  results with width-aware GPR/SP/XZR/NONE writeback and the
+  provenance-preserving pointer-ADD path.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -52,18 +54,21 @@ increment is committed and pushed immediately). Current state:
 
 ### Current boundary and open work
 
-- Open x86 proof surface: IMUL (immediate and register-register), memory
-  lanes and stores, the objdump/parser-to-AUX selection relation, C-to-Lean
+- Open x86 proof surface: memory-operand handler composition, the
+  objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
   multi-step control-flow traces, and specialization preservation. All x86 value
   helpers (`x86_bswap`, `x86_popcount64`, `x86_sign_extend`,
   `x86_signed_abs_width`, `x86_shld`/`x86_shrd`, `x86_ror`, the BT/BZHI
   predicates) now delegate to generated contracts with proven refinements.
-- Open on the AArch64 side: the register-lane handler composition (the ALU
-  op-step half is proved: `arm64_add_step_refines`, `arm64_sub_step_refines`,
-  and `arm64_logic_step_refines` compose the generated result and generated flag
-  transition into the independent `Arm64AluStep` statement), the remaining
-  load/store address and tag paths,
+- Open on the AArch64 side: flag-setting and source-modifier handler
+  compositions beyond the generic ALU slice. The generic immediate/register
+  ALU handler is now composed by `arm64_alu_handler_refines`: it covers the
+  pointer-preserving 64-bit ADD path, scalarized arithmetic writeback, width
+  narrowing, and GPR/SP/XZR/NONE destinations after typed operands are supplied.
+  The ALU flag op-step half is separately proved by `arm64_add_step_refines`,
+  `arm64_sub_step_refines`, and `arm64_logic_step_refines`. Remaining work also
+  includes the load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
@@ -93,7 +98,8 @@ increment is committed and pushed immediately). Current state:
 
 - Each increment: shared JSON spec -> generated Lean + C -> Lean refine
   theorem against an independent spec -> full `make -C native-sim/formal
-  check` -> (when C changed) `make -C native-sim/x86 micro-proofs-build`
+  check` -> (when C changed) the affected architecture's
+  `make -C native-sim/<arch> micro-proofs-build`
   (negative artifact + 29 workload-derived artifacts) -> commit + push +
   record evidence in the research log.
 - No new measurement-validity gates; no program filtering; keep all failures

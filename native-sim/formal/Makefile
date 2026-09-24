@@ -8,6 +8,7 @@ check:
 	python3 generate_arm64_flags_spec.py --check
 	python3 generate_arm64_decode_spec.py --check
 	python3 generate_arm64_alu_result_spec.py --check
+	python3 generate_arm64_alu_handler_spec.py --check
 	python3 generate_arm64_mod_spec.py --check
 	python3 generate_arm64_bitfield_spec.py --check
 	python3 generate_arm64_mul_spec.py --check
@@ -106,6 +107,10 @@ check:
 	lake env lean KProgFormal/Arm64AluResult.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_result_host.c -o build/test_arm64_alu_result_host
 	./build/test_arm64_alu_result_host
+	lake env lean KProgFormal/GeneratedArm64AluHandler.lean
+	lake env lean KProgFormal/Arm64AluHandler.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
+	./build/test_arm64_alu_handler_host
 	lake env lean KProgFormal/Arm64Mod.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mod_host.c -o build/test_arm64_mod_host
 	./build/test_arm64_mod_host
