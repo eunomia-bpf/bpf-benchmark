@@ -375,6 +375,10 @@ CILIUM_SITE_ARMS = (
     ("RQ3 Cilium no-bulk applied sites", "corpus/results/x86_kvm_corpus_20260924_085901_647044", "kop_all_no_bulk_prefetch"),
     ("RQ3 Cilium no-bulk/no-prefetch applied sites", "corpus/results/x86_kvm_corpus_20260924_095500_223221", "kop_all_no_bulk_no_prefetch"),
 )
+# Fresh rerun of the RQ2 Cilium run's own pass policy (`kop`), retained with
+# its report stream so the RQ2 applied-site count is derived rather than
+# declared. Note the fresh `kop` policy no longer enables bulk_memory.
+CILIUM_RQ2_SITE_RUN = "corpus/results/x86_kvm_corpus_20260924_114427_040291"
 PPS = re.compile(r"\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)")
 
 
@@ -482,9 +486,22 @@ def cilium_claim_rows(root: Path) -> list[Row]:
     else:
         rows.append(Row("RQ2 Cilium x86 throughput (1.074x)", UNAVAILABLE,
                         f"completed Cilium run with 3+3 positive pps samples missing: {CILIUM_RQ2}"))
-    rows.append(Row("RQ2 Cilium x86 applied sites (4086)", UNAVAILABLE,
-                    "original per-pass loadtime report is not retained; app JSON alone cannot prove site count. "
-                    "The fresh-generation equivalent family set (kop_all_no_prefetch) derives 3512 sites"))
+    rq2_run = "RQ2 Cilium x86 applied sites (4086)"
+    derived_rq2 = loadtime_sites(
+        root / CILIUM_RQ2_SITE_RUN / "details/loadtime-reports/cilium__agent.jsonl")
+    if derived_rq2 is None:
+        rows.append(Row(rq2_run, UNAVAILABLE,
+                        "original per-pass loadtime report is not retained; app JSON alone cannot prove site count"))
+    else:
+        total, per_pass = derived_rq2
+        single = per_pass.get("kop") == total and total > 0
+        rows.append(Row(
+            f"RQ2 Cilium x86 applied sites ({total} fresh)",
+            PASS if single else PARTIAL,
+            f"the June run's own `kop` policy, rerun in {CILIUM_RQ2_SITE_RUN}: sum of "
+            f"report.sites_applied = {total}, {per_pass}; the June 4086 count remains declared because "
+            f"its report stream is gone and the fresh `kop` policy no longer enables bulk_memory",
+        ))
 
     on = cilium_app(root, CILIUM_RQ4_ON, bpf_stats=True)
     off = cilium_app(root, CILIUM_RQ4_OFF, bpf_stats=False)
@@ -1105,6 +1122,24 @@ def self_test() -> int:
             failures.append(
                 "RQ3 site row spanning two steps expected PARTIAL, got "
                 f"{[(r.claim, r.status) for r in site_rows]}"
+            )
+
+        # RQ2 applied-site row: derived from the fresh `kop` rerun's report.
+        rq2_arm = root / CILIUM_RQ2_SITE_RUN / "details/loadtime-reports"
+        rq2_rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ2 Cilium x86 applied sites")]
+        if len(rq2_rows) != 1 or rq2_rows[0].status != UNAVAILABLE:
+            failures.append(
+                "RQ2 site row without report expected UNAVAILABLE, got "
+                f"{[(r.claim, r.status) for r in rq2_rows]}"
+            )
+        rq2_arm.mkdir(parents=True)
+        (rq2_arm / "cilium__agent.jsonl").write_text(json.dumps({
+            "step": "kop", "report": {"pass": "kop", "sites_applied": 2988}}) + "\n")
+        rq2_rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ2 Cilium x86 applied sites")]
+        if len(rq2_rows) != 1 or rq2_rows[0].status != PASS or "2988 fresh" not in rq2_rows[0].claim:
+            failures.append(
+                "RQ2 site row with retained `kop` report expected PASS/2988, got "
+                f"{[(r.claim, r.status) for r in rq2_rows]}"
             )
 
     if failures:

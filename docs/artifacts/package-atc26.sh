@@ -165,6 +165,7 @@ CORPUS_RUNS=(
     x86_kvm_corpus_20260924_074900_275227
     x86_kvm_corpus_20260924_085901_647044
     x86_kvm_corpus_20260924_095500_223221
+    x86_kvm_corpus_20260924_114427_040291
     aws_arm64_corpus_20260605_080836_924256
     aws_arm64_corpus_20260605_094729_221231
 )
@@ -347,6 +348,7 @@ required=(
     corpus/results/x86_kvm_corpus_20260924_074900_275227/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/x86_kvm_corpus_20260924_085901_647044/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/x86_kvm_corpus_20260924_095500_223221/details/loadtime-reports/cilium__agent.jsonl
+    corpus/results/x86_kvm_corpus_20260924_114427_040291/details/loadtime-reports/cilium__agent.jsonl
 )
 for rel in "${required[@]}"; do
     [ -e "$VERIFY/$rel" ] || { echo "missing from ZIP: $rel" >&2; exit 1; }
