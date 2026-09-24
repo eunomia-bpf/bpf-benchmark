@@ -379,6 +379,15 @@ CILIUM_SITE_ARMS = (
 # its report stream so the RQ2 applied-site count is derived rather than
 # declared. Note the fresh `kop` policy no longer enables bulk_memory.
 CILIUM_RQ2_SITE_RUN = "corpus/results/x86_kvm_corpus_20260924_114427_040291"
+# Fresh isolated reruns of the two RQ3 Katran ARM64 policies, retained with
+# their report streams so the Katran applied-site counts are derived rather
+# than declared. These run under local arm64 QEMU; the June runs used AWS.
+KATRAN_SITE_ARMS = (
+    ("RQ3 Katran conservative applied sites", "corpus/results/arm64_qemu_corpus_19700101_000011_781867",
+     ["kop"]),
+    ("RQ3 Katran coverage-max applied sites", "corpus/results/arm64_qemu_corpus_19700101_000011_741370",
+     ["rotate", "extract", "endian_fusion", "bulk_memory", "prefetch", "cond_select", "ccmp"]),
+)
 PPS = re.compile(r"\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)")
 
 
@@ -608,6 +617,46 @@ def cilium_site_rows(root: Path) -> list[Row]:
             + f"; {run}/details/apps/cilium__agent.json",
         ))
     rows.append(corpus_divergence_row(root))
+    rows.extend(katran_site_rows(root))
+    return rows
+
+
+def katran_site_rows(root: Path) -> list[Row]:
+    """Derive RQ3 Katran ARM64 applied-site counts from fresh shim reports.
+
+    The June ARM64 runs retained no per-pass reports, so these are fresh
+    isolated local-QEMU reruns of the identical policies; the derived count is
+    the sum of report.sites_applied over details/loadtime-reports/katran.jsonl.
+    The policy is matched per step (the coverage-max list has one step per
+    family), so the total spans several steps and is reported as PARTIAL.
+    """
+    rows: list[Row] = []
+    for label, run, passes in KATRAN_SITE_ARMS:
+        path = root / run / "details/loadtime-reports/katran.jsonl"
+        derived = loadtime_sites(path)
+        app = corpus_app(root, run, run_type="arm64_qemu_corpus", app_file="katran.json",
+                         passes=passes, bpf_stats=True, workload_seconds=30.0)
+        baseline = phase_pps(app, "baseline") if app else []
+        post = phase_pps(app, "post_rejit") if app else []
+        ratio = statistics.mean(post) / statistics.mean(baseline) if len(baseline) == len(post) == 3 and min(baseline + post) > 0 else None
+        cost_b = bpf_ns_per_run(app, "baseline") if app else None
+        cost_p = bpf_ns_per_run(app, "post_rejit") if app else None
+        cost = cost_p / cost_b if cost_b and cost_p else None
+        if derived is None:
+            rows.append(Row(label, UNAVAILABLE,
+                            f"retained loadtime report missing: {run}/details/loadtime-reports/katran.jsonl"))
+            continue
+        total, per_pass = derived
+        rows.append(Row(
+            f"{label} ({total} sites, {ratio:.3f}x)" if ratio is not None
+            else f"{label} ({total} sites)",
+            PASS if ratio is not None else PARTIAL,
+            f"sum of report.sites_applied over {run}/details/loadtime-reports/katran.jsonl "
+            f"= {total} across {len(per_pass)} step(s) {per_pass}; fresh local-QEMU run: "
+            + (f"post/baseline mean pps={ratio:.6f}x, BPF cost ratio={cost:.6f}" if cost is not None
+               else "workload ratio unavailable")
+            + f"; {run}/details/apps/katran.json",
+        ))
     return rows
 
 
@@ -1140,6 +1189,25 @@ def self_test() -> int:
             failures.append(
                 "RQ2 site row with retained `kop` report expected PASS/2988, got "
                 f"{[(r.claim, r.status) for r in rq2_rows]}"
+            )
+
+        # RQ3 Katran applied-site rows: derived from the fresh arm64 arm report.
+        kat_label = KATRAN_SITE_ARMS[0][1]
+        kat_rows = [r for r in katran_site_rows(root) if r.claim.startswith("RQ3 Katran conservative")]
+        if len(kat_rows) != 1 or kat_rows[0].status != UNAVAILABLE:
+            failures.append(
+                "RQ3 Katran site row without report expected UNAVAILABLE, got "
+                f"{[(r.claim, r.status) for r in kat_rows]}"
+            )
+        kat_dir = root / kat_label / "details/loadtime-reports"
+        kat_dir.mkdir(parents=True)
+        (kat_dir / "katran.jsonl").write_text(json.dumps({
+            "step": "kop", "report": {"pass": "kop", "sites_applied": 21}}) + "\n")
+        kat_rows = [r for r in katran_site_rows(root) if r.claim.startswith("RQ3 Katran conservative")]
+        if len(kat_rows) != 1 or kat_rows[0].status != PARTIAL or "21 sites" not in kat_rows[0].claim:
+            failures.append(
+                "RQ3 Katran site row with report but no app JSON expected PARTIAL/21, got "
+                f"{[(r.claim, r.status) for r in kat_rows]}"
             )
 
     if failures:

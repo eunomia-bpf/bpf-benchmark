@@ -434,7 +434,7 @@ metric rows.
 | RQ1 arm64 | ARM64 micro speedup | `PLATFORM=aws ARCH=arm64 make micro` | `micro/results/` | Yes (needs AWS) |
 | RQ1 overhead | `object_load_ns` ratio | included in `make micro` | `micro/results/` | Command path yes; retained 62-case claim `PARTIAL` |
 | RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; throughput derives from retained JSON; the 4086 count is a full-scale run, with the same-policy `kop` rerun deriving 2988 fresh |
-| RQ3 policy | site-count vs profitability | four-arm Cilium ladder + Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points and the four fresh Cilium site counts derive from retained raw JSON; the June per-pass site reports are missing, so the June/Katran counts are declared and the fresh ladder's ordering diverges from June's |
+| RQ3 policy | site-count vs profitability | four-arm Cilium ladder + two-arm Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points and all six fresh site counts (Cilium 4017/3512/3517/2988; Katran 21/64) derive from retained raw JSON; the June per-pass site reports are missing, so the June site counts are declared and the fresh ladder's ordering diverges from June's |
 | RQ4 native bound | 2.358×, 488.7→262.3 ns/run | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; 113/22/89 loader counts unavailable |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
 | Proofs | "emit computes the same result as its proof sequence" | `make -C native-sim/formal check` | stdout | **Yes** |
@@ -446,10 +446,16 @@ conservative ARM64 pass with the all-selector pass list. The Cilium arm
 commands have since been re-run to completion on the current host/toolchain
 generation (the four `corpus/results/x86_kvm_corpus_20260924_*` directories),
 and those runs retain `details/loadtime-reports/cilium__agent.jsonl`, from which
-the renderer derives 4017/3512/3517/2988 applied sites. The June and Katran site
-counts remain declared from `docs/tmp/kop_ablation_20260605_summary.md` because
-their runs retained no per-pass report. The Katran re-run recipes have not been
-validated against a fresh completed run:
+the renderer derives 4017/3512/3517/2988 applied sites. The two Katran ARM64
+policies have likewise been re-run to completion locally under
+`PLATFORM=qemu ARCH=arm64` (the two
+`corpus/results/arm64_qemu_corpus_19700101_*` directories; `qemu` substitutes
+for the unavailable `aws` platform here), retaining
+`details/loadtime-reports/katran.jsonl` from which the renderer derives
+21 (conservative) and 64 (coverage-max) applied sites. The June and historical
+RQ2 site counts remain declared from
+`docs/tmp/kop_ablation_20260605_summary.md` because their runs retained no
+per-pass report:
 
 ```bash
 for arm in kop_all_prefetch kop_all_no_prefetch \
@@ -457,12 +463,14 @@ for arm in kop_all_prefetch kop_all_no_prefetch \
   BPFREJIT_BENCH_PASSES=$arm BPFREJIT_CORPUS_APPS=cilium/agent \
     SAMPLES=3 WORKLOAD_DURATION=30 make corpus
 done
-PLATFORM=aws ARCH=arm64 BPFREJIT_BENCH_PASSES=kop \
+PLATFORM=qemu ARCH=arm64 BPFREJIT_BENCH_PASSES=kop \
   BPFREJIT_CORPUS_APPS=katran SAMPLES=3 WORKLOAD_DURATION=30 make corpus
-PLATFORM=aws ARCH=arm64 \
+PLATFORM=qemu ARCH=arm64 \
   BPFREJIT_BENCH_PASSES=rotate,extract,endian_fusion,bulk_memory,prefetch,cond_select,ccmp \
   BPFREJIT_CORPUS_APPS=katran SAMPLES=3 WORKLOAD_DURATION=30 make corpus
 ```
+(`PLATFORM=aws ARCH=arm64` is the equivalent remote arm64 executor when AWS
+credentials are configured; the retained reruns above used local QEMU.)
 
 To render the tracked raw JSON into a human-readable claim table, run:
 
@@ -545,6 +553,18 @@ values. The Katran and the historical RQ2 counts (21/62, 4086) remain
 `details/loadtime-reports/` tree survives for those runs and the figures
 annotate them as declared.
 
+The **Katran** applied-site counts are derived the same way from two fresh
+local-QEMU ARM64 reruns of the paper's two policies
+(`corpus/results/arm64_qemu_corpus_19700101_000011_781867`,
+`..._000011_741370`). The conservative `kop` arm derives 21 sites
+(`{'kop': 21}`; families `rotate 20, extract 1`), exactly matching the declared
+per-app 21. The coverage-max seven-family arm derives 64 sites across its
+seven steps (`rotate 20, extract 1, endian_fusion 9, bulk_memory 28, prefetch 6`,
+`cond_select 0, ccmp 0`), against the declared 62 — a same-policy
+different-generation count, not a reproduction. Both rows carry their fresh
+throughput and cost ratios. As with the Cilium arms, the June/July counts remain
+**declared**; these fresh arm64 runs are shipped as separate evidence.
+
 For the paper's 62-case x86 object-load claim, the two retained completed
 May 14 ReJIT runs each contain 63 cases. Restricting each to the exact 62
 benchmark names in the earlier April 29 run (the only extra name is
@@ -612,18 +632,23 @@ assuming a command or retained directory succeeded.
    + extract 4). The paper quotes the per-app 21; the two are different
    aggregations of the same run and the discrepancy is unresolved because the
    per-pass report is not retained.
-7. **The June RQ3/RQ2 site counts are declared; the fresh Cilium counts are
-   derived.** No `details/loadtime-reports/` tree survives for the June ladder,
-   so its annotated counts (4697/4086/4136/3512), the Katran counts (21/62) and
-   the RQ2 4086 count are **declared** from
+7. **The June RQ3/RQ2 site counts are declared; the fresh Cilium and Katran
+   counts are derived.** No `details/loadtime-reports/` tree survives for the
+   June ladder, so its annotated counts (4697/4086/4136/3512), the June Katran
+   counts (21/62) and the RQ2 4086 count are **declared** from
    `docs/tmp/kop_ablation_20260605_summary.md`. Five fresh Cilium reruns retain
    their report streams: the four RQ3 policy arms
    (`corpus/results/x86_kvm_corpus_20260924_{064817_392000,074900_275227,085901_647044,095500_223221}`)
    derive 4017/3512/3517/2988, and a rerun of the RQ2 run's own `kop` policy
-   (`corpus/results/x86_kvm_corpus_20260924_114427_040291`) derives 2988. The
+   (`corpus/results/x86_kvm_corpus_20260924_114427_040291`) derives 2988. Two
+   fresh local-QEMU ARM64 reruns retain `details/loadtime-reports/katran.jsonl`:
+   the conservative `kop` arm (`corpus/results/arm64_qemu_corpus_19700101_000011_781867`)
+   derives 21, and the seven-family coverage-max arm
+   (`corpus/results/arm64_qemu_corpus_19700101_000011_741370`) derives 64. The
    fresh `kop` policy no longer enables `bulk_memory`. These are a different
-   host/toolchain generation, so do not treat the derived counts as reproducing
-   the June numbers.
+   host/toolchain generation (the ARM64 arms also ran under local QEMU rather
+   than AWS), so do not treat the derived counts as reproducing the June
+   numbers.
 8. **The fresh Cilium ladder does not reproduce the June ladder's ordering.**
    On the same fresh generation the post/baseline throughput ordering is the
    reverse of the June ladder (no-bulk+no-prefetch 1.138190× fastest,
@@ -672,7 +697,7 @@ evidence status, not an AEC decision.
 |---|---|---|
 | Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. An `atc26-ae-2` candidate ZIP was built by `docs/artifacts/package-atc26.sh` and replay-verified from clean extraction. | The `atc26-ae-2` candidate must be **published** on Zenodo, and an independent evaluator must verify that published ZIP from clean extraction, before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
 | Functional | Component map, environment, dependencies, safety notes, no-VM formal path and a completed Katran KVM smoke are documented above. The `atc26-ae-2` candidate passed the packager's clean-extraction replay (`make lint`, `py_compile`, renderer `--self-test`, table generation and manifest parse). | An independent evaluation must confirm the **published** ZIP through the documented proof/build/smoke path; a build-time self-test in the authors' checkout alone is weaker evidence. |
-| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). Five fresh Cilium reruns retain their shim report streams: the four RQ3 arms derive applied-site counts 4017/3512/3517/2988, a rerun of the RQ2 run's own `kop` policy derives 2988, and the renderer derives a `PARTIAL` June-vs-fresh ordering divergence row. The formal, Katran-smoke and six-app-success receipts are hash-bound. The six-app run `x86_kvm_corpus_20260923_114624_121697` completed with 6/6 successful workloads. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; the June RQ2 4086 and RQ3 site counts and RQ4's 113/22/89 counts lack independent per-pass logs, and the fresh Cilium ladder's throughput ordering diverges from June's, so those rows are declared or `PARTIAL` rather than derived matches. |
+| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). Five fresh Cilium reruns retain their shim report streams: the four RQ3 arms derive applied-site counts 4017/3512/3517/2988 and a rerun of the RQ2 run's own `kop` policy derives 2988; two fresh local-QEMU ARM64 Katran reruns derive 21 (conservative) and 64 (coverage-max); the renderer derives a `PARTIAL` June-vs-fresh ordering divergence row. The formal, Katran-smoke and six-app-success receipts are hashed in `docs/artifacts/evidence/`. | The fresh site counts are a different host/toolchain generation (the ARM64 arms under local QEMU, not AWS), so they do not reproduce the June 4697/4086/4136/3512 and 21/62 counts, which remain **declared**. RQ4's 113/22/89 loader counts are unavailable. |
 
 `docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
 numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to
