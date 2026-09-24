@@ -126,6 +126,36 @@ def parse_wrk(stdout: str) -> dict[str, Any]:
     return metrics
 
 
+def parse_kernel_pktgen(stdout: str) -> dict[str, Any]:
+    """Extract the raw throughput fields from a kernel pktgen result.
+
+    A completed pktgen report ends with lines such as::
+
+        Result: OK: 179970676(c179970676+d0) usec, 135740722 (64byte,-1frags)
+          754237pps 386Mb/sec (386169344bps) errors: 0
+
+    The parser deliberately returns the raw per-thread rate.  Aggregation
+    across workload components and phase comparison remain analysis-side
+    decisions made by the caller.
+    """
+    result_lines = re.findall(
+        r"(?m)^\s*([0-9]+)pps\s+[^\n]*\berrors:\s*([0-9]+)\s*$",
+        stdout or "",
+    )
+    packet_lines = re.findall(
+        r"(?m)^Result:\s+OK:\s+[^\n]*,\s+([0-9]+)\s+\(",
+        stdout or "",
+    )
+    if len(result_lines) != 1 or len(packet_lines) != 1:
+        return {}
+    packets_per_second, error_count = result_lines[0]
+    return {
+        "packets_per_second": int(packets_per_second),
+        "packet_count": int(packet_lines[0]),
+        "error_count": int(error_count),
+    }
+
+
 def parse_stress_ng(stdout: str, stderr: str) -> dict[str, Any]:
     """Extract per-stressor bogo-ops from stress-ng --metrics-brief output.
 
@@ -235,6 +265,7 @@ def parse_katran_parallel_http(stdout: str) -> dict[str, Any]:
 # Maps workload_name (or config.tool) to parser. Preference order: workload_name first.
 TOOL_PARSERS = {
     "wrk": lambda r: parse_wrk(r.get("stdout", "")),
+    "kernel_pktgen": lambda r: parse_kernel_pktgen(r.get("stdout", "")),
     "stress-ng": lambda r: parse_stress_ng(r.get("stdout", ""), r.get("stderr", "")),
     "fio": lambda r: parse_fio(r.get("stdout", "")),
     "python_parallel": lambda r: parse_katran_parallel_http(r.get("stdout", "")),
@@ -311,8 +342,14 @@ def collect_corpus_run(run_dir: Path, app_filter: str | None = None,
             continue
         out.extend(walk_app_json(payload, app_name))
     if tool_filter:
-        out = [r for r in out if r.get("tool") == tool_filter
-               or r.get("workload_name") == tool_filter]
+        def contains_tool(record: Mapping[str, Any]) -> bool:
+            if (record.get("tool") == tool_filter
+                    or record.get("workload_name") == tool_filter):
+                return True
+            components = record.get("components") or []
+            return any(contains_tool(component) for component in components)
+
+        out = [record for record in out if contains_tool(record)]
     return out
 
 

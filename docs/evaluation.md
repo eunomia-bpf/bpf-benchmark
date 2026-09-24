@@ -11,6 +11,44 @@ The older daemon, `BPF_PROG_REJIT`, kop, seven-app, and 20-app measurements
 retained later in this document are historical experiment records. They do not
 describe the current speculative paper's architecture or supported corpus.
 
+## Current speculative throughput evidence — 2026-09-24
+
+The historical real-application batches named by the user have been
+reconstructed from their committed per-app JSON rather than copied from prior
+summaries. The analysis-side tool
+[`analysis/speculative_workload_history.py`](../analysis/speculative_workload_history.py)
+selects a deterministic app/run interval at Git artifact snapshot `5b130b6ec`,
+checks the completed two-start/load-time lifecycle and exact pass list, parses
+each raw workload leaf, and maps every app JSON to its introducing commit. The
+full 60-run output and exact commands are retained in
+[`raw-results.md`](tmp/build-and-evaluate/step-0004-20260924T163615+0000/experiment-001/raw-results.md).
+
+Four ten-run, 180-second pktgen batches have positive policy/baseline
+workload-throughput geomeans whose fixed-seed 95% run-level percentile
+bootstrap intervals are wholly above one:
+
+- Cilium `hot_region_version,map_inline`: `1.0517214715`, interval
+  `[1.0118063845, 1.0938097141]`, 8/2 wins/losses;
+- Cilium `hot_region_version`: `1.0504250464`, interval
+  `[1.0311387601, 1.0710336116]`, 10/0;
+- Cilium `map_inline`: `1.0666709764`, interval
+  `[1.0392809322, 1.0991746828]`, 10/0; and
+- Katran `map_inline`: `1.0911970593`, interval
+  `[1.0836097791, 1.0982745206]`, 10/0.
+
+The Cilium batches were collected on different dates, so their differences are
+not a causal pass ablation. The historical app JSON records a successful
+declared load-time policy but omits the per-step reports; these results are
+therefore observed baseline/policy phase differences, not per-site causal
+attribution. Introducing commits establish raw-artifact provenance, not the
+unrecorded runtime kernel/application/optimizer revision.
+
+The same audit reproduces the requested Tracee and BCC `context_specialize`
+summed-bogo-op geomeans (`1.0003915611` and `1.0043429528`), with intervals
+crossing one. Because stress-ng bogo ops have stressor-specific meanings, those
+sums remain internal boundary evidence and do not enter the reader-facing
+paper.
+
 ## 1. System Under Test
 
 - **What it does**: optimize programs loaded by real upstream applications
