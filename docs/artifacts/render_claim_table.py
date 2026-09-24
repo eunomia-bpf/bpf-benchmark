@@ -366,6 +366,13 @@ def micro_claim_rows(root: Path) -> list[Row]:
 CILIUM_RQ2 = "corpus/results/x86_kvm_corpus_20260604_100557_313063"
 CILIUM_RQ4_ON = "corpus/results/x86_kvm_corpus_20260529_033517_489159"
 CILIUM_RQ4_OFF = "corpus/results/x86_kvm_corpus_20260529_040554_604387"
+# Fresh native-loader Cilium run: the June native-post run retained no shim
+# log, so the paper's 113/22 loader counts cannot be recovered. This run
+# retains details/shim-logs/cilium__agent.post_rejit.log plus the staged Cilium
+# native manifest, so the loader decision counts are derived rather than
+# declared. It is a separate fresh generation and never merged with 113/22.
+CILIUM_NATIVE_POST_RUN = "corpus/results/x86_kvm_corpus_20260924_164153_955835"
+NATIVE_EVIDENCE_DIR = "docs/artifacts/evidence/rq4-cilium-native-loader"
 # Fresh isolated reruns of the four RQ3 Cilium single-pass policies. The June
 # ladder retained no per-pass loadtime reports, so site counts were declared;
 # these runs retain details/loadtime-reports/cilium__agent.jsonl.
@@ -479,6 +486,108 @@ def loadtime_sites(path: Path) -> tuple[int, dict[str, int]] | None:
     return (total, per_pass) if seen else None
 
 
+def native_loader_counts(path: Path) -> dict[str, int] | None:
+    """Count loader decisions from a retained shim log.
+
+    The shim emits one `BPF_PROG_LOAD type=` marker per intercepted load, and
+    for each load it classifies exactly one of `native-loader replaced prog=`,
+    `native-loader no manifest match pass-through for prog=`, or
+    `native-loader skipped <kind> program`. Loads issued before the loader
+    finishes initializing carry no decision line, so
+    `loads != replaced + pass_through + skipped` in general; both sides are
+    reported so the gap stays visible. Returns None when the log is absent or
+    holds no load markers.
+    """
+    try:
+        text = path.read_text(errors="replace")
+    except OSError:
+        return None
+    counts = {"loads": 0, "replaced": 0, "pass_through": 0, "skipped": 0}
+    for line in text.splitlines():
+        if "BPF_PROG_LOAD type=" in line:
+            counts["loads"] += 1
+        elif "native-loader replaced prog=" in line:
+            counts["replaced"] += 1
+        elif "native-loader no manifest match pass-through for prog=" in line:
+            counts["pass_through"] += 1
+        elif "native-loader skipped " in line and " program" in line:
+            counts["skipped"] += 1
+    return counts if counts["loads"] else None
+
+
+def native_manifest_objects(path: Path) -> tuple[int, int] | None:
+    """Return (object entries, distinct native objects) from a staged manifest.
+
+    Only the manifest's own `objects` list is counted; the paper's
+    `native_files` figure is not reproduced from this tree and is not derived.
+    """
+    data = load_json(path)
+    if not isinstance(data, dict):
+        return None
+    objects = data.get("objects")
+    if not isinstance(objects, list) or not objects:
+        return None
+    names = {o["native_object"] for o in objects
+             if isinstance(o, dict) and o.get("native_object")}
+    return len(objects), len(names)
+
+
+def native_loader_rows(root: Path) -> list[Row]:
+    """Derive RQ4 native-loader counts from the fresh retained native-post run.
+
+    The June native-post run kept no shim log, so the paper's 113/22 loader
+    split stays declared. This fresh run retains its post-phase shim log and
+    the staged Cilium native manifest, so replacement and manifest-object
+    counts are derived. They are a new host/toolchain generation and are never
+    merged with the paper's 113/22/89.
+    """
+    rows: list[Row] = []
+    log_rel = f"{NATIVE_EVIDENCE_DIR}/details/shim-logs/cilium__agent.post_rejit.log"
+    run_ok = corpus_app(root, CILIUM_NATIVE_POST_RUN, run_type="x86_kvm_corpus",
+                        app_file="cilium__agent.json", passes=[], bpf_stats=True,
+                        workload_seconds=30.0)
+    counts = native_loader_counts(root / log_rel)
+    receipt = load_json(root / NATIVE_EVIDENCE_DIR / "receipt.json") or {}
+    hashes = receipt.get("shim_log_files_sha256")
+    log_ok = (
+        isinstance(hashes, dict)
+        and hashes.get("details/shim-logs/cilium__agent.post_rejit.log")
+        == file_sha256(root / log_rel)
+    ) if (root / log_rel).is_file() else False
+    if run_ok is None or counts is None:
+        rows.append(Row(
+            "RQ4 native loader counts (113/22/89)", UNAVAILABLE,
+            f"fresh native-post run or its post-phase shim log missing: "
+            f"{CILIUM_NATIVE_POST_RUN}, {log_rel}"))
+    else:
+        undecided = (counts["loads"] - counts["replaced"]
+                     - counts["pass_through"] - counts["skipped"])
+        rows.append(Row(
+            f"RQ4 native loader replacements ({counts['replaced']} fresh, {counts['loads']} loads)",
+            PASS if counts["replaced"] > 0 and log_ok else PARTIAL,
+            f"{log_rel}: {counts['loads']} intercepted loads, {counts['replaced']} replaced, "
+            f"{counts['pass_through']} manifest pass-through, {counts['skipped']} feature-probe "
+            f"skips, {undecided} loads carrying no decision line, receipt log hash valid={log_ok}; "
+            f"the paper's 113/22 loader split remains declared because the June native-post run "
+            f"retained no shim log",
+        ))
+    manifest = native_manifest_objects(root / NATIVE_EVIDENCE_DIR / "manifest.json")
+    if manifest is None:
+        rows.append(Row(
+            "RQ4 Cilium native manifest objects (89)", UNAVAILABLE,
+            f"retained staged manifest missing: {NATIVE_EVIDENCE_DIR}/manifest.json"))
+    else:
+        objects, names = manifest
+        rows.append(Row(
+            f"RQ4 Cilium native manifest objects ({objects} fresh)",
+            PASS if objects == 89 else PARTIAL,
+            f"{NATIVE_EVIDENCE_DIR}/manifest.json: {objects} object entries across {names} "
+            f"distinct native objects; the paper's 89 stays declared, and the paper's "
+            f"native-file count is not reproduced from this tree",
+        ))
+    return rows
+
+
 def cilium_claim_rows(root: Path) -> list[Row]:
     """Derive selected RQ2/RQ4 Cilium claims from retained three-sample raw JSON."""
     rows: list[Row] = []
@@ -542,8 +651,7 @@ def cilium_claim_rows(root: Path) -> list[Row]:
     else:
         rows.append(Row("RQ4 Cilium BPF cost (488.7 to 262.3 ns/run)", UNAVAILABLE,
                         f"retained >=100-run BPF records missing: {CILIUM_RQ4_ON}"))
-    rows.append(Row("RQ4 native loader counts (113/22/89)", UNAVAILABLE,
-                    "loader match/replacement raw logs are not retained in the selected Cilium JSON"))
+    rows.extend(native_loader_rows(root))
     for label, run, run_type, app_file, policy, sites, wl_claim, cost_claim in (
         ("RQ3 Cilium coverage-max throughput (1.114x)", "corpus/results/x86_kvm_corpus_20260605_145112_835705",
          "x86_kvm_corpus", "cilium__agent.json", "kop_all_prefetch", 4697, "1.114", "0.776"),
@@ -1210,11 +1318,86 @@ def self_test() -> int:
                 f"{[(r.claim, r.status) for r in kat_rows]}"
             )
 
+        # RQ4 native-loader rows: derived from the fresh retained shim log.
+        nat_rows = native_loader_rows(root)
+        if len(nat_rows) != 2 or any(r.status != UNAVAILABLE for r in nat_rows):
+            failures.append(
+                "RQ4 native rows without shim log expected UNAVAILABLE, got "
+                f"{[(r.claim, r.status) for r in nat_rows]}"
+            )
+        nat_run = root / CILIUM_NATIVE_POST_RUN
+        (nat_run / "details/apps").mkdir(parents=True)
+        (nat_run / "metadata.json").write_text(json.dumps({
+            "status": "completed", "run_type": "x86_kvm_corpus", "suite": "corpus",
+            "samples": 3, "workload_seconds": 30.0, "bpf_stats": True,
+            "config": {"enabled_passes": []},
+        }))
+        (nat_run / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+        (nat_run / "details/apps/cilium__agent.json").write_text(json.dumps({
+            "status": "ok", "baseline": {**_wl(1000), "bpf": bpf},
+            "post_rejit": {**_wl(2358), "bpf": bpf_post},
+        }))
+        nat_log = root / NATIVE_EVIDENCE_DIR / "details/shim-logs/cilium__agent.post_rejit.log"
+        nat_log.parent.mkdir(parents=True)
+        nat_log.write_text("\n".join([
+            "BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2",
+            "BPF_PROG_LOAD type=6 (xdp) name=bpf_xdp insn_cnt=40",
+            "native-loader replaced prog=bpf_xdp original_fd=7 native_object=bpf_xdp.native.o",
+            "BPF_PROG_LOAD type=3 (sched_cls) name=probe insn_cnt=23",
+            "native-loader skipped feature probe program name=probe insn_cnt=23",
+        ]) + "\n")
+        nat_rows = native_loader_rows(root)
+        first = nat_rows[0]
+        if (len(nat_rows) != 2 or first.status != PARTIAL
+                or first.claim != "RQ4 native loader replacements (1 fresh, 3 loads)"
+                or "1 loads carrying no decision line" not in first.evidence):
+            failures.append(
+                "RQ4 native loader row without receipt expected PARTIAL/1 fresh/3 loads, got "
+                f"{[(r.claim, r.status) for r in nat_rows]} {first.evidence!r}"
+            )
+        (root / NATIVE_EVIDENCE_DIR / "receipt.json").write_text(json.dumps({
+            "shim_log_files_sha256": {
+                "details/shim-logs/cilium__agent.post_rejit.log": file_sha256(nat_log),
+            },
+        }))
+        nat_rows = native_loader_rows(root)
+        first = nat_rows[0]
+        if first.status != PASS or "receipt log hash valid=True" not in first.evidence:
+            failures.append(
+                "RQ4 native loader row with matching receipt hash expected PASS, got "
+                f"{(first.status, first.evidence)!r}"
+            )
+        (root / NATIVE_EVIDENCE_DIR / "receipt.json").write_text(json.dumps({
+            "shim_log_files_sha256": {
+                "details/shim-logs/cilium__agent.post_rejit.log": "0" * 64,
+            },
+        }))
+        first = native_loader_rows(root)[0]
+        if first.status != PARTIAL or "receipt log hash valid=False" not in first.evidence:
+            failures.append(
+                "RQ4 native loader row with stale receipt hash expected PARTIAL, got "
+                f"{(first.status, first.evidence)!r}"
+            )
+        (root / NATIVE_EVIDENCE_DIR / "manifest.json").write_text(json.dumps({
+            "objects": [{"native_object": "bpf_xdp.native.o"},
+                        {"native_object": "bpf_xdp.native.o"},
+                        {"native_object": "bpf_host.native.o"}],
+        }))
+        nat_rows = native_loader_rows(root)
+        second = nat_rows[1]
+        if (second.status != PARTIAL
+                or second.claim != "RQ4 Cilium native manifest objects (3 fresh)"
+                or "2 distinct native objects" not in second.evidence):
+            failures.append(
+                "RQ4 manifest row with synthetic 3-object manifest expected PARTIAL/3 fresh, got "
+                f"{[(r.claim, r.status) for r in nat_rows]} {second.evidence!r}"
+            )
+
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
         return 1
-    print("self-test: OK (8 evidence classes)")
+    print("self-test: OK (9 evidence classes)")
     return 0
 
 

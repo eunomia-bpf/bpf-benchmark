@@ -230,10 +230,11 @@ JSON datasets read by the included plotting scripts, historical load-time and 62
 JSON datasets whose pairing remains weaker than the paper's 0.99x claim,
 plus selected Cilium and Katran RQ2/RQ3/RQ4 raw app records and run-status
 provenance read by the claim renderer. Compact retained evidence
-records the complete formal check, the six-application ReJIT coverage run, and
-the fresh Katran KVM smoke. ARTIFACT_MANIFEST.json records the superproject
-commit and every direct and nested submodule pin. Historical bulk result trees are omitted; the
-guide gives the commands that regenerate them.
+records the complete formal check, the six-application ReJIT coverage run, the
+fresh Katran KVM smoke, and the fresh Cilium native-loader run whose shim log
+derives the RQ4 loader and manifest-object counts. ARTIFACT_MANIFEST.json records
+the superproject commit and every direct and nested submodule pin. Historical bulk
+result trees are omitted; the guide gives the commands that regenerate them.
 EOF
 
 # Build a machine-readable manifest without scanning submodule working trees.
@@ -297,6 +298,10 @@ manifest = {
         'docs/artifacts/evidence/kvm-six-app-success/make-corpus.log',
         'docs/artifacts/evidence/kvm-katran-smoke/receipt.json',
         'docs/artifacts/evidence/kvm-katran-smoke/make-corpus.log',
+        'docs/artifacts/evidence/rq4-cilium-native-loader/receipt.json',
+        'docs/artifacts/evidence/rq4-cilium-native-loader/manifest.json',
+        'docs/artifacts/evidence/rq4-cilium-native-loader/make-corpus.log',
+        'docs/artifacts/evidence/rq4-cilium-native-loader/details/shim-logs/cilium__agent.post_rejit.log',
     ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
 }
@@ -342,6 +347,10 @@ required=(
     docs/artifacts/evidence/kvm-katran-smoke/make-corpus.log
     docs/artifacts/evidence/kvm-katran-smoke/details/progress.json
     docs/artifacts/evidence/kvm-katran-smoke/details/apps/katran.json
+    docs/artifacts/evidence/rq4-cilium-native-loader/receipt.json
+    docs/artifacts/evidence/rq4-cilium-native-loader/manifest.json
+    docs/artifacts/evidence/rq4-cilium-native-loader/make-corpus.log
+    docs/artifacts/evidence/rq4-cilium-native-loader/details/shim-logs/cilium__agent.post_rejit.log
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     corpus/results/x86_kvm_corpus_20260604_100557_313063/details/apps/cilium__agent.json
     corpus/results/x86_kvm_corpus_20260529_033517_489159/details/apps/cilium__agent.json

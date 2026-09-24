@@ -1,0 +1,61 @@
+{
+  "apps": {
+    "cilium/agent": {
+      "rejit_status": "ok",
+      "status": "ok"
+    }
+  },
+  "command": "BPFREJIT_CORPUS_APPS=\"cilium/agent\" BPFREJIT_SHIM_NATIVE_LOADER=post SAMPLES=3 WORKLOAD_DURATION=30 JOBS=8 IMAGE_BUILD_JOBS=8 TIMEOUT=3600 make corpus",
+  "derived_counts": {
+    "feature_probe_skips": 33,
+    "intercepted_bpf_prog_loads": 179,
+    "loads_without_decision_line": 11,
+    "manifest_distinct_native_objects": 6,
+    "manifest_object_entries": 89,
+    "manifest_pass_through": 0,
+    "native_object_distribution": {
+      "bpf_host.native.o": 105,
+      "bpf_lxc.native.o": 28,
+      "bpf_xdp.native.o": 2
+    },
+    "native_replacements": 135,
+    "note": "Fresh native-post generation; the paper's declared 113/22 loader split and 89-object count are not merged with these figures. The paper's native-file count is not reproduced from this tree and is not derived."
+  },
+  "ended_at": "2026-09-24T16:46:30+00:00",
+  "environment": "tracked devcontainer toolchain; Docker-in-Docker; local x86 KVM guest via virtme-ng",
+  "evidence_kind": "atc26-ae-rq4-cilium-native-loader",
+  "exit_code": 0,
+  "files_sha256": {
+    "details/apps/cilium__agent.json": "26d8e05b42af9e3e4ff7c8faa3768185a69484a89c050bddb99b2676b2a7be96",
+    "details/progress.json": "22f3c4cf0a24d937bbbfc9a34c2bc7f8cb8a6706d9ed4612ad816fe065d40524",
+    "details/result.json": "804c62177457f9ee968bea1859eb9c6488d34370ef6f96ecdb7eacfd348b7c52",
+    "details/shim-logs/cilium__agent.baseline.log": "12fcd0f35ab88172195ee353a8e840fcf42e65ed56b08cec339a67008bdd015f",
+    "details/shim-logs/cilium__agent.post_rejit.log": "cdb5ec984d1451f486b0fac9fff2f2eee7e6df9e36984e866a644b722e1c8931",
+    "make-corpus.log": "2ac6d07990b80480adbefb40dd64c955a96d7b9e5374cc603d7948e12716bf24",
+    "manifest.json": "11e83f2f275e22f935292e09354da9f19568fd7a5b75cf9780a3956cd385d287",
+    "metadata.json": "150004e00b2bd15e48d70f72203bfb47cfca93b65ebfb8740f3993443ae59241"
+  },
+  "log_file": "make-corpus.log",
+  "log_normalization": "Guest-console carriage returns and trailing horizontal whitespace normalized in the retained copy.",
+  "log_sha256": "2ac6d07990b80480adbefb40dd64c955a96d7b9e5374cc603d7948e12716bf24",
+  "manifest_file": "manifest.json",
+  "manifest_provenance": "Every (program, native_object) pair in the retained post-phase shim log resolves in the retained staged manifest copy; the staged manifest mtime (2026-09-24T16:34:00) predates the run start.",
+  "manifest_sha256": "11e83f2f275e22f935292e09354da9f19568fd7a5b75cf9780a3956cd385d287",
+  "schema_version": 1,
+  "scope": "Fresh local KVM native-loader evidence for Cilium only. It derives loader decision counts and manifest object counts from the retained shim log and staged manifest; it does not re-measure the paper's June native-post run, which retained no shim log.",
+  "shim_log_files_sha256": {
+    "details/shim-logs/cilium__agent.baseline.log": "12fcd0f35ab88172195ee353a8e840fcf42e65ed56b08cec339a67008bdd015f",
+    "details/shim-logs/cilium__agent.post_rejit.log": "cdb5ec984d1451f486b0fac9fff2f2eee7e6df9e36984e866a644b722e1c8931"
+  },
+  "source_commit": "23595dcc2789697d8d6707e3c2d90e3bf1629cb6",
+  "source_run": "corpus/results/x86_kvm_corpus_20260924_164153_955835",
+  "started_at": "2026-09-24T16:41:53+00:00",
+  "suite_status": "completed",
+  "tool_versions": {
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "go": "go version go1.26.8 linux/amd64",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "virtme_ng": "virtme-ng 1.41"
+  },
+  "wall_seconds": 2846
+}
