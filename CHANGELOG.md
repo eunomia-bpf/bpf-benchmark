@@ -55,6 +55,14 @@ Added for artifact evaluation:
 - `docs/artifacts/render_claim_table.py` derives all six RQ3 throughput/cost
   points from the retained app JSON. Applied-site counts remain declared from
   `docs/tmp/kop_ablation_20260605_summary.md`, which is now shipped.
+- Formal-proof evidence refresh: the retained `Semantic proofs` receipt and log
+  were regenerated at commit `68a77fe0e` (`make -C native-sim/formal check`,
+  exit 0: 52 generator `--check` runs, 80 Lean module checks, 30 host
+  cross-checks over 1,517,532 oracle cases), replacing the 2026-09-22 record
+  that predated five proof commits. `docs/artifacts/render_claim_table.py` now
+  derives those counts from the retained log and requires them to agree with
+  both the receipt and the `native-sim/formal/Makefile` at the current commit,
+  so a stale receipt reports PARTIAL instead of passing on a hard-coded count.
 
 ## atc26-ae-1 (2026-09-22)
 

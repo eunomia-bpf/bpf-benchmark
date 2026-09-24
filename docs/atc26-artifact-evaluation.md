@@ -279,11 +279,19 @@ would be a defect, not a warning. (Check: `grep -rn "sorry" native-sim/formal/KP
 tens of minutes on a first run and much less on re-runs (the `.lake` build
 directory is cached).
 
-**Validation evidence (2026-09-22).** A full `make -C native-sim/formal check`
-completed with **exit status 0**, including the generated-artifact drift checks,
-the Lean module checks, and the C host cross-checks. Performance experiments were
-**not** rerun as part of this documentation validation; the paper's performance
-numbers are not claimed to have been re-measured here.
+**Validation evidence (2026-09-24).** A full `make -C native-sim/formal check`
+completed with **exit status 0** at commit `68a77fe0e`: 52
+`generate_*_spec.py --check` generators, 80 `lake env lean` refinement-module
+checks, and 30 compiled-and-run C host cross-checks reporting 1,517,532 oracle
+cases in total. The retained receipt is
+`docs/artifacts/evidence/formal-check.json`, its console log is
+`docs/artifacts/evidence/formal-check.log`, and the claim table's
+`Semantic proofs` row derives those four counts from the log and cross-checks
+them against both the receipt and the `native-sim/formal/Makefile` at the
+current commit, so a receipt left behind by an older proof tree reports
+PARTIAL rather than passing. Performance experiments were **not** rerun as part
+of this documentation validation; the paper's performance numbers are not
+claimed to have been re-measured here.
 
 ---
 

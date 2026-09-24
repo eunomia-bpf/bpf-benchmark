@@ -65,6 +65,13 @@ SMOKE_COMMAND = (
     "TIMEOUT=3000 make corpus"
 )
 FORMAL_RECEIPT = "docs/artifacts/evidence/formal-check.json"
+FORMAL_LOG = "docs/artifacts/evidence/formal-check.log"
+FORMAL_MAKEFILE = "native-sim/formal/Makefile"
+# The formal check prints one `<label> host cross-check: OK (<N> cases)` line
+# per cross-check program; the totals are the oracle-case counts they report.
+FORMAL_CASES = re.compile(r"host cross-check: OK \((\d+) cases\)")
+FORMAL_LOG_COMMIT = re.compile(r"\bcommit=([0-9a-f]{40})\b")
+FORMAL_LOG_EXIT = re.compile(r"\bexit=(\d+)\b")
 
 
 @dataclass
@@ -931,24 +938,134 @@ def corpus_evidence(
         ),
     ]
 
-def formal_evidence(receipt_path: Path) -> tuple[str, str]:
-    """Validate a retained receipt from the complete formal-check command."""
+def formal_log_counts(path: Path) -> dict[str, int] | None:
+    """Count the check classes a retained `make -C native-sim/formal check` log ran.
+
+    Each generator is invoked as `python3 generate_*_spec.py --check`, each
+    refinement module as `lake env lean KProgFormal/<Module>.lean`, and each C
+    host cross-check as `./build/test_*_host`, which prints
+    `<label> host cross-check: OK (<N> cases)`. Returns None when the log is
+    absent or ran none of them.
+    """
+    try:
+        text = path.read_text(errors="replace")
+    except OSError:
+        return None
+    counts = {"generator_scripts": 0, "lean_module_commands": 0,
+              "host_cross_checks": 0, "host_cross_check_cases": 0}
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.endswith("--check"):
+            counts["generator_scripts"] += 1
+        elif "lake env lean " in stripped:
+            counts["lean_module_commands"] += 1
+        elif stripped.startswith("./build/test_"):
+            counts["host_cross_checks"] += 1
+        match = FORMAL_CASES.search(line)
+        if match:
+            counts["host_cross_check_cases"] += int(match.group(1))
+    return counts if any(counts.values()) else None
+
+
+def formal_makefile_counts(path: Path) -> dict[str, int] | None:
+    """Count the check commands the formal Makefile at this commit enumerates.
+
+    The Makefile is the authority on what `make -C native-sim/formal check`
+    must run, so disagreement between it and a retained log means the log
+    predates the current proof tree.
+    """
+    counts = formal_log_counts(path)
+    if counts is None:
+        return None
+    return {k: v for k, v in counts.items() if k != "host_cross_check_cases"}
+
+
+def formal_log_header(path: Path) -> tuple[str | None, int | None]:
+    """Return the `commit=` and `exit=` values the retained log records."""
+    try:
+        text = path.read_text(errors="replace")
+    except OSError:
+        return None, None
+    commit = FORMAL_LOG_COMMIT.search(text)
+    exit_code = FORMAL_LOG_EXIT.search(text)
+    return (commit.group(1) if commit else None,
+            int(exit_code.group(1)) if exit_code else None)
+
+
+FORMAL_COUNT_KEYS = ("generator_scripts", "lean_module_commands", "host_cross_checks")
+
+
+def formal_evidence(root: Path) -> tuple[str, str]:
+    """Validate the retained formal-check receipt against its log and the tree.
+
+    The receipt is the machine record, but it is only evidence for the checks
+    the current tree enumerates: the retained log supplies the counts, the
+    receipt must match them, and the formal Makefile at this commit must
+    enumerate the same totals. A receipt left behind by an older proof tree
+    therefore degrades to PARTIAL instead of silently passing.
+    """
+    receipt_path = root / FORMAL_RECEIPT
     data = load_json(receipt_path)
     if not isinstance(data, dict):
-        return UNAVAILABLE, f"{receipt_path} missing or unparsable"
+        return UNAVAILABLE, f"{FORMAL_RECEIPT} missing or unparsable"
     checks = data.get("checks") or {}
-    passed = (
+    log_block = data.get("log") or {}
+    log_rel = log_block.get("path") or FORMAL_LOG
+    log_path = root / log_rel
+    log_counts = formal_log_counts(log_path)
+    tree_counts = formal_makefile_counts(root / FORMAL_MAKEFILE)
+    commit, log_exit = formal_log_header(log_path)
+    hash_ok = bool(
+        isinstance(log_block.get("sha256"), str)
+        and log_path.is_file()
+        and file_sha256(log_path) == log_block["sha256"]
+    )
+    commit_ok = commit is not None and commit == data.get("commit")
+    counts_agree = bool(
+        log_counts is not None
+        and tree_counts is not None
+        and all(checks.get(k) == log_counts[k] == tree_counts[k]
+                for k in FORMAL_COUNT_KEYS)
+    )
+    cases_ok = bool(
+        log_counts is not None
+        and checks.get("host_cross_check_cases") == log_counts["host_cross_check_cases"]
+    )
+    base_ok = (
         data.get("command") == "make -C native-sim/formal check"
         and data.get("exit_code") == 0
         and checks.get("generated_contract_drift") is True
         and checks.get("lean_modules") is True
-        and checks.get("host_cross_checks") == 25
     )
+    passed = bool(base_ok and hash_ok and commit_ok and counts_agree and cases_ok)
+    if log_counts is None:
+        log_detail = f"retained log {log_rel} missing or holds no check commands"
+    else:
+        log_detail = (
+            f"retained log {log_rel}: {log_counts['generator_scripts']} --check "
+            f"generators, {log_counts['lean_module_commands']} Lean module checks, "
+            f"{log_counts['host_cross_checks']} host cross-checks "
+            f"({log_counts['host_cross_check_cases']} oracle cases), exit={log_exit}"
+        )
+    if tree_counts is None:
+        tree_detail = f"{FORMAL_MAKEFILE} missing or enumerates no check commands"
+    else:
+        tree_detail = (
+            f"{FORMAL_MAKEFILE} enumerates "
+            + "/".join(str(tree_counts[k]) for k in FORMAL_COUNT_KEYS)
+            + " (generators/Lean/host)"
+        )
     detail = (
-        f"{receipt_path}: exit_code={data.get('exit_code')!r}, "
+        f"{FORMAL_RECEIPT}: exit_code={data.get('exit_code')!r}, "
         f"generated_contract_drift={checks.get('generated_contract_drift')!r}, "
-        f"lean_modules={checks.get('lean_modules')!r}, "
-        f"host_cross_checks={checks.get('host_cross_checks')!r}"
+        f"lean_modules={checks.get('lean_modules')!r}; "
+        f"receipt counts="
+        + "/".join(str(checks.get(k)) for k in FORMAL_COUNT_KEYS)
+        + f", receipt counts agree with log and tree={counts_agree}, "
+        f"receipt oracle cases={checks.get('host_cross_check_cases')!r} agree={cases_ok}; "
+        f"{log_detail}; {tree_detail}; "
+        f"receipt commit={data.get('commit')!r} == log commit={commit!r} -> {commit_ok}; "
+        f"receipt log hash valid={hash_ok}"
     )
     return (PASS if passed else PARTIAL), detail
 
@@ -977,7 +1094,7 @@ def build_rows(root: Path) -> list[Row]:
         claim_label="Katran smoke",
         required_command=SMOKE_COMMAND,
     ))
-    st, prov = formal_evidence(root / FORMAL_RECEIPT)
+    st, prov = formal_evidence(root)
     rows.append(Row("Semantic proofs: native emit == proof sequence", st, prov))
     return rows
 
@@ -1182,23 +1299,103 @@ def self_test() -> int:
                 f"failed smoke receipt expected [PARTIAL, PARTIAL], got {[r.status for r in rows]}"
             )
 
-        # Formal PASS requires a complete retained receipt, not source presence.
+        # Formal PASS requires a retained receipt that agrees with the log it
+        # names and with the Makefile the current tree enumerates, so a receipt
+        # left behind by an older proof tree degrades to PARTIAL.
         receipt = root / FORMAL_RECEIPT
         receipt.parent.mkdir(parents=True, exist_ok=True)
-        receipt.write_text(json.dumps({
+        fmake = root / FORMAL_MAKEFILE
+        fmake.parent.mkdir(parents=True, exist_ok=True)
+        synthetic_log = (
+            "started=1970-01-01T00:00:00+00:00 commit=" + "a" * 40 + "\n"
+            "python3 generate_one_spec.py --check\n"
+            "python3 generate_two_spec.py --check\n"
+            "lake env lean KProgFormal/One.lean\n"
+            "./build/test_one_host\n"
+            "one host cross-check: OK (11 cases)\n"
+            "exit=0 ended=1970-01-01T00:00:01+00:00\n"
+        )
+        fmake.write_text(
+            "check:\n"
+            "\tpython3 generate_one_spec.py --check\n"
+            "\tpython3 generate_two_spec.py --check\n"
+            "\tlake env lean KProgFormal/One.lean\n"
+            "\t./build/test_one_host\n"
+        )
+        good_formal = {
             "command": "make -C native-sim/formal check",
             "exit_code": 0,
+            "commit": "a" * 40,
             "checks": {
                 "generated_contract_drift": True,
                 "lean_modules": True,
-                "host_cross_checks": 25,
+                "generator_scripts": 2,
+                "lean_module_commands": 1,
+                "host_cross_checks": 1,
+                "host_cross_check_cases": 11,
             },
-        }))
-        st, _ = formal_evidence(receipt)
+            "log": {"path": FORMAL_LOG},
+        }
+        log_path = root / FORMAL_LOG
+
+        def write_formal(payload: dict) -> None:
+            receipt.write_text(json.dumps(payload))
+
+        def write_log(text: str) -> None:
+            log_path.write_text(text)
+            good_formal["log"]["sha256"] = file_sha256(log_path)
+
+        # Consistent receipt + log + Makefile -> PASS.
+        write_log(synthetic_log)
+        write_formal(good_formal)
+        st, prov = formal_evidence(root)
         if st != PASS:
-            failures.append(f"valid formal receipt expected PASS, got {st}")
-        receipt.write_text(json.dumps({"command": "make -C native-sim/formal check", "exit_code": 1}))
-        st, _ = formal_evidence(receipt)
+            failures.append(f"consistent formal evidence expected PASS, got {st}: {prov}")
+
+        # A log from an older proof tree (fewer checks) must not PASS even
+        # though the receipt still claims to be complete.
+        stale = synthetic_log.replace(
+            "python3 generate_two_spec.py --check\n", ""
+        ).replace("./build/test_one_host\n", "").replace(
+            "one host cross-check: OK (11 cases)\n", ""
+        )
+        write_log(stale)
+        write_formal(good_formal)
+        st, prov = formal_evidence(root)
+        if st != PARTIAL or "agree with log and tree=False" not in prov:
+            failures.append(
+                f"stale formal log expected PARTIAL with disagreement, got {st}: {prov}"
+            )
+
+        # A receipt whose recorded log hash no longer matches the log -> PARTIAL.
+        write_log(synthetic_log)
+        tampered = json.loads(json.dumps(good_formal))
+        tampered["log"]["sha256"] = "0" * 64
+        write_formal(tampered)
+        st, prov = formal_evidence(root)
+        if st != PARTIAL or "receipt log hash valid=False" not in prov:
+            failures.append(
+                f"stale formal log hash expected PARTIAL, got {st}: {prov}"
+            )
+
+        # A receipt whose commit disagrees with the log header -> PARTIAL.
+        write_log(synthetic_log)
+        wrong_commit = json.loads(json.dumps(good_formal))
+        wrong_commit["commit"] = "b" * 40
+        write_formal(wrong_commit)
+        st, prov = formal_evidence(root)
+        if st != PARTIAL or "-> False" not in prov:
+            failures.append(
+                f"formal commit mismatch expected PARTIAL, got {st}: {prov}"
+            )
+
+        # Non-zero exit -> PARTIAL.
+        write_log(synthetic_log)
+        write_formal({"command": "make -C native-sim/formal check", "exit_code": 1,
+                      "commit": "a" * 40, "checks": good_formal["checks"],
+                      "log": {"path": FORMAL_LOG,
+                              "sha256": file_sha256(log_path)}})
+        st, _ = formal_evidence(root)
         if st != PARTIAL:
             failures.append(f"failed formal receipt expected PARTIAL, got {st}")
 

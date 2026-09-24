@@ -1,4 +1,4 @@
-started=2026-09-22T16:39:52+00:00 commit=1181c1726a42dafc63d71bdb060addb6b7782f5f
+started=2026-09-24T19:41:58+00:00 commit=68a77fe0e703f8873875f6eab8381b0181ebd4a9
 make: Entering directory '/workspaces/repository/native-sim/formal'
 install -d build
 python3 generate_ptr_add_spec.py --check
@@ -7,6 +7,11 @@ python3 generate_arm64_width_spec.py --check
 python3 generate_arm64_flags_spec.py --check
 python3 generate_arm64_decode_spec.py --check
 python3 generate_arm64_alu_result_spec.py --check
+python3 generate_arm64_alu_handler_spec.py --check
+python3 generate_arm64_alu_operand_spec.py --check
+python3 generate_arm64_flag_handler_spec.py --check
+python3 generate_arm64_logic_flag_handler_spec.py --check
+python3 generate_arm64_ccmp_handler_spec.py --check
 python3 generate_arm64_mod_spec.py --check
 python3 generate_arm64_bitfield_spec.py --check
 python3 generate_arm64_mul_spec.py --check
@@ -115,6 +120,31 @@ lake env lean KProgFormal/Arm64AluResult.lean
 cc -Wall -Wextra -O2 -I. test_arm64_alu_result_host.c -o build/test_arm64_alu_result_host
 ./build/test_arm64_alu_result_host
 arm64 alu result host cross-check: OK (120073 cases)
+lake env lean KProgFormal/GeneratedArm64AluHandler.lean
+lake env lean KProgFormal/Arm64AluHandler.lean
+cc -Wall -Wextra -O2 -I. test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
+./build/test_arm64_alu_handler_host
+arm64 ALU handler path host cross-check: OK (168 cases)
+lake env lean KProgFormal/GeneratedArm64AluOperand.lean
+lake env lean KProgFormal/Arm64AluOperandHandler.lean
+cc -Wall -Wextra -O2 -I. test_arm64_alu_operand_host.c -o build/test_arm64_alu_operand_host
+./build/test_arm64_alu_operand_host
+arm64 ALU operand host cross-check: OK (5632 cases)
+lake env lean KProgFormal/GeneratedArm64FlagHandler.lean
+lake env lean KProgFormal/Arm64FlagHandler.lean
+cc -Wall -Wextra -O2 -I. test_arm64_flag_handler_host.c -o build/test_arm64_flag_handler_host
+./build/test_arm64_flag_handler_host
+arm64 flag handler host cross-check: OK (64 cases)
+lake env lean KProgFormal/GeneratedArm64LogicFlagHandler.lean
+lake env lean KProgFormal/Arm64LogicFlagHandler.lean
+cc -Wall -Wextra -O2 -I. test_arm64_logic_flag_handler_host.c -o build/test_arm64_logic_flag_handler_host
+./build/test_arm64_logic_flag_handler_host
+arm64 logic flag handler host cross-check: OK (64 cases)
+lake env lean KProgFormal/GeneratedArm64CcmpHandler.lean
+lake env lean KProgFormal/Arm64CcmpHandler.lean
+cc -Wall -Wextra -O2 -I. test_arm64_ccmp_handler_host.c -o build/test_arm64_ccmp_handler_host
+./build/test_arm64_ccmp_handler_host
+arm64 CCMP handler host cross-check: OK (122880 cases)
 lake env lean KProgFormal/Arm64Mod.lean
 cc -Wall -Wextra -O2 -I. test_arm64_mod_host.c -o build/test_arm64_mod_host
 ./build/test_arm64_mod_host
@@ -196,4 +226,4 @@ cc -Wall -Wextra -O2 -I. test_arm64_stack_tag_host.c -o build/test_arm64_stack_t
 arm64 stack tag host cross-check: OK (36 cases)
 lake env lean KProgFormal/Arm64Decode.lean
 make: Leaving directory '/workspaces/repository/native-sim/formal'
-exit=0 ended=2026-09-22T16:47:55+00:00
+exit=0 ended=2026-09-24T19:45:01+00:00
