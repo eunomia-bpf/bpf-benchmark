@@ -178,14 +178,15 @@ on that record; there is no public ae-1 `.sha256` companion. Once ae-2 is
 published, download both its ZIP and `.sha256` companion and run `sha256sum -c`
 in their directory. Do not use a draft's checksum as public verification.
 
-The `atc26-ae-2` candidate ZIP built from superproject commit
-`ea84bd45a1ec2c262dc3002f2d2212f2fb0acc8c` is 914,727,020 bytes and has SHA256
-`7b245f361dc295628bf1020aa6694345a859ab9f08018014f06c57bd34bfbcbf`.
-It passed the packager's clean-extraction verification (`make lint`,
-`py_compile`, renderer `--self-test`, table generation, manifest JSON parse,
-and the `required=(...)` file list). It is a local build, not a published
-record; the authors must upload this ZIP and its `.sha256` companion to Zenodo
-and publish the version before it counts as available evidence.
+Superproject commit `ea84bd45a1ec2c262dc3002f2d2212f2fb0acc8c` was packaged as
+an `atc26-ae-2` candidate (914,727,020 bytes) and passed the packager's
+clean-extraction verification (`make lint`, `py_compile`, renderer
+`--self-test`, table generation, manifest JSON parse, and the
+`required=(...)` file list). Any later commit produces a different archive, so
+the authoritative SHA256 is whatever the packager prints and whatever the
+published Zenodo record shows. It is a local build, not a published record:
+the authors must upload the ZIP and its `.sha256` companion to Zenodo and
+publish the version before it counts as available evidence.
 
 ```bash
 ZIP=atc26-ae-1.zip  # select the ZIP from a published Zenodo record
