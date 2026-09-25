@@ -1,0 +1,54 @@
+{
+  "apps": {
+    "katran": {
+      "rejit_status": "ok",
+      "status": "ok"
+    }
+  },
+  "command": "env PLATFORM=qemu ARCH=arm64 BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus",
+  "derived_counts": {
+    "changed_load_instances": 1,
+    "insn_count_after_total": 2284,
+    "insn_count_before_total": 2554,
+    "insn_count_delta_total": -270,
+    "note": "Every derived value is computed from the retained details/loadtime-reports/katran.jsonl stream and the retained per-step bytecode in details/loadtime-workdirs/. The paper's declared Katran 21/62 site figures are not merged with this fresh arm64 figure.",
+    "report_rows": 6,
+    "retained_bytecode_len_matches_report": 1,
+    "retained_changed_workdirs": 1,
+    "retained_input_output_bytecode_differ": 1,
+    "sites_applied_total": 16,
+    "unchanged_report_rows": 5
+  },
+  "enabled_passes": [
+    "map_inline"
+  ],
+  "ended_at": "1970-01-01T00:05:38.512353+00:00",
+  "evidence_kind": "atc26-ae-rq2-katran-arm64-map-inline-retained-bytecode",
+  "exit_code": 0,
+  "files_sha256": {
+    "details/apps/katran.json": "555e8c6050bbb1a5b3727fd19a2da163741d258b7b960d83da1a6218ab6e0985",
+    "details/loadtime-plans/katran.json": "ddc66d1afb4c01aa5b595011ba11a7947109625df721afc91b665d6849653a53",
+    "details/loadtime-reports/katran.jsonl": "6caff653e8887ec0fbd24cf5653912ef14c4f19cc3e4c473ea63c647e7195c07",
+    "details/loadtime-workdirs/loadtime_1017_5/input.step.0.bin": "1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e",
+    "details/loadtime-workdirs/loadtime_1017_5/output.next.0.bin": "48ecf150b94f43a62ffef77f722df40aae41bf301eef4bab8da98147e5fc16a4",
+    "details/loadtime-workdirs/loadtime_1017_5/report.0.json": "54ed94e1be7308dba8417114a022a2af90ad6b703990b7c94643d75f158159db",
+    "details/progress.json": "d6f0beae6658a446b4c2fa402ba40dff1aa4047545c0a04b350024664b822d25",
+    "details/result.json": "41eb4b79a2b569f6760102edd10394abbb89ef6670fc44b28e017ab31d669069",
+    "details/shim-logs/katran.baseline.log": "43f7027eda28e21c17194b30f7731815b5b301a61261ad0dbcbf705ed1fc54a0",
+    "details/shim-logs/katran.post_rejit.log": "3c64b5cb5fe1d6cda65ef80659902522152788a8b9a3717cd478bf04edb73a40",
+    "make-corpus.log": "6fe8a85acb6bc98fac4493987aeb0851d1533f5bccdfea9fdf7fba191fdc83c7",
+    "metadata.json": "2f2b1228d0bd184a8198640877b38c2a28534800cf582c0d0e136a1a5393ee95",
+    "provenance/start.json": "12711e70f801edbef9df904b4ea89b630040d9d2a54102d34969abdb6b93c063"
+  },
+  "log_file": "make-corpus.log",
+  "log_normalization": "Guest-console carriage returns and trailing horizontal whitespace normalized in the retained copy.",
+  "log_sha256": "6fe8a85acb6bc98fac4493987aeb0851d1533f5bccdfea9fdf7fba191fdc83c7",
+  "samples": 1,
+  "schema_version": 1,
+  "scope": "Fresh local arm64 QEMU single-pass map_inline run for Katran only. It retains, for the one changed load instance (balancer_ingress, an XDP program), the per-step input and output bytecode plus the optimizer report, so the rewrite's before/after instruction counts and applied-site totals are derived rather than declared. It exercises the overlay/hint policy path (--inline-hint anchors plus overlays/katran/*.json) that targets ctl_array, vip_map, ch_rings, reals and the LPM NULL-entry hints. It is a single startup with SAMPLES=1 under the local arm64 QEMU executor and does not re-measure the paper's declared Katran site figures; the two are never merged.",
+  "source_commit": "8f90c5a1200b71c21bf7ba54130e6095cf9e56c7",
+  "source_run": "corpus/results/arm64_qemu_corpus_19700101_000012_467359",
+  "started_at": "1970-01-01T00:00:12.467359+00:00",
+  "suite_status": "completed",
+  "workload_seconds": 30.0
+}

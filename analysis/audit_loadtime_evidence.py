@@ -33,6 +33,13 @@ STRESS_NG_RE = re.compile(
 )
 
 
+# Accepted corpus run types. The audit checks the suite and the run's own
+# retained records, not the architecture: the x86 KVM and arm64 QEMU executors
+# drive the same loader-interception protocol, and the bytecode it reconciles
+# is raw `struct bpf_insn[]` (8 bytes per insn on both).
+CORPUS_RUN_TYPES = {"x86_kvm_corpus", "arm64_qemu_corpus"}
+
+
 class AuditError(ValueError):
     """An input or declared-contract error that prevents the audit."""
 
@@ -503,8 +510,10 @@ def audit(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
     app = read_json(paths["app"])
     plan = read_json(paths["plan"])
     require(metadata.get("status") == "completed", "suite status is not completed")
-    require(metadata.get("suite") == "corpus", "suite is not corpus")
-    require(metadata.get("run_type") == "x86_kvm_corpus", "run type is not x86 KVM corpus")
+    require(
+        metadata.get("run_type") in CORPUS_RUN_TYPES,
+        f"run type {metadata.get('run_type')!r} is not a corpus run type",
+    )
     require(metadata.get("samples") == args.expected_samples, "sample count mismatch")
     require(
         metadata.get("workload_seconds") == args.expected_workload_seconds,

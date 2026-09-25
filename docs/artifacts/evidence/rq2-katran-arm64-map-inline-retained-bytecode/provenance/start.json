@@ -1,0 +1,8 @@
+{
+  "started_at": "2026-09-25T15:44:41.000000+00:00",
+  "source_revision": "8f90c5a1200b71c21bf7ba54130e6095cf9e56c7",
+  "command": "env PLATFORM=qemu ARCH=arm64 BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus",
+  "uses_prebuilt_runtime": false,
+  "runtime_image": "bpf-benchmark/runner-runtime:arm64",
+  "runtime_image_tar": "/workspaces/repository/.cache/container-images/arm64-runner-runtime.image.tar"
+}

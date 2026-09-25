@@ -1,0 +1,223 @@
+[166.781793 pid=1017 tid=1017] shim_init pid=1017 exe=/artifacts/user/repo-artifacts/arm64/katran/bin/katran_server_grpc
+[166.798960 pid=1017 tid=1021] socket: listening on /var/run/bpfrejit/shim-1017.sock
+[166.993665 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[167.090880 pid=1017 tid=1017] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[167.210955 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[167.425396 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[167.644673 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[167.854100 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[168.072699 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[168.282704 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[168.494712 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[168.706682 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[168.916800 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[169.125778 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[169.334660 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[169.543810 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[169.657007 pid=1017 tid=1017] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[169.753194 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[169.967750 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[170.185307 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[170.399720 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[170.609428 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[170.821241 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[171.044144 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[171.283033 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[171.515504 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[171.746203 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[171.989472 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[172.224067 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[172.471659 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[172.710167 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[172.946902 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[172.951313 pid=1017 tid=1017] loadtime step prog= step=map_inline elapsed_ms=3046
+[172.951680 pid=1017 tid=1017] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[172.953911 pid=1017 tid=1017]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=12
+[172.955038 pid=1017 tid=1017] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[173.178448 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[173.404868 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[173.630334 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[173.851946 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[174.083482 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[174.308487 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[174.422058 pid=1017 tid=1017] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[174.531858 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[174.761409 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[174.985138 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[175.216970 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[175.446065 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[175.674131 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[175.909721 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[176.137642 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[176.270903 pid=1017 tid=1017] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=1663
+[176.271452 pid=1017 tid=1017] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[176.272748 pid=1017 tid=1017]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=15
+[176.273578 pid=1017 tid=1017] BPF_MAP_CREATE type=9 key_size=40 value_size=16 max_entries=1024 name=katran_lru0
+[176.274485 pid=1017 tid=1017]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=22
+[176.366008 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[176.472026 pid=1017 tid=1017] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[176.594120 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[176.823321 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[177.063162 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[177.293706 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[177.510177 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[177.725247 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[177.926107 pid=1017 tid=1017] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[177.940772 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[178.159966 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[178.383027 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[178.605088 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[178.828146 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[179.051126 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[179.276945 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[179.295322 pid=1017 tid=1017] loadtime step prog= step=map_inline elapsed_ms=1251
+[179.295783 pid=1017 tid=1017] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[179.297281 pid=1017 tid=1017]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=18
+[179.303979 pid=1017 tid=1017] BPF_PROG_LOAD type=2 (kprobe) name=det_arg_ctx insn_cnt=4 hash=3ae725ddb7d69e19 policy_hash=3ae725ddb7d69e19 branch_profile_hash=3be13a826158503f license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=13 attach_btf_obj_fd=0 attach_prog_fd=0
+[179.509278 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[179.730159 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[179.950225 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[180.172966 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[180.405359 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[180.641168 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[180.695873 pid=1017 tid=1017] loadtime policy prog=det_arg_ctx policy_hash=3ae725ddb7d69e19 branch_profile_hash=3be13a826158503f insn_cnt=4
+[180.878951 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[181.100297 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[181.323111 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[181.555970 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[181.782677 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[182.073756 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[182.322472 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[182.564067 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[182.792360 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[182.799707 pid=1017 tid=1017] loadtime step prog=det_arg_ctx step=map_inline elapsed_ms=1819
+[182.800491 pid=1017 tid=1017] loadtime prog=det_arg_ctx produced no bytecode changes; passing original BPF_PROG_LOAD through
+[182.806262 pid=1017 tid=1017]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=21
+[182.819696 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=1024 name=stats
+[182.825293 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=23
+[182.827118 pid=1017 tid=1017] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=16 name=ctl_array
+[182.827918 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=24
+[182.828481 pid=1017 tid=1017] BPF_MAP_CREATE type=1 key_size=20 value_size=8 max_entries=512 name=vip_map
+[182.830399 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=25
+[182.831002 pid=1017 tid=1017] BPF_MAP_CREATE type=9 key_size=40 value_size=16 max_entries=1000 name=fallback_cache
+[182.832197 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=26
+[182.832875 pid=1017 tid=1017] BPF_MAP_CREATE type=12 key_size=4 value_size=4 max_entries=128 name=lru_mapping
+[182.833647 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=27
+[182.834156 pid=1017 tid=1017] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=33554944 name=ch_rings
+[182.920380 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=28
+[182.921367 pid=1017 tid=1017] BPF_MAP_CREATE type=2 key_size=4 value_size=20 max_entries=4096 name=reals
+[182.922477 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=29
+[182.923165 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=4096 name=reals_stats
+[182.930603 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=30
+[182.931075 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=4 max_entries=4096 name=lru_miss_stats
+[182.938808 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=31
+[182.939746 pid=1017 tid=1017] BPF_MAP_CREATE type=2 key_size=4 value_size=20 max_entries=1 name=vip_miss_stats
+[182.940495 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=32
+[182.941175 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=104 max_entries=1 name=quic_stats_map
+[182.941873 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=33
+[182.942452 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=40 max_entries=1 name=stable_rt_stats
+[182.943256 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=34
+[182.943790 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=512 name=decap_vip_stats
+[182.945558 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=35
+[182.946846 pid=1017 tid=1017] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16777214 name=server_id_map
+[183.004800 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=36
+[183.005882 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=32 max_entries=1 name=tpr_stats_map
+[183.006758 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=37
+[183.007515 pid=1017 tid=1017] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=512 name=server_id_stats
+[183.009147 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=38
+[183.009921 pid=1017 tid=1017] BPF_MAP_CREATE type=1 key_size=4 value_size=1 max_entries=4096 name=vip_to_down_rea
+[183.011454 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=39
+[183.012104 pid=1017 tid=1017] BPF_MAP_CREATE type=13 key_size=20 value_size=4 max_entries=512 name=vip_to_down_rea
+[183.013315 pid=1017 tid=1017]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=40
+[183.016173 pid=1017 tid=1017] BPF_PROG_LOAD type=9 (cgroup_sock) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=de07ed38c37628d2 license=GPL expected_attach=2 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[183.022676 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[183.255395 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[183.483371 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[183.708351 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[183.928646 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[184.151382 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[184.234345 pid=1017 tid=1017] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=de07ed38c37628d2 insn_cnt=2
+[184.369026 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[184.584675 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[184.813020 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[185.036568 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[185.466262 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[185.684766 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[185.810923 pid=1017 tid=1017] loadtime step prog= step=map_inline elapsed_ms=1435
+[185.811505 pid=1017 tid=1017] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[185.813135 pid=1017 tid=1017]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=24
+[185.818953 pid=1017 tid=1017] BPF_PROG_LOAD type=6 (xdp) name=balancer_ingres insn_cnt=2542 hash=0325eddd38cf33c9 policy_hash=d18d38307868f10d branch_profile_hash=e7852c63b43bc41b license=GPL expected_attach=37 attach_btf_id=0 prog_btf_fd=13 attach_btf_obj_fd=0 attach_prog_fd=0
+[185.909862 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[186.131248 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[186.353135 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[186.577259 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[186.804378 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[187.034919 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[187.260643 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[187.478948 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[187.698210 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[187.919878 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[188.148408 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[188.368438 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[188.593058 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[188.826359 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[189.053001 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[189.274018 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[189.494071 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[189.716671 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[189.937091 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[190.162181 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[190.397939 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[190.616409 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[190.829759 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[191.042183 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[191.258823 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[191.469279 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[191.683195 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[191.896223 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[192.108355 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[192.324161 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[192.535703 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[192.748046 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[192.963199 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[193.176955 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[193.390562 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[193.606611 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[193.820474 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[194.056539 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[194.290289 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[194.520705 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[194.740747 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[194.960577 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[195.179999 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[195.407280 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[195.626939 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[195.854546 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[195.976345 pid=1017 tid=1017] loadtime policy prog=balancer_ingres policy_hash=d18d38307868f10d branch_profile_hash=e7852c63b43bc41b insn_cnt=2542
+[196.076518 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[196.313178 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[196.541522 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[196.767253 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[197.010234 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[197.233728 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[197.455916 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[197.680783 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[197.913849 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[198.158233 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[198.391231 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[198.618623 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[198.849285 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[199.076212 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[199.315191 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[199.543039 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[199.771083 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[200.000413 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[200.238721 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[200.481495 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[200.714342 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[200.950933 pid=1017 tid=1021] socket: cmd=list_progs len=22
+[221.565295 pid=1017 tid=1017] loadtime step prog=balancer_ingres step=map_inline elapsed_ms=24466
+[221.572886 pid=1017 tid=1017] loadtime optimized prog=balancer_ingres insns=2542->2272 maps=14 workdir=/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000012_467359/details/loadtime-workdirs/loadtime_1017_5
+[222.424851 pid=1017 tid=1017]   PROG_LOAD -> fd=45 errno=0 kernel_prog_id=27
+[289.277909 pid=1017 tid=1021] socket: cmd=measure_start len=25
+[332.020459 pid=1017 tid=1021] socket: cmd=measure_finish len=26

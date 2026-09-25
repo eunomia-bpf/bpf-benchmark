@@ -241,8 +241,11 @@ records the complete formal check, the six-application ReJIT coverage run, the
 fresh Katran KVM smoke, and the fresh Cilium native-loader run whose shim log
 derives the RQ4 loader and manifest-object counts, plus the fresh Cilium
 single-pass \`map_inline\` run, the fresh Katran \`map_inline\` run over the
-overlay/hint policy path, and the fresh Tracee \`map_inline\` run over the
-hint-free default policy path, all retaining per-step before/after bytecode so
+overlay/hint policy path, the fresh Tracee \`map_inline\` run over the
+hint-free default policy path, the fresh Tetragon \`map_inline\` run over the
+hint-free default policy path across six array maps, and the fresh arm64 Katran
+\`map_inline\` run over the same overlay/hint policy path under the local
+\`qemu-system-aarch64\` executor, all retaining per-step before/after bytecode so
 the RQ2 rewrite can be re-derived per application. ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
@@ -325,6 +328,9 @@ manifest = {
         'docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/receipt.json',
         'docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/make-corpus.log',
         'docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/details/loadtime-reports/tetragon__observer.jsonl',
+        'docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/receipt.json',
+        'docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/make-corpus.log',
+        'docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/details/loadtime-reports/katran.jsonl',
     ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
 }
@@ -390,6 +396,10 @@ required=(
     docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/make-corpus.log
     docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/details/loadtime-reports/tetragon__observer.jsonl
     docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/details/loadtime-workdirs/loadtime_2060_103/input.step.0.bin
+    docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/receipt.json
+    docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/make-corpus.log
+    docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/details/loadtime-reports/katran.jsonl
+    docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/details/loadtime-workdirs/loadtime_1017_5/input.step.0.bin
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     micro/results/x86_kvm_micro_20260924_231824_136293/details/result.json
     micro/results/x86_kvm_micro_20260925_002201_525373/details/result.json

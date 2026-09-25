@@ -12,6 +12,11 @@ from typing import Any
 
 EXPECTED_PASSES = ["map_inline"]
 
+# Accepted corpus run types: x86 KVM and arm64 QEMU both drive the same
+# loader-interception protocol, so the audit gates on the suite and the run's
+# own records rather than on the executor architecture.
+CORPUS_RUN_TYPES = {"x86_kvm_corpus", "arm64_qemu_corpus"}
+
 
 class AuditError(ValueError):
     """An input or declared-contract error that prevents the audit."""
@@ -124,8 +129,8 @@ def validate_protocol(run_dir: Path, app: str) -> tuple[dict[str, Any], Path]:
     require(metadata.get("status") == "completed", "suite status is not completed")
     require(metadata.get("suite") == "corpus", "suite is not corpus")
     require(
-        metadata.get("run_type") == "x86_kvm_corpus",
-        "run type is not x86 KVM corpus",
+        metadata.get("run_type") in CORPUS_RUN_TYPES,
+        f"run type {metadata.get('run_type')!r} is not a corpus run type",
     )
     require(metadata.get("samples") == 1, "sample count is not one")
     require(metadata.get("workload_seconds") == 30.0, "workload duration is not 30 seconds")

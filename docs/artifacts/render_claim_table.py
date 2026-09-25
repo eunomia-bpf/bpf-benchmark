@@ -43,6 +43,12 @@ SUITE_SUCCESS = "completed"
 APP_SUCCESS = "ok"
 REJIT_SUCCESS = "ok"
 
+# Corpus run types the retained-bytecode rows accept. x86 KVM and arm64 QEMU
+# drive the same loader-interception protocol; the reconciled bytecode is raw
+# `struct bpf_insn[]` (8 bytes per insn on both), so the row gates on the
+# suite and the run's own records rather than on the executor architecture.
+CORPUS_RUN_TYPES = {"x86_kvm_corpus", "arm64_qemu_corpus"}
+
 MICRO_RESULTS = {
     "RQ1 micro x86 (run)": "micro/results/x86_kvm_micro_20260519_114214_364050",
     "RQ1 micro x86 (stock baseline)": "micro/results/x86_kvm_micro_20260526_210351_224315",
@@ -1036,6 +1042,11 @@ def cilium_attribution_rows(root: Path) -> list[Row]:
 # from the retained streams instead of declared. It is a separate single-startup
 # generation and is never merged with the paper's declared 4086 figure.
 MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode"
+# Katran arm64 retained-bytecode evidence dir (same overlay/hint policy path,
+# local arm64 QEMU executor).
+KATRAN_ARM64_MAP_INLINE_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode"
+)
 KATRAN_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode"
 TRACEE_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode"
 # Tetragon retained-bytecode evidence dir (default map_inline policy, six maps).
@@ -1127,7 +1138,7 @@ def _retained_bytecode_app_row(
     receipt = load_json(base / "receipt.json") or {}
     run_ok = (
         meta.get("status") == SUITE_SUCCESS
-        and meta.get("run_type") == "x86_kvm_corpus"
+        and meta.get("run_type") in CORPUS_RUN_TYPES
         and meta.get("suite") == "corpus"
         and progress.get("status") == SUITE_SUCCESS
         and app.get("status") == APP_SUCCESS
@@ -1229,6 +1240,24 @@ def tetragon_retained_bytecode_rows(root: Path) -> list[Row]:
         "RQ2 Tetragon retained map_inline bytecode",
         "the paper's declared Tetragon site figures remain declared and are not "
         "merged with the fresh {sites}",
+    )
+
+
+def katran_arm64_retained_bytecode_rows(root: Path) -> list[Row]:
+    """RQ2 Katran arm64 rewrite evidence (overlay/hint policy path).
+
+    Same overlay/hint `map_inline` policy as the x86 Katran row, executed by
+    the local arm64 QEMU corpus executor; the reconciled bytecode is raw
+    `struct bpf_insn[]` (8 bytes per insn on both architectures).
+    """
+    return _retained_bytecode_app_row(
+        root,
+        KATRAN_ARM64_MAP_INLINE_EVIDENCE_DIR,
+        "details/loadtime-reports/katran.jsonl",
+        "Katran arm64",
+        "RQ2 Katran arm64 retained map_inline bytecode",
+        "the paper's declared Katran site figures remain declared and are not "
+        "merged with the fresh arm64 {sites}",
     )
 
 
@@ -1541,6 +1570,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(katran_retained_bytecode_rows(root))
     rows.extend(tracee_retained_bytecode_rows(root))
     rows.extend(tetragon_retained_bytecode_rows(root))
+    rows.extend(katran_arm64_retained_bytecode_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -2520,6 +2550,72 @@ def self_test() -> int:
         if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
             failures.append(
                 f"Tetragon bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        # Katran arm64 retained bytecode row: identical derivation over an
+        # arm64_qemu_corpus run, proving the accepted-run-type set is honoured.
+        kev = root / KATRAN_ARM64_MAP_INLINE_EVIDENCE_DIR
+
+        def write_katran_arm64_map_inline(instances: list[tuple[int, int]],
+                                          bytecode: str = "differing",
+                                          run_type: str = "arm64_qemu_corpus") -> None:
+            if kev.exists():
+                import shutil as _sh
+                _sh.rmtree(kev)
+            (kev / "details/apps").mkdir(parents=True)
+            (kev / "details/loadtime-reports").mkdir(parents=True)
+            lines = []
+            for index, (before, after) in enumerate(instances):
+                wd = kev / f"details/loadtime-workdirs/loadtime_5_{index}"
+                wd.mkdir(parents=True)
+                lines.append(json.dumps({
+                    "prog_name": f"prog_{index}",
+                    "workdir": f"/run/details/loadtime-workdirs/loadtime_5_{index}",
+                    "report": {"insn_count_before": before,
+                               "insn_count_after": after, "sites_applied": 16}}))
+                (wd / "report.0.json").write_text(json.dumps({
+                    "insn_count_before": before, "insn_count_after": after,
+                    "sites_applied": 16}))
+                (wd / "input.step.0.bin").write_bytes(b"\x00" * (8 * before))
+                out = (b"\x00" * (8 * before) if bytecode == "identical"
+                       else b"\x00" * (8 * after))
+                (wd / "output.next.0.bin").write_bytes(out)
+            (kev / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": run_type,
+                "suite": "corpus", "samples": 1, "workload_seconds": 30.0}))
+            (kev / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            (kev / "details/apps/katran.json").write_text(json.dumps({
+                "status": "ok", "error": ""}))
+            (kev / "details/loadtime-reports/katran.jsonl").write_text(
+                "\n".join(lines) + "\n")
+            (kev / "receipt.json").write_text(json.dumps({
+                "files_sha256": {"metadata.json": file_sha256(kev / "metadata.json")}}))
+
+        def katran_arm64_row() -> Row:
+            return katran_arm64_retained_bytecode_rows(root)[0]
+
+        write_katran_arm64_map_inline([(2542, 2272)])
+        row = katran_arm64_row()
+        if row.status != PASS or "16 applied sites" not in row.evidence:
+            failures.append(
+                f"arm64 Katran retained bytecode expected PASS/16 sites, got {(row.status, row.evidence)!r}")
+        if "insn 2542->2272 (-270)" not in row.evidence:
+            failures.append(
+                f"arm64 Katran retained bytecode expected aggregated insn delta, got {row.evidence!r}")
+
+        write_katran_arm64_map_inline([(2542, 2272)], run_type="x86_kvm_corpus")
+        row = katran_arm64_row()
+        if row.status != PASS:
+            failures.append(
+                f"arm64 Katran row must also accept x86_kvm_corpus, got {(row.status, row.evidence)!r}")
+
+        write_katran_arm64_map_inline([(2542, 2272)])
+        (kev / "metadata.json").write_text(json.dumps({
+            "status": "completed", "run_type": "aws_arm64_corpus",
+            "suite": "corpus", "samples": 1, "workload_seconds": 30.0}))
+        row = katran_arm64_row()
+        if row.status != PARTIAL or "run status valid=False" not in row.evidence:
+            failures.append(
+                f"arm64 Katran row must reject an unknown run type, got {(row.status, row.evidence)!r}")
 
 
     if failures:
