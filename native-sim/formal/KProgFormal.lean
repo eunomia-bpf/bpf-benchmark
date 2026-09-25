@@ -35,6 +35,7 @@ import KProgFormal.X86RegLaneAux
 import KProgFormal.X86UnaryWriteback
 import KProgFormal.X86MemAccess
 import KProgFormal.X86MemAluHandler
+import KProgFormal.X86MemStoreAluHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags

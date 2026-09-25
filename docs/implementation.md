@@ -60,6 +60,11 @@ increment is committed and pushed immediately). Current state:
   low-lane register writeback for all legal widths. Its independent 22,048-case
   C oracle also caught and now pins a real SBB overflow bug: OF must compare the
   original `b` with the final result, not the width-wrapped `b+borrow`.
+- The complementary x86 memory-destination theorem composes the old-value load,
+  ADD/ADC/SUB/SBB transition, and little-endian store. It proves replacement of
+  exactly the selected width's bytes, preservation of every other byte, and
+  equality of all modeled flags; a separate 22,048-case C oracle checks the
+  generated load/store macros against independent byte and 128-bit arithmetic.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -68,8 +73,8 @@ increment is committed and pushed immediately). Current state:
 
 ### Current boundary and open work
 
-- Open x86 proof surface: memory-destination and non-arithmetic memory-operand
-  handler composition, effective-address/address-space selection, the
+- Open x86 proof surface: non-arithmetic memory-operand handler composition,
+  effective-address/address-space and immediate/register-RHS selection, the
   objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
   multi-step control-flow traces, and specialization preservation. All x86 value

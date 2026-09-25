@@ -367,6 +367,17 @@ fixed-seed cases using a byte loop plus 128-bit carry/borrow and signed-range
 arithmetic. Effective-address calculation, stack/ABI dispatch, memory safety,
 opcode/width selection, memory-destination stores, and native bytes remain
 outside this theorem.
+The complementary memory-destination arithmetic theorem covers
+`ADD/ADC/SUB/SBB [mem], rhs` after the effective address and right-hand
+operand have been selected. It composes the old-value byte load, the same
+carry/borrow-correct result and flag transitions, and the generated
+little-endian store. `x86_mem_dest_arith_handler_refines` proves equality of
+all modeled flags and every memory byte: exactly `width/8` bytes receive the
+width-local result and every byte outside that range is unchanged. A separate
+22,048-case host oracle compares the actual generated C load/store and flag
+macros with a byte-loop and 128-bit arithmetic. Address derivation and safety,
+stack/ABI dispatch, immediate/register RHS decoding, opcode selection, and
+non-arithmetic memory handlers remain outside this theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86

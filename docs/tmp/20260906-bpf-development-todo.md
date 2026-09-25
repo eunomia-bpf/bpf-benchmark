@@ -4282,3 +4282,26 @@ framework leaves the original bytecode in place and continues.
   independent 128-bit carry/borrow and signed-range oracle over 22,048 boundary
   and fixed-seed cases. This is a bounded handler refinement and bug fix, not a
   whole-simulator or native-byte equivalence claim.
+
+### x86 memory-destination arithmetic handler composition, 2026-09-25
+
+- Gap: `X86_SIM_L_EXEC_ALU_MEM_IMM` and `...MEM_REG` read the old memory value,
+  run ADD/ADC/SUB/SBB, update flags, and store the width-local result, but only
+  the load/store primitives and register-destination arithmetic composition had
+  theorems. The new `x86_mem_dest_arith_handler_refines` theorem covers this
+  complementary state transition after a valid effective address, typed width
+  and RHS have been supplied.
+- Machine-checked statement: for arbitrary old memory bytes, RHS, incoming
+  flags, operation, and legal width, the composed generated step agrees with an
+  independent arithmetic statement on every modeled flag and every memory byte.
+  Exactly `width/8` little-endian bytes receive the width-local result; every
+  byte outside the access remains unchanged. A concrete theorem pins a 16-bit
+  ADC carry/wrap store and preservation of the following byte. There is no
+  `sorry` or `admit`.
+- Independent C oracle: `test_x86_mem_store_alu_handler_host.c` executes the
+  generated load, result, flag, and store macros and compares the full 16-byte
+  buffer plus flags against a byte-loop and exact 128-bit signed/unsigned model
+  over 22,048 boundary and fixed-seed cases. This proof does not cover address
+  calculation or bounds, stack/ABI dispatch, immediate/register RHS decoding,
+  AUX/opcode selection, compiler/native bytes, multi-step traces, helpers,
+  specialization preservation, or full O1--O4.
