@@ -389,6 +389,7 @@ status**:
 | `docs/artifacts/evidence/rq4-cilium-native-loader/` (source run `x86_kvm_corpus_20260924_164153_955835`) | `completed` | Cilium `status: ok` | **Fresh tracked native-loader run.** The exact command `BPFREJIT_CORPUS_APPS="cilium/agent" BPFREJIT_SHIM_NATIVE_LOADER=post SAMPLES=3 WORKLOAD_DURATION=30 JOBS=8 IMAGE_BUILD_JOBS=8 TIMEOUT=3600 make corpus` exited 0 after 2,846 seconds. `receipt.json` binds the command, source commit, normalized log, post-phase shim log, staged manifest and retained JSON files by SHA256. Supports the derived RQ4 loader counts (179 loads / 135 replacements / 0 pass-throughs / 33 feature-probe skips / 11 pre-init loads) and the 89-object staged manifest; it does not reproduce the paper's declared 113/22 loader split. |
 | `docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_081752_606800`) | `completed` | Cilium `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~290 s inside the guest. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 122 changed load instances by SHA256. Supports the derived rewrite evidence (122/122 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 3,787 applied sites; 159,896 → 111,826 instructions); it is a single startup and does not reproduce the paper's declared 4,086-site full-scale run. |
 | `docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_101028_808501`) | `completed` | Katran `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after 3m29s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the one changed load instance by SHA256. Supports the derived rewrite evidence for the overlay/hint policy path (`--inline-hint` anchors plus `overlays/katran/*.json`): 1/1 changed workdir whose retained before/after bytecode lengths match the reported instruction counts and whose images differ, 16 applied sites, 2,554 → 2,284 instructions (−270). Does **not** support a population-scale claim; the fresh 16-site figure is not merged with the paper's declared Katran site figures. |
+| `docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_111811_456569`) | `completed` | Tracee `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=tracee/monitor BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~362 s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 12 changed load instances by SHA256. Supports the derived rewrite evidence for the default `--map-values`/`--map-ids` policy path (no inline hints) over the two global config arrays, across kprobe, raw_tracepoint and cgroup_skb program types: 12/12 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ, 12 applied sites, 400,640 → 398,817 instructions (−1,823). Does **not** support a population-scale claim; the fresh 12-site figure is not merged with the paper's declared RQ2 4086 figure or any declared Tracee site count. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -807,6 +808,29 @@ counts at render time and asserts both reconciliations. The Katran set is thin
 (1 changed load instance), so it establishes the policy path and its retained
 rewrite, not a population-scale effect; the fresh 16-site figure is not merged
 with the paper's declared Katran site figures or with Cilium's fresh 3,787.
+
+A third retained-bytecode run applies the same derivation to Tracee, which uses
+the default `--map-values`/`--map-ids` policy path with no inline hints and
+whose workload is stress-ng rather than a packet generator. A fresh single-pass
+run `BPFREJIT_CORPUS_APPS=tracee/monitor BPFREJIT_BENCH_PASSES=map_inline
+SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` (source commit
+`14ab524f32`) retains, for each of the 12 changed load instances, the per-step
+`input.step.0.bin` / `output.next.0.bin` pair and its `report.0.json` under
+`docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/`. Its retained
+`details/loadtime-reports/tracee__monitor.jsonl` holds 162 report rows (12
+changed load instances, 150 unchanged), 12 applied sites, and instruction
+counts 400,640 → 398,817 (−1,823); the per-program deltas are large for single
+sites because each inlined array load replaces a map-value lookup sequence, and
+the changed set spans `kprobe`, `raw_tracepoint` and `cgroup_skb` program types
+(`sys_enter_init` 579 → 416, `lkm_seeker_mod_` 218 → 90, `cgroup_skb_ingr`
+3,602 → 3,420, and nine more). For all 12 changed workdirs the retained
+bytecode's raw `struct bpf_insn` length (8 bytes each) matches the reported
+before/after instruction counts and the two images differ. The renderer computes
+these counts at render time and asserts both reconciliations. The Tracee set is
+small (12 changed load instances, 12 sites), so it establishes the hint-free
+policy path and its retained rewrite, not a population-scale effect; the fresh
+12-site figure is not merged with the paper's declared RQ2 4086 figure or any
+declared Tracee site count.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are

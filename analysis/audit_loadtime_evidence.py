@@ -23,6 +23,15 @@ PKTGEN_RE = re.compile(
     re.MULTILINE,
 )
 
+# One stress-ng metrics row. The two final columns are the reported bogo ops/s
+# over real time and over usr+sys time.
+STRESS_NG_RE = re.compile(
+    r"^stress-ng: metrc: \[\d+\] (?P<stressor>\S+)\s+(?P<bogo_ops>\d+)\s+"
+    r"(?P<real_s>[\d.]+)\s+(?P<usr_s>[\d.]+)\s+(?P<sys_s>[\d.]+)\s+"
+    r"(?P<ops_per_second_real>[\d.]+)\s+(?P<ops_per_second_usr_sys>[\d.]+)\s*$",
+    re.MULTILINE,
+)
+
 
 class AuditError(ValueError):
     """An input or declared-contract error that prevents the audit."""
@@ -290,8 +299,12 @@ def summarize_integrity_errors(errors: list[str]) -> dict[str, Any]:
     }
 
 
+# Per-application workload contract. `kind` selects the parser: the packet
+# generators expose one pktgen leaf per thread, while Tracee's stress-ng
+# workload reports per-stressor bogo ops/s instead.
 WORKLOAD_CONTRACTS: dict[str, dict[str, Any]] = {
     "cilium/agent": {
+        "kind": "kernel_pktgen",
         "names": {
             "cilium_endpoint_pktgen_forward",
             "cilium_endpoint_pktgen_reverse",
@@ -301,75 +314,165 @@ WORKLOAD_CONTRACTS: dict[str, dict[str, Any]] = {
     # Katran emits one pktgen leaf per available kpktgend thread (a machine
     # property, not a fixed number), all sharing one workload name.
     "katran": {
+        "kind": "kernel_pktgen",
         "names": {"katran_kernel_pktgen_l2_udp_thread"},
         "leaf_count": None,
     },
+    "tracee/monitor": {
+        "kind": "stress_ng",
+        "names": {"stress_ng_tracee_syscall_hot"},
+        "leaf_count": 1,
+        "stressors": [
+            "cap", "set", "sigfd", "eventfd", "kill", "futex", "prctl",
+        ],
+    },
 }
+
+
+def _parse_pktgen_phase(
+    phase: str,
+    workloads: list[Any],
+    app: str,
+    contract: dict[str, Any],
+) -> list[dict[str, Any]]:
+    expected_names = contract["names"]
+    expected_leaf_count = contract["leaf_count"]
+    components: list[dict[str, Any]] = []
+    for workload in workloads:
+        leaves = workload.get("components")
+        require(isinstance(leaves, list), f"{phase}: workload components missing")
+        for leaf in leaves:
+            name = leaf.get("workload_name")
+            require(name in expected_names, f"{phase}: unexpected workload {name}")
+            require(leaf.get("returncode") == 0, f"{phase}/{name}: nonzero return code")
+            require(
+                (leaf.get("config") or {}).get("tool") == "kernel_pktgen",
+                f"{phase}/{name}: workload is not kernel_pktgen",
+            )
+            matches = list(PKTGEN_RE.finditer(leaf.get("stdout") or ""))
+            require(len(matches) == 1, f"{phase}/{name}: expected one pktgen result")
+            usec, active_usec, delay_usec, packets, pps, errors = map(
+                int, matches[0].groups()
+            )
+            components.append({
+                "name": name,
+                "duration_s": leaf.get("duration_s"),
+                "result_usec": usec,
+                "active_usec": active_usec,
+                "delay_usec": delay_usec,
+                "packet_count": packets,
+                "packets_per_second": pps,
+                "error_count": errors,
+            })
+    names = {row["name"] for row in components}
+    if expected_leaf_count is not None:
+        require(
+            names == expected_names and len(components) == expected_leaf_count,
+            f"{phase}: expected exactly the declared pktgen leaves for {app}",
+        )
+    else:
+        require(
+            names == expected_names and len(components) >= 1,
+            f"{phase}: expected at least one {app} pktgen leaf",
+        )
+    components.sort(key=lambda row: row["name"])
+    return components
+
+
+def _parse_stress_ng_phase(
+    phase: str,
+    workloads: list[Any],
+    app: str,
+    contract: dict[str, Any],
+) -> list[dict[str, Any]]:
+    expected_names = contract["names"]
+    expected_stressors = contract["stressors"]
+    measured: list[dict[str, Any]] = []
+    for workload in workloads:
+        name = workload.get("workload_name")
+        require(name in expected_names, f"{phase}: unexpected workload {name}")
+        require(workload.get("returncode") == 0, f"{phase}/{name}: nonzero return code")
+        config = workload.get("config") or {}
+        require(
+            config.get("tool") == "stress-ng",
+            f"{phase}/{name}: workload is not stress-ng",
+        )
+        require(
+            config.get("stressors") == expected_stressors,
+            f"{phase}/{name}: stressor set differs from the declared set",
+        )
+        stdout = workload.get("stdout") or ""
+        rows = {
+            match.group("stressor"): {
+                "bogo_ops": int(match.group("bogo_ops")),
+                "duration_s": float(match.group("real_s")),
+                "ops_per_second_real": float(match.group("ops_per_second_real")),
+                "ops_per_second_usr_sys": float(
+                    match.group("ops_per_second_usr_sys")
+                ),
+            }
+            for match in STRESS_NG_RE.finditer(stdout)
+        }
+        require(
+            sorted(rows) == sorted(expected_stressors),
+            f"{phase}/{name}: reported stressors differ from the declared set",
+        )
+        require(
+            f"passed: {len(expected_stressors)}:" in stdout,
+            f"{phase}/{name}: stress-ng did not report every stressor passing",
+        )
+        require("failed: 0" in stdout, f"{phase}/{name}: stress-ng reported failures")
+        measured.append({
+            "name": name,
+            "duration_s": workload.get("duration_s"),
+            "stressors": rows,
+        })
+    names = {row["name"] for row in measured}
+    require(
+        names == expected_names and len(measured) == contract["leaf_count"],
+        f"{phase}: expected the declared stress-ng workload for {app}",
+    )
+    return measured
 
 
 def parse_workloads(data: dict[str, Any], app: str) -> dict[str, Any]:
     contract = WORKLOAD_CONTRACTS.get(app)
     require(contract is not None, f"no workload contract for app {app!r}")
-    expected_names = contract["names"]
-    expected_leaf_count = contract["leaf_count"]
     phases: dict[str, Any] = {}
     for phase in ("baseline", "post_rejit"):
         workloads = (data.get(phase) or {}).get("workloads")
         require(isinstance(workloads, list), f"{phase}: workloads are missing")
-        components: list[dict[str, Any]] = []
-        for workload in workloads:
-            leaves = workload.get("components")
-            require(isinstance(leaves, list), f"{phase}: workload components missing")
-            for leaf in leaves:
-                name = leaf.get("workload_name")
-                require(name in expected_names, f"{phase}: unexpected workload {name}")
-                require(leaf.get("returncode") == 0, f"{phase}/{name}: nonzero return code")
-                require(
-                    (leaf.get("config") or {}).get("tool") == "kernel_pktgen",
-                    f"{phase}/{name}: workload is not kernel_pktgen",
-                )
-                matches = list(PKTGEN_RE.finditer(leaf.get("stdout") or ""))
-                require(len(matches) == 1, f"{phase}/{name}: expected one pktgen result")
-                usec, active_usec, delay_usec, packets, pps, errors = map(
-                    int, matches[0].groups()
-                )
-                components.append({
-                    "name": name,
-                    "duration_s": leaf.get("duration_s"),
-                    "result_usec": usec,
-                    "active_usec": active_usec,
-                    "delay_usec": delay_usec,
-                    "packet_count": packets,
-                    "packets_per_second": pps,
-                    "error_count": errors,
-                })
-        names = {row["name"] for row in components}
-        if expected_leaf_count is not None:
-            require(
-                names == expected_names and len(components) == expected_leaf_count,
-                f"{phase}: expected exactly the declared pktgen leaves for {app}",
-            )
+        if contract["kind"] == "stress_ng":
+            components = _parse_stress_ng_phase(phase, workloads, app, contract)
+            phases[phase] = {
+                "components": components,
+                "bogo_ops_per_second_sum": sum(
+                    stressor["ops_per_second_real"]
+                    for row in components
+                    for stressor in row["stressors"].values()
+                ),
+            }
         else:
-            require(
-                names == expected_names and len(components) >= 1,
-                f"{phase}: expected at least one {app} pktgen leaf",
-            )
-        components.sort(key=lambda row: row["name"])
-        phases[phase] = {
-            "components": components,
-            "packets_per_second_sum": sum(
-                row["packets_per_second"] for row in components
-            ),
-            "packet_count_sum": sum(row["packet_count"] for row in components),
-            "error_count_sum": sum(row["error_count"] for row in components),
-        }
+            components = _parse_pktgen_phase(phase, workloads, app, contract)
+            phases[phase] = {
+                "components": components,
+                "packets_per_second_sum": sum(
+                    row["packets_per_second"] for row in components
+                ),
+                "packet_count_sum": sum(row["packet_count"] for row in components),
+                "error_count_sum": sum(row["error_count"] for row in components),
+            }
     require(
         len(phases["baseline"]["components"]) == len(phases["post_rejit"]["components"]),
-        f"{app}: baseline and post-rejit leaf counts differ",
+        f"{app}: baseline and post-rejit workload counts differ",
+    )
+    metric = (
+        "bogo_ops_per_second_sum"
+        if contract["kind"] == "stress_ng"
+        else "packets_per_second_sum"
     )
     phases["policy_to_baseline_ratio"] = (
-        phases["post_rejit"]["packets_per_second_sum"]
-        / phases["baseline"]["packets_per_second_sum"]
+        phases["post_rejit"][metric] / phases["baseline"][metric]
     )
     return phases
 

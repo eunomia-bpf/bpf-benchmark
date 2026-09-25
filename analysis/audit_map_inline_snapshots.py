@@ -79,6 +79,15 @@ APP_CONTRACTS: dict[str, dict[str, Any]] = {
         },
         "dump_key_match": "optional",
     },
+    # Tracee's default map_inline policy inlines its two global config arrays
+    # (see corpus/config/benchmark_config.yaml `full-x86`); their values are
+    # snapshotted from the live map, so the inlined key must be present.
+    "tracee/monitor": {
+        "stem": "tracee__monitor",
+        "expected_entries": "declared_entry_maps",
+        "entry_maps": {"config_map", "netconfig_map"},
+        "dump_key_match": "required",
+    },
 }
 
 

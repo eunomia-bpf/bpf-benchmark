@@ -1037,6 +1037,7 @@ def cilium_attribution_rows(root: Path) -> list[Row]:
 # generation and is never merged with the paper's declared 4086 figure.
 MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode"
 KATRAN_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode"
+TRACEE_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode"
 
 
 def _retained_changed_bytecode(
@@ -1097,80 +1098,30 @@ def _retained_changed_bytecode(
     return out
 
 
-def cilium_retained_bytecode_rows(root: Path) -> list[Row]:
-    """Derive RQ2 Cilium rewrite evidence from retained per-step bytecode.
+def _retained_bytecode_app_row(
+    root: Path,
+    evidence_dir: str,
+    report_rel: str,
+    label: str,
+    unavailable_label: str,
+    declared_note: str,
+) -> list[Row]:
+    """Derive RQ2 rewrite evidence from one app's retained per-step bytecode.
 
     Asserts only what the retained streams prove: for every changed load
     instance the report stream names, the retained input/output bytecode agree
     with the reported before/after instruction counts AND the two bytecode
-    images differ. Status is PASS when the runs' own status records are
+    images differ. Status is PASS when the run's own status records are
     completed/ok, both streams reconcile with no mismatch, and the receipt
-    binds the retained files; otherwise PARTIAL.
+    binds the retained files; otherwise PARTIAL. `declared_note` is a format
+    string with a `{sites}` field naming what stays declared.
     """
-    base = root / MAP_INLINE_EVIDENCE_DIR
-    counts = _retained_changed_bytecode(root)
+    base = root / evidence_dir
+    counts = _retained_changed_bytecode(root, evidence_dir, report_rel)
+    stem = Path(report_rel).stem
     meta = load_json(base / "metadata.json") or {}
     progress = load_json(base / "details/progress.json") or {}
-    app = load_json(base / "details/apps/cilium__agent.json") or {}
-    receipt = load_json(base / "receipt.json") or {}
-    run_ok = (
-        meta.get("status") == SUITE_SUCCESS
-        and meta.get("run_type") == "x86_kvm_corpus"
-        and meta.get("suite") == "corpus"
-        and progress.get("status") == SUITE_SUCCESS
-        and app.get("status") == APP_SUCCESS
-        and not app.get("error")
-    )
-    hashes = receipt.get("files_sha256")
-    files_ok = retained_files_valid(root / MAP_INLINE_EVIDENCE_DIR, hashes)
-    if counts is None:
-        return [Row(
-            "RQ2 Cilium retained map_inline bytecode (4086 sites)",
-            UNAVAILABLE,
-            f"retained report stream or per-step bytecode missing: "
-            f"{MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/cilium__agent.jsonl",
-        )]
-    reconciled = (
-        counts["changed"] > 0
-        and counts["retained_changed_workdirs"] == counts["changed"]
-        and counts["len_mismatches"] == 0
-        and counts["changed_missing_bytecode"] == 0
-        and counts["changed_not_differing"] == 0
-    )
-    status = PASS if (run_ok and reconciled and files_ok) else PARTIAL
-    return [Row(
-        f"RQ2 Cilium retained map_inline bytecode ({counts['sites_applied']} sites)",
-        status,
-        f"{MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/cilium__agent.jsonl: "
-        f"{counts['rows']} report rows, {counts['changed']} changed load instances, "
-        f"{counts['sites_applied']} applied sites, insn {counts['insn_before']}->"
-        f"{counts['insn_after']} ({counts['insn_after'] - counts['insn_before']:+d}); "
-        f"per-step bytecode retained for {counts['retained_changed_workdirs']}/{counts['changed']} "
-        f"changed workdirs with {counts['len_mismatches']} length mismatches and "
-        f"{counts['changed_not_differing']} identical before/after images; "
-        f"run status valid={run_ok}, receipt file hashes valid={files_ok}; the paper's "
-        f"4086 remains declared and is not merged with the fresh {counts['sites_applied']}",
-    )]
-
-
-def katran_retained_bytecode_rows(root: Path) -> list[Row]:
-    """Derive the Katran map_inline rewrite from retained per-step bytecode.
-
-    Same derivation as `cilium_retained_bytecode_rows`, over the Katran
-    overlay/hint policy path: every changed load instance's retained
-    input/output bytecode must agree with the reported before/after instruction
-    counts and the two images must differ. The pre/post workload counters are
-    reported only as raw `apps/katran.json` values, not as a framework metric.
-    """
-    base = root / KATRAN_MAP_INLINE_EVIDENCE_DIR
-    counts = _retained_changed_bytecode(
-        root,
-        KATRAN_MAP_INLINE_EVIDENCE_DIR,
-        "details/loadtime-reports/katran.jsonl",
-    )
-    meta = load_json(base / "metadata.json") or {}
-    progress = load_json(base / "details/progress.json") or {}
-    app = load_json(base / "details/apps/katran.json") or {}
+    app = load_json(base / "details/apps" / f"{stem}.json") or {}
     receipt = load_json(base / "receipt.json") or {}
     run_ok = (
         meta.get("status") == SUITE_SUCCESS
@@ -1184,10 +1135,10 @@ def katran_retained_bytecode_rows(root: Path) -> list[Row]:
     files_ok = retained_files_valid(base, hashes)
     if counts is None:
         return [Row(
-            "RQ2 Katran retained map_inline bytecode",
+            unavailable_label,
             UNAVAILABLE,
             f"retained report stream or per-step bytecode missing: "
-            f"{KATRAN_MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/katran.jsonl",
+            f"{evidence_dir}/{report_rel}",
         )]
     reconciled = (
         counts["changed"] > 0
@@ -1198,19 +1149,65 @@ def katran_retained_bytecode_rows(root: Path) -> list[Row]:
     )
     status = PASS if (run_ok and reconciled and files_ok) else PARTIAL
     return [Row(
-        f"RQ2 Katran retained map_inline bytecode ({counts['sites_applied']} sites)",
+        f"RQ2 {label} retained map_inline bytecode ({counts['sites_applied']} sites)",
         status,
-        f"{KATRAN_MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/katran.jsonl: "
+        f"{evidence_dir}/{report_rel}: "
         f"{counts['rows']} report rows, {counts['changed']} changed load instances, "
         f"{counts['sites_applied']} applied sites, insn {counts['insn_before']}->"
         f"{counts['insn_after']} ({counts['insn_after'] - counts['insn_before']:+d}); "
         f"per-step bytecode retained for {counts['retained_changed_workdirs']}/{counts['changed']} "
         f"changed workdirs with {counts['len_mismatches']} length mismatches and "
         f"{counts['changed_not_differing']} identical before/after images; "
-        f"run status valid={run_ok}, receipt file hashes valid={files_ok}; the paper's "
-        f"declared Katran site figures remain declared and are not merged with the "
-        f"fresh {counts['sites_applied']}",
+        f"run status valid={run_ok}, receipt file hashes valid={files_ok}; "
+        + declared_note.format(sites=counts["sites_applied"]),
     )]
+
+
+def cilium_retained_bytecode_rows(root: Path) -> list[Row]:
+    """RQ2 Cilium rewrite evidence (`.rodata.config` policy path)."""
+    return _retained_bytecode_app_row(
+        root,
+        MAP_INLINE_EVIDENCE_DIR,
+        "details/loadtime-reports/cilium__agent.jsonl",
+        "Cilium",
+        "RQ2 Cilium retained map_inline bytecode (4086 sites)",
+        "the paper's 4086 remains declared and is not merged with the fresh {sites}",
+    )
+
+
+def katran_retained_bytecode_rows(root: Path) -> list[Row]:
+    """RQ2 Katran rewrite evidence (overlay/hint policy path).
+
+    The pre/post workload counters are reported only as raw `apps/katran.json`
+    values elsewhere, not as a framework metric.
+    """
+    return _retained_bytecode_app_row(
+        root,
+        KATRAN_MAP_INLINE_EVIDENCE_DIR,
+        "details/loadtime-reports/katran.jsonl",
+        "Katran",
+        "RQ2 Katran retained map_inline bytecode",
+        "the paper's declared Katran site figures remain declared and are not "
+        "merged with the fresh {sites}",
+    )
+
+
+def tracee_retained_bytecode_rows(root: Path) -> list[Row]:
+    """RQ2 Tracee rewrite evidence (default `--map-values`/`--map-ids` policy).
+
+    Tracee's run inlines two global config arrays across kprobe, raw_tracepoint
+    and cgroup_skb program types; its workload is stress-ng rather than a
+    packet generator, so no packet counters are involved.
+    """
+    return _retained_bytecode_app_row(
+        root,
+        TRACEE_MAP_INLINE_EVIDENCE_DIR,
+        "details/loadtime-reports/tracee__monitor.jsonl",
+        "Tracee",
+        "RQ2 Tracee retained map_inline bytecode",
+        "the paper's declared Tracee site figures remain declared and are not "
+        "merged with the fresh {sites}",
+    )
 
 
 # Fresh ladder run dirs keyed by the same arm labels as CILIUM_JUNE_ARMS.
@@ -1520,6 +1517,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(cilium_attribution_rows(root))
     rows.extend(cilium_retained_bytecode_rows(root))
     rows.extend(katran_retained_bytecode_rows(root))
+    rows.extend(tracee_retained_bytecode_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -2371,6 +2369,70 @@ def self_test() -> int:
         if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
             failures.append(
                 f"Katran bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        # Tracee retained bytecode row: same shared derivation over the tracee
+        # report stream, so a multi-instance stream must aggregate and a
+        # mismatch must degrade it.
+        tev = root / TRACEE_MAP_INLINE_EVIDENCE_DIR
+
+        def write_tracee_map_inline(instances: list[tuple[int, int]],
+                                    bytecode: str = "differing") -> None:
+            if tev.exists():
+                import shutil as _sh
+                _sh.rmtree(tev)
+            (tev / "details/apps").mkdir(parents=True)
+            (tev / "details/loadtime-reports").mkdir(parents=True)
+            lines = []
+            for index, (before, after) in enumerate(instances):
+                wd = tev / f"details/loadtime-workdirs/loadtime_3_{index}"
+                wd.mkdir(parents=True)
+                lines.append(json.dumps({
+                    "prog_name": f"prog_{index}",
+                    "workdir": f"/run/details/loadtime-workdirs/loadtime_3_{index}",
+                    "report": {"insn_count_before": before,
+                               "insn_count_after": after, "sites_applied": 1}}))
+                (wd / "report.0.json").write_text(json.dumps({
+                    "insn_count_before": before, "insn_count_after": after,
+                    "sites_applied": 1}))
+                (wd / "input.step.0.bin").write_bytes(b"\x00" * (8 * before))
+                out = (b"\x00" * (8 * before) if bytecode == "identical"
+                       else b"\x00" * (8 * after))
+                (wd / "output.next.0.bin").write_bytes(out)
+            (tev / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_corpus",
+                "suite": "corpus", "samples": 1, "workload_seconds": 30.0}))
+            (tev / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            (tev / "details/apps/tracee__monitor.json").write_text(json.dumps({
+                "status": "ok", "error": ""}))
+            (tev / "details/loadtime-reports/tracee__monitor.jsonl").write_text(
+                "\n".join(lines) + "\n")
+            (tev / "receipt.json").write_text(json.dumps({
+                "files_sha256": {"metadata.json": file_sha256(tev / "metadata.json")}}))
+
+        def tracee_row() -> Row:
+            return tracee_retained_bytecode_rows(root)[0]
+
+        write_tracee_map_inline([(579, 416), (482, 353)])
+        row = tracee_row()
+        if row.status != PASS or "2 applied sites" not in row.evidence:
+            failures.append(
+                f"valid Tracee retained bytecode expected PASS/2 sites, got {(row.status, row.evidence)!r}")
+        if "insn 1061->769 (-292)" not in row.evidence:
+            failures.append(
+                f"Tracee retained bytecode expected aggregated insn delta, got {row.evidence!r}")
+
+        write_tracee_map_inline([(579, 416), (482, 353)], bytecode="identical")
+        row = tracee_row()
+        if row.status != PARTIAL or "2 identical before/after images" not in row.evidence:
+            failures.append(
+                f"Tracee identical before/after expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        write_tracee_map_inline([(579, 416), (482, 353)])
+        (tev / "details/loadtime-workdirs/loadtime_3_1/input.step.0.bin").write_bytes(b"\x00" * 8)
+        row = tracee_row()
+        if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
+            failures.append(
+                f"Tracee bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
 
 
     if failures:

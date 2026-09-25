@@ -318,6 +318,9 @@ manifest = {
         'docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/receipt.json',
         'docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/make-corpus.log',
         'docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/details/loadtime-reports/katran.jsonl',
+        'docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/receipt.json',
+        'docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/make-corpus.log',
+        'docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/details/loadtime-reports/tracee__monitor.jsonl',
     ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
 }
@@ -375,6 +378,10 @@ required=(
     docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/make-corpus.log
     docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/details/loadtime-reports/katran.jsonl
     docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/details/loadtime-workdirs/loadtime_2879_5/input.step.0.bin
+    docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/receipt.json
+    docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/make-corpus.log
+    docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/details/loadtime-reports/tracee__monitor.jsonl
+    docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/details/loadtime-workdirs/loadtime_19520_10/input.step.0.bin
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     micro/results/x86_kvm_micro_20260924_231824_136293/details/result.json
     micro/results/x86_kvm_micro_20260925_002201_525373/details/result.json
