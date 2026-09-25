@@ -632,6 +632,51 @@ def loadtime_sites(path: Path) -> tuple[int, dict[str, int]] | None:
     return (total, per_pass) if seen else None
 
 
+def loadtime_sites_by_name(path: Path) -> dict[str, int] | None:
+    """Sum per-program sites_applied from a retained shim loadtime report stream.
+
+    The report `prog_name` is truncated to 15 characters by the shim, exactly
+    as the `name` field of the application's own `baseline.bpf[*]` records, so
+    the two are comparable. The join is still lossy: programs whose 15-char
+    prefixes collide, or that the app never reported a counter for, appear as
+    an unmatched residual. Returns None on absent/unparsable/empty input.
+    """
+    if not path.exists():
+        return None
+    by_name: dict[str, int] = {}
+    seen = False
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            return None
+        seen = True
+        report = record.get("report") or {}
+        name = record.get("prog_name") or ""
+        by_name[name] = by_name.get(name, 0) + int(report.get("sites_applied") or 0)
+    return by_name if seen else None
+
+
+def runtime_programs(path: Path, phase: str) -> list[dict] | None:
+    """Per-program runtime counter records from a retained corpus app payload.
+
+    Returns the `bpf` list under `phase` (`baseline`/`post_rejit`) when present.
+    `bpf` may be either a dict keyed by program id or a list; both shapes are
+    normalized to a list. None if the app payload or the phase is unusable.
+    """
+    data = load_json(path)
+    if not isinstance(data, dict):
+        return None
+    bpf = (data.get(phase) or {}).get("bpf")
+    if isinstance(bpf, dict):
+        return list(bpf.values())
+    if isinstance(bpf, list):
+        return bpf
+    return None
+
+
 def native_loader_counts(path: Path) -> dict[str, int] | None:
     """Count loader decisions from a retained shim log.
 
@@ -910,6 +955,75 @@ def katran_site_rows(root: Path) -> list[Row]:
             + (f"post/baseline mean pps={ratio:.6f}x, BPF cost ratio={cost:.6f}" if cost is not None
                else "workload ratio unavailable")
             + f"; {run}/details/apps/katran.json",
+        ))
+    return rows
+
+
+# The Cilium report arms, each retaining both a shim loadtime report stream and
+# the application's own per-program runtime counters. Sites applied to a
+# tail-called program are billed at its directly attached caller, whose
+# run_time_ns_delta already includes the descendant's cost (the tail call jumps
+# inline and control does not return), so the split below is the qualified
+# population's attribution, not a claim about self-applied sites.
+CILIUM_ATTRIBUTION_ARMS = CILIUM_SITE_ARMS + (
+    ("RQ2 Cilium x86 kop applied sites", CILIUM_RQ2_SITE_RUN, "kop"),
+)
+
+
+def cilium_attribution_rows(root: Path) -> list[Row]:
+    """Attribute Cilium applied sites to callers versus tail-call descendants.
+
+    Joins each arm's `report.prog_name` site counts against the application's
+    own `baseline.bpf[*]` runtime counters by 15-char truncated name. Programs
+    the app reported no counter for (or whose prefix collides) remain as an
+    unmatched residual, so the split is reported alongside that residual and
+    is never presented as total. Status asserts only that both streams parsed
+    and the sites reconcile into directly-attached / zero-self / unmatched.
+    """
+    rows: list[Row] = []
+    for label, run, policy in CILIUM_ATTRIBUTION_ARMS:
+        rel = run.removeprefix("corpus/results/")
+        report_path = root / run / "details/loadtime-reports/cilium__agent.jsonl"
+        app_path = root / run / "details/apps/cilium__agent.json"
+        sites = loadtime_sites_by_name(report_path)
+        progs = runtime_programs(app_path, "baseline")
+        if sites is None or progs is None:
+            rows.append(Row(
+                f"{label} attribution",
+                UNAVAILABLE,
+                f"retained report and/or app counters missing or unparsable: "
+                f"{rel}/details/loadtime-reports/cilium__agent.jsonl, "
+                f"{rel}/details/apps/cilium__agent.json",
+            ))
+            continue
+        run_cnt: dict[str, int] = {}
+        run_time: dict[str, int] = {}
+        for prog in progs:
+            name = prog.get("name") or ""
+            run_cnt[name] = run_cnt.get(name, 0) + int(prog.get("run_cnt_delta") or 0)
+            run_time[name] = run_time.get(name, 0) + int(prog.get("run_time_ns_delta") or 0)
+        total = sum(sites.values())
+        bearing = {n: s for n, s in sites.items() if s > 0}
+        direct = sum(s for n, s in bearing.items() if run_cnt.get(n, 0) > 0)
+        zero_self = sum(s for n, s in bearing.items() if n in run_cnt and run_cnt[n] == 0)
+        unmatched = total - direct - zero_self
+        direct_names = sorted(n for n in bearing if run_cnt.get(n, 0) > 0)
+        zero_names = sorted(n for n in bearing if n in run_cnt and run_cnt[n] == 0)
+        unmatched_names = sorted(n for n in bearing if n not in run_cnt)
+        direct_runtime = sum(run_time.get(n, 0) for n in direct_names)
+        reconciled = direct + zero_self + unmatched == total and total > 0
+        rows.append(Row(
+            f"{label} attribution (caller vs tail descendant)",
+            PASS if reconciled else PARTIAL,
+            f"sum of report.prog_name sites_applied over {rel}/details/loadtime-reports/"
+            f"cilium__agent.jsonl = {total}; joined to baseline.bpf[*] runtime counters in "
+            f"{rel}/details/apps/cilium__agent.json by 15-char name: directly attached "
+            f"(run_cnt_delta>0) = {direct} sites on {len(direct_names)} programs {direct_names}, "
+            f"zero-self (tail targets) = {zero_self} sites on {len(zero_names)} programs "
+            f"{zero_names}, name-join residual = {unmatched} sites on {len(unmatched_names)} "
+            f"names {unmatched_names}; callers' summed baseline run_time_ns_delta="
+            f"{direct_runtime} already includes every tail descendant's cost "
+            f"(policy={policy}); sites reconcile={reconciled}",
         ))
     return rows
 
@@ -1219,6 +1333,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(fresh_loadtime_rows(root))
     rows.extend(fresh_exec_speedup_rows(root))
     rows.extend(fresh_codesize_rows(root))
+    rows.extend(cilium_attribution_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -1636,6 +1751,51 @@ def self_test() -> int:
             failures.append(
                 "RQ2 site row with retained `kop` report expected PASS/2988, got "
                 f"{[(r.claim, r.status) for r in rq2_rows]}"
+            )
+
+        # Caller-vs-tail-descendant attribution rows: derivable only when both
+        # the report stream and the app's own counters are retained and parse.
+        (reports / "cilium__agent.jsonl").unlink()
+        attr_rows = [r for r in cilium_attribution_rows(root)
+                     if r.claim.startswith("RQ3 Cilium coverage-max applied sites attribution")]
+        if len(attr_rows) != 1 or attr_rows[0].status != UNAVAILABLE:
+            failures.append(
+                "attribution row without report expected UNAVAILABLE, got "
+                f"{[(r.claim, r.status) for r in attr_rows]}"
+            )
+        (arm / "details/apps/cilium__agent.json").write_text(json.dumps({
+            "status": "ok",
+            "baseline": {"bpf": [
+                {"name": "cil_from_contai", "run_cnt_delta": 900,
+                 "run_time_ns_delta": 900_000},
+                {"name": "tail_nodeport_n", "run_cnt_delta": 0,
+                 "run_time_ns_delta": 0},
+            ]},
+        }))
+        (reports / "cilium__agent.jsonl").write_text("\n".join(json.dumps({
+            "prog_name": name, "report": {"sites_applied": sites},
+        }) for name, sites in (
+            ("cil_from_contai", 300), ("tail_nodeport_n", 500),
+            ("orphan_prefix", 40),
+        )) + "\n")
+        attr_rows = [r for r in cilium_attribution_rows(root)
+                     if r.claim.startswith("RQ3 Cilium coverage-max applied sites attribution")]
+        if (len(attr_rows) != 1 or attr_rows[0].status != PASS
+                or "directly attached (run_cnt_delta>0) = 300" not in attr_rows[0].evidence
+                or "zero-self (tail targets) = 500" not in attr_rows[0].evidence
+                or "name-join residual = 40" not in attr_rows[0].evidence
+                or "sites reconcile=True" not in attr_rows[0].evidence):
+            failures.append(
+                "attribution row expected PASS/300/500/40, got "
+                f"{[(r.claim, r.status, r.evidence) for r in attr_rows]}"
+            )
+        (reports / "cilium__agent.jsonl").write_text("{not json\n")
+        attr_rows = [r for r in cilium_attribution_rows(root)
+                     if r.claim.startswith("RQ3 Cilium coverage-max applied sites attribution")]
+        if len(attr_rows) != 1 or attr_rows[0].status != UNAVAILABLE:
+            failures.append(
+                "attribution row with unparsable report expected UNAVAILABLE, got "
+                f"{[(r.claim, r.status) for r in attr_rows]}"
             )
 
         # RQ3 Katran applied-site rows: derived from the fresh arm64 arm report.
