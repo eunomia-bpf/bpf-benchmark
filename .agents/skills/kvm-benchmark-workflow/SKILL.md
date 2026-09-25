@@ -28,7 +28,7 @@ Project-local benchmark rules win over this skill. If the repository says all ru
 - Use the documented public target, usually `make <target>`, instead of directly invoking internal Python modules, Cargo binaries, Docker commands, QEMU commands, or runner components.
 - Do not bypass the Makefile or runner when it owns build dependencies, VM image assembly, KVM dispatch, environment variables, or result paths.
 - If no public target exists, report the missing benchmark contract and propose the smallest documented smoke command; do not invent a hidden direct runner path as the authoritative benchmark.
-- Makefile edits must be minimal and local. Do not refactor target structure, add convenience aliases, or change output directories unless the user asks to fix the benchmark contract.
+- Makefile edits stay minimal and local per the project's own rules (see First Step) — don't refactor target structure or add convenience aliases just to make a run easier.
 
 ## KVM Environment Check
 
