@@ -378,6 +378,17 @@ width-local result and every byte outside that range is unchanged. A separate
 macros with a byte-loop and 128-bit arithmetic. Address derivation and safety,
 stack/ABI dispatch, immediate/register RHS decoding, opcode selection, and
 non-arithmetic memory handlers remain outside this theorem.
+The memory-unary theorem covers the real `X86_OP_ALU_MEM_UNARY` transition for
+`INC/DEC/NEG/NOT [mem]` after effective-address, operation, and width
+selection. It composes the byte load, the proved unary result/flag transition,
+and the width-confined little-endian store, proving equality of every modeled
+flag and memory byte. In particular, `INC` and `DEC` preserve incoming carry,
+`NOT` preserves all flags, and `NEG` replaces arithmetic flags. A separate
+22,048-case oracle checks the actual generated macros against an independent
+signed-range and byte-loop model across all 16 incoming flag combinations.
+Address derivation and safety, stack/ABI dispatch, packed-AUX operation
+selection, and logical, shift, bit, compare, and multiply memory handlers
+remain outside this theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86

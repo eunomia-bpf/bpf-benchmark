@@ -65,6 +65,11 @@ increment is committed and pushed immediately). Current state:
   exactly the selected width's bytes, preservation of every other byte, and
   equality of all modeled flags; a separate 22,048-case C oracle checks the
   generated load/store macros against independent byte and 128-bit arithmetic.
+- The x86 memory-unary theorem composes the real `X86_OP_ALU_MEM_UNARY`
+  `INC/DEC/NEG/NOT` load, result/flag transition, and width-confined store. It
+  proves equality of every modeled flag and memory byte; an independent
+  22,048-case oracle exhausts all 16 incoming flag combinations over its
+  boundary vectors and checks 20,000 fixed-seed cases.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -73,7 +78,8 @@ increment is committed and pushed immediately). Current state:
 
 ### Current boundary and open work
 
-- Open x86 proof surface: non-arithmetic memory-operand handler composition,
+- Open x86 proof surface: remaining logical/shift/bit/compare/multiply
+  memory-operand handler composition,
   effective-address/address-space and immediate/register-RHS selection, the
   objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,

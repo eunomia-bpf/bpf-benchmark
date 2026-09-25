@@ -4305,3 +4305,27 @@ framework leaves the original bytecode in place and continues.
   calculation or bounds, stack/ABI dispatch, immediate/register RHS decoding,
   AUX/opcode selection, compiler/native bytes, multi-step traces, helpers,
   specialization preservation, or full O1--O4.
+
+### x86 memory-unary handler composition, 2026-09-25
+
+- Gap: the real `X86_OP_ALU_MEM_UNARY` handler loads a width-local memory
+  value, executes `INC`, `DEC`, `NEG`, or `NOT` with their distinct flag
+  policies, and stores the result, but the existing theorem stopped at the
+  corresponding register-lane handlers and standalone memory primitives.
+- Machine-checked statement: `x86_mem_unary_handler_refines` composes those
+  pieces after a valid effective address, unary operation, and legal width have
+  been supplied. For arbitrary old bytes and incoming flags, it proves equality
+  with an independent load/unary/store statement on every modeled flag and
+  every memory byte. The selected width receives the little-endian result and
+  all bytes outside it are preserved; `INC`/`DEC` preserve carry, `NOT`
+  preserves all flags, and `NEG` replaces arithmetic flags. A concrete theorem
+  pins 8-bit signed-minimum `NEG` overflow and preservation of the following
+  byte. There is no `sorry` or `admit`.
+- Independent C oracle: `test_x86_mem_unary_handler_host.c` executes the actual
+  generated load/result/flag/store macros and compares them with a byte-loop
+  and exact signed-range model over 22,048 cases. Its boundary portion covers
+  every operation, width, selected value, and all 16 incoming flag
+  combinations. The theorem does not cover address calculation/bounds,
+  stack/ABI dispatch, packed-AUX operation selection, other memory handlers,
+  compiler/native bytes, multi-step traces, helpers, specialization
+  preservation, or full O1--O4.
