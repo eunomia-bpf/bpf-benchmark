@@ -609,16 +609,19 @@ kernel_rejit" make micro`): `x86_kvm_micro_20260924_231824_136293` under the
 default `full-x86` policy and `x86_kvm_micro_20260925_002201_525373` under
 `kop`. Neither reproduces the paper's 62-name population — the current config
 retains only 2 names in common with either May 14 run — so the renderer
-derives four separate rows from these runs' own paired series. Two are
+derives six separate rows from these runs' own paired series. Two are
 object-load overhead rows from the paired `object_load_ns` geomeans
-(1.161575× and 1.223405×, both `PARTIAL` against the paper's 0.99×). The
-other two apply the paper's RQ1 exec-speedup definition (geomean
-kernel/kernel_rejit median `exec_ns` over the 27 non-simple cases whose median
-applied kop sites exceed zero) and yield 1.081422× (`full-x86`, 532 applied
-kop sites plus the pure-bytecode passes) and 1.213995× (`kop`, 525 applied kop
-sites); both are `PASS` on provenance, but they are same-policy
-different-generation values, not reproductions of the paper's 1.242×. The
-paper's 62-case row is never merged with them.
+(1.161575× and 1.223405×, both `PARTIAL` against the paper's 0.99×). Two apply
+the paper's RQ1 exec-speedup definition (geomean kernel/kernel_rejit median
+`exec_ns` over the 27 non-simple cases whose median applied kop sites exceed
+zero) and yield 1.081422× (`full-x86`, 532 applied kop sites plus the
+pure-bytecode passes) and 1.213995× (`kop`, 525 applied kop sites). Two apply
+the paper's RQ1 code-size definition (geomean kernel_rejit/kernel median
+`native_code_bytes` over all 29 cases) and yield 0.893127× (`full-x86`) and
+0.896642× (`kop`). All four speedup/size rows are `PASS` on provenance, but
+they are same-policy different-generation values, not reproductions of the
+paper's 1.242× speedup or 0.772× code size. The paper's 62-case row is never
+merged with them.
 
 These are analysis-side computations. No aggregation lives in the
 measurement framework; the plot scripts derive every plotted value except the
@@ -735,7 +738,7 @@ evidence status, not an AEC decision.
 |---|---|---|
 | Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. An `atc26-ae-2` candidate ZIP was built by `docs/artifacts/package-atc26.sh` and replay-verified from clean extraction. | The `atc26-ae-2` candidate must be **published** on Zenodo, and an independent evaluator must verify that published ZIP from clean extraction, before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
 | Functional | Component map, environment, dependencies, safety notes, no-VM formal path, a completed six-application KVM corpus run and a completed fresh Cilium native-loader run are documented above. The `atc26-ae-2` candidate passed the packager's clean-extraction replay (`make lint`, `py_compile`, renderer `--self-test`, table generation and manifest parse). | An independent evaluation must confirm the **published** ZIP through the documented proof/build/smoke path; a build-time self-test in the authors' checkout alone is weaker evidence. |
-| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. The two fresh x86 paired runs additionally derive same-policy different-generation exec-speedup rows (1.081× under `full-x86`, 1.214× under `kop`, on their 27 kop-bearing non-simple cases), which is the paper RQ1 quantity from self-contained paired runs but not a reproduction of 1.242×. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). Five fresh Cilium reruns retain their shim report streams: the four RQ3 arms derive applied-site counts 4017/3512/3517/2988 and a rerun of the RQ2 run's own `kop` policy derives 2988; two fresh local-QEMU ARM64 Katran reruns derive 21 (conservative) and 64 (coverage-max); the renderer derives a `PARTIAL` June-vs-fresh ordering divergence row. A fresh native-post Cilium run retains its post-phase shim log, from which the renderer derives 179 intercepted loads, 135 native replacements, 0 pass-throughs, 33 feature-probe skips, 11 pre-init loads and 89 manifest objects across 6 native objects. The formal, Katran-smoke, six-app-success and native-loader receipts are hashed in `docs/artifacts/evidence/`. | The fresh site counts are a different host/toolchain generation (the ARM64 arms under local QEMU, not AWS), so they do not reproduce the June 4697/4086/4136/3512 and 21/62 counts, which remain **declared**. The fresh native-loader counts likewise do not reproduce the paper's declared 113/22/89 loader split. |
+| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. The two fresh x86 paired runs additionally derive same-policy different-generation RQ1 rows: exec speedup 1.081× (`full-x86`) and 1.214× (`kop`) over their 27 kop-bearing non-simple cases, and code size 0.893× (`full-x86`) and 0.897× (`kop`) over all 29 cases -- self-contained paired runs, but not reproductions of the paper's 1.242× speedup or 0.772× code size. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). Five fresh Cilium reruns retain their shim report streams: the four RQ3 arms derive applied-site counts 4017/3512/3517/2988 and a rerun of the RQ2 run's own `kop` policy derives 2988; two fresh local-QEMU ARM64 Katran reruns derive 21 (conservative) and 64 (coverage-max); the renderer derives a `PARTIAL` June-vs-fresh ordering divergence row. A fresh native-post Cilium run retains its post-phase shim log, from which the renderer derives 179 intercepted loads, 135 native replacements, 0 pass-throughs, 33 feature-probe skips, 11 pre-init loads and 89 manifest objects across 6 native objects. The formal, Katran-smoke, six-app-success and native-loader receipts are hashed in `docs/artifacts/evidence/`. | The fresh site counts are a different host/toolchain generation (the ARM64 arms under local QEMU, not AWS), so they do not reproduce the June 4697/4086/4136/3512 and 21/62 counts, which remain **declared**. The fresh native-loader counts likewise do not reproduce the paper's declared 113/22/89 loader split. |
 
 `docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
 numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to

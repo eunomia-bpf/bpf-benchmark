@@ -472,6 +472,43 @@ def fresh_exec_speedup_rows(root: Path) -> list[Row]:
         ))
     return rows
 
+
+# The same two runs carry per-runtime native_code_bytes, so the paper's RQ1
+# code-size quantity (geomean candidate/stock over all 29 cases) is derivable
+# from them too. Fresh-generation values do not reproduce the paper's 0.772x.
+FRESH_CODESIZE_RUNS = (
+    ("RQ1 x86 fresh paired code size (full-x86 policy)",
+     "micro/results/x86_kvm_micro_20260924_231824_136293", "full-x86"),
+    ("RQ1 x86 fresh paired code size (kop policy)",
+     "micro/results/x86_kvm_micro_20260925_002201_525373", "kop"),
+)
+
+
+def fresh_codesize_rows(root: Path) -> list[Row]:
+    rows: list[Row] = []
+    for label, rel, policy in FRESH_CODESIZE_RUNS:
+        data = load_json(root / rel / "details/result.json")
+        if not isinstance(data, dict):
+            rows.append(Row(label, UNAVAILABLE, f"fresh paired result.json missing: {rel}"))
+            continue
+        stock = median_native_bytes(data, "kernel")
+        rejit = median_native_bytes(data, "kernel_rejit")
+        names = sorted(stock.keys() & rejit.keys())
+        if not names:
+            rows.append(Row(label, UNAVAILABLE, f"no paired kernel/kernel_rejit native_code_bytes: {rel}"))
+            continue
+        value = math.exp(sum(math.log(rejit[n] / stock[n]) for n in names) / len(names))
+        provenance_ok = micro_run_provenance_ok(root, rel, "x86_kvm_micro", "x86_64")
+        rows.append(Row(
+            label,
+            PASS if provenance_ok else PARTIAL,
+            f"geomean kernel_rejit/kernel median native_code_bytes={value:.6f}x over "
+            f"{len(names)} paired cases; same-policy different-generation ReJIT "
+            f"policy={policy}; run metadata/progress valid={provenance_ok}; "
+            f"source={rel}/details/result.json",
+        ))
+    return rows
+
 CILIUM_RQ2 = "corpus/results/x86_kvm_corpus_20260604_100557_313063"
 CILIUM_RQ4_ON = "corpus/results/x86_kvm_corpus_20260529_033517_489159"
 CILIUM_RQ4_OFF = "corpus/results/x86_kvm_corpus_20260529_040554_604387"
@@ -1181,6 +1218,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(cilium_claim_rows(root))
     rows.extend(fresh_loadtime_rows(root))
     rows.extend(fresh_exec_speedup_rows(root))
+    rows.extend(fresh_codesize_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -1823,6 +1861,42 @@ def self_test() -> int:
         if row.status != UNAVAILABLE or "expected 27" not in row.evidence:
             failures.append(
                 f"fresh exec row with no applied sites expected UNAVAILABLE, got {(row.status, row.evidence)!r}")
+
+        # Fresh paired code-size row: same run, derived from the paired
+        # native_code_bytes series over all 29 cases.
+        def write_fresh_codesize(rejit_bytes: int) -> None:
+            d = root / fresh_rel
+            (d / "details").mkdir(parents=True, exist_ok=True)
+            (d / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_micro",
+                "suite": "micro_staged_codegen",
+                "host": {"platform": "x86_64", "kernel_version": "7.0.0-rc2+"},
+            }))
+            (d / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            benches = [{"name": "caseA", "runs": [
+                {"runtime": "kernel", "samples": [
+                    {"code_size": {"native_code_bytes": 1000}, "exec_ns": 1000}]},
+                {"runtime": "kernel_rejit", "samples": [
+                    {"code_size": {"native_code_bytes": rejit_bytes}, "exec_ns": 1000}]},
+            ]}]
+            (d / "details/result.json").write_text(json.dumps({"benchmarks": benches}))
+
+        def fresh_codesize_row() -> Row:
+            return next(r for r in fresh_codesize_rows(root)
+                        if r.claim == FRESH_CODESIZE_RUNS[0][0])
+
+        write_fresh_codesize(500)
+        row = fresh_codesize_row()
+        if (row.status != PASS or "median native_code_bytes=0.500000x" not in row.evidence
+                or f"policy={fresh_policy}" not in row.evidence):
+            failures.append(
+                f"fresh code-size row with 0.5x expected PASS/0.500000x, got {(row.status, row.evidence)!r}")
+
+        write_fresh_codesize(0)
+        row = fresh_codesize_row()
+        if row.status != UNAVAILABLE or "no paired kernel/kernel_rejit native_code_bytes" not in row.evidence:
+            failures.append(
+                f"fresh code-size row with no bytes expected UNAVAILABLE, got {(row.status, row.evidence)!r}")
 
 
     if failures:

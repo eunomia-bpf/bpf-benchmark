@@ -75,18 +75,21 @@ Added for artifact evaluation:
   policy), both `SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 RUNTIMES="kernel
   kernel_rejit" make micro`, exit 0, suite/progress `completed`. Their raw
   `metadata.json`, `details/progress.json`, and `details/result.json` are now
-  tracked. `docs/artifacts/render_claim_table.py` derives four new rows from
+  tracked. `docs/artifacts/render_claim_table.py` derives six new rows from
   them. Two are object-load overhead rows: the paired `object_load_ns` geomean
   is 1.161575x (`full-x86`) and 1.223405x (`kop`), i.e. PARTIAL against the
   paper's 0.99x, because the current 29-case generation differs from the
   paper's 62-name population (60 of its names are absent from the current
-  micro config) and the ReJIT policy stack is a different generation. The
-  other two are exec-speedup rows using the paper's RQ1 definition (geomean
+  micro config) and the ReJIT policy stack is a different generation. Two are
+  exec-speedup rows using the paper's RQ1 definition (geomean
   kernel/kernel_rejit median `exec_ns` over the 27 non-simple cases with
   median applied kop sites > 0): 1.081422x (`full-x86`, 532 applied kop sites
-  plus the pure-bytecode passes) and 1.213995x (`kop`, 525 kop sites). Both
-  derive `PASS` because their provenance is valid; the values are same-policy
-  different-generation, not a reproduction of the paper's 1.242x. The paper's
+  plus the pure-bytecode passes) and 1.213995x (`kop`, 525 kop sites). Two are
+  code-size rows using the paper's RQ1 definition (geomean
+  kernel_rejit/kernel median `native_code_bytes` over all 29 cases): 0.893127x
+  (`full-x86`) and 0.896642x (`kop`). All four derive `PASS` because their
+  provenance is valid; the values are same-policy different-generation, not a
+  reproduction of the paper's 1.242x speedup or 0.772x code size. The paper's
   62-case row is unchanged and never merged with these fresh runs.
 
 ## atc26-ae-1 (2026-09-22)
