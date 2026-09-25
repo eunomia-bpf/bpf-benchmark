@@ -118,7 +118,8 @@ EMBEDDED_SUBMODULES=(
 echo "embedding artifact submodules:"
 for path in "${EMBEDDED_SUBMODULES[@]}"; do embed_submodule "$path"; done
 
-# Add only the five raw paper-result datasets consumed by the plotting scripts.
+# Add the raw paper-result datasets consumed by the plotting scripts and the
+# renderer's 62-case/fresh load-time rows.
 RESULTS=(
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     micro/results/x86_kvm_micro_20260526_210351_224315/details/result.json
@@ -128,6 +129,8 @@ RESULTS=(
     micro/results/x86_kvm_micro_20260514_031744_210343/details/result.json
     micro/results/x86_kvm_micro_20260514_181806_133778/details/result.json
     micro/results/x86_kvm_micro_20260429_035938_203074/details/result.json
+    micro/results/x86_kvm_micro_20260924_231824_136293/details/result.json
+    micro/results/x86_kvm_micro_20260925_002201_525373/details/result.json
 )
 echo "embedding paper-result datasets:"
 for rel in "${RESULTS[@]}"; do
@@ -356,6 +359,8 @@ required=(
     docs/artifacts/evidence/rq4-cilium-native-loader/make-corpus.log
     docs/artifacts/evidence/rq4-cilium-native-loader/details/shim-logs/cilium__agent.post_rejit.log
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
+    micro/results/x86_kvm_micro_20260924_231824_136293/details/result.json
+    micro/results/x86_kvm_micro_20260925_002201_525373/details/result.json
     corpus/results/x86_kvm_corpus_20260604_100557_313063/details/apps/cilium__agent.json
     corpus/results/x86_kvm_corpus_20260529_033517_489159/details/apps/cilium__agent.json
     corpus/results/x86_kvm_corpus_20260605_145112_835705/details/apps/cilium__agent.json

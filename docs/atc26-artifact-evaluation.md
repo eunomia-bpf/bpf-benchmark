@@ -602,6 +602,17 @@ recovered. Two fresh reruns of the RQ2 run's own `kop` policy and of the
 no-prefetch family set retain their report streams and derive 2988 and 3512
 sites respectively; the fresh `kop` policy no longer enables `bulk_memory`, so
 both are same-policy different-generation counts, not reproductions of 4086.
+
+Two further fresh x86 paired load-time runs were taken on the current micro
+generation (`SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 RUNTIMES="kernel
+kernel_rejit" make micro`): `x86_kvm_micro_20260924_231824_136293` under the
+default `full-x86` policy and `x86_kvm_micro_20260925_002201_525373` under
+`kop`. Neither reproduces the paper's 62-name population — the current config
+retains only 2 names in common with either May 14 run — so the renderer
+derives two separate rows from these runs' own paired `object_load_ns`
+geomeans (1.161575× and 1.223405×, both `PARTIAL` against the paper's 0.99×).
+The paper's 62-case row is never merged with them.
+
 These are analysis-side computations. No aggregation lives in the
 measurement framework; the plot scripts derive every plotted value except the
 declared site annotations.

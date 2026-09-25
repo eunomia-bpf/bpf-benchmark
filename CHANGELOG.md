@@ -69,6 +69,19 @@ Added for artifact evaluation:
   pass their live metadata/progress provenance check; PARTIAL otherwise). It
   was the last row whose status was a hard-coded literal, so a future paired
   62-case run that reproduces 0.99x promotes it without an edit.
+- Fresh x86 paired load-time runs on the current micro generation:
+  `micro/results/x86_kvm_micro_20260924_231824_136293` (default `full-x86`
+  policy) and `micro/results/x86_kvm_micro_20260925_002201_525373` (`kop`
+  policy), both `SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 RUNTIMES="kernel
+  kernel_rejit" make micro`, exit 0, suite/progress `completed`. Their raw
+  `metadata.json`, `details/progress.json`, and `details/result.json` are now
+  tracked. `docs/artifacts/render_claim_table.py` derives two new rows from
+  them: the paired `object_load_ns` geomean is 1.161575x (`full-x86`) and
+  1.223405x (`kop`), i.e. PARTIAL against the paper's 0.99x, because the
+  current 29-case generation differs from the paper's 62-name population (60
+  of its names are absent from the current micro config) and the ReJIT policy
+  stack is a different generation. The paper's 62-case row is unchanged and
+  never merged with these fresh runs.
 
 ## atc26-ae-1 (2026-09-22)
 

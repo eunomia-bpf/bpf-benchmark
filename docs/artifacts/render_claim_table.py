@@ -372,6 +372,46 @@ def micro_claim_rows(root: Path) -> list[Row]:
     return rows
 
 
+# Fresh x86 paired load-time runs on the current 29-case micro generation. The
+# paper's 62-name population is not reproducible (60 of its 62 names are absent
+# from the current micro config), so these are their own generation: the row
+# status is derived from the run's own object_load_ns ratio against the paper's
+# 0.99x threshold, never declared. They retain their raw details/result.json.
+FRESH_LOADTIME_RUNS = (
+    ("RQ1 x86 fresh paired object-load overhead (full-x86 policy)",
+     "micro/results/x86_kvm_micro_20260924_231824_136293", "full-x86"),
+    ("RQ1 x86 fresh paired object-load overhead (kop policy)",
+     "micro/results/x86_kvm_micro_20260925_002201_525373", "kop"),
+)
+
+
+def fresh_loadtime_rows(root: Path) -> list[Row]:
+    rows: list[Row] = []
+    for label, rel, policy in FRESH_LOADTIME_RUNS:
+        data = load_json(root / rel / "details/result.json")
+        if not isinstance(data, dict):
+            rows.append(Row(label, UNAVAILABLE, f"fresh paired result.json missing: {rel}"))
+            continue
+        kernel_load = median_object_load_ns(data, "kernel")
+        rejit_load = median_object_load_ns(data, "kernel_rejit")
+        names = sorted(kernel_load.keys() & rejit_load.keys())
+        if not names:
+            rows.append(Row(label, UNAVAILABLE, f"no paired kernel/kernel_rejit object_load_ns: {rel}"))
+            continue
+        value = math.exp(sum(math.log(rejit_load[n] / kernel_load[n]) for n in names) / len(names))
+        provenance_ok = micro_run_provenance_ok(root, rel, "x86_kvm_micro", "x86_64")
+        matched = f"{value:.2f}" == "0.99" and provenance_ok
+        rows.append(Row(
+            label,
+            PASS if matched else PARTIAL,
+            f"geomean kernel_rejit/kernel median object_load_ns={value:.6f}x "
+            f"(rounds {value:.2f}x) over {len(names)} paired cases; "
+            f"same-policy different-generation ReJIT policy={policy}; "
+            f"run metadata/progress valid={provenance_ok}; rounds to paper 0.99x={matched}; "
+            f"source={rel}/details/result.json",
+        ))
+    return rows
+
 CILIUM_RQ2 = "corpus/results/x86_kvm_corpus_20260604_100557_313063"
 CILIUM_RQ4_ON = "corpus/results/x86_kvm_corpus_20260529_033517_489159"
 CILIUM_RQ4_OFF = "corpus/results/x86_kvm_corpus_20260529_040554_604387"
@@ -1079,6 +1119,7 @@ def build_rows(root: Path) -> list[Row]:
         rows.append(Row(label, st, prov))
     rows.extend(micro_claim_rows(root))
     rows.extend(cilium_claim_rows(root))
+    rows.extend(fresh_loadtime_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -1636,6 +1677,44 @@ def self_test() -> int:
         if row.status != PARTIAL or "rounds to paper 0.99x=False" not in row.evidence:
             failures.append(
                 f"62-case row with a 1.00x run expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        # Fresh paired load-time row: status derives from the run's own
+        # object_load_ns ratio against the paper's 0.99x threshold.
+        fresh_rel, fresh_policy = FRESH_LOADTIME_RUNS[0][1], FRESH_LOADTIME_RUNS[0][2]
+
+        def write_fresh(rejit_ns: int) -> None:
+            d = root / fresh_rel
+            (d / "details").mkdir(parents=True, exist_ok=True)
+            (d / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_micro",
+                "suite": "micro_staged_codegen",
+                "host": {"platform": "x86_64", "kernel_version": "7.0.0-rc2+"},
+            }))
+            (d / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            benches = [{"name": "caseA", "runs": [
+                {"runtime": "kernel", "samples": [
+                    {"phases_ns": {"object_load_ns": 1000}}]},
+                {"runtime": "kernel_rejit", "samples": [
+                    {"phases_ns": {"object_load_ns": rejit_ns}}]},
+            ]}]
+            (d / "details/result.json").write_text(json.dumps({"benchmarks": benches}))
+
+        def fresh_row() -> Row:
+            return next(r for r in fresh_loadtime_rows(root)
+                        if r.claim == FRESH_LOADTIME_RUNS[0][0])
+
+        write_fresh(990)
+        row = fresh_row()
+        if (row.status != PASS or "rounds to paper 0.99x=True" not in row.evidence
+                or f"policy={fresh_policy}" not in row.evidence):
+            failures.append(
+                f"fresh row with 0.99x ratio expected PASS, got {(row.status, row.evidence)!r}")
+
+        write_fresh(1160)
+        row = fresh_row()
+        if row.status != PARTIAL or "rounds to paper 0.99x=False" not in row.evidence:
+            failures.append(
+                f"fresh row with 1.16x ratio expected PARTIAL, got {(row.status, row.evidence)!r}")
 
 
     if failures:
