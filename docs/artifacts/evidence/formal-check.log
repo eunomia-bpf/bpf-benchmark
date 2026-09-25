@@ -1,4 +1,4 @@
-started=2026-09-24T19:41:58+00:00 commit=68a77fe0e703f8873875f6eab8381b0181ebd4a9
+started=2026-09-25T03:39:21+00:00 commit=735539c2c45ac6e1cd6b805b5806ace088037fd2
 make: Entering directory '/workspaces/repository/native-sim/formal'
 install -d build
 python3 generate_ptr_add_spec.py --check
@@ -112,6 +112,22 @@ lake env lean KProgFormal/X86MemAccess.lean
 cc -Wall -Wextra -O2 -I. test_mem_access_host.c -o build/test_mem_access_host
 ./build/test_mem_access_host
 x86 memory-access host cross-check: OK (40020 cases)
+lake env lean KProgFormal/X86MemAluHandler.lean
+cc -Wall -Wextra -O2 -I. test_x86_mem_alu_handler_host.c -o build/test_x86_mem_alu_handler_host
+./build/test_x86_mem_alu_handler_host
+x86 memory-ALU handler host cross-check: OK (22048 cases)
+lake env lean KProgFormal/X86MemStoreAluHandler.lean
+cc -Wall -Wextra -O2 -I. test_x86_mem_store_alu_handler_host.c -o build/test_x86_mem_store_alu_handler_host
+./build/test_x86_mem_store_alu_handler_host
+x86 memory-store ALU host cross-check: OK (22048 cases)
+lake env lean KProgFormal/X86MemUnaryHandler.lean
+cc -Wall -Wextra -O2 -I. test_x86_mem_unary_handler_host.c -o build/test_x86_mem_unary_handler_host
+./build/test_x86_mem_unary_handler_host
+x86 memory-unary host cross-check: OK (22048 cases)
+lake env lean KProgFormal/X86MemLogicHandler.lean
+cc -Wall -Wextra -O2 -I. test_x86_mem_logic_handler_host.c -o build/test_x86_mem_logic_handler_host
+./build/test_x86_mem_logic_handler_host
+x86 memory-logic host cross-check: OK (21536 cases)
 lake env lean KProgFormal/Arm64Flags.lean
 cc -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 ./build/test_arm64_flags_host
@@ -226,4 +242,5 @@ cc -Wall -Wextra -O2 -I. test_arm64_stack_tag_host.c -o build/test_arm64_stack_t
 arm64 stack tag host cross-check: OK (36 cases)
 lake env lean KProgFormal/Arm64Decode.lean
 make: Leaving directory '/workspaces/repository/native-sim/formal'
-exit=0 ended=2026-09-24T19:45:01+00:00
+exit=0
+ended=2026-09-25T03:42:21+00:00
