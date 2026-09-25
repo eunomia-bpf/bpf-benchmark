@@ -1036,9 +1036,14 @@ def cilium_attribution_rows(root: Path) -> list[Row]:
 # from the retained streams instead of declared. It is a separate single-startup
 # generation and is never merged with the paper's declared 4086 figure.
 MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode"
+KATRAN_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode"
 
 
-def _retained_changed_bytecode(root: Path) -> dict[str, int] | None:
+def _retained_changed_bytecode(
+    root: Path,
+    evidence_dir: str = MAP_INLINE_EVIDENCE_DIR,
+    report_rel: str = "details/loadtime-reports/cilium__agent.jsonl",
+) -> dict[str, int] | None:
     """Reconcile retained per-step bytecode with the report stream.
 
     Reads `details/loadtime-reports/cilium__agent.jsonl` and, for every changed
@@ -1049,8 +1054,8 @@ def _retained_changed_bytecode(root: Path) -> dict[str, int] | None:
     is counted in `len_mismatches`, and a changed workdir whose before/after
     bytecode is byte-identical is counted in `changed_not_differing`.
     """
-    base = root / MAP_INLINE_EVIDENCE_DIR
-    report = base / "details/loadtime-reports/cilium__agent.jsonl"
+    base = root / evidence_dir
+    report = base / report_rel
     if not report.is_file():
         return None
     try:
@@ -1145,6 +1150,66 @@ def cilium_retained_bytecode_rows(root: Path) -> list[Row]:
         f"{counts['changed_not_differing']} identical before/after images; "
         f"run status valid={run_ok}, receipt file hashes valid={files_ok}; the paper's "
         f"4086 remains declared and is not merged with the fresh {counts['sites_applied']}",
+    )]
+
+
+def katran_retained_bytecode_rows(root: Path) -> list[Row]:
+    """Derive the Katran map_inline rewrite from retained per-step bytecode.
+
+    Same derivation as `cilium_retained_bytecode_rows`, over the Katran
+    overlay/hint policy path: every changed load instance's retained
+    input/output bytecode must agree with the reported before/after instruction
+    counts and the two images must differ. The pre/post workload counters are
+    reported only as raw `apps/katran.json` values, not as a framework metric.
+    """
+    base = root / KATRAN_MAP_INLINE_EVIDENCE_DIR
+    counts = _retained_changed_bytecode(
+        root,
+        KATRAN_MAP_INLINE_EVIDENCE_DIR,
+        "details/loadtime-reports/katran.jsonl",
+    )
+    meta = load_json(base / "metadata.json") or {}
+    progress = load_json(base / "details/progress.json") or {}
+    app = load_json(base / "details/apps/katran.json") or {}
+    receipt = load_json(base / "receipt.json") or {}
+    run_ok = (
+        meta.get("status") == SUITE_SUCCESS
+        and meta.get("run_type") == "x86_kvm_corpus"
+        and meta.get("suite") == "corpus"
+        and progress.get("status") == SUITE_SUCCESS
+        and app.get("status") == APP_SUCCESS
+        and not app.get("error")
+    )
+    hashes = receipt.get("files_sha256")
+    files_ok = retained_files_valid(base, hashes)
+    if counts is None:
+        return [Row(
+            "RQ2 Katran retained map_inline bytecode",
+            UNAVAILABLE,
+            f"retained report stream or per-step bytecode missing: "
+            f"{KATRAN_MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/katran.jsonl",
+        )]
+    reconciled = (
+        counts["changed"] > 0
+        and counts["retained_changed_workdirs"] == counts["changed"]
+        and counts["len_mismatches"] == 0
+        and counts["changed_missing_bytecode"] == 0
+        and counts["changed_not_differing"] == 0
+    )
+    status = PASS if (run_ok and reconciled and files_ok) else PARTIAL
+    return [Row(
+        f"RQ2 Katran retained map_inline bytecode ({counts['sites_applied']} sites)",
+        status,
+        f"{KATRAN_MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/katran.jsonl: "
+        f"{counts['rows']} report rows, {counts['changed']} changed load instances, "
+        f"{counts['sites_applied']} applied sites, insn {counts['insn_before']}->"
+        f"{counts['insn_after']} ({counts['insn_after'] - counts['insn_before']:+d}); "
+        f"per-step bytecode retained for {counts['retained_changed_workdirs']}/{counts['changed']} "
+        f"changed workdirs with {counts['len_mismatches']} length mismatches and "
+        f"{counts['changed_not_differing']} identical before/after images; "
+        f"run status valid={run_ok}, receipt file hashes valid={files_ok}; the paper's "
+        f"declared Katran site figures remain declared and are not merged with the "
+        f"fresh {counts['sites_applied']}",
     )]
 
 
@@ -1454,6 +1519,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(fresh_codesize_rows(root))
     rows.extend(cilium_attribution_rows(root))
     rows.extend(cilium_retained_bytecode_rows(root))
+    rows.extend(katran_retained_bytecode_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -2246,6 +2312,65 @@ def self_test() -> int:
         if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
             failures.append(
                 f"bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        # Katran retained bytecode row: same derivation over the katran report
+        # stream, so a mismatched length or identical image must degrade it.
+        kev = root / KATRAN_MAP_INLINE_EVIDENCE_DIR
+
+        def write_katran_map_inline(before: int, after: int,
+                                    bytecode: str = "differing") -> None:
+            if kev.exists():
+                import shutil as _sh
+                _sh.rmtree(kev)
+            (kev / "details/apps").mkdir(parents=True)
+            (kev / "details/loadtime-reports").mkdir(parents=True)
+            wd = kev / "details/loadtime-workdirs/loadtime_2_0"
+            wd.mkdir(parents=True)
+            (kev / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_corpus",
+                "suite": "corpus", "samples": 1, "workload_seconds": 30.0}))
+            (kev / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            (kev / "details/apps/katran.json").write_text(json.dumps({
+                "status": "ok", "error": ""}))
+            (kev / "details/loadtime-reports/katran.jsonl").write_text(json.dumps({
+                "prog_name": "balancer_ingres",
+                "workdir": "/run/details/loadtime-workdirs/loadtime_2_0",
+                "report": {"insn_count_before": before, "insn_count_after": after,
+                           "sites_applied": 16}}) + "\n")
+            (wd / "report.0.json").write_text(json.dumps({
+                "insn_count_before": before, "insn_count_after": after,
+                "sites_applied": 16}))
+            (wd / "input.step.0.bin").write_bytes(b"\x00" * (8 * before))
+            out = (b"\x00" * (8 * before) if bytecode == "identical"
+                   else b"\x00" * (8 * after))
+            (wd / "output.next.0.bin").write_bytes(out)
+            (kev / "receipt.json").write_text(json.dumps({
+                "files_sha256": {"metadata.json": file_sha256(kev / "metadata.json")}}))
+
+        def katran_row() -> Row:
+            return katran_retained_bytecode_rows(root)[0]
+
+        write_katran_map_inline(before=2542, after=2272)
+        row = katran_row()
+        if row.status != PASS or "16 applied sites" not in row.evidence:
+            failures.append(
+                f"valid Katran retained bytecode expected PASS/16 sites, got {(row.status, row.evidence)!r}")
+        if "insn 2542->2272 (-270)" not in row.evidence:
+            failures.append(
+                f"Katran retained bytecode expected derived insn delta, got {row.evidence!r}")
+
+        write_katran_map_inline(before=2542, after=2272, bytecode="identical")
+        row = katran_row()
+        if row.status != PARTIAL or "1 identical before/after images" not in row.evidence:
+            failures.append(
+                f"Katran identical before/after expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        write_katran_map_inline(before=2542, after=2272)
+        (kev / "details/loadtime-workdirs/loadtime_2_0/input.step.0.bin").write_bytes(b"\x00" * 8)
+        row = katran_row()
+        if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
+            failures.append(
+                f"Katran bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
 
 
     if failures:

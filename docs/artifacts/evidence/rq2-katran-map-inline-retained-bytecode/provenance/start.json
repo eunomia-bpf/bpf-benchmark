@@ -1,0 +1,8 @@
+{
+  "started_at": "2026-09-25T10:10:28.808501+00:00",
+  "source_revision": "b04df85dc1be2620b855a92de903ec0a7c41b8bc",
+  "command": "env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image",
+  "uses_prebuilt_runtime": true,
+  "runtime_image": "bpf-benchmark/runner-runtime:x86_64",
+  "runtime_image_tar": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar"
+}

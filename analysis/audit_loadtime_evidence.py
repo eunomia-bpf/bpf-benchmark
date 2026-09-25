@@ -290,11 +290,28 @@ def summarize_integrity_errors(errors: list[str]) -> dict[str, Any]:
     }
 
 
-def parse_workloads(data: dict[str, Any]) -> dict[str, Any]:
-    expected_names = {
-        "cilium_endpoint_pktgen_forward",
-        "cilium_endpoint_pktgen_reverse",
-    }
+WORKLOAD_CONTRACTS: dict[str, dict[str, Any]] = {
+    "cilium/agent": {
+        "names": {
+            "cilium_endpoint_pktgen_forward",
+            "cilium_endpoint_pktgen_reverse",
+        },
+        "leaf_count": 2,
+    },
+    # Katran emits one pktgen leaf per available kpktgend thread (a machine
+    # property, not a fixed number), all sharing one workload name.
+    "katran": {
+        "names": {"katran_kernel_pktgen_l2_udp_thread"},
+        "leaf_count": None,
+    },
+}
+
+
+def parse_workloads(data: dict[str, Any], app: str) -> dict[str, Any]:
+    contract = WORKLOAD_CONTRACTS.get(app)
+    require(contract is not None, f"no workload contract for app {app!r}")
+    expected_names = contract["names"]
+    expected_leaf_count = contract["leaf_count"]
     phases: dict[str, Any] = {}
     for phase in ("baseline", "post_rejit"):
         workloads = (data.get(phase) or {}).get("workloads")
@@ -326,11 +343,17 @@ def parse_workloads(data: dict[str, Any]) -> dict[str, Any]:
                     "packets_per_second": pps,
                     "error_count": errors,
                 })
-        require(
-            {row["name"] for row in components} == expected_names
-            and len(components) == 2,
-            f"{phase}: expected exactly the forward and reverse pktgen leaves",
-        )
+        names = {row["name"] for row in components}
+        if expected_leaf_count is not None:
+            require(
+                names == expected_names and len(components) == expected_leaf_count,
+                f"{phase}: expected exactly the declared pktgen leaves for {app}",
+            )
+        else:
+            require(
+                names == expected_names and len(components) >= 1,
+                f"{phase}: expected at least one {app} pktgen leaf",
+            )
         components.sort(key=lambda row: row["name"])
         phases[phase] = {
             "components": components,
@@ -340,6 +363,10 @@ def parse_workloads(data: dict[str, Any]) -> dict[str, Any]:
             "packet_count_sum": sum(row["packet_count"] for row in components),
             "error_count_sum": sum(row["error_count"] for row in components),
         }
+    require(
+        len(phases["baseline"]["components"]) == len(phases["post_rejit"]["components"]),
+        f"{app}: baseline and post-rejit leaf counts differ",
+    )
     phases["policy_to_baseline_ratio"] = (
         phases["post_rejit"]["packets_per_second_sum"]
         / phases["baseline"]["packets_per_second_sum"]
@@ -394,7 +421,7 @@ def audit(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
     log = parse_shim_log(paths["shim_log"])
     integrity_errors.extend(log["pairing_errors"])
     integrity_errors.extend(join_reports_and_events(reports, log["optimized"]))
-    workloads = parse_workloads(app)
+    workloads = parse_workloads(app, args.app)
 
     changed = [row for row in reports if row["sites_applied"] > 0]
     successful = [event for event in log["optimized"] if event["fd"] is not None and event["fd"] >= 0]

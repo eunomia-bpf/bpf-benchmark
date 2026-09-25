@@ -240,8 +240,9 @@ provenance read by the claim renderer. Compact retained evidence
 records the complete formal check, the six-application ReJIT coverage run, the
 fresh Katran KVM smoke, and the fresh Cilium native-loader run whose shim log
 derives the RQ4 loader and manifest-object counts, plus the fresh Cilium
-single-pass `map_inline` run whose retained per-step before/after bytecode lets
-the RQ2 rewrite be re-derived. ARTIFACT_MANIFEST.json records
+single-pass `map_inline` run and the fresh Katran `map_inline` run over the
+overlay/hint policy path, both retaining per-step before/after bytecode so the
+RQ2 rewrite can be re-derived per application. ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
 EOF
@@ -314,6 +315,9 @@ manifest = {
         'docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/receipt.json',
         'docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/make-corpus.log',
         'docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/details/loadtime-reports/cilium__agent.jsonl',
+        'docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/receipt.json',
+        'docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/make-corpus.log',
+        'docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/details/loadtime-reports/katran.jsonl',
     ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
 }
@@ -367,6 +371,10 @@ required=(
     docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/make-corpus.log
     docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/details/loadtime-reports/cilium__agent.jsonl
     docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/details/loadtime-workdirs/loadtime_3525_30/input.step.0.bin
+    docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/receipt.json
+    docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/make-corpus.log
+    docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/details/loadtime-reports/katran.jsonl
+    docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/details/loadtime-workdirs/loadtime_2879_5/input.step.0.bin
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     micro/results/x86_kvm_micro_20260924_231824_136293/details/result.json
     micro/results/x86_kvm_micro_20260925_002201_525373/details/result.json

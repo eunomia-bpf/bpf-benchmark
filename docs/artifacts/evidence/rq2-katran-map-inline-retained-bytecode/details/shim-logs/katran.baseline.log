@@ -1,0 +1,66 @@
+[49.834939 pid=2250 tid=2250] shim_init pid=2250 exe=/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc
+[49.835626 pid=2250 tid=2254] socket: listening on /var/run/bpfrejit/shim-2250.sock
+[49.837452 pid=2250 tid=2250] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[49.837720 pid=2250 tid=2250]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=4
+[49.838016 pid=2250 tid=2250] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[49.838252 pid=2250 tid=2250]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=5
+[49.838406 pid=2250 tid=2250] BPF_MAP_CREATE type=9 key_size=40 value_size=16 max_entries=1024 name=katran_lru0
+[49.838528 pid=2250 tid=2250]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=2
+[49.838914 pid=2250 tid=2250] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[49.839079 pid=2250 tid=2250]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=6
+[49.839354 pid=2250 tid=2250] BPF_PROG_LOAD type=2 (kprobe) name=det_arg_ctx insn_cnt=4 hash=3ae725ddb7d69e19 policy_hash=3ae725ddb7d69e19 branch_profile_hash=3be13a826158503f license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=13 attach_btf_obj_fd=0 attach_prog_fd=0
+[49.839939 pid=2250 tid=2250]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=7
+[49.840134 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=1024 name=stats
+[49.840840 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=3
+[49.841524 pid=2250 tid=2250] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=16 name=ctl_array
+[49.841646 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=4
+[49.841925 pid=2250 tid=2250] BPF_MAP_CREATE type=1 key_size=20 value_size=8 max_entries=512 name=vip_map
+[49.842161 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=5
+[49.842494 pid=2250 tid=2250] BPF_MAP_CREATE type=9 key_size=40 value_size=16 max_entries=1000 name=fallback_cache
+[49.842687 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=6
+[49.842964 pid=2250 tid=2250] BPF_MAP_CREATE type=12 key_size=4 value_size=4 max_entries=128 name=lru_mapping
+[49.843162 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=7
+[49.843283 pid=2250 tid=2250] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=33554944 name=ch_rings
+[50.016634 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[50.030159 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=8
+[50.030374 pid=2250 tid=2250] BPF_MAP_CREATE type=2 key_size=4 value_size=20 max_entries=4096 name=reals
+[50.030556 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=9
+[50.030712 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=4096 name=reals_stats
+[50.031681 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=10
+[50.031783 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=4 max_entries=4096 name=lru_miss_stats
+[50.032731 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=11
+[50.032829 pid=2250 tid=2250] BPF_MAP_CREATE type=2 key_size=4 value_size=20 max_entries=1 name=vip_miss_stats
+[50.033020 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=12
+[50.033118 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=104 max_entries=1 name=quic_stats_map
+[50.033264 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=13
+[50.033381 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=40 max_entries=1 name=stable_rt_stats
+[50.033526 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=14
+[50.033680 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=512 name=decap_vip_stats
+[50.033936 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=15
+[50.034035 pid=2250 tid=2250] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16777214 name=server_id_map
+[50.150844 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=16
+[50.151191 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=32 max_entries=1 name=tpr_stats_map
+[50.151350 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=17
+[50.151538 pid=2250 tid=2250] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=512 name=server_id_stats
+[50.151814 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=18
+[50.152066 pid=2250 tid=2250] BPF_MAP_CREATE type=1 key_size=4 value_size=1 max_entries=4096 name=vip_to_down_rea
+[50.152181 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=19
+[50.152278 pid=2250 tid=2250] BPF_MAP_CREATE type=13 key_size=20 value_size=4 max_entries=512 name=vip_to_down_rea
+[50.152399 pid=2250 tid=2250]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=20
+[50.152526 pid=2250 tid=2250] BPF_PROG_LOAD type=9 (cgroup_sock) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=de07ed38c37628d2 license=GPL expected_attach=2 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[50.152891 pid=2250 tid=2250]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=8
+[50.153144 pid=2250 tid=2250] BPF_PROG_LOAD type=6 (xdp) name=balancer_ingres insn_cnt=2542 hash=0325eddd38cf33c9 policy_hash=d18d38307868f10d branch_profile_hash=e7852c63b43bc41b license=GPL expected_attach=37 attach_btf_id=0 prog_btf_fd=13 attach_btf_obj_fd=0 attach_prog_fd=0
+[50.182732 pid=2250 tid=2250]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=9
+[50.218080 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[50.419362 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[50.620617 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[50.822421 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[51.023840 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[51.225205 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[51.426744 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[51.628592 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[51.829989 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[52.031397 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[52.233087 pid=2250 tid=2254] socket: cmd=list_progs len=22
+[85.208676 pid=2250 tid=2254] socket: cmd=measure_start len=25
+[116.087888 pid=2250 tid=2254] socket: cmd=measure_finish len=26

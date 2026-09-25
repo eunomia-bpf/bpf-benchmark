@@ -52,12 +52,45 @@ def dump_bytes(value: Any, label: str) -> bytes:
     return bytes(result)
 
 
-def validate_protocol(run_dir: Path) -> tuple[dict[str, Any], Path]:
+# Per-application audit contract. `expected_entries` names the map population
+# that must account for every reported applied site; it is the falsifiable
+# expectation this audit checks, not a derived metric. `dump_key_match` states
+# whether the workdir map snapshot is expected to contain the inlined key:
+# Cilium's values come from snapshotted maps, while Katran's hinted maps are
+# size-skipped or filled from static overlays, so the dump holds no entry.
+APP_CONTRACTS: dict[str, dict[str, Any]] = {
+    "cilium/agent": {
+        "stem": "cilium__agent",
+        "expected_entries": "rodata_config",
+        "dump_key_match": "required",
+    },
+    # Katran's map_inline policy specializes exactly the hinted maps (see
+    # runner/config/passes/map_inline/katran.yaml); any other map inlined into
+    # balancer_ingress would mean an unhinted site was rewritten.
+    "katran": {
+        "stem": "katran",
+        "expected_entries": "katran_hinted_maps",
+        "entry_maps": {
+            "ctl_array",
+            "vip_map",
+            "ch_rings",
+            "reals",
+            "server_id_map",
+        },
+        "dump_key_match": "optional",
+    },
+}
+
+
+def validate_protocol(run_dir: Path, app: str) -> tuple[dict[str, Any], Path]:
+    contract = APP_CONTRACTS.get(app)
+    require(contract is not None, f"no audit contract for app {app!r}")
+    stem = contract["stem"]
     metadata = read_json(run_dir / "metadata.json")
-    app_path = run_dir / "details" / "apps" / "cilium__agent.json"
-    plan_path = run_dir / "details" / "loadtime-plans" / "cilium__agent.json"
-    reports_path = run_dir / "details" / "loadtime-reports" / "cilium__agent.jsonl"
-    app = read_json(app_path)
+    app_path = run_dir / "details" / "apps" / f"{stem}.json"
+    plan_path = run_dir / "details" / "loadtime-plans" / f"{stem}.json"
+    reports_path = run_dir / "details" / "loadtime-reports" / f"{stem}.jsonl"
+    app_data = read_json(app_path)
     plan = read_json(plan_path)
 
     require(metadata.get("status") == "completed", "suite status is not completed")
@@ -72,9 +105,9 @@ def validate_protocol(run_dir: Path) -> tuple[dict[str, Any], Path]:
         (metadata.get("config") or {}).get("enabled_passes") == EXPECTED_PASSES,
         "enabled pass list is not exactly map_inline",
     )
-    require(app.get("app") == "cilium/agent", "application is not cilium/agent")
-    require(app.get("status") == "ok", "Cilium application status is not ok")
-    require(app.get("error") == "", "Cilium application error is not empty")
+    require(app_data.get("app") == app, f"application is not {app}")
+    require(app_data.get("status") == "ok", f"{app} application status is not ok")
+    require(app_data.get("error") == "", f"{app} application error is not empty")
     require(plan.get("cmd") == "execute_plan", "load-time plan command mismatch")
     steps = plan.get("steps")
     require(isinstance(steps, list) and len(steps) == 1, "plan is not one step")
@@ -118,10 +151,13 @@ def find_dump_entry(dump: Any, key: bytes, label: str) -> dict[str, Any]:
     return matches[0]
 
 
-def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], int]:
+def audit(
+    run_dir: Path, selected_workdir: str | None, app: str
+) -> tuple[dict[str, Any], int]:
     run_dir = run_dir.resolve()
     require(run_dir.is_dir(), f"run directory not found: {run_dir}")
-    metadata, reports_path = validate_protocol(run_dir)
+    metadata, reports_path = validate_protocol(run_dir, app)
+    contract = APP_CONTRACTS[app]
     rows = load_report_rows(reports_path)
     workdirs_root = run_dir / "details" / "loadtime-workdirs"
 
@@ -137,6 +173,7 @@ def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], 
     changed_rows = 0
     sites_applied = 0
     weak_value_matches = 0
+    weak_value_dump_skipped = 0
     weak_value_misses = 0
     map_groups: Counter[tuple[str, str, int, int]] = Counter()
     map_group_workdirs: dict[tuple[str, str, int, int], set[str]] = {}
@@ -198,10 +235,10 @@ def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], 
             key = parse_hex(entry.get("key_hex"), f"{entry_label}.key_hex")
             value = parse_hex(entry.get("value_hex"), f"{entry_label}.value_hex")
 
+
             show_path = workdir / "map-values" / f"map-{map_id}.show.json"
             dump_path = workdir / "map-values" / f"map-{map_id}.dump.json"
             require(show_path.is_file(), f"{entry_label}: map metadata is missing")
-            require(dump_path.is_file(), f"{entry_label}: map dump is missing")
             if show_path not in metadata_cache:
                 show = read_json(show_path)
                 require(isinstance(show, dict), f"{entry_label}: map metadata is not an object")
@@ -217,18 +254,44 @@ def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], 
             require(isinstance(flags, int) and flags >= 0, f"{entry_label}: invalid flags")
             require(frozen in (0, 1), f"{entry_label}: invalid frozen state")
 
+            require(dump_path.is_file(), f"{entry_label}: map dump is missing")
             if dump_path not in dump_cache:
                 dump_cache[dump_path] = read_json(dump_path)
-            dump_entry = find_dump_entry(
-                dump_cache[dump_path], key, f"{entry_label}: map dump"
-            )
-            snapshot_value = dump_bytes(
-                dump_entry.get("value"), f"{entry_label}: dump value"
-            )
-            if value in snapshot_value:
-                weak_value_matches += 1
+            dump = dump_cache[dump_path]
+            dump_entry = None
+            if isinstance(dump, dict) and dump.get("skipped") is True:
+                pass
+            elif isinstance(dump, list):
+                candidates = [
+                    entry
+                    for entry in dump
+                    if isinstance(entry, dict)
+                    and dump_bytes(entry.get("key"), f"{entry_label}.dump.key") == key
+                ]
+                require(
+                    len(candidates) <= 1,
+                    f"{entry_label}: key has {len(candidates)} dump matches",
+                )
+                if candidates:
+                    dump_entry = candidates[0]
+                elif contract["dump_key_match"] == "required":
+                    require(False, f"{entry_label}: key has 0 dump matches")
             else:
-                weak_value_misses += 1
+                require(False, f"{entry_label}: map dump is neither list nor skip record")
+            if dump_entry is None:
+                # Snapshot value is unavailable (size-skipped map, or a hinted
+                # map whose entry is injected from a static overlay); the value
+                # check is excluded from this diagnostic's denominator rather
+                # than counted as a miss.
+                weak_value_dump_skipped += 1
+            else:
+                snapshot_value = dump_bytes(
+                    dump_entry.get("value"), f"{entry_label}: dump value"
+                )
+                if value in snapshot_value:
+                    weak_value_matches += 1
+                else:
+                    weak_value_misses += 1
 
             map_key = (map_name, map_type, int(frozen), flags)
             map_groups[map_key] += 1
@@ -236,11 +299,30 @@ def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], 
             program_groups[(prog_name, prog_type, map_name, map_type, int(frozen))] += 1
 
     require(report_rows > 0, "workdir filter selected no report rows")
-    expected_entries = sum(
-        count
-        for (name, map_type, frozen, _flags), count in map_groups.items()
-        if name == ".rodata.config" and map_type == "array" and frozen == 1
-    )
+    if contract["expected_entries"] == "rodata_config":
+        expected_entries = sum(
+            count
+            for (name, map_type, frozen, _flags), count in map_groups.items()
+            if name == ".rodata.config" and map_type == "array" and frozen == 1
+        )
+    else:
+        allowed = contract["entry_maps"]
+        expected_entries = sum(
+            count
+            for (name, _map_type, _frozen, _flags), count in map_groups.items()
+            if name in allowed
+        )
+        unexpected = sorted(
+            {
+                name
+                for (name, _map_type, _frozen, _flags) in map_groups
+                if name not in allowed
+            }
+        )
+        require(
+            not unexpected,
+            f"{app}: inlined maps outside the declared hint set: {unexpected}",
+        )
     if sites_applied == 0:
         outcome = "contradicted"
     elif expected_entries == sites_applied:
@@ -254,7 +336,7 @@ def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], 
         "outcome": outcome,
         "scope": {
             "artifact": str(run_dir),
-            "application": "cilium/agent",
+            "application": app,
             "enabled_passes": EXPECTED_PASSES,
             "samples": metadata["samples"],
             "workload_seconds": metadata["workload_seconds"],
@@ -308,6 +390,7 @@ def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], 
             ),
             "matches": weak_value_matches,
             "misses": weak_value_misses,
+            "skipped_dump_unavailable": weak_value_dump_skipped,
         },
     }
     return result, 0
@@ -316,10 +399,11 @@ def audit(run_dir: Path, selected_workdir: str | None) -> tuple[dict[str, Any], 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_dir", type=Path)
+    parser.add_argument("--app", required=True)
     parser.add_argument("--workdir")
     args = parser.parse_args()
     try:
-        result, exit_code = audit(args.run_dir, args.workdir)
+        result, exit_code = audit(args.run_dir, args.workdir, args.app)
     except AuditError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
