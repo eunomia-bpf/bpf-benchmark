@@ -390,6 +390,7 @@ status**:
 | `docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_081752_606800`) | `completed` | Cilium `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~290 s inside the guest. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 122 changed load instances by SHA256. Supports the derived rewrite evidence (122/122 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 3,787 applied sites; 159,896 → 111,826 instructions); it is a single startup and does not reproduce the paper's declared 4,086-site full-scale run. |
 | `docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_101028_808501`) | `completed` | Katran `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after 3m29s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the one changed load instance by SHA256. Supports the derived rewrite evidence for the overlay/hint policy path (`--inline-hint` anchors plus `overlays/katran/*.json`): 1/1 changed workdir whose retained before/after bytecode lengths match the reported instruction counts and whose images differ, 16 applied sites, 2,554 → 2,284 instructions (−270). Does **not** support a population-scale claim; the fresh 16-site figure is not merged with the paper's declared Katran site figures. |
 | `docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_111811_456569`) | `completed` | Tracee `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=tracee/monitor BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~362 s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 12 changed load instances by SHA256. Supports the derived rewrite evidence for the default `--map-values`/`--map-ids` policy path (no inline hints) over the two global config arrays, across kprobe, raw_tracepoint and cgroup_skb program types: 12/12 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ, 12 applied sites, 400,640 → 398,817 instructions (−1,823). Does **not** support a population-scale claim; the fresh 12-site figure is not merged with the paper's declared RQ2 4086 figure or any declared Tracee site count. |
+| `docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_133216_342697`) | `completed` | Tetragon `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~400 s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 118 changed load instances by SHA256. Supports the derived rewrite evidence for the default `--map-values`/`--map-ids` policy path (no inline hints) over six array maps (`tg_conf_map`, `policy_conf`, `policy_stats`, `cgroup_rate_opt`, `.rodata`, `config_map`), across kprobe, tracepoint, raw_tracepoint and socket_filter program types, and covering single-site as well as two- and three-site programs: 118/118 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 140 applied sites; 234,754 → 220,562 instructions. It is a single startup with `SAMPLES=1` and does not re-measure the paper's declared Tetragon site figures. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -831,6 +832,29 @@ small (12 changed load instances, 12 sites), so it establishes the hint-free
 policy path and its retained rewrite, not a population-scale effect; the fresh
 12-site figure is not merged with the paper's declared RQ2 4086 figure or any
 declared Tracee site count.
+
+A fourth retained-bytecode run applies the same derivation to Tetragon, which
+also uses the default `--map-values`/`--map-ids` policy path with no inline
+hints and whose workload is stress-ng. A fresh single-pass run
+`BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_BENCH_PASSES=map_inline
+SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` (source commit
+`ac3432e60`) retains, for each of the 118 changed load instances, the per-step
+`input.step.0.bin` / `output.next.0.bin` pair and its `report.0.json` under
+`docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/`. Its
+retained `details/loadtime-reports/tetragon__observer.jsonl` holds 215 report
+rows (118 changed load instances, 97 unchanged), 140 applied sites, and
+instruction counts 234,754 → 220,562 (−14,192); this is the largest retained
+changed-instance set in the package and it spans `kprobe`, `tracepoint`,
+`raw_tracepoint` and `socket_filter` program types, including programs with two
+and three applied sites as well as single-site ones. Six distinct array maps are
+inlined — `tg_conf_map` (77 sites), `policy_conf` (41), `policy_stats` (18),
+`cgroup_rate_opt` (2), `.rodata` (1, frozen) and `config_map` (1) — verified
+against each workdir's `map-values/map-<id>.show.json`. For all 118 changed
+workdirs the retained bytecode's raw `struct bpf_insn` length (8 bytes each)
+matches the reported before/after instruction counts and the two images differ.
+The renderer computes these counts at render time and asserts both
+reconciliations. The fresh 140-site figure is not merged with the paper's
+declared Tetragon site figures.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are

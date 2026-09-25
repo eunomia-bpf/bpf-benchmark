@@ -326,6 +326,12 @@ WORKLOAD_CONTRACTS: dict[str, dict[str, Any]] = {
             "cap", "set", "sigfd", "eventfd", "kill", "futex", "prctl",
         ],
     },
+    "tetragon/observer": {
+        "kind": "stress_ng",
+        "names": {"stress_ng_tetragon_policy_hot"},
+        "leaf_count": 1,
+        "stressors": ["eventfd", "mmap", "udp", "sock", "sockfd", "sockpair"],
+    },
 }
 
 

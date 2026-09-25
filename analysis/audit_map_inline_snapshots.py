@@ -88,6 +88,25 @@ APP_CONTRACTS: dict[str, dict[str, Any]] = {
         "entry_maps": {"config_map", "netconfig_map"},
         "dump_key_match": "required",
     },
+    # Tetragon's default map_inline policy has no hint file either; the
+    # optimizer discovers its map references through --map-ids. The declared
+    # set is the union of the array maps its own programs reference
+    # (tg_conf_map's policy/config/stat arrays, the cgroup rate opts, the
+    # frozen .rodata, and one generic tracing config_map), and the audit's
+    # falsifiable expectation is that no *other* map is inlined.
+    "tetragon/observer": {
+        "stem": "tetragon__observer",
+        "expected_entries": "declared_entry_maps",
+        "entry_maps": {
+            "tg_conf_map",
+            "policy_conf",
+            "policy_stats",
+            "cgroup_rate_opt",
+            ".rodata",
+            "config_map",
+        },
+        "dump_key_match": "required",
+    },
 }
 
 

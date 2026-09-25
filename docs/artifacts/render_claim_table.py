@@ -1038,6 +1038,8 @@ def cilium_attribution_rows(root: Path) -> list[Row]:
 MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode"
 KATRAN_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode"
 TRACEE_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode"
+# Tetragon retained-bytecode evidence dir (default map_inline policy, six maps).
+TETRAGON_MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode"
 
 
 def _retained_changed_bytecode(
@@ -1206,6 +1208,26 @@ def tracee_retained_bytecode_rows(root: Path) -> list[Row]:
         "Tracee",
         "RQ2 Tracee retained map_inline bytecode",
         "the paper's declared Tracee site figures remain declared and are not "
+        "merged with the fresh {sites}",
+    )
+
+
+def tetragon_retained_bytecode_rows(root: Path) -> list[Row]:
+    """RQ2 Tetragon rewrite evidence (default `--map-values`/`--map-ids` policy).
+
+    Tetragon's run inlines six array maps (`tg_conf_map`, `policy_conf`,
+    `policy_stats`, `cgroup_rate_opt`, `.rodata`, `config_map`) across kprobe,
+    tracepoint, raw_tracepoint and socket_filter programs, including programs
+    with two and three applied sites; its workload is stress-ng rather than a
+    packet generator.
+    """
+    return _retained_bytecode_app_row(
+        root,
+        TETRAGON_MAP_INLINE_EVIDENCE_DIR,
+        "details/loadtime-reports/tetragon__observer.jsonl",
+        "Tetragon",
+        "RQ2 Tetragon retained map_inline bytecode",
+        "the paper's declared Tetragon site figures remain declared and are not "
         "merged with the fresh {sites}",
     )
 
@@ -1518,6 +1540,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(cilium_retained_bytecode_rows(root))
     rows.extend(katran_retained_bytecode_rows(root))
     rows.extend(tracee_retained_bytecode_rows(root))
+    rows.extend(tetragon_retained_bytecode_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -2433,6 +2456,70 @@ def self_test() -> int:
         if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
             failures.append(
                 f"Tracee bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        # Tetragon retained bytecode row: same shared derivation over the
+        # tetragon report stream, including a multi-site program.
+        gev = root / TETRAGON_MAP_INLINE_EVIDENCE_DIR
+
+        def write_tetragon_map_inline(instances: list[tuple[int, int, int]],
+                                      bytecode: str = "differing") -> None:
+            if gev.exists():
+                import shutil as _sh
+                _sh.rmtree(gev)
+            (gev / "details/apps").mkdir(parents=True)
+            (gev / "details/loadtime-reports").mkdir(parents=True)
+            lines = []
+            for index, (before, after, sites) in enumerate(instances):
+                wd = gev / f"details/loadtime-workdirs/loadtime_4_{index}"
+                wd.mkdir(parents=True)
+                lines.append(json.dumps({
+                    "prog_name": f"prog_{index}",
+                    "workdir": f"/run/details/loadtime-workdirs/loadtime_4_{index}",
+                    "report": {"insn_count_before": before,
+                               "insn_count_after": after, "sites_applied": sites}}))
+                (wd / "report.0.json").write_text(json.dumps({
+                    "insn_count_before": before, "insn_count_after": after,
+                    "sites_applied": sites}))
+                (wd / "input.step.0.bin").write_bytes(b"\x00" * (8 * before))
+                out = (b"\x00" * (8 * before) if bytecode == "identical"
+                       else b"\x00" * (8 * after))
+                (wd / "output.next.0.bin").write_bytes(out)
+            (gev / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_corpus",
+                "suite": "corpus", "samples": 1, "workload_seconds": 30.0}))
+            (gev / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            (gev / "details/apps/tetragon__observer.json").write_text(json.dumps({
+                "status": "ok", "error": ""}))
+            (gev / "details/loadtime-reports/tetragon__observer.jsonl").write_text(
+                "\n".join(lines) + "\n")
+            (gev / "receipt.json").write_text(json.dumps({
+                "files_sha256": {"metadata.json": file_sha256(gev / "metadata.json")}}))
+
+        def tetragon_row() -> Row:
+            return tetragon_retained_bytecode_rows(root)[0]
+
+        write_tetragon_map_inline([(400, 300, 1), (200, 120, 2), (100, 90, 3)])
+        row = tetragon_row()
+        if row.status != PASS or "6 applied sites" not in row.evidence:
+            failures.append(
+                f"valid Tetragon retained bytecode expected PASS/6 sites, got {(row.status, row.evidence)!r}")
+        if "insn 700->510 (-190)" not in row.evidence:
+            failures.append(
+                f"Tetragon retained bytecode expected aggregated insn delta, got {row.evidence!r}")
+
+        write_tetragon_map_inline([(400, 300, 1), (200, 120, 2), (100, 90, 3)],
+                                  bytecode="identical")
+        row = tetragon_row()
+        if row.status != PARTIAL or "3 identical before/after images" not in row.evidence:
+            failures.append(
+                f"Tetragon identical before/after expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        write_tetragon_map_inline([(400, 300, 1), (200, 120, 2), (100, 90, 3)])
+        (gev / "details/loadtime-workdirs/loadtime_4_2/input.step.0.bin").write_bytes(b"\x00" * 8)
+        row = tetragon_row()
+        if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
+            failures.append(
+                f"Tetragon bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
 
 
     if failures:
