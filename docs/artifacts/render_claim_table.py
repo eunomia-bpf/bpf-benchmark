@@ -547,6 +547,39 @@ KATRAN_SITE_ARMS = (
     ("RQ3 Katran coverage-max applied sites", "corpus/results/arm64_qemu_corpus_19700101_000011_741370",
      ["rotate", "extract", "endian_fusion", "bulk_memory", "prefetch", "cond_select", "ccmp"]),
 )
+# Controlled per-pass throughput causality from the May 2026 matched batch
+# (`x86_kvm_corpus_20260522_*`). Per app the batch holds one `map_inline`-only
+# run and two same-batch no-pass runs (`enabled_passes==[]`, mode=loadtime,
+# status=skipped), all single-app `x86_kvm_corpus` with 3 baseline + 3
+# post_rejit workload samples and `workload_seconds=60.0`. The no-pass runs are
+# the restart-drift null: an optimized through-drift ratio is
+# `MI median / control median`, and the two controls' own spread bounds how
+# much of the raw ratio is attributable to the pass. These runs retain no
+# per-step bytecode, so no site counts are claimed and the paper's June ratios
+# are never merged with this generation.
+CAUSALITY_WORKLOAD_SECONDS = 60.0
+MAP_INLINE_CAUSALITY = (
+    ("bcc/set", "corpus/results/x86_kvm_corpus_20260522_042759_209148",
+     ("corpus/results/x86_kvm_corpus_20260522_040414_983443",
+      "corpus/results/x86_kvm_corpus_20260522_041848_461647"), "bcc__set.json"),
+    ("otelcol", "corpus/results/x86_kvm_corpus_20260522_050233_401368",
+     ("corpus/results/x86_kvm_corpus_20260522_044521_899895",
+      "corpus/results/x86_kvm_corpus_20260522_045359_622598"),
+     "otelcol-ebpf-profiler__profiling.json"),
+    ("cilium", "corpus/results/x86_kvm_corpus_20260522_054834_450402",
+     ("corpus/results/x86_kvm_corpus_20260522_052646_166503",
+      "corpus/results/x86_kvm_corpus_20260522_053738_559124"), "cilium__agent.json"),
+    ("tetragon", "corpus/results/x86_kvm_corpus_20260522_070721_604229",
+     ("corpus/results/x86_kvm_corpus_20260522_064657_150013",
+      "corpus/results/x86_kvm_corpus_20260522_065609_372274"), "tetragon__observer.json"),
+    ("katran", "corpus/results/x86_kvm_corpus_20260522_074136_764813",
+     ("corpus/results/x86_kvm_corpus_20260522_072319_967424",
+      "corpus/results/x86_kvm_corpus_20260522_073158_210866"), "katran.json"),
+    ("tracee", "corpus/results/x86_kvm_corpus_20260522_081529_738968",
+     ("corpus/results/x86_kvm_corpus_20260522_075613_925659",
+      "corpus/results/x86_kvm_corpus_20260522_080555_505608"), "tracee__monitor.json"),
+)
+
 PPS = re.compile(r"\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)")
 
 
@@ -606,6 +639,61 @@ def bpf_ns_per_run(app: dict, phase: str) -> float | None:
     runs = sum(record.get("run_cnt_delta", 0) for record in records)
     elapsed = sum(record.get("run_time_ns_delta", 0) for record in records)
     return elapsed / runs if runs else None
+
+# The May batch's workload stdout carries three different rate shapes, so the
+# controlled-causality rows need a wider extractor than `workload_pps` (which
+# only reads kernel-pktgen `pps ... errors:` lines and returns 0 for wrk and
+# stress-ng). Each workload contributes at most one scalar: its own stdout/
+# stderr if it carries a rate, otherwise the first component that does. No
+# existing row's `phase_pps` semantics are touched.
+
+
+WRK_REQUESTS_PER_SEC = re.compile(r"(?m)^\s*Requests/sec:\s+(\S+)")
+STRESS_NG_METRC = re.compile(
+    r"(?m)^stress-ng:\s+metrc:\s+\[\d+\]\s+\S+\s+"
+    r"([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\b"
+)
+
+
+def _rate_scalar(stdout: str | None, stderr: str | None) -> float | None:
+    """One workload's throughput scalar: pktgen pps, wrk req/s, or bogo-ops."""
+    text = "\n" + (stdout or "") + "\n" + (stderr or "")
+    packets = sum(float(m.group(1)) for m in PPS.finditer(text))
+    if packets:
+        return packets
+    requests = sum(float(m.group(1)) for m in WRK_REQUESTS_PER_SEC.finditer(text))
+    if requests:
+        return requests
+    bogo = sum(float(m.group(1)) for m in STRESS_NG_METRC.finditer(text))
+    return bogo or None
+
+
+def workload_throughput(workload: dict) -> float | None:
+    value = _rate_scalar(workload.get("stdout"), workload.get("stderr"))
+    if value is not None:
+        return value
+    for component in workload.get("components") or []:
+        value = _rate_scalar(component.get("stdout"), component.get("stderr"))
+        if value is not None:
+            return value
+    return None
+
+
+def phase_throughput(app: dict, phase: str) -> list[float | None]:
+    obj = app.get(phase) or {}
+    return [workload_throughput(w) for w in obj.get("workloads") or []]
+
+
+def _throughput_ratio(app: dict) -> float | None:
+    """Median post/baseline throughput ratio over 3+3 positive samples."""
+    baseline = phase_throughput(app, "baseline")
+    post = phase_throughput(app, "post_rejit")
+    samples = baseline + post
+    if len(baseline) != 3 or len(post) != 3:
+        return None
+    if any(value is None or value <= 0 for value in samples):
+        return None
+    return statistics.median(post) / statistics.median(baseline)
 
 
 def loadtime_sites(path: Path) -> tuple[int, dict[str, int]] | None:
@@ -882,6 +970,93 @@ def cilium_claim_rows(root: Path) -> list[Row]:
         else:
             rows.append(Row(label, UNAVAILABLE, f"verified samples missing: {run}"))
     rows.extend(cilium_site_rows(root))
+    return rows
+
+
+# Frozen May-batch causality values: per app, the raw `map_inline` median
+# throughput ratio and the control-drift-corrected ratio (MI median / median of
+# the two no-pass controls). There is no paper-declared single-pass causality
+# constant, so these are declared from the matched batch itself and a row is
+# PASS only when the derived value reproduces the declared one at the printed
+# precision; any drift flips the row to PARTIAL rather than silently
+# re-baselining.
+MAP_INLINE_CAUSALITY_DECLARED = {
+    "bcc/set": ("0.8318", "0.7921"),
+    "otelcol": ("0.9984", "0.9983"),
+    "cilium": ("0.8885", "0.9585"),
+    "tetragon": ("1.0408", "1.0840"),
+    "katran": ("1.0191", "1.0345"),
+    "tracee": ("0.9243", "1.0114"),
+}
+MAP_INLINE_CAUSALITY_POOLED = "0.9751"
+
+
+def map_inline_causality_rows(
+    root: Path,
+    apps=MAP_INLINE_CAUSALITY,
+    declared=MAP_INLINE_CAUSALITY_DECLARED,
+    pooled_declared: str = MAP_INLINE_CAUSALITY_POOLED,
+) -> list[Row]:
+    """Controlled per-pass throughput causality from the May matched batch.
+
+    Each app contributes a raw ratio (its `map_inline` run's median post/
+    baseline throughput) and a control-drift-corrected ratio (raw / median of
+    the same batch's two no-pass `loadtime` runs). The controls pair an
+    optimized and a plain restart of the same app at identical 60 s duration,
+    so their spread measures how much of the raw ratio is restart drift rather
+    than pass effect. No site counts are claimed: these runs retain no per-step
+    bytecode, and the paper's June ratios are a separate generation.
+
+    `apps`/`declared`/`pooled_declared` are injectable so `self_test` can drive
+    the identical derivation over synthetic runs.
+    """
+    rows: list[Row] = []
+    controlled: list[float] = []
+    for app_label, mi_run, control_runs, app_file in apps:
+        mi = corpus_app(root, mi_run, run_type="x86_kvm_corpus", app_file=app_file,
+                        passes=["map_inline"], bpf_stats=True,
+                        workload_seconds=CAUSALITY_WORKLOAD_SECONDS)
+        raw = _throughput_ratio(mi) if mi else None
+        control_ratios: list[float] = []
+        for control_run in control_runs:
+            control = corpus_app(root, control_run, run_type="x86_kvm_corpus",
+                                 app_file=app_file, passes=[],
+                                 workload_seconds=CAUSALITY_WORKLOAD_SECONDS)
+            ratio = _throughput_ratio(control) if control else None
+            if ratio is not None:
+                control_ratios.append(ratio)
+        label = f"map_inline per-pass causality {app_label}"
+        if raw is None or not control_ratios:
+            rows.append(Row(label, UNAVAILABLE,
+                            f"matched map_inline run plus no-pass controls with 3+3 "
+                            f"positive throughput samples missing: {mi_run}"))
+            continue
+        control_median = statistics.median(control_ratios)
+        corrected = raw / control_median
+        controlled.append(corrected)
+        declared_raw, declared_corrected = declared[app_label]
+        ok = (f"{raw:.4f}" == declared_raw
+              and f"{corrected:.4f}" == declared_corrected)
+        rows.append(Row(
+            label, PASS if ok else PARTIAL,
+            f"map_inline median throughput ratio={raw:.6f}x; no-pass controls "
+            f"{['%.4f' % r for r in control_ratios]} (median {control_median:.6f}x); "
+            f"control-corrected={corrected:.6f}x, 3+3 samples per run; "
+            f"{mi_run}/details/apps/{app_file}",
+        ))
+    label = "map_inline per-pass causality pooled (6 apps)"
+    if len(controlled) == len(apps):
+        pooled = math.exp(sum(math.log(x) for x in controlled) / len(controlled))
+        rows.append(Row(
+            label, PASS if f"{pooled:.4f}" == pooled_declared else PARTIAL,
+            f"geomean of per-app control-corrected ratios={pooled:.6f}x over "
+            f"{len(controlled)} apps; null drift is the median of the two no-pass "
+            f"loadtime controls in each app's matched May batch",
+        ))
+    else:
+        rows.append(Row(label, UNAVAILABLE,
+                        f"only {len(controlled)}/{len(apps)} apps produced "
+                        f"a controlled ratio"))
     return rows
 
 
@@ -1571,6 +1746,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(tracee_retained_bytecode_rows(root))
     rows.extend(tetragon_retained_bytecode_rows(root))
     rows.extend(katran_arm64_retained_bytecode_rows(root))
+    rows.extend(map_inline_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -2617,12 +2793,111 @@ def self_test() -> int:
             failures.append(
                 f"arm64 Katran row must reject an unknown run type, got {(row.status, row.evidence)!r}")
 
+        # Wide throughput extractor: the May batch's three stdout shapes must
+        # each yield a scalar, otherwise the cilium/otel/stress-ng apps would
+        # silently read as zero and drop out of the causality rows.
+        if workload_throughput(
+                {"stdout": "\n2000000pps 1000Mb/sec (1000000000bps) errors: 0\n"}) != 2000000.0:
+            failures.append("pktgen pps workload must yield its packet rate")
+        if workload_throughput(
+                {"stdout": "Requests/sec:    149.20\n"}) != 149.20:
+            failures.append("wrk workload must yield its Requests/sec rate")
+        if workload_throughput({"components": [{"stdout": (
+                "stress-ng: metrc: [123] cpu  118837.0  60.0  59.99  0.0  1980.6  1980.94\n")}]}) != 118837.0:
+            failures.append("nested stress-ng component must yield bogo_ops_total")
+
+        # Controlled map_inline causality rows: the same derivation over
+        # synthetic matched runs, driven through the injectable app list. The
+        # declared constants are the frozen May-batch values, so a synthetic
+        # run that reproduces them must PASS and any gate mutation must flip it.
+        capp = "causality__app.json"
+
+        def write_causality_run(run: str, *, baseline_pps: int = 1000,
+                                post_pps: int = 1000, passes=("map_inline",),
+                                samples: int = 3, bpf_stats: bool = True,
+                                workload_seconds: float = 60.0,
+                                status: str = "completed", app_status: str = "ok") -> str:
+            base = root / run
+            (base / "details/apps").mkdir(parents=True, exist_ok=True)
+            (base / "metadata.json").write_text(json.dumps({
+                "status": status, "run_type": "x86_kvm_corpus", "suite": "corpus",
+                "samples": samples, "workload_seconds": workload_seconds,
+                "bpf_stats": bpf_stats,
+                "config": {"enabled_passes": list(passes)}}))
+            (base / "details/progress.json").write_text(json.dumps({"status": status}))
+            (base / "details/apps" / capp).write_text(json.dumps({
+                "status": app_status, "error": "",
+                "baseline": {"workloads": [{"stdout": f"\n{baseline_pps}pps 1000Mb/sec (1000000000bps) errors: 0\n"}] * 3},
+                "post_rejit": {"workloads": [{"stdout": f"\n{post_pps}pps 1000Mb/sec (1000000000bps) errors: 0\n"}] * 3}}))
+            return run
+
+        mi_run = write_causality_run("mi")
+        ctl_a = write_causality_run("ctl_a", passes=())
+        ctl_b = write_causality_run("ctl_b", passes=())
+        causal_apps = (("synthetic", mi_run, (ctl_a, ctl_b), capp),)
+        causal_declared = {"synthetic": ("1.0000", "1.0000")}
+
+        def causality_rows() -> list[Row]:
+            return map_inline_causality_rows(root, causal_apps, causal_declared, "1.0000")
+
+        def causality_row() -> Row:
+            return causality_rows()[0]
+
+        rows = causality_rows()
+        if rows[0].status != PASS or "control-corrected=1.000000x" not in rows[0].evidence:
+            failures.append(
+                f"valid matched causality expected PASS/1.000000x, got {(rows[0].status, rows[0].evidence)!r}")
+        if len(rows) != 2 or rows[1].status != PASS or "geomean of per-app control-corrected" not in rows[1].evidence:
+            failures.append(
+                f"single-app causality must pool to a PASS geomean row, got {rows[1:]!r}")
+
+        # A drifting post-phase must not silently re-baseline: the ratio moves,
+        # the declared constant does not, so the row degrades to PARTIAL.
+        write_causality_run("mi", post_pps=900)
+        row = causality_row()
+        if row.status != PARTIAL or "0.900000x; no-pass controls" not in row.evidence:
+            failures.append(
+                f"drifted causality expected PARTIAL/0.9x, got {(row.status, row.evidence)!r}")
+        write_causality_run("mi")
+        if causality_row().status != PASS:
+            failures.append("restored causality run must return to PASS")
+
+        # The map_inline run must be exactly the `map_inline` policy and 3
+        # samples/60 s; a no-pass or short run is not the measured arm.
+        write_causality_run("mi", passes=("kop",))
+        row = causality_row()
+        if row.status != UNAVAILABLE or "matched map_inline run" not in row.evidence:
+            failures.append(
+                f"non-map_inline causality run expected UNAVAILABLE, got {(row.status, row.evidence)!r}")
+        write_causality_run("mi", samples=2)
+        if causality_row().status != UNAVAILABLE:
+            failures.append("causality run with samples!=3 must be UNAVAILABLE")
+        # The measured arm is only comparable to the controls at the identical
+        # 60 s workload duration and with BPF stats enabled, so a run at another
+        # duration or without bpf_stats must not be admitted as the arm.
+        write_causality_run("mi", workload_seconds=30.0)
+        if causality_row().status != UNAVAILABLE:
+            failures.append("causality run at a different duration must be UNAVAILABLE")
+        write_causality_run("mi", bpf_stats=False)
+        if causality_row().status != UNAVAILABLE:
+            failures.append("causality run without bpf_stats must be UNAVAILABLE")
+        write_causality_run("mi")
+        # The null must itself be a no-pass run; controls carrying the pass
+        # would make the drift correction absorb the effect it is meant to remove.
+        write_causality_run("ctl_a", passes=("map_inline",), post_pps=900)
+        write_causality_run("ctl_b", passes=("map_inline",), post_pps=900)
+        if causality_row().status != UNAVAILABLE:
+            failures.append("causality controls must be no-pass loadtime runs")
+        write_causality_run("ctl_a", passes=())
+        write_causality_run("ctl_b", passes=())
+        if causality_row().status != PASS:
+            failures.append("restored causality controls must return to PASS")
 
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
         return 1
-    print("self-test: OK (10 evidence classes)")
+    print("self-test: OK (11 evidence classes)")
     return 0
 
 

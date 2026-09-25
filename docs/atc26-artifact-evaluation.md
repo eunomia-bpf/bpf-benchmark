@@ -392,6 +392,7 @@ status**:
 | `docs/artifacts/evidence/rq2-tracee-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_111811_456569`) | `completed` | Tracee `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=tracee/monitor BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~362 s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 12 changed load instances by SHA256. Supports the derived rewrite evidence for the default `--map-values`/`--map-ids` policy path (no inline hints) over the two global config arrays, across kprobe, raw_tracepoint and cgroup_skb program types: 12/12 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ, 12 applied sites, 400,640 → 398,817 instructions (−1,823). Does **not** support a population-scale claim; the fresh 12-site figure is not merged with the paper's declared RQ2 4086 figure or any declared Tracee site count. |
 | `docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_133216_342697`) | `completed` | Tetragon `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~400 s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 118 changed load instances by SHA256. Supports the derived rewrite evidence for the default `--map-values`/`--map-ids` policy path (no inline hints) over six array maps (`tg_conf_map`, `policy_conf`, `policy_stats`, `cgroup_rate_opt`, `.rodata`, `config_map`), across kprobe, tracepoint, raw_tracepoint and socket_filter program types, and covering single-site as well as two- and three-site programs: 118/118 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 140 applied sites; 234,754 → 220,562 instructions. It is a single startup with `SAMPLES=1` and does not re-measure the paper's declared Tetragon site figures. |
 | `docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/` (source run `arm64_qemu_corpus_19700101_000012_467359`) | `completed` | Katran `status: ok` | **Fresh tracked retained-bytecode run on AArch64.** The exact command `env PLATFORM=qemu ARCH=arm64 BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after 326 s of guest-reported wall time under the local `qemu-system-aarch64` executor. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the one changed load instance by SHA256. Supports the derived rewrite evidence for the same overlay/hint policy path used by the x86 Katran row, now on arm64: 1/1 changed workdir whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 16 applied sites; instruction counts 2,554 → 2,284 (−270). The arm64 set has the same single changed instance and the same 16 applied sites as the x86 Katran set, so the rewrite is architecture-symmetric; it does not re-measure the paper's declared Katran figures or any workload throughput, and the two architectures are never merged. |
+| `corpus/results/x86_kvm_corpus_20260522_*` (18 runs: six apps × one `map_inline`-only + two no-pass `loadtime`) | `completed` | all six apps `status: ok` | **Tracked historical matched batch.** The only tracked set that holds, for all six applications, a `map_inline`-only run *and* same-batch no-pass `loadtime` nulls at the identical 60 s `WORKLOAD_DURATION` with 3+3 workload samples. Supports the renderer's controlled per-pass throughput-causality rows (raw `map_inline` vs restart-drift-corrected ratios) and the pooled 0.9751 control-corrected geomean. Retains no per-step bytecode, so no site counts are claimed; single-app runs, no `metadata.command`/`source_revision` (old format), so no `receipt.json`. Not merged with the paper's separate June ratios. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -876,6 +877,29 @@ single changed instance and 16 applied sites exactly, so the retained evidence
 shows the rewrite is architecture-symmetric. It is a single startup with
 `SAMPLES=1`, re-measures no workload throughput, and its fresh 16-site figure is
 not merged with the paper's declared Katran site figures or with the x86 set.
+
+A sixth derivation answers per-pass throughput causality from a *tracked
+historical* batch rather than fresh retained bytecode. The `x86_kvm_corpus_20260522_*`
+set holds, for each of the six applications, one `map_inline`-only run and two
+same-batch no-pass runs (`enabled_passes==[]`, `mode=loadtime`,
+`status=skipped`) — all single-app `x86_kvm_corpus` with three baseline and
+three post-restart workload samples at the identical 60 s
+`WORKLOAD_DURATION`. The two no-pass runs are the restart-drift null: they pair
+an optimized and a plain restart of the same application at the same duration,
+so their median ratio measures how much of the raw post/baseline throughput
+ratio is restart drift rather than pass effect. The renderer derives each
+application's raw `map_inline` median throughput ratio and its
+control-drift-corrected ratio (raw ÷ median of the two controls) directly from
+the tracked `corpus/results/**` JSON: bcc/set 0.8318 → 0.7921, otelcol 0.9984 →
+0.9983, cilium 0.8885 → 0.9585, tetragon 1.0408 → 1.0840, katran 1.0191 →
+1.0345, tracee 0.9243 → 1.0114, with a pooled control-corrected geomean of
+0.9751 over the six applications. Because controls differ by app, this
+controlled figure is not the sum of an independent measured effect. These runs
+retain no per-step bytecode, so the causality rows claim no site counts, and
+the May-batch ratios are never merged with the paper's separate June
+generation. The renderer's `map_inline` causality rows are `PASS` only when the
+derived values reproduce frozen declared constants at the printed precision;
+any drift degrades the row to `PARTIAL` rather than silently re-baselining.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are

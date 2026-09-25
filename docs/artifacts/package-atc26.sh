@@ -194,6 +194,44 @@ for run in "${CORPUS_RUNS[@]}"; do
     done
 done
 
+# The controlled per-pass throughput-causality rows read, for each of the six
+# applications, one `map_inline`-only run plus two same-batch no-pass
+# `loadtime` runs from the tracked May 2026 matched batch. Each run needs its
+# own single app record alongside the status files the renderer gates on;
+# `corpus/results` is excluded above, so stage them explicitly here.
+CAUSALITY_RUNS=(
+    "x86_kvm_corpus_20260522_042759_209148 bcc__set.json"
+    "x86_kvm_corpus_20260522_040414_983443 bcc__set.json"
+    "x86_kvm_corpus_20260522_041848_461647 bcc__set.json"
+    "x86_kvm_corpus_20260522_050233_401368 otelcol-ebpf-profiler__profiling.json"
+    "x86_kvm_corpus_20260522_044521_899895 otelcol-ebpf-profiler__profiling.json"
+    "x86_kvm_corpus_20260522_045359_622598 otelcol-ebpf-profiler__profiling.json"
+    "x86_kvm_corpus_20260522_054834_450402 cilium__agent.json"
+    "x86_kvm_corpus_20260522_052646_166503 cilium__agent.json"
+    "x86_kvm_corpus_20260522_053738_559124 cilium__agent.json"
+    "x86_kvm_corpus_20260522_070721_604229 tetragon__observer.json"
+    "x86_kvm_corpus_20260522_064657_150013 tetragon__observer.json"
+    "x86_kvm_corpus_20260522_065609_372274 tetragon__observer.json"
+    "x86_kvm_corpus_20260522_074136_764813 katran.json"
+    "x86_kvm_corpus_20260522_072319_967424 katran.json"
+    "x86_kvm_corpus_20260522_073158_210866 katran.json"
+    "x86_kvm_corpus_20260522_081529_738968 tracee__monitor.json"
+    "x86_kvm_corpus_20260522_075613_925659 tracee__monitor.json"
+    "x86_kvm_corpus_20260522_080555_505608 tracee__monitor.json"
+)
+echo "embedding May causality runs:"
+for spec in "${CAUSALITY_RUNS[@]}"; do
+    set -- $spec
+    run="$1"; app="$2"
+    for extra in metadata.json details/progress.json "details/apps/$app"; do
+        path="corpus/results/$run/$extra"
+        git -C "$ROOT_DIR" ls-tree "$COMMIT" -- "$path" | grep -q . || continue
+        mkdir -p "$STAGE/$(dirname "$path")"
+        git -C "$ROOT_DIR" show "$COMMIT:$path" > "$STAGE/$path"
+    done
+    echo "  $run ($app)"
+done
+
 # docs/tmp holds the engineering log and the analysis scripts several shipped
 # documents cite, but the bulk result trees under it are excluded above.
 # Re-add only the cited files so no shipped reference dangles.
@@ -244,9 +282,12 @@ single-pass \`map_inline\` run, the fresh Katran \`map_inline\` run over the
 overlay/hint policy path, the fresh Tracee \`map_inline\` run over the
 hint-free default policy path, the fresh Tetragon \`map_inline\` run over the
 hint-free default policy path across six array maps, and the fresh arm64 Katran
-\`map_inline\` run over the same overlay/hint policy path under the local
 \`qemu-system-aarch64\` executor, all retaining per-step before/after bytecode so
-the RQ2 rewrite can be re-derived per application. ARTIFACT_MANIFEST.json records
+the RQ2 rewrite can be re-derived per application. A tracked May 2026 matched
+batch of eighteen single-application runs (six apps × one \`map_inline\`-only run
+plus two same-batch no-pass \`loadtime\` nulls at the identical 60 s duration)
+lets the renderer derive controlled per-pass throughput-causality ratios whose
+restart drift is subtracted by the no-pass controls. ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
 EOF
@@ -380,6 +421,28 @@ required=(
     docs/artifacts/evidence/rq4-cilium-native-loader/manifest.json
     docs/artifacts/evidence/rq4-cilium-native-loader/make-corpus.log
     docs/artifacts/evidence/rq4-cilium-native-loader/details/shim-logs/cilium__agent.post_rejit.log
+    corpus/results/x86_kvm_corpus_20260522_042759_209148/metadata.json
+    corpus/results/x86_kvm_corpus_20260522_042759_209148/details/progress.json
+    corpus/results/x86_kvm_corpus_20260522_042759_209148/details/apps/bcc__set.json
+    corpus/results/x86_kvm_corpus_20260522_040414_983443/details/apps/bcc__set.json
+    corpus/results/x86_kvm_corpus_20260522_041848_461647/details/apps/bcc__set.json
+    corpus/results/x86_kvm_corpus_20260522_050233_401368/details/apps/otelcol-ebpf-profiler__profiling.json
+    corpus/results/x86_kvm_corpus_20260522_044521_899895/details/apps/otelcol-ebpf-profiler__profiling.json
+    corpus/results/x86_kvm_corpus_20260522_045359_622598/details/apps/otelcol-ebpf-profiler__profiling.json
+    corpus/results/x86_kvm_corpus_20260522_054834_450402/details/apps/cilium__agent.json
+    corpus/results/x86_kvm_corpus_20260522_052646_166503/details/apps/cilium__agent.json
+    corpus/results/x86_kvm_corpus_20260522_053738_559124/details/apps/cilium__agent.json
+    corpus/results/x86_kvm_corpus_20260522_070721_604229/details/apps/tetragon__observer.json
+    corpus/results/x86_kvm_corpus_20260522_064657_150013/details/apps/tetragon__observer.json
+    corpus/results/x86_kvm_corpus_20260522_065609_372274/details/apps/tetragon__observer.json
+    corpus/results/x86_kvm_corpus_20260522_074136_764813/metadata.json
+    corpus/results/x86_kvm_corpus_20260522_074136_764813/details/progress.json
+    corpus/results/x86_kvm_corpus_20260522_074136_764813/details/apps/katran.json
+    corpus/results/x86_kvm_corpus_20260522_072319_967424/details/apps/katran.json
+    corpus/results/x86_kvm_corpus_20260522_073158_210866/details/apps/katran.json
+    corpus/results/x86_kvm_corpus_20260522_081529_738968/details/apps/tracee__monitor.json
+    corpus/results/x86_kvm_corpus_20260522_075613_925659/details/apps/tracee__monitor.json
+    corpus/results/x86_kvm_corpus_20260522_080555_505608/details/apps/tracee__monitor.json
     docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/receipt.json
     docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/make-corpus.log
     docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/details/loadtime-reports/cilium__agent.jsonl
