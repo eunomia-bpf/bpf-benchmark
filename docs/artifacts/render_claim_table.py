@@ -1028,6 +1028,126 @@ def cilium_attribution_rows(root: Path) -> list[Row]:
     return rows
 
 
+# Fresh single-pass `map_inline` run for Cilium that retains, for every changed
+# load instance, the per-step input AND output bytecode plus the optimizer
+# report. The older RQ2 artifacts kept neither retained outputs nor before
+# images, so their rewrite and throughput claims could not be re-derived; this
+# run's raw before/after instruction counts and applied-site totals are derived
+# from the retained streams instead of declared. It is a separate single-startup
+# generation and is never merged with the paper's declared 4086 figure.
+MAP_INLINE_EVIDENCE_DIR = "docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode"
+
+
+def _retained_changed_bytecode(root: Path) -> dict[str, int] | None:
+    """Reconcile retained per-step bytecode with the report stream.
+
+    Reads `details/loadtime-reports/cilium__agent.jsonl` and, for every changed
+    workdir it names, the retained `input.step.0.bin` / `output.next.0.bin` and
+    `report.0.json`. Returns None when either stream is absent or unparsable;
+    otherwise the counts below, where a mismatch between a bin's raw
+    `struct bpf_insn` length (8 bytes each) and the report's instruction count
+    is counted in `len_mismatches`, and a changed workdir whose before/after
+    bytecode is byte-identical is counted in `changed_not_differing`.
+    """
+    base = root / MAP_INLINE_EVIDENCE_DIR
+    report = base / "details/loadtime-reports/cilium__agent.jsonl"
+    if not report.is_file():
+        return None
+    try:
+        rows = [json.loads(line) for line in report.read_text().splitlines() if line.strip()]
+    except Exception:
+        return None
+    if not rows:
+        return None
+    out = {
+        "rows": len(rows), "changed": 0, "sites_applied": 0,
+        "insn_before": 0, "insn_after": 0,
+        "retained_changed_workdirs": 0, "changed_missing_bytecode": 0,
+        "len_mismatches": 0, "changed_not_differing": 0,
+    }
+    for row in rows:
+        rep = row.get("report")
+        if not isinstance(rep, dict):
+            return None
+        before = int(rep.get("insn_count_before") or 0)
+        after = int(rep.get("insn_count_after") or 0)
+        applied = int(rep.get("sites_applied") or 0)
+        out["insn_before"] += before
+        out["insn_after"] += after
+        out["sites_applied"] += applied
+        if applied <= 0:
+            continue
+        out["changed"] += 1
+        name = Path(row.get("workdir") or "").name
+        wd = base / "details/loadtime-workdirs" / name
+        inp, outp, rp = wd / "input.step.0.bin", wd / "output.next.0.bin", wd / "report.0.json"
+        if not (inp.is_file() and outp.is_file() and rp.is_file()):
+            out["changed_missing_bytecode"] += 1
+            continue
+        out["retained_changed_workdirs"] += 1
+        if inp.stat().st_size != 8 * before or outp.stat().st_size != 8 * after:
+            out["len_mismatches"] += 1
+        if inp.read_bytes() == outp.read_bytes():
+            out["changed_not_differing"] += 1
+    return out
+
+
+def cilium_retained_bytecode_rows(root: Path) -> list[Row]:
+    """Derive RQ2 Cilium rewrite evidence from retained per-step bytecode.
+
+    Asserts only what the retained streams prove: for every changed load
+    instance the report stream names, the retained input/output bytecode agree
+    with the reported before/after instruction counts AND the two bytecode
+    images differ. Status is PASS when the runs' own status records are
+    completed/ok, both streams reconcile with no mismatch, and the receipt
+    binds the retained files; otherwise PARTIAL.
+    """
+    base = root / MAP_INLINE_EVIDENCE_DIR
+    counts = _retained_changed_bytecode(root)
+    meta = load_json(base / "metadata.json") or {}
+    progress = load_json(base / "details/progress.json") or {}
+    app = load_json(base / "details/apps/cilium__agent.json") or {}
+    receipt = load_json(base / "receipt.json") or {}
+    run_ok = (
+        meta.get("status") == SUITE_SUCCESS
+        and meta.get("run_type") == "x86_kvm_corpus"
+        and meta.get("suite") == "corpus"
+        and progress.get("status") == SUITE_SUCCESS
+        and app.get("status") == APP_SUCCESS
+        and not app.get("error")
+    )
+    hashes = receipt.get("files_sha256")
+    files_ok = retained_files_valid(root / MAP_INLINE_EVIDENCE_DIR, hashes)
+    if counts is None:
+        return [Row(
+            "RQ2 Cilium retained map_inline bytecode (4086 sites)",
+            UNAVAILABLE,
+            f"retained report stream or per-step bytecode missing: "
+            f"{MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/cilium__agent.jsonl",
+        )]
+    reconciled = (
+        counts["changed"] > 0
+        and counts["retained_changed_workdirs"] == counts["changed"]
+        and counts["len_mismatches"] == 0
+        and counts["changed_missing_bytecode"] == 0
+        and counts["changed_not_differing"] == 0
+    )
+    status = PASS if (run_ok and reconciled and files_ok) else PARTIAL
+    return [Row(
+        f"RQ2 Cilium retained map_inline bytecode ({counts['sites_applied']} sites)",
+        status,
+        f"{MAP_INLINE_EVIDENCE_DIR}/details/loadtime-reports/cilium__agent.jsonl: "
+        f"{counts['rows']} report rows, {counts['changed']} changed load instances, "
+        f"{counts['sites_applied']} applied sites, insn {counts['insn_before']}->"
+        f"{counts['insn_after']} ({counts['insn_after'] - counts['insn_before']:+d}); "
+        f"per-step bytecode retained for {counts['retained_changed_workdirs']}/{counts['changed']} "
+        f"changed workdirs with {counts['len_mismatches']} length mismatches and "
+        f"{counts['changed_not_differing']} identical before/after images; "
+        f"run status valid={run_ok}, receipt file hashes valid={files_ok}; the paper's "
+        f"4086 remains declared and is not merged with the fresh {counts['sites_applied']}",
+    )]
+
+
 # Fresh ladder run dirs keyed by the same arm labels as CILIUM_JUNE_ARMS.
 CILIUM_SITE_ARMS_ORDERED = tuple(
     (label.split("applied sites")[0].replace("RQ3 Cilium ", "").strip(), run, policy)
@@ -1298,7 +1418,6 @@ def formal_evidence(root: Path) -> tuple[str, str]:
             f"retained log {log_rel}: {log_counts['generator_scripts']} --check "
             f"generators, {log_counts['lean_module_commands']} Lean module checks, "
             f"{log_counts['host_cross_checks']} host cross-checks "
-            f"({log_counts['host_cross_check_cases']} oracle cases), exit={log_exit}"
         )
     if tree_counts is None:
         tree_detail = f"{FORMAL_MAKEFILE} missing or enumerates no check commands"
@@ -1334,6 +1453,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(fresh_exec_speedup_rows(root))
     rows.extend(fresh_codesize_rows(root))
     rows.extend(cilium_attribution_rows(root))
+    rows.extend(cilium_retained_bytecode_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -2058,12 +2178,81 @@ def self_test() -> int:
             failures.append(
                 f"fresh code-size row with no bytes expected UNAVAILABLE, got {(row.status, row.evidence)!r}")
 
+        # Retained map_inline bytecode row: PASS requires the report stream and
+        # the per-step bytecode to reconcile, so a missing evidence dir is
+        # UNAVAILABLE and a tampered length or identical before/after image
+        # degrades the row to PARTIAL.
+        ev = root / MAP_INLINE_EVIDENCE_DIR
+
+        def write_map_inline(applied: int, before: int, after: int,
+                             bytecode: str = "differing") -> None:
+            if ev.exists():
+                import shutil as _sh
+                _sh.rmtree(ev)
+            (ev / "details/apps").mkdir(parents=True)
+            (ev / "details/loadtime-reports").mkdir(parents=True)
+            wd = ev / "details/loadtime-workdirs/loadtime_1_0"
+            wd.mkdir(parents=True)
+            (ev / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_corpus",
+                "suite": "corpus", "samples": 1, "workload_seconds": 30.0}))
+            (ev / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            (ev / "details/apps/cilium__agent.json").write_text(json.dumps({
+                "status": "ok", "error": ""}))
+            (ev / "details/loadtime-reports/cilium__agent.jsonl").write_text(json.dumps({
+                "prog_name": "p", "workdir": "/run/details/loadtime-workdirs/loadtime_1_0",
+                "report": {"insn_count_before": before, "insn_count_after": after,
+                           "sites_applied": applied}}) + "\n")
+            (wd / "report.0.json").write_text(json.dumps({
+                "insn_count_before": before, "insn_count_after": after,
+                "sites_applied": applied}))
+            (wd / "input.step.0.bin").write_bytes(b"\x00" * (8 * before))
+            if bytecode == "identical":
+                out = b"\x00" * (8 * before)
+            else:
+                out = b"\x00" * (8 * after)
+            (wd / "output.next.0.bin").write_bytes(out)
+            (ev / "receipt.json").write_text(json.dumps({
+                "files_sha256": {"metadata.json": file_sha256(ev / "metadata.json")}}))
+
+        def map_inline_row() -> Row:
+            return cilium_retained_bytecode_rows(root)[0]
+
+        write_map_inline(applied=7, before=10, after=4)
+        row = map_inline_row()
+        if row.status != PASS or "7 applied sites" not in row.evidence:
+            failures.append(
+                f"valid retained bytecode expected PASS/7 sites, got {(row.status, row.evidence)!r}")
+        if "insn 10->4 (-6)" not in row.evidence:
+            failures.append(
+                f"retained bytecode expected derived insn delta, got {row.evidence!r}")
+
+        import shutil as _sh
+        _sh.rmtree(ev)
+        row = map_inline_row()
+        if row.status != UNAVAILABLE:
+            failures.append(
+                f"missing retained bytecode expected UNAVAILABLE, got {(row.status, row.evidence)!r}")
+
+        write_map_inline(applied=7, before=10, after=4, bytecode="identical")
+        row = map_inline_row()
+        if row.status != PARTIAL or "1 identical before/after images" not in row.evidence:
+            failures.append(
+                f"identical before/after expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        write_map_inline(applied=7, before=10, after=4, bytecode="short")
+        (ev / "details/loadtime-workdirs/loadtime_1_0/input.step.0.bin").write_bytes(b"\x00" * 8)
+        row = map_inline_row()
+        if row.status != PARTIAL or "1 length mismatches" not in row.evidence:
+            failures.append(
+                f"bytecode length mismatch expected PARTIAL, got {(row.status, row.evidence)!r}")
+
 
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
         return 1
-    print("self-test: OK (9 evidence classes)")
+    print("self-test: OK (10 evidence classes)")
     return 0
 
 

@@ -387,6 +387,7 @@ status**:
 | `docs/artifacts/evidence/kvm-katran-smoke/` (source run `x86_kvm_corpus_20260922_213414_889964`) | `completed` | Katran `status: ok`; `rejit_result.status: ok` | **Fresh tracked KVM smoke.** The exact command exited 0 after 5,946 seconds. `receipt.json` binds the command, source commit, log, and retained JSON files by SHA256. Supports both Katran rejit/KOperation coverage and a complete successful single-app workload run. |
 | `docs/artifacts/evidence/kvm-six-app-success/` (source run `x86_kvm_corpus_20260923_114624_121697`) | `completed` | all six apps `ok`; all six `rejit_result.status: ok` | **Fresh tracked full six-application corpus run.** The exact command `SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus` exited 0 after 1,162 seconds. `receipt.json` binds the command, source commit, normalized log, and every retained JSON by SHA256. Supports six successful workloads and full ReJIT/KOperation coverage under the default `full-x86` policy. It is a single-sample 10 s run, not a paper-scale Xeon/AWS rerun. |
 | `docs/artifacts/evidence/rq4-cilium-native-loader/` (source run `x86_kvm_corpus_20260924_164153_955835`) | `completed` | Cilium `status: ok` | **Fresh tracked native-loader run.** The exact command `BPFREJIT_CORPUS_APPS="cilium/agent" BPFREJIT_SHIM_NATIVE_LOADER=post SAMPLES=3 WORKLOAD_DURATION=30 JOBS=8 IMAGE_BUILD_JOBS=8 TIMEOUT=3600 make corpus` exited 0 after 2,846 seconds. `receipt.json` binds the command, source commit, normalized log, post-phase shim log, staged manifest and retained JSON files by SHA256. Supports the derived RQ4 loader counts (179 loads / 135 replacements / 0 pass-throughs / 33 feature-probe skips / 11 pre-init loads) and the 89-object staged manifest; it does not reproduce the paper's declared 113/22 loader split. |
+| `docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_081752_606800`) | `completed` | Cilium `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~290 s inside the guest. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 122 changed load instances by SHA256. Supports the derived rewrite evidence (122/122 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 3,787 applied sites; 159,896 → 111,826 instructions); it is a single startup and does not reproduce the paper's declared 4,086-site full-scale run. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -765,6 +766,26 @@ the tail-call accounting caveat made concrete: the callers' `run_time_ns_delta`
 already includes every tail descendant's cost, so the applied-site total
 reconciles as directly attached + zero-self + residual and the join is reported
 as lossy rather than presented as total.
+
+The renderer also derives a fresh RQ2 Cilium rewrite row from retained per-step
+bytecode. The older RQ2 artifacts kept neither retained outputs nor before
+images, so a `map_inline` rewrite could not be shown to have changed any
+bytecode. A fresh single-pass run `BPFREJIT_CORPUS_APPS=cilium/agent
+BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30
+KEEP_WORKDIRS=1 make corpus` (source commit `680a9e9b88`) retains, for every
+changed load instance, the per-step `input.step.0.bin` / `output.next.0.bin`
+pair and its `report.0.json` under
+`docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/`. Its
+retained `details/loadtime-reports/cilium__agent.jsonl` holds 169 report rows
+(122 changed load instances, 47 unchanged), 3,787 applied sites, and instruction
+counts 159,896 → 111,826 (−48,070). For all 122 changed workdirs the retained
+bytecode's raw `struct bpf_insn` length (8 bytes each) matches the reported
+before/after instruction counts, and all 122 before/after images differ; the
+run's `provenance/start.json` (hand-authored, not Makefile-generated) records
+the command and source revision. The renderer computes these counts at render
+time and asserts both reconciliations. This is a single startup, so it proves
+the rewrite on retained bytecode rather than per-pass throughput causality, and
+the paper's declared 4,086 site count is not merged with the fresh 3,787.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are
