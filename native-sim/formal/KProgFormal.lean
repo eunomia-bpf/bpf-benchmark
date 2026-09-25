@@ -37,6 +37,7 @@ import KProgFormal.X86MemAccess
 import KProgFormal.X86MemAluHandler
 import KProgFormal.X86MemStoreAluHandler
 import KProgFormal.X86MemUnaryHandler
+import KProgFormal.X86MemLogicHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags

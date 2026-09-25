@@ -70,6 +70,10 @@ increment is committed and pushed immediately). Current state:
   proves equality of every modeled flag and memory byte; an independent
   22,048-case oracle exhausts all 16 incoming flag combinations over its
   boundary vectors and checks 20,000 fixed-seed cases.
+- The x86 memory-destination logic theorem similarly composes `AND/OR/XOR`
+  through load, replacement flags, and confined store. Its independent
+  21,536-case oracle checks every incoming flag combination in the boundary
+  vectors and confirms that logical CF/OF are cleared while ZF/SF are replaced.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -78,7 +82,7 @@ increment is committed and pushed immediately). Current state:
 
 ### Current boundary and open work
 
-- Open x86 proof surface: remaining logical/shift/bit/compare/multiply
+- Open x86 proof surface: remaining shift/bit/compare/multiply
   memory-operand handler composition,
   effective-address/address-space and immediate/register-RHS selection, the
   objdump/parser-to-AUX selection relation, C-to-Lean

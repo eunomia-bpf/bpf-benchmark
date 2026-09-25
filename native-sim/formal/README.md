@@ -389,6 +389,14 @@ signed-range and byte-loop model across all 16 incoming flag combinations.
 Address derivation and safety, stack/ABI dispatch, packed-AUX operation
 selection, and logical, shift, bit, compare, and multiply memory handlers
 remain outside this theorem.
+The memory-destination logic theorem covers `AND/OR/XOR [mem], rhs` after a
+valid address, RHS, operation, and width have been selected. It composes the
+load, width-local logical result and replacement flags, and confined store,
+proving equality of every modeled flag and byte. Its independent 21,536-case
+oracle checks actual generated macros against a byte-loop model, including all
+16 incoming flag combinations to ensure CF/OF are cleared and ZF/SF are
+replaced. RHS decoding, address-space dispatch, and shift, bit, compare, and
+multiply memory handlers remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86

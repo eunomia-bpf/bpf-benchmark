@@ -4329,3 +4329,23 @@ framework leaves the original bytecode in place and continues.
   stack/ABI dispatch, packed-AUX operation selection, other memory handlers,
   compiler/native bytes, multi-step traces, helpers, specialization
   preservation, or full O1--O4.
+
+### x86 memory-destination logic handler composition, 2026-09-25
+
+- Gap: the memory-destination `AND`, `OR`, and `XOR` paths shared the proved
+  memory primitives and register logical transitions, but lacked a theorem for
+  their real load/result/flag/store composition.
+- Machine-checked statement: `x86_mem_logic_handler_refines` proves, after a
+  valid address, RHS, operation, and width have been supplied, equality with an
+  independent statement on every modeled flag and memory byte. The selected
+  width receives the little-endian logical result, all other bytes remain
+  unchanged, CF/OF are cleared, and ZF/SF are derived from the width-local
+  result. A concrete theorem pins a 16-bit XOR-to-zero store and following-byte
+  preservation. There is no `sorry` or `admit`.
+- Independent C oracle: `test_x86_mem_logic_handler_host.c` exercises actual
+  generated load, logic-flag, and store macros against an independent byte-loop
+  model for 21,536 boundary and fixed-seed cases. The boundary portion covers
+  all 16 incoming flag combinations. Address calculation/bounds, stack/ABI
+  dispatch, RHS and packed-AUX selection, other memory handlers,
+  compiler/native bytes, multi-step traces, helpers, specialization
+  preservation, and full O1--O4 remain outside the theorem.
