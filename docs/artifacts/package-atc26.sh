@@ -235,14 +235,15 @@ The archive contains the exact source trees needed by the documented proof,
 microbenchmark, and six-application KVM paths, plus the five raw paper-result
 JSON datasets read by the included plotting scripts, historical load-time and 62-name population
 JSON datasets whose pairing remains weaker than the paper's 0.99x claim,
-plus selected Cilium and Katran RQ2/RQ3/RQ4 raw app records and run-status
+plus selected Cilium, Katran and Tracee RQ2/RQ3/RQ4 raw app records and run-status
 provenance read by the claim renderer. Compact retained evidence
 records the complete formal check, the six-application ReJIT coverage run, the
 fresh Katran KVM smoke, and the fresh Cilium native-loader run whose shim log
 derives the RQ4 loader and manifest-object counts, plus the fresh Cilium
-single-pass `map_inline` run and the fresh Katran `map_inline` run over the
-overlay/hint policy path, both retaining per-step before/after bytecode so the
-RQ2 rewrite can be re-derived per application. ARTIFACT_MANIFEST.json records
+single-pass \`map_inline\` run, the fresh Katran \`map_inline\` run over the
+overlay/hint policy path, and the fresh Tracee \`map_inline\` run over the
+hint-free default policy path, all retaining per-step before/after bytecode so
+the RQ2 rewrite can be re-derived per application. ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
 EOF
