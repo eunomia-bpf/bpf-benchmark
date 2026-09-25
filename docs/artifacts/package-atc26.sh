@@ -119,7 +119,7 @@ echo "embedding artifact submodules:"
 for path in "${EMBEDDED_SUBMODULES[@]}"; do embed_submodule "$path"; done
 
 # Add the raw paper-result datasets consumed by the plotting scripts and the
-# renderer's 62-case/fresh load-time rows.
+# renderer's 62-case/fresh load-time and exec rows.
 RESULTS=(
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     micro/results/x86_kvm_micro_20260526_210351_224315/details/result.json

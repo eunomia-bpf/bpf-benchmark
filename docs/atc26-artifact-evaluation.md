@@ -609,9 +609,16 @@ kernel_rejit" make micro`): `x86_kvm_micro_20260924_231824_136293` under the
 default `full-x86` policy and `x86_kvm_micro_20260925_002201_525373` under
 `kop`. Neither reproduces the paper's 62-name population — the current config
 retains only 2 names in common with either May 14 run — so the renderer
-derives two separate rows from these runs' own paired `object_load_ns`
-geomeans (1.161575× and 1.223405×, both `PARTIAL` against the paper's 0.99×).
-The paper's 62-case row is never merged with them.
+derives four separate rows from these runs' own paired series. Two are
+object-load overhead rows from the paired `object_load_ns` geomeans
+(1.161575× and 1.223405×, both `PARTIAL` against the paper's 0.99×). The
+other two apply the paper's RQ1 exec-speedup definition (geomean
+kernel/kernel_rejit median `exec_ns` over the 27 non-simple cases whose median
+applied kop sites exceed zero) and yield 1.081422× (`full-x86`, 532 applied
+kop sites plus the pure-bytecode passes) and 1.213995× (`kop`, 525 applied kop
+sites); both are `PASS` on provenance, but they are same-policy
+different-generation values, not reproductions of the paper's 1.242×. The
+paper's 62-case row is never merged with them.
 
 These are analysis-side computations. No aggregation lives in the
 measurement framework; the plot scripts derive every plotted value except the

@@ -204,6 +204,22 @@ def kop_applied_in_sample(sample: dict) -> int:
     return count
 
 
+def median_kop_applied(data: dict, runtime: str) -> dict[str, float]:
+    rows: dict[str, float] = {}
+    for bench in data.get("benchmarks") or []:
+        if not isinstance(bench, dict):
+            continue
+        for run in bench.get("runs") or []:
+            if not isinstance(run, dict) or run.get("runtime") != runtime:
+                continue
+            counts = [kop_applied_in_sample(s)
+                      for s in run.get("samples") or [] if isinstance(s, dict)]
+            if counts:
+                rows[bench["name"]] = statistics.median(counts)
+            break
+    return rows
+
+
 def micro_run_provenance_ok(root: Path, rel: str, run_type: str, arch: str) -> bool:
     d = root / rel
     metadata = load_json(d / "metadata.json") or {}
@@ -408,6 +424,50 @@ def fresh_loadtime_rows(root: Path) -> list[Row]:
             f"(rounds {value:.2f}x) over {len(names)} paired cases; "
             f"same-policy different-generation ReJIT policy={policy}; "
             f"run metadata/progress valid={provenance_ok}; rounds to paper 0.99x={matched}; "
+            f"source={rel}/details/result.json",
+        ))
+    return rows
+
+
+# The same two fresh runs also carry a within-run paired kernel/kernel_rejit
+# exec_ns series with real applied kop sites, so they support the paper's RQ1
+# exec-speedup quantity directly (same definition as the arm64 row): geomean
+# stock/candidate median exec_ns over the 27 non-simple cases that applied kop
+# sites. The paper's own 27-case population is a different generation, so the
+# status only asserts the derivation, not a reproduction of 1.242x.
+FRESH_EXEC_RUNS = (
+    ("RQ1 x86 fresh paired exec speedup (full-x86 policy)",
+     "micro/results/x86_kvm_micro_20260924_231824_136293", "full-x86"),
+    ("RQ1 x86 fresh paired exec speedup (kop policy)",
+     "micro/results/x86_kvm_micro_20260925_002201_525373", "kop"),
+)
+
+
+def fresh_exec_speedup_rows(root: Path) -> list[Row]:
+    rows: list[Row] = []
+    for label, rel, policy in FRESH_EXEC_RUNS:
+        data = load_json(root / rel / "details/result.json")
+        if not isinstance(data, dict):
+            rows.append(Row(label, UNAVAILABLE, f"fresh paired result.json missing: {rel}"))
+            continue
+        stock = median_runtime_ns(data, "kernel")
+        rejit = median_runtime_ns(data, "kernel_rejit")
+        paper_cases = sorted((stock.keys() & rejit.keys()) - {"simple", "simple_packet"})
+        applied = median_kop_applied(data, "kernel_rejit")
+        bearing = [n for n in paper_cases if applied.get(n, 0) > 0]
+        if len(bearing) != 27:
+            rows.append(Row(label, UNAVAILABLE,
+                            f"kop-bearing non-simple cases={len(bearing)}, expected 27: {rel}"))
+            continue
+        value = math.exp(sum(math.log(stock[n] / rejit[n]) for n in bearing) / len(bearing))
+        provenance_ok = micro_run_provenance_ok(root, rel, "x86_kvm_micro", "x86_64")
+        rows.append(Row(
+            label,
+            PASS if provenance_ok else PARTIAL,
+            f"median kernel/kernel_rejit exec_ns, geomean={value:.6f}x over "
+            f"{len(bearing)} kop-bearing non-simple cases (median applied kop sites > 0); "
+            f"same-policy different-generation ReJIT policy={policy}; "
+            f"run metadata/progress valid={provenance_ok}; single sample per runtime; "
             f"source={rel}/details/result.json",
         ))
     return rows
@@ -1120,6 +1180,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(micro_claim_rows(root))
     rows.extend(cilium_claim_rows(root))
     rows.extend(fresh_loadtime_rows(root))
+    rows.extend(fresh_exec_speedup_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -1715,6 +1776,53 @@ def self_test() -> int:
         if row.status != PARTIAL or "rounds to paper 0.99x=False" not in row.evidence:
             failures.append(
                 f"fresh row with 1.16x ratio expected PARTIAL, got {(row.status, row.evidence)!r}")
+
+        # Fresh paired exec-speedup row: same run, derived from the paired
+        # exec_ns series restricted to the 27 non-simple kop-bearing cases.
+        def write_fresh_exec(rejit_ns: int, kop_sites: int) -> None:
+            d = root / fresh_rel
+            (d / "details").mkdir(parents=True, exist_ok=True)
+            (d / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_micro",
+                "suite": "micro_staged_codegen",
+                "host": {"platform": "x86_64", "kernel_version": "7.0.0-rc2+"},
+            }))
+            (d / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            names = [f"c{i}" for i in range(27)] + ["simple", "simple_packet"]
+            benches = []
+            for n in names:
+                benches.append({"name": n, "runs": [
+                    {"runtime": "kernel", "samples": [
+                        {"phases_ns": {"object_load_ns": 1000}, "exec_ns": 1000}]},
+                    {"runtime": "kernel_rejit", "samples": [
+                        {"phases_ns": {"object_load_ns": 1000}, "exec_ns": rejit_ns,
+                         "rejit_result": {"per_program": {"1": {"passes": [
+                             {"bpfopt_summary": {"pass": "kop", "sites_applied": kop_sites}}]}}}}]},
+                ]})
+            (d / "details/result.json").write_text(json.dumps({"benchmarks": benches}))
+
+        def fresh_exec_row() -> Row:
+            return next(r for r in fresh_exec_speedup_rows(root)
+                        if r.claim == FRESH_EXEC_RUNS[0][0])
+
+        write_fresh_exec(1000, 5)
+        row = fresh_exec_row()
+        if (row.status != PASS or "27 kop-bearing" not in row.evidence
+                or f"policy={fresh_policy}" not in row.evidence):
+            failures.append(
+                f"fresh exec row with 27 bearing cases expected PASS, got {(row.status, row.evidence)!r}")
+
+        write_fresh_exec(2000, 5)
+        row = fresh_exec_row()
+        if row.status != PASS or "geomean=0.500000x" not in row.evidence:
+            failures.append(
+                f"fresh exec row with 0.5x speedup expected PASS/0.500000x, got {(row.status, row.evidence)!r}")
+
+        write_fresh_exec(1000, 0)
+        row = fresh_exec_row()
+        if row.status != UNAVAILABLE or "expected 27" not in row.evidence:
+            failures.append(
+                f"fresh exec row with no applied sites expected UNAVAILABLE, got {(row.status, row.evidence)!r}")
 
 
     if failures:
