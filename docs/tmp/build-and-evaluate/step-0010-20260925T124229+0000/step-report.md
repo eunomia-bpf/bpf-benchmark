@@ -123,3 +123,27 @@ remain single-startup rewrite reconciliations.  The remaining runnable
 questions — a second application pushed past the single-site-per-program regime,
 the proof line's next AArch64 items, and per-pass throughput causality — stay
 outside this step's scope.
+
+## Delivery
+
+Two commits shipped this step and were pushed to `origin/master`:
+`b917cb294` (the Tracee evidence dir, both analyzer extensions, the renderer
+row, and the guide edits) and `b09aeea11` (this report).
+
+The archival ZIP `docs/artifacts/dist/atc26-ae-2.zip` was then rebuilt so it no
+longer predates them.  Rebuilding surfaced a real defect in
+`docs/artifacts/package-atc26.sh` that predates this step: the unquoted
+`README-ARTIFACT.md` heredoc interpreted the backticks around `map_inline`,
+printing `bash: line 228: map_inline: command not found` and writing
+`single-pass  run` into the archive README.  Commit `578762b98` escapes the
+backticks, adds the Tracee run to the README's retained-evidence sentence, and
+bumps the Tracee evidence paths into `ARTIFACT_MANIFEST.json`'s
+`validationEvidence`.  A region-verbatim reproduction confirmed the escaped
+heredoc emits literal backticks.
+
+The rebuilt archive (916,380,580 bytes) reports
+`superprojectCommit = 578762b985ac6d5e2aed4ec8115cd2bebddb5d5e`, contains a
+correct README, and lists the three new `rq2-tracee-*` validation paths; its
+`sha256` is `aa3317db6b7f731893b5d417088938dc7dd83f2ffb4f47fb6bc0199589f1797a`.
+The packager's own `self-test: OK (10 evidence classes)` and clean-extraction
+verification both passed on the rebuilt ZIP.
