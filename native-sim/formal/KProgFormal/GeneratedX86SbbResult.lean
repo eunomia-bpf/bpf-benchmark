@@ -2,5 +2,4 @@
 import Std
 namespace KProgFormal.GeneratedX86SbbResult
 def result (a b : BitVec 64) (borrow : Bool) : BitVec 64 := ((a - b) - (if borrow then 1 else 0))
-def subtrahend (b mask : BitVec 64) (borrow : Bool) : BitVec 64 := (BitVec.and (b + (if borrow then 1 else 0)) mask)
 end KProgFormal.GeneratedX86SbbResult

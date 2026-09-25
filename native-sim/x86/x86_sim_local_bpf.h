@@ -564,13 +564,11 @@ struct x86_sim_state {
 		__u64 __x86_sbb_mask = x86_width_mask(__x86_sbb_width);   \
 		__u64 __x86_sbb_a = (LHS) & __x86_sbb_mask;               \
 		__u64 __x86_sbb_b = (RHS) & __x86_sbb_mask;               \
-		__u64 __x86_sbb_sub = KPROG_X86_SBB_SUBTRAHEND(           \
-			__x86_sbb_b, __x86_sbb_mask, (BORROW));             \
 		__u64 __x86_sbb_r = (RESULT) & __x86_sbb_mask;            \
 		__u64 __x86_sbb_sign = x86_width_sign_mask(__x86_sbb_width);\
 		KPROG_X86_SET_SBB_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
-			__x86_of, __x86_sbb_a, __x86_sbb_b, __x86_sbb_sub,\
-			__x86_sbb_r, __x86_sbb_sign, (BORROW));             \
+			__x86_of, __x86_sbb_a, __x86_sbb_b, __x86_sbb_r,  \
+			__x86_sbb_sign, (BORROW));                          \
 	} while (0)
 
 #define X86_SIM_L_SET_IMUL_FLAGS(LHS, RHS, WIDTH)                           \

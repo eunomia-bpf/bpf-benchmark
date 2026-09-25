@@ -365,9 +365,6 @@ def generatedX86SbbHandler (state : X86RegAluState) (rhs : BitVec 64)
   { dst := generatedX86RegWrite state.dst result width
     flags := generatedX86SbbFlags (GeneratedX86Width.narrow lhs width)
       (GeneratedX86Width.narrow rhs width)
-      (GeneratedX86SbbResult.subtrahend
-        (GeneratedX86Width.narrow rhs width)
-        (GeneratedX86Width.mask width) borrow)
       (GeneratedX86Width.narrow result width)
       (GeneratedX86Width.signMask width) borrow }
 
@@ -379,8 +376,6 @@ def x86SbbHandlerSpec (state : X86RegAluState) (rhs : BitVec 64)
   { dst := x86RegWriteSpec state.dst result width
     flags := x86SbbFlagsSpec (x86NarrowSpec lhs width)
       (x86NarrowSpec rhs width)
-      (x86SbbSubtrahendSpec (x86NarrowSpec rhs width)
-        (x86WidthMaskSpec width) borrow)
       (x86NarrowSpec result width) (x86WidthSignMaskSpec width) borrow }
 
 theorem x86_sbb_handler_refines (state : X86RegAluState)
@@ -401,9 +396,6 @@ def generatedX86SbbLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
   { dst := generatedX86RegWriteAt state.dst result width dstLane
     flags := generatedX86SbbFlags (GeneratedX86Width.narrow lhs width)
       (GeneratedX86Width.narrow rhs width)
-      (GeneratedX86SbbResult.subtrahend
-        (GeneratedX86Width.narrow rhs width)
-        (GeneratedX86Width.mask width) borrow)
       (GeneratedX86Width.narrow result width)
       (GeneratedX86Width.signMask width) borrow }
 
@@ -416,8 +408,6 @@ def x86SbbLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
   { dst := x86RegWriteAtSpec state.dst result width dstLane
     flags := x86SbbFlagsSpec (x86NarrowSpec lhs width)
       (x86NarrowSpec rhs width)
-      (x86SbbSubtrahendSpec (x86NarrowSpec rhs width)
-        (x86WidthMaskSpec width) borrow)
       (x86NarrowSpec result width) (x86WidthSignMaskSpec width) borrow }
 
 theorem x86_sbb_lane_handler_refines (state : X86RegAluState)
@@ -439,7 +429,7 @@ theorem x86_sbb_high8_consumes_incoming_borrow :
   native_decide
 
 /-- Register-destination SBB-immediate after lane selection and raw immediate
-decoding. The borrow used by the result, subtrahend, and flags is captured from
+decoding. The borrow used by the result and flags is captured from
 one pre-state. -/
 def generatedX86SbbImmLaneHandler (state : X86RegAluState)
     (rawImm : BitVec 64) (width : X86Width)
@@ -451,9 +441,6 @@ def generatedX86SbbImmLaneHandler (state : X86RegAluState)
   { dst := generatedX86RegWriteAt state.dst result width dstLane
     flags := generatedX86SbbFlags (GeneratedX86Width.narrow lhs width)
       (GeneratedX86Width.narrow rhs width)
-      (GeneratedX86SbbResult.subtrahend
-        (GeneratedX86Width.narrow rhs width)
-        (GeneratedX86Width.mask width) borrow)
       (GeneratedX86Width.narrow result width)
       (GeneratedX86Width.signMask width) borrow }
 
@@ -467,8 +454,6 @@ def x86SbbImmLaneHandlerSpec (state : X86RegAluState)
   { dst := x86RegWriteAtSpec state.dst result width dstLane
     flags := x86SbbFlagsSpec (x86NarrowSpec lhs width)
       (x86NarrowSpec rhs width)
-      (x86SbbSubtrahendSpec (x86NarrowSpec rhs width)
-        (x86WidthMaskSpec width) borrow)
       (x86NarrowSpec result width) (x86WidthSignMaskSpec width) borrow }
 
 theorem x86_sbb_imm_lane_handler_refines (state : X86RegAluState)

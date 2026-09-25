@@ -4254,3 +4254,31 @@ framework leaves the original bytecode in place and continues.
   multi-step traces, helpers, specialization preservation, or full O1--O4.
   The architecture rebuild is regression evidence, not whole-simulator
   semantic equivalence.
+
+### x86 memory-source arithmetic handler composition and SBB overflow fix, 2026-09-25
+
+- Gap and boundary: the generated x86 little-endian memory primitive and the
+  ADD/ADC/SUB/SBB result, flag, and register-writeback contracts were proved
+  separately, but `X86_SIM_L_EXEC_ALU_MEM` still had no handler-state theorem.
+  `x86_mem_arith_handler_refines` now composes those contracts for arbitrary
+  memory bytes, destination bits/tag, incoming flags, and all four legal widths.
+  It begins after a valid effective address and address-space path have supplied
+  the source bytes and after a typed arithmetic operation/width is selected; it
+  does not cover address derivation, bounds/provenance checks, stack/ABI dispatch,
+  parsing/AUX selection, memory-destination stores, compiler output, or native
+  bytes.
+- The independent host oracle exposed a real pre-existing SBB flag defect. The
+  generated C/Lean contract used the width-wrapped `(b + borrow)` as the second
+  operand of the subtraction-overflow test. For 8-bit `0 - 127 - 1`, that turns
+  `127` into `-128` and falsely sets OF even though the exact result is `-128`;
+  the dual `-1 - 127 - 1 = -129` case was falsely cleared. The contract and real
+  C flag path now use the architectural original-operand formula
+  `((a ^ b) & (a ^ result) & sign) != 0`. The now-unused generated subtrahend
+  expression was removed rather than retained as dead code.
+- Machine checks: the Lean theorem covers full modeled destination/flag state;
+  concrete theorems pin 16-bit little-endian ADC carry/partial writeback and
+  32-bit SUB borrow/zero-extension. `test_x86_mem_alu_handler_host.c` composes
+  the same generated C primitives and compares them with a byte-loop plus
+  independent 128-bit carry/borrow and signed-range oracle over 22,048 boundary
+  and fixed-seed cases. This is a bounded handler refinement and bug fix, not a
+  whole-simulator or native-byte equivalence claim.

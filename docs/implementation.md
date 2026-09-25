@@ -55,6 +55,11 @@ increment is committed and pushed immediately). Current state:
   preserve modeled register/SP state. The CCMP theorem composes the incoming
   condition decision with SUB-NZCV or immediate fallback NZCV and proves that
   both paths preserve modeled register/SP state.
+- The x86 memory-source arithmetic handler theorem composes the generated
+  little-endian load with ADD/ADC/SUB/SBB result and flag transitions plus
+  low-lane register writeback for all legal widths. Its independent 22,048-case
+  C oracle also caught and now pins a real SBB overflow bug: OF must compare the
+  original `b` with the final result, not the width-wrapped `b+borrow`.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -63,7 +68,8 @@ increment is committed and pushed immediately). Current state:
 
 ### Current boundary and open work
 
-- Open x86 proof surface: memory-operand handler composition, the
+- Open x86 proof surface: memory-destination and non-arithmetic memory-operand
+  handler composition, effective-address/address-space selection, the
   objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
   multi-step control-flow traces, and specialization preservation. All x86 value

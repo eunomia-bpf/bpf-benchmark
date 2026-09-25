@@ -121,8 +121,10 @@ C/Lean expression contract. Lean proves its 64-bit modular result and the
 per-width narrowing of that result against independent specifications. This
 closes the earlier supplied-result premise for those handler expressions. A
 separate generated SBB flag contract covers borrow-in, zero, sign, and overflow
-and composes the result/subtrahend/narrowing layers as well as the next-PC
-decision. Decoder selection and sign-mask derivation remain open.
+and composes the result/narrowing layers as well as the next-PC decision. Its
+overflow test compares the original operands with the final result; using the
+wrapped `b+borrow` value is incorrect at boundaries such as 8-bit
+`0-127-1=-128`. Decoder selection and sign-mask derivation remain open.
 The five x86 ADC binary operand forms use a dedicated generated result and
 flag contract. This preserves carry-in through width overflow instead of
 folding it into an ordinary ADD operand, and Lean composes modular
@@ -354,6 +356,17 @@ fixed-seed 20000-case sweep of all four widths; `make check` runs it. Decoder
 selection of the access width, operand-form selection, the C compiler, and
 native bytes remain boundaries, and the memory access/store integration noted
 for the unary/ALU handlers is now shared with this primitive.
+The memory-source arithmetic handler now has a composed state-transition
+theorem over ADD, ADC, SUB, and SBB. `x86_mem_arith_handler_refines` starts
+after a valid effective address and address-space path have supplied the bytes,
+then composes the generated little-endian load, carry/borrow-sensitive result
+and flag transitions, low-lane partial-register writeback, 32-bit zero
+extension, and provenance scalarization against an independently assembled
+specification. An independent host oracle checks 22,048 boundary and
+fixed-seed cases using a byte loop plus 128-bit carry/borrow and signed-range
+arithmetic. Effective-address calculation, stack/ABI dispatch, memory safety,
+opcode/width selection, memory-destination stores, and native bytes remain
+outside this theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
