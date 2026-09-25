@@ -62,6 +62,17 @@ commands and the independent review are in
 and the retention fix is recorded in
 [`step-0006`](tmp/build-and-evaluate/step-0006-20260924T172311+0000/step-report.md).
 
+The same retained workdirs do support a narrower, valid input-provenance
+result.  A fail-fast join of all 3,787 optimizer-reported applied entries to
+their workdir-local map metadata found one map class across 122 changed load
+instances: an `array` named `.rodata.config`, with `frozen=1` and flags 1152.
+Thus this startup's reported entries referenced frozen `.rodata.config`
+metadata rather than mutable-map metadata.  This separate finding does not
+repair the missing before images or prove rewriting, exact value offsets,
+cross-start stability, execution, or throughput causality.  The plan, formal
+output, and independent recomputation are retained in
+[`step-0007`](tmp/build-and-evaluate/step-0007-20260925T015337+0000/step-report.md).
+
 ## 1. System Under Test
 
 - **What it does**: optimize programs loaded by real upstream applications

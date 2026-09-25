@@ -1,0 +1,286 @@
+{
+  "map_classes": [
+    {
+      "applied_entry_occurrences": 3787,
+      "changed_workdirs": 122,
+      "flags": 1152,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array"
+    }
+  ],
+  "outcome": "supported",
+  "program_map_classes": [
+    {
+      "applied_entry_occurrences": 20,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_from_contai",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 333,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_from_host",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 261,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_from_netdev",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 122,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_lxc_policy",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 36,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_to_containe",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 108,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_to_host",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 432,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_to_netdev",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 4,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_xdp_entry",
+      "prog_type": "xdp"
+    },
+    {
+      "applied_entry_occurrences": 53,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_drop_notif",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 4,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_handle_arp",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 893,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_handle_ipv",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 495,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_handle_sna",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 108,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_ipv4_ct_eg",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 116,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_ipv4_ct_in",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 78,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_ipv4_polic",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 78,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_ipv4_to_en",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 6,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_no_service",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 594,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_nodeport_n",
+      "prog_type": "sched_cls"
+    },
+    {
+      "applied_entry_occurrences": 46,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "tail_nodeport_r",
+      "prog_type": "sched_cls"
+    }
+  ],
+  "reports": {
+    "changed_load_instances": 122,
+    "changed_program_name_type_pairs": [
+      {
+        "changed_load_instances": 2,
+        "prog_name": "cil_from_contai",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 9,
+        "prog_name": "cil_from_host",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 9,
+        "prog_name": "cil_from_netdev",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "cil_lxc_policy",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "cil_to_containe",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 9,
+        "prog_name": "cil_to_host",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 9,
+        "prog_name": "cil_to_netdev",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "cil_xdp_entry",
+        "prog_type": "xdp"
+      },
+      {
+        "changed_load_instances": 11,
+        "prog_name": "tail_drop_notif",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "tail_handle_arp",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 22,
+        "prog_name": "tail_handle_ipv",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 9,
+        "prog_name": "tail_handle_sna",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "tail_ipv4_ct_eg",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "tail_ipv4_ct_in",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "tail_ipv4_polic",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "tail_ipv4_to_en",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 6,
+        "prog_name": "tail_no_service",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 18,
+        "prog_name": "tail_nodeport_n",
+        "prog_type": "sched_cls"
+      },
+      {
+        "changed_load_instances": 2,
+        "prog_name": "tail_nodeport_r",
+        "prog_type": "sched_cls"
+      }
+    ],
+    "rows": 169,
+    "rows_without_applied_sites": 47,
+    "sites_applied": 3787
+  },
+  "scope": {
+    "application": "cilium/agent",
+    "artifact": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418",
+    "claim_boundary": "attributes optimizer-reported entries to workdir-local map metadata; does not prove bytecode rewriting, exact value offsets, attachment, execution, stability across starts, or throughput causality",
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "samples": 1,
+    "selected_workdir": null,
+    "workload_seconds": 30.0
+  },
+  "weak_value_diagnostic": {
+    "description": "reported value bytes occur contiguously in the snapshot value; the report omits source offsets, so matches are not provenance proof",
+    "matches": 3787,
+    "misses": 0
+  }
+}

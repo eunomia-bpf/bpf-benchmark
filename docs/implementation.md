@@ -253,6 +253,16 @@ capture and the Katran `map_inline` confirmation; the pass policy
 (`runner/config/passes/`) may change freely, frozen workloads and benchmark
 launchers may not.
 
+The September 19 single-pass Cilium artifact now has a separate, valid
+opportunity-source audit: all 3,787 reported applied entries across 122 changed
+load instances join to workdir-local metadata for a frozen `.rodata.config`
+array.  Its overwritten before images still make the rewrite claim
+invalid/inconclusive.  A new KVM artifact remains pending because the AE
+supervisor owns an uncommitted generic LLVM-roundtrip change in
+`bpfopt/llvm/src/llvm_mapinline.hpp`; the current x86 runtime image contains a
+binary built from that dirty source and must not be used for speculative paper
+evidence.
+
 ## Toolchain note
 
 The duty OMP binary is pinned at

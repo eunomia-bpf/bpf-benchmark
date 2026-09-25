@@ -1,0 +1,52 @@
+{
+  "map_classes": [
+    {
+      "applied_entry_occurrences": 2,
+      "changed_workdirs": 1,
+      "flags": 1152,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array"
+    }
+  ],
+  "outcome": "supported",
+  "program_map_classes": [
+    {
+      "applied_entry_occurrences": 2,
+      "frozen": 1,
+      "map_name": ".rodata.config",
+      "map_type": "array",
+      "prog_name": "cil_xdp_entry",
+      "prog_type": "xdp"
+    }
+  ],
+  "reports": {
+    "changed_load_instances": 1,
+    "changed_program_name_type_pairs": [
+      {
+        "changed_load_instances": 1,
+        "prog_name": "cil_xdp_entry",
+        "prog_type": "xdp"
+      }
+    ],
+    "rows": 1,
+    "rows_without_applied_sites": 0,
+    "sites_applied": 2
+  },
+  "scope": {
+    "application": "cilium/agent",
+    "artifact": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418",
+    "claim_boundary": "attributes optimizer-reported entries to workdir-local map metadata; does not prove bytecode rewriting, exact value offsets, attachment, execution, stability across starts, or throughput causality",
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "samples": 1,
+    "selected_workdir": "loadtime_3945_29",
+    "workload_seconds": 30.0
+  },
+  "weak_value_diagnostic": {
+    "description": "reported value bytes occur contiguously in the snapshot value; the report omits source offsets, so matches are not provenance proof",
+    "matches": 2,
+    "misses": 0
+  }
+}
