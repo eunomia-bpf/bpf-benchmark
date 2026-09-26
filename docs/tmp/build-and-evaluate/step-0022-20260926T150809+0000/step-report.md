@@ -25,9 +25,12 @@ reused, because the step-0021 comparison had summed `sites_applied` over whole
 report streams (which include `map_inline` and other steps), producing numbers
 (616/929/299/65) that are not comparable with the isolated single-pass triplets.
 Counting only the rows whose `step` is `wide_mem` in a single application
-startup gives: Tetragon 254, Cilium 164, Tracee 92, BCC 13,
-otelcol-ebpf-profiler 12, Katran 1. Cilium is therefore the second-densest
-`wide_mem` producer after the already-shipped Tetragon, and — unlike Tetragon,
+startup of the six-app default-policy run gives: Tetragon 254, Cilium 164,
+Tracee 92, BCC 13, otelcol-ebpf-profiler 12, Katran 1. Measured on the
+isolated single-pass basis the triplets themselves use, only three of the six
+have an isolated `wide_mem` run: Tetragon 254, Cilium 164, Tracee 142. Cilium
+is the second-densest `wide_mem` producer after the already-shipped Tetragon on
+either basis, and — unlike Tetragon,
 whose fresh workload is one component-less stress-ng run — Cilium's fresh
 workload emits two kernel-pktgen components. Picking it tests the derivation
 against a second rate shape as well as a second application.

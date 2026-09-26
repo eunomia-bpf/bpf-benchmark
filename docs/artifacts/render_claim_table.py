@@ -1479,9 +1479,11 @@ def otelcol_fresh_causality_rows(
 # contract as the `map_inline` triplets (see `fresh_causality_rows`); only
 # `pass_name` differs, so the single-pass prefilter, the report reconciliation
 # and the control-corrected ratio all apply unchanged. Tetragon is the
-# densest `wide_mem` producer of the six apps in a single application startup
-# (254 applied sites, against 164 for Cilium, 92 for Tracee and 13 for BCC),
-# so a controlled measurement there has the most sites behind it. The workload
+# densest `wide_mem` producer of the six apps measured on the isolated
+# single-pass basis these triplets use (254 applied sites, against 164 for
+# Cilium and 142 for Tracee -- the only three apps with an isolated `wide_mem`
+# run), so a controlled measurement there has the most sites behind it. The
+# workload
 # is the same component-less stress-ng shape as the Tetragon `map_inline`
 # triplet, so the derived scalar is the workload-level `stress-ng: metrc:`
 # bogo-ops column.
@@ -1511,8 +1513,9 @@ def wide_mem_tetragon_causality_rows(
 
 # Fresh provenance-complete Cilium `wide_mem` causality triplet, the second
 # non-`map_inline` pass triplet. Cilium is the second-densest `wide_mem`
-# producer of the six apps in one app run (164 applied sites), so a controlled
-# measurement there has a large site population behind it. Cilium's fresh
+# producer measured on the isolated single-pass basis (164 applied sites,
+# behind Tetragon's 254 and ahead of Tracee's 142), so a controlled measurement
+# there has a large site population behind it. Cilium's fresh
 # workload is two kernel-pktgen components, so the derived scalar is the sum
 # over both components' pktgen pps rather than the stress-ng bogo-ops column
 # the Tetragon `wide_mem` triplet uses; the shared summed extractor already
@@ -1537,6 +1540,41 @@ def wide_mem_cilium_causality_rows(
         evidence_dir=evidence_dir,
         declared=declared,
         metric_noun="summed kernel-pktgen pps",
+        pass_name="wide_mem",
+    )
+
+
+# Fresh provenance-complete Tracee `wide_mem` causality triplet, the third
+# non-`map_inline` pass triplet and the second on `wide_mem`. Tracee is the
+# third-densest `wide_mem` producer, on the isolated single-pass basis these
+# triplets use (142 applied sites, against 254 for Tetragon and 164 for Cilium
+# -- the only three apps with an isolated `wide_mem` run), so the controlled
+# measurement is on a visibly smaller site population than the Tetragon and
+# Cilium triplets and shows the derivation does not depend on that
+# population's size. Tracee's fresh
+# workload is a single stress-ng run, so the derived scalar is the same
+# workload-level `stress-ng: metrc:` bogo-ops column the Tetragon `wide_mem`
+# triplet uses rather than Cilium's summed kernel-pktgen pps.
+WIDE_MEM_TRACEE_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality"
+)
+WIDE_MEM_TRACEE_CAUSALITY_DECLARED = ("0.9927", "1.0039")
+
+
+def wide_mem_tracee_causality_rows(
+    root: Path,
+    evidence_dir: str = WIDE_MEM_TRACEE_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = WIDE_MEM_TRACEE_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Tracee fresh wide_mem causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="tracee__monitor",
+        report_rel="details/loadtime-reports/tracee__monitor.jsonl",
+        label="RQ2 Tracee fresh wide_mem causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="stress-ng metrc bogo-ops",
         pass_name="wide_mem",
     )
 
@@ -2236,6 +2274,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(otelcol_fresh_causality_rows(root))
     rows.extend(wide_mem_tetragon_causality_rows(root))
     rows.extend(wide_mem_cilium_causality_rows(root))
+    rows.extend(wide_mem_tracee_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3777,6 +3816,46 @@ def self_test() -> int:
                               ctl_a_post=1000, ctl_b_post=1000)
         if wide_mem_cilium_row().status != PASS:
             failures.append("restored Cilium wide_mem causality must return to PASS")
+
+        # The wide_mem Tracee row is the third non-map_inline triplet and the
+        # smallest site population of the three (142 applied sites against 254
+        # for Tetragon and 164 for Cilium, all on the isolated single-pass
+        # basis), so it asserts the derivation does not need a large site
+        # count. Tracee's fresh workload is the
+        # component-less stress-ng shape, so the row must name the bogo-ops
+        # column rather than Cilium's summed pktgen rate; it accepts
+        # `wide_mem`, rejects `map_inline`, and is gated on Tracee's own app
+        # record rather than either other app's.
+        wmt_ev = WIDE_MEM_TRACEE_CAUSALITY_EVIDENCE_DIR
+        wmt_declared = ("1.0000", "1.0000")
+
+        def wide_mem_tracee_row() -> Row:
+            return wide_mem_tracee_causality_rows(root, wmt_ev, wmt_declared)[0]
+
+        write_fresh_causality(ev=wmt_ev, stem="tracee__monitor",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        row = wide_mem_tracee_row()
+        if row.status != PASS or "wide_mem median" not in row.evidence:
+            failures.append(
+                f"valid Tracee wide_mem causality expected PASS/wide_mem, got {(row.status, row.evidence)!r}")
+        if "stress-ng metrc bogo-ops" not in row.evidence:
+            failures.append("Tracee wide_mem causality must name its rate shape")
+        write_fresh_causality(ev=wmt_ev, stem="tracee__monitor",
+                              wl_factory=metrc_wl, mi_passes=("map_inline",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_tracee_row().status != PARTIAL:
+            failures.append("Tracee wide_mem causality must reject a map_inline run")
+        write_fresh_causality(ev=wmt_ev, stem="cilium__agent",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_tracee_row().status != UNAVAILABLE:
+            failures.append("Tracee wide_mem causality must require the tracee app record")
+        write_fresh_causality(ev=wmt_ev, stem="tracee__monitor",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_tracee_row().status != PASS:
+            failures.append("restored Tracee wide_mem causality must return to PASS")
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)

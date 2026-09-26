@@ -17,12 +17,14 @@ The prior increment (step 0020) left the renderer's `fresh_causality_rows`
 builder parameterized on the pass under test (`3b9ccc3bc`), so the axis was
 ready but unmeasured. Two facts decided the target:
 
-1. **Tetragon is the densest retained `wide_mem` producer** of the six supported
-   applications, counted per single application startup over the report rows
-   whose `step` is `wide_mem`: 254 applied sites for Tetragon, against 164 for
-   Cilium, 92 for Tracee, 13 for BCC, 12 for otelcol-ebpf-profiler and 1 for
-   Katran. A controlled measurement is worth more where more sites sit behind
-   it.
+1. **Tetragon is the densest retained `wide_mem` producer** measured on the
+   basis the triplets use, i.e. the isolated single-pass run's own report
+   stream: 254 applied sites for Tetragon against 164 for Cilium and 142 for
+   Tracee, the only three applications with an isolated `wide_mem` run. (The
+   same count over the multi-pass default-policy stream is not comparable --
+   there earlier passes shrink `wide_mem`'s input, and it gives 154/92/13/12/1
+   for Tetragon/Tracee/BCC/otelcol-ebpf-profiler/Katran.) A controlled
+   measurement is worth more where more sites sit behind it.
 2. **`const_prop` is a poor next choice**: `docs/evaluation.md:342` records
    `bpfopt_failed[const_prop]` on 44 programs at the `bpfopt` CLI layer, so a
    triplet there would measure a mostly-failing pass.
@@ -140,9 +142,9 @@ Latitude, stated plainly.
 - `PASS` remains local to the named row. `OVERALL AE EVIDENCE` stays
   `INCOMPLETE` until the `atc26-ae-2` ZIP is published on Zenodo.
 
-The same axis is available for a second `wide_mem` app (Cilium, 164 applied
-sites per startup, or Tracee, 92) and for other pure-bytecode passes; each needs
-only a new wrapper plus its two frozen constants.
+The same axis is available for a third `wide_mem` app (Tracee, 142 applied
+sites in an isolated single-pass run) and for other pure-bytecode passes; each
+needs only a new wrapper plus its two frozen constants.
 
 ## Delivery
 
