@@ -400,6 +400,7 @@ status**:
 | `docs/artifacts/evidence/rq2-bcc-map-inline-fresh-causality/` (source run `x86_kvm_corpus_20260926_070636_267511` plus no-pass controls `x86_kvm_corpus_20260926_071903_072417`, `x86_kvm_corpus_20260926_073026_776920`) | `completed` | BCC `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_BENCH_PASSES=map_inline SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, the retained per-step bytecode for the 19 changed load instances, and both control records by SHA256. Supports the derived 83-site rewrite (19 changed load instances, insn 2,263 → 1,530, all 19 retained before/after images matching the reported counts and differing) bound to the measured control-corrected throughput ratio (median stress-ng `metrc` bogo-ops raw 1.0107x, control median 1.0032x, corrected 1.0075x; controls 0.9995/1.0068). This app's fresh workload is a single component-less stress-ng run, so the derived scalar is the workload-level `stress-ng: metrc:` bogo-ops column. The fresh corrected ratio is within restart drift of neutral, whereas the May BCC batch's independent generation reports 0.7921 (below 1.0); the two are separate generations, so the row claims the controlled measurement rather than a speedup, and it is never merged with the paper's declared site counts or the May numbers. |
 | `docs/artifacts/evidence/rq2-otelcol-map-inline-fresh-causality/` (source run `x86_kvm_corpus_20260926_082957_279287` plus no-pass controls `x86_kvm_corpus_20260926_084138_823558`, `x86_kvm_corpus_20260926_085249_602113`) | `completed` | otelcol-ebpf-profiler `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=otelcol-ebpf-profiler/profiling BPFREJIT_BENCH_PASSES=map_inline SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, the retained per-step bytecode for the 13 changed load instances, and both control records by SHA256. Supports the derived 1,078-site rewrite (13 changed load instances, insn 53,346 → 24,566, all 13 retained before/after images matching the reported counts and differing) bound to the measured control-corrected throughput ratio (median stress-ng `metrc` bogo-ops raw 1.0188x, control median 0.9435x, corrected 1.0798x; controls 1.0228/0.8643). This app's fresh workload is composite — five interpreter sha256 workers plus one stress-ng `--cpu` component — but only the stress-ng component carries a rate the extractor recognizes (its `stress-ng: metrc:` bogo-ops column), so the derived scalar is that metrc column summed over the workload's rate-bearing components. The fresh corrected ratio is above 1.0, whereas the May otelcol batch's independent generation reports 0.9983 (below 1.0); the two are separate generations, so the row claims the controlled measurement rather than a speedup, and it is never merged with the paper's declared site counts or the May numbers. |
 | `docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality/` (source run `x86_kvm_corpus_20260926_122945_897790` plus no-pass controls `x86_kvm_corpus_20260926_124505_606032`, `x86_kvm_corpus_20260926_130125_857040`) | `completed` | Tetragon `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet, first on a non-`map_inline` pass.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_BENCH_PASSES=wide_mem SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode for all 254 changed load instances by SHA256. Unlike the `map_inline` triplets, the pass under test is a pure BPF-to-BPF rewriting pass, so the row shows the controlled-causality derivation is not specific to kfunc lowering: the retained stream gives 254 changed load instances totalling 254 applied sites (instruction counts 373,141 → 343,261), all 254 of whose retained before/after images match the reported counts and differ, and the throughput derivation gives median raw 1.0142x, no-pass control median 0.9346x (controls 0.9358/0.9334), control-corrected 1.0852x over 3+3 samples at 60 s. Tetragon's fresh workload is a single component-less stress-ng run, so the derived scalar is the workload-level `stress-ng: metrc:` bogo-ops column. The row is `PASS` only when both derived ratios reproduce the frozen declared constants at four decimal places, is gated on `enabled_passes==["wide_mem"]`, and is never merged with the `map_inline` triplets or the May batch. |
+| `docs/artifacts/evidence/rq2-cilium-wide-mem-fresh-causality/` (source run `x86_kvm_corpus_20260926_133930_796763` plus no-pass controls `x86_kvm_corpus_20260926_135405_708186`, `x86_kvm_corpus_20260926_140808_071557`) | `completed` | Cilium `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet, second on a non-`map_inline` pass.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=wide_mem SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode by SHA256. Supports the derived rewrite evidence (164/164 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 164 applied sites; 159,896 to 156,508 instructions) and the controlled throughput causality (raw 1.1232x, no-pass control median 1.0234x, control-corrected 1.0974x over 3+3 samples at 60 s). This triplet's derived rate is the sum over two kernel-pktgen components, a different workload rate shape from the Tetragon `wide_mem` triplet's component-less stress-ng column, so the derivation is shown to hold independent of both pass family and rate shape. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -1067,13 +1068,13 @@ different pass, so the controlled-causality method is not specific to kfunc
 lowering: `docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality/`
 carries one `wide_mem` run (`x86_kvm_corpus_20260926_122945_897790`) plus two
 matched no-pass controls (`x86_kvm_corpus_20260926_124505_606032`,
-`x86_kvm_corpus_20260926_130125_857040`), each with its own make-console log
-and the optimized run retaining per-step bytecode. `wide_mem` is a pure
-BPF-to-BPF rewriting pass rather than a kfunc-lowering pass, and Tetragon is the
-densest retained `wide_mem` producer of the six applications (616 applied sites
-across its retained report streams, against 299 for Tracee and 65 for BCC), so
-the controlled measurement has the most sites behind it. The retained report
-stream gives 254 changed load instances totalling 254 applied sites
+`x86_kvm_corpus_20260926_130125_857040`), each with its own make-console log.
+The pass under test is a pure BPF-to-BPF rewriting pass rather than a
+kfunc-lowering pass, and Tetragon is the densest `wide_mem` producer of the six
+applications in a single application startup (254 applied sites, against 164
+for Cilium, 92 for Tracee and 13 for BCC), so the controlled measurement has
+the most sites behind it. The retained report stream gives 254 changed load
+instances totalling 254 applied sites
 (instruction counts 373,141 → 343,261, −29,880), all 254 of whose retained
 before/after images match the reported counts and differ; the throughput
 derivation gives median raw 1.0142x, no-pass control median 0.9346x (controls
@@ -1088,6 +1089,31 @@ so this row is gated on `enabled_passes==["wide_mem"]` and on its own evidence
 directory and cannot be satisfied by any `map_inline` triplet's files; its
 declared constants are frozen from this triplet and any drift degrades the row
 to `PARTIAL` rather than silently re-baselining.
+
+A fourteenth derivation is the second **fresh provenance-complete** treatment of
+a non-`map_inline` pass and, with the thirteenth, shows the derivation is not
+specific to a pass family or a workload rate shape:
+`docs/artifacts/evidence/rq2-cilium-wide-mem-fresh-causality/` carries one
+`wide_mem` run (`x86_kvm_corpus_20260926_133930_796763`) plus two matched
+no-pass controls (`x86_kvm_corpus_20260926_135405_708186`,
+`x86_kvm_corpus_20260926_140808_071557`), each with its own make-console log and
+the optimized run retaining per-step bytecode. The retained report stream gives
+164 changed load instances totalling 164 applied sites (instruction counts
+159,896 to 156,508, −3,388), all 164 of whose retained before/after images match
+the reported counts and differ; the throughput derivation gives median raw
+1.1232x, no-pass control median 1.0234x (controls 1.0187/1.0282),
+control-corrected 1.0974x over 3+3 samples at 60 s. Unlike the thirteenth
+derivation, whose workload is a single component-less stress-ng run, Cilium's
+fresh workload emits two kernel-pktgen components, so the derived scalar is the
+sum over both components' pktgen pps; the shared summed extractor already
+accepts both shapes, so the same builder serves the triplet unchanged. The
+corrected ratio is above 1.0 here, whereas Cilium's `map_inline` triplet lands
+below it: the two are different passes measured in separate generations, so the
+row claims the controlled measurement rather than a speedup and the two are
+never merged. The row is gated on `enabled_passes==["wide_mem"]` and on this
+application's own record and report path, and its declared constants are frozen
+from this triplet, so any drift degrades the row to `PARTIAL` rather than
+silently re-baselining.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are
