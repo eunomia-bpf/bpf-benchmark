@@ -1,0 +1,10 @@
+{
+  "cmd": "execute_plan",
+  "steps": [
+    {
+      "command": "bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "wide_mem"
+    }
+  ]
+}
