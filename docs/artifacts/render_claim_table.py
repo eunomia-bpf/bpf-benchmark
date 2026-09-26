@@ -1478,12 +1478,13 @@ def otelcol_fresh_causality_rows(
 # non-`map_inline` pass to get one. Same triplet shape and same evidence dir
 # contract as the `map_inline` triplets (see `fresh_causality_rows`); only
 # `pass_name` differs, so the single-pass prefilter, the report reconciliation
-# and the control-corrected ratio all apply unchanged. Tetragon is the densest
-# retained `wide_mem` producer of the six apps (616 applied sites over its
-# retained report stream vs. 299 for Tracee and 65 for BCC), so a controlled
-# measurement there has the most sites behind it. The workload is the same
-# component-less stress-ng shape as the Tetragon `map_inline` triplet, so the
-# derived scalar is the workload-level `stress-ng: metrc:` bogo-ops column.
+# and the control-corrected ratio all apply unchanged. Tetragon is the
+# densest `wide_mem` producer of the six apps in a single application startup
+# (254 applied sites, against 164 for Cilium, 92 for Tracee and 13 for BCC),
+# so a controlled measurement there has the most sites behind it. The workload
+# is the same component-less stress-ng shape as the Tetragon `map_inline`
+# triplet, so the derived scalar is the workload-level `stress-ng: metrc:`
+# bogo-ops column.
 WIDE_MEM_TETRAGON_CAUSALITY_EVIDENCE_DIR = (
     "docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality"
 )
@@ -1504,6 +1505,38 @@ def wide_mem_tetragon_causality_rows(
         evidence_dir=evidence_dir,
         declared=declared,
         metric_noun="stress-ng metrc bogo-ops",
+        pass_name="wide_mem",
+    )
+
+
+# Fresh provenance-complete Cilium `wide_mem` causality triplet, the second
+# non-`map_inline` pass triplet. Cilium is the second-densest `wide_mem`
+# producer of the six apps in one app run (164 applied sites), so a controlled
+# measurement there has a large site population behind it. Cilium's fresh
+# workload is two kernel-pktgen components, so the derived scalar is the sum
+# over both components' pktgen pps rather than the stress-ng bogo-ops column
+# the Tetragon `wide_mem` triplet uses; the shared summed extractor already
+# covers both shapes and `metric_noun` keeps the row's wording accurate.
+WIDE_MEM_CILIUM_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-cilium-wide-mem-fresh-causality"
+)
+WIDE_MEM_CILIUM_CAUSALITY_DECLARED = ("1.1232", "1.0974")
+
+
+def wide_mem_cilium_causality_rows(
+    root: Path,
+    evidence_dir: str = WIDE_MEM_CILIUM_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = WIDE_MEM_CILIUM_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Cilium fresh wide_mem causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="cilium__agent",
+        report_rel="details/loadtime-reports/cilium__agent.jsonl",
+        label="RQ2 Cilium fresh wide_mem causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="summed kernel-pktgen pps",
         pass_name="wide_mem",
     )
 
@@ -2202,6 +2235,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(bcc_fresh_causality_rows(root))
     rows.extend(otelcol_fresh_causality_rows(root))
     rows.extend(wide_mem_tetragon_causality_rows(root))
+    rows.extend(wide_mem_cilium_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3706,6 +3740,43 @@ def self_test() -> int:
                               mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
         if wide_mem_row().status != PASS:
             failures.append("restored wide_mem causality must return to PASS")
+
+        # The wide_mem Cilium row is the second non-map_inline triplet and the
+        # other workload shape behind it: Cilium's rate is a two-component
+        # kernel-pktgen sum, not the component-less stress-ng column the
+        # Tetragon wide_mem row uses. This case asserts the row names that
+        # shape, accepts `wide_mem`, rejects `map_inline`, and is gated on
+        # Cilium's own app record rather than the Tetragon one.
+        wmc_ev = WIDE_MEM_CILIUM_CAUSALITY_EVIDENCE_DIR
+        wmc_declared = ("1.0000", "1.0000")
+
+        def wide_mem_cilium_row() -> Row:
+            return wide_mem_cilium_causality_rows(root, wmc_ev, wmc_declared)[0]
+
+        write_fresh_causality(ev=wmc_ev, stem="cilium__agent",
+                              mi_passes=("wide_mem",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        row = wide_mem_cilium_row()
+        if row.status != PASS or "wide_mem median" not in row.evidence:
+            failures.append(
+                f"valid Cilium wide_mem causality expected PASS/wide_mem, got {(row.status, row.evidence)!r}")
+        if "summed kernel-pktgen pps" not in row.evidence:
+            failures.append("Cilium wide_mem causality must name its rate shape")
+        write_fresh_causality(ev=wmc_ev, stem="cilium__agent",
+                              mi_passes=("map_inline",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_cilium_row().status != PARTIAL:
+            failures.append("Cilium wide_mem causality must reject a map_inline run")
+        write_fresh_causality(ev=wmc_ev, stem="tetragon__observer",
+                              mi_passes=("wide_mem",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_cilium_row().status != UNAVAILABLE:
+            failures.append("Cilium wide_mem causality must require the cilium app record")
+        write_fresh_causality(ev=wmc_ev, stem="cilium__agent",
+                              mi_passes=("wide_mem",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_cilium_row().status != PASS:
+            failures.append("restored Cilium wide_mem causality must return to PASS")
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
