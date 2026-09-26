@@ -1487,7 +1487,7 @@ def otelcol_fresh_causality_rows(
 WIDE_MEM_TETRAGON_CAUSALITY_EVIDENCE_DIR = (
     "docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality"
 )
-WIDE_MEM_TETRAGON_CAUSALITY_DECLARED = ("1.0", "1.0")
+WIDE_MEM_TETRAGON_CAUSALITY_DECLARED = ("1.0142", "1.0852")
 
 
 def wide_mem_tetragon_causality_rows(
