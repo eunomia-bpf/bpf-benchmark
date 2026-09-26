@@ -393,6 +393,7 @@ status**:
 | `docs/artifacts/evidence/rq2-tetragon-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_133216_342697`) | `completed` | Tetragon `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~400 s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 118 changed load instances by SHA256. Supports the derived rewrite evidence for the default `--map-values`/`--map-ids` policy path (no inline hints) over six array maps (`tg_conf_map`, `policy_conf`, `policy_stats`, `cgroup_rate_opt`, `.rodata`, `config_map`), across kprobe, tracepoint, raw_tracepoint and socket_filter program types, and covering single-site as well as two- and three-site programs: 118/118 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 140 applied sites; 234,754 → 220,562 instructions. It is a single startup with `SAMPLES=1` and does not re-measure the paper's declared Tetragon site figures. |
 | `docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/` (source run `arm64_qemu_corpus_19700101_000012_467359`) | `completed` | Katran `status: ok` | **Fresh tracked retained-bytecode run on AArch64.** The exact command `env PLATFORM=qemu ARCH=arm64 BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after 326 s of guest-reported wall time under the local `qemu-system-aarch64` executor. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the one changed load instance by SHA256. Supports the derived rewrite evidence for the same overlay/hint policy path used by the x86 Katran row, now on arm64: 1/1 changed workdir whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 16 applied sites; instruction counts 2,554 → 2,284 (−270). The arm64 set has the same single changed instance and the same 16 applied sites as the x86 Katran set, so the rewrite is architecture-symmetric; it does not re-measure the paper's declared Katran figures or any workload throughput, and the two architectures are never merged. |
 | `corpus/results/x86_kvm_corpus_20260522_*` (18 runs: six apps × one `map_inline`-only + two no-pass `loadtime`) | `completed` | all six apps `status: ok` | **Tracked historical matched batch.** The only tracked set that holds, for all six applications, a `map_inline`-only run *and* same-batch no-pass `loadtime` nulls at the identical 60 s `WORKLOAD_DURATION` with 3+3 workload samples. Supports the renderer's controlled per-pass throughput-causality rows (raw `map_inline` vs restart-drift-corrected ratios) and the pooled 0.9751 control-corrected geomean. Retains no per-step bytecode, so no site counts are claimed; single-app runs, no `metadata.command`/`source_revision` (old format), so no `receipt.json`. Not merged with the paper's separate June ratios. |
+| `docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/` (source run `x86_kvm_corpus_20260926_005057_618064` plus no-pass controls `x86_kvm_corpus_20260926_010023_572333`, `x86_kvm_corpus_20260926_010936_702976`) | `completed` | Katran `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, the retained per-step bytecode for the one changed load instance, and both controls' logs, metadata and app records by SHA256. Unlike the May matched batch, each run retains its own make-console log and the MI run retains per-step bytecode, so one row binds the derived 16-site rewrite (1 changed load instance, insn 2554 → 2284) to the measured control-corrected throughput ratio (median summed-pktgen raw 1.0751x, control median 0.9997x, corrected 1.0754x; controls 1.0029/0.9966). Single-app, `SAMPLES=3` at 60 s; the fresh pktgen workload sums four components per phase. Not merged with the May ratios or the paper's June ratios. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -900,6 +901,27 @@ the May-batch ratios are never merged with the paper's separate June
 generation. The renderer's `map_inline` causality rows are `PASS` only when the
 derived values reproduce frozen declared constants at the printed precision;
 any drift degrades the row to `PARTIAL` rather than silently re-baselining.
+
+A seventh derivation answers the same causality question from a **fresh,
+provenance-complete** triplet rather than the tracked historical batch:
+`docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/` carries one
+`map_inline` run (`x86_kvm_corpus_20260926_005057_618064`) plus two matched
+no-pass controls (`x86_kvm_corpus_20260926_010023_572333`,
+`x86_kvm_corpus_20260926_010936_702976`), each with its own make-console log and
+the MI run retaining per-step bytecode. Unlike the May batch, a single row
+therefore binds the measured pass effect to the bytecode change that produced
+it: the retained report stream gives one changed load instance
+(`balancer_ingress`, 16 applied sites, instruction counts 2,554 → 2,284) whose
+retained before/after images match the reported counts and differ, and the
+throughput derivation gives median summed-pktgen raw 1.0751x, no-pass control
+median 0.9997x (controls 1.0029/0.9966), control-corrected 1.0754x over 3+3
+samples at 60 s. The fresh kernel-pktgen workload splits each phase into four
+nondeterministically ordered components, so the derived throughput is the sum
+over all components' pktgen pps rather than the first rate-bearing component;
+the row is `PASS` only when both derived ratios reproduce the frozen declared
+constants at four decimal places. The three runs are single-app `x86_kvm_corpus`
+with `SAMPLES=3` and 60 s `WORKLOAD_DURATION`; their ratios are never merged
+with the May-batch ratios or the paper's June generation.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are
