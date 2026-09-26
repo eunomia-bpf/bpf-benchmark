@@ -1059,6 +1059,163 @@ def map_inline_causality_rows(
                         f"a controlled ratio"))
     return rows
 
+# Fresh provenance-complete Katran causality triplet: one `map_inline` run with
+# two matched no-pass controls, each retaining its own make-console log. Unlike
+# the May matched batch (which retains no per-step bytecode and no console
+# logs), this dir carries both the rewrite reconciliation and the controlled
+# throughput causality, so a single row can bind a measured pass effect to the
+# bytecode change that produced it. The declared constants are frozen from this
+# triplet; drift flips the row to PARTIAL rather than silently re-baselining.
+KATRAN_FRESH_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality"
+)
+KATRAN_FRESH_CAUSALITY_DECLARED = ("1.0751", "1.0754")
+
+
+def _summed_pktgen_throughput(workload: dict) -> float | None:
+    """One workload's throughput as the sum of its rate-bearing components.
+
+    The fresh kernel-pktgen workload emits four components per phase in
+    nondeterministic order, so `workload_throughput` (first rate-bearing
+    component) would sample only one of them. Sum every component's scalar;
+    fall back to the workload's own stdout/stderr when it carries the rate
+    directly. Returns None when no rate is present.
+    """
+    total = 0.0
+    found = False
+    for component in workload.get("components") or []:
+        value = _rate_scalar(component.get("stdout"), component.get("stderr"))
+        if value:
+            total += value
+            found = True
+    if not found:
+        value = _rate_scalar(workload.get("stdout"), workload.get("stderr"))
+        if value:
+            total += value
+            found = True
+    return total if found else None
+
+
+def _summed_phase_throughput(app: dict, phase: str) -> list[float | None]:
+    obj = app.get(phase) or {}
+    return [_summed_pktgen_throughput(w) for w in obj.get("workloads") or []]
+
+
+def _summed_throughput_ratio(app: dict) -> float | None:
+    """Median post/baseline summed-pktgen throughput ratio over 3+3 samples."""
+    baseline = _summed_phase_throughput(app, "baseline")
+    post = _summed_phase_throughput(app, "post_rejit")
+    if len(baseline) != 3 or len(post) != 3:
+        return None
+    if any(value is None or value <= 0 for value in baseline + post):
+        return None
+    return statistics.median(post) / statistics.median(baseline)
+
+
+def katran_fresh_causality_rows(
+    root: Path,
+    evidence_dir: str = KATRAN_FRESH_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = KATRAN_FRESH_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Katran fresh map_inline causality bound to its retained bytecode.
+
+    One evidence dir carries a `map_inline` loadtime run (rewrite reconciliation
+    plus throughput) and two matched no-pass controls. The row PASSes only when
+    the MI run's status records are completed/ok with `enabled_passes ==
+    ["map_inline"]`, the retained per-step bytecode reconciles with the report
+    stream, the receipt binds every retained file, both controls are
+    `passes == []` loadtime skips at identical 3-sample/60 s shape, and the
+    derived raw and control-corrected ratios reproduce the frozen declared
+    constants. Any drift flips the row to PARTIAL.
+    """
+    base = root / evidence_dir
+    label = "RQ2 Katran fresh map_inline causality + retained bytecode"
+    meta = load_json(base / "metadata.json") or {}
+    progress = load_json(base / "details/progress.json") or {}
+    app = load_json(base / "details/apps/katran.json") or {}
+    receipt = load_json(base / "receipt.json") or {}
+    run_ok = (
+        meta.get("status") == SUITE_SUCCESS
+        and meta.get("run_type") in CORPUS_RUN_TYPES
+        and meta.get("suite") == "corpus"
+        and meta.get("samples") == 3
+        and meta.get("workload_seconds") == CAUSALITY_WORKLOAD_SECONDS
+        and (meta.get("config") or {}).get("enabled_passes") == ["map_inline"]
+        and progress.get("status") == SUITE_SUCCESS
+        and app.get("status") == APP_SUCCESS
+        and not app.get("error")
+        and (app.get("rejit_result") or {}).get("status") == "ok"
+    )
+    counts = _retained_changed_bytecode(
+        root, evidence_dir, "details/loadtime-reports/katran.jsonl"
+    )
+    reconciled = counts is not None and (
+        counts["changed"] > 0
+        and counts["retained_changed_workdirs"] == counts["changed"]
+        and counts["len_mismatches"] == 0
+        and counts["changed_missing_bytecode"] == 0
+        and counts["changed_not_differing"] == 0
+    )
+    files_ok = retained_files_valid(base, receipt.get("files_sha256"))
+
+    control_ratios: list[float] = []
+    controls_ok = True
+    for control in ("nullA", "nullB"):
+        cmeta = load_json(base / "controls" / control / "metadata.json") or {}
+        capp = load_json(base / "controls" / control / "details/apps/katran.json") or {}
+        gate_ok = (
+            cmeta.get("status") == SUITE_SUCCESS
+            and cmeta.get("run_type") in CORPUS_RUN_TYPES
+            and cmeta.get("suite") == "corpus"
+            and cmeta.get("samples") == 3
+            and cmeta.get("workload_seconds") == CAUSALITY_WORKLOAD_SECONDS
+            and (cmeta.get("config") or {}).get("enabled_passes") == []
+            and capp.get("status") == APP_SUCCESS
+            and not capp.get("error")
+            and (capp.get("rejit_result") or {}).get("status") == "skipped"
+        )
+        if not gate_ok:
+            controls_ok = False
+        ratio = _summed_throughput_ratio(capp)
+        if ratio is not None:
+            control_ratios.append(ratio)
+
+    raw = _summed_throughput_ratio(app)
+    declared_raw, declared_corrected = declared
+    if raw is None or len(control_ratios) != 2:
+        return [Row(
+            label, UNAVAILABLE,
+            f"fresh map_inline run plus two matched no-pass controls with 3+3 "
+            f"positive summed-pktgen samples missing: {evidence_dir}",
+        )]
+    control_median = statistics.median(control_ratios)
+    corrected = raw / control_median
+    derived_ok = (
+        f"{raw:.4f}" == declared_raw and f"{corrected:.4f}" == declared_corrected
+    )
+    status = PASS if (
+        run_ok and reconciled and files_ok and controls_ok and derived_ok
+    ) else PARTIAL
+    return [Row(
+        f"{label} ({counts['sites_applied']} sites)" if counts else label,
+        status,
+        f"{evidence_dir}: map_inline median summed-pktgen ratio={raw:.6f}x; "
+        f"no-pass controls {['%.4f' % r for r in control_ratios]} "
+        f"(median {control_median:.6f}x); control-corrected={corrected:.6f}x "
+        f"(declared {declared_raw}/{declared_corrected}), 3+3 samples per run; "
+        + (f"{counts['rows']} report rows, {counts['changed']} changed load "
+           f"instances, {counts['sites_applied']} applied sites, insn "
+           f"{counts['insn_before']}->{counts['insn_after']} "
+           f"({counts['insn_after'] - counts['insn_before']:+d}); "
+           f"bytecode retained for {counts['retained_changed_workdirs']}/"
+           f"{counts['changed']} changed workdirs, "
+           f"{counts['len_mismatches']} length mismatches, "
+           f"{counts['changed_not_differing']} identical images; " if counts
+           else "retained report stream missing; ")
+        + f"run status valid={run_ok}, controls valid={controls_ok}, "
+          f"receipt file hashes valid={files_ok}",
+    )]
+
 
 def cilium_site_rows(root: Path) -> list[Row]:
     """Derive RQ3 applied-site counts from retained shim loadtime reports.
@@ -1747,6 +1904,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(tetragon_retained_bytecode_rows(root))
     rows.extend(katran_arm64_retained_bytecode_rows(root))
     rows.extend(map_inline_causality_rows(root))
+    rows.extend(katran_fresh_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -2893,11 +3051,113 @@ def self_test() -> int:
         if causality_row().status != PASS:
             failures.append("restored causality controls must return to PASS")
 
+        # Fresh Katran causality: one map_inline run carrying both retained
+        # per-step bytecode and two matched no-pass controls. The synthetic
+        # pktgen workload splits each phase into two components so the fixture
+        # exercises the summed-component extractor; the injected declared
+        # constants match the synthetic ratios, and every gate mutation must
+        # flip the row off PASS.
+        causal_ev = KATRAN_FRESH_CAUSALITY_EVIDENCE_DIR
+        causal_declared = ("1.0750", "1.0750")
+
+        def wl(total: int) -> dict:
+            half = total // 2
+            def comp(pps: int) -> dict:
+                return {"stdout": f"\n{pps}pps 1000Mb/sec (1000000000bps) errors: 0\n"}
+            return {"components": [comp(half), comp(total - half)]}
+
+        def write_fresh_causality(
+            *, mi_post: int = 1075, mi_status: str = "completed",
+            mi_passes=("map_inline",), app_status: str = "ok",
+            mi_rejit: str = "ok", ctl_a_post: int = 1001, ctl_b_post: int = 999,
+            ctl_a_passes=(), ctl_b_passes=(), ctl_rejit: str = "skipped",
+            retain_bytecode: bool = True, receipt_hashes: bool = True,
+        ) -> None:
+            base = root / causal_ev
+            import shutil
+            if base.exists():
+                shutil.rmtree(base)
+            def write_dir(rel: str, *, post: int, passes, rejit: str,
+                          status: str, app_st: str) -> None:
+                d = base / rel
+                (d / "details/apps").mkdir(parents=True, exist_ok=True)
+                (d / "metadata.json").write_text(json.dumps({
+                    "status": status, "run_type": "x86_kvm_corpus",
+                    "suite": "corpus", "samples": 3, "workload_seconds": 60.0,
+                    "bpf_stats": True, "config": {"enabled_passes": list(passes)}}))
+                (d / "details/progress.json").write_text(json.dumps({"status": status}))
+                (d / "details/apps/katran.json").write_text(json.dumps({
+                    "status": app_st, "error": "",
+                    "rejit_result": {"mode": "loadtime", "status": rejit},
+                    "baseline": {"workloads": [wl(1000)] * 3},
+                    "post_rejit": {"workloads": [wl(post)] * 3}}))
+            write_dir("", post=mi_post, passes=mi_passes, rejit=mi_rejit,
+                      status=mi_status, app_st=app_status)
+            write_dir("controls/nullA", post=ctl_a_post, passes=ctl_a_passes,
+                      rejit=ctl_rejit, status="completed", app_st="ok")
+            write_dir("controls/nullB", post=ctl_b_post, passes=ctl_b_passes,
+                      rejit=ctl_rejit, status="completed", app_st="ok")
+            rows = [
+                {"prog_type": "xdp", "workdir": "/wd/loadtime_1_0",
+                 "report": {"insn_count_before": 2542, "insn_count_after": 2272,
+                            "sites_matched": 16, "sites_applied": 16}},
+            ] + [
+                {"prog_type": "socket_filter", "workdir": f"/wd/loadtime_1_{i}",
+                 "report": {"insn_count_before": 2, "insn_count_after": 2,
+                            "sites_matched": 0, "sites_applied": 0}}
+                for i in range(1, 6)
+            ]
+            (base / "details/loadtime-reports").mkdir(parents=True, exist_ok=True)
+            (base / "details/loadtime-reports/katran.jsonl").write_text(
+                "\n".join(json.dumps(r) for r in rows) + "\n")
+            if retain_bytecode:
+                wd = base / "details/loadtime-workdirs/loadtime_1_0"
+                wd.mkdir(parents=True, exist_ok=True)
+                (wd / "input.step.0.bin").write_bytes(b"\x01" * (8 * 2542))
+                (wd / "output.next.0.bin").write_bytes(b"\x02" * (8 * 2272))
+                (wd / "report.0.json").write_text(json.dumps(rows[0]["report"]))
+            if receipt_hashes:
+                files = {
+                    str(p.relative_to(base)): file_sha256(p)
+                    for p in sorted(base.rglob("*"))
+                    if p.is_file() and p.name != "receipt.json"
+                }
+                (base / "receipt.json").write_text(json.dumps({"files_sha256": files}))
+            else:
+                (base / "receipt.json").write_text(json.dumps({"files_sha256": {}}))
+
+        def fresh_row() -> Row:
+            return katran_fresh_causality_rows(root, causal_ev, causal_declared)[0]
+
+        write_fresh_causality()
+        row = fresh_row()
+        if row.status != PASS or "control-corrected=1.075000x" not in row.evidence:
+            failures.append(
+                f"valid fresh causality expected PASS/1.075000x, got {(row.status, row.evidence)!r}")
+        write_fresh_causality(mi_post=1200)
+        if fresh_row().status != PARTIAL:
+            failures.append("fresh causality must degrade on throughput drift")
+        write_fresh_causality(ctl_a_passes=("map_inline",))
+        if fresh_row().status != PARTIAL:
+            failures.append("fresh causality controls must be no-pass runs")
+        write_fresh_causality(mi_passes=("kop",))
+        if fresh_row().status != UNAVAILABLE and fresh_row().status != PARTIAL:
+            failures.append("fresh causality must require the map_inline pass")
+        write_fresh_causality(retain_bytecode=False)
+        if fresh_row().status != PARTIAL:
+            failures.append("fresh causality must require retained bytecode")
+        write_fresh_causality(receipt_hashes=False)
+        if fresh_row().status != PARTIAL:
+            failures.append("fresh causality must require receipt file hashes")
+        write_fresh_causality()
+        if fresh_row().status != PASS:
+            failures.append("restored fresh causality must return to PASS")
+
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
         return 1
-    print("self-test: OK (11 evidence classes)")
+    print("self-test: OK (12 evidence classes)")
     return 0
 
 

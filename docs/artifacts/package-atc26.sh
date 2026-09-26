@@ -287,7 +287,12 @@ the RQ2 rewrite can be re-derived per application. A tracked May 2026 matched
 batch of eighteen single-application runs (six apps × one \`map_inline\`-only run
 plus two same-batch no-pass \`loadtime\` nulls at the identical 60 s duration)
 lets the renderer derive controlled per-pass throughput-causality ratios whose
-restart drift is subtracted by the no-pass controls. ARTIFACT_MANIFEST.json records
+restart drift is subtracted by the no-pass controls. The archive additionally
+carries a fresh, provenance-complete Katran \`map_inline\` causality triplet —
+one optimized run plus two matched no-pass controls, each with its own
+make-console log — whose retained per-step bytecode binds the derived 16-site
+rewrite to the measured control-corrected throughput ratio.
+ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
 EOF
@@ -480,6 +485,12 @@ required=(
     corpus/results/x86_kvm_corpus_20260924_095500_223221/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/x86_kvm_corpus_20260924_114427_040291/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/arm64_qemu_corpus_19700101_000011_781867/details/loadtime-reports/katran.jsonl
+    docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/receipt.json
+    docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/make-corpus.log
+    docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/details/loadtime-reports/katran.jsonl
+    docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/details/loadtime-workdirs/loadtime_3080_5/input.step.0.bin
+    docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/controls/nullA/metadata.json
+    docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/controls/nullB/metadata.json
     corpus/results/arm64_qemu_corpus_19700101_000011_741370/details/loadtime-reports/katran.jsonl
 )
 for rel in "${required[@]}"; do
