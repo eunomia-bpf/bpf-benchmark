@@ -1112,12 +1112,16 @@ def _summed_throughput_ratio(app: dict) -> float | None:
     return statistics.median(post) / statistics.median(baseline)
 
 
-def katran_fresh_causality_rows(
+def fresh_causality_rows(
     root: Path,
-    evidence_dir: str = KATRAN_FRESH_CAUSALITY_EVIDENCE_DIR,
-    declared: tuple[str, str] = KATRAN_FRESH_CAUSALITY_DECLARED,
+    *,
+    app_stem: str,
+    report_rel: str,
+    label: str,
+    evidence_dir: str,
+    declared: tuple[str, str],
 ) -> list[Row]:
-    """Katran fresh map_inline causality bound to its retained bytecode.
+    """One app's fresh map_inline causality bound to its retained bytecode.
 
     One evidence dir carries a `map_inline` loadtime run (rewrite reconciliation
     plus throughput) and two matched no-pass controls. The row PASSes only when
@@ -1129,10 +1133,9 @@ def katran_fresh_causality_rows(
     constants. Any drift flips the row to PARTIAL.
     """
     base = root / evidence_dir
-    label = "RQ2 Katran fresh map_inline causality + retained bytecode"
     meta = load_json(base / "metadata.json") or {}
     progress = load_json(base / "details/progress.json") or {}
-    app = load_json(base / "details/apps/katran.json") or {}
+    app = load_json(base / "details/apps" / f"{app_stem}.json") or {}
     receipt = load_json(base / "receipt.json") or {}
     run_ok = (
         meta.get("status") == SUITE_SUCCESS
@@ -1146,9 +1149,7 @@ def katran_fresh_causality_rows(
         and not app.get("error")
         and (app.get("rejit_result") or {}).get("status") == "ok"
     )
-    counts = _retained_changed_bytecode(
-        root, evidence_dir, "details/loadtime-reports/katran.jsonl"
-    )
+    counts = _retained_changed_bytecode(root, evidence_dir, report_rel)
     reconciled = counts is not None and (
         counts["changed"] > 0
         and counts["retained_changed_workdirs"] == counts["changed"]
@@ -1162,7 +1163,7 @@ def katran_fresh_causality_rows(
     controls_ok = True
     for control in ("nullA", "nullB"):
         cmeta = load_json(base / "controls" / control / "metadata.json") or {}
-        capp = load_json(base / "controls" / control / "details/apps/katran.json") or {}
+        capp = load_json(base / "controls" / control / "details/apps" / f"{app_stem}.json") or {}
         gate_ok = (
             cmeta.get("status") == SUITE_SUCCESS
             and cmeta.get("run_type") in CORPUS_RUN_TYPES
@@ -1215,6 +1216,56 @@ def katran_fresh_causality_rows(
         + f"run status valid={run_ok}, controls valid={controls_ok}, "
           f"receipt file hashes valid={files_ok}",
     )]
+
+
+# Fresh provenance-complete Katran causality triplet: one `map_inline` run with
+# two matched no-pass controls, each retaining its own make-console log. Unlike
+# the May matched batch (which retains no per-step bytecode and no console
+# logs), this dir carries both the rewrite reconciliation and the controlled
+# throughput causality, so a single row can bind a measured pass effect to the
+# bytecode change that produced it. The declared constants are frozen from this
+# triplet; drift flips the row to PARTIAL rather than silently re-baselining.
+def katran_fresh_causality_rows(
+    root: Path,
+    evidence_dir: str = KATRAN_FRESH_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = KATRAN_FRESH_CAUSALITY_DECLARED,
+) -> list[Row]:
+    return fresh_causality_rows(
+        root,
+        app_stem="katran",
+        report_rel="details/loadtime-reports/katran.jsonl",
+        label="RQ2 Katran fresh map_inline causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+    )
+
+CILIUM_FRESH_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-cilium-map-inline-fresh-causality"
+)
+CILIUM_FRESH_CAUSALITY_DECLARED = ("1.0325", "0.9619")
+
+
+def cilium_fresh_causality_rows(
+    root: Path,
+    evidence_dir: str = CILIUM_FRESH_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = CILIUM_FRESH_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Cilium fresh map_inline causality bound to its retained bytecode.
+
+    Same shape as the Katran triplet (see `fresh_causality_rows`). The
+    control-corrected sign agrees with the May Cilium batch's `0.9585`, which
+    is an independent generation: Cilium's `map_inline` effect is within
+    restart drift of neutral here, so the row's claim is the controlled
+    measurement, not a speedup.
+    """
+    return fresh_causality_rows(
+        root,
+        app_stem="cilium__agent",
+        report_rel="details/loadtime-reports/cilium__agent.jsonl",
+        label="RQ2 Cilium fresh map_inline causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+    )
 
 
 def cilium_site_rows(root: Path) -> list[Row]:
@@ -1905,6 +1956,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(katran_arm64_retained_bytecode_rows(root))
     rows.extend(map_inline_causality_rows(root))
     rows.extend(katran_fresh_causality_rows(root))
+    rows.extend(cilium_fresh_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3051,14 +3103,18 @@ def self_test() -> int:
         if causality_row().status != PASS:
             failures.append("restored causality controls must return to PASS")
 
-        # Fresh Katran causality: one map_inline run carrying both retained
-        # per-step bytecode and two matched no-pass controls. The synthetic
-        # pktgen workload splits each phase into two components so the fixture
+        # Fresh causality triplets: one map_inline run carrying both retained
+        # per-step bytecode and two matched no-pass controls, for Katran and
+        # now Cilium, which share the generic row builder. The synthetic pktgen
+        # workload splits each phase into two components so the fixture
         # exercises the summed-component extractor; the injected declared
         # constants match the synthetic ratios, and every gate mutation must
-        # flip the row off PASS.
+        # flip the row off PASS. The Cilium case additionally asserts that the
+        # app stem/report path are honored rather than hardcoded to Katran.
         causal_ev = KATRAN_FRESH_CAUSALITY_EVIDENCE_DIR
         causal_declared = ("1.0750", "1.0750")
+        cilium_ev = CILIUM_FRESH_CAUSALITY_EVIDENCE_DIR
+        cilium_declared = ("0.9000", "0.9000")
 
         def wl(total: int) -> dict:
             half = total // 2
@@ -3067,13 +3123,14 @@ def self_test() -> int:
             return {"components": [comp(half), comp(total - half)]}
 
         def write_fresh_causality(
-            *, mi_post: int = 1075, mi_status: str = "completed",
+            *, ev: str = causal_ev, stem: str = "katran",
+            mi_post: int = 1075, mi_status: str = "completed",
             mi_passes=("map_inline",), app_status: str = "ok",
             mi_rejit: str = "ok", ctl_a_post: int = 1001, ctl_b_post: int = 999,
             ctl_a_passes=(), ctl_b_passes=(), ctl_rejit: str = "skipped",
             retain_bytecode: bool = True, receipt_hashes: bool = True,
         ) -> None:
-            base = root / causal_ev
+            base = root / ev
             import shutil
             if base.exists():
                 shutil.rmtree(base)
@@ -3086,7 +3143,7 @@ def self_test() -> int:
                     "suite": "corpus", "samples": 3, "workload_seconds": 60.0,
                     "bpf_stats": True, "config": {"enabled_passes": list(passes)}}))
                 (d / "details/progress.json").write_text(json.dumps({"status": status}))
-                (d / "details/apps/katran.json").write_text(json.dumps({
+                (d / "details/apps" / f"{stem}.json").write_text(json.dumps({
                     "status": app_st, "error": "",
                     "rejit_result": {"mode": "loadtime", "status": rejit},
                     "baseline": {"workloads": [wl(1000)] * 3},
@@ -3108,7 +3165,7 @@ def self_test() -> int:
                 for i in range(1, 6)
             ]
             (base / "details/loadtime-reports").mkdir(parents=True, exist_ok=True)
-            (base / "details/loadtime-reports/katran.jsonl").write_text(
+            (base / "details/loadtime-reports" / f"{stem}.jsonl").write_text(
                 "\n".join(json.dumps(r) for r in rows) + "\n")
             if retain_bytecode:
                 wd = base / "details/loadtime-workdirs/loadtime_1_0"
@@ -3128,6 +3185,9 @@ def self_test() -> int:
 
         def fresh_row() -> Row:
             return katran_fresh_causality_rows(root, causal_ev, causal_declared)[0]
+
+        def cilium_row() -> Row:
+            return cilium_fresh_causality_rows(root, cilium_ev, cilium_declared)[0]
 
         write_fresh_causality()
         row = fresh_row()
@@ -3152,6 +3212,29 @@ def self_test() -> int:
         write_fresh_causality()
         if fresh_row().status != PASS:
             failures.append("restored fresh causality must return to PASS")
+
+        # The Cilium row reuses the generic builder with its own app stem and
+        # report path: a Cilium triplet must not be satisfied by Katran files.
+        write_fresh_causality(ev=cilium_ev, stem="cilium__agent",
+                              mi_post=900, ctl_a_post=1000, ctl_b_post=1000)
+        row = cilium_row()
+        if row.status != PASS or "control-corrected=0.900000x" not in row.evidence:
+            failures.append(
+                f"valid Cilium fresh causality expected PASS/0.900000x, got {(row.status, row.evidence)!r}")
+        if cilium_ev not in row.evidence:
+            failures.append("Cilium fresh causality must report its own evidence dir")
+        write_fresh_causality(ev=cilium_ev, stem="katran",
+                              mi_post=900, ctl_a_post=1000, ctl_b_post=1000)
+        if cilium_row().status != UNAVAILABLE:
+            failures.append("Cilium fresh causality must require the Cilium app record")
+        write_fresh_causality(ev=cilium_ev, stem="cilium__agent",
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if cilium_row().status != PARTIAL:
+            failures.append("Cilium fresh causality must degrade on constant drift")
+        write_fresh_causality(ev=cilium_ev, stem="cilium__agent",
+                              mi_post=900, ctl_a_post=1000, ctl_b_post=1000)
+        if cilium_row().status != PASS:
+            failures.append("restored Cilium fresh causality must return to PASS")
 
     if failures:
         for f in failures:
