@@ -4349,3 +4349,26 @@ framework leaves the original bytecode in place and continues.
   dispatch, RHS and packed-AUX selection, other memory handlers,
   compiler/native bytes, multi-step traces, helpers, specialization
   preservation, and full O1--O4 remain outside the theorem.
+
+### x86 memory-source shift/rotate handler composition, 2026-09-26
+
+- Gap: the flagless BMI2 memory-source shifts `SHLX/SHRX/SARX dst, [mem],
+  count` and `RORX dst, [mem], imm8` shared the proved memory, shift-result,
+  and register-writeback primitives but lacked a theorem for their real
+  load/shift/writeback composition.
+- Machine-checked statement: `x86_mem_shift_step_refines` and
+  `x86_mem_rorx_step_refines` prove, for arbitrary bytes, register state,
+  incoming flags, count, and legal width, equality with an independent
+  statement. `x86_mem_shift_preserves_flags`/`x86_mem_rorx_preserves_flags`
+  prove every modeled flag is preserved, the architectural property that
+  separates the flagless BMI2 forms from their flag-writing legacy
+  counterparts. Three concrete theorems pin a 32-bit SHLX, an 8-bit SARX
+  sign-fill, and an 8-bit RORX. No `sorry` or `admit`.
+- Independent C oracle: `test_x86_mem_shift_handler_host.c` exercises the
+  actual generated load, shift-result, and writeback macros against a
+  byte-loop model for 21,024 boundary and fixed-seed cases, including the
+  architectural 32-bit zero-extension into the 64-bit destination. Full
+  `make -C native-sim/formal check` passes with 0 errors. Effective-address
+  derivation, count register selection, bit/compare/multiply memory handlers,
+  compiler/native bytes, multi-step traces, and specialization preservation
+  remain outside the theorem.

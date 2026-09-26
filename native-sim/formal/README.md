@@ -395,13 +395,24 @@ load, width-local logical result and replacement flags, and confined store,
 proving equality of every modeled flag and byte. Its independent 21,536-case
 oracle checks actual generated macros against a byte-loop model, including all
 16 incoming flag combinations to ensure CF/OF are cleared and ZF/SF are
-replaced. RHS decoding, address-space dispatch, and shift, bit, compare, and
-multiply memory handlers remain outside the theorem.
+replaced. RHS decoding, address-space dispatch, and bit, compare, and multiply
+memory handlers remain outside the theorem.
+The memory-source shift theorem covers the flagless BMI2 forms
+`SHLX/SHRX/SARX dst, [mem], count` and `RORX dst, [mem], imm8`. It composes the
+byte load, the width-local shift result (the rotate reaching its result through
+the complementary-count rotate-left contract), and the width-confined register
+writeback, proving destination equality and that every modeled flag is
+preserved. Its independent 21,024-case oracle checks the actual generated
+macros, including the architectural 32-bit zero-extension into the 64-bit
+destination, against a byte-loop model. Effective-address derivation, count
+register selection, and bit/compare/multiply memory handlers remain outside
+the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
-load/store contract, and AArch64 width, generic ALU handler writeback/path
+load/store contract, the memory-source shift/rotate flagless composition, and
+AArch64 width, generic ALU handler writeback/path
 selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, and CCMP composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
