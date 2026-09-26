@@ -1201,13 +1201,14 @@ def fresh_causality_rows(
     evidence_dir: str,
     declared: tuple[str, str],
     metric_noun: str = "summed-pktgen",
+    pass_name: str = "map_inline",
 ) -> list[Row]:
     """One app's fresh map_inline causality bound to its retained bytecode.
 
-    One evidence dir carries a `map_inline` loadtime run (rewrite reconciliation
+    One evidence dir carries a single-pass loadtime run (rewrite reconciliation
     plus throughput) and two matched no-pass controls. The row PASSes only when
-    the MI run's status records are completed/ok with `enabled_passes ==
-    ["map_inline"]`, the retained per-step bytecode reconciles with the report
+    the optimized run's status records are completed/ok with `enabled_passes ==
+    [pass_name]`, the retained per-step bytecode reconciles with the report
     stream, the receipt binds every retained file, both controls are
     `passes == []` loadtime skips at identical 3-sample/60 s shape, and the
     derived raw and control-corrected ratios reproduce the frozen declared
@@ -1224,7 +1225,7 @@ def fresh_causality_rows(
         and meta.get("suite") == "corpus"
         and meta.get("samples") == 3
         and meta.get("workload_seconds") == CAUSALITY_WORKLOAD_SECONDS
-        and (meta.get("config") or {}).get("enabled_passes") == ["map_inline"]
+        and (meta.get("config") or {}).get("enabled_passes") == [pass_name]
         and progress.get("status") == SUITE_SUCCESS
         and app.get("status") == APP_SUCCESS
         and not app.get("error")
@@ -1267,7 +1268,7 @@ def fresh_causality_rows(
     if raw is None or len(control_ratios) != 2:
         return [Row(
             label, UNAVAILABLE,
-            f"fresh map_inline run plus two matched no-pass controls with 3+3 "
+            f"fresh {pass_name} run plus two matched no-pass controls with 3+3 "
             f"positive {metric_noun} samples missing: {evidence_dir}",
         )]
     control_median = statistics.median(control_ratios)
@@ -1281,7 +1282,7 @@ def fresh_causality_rows(
     return [Row(
         f"{label} ({counts['sites_applied']} sites)" if counts else label,
         status,
-        f"{evidence_dir}: map_inline median {metric_noun} ratio={raw:.6f}x; "
+        f"{evidence_dir}: {pass_name} median {metric_noun} ratio={raw:.6f}x; "
         f"no-pass controls {['%.4f' % r for r in control_ratios]} "
         f"(median {control_median:.6f}x); control-corrected={corrected:.6f}x "
         f"(declared {declared_raw}/{declared_corrected}), 3+3 samples per run; "
@@ -1470,6 +1471,40 @@ def otelcol_fresh_causality_rows(
         evidence_dir=evidence_dir,
         declared=declared,
         metric_noun="stress-ng metrc bogo-ops",
+    )
+
+
+# Fresh provenance-complete Tetragon `wide_mem` causality triplet, the first
+# non-`map_inline` pass to get one. Same triplet shape and same evidence dir
+# contract as the `map_inline` triplets (see `fresh_causality_rows`); only
+# `pass_name` differs, so the single-pass prefilter, the report reconciliation
+# and the control-corrected ratio all apply unchanged. Tetragon is the densest
+# retained `wide_mem` producer of the six apps (616 applied sites over its
+# retained report stream vs. 299 for Tracee and 65 for BCC), so a controlled
+# measurement there has the most sites behind it. The workload is the same
+# component-less stress-ng shape as the Tetragon `map_inline` triplet, so the
+# derived scalar is the workload-level `stress-ng: metrc:` bogo-ops column.
+WIDE_MEM_TETRAGON_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality"
+)
+WIDE_MEM_TETRAGON_CAUSALITY_DECLARED = ("1.0", "1.0")
+
+
+def wide_mem_tetragon_causality_rows(
+    root: Path,
+    evidence_dir: str = WIDE_MEM_TETRAGON_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = WIDE_MEM_TETRAGON_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Tetragon fresh wide_mem causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="tetragon__observer",
+        report_rel="details/loadtime-reports/tetragon__observer.jsonl",
+        label="RQ2 Tetragon fresh wide_mem causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="stress-ng metrc bogo-ops",
+        pass_name="wide_mem",
     )
 
 
@@ -2166,6 +2201,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(tracee_fresh_causality_rows(root))
     rows.extend(bcc_fresh_causality_rows(root))
     rows.extend(otelcol_fresh_causality_rows(root))
+    rows.extend(wide_mem_tetragon_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3628,6 +3664,48 @@ def self_test() -> int:
         if otelcol_row().status != PASS:
             failures.append("restored otelcol fresh causality must return to PASS")
 
+
+        # The wide_mem Tetragon row exercises the parameterized pass gate: the
+        # same triplet builder must accept a `wide_mem` enabled_passes list and
+        # reject a `map_inline` one, so a wide_mem triplet cannot be satisfied
+        # by a map_inline run's records.
+        wm_ev = WIDE_MEM_TETRAGON_CAUSALITY_EVIDENCE_DIR
+        wm_declared = ("1.0000", "1.0000")
+
+        def wide_mem_row() -> Row:
+            return wide_mem_tetragon_causality_rows(root, wm_ev, wm_declared)[0]
+
+        write_fresh_causality(ev=wm_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        row = wide_mem_row()
+        if row.status != PASS or "wide_mem median" not in row.evidence:
+            failures.append(
+                f"valid wide_mem causality expected PASS/wide_mem, got {(row.status, row.evidence)!r}")
+        if "control-corrected=1.000000x" not in row.evidence:
+            failures.append("wide_mem causality must report its corrected ratio")
+        write_fresh_causality(ev=wm_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_passes=("map_inline",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_row().status != PARTIAL:
+            failures.append("wide_mem causality must reject a map_inline run")
+        write_fresh_causality(ev=wm_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_row().status != PASS:
+            failures.append("restored wide_mem causality must return to PASS")
+        # The row must be gated on Tetragon's own app stem, not on whatever
+        # record the evidence dir happens to hold.
+        write_fresh_causality(ev=wm_ev, stem="katran",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_row().status != UNAVAILABLE:
+            failures.append("wide_mem causality must require the tetragon app record")
+        write_fresh_causality(ev=wm_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if wide_mem_row().status != PASS:
+            failures.append("restored wide_mem causality must return to PASS")
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
