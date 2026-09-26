@@ -332,6 +332,17 @@ independent of the \`wide_mem\` label. Its workload is the
 component-less stress-ng shape, and its control-corrected ratio is close to
 neutral (1.0088x), so the claim is the controlled measurement rather than a
 speedup.
+The archive carries a fifth non-\`map_inline\` triplet and the first on a
+genuinely distinct pass pipeline rather than another name for the generic O3
+relift: a fresh, provenance-complete Cilium \`lea\` run plus two matched no-pass
+controls. \`lea\` is a kop-family pass that dispatches on the pass name
+(per-name LLVM codegen policy) and consumes a real per-site \`--target\` kop map
+synthesized by the shim, so its 2416 applied sites across 131 changed load
+instances and its 159,896 -> 160,582 instruction change are a distinct rewrite,
+not the shared generic relift; its control-corrected ratio is 0.9827x over 3+3
+samples at 60 s, so the claim is the controlled measurement rather than a
+speedup. Its retained workdirs also carry the \`target.json\` the pass consumed,
+so the \`lea\` rewrite is replayable from the archive.
 ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
@@ -446,6 +457,9 @@ manifest = {
         'docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/receipt.json',
         'docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/make-corpus.log',
         'docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/details/loadtime-reports/tetragon__observer.jsonl',
+        'docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/receipt.json',
+        'docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/make-corpus.log',
+        'docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/details/loadtime-reports/cilium__agent.jsonl',
     ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
 }
@@ -616,6 +630,13 @@ required=(
     docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/controls/nullA/metadata.json
     docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/controls/nullB/metadata.json
     docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/details/loadtime-workdirs/loadtime_2097_1/input.step.0.bin
+    docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/receipt.json
+    docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/make-corpus.log
+    docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/details/loadtime-reports/cilium__agent.jsonl
+    docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/details/loadtime-workdirs/loadtime_3648_67/input.step.0.bin
+    docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/details/loadtime-workdirs/loadtime_3648_67/target.json
+    docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/controls/nullA/metadata.json
+    docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/controls/nullB/metadata.json
 )
 for rel in "${required[@]}"; do
     [ -e "$VERIFY/$rel" ] || { echo "missing from ZIP: $rel" >&2; exit 1; }
@@ -638,6 +659,7 @@ grep -q '^RQ2 Tetragon fresh wide_mem causality.*PASS' "$VERIFY/claim-table.txt"
 grep -q '^RQ2 Cilium fresh wide_mem causality.*PASS' "$VERIFY/claim-table.txt"
 grep -q '^RQ2 Tracee fresh wide_mem causality.*PASS' "$VERIFY/claim-table.txt"
 grep -q '^RQ2 Tetragon fresh dce causality.*PASS' "$VERIFY/claim-table.txt"
+grep -q '^RQ2 Cilium fresh lea causality.*PASS' "$VERIFY/claim-table.txt"
 python3 -m json.tool "$VERIFY/ARTIFACT_MANIFEST.json" >/dev/null
 python3 -m json.tool "$VERIFY/.zenodo.json" >/dev/null
 

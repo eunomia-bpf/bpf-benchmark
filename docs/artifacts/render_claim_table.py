@@ -1623,6 +1623,43 @@ def dce_tetragon_causality_rows(
     )
 
 
+# Fresh provenance-complete Cilium `lea` causality triplet, the fifth
+# non-`map_inline` triplet and the first on a genuinely distinct pass pipeline
+# rather than another name for the generic O3 relift. `lea` is a kop-family
+# pass: `bpfopt` selects per-name LLVM codegen policy for it
+# (`all=disable,preemit-lea=force,scaled-index-mem=force`) and it consumes a real
+# per-site `--target` kop map that the shim synthesizes with `kopprober`, unlike
+# `noop`/`dce`/`wide_mem`/`bounds_check_merge`/`skb_load_bytes_spec`/`const_prop`
+# which are byte-identical to each other. Cilium carries the densest retained
+# `lea` population of the supported apps (2416 applied sites over 131 changed
+# load instances on the isolated single-pass basis, against the `lea`/`kop`
+# sub-pass totals for other apps), so a controlled measurement there has the
+# most sites behind it. Cilium's fresh workload is two kernel-pktgen components,
+# so the derived scalar is the sum over both components' pktgen pps, the same
+# rate shape as the Cilium `wide_mem` triplet.
+CILIUM_LEA_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-cilium-lea-fresh-causality"
+)
+CILIUM_LEA_CAUSALITY_DECLARED = ("1.0236", "0.9827")
+
+
+def cilium_lea_causality_rows(
+    root: Path,
+    evidence_dir: str = CILIUM_LEA_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = CILIUM_LEA_CAUSALITY_DECLARED,
+) -> list[Row]:
+    return fresh_causality_rows(
+        root,
+        app_stem="cilium__agent",
+        report_rel="details/loadtime-reports/cilium__agent.jsonl",
+        label="RQ2 Cilium fresh lea causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="summed kernel-pktgen pps",
+        pass_name="lea",
+    )
+
+
 def cilium_site_rows(root: Path) -> list[Row]:
     """Derive RQ3 applied-site counts from retained shim loadtime reports.
 
@@ -2320,6 +2357,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(wide_mem_cilium_causality_rows(root))
     rows.extend(wide_mem_tracee_causality_rows(root))
     rows.extend(dce_tetragon_causality_rows(root))
+    rows.extend(cilium_lea_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3940,6 +3978,43 @@ def self_test() -> int:
                               mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
         if dce_tetragon_row().status != PASS:
             failures.append("restored Tetragon dce causality must return to PASS")
+        # The Cilium lea row is the fifth labelled non-map_inline triplet and
+        # the first on a genuinely distinct pass pipeline (kop-family `lea`,
+        # which dispatches on the pass name and consumes a real `--target` kop
+        # map) rather than another name for the generic O3 relift. Cilium's rate
+        # is the two-component kernel-pktgen sum, so it asserts the row names
+        # that shape, accepts `lea`, rejects the alias `wide_mem`, and is gated
+        # on Cilium's own app record.
+        clea_ev = CILIUM_LEA_CAUSALITY_EVIDENCE_DIR
+        clea_declared = ("1.0000", "1.0000")
+
+        def cilium_lea_row() -> Row:
+            return cilium_lea_causality_rows(root, clea_ev, clea_declared)[0]
+
+        write_fresh_causality(ev=clea_ev, stem="cilium__agent",
+                              mi_passes=("lea",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        row = cilium_lea_row()
+        if row.status != PASS or "lea median" not in row.evidence:
+            failures.append(
+                f"valid Cilium lea causality expected PASS/lea, got {(row.status, row.evidence)!r}")
+        if "summed kernel-pktgen pps" not in row.evidence:
+            failures.append("Cilium lea causality must name its rate shape")
+        write_fresh_causality(ev=clea_ev, stem="cilium__agent",
+                              mi_passes=("wide_mem",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if cilium_lea_row().status != PARTIAL:
+            failures.append("Cilium lea causality must reject a wide_mem run")
+        write_fresh_causality(ev=clea_ev, stem="tetragon__observer",
+                              mi_passes=("lea",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if cilium_lea_row().status != UNAVAILABLE:
+            failures.append("Cilium lea causality must require the cilium app record")
+        write_fresh_causality(ev=clea_ev, stem="cilium__agent",
+                              mi_passes=("lea",), mi_post=1000,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if cilium_lea_row().status != PASS:
+            failures.append("restored Cilium lea causality must return to PASS")
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)

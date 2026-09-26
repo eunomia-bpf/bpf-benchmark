@@ -403,6 +403,7 @@ status**:
 | `docs/artifacts/evidence/rq2-cilium-wide-mem-fresh-causality/` (source run `x86_kvm_corpus_20260926_133930_796763` plus no-pass controls `x86_kvm_corpus_20260926_135405_708186`, `x86_kvm_corpus_20260926_140808_071557`) | `completed` | Cilium `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet on the same labelled generic pass name as the Tetragon `wide_mem` row, on a second application.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=wide_mem SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode by SHA256. Supports the derived rewrite evidence (164/164 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 164 applied sites; 159,896 to 156,508 instructions) and the controlled throughput causality (raw 1.1232x, no-pass control median 1.0234x, control-corrected 1.0974x over 3+3 samples at 60 s). This triplet's derived rate is the sum over two kernel-pktgen components, a different workload rate shape from the Tetragon `wide_mem` triplet's component-less stress-ng column, so the derivation is shown to hold independent of rate shape; the pass-name axis it repeats is the Tetragon row's, not a new one (the distinct-pipeline axis is the Cilium `lea` triplet below). |
 | `docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/` (source run `x86_kvm_corpus_20260926_152627_089782` plus no-pass controls `x86_kvm_corpus_20260926_154230_879447`, `x86_kvm_corpus_20260926_155641_973127`) | `completed` | Tracee `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet on the same labelled generic pass name, on a third application.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=tracee/monitor BPFREJIT_BENCH_PASSES=wide_mem SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step `input.step.0.bin` / `output.next.0.bin` / `report.0.json` of every changed load instance. Its 142 applied sites are the smallest of the three `wide_mem` triplets (Tetragon 254, Cilium 164), so it shows the derivation does not need a large rewritten population. Its row is gated on `enabled_passes == ["wide_mem"]` and on Tracee's own app record. |
 | `docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/` (source run `x86_kvm_corpus_20260926_164707_409188` plus no-pass controls `x86_kvm_corpus_20260926_170758_323681`, `x86_kvm_corpus_20260926_173231_340346`) | `completed` | Tetragon `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet under a different labelled pass name on the same application as the Tetragon `wide_mem` row.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_BENCH_PASSES=dce SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode for all 254 changed load instances. The retained stream gives 264 report rows, 254 changed load instances and 254 applied sites (instruction counts 373,141 -> 343,261, -29,880), and the controlled throughput derivation gives raw 0.9526x, no-pass control median 0.9443x (controls 0.9458x, 0.9427x) and control-corrected 1.0088x over 3+3 samples at 60 s. `dce` and `wide_mem` are two names for the same shared generic relift (they are byte-identical on this application, the same 254 sites and the same 373,141 -> 343,261 counts), so this row adds a labelled policy run on the largest `dce`-named population rather than a different rewrite. Its row is gated on `enabled_passes == ["dce"]` and on Tetragon's own app record. |
+| `docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/` (source run `x86_kvm_corpus_20260926_210350_394038` plus no-pass controls `x86_kvm_corpus_20260926_212638_174173`, `x86_kvm_corpus_20260926_215101_823717`) | `completed` | Cilium `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet on the first genuinely distinct pass pipeline, not another labelled generic run.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=lea SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `lea` is a kop-family pass: unlike the generic relift aliases it dispatches on the pass name (per-name LLVM codegen policy `all=disable,preemit-lea=force,scaled-index-mem=force`) and consumes a real per-site `--target` kop map that the shim synthesizes with `kopprober`, so its rewrite is genuinely distinct. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode (plus the consumed `target.json`) for all 131 changed load instances. The retained stream gives 169 report rows, 131 changed load instances and 2416 applied sites (instruction counts 159,896 -> 160,582, +686), and the controlled throughput derivation gives raw 1.0236x, no-pass control median 1.0416x (controls 1.1049x, 0.9783x) and control-corrected 0.9827x over 3+3 samples at 60 s. Cilium carries the densest retained `lea` population of the supported apps. Its row is gated on `enabled_passes == ["lea"]` and on Cilium's own app record. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -420,8 +421,8 @@ Tetragon inputs confirms this: `--pass dce` and `--pass wide_mem` produce
 byte-identical output on all 254, and both are byte-identical to `--pass noop`.
 The `wide_mem` and `dce` triplets above are therefore four *labelled policy runs
 of the shared generic relift on distinct applications*, not four distinct
-rewrites; the Cilium `lea` triplet below is the first on a genuinely distinct
-pass pipeline.
+rewrites; the Cilium `lea` triplet in the last row above is the first on a
+genuinely distinct pass pipeline.
 
 **Ground rule.** A result directory is evidence only for what its own
 `details/progress.json` (`status`) and `details/apps/<app>.json` (`status`,
@@ -1191,6 +1192,36 @@ measurement rather than a speedup, exactly as with the Tracee `wide_mem`
 triplet. The row is gated on `enabled_passes==["dce"]` and on Tetragon's own app
 record and report path, and its declared constants are frozen from this triplet,
 so any drift degrades the row to `PARTIAL` rather than silently re-baselining.
+
+A seventeenth derivation is the fifth **fresh provenance-complete**
+non-`map_inline` treatment and the first on a genuinely distinct pass pipeline
+rather than another name for the shared generic O3 relift
+(`docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/`): one `lea` run
+(`x86_kvm_corpus_20260926_210350_394038`) plus two matched no-pass controls
+(`x86_kvm_corpus_20260926_212638_174173`, `x86_kvm_corpus_20260926_215101_823717`),
+each with its own make-console log and the optimized run retaining per-step
+bytecode. Unlike the `wide_mem` and `dce` triplets, `lea` is a kop-family pass
+that dispatches on the pass name (per-name LLVM codegen policy) and consumes a
+real per-site `--target` kop map the shim synthesizes with `kopprober`, so this
+triplet is direct evidence for a rewrite the generic aliases do not perform, and
+its retained workdirs carry the consumed `target.json` so the rewrite is
+replayable from the archive. Cilium is the densest `lea` producer of the
+supported apps on the isolated single-pass basis these triplets use (2416
+applied sites across 131 changed load instances).
+The retained report stream gives 169 reports, 131
+changed load instances and 2416 applied sites (instruction counts 159,896 ->
+160,582, +686), all of whose retained before/after images match the reported
+counts and differ; the throughput derivation gives raw 1.0236x, no-pass control
+median 1.0416x (controls 1.1049x, 0.9783x) and control-corrected 0.9827x over
+3+3 samples at 60 s. Cilium's workload is two kernel-pktgen components, so the
+derived scalar is the summed kernel-pktgen pps, the same rate shape as the
+Cilium `wide_mem` triplet rather than the component-less stress-ng shape. The
+control-corrected sign is close to neutral (0.9827x) with a wider control spread
+than the other triplets, so the row's claim is the controlled measurement rather
+than a speedup. The row is gated on `enabled_passes==["lea"]` and on Cilium's own
+app record and report path, and its declared constants are frozen from this
+triplet, so any drift degrades the row to `PARTIAL` rather than silently
+re-baselining.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are
