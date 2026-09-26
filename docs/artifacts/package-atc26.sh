@@ -298,19 +298,21 @@ whose retained per-step bytecode binds the derived applied-site rewrite (16
 sites for Katran, 3787 for Cilium, 148 for Tetragon, 12 for Tracee, 83 for BCC,
 1078 for otelcol-ebpf-profiler) to the measured
 control-corrected throughput ratio.
-The archive additionally carries the first non-\`map_inline\` causality triplet:
-a fresh, provenance-complete Tetragon \`wide_mem\` run plus two matched no-pass
-controls whose retained per-step bytecode binds 254 applied sites across 254
-changed load instances to the measured control-corrected throughput ratio, so
-the same controlled-causality derivation holds for a pure BPF-to-BPF rewriting
-pass and not only for kfunc lowering.
-The archive carries a second non-\`map_inline\` triplet for the same reason: a
-fresh, provenance-complete Cilium \`wide_mem\` run plus two matched no-pass
+The archive additionally carries the first non-\`map_inline\` causality triplet
+under a labelled generic pass name: a fresh, provenance-complete Tetragon
+\`wide_mem\` run plus two matched no-pass controls whose retained per-step
+bytecode binds 254 applied sites across 254 changed load instances to the
+measured control-corrected throughput ratio. \`wide_mem\` names the shared
+generic O3 relift rather than a pass-specific rewrite, so what this shows is
+that the same controlled-causality derivation holds on the bytecode-rewriting
+path and not only for \`map_inline\` kfunc lowering.
+The archive carries a second triplet under that same generic name: a fresh,
+provenance-complete Cilium \`wide_mem\` run plus two matched no-pass
 controls whose retained per-step bytecode binds 164 applied sites across 164
 changed load instances to the measured control-corrected throughput ratio. This
 one exercises the summed kernel-pktgen rate shape rather than the component-less
 stress-ng column, so the controlled-causality derivation is shown to be
-independent of the workload's rate shape as well as of the pass family.
+independent of the workload's rate shape.
 The archive carries a third non-\`map_inline\` triplet, on the same \`wide_mem\`
 pass but a visibly smaller site population: a fresh, provenance-complete Tracee
 \`wide_mem\` run plus two matched no-pass controls whose retained per-step
@@ -320,13 +322,13 @@ ratio. Its isolated single-pass site count is 142 against 254 for Tetragon and
 rewritten population; its
 workload is the component-less stress-ng shape, not Cilium's summed
 kernel-pktgen one.
-The archive carries a fourth non-\`map_inline\` triplet, and the first on a pass
-family other than \`map_inline\`/\`wide_mem\`: a fresh, provenance-complete
+The archive carries a fourth triplet under a different labelled generic pass
+name (\`dce\`, byte-identical to \`wide_mem\` on this app): a fresh,
+provenance-complete
 Tetragon \`dce\` run plus two matched no-pass controls whose retained per-step
 bytecode binds 254 applied sites across 254 changed load instances to the
-measured control-corrected throughput ratio. \`dce\` is a pure BPF-to-BPF
-rewriting pass distinct from \`wide_mem\`, so the same controlled-causality
-derivation is shown to hold for a second pass in that class. Its workload is the
+measured control-corrected throughput ratio, showing the derivation is
+independent of the \`wide_mem\` label. Its workload is the
 component-less stress-ng shape, and its control-corrected ratio is close to
 neutral (1.0088x), so the claim is the controlled measurement rather than a
 speedup.

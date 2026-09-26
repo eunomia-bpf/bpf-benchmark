@@ -134,16 +134,25 @@ Three classes; every benchmark run selects an explicit subset via
 
 ### 2.2 Bytecode-rewriting — pure BPF→BPF, no kfunc; kernel JIT lowers as usual
 
-- **`noop`** — no transform pass
-- **`wide_mem`** — collapse byte-by-byte ladder into one wide `LDX_MEM`
-  (size `H` / `W` / `DW`)
+`map_inline` performs its own pass-specific IR rewrite before the LLVM relift.
+Every other pass name in this class currently shares one generic O3
+lift/optimize/lower relift (`bpfopt/llvm/README.md`): the name selects no
+distinct rewrite, so the bullets below give each name's *intended* semantics,
+and a direct probe shows `--pass noop`/`dce`/`wide_mem`/`bounds_check_merge`/
+`skb_load_bytes_spec`/`const_prop` producing byte-identical output on every
+retained input.
+
+- **`noop`** — no transform pass (reference for the generic relift)
+- **`wide_mem`** — intended: collapse byte-by-byte ladder into one wide
+  `LDX_MEM` (size `H` / `W` / `DW`)
 - **`map_inline`** — speculate constant `bpf_map_lookup_elem` results from
-  captured map values
-- **`const_prop`** — propagate verifier-known constants, fold uses
-- **`dce`** — drop instructions dead under verifier liveness
-- **`bounds_check_merge`** — merge redundant bounds checks on the same range
-- **`skb_load_bytes_spec`** — specialize `bpf_skb_load_bytes` to fixed-width
-  loads
+  captured map values (pass-specific rewrite)
+- **`const_prop`** — intended: propagate verifier-known constants, fold uses
+- **`dce`** — intended: drop instructions dead under verifier liveness
+- **`bounds_check_merge`** — intended: merge redundant bounds checks on the
+  same range
+- **`skb_load_bytes_spec`** — intended: specialize `bpf_skb_load_bytes` to
+  fixed-width loads
 
 ## 3. Historical Workload Snapshot — 7 Applications
 

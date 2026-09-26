@@ -1474,9 +1474,15 @@ def otelcol_fresh_causality_rows(
     )
 
 
-# Fresh provenance-complete Tetragon `wide_mem` causality triplet, the first
-# non-`map_inline` pass to get one. Same triplet shape and same evidence dir
-# contract as the `map_inline` triplets (see `fresh_causality_rows`); only
+# Fresh provenance-complete Tetragon `wide_mem` causality triplet, the first on
+# a labelled non-`map_inline` pass name. `wide_mem` is one of the generic names
+# that run the shared O3 relift rather than a distinctive rewrite (see
+# `bpfopt/llvm/README.md`; a probe shows `--pass wide_mem` byte-identical to
+# `--pass noop`/`dce` on every retained input), so what this row demonstrates is
+# that the controlled-causality method is not specific to `map_inline` kfunc
+# lowering -- the distinct-pipeline axis is carried by the Cilium `lea` triplet
+# instead. Same triplet shape and same evidence dir contract as the
+# `map_inline` triplets (see `fresh_causality_rows`); only
 # `pass_name` differs, so the single-pass prefilter, the report reconciliation
 # and the control-corrected ratio all apply unchanged. Tetragon is the
 # densest `wide_mem` producer of the six apps measured on the isolated
@@ -1511,10 +1517,12 @@ def wide_mem_tetragon_causality_rows(
     )
 
 
-# Fresh provenance-complete Cilium `wide_mem` causality triplet, the second
-# non-`map_inline` pass triplet. Cilium is the second-densest `wide_mem`
-# producer measured on the isolated single-pass basis (164 applied sites,
-# behind Tetragon's 254 and ahead of Tracee's 142), so a controlled measurement
+# Fresh provenance-complete Cilium `wide_mem` causality triplet, the second on
+# a labelled non-`map_inline` pass name (the same shared-generic-relift name as
+# the Tetragon `wide_mem` row, on a second app). Cilium is the second-densest
+# `wide_mem` producer measured on the isolated single-pass basis (164 applied
+# sites, behind Tetragon's 254 and ahead of Tracee's 142), so a controlled
+# measurement
 # there has a large site population behind it. Cilium's fresh
 # workload is two kernel-pktgen components, so the derived scalar is the sum
 # over both components' pktgen pps rather than the stress-ng bogo-ops column
@@ -1544,9 +1552,9 @@ def wide_mem_cilium_causality_rows(
     )
 
 
-# Fresh provenance-complete Tracee `wide_mem` causality triplet, the third
-# non-`map_inline` pass triplet and the second on `wide_mem`. Tracee is the
-# third-densest `wide_mem` producer, on the isolated single-pass basis these
+# Fresh provenance-complete Tracee `wide_mem` causality triplet, the third on a
+# labelled non-`map_inline` pass name and the third under `wide_mem`. Tracee is
+# the third-densest `wide_mem` producer, on the isolated single-pass basis these
 # triplets use (142 applied sites, against 254 for Tetragon and 164 for Cilium
 # -- the only three apps with an isolated `wide_mem` run), so the controlled
 # measurement is on a visibly smaller site population than the Tetragon and
@@ -1579,11 +1587,12 @@ def wide_mem_tracee_causality_rows(
     )
 
 
-# Fresh provenance-complete Tetragon `dce` causality triplet, the fourth
-# non-`map_inline` pass triplet and the first on a pass family other than
-# `map_inline`/`wide_mem`. `dce` is a pure BPF-to-BPF rewriting pass like
-# `wide_mem`, so the same single-pass prefilter, report reconciliation and
-# control-corrected ratio apply unchanged; only `pass_name` differs. Tetragon
+# Fresh provenance-complete Tetragon `dce` causality triplet, the fourth on a
+# labelled non-`map_inline` pass name and the first under `dce`. `dce` names the
+# same shared generic O3 relift as `wide_mem` (byte-identical on this app), so
+# the same single-pass prefilter, report reconciliation and control-corrected
+# ratio apply unchanged; what it adds is a labelled policy run under a different
+# name, not a distinct rewrite axis. Tetragon
 # is the densest `dce` producer of the six apps in the default-policy stream
 # (308 applied sites, against 196 for Tracee and 28 for BCC), so a controlled
 # measurement there has the most sites behind it. The workload is the same
@@ -3892,11 +3901,12 @@ def self_test() -> int:
                               mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
         if wide_mem_tracee_row().status != PASS:
             failures.append("restored Tracee wide_mem causality must return to PASS")
-
-        # The dce Tetragon row is the fourth non-map_inline triplet and the
-        # first on a pass family other than map_inline/wide_mem, so it asserts
-        # the shared builder is genuinely pass-parameterized rather than
-        # wide_mem-shaped. DCE's Tetragon workload is the component-less
+        # The dce Tetragon row is the fourth labelled non-map_inline triplet
+        # and the first under the `dce` name, so it asserts the shared builder
+        # is genuinely pass-name-parameterized rather than wide_mem-shaped.
+        # (`dce` and `wide_mem` name the same shared generic O3 relift, so this
+        # is a labelled-policy axis, not a distinct-rewrite axis.) DCE's
+        # Tetragon workload is the component-less
         # stress-ng shape like the Tetragon wide_mem and map_inline rows, so it
         # names the bogo-ops column; it accepts `dce`, rejects `wide_mem`, and
         # is gated on Tetragon's own app record.
