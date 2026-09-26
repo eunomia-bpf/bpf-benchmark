@@ -1,0 +1,60 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 2080,
+  "insn_count_before": 2022,
+  "insn_delta": 58,
+  "kop_calls_by_family": {
+    "lea": 23
+  },
+  "kop_calls_by_name": {
+    "bpf_x86_leal": 1,
+    "bpf_x86_leaq": 22
+  },
+  "kop_payload_shapes": {
+    "bpf_x86_leal|dst=r4|base=r3|index=none|scale=0|disp=-1": 1,
+    "bpf_x86_leaq|dst=r1|base=r10|index=none|scale=0|disp=-104": 1,
+    "bpf_x86_leaq|dst=r1|base=r10|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r2|base=r10|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r2|base=r9|index=none|scale=0|disp=-104": 1,
+    "bpf_x86_leaq|dst=r2|base=r9|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r3|base=r7|index=none|scale=0|disp=-16": 2,
+    "bpf_x86_leaq|dst=r3|base=r9|index=none|scale=0|disp=-16": 2,
+    "bpf_x86_leaq|dst=r4|base=r10|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r7|base=r8|index=none|scale=0|disp=-24": 1,
+    "bpf_x86_leaq|dst=r7|base=r9|index=none|scale=0|disp=-116": 1,
+    "bpf_x86_leaq|dst=r7|base=r9|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r8|base=r7|index=none|scale=0|disp=-24": 1,
+    "bpf_x86_leaq|dst=r8|base=r7|index=none|scale=0|disp=-40": 1,
+    "bpf_x86_leaq|dst=r8|base=r9|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r8|base=r9|index=none|scale=0|disp=-24": 2,
+    "bpf_x86_leaq|dst=r8|base=r9|index=none|scale=0|disp=-40": 3,
+    "bpf_x86_leaq|dst=r9|base=r7|index=none|scale=0|disp=-24": 1
+  },
+  "kop_policy": {
+    "bytecode_families": {
+      "bitops": false,
+      "bulk_memory": false,
+      "ccmp": false,
+      "cond_select": false,
+      "endian_fusion": false,
+      "extract": false,
+      "prefetch": false,
+      "rotate": false
+    },
+    "bytecode_family_overrides": {},
+    "llvm_args": [
+      "bpfopt",
+      "-bpf-enable-kop-select",
+      "-bpf-stack-size=4096",
+      "-bpf-kop-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
+    ],
+    "pass_args": []
+  },
+  "pass": "lea",
+  "sites_applied": 23,
+  "sites_matched": 23,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}

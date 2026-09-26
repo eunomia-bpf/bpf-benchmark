@@ -1,0 +1,58 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 1390,
+  "insn_count_before": 1404,
+  "insn_delta": -14,
+  "kop_calls_by_family": {
+    "lea": 18
+  },
+  "kop_calls_by_name": {
+    "bpf_x86_leal": 4,
+    "bpf_x86_leaq": 14
+  },
+  "kop_payload_shapes": {
+    "bpf_x86_leal|dst=r2|base=r4|index=r1|scale=0|disp=0": 1,
+    "bpf_x86_leal|dst=r2|base=r8|index=none|scale=0|disp=2": 1,
+    "bpf_x86_leal|dst=r3|base=r2|index=r7|scale=0|disp=0": 1,
+    "bpf_x86_leal|dst=r7|base=r2|index=r6|scale=0|disp=0": 1,
+    "bpf_x86_leaq|dst=r2|base=r3|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r2|base=r5|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r2|base=r9|index=none|scale=0|disp=-96": 1,
+    "bpf_x86_leaq|dst=r3|base=r5|index=none|scale=0|disp=-88": 1,
+    "bpf_x86_leaq|dst=r3|base=r9|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r3|base=r9|index=none|scale=0|disp=-72": 3,
+    "bpf_x86_leaq|dst=r3|base=r9|index=none|scale=0|disp=-80": 1,
+    "bpf_x86_leaq|dst=r4|base=r1|index=none|scale=0|disp=34": 1,
+    "bpf_x86_leaq|dst=r7|base=r8|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r7|base=r9|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r7|base=r9|index=none|scale=0|disp=-80": 1,
+    "bpf_x86_leaq|dst=r8|base=r9|index=none|scale=0|disp=-72": 1
+  },
+  "kop_policy": {
+    "bytecode_families": {
+      "bitops": false,
+      "bulk_memory": false,
+      "ccmp": false,
+      "cond_select": false,
+      "endian_fusion": false,
+      "extract": false,
+      "prefetch": false,
+      "rotate": false
+    },
+    "bytecode_family_overrides": {},
+    "llvm_args": [
+      "bpfopt",
+      "-bpf-enable-kop-select",
+      "-bpf-stack-size=4096",
+      "-bpf-kop-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
+    ],
+    "pass_args": []
+  },
+  "pass": "lea",
+  "sites_applied": 18,
+  "sites_matched": 18,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}

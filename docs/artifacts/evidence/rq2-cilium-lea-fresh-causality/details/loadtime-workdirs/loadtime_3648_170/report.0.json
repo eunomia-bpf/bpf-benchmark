@@ -1,0 +1,82 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 622,
+  "insn_count_before": 601,
+  "insn_delta": 21,
+  "kop_calls_by_family": {
+    "lea": 40
+  },
+  "kop_calls_by_name": {
+    "bpf_x86_leal": 1,
+    "bpf_x86_leaq": 39
+  },
+  "kop_payload_shapes": {
+    "bpf_x86_leal|dst=r2|base=r7|index=none|scale=0|disp=14": 1,
+    "bpf_x86_leaq|dst=r1|base=r2|index=none|scale=0|disp=15": 1,
+    "bpf_x86_leaq|dst=r1|base=r2|index=none|scale=0|disp=16": 1,
+    "bpf_x86_leaq|dst=r1|base=r9|index=none|scale=0|disp=14": 1,
+    "bpf_x86_leaq|dst=r2|base=r9|index=none|scale=0|disp=34": 1,
+    "bpf_x86_leaq|dst=r2|base=r9|index=none|scale=0|disp=42": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=18": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=22": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=26": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=30": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=34": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=38": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=42": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=46": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=50": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=54": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=58": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=62": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=66": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=70": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=74": 1,
+    "bpf_x86_leaq|dst=r4|base=r2|index=none|scale=0|disp=78": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=20": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=24": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=28": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=32": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=36": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=40": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=44": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=48": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=52": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=56": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=60": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=64": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=68": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=72": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=76": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=80": 1,
+    "bpf_x86_leaq|dst=r8|base=r3|index=none|scale=0|disp=-24": 1,
+    "bpf_x86_leaq|dst=r8|base=r9|index=none|scale=0|disp=34": 1
+  },
+  "kop_policy": {
+    "bytecode_families": {
+      "bitops": false,
+      "bulk_memory": false,
+      "ccmp": false,
+      "cond_select": false,
+      "endian_fusion": false,
+      "extract": false,
+      "prefetch": false,
+      "rotate": false
+    },
+    "bytecode_family_overrides": {},
+    "llvm_args": [
+      "bpfopt",
+      "-bpf-enable-kop-select",
+      "-bpf-stack-size=4096",
+      "-bpf-kop-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
+    ],
+    "pass_args": []
+  },
+  "pass": "lea",
+  "sites_applied": 40,
+  "sites_matched": 40,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}

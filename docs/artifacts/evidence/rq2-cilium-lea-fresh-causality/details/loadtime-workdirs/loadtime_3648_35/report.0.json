@@ -1,0 +1,51 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 306,
+  "insn_count_before": 280,
+  "insn_delta": 26,
+  "kop_calls_by_family": {
+    "lea": 14
+  },
+  "kop_calls_by_name": {
+    "bpf_x86_leaq": 14
+  },
+  "kop_payload_shapes": {
+    "bpf_x86_leaq|dst=r2|base=r3|index=none|scale=0|disp=-8": 1,
+    "bpf_x86_leaq|dst=r2|base=r7|index=none|scale=0|disp=-8": 1,
+    "bpf_x86_leaq|dst=r3|base=r1|index=none|scale=0|disp=14": 1,
+    "bpf_x86_leaq|dst=r3|base=r1|index=none|scale=0|disp=34": 1,
+    "bpf_x86_leaq|dst=r3|base=r1|index=none|scale=0|disp=4": 1,
+    "bpf_x86_leaq|dst=r3|base=r7|index=none|scale=0|disp=-10": 3,
+    "bpf_x86_leaq|dst=r3|base=r7|index=none|scale=0|disp=-8": 3,
+    "bpf_x86_leaq|dst=r3|base=r7|index=none|scale=0|disp=-9": 1,
+    "bpf_x86_leaq|dst=r9|base=r1|index=none|scale=0|disp=14": 1,
+    "bpf_x86_leaq|dst=r9|base=r1|index=none|scale=0|disp=34": 1
+  },
+  "kop_policy": {
+    "bytecode_families": {
+      "bitops": false,
+      "bulk_memory": false,
+      "ccmp": false,
+      "cond_select": false,
+      "endian_fusion": false,
+      "extract": false,
+      "prefetch": false,
+      "rotate": false
+    },
+    "bytecode_family_overrides": {},
+    "llvm_args": [
+      "bpfopt",
+      "-bpf-enable-kop-select",
+      "-bpf-stack-size=4096",
+      "-bpf-kop-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
+    ],
+    "pass_args": []
+  },
+  "pass": "lea",
+  "sites_applied": 14,
+  "sites_matched": 14,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}

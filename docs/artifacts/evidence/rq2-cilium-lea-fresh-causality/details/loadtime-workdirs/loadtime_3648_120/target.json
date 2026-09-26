@@ -1,0 +1,190 @@
+{
+  "arch": "x86_64",
+  "koperation": {
+    "bpf_x86_andl": {
+      "btf_func_id": 129876,
+      "btf_id": 37,
+      "call_offset": 6
+    },
+    "bpf_x86_bextrq": {
+      "btf_func_id": 129857,
+      "btf_id": 38,
+      "call_offset": 7
+    },
+    "bpf_x86_blsiq": {
+      "btf_func_id": 129858,
+      "btf_id": 38,
+      "call_offset": 7
+    },
+    "bpf_x86_blsrq": {
+      "btf_func_id": 129859,
+      "btf_id": 38,
+      "call_offset": 7
+    },
+    "bpf_x86_bswapl": {
+      "btf_func_id": 129858,
+      "btf_id": 40,
+      "call_offset": 9
+    },
+    "bpf_x86_bswapq": {
+      "btf_func_id": 129859,
+      "btf_id": 40,
+      "call_offset": 9
+    },
+    "bpf_x86_bzhil": {
+      "btf_func_id": 129861,
+      "btf_id": 39,
+      "call_offset": 8
+    },
+    "bpf_x86_bzhiq": {
+      "btf_func_id": 129862,
+      "btf_id": 39,
+      "call_offset": 8
+    },
+    "bpf_x86_cmp_cmovb": {
+      "btf_func_id": 129859,
+      "btf_id": 41,
+      "call_offset": 10
+    },
+    "bpf_x86_cmp_cmove": {
+      "btf_func_id": 129860,
+      "btf_id": 41,
+      "call_offset": 10
+    },
+    "bpf_x86_cmp_cmovne": {
+      "btf_func_id": 129861,
+      "btf_id": 41,
+      "call_offset": 10
+    },
+    "bpf_x86_leal": {
+      "btf_func_id": 129861,
+      "btf_id": 43,
+      "call_offset": 11
+    },
+    "bpf_x86_leaq": {
+      "btf_func_id": 129862,
+      "btf_id": 43,
+      "call_offset": 11
+    },
+    "bpf_x86_movb": {
+      "btf_func_id": 129867,
+      "btf_id": 44,
+      "call_offset": 12
+    },
+    "bpf_x86_movbe16": {
+      "btf_func_id": 129860,
+      "btf_id": 45,
+      "call_offset": 13
+    },
+    "bpf_x86_movbe32": {
+      "btf_func_id": 129861,
+      "btf_id": 45,
+      "call_offset": 13
+    },
+    "bpf_x86_movbe64": {
+      "btf_func_id": 129862,
+      "btf_id": 45,
+      "call_offset": 13
+    },
+    "bpf_x86_movl": {
+      "btf_func_id": 129868,
+      "btf_id": 44,
+      "call_offset": 12
+    },
+    "bpf_x86_movq": {
+      "btf_func_id": 129869,
+      "btf_id": 44,
+      "call_offset": 12
+    },
+    "bpf_x86_movw": {
+      "btf_func_id": 129872,
+      "btf_id": 44,
+      "call_offset": 12
+    },
+    "bpf_x86_movzbl": {
+      "btf_func_id": 129873,
+      "btf_id": 44,
+      "call_offset": 12
+    },
+    "bpf_x86_movzwl": {
+      "btf_func_id": 129874,
+      "btf_id": 44,
+      "call_offset": 12
+    },
+    "bpf_x86_popcntq": {
+      "btf_func_id": 129858,
+      "btf_id": 48,
+      "call_offset": 14
+    },
+    "bpf_x86_prefetcht0": {
+      "btf_func_id": 129857,
+      "btf_id": 49,
+      "call_offset": 15
+    },
+    "bpf_x86_roll": {
+      "btf_func_id": 129859,
+      "btf_id": 50,
+      "call_offset": 16
+    },
+    "bpf_x86_rolq": {
+      "btf_func_id": 129860,
+      "btf_id": 50,
+      "call_offset": 16
+    },
+    "bpf_x86_rolw": {
+      "btf_func_id": 129861,
+      "btf_id": 40,
+      "call_offset": 9
+    },
+    "bpf_x86_rorxl": {
+      "btf_func_id": 129861,
+      "btf_id": 50,
+      "call_offset": 16
+    },
+    "bpf_x86_shldl": {
+      "btf_func_id": 129859,
+      "btf_id": 51,
+      "call_offset": 17
+    },
+    "bpf_x86_shldq": {
+      "btf_func_id": 129860,
+      "btf_id": 51,
+      "call_offset": 17
+    },
+    "bpf_x86_shlxl": {
+      "btf_func_id": 129863,
+      "btf_id": 39,
+      "call_offset": 8
+    },
+    "bpf_x86_shlxq": {
+      "btf_func_id": 129864,
+      "btf_id": 39,
+      "call_offset": 8
+    },
+    "bpf_x86_shrdl": {
+      "btf_func_id": 129861,
+      "btf_id": 51,
+      "call_offset": 17
+    },
+    "bpf_x86_shrdq": {
+      "btf_func_id": 129862,
+      "btf_id": 51,
+      "call_offset": 17
+    },
+    "bpf_x86_shrq": {
+      "btf_func_id": 129893,
+      "btf_id": 37,
+      "call_offset": 6
+    },
+    "bpf_x86_shrxl": {
+      "btf_func_id": 129865,
+      "btf_id": 39,
+      "call_offset": 8
+    },
+    "bpf_x86_shrxq": {
+      "btf_func_id": 129866,
+      "btf_id": 39,
+      "call_offset": 8
+    }
+  }
+}

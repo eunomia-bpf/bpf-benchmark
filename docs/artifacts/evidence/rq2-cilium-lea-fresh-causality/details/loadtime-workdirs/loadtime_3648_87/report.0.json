@@ -1,0 +1,60 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 1885,
+  "insn_count_before": 1800,
+  "insn_delta": 85,
+  "kop_calls_by_family": {
+    "lea": 19
+  },
+  "kop_calls_by_name": {
+    "bpf_x86_leal": 2,
+    "bpf_x86_leaq": 17
+  },
+  "kop_payload_shapes": {
+    "bpf_x86_leal|dst=r2|base=r8|index=none|scale=0|disp=2": 1,
+    "bpf_x86_leal|dst=r8|base=r2|index=r1|scale=0|disp=0": 1,
+    "bpf_x86_leaq|dst=r1|base=r7|index=none|scale=0|disp=20": 1,
+    "bpf_x86_leaq|dst=r1|base=r9|index=none|scale=0|disp=20": 1,
+    "bpf_x86_leaq|dst=r2|base=r5|index=none|scale=0|disp=-16": 2,
+    "bpf_x86_leaq|dst=r2|base=r5|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r2|base=r5|index=none|scale=0|disp=-96": 1,
+    "bpf_x86_leaq|dst=r3|base=r10|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r3|base=r5|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r3|base=r9|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r7|base=r3|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r8|base=r5|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r8|base=r5|index=none|scale=0|disp=-72": 1,
+    "bpf_x86_leaq|dst=r8|base=r5|index=none|scale=0|disp=-80": 1,
+    "bpf_x86_leaq|dst=r8|base=r5|index=none|scale=0|disp=-88": 1,
+    "bpf_x86_leaq|dst=r9|base=r5|index=none|scale=0|disp=-112": 1,
+    "bpf_x86_leaq|dst=r9|base=r5|index=none|scale=0|disp=-16": 1,
+    "bpf_x86_leaq|dst=r9|base=r5|index=none|scale=0|disp=-80": 1
+  },
+  "kop_policy": {
+    "bytecode_families": {
+      "bitops": false,
+      "bulk_memory": false,
+      "ccmp": false,
+      "cond_select": false,
+      "endian_fusion": false,
+      "extract": false,
+      "prefetch": false,
+      "rotate": false
+    },
+    "bytecode_family_overrides": {},
+    "llvm_args": [
+      "bpfopt",
+      "-bpf-enable-kop-select",
+      "-bpf-stack-size=4096",
+      "-bpf-kop-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
+    ],
+    "pass_args": []
+  },
+  "pass": "lea",
+  "sites_applied": 19,
+  "sites_matched": 19,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}

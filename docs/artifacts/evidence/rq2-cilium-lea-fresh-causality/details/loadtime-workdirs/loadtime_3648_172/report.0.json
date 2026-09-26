@@ -1,0 +1,47 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 231,
+  "insn_count_before": 197,
+  "insn_delta": 34,
+  "kop_calls_by_family": {
+    "lea": 7
+  },
+  "kop_calls_by_name": {
+    "bpf_x86_leaq": 7
+  },
+  "kop_payload_shapes": {
+    "bpf_x86_leaq|dst=r3|base=r6|index=none|scale=0|disp=-2": 1,
+    "bpf_x86_leaq|dst=r3|base=r6|index=none|scale=0|disp=-24": 1,
+    "bpf_x86_leaq|dst=r3|base=r6|index=none|scale=0|disp=-48": 1,
+    "bpf_x86_leaq|dst=r5|base=r2|index=none|scale=0|disp=42": 1,
+    "bpf_x86_leaq|dst=r8|base=r6|index=none|scale=0|disp=-32": 2,
+    "bpf_x86_leaq|dst=r9|base=r6|index=none|scale=0|disp=-40": 1
+  },
+  "kop_policy": {
+    "bytecode_families": {
+      "bitops": false,
+      "bulk_memory": false,
+      "ccmp": false,
+      "cond_select": false,
+      "endian_fusion": false,
+      "extract": false,
+      "prefetch": false,
+      "rotate": false
+    },
+    "bytecode_family_overrides": {},
+    "llvm_args": [
+      "bpfopt",
+      "-bpf-enable-kop-select",
+      "-bpf-stack-size=4096",
+      "-bpf-kop-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
+    ],
+    "pass_args": []
+  },
+  "pass": "lea",
+  "sites_applied": 7,
+  "sites_matched": 7,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}
