@@ -1079,7 +1079,10 @@ def _summed_pktgen_throughput(workload: dict) -> float | None:
     nondeterministic order, so `workload_throughput` (first rate-bearing
     component) would sample only one of them. Sum every component's scalar;
     fall back to the workload's own stdout/stderr when it carries the rate
-    directly. Returns None when no rate is present.
+    directly (the stress-ng workloads carry no components and emit their
+    bogo-ops scalar in the workload-level stdout). `_rate_scalar` already
+    accepts all three emitted shapes, so this is the shared extractor for
+    every fresh causality triplet. Returns None when no rate is present.
     """
     total = 0.0
     found = False
@@ -1102,7 +1105,7 @@ def _summed_phase_throughput(app: dict, phase: str) -> list[float | None]:
 
 
 def _summed_throughput_ratio(app: dict) -> float | None:
-    """Median post/baseline summed-pktgen throughput ratio over 3+3 samples."""
+    """Median post/baseline summed rate scalar over 3+3 samples."""
     baseline = _summed_phase_throughput(app, "baseline")
     post = _summed_phase_throughput(app, "post_rejit")
     if len(baseline) != 3 or len(post) != 3:
@@ -1120,6 +1123,7 @@ def fresh_causality_rows(
     label: str,
     evidence_dir: str,
     declared: tuple[str, str],
+    metric_noun: str = "summed-pktgen",
 ) -> list[Row]:
     """One app's fresh map_inline causality bound to its retained bytecode.
 
@@ -1187,7 +1191,7 @@ def fresh_causality_rows(
         return [Row(
             label, UNAVAILABLE,
             f"fresh map_inline run plus two matched no-pass controls with 3+3 "
-            f"positive summed-pktgen samples missing: {evidence_dir}",
+            f"positive {metric_noun} samples missing: {evidence_dir}",
         )]
     control_median = statistics.median(control_ratios)
     corrected = raw / control_median
@@ -1200,7 +1204,7 @@ def fresh_causality_rows(
     return [Row(
         f"{label} ({counts['sites_applied']} sites)" if counts else label,
         status,
-        f"{evidence_dir}: map_inline median summed-pktgen ratio={raw:.6f}x; "
+        f"{evidence_dir}: map_inline median {metric_noun} ratio={raw:.6f}x; "
         f"no-pass controls {['%.4f' % r for r in control_ratios]} "
         f"(median {control_median:.6f}x); control-corrected={corrected:.6f}x "
         f"(declared {declared_raw}/{declared_corrected}), 3+3 samples per run; "
@@ -1265,6 +1269,38 @@ def cilium_fresh_causality_rows(
         label="RQ2 Cilium fresh map_inline causality + retained bytecode",
         evidence_dir=evidence_dir,
         declared=declared,
+    )
+
+
+# Fresh provenance-complete Tetragon causality triplet, same shape as Katran
+# and Cilium (see `fresh_causality_rows`). Tetragon's fresh workload is a
+# single stress-ng run with no components, so the derived throughput scalar is
+# the workload-level `stress-ng: metrc:` bogo-ops column rather than a pktgen
+# pps sum; the shared extractor's `_rate_scalar` fallback already covers that
+# shape, and `metric_noun` keeps the row's wording accurate. The
+# control-corrected sign agrees with the May Tetragon batch's independent
+# `1.0840` (both above 1.0), so the effect is positive here too, but the two
+# are separate generations and are never merged.
+TETRAGON_FRESH_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality"
+)
+TETRAGON_FRESH_CAUSALITY_DECLARED = ("1.0423", "1.0357")
+
+
+def tetragon_fresh_causality_rows(
+    root: Path,
+    evidence_dir: str = TETRAGON_FRESH_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = TETRAGON_FRESH_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Tetragon fresh map_inline causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="tetragon__observer",
+        report_rel="details/loadtime-reports/tetragon__observer.jsonl",
+        label="RQ2 Tetragon fresh map_inline causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="stress-ng metrc bogo-ops",
     )
 
 
@@ -1957,6 +1993,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(map_inline_causality_rows(root))
     rows.extend(katran_fresh_causality_rows(root))
     rows.extend(cilium_fresh_causality_rows(root))
+    rows.extend(tetragon_fresh_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3115,12 +3152,26 @@ def self_test() -> int:
         causal_declared = ("1.0750", "1.0750")
         cilium_ev = CILIUM_FRESH_CAUSALITY_EVIDENCE_DIR
         cilium_declared = ("0.9000", "0.9000")
+        tetragon_ev = TETRAGON_FRESH_CAUSALITY_EVIDENCE_DIR
+        tetragon_declared = ("0.8000", "0.8000")
 
         def wl(total: int) -> dict:
             half = total // 2
             def comp(pps: int) -> dict:
                 return {"stdout": f"\n{pps}pps 1000Mb/sec (1000000000bps) errors: 0\n"}
             return {"components": [comp(half), comp(total - half)]}
+
+        def metrc_wl(total: int) -> dict:
+            """A component-less stress-ng workload: the rate is its own stdout.
+
+            `_rate_scalar` sums the metrc row's first numeric column (bogo
+            ops), exactly as it does for the shipped May causality rows.
+            """
+            half = total // 2
+            line = ("stress-ng: metrc: [1] cpu            {n}      60.00      1.00 "
+                    "     0.50      1.00      1.00\n")
+            return {"components": [],
+                    "stdout": line.format(n=half) + line.format(n=total - half)}
 
         def write_fresh_causality(
             *, ev: str = causal_ev, stem: str = "katran",
@@ -3129,6 +3180,7 @@ def self_test() -> int:
             mi_rejit: str = "ok", ctl_a_post: int = 1001, ctl_b_post: int = 999,
             ctl_a_passes=(), ctl_b_passes=(), ctl_rejit: str = "skipped",
             retain_bytecode: bool = True, receipt_hashes: bool = True,
+            wl_factory=wl,
         ) -> None:
             base = root / ev
             import shutil
@@ -3146,8 +3198,8 @@ def self_test() -> int:
                 (d / "details/apps" / f"{stem}.json").write_text(json.dumps({
                     "status": app_st, "error": "",
                     "rejit_result": {"mode": "loadtime", "status": rejit},
-                    "baseline": {"workloads": [wl(1000)] * 3},
-                    "post_rejit": {"workloads": [wl(post)] * 3}}))
+                    "baseline": {"workloads": [wl_factory(1000)] * 3},
+                    "post_rejit": {"workloads": [wl_factory(post)] * 3}}))
             write_dir("", post=mi_post, passes=mi_passes, rejit=mi_rejit,
                       status=mi_status, app_st=app_status)
             write_dir("controls/nullA", post=ctl_a_post, passes=ctl_a_passes,
@@ -3188,6 +3240,9 @@ def self_test() -> int:
 
         def cilium_row() -> Row:
             return cilium_fresh_causality_rows(root, cilium_ev, cilium_declared)[0]
+
+        def tetragon_row() -> Row:
+            return tetragon_fresh_causality_rows(root, tetragon_ev, tetragon_declared)[0]
 
         write_fresh_causality()
         row = fresh_row()
@@ -3236,11 +3291,36 @@ def self_test() -> int:
         if cilium_row().status != PASS:
             failures.append("restored Cilium fresh causality must return to PASS")
 
+        # The Tetragon row exercises the component-less workload shape: its
+        # rate lives in the workload's own stdout as `stress-ng: metrc:`
+        # bogo-ops, which `_summed_pktgen_throughput` reaches only through its
+        # workload-level fallback. A pktgen-component-only extractor would
+        # return None here and degrade the row to UNAVAILABLE.
+        write_fresh_causality(ev=tetragon_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_post=800,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        row = tetragon_row()
+        if row.status != PASS or "control-corrected=0.800000x" not in row.evidence:
+            failures.append(
+                f"valid Tetragon fresh causality expected PASS/0.800000x, got {(row.status, row.evidence)!r}")
+        if "stress-ng metrc bogo-ops" not in row.evidence:
+            failures.append("Tetragon fresh causality must name its rate shape")
+        write_fresh_causality(ev=tetragon_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_post=820,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if tetragon_row().status != PARTIAL:
+            failures.append("Tetragon fresh causality must degrade on drift")
+        write_fresh_causality(ev=tetragon_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_post=800,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if tetragon_row().status != PASS:
+            failures.append("restored Tetragon fresh causality must return to PASS")
+
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
         return 1
-    print("self-test: OK (12 evidence classes)")
+    print("self-test: OK (13 evidence classes)")
     return 0
 
 
