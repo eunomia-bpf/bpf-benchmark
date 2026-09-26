@@ -131,6 +131,7 @@ RESULTS=(
     micro/results/x86_kvm_micro_20260429_035938_203074/details/result.json
     micro/results/x86_kvm_micro_20260924_231824_136293/details/result.json
     micro/results/x86_kvm_micro_20260925_002201_525373/details/result.json
+    micro/results/x86_kvm_micro_20260926_105108_035832/details/result.json
 )
 echo "embedding paper-result datasets:"
 for rel in "${RESULTS[@]}"; do
@@ -271,8 +272,10 @@ This is the single archival ZIP for accepted ATC 2026 paper #1160,
 Start with [docs/atc26-artifact-evaluation.md](docs/atc26-artifact-evaluation.md).
 The archive contains the exact source trees needed by the documented proof,
 microbenchmark, and six-application KVM paths, plus the five raw paper-result
-JSON datasets read by the included plotting scripts, historical load-time and 62-name population
-JSON datasets whose pairing remains weaker than the paper's 0.99x claim,
+JSON datasets read by the included plotting scripts, plus the historical
+62-name population and load-time datasets from which the renderer derives the
+paper's 0.99x object-load claim on the open+load (\`compile_ns\`) quantity whose
+name pairing remains weaker than the paper's exact population,
 plus selected Cilium, Katran and Tracee RQ2/RQ3/RQ4 raw app records and run-status
 provenance read by the claim renderer. Compact retained evidence
 records the complete formal check, the six-application ReJIT coverage run, the
@@ -491,6 +494,7 @@ required=(
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     micro/results/x86_kvm_micro_20260924_231824_136293/details/result.json
     micro/results/x86_kvm_micro_20260925_002201_525373/details/result.json
+    micro/results/x86_kvm_micro_20260926_105108_035832/details/result.json
     corpus/results/x86_kvm_corpus_20260604_100557_313063/details/apps/cilium__agent.json
     corpus/results/x86_kvm_corpus_20260529_033517_489159/details/apps/cilium__agent.json
     corpus/results/x86_kvm_corpus_20260605_145112_835705/details/apps/cilium__agent.json
@@ -555,6 +559,11 @@ make -C "$VERIFY" lint
 python3 -m py_compile "$VERIFY/docs/artifacts/render_claim_table.py"
 python3 "$VERIFY/docs/artifacts/render_claim_table.py" --self-test
 python3 "$VERIFY/docs/artifacts/render_claim_table.py" "$VERIFY" > "$VERIFY/claim-table.txt"
+# The 62-case object-load row must still render PASS and the repeated-sample
+# fresh row must still find its run, both from the archived sources alone.
+grep -q '^RQ1 x86 62-case object-load overhead (paper 0.99x).*PASS' "$VERIFY/claim-table.txt"
+grep -q '^RQ1 x86 repeated-sample paired object-load overhead (full-x86 policy)' "$VERIFY/claim-table.txt"
+grep -q '^OVERALL AE EVIDENCE: INCOMPLETE' "$VERIFY/claim-table.txt"
 python3 -m json.tool "$VERIFY/ARTIFACT_MANIFEST.json" >/dev/null
 python3 -m json.tool "$VERIFY/.zenodo.json" >/dev/null
 
