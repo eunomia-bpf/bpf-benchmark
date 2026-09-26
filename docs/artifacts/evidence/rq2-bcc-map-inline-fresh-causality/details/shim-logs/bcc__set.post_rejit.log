@@ -1,0 +1,1394 @@
+[342.560440 pid=2183 tid=2183] shim_init pid=2183 exe=/usr/local/bin/capable
+[342.560893 pid=2183 tid=2207] socket: listening on /var/run/bpfrejit/shim-2183.sock
+[342.561008 pid=2183 tid=2183] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.560895 pid=2198 tid=2198] shim_init pid=2198 exe=/usr/local/bin/tcpconnect
+[342.561428 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[342.561195 pid=2189 tid=2189] shim_init pid=2189 exe=/usr/local/bin/vfsstat
+[342.561557 pid=2198 tid=2210] socket: listening on /var/run/bpfrejit/shim-2198.sock
+[342.561546 pid=2201 tid=2201] shim_init pid=2201 exe=/usr/local/bin/tcplife
+[342.561530 pid=2195 tid=2195] shim_init pid=2195 exe=/usr/local/bin/syscount
+[342.561733 pid=2189 tid=2212] socket: listening on /var/run/bpfrejit/shim-2189.sock
+[342.561600 pid=2204 tid=2204] shim_init pid=2204 exe=/usr/local/bin/runqlat
+[342.561720 pid=2198 tid=2198] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.561619 pid=2186 tid=2186] shim_init pid=2186 exe=/usr/local/bin/biosnoop
+[342.561824 pid=2195 tid=2216] socket: listening on /var/run/bpfrejit/shim-2195.sock
+[342.561693 pid=2192 tid=2192] shim_init pid=2192 exe=/usr/local/bin/opensnoop
+[342.561901 pid=2201 tid=2201] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.561930 pid=2204 tid=2219] socket: listening on /var/run/bpfrejit/shim-2204.sock
+[342.561917 pid=2186 tid=2220] socket: listening on /var/run/bpfrejit/shim-2186.sock
+[342.562065 pid=2201 tid=2215] socket: listening on /var/run/bpfrejit/shim-2201.sock
+[342.562046 pid=2192 tid=2222] socket: listening on /var/run/bpfrejit/shim-2192.sock
+[342.562166 pid=2192 tid=2192] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.562160 pid=2186 tid=2186] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.562754 pid=2223 tid=2223] shim_init pid=2223 exe=/usr/bin/dash
+[342.563080 pid=2223 tid=2225] socket: listening on /var/run/bpfrejit/shim-2223.sock
+[342.563823 pid=2226 tid=2226] shim_init pid=2226 exe=/usr/bin/ausyscall
+[342.564098 pid=2226 tid=2228] socket: listening on /var/run/bpfrejit/shim-2226.sock
+[342.564585 pid=2195 tid=2195] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.569485 pid=2204 tid=2204] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.571385 pid=2189 tid=2189] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.583166 pid=2201 tid=2201] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.583663 pid=2195 tid=2195] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.583844 pid=2198 tid=2198] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.584045 pid=2192 tid=2192] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.584238 pid=2183 tid=2183] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.585757 pid=2186 tid=2186] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.586428 pid=2204 tid=2204] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.587734 pid=2189 tid=2189] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.607737 pid=2198 tid=2198] loadtime step prog= step=map_inline elapsed_ms=9
+[342.607814 pid=2198 tid=2198] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.607910 pid=2198 tid=2198]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=97
+[342.608043 pid=2198 tid=2198] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.608042 pid=2195 tid=2195] loadtime step prog= step=map_inline elapsed_ms=9
+[342.608093 pid=2195 tid=2195] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.608200 pid=2195 tid=2195]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=98
+[342.608278 pid=2195 tid=2195] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.608388 pid=2201 tid=2201] loadtime step prog= step=map_inline elapsed_ms=9
+[342.608440 pid=2201 tid=2201] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.608542 pid=2201 tid=2201]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=99
+[342.608648 pid=2201 tid=2201] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.608701 pid=2192 tid=2192] loadtime step prog= step=map_inline elapsed_ms=8
+[342.608753 pid=2192 tid=2192] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.608849 pid=2192 tid=2192]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=100
+[342.608923 pid=2192 tid=2192] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.609041 pid=2186 tid=2186] loadtime step prog= step=map_inline elapsed_ms=8
+[342.609113 pid=2186 tid=2186] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.609200 pid=2186 tid=2186]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=101
+[342.609233 pid=2183 tid=2183] loadtime step prog= step=map_inline elapsed_ms=8
+[342.609277 pid=2183 tid=2183] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.609314 pid=2186 tid=2186] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.609368 pid=2183 tid=2183]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=102
+[342.609489 pid=2183 tid=2183] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.609490 pid=2204 tid=2204] loadtime step prog= step=map_inline elapsed_ms=8
+[342.609550 pid=2204 tid=2204] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.609654 pid=2204 tid=2204]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=103
+[342.609764 pid=2204 tid=2204] BPF_PROG_LOAD type=26 (tracing) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=5ed165a784375ea1 license=GPL expected_attach=23 attach_btf_id=74191 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.611818 pid=2189 tid=2189] loadtime step prog= step=map_inline elapsed_ms=10
+[342.611876 pid=2189 tid=2189] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.611958 pid=2189 tid=2189]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=104
+[342.612052 pid=2189 tid=2189] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.622477 pid=2198 tid=2198] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.623902 pid=2204 tid=2204] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=5ed165a784375ea1 insn_cnt=2
+[342.624026 pid=2186 tid=2186] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.624568 pid=2192 tid=2192] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.624838 pid=2201 tid=2201] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.625823 pid=2195 tid=2195] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.626129 pid=2183 tid=2183] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.626923 pid=2189 tid=2189] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.645925 pid=2204 tid=2204] loadtime step prog= step=map_inline elapsed_ms=7
+[342.646025 pid=2204 tid=2204] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.646117 pid=2204 tid=2204]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=121
+[342.646166 pid=2204 tid=2204] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.646238 pid=2186 tid=2186] loadtime step prog= step=map_inline elapsed_ms=7
+[342.646287 pid=2186 tid=2186] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.646374 pid=2186 tid=2186]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=122
+[342.646583 pid=2198 tid=2198] loadtime step prog= step=map_inline elapsed_ms=7
+[342.646633 pid=2198 tid=2198] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.646732 pid=2198 tid=2198]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=123
+[342.646817 pid=2183 tid=2183] loadtime step prog= step=map_inline elapsed_ms=7
+[342.646924 pid=2183 tid=2183] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.647007 pid=2183 tid=2183]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=124
+[342.647195 pid=2195 tid=2195] loadtime step prog= step=map_inline elapsed_ms=7
+[342.647301 pid=2195 tid=2195] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.647380 pid=2195 tid=2195]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=125
+[342.647466 pid=2189 tid=2189] loadtime step prog= step=map_inline elapsed_ms=7
+[342.647543 pid=2189 tid=2189] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.647629 pid=2189 tid=2189]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=126
+[342.647777 pid=2192 tid=2192] loadtime step prog= step=map_inline elapsed_ms=9
+[342.647849 pid=2192 tid=2192] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.647971 pid=2192 tid=2192]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=127
+[342.648379 pid=2201 tid=2201] loadtime step prog= step=map_inline elapsed_ms=10
+[342.648432 pid=2201 tid=2201] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.648508 pid=2201 tid=2201]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=128
+[342.654290 pid=2186 tid=2186] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=14977 attach_prog_fd=14977
+[342.655075 pid=2195 tid=2195] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=30954 attach_prog_fd=30954
+[342.655142 pid=2198 tid=2198] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=34427 attach_prog_fd=34427
+[342.655654 pid=2183 tid=2183] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=4490 attach_prog_fd=4490
+[342.655780 pid=2189 tid=2189] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=1813 attach_prog_fd=1813
+[342.655778 pid=2201 tid=2201] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=42956 attach_prog_fd=42956
+[342.656825 pid=2192 tid=2192] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=3505 attach_prog_fd=3505
+[342.660154 pid=2204 tid=2204] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.667798 pid=2198 tid=2198] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.669158 pid=2201 tid=2201] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.669539 pid=2186 tid=2186] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.670634 pid=2195 tid=2195] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.671052 pid=2189 tid=2189] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.671174 pid=2183 tid=2183] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.671586 pid=2192 tid=2192] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.684157 pid=2204 tid=2204] loadtime step prog= step=map_inline elapsed_ms=10
+[342.684217 pid=2204 tid=2204] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.684304 pid=2204 tid=2204]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=139
+[342.689184 pid=2198 tid=2198] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=7
+[342.689232 pid=2198 tid=2198] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.689323 pid=2198 tid=2198]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=146
+[342.689382 pid=2198 tid=2198] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.689444 pid=2198 tid=2198]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=62
+[342.689497 pid=2198 tid=2198] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=8192 name=sockets
+[342.689643 pid=2198 tid=2198]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=63
+[342.689716 pid=2198 tid=2198] BPF_MAP_CREATE type=1 key_size=12 value_size=8 max_entries=8192 name=ipv4_count
+[342.689853 pid=2198 tid=2198]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=64
+[342.689910 pid=2198 tid=2198] BPF_MAP_CREATE type=1 key_size=36 value_size=8 max_entries=8192 name=ipv6_count
+[342.690087 pid=2198 tid=2198]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=65
+[342.690159 pid=2198 tid=2198] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[342.690241 pid=2198 tid=2198]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=66
+[342.690291 pid=2198 tid=2198] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.690334 pid=2198 tid=2198]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=67
+[342.690475 pid=2198 tid=2198] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=be83cd95099a1830 policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.691063 pid=2201 tid=2201] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=8
+[342.691081 pid=2186 tid=2186] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=8
+[342.691125 pid=2201 tid=2201] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.691120 pid=2186 tid=2186] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.691212 pid=2201 tid=2201]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=148
+[342.691203 pid=2186 tid=2186]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=147
+[342.691257 pid=2201 tid=2201] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.691254 pid=2186 tid=2186] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.691299 pid=2201 tid=2201]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=69
+[342.691298 pid=2186 tid=2186]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=68
+[342.691339 pid=2201 tid=2201] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=10240 name=birth
+[342.691338 pid=2186 tid=2186] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[342.691379 pid=2183 tid=2183] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=7
+[342.691378 pid=2186 tid=2186]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=70
+[342.691421 pid=2186 tid=2186] BPF_MAP_CREATE type=1 key_size=8 value_size=20 max_entries=10240 name=infobyreq
+[342.691419 pid=2183 tid=2183] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.691502 pid=2183 tid=2183]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=149
+[342.691500 pid=2201 tid=2201]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=71
+[342.691559 pid=2183 tid=2183] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.691556 pid=2201 tid=2201] BPF_MAP_CREATE type=1 key_size=8 value_size=20 max_entries=10240 name=idents
+[342.691605 pid=2186 tid=2186]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=72
+[342.691618 pid=2183 tid=2183]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=73
+[342.691670 pid=2183 tid=2183] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=10240 name=start
+[342.691669 pid=2186 tid=2186] BPF_MAP_CREATE type=1 key_size=8 value_size=24 max_entries=10240 name=start
+[342.691719 pid=2195 tid=2195] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=7
+[342.691758 pid=2195 tid=2195] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.691777 pid=2201 tid=2201]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=74
+[342.691838 pid=2195 tid=2195]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=150
+[342.691869 pid=2186 tid=2186]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=75
+[342.691864 pid=2201 tid=2201] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[342.691885 pid=2183 tid=2183]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=76
+[342.691900 pid=2195 tid=2195] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.691920 pid=2201 tid=2201]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=77
+[342.691914 pid=2186 tid=2186] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[342.691936 pid=2189 tid=2189] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=8
+[342.691937 pid=2183 tid=2183] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[342.691966 pid=2195 tid=2195]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=78
+[342.691963 pid=2201 tid=2201] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.691987 pid=2186 tid=2186]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=79
+[342.692009 pid=2201 tid=2201]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=81
+[342.692005 pid=2183 tid=2183]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=80
+[342.692005 pid=2195 tid=2195] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[342.692002 pid=2189 tid=2189] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.692069 pid=2189 tid=2189]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=151
+[342.692057 pid=2183 tid=2183] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[342.692052 pid=2186 tid=2186] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.692049 pid=2195 tid=2195]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=82
+[342.692099 pid=2201 tid=2201] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.692127 pid=2189 tid=2189] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.692126 pid=2186 tid=2186]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=84
+[342.692124 pid=2183 tid=2183]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=83
+[342.692124 pid=2195 tid=2195] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=8192 name=start
+[342.692174 pid=2189 tid=2189]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=85
+[342.692168 pid=2183 tid=2183] BPF_MAP_CREATE type=7 key_size=4 value_size=1016 max_entries=1024 name=stackmap
+[342.692220 pid=2186 tid=2186] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=be83cd95099a1830 policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.692237 pid=2189 tid=2189] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.692259 pid=2192 tid=2192] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=7
+[342.692314 pid=2192 tid=2192] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.692299 pid=2195 tid=2195]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=86
+[342.692298 pid=2189 tid=2189]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=87
+[342.692396 pid=2189 tid=2189] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=06ffeef05d7e610c policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.692365 pid=2195 tid=2195] BPF_MAP_CREATE type=1 key_size=4 value_size=32 max_entries=8192 name=data
+[342.692409 pid=2192 tid=2192]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=152
+[342.692423 pid=2183 tid=2183]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=88
+[342.692474 pid=2183 tid=2183] BPF_MAP_CREATE type=1 key_size=16 value_size=44 max_entries=10240 name=info
+[342.692469 pid=2192 tid=2192] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.692529 pid=2192 tid=2192]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=89
+[342.692600 pid=2192 tid=2192] BPF_MAP_CREATE type=1 key_size=4 value_size=16 max_entries=10240 name=start
+[342.692579 pid=2195 tid=2195]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=90
+[342.692660 pid=2195 tid=2195] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.692725 pid=2195 tid=2195]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=91
+[342.692837 pid=2192 tid=2192]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=92
+[342.692829 pid=2195 tid=2195] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.692902 pid=2192 tid=2192] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[342.692976 pid=2204 tid=2204] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=33140 attach_prog_fd=33140
+[342.692954 pid=2192 tid=2192]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=93
+[342.693025 pid=2192 tid=2192] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.693087 pid=2192 tid=2192]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=94
+[342.693200 pid=2192 tid=2192] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=918b4f57cc8f3b1e policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.693386 pid=2183 tid=2183]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=95
+[342.693432 pid=2183 tid=2183] BPF_MAP_CREATE type=1 key_size=16 value_size=8 max_entries=10240 name=seen
+[342.693637 pid=2183 tid=2183]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=96
+[342.693688 pid=2183 tid=2183] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.693780 pid=2183 tid=2183]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=97
+[342.693906 pid=2183 tid=2183] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f24bde511ad423d2 policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.708014 pid=2204 tid=2204] loadtime policy prog=libbpf_nametest policy_hash=58255400910d7827 branch_profile_hash=9d7920482b168705 insn_cnt=2
+[342.710222 pid=2198 tid=2198] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.712117 pid=2189 tid=2189] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.713531 pid=2186 tid=2186] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.716483 pid=2201 tid=2201] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.716702 pid=2195 tid=2195] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.717026 pid=2192 tid=2192] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.717735 pid=2183 tid=2183] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.731109 pid=2204 tid=2204] loadtime step prog=libbpf_nametest step=map_inline elapsed_ms=10
+[342.731205 pid=2204 tid=2204] loadtime prog=libbpf_nametest produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.731290 pid=2204 tid=2204]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=164
+[342.731340 pid=2204 tid=2204] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[342.731402 pid=2204 tid=2204]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=98
+[342.731463 pid=2204 tid=2204] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[342.731511 pid=2204 tid=2204]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=99
+[342.731548 pid=2204 tid=2204] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=10240 name=start
+[342.732095 pid=2204 tid=2204]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=100
+[342.732152 pid=2204 tid=2204] BPF_MAP_CREATE type=1 key_size=4 value_size=120 max_entries=10240 name=hists
+[342.735326 pid=2198 tid=2198] loadtime step prog= step=map_inline elapsed_ms=10
+[342.735379 pid=2198 tid=2198] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.735448 pid=2198 tid=2198]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=170
+[342.735499 pid=2198 tid=2198] BPF_MAP_CREATE type=2 key_size=4 value_size=280 max_entries=1 name=tcpconne.rodata
+[342.735553 pid=2198 tid=2198]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=101
+[342.735591 pid=2198 tid=2198] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=1 name=tcpconne.bss
+[342.735627 pid=2189 tid=2189] loadtime step prog= step=map_inline elapsed_ms=9
+[342.735640 pid=2198 tid=2198]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=102
+[342.735667 pid=2189 tid=2189] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.735771 pid=2189 tid=2189]   PROG_LOAD -> fd=8 errno=0 kernel_prog_id=171
+[342.735829 pid=2189 tid=2189] BPF_MAP_CREATE type=2 key_size=4 value_size=40 max_entries=1 name=vfsstat_.bss
+[342.735886 pid=2189 tid=2189]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=103
+[342.736649 pid=2189 tid=2189] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_read insn_cnt=6 hash=ca9822ef332acdf2 policy_hash=eb9f3d374e028c39 branch_profile_hash=58d68f3159c40362 license=GPL expected_attach=24 attach_btf_id=123768 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.737193 pid=2201 tid=2201] loadtime step prog= step=map_inline elapsed_ms=9
+[342.737251 pid=2201 tid=2201] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.737321 pid=2201 tid=2201]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=172
+[342.737380 pid=2201 tid=2201] BPF_MAP_CREATE type=2 key_size=4 value_size=4106 max_entries=1 name=tcplife_.rodata
+[342.737453 pid=2201 tid=2201]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=104
+[342.737432 pid=2186 tid=2186] loadtime step prog= step=map_inline elapsed_ms=10
+[342.737496 pid=2186 tid=2186] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.737581 pid=2186 tid=2186]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=173
+[342.737632 pid=2186 tid=2186] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=1 name=biosnoop.rodata
+[342.737698 pid=2186 tid=2186]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=105
+[342.737747 pid=2186 tid=2186] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=biosnoo.kconfig
+[342.737770 pid=2195 tid=2195] loadtime step prog= step=map_inline elapsed_ms=10
+[342.737826 pid=2195 tid=2195] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.737813 pid=2186 tid=2186]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=106
+[342.737905 pid=2195 tid=2195]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=174
+[342.737957 pid=2195 tid=2195] BPF_MAP_CREATE type=2 key_size=4 value_size=48 max_entries=1 name=syscount.rodata
+[342.737981 pid=2183 tid=2183] loadtime step prog= step=map_inline elapsed_ms=9
+[342.738002 pid=2195 tid=2195]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=107
+[342.738029 pid=2183 tid=2183] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.738101 pid=2183 tid=2183]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=175
+[342.738151 pid=2183 tid=2183] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=capable_.rodata
+[342.738212 pid=2183 tid=2183]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=108
+[342.738290 pid=2183 tid=2183] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=capable.kconfig
+[342.738271 pid=2192 tid=2192] loadtime step prog= step=map_inline elapsed_ms=10
+[342.738274 pid=2198 tid=2198] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.738333 pid=2183 tid=2183]   MAP_CREATE -> fd=14 errno=0 kernel_map_id=109
+[342.738331 pid=2192 tid=2192] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.738430 pid=2192 tid=2192]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=176
+[342.738519 pid=2192 tid=2192] BPF_MAP_CREATE type=2 key_size=4 value_size=13 max_entries=1 name=opensnoo.rodata
+[342.738579 pid=2192 tid=2192]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=110
+[342.739667 pid=2183 tid=2183] BPF_PROG_LOAD type=2 (kprobe) name=kprobe__cap_cap insn_cnt=38 hash=870f49dfc7705d8c policy_hash=41eac26b96a18be4 branch_profile_hash=f19927e2c6858059 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.739947 pid=2201 tid=2201] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.740525 pid=2195 tid=2195] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.740653 pid=2204 tid=2204]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=111
+[342.740730 pid=2204 tid=2204] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[342.740788 pid=2204 tid=2204]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=112
+[342.740914 pid=2204 tid=2204] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.740886 pid=2192 tid=2192] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.743731 pid=2186 tid=2186] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.753219 pid=2198 tid=2198] loadtime policy prog= policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a insn_cnt=6
+[342.754792 pid=2201 tid=2201] loadtime policy prog= policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a insn_cnt=6
+[342.755626 pid=2195 tid=2195] loadtime policy prog= policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a insn_cnt=6
+[342.756367 pid=2192 tid=2192] loadtime policy prog= policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a insn_cnt=6
+[342.757518 pid=2189 tid=2189] loadtime policy prog=fentry_vfs_read policy_hash=eb9f3d374e028c39 branch_profile_hash=58d68f3159c40362 insn_cnt=6
+[342.757798 pid=2186 tid=2186] loadtime policy prog= policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a insn_cnt=6
+[342.760701 pid=2204 tid=2204] loadtime policy prog= policy_hash=048f9e0260e5b0fb branch_profile_hash=b9cb6abd276be64d insn_cnt=5
+[342.761823 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[342.766891 pid=2183 tid=2183] loadtime policy prog=kprobe__cap_cap policy_hash=41eac26b96a18be4 branch_profile_hash=f19927e2c6858059 insn_cnt=38
+[342.774596 pid=2201 tid=2201] loadtime step prog= step=map_inline elapsed_ms=7
+[342.774637 pid=2201 tid=2201] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.774718 pid=2201 tid=2201]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=191
+[342.774822 pid=2198 tid=2198] loadtime step prog= step=map_inline elapsed_ms=7
+[342.774847 pid=2201 tid=2201] BPF_PROG_LOAD type=5 (tracepoint) name=inet_sock_set_s insn_cnt=309 hash=8e43f6c8f4b557f0 policy_hash=acc1e85c57d6e569 branch_profile_hash=5926d0e6fdb745e8 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.774877 pid=2198 tid=2198] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.774975 pid=2198 tid=2198]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=192
+[342.775065 pid=2198 tid=2198] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v4_connect insn_cnt=32 hash=9b37d763eeafa7fa policy_hash=606afffe465af5d1 branch_profile_hash=13311a76b21b4fa9 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.775106 pid=2192 tid=2192] loadtime step prog= step=map_inline elapsed_ms=6
+[342.775192 pid=2192 tid=2192] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.775271 pid=2192 tid=2192]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=194
+[342.775351 pid=2195 tid=2195] loadtime step prog= step=map_inline elapsed_ms=7
+[342.775377 pid=2192 tid=2192] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=46 hash=d1065e8f646a994e policy_hash=d5b20501d4592f50 branch_profile_hash=fc58c43c0c2ee930 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.775410 pid=2195 tid=2195] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.775491 pid=2195 tid=2195]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=195
+[342.775574 pid=2195 tid=2195] BPF_PROG_LOAD type=5 (tracepoint) name=sys_enter insn_cnt=31 hash=a88ae21d0f87b8fa policy_hash=6c8284e6d6ce53fd branch_profile_hash=308d6ea1f88177f4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.775716 pid=2186 tid=2186] loadtime step prog= step=map_inline elapsed_ms=7
+[342.775802 pid=2186 tid=2186] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.775893 pid=2186 tid=2186]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=196
+[342.775967 pid=2186 tid=2186] BPF_PROG_LOAD type=2 (kprobe) name=blk_account_io_ insn_cnt=31 hash=e873fdad705e3f0f policy_hash=63ae9a343765dcb3 branch_profile_hash=2e0c1fc0a6e2a77b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.779371 pid=2189 tid=2189] loadtime step prog=fentry_vfs_read step=map_inline elapsed_ms=9
+[342.779450 pid=2189 tid=2189] loadtime prog=fentry_vfs_read produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.779565 pid=2189 tid=2189]   PROG_LOAD -> fd=8 errno=0 kernel_prog_id=197
+[342.780630 pid=2189 tid=2189] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_writ insn_cnt=6 hash=d0c2d468d90e10ba policy_hash=ac8041a1ad2fc441 branch_profile_hash=6919d3fd93d66932 license=GPL expected_attach=24 attach_btf_id=123788 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.781481 pid=2204 tid=2204] loadtime step prog= step=map_inline elapsed_ms=9
+[342.781523 pid=2204 tid=2204] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.781620 pid=2204 tid=2204]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=198
+[342.781669 pid=2204 tid=2204] BPF_MAP_CREATE type=2 key_size=4 value_size=12 max_entries=1 name=runqlat_.rodata
+[342.781728 pid=2204 tid=2204]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=113
+[342.781785 pid=2204 tid=2204] BPF_MAP_CREATE type=2 key_size=4 value_size=120 max_entries=1 name=runqlat_.bss
+[342.781855 pid=2204 tid=2204]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=114
+[342.787269 pid=2204 tid=2204] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.794593 pid=2183 tid=2183] loadtime step prog=kprobe__cap_cap step=map_inline elapsed_ms=16
+[342.795184 pid=2198 tid=2198] loadtime policy prog=tcp_v4_connect policy_hash=606afffe465af5d1 branch_profile_hash=13311a76b21b4fa9 insn_cnt=32
+[342.795572 pid=2189 tid=2189] loadtime policy prog=fentry_vfs_writ policy_hash=ac8041a1ad2fc441 branch_profile_hash=6919d3fd93d66932 insn_cnt=6
+[342.796268 pid=2183 tid=2183] loadtime optimized prog=kprobe__cap_cap insns=38->22 maps=3 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2183_4
+[342.796298 pid=2192 tid=2192] loadtime policy prog=tracepoint__sys policy_hash=d5b20501d4592f50 branch_profile_hash=fc58c43c0c2ee930 insn_cnt=46
+[342.796414 pid=2183 tid=2183]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=200
+[342.796505 pid=2183 tid=2183] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[342.796569 pid=2183 tid=2183]   MAP_CREATE -> fd=15 errno=0 kernel_map_id=115
+[342.796611 pid=2183 tid=2183] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.797305 pid=2186 tid=2186] loadtime policy prog=blk_account_io_ policy_hash=63ae9a343765dcb3 branch_profile_hash=2e0c1fc0a6e2a77b insn_cnt=31
+[342.798241 pid=2204 tid=2204] loadtime policy prog= policy_hash=7e4864ff1af3e9d4 branch_profile_hash=2530ec7d038f421a insn_cnt=6
+[342.798420 pid=2195 tid=2195] loadtime policy prog=sys_enter policy_hash=6c8284e6d6ce53fd branch_profile_hash=308d6ea1f88177f4 insn_cnt=31
+[342.802726 pid=2201 tid=2201] loadtime policy prog=inet_sock_set_s policy_hash=acc1e85c57d6e569 branch_profile_hash=5926d0e6fdb745e8 insn_cnt=309
+[342.807048 pid=2183 tid=2183] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.816283 pid=2204 tid=2204] loadtime step prog= step=map_inline elapsed_ms=7
+[342.816329 pid=2204 tid=2204] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.816429 pid=2204 tid=2204]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=211
+[342.816546 pid=2189 tid=2189] loadtime step prog=fentry_vfs_writ step=map_inline elapsed_ms=9
+[342.816595 pid=2189 tid=2189] loadtime prog=fentry_vfs_writ produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.816682 pid=2189 tid=2189]   PROG_LOAD -> fd=9 errno=0 kernel_prog_id=212
+[342.816891 pid=2204 tid=2204] BPF_PROG_LOAD type=26 (tracing) name=sched_wakeup insn_cnt=32 hash=664da210f6a9400d policy_hash=ed91a90f9251272e branch_profile_hash=256c2e5d8e0d567e license=GPL expected_attach=23 attach_btf_id=74191 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.817847 pid=2189 tid=2189] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_fsyn insn_cnt=6 hash=cc6d44cf3357ea62 policy_hash=e302712d2cc3eaa9 branch_profile_hash=5af80ba5364c8d96 license=GPL expected_attach=24 attach_btf_id=123734 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.822787 pid=2198 tid=2198] loadtime step prog=tcp_v4_connect step=map_inline elapsed_ms=15
+[342.822991 pid=2192 tid=2192] loadtime step prog=tracepoint__sys step=map_inline elapsed_ms=15
+[342.823514 pid=2186 tid=2186] loadtime step prog=blk_account_io_ step=map_inline elapsed_ms=15
+[342.823621 pid=2198 tid=2198] loadtime optimized prog=tcp_v4_connect insns=32->15 maps=2 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2198_5
+[342.823696 pid=2198 tid=2198]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=218
+[342.823761 pid=2198 tid=2198] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[342.823768 pid=2192 tid=2192] loadtime optimized prog=tracepoint__sys insns=46->19 maps=2 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2192_5
+[342.823820 pid=2198 tid=2198]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=116
+[342.823867 pid=2198 tid=2198] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.823896 pid=2192 tid=2192]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=219
+[342.823963 pid=2192 tid=2192] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[342.824042 pid=2192 tid=2192]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=117
+[342.824095 pid=2192 tid=2192] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.824418 pid=2186 tid=2186] loadtime optimized prog=blk_account_io_ insns=31->22 maps=3 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2186_5
+[342.824492 pid=2186 tid=2186]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=220
+[342.824526 pid=2186 tid=2186] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[342.824587 pid=2186 tid=2186]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=118
+[342.824652 pid=2186 tid=2186] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.825013 pid=2195 tid=2195] loadtime step prog=sys_enter step=map_inline elapsed_ms=14
+[342.825258 pid=2183 tid=2183] loadtime step prog= step=map_inline elapsed_ms=6
+[342.825303 pid=2183 tid=2183] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.825418 pid=2183 tid=2183]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=221
+[342.825606 pid=2183 tid=2183] BPF_PROG_LOAD type=2 (kprobe) name=kprobe__cap_cap insn_cnt=142 hash=e09b549328e1631b policy_hash=b970952a1945633e branch_profile_hash=e0b458fe7a36e5ac license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.826755 pid=2195 tid=2195] loadtime optimized prog=sys_enter insns=31->14 maps=3 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2195_5
+[342.826850 pid=2195 tid=2195]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=222
+[342.826899 pid=2195 tid=2195] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[342.826956 pid=2195 tid=2195]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=119
+[342.826995 pid=2195 tid=2195] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.834449 pid=2189 tid=2189] loadtime policy prog=fentry_vfs_fsyn policy_hash=e302712d2cc3eaa9 branch_profile_hash=5af80ba5364c8d96 insn_cnt=6
+[342.835202 pid=2186 tid=2186] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.835552 pid=2198 tid=2198] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.835595 pid=2192 tid=2192] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.838031 pid=2195 tid=2195] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.840727 pid=2204 tid=2204] loadtime policy prog=sched_wakeup policy_hash=ed91a90f9251272e branch_profile_hash=256c2e5d8e0d567e insn_cnt=32
+[342.846645 pid=2201 tid=2201] loadtime step prog=inet_sock_set_s step=map_inline elapsed_ms=31
+[342.847434 pid=2201 tid=2201] loadtime optimized prog=inet_sock_set_s insns=309->230 maps=4 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2201_5
+[342.847749 pid=2201 tid=2201]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=230
+[342.847830 pid=2201 tid=2201] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[342.847895 pid=2201 tid=2201]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=120
+[342.847943 pid=2201 tid=2201] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.853905 pid=2186 tid=2186] loadtime step prog= step=map_inline elapsed_ms=6
+[342.853948 pid=2186 tid=2186] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.854022 pid=2186 tid=2186]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=236
+[342.854171 pid=2192 tid=2192] loadtime step prog= step=map_inline elapsed_ms=6
+[342.854225 pid=2192 tid=2192] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.854299 pid=2192 tid=2192]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=237
+[342.854433 pid=2192 tid=2192] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=46 hash=67e42c98e01a90ee policy_hash=8169cb264c7288e0 branch_profile_hash=fc58c43c0c2ee930 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.854450 pid=2186 tid=2186] BPF_PROG_LOAD type=26 (tracing) name=block_rq_insert insn_cnt=165 hash=7a3cc784f2afd7b0 policy_hash=e5135f031e4d3475 branch_profile_hash=fb48297ebb029683 license=GPL expected_attach=23 attach_btf_id=73523 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.855219 pid=2198 tid=2198] loadtime step prog= step=map_inline elapsed_ms=6
+[342.855279 pid=2198 tid=2198] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.855348 pid=2198 tid=2198]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=238
+[342.855458 pid=2198 tid=2198] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v4_connect_ insn_cnt=167 hash=9928e6ae2f001c9a policy_hash=941b39086eac4432 branch_profile_hash=1c8aa1b17598194f license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.856645 pid=2189 tid=2189] loadtime step prog=fentry_vfs_fsyn step=map_inline elapsed_ms=10
+[342.856698 pid=2189 tid=2189] loadtime prog=fentry_vfs_fsyn produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.856801 pid=2189 tid=2189]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=239
+[342.857516 pid=2195 tid=2195] loadtime step prog= step=map_inline elapsed_ms=6
+[342.857571 pid=2195 tid=2195] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.857648 pid=2195 tid=2195]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=240
+[342.857759 pid=2195 tid=2195] BPF_PROG_LOAD type=5 (tracepoint) name=sys_exit insn_cnt=116 hash=b73a9e8ecdbe64c4 policy_hash=de95d952a2e893a7 branch_profile_hash=642e3a2b66352519 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.857733 pid=2189 tid=2189] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_open insn_cnt=6 hash=c826085eb7cf6f2a policy_hash=eaad82b2b8d52871 branch_profile_hash=7044eba30c0b459a license=GPL expected_attach=24 attach_btf_id=123758 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.858017 pid=2201 tid=2201] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.864168 pid=2183 tid=2183] loadtime policy prog=kprobe__cap_cap policy_hash=b970952a1945633e branch_profile_hash=e0b458fe7a36e5ac insn_cnt=142
+[342.868614 pid=2204 tid=2204] loadtime step prog=sched_wakeup step=map_inline elapsed_ms=15
+[342.869714 pid=2204 tid=2204] loadtime optimized prog=sched_wakeup insns=32->16 maps=3 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2204_6
+[342.869847 pid=2204 tid=2204]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=244
+[342.869913 pid=2204 tid=2204] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[342.870012 pid=2204 tid=2204]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=121
+[342.870058 pid=2204 tid=2204] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.875244 pid=2189 tid=2189] loadtime policy prog=fentry_vfs_open policy_hash=eaad82b2b8d52871 branch_profile_hash=7044eba30c0b459a insn_cnt=6
+[342.876410 pid=2192 tid=2192] loadtime policy prog=tracepoint__sys policy_hash=8169cb264c7288e0 branch_profile_hash=fc58c43c0c2ee930 insn_cnt=46
+[342.878847 pid=2201 tid=2201] loadtime step prog= step=map_inline elapsed_ms=7
+[342.878899 pid=2201 tid=2201] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.878994 pid=2201 tid=2201]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=248
+[342.879470 pid=2201 tid=2201] perf_event_open type=2 config=2207 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=11 errno=0
+[342.879530 pid=2201 tid=2201] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.880975 pid=2204 tid=2204] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
+[342.881642 pid=2186 tid=2186] loadtime policy prog=block_rq_insert policy_hash=e5135f031e4d3475 branch_profile_hash=fb48297ebb029683 insn_cnt=165
+[342.885716 pid=2195 tid=2195] loadtime policy prog=sys_exit policy_hash=de95d952a2e893a7 branch_profile_hash=642e3a2b66352519 insn_cnt=116
+[342.888731 pid=2198 tid=2198] loadtime policy prog=tcp_v4_connect_ policy_hash=941b39086eac4432 branch_profile_hash=1c8aa1b17598194f insn_cnt=167
+[342.889684 pid=2201 tid=2201] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e insn_cnt=2
+[342.896597 pid=2189 tid=2189] loadtime step prog=fentry_vfs_open step=map_inline elapsed_ms=9
+[342.896645 pid=2189 tid=2189] loadtime prog=fentry_vfs_open produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.896782 pid=2189 tid=2189]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=256
+[342.897716 pid=2189 tid=2189] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_crea insn_cnt=6 hash=8656aae1a3bb4f12 policy_hash=aeeb994e67fe2b99 branch_profile_hash=dd94dd51e52de137 license=GPL expected_attach=24 attach_btf_id=123719 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.899390 pid=2204 tid=2204] loadtime step prog= step=map_inline elapsed_ms=7
+[342.899432 pid=2204 tid=2204] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.899495 pid=2204 tid=2204]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=258
+[342.899857 pid=2204 tid=2204] BPF_PROG_LOAD type=26 (tracing) name=sched_wakeup_ne insn_cnt=32 hash=664da210f6a9400d policy_hash=ed91a90f9251272e branch_profile_hash=56853fffce2bf832 license=GPL expected_attach=23 attach_btf_id=74192 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.903832 pid=2192 tid=2192] loadtime step prog=tracepoint__sys step=map_inline elapsed_ms=16
+[342.904740 pid=2192 tid=2192] loadtime optimized prog=tracepoint__sys insns=46->19 maps=2 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2192_7
+[342.904838 pid=2192 tid=2192]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=260
+[342.904941 pid=2192 tid=2192] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=102 hash=3ee7b67cec664f61 policy_hash=debe2f7eaf8af3c0 branch_profile_hash=46af79ec21899571 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.908348 pid=2201 tid=2201] loadtime step prog= step=map_inline elapsed_ms=7
+[342.908394 pid=2201 tid=2201] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.908494 pid=2201 tid=2201]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=261
+[342.908561 pid=2201 tid=2201] BPF_LINK_CREATE prog_fd=12 target_fd=4294967295 attach_type=41 flags=0
+[342.908613 pid=2201 tid=2201]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[342.908664 pid=2201 tid=2201] BPF_LINK_CREATE prog_fd=15 target_fd=11 attach_type=41 flags=0
+[342.908744 pid=2201 tid=2201] BPF_PERF_EVENT target retained target_fd=11 hold_fd=13 link_fd=12
+[342.908842 pid=2201 tid=2201] BPF_TASK_FD_QUERY target_fd=11 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=230 probe_offset=0 probe_addr=0 symbol=inet_sock_set_state
+[342.908893 pid=2201 tid=2201]   LINK_CREATE -> fd=12 errno=0 kernel_link_id=25
+[342.908959 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=11
+[342.909063 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=16 errno=0
+[342.909153 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=16
+[342.909225 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=17 errno=0
+[342.909290 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=17
+[342.909345 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=18 errno=0
+[342.909426 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=18
+[342.909500 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=19 errno=0
+[342.909576 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=19
+[342.909651 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=20 errno=0
+[342.909724 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=20
+[342.909771 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=21 errno=0
+[342.909846 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=21
+[342.909926 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=22 errno=0
+[342.910141 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=22
+[342.910211 pid=2201 tid=2201] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=23 errno=0
+[342.910281 pid=2201 tid=2201] PERF_EVENT_IOC_ENABLE event_fd=23
+[342.912657 pid=2189 tid=2189] loadtime policy prog=fentry_vfs_crea policy_hash=aeeb994e67fe2b99 branch_profile_hash=dd94dd51e52de137 insn_cnt=6
+[342.915080 pid=2183 tid=2183] loadtime step prog=kprobe__cap_cap step=map_inline elapsed_ms=39
+[342.915995 pid=2183 tid=2183] loadtime optimized prog=kprobe__cap_cap insns=142->60 maps=7 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2183_6
+[342.916170 pid=2183 tid=2183]   PROG_LOAD -> fd=23 errno=0 kernel_prog_id=265
+[342.919456 pid=2186 tid=2186] loadtime step prog=block_rq_insert step=map_inline elapsed_ms=27
+[342.920295 pid=2186 tid=2186] loadtime optimized prog=block_rq_insert insns=165->64 maps=4 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2186_7
+[342.920453 pid=2186 tid=2186]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=267
+[342.920901 pid=2186 tid=2186] BPF_PROG_LOAD type=26 (tracing) name=block_rq_issue insn_cnt=117 hash=bcc1df550d6af5d3 policy_hash=460189ef12691409 branch_profile_hash=659a17504686f6a4 license=GPL expected_attach=23 attach_btf_id=73524 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.920924 pid=2204 tid=2204] loadtime policy prog=sched_wakeup_ne policy_hash=ed91a90f9251272e branch_profile_hash=56853fffce2bf832 insn_cnt=32
+[342.924840 pid=2195 tid=2195] loadtime step prog=sys_exit step=map_inline elapsed_ms=27
+[342.925838 pid=2195 tid=2195] loadtime optimized prog=sys_exit insns=116->45 maps=4 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2195_7
+[342.925979 pid=2195 tid=2195]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=269
+[342.926379 pid=2195 tid=2195] perf_event_open type=2 config=371 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=11 errno=0
+[342.926477 pid=2195 tid=2195] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.926566 pid=2192 tid=2192] loadtime policy prog=tracepoint__sys policy_hash=debe2f7eaf8af3c0 branch_profile_hash=46af79ec21899571 insn_cnt=102
+[342.933350 pid=2189 tid=2189] loadtime step prog=fentry_vfs_crea step=map_inline elapsed_ms=9
+[342.933400 pid=2189 tid=2189] loadtime prog=fentry_vfs_crea produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.933509 pid=2189 tid=2189]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=273
+[342.933708 pid=2198 tid=2198] loadtime step prog=tcp_v4_connect_ step=map_inline elapsed_ms=34
+[342.933839 pid=2189 tid=2189] BPF_LINK_CREATE prog_fd=8 target_fd=0 attach_type=24 flags=0
+[342.934530 pid=2198 tid=2198] loadtime optimized prog=tcp_v4_connect_ insns=167->85 maps=5 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2198_7
+[342.934939 pid=2198 tid=2198]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=274
+[342.934933 pid=2189 tid=2189]   LINK_CREATE -> fd=13 errno=0 kernel_link_id=26
+[342.934986 pid=2189 tid=2189] BPF_LINK_CREATE prog_fd=9 target_fd=0 attach_type=24 flags=0
+[342.934998 pid=2198 tid=2198] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v6_connect insn_cnt=32 hash=9b37d763eeafa7fa policy_hash=606afffe465af5d1 branch_profile_hash=e90ce8e2088785c3 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.936508 pid=2189 tid=2189]   LINK_CREATE -> fd=14 errno=0 kernel_link_id=27
+[342.936556 pid=2189 tid=2189] BPF_LINK_CREATE prog_fd=10 target_fd=0 attach_type=24 flags=0
+[342.936618 pid=2195 tid=2195] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e insn_cnt=2
+[342.937762 pid=2189 tid=2189]   LINK_CREATE -> fd=15 errno=0 kernel_link_id=28
+[342.937805 pid=2189 tid=2189] BPF_LINK_CREATE prog_fd=11 target_fd=0 attach_type=24 flags=0
+[342.939290 pid=2189 tid=2189]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=29
+[342.939356 pid=2189 tid=2189] BPF_LINK_CREATE prog_fd=12 target_fd=0 attach_type=24 flags=0
+[342.940796 pid=2189 tid=2189]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=30
+[342.946532 pid=2204 tid=2204] loadtime step prog=sched_wakeup_ne step=map_inline elapsed_ms=14
+[342.947415 pid=2204 tid=2204] loadtime optimized prog=sched_wakeup_ne insns=32->16 maps=3 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2204_8
+[342.947529 pid=2204 tid=2204]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=277
+[342.947810 pid=2186 tid=2186] loadtime policy prog=block_rq_issue policy_hash=460189ef12691409 branch_profile_hash=659a17504686f6a4 insn_cnt=117
+[342.947957 pid=2204 tid=2204] BPF_PROG_LOAD type=26 (tracing) name=sched_switch insn_cnt=257 hash=b10d44abfbb937d0 policy_hash=5daefcf1ef23c2d1 branch_profile_hash=a88c2cb7712c67f9 license=GPL expected_attach=23 attach_btf_id=74185 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.954518 pid=2198 tid=2198] loadtime policy prog=tcp_v6_connect policy_hash=606afffe465af5d1 branch_profile_hash=e90ce8e2088785c3 insn_cnt=32
+[342.954603 pid=2195 tid=2195] loadtime step prog= step=map_inline elapsed_ms=6
+[342.954645 pid=2195 tid=2195] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[342.954725 pid=2195 tid=2195]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=281
+[342.954777 pid=2195 tid=2195] BPF_LINK_CREATE prog_fd=12 target_fd=4294967295 attach_type=41 flags=0
+[342.954857 pid=2195 tid=2195]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[342.954908 pid=2195 tid=2195] BPF_LINK_CREATE prog_fd=16 target_fd=11 attach_type=41 flags=0
+[342.954964 pid=2195 tid=2195] BPF_PERF_EVENT target retained target_fd=11 hold_fd=13 link_fd=12
+[342.955032 pid=2195 tid=2195] BPF_TASK_FD_QUERY target_fd=11 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=269 probe_offset=0 probe_addr=0 symbol=sys_exit
+[342.955085 pid=2195 tid=2195]   LINK_CREATE -> fd=12 errno=0 kernel_link_id=31
+[342.955123 pid=2195 tid=2195] PERF_EVENT_IOC_ENABLE event_fd=11
+[342.955321 pid=2195 tid=2195] perf_event_open type=2 config=372 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=15 errno=0
+[342.955378 pid=2195 tid=2195] BPF_LINK_CREATE prog_fd=14 target_fd=15 attach_type=41 flags=0
+[342.955432 pid=2195 tid=2195] BPF_PERF_EVENT target retained target_fd=15 hold_fd=18 link_fd=17
+[342.955469 pid=2195 tid=2195] BPF_TASK_FD_QUERY target_fd=15 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=222 probe_offset=0 probe_addr=0 symbol=sys_enter
+[342.955526 pid=2195 tid=2195]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=32
+[342.955572 pid=2195 tid=2195] PERF_EVENT_IOC_ENABLE event_fd=15
+[342.958840 pid=2192 tid=2192] loadtime step prog=tracepoint__sys step=map_inline elapsed_ms=21
+[342.959826 pid=2192 tid=2192] loadtime optimized prog=tracepoint__sys insns=102->101 maps=3 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2192_8
+[342.959967 pid=2192 tid=2192]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=283
+[342.960064 pid=2192 tid=2192] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=102 hash=3ee7b67cec664f61 policy_hash=debe2f7eaf8af3c0 branch_profile_hash=46af79ec21899571 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.962219 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[342.975812 pid=2204 tid=2204] loadtime policy prog=sched_switch policy_hash=5daefcf1ef23c2d1 branch_profile_hash=a88c2cb7712c67f9 insn_cnt=257
+[342.978221 pid=2198 tid=2198] loadtime step prog=tcp_v6_connect step=map_inline elapsed_ms=13
+[342.979091 pid=2198 tid=2198] loadtime optimized prog=tcp_v6_connect insns=32->15 maps=2 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2198_8
+[342.979180 pid=2198 tid=2198]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=286
+[342.979293 pid=2198 tid=2198] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v6_connect_ insn_cnt=170 hash=597c5385273447d9 policy_hash=2e1c6666282cebf4 branch_profile_hash=3833e78a81507d48 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[342.980992 pid=2192 tid=2192] loadtime policy prog=tracepoint__sys policy_hash=debe2f7eaf8af3c0 branch_profile_hash=46af79ec21899571 insn_cnt=102
+[342.990415 pid=2186 tid=2186] loadtime step prog=block_rq_issue step=map_inline elapsed_ms=31
+[342.991976 pid=2186 tid=2186] loadtime optimized prog=block_rq_issue insns=117->78 maps=5 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2186_8
+[342.992157 pid=2186 tid=2186]   PROG_LOAD -> fd=20 errno=0 kernel_prog_id=289
+[342.992568 pid=2186 tid=2186] BPF_PROG_LOAD type=26 (tracing) name=block_rq_comple insn_cnt=114 hash=5979a2ca13e1d758 policy_hash=05e8ff83a15ec170 branch_profile_hash=9ff3fe492f687f42 license=GPL expected_attach=23 attach_btf_id=73521 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[343.004516 pid=2198 tid=2198] loadtime policy prog=tcp_v6_connect_ policy_hash=2e1c6666282cebf4 branch_profile_hash=3833e78a81507d48 insn_cnt=170
+[343.015012 pid=2192 tid=2192] loadtime step prog=tracepoint__sys step=map_inline elapsed_ms=24
+[343.015269 pid=2204 tid=2204] loadtime step prog=sched_switch step=map_inline elapsed_ms=29
+[343.015349 pid=2204 tid=2204] loadtime prog=sched_switch produced no bytecode changes; passing original BPF_PROG_LOAD through
+[343.015782 pid=2204 tid=2204]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=293
+[343.015840 pid=2192 tid=2192] loadtime optimized prog=tracepoint__sys insns=102->101 maps=3 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2192_9
+[343.016009 pid=2192 tid=2192]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=294
+[343.016129 pid=2186 tid=2186] loadtime policy prog=block_rq_comple policy_hash=05e8ff83a15ec170 branch_profile_hash=9ff3fe492f687f42 insn_cnt=114
+[343.016229 pid=2204 tid=2204] BPF_LINK_CREATE prog_fd=15 target_fd=0 attach_type=23 flags=0
+[343.016515 pid=2204 tid=2204]   LINK_CREATE -> fd=13 errno=0 kernel_link_id=33
+[343.016482 pid=2183 tid=2183] perf_event_open type=8 config=0 config1=94662991400688 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=cap_capable kprobe_addr=0 -> fd=15 errno=0
+[343.016574 pid=2183 tid=2183] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[343.016566 pid=2204 tid=2204] BPF_LINK_CREATE prog_fd=16 target_fd=0 attach_type=23 flags=0
+[343.016565 pid=2192 tid=2192] perf_event_open type=2 config=728 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=10 errno=0
+[343.016636 pid=2192 tid=2192] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[343.016676 pid=2204 tid=2204]   LINK_CREATE -> fd=14 errno=0 kernel_link_id=34
+[343.016725 pid=2204 tid=2204] BPF_LINK_CREATE prog_fd=12 target_fd=0 attach_type=23 flags=0
+[343.016803 pid=2204 tid=2204]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=35
+[343.026797 pid=2183 tid=2183] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e insn_cnt=2
+[343.027013 pid=2192 tid=2192] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e insn_cnt=2
+[343.044457 pid=2192 tid=2192] loadtime step prog= step=map_inline elapsed_ms=7
+[343.044524 pid=2192 tid=2192] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[343.044610 pid=2192 tid=2192]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=301
+[343.044659 pid=2192 tid=2192] BPF_LINK_CREATE prog_fd=11 target_fd=4294967295 attach_type=41 flags=0
+[343.044691 pid=2192 tid=2192]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[343.044760 pid=2192 tid=2192] BPF_LINK_CREATE prog_fd=12 target_fd=10 attach_type=41 flags=0
+[343.044773 pid=2183 tid=2183] loadtime step prog= step=map_inline elapsed_ms=7
+[343.044807 pid=2192 tid=2192] BPF_PERF_EVENT target retained target_fd=10 hold_fd=14 link_fd=11
+[343.044854 pid=2192 tid=2192] BPF_TASK_FD_QUERY target_fd=10 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=219 probe_offset=0 probe_addr=0 symbol=sys_enter_open
+[343.044834 pid=2183 tid=2183] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[343.044904 pid=2192 tid=2192]   LINK_CREATE -> fd=11 errno=0 kernel_link_id=36
+[343.044934 pid=2183 tid=2183]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=302
+[343.044950 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=10
+[343.044984 pid=2183 tid=2183] BPF_LINK_CREATE prog_fd=16 target_fd=4294967295 attach_type=41 flags=0
+[343.044996 pid=2198 tid=2198] loadtime step prog=tcp_v6_connect_ step=map_inline elapsed_ms=29
+[343.045026 pid=2183 tid=2183]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[343.045077 pid=2192 tid=2192] perf_event_open type=2 config=726 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=17 errno=0
+[343.045071 pid=2183 tid=2183] BPF_LINK_CREATE prog_fd=18 target_fd=15 attach_type=41 flags=0
+[343.045129 pid=2183 tid=2183] BPF_PERF_EVENT target retained target_fd=15 hold_fd=17 link_fd=16
+[343.045125 pid=2192 tid=2192] BPF_LINK_CREATE prog_fd=13 target_fd=17 attach_type=41 flags=0
+[343.045237 pid=2183 tid=2183] BPF_TASK_FD_QUERY target_fd=15 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=200 probe_offset=0 probe_addr=18446744072074965696 symbol=cap_capable
+[343.045235 pid=2192 tid=2192] BPF_PERF_EVENT target retained target_fd=17 hold_fd=19 link_fd=18
+[343.045296 pid=2192 tid=2192] BPF_TASK_FD_QUERY target_fd=17 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=260 probe_offset=0 probe_addr=0 symbol=sys_enter_openat
+[343.045293 pid=2183 tid=2183]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=37
+[343.045363 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=15
+[343.045363 pid=2192 tid=2192]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=38
+[343.045427 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=17
+[343.045586 pid=2192 tid=2192] perf_event_open type=2 config=727 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=20 errno=0
+[343.045643 pid=2192 tid=2192] BPF_LINK_CREATE prog_fd=15 target_fd=20 attach_type=41 flags=0
+[343.045718 pid=2192 tid=2192] BPF_PERF_EVENT target retained target_fd=20 hold_fd=22 link_fd=21
+[343.045791 pid=2192 tid=2192] BPF_TASK_FD_QUERY target_fd=20 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=283 probe_offset=0 probe_addr=0 symbol=sys_exit_open
+[343.045852 pid=2192 tid=2192]   LINK_CREATE -> fd=21 errno=0 kernel_link_id=39
+[343.045918 pid=2198 tid=2198] loadtime optimized prog=tcp_v6_connect_ insns=170->89 maps=4 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2198_9
+[343.045913 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=20
+[343.045999 pid=2192 tid=2192] perf_event_open type=2 config=725 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=23 errno=0
+[343.046085 pid=2192 tid=2192] BPF_LINK_CREATE prog_fd=16 target_fd=23 attach_type=41 flags=0
+[343.046061 pid=2198 tid=2198]   PROG_LOAD -> fd=20 errno=0 kernel_prog_id=303
+[343.046122 pid=2183 tid=2183] perf_event_open type=8 config=1 config1=94662991395616 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=cap_capable kprobe_addr=0 -> fd=19 errno=0
+[343.046143 pid=2192 tid=2192] BPF_PERF_EVENT target retained target_fd=23 hold_fd=25 link_fd=24
+[343.046181 pid=2183 tid=2183] BPF_LINK_CREATE prog_fd=23 target_fd=19 attach_type=41 flags=0
+[343.046223 pid=2192 tid=2192] BPF_TASK_FD_QUERY target_fd=23 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=294 probe_offset=0 probe_addr=0 symbol=sys_exit_openat
+[343.046277 pid=2183 tid=2183] BPF_PERF_EVENT target retained target_fd=19 hold_fd=21 link_fd=20
+[343.046326 pid=2192 tid=2192]   LINK_CREATE -> fd=24 errno=0 kernel_link_id=40
+[343.046361 pid=2183 tid=2183] BPF_TASK_FD_QUERY target_fd=19 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=265 probe_offset=0 probe_addr=18446744072074965696 symbol=cap_capable
+[343.046398 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=23
+[343.046430 pid=2183 tid=2183]   LINK_CREATE -> fd=20 errno=0 kernel_link_id=41
+[343.046510 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=27 errno=0
+[343.046500 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=19
+[343.046633 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=27
+[343.046621 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=24 errno=0
+[343.046725 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=24
+[343.046723 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=28 errno=0
+[343.046808 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=28
+[343.046789 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=25 errno=0
+[343.046887 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=29 errno=0
+[343.046886 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=25
+[343.047009 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=29
+[343.046988 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=26 errno=0
+[343.047090 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=26
+[343.047086 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=30 errno=0
+[343.047172 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=27 errno=0
+[343.047197 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=30
+[343.047235 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=27
+[343.047267 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=31 errno=0
+[343.047316 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=28 errno=0
+[343.047420 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=28
+[343.047390 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=31
+[343.047481 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=32 errno=0
+[343.047478 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=29 errno=0
+[343.047584 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=29
+[343.047679 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=30 errno=0
+[343.047650 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=32
+[343.047769 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=33 errno=0
+[343.047768 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=30
+[343.047843 pid=2198 tid=2198] perf_event_open type=8 config=0 config1=94837959195888 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v4_connect kprobe_addr=0 -> fd=13 errno=0
+[343.047836 pid=2183 tid=2183] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=31 errno=0
+[343.047854 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=33
+[343.047906 pid=2198 tid=2198] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[343.047906 pid=2183 tid=2183] PERF_EVENT_IOC_ENABLE event_fd=31
+[343.047950 pid=2192 tid=2192] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=34 errno=0
+[343.048057 pid=2192 tid=2192] PERF_EVENT_IOC_ENABLE event_fd=34
+[343.059170 pid=2198 tid=2198] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e insn_cnt=2
+[343.059308 pid=2186 tid=2186] loadtime step prog=block_rq_comple step=map_inline elapsed_ms=30
+[343.060243 pid=2186 tid=2186] loadtime optimized prog=block_rq_comple insns=114->80 maps=5 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_070636_267511/details/loadtime-workdirs/loadtime_2186_9
+[343.060400 pid=2186 tid=2186]   PROG_LOAD -> fd=21 errno=0 kernel_prog_id=306
+[343.089586 pid=2198 tid=2198] loadtime step prog= step=map_inline elapsed_ms=12
+[343.089675 pid=2198 tid=2198] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[343.089792 pid=2198 tid=2198]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=308
+[343.089880 pid=2198 tid=2198] BPF_LINK_CREATE prog_fd=14 target_fd=4294967295 attach_type=41 flags=0
+[343.089969 pid=2198 tid=2198]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[343.090066 pid=2198 tid=2198] BPF_LINK_CREATE prog_fd=15 target_fd=13 attach_type=41 flags=0
+[343.090184 pid=2198 tid=2198] BPF_PERF_EVENT target retained target_fd=13 hold_fd=17 link_fd=14
+[343.090277 pid=2198 tid=2198] BPF_TASK_FD_QUERY target_fd=13 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=218 probe_offset=0 probe_addr=18446744072080359296 symbol=tcp_v4_connect
+[343.090367 pid=2198 tid=2198]   LINK_CREATE -> fd=14 errno=0 kernel_link_id=42
+[343.090454 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=13
+[343.091537 pid=2198 tid=2198] perf_event_open type=8 config=1 config1=94837959224656 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v4_connect kprobe_addr=0 -> fd=18 errno=0
+[343.091775 pid=2198 tid=2198] BPF_LINK_CREATE prog_fd=19 target_fd=18 attach_type=41 flags=0
+[343.091875 pid=2198 tid=2198] BPF_PERF_EVENT target retained target_fd=18 hold_fd=22 link_fd=21
+[343.091977 pid=2198 tid=2198] BPF_TASK_FD_QUERY target_fd=18 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=274 probe_offset=0 probe_addr=18446744072080359296 symbol=tcp_v4_connect
+[343.092055 pid=2198 tid=2198]   LINK_CREATE -> fd=21 errno=0 kernel_link_id=43
+[343.092143 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=18
+[343.094566 pid=2198 tid=2198] perf_event_open type=8 config=0 config1=94837959225760 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v6_connect kprobe_addr=0 -> fd=23 errno=0
+[343.094830 pid=2198 tid=2198] BPF_LINK_CREATE prog_fd=16 target_fd=23 attach_type=41 flags=0
+[343.094953 pid=2198 tid=2198] BPF_PERF_EVENT target retained target_fd=23 hold_fd=25 link_fd=24
+[343.095116 pid=2198 tid=2198] BPF_TASK_FD_QUERY target_fd=23 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=286 probe_offset=0 probe_addr=18446744072081156384 symbol=tcp_v6_connect
+[343.095228 pid=2198 tid=2198]   LINK_CREATE -> fd=24 errno=0 kernel_link_id=44
+[343.095319 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=23
+[343.096089 pid=2198 tid=2198] perf_event_open type=8 config=1 config1=94837959226864 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v6_connect kprobe_addr=0 -> fd=26 errno=0
+[343.096388 pid=2198 tid=2198] BPF_LINK_CREATE prog_fd=20 target_fd=26 attach_type=41 flags=0
+[343.096519 pid=2198 tid=2198] BPF_PERF_EVENT target retained target_fd=26 hold_fd=28 link_fd=27
+[343.096612 pid=2198 tid=2198] BPF_TASK_FD_QUERY target_fd=26 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=303 probe_offset=0 probe_addr=18446744072081156384 symbol=tcp_v6_connect
+[343.096696 pid=2198 tid=2198]   LINK_CREATE -> fd=27 errno=0 kernel_link_id=45
+[343.096785 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=26
+[343.097005 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=30 errno=0
+[343.097258 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=30
+[343.097425 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=31 errno=0
+[343.097687 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=31
+[343.097796 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=32 errno=0
+[343.098042 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=32
+[343.098242 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=33 errno=0
+[343.098435 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=33
+[343.098532 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=34 errno=0
+[343.098781 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=34
+[343.098882 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=35 errno=0
+[343.099122 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=35
+[343.099222 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=36 errno=0
+[343.099415 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=36
+[343.099557 pid=2198 tid=2198] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=37 errno=0
+[343.099729 pid=2198 tid=2198] PERF_EVENT_IOC_ENABLE event_fd=37
+[343.154710 pid=2186 tid=2186] perf_event_open type=8 config=0 config1=94069455315120 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=blk_account_io_merge_bio kprobe_addr=0 -> fd=13 errno=0
+[343.155225 pid=2186 tid=2186] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[343.162833 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[343.198858 pid=2186 tid=2186] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=ade3dc05a46d255e insn_cnt=2
+[343.270995 pid=2186 tid=2186] loadtime step prog= step=map_inline elapsed_ms=19
+[343.271327 pid=2186 tid=2186] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through
+[343.271640 pid=2186 tid=2186]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=311
+[343.271860 pid=2186 tid=2186] BPF_LINK_CREATE prog_fd=14 target_fd=4294967295 attach_type=41 flags=0
+[343.272144 pid=2186 tid=2186]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[343.272385 pid=2186 tid=2186] BPF_LINK_CREATE prog_fd=16 target_fd=13 attach_type=41 flags=0
+[343.272660 pid=2186 tid=2186] BPF_PERF_EVENT target retained target_fd=13 hold_fd=15 link_fd=14
+[343.272770 pid=2186 tid=2186] BPF_TASK_FD_QUERY target_fd=13 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=220 probe_offset=0 probe_addr=18446744072075523408 symbol=blk_account_io_merge_bio
+[343.272973 pid=2186 tid=2186]   LINK_CREATE -> fd=14 errno=0 kernel_link_id=46
+[343.273319 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=13
+[343.273711 pid=2186 tid=2186] BPF_LINK_CREATE prog_fd=20 target_fd=0 attach_type=23 flags=0
+[343.274676 pid=2186 tid=2186]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=47
+[343.275037 pid=2186 tid=2186] BPF_LINK_CREATE prog_fd=21 target_fd=0 attach_type=23 flags=0
+[343.275360 pid=2186 tid=2186]   LINK_CREATE -> fd=19 errno=0 kernel_link_id=48
+[343.276011 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=23 errno=0
+[343.276327 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=23
+[343.276791 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=24 errno=0
+[343.277453 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=24
+[343.277737 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=25 errno=0
+[343.278020 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=25
+[343.278496 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=26 errno=0
+[343.278615 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=26
+[343.278833 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=27 errno=0
+[343.278933 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=27
+[343.279240 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=28 errno=0
+[343.279649 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=28
+[343.279831 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=29 errno=0
+[343.280297 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=29
+[343.280557 pid=2186 tid=2186] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=30 errno=0
+[343.280814 pid=2186 tid=2186] PERF_EVENT_IOC_ENABLE event_fd=30
+[343.364007 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[343.565436 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[343.766801 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[343.968136 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[344.169565 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[344.371112 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[344.572316 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[344.773833 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[344.975497 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[345.177133 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[345.378501 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[345.579954 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[345.781438 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[345.983004 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[346.184895 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[346.386560 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[346.588241 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[346.789823 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[346.991393 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[347.192817 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[347.394410 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[347.595972 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[347.797643 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[347.999197 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[348.200578 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[348.402278 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[348.603779 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[348.805327 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[349.007104 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[349.208696 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[349.410225 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[349.611713 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[349.813282 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[350.014790 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[350.216308 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[350.417831 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[350.619358 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[350.820772 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[351.022411 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[351.223892 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[351.425432 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[351.627009 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[351.828742 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[352.030351 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[352.231629 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[352.433108 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[352.634553 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[352.836000 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[353.037641 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[353.239257 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[353.440747 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[353.642181 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[353.843781 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[354.045510 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[354.247075 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[354.448511 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[354.649928 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[354.851224 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[355.052838 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[355.254355 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[355.455598 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[355.657124 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[355.858455 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[356.059913 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[356.261270 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[356.462792 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[356.664277 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[356.865723 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[357.067406 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[357.269096 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[357.470770 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[357.672428 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[357.873973 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[358.075545 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[358.277060 pid=2183 tid=2207] socket: cmd=list_progs len=22
+[358.278144 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[358.479166 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[358.680807 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[358.882287 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[359.083613 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[359.285051 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[359.486591 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[359.688163 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[359.889729 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[360.091067 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[360.292324 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[360.493865 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[360.695196 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[360.896676 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[361.098039 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[361.299531 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[361.500960 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[361.702459 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[361.904116 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[362.105957 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[362.307586 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[362.509069 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[362.710733 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[362.911961 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[363.113458 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[363.314873 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[363.516437 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[363.717744 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[363.918966 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[364.120846 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[364.322047 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[364.523424 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[364.724734 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[364.926259 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[365.127853 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[365.329402 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[365.530998 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[365.732513 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[365.934143 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[366.135582 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[366.337042 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[366.538814 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[366.740260 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[366.941954 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[367.143320 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[367.344944 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[367.546554 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[367.748232 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[367.949936 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[368.151515 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[368.353264 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[368.554918 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[368.756710 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[368.958140 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[369.159889 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[369.361377 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[369.562961 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[369.764646 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[369.965812 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[370.167373 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[370.368800 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[370.570325 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[370.771855 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[370.973117 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[371.174747 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[371.376298 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[371.578254 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[371.780106 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[371.981247 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[372.182265 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[372.383767 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[372.585218 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[372.786490 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[372.987925 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[373.189384 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[373.390888 pid=2186 tid=2220] socket: cmd=list_progs len=22
+[373.392278 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[373.593640 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[373.795039 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[373.996862 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[374.198233 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[374.399969 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[374.601526 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[374.803047 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[375.004541 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[375.206050 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[375.407532 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[375.608913 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[375.810375 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[376.011921 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[376.213315 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[376.414482 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[376.615745 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[376.817279 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[377.018730 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[377.219826 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[377.420956 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[377.622407 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[377.823983 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[378.025505 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[378.226746 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[378.427864 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[378.629421 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[378.830530 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[379.031853 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[379.233164 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[379.434546 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[379.635968 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[379.837368 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[380.038898 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[380.240386 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[380.441675 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[380.642871 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[380.844347 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[381.045950 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[381.247356 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[381.448650 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[381.650051 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[381.851790 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[382.053589 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[382.255082 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[382.456712 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[382.658199 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[382.859413 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[383.060683 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[383.262144 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[383.463526 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[383.664884 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[383.866614 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[384.068182 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[384.269691 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[384.471019 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[384.672471 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[384.873819 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[385.075116 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[385.276545 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[385.477658 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[385.679176 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[385.880795 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[386.082342 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[386.283820 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[386.485168 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[386.686566 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[386.888123 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[387.089493 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[387.291074 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[387.492502 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[387.693958 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[387.895449 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[388.096791 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[388.298505 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[388.499915 pid=2189 tid=2212] socket: cmd=list_progs len=22
+[388.501067 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[388.702353 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[388.904139 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[389.105582 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[389.307200 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[389.509074 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[389.711129 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[389.912787 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[390.114250 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[390.315444 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[390.516796 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[390.718302 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[390.919630 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[391.121083 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[391.322332 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[391.523777 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[391.725166 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[391.926783 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[392.128530 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[392.330109 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[392.531380 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[392.732689 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[392.934284 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[393.136017 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[393.337283 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[393.538839 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[393.740381 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[393.941913 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[394.143417 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[394.344773 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[394.546217 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[394.747969 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[394.949705 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[395.151372 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[395.352808 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[395.554173 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[395.755687 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[395.957402 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[396.158956 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[396.360210 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[396.561395 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[396.762981 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[396.964413 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[397.165961 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[397.367506 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[397.568838 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[397.770195 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[397.971601 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[398.173146 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[398.374757 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[398.576167 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[398.777228 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[398.978602 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[399.179963 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[399.381784 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[399.583450 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[399.785049 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[399.986688 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[400.188158 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[400.389673 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[400.591357 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[400.792936 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[400.994418 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[401.195735 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[401.397134 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[401.598678 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[401.800341 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[402.002161 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[402.203808 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[402.405024 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[402.606305 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[402.807860 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[403.009127 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[403.210770 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[403.412155 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[403.613276 pid=2192 tid=2222] socket: cmd=list_progs len=22
+[403.614549 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[403.815517 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[404.017240 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[404.218742 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[404.420305 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[404.621524 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[404.822902 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[405.024166 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[405.225895 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[405.427621 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[405.629237 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[405.830858 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[406.032604 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[406.234111 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[406.435781 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[406.637490 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[406.839081 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[407.040478 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[407.241566 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[407.443005 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[407.644448 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[407.845707 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[408.046825 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[408.248327 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[408.449914 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[408.651634 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[408.853212 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[409.054886 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[409.256400 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[409.457846 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[409.659385 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[409.860970 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[410.062554 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[410.264049 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[410.465566 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[410.666959 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[410.868464 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[411.069956 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[411.271478 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[411.472835 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[411.674524 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[411.876601 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[412.078318 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[412.279679 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[412.481297 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[412.682688 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[412.884115 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[413.085735 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[413.287363 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[413.489137 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[413.690777 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[413.892381 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[414.093761 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[414.294849 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[414.496487 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[414.697939 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[414.899414 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[415.101059 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[415.302540 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[415.504004 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[415.705530 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[415.906940 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[416.108503 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[416.310039 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[416.511622 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[416.713092 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[416.914769 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[417.116128 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[417.317711 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[417.519021 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[417.720383 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[417.921811 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[418.123154 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[418.324650 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[418.526290 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[418.727767 pid=2195 tid=2216] socket: cmd=list_progs len=22
+[418.728888 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[418.930157 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[419.131429 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[419.333022 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[419.534742 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[419.736414 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[419.938284 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[420.139761 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[420.341489 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[420.542960 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[420.744521 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[420.946062 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[421.147709 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[421.349270 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[421.551071 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[421.752849 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[421.954662 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[422.156336 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[422.357809 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[422.559111 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[422.760375 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[422.961798 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[423.163428 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[423.365091 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[423.566732 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[423.768421 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[423.970064 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[424.171641 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[424.373359 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[424.575202 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[424.777007 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[424.978762 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[425.180407 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[425.381938 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[425.583609 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[425.785161 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[425.986944 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[426.188549 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[426.390106 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[426.591586 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[426.793165 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[426.994725 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[427.196077 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[427.397512 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[427.598651 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[427.800192 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[428.001511 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[428.203150 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[428.404436 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[428.606112 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[428.807666 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[429.009357 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[429.211055 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[429.412639 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[429.614090 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[429.815651 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[430.017190 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[430.218598 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[430.420046 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[430.621510 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[430.822911 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[431.024408 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[431.226103 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[431.427711 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[431.629315 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[431.830703 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[432.032227 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[432.233702 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[432.435100 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[432.636468 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[432.838142 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[433.039539 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[433.241128 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[433.442539 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[433.644134 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[433.845484 pid=2198 tid=2210] socket: cmd=list_progs len=22
+[433.846704 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[434.048013 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[434.249621 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[434.451095 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[434.652343 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[434.853780 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[435.055223 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[435.256642 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[435.458083 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[435.659653 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[435.861185 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[436.062725 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[436.264267 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[436.465612 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[436.667033 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[436.868317 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[437.069802 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[437.271301 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[437.472874 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[437.674315 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[437.875717 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[438.077105 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[438.278683 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[438.480299 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[438.681940 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[438.883314 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[439.084718 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[439.286267 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[439.487937 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[439.689573 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[439.891097 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[440.092667 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[440.294132 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[440.495564 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[440.696990 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[440.898342 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[441.099815 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[441.301264 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[441.503003 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[441.704876 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[441.906698 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[442.108253 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[442.309834 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[442.511262 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[442.712734 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[442.914289 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[443.115901 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[443.317325 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[443.518871 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[443.720387 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[443.922091 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[444.123793 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[444.325144 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[444.526639 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[444.728106 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[444.929498 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[445.131158 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[445.332717 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[445.534101 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[445.735552 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[445.937149 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[446.138744 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[446.340288 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[446.541770 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[446.743307 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[446.944663 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[447.146140 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[447.347647 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[447.548791 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[447.750226 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[447.951588 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[448.152922 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[448.354272 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[448.555643 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[448.756883 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[448.958350 pid=2201 tid=2215] socket: cmd=list_progs len=22
+[448.959590 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[449.161012 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[449.362589 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[449.564259 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[449.765842 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[449.967361 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[450.169046 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[450.370646 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[450.572066 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[450.773709 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[450.975344 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[451.176926 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[451.378496 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[451.579953 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[451.781045 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[451.982747 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[452.184056 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[452.385890 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[452.587492 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[452.789016 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[452.990447 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[453.191703 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[453.393193 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[453.594617 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[453.796018 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[453.997623 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[454.199036 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[454.400564 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[454.601839 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[454.803381 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[455.004948 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[455.206457 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[455.407912 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[455.609483 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[455.810968 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[456.012670 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[456.214106 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[456.415645 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[456.616939 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[456.818590 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[457.020130 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[457.221315 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[457.422821 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[457.624269 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[457.825768 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[458.027172 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[458.228723 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[458.429936 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[458.631483 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[458.832730 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[459.034095 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[459.235728 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[459.437471 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[459.638667 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[459.840126 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[460.041593 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[460.242993 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[460.444407 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[460.645907 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[460.847488 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[461.048930 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[461.250196 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[461.451612 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[461.652981 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[461.854820 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[462.056351 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[462.257508 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[462.458894 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[462.660129 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[462.861682 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[463.063298 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[463.264825 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[463.466382 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[463.667822 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[463.869121 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[464.070423 pid=2204 tid=2219] socket: cmd=list_progs len=22
+[525.092916 pid=2183 tid=2207] socket: cmd=measure_start len=25
+[525.093921 pid=2186 tid=2220] socket: cmd=measure_start len=25
+[525.094740 pid=2189 tid=2212] socket: cmd=measure_start len=25
+[525.095681 pid=2192 tid=2222] socket: cmd=measure_start len=25
+[525.096394 pid=2195 tid=2216] socket: cmd=measure_start len=25
+[525.097090 pid=2198 tid=2210] socket: cmd=measure_start len=25
+[525.097792 pid=2201 tid=2215] socket: cmd=measure_start len=25
+[525.098560 pid=2204 tid=2219] socket: cmd=measure_start len=25
+[707.150295 pid=2183 tid=2207] socket: cmd=measure_finish len=26
+[707.155464 pid=2186 tid=2220] socket: cmd=measure_finish len=26
+[707.156077 pid=2189 tid=2212] socket: cmd=measure_finish len=26
+[707.156796 pid=2192 tid=2222] socket: cmd=measure_finish len=26
+[707.157157 pid=2195 tid=2216] socket: cmd=measure_finish len=26
+[707.157885 pid=2198 tid=2210] socket: cmd=measure_finish len=26
+[707.158505 pid=2201 tid=2215] socket: cmd=measure_finish len=26
+[707.158884 pid=2204 tid=2219] socket: cmd=measure_finish len=26
+[707.159962 pid=2183 tid=2183] PERF_EVENT_IOC_DISABLE event_fd=15
+[707.320359 pid=2183 tid=2183] PERF_EVENT_IOC_DISABLE event_fd=19
+[707.524781 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=23
+[707.525767 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=24
+[707.526542 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=25
+[707.526929 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=26
+[707.527567 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=27
+[707.527931 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=28
+[707.528424 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=29
+[707.528839 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=30
+[707.529121 pid=2186 tid=2186] PERF_EVENT_IOC_DISABLE event_fd=13
+[707.754891 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=27
+[707.755534 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=28
+[707.756119 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=29
+[707.756660 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=30
+[707.757423 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=31
+[707.757942 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=32
+[707.758473 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=33
+[707.758718 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=34
+[707.758847 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=10
+[707.940983 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=17
+[708.240528 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=20
+[708.400779 pid=2192 tid=2192] PERF_EVENT_IOC_DISABLE event_fd=23
+[708.721948 pid=2195 tid=2195] PERF_EVENT_IOC_DISABLE event_fd=15
+[709.040257 pid=2195 tid=2195] PERF_EVENT_IOC_DISABLE event_fd=11
+[709.388336 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=30
+[709.389008 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=31
+[709.389724 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=32
+[709.390367 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=33
+[709.391105 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=34
+[709.391535 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=35
+[709.391986 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=36
+[709.392617 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=37
+[709.393064 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=13
+[709.580400 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=18
+[709.750387 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=23
+[709.910218 pid=2198 tid=2198] PERF_EVENT_IOC_DISABLE event_fd=26
+[710.104321 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=16
+[710.105231 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=17
+[710.105897 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=18
+[710.106516 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=19
+[710.106989 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=20
+[710.107568 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=21
+[710.108042 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=22
+[710.108303 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=23
+[710.108877 pid=2201 tid=2201] PERF_EVENT_IOC_DISABLE event_fd=11

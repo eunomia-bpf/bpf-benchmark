@@ -1333,6 +1333,35 @@ def tracee_fresh_causality_rows(
     )
 
 
+# Fresh provenance-complete BCC causality triplet, the third on the
+# component-less stress-ng shape (see `fresh_causality_rows`). BCC's fresh
+# workload is a single stress-ng run with no components, so the derived scalar
+# is the workload-level `stress-ng: metrc:` bogo-ops column. The May BCC batch
+# reports an independent corrected `0.7921`; the two are separate generations
+# and are never merged.
+BCC_FRESH_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-bcc-map-inline-fresh-causality"
+)
+BCC_FRESH_CAUSALITY_DECLARED = ("1.0107", "1.0075")
+
+
+def bcc_fresh_causality_rows(
+    root: Path,
+    evidence_dir: str = BCC_FRESH_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = BCC_FRESH_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """BCC fresh map_inline causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="bcc__set",
+        report_rel="details/loadtime-reports/bcc__set.jsonl",
+        label="RQ2 BCC fresh map_inline causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="stress-ng metrc bogo-ops",
+    )
+
+
 def cilium_site_rows(root: Path) -> list[Row]:
     """Derive RQ3 applied-site counts from retained shim loadtime reports.
 
@@ -2024,6 +2053,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(cilium_fresh_causality_rows(root))
     rows.extend(tetragon_fresh_causality_rows(root))
     rows.extend(tracee_fresh_causality_rows(root))
+    rows.extend(bcc_fresh_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3375,6 +3405,35 @@ def self_test() -> int:
                               ctl_a_post=1000, ctl_b_post=1000)
         if tracee_row().status != PASS:
             failures.append("restored Tracee fresh causality must return to PASS")
+
+        # The BCC row is likewise the component-less `metrc` shape; this case
+        # asserts the fifth app is gated on its own app stem/report path, so a
+        # BCC triplet cannot be satisfied by any other app's files.
+        bcc_ev = BCC_FRESH_CAUSALITY_EVIDENCE_DIR
+        bcc_declared = ("0.8500", "0.8500")
+
+        def bcc_row() -> Row:
+            return bcc_fresh_causality_rows(root, bcc_ev, bcc_declared)[0]
+
+        write_fresh_causality(ev=bcc_ev, stem="bcc__set",
+                              wl_factory=metrc_wl, mi_post=850,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        row = bcc_row()
+        if row.status != PASS or "control-corrected=0.850000x" not in row.evidence:
+            failures.append(
+                f"valid BCC fresh causality expected PASS/0.850000x, got {(row.status, row.evidence)!r}")
+        if "stress-ng metrc bogo-ops" not in row.evidence:
+            failures.append("BCC fresh causality must name its rate shape")
+        write_fresh_causality(ev=bcc_ev, stem="tracee__monitor",
+                              wl_factory=metrc_wl, mi_post=850,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if bcc_row().status != UNAVAILABLE:
+            failures.append("BCC fresh causality must require the BCC app record")
+        write_fresh_causality(ev=bcc_ev, stem="bcc__set",
+                              wl_factory=metrc_wl, mi_post=850,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if bcc_row().status != PASS:
+            failures.append("restored BCC fresh causality must return to PASS")
 
     if failures:
         for f in failures:
