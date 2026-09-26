@@ -152,9 +152,10 @@ Latitude, stated plainly.
 - `PASS` remains local to the named row. `OVERALL AE EVIDENCE` stays
   `INCOMPLETE` until the `atc26-ae-2` ZIP is published on Zenodo.
 
-The same axis is available for a third `wide_mem` app (Tracee, 92 applied sites
-per startup, or BCC, 13) and for other pure-bytecode passes; each needs only a
-new wrapper plus its two frozen constants.
+The same axis is available for a third `wide_mem` app (Tracee, 142 applied
+sites in an isolated single-pass run; shipped as step 0023) and for other
+pure-bytecode passes; each needs only a new wrapper plus its two frozen
+constants.
 
 ## Delivery
 
