@@ -288,11 +288,12 @@ batch of eighteen single-application runs (six apps × one \`map_inline\`-only r
 plus two same-batch no-pass \`loadtime\` nulls at the identical 60 s duration)
 lets the renderer derive controlled per-pass throughput-causality ratios whose
 restart drift is subtracted by the no-pass controls. The archive additionally
-carries fresh, provenance-complete Katran, Cilium, and Tetragon \`map_inline\`
-causality triplets — for each, one optimized run plus two matched no-pass
-controls, each with its own make-console log — whose retained per-step bytecode
-binds the derived applied-site rewrite (16 sites for Katran, 3787 for Cilium,
-148 for Tetragon) to the measured control-corrected throughput ratio.
+carries fresh, provenance-complete Katran, Cilium, Tetragon, and Tracee
+\`map_inline\` causality triplets — for each, one optimized run plus two matched
+no-pass controls, each with its own make-console log — whose retained per-step
+bytecode binds the derived applied-site rewrite (16 sites for Katran, 3787 for
+Cilium, 148 for Tetragon, 12 for Tracee) to the measured control-corrected
+throughput ratio.
 ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
@@ -385,6 +386,9 @@ manifest = {
         'docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/receipt.json',
         'docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/make-corpus.log',
         'docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/details/loadtime-reports/tetragon__observer.jsonl',
+        'docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/receipt.json',
+        'docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/make-corpus.log',
+        'docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/details/loadtime-reports/tracee__monitor.jsonl',
         'docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/details/loadtime-reports/katran.jsonl',
     ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
@@ -509,6 +513,12 @@ required=(
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/receipt.json
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/make-corpus.log
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/details/loadtime-reports/tetragon__observer.jsonl
+    docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/receipt.json
+    docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/make-corpus.log
+    docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/details/loadtime-reports/tracee__monitor.jsonl
+    docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/details/loadtime-workdirs/loadtime_6620_10/input.step.0.bin
+    docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/controls/nullA/metadata.json
+    docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality/controls/nullB/metadata.json
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/details/loadtime-workdirs/loadtime_2109_103/input.step.0.bin
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/controls/nullA/metadata.json
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/controls/nullB/metadata.json

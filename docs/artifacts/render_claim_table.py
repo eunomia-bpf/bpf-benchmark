@@ -1304,6 +1304,35 @@ def tetragon_fresh_causality_rows(
     )
 
 
+# Fresh provenance-complete Tracee causality triplet, same shape as Tetragon
+# (see `fresh_causality_rows`). Tracee's fresh workload is likewise a single
+# stress-ng run with no components, so the derived scalar is the workload-level
+# `stress-ng: metrc:` bogo-ops column. The control-corrected sign agrees with
+# the May Tracee batch's independent `1.0114` (both above 1.0), but the two are
+# separate generations and are never merged.
+TRACEE_FRESH_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-tracee-map-inline-fresh-causality"
+)
+TRACEE_FRESH_CAUSALITY_DECLARED = ("1.0110", "1.0152")
+
+
+def tracee_fresh_causality_rows(
+    root: Path,
+    evidence_dir: str = TRACEE_FRESH_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = TRACEE_FRESH_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Tracee fresh map_inline causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="tracee__monitor",
+        report_rel="details/loadtime-reports/tracee__monitor.jsonl",
+        label="RQ2 Tracee fresh map_inline causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="stress-ng metrc bogo-ops",
+    )
+
+
 def cilium_site_rows(root: Path) -> list[Row]:
     """Derive RQ3 applied-site counts from retained shim loadtime reports.
 
@@ -1994,6 +2023,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(katran_fresh_causality_rows(root))
     rows.extend(cilium_fresh_causality_rows(root))
     rows.extend(tetragon_fresh_causality_rows(root))
+    rows.extend(tracee_fresh_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3315,6 +3345,36 @@ def self_test() -> int:
                               ctl_a_post=1000, ctl_b_post=1000)
         if tetragon_row().status != PASS:
             failures.append("restored Tetragon fresh causality must return to PASS")
+
+        # The Tracee row is the same component-less `metrc` shape as Tetragon,
+        # so the new-class coinage is already covered; this case asserts that
+        # the row is gated on Tracee's own app stem/report path rather than
+        # inheriting another app's files, and that it names its rate shape.
+        tracee_ev = TRACEE_FRESH_CAUSALITY_EVIDENCE_DIR
+        tracee_declared = ("0.7000", "0.7000")
+
+        def tracee_row() -> Row:
+            return tracee_fresh_causality_rows(root, tracee_ev, tracee_declared)[0]
+
+        write_fresh_causality(ev=tracee_ev, stem="tracee__monitor",
+                              wl_factory=metrc_wl, mi_post=700,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        row = tracee_row()
+        if row.status != PASS or "control-corrected=0.700000x" not in row.evidence:
+            failures.append(
+                f"valid Tracee fresh causality expected PASS/0.700000x, got {(row.status, row.evidence)!r}")
+        if "stress-ng metrc bogo-ops" not in row.evidence:
+            failures.append("Tracee fresh causality must name its rate shape")
+        write_fresh_causality(ev=tracee_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_post=700,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if tracee_row().status != UNAVAILABLE:
+            failures.append("Tracee fresh causality must require the Tracee app record")
+        write_fresh_causality(ev=tracee_ev, stem="tracee__monitor",
+                              wl_factory=metrc_wl, mi_post=700,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if tracee_row().status != PASS:
+            failures.append("restored Tracee fresh causality must return to PASS")
 
     if failures:
         for f in failures:
