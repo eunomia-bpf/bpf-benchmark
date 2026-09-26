@@ -1362,6 +1362,40 @@ def bcc_fresh_causality_rows(
     )
 
 
+# Fresh provenance-complete otelcol-ebpf-profiler causality triplet, the
+# sixth and last app on the same stress-ng shape (see
+# `fresh_causality_rows`). Unlike BCC/Tetragon/Tracee, otelcol's workload is
+# composite: five interpreter sha256 workers plus one stress-ng cpu component.
+# Only the stress-ng component carries a rate the shared extractor recognizes
+# (its `stress-ng: metrc:` bogo-ops column); the interpreters' own
+# `<lang> sha256 ops=N elapsed_s=T` stdout matches no shape, so the summed
+# extractor's per-component sum yields the same metrc scalar the May batch
+# derived. `metric_noun` names that shape. The May otelcol batch reports an
+# independent corrected `0.9983`; the two are separate generations and are
+# never merged.
+OTELCOL_FRESH_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-otelcol-map-inline-fresh-causality"
+)
+OTELCOL_FRESH_CAUSALITY_DECLARED = ("1.0188", "1.0798")
+
+
+def otelcol_fresh_causality_rows(
+    root: Path,
+    evidence_dir: str = OTELCOL_FRESH_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = OTELCOL_FRESH_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """otelcol fresh map_inline causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="otelcol-ebpf-profiler__profiling",
+        report_rel="details/loadtime-reports/otelcol-ebpf-profiler__profiling.jsonl",
+        label="RQ2 otelcol fresh map_inline causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="stress-ng metrc bogo-ops",
+    )
+
+
 def cilium_site_rows(root: Path) -> list[Row]:
     """Derive RQ3 applied-site counts from retained shim loadtime reports.
 
@@ -2054,6 +2088,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(tetragon_fresh_causality_rows(root))
     rows.extend(tracee_fresh_causality_rows(root))
     rows.extend(bcc_fresh_causality_rows(root))
+    rows.extend(otelcol_fresh_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3434,6 +3469,35 @@ def self_test() -> int:
                               ctl_a_post=1000, ctl_b_post=1000)
         if bcc_row().status != PASS:
             failures.append("restored BCC fresh causality must return to PASS")
+
+        # The otelcol row is the sixth app and the same `metrc` shape; this
+        # case asserts it is gated on its own app stem/report path, so its
+        # triplet cannot be satisfied by any other app's files.
+        otelcol_ev = OTELCOL_FRESH_CAUSALITY_EVIDENCE_DIR
+        otelcol_declared = ("0.8500", "0.8500")
+
+        def otelcol_row() -> Row:
+            return otelcol_fresh_causality_rows(root, otelcol_ev, otelcol_declared)[0]
+
+        write_fresh_causality(ev=otelcol_ev, stem="otelcol-ebpf-profiler__profiling",
+                              wl_factory=metrc_wl, mi_post=850,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        row = otelcol_row()
+        if row.status != PASS or "control-corrected=0.850000x" not in row.evidence:
+            failures.append(
+                f"valid otelcol fresh causality expected PASS/0.850000x, got {(row.status, row.evidence)!r}")
+        if "stress-ng metrc bogo-ops" not in row.evidence:
+            failures.append("otelcol fresh causality must name its rate shape")
+        write_fresh_causality(ev=otelcol_ev, stem="bcc__set",
+                              wl_factory=metrc_wl, mi_post=850,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if otelcol_row().status != UNAVAILABLE:
+            failures.append("otelcol fresh causality must require the otelcol app record")
+        write_fresh_causality(ev=otelcol_ev, stem="otelcol-ebpf-profiler__profiling",
+                              wl_factory=metrc_wl, mi_post=850,
+                              ctl_a_post=1000, ctl_b_post=1000)
+        if otelcol_row().status != PASS:
+            failures.append("restored otelcol fresh causality must return to PASS")
 
     if failures:
         for f in failures:
