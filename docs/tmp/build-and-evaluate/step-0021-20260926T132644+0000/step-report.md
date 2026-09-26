@@ -18,9 +18,9 @@ builder parameterized on the pass under test (`3b9ccc3bc`), so the axis was
 ready but unmeasured. Two facts decided the target:
 
 1. **Tetragon is the densest retained `wide_mem` producer** of the six supported
-   applications: 616 applied sites across its retained report streams, against
-   929 for Cilium (but Cilium already carries six triplets and a large
-   attribution analysis), 299 for Tracee, 65 for BCC, 45 for otelcol, 10 for
+   applications, counted per single application startup over the report rows
+   whose `step` is `wide_mem`: 254 applied sites for Tetragon, against 164 for
+   Cilium, 92 for Tracee, 13 for BCC, 12 for otelcol-ebpf-profiler and 1 for
    Katran. A controlled measurement is worth more where more sites sit behind
    it.
 2. **`const_prop` is a poor next choice**: `docs/evaluation.md:342` records
@@ -140,9 +140,9 @@ Latitude, stated plainly.
 - `PASS` remains local to the named row. `OVERALL AE EVIDENCE` stays
   `INCOMPLETE` until the `atc26-ae-2` ZIP is published on Zenodo.
 
-The same axis is available for a second `wide_mem` app (Cilium, 929 retained
-sites, or Tracee, 299) and for other pure-bytecode passes; each needs only a
-new wrapper plus its two frozen constants.
+The same axis is available for a second `wide_mem` app (Cilium, 164 applied
+sites per startup, or Tracee, 92) and for other pure-bytecode passes; each needs
+only a new wrapper plus its two frozen constants.
 
 ## Delivery
 

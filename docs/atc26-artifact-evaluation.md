@@ -1069,11 +1069,11 @@ lowering: `docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality/`
 carries one `wide_mem` run (`x86_kvm_corpus_20260926_122945_897790`) plus two
 matched no-pass controls (`x86_kvm_corpus_20260926_124505_606032`,
 `x86_kvm_corpus_20260926_130125_857040`), each with its own make-console log.
-The pass under test is a pure BPF-to-BPF rewriting pass rather than a
-kfunc-lowering pass, and Tetragon is the densest `wide_mem` producer of the six
-applications in a single application startup (254 applied sites, against 164
-for Cilium, 92 for Tracee and 13 for BCC), so the controlled measurement has
-the most sites behind it. The retained report stream gives 254 changed load
+The pass under test is a pure BPF-to-BPF rewriting pass, and Tetragon is the
+densest `wide_mem` producer of the six applications in a single application
+startup (254 applied sites, against 164 for Cilium, 92 for Tracee, 13 for BCC,
+12 for otelcol-ebpf-profiler and 1 for Katran), so the controlled measurement
+has the most sites behind it. The retained report stream gives 254 changed load
 instances totalling 254 applied sites
 (instruction counts 373,141 → 343,261, −29,880), all 254 of whose retained
 before/after images match the reported counts and differ; the throughput
