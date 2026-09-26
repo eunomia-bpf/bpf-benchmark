@@ -1579,6 +1579,41 @@ def wide_mem_tracee_causality_rows(
     )
 
 
+# Fresh provenance-complete Tetragon `dce` causality triplet, the fourth
+# non-`map_inline` pass triplet and the first on a pass family other than
+# `map_inline`/`wide_mem`. `dce` is a pure BPF-to-BPF rewriting pass like
+# `wide_mem`, so the same single-pass prefilter, report reconciliation and
+# control-corrected ratio apply unchanged; only `pass_name` differs. Tetragon
+# is the densest `dce` producer of the six apps in the default-policy stream
+# (308 applied sites, against 196 for Tracee and 28 for BCC), so a controlled
+# measurement there has the most sites behind it. The workload is the same
+# component-less stress-ng shape as the Tetragon `wide_mem` and `map_inline`
+# triplets, so the derived scalar is the workload-level `stress-ng: metrc:`
+# bogo-ops column.
+DCE_TETRAGON_CAUSALITY_EVIDENCE_DIR = (
+    "docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality"
+)
+DCE_TETRAGON_CAUSALITY_DECLARED = ("0.9526", "1.0088")
+
+
+def dce_tetragon_causality_rows(
+    root: Path,
+    evidence_dir: str = DCE_TETRAGON_CAUSALITY_EVIDENCE_DIR,
+    declared: tuple[str, str] = DCE_TETRAGON_CAUSALITY_DECLARED,
+) -> list[Row]:
+    """Tetragon fresh dce causality bound to its retained bytecode."""
+    return fresh_causality_rows(
+        root,
+        app_stem="tetragon__observer",
+        report_rel="details/loadtime-reports/tetragon__observer.jsonl",
+        label="RQ2 Tetragon fresh dce causality + retained bytecode",
+        evidence_dir=evidence_dir,
+        declared=declared,
+        metric_noun="stress-ng metrc bogo-ops",
+        pass_name="dce",
+    )
+
+
 def cilium_site_rows(root: Path) -> list[Row]:
     """Derive RQ3 applied-site counts from retained shim loadtime reports.
 
@@ -2275,6 +2310,7 @@ def build_rows(root: Path) -> list[Row]:
     rows.extend(wide_mem_tetragon_causality_rows(root))
     rows.extend(wide_mem_cilium_causality_rows(root))
     rows.extend(wide_mem_tracee_causality_rows(root))
+    rows.extend(dce_tetragon_causality_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -3856,6 +3892,44 @@ def self_test() -> int:
                               mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
         if wide_mem_tracee_row().status != PASS:
             failures.append("restored Tracee wide_mem causality must return to PASS")
+
+        # The dce Tetragon row is the fourth non-map_inline triplet and the
+        # first on a pass family other than map_inline/wide_mem, so it asserts
+        # the shared builder is genuinely pass-parameterized rather than
+        # wide_mem-shaped. DCE's Tetragon workload is the component-less
+        # stress-ng shape like the Tetragon wide_mem and map_inline rows, so it
+        # names the bogo-ops column; it accepts `dce`, rejects `wide_mem`, and
+        # is gated on Tetragon's own app record.
+        dce_ev = DCE_TETRAGON_CAUSALITY_EVIDENCE_DIR
+        dce_declared = ("1.0000", "1.0000")
+
+        def dce_tetragon_row() -> Row:
+            return dce_tetragon_causality_rows(root, dce_ev, dce_declared)[0]
+
+        write_fresh_causality(ev=dce_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_passes=("dce",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        row = dce_tetragon_row()
+        if row.status != PASS or "dce median" not in row.evidence:
+            failures.append(
+                f"valid Tetragon dce causality expected PASS/dce, got {(row.status, row.evidence)!r}")
+        if "stress-ng metrc bogo-ops" not in row.evidence:
+            failures.append("Tetragon dce causality must name its rate shape")
+        write_fresh_causality(ev=dce_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_passes=("wide_mem",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if dce_tetragon_row().status != PARTIAL:
+            failures.append("Tetragon dce causality must reject a wide_mem run")
+        write_fresh_causality(ev=dce_ev, stem="cilium__agent",
+                              wl_factory=metrc_wl, mi_passes=("dce",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if dce_tetragon_row().status != UNAVAILABLE:
+            failures.append("Tetragon dce causality must require the tetragon app record")
+        write_fresh_causality(ev=dce_ev, stem="tetragon__observer",
+                              wl_factory=metrc_wl, mi_passes=("dce",),
+                              mi_post=1000, ctl_a_post=1000, ctl_b_post=1000)
+        if dce_tetragon_row().status != PASS:
+            failures.append("restored Tetragon dce causality must return to PASS")
     if failures:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)

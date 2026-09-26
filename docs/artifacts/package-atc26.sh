@@ -320,6 +320,16 @@ ratio. Its isolated single-pass site count is 142 against 254 for Tetragon and
 rewritten population; its
 workload is the component-less stress-ng shape, not Cilium's summed
 kernel-pktgen one.
+The archive carries a fourth non-\`map_inline\` triplet, and the first on a pass
+family other than \`map_inline\`/\`wide_mem\`: a fresh, provenance-complete
+Tetragon \`dce\` run plus two matched no-pass controls whose retained per-step
+bytecode binds 254 applied sites across 254 changed load instances to the
+measured control-corrected throughput ratio. \`dce\` is a pure BPF-to-BPF
+rewriting pass distinct from \`wide_mem\`, so the same controlled-causality
+derivation is shown to hold for a second pass in that class. Its workload is the
+component-less stress-ng shape, and its control-corrected ratio is close to
+neutral (1.0088x), so the claim is the controlled measurement rather than a
+speedup.
 ARTIFACT_MANIFEST.json records
 the superproject commit and every direct and nested submodule pin. Historical bulk
 result trees are omitted; the guide gives the commands that regenerate them.
@@ -431,6 +441,9 @@ manifest = {
         'docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/receipt.json',
         'docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/make-corpus.log',
         'docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/details/loadtime-reports/tracee__monitor.jsonl',
+        'docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/receipt.json',
+        'docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/make-corpus.log',
+        'docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/details/loadtime-reports/tetragon__observer.jsonl',
     ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
 }
@@ -595,6 +608,12 @@ required=(
     docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/details/loadtime-workdirs/loadtime_12507_0/input.step.0.bin
     docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/controls/nullA/metadata.json
     docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/controls/nullB/metadata.json
+    docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/receipt.json
+    docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/make-corpus.log
+    docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/details/loadtime-reports/tetragon__observer.jsonl
+    docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/controls/nullA/metadata.json
+    docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/controls/nullB/metadata.json
+    docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/details/loadtime-workdirs/loadtime_2097_1/input.step.0.bin
 )
 for rel in "${required[@]}"; do
     [ -e "$VERIFY/$rel" ] || { echo "missing from ZIP: $rel" >&2; exit 1; }
@@ -616,6 +635,7 @@ grep -q '^OVERALL AE EVIDENCE: INCOMPLETE' "$VERIFY/claim-table.txt"
 grep -q '^RQ2 Tetragon fresh wide_mem causality.*PASS' "$VERIFY/claim-table.txt"
 grep -q '^RQ2 Cilium fresh wide_mem causality.*PASS' "$VERIFY/claim-table.txt"
 grep -q '^RQ2 Tracee fresh wide_mem causality.*PASS' "$VERIFY/claim-table.txt"
+grep -q '^RQ2 Tetragon fresh dce causality.*PASS' "$VERIFY/claim-table.txt"
 python3 -m json.tool "$VERIFY/ARTIFACT_MANIFEST.json" >/dev/null
 python3 -m json.tool "$VERIFY/.zenodo.json" >/dev/null
 
