@@ -433,13 +433,23 @@ written against an independently stated load/flags specification. Its
 independent 40,784-case oracle checks the actual generated macros against a
 byte-loop model. Effective-address derivation and RHS source selection remain
 outside the theorem.
+The two-destination `MULX` theorem covers `X86_SIM_L_EXEC_MULX`. It composes
+the 32-bit zero-extended low-word product and the 64-bit four-limb ladder with
+the width-confined writeback of both the destination and the auxiliary operand,
+proving both register halves equal the halves of an exact 128-bit product and
+that the flag word is untouched, against an independently stated
+product/writeback specification. Its independent 41,296-case oracle checks the
+actual generated write macros against a 128-bit-product model that shares no
+arithmetic with the limb ladder. The implicit `RDX` left operand, the
+auxiliary-destination decode, and effective-address derivation remain outside
+the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
-multiply and compare compositions, and
+multiply, two-destination `MULX`, and compare compositions, and
 AArch64 width, generic ALU handler writeback/path
 selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, and CCMP composition,
 plus ADD/SUB/logical NZCV production;
