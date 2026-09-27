@@ -4372,3 +4372,30 @@ framework leaves the original bytecode in place and continues.
   derivation, count register selection, bit/compare/multiply memory handlers,
   compiler/native bytes, multi-step traces, and specialization preservation
   remain outside the theorem.
+
+### x86 memory-source bit-test/zero-high-bits handler composition, 2026-09-27
+
+- Gap: the memory-source bit handlers `BT [mem], imm8` and `BZHI dst, [mem],
+  count` shared the proved memory, bit-helper, and register-writeback
+  primitives but lacked a theorem for their real load/bit-test/writeback
+  composition.
+- Machine-checked statement: `x86_mem_bit_step_refines` proves, for arbitrary
+  bytes, register state, incoming flags, decoded second operand, and legal
+  width, equality with an independent statement that loads through the byte-sum
+  memory specification and applies the independently stated `bt`/`bzhi`
+  contract. `x86_mem_bt_preserves_dst`/`x86_mem_bt_only_cf` prove `BT` writes no
+  register and only CF; `x86_mem_bzhi_clears_sf_of` proves `BZHI` defines SF/OF
+  as zero. Three concrete theorems pin an 8-bit BT, a 32-bit BZHI, and an 8-bit
+  BZHI whose count reaches the width. No `sorry` or `admit`.
+- Supporting bridges: `x86_width_bits_refines` in `X86Width.lean` (BZHI's
+  `CF := count >= bits`), and `x86_width_code_spec_cases`/
+  `x86_bt_refines_width`/`x86_bzhi_refines_width` in `X86Bitops.lean` to join
+  the generated width code to the independent width code.
+- Independent C oracle: `test_x86_mem_bit_handler_host.c` exercises the actual
+  generated load, bit-helper, and writeback macros against a byte-loop model for
+  20,512 boundary and fixed-seed cases, including the masked-to-63/31 bit index,
+  the byte-masked count, and the architectural 32-bit zero-extension. Full
+  `make -C native-sim/formal check` passes with 0 errors. Effective-address
+  derivation, decoded second-operand selection (immediate vs register),
+  compare/multiply memory handlers, compiler/native bytes, multi-step traces,
+  and specialization preservation remain outside the theorem.

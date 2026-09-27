@@ -387,7 +387,7 @@ flag and memory byte. In particular, `INC` and `DEC` preserve incoming carry,
 22,048-case oracle checks the actual generated macros against an independent
 signed-range and byte-loop model across all 16 incoming flag combinations.
 Address derivation and safety, stack/ABI dispatch, packed-AUX operation
-selection, and logical, shift, bit, compare, and multiply memory handlers
+selection, and the compare and multiply memory handlers
 remain outside this theorem.
 The memory-destination logic theorem covers `AND/OR/XOR [mem], rhs` after a
 valid address, RHS, operation, and width have been selected. It composes the
@@ -395,7 +395,7 @@ load, width-local logical result and replacement flags, and confined store,
 proving equality of every modeled flag and byte. Its independent 21,536-case
 oracle checks actual generated macros against a byte-loop model, including all
 16 incoming flag combinations to ensure CF/OF are cleared and ZF/SF are
-replaced. RHS decoding, address-space dispatch, and bit, compare, and multiply
+replaced. RHS decoding, address-space dispatch, and the compare and multiply
 memory handlers remain outside the theorem.
 The memory-source shift theorem covers the flagless BMI2 forms
 `SHLX/SHRX/SARX dst, [mem], count` and `RORX dst, [mem], imm8`. It composes the
@@ -405,13 +405,24 @@ writeback, proving destination equality and that every modeled flag is
 preserved. Its independent 21,024-case oracle checks the actual generated
 macros, including the architectural 32-bit zero-extension into the 64-bit
 destination, against a byte-loop model. Effective-address derivation, count
-register selection, and bit/compare/multiply memory handlers remain outside
+register selection, and the compare and multiply memory handlers remain outside
 the theorem.
+The memory-source bit-test theorem covers the legacy `BT [mem], imm8` handler
+and the BMI2 `BZHI dst, [mem], count` handler. It composes the byte load with
+the generated `bt`/`bzhi` bit-helper contracts, proving that `BT` changes only
+CF and writes no register while `BZHI` writes the width-confined destination and
+defines CF/ZF/SF/OF, against an independently stated bit-test/kept-mask
+specification. Its independent 20,512-case oracle checks the actual generated
+macros — including the masked-to-63/31 bit index, the byte-masked count, and the
+architectural 32-bit zero-extension — against a byte-loop model. The decoded
+immediate/register second operand, effective-address derivation, and
+compare/multiply memory handlers remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
-load/store contract, the memory-source shift/rotate flagless composition, and
+load/store contract, the memory-source shift/rotate flagless composition, the
+memory-source bit-test/zero-high-bits composition, and
 AArch64 width, generic ALU handler writeback/path
 selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, and CCMP composition,
 plus ADD/SUB/logical NZCV production;

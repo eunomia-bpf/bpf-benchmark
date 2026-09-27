@@ -20,6 +20,7 @@ def x86SignSpec (v:X86Word) (w:X86Width) : Bool := (x86NarrowSpec v w).getLsbD (
 theorem x86_width_mask_refines (w:X86Width) : GeneratedX86Width.mask w=x86WidthMaskSpec w := by cases w <;> rfl
 theorem x86_width_sign_mask_refines (w:X86Width) : GeneratedX86Width.signMask w=x86WidthSignMaskSpec w := by cases w <;> rfl
 theorem x86_width_code_refines (w:X86Width) : GeneratedX86Width.code w=x86WidthCodeSpec w := by cases w <;> rfl
+theorem x86_width_bits_refines (w:X86Width) : GeneratedX86Width.bits w=x86WidthBitsSpec w := by cases w <;> rfl
 theorem x86_narrow_refines (v:X86Word) (w:X86Width) : GeneratedX86Width.narrow v w=x86NarrowSpec v w := by cases w <;> rfl
 theorem x86_zero_refines (v:X86Word) (w:X86Width) : GeneratedX86Width.zero v w=x86ZeroSpec v w := by cases w <;> rfl
 theorem x86_sign_refines (v:X86Word) (w:X86Width) : GeneratedX86Width.sign v w=x86SignSpec v w := by cases w <;> rfl

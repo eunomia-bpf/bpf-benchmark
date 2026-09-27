@@ -1,4 +1,5 @@
 import KProgFormal.GeneratedX86Bitops
+import KProgFormal.X86Width
 import Std.Tactic.BVDecide
 
 namespace KProgFormal
@@ -47,6 +48,31 @@ theorem x86_bzhi_refines (src count : BitVec 64) (widthCode : Nat)
     simp only [GeneratedX86Bitops.bzhi, GeneratedX86Bitops.widthMask, x86BzhiSpec,
       x86BitopsMaskCode] <;>
     bv_decide
+
+/-- The four legal x86 width codes, as the closed set `bt`/`bzhi` are defined
+on. -/
+theorem x86_width_code_spec_cases (w : X86Width) :
+    x86WidthCodeSpec w = 1 ∨ x86WidthCodeSpec w = 2 ∨
+      x86WidthCodeSpec w = 4 ∨ x86WidthCodeSpec w = 8 := by
+  cases w <;> simp [x86WidthCodeSpec]
+
+/-- Width-indexed bridge: the generated `bt` at the generated width code
+refines the independent `bt` statement at the independent width code. -/
+theorem x86_bt_refines_width (base index : BitVec 64) (width : X86Width) :
+    GeneratedX86Bitops.bt base index (GeneratedX86Width.code width) =
+      x86BtSpec base index (x86WidthCodeSpec width) := by
+  rw [x86_width_code_refines]
+  exact x86_bt_refines base index (x86WidthCodeSpec width)
+    (x86_width_code_spec_cases width)
+
+/-- Width-indexed bridge: the generated `bzhi` at the generated width code
+refines the independent `bzhi` statement at the independent width code. -/
+theorem x86_bzhi_refines_width (src count : BitVec 64) (width : X86Width) :
+    GeneratedX86Bitops.bzhi src count (GeneratedX86Width.code width) =
+      x86BzhiSpec src count (x86WidthCodeSpec width) := by
+  rw [x86_width_code_refines]
+  exact x86_bzhi_refines src count (x86WidthCodeSpec width)
+    (x86_width_code_spec_cases width)
 
 /-- `bzhi` never sets a bit above its width: the result is always within the
 width mask. -/
