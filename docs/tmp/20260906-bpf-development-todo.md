@@ -4660,4 +4660,4 @@ framework leaves the original bytecode in place and continues.
   mapping, compiler/native bytes, multi-step traces, and specialization
   preservation remain outside the theorem.
 - Commit `e861cf838` (code increment, 6 files). Step report and research log:
-  pending.
+  `29495e78a`. Evidence refresh: `7359f4cb7`. All pushed to `origin/master`.

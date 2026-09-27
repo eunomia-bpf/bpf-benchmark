@@ -140,4 +140,29 @@ specialization preservation.
 ## Commit
 
 `e861cf838` — code increment, 6 files, pushed to `origin/master`.
-Step report and research log: pending.
+`29495e78a` — step report and research log. Both pushed in one push
+(`cc7b34d90..7359f4cb7`).
+
+## Evidence pair regeneration
+
+The retained receipt and log were regenerated at `29495e78a`
+(`make -C native-sim/formal check`, exit 0): 53 generator `--check` runs, 95
+Lean module checks, 43 host cross-checks over 2,037,557 oracle cases; log bytes
+14793, sha256
+`f626091eadb6126ab0c1248d5fd624e1e0d946e9afd23f8cb6799723bb44bb9a`.
+
+`render_claim_table.formal_evidence(Path('.'))` returns `PASS` (receipt counts
+agree with both the retained log and the `native-sim/formal/Makefile` at this
+commit, receipt commit equals the log commit, log hash valid). Evidence refresh
+committed and pushed as `7359f4cb7` (4 files: receipt, log, AE guide paragraph,
+CHANGELOG).
+
+## Archival ZIP
+
+`docs/artifacts/package-atc26.sh` rebuilt `docs/artifacts/dist/atc26-ae-2.zip`
+at `7359f4cb7`: sha256
+`6cb18681efdc102ab7387d415aa1dfc901a8acbff819db39179a9808b78f163d`,
+933,791,304 bytes, `ARTIFACT_MANIFEST.json.superprojectCommit` =
+`7359f4cb7613b912871c42cc80fe2b50e8e2af4a` (matches HEAD), `self-test: OK
+(13 evidence classes)`, `clean-extraction verification OK`. The ZIP is
+untracked by design; its publication to Zenodo stays blocked on a credential.
