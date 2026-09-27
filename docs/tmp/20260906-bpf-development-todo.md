@@ -4623,3 +4623,41 @@ framework leaves the original bytecode in place and continues.
   multi-step traces, and specialization preservation remain outside the theorem.
 - Commit `21f6aae0f` (code increment, 6 files). Step report and research log:
   `650e28d1e`. Evidence refresh: `03b685164`. All pushed to `origin/master`.
+- Step 0034 (2026-09-27): proved the width-converting register-source `MOV`
+  handlers `X86_OP_MOVZX_REG` and `X86_OP_MOVSX_REG` — the shared body
+  `X86_SIM_L_EXEC_MOVX_REG`, which also carries bare `cdqe` and `movsxd` — in
+  the new `native-sim/formal/KProgFormal/X86MovxRegHandler.lean` (local
+  `X86MovxState {dst}`, `inductive X86MovxOp | movzx | movsx`).
+  `x86_movx_reg_step_refines` composes the source register's raw 64-bit value
+  through the already-proved `GeneratedX86Width.narrow` (MOVZX) or
+  `GeneratedX86Signed.signExtend` (MOVSX) at the decoded *source* width, then
+  through `generatedX86RegWrite` at the decoded *destination* width.
+  `x86_movzx_is_narrow`/`x86_movsx_is_sign_extend` pin the two arms,
+  `x86_cdqe_is_movsx_w32_w64` identifies the `cdqe`/`movsxd` decoding,
+  `x86_movzx_same_width_idempotent` rules out double truncation,
+  `x86_movzx_ignores_upper_source_bits` shows the source's upper bits never
+  reach the destination, `x86_movx_reg_tag_scalar` shows every writeback
+  scalarizes, and `x86_movx_reg_narrow_preserves_upper` shows a sub-64-bit
+  destination keeps its upper bytes. Six `native_decide` examples, each
+  re-derived in Python. No `sorry` or `admit`.
+- No new generated contract: MOVX is fully expressible over the existing
+  `GeneratedX86Width.narrow` and `GeneratedX86Signed.signExtend` value contracts
+  plus the shared writeback, so the generator count stays 53. This is the first
+  proof to compose both value contracts in one handler and the first to carry a
+  source width distinct from the destination width.
+- Unlike the register-source `MOV`, the MOVX body reads the raw 64-bit register
+  with no byte lane and writes with lane shift 0; `AUX` is a width code, not a
+  lane aux. A corpus-wide grep finds no high-byte (`%ah`) MOVX source.
+- Independent C oracle: `test_x86_movx_reg_host.c` drives the actual generated
+  `KPROG_X86_APPLY_WIDTH`/`kprog_x86_sign_extend_value` and `KPROG_X86_WRITE_REG*`
+  macros against an independent sign-bit model over a 25-pair width-code grid,
+  a `cdqe` decoding block, an LCG sweep, and a `movsxd`-identity block: 62,409
+  cases, zero warnings. Full `make -C native-sim/formal check` passes with 0
+  errors, 53 generators, 95 Lean module checks and 43 host cross-checks over
+  2,037,557 cases. The memory-touching `MOV` forms, `CMOV`/`SETCC`/`STORE`/`XMM`/
+  `CALL`/`PUSH`/`REP_MOVS`/`ANDN`/`BZHI`/`MOVBE`/`CMP_*_OP`, the index register
+  decode and packed-AUX layout, the simulator-stack-to-abstract-frame-base
+  mapping, compiler/native bytes, multi-step traces, and specialization
+  preservation remain outside the theorem.
+- Commit `e861cf838` (code increment, 6 files). Step report and research log:
+  pending.
