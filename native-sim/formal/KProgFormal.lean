@@ -44,6 +44,9 @@ import KProgFormal.X86MemImulHandler
 import KProgFormal.X86MemCompareHandler
 import KProgFormal.X86MulxHandler
 import KProgFormal.X86ImulRegImmHandler
+import KProgFormal.GeneratedX86MemOffset
+import KProgFormal.X86MemOffset
+import KProgFormal.X86LeaHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags

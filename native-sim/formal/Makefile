@@ -45,6 +45,7 @@ check:
 	python3 generate_x86_doubleshift_spec.py --check
 	python3 generate_x86_shift_flags_spec.py --check
 	python3 generate_x86_reg_write_spec.py --check
+	python3 generate_x86_mem_offset_spec.py --check
 	python3 generate_x86_reg_read_spec.py --check
 	python3 generate_x86_reg_lane_aux_spec.py --check
 	python3 generate_x86_sub_flags_spec.py --check
@@ -135,6 +136,11 @@ check:
 	lake env lean KProgFormal/X86ImulRegImmHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_imul_reg_imm_handler_host.c -o build/test_x86_imul_reg_imm_handler_host
 	./build/test_x86_imul_reg_imm_handler_host
+	lake env lean KProgFormal/GeneratedX86MemOffset.lean
+	lake env lean KProgFormal/X86MemOffset.lean
+	lake env lean KProgFormal/X86LeaHandler.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_lea_handler_host.c -o build/test_x86_lea_handler_host
+	./build/test_x86_lea_handler_host
 	lake env lean KProgFormal/Arm64Flags.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 	./build/test_arm64_flags_host

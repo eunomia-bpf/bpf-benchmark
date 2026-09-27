@@ -93,8 +93,14 @@ increment is committed and pushed immediately). Current state:
   `x86_cmp_reg_mem_step_refines`, and the two-destination `MULX` by
   `x86_mulx_step_refines`, each over the generated
   load/shift-result/bit-helper/immediate/sign-extend/multiply-flag/
-  four-limb-product/sub-flag/logic-flag/writeback contracts;
-  effective-address/address-space, register and immediate/RHS selection, the
+  four-limb-product/sub-flag/logic-flag/writeback contracts. The
+  effective-address/LEA handler `X86_SIM_L_EXEC_LEA` is composed by
+  `x86_lea_step_refines` over the generated `KPROG_X86_MEM_OFFSET` contract
+  (`x86_mem_offset_refines`), covering the RODATA fast path, the abstract
+  stack-base path, the provenance-carrying 64-bit pointer path, and the
+  scalarizing narrow-width exits. Open: the index register decode and packed
+  AUX layout, the mapping from the simulator's stack region to the abstract
+  frame base, address-space, register and immediate/RHS selection, the
   objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
   multi-step control-flow traces, and specialization preservation. All x86 value

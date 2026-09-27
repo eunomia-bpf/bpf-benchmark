@@ -454,10 +454,31 @@ actual generated write macros against a 128-bit-product model that shares no
 arithmetic with the limb ladder. The implicit `RDX` left operand, the
 auxiliary-destination decode, and effective-address derivation remain outside
 the theorem.
+The effective-address and LEA theorem covers `X86_SIM_L_EXEC_LEA`. A dedicated
+contract generated from `x86_mem_offset_spec.json` produces the
+`KPROG_X86_MEM_OFFSET` macro and a Lean `GeneratedX86MemOffset` module for the
+base-plus-scaled-index offset, and `x86_mem_offset_refines` proves the generated
+transition equal to an independent statement of the same sum. On top of it,
+`x86_lea_step_refines` composes the RODATA fast path (no source register:
+writes the raw immediate and scalarizes), the 64-bit stack-pointer path
+(resolves through an abstract frame base and tags the result as stack), the
+64-bit general path (sums the source pointer and carries its provenance), and
+the narrow-width exits (truncate the summed pointer through the
+partial-register writeback and scalarize), proving the composed handler equal
+to an independently stated step for every destination state, source operand,
+immediate, rodata flag, width, and effective-address term. Four further
+theorems pin the RODATA fast path, the source-register bypass of it, the stack
+base, and the narrow-width independence from the stack-pointer distinction.
+Its independent 61,440-case oracle checks the actual generated offset and
+write macros against an explicit power-of-two-multiply and partial-writeback
+model. The register decode that supplies the index value, the AUX bit layout,
+and the mapping from the simulator's stack region to the abstract frame base
+remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
-logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
+logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset and
+LEA composition, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
