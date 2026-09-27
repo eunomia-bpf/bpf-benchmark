@@ -82,13 +82,14 @@ increment is committed and pushed immediately). Current state:
 
 ### Current boundary and open work
 
-- Open x86 proof surface: remaining compare/multiply memory-operand handler
-  composition
+- Open x86 proof surface: remaining register-source multiply handler composition
   (the memory-source shift/rotate handlers `SHLX/SHRX/SARX/RORX [mem]` are
-  now composed by `x86_mem_shift_step_refines`/`x86_mem_rorx_step_refines`, and
+  now composed by `x86_mem_shift_step_refines`/`x86_mem_rorx_step_refines`,
   the `BT [mem], imm8`/`BZHI dst, [mem], count` handlers by
-  `x86_mem_bit_step_refines`, each over the generated
-  load/shift-result/bit-helper/writeback contracts),
+  `x86_mem_bit_step_refines`, and the `IMUL reg, [mem], imm` handler by
+  `x86_mem_imul_step_refines`, each over the generated
+  load/shift-result/bit-helper/immediate/sign-extend/multiply-flag/writeback
+  contracts),
   effective-address/address-space and immediate/register-RHS selection, the
   objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,

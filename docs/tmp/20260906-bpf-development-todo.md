@@ -4399,3 +4399,36 @@ framework leaves the original bytecode in place and continues.
   derivation, decoded second-operand selection (immediate vs register),
   compare/multiply memory handlers, compiler/native bytes, multi-step traces,
   and specialization preservation remain outside the theorem.
+
+### x86 memory-source multiply handler composition, 2026-09-27
+
+- Gap: the memory-source multiply handler `IMUL reg, [mem], imm` shared the
+  proved memory, immediate, sign-extend, IMUL-flag, and register-writeback
+  primitives but lacked a theorem for their real composition.
+- Machine-checked statement: `x86_mem_imul_step_refines` proves, for arbitrary
+  bytes, register state, incoming flags, raw immediate, destination width, and
+  memory width, equality with an independent statement that loads through the
+  byte-sum memory specification, applies the independently stated
+  immediate/sign-extend/multiply-flag contracts, and writes the width-confined
+  destination. `x86_mem_imul_preserves_zf_sf` and `x86_mem_imul_cf_eq_of` pin
+  the IMUL flag convention (ZF/SF untouched, CF equal to OF),
+  `x86_mem_imul_tag_scalar` pins destination tag scalarization,
+  `x86_mem_imul_bytes_congruent` confines the load to the memory operand's byte
+  count, and `x86_mem_imul_rhs_narrow_reads_low_bits` shows the immediate
+  extension depends only on the raw value's low bits. Four concrete theorems pin
+  a 16-bit overflow, an 8-bit memory read sign-extended into a 64-bit multiply,
+  an 8-bit mixed-sign overflow, and an 8-bit in-range product. No `sorry` or
+  `admit`.
+- Independent C oracle: `test_x86_mem_imul_handler_host.c` exercises the actual
+  generated load, immediate, sign-extend, IMUL-flag, and writeback macros against
+  a byte-loop model for 43,136 boundary and fixed-seed cases across all
+  destination/memory width pairings. Its CF/OF model is independently stated as
+  "the 128-bit mathematical signed product fits the destination's signed width",
+  and expressing a sign-filled operand in the 128-bit domain needed a 64-bit
+  signed cast in between; the first run failed on that alone (11,198 flag
+  mismatches with every destination equal), confirming the generated side and
+  the oracle differ on exactly one axis. Full `make -C native-sim/formal check`
+  passes with 0 errors and 37 host cross-checks. Register-source multiply
+  handlers, effective-address derivation, packed-AUX/effective-width decoding,
+  compare memory handlers, compiler/native bytes, multi-step traces, and
+  specialization preservation remain outside the theorem.
