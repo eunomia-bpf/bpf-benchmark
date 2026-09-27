@@ -4589,3 +4589,36 @@ framework leaves the original bytecode in place and continues.
   compiler/native bytes, multi-step traces, and specialization preservation
   remain outside the theorem.
 - Commit `601c76544`, pushed to `origin/master`.
+- Step 0033 (2026-09-27): proved the register-writing `MOV` handlers
+  `X86_SIM_L_EXEC_MOV_IMM{,_AUX}` and `X86_SIM_L_EXEC_MOV_REG{,_AUX}` in the
+  new `native-sim/formal/KProgFormal/X86MovHandler.lean` (236 lines, local
+  `X86MovState {dst}` and `X86MovSrc {bits, tag, isRsp}`). `x86_mov_imm_step_refines`
+  composes the immediate form over the generated `GeneratedX86RegWrite.writeAt`
+  partial-register writeback (destination width + explicit byte lane), with
+  `x86_mov_imm_low_lane_is_plain` for the zero-aux degenerate lane.
+  `x86_mov_reg_step_refines` composes the register source: the w64 stack-pointer
+  arm resolves through an abstract frame base and tags `.stack`, the w64 general
+  arm copies the source bits and provenance (`x86_mov_reg_copies_provenance`),
+  and the narrow arm reads the source through its decoded lane, writes through
+  the destination lane, and scalarizes (`x86_mov_reg_narrow_scalarizes`,
+  `x86_mov_reg_narrow_ignores_rsp`). Five `native_decide` examples (`0x4000`,
+  `0x112233445566aa88`, `0x7000`, `0x1234`, `0xffffffffffffffaa`), each
+  re-derived in Python. No `sorry` or `admit`.
+- No new generated contract: `MOV_IMM`/`MOV_REG` are fully expressible over the
+  existing `writeAt`/`readAt`/`GeneratedPtrAdd` contracts, so step 0033 adds only
+  the Lean handler module and its oracle; the `_AUX` forms reuse
+  `GeneratedX86RegLaneAux.pack`/`dstShift`/`srcShift` at the oracle level.
+- Independent C oracle: `test_x86_mov_handler_host.c` checks the immediate
+  composition against an explicit lane-selecting partial-writeback model and the
+  register-source composition (RSP arm, general pointer arm, narrow arm with both
+  decoded lanes) against an independent lane-read and writeback model, for
+  100,448 boundary and fixed-seed cases. First draft warned on an unused
+  `old_tag` parameter in `oracle_mov_imm`; fixed with the same `(void)old_tag;`
+  precedent as `test_x86_lea_handler_host.c`. Zero warnings. Full
+  `make -C native-sim/formal check` passes with 0 errors, 53 generators, 94 Lean
+  module checks and 42 host cross-checks over 1,975,148 cases. The memory-touching
+  `MOV` forms, `CMOV`/`SETCC`/`STORE`/`XMM`/`CALL`/`PUSH`/`REP_MOVS`/`ANDN`/`BZHI`/
+  `MOVBE`/`CMP_*_OP`, the index register decode and packed-AUX layout, the
+  simulator-stack-to-abstract-frame-base mapping, compiler/native bytes,
+  multi-step traces, and specialization preservation remain outside the theorem.
+- Commit `PENDING`, pushed to `origin/master`.
