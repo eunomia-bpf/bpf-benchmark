@@ -1,4 +1,4 @@
-started=2026-09-27T11:09:12+00:00 commit=12475532c420637d8f980294af9d84e5ad8c527d
+started=2026-09-27T16:00:22+00:00 commit=98426b87241e031b475ecb064de52cbf753eda52
 make: Entering directory '/workspaces/repository/native-sim/formal'
 install -d build
 python3 generate_ptr_add_spec.py --check
@@ -44,6 +44,7 @@ python3 generate_x86_bitops_spec.py --check
 python3 generate_x86_doubleshift_spec.py --check
 python3 generate_x86_shift_flags_spec.py --check
 python3 generate_x86_reg_write_spec.py --check
+python3 generate_x86_mem_offset_spec.py --check
 python3 generate_x86_reg_read_spec.py --check
 python3 generate_x86_reg_lane_aux_spec.py --check
 python3 generate_x86_sub_flags_spec.py --check
@@ -152,6 +153,12 @@ lake env lean KProgFormal/X86ImulRegImmHandler.lean
 cc -Wall -Wextra -O2 -I. test_x86_imul_reg_imm_handler_host.c -o build/test_x86_imul_reg_imm_handler_host
 ./build/test_x86_imul_reg_imm_handler_host
 x86 IMUL-immediate register-source host cross-check: OK (41296 cases)
+lake env lean KProgFormal/GeneratedX86MemOffset.lean
+lake env lean KProgFormal/X86MemOffset.lean
+lake env lean KProgFormal/X86LeaHandler.lean
+cc -Wall -Wextra -O2 -I. test_x86_lea_handler_host.c -o build/test_x86_lea_handler_host
+./build/test_x86_lea_handler_host
+x86 LEA host cross-check: OK (61440 cases)
 lake env lean KProgFormal/Arm64Flags.lean
 cc -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 ./build/test_arm64_flags_host
@@ -267,4 +274,4 @@ arm64 stack tag host cross-check: OK (36 cases)
 lake env lean KProgFormal/Arm64Decode.lean
 make: Leaving directory '/workspaces/repository/native-sim/formal'
 exit=0
-ended=2026-09-27T11:11:30+00:00
+ended=2026-09-27T16:03:14+00:00

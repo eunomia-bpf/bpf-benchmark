@@ -250,7 +250,7 @@ KVM-capable host, so it belongs to the full-validation stage in
 It is the paper's **soundness check for the "native emit == proof sequence"
 claim**. In order it:
 
-1. Runs `--check` on the 52 generator scripts (e.g.
+1. Runs `--check` on the 53 generator scripts (e.g.
    `generate_arm64_alu_result_spec.py --check`,
    `generate_x86_add_flags_spec.py --check`) that regenerate the shared
    Lean + C contracts from the JSON specs and **fail if any generated artifact
@@ -280,12 +280,12 @@ tens of minutes on a first run and much less on re-runs (the `.lake` build
 directory is cached).
 
 **Validation evidence (2026-09-27).** A full `make -C native-sim/formal check`
-completed with **exit status 0** at commit `12475532c`: 52
-`generate_*_spec.py --check` generators, 90 `lake env lean` refinement-module
-checks, and 40 compiled-and-run C host cross-checks reporting 1,813,260 oracle
-cases in total. (The previous receipt, at commit `4eb558734`, recorded
-52/89/39 checks and 1,771,964 oracle cases; the proof line has since grown the
-x86 register-source `IMUL reg, imm` handler cross-check.) The retained
+completed with **exit status 0** at commit `98426b872`: 53
+`generate_*_spec.py --check` generators, 93 `lake env lean` refinement-module
+checks, and 41 compiled-and-run C host cross-checks reporting 1,874,700 oracle
+cases in total. (The previous receipt, at commit `12475532c`, recorded
+52/90/40 checks and 1,813,260 oracle cases; the proof line has since grown the
+x86 effective-address offset and `LEA` handler cross-check.) The retained
 receipt is `docs/artifacts/evidence/formal-check.json`, its console log is
 `docs/artifacts/evidence/formal-check.log`, and the claim table's
 `Semantic proofs` row derives those four counts from the log and cross-checks
