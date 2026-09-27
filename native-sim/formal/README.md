@@ -422,9 +422,20 @@ every modeled flag against an independently stated specification that decides
 CF/OF from whether the mathematical product fits the destination's signed width.
 Its independent 43,136-case oracle checks the actual generated macros — including
 the 32-bit-truncated immediate, the signed narrow memory read, and the
-architectural 32-bit zero-extension — against a byte-loop model. The remaining
-register- and memory-source multiply forms and effective-address derivation
-remain outside the theorem.
+architectural 32-bit zero-extension — against a byte-loop model. Effective-address
+derivation remains outside the theorem.
+The register-source multiply theorem covers the legacy `IMUL reg, imm` handler.
+It composes the raw 64-bit register read (never sign-extended, unlike the memory
+operand), the arithmetic-immediate rule and sign extension of the immediate, the
+divide-based IMUL flag construction, and the width-confined register writeback,
+proving destination equality and equality of every modeled flag against an
+independently stated specification that decides CF/OF from whether the
+mathematical product of the width-narrowed operands fits the destination's
+signed width. Its independent 41,296-case oracle checks the actual generated
+macros — including the 32-bit-truncated and sign-extended immediate, the
+width-narrowed source sign extension, and the architectural 32-bit
+zero-extension — against an exact-product model. Register selection and
+effective-address derivation remain outside the theorem.
 The memory-source compare theorem covers the four `CMP/TEST [mem], rhs` forms
 and `CMP reg, [mem]`. It composes the byte load with the generated zero-borrow
 subtraction flags for the compare forms and the generated logical flags for the
@@ -449,7 +460,8 @@ policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
-multiply, two-destination `MULX`, and compare compositions, and
+multiply, the register-source multiply, two-destination `MULX`, and compare
+compositions, and
 AArch64 width, generic ALU handler writeback/path
 selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, and CCMP composition,
 plus ADD/SUB/logical NZCV production;
