@@ -4464,3 +4464,38 @@ framework leaves the original bytecode in place and continues.
   cross-checks. Register-source multiply handlers, effective-address derivation,
   packed-AUX/effective-width decoding, compiler/native bytes, multi-step traces,
   and specialization preservation remain outside the theorem.
+
+
+### x86 two-destination MULX handler composition, 2026-09-27
+
+- Gap: `X86_SIM_L_EXEC_MULX` writes two registers — the low half of the product
+  into the destination and the high half into the auxiliary operand — computes a
+  128-bit high half, and produces no flags. None of that was covered by the
+  single-destination arithmetic handlers.
+- Machine-checked statement: `x86_mulx_step_refines` proves, for arbitrary
+  register state, operands, operand width, and auxiliary-destination presence,
+  that the generated composition equals an independent statement in which the
+  low half is the exact product and the high half is the upper word of the exact
+  128-bit product. `x86_mulx_preserves_flags` pins that the flag word is
+  untouched, `x86_mulx_aux_absent_preserves_aux` pins the
+  `if ((AUX) != X86_REG_NONE)` guard, and `x86_mulx_dst_tag_scalar`/
+  `x86_mulx_aux_tag_scalar` pin both writebacks' tag scalarization. Four
+  `native_decide` examples pin 64-bit max×max, 32-bit max×max, an aux-absent
+  case, and a 16-bit limb-branch case. No `sorry` or `admit`.
+- The high half is proved by reuse, not re-derivation: `x86MulxHighLadderEqUmulhAlg`
+  shows the C four-limb ladder equals `arm64MulUmulhAlg` up to cross-term order
+  (`simp only` then `ac_rfl`), and `arm64MulUmulhLadderEqHighWord` from
+  `Arm64Mul.lean` then yields the 128-bit high-word equality. This avoids the
+  infeasible `bv_decide` on the 64×64→128 identity and the product-blind `omega`
+  entirely; `bv_decide` is used only on the small `w32` mask-vs-`setWidth`
+  bridge.
+- Independent C oracle: `test_x86_mulx_handler_host.c` derives both halves from
+  a plain-C exact 128-bit product (`__int128`) — sharing no arithmetic with the
+  limb ladder — and checks them against the real `KPROG_X86_WRITE_REG8/16/32/64`
+  macros for 41,296 boundary and fixed-seed cases across all four widths, each
+  swept with and without the auxiliary destination. Zero warnings. Full
+  `make -C native-sim/formal check` passes with 0 errors and 39 host
+  cross-checks. Register-source multiply handlers, effective-address derivation,
+  packed-AUX/effective-width decoding, compiler/native bytes, multi-step traces,
+  and specialization preservation remain outside the theorem.
+- Commit `bd518d708`, pushed to `origin/master`.
