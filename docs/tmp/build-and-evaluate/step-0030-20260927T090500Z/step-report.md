@@ -107,4 +107,32 @@ traces, specialization preservation.
 
 ## Commit
 
-`bd518d708` — code increment, 6 files, pushed to `origin/master`.
+`bd518d708` — code increment, 6 files, pushed to `origin/master`. Step report
+and research log: `4eb558734`.
+
+## Evidence pair regeneration
+
+Committed and pushed first: `bd518d708` (code increment, 6 files), `4eb558734`
+(step report + research log). The retained receipt and log were regenerated at
+`4eb558734` (`make -C native-sim/formal check`, exit 0): 52 generator `--check`
+runs, 89 Lean module checks, 39 host cross-checks over 1,771,964 oracle cases;
+log bytes 13746, sha256
+`240b0fcf0ecd98fc147c3be4c655e93dfcadba4cf8357e715e01651024a72a91`.
+
+`render_claim_table.formal_evidence(Path('.'))` returns `PASS` (receipt counts
+agree with both the retained log and the `native-sim/formal/Makefile` at this
+commit, receipt commit equals the log commit, log hash valid). Evidence refresh
+committed and pushed as `8662d7070` (4 files: receipt, log, AE guide paragraph,
+CHANGELOG).
+
+## Archival ZIP
+
+`docs/artifacts/package-atc26.sh` rebuilt `docs/artifacts/dist/atc26-ae-2.zip`
+at `8662d7070`: sha256
+`fb1e4aefe296d083a8e149e5e567c776f61f202585a8ca71691b8925e037dcf9`,
+933,758,622 bytes, `ARTIFACT_MANIFEST.json.superprojectCommit` =
+`8662d707077801f60b2837499fcf0060bef19060` (matches HEAD), `self-test: OK
+(13 evidence classes)`, `clean-extraction verification OK`. The ZIP is
+untracked by design. This closes the prior "ZIP is one docs commit stale"
+follow-up: the archive now matches HEAD including the MULX increment and its
+evidence refresh.
