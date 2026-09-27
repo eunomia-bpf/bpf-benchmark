@@ -4621,4 +4621,5 @@ framework leaves the original bytecode in place and continues.
   `MOVBE`/`CMP_*_OP`, the index register decode and packed-AUX layout, the
   simulator-stack-to-abstract-frame-base mapping, compiler/native bytes,
   multi-step traces, and specialization preservation remain outside the theorem.
-- Commit `PENDING`, pushed to `origin/master`.
+- Commit `21f6aae0f` (code increment, 6 files). Step report and research log:
+  `650e28d1e`. Evidence refresh: `03b685164`. All pushed to `origin/master`.
