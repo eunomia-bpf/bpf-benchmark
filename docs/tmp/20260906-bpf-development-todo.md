@@ -4499,3 +4499,42 @@ framework leaves the original bytecode in place and continues.
   packed-AUX/effective-width decoding, compiler/native bytes, multi-step traces,
   and specialization preservation remain outside the theorem.
 - Commit `bd518d708`, pushed to `origin/master`.
+
+
+### x86 register-source IMUL-immediate handler composition, 2026-09-27
+
+- Gap: `X86_SIM_L_EXEC_IMUL_IMM` multiplies the source register by an
+  immediate. Unlike `IMUL reg, [mem], imm` there is no memory load and no
+  memory-operand width: the left operand is the register's *raw* 64-bit value,
+  never sign-extended, while only the immediate is sign-extended and at the
+  destination width. A source holding `0xffff...ffff` therefore multiplies as
+  `2^64 - 1`, not as a width-narrowed `-1`.
+- Machine-checked statement: `x86_imul_reg_imm_step_refines` proves, for
+  arbitrary register state, source value, decoded immediate and destination
+  width, that the generated composition equals an independent
+  sign-extend/multiply/flags/writeback statement. A single `simp only` over the
+  four generated `*_refines` lemmas (`x86_immediate_value_refines`,
+  `x86_sign_extend_refines`, `x86_reg_write_refines`,
+  `x86_imul_flags_apply_refines`) closes it — no `cases width`, because the
+  composition is uniform at every width (unlike MULX's `w32` limb branch).
+  `x86_imul_reg_imm_preserves_zf_sf`, `x86_imul_reg_imm_cf_eq_of` and
+  `x86_imul_reg_imm_tag_scalar` pin the flag-survival, CF-equals-OF and
+  scalarization contracts; `x86_imul_reg_imm_source_not_extended` pins the
+  register-source rule the memory form does not have. Four `native_decide`
+  examples pin a 16-bit overflow, a 64-bit sign-extending immediate that still
+  fits, an 8-bit mixed-sign overflow, and an in-range 8-bit product. No `sorry`
+  or `admit`.
+- Independent C oracle: `test_x86_imul_reg_imm_handler_host.c` sign-extends the
+  narrowed source and computes an exact `__int128` product, checking it against
+  the real generated immediate/sign-extend/abs/flags/writeback macros for
+  41,296 boundary and fixed-seed cases across all four widths. The first draft
+  computed its overflow comparison from `lhs & width_mask(width)` — masking
+  rather than sign-extending — and disagreed with the generated side on CF/OF
+  whenever the narrowed lhs had its sign bit set: 294 mismatches, all CF/OF-only,
+  `dst` always matching. The oracle was fixed; the generated macro was never
+  touched. Zero warnings. Full `make -C native-sim/formal check` passes with 0
+  errors and 40 host cross-checks. The AUX-payload `X86_SIM_L_EXEC_ALU_REG` IMUL
+  path, effective-address derivation, packed-AUX/effective-width decoding,
+  compiler/native bytes, multi-step traces, and specialization preservation
+  remain outside the theorem.
+- Commit `PENDING`, pushed to `origin/master`.
