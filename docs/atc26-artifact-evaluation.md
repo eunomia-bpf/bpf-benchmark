@@ -280,12 +280,12 @@ tens of minutes on a first run and much less on re-runs (the `.lake` build
 directory is cached).
 
 **Validation evidence (2026-09-27).** A full `make -C native-sim/formal check`
-completed with **exit status 0** at commit `40ca51e79`: 52
-`generate_*_spec.py --check` generators, 86 `lake env lean` refinement-module
-checks, and 36 compiled-and-run C host cross-checks reporting 1,646,748 oracle
-cases in total. (The previous receipt, at commit `5b20bc853`, recorded
-52/85/35 checks and 1,626,236 oracle cases; the proof line has since grown the
-x86 memory-source bit-test/zero-high-bits handler cross-check.) The retained
+completed with **exit status 0** at commit `5c5f9515a`: 52
+`generate_*_spec.py --check` generators, 87 `lake env lean` refinement-module
+checks, and 37 compiled-and-run C host cross-checks reporting 1,689,884 oracle
+cases in total. (The previous receipt, at commit `40ca51e79`, recorded
+52/86/36 checks and 1,646,748 oracle cases; the proof line has since grown the
+x86 memory-source multiply handler cross-check.) The retained
 receipt is `docs/artifacts/evidence/formal-check.json`, its console log is
 `docs/artifacts/evidence/formal-check.log`, and the claim table's
 `Semantic proofs` row derives those four counts from the log and cross-checks
