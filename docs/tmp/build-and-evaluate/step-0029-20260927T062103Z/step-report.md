@@ -85,3 +85,26 @@ effective-address/address-space and immediate/register-RHS selection,
 objdump/parser-to-AUX selection relation, C-to-Lean unsigned-semantics
 correspondence, compiler/native-byte correspondence, multi-step control-flow
 traces, specialization preservation.
+
+## Evidence pair regeneration
+
+Committed and pushed first: `947efed1a` (code increment, 8 files), `a56243dae`
+(evidence refresh, 4 files). The retained receipt and log were regenerated at
+`947efed1a` (`make -C native-sim/formal check`, exit 0): 52 generator `--check`
+runs, 88 Lean module checks, 38 host cross-checks over 1,730,668 oracle cases;
+log bytes 13531, sha256
+`513080d5cb6592c872a95477409a4df445288c9e43a2d220128867f3209b4610`.
+
+`render_claim_table.formal_evidence(Path('.'))` returns `PASS` (receipt counts
+agree with both the retained log and the `native-sim/formal/Makefile` at this
+commit, receipt commit equals the log commit, log hash valid).
+
+## Archival ZIP
+
+`docs/artifacts/package-atc26.sh` rebuilt `docs/artifacts/dist/atc26-ae-2.zip`
+at `a56243dae`: sha256
+`ddbb147e3a69e0a11fcb13f7b81a83d1574b1504f8a4c8789d36778c5427b382`,
+933,751,981 bytes, `ARTIFACT_MANIFEST.json.superprojectCommit` =
+`a56243dae73eacca939fa6d866c1a7f14f9b128f` (matches HEAD), `self-test: OK
+(13 evidence classes)`, `clean-extraction verification OK`. The ZIP is
+untracked by design.
