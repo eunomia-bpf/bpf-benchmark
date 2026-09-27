@@ -99,12 +99,30 @@ correspondence, multi-step control-flow traces, specialization preservation.
 
 ## Commit
 
-Code increment + step report + research log: `PENDING`.
+`011e3a80e` — code increment, 6 files, pushed to `origin/master`. Step report
+and research log: `12475532c`.
 
 ## Evidence pair regeneration
 
-`PENDING`.
+Committed and pushed first: `011e3a80e` (code increment, 6 files), `12475532c`
+(step report + research log). The retained receipt and log were regenerated at
+`12475532c` (`make -C native-sim/formal check`, exit 0): 52 generator `--check`
+runs, 90 Lean module checks, 40 host cross-checks over 1,813,260 oracle cases;
+log bytes 14017, sha256
+`ec7ff06322afff5330200c13d73e4f7102aa791fc275eab2367aa1a542d5209e`.
+
+`render_claim_table.formal_evidence(Path('.'))` returns `PASS` (receipt counts
+agree with both the retained log and the `native-sim/formal/Makefile` at this
+commit, receipt commit equals the log commit, log hash valid). Evidence refresh
+committed and pushed as `a14f9fdfd` (4 files: receipt, log, AE guide paragraph,
+CHANGELOG).
 
 ## Archival ZIP
 
-`PENDING`.
+`docs/artifacts/package-atc26.sh` rebuilt `docs/artifacts/dist/atc26-ae-2.zip`
+at `a14f9fdfd`: sha256
+`f14b3b27caf6ba1d479a3b7c108050489f8e4b9db0d7b61e16c0c2db52407b7e`,
+933,764,362 bytes, `ARTIFACT_MANIFEST.json.superprojectCommit` =
+`a14f9fdfdd90ffa245e7645c1a4e99e606a9e78f` (matches HEAD), `self-test: OK
+(13 evidence classes)`, `clean-extraction verification OK`. The ZIP is
+untracked by design.

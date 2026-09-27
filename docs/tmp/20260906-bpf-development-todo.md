@@ -4537,4 +4537,4 @@ framework leaves the original bytecode in place and continues.
   path, effective-address derivation, packed-AUX/effective-width decoding,
   compiler/native bytes, multi-step traces, and specialization preservation
   remain outside the theorem.
-- Commit `PENDING`, pushed to `origin/master`.
+- Commit `011e3a80e`, pushed to `origin/master`.
