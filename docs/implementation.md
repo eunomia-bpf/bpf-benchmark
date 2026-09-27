@@ -102,7 +102,13 @@ increment is committed and pushed immediately). Current state:
   `X86_SIM_L_EXEC_MOV_IMM` and `X86_SIM_L_EXEC_MOV_REG` are composed by
   `x86_mov_imm_step_refines` (partial-register writeback over the raw
   immediate) and `x86_mov_reg_step_refines` (64-bit provenance-copying and
-  abstract stack-base arms, scalarizing narrow arms). Open: the index register
+  abstract stack-base arms, scalarizing narrow arms). The width-converting
+  register-source MOV handlers `X86_OP_MOVZX_REG` and `X86_OP_MOVSX_REG`
+  (shared body `X86_SIM_L_EXEC_MOVX_REG`, also carrying `cdqe` and `movsxd`)
+  are composed by `x86_movx_reg_step_refines`: the source register's raw
+  64-bit value is narrowed or sign-extended at the decoded *source* width and
+  written back through the partial-register writeback at the decoded
+  *destination* width, with no byte lane. Open: the index register
   decode and packed AUX layout, the mapping from the simulator's stack region
   to the abstract frame base, address-space, register and immediate/RHS
   objdump/parser-to-AUX selection relation, C-to-Lean

@@ -144,6 +144,9 @@ check:
 	lake env lean KProgFormal/X86MovHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_handler_host.c -o build/test_x86_mov_handler_host
 	./build/test_x86_mov_handler_host
+	lake env lean KProgFormal/X86MovxRegHandler.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_movx_reg_host.c -o build/test_x86_movx_reg_host
+	./build/test_x86_movx_reg_host
 	lake env lean KProgFormal/Arm64Flags.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 	./build/test_arm64_flags_host

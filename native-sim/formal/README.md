@@ -490,11 +490,26 @@ pointer-add macros against an explicit lane-read and partial-writeback model.
 The register decode that supplies the source value and provenance, the AUX bit
 layout, and the mapping from the simulator's stack region to the abstract
 frame base remain outside the theorem.
+The width-converting register-source MOV theorem covers
+`X86_SIM_L_EXEC_MOVX_REG`, the shared body of `X86_OP_MOVZX_REG` and
+`X86_OP_MOVSX_REG` (and so of `cdqe` and `movsxd`). `x86_movx_reg_step_refines`
+composes both opcodes over the already-proved narrowing and sign-extension
+contracts at the decoded source width, then the partial-register writeback at
+the decoded destination width. Further theorems pin the two opcode arms, the
+`cdqe`/`movsxd` decoding as the 32-bit-source instance, the idempotence of
+same-width narrowing, and that every writeback scalarizes. Unlike the
+register-source MOV, the MOVX body reads the raw 64-bit register with no byte
+lane. Its independent 62,409-case oracle checks the actual generated
+narrowing/sign-extension/write macros against an explicit sign-bit model. The
+register decode that supplies the source value, the width-code resolution that
+turns zero into the 64-bit fallback, and the source-width/destination-width
+selection relation remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
-LEA and register-writing MOV compositions, the x86 little-endian memory
+LEA, register-writing MOV, and width-converting register MOV compositions, the
+x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
