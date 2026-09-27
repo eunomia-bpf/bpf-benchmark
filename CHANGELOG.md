@@ -98,6 +98,13 @@ Added for artifact evaluation:
   receipt, which predated the x86 memory-source compare/test handler proof
   commit and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
+- Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
+  and log were regenerated at commit `4eb558734` (`make -C native-sim/formal
+  check`, exit 0: 52 generator `--check` runs, 89 Lean module checks, 39 host
+  cross-checks over 1,771,964 oracle cases). This replaces the `947efed1a`
+  receipt, which predated the x86 two-destination `MULX` handler proof commit
+  and had therefore drifted to PARTIAL against the current Makefile
+  enumeration.
 - `docs/artifacts/render_claim_table.py`'s RQ1 62-case object-load row now
   derives its status from the two retained May 14 ReJIT ratios over the April
   29 name set (PASS only when both round to the paper's 0.99x and both runs
