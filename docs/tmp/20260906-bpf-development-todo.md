@@ -4432,3 +4432,35 @@ framework leaves the original bytecode in place and continues.
   handlers, effective-address derivation, packed-AUX/effective-width decoding,
   compare memory handlers, compiler/native bytes, multi-step traces, and
   specialization preservation remain outside the theorem.
+
+### x86 memory-source compare/test handler composition, 2026-09-27
+
+- Gap: the four `CMP/TEST [mem], rhs` handlers and `CMP reg, [mem]` shared the
+  proved memory load, subtraction-flag, and logical-flag primitives but lacked a
+  theorem for their real composition.
+- Machine-checked statement: `x86_mem_compare_step_refines` proves, for arbitrary
+  bytes, register state, incoming flags, decoded right-hand side, operation, and
+  width, equality with an independent statement that loads through the byte-sum
+  memory specification and applies either the independently stated zero-borrow
+  subtraction contract or the two-operand logical-flag contract.
+  `x86_mem_compare_preserves_dst` pins that no register is written, and
+  `x86_mem_compare_cmp_flags`/`x86_mem_compare_test_flags` pin the flag half per
+  family. `x86_cmp_reg_mem_step_refines` composes the register-left, memory-right
+  form, which always takes the subtraction path, and
+  `x86_mem_compare_handler_refines` conjoins both. Four concrete theorems pin an
+  equal 32-bit compare, an 8-bit borrow, a 16-bit zero test, and the 64-bit
+  register/memory borrow. No `sorry` or `admit`.
+- Independent C oracle: `test_x86_mem_compare_handler_host.c` exercises the
+  actual generated load, immediate, SBB-result, subtraction-flag, and logical-flag
+  macros against a byte-loop model for 40,784 boundary and fixed-seed cases
+  across all four widths. The generated contract must be evaluated with
+  simulator-level masking: `KPROG_X86_SET_SUB_FLAGS` compares raw operands and
+  takes the width's sign *mask* as its last argument, while the `X86_SIM_L_*`
+  wrapper masks both operands and the result first; the first oracle run used
+  unmasked operands and passed the width where the mask belongs, failing with
+  39,262 mismatches exactly on mask boundaries. The generated side was correct
+  throughout — the oracle was fixed, never the macro. Full
+  `make -C native-sim/formal check` passes with 0 errors and 38 host
+  cross-checks. Register-source multiply handlers, effective-address derivation,
+  packed-AUX/effective-width decoding, compiler/native bytes, multi-step traces,
+  and specialization preservation remain outside the theorem.

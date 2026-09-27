@@ -386,17 +386,15 @@ flag and memory byte. In particular, `INC` and `DEC` preserve incoming carry,
 `NOT` preserves all flags, and `NEG` replaces arithmetic flags. A separate
 22,048-case oracle checks the actual generated macros against an independent
 signed-range and byte-loop model across all 16 incoming flag combinations.
-Address derivation and safety, stack/ABI dispatch, packed-AUX operation
-selection, and the compare and multiply memory handlers
-remain outside this theorem.
+Address derivation and safety, stack/ABI dispatch, and packed-AUX operation
+selection remain outside this theorem.
 The memory-destination logic theorem covers `AND/OR/XOR [mem], rhs` after a
 valid address, RHS, operation, and width have been selected. It composes the
 load, width-local logical result and replacement flags, and confined store,
 proving equality of every modeled flag and byte. Its independent 21,536-case
 oracle checks actual generated macros against a byte-loop model, including all
 16 incoming flag combinations to ensure CF/OF are cleared and ZF/SF are
-replaced. RHS decoding, address-space dispatch, and the compare memory handler
-remain outside the theorem.
+RHS decoding and address-space dispatch remain outside the theorem.
 The memory-source shift theorem covers the flagless BMI2 forms
 `SHLX/SHRX/SARX dst, [mem], count` and `RORX dst, [mem], imm8`. It composes the
 byte load, the width-local shift result (the rotate reaching its result through
@@ -404,8 +402,8 @@ the complementary-count rotate-left contract), and the width-confined register
 writeback, proving destination equality and that every modeled flag is
 preserved. Its independent 21,024-case oracle checks the actual generated
 macros, including the architectural 32-bit zero-extension into the 64-bit
-destination, against a byte-loop model. Effective-address derivation, count
-register selection, and the compare memory handler remain outside the theorem.
+Effective-address derivation and count register selection remain outside the
+theorem.
 The memory-source bit-test theorem covers the legacy `BT [mem], imm8` handler
 and the BMI2 `BZHI dst, [mem], count` handler. It composes the byte load with
 the generated `bt`/`bzhi` bit-helper contracts, proving that `BT` changes only
@@ -414,8 +412,8 @@ defines CF/ZF/SF/OF, against an independently stated bit-test/kept-mask
 specification. Its independent 20,512-case oracle checks the actual generated
 macros — including the masked-to-63/31 bit index, the byte-masked count, and the
 architectural 32-bit zero-extension — against a byte-loop model. The decoded
-immediate/register second operand, effective-address derivation, and the
-compare memory handler remain outside the theorem.
+The decoded immediate/register second operand and effective-address derivation
+remain outside the theorem.
 The memory-source multiply theorem covers the legacy `IMUL reg, [mem], imm`
 handler. It composes the byte load, the arithmetic-immediate rule, the generated
 sign extension of both operands, the divide-based IMUL flag construction, and the
@@ -425,15 +423,23 @@ CF/OF from whether the mathematical product fits the destination's signed width.
 Its independent 43,136-case oracle checks the actual generated macros — including
 the 32-bit-truncated immediate, the signed narrow memory read, and the
 architectural 32-bit zero-extension — against a byte-loop model. The remaining
-register- and memory-source multiply forms, effective-address derivation, and the
-compare memory handlers remain outside the theorem.
+register- and memory-source multiply forms and effective-address derivation
+remain outside the theorem.
+The memory-source compare theorem covers the four `CMP/TEST [mem], rhs` forms
+and `CMP reg, [mem]`. It composes the byte load with the generated zero-borrow
+subtraction flags for the compare forms and the generated logical flags for the
+test forms, proving equality of every modeled flag and that no register is
+written against an independently stated load/flags specification. Its
+independent 40,784-case oracle checks the actual generated macros against a
+byte-loop model. Effective-address derivation and RHS source selection remain
+outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
-multiply composition, and
+multiply and compare compositions, and
 AArch64 width, generic ALU handler writeback/path
 selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, and CCMP composition,
 plus ADD/SUB/logical NZCV production;
