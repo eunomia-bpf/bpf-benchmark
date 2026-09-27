@@ -1,4 +1,4 @@
-started=2026-09-27T10:04:15+00:00 commit=4eb5587342b59308d460f42b713dcf27cf47359a
+started=2026-09-27T11:09:12+00:00 commit=12475532c420637d8f980294af9d84e5ad8c527d
 make: Entering directory '/workspaces/repository/native-sim/formal'
 install -d build
 python3 generate_ptr_add_spec.py --check
@@ -148,6 +148,10 @@ lake env lean KProgFormal/X86MulxHandler.lean
 cc -Wall -Wextra -O2 -I. test_x86_mulx_handler_host.c -o build/test_x86_mulx_handler_host
 ./build/test_x86_mulx_handler_host
 x86 MULX host cross-check: OK (41296 cases)
+lake env lean KProgFormal/X86ImulRegImmHandler.lean
+cc -Wall -Wextra -O2 -I. test_x86_imul_reg_imm_handler_host.c -o build/test_x86_imul_reg_imm_handler_host
+./build/test_x86_imul_reg_imm_handler_host
+x86 IMUL-immediate register-source host cross-check: OK (41296 cases)
 lake env lean KProgFormal/Arm64Flags.lean
 cc -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 ./build/test_arm64_flags_host
@@ -263,4 +267,4 @@ arm64 stack tag host cross-check: OK (36 cases)
 lake env lean KProgFormal/Arm64Decode.lean
 make: Leaving directory '/workspaces/repository/native-sim/formal'
 exit=0
-ended=2026-09-27T10:06:38+00:00
+ended=2026-09-27T11:11:30+00:00
