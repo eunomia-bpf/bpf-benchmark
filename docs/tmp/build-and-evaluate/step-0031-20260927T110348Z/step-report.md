@@ -90,12 +90,16 @@ Target C path (read-only reference):
 
 ## Remaining open x86 surface
 
-The AUX-payload `X86_SIM_L_EXEC_ALU_REG` IMUL path
-(`native-sim/x86/x86_sim_local_bpf.h:908-953`, IMUL dispatch inside
-`x86_alu_result` reached at line 943), then effective-address/address-space and
-immediate/register-RHS selection, objdump/parser-to-AUX selection relation,
-C-to-Lean unsigned-semantics correspondence, compiler/native-byte
-correspondence, multi-step control-flow traces, specialization preservation.
+The AUX-payload `X86_SIM_L_EXEC_ALU_REG` IMUL path is already covered by
+`x86_imul_reg_lane_handler_refines` (`X86AluWriteback.lean:1150`) — the same
+two-lane `X86RegRead.readAt` operands and `x86ImulFlagsApplied` contract, so
+the register-multiply surface is closed. Still open: effective-address/
+address-space and immediate/register-RHS selection (`X86_SIM_L_EXEC_LEA`,
+`_MOV_IMM`/`_MOV_REG`/`_MOV_LOAD`, `_CMOV`, `_SETCC`, `_STORE`, `_XMM`,
+`_CALL_MEMCPY`/`_CALL_MEMSET`, `_PUSH`/`_POP`), the objdump/parser-to-AUX
+selection relation, C-to-Lean unsigned-semantics correspondence,
+compiler/native-byte correspondence, multi-step control-flow traces, and
+specialization preservation.
 
 ## Commit
 

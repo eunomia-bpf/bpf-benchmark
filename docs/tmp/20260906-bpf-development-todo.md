@@ -4538,3 +4538,54 @@ framework leaves the original bytecode in place and continues.
   compiler/native bytes, multi-step traces, and specialization preservation
   remain outside the theorem.
 - Commit `011e3a80e`, pushed to `origin/master`.
+
+## Step 0032 — x86 effective-address offset + LEA handler composition
+
+- Scope: `X86_SIM_L_EXEC_LEA`. Chosen because `X86_SIM_L_MEM_OFFSET` is shared
+  by every remaining memory-source handler (`_MOV_LOAD`, `_STORE`,
+  `_CMOV_MEM`, …), so proving the offset once removes it from the boundary for
+  the whole family.
+- Generated contract: `x86_mem_offset_spec.json` +
+  `generate_x86_mem_offset_spec.py` → `GeneratedX86MemOffset.lean`
+  (`value`/`valueSpec`) and `generated/x86_mem_offset.h`
+  (`KPROG_X86_MEM_OFFSET(AUX, DISP, INDEX_VALUE, HAS_INDEX)`).
+  `x86_mem_offset_refines` (`cases hasIndex <;> bv_decide`) proves the generated
+  transition equal to an independent sum; `x86_mem_offset_plain_ignores_index`
+  and the `x86_mem_offset_scale_is_power_of_two` components pin the two
+  contracts. Three `native_decide` examples (12, `0x8000000000000000`,
+  `0xfffffffffffffff8`) were each re-derived with an independent Python
+  simulation before the commit.
+- Machine-checked statement: `x86_lea_step_refines` proves, for arbitrary
+  destination state, source operand (bits/tag/isNone/isRsp), decoded immediate,
+  rodata flag, destination width and effective-address terms, that the
+  generated handler equals an independent statement — the RODATA fast path
+  writes the raw immediate and scalarizes, the 64-bit stack path resolves
+  through an abstract frame base and tags `.stack`, the 64-bit general path sums
+  the source pointer and carries its tag, and the narrow exits truncate the
+  summed pointer through the partial-register writeback. Four further theorems
+  pin each path (`x86_lea_rodata_fast_path`, `x86_lea_rodata_needs_no_source`,
+  `x86_lea_rsp_uses_stack_base`, `x86_lea_narrow_ignores_rsp`) plus four
+  `native_decide` examples (`0x4000`, `0x1030`, `0x7020`, `0x1010`), each
+  re-derived in Python. No `sorry` or `admit`.
+- Design decisions: the offset contract takes the raw scale byte — C `<<` and
+  Lean `<<<` both reduce the amount modulo the word width, so no `& 3` mask is
+  needed and the `--check` grid confirms bit-identity for every scale. The
+  macro takes the already-read `INDEX_VALUE`, so no `X86_SIM_L_READ_REG`
+  dependency leaks into `generated/`. The abstract `stackBase` exists because
+  RSP is never initialized in this build (BSS zero ⇒ `__x86_rsp.ptr = NULL`)
+  while `X86_SIM_L_STACK_PTR(0) = &stack_mem.b[0] ≠ NULL`.
+- Independent C oracle: `test_x86_lea_handler_host.c` checks
+  `KPROG_X86_MEM_OFFSET` against an `__int128` power-of-two multiply and the
+  composed step against an explicit `stack_base + src_ptr + off` and
+  partial-writeback model, for 61,440 boundary and fixed-seed cases. The first
+  draft's stack arm omitted `src_ptr` from the base, producing 5,048 mismatches,
+  all on the 64-bit RSP arm and all short by exactly `src_ptr`; the sim adds the
+  raw RSP value to the offset before `X86_SIM_L_STACK_PTR` indexes. The oracle
+  was fixed; the generated macro and the Lean module were never touched. Zero
+  warnings. Full `make -C native-sim/formal check` passes with 0 errors, 53
+  generators and 41 host cross-checks. The index register decode and packed-AUX
+  layout, the mapping from the simulator's stack region to the abstract frame
+  base, the `MOV`/`CMOV`/`SETCC`/`STORE`/`XMM`/`CALL`/`PUSH`/`REP_MOVS` matrix,
+  compiler/native bytes, multi-step traces, and specialization preservation
+  remain outside the theorem.
+- Commit `601c76544`, pushed to `origin/master`.
