@@ -474,11 +474,27 @@ write macros against an explicit power-of-two-multiply and partial-writeback
 model. The register decode that supplies the index value, the AUX bit layout,
 and the mapping from the simulator's stack region to the abstract frame base
 remain outside the theorem.
+The register-writing MOV theorem covers `X86_SIM_L_EXEC_MOV_IMM` and
+`X86_SIM_L_EXEC_MOV_REG`. `x86_mov_imm_step_refines` composes the
+register-destination immediate move over the partial-register writeback
+(destination width and explicit byte lane), and `x86_mov_reg_step_refines`
+composes the register-source move: the 64-bit stack-pointer arm resolves
+through the abstract frame base and tags the result as stack, the 64-bit
+general arm copies the source pointer and its provenance, and every narrow
+width reads the source through its decoded lane, writes through the
+partial-register writeback, and scalarizes. Further theorems pin the
+provenance-copying and stack-base arms, the narrow-width independence from the
+stack-pointer distinction, and that every narrow move scalarizes. Its
+independent 100,448-case oracle checks the actual generated read/write and
+pointer-add macros against an explicit lane-read and partial-writeback model.
+The register decode that supplies the source value and provenance, the AUX bit
+layout, and the mapping from the simulator's stack region to the abstract
+frame base remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
-logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset and
-LEA composition, the x86 little-endian memory
+logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
+LEA and register-writing MOV compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
