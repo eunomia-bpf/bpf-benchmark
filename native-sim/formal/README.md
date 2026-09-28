@@ -520,12 +520,30 @@ independent 3,650-case oracle checks the actual generated dispatch, offset and
 byte-ladder load macros against an explicit read-body model. The register
 decode that supplies the base pointer and tag, the register-file layout, and
 the simulated stack region remain outside the theorem.
+The shared `MOV_LOAD` handler-composition theorem covers
+`X86_SIM_L_EXEC_MOV_LOAD`, the single body shared by `X86_OP_MOV_LOAD`,
+`X86_OP_MOV_LOAD_SCALAR`, and `X86_OP_MOVSX_LOAD`. `x86_mov_load_step_refines`
+composes the width resolution (`x86_mov_load_resolve_width_refines`, the
+64-bit write default and the memory-width fallback to the write width, both
+total), the arm table (`x86_mov_load_arm_refines`), the byte-ladder load, the
+sign extension, the ABI provenance tag, and the partial-register writeback in
+one step relation. Further theorems pin the x86-specific asymmetries: the first
+arm test is register identity, so the stack arm overrides the ABI arm and
+ignores `_MOVSX_LOAD` sign extension, while the ABI pointer arm requires the
+plain `_MOV_LOAD` opcode *and* both resolved widths at 64 bits, so an
+ABI-tagged base reached by a narrow opcode is scalarized. The generated
+provenance tag is bridged to the declarative `abiTagSpec` policy
+(`generated_abi_load_tag_refines`), and every arm is reachable. Its independent
+86,461-case oracle checks the actual generated width, arm, offset, load, and
+provenance macros against an explicit handler model. The register decode that
+supplies the base pointer, register identity and tag, and the effective-address
+computation remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
-LEA, register-writing MOV, width-converting register MOV, and shared memory
-read-dispatch compositions, the x86 little-endian memory
+LEA, register-writing MOV, width-converting register MOV, shared memory
+read-dispatch, and shared `MOV_LOAD` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare

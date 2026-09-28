@@ -1,0 +1,497 @@
+{
+  "schema_version": 1,
+  "operation": "x86MovLoadHandler",
+  "selector": "width_resolution_then_op_and_abi_tag_arm",
+  "width_rows": [
+    {
+      "aux_width": 0,
+      "flags_width": 0,
+      "mem_width": 8,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_64",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 0,
+      "flags_width": 1,
+      "mem_width": 1,
+      "write_width": 1,
+      "mem_define": "X86_WIDTH_8",
+      "write_define": "X86_WIDTH_8"
+    },
+    {
+      "aux_width": 0,
+      "flags_width": 2,
+      "mem_width": 2,
+      "write_width": 2,
+      "mem_define": "X86_WIDTH_16",
+      "write_define": "X86_WIDTH_16"
+    },
+    {
+      "aux_width": 0,
+      "flags_width": 4,
+      "mem_width": 4,
+      "write_width": 4,
+      "mem_define": "X86_WIDTH_32",
+      "write_define": "X86_WIDTH_32"
+    },
+    {
+      "aux_width": 0,
+      "flags_width": 8,
+      "mem_width": 8,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_64",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 1,
+      "flags_width": 0,
+      "mem_width": 1,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_8",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 1,
+      "flags_width": 1,
+      "mem_width": 1,
+      "write_width": 1,
+      "mem_define": "X86_WIDTH_8",
+      "write_define": "X86_WIDTH_8"
+    },
+    {
+      "aux_width": 1,
+      "flags_width": 2,
+      "mem_width": 1,
+      "write_width": 2,
+      "mem_define": "X86_WIDTH_8",
+      "write_define": "X86_WIDTH_16"
+    },
+    {
+      "aux_width": 1,
+      "flags_width": 4,
+      "mem_width": 1,
+      "write_width": 4,
+      "mem_define": "X86_WIDTH_8",
+      "write_define": "X86_WIDTH_32"
+    },
+    {
+      "aux_width": 1,
+      "flags_width": 8,
+      "mem_width": 1,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_8",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 2,
+      "flags_width": 0,
+      "mem_width": 2,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_16",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 2,
+      "flags_width": 1,
+      "mem_width": 2,
+      "write_width": 1,
+      "mem_define": "X86_WIDTH_16",
+      "write_define": "X86_WIDTH_8"
+    },
+    {
+      "aux_width": 2,
+      "flags_width": 2,
+      "mem_width": 2,
+      "write_width": 2,
+      "mem_define": "X86_WIDTH_16",
+      "write_define": "X86_WIDTH_16"
+    },
+    {
+      "aux_width": 2,
+      "flags_width": 4,
+      "mem_width": 2,
+      "write_width": 4,
+      "mem_define": "X86_WIDTH_16",
+      "write_define": "X86_WIDTH_32"
+    },
+    {
+      "aux_width": 2,
+      "flags_width": 8,
+      "mem_width": 2,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_16",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 4,
+      "flags_width": 0,
+      "mem_width": 4,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_32",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 4,
+      "flags_width": 1,
+      "mem_width": 4,
+      "write_width": 1,
+      "mem_define": "X86_WIDTH_32",
+      "write_define": "X86_WIDTH_8"
+    },
+    {
+      "aux_width": 4,
+      "flags_width": 2,
+      "mem_width": 4,
+      "write_width": 2,
+      "mem_define": "X86_WIDTH_32",
+      "write_define": "X86_WIDTH_16"
+    },
+    {
+      "aux_width": 4,
+      "flags_width": 4,
+      "mem_width": 4,
+      "write_width": 4,
+      "mem_define": "X86_WIDTH_32",
+      "write_define": "X86_WIDTH_32"
+    },
+    {
+      "aux_width": 4,
+      "flags_width": 8,
+      "mem_width": 4,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_32",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 8,
+      "flags_width": 0,
+      "mem_width": 8,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_64",
+      "write_define": "X86_WIDTH_64"
+    },
+    {
+      "aux_width": 8,
+      "flags_width": 1,
+      "mem_width": 8,
+      "write_width": 1,
+      "mem_define": "X86_WIDTH_64",
+      "write_define": "X86_WIDTH_8"
+    },
+    {
+      "aux_width": 8,
+      "flags_width": 2,
+      "mem_width": 8,
+      "write_width": 2,
+      "mem_define": "X86_WIDTH_64",
+      "write_define": "X86_WIDTH_16"
+    },
+    {
+      "aux_width": 8,
+      "flags_width": 4,
+      "mem_width": 8,
+      "write_width": 4,
+      "mem_define": "X86_WIDTH_64",
+      "write_define": "X86_WIDTH_32"
+    },
+    {
+      "aux_width": 8,
+      "flags_width": 8,
+      "mem_width": 8,
+      "write_width": 8,
+      "mem_define": "X86_WIDTH_64",
+      "write_define": "X86_WIDTH_64"
+    }
+  ],
+  "arm_rows": [
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "stackRead",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_STACK"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "abiPtrWrite",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ABI_PTR"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": true,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": true,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": true,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": true,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": true,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    },
+    {
+      "is_rsp": false,
+      "is_mov_load": false,
+      "mem_is_64": false,
+      "write_is_64": false,
+      "base_is_abi": false,
+      "arm": "ordinary",
+      "arm_define": "KPROG_X86_MOV_LOAD_ARM_ORDINARY"
+    }
+  ]
+}

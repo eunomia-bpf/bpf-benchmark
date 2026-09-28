@@ -115,7 +115,16 @@ increment is committed and pushed immediately). Current state:
   register is the stack pointer (register identity, tested first), whether its
   tag is ABI, and whether the effective width is 64 bits. It carries no reloc
   arm and no per-arm result tag; the ABI packet tag refinement lives in
-  `X86_SIM_L_EXEC_MOV_LOAD`. Open: the index register
+  `X86_SIM_L_EXEC_MOV_LOAD`, whose handler composition (the shared body of
+  `X86_OP_MOV_LOAD`, `X86_OP_MOV_LOAD_SCALAR`, and `X86_OP_MOVSX_LOAD`) is
+  composed by `x86_mov_load_step_refines` over the generated width-resolution
+  and arm contracts: the write width defaults to 64 bits and the memory width
+  falls back to it, the arm table selects the stack read (register identity,
+  tested first, ignoring `_MOVSX_LOAD` sign extension), the ABI pointer arm
+  (gated on the plain `_MOV_LOAD` opcode and both resolved widths at 64 bits,
+  writing the generated `KPROG_ABI_LOAD_TAG` provenance), or the ordinary
+  byte-ladder load with `_MOVSX_LOAD` sign extension, then the partial-register
+  writeback. Open: the index register
   decode and packed AUX layout, the mapping from the simulator's stack region
   to the abstract frame base, address-space, register and immediate/RHS
   objdump/parser-to-AUX selection relation, C-to-Lean
