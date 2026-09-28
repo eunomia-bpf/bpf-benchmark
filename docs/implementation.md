@@ -124,7 +124,16 @@ increment is committed and pushed immediately). Current state:
   (gated on the plain `_MOV_LOAD` opcode and both resolved widths at 64 bits,
   writing the generated `KPROG_ABI_LOAD_TAG` provenance), or the ordinary
   byte-ladder load with `_MOVSX_LOAD` sign extension, then the partial-register
-  writeback. Open: the index register
+  writeback. The shared store body `X86_SIM_L_EXEC_STORE` — the single body
+  behind `X86_OP_MOV_STORE_IMM` and `X86_OP_MOV_STORE_REG` — is composed by
+  `x86_store_step_refines` over the generated width-resolution, displacement,
+  value-source, AUX-shift-source, and arm contracts: it resolves one width used
+  for both the immediate value and the write, takes `(s32)(IMM >> 32)` on the
+  immediate form and `(s64)IMM` on the register form, reads the AUX source
+  shift only on the register form (after the register read, so the immediate
+  form ignores it, and modulo 64, matching the C `>>=` truncation), and writes
+  through the stack helper when the destination is the stack pointer and the
+  ordinary little-endian store otherwise. Open: the index register
   decode and packed AUX layout, the mapping from the simulator's stack region
   to the abstract frame base, address-space, register and immediate/RHS
   objdump/parser-to-AUX selection relation, C-to-Lean

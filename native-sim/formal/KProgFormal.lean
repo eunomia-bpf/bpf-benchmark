@@ -53,6 +53,8 @@ import KProgFormal.GeneratedX86MemDispatch
 import KProgFormal.X86MemDispatch
 import KProgFormal.GeneratedX86MovLoad
 import KProgFormal.X86MovLoadHandler
+import KProgFormal.GeneratedX86Store
+import KProgFormal.X86StoreHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags

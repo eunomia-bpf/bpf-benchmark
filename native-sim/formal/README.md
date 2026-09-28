@@ -538,12 +538,38 @@ provenance tag is bridged to the declarative `abiTagSpec` policy
 provenance macros against an explicit handler model. The register decode that
 supplies the base pointer, register identity and tag, and the effective-address
 computation remain outside the theorem.
+The shared `MOV_STORE` handler-composition theorem covers
+`X86_SIM_L_EXEC_STORE`, the single body shared by `X86_OP_MOV_STORE_IMM`
+(`0x07`) and `X86_OP_MOV_STORE_REG` (`0x08`). `x86_store_step_refines`
+composes the width resolution (`x86_store_width_refines`, the 64-bit fallback
+for an absent `FLAGS` code, total), the displacement form, the value source,
+the AUX shift source, the arm table (`x86_store_arm_refines`), the generated
+effective-address offset, and the little-endian byte update in one step
+relation. Further theorems pin the x86-specific asymmetries: the handler
+resolves exactly one width, used for both the immediate value and the write, so
+the stack arm's `X86_SIM_L_EFFECTIVE_WIDTH(FLAGS)` is the same expression as
+the memory arm's width (there is no second, AUX-sourced memory width as in the
+read body); the immediate form takes `(s32)(IMM >> 32)` while the register form
+takes `(s64)IMM`, so the same artifact field yields different displacements;
+only the register form consults the AUX source-shift field, and it is read
+after the register read, so the immediate form ignores any AUX byte; and the
+register source is read at the full 64 bits even at a narrow store width, so a
+narrow store of a shifted 64-bit value discards the shift's high half in the
+width mask rather than in the read. The register shift amount is the AUX shift
+byte modulo 64, because the body's `>>=` on a `__u64` uses the x86 count
+truncation while `BitVec`'s `>>>` saturates to zero above the word width; the
+statement `x86_store_shift_spec` fixes the reading explicitly. Its independent
+48,013-case oracle drives the generated width, displacement, value, shift,
+arm, offset, and store macros against an explicit store-body model, comparing
+every resulting memory and stack byte. The register decode that supplies the
+base pointer, register identity and the register source value, and the
+addressing-mode decode remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, and shared `MOV_LOAD` handler compositions, the x86 little-endian memory
+read-dispatch, and shared `MOV_LOAD`/`MOV_STORE` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
