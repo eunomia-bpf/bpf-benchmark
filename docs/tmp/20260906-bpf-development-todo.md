@@ -4795,3 +4795,57 @@ framework leaves the original bytecode in place and continues.
   passes with 0 errors, 56 generators, 101 Lean module checks and 46 host
   cross-checks over 2,175,681 cases. Commit `ff267c8b5` (code increment, 10
   files).
+
+## Step 0038 — x86 `SETCC` handler composition
+
+- Scope: `X86_SIM_L_EXEC_SETCC` (`X86_OP_SETCC`, `0x16`). Chosen over the
+  alternate `MOVBE_LOAD` because its whole dependency chain was already
+  proved — `x86_condition_sound`, `x86_reg_write_at_refines`,
+  `x86_reg_lane_aux_*_roundtrip` — and it has real corpus callers
+  (`bcc_tcpconnect_ipv4_tuple_filter.bpf.c:187`,
+  `cilium_socket_lb_service_select.bpf.c:121,127`). The body reads the
+  condition from the AUX *payload* byte and the byte lane from the
+  *destination-shift* byte, fixes the width at `X86_WIDTH_8`, and scalarizes
+  the destination tag unconditionally.
+- New generator `generate_x86_setcc_spec.py` (57th) emits
+  `GeneratedX86Setcc.lean`, `generated/x86_setcc.h` and `x86_setcc_spec.json`.
+  The generated proof obligation is split: `condOf : BitVec 8 -> Option Cond`
+  maps the 14 raw `X86_CC_*` codes, `evalCond` is total over the 14
+  constructors, and `evalRaw` composes them with a defined `false` for the
+  unsupported codes. Two earlier revisions were rejected — one typed a
+  selector as `Option Nat` while returning a constructor, one built `evalRaw`
+  from the boolean expressions and thereby required an unprovable 256-way
+  `BitVec 8` exhaustion for the default arm.
+- New `KProgFormal/X86SetccHandler.lean`: `x86_setcc_eval_cond_sound` (14
+  constructor cases, so a transposition of any two arms fails),
+  `x86_setcc_raw_cond_sound`, `x86_setcc_raw_unsupported`,
+  `x86_setcc_lane_not_eight` / `x86_setcc_lane_high_iff` (the lane decode is an
+  *equality*, so a destination shift of 9 selects the low byte),
+  `x86_setcc_aux_fields`, `x86_setcc_step_at_refines` /
+  `x86_setcc_step_refines`, and the asymmetry theorems
+  `x86_setcc_step_preserves_upper_bytes` (the strong
+  `0xffffffffffffff00` mask is false — the high lane writes the *second*
+  byte), `x86_setcc_step_scalarizes` (unlike `CMOV`, which preserves the source
+  pointer tag at `w64`), and the two lane-specific writeback lemmas. No
+  `sorry`. `BitVec.ofBool : Bool -> BitVec 1` here, so the 64-bit boolean
+  widening is the local `x86BoolValue`.
+- Independent C oracle `test_x86_setcc_host.c`: part 1 sweeps the whole
+  256-value raw condition byte space against the generated fold; part 2 the
+  whole 256-value destination-shift space; part 3 the full handler over a
+  deterministic 16-register model (16 × 256 × 8 × 16 = 524,288 cases),
+  comparing every byte and the tag; part 4 a second destination-shift sweep;
+  part 5 seven asymmetry pins including every accepted code reproducing the
+  raw `KPROG_X86_EVAL_CC` expression over all 16 flag combinations; part 6 the
+  generated `KPROG_X86_WRITE_REG8` helper over every byte shift. 590,726
+  cases, zero warnings. Eight model mutations plus two mutations of the *real
+  generated headers* each make the oracle exit 1.
+- Full `make -C native-sim/formal check` passes with 0 errors, 57 generators,
+  103 Lean module checks and 47 host cross-checks over 2,766,407 cases.
+
+## Next after step 0038
+
+`X86_OP_SETCC_MEM` (`0x3e`) and `X86_OP_CMOV`/`X86_OP_CMOV_MEM` (`0x15`/`0x40`)
+have their full bodies read and share the pieces step 0038 composed:
+`SETCC_MEM` takes the condition from the AUX *source-shift* byte (not the
+payload) and writes memory, and `CMOV` reads the whole AUX word and preserves
+the pointer tag at `w64`.
