@@ -133,8 +133,19 @@ increment is committed and pushed immediately). Current state:
   shift only on the register form (after the register read, so the immediate
   form ignores it, and modulo 64, matching the C `>>=` truncation), and writes
   through the stack helper when the destination is the stack pointer and the
-  ordinary little-endian store otherwise. Open: the index register
-  decode and packed AUX layout, the mapping from the simulator's stack region
+  ordinary little-endian store otherwise.
+  The `SETCC` handler `X86_SIM_L_EXEC_SETCC` (`X86_OP_SETCC`, `0x16`) is
+  composed by `x86_setcc_step_refines` over the generated condition-decode,
+  lane-decode, and 8-bit-writeback contracts: the condition is resolved from
+  the AUX payload byte with the flags used as given (no flag production), the
+  generated `KPROG_X86_EVAL_CC` expression table is pinned to the architectural
+  condition table by `x86_setcc_eval_cond_sound` (a 14-case proof, so a
+  transposition of any two arms fails), codes outside the accepted subset
+  evaluate to false, the write width is fixed at 8 regardless of the AUX
+  source-shift byte, the destination byte lane is selected by an *equality*
+  test on the destination shift (so 9 selects the low byte), and the
+  destination tag is scalarized unconditionally.
+  Open: the index register decode and packed AUX layout, the mapping from the simulator's stack region
   to the abstract frame base, address-space, register and immediate/RHS
   objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,

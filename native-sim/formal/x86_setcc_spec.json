@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "operation": "x86SetccHandler",
+  "selector": "aux_condition_code_and_destination_lane",
+  "cond_rows": [
+    {
+      "cond": "o",
+      "cc_code": 0,
+      "cc_define": "X86_CC_O",
+      "expr": "of"
+    },
+    {
+      "cond": "no",
+      "cc_code": 1,
+      "cc_define": "X86_CC_NO",
+      "expr": "!of"
+    },
+    {
+      "cond": "b",
+      "cc_code": 2,
+      "cc_define": "X86_CC_B",
+      "expr": "cf"
+    },
+    {
+      "cond": "ae",
+      "cc_code": 3,
+      "cc_define": "X86_CC_AE",
+      "expr": "!cf"
+    },
+    {
+      "cond": "e",
+      "cc_code": 4,
+      "cc_define": "X86_CC_E",
+      "expr": "zf"
+    },
+    {
+      "cond": "ne",
+      "cc_code": 5,
+      "cc_define": "X86_CC_NE",
+      "expr": "!zf"
+    },
+    {
+      "cond": "be",
+      "cc_code": 6,
+      "cc_define": "X86_CC_BE",
+      "expr": "cf || zf"
+    },
+    {
+      "cond": "a",
+      "cc_code": 7,
+      "cc_define": "X86_CC_A",
+      "expr": "!cf && !zf"
+    },
+    {
+      "cond": "s",
+      "cc_code": 8,
+      "cc_define": "X86_CC_S",
+      "expr": "sf"
+    },
+    {
+      "cond": "ns",
+      "cc_code": 9,
+      "cc_define": "X86_CC_NS",
+      "expr": "!sf"
+    },
+    {
+      "cond": "l",
+      "cc_code": 12,
+      "cc_define": "X86_CC_L",
+      "expr": "sf != of"
+    },
+    {
+      "cond": "ge",
+      "cc_code": 13,
+      "cc_define": "X86_CC_GE",
+      "expr": "sf == of"
+    },
+    {
+      "cond": "le",
+      "cc_code": 14,
+      "cc_define": "X86_CC_LE",
+      "expr": "zf || (sf != of)"
+    },
+    {
+      "cond": "g",
+      "cc_code": 15,
+      "cc_define": "X86_CC_G",
+      "expr": "!zf && (sf == of)"
+    }
+  ],
+  "unsupported_cc_codes": [
+    10,
+    11
+  ],
+  "lane_rows": [
+    {
+      "dst_shift_is_eight": true,
+      "lane": "high",
+      "lane_define": "KPROG_X86_SETCC_LANE_HIGH"
+    },
+    {
+      "dst_shift_is_eight": false,
+      "lane": "low",
+      "lane_define": "KPROG_X86_SETCC_LANE_LOW"
+    }
+  ]
+}

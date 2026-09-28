@@ -564,12 +564,32 @@ arm, offset, and store macros against an explicit store-body model, comparing
 every resulting memory and stack byte. The register decode that supplies the
 base pointer, register identity and the register source value, and the
 addressing-mode decode remain outside the theorem.
+The `SETCC` handler-composition theorem covers `X86_SIM_L_EXEC_SETCC`
+(`X86_OP_SETCC`, `0x16`). `x86_setcc_step_refines` composes the condition
+decode (`x86_setcc_raw_cond_sound`, the generated `KPROG_X86_EVAL_CC`
+expression table pinned to the architectural condition table with the
+unsupported codes falling to false), the destination byte-lane decode (the
+equality test, `x86_setcc_lane_high_iff`), and the 8-bit register writeback in
+one step relation. `x86_setcc_eval_cond_sound` is the content of the generated
+table: it is proved by 14 constructor cases, so a transposition of any two
+condition arms makes it fail. Further theorems pin the x86-specific
+asymmetries: the condition is read from the AUX payload byte alone and the
+flags are used as given, so no flag production participates; the write width is
+fixed at 8 regardless of the AUX source-shift byte; the destination tag is
+scalarized unconditionally, unlike `CMOV`'s pointer-preserving 64-bit arm; and
+the lane test is an equality, so a destination shift of 9 selects the low byte
+rather than the high one. Its independent 590,726-case oracle sweeps the whole
+256-value condition byte space and the whole 256-value destination-shift space
+against the real `KPROG_X86_EVAL_CC` expression and a restated write helper,
+and drives the full handler over a deterministic 16-register model comparing
+every byte and tag. The register decode that supplies the destination identity
+and the flags remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, and shared `MOV_LOAD`/`MOV_STORE` handler compositions, the x86 little-endian memory
+read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
