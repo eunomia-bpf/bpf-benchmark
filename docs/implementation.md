@@ -108,7 +108,14 @@ increment is committed and pushed immediately). Current state:
   are composed by `x86_movx_reg_step_refines`: the source register's raw
   64-bit value is narrowed or sign-extended at the decoded *source* width and
   written back through the partial-register writeback at the decoded
-  *destination* width, with no byte lane. Open: the index register
+  *destination* width, with no byte lane. The shared memory read body
+  `X86_SIM_L_READ_MEM_VALUE` — the value-source selection behind the plain
+  load and store families — is classified by `x86_mem_dispatch_src_refines`
+  over the generated `KPROG_X86_MEM_READ_SRC` contract: whether the base
+  register is the stack pointer (register identity, tested first), whether its
+  tag is ABI, and whether the effective width is 64 bits. It carries no reloc
+  arm and no per-arm result tag; the ABI packet tag refinement lives in
+  `X86_SIM_L_EXEC_MOV_LOAD`. Open: the index register
   decode and packed AUX layout, the mapping from the simulator's stack region
   to the abstract frame base, address-space, register and immediate/RHS
   objdump/parser-to-AUX selection relation, C-to-Lean

@@ -55,6 +55,7 @@ check:
 	python3 generate_x86_adc_spec.py --check
 	python3 generate_x86_imul_flags_spec.py --check
 	python3 generate_x86_mem_access_spec.py --check
+	python3 generate_x86_mem_dispatch_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -147,6 +148,10 @@ check:
 	lake env lean KProgFormal/X86MovxRegHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_movx_reg_host.c -o build/test_x86_movx_reg_host
 	./build/test_x86_movx_reg_host
+	lake env lean KProgFormal/GeneratedX86MemDispatch.lean
+	lake env lean KProgFormal/X86MemDispatch.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_read_dispatch_host.c -o build/test_x86_mem_read_dispatch_host
+	./build/test_x86_mem_read_dispatch_host
 	lake env lean KProgFormal/Arm64Flags.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 	./build/test_arm64_flags_host

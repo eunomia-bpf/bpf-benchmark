@@ -504,12 +504,28 @@ narrowing/sign-extension/write macros against an explicit sign-bit model. The
 register decode that supplies the source value, the width-code resolution that
 turns zero into the 64-bit fallback, and the source-width/destination-width
 selection relation remain outside the theorem.
+The shared memory read-dispatch theorem covers the value-source selection of
+`X86_SIM_L_READ_MEM_VALUE`, the single read body the plain load and store
+families share. `x86_mem_dispatch_src_refines` equates the generated
+value-source table with an independent predicate nesting over the three facts
+the body consults: whether the base register *is* the stack pointer, whether
+its memory tag is the ABI tag, and whether the effective width is 64 bits.
+Further theorems pin the x86-specific asymmetry against the AArch64 dispatch —
+the first test is register identity, not a memory tag, so an ABI-tagged stack
+pointer still reads through the stack helper, and the ABI arm is gated on width
+64 so an ABI base off width 64 falls through to the ordinary load — plus the
+reachability of every arm. This body carries no reloc arm and no per-arm result
+tag; the ABI packet tag refinement stays in `X86_SIM_L_EXEC_MOV_LOAD`. Its
+independent 3,650-case oracle checks the actual generated dispatch, offset and
+byte-ladder load macros against an explicit read-body model. The register
+decode that supplies the base pointer and tag, the register-file layout, and
+the simulated stack region remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
-LEA, register-writing MOV, and width-converting register MOV compositions, the
-x86 little-endian memory
+LEA, register-writing MOV, width-converting register MOV, and shared memory
+read-dispatch compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare

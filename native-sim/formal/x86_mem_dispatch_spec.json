@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "operation": "x86MemReadDispatch",
+  "selector": "stack_pointer_identity_then_abi_tag_and_width_64",
+  "rows": [
+    {
+      "is_rsp": true,
+      "is_abi": true,
+      "w64": true,
+      "src": "stackRead",
+      "src_define": "KPROG_X86_MEM_SRC_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_abi": true,
+      "w64": false,
+      "src": "stackRead",
+      "src_define": "KPROG_X86_MEM_SRC_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_abi": false,
+      "w64": true,
+      "src": "stackRead",
+      "src_define": "KPROG_X86_MEM_SRC_STACK"
+    },
+    {
+      "is_rsp": true,
+      "is_abi": false,
+      "w64": false,
+      "src": "stackRead",
+      "src_define": "KPROG_X86_MEM_SRC_STACK"
+    },
+    {
+      "is_rsp": false,
+      "is_abi": true,
+      "w64": true,
+      "src": "abiPtrLoad",
+      "src_define": "KPROG_X86_MEM_SRC_ABI_PTR_LOAD"
+    },
+    {
+      "is_rsp": false,
+      "is_abi": true,
+      "w64": false,
+      "src": "normalLoad",
+      "src_define": "KPROG_X86_MEM_SRC_NORMAL_LOAD"
+    },
+    {
+      "is_rsp": false,
+      "is_abi": false,
+      "w64": true,
+      "src": "normalLoad",
+      "src_define": "KPROG_X86_MEM_SRC_NORMAL_LOAD"
+    },
+    {
+      "is_rsp": false,
+      "is_abi": false,
+      "w64": false,
+      "src": "normalLoad",
+      "src_define": "KPROG_X86_MEM_SRC_NORMAL_LOAD"
+    }
+  ]
+}
