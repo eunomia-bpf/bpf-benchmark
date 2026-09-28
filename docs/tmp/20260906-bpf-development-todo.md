@@ -4706,3 +4706,48 @@ framework leaves the original bytecode in place and continues.
   simulator-stack-to-abstract-frame-base mapping, compiler/native bytes,
   multi-step traces, and specialization preservation remain outside the theorem.
 - Commit `7a43a5b27` (code increment, 9 files).
+
+- Step 0036 (2026-09-28): proved the shared x86 `MOV_LOAD` handler
+  composition `X86_SIM_L_EXEC_MOV_LOAD`, the single body behind
+  `X86_OP_MOV_LOAD`, `X86_OP_MOV_LOAD_SCALAR` and `X86_OP_MOVSX_LOAD`, in the
+  new `native-sim/formal/KProgFormal/X86MovLoadHandler.lean`. A new generator
+  `generate_x86_mov_load_spec.py` (55th) emits a closed width-resolution table
+  `GeneratedX86MovLoad.resolveWidth` over the five `X86_WIDTH_*` codes
+  (including the 0 "absent" code) and a closed 32-row arm table
+  `GeneratedX86MovLoad.arm : Bool -> Bool -> Bool -> Bool -> Bool -> Arm`, with
+  the C predicates `KPROG_X86_MOV_LOAD_WRITE_WIDTH`,
+  `KPROG_X86_MOV_LOAD_MEM_WIDTH` and `KPROG_X86_MOV_LOAD_ARM`.
+  `x86_mov_load_resolve_width_refines` and `x86_mov_load_arm_refines` equate
+  each generated table with an independent statement — a two-fallback width
+  resolver and a predicate *nesting* over the five selector facts — and
+  `x86_mov_load_resolved_not_absent` shows both resolved widths are total, so
+  the handler has no unsupported width. `x86_mov_load_step_refines` composes
+  the resolution, the arm, the byte-ladder load, the sign extension, the ABI
+  provenance tag and the partial-register writeback in one step relation.
+  Further theorems pin the x86 asymmetries:
+  `x86_mov_load_arm_stack_ignores_op_and_tag` and
+  `x86_mov_load_stack_arm_ignores_sign_extension` (the first arm test is
+  register identity, so the stack arm precedes the ABI arm and a stack-based
+  `_MOVSX_LOAD` is not sign-extended), `x86_mov_load_arm_abi_iff` (the ABI arm
+  needs the plain `_MOV_LOAD` opcode and both resolved widths at 64 bits),
+  `x86_mov_load_ordinary_scalarizes`, `x86_mov_load_ordinary_w64_masks_mem`,
+  `x86_mov_load_abi_arm_tag`/`_at_end`, and
+  `generated_abi_load_tag_refines`, which bridges the generated
+  `GeneratedAbiLoad.tag` to the declarative `abiTagSpec` provenance policy.
+  No `sorry` or `admit`.
+- The generated contract is closed over an explicit `Code` inductive rather
+  than `Nat`, because a partial `Nat` table would let `resolveWidth` be
+  partial; `x86WidthIs64` is a local matcher rather than `==` because Lean has
+  no usable `BEq X86Width` for `native_decide` evaluation. The contract is not
+  wired into the live sim — the same proof-only decision as the MOVX and
+  read-dispatch increments.
+- Independent C oracle: `test_x86_mov_load_host.c` checks the generated
+  width-resolution table over the 25 code pairs, the arm table over its 32
+  selector combinations, and the full handler over a deterministic
+  memory/register/stack model — 16 base registers × 4 base tags × 3 opcodes ×
+  5 AUX codes × 5 FLAGS codes × 3 displacement classes × 2 ABI kinds × 3
+  destination values, plus an ABI-arm provenance pin — against an explicit
+  handler model that restates the arms from the raw fields: 86,461 cases, zero
+  warnings. Full `make -C native-sim/formal check` passes with 0 errors, 55
+  generators, 99 Lean module checks and 45 host cross-checks over 2,127,668
+  cases. Commit `5d7b435c2` (code increment, 10 files).
