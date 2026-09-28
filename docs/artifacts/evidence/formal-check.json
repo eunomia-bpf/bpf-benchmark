@@ -1,21 +1,21 @@
 {
   "schema_version": 1,
-  "recorded_at": "2026-09-28T05:26:04Z",
+  "recorded_at": "2026-09-28T18:22:24Z",
   "command": "make -C native-sim/formal check",
-  "commit": "aebeabf6f00af7f3428edd79460ca11d49de5f40",
+  "commit": "4c1cb37050723ec4581520f41e70aab0ad138df8",
   "exit_code": 0,
   "checks": {
     "generated_contract_drift": true,
-    "generator_scripts": 55,
+    "generator_scripts": 56,
     "lean_modules": true,
-    "lean_module_commands": 99,
-    "host_cross_checks": 45,
-    "host_cross_check_cases": 2127668
+    "lean_module_commands": 101,
+    "host_cross_checks": 46,
+    "host_cross_check_cases": 2175681
   },
   "log": {
     "path": "docs/artifacts/evidence/formal-check.log",
-    "sha256": "5149c442719a8ce1030496378776eac823647e469b4930bf324ba57c5e26b4f0",
-    "bytes": 15455,
+    "sha256": "3b16545ee465281a608d5d9eabfbd735f471616cdac4f3b1de76158a314bc5b3",
+    "bytes": 15751,
     "normalization": "crlf and trailing-whitespace stripped"
   }
 }
