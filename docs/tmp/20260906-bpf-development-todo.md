@@ -4661,3 +4661,48 @@ framework leaves the original bytecode in place and continues.
   preservation remain outside the theorem.
 - Commit `e861cf838` (code increment, 6 files). Step report and research log:
   `29495e78a`. Evidence refresh: `7359f4cb7`. All pushed to `origin/master`.
+
+- Step 0035 (2026-09-28): proved the shared x86 memory read-dispatch
+  classification of `X86_SIM_L_READ_MEM_VALUE`, the one read body behind the
+  plain load and store families, in the new
+  `native-sim/formal/KProgFormal/X86MemDispatch.lean`. A new generator
+  `generate_x86_mem_dispatch_spec.py` (54th) emits a closed eight-row table
+  `GeneratedX86MemDispatch.valueSrc : Bool -> Bool -> Bool -> ValueSrc` over
+  the three facts the body consults — stack-pointer register identity, ABI
+  memory tag, effective width 64 — and the C predicate
+  `KPROG_X86_MEM_READ_SRC`. `x86_mem_dispatch_src_refines` equates the
+  generated table with an independent predicate *nesting*
+  (`if isRsp then .stackRead else if isAbi && w64 then .abiPtrLoad else
+  .normalLoad`), not a copy of the generated table. Further theorems pin the
+  x86 asymmetry — `x86_mem_dispatch_stack_overrides_tag` (register identity is
+  tested first, so an ABI-tagged stack pointer still reads through the stack
+  helper at either width; contrast AArch64, whose first test is a memory tag),
+  `x86_mem_dispatch_abi_requires_width64` (the ABI arm holds only at width 64;
+  off width 64 an ABI base falls through to the ordinary load) — plus
+  `x86_mem_dispatch_no_tag_widening` and
+  `x86_mem_dispatch_all_arms_reachable`. No `sorry` or `admit`.
+- `READ_MEM_VALUE` carries no reloc arm and no per-arm result tag, unlike the
+  AArch64 dispatch: the contract is a value-source table only, because the ABI
+  packet tag refinement (`KPROG_ABI_LOAD_TAG`) lives in `X86_SIM_L_EXEC_MOV_LOAD`
+  (690-700) rather than in the read body. `X86_REG_NONE` (0xff) is not
+  `X86_RSP` (4) and `X86_SIM_L_REG_TAG`'s `switch` default leaves the tag
+  scalar, so a `NONE` base falls through to the ordinary load without needing
+  a separate row. The generated contract is not wired into the live sim, the
+  same proof-only decision as the MOVX increment.
+- Independent C oracle: `test_x86_mem_read_dispatch_host.c` sweeps the
+  generated dispatch over (2 stack-pointer identities × 5 tags × 4 widths)
+  plus override/non-widening/reachability blocks, then drives the generated
+  `KPROG_X86_MEM_OFFSET` and `KPROG_X86_MEM_LOAD` contracts with the dispatch
+  over a deterministic memory/register/stack model — 16 base registers × 4 tags
+  × 4 widths × 7 displacements × 2 `STORE_DISP` plus an indexed block — against
+  an explicit read-body model: 3,650 cases, zero warnings. Full
+  `make -C native-sim/formal check` passes with 0 errors, 54 generators, 97 Lean
+  module checks and 44 host cross-checks over 2,041,207 cases. The concrete
+  memory-load forms that compose on top of this dispatch (`MOV_LOAD`/
+  `MOVSX_LOAD`/`MOV_LOAD_SCALAR`/`MOVBE_LOAD`/`MOVBE_STORE`/`MOV_STORE_*`) and
+  `MOV_LOAD_MAP_PTR` (a pointer-immediate write, not a memory read), the
+  remaining `CMOV`/`SETCC`/`XMM`/`CALL`/`PUSH`/`REP_MOVS`/`ANDN`/`BZHI`/
+  `CMP_*_OP` forms, the index register decode and packed-AUX layout, the
+  simulator-stack-to-abstract-frame-base mapping, compiler/native bytes,
+  multi-step traces, and specialization preservation remain outside the theorem.
+- Commit `7a43a5b27` (code increment, 9 files).
