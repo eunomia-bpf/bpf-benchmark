@@ -4751,3 +4751,47 @@ framework leaves the original bytecode in place and continues.
   warnings. Full `make -C native-sim/formal check` passes with 0 errors, 55
   generators, 99 Lean module checks and 45 host cross-checks over 2,127,668
   cases. Commit `5d7b435c2` (code increment, 10 files).
+
+- Step 0037 (2026-09-28): proved the shared x86 `MOV_STORE` handler
+  composition `X86_SIM_L_EXEC_STORE`, the single body behind
+  `X86_OP_MOV_STORE_IMM` (`0x07`) and `X86_OP_MOV_STORE_REG` (`0x08`), in the
+  new `native-sim/formal/KProgFormal/X86StoreHandler.lean`. A new generator
+  `generate_x86_store_spec.py` (56th) emits a closed width-resolution table
+  `GeneratedX86Store.resolveWidth` over the five `X86_WIDTH_*` codes
+  (including the 0 "absent" code, which defaults to 64 bits) plus three
+  separate selector tables — `dispForm` (`immHighHalf`/`signedImm`),
+  `valueSource` (`immediateWidth`/`registerRead`) and `shiftSource`
+  (`auxSrcShift`/`zero`) — so the two displacement arms out of the same
+  artifact field cannot be conflated, and an arm table `arm`
+  (`stackWrite`/`memoryStore`). `x86_store_step_refines` composes the width
+  resolution, the displacement form, the value source, the AUX shift source,
+  the arm, the generated effective-address offset and the little-endian byte
+  update into a five-conjunct step relation (four field equalities plus a
+  `∀ i` byte statement), with `x86_store_step_fields_refines` and
+  `x86_store_step_bytes_refines` exported as reusable pieces.
+- Step 0037 design notes: the store's observable state is memory only (no
+  flags, no register, no ABI tag), so `X86StoreEffect` carries only
+  `arm`/`width`/`value`/`addr`/`bytes` and `X86MovLoadState` is not reused;
+  one resolved width feeds both the immediate value and the write, and the
+  stack arm re-derives the same `FLAGS ? FLAGS : 64` expression (stated as
+  `x86_store_both_arms_use_one_width` — there is no second, AUX-sourced memory
+  width as in the read body); `x86_store_imm_disp(IMM) = (s32)(IMM >> 32)`
+  while `x86_simm(IMM) = (s64)IMM`; only the register form consults the AUX
+  source-shift byte, and modulo 64 because the C `>>=` on a `__u64` truncates
+  while Lean's `BitVec` `>>>` saturates, routed through
+  `GeneratedX86ShiftCount.count srcShift .w64`; the register source is read at
+  the full 64 bits even at a narrow store width. The explicit
+  `generatedX86StoreDisp`/`Value`/`Shift` selector-helper defs are the shape
+  that made the proof tractable — the same pattern as step 0036.
+- Independent C oracle: `test_x86_store_host.c` sweeps the generated width
+  resolution over the five codes, the generated arm contract, and the full
+  handler over a deterministic memory/register/stack model — 16 base registers
+  × 2 opcodes × 5 index codes × 5 shift codes × 5 FLAGS codes × 4 displacement
+  classes × 3 index values, plus six asymmetry pins — against an explicit
+  store-body model, snapshotting and restoring the pristine buffers around
+  every pair and comparing every resulting memory and stack byte: 48,013
+  cases, zero warnings. Five independent model mutations each make the oracle
+  exit 1, so the sweep is non-vacuous. Full `make -C native-sim/formal check`
+  passes with 0 errors, 56 generators, 101 Lean module checks and 46 host
+  cross-checks over 2,175,681 cases. Commit `ff267c8b5` (code increment, 10
+  files).
