@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "operation": "x86SetccMemHandler",
+  "selector": "aux_source_shift_byte_condition_and_register_number",
+  "opcode": {
+    "define": "X86_OP_SETCC_MEM",
+    "code": "0x3e"
+  },
+  "condition_field": {
+    "field": "source_shift",
+    "shift": 24,
+    "mask": "0xff",
+    "decoder": "X86_REG_AUX_GET_SRC_SHIFT",
+    "lean": "conditionCode",
+    "cond_table": "GeneratedX86Setcc.condOf"
+  },
+  "width": {
+    "define": "X86_WIDTH_8",
+    "code": 1,
+    "bits": 8,
+    "lean": "w8"
+  },
+  "none_reg": {
+    "define": "X86_REG_NONE",
+    "code": "0xff"
+  },
+  "rsp_reg": {
+    "define": "X86_RSP",
+    "code": "4"
+  },
+  "base_rows": [
+    {
+      "dst_is_none": true,
+      "base": "nullBase",
+      "base_define": "KPROG_X86_SETCC_MEM_BASE_NULL",
+      "base_code": 0
+    },
+    {
+      "dst_is_none": false,
+      "base": "registerBase",
+      "base_define": "KPROG_X86_SETCC_MEM_BASE_REGISTER",
+      "base_code": 1
+    }
+  ],
+  "arm_rows": [
+    {
+      "dst_is_rsp": true,
+      "arm": "stackWrite",
+      "arm_define": "KPROG_X86_SETCC_MEM_ARM_STACK",
+      "arm_code": 0
+    },
+    {
+      "dst_is_rsp": false,
+      "arm": "memoryStore",
+      "arm_define": "KPROG_X86_SETCC_MEM_ARM_MEMORY",
+      "arm_code": 1
+    }
+  ]
+}

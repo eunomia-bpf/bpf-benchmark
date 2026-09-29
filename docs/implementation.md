@@ -145,6 +145,17 @@ increment is committed and pushed immediately). Current state:
   source-shift byte, the destination byte lane is selected by an *equality*
   test on the destination shift (so 9 selects the low byte), and the
   destination tag is scalarized unconditionally.
+  The `SETCC_MEM` handler `X86_SIM_L_EXEC_SETCC_MEM` (`X86_OP_SETCC_MEM`,
+  `0x3e`) is composed by `x86_setcc_mem_step_refines` over the generated
+  source-shift condition decode, the null-base and stack-arm selectors, the
+  generated effective-address offset, and the one-byte memory/stack write: the
+  condition is the AUX source-shift byte at bits 24..31 (so the same AUX word
+  names a different condition here than for `SETCC`), the displacement is the
+  whole immediate (unlike the immediate store's high-half slice), the write
+  width is the opcode's constant 8-bit code regardless of any AUX memory-width
+  byte or FLAGS code, and the destination register number drives both the
+  null-base test (`X86_REG_NONE` forms process null, which is not the stack
+  pointer and so always takes the memory arm) and the `X86_RSP` arm test.
   Open: the index register decode and packed AUX layout, the mapping from the simulator's stack region
   to the abstract frame base, address-space, register and immediate/RHS
   objdump/parser-to-AUX selection relation, C-to-Lean

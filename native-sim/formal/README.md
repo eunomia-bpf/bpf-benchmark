@@ -584,12 +584,38 @@ against the real `KPROG_X86_EVAL_CC` expression and a restated write helper,
 and drives the full handler over a deterministic 16-register model comparing
 every byte and tag. The register decode that supplies the destination identity
 and the flags remain outside the theorem.
+The `SETCC_MEM` handler-composition theorem covers `X86_SIM_L_EXEC_SETCC_MEM`
+(`X86_OP_SETCC_MEM`, `0x3e`). `x86_setcc_mem_step_refines` composes the
+condition decode (`x86_setcc_mem_raw_cond_sound`, the same generated
+`KPROG_X86_EVAL_CC` expression table the register form composes, driven from
+the AUX source-shift byte instead of the payload byte), the null-base and
+stack-arm selection, the effective address, and the one-byte memory or stack
+write in one step relation. It is exactly here that the two x86 forms differ,
+and the theorems say so: `x86_setcc_mem_condition_source_differs` pins that the
+condition byte is bits 24..31 rather than bits 0..7, so the same AUX word names
+different conditions for `SETCC` and `SETCC_MEM`;
+`x86_setcc_mem_disp_differs_from_imm_store` pins that the displacement is the
+whole artifact rather than the immediate store's high-half slice; and
+`x86_setcc_mem_both_arms_use_one_width` pins that the write is one byte wide
+regardless of a nonzero AUX memory-width byte and a nonzero FLAGS code, which
+is what separates this opcode from the width-selecting stores. The destination
+register number drives both selectors, so `x86_setcc_mem_null_base_ignores_dst`
+pins that `X86_REG_NONE` forms process null before the arm test and therefore
+always takes the memory arm — the null base is not the stack pointer. Its
+independent 1,053,191-case oracle sweeps the whole 256-value condition byte
+space against the real `KPROG_X86_EVAL_CC`, the whole register space against
+both selectors, and drives the full handler over a deterministic
+register/memory/stack model comparing every byte of both buffers, with pins on
+the source-shift decode, the whole-artifact displacement, the constant width,
+the null-base arm, the unsupported parity codes, and the scaled-index offset.
+The register decode that supplies the destination identity, the base-pointer
+value and the flags remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC` handler compositions, the x86 little-endian memory
+read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
