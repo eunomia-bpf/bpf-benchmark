@@ -4849,3 +4849,76 @@ have their full bodies read and share the pieces step 0038 composed:
 `SETCC_MEM` takes the condition from the AUX *source-shift* byte (not the
 payload) and writes memory, and `CMOV` reads the whole AUX word and preserves
 the pointer tag at `w64`.
+
+## Step 0039 — x86 `SETCC_MEM` handler composition
+
+- Scope: `X86_SIM_L_EXEC_SETCC_MEM` (`X86_OP_SETCC_MEM`, `0x3e`). Chosen over
+  `CMOV`/`CMOV_MEM` because it reuses both halves of the chain the previous two
+  steps composed — step 0038's condition decode and step 0037's memory-write arm
+  (`x86_mem_offset_refines`, `x86_mem_store_byte_refines`,
+  `x86_store_byte_update_refines`, `x86_store_bytes_above_width_unchanged`) — so
+  the *new* obligation is exactly the asymmetry the register form could not
+  have: a condition decoded from a different AUX byte composed onto the register
+  form's condition table.
+- Three asymmetries modeled and pinned: (1) the condition byte is the AUX
+  **source-shift** byte at bits 24..31 (`X86_REG_AUX_GET_SRC_SHIFT`), not the
+  payload byte at bits 0..7 that `SETCC` reads, so the same AUX word names
+  different conditions for the two opcodes; (2) the displacement is the **whole
+  artifact** (`x86_simm(IMM) = (__s64)IMM`), unlike `_MOV_STORE_IMM`'s
+  high-half slice; (3) `(DST) == X86_REG_NONE` forms a **null base pointer**
+  *before* the `X86_RSP` arm test, so the null base always takes the memory arm
+  with process null as the base. The width is the opcode's constant
+  `X86_WIDTH_8` — neither a FLAGS code nor the AUX `X86_MEM_AUX_MEM_WIDTH` byte
+  can move it.
+- New `generate_x86_setcc_mem_spec.py` (58th generator). `GeneratedX86SetccMem`
+  deliberately does **not** re-emit the `condOf`/`evalCond` two-table split: it
+  imports `KProgFormal.GeneratedX86Setcc` and defines
+  `conditionCode (aux : BitVec 32) := (aux >>> 24).setWidth 8` composed onto it,
+  so the counterexample pin (`x86_setcc_mem_condition_source_differs`) is real
+  content. The generated `base`/`arm` selectors are stated over decoded `Bool`
+  predicates, with three `rfl` refinements in the handler bridging the raw
+  register-number tests.
+- New `KProgFormal/X86SetccMemHandler.lean`: `abbrev X86SetccMemEffect :=
+  X86StoreEffect` (same five fields, so the store's byte-update lemmas apply
+  unchanged and the 5-conjunction needs `X86StoreEffect.mk.injEq`);
+  `x86_setcc_mem_raw_cond_sound` / `…_raw_unsupported` /
+  `…_value_refines`; `…_step_fields_refines` / `…_bytes_refines` /
+  `…_step_refines` (13-argument independent spec) / `…_step_aux_refines` (the
+  packed-AUX form the dispatch has); the asymmetry theorems
+  `x86_setcc_mem_width_ignores_inputs` (a nonzero `X86_MEM_AUX_MEM_WIDTH` byte
+  *and* a nonzero FLAGS code both leave the width at `.w8`),
+  `x86_setcc_mem_both_arms_use_one_width`,
+  `x86_setcc_mem_null_base_ignores_dst`, `x86_setcc_mem_arm_stack_iff`,
+  `x86_setcc_mem_step_writes_one_byte`; seven `native_decide` examples. No
+  `sorry`.
+- Independent C oracle `test_x86_setcc_mem_host.c`: part 1 sweeps the whole
+  256-value source-shift byte space through the generated decoder into the real
+  `KPROG_X86_EVAL_CC` over all 16 raw flag nibbles against a restated 14-arm
+  table, pinning every unsupported code to 0; parts 2/3 sweep all 256 register
+  numbers through the base table and both truth values through the arm table;
+  part 4 drives the whole handler over a deterministic register/memory/stack
+  model (16 dst × 256 conditions × 16 flag nibbles × 2 address modes × 2
+  memory-width bytes × 4 immediates plus the smaller sweeps), comparing arm,
+  width, value, address and every byte of both buffers; part 5 pins the
+  source-shift decode, the whole-artifact displacement, the constant width, the
+  null-base memory arm, the unsupported parity codes 10/11, and the scaled-index
+  offset on both arms. **1,053,191 cases**, zero non-macro `-Wall -Wextra`
+  warnings. Nine mutations of the real generated header each make the oracle
+  exit 1 (the `>> 24` decode, the base/arm code swaps, the inverted selectors,
+  and each of `WIDTH_CODE`, `NONE_REG`, `RSP_REG` tripping the generated
+  `_Static_assert` drift checks); mutating the JSON opcode `0x3e` → `0x3f`
+  makes `--check` exit 1.
+- Full `make -C native-sim/formal check` passes with 0 errors, 58 generators,
+  105 Lean module checks and 48 host cross-checks over 3,819,598 cases.
+
+## Next after step 0039
+
+`X86_OP_CMOV`/`X86_OP_CMOV_MEM` (`0x15`/`0x40`) have their full bodies read:
+`CMOV` reads the **whole AUX word** as the condition (`X86_SIM_L_EVAL_CC(AUX)`,
+not a byte field) and at `w64` preserves the **source's pointer tag** through
+`X86_SIM_L_WRITE_REG_PTR_TAG`, the asymmetry against `SETCC`'s unconditional
+scalarization; `CMOV_MEM` reads the source-shift byte *and* has a two-level
+width fallback (`X86_MEM_AUX_MEM_WIDTH(AUX) ?: effective(FLAGS)`) with
+`STORE_DISP = 1`, so it takes the high-half displacement slice. Then
+`_MOVBE_LOAD`/`_MOVBE_STORE`, `_MOV_LOAD_MAP_PTR`, and the rest of the x86
+surface.
