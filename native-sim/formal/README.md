@@ -610,12 +610,52 @@ the source-shift decode, the whole-artifact displacement, the constant width,
 the null-base arm, the unsupported parity codes, and the scaled-index offset.
 The register decode that supplies the destination identity, the base-pointer
 value and the flags remain outside the theorem.
+The `CMOV` / `CMOV_MEM` handler-composition theorem covers
+`X86_SIM_L_EXEC_CMOV` (`X86_OP_CMOV`, `0x15`) and
+`X86_SIM_L_EXEC_CMOV_MEM` (`X86_OP_CMOV_MEM`, `0x40`).
+`x86_cmov_step_refines` composes both bodies in one step relation over the
+generated condition, write-width, access-width, displacement, and writeback
+contracts: the register form's condition is the whole AUX word, evaluated
+through the same generated `KPROG_X86_EVAL_CC` expression table the
+`SETCC` forms compose, with unsupported words falling to the C default
+false, while the memory form's condition is the AUX source-shift byte at
+bits 24..31; the write width is the FLAGS code with a 64-bit fallback, the
+memory form's access width a two-level fallback through the memory-width
+byte, and the writeback a width-keyed table that selects the
+pointer-preserving write at 64 bits and the scalarizing partial-register
+write otherwise. Both forms are conditional — the entire body, value
+production included, is inside the condition test — so
+`x86_cmov_false_condition_no_write` pins that a false condition leaves the
+destination exactly as it was. The register form's 64-bit arm preserves the
+source's provenance tag while every narrower arm scalarizes,
+`x86_cmov_w64_arm_preserves_source_tag` and
+`x86_cmov_narrow_arm_scalarizes`; the memory form instead writes through
+the partial-register write at every width, including the 64-bit one, and so
+never preserves a provenance tag. `x86_cmov_condition_sources_differ` pins
+the register form's whole-word condition against the memory form's
+source-shift byte — one AUX word names two different conditions, so
+`x86_cmov_whole_word_not_low_byte_equality` pins that the whole-word
+table, not the low-byte decode, is the register form's faithful statement.
+`x86_cmov_mem_width_two_level_fallback` pins the two-level fallback, and
+`x86_cmov_mem_disp_differs_from_setcc_mem` pins that the memory form's
+displacement is the high half of the instruction artifact, the immediate
+store's slice, unlike the whole artifact the memory `SETCC` consumes.
+`x86_cmov_unsupported_example` pins that an unsupported parity code
+evaluates to false for both opcodes. Its independent 484,369-case oracle
+sweeps the whole-word and byte condition spaces against the real
+`KPROG_X86_EVAL_CC` expression, the writeback width contracts, and both
+handler bodies against a hand-written C model, with pins on the false
+condition, the 64-bit tag preservation, the memory form's scalarization,
+the two-level width fallback, and the high-half displacement. The register
+decode that supplies the source, the base-pointer value, and the flags
+remain outside the theorem.
+
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM` handler compositions, the x86 little-endian memory
+read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare

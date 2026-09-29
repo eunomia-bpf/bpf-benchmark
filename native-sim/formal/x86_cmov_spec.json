@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "operation": "x86CmovHandler",
+  "selector": "aux_word_condition_and_flags_width_with_source_writeback",
+  "opcode_rows": [
+    {
+      "op": "cmov",
+      "op_define": "X86_OP_CMOV",
+      "op_code": "0x15",
+      "condition_source": "wholeWord"
+    },
+    {
+      "op": "cmovMem",
+      "op_define": "X86_OP_CMOV_MEM",
+      "op_code": "0x40",
+      "condition_source": "sourceShift"
+    }
+  ],
+  "condition_rows": [
+    {
+      "source": "wholeWord",
+      "source_define": "KPROG_X86_CMOV_CONDITION_WHOLE_WORD",
+      "source_code": 0,
+      "decoder": "aux_whole_word",
+      "lean": "conditionByte"
+    },
+    {
+      "source": "sourceShift",
+      "source_define": "KPROG_X86_CMOV_CONDITION_SOURCE_SHIFT",
+      "source_code": 1,
+      "decoder": "aux_source_shift_byte",
+      "lean": "sourceShiftCode"
+    }
+  ],
+  "writeback_rows": [
+    {
+      "is64": true,
+      "writeback": "pointerTag",
+      "writeback_define": "KPROG_X86_CMOV_WRITEBACK_POINTER_TAG",
+      "writeback_code": 0
+    },
+    {
+      "is64": false,
+      "writeback": "scalarize",
+      "writeback_define": "KPROG_X86_CMOV_WRITEBACK_SCALARIZE",
+      "writeback_code": 1
+    }
+  ],
+  "condition_codes": [
+    {
+      "code": 0,
+      "cond": "o"
+    },
+    {
+      "code": 1,
+      "cond": "no"
+    },
+    {
+      "code": 2,
+      "cond": "b"
+    },
+    {
+      "code": 3,
+      "cond": "ae"
+    },
+    {
+      "code": 4,
+      "cond": "e"
+    },
+    {
+      "code": 5,
+      "cond": "ne"
+    },
+    {
+      "code": 6,
+      "cond": "be"
+    },
+    {
+      "code": 7,
+      "cond": "a"
+    },
+    {
+      "code": 8,
+      "cond": "s"
+    },
+    {
+      "code": 9,
+      "cond": "ns"
+    },
+    {
+      "code": 12,
+      "cond": "l"
+    },
+    {
+      "code": 13,
+      "cond": "ge"
+    },
+    {
+      "code": 14,
+      "cond": "le"
+    },
+    {
+      "code": 15,
+      "cond": "g"
+    }
+  ],
+  "width": {
+    "define": "X86_WIDTH_64",
+    "code": 8,
+    "field": "flags",
+    "lean": "resolveWidth"
+  },
+  "mem_width": {
+    "field": "aux_mem_width",
+    "shift": 16,
+    "mask": "0xff",
+    "decoder": "X86_MEM_AUX_MEM_WIDTH",
+    "fallback": "flags_width"
+  },
+  "disp": {
+    "field": "imm_high_half",
+    "shift": 32,
+    "lean": "dispSpec"
+  }
+}

@@ -156,6 +156,31 @@ increment is committed and pushed immediately). Current state:
   byte or FLAGS code, and the destination register number drives both the
   null-base test (`X86_REG_NONE` forms process null, which is not the stack
   pointer and so always takes the memory arm) and the `X86_RSP` arm test.
+  The `CMOV` / `CMOV_MEM` handlers `X86_SIM_L_EXEC_CMOV`
+  (`X86_OP_CMOV`, `0x15`) and `X86_SIM_L_EXEC_CMOV_MEM`
+  (`X86_OP_CMOV_MEM`, `0x40`) are composed by
+  `x86_cmov_step_refines` over the generated condition, width, access-width,
+  displacement, and writeback contracts: the register form's condition is
+  the whole AUX word against the generated `KPROG_X86_EVAL_CC` expression
+  table, the memory form's is the AUX source-shift byte at bits 24..31
+  (so one AUX word names two different conditions,
+  `x86_cmov_condition_sources_differ`), the write width is the FLAGS code
+  with a 64-bit fallback, the memory form's access width a two-level
+  fallback through the AUX memory-width byte
+  (`x86_cmov_mem_width_two_level_fallback`), the memory form's
+  displacement is the high half of the instruction artifact, the
+  immediate store's slice
+  (`x86_cmov_mem_disp_differs_from_setcc_mem`), and the writeback is a
+  width-keyed table, pointer-preserving at 64 bits, scalarizing below.
+  Both forms are conditional — the whole body, value production included,
+  is inside the condition test, so a false condition leaves the
+  destination untouched (`x86_cmov_false_condition_no_write`). The
+  register form's 64-bit arm preserves the source's provenance tag, every
+  narrower arm scalarizes
+  (`x86_cmov_w64_arm_preserves_source_tag`,
+  `x86_cmov_narrow_arm_scalarizes`); the memory form writes through the
+  scalarizing partial-register write at every width, including the
+  64-bit one, and so never preserves a tag.
   Open: the index register decode and packed AUX layout, the mapping from the simulator's stack region
   to the abstract frame base, address-space, register and immediate/RHS
   objdump/parser-to-AUX selection relation, C-to-Lean
