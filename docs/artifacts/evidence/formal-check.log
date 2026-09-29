@@ -1,4 +1,4 @@
-started=2026-09-28T21:18:05+00:00 commit=cfe42a8da1c6b563f307e0e596fea1570a744044
+started=2026-09-29T01:58:40+00:00 commit=a84158bea36fcba60a7f14fe94a145e1087cddd1
 make: Entering directory '/workspaces/repository/native-sim/formal'
 install -d build
 python3 generate_ptr_add_spec.py --check
@@ -58,6 +58,7 @@ python3 generate_x86_mem_dispatch_spec.py --check
 python3 generate_x86_mov_load_spec.py --check
 python3 generate_x86_store_spec.py --check
 python3 generate_x86_setcc_spec.py --check
+python3 generate_x86_setcc_mem_spec.py --check
 lake build
 Build completed successfully.
 lake env lean KProgFormal/TagErasure.lean
@@ -191,6 +192,11 @@ lake env lean KProgFormal/X86SetccHandler.lean
 cc -Wall -Wextra -O2 -I. test_x86_setcc_host.c -o build/test_x86_setcc_host
 ./build/test_x86_setcc_host
 x86 setcc handler host cross-check: OK (590726 cases)
+lake env lean KProgFormal/GeneratedX86SetccMem.lean
+lake env lean KProgFormal/X86SetccMemHandler.lean
+cc -Wall -Wextra -O2 -I. test_x86_setcc_mem_host.c -o build/test_x86_setcc_mem_host
+./build/test_x86_setcc_mem_host
+x86 setcc_mem handler host cross-check: OK (1053191 cases)
 lake env lean KProgFormal/Arm64Flags.lean
 cc -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 ./build/test_arm64_flags_host
@@ -306,4 +312,4 @@ arm64 stack tag host cross-check: OK (36 cases)
 lake env lean KProgFormal/Arm64Decode.lean
 make: Leaving directory '/workspaces/repository/native-sim/formal'
 exit=0
-ended=2026-09-28T21:19:11+00:00
+ended=2026-09-29T01:59:46+00:00
