@@ -4922,3 +4922,78 @@ width fallback (`X86_MEM_AUX_MEM_WIDTH(AUX) ?: effective(FLAGS)`) with
 `STORE_DISP = 1`, so it takes the high-half displacement slice. Then
 `_MOVBE_LOAD`/`_MOVBE_STORE`, `_MOV_LOAD_MAP_PTR`, and the rest of the x86
 surface.
+
+## Step 0040 — x86 `CMOV` / `CMOV_MEM` handler composition
+
+- Scope: `X86_SIM_L_EXEC_CMOV` (`X86_OP_CMOV`, `0x15`) and
+  `X86_SIM_L_EXEC_CMOV_MEM` (`X86_OP_CMOV_MEM`, `0x40`), composed in one module
+  because they share the chain the previous four steps composed — step 0038's
+  condition decode, step 0037's width/mem-offset pieces and the register-write
+  contract. The two forms differ only in where the condition byte comes from
+  and whether the value crosses memory.
+- Two asymmetries modeled and pinned: (1) `CMOV`'s condition is the **whole
+  AUX word** (`X86_SIM_L_EVAL_CC(AUX)`), not a byte field — the low-byte table
+  is a *truncating* model, and
+  `x86_cmov_whole_word_not_low_byte_equality` (the `0x00000105` witness:
+  whole word unsupported, low byte `0x05` supported) pins the distinction,
+  while `x86_cmov_condition_sources_differ` (`0x05000000` vs. `0x00000005`)
+  pins that the register form's whole word and the memory form's source-shift
+  byte name two different conditions from one AUX word; (2) the writeback is
+  keyed by the 64-bit test, not by opcode — the register form's `w64` arm
+  preserves the source's pointer tag via
+  `X86_SIM_L_WRITE_REG_PTR_TAG` (`x86_cmov_w64_arm_preserves_source_tag`),
+  every narrower arm scalarizes (`x86_cmov_narrow_arm_scalarizes`), and
+  `x86_cmov_writeback_only_w64` pins that the `pointerTag` arm fires only at the
+  64-bit width; the memory form, by contrast, scalarizes at **every** width
+  including 64-bit (its `WRITE_REG_WIDTH` writeback), so the `pointerTag` arm
+  is register-form-only — pinned by the oracle part 4 model, not a dedicated
+  theorem.
+- New `generate_x86_cmov_spec.py` (59th generator) emitting
+  `KProgFormal/GeneratedX86Cmov.lean` + `generated/x86_cmov.h` +
+  `x86_cmov_spec.json`: the `X86CmovOp`/`ConditionSource` op tables, the
+  whole-word `condOf` / low-byte `condOfByte` / source-shift `condOfSrcShift`
+  condition tables composed onto `GeneratedX86Setcc`'s expression table, the
+  width tables `resolveWidth`/`resolveMemWidth` over `Code`, and the
+  is-64-keyed `writeBack : Bool -> WriteBack` table.
+- New `KProgFormal/X86CmovHandler.lean` (515 lines, 31 theorems): 12
+  refinement lemmas bridging the generated contracts to the C bodies
+  (condition byte/word, mem condition, width/mem-width/mem-disp, writeback,
+  evalRaw) plus the top-level `x86_cmov_step_refines` (9-argument); the
+  asymmetry theorems `x86_cmov_false_condition_no_write`,
+  `x86_cmov_w64_arm_preserves_source_tag`,
+  `x86_cmov_narrow_arm_scalarizes`, `x86_cmov_condition_sources_differ`,
+  `x86_cmov_whole_word_not_low_byte_equality`,
+  `x86_cmov_mem_width_two_level_fallback`,
+  `x86_cmov_mem_disp_differs_from_setcc_mem` (the `0xdeadbeef00000008`
+  witness), `x86_cmov_writeback_only_w64`, `x86_cmov_unsupported_example`;
+  and four `native_decide` examples. No `sorry`.
+- Independent C oracle `test_x86_cmov_host.c`: part 1 sweeps the 14 × 16
+  condition expression table, the whole-word (256 × 256) and truncating byte
+  (256 × 16) condition spaces through the generated macros into the real
+  `KPROG_X86_EVAL_CC`, plus the 256-case mem source-shift byte extraction
+  (70,112 cases); part 2 sweeps all 6 FLAGS codes through the width and
+  writeback contracts; part 3 drives the register form over a deterministic
+  register model (30,240 cases); part 4 drives the memory form (384,000
+  cases) with the model deliberately scalarizing at **every** width,
+  including 64-bit; part 5 pins the eight asymmetry pins (4+7 cases).
+  **484,369 cases**, zero non-macro `-Wall -Wextra` warnings. Six mutations
+  of the real generated header/spec each make the oracle or the drift check
+  exit 1 (the `(AUX)` → `(__u8)(AUX)` low-byte condition, the `>> 24`
+  decode → low-byte mem condition, the inverted `if (IS_64)` writeback
+  branch, the high-half → whole-artifact displacement, the `>> 16` → `>> 8`
+  mem-width shift, and the JSON opcode `0x15` → `0x25` drift check);
+  relabeling the numeric `POINTER_TAG`/`SCALARIZE` codes alone does **not**
+  trip the oracle — the codes are a shared label both sides derive.
+- Full `make -C native-sim/formal check` passes with 0 errors, 59
+  generators, 107 Lean module checks and 49 host cross-checks over
+  4,303,967 cases.
+
+## Next after step 0040
+
+`_MOVBE_LOAD`/`_MOVBE_STORE`, `_MOV_LOAD_MAP_PTR`, and the rest of the x86
+surface (`_STORE_XMM0`/`_LOAD_XMM0`, `_CALL_MEMCPY_{,REG}`/
+`_CALL_MEMSET_{,REG}`, `_PUSH`/`_POP`, `_REP_MOVS`, `_ANDN{,_MEM}`,
+`_BZHI{,_MEM}`, `_CMP_{IMM,REG}_OP`), the index register decode and
+packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
+compiler/native bytes, multi-step traces, and specialization preservation
+remain open.
