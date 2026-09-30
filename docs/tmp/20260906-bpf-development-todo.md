@@ -5029,3 +5029,26 @@ remain open.
 - Retained log copy + run marker:
   `docs/tmp/build-and-evaluate/step-0041-20260929T234020Z/make-selftest.log`
   and `run-marker.txt`; full report in `step-report.md`.
+
+### KVM micro sanity (`simple`) at `5b4730556`, 2026-09-30
+
+- `make micro BENCH="simple" SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` (default
+  `PLATFORM=kvm ARCH=x86`, zero extra env vars), launched 00:12:40Z,
+  completed 00:17:13Z (~4.5 min; x86 image cached from step 0041), make
+  PID 302214, host kernel `7.3.0-070300rc3-generic`.
+- Run `micro/results/x86_kvm_micro_20260930_001655_090124/`
+  `status: completed` (1/1 benchmark), VM powered down cleanly, no make
+  error markers. `simple` matches on all three runtimes (raw):
+  `native` `compile_ns: 52456` / `exec_ns: 13` / `native_code_bytes: 61`;
+  `kernel` `compile_ns: 387392` / `exec_ns: 44` / `jited_prog_len: 111`;
+  `llvmbpf` `compile_ns: 4471088` / `exec_ns: 21` / `native_code_bytes: 59`;
+  all `result: 12345678` = `expected_result`, `retval: 2` =
+  `expected_retval`. Raw counters only, no ratio vs the 09-26 anchor
+  (`x86_kvm_micro_20260926_105108_035832`); the check is exact-result
+  match, not a performance delta.
+- Tracked summary files added to git: `metadata.json`,
+  `details/result.json`, `details/progress.json` (same set as the 09-26
+  run); `code_compare/` and `jit_dumps/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0042-20260930T001631Z/make-micro.log`
+  and `run-marker.txt`; full report in `step-report.md`.
