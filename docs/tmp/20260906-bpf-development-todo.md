@@ -5196,3 +5196,59 @@ remain open.
   `docs/tmp/build-and-evaluate/step-0046-20260930T024655Z/make-micro.log`
   (attempt 2), `make-micro-interrupted-attempt1.log` (attempt 1), and
   `run-marker.txt`; full report in `step-report.md`.
+
+### KVM cilium/agent corpus run at `9738ca00f`, 2026-09-30
+
+- `BPFREJIT_CORPUS_APPS="cilium/agent" make corpus` (default
+  `PLATFORM=kvm ARCH=x86`; default policy `SAMPLES=3`,
+  `WORKLOAD_DURATION` 30 s, `FUZZ_ROUNDS=1000`; zero extra env vars),
+  launched 03:14:42Z, make PID 407106, x86 image cached from the step
+  0041 build; host kernel `7.3.0-070300rc3-generic`.
+- Run `corpus/results/x86_kvm_corpus_20260930_031929_336215/`
+  `status: completed` (`progress.json` status `completed`); suite
+  `details/result.json` `status: ok`, `suite_name: macro_apps`,
+  `samples: 3`; app `details/apps/cilium__agent.json` `status: ok`,
+  `error: ''`. `rejit_result`: `mode: loadtime`,
+  `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
+  kop]`, `selected_workload: cilium_endpoint_pktgen`, `runner:
+  cilium`.
+- **53 BPF programs** recorded per start (baseline and post_rejit),
+  keyed by in-VM program id. Hot pair is `cil_from_container` (LXC
+  endpoint forward program); the two-start raw two-start BPF counters
+  (raw only, no ratios):
+  - baseline `cil_from_container` id 147 `run_cnt_delta
+    57,263,642` / `run_time_ns_delta 40,673,150,028` / `bytes_jited
+    1,093` / `bytes_xlated 1,720`; id 163 `run_cnt_delta 57,273,769` /
+    `run_time_ns_delta 40,567,185,435` / `1,093` / `1,720`.
+  - post_rejit `cil_from_container` id 2058 `run_cnt_delta
+    60,692,033` / `run_time_ns_delta 38,285,958,028` / `bytes_jited
+    952` / `bytes_xlated 1,416`; id 2214 `run_cnt_delta 60,631,769` /
+    `run_time_ns_delta 37,389,204,336` / `952` / `1,416`.
+  - The full 53-program table is preserved verbatim in
+    `details/apps/cilium__agent.json` (tracked into git this step).
+- Raw app-side workload counters (two `kernel_pktgen` components per
+  sample, both `rc=0`, `errors: 0` across all six runs; `pkts-sofar`
+  per netns `bpfbench-cepa` / `bpfbench-cepb`):
+  - baseline: sample 0 `19,001,255`/`19,007,707`; sample 1
+    `19,254,010`/`19,253,530`; sample 2 `19,008,281`/`19,012,437`.
+  - post_rejit: sample 0 `20,853,949`/`20,853,437`; sample 1
+    `20,037,542`/`19,972,009`; sample 2 `19,800,446`/`19,806,227`.
+  - No ratio, geomean, or win/loss tally computed here — any
+    cross-start comparison is analysis per `docs/evaluation.md` §5.
+- In-VM BPF program ids differ between the two starts (147/163 →
+  2058/2214 for the same named program), so the hot pair is matched by
+  `name`, not id.
+- Tracked summary files added to git (same set as the step 0043/0044
+  corpus runs): `metadata.json`, `details/result.json`,
+  `details/progress.json`, `details/apps/cilium__agent.json`,
+  `details/loadtime-reports/cilium__agent.jsonl`; `details/shim-logs/`
+  and `details/loadtime-plans/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0047-20260930T031442Z/make-corpus.log`
+  and `run-marker.txt`; full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` corpus within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
