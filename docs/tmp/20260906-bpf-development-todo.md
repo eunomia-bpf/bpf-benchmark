@@ -6148,3 +6148,47 @@ remain open.
   external blocker, not an invented gate; re-checked 2026-09-30: no
   `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
   credentials land.
+
+### QEMU arm64 `make selftest` gate (zero knobs) at `d098e6530`,
+ 2026-09-30 (completes the arm64 target-parity matrix; selftest mode =
+ kop modules + native-proof smokes + BPF-negative suite + bpf_stats)
+
+- `PLATFORM=qemu ARCH=arm64 make selftest` (zero knobs; `TEST_MODE=
+  selftest`, `runner.suites.test`, Makefile:226/233), launched
+  13:29:22Z, make PID 914605, exited 13:36:03Z, prev HEAD `d098e6530`.
+  Selftest is the fullest gate mode — kop modules + native-proof micro
+  smoke + native-proof negative smoke + BPF-verifier negative suite
+  (non-fuzz) + `ensure_bpf_stats_enabled` (`_mode_needs_bpf_stats`,
+  `test.py:487`), which `test` mode also needs but `negative` mode does
+  not. The arm64 counterpart of KVM x86 selftest (increment 2 / step 0052
+  lineage).
+- Result dir `tests/results/3736936a/` (token-based; nested run dir
+  `native_proof_micro_19700101_000013_422919/`; QEMU in-VM clock 1970).
+- **Gate result: PASS (5 PASS / 0 FAIL)**: BPF verifier negative smoke
+  `valid_xdp_pass`, `invalid_opcode errno=22`, `stack_oob_write
+  errno=13`, `uninitialized_register errno=13`; native_proof verifier
+  rejection `unchecked_packet_read rejected rc=1`. 5 PASS / 0 FAIL in
+  `make-selftest-arm64.log`.
+- **Bonus: native-proof micro staged-codegen 29/29 completed**
+  (`suite=micro_staged_codegen`, `progress.json status: completed`
+  29/29; `metadata.json status: completed`, `run_type=native_proof_micro`).
+  No ratio/geomean/rollup computed.
+- **Cross-arch readout (analysis per `docs/evaluation.md` §5, not a
+  gate)**: the selftest mode (which re-enables bpf_stats on top of 0061's
+  gate set) **passes on aarch64 QEMU**. The target-parity matrix now
+  covers every KVM target on the arm64 line: micro (0058 clean), corpus
+  ×2 (0059/0060 recorded failure, deterministic), test (0061 pass),
+  selftest (0062 pass); only `negative-test` remains. This reaffirms the
+  0061 localization that the arm64 corpus post-rejit failure is specific
+  to the load-time-plan/post-rejit path — not the verifier, kop modules,
+  bpf_stats, or test infrastructure. No framework/app/runner changes.
+- Clean QEMU power-down, `qemu-status=0`, make target exits 0. 32
+  trackable files under the run dir committed (token + nested run dir:
+  `metadata.json`, `details/progress.json`, `details/result.json`, 29×
+  `details/code_compare/*.md`).
+- `PLATFORM=aws ARCH=arm64` (the AWS line) remains **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate; re-checked 2026-09-30: no
+  `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
+  credentials land.
