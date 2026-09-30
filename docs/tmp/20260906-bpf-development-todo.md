@@ -5780,3 +5780,82 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM `make corpus` variance re-run (zero knobs) at `674d32748`,
+ 2026-09-30
+
+- Plain `make corpus` (default `PLATFORM=kvm`, `ARCH=x86`, zero knobs;
+  `SAMPLES=3`, `WORKLOAD_DURATION=30` defaults); launched 08:37:24Z,
+  make PID 721250, prev HEAD `674d32748`; run token `46529a8b`,
+  result dir
+  `corpus/results/x86_kvm_corpus_20260930_084230_227783/` (in-VM
+  08:42:30 → 09:16:38Z, ~34 min; VM power-down at in-VM ~2090 s).
+- **Purpose: paired variance data point against the canonical
+  step-0051 full-corpus run (`42e1c4e37`)** — the paper's primary
+  measurement is workload throughput, and `docs/evaluation.md` §5
+  analysis (ratios, `min_runs ≥ 100` filter, geomean, tail-call
+  accounting) needs ≥2 raw runs of the primary metric. This is the
+  second whole-corpus run on the same host kernel
+  (`7.3.0-070300rc3-generic`).
+- Top `metadata.json` `status: completed`, `run_type:
+  x86_kvm_corpus`, `samples: 3`, `workload_seconds: 30.0`;
+  `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
+  kop]` (same pass list as step 0051); `details/progress.json`
+  `status: completed`, `completed_at 2026-09-30T09:16:38Z`.
+- **All 6 apps `status: ok`, 0 `error`**, raw two-start BPF counters
+  (sum `run_cnt_delta` baseline → post_rejit; sum `run_time_ns_delta`
+  baseline → post_rejit):
+  - `bcc/set` (25 progs/start): 1,264,807,680 → 1,261,697,834;
+    131,799,998,389 → 130,103,656,097 ns.
+  - `cilium/agent` (60 progs/start): 119,792,066 → 120,840,657;
+    77,865,616,730 → 76,816,178,280 ns.
+  - `katran` (1 hot xdp prog): 219,133,665 → 233,004,895;
+    37,265,401,864 → 34,422,786,269 ns.
+  - `otelcol-ebpf-profiler/profiling` (13 progs/start): 723,235 →
+    723,477; 3,233,580,399 → 3,468,636,568 ns.
+  - `tetragon/observer` (287 progs/start): 485,755,566 →
+    552,086,889; 352,597,966,080 → 320,901,728,419 ns.
+  - `tracee/monitor` (151 progs/start): 1,164,270,875 →
+    1,163,045,466; 418,519,538,380 → 418,432,584,943 ns.
+- Raw workload counters (per-sample, 3 samples/segment; raw values
+  only, no aggregation):
+  - `bcc/set` (stress-ng `--metrics-brief`): baseline cap ≈ 8.63M /
+    8.67M / 8.62M, sockfd ≈ 6.48M / 6.50M / 6.48M; post_rejit cap
+    ≈ 8.51M / 8.40M / 8.49M, sockfd ≈ 6.50M / 6.54M / 6.53M.
+  - `cilium/agent` (kernel pktgen): pkts-sofar ≈ 20.12M / 19.77M /
+    20.07M vs 20.21M / 19.94M / 20.17M; errors=0 all samples.
+  - `katran` (kernel pktgen): pkts-sofar ≈ 23.96M / 24.20M / 24.15M
+    vs 26.44M / 25.66M / 16.10M; errors ≈ 26.42M / 27.54M / 26.84M
+    vs 26.30M / 24.91M / 15.24M (raw as reported; recorded as-is,
+    not gated on — contention/noise caveat).
+  - `otelcol-ebpf-profiler/profiling` (`int_loop ops=`): 493,393,552
+    / 543,141,293 / 639,538,573 vs 548,755,969 / 521,043,509 /
+    603,085,450.
+  - `tetragon/observer` (stress-ng): baseline udp ≈ 3.18M / 3.18M /
+    3.14M, sockfd ≈ 3.52M / 3.31M / 3.46M; post_rejit udp ≈ 4.71M /
+    4.07M / 3.17M, sockfd ≈ 6.74M / 4.76M / 3.53M.
+  - `tracee/monitor` (stress-ng): cap ≈ 1.85M / 1.85M / 1.85M vs
+    1.89M / 1.79M / 1.83M; futex ≈ 4.42M / 4.64M / 4.45M vs 4.53M /
+    4.46M / 4.50M.
+- Host log: **0 error markers**; clean VM power-down
+  (`reboot: Power down`).
+- 15 trackable files under the result dir committed (`git
+  check-ignore` confirms `details/shim-logs/` +
+  `details/loadtime-plans/` stay gitignored via `corpus/.gitignore`
+  `results/*/details/*` + negation rules): top `metadata.json`,
+  `details/progress.json`, `details/result.json`, 6×
+  `details/apps/*.json`, 6× `details/loadtime-reports/*.jsonl`.
+- No ratio / geomean / rollup computed here (raw two-start BPF
+  counters + raw per-sample workload counters only; the
+  step-0051 ↔ step-0056 paired delta is analysis per
+  `docs/evaluation.md` §5).
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0056-20260930T083724Z/
+  make-corpus.log` (clean power-down) and `run-marker.txt`; full
+  report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
