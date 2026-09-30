@@ -5719,3 +5719,64 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM `make negative-test` at `7a0da65f0`, 2026-09-30 (observed
+ test-mode shape; TEST_MODE in-VM propagation gap recorded)
+
+- Plain `make negative-test` (default `PLATFORM=kvm`, `ARCH=x86`, zero
+  knobs); launched 08:00:27Z, make PID 534924, x86 image cached; host
+  kernel `7.3.0-070300rc3-generic`. Target intent is the dedicated
+  negative-only suite (`TEST_MODE ?= negative`, Makefile:227;
+  `_run_negative_mode`, `fuzz=False`, writes `negative.log`, no micro
+  smoke).
+- **Observed shape = test-mode, not negative-mode**: the run executed
+  the three-section test-mode suite (`native_proof micro smoke` +
+  `native_proof verifier rejection smoke` + `BPF verifier negative
+  smoke`) and wrote a `native_proof_micro_<ts>/` dir, **not** a
+  `negative.log`. Root cause confirmed via `make -n` dry runs of
+  `negative-test`/`test`/`selftest`: the KVM `vng --exec "make -C …
+  __runtime-vm-test $(RUN_MAKE_VARS)"` line carries **no `TEST_MODE`**
+  (only `SAMPLES='3' FUZZ_ROUNDS='1000'
+  MERLIN_COMPILETIME_MODE='none'`), so the in-VM suite fell back to
+  `env_str("TEST_MODE","test")` (`runner/suites/test.py:48`). All three
+  test-family targets run the default test-mode suite on the KVM path.
+  Frozen benchmark Makefile — recorded as a wiring gap, not patched,
+  not a gate.
+- Run token `tests/results/4dca07ca/`; artifact
+  `tests/results/4dca07ca/native_proof_micro_20260930_080511_037492/`
+  `status: completed`, `run_type: native_proof_micro` (in-VM
+  08:05:11 → 08:05:15Z, ~4 s; VM power-down ~08:05:16Z).
+- `progress.json` `completed_benchmarks: 29 / total_benchmarks: 29`;
+  **all 29 `native_proof` benchmarks matched** their
+  `expected_result`/`expected_retval` (`runtime=native_proof`,
+  `--samples 1 --warmups 0 --inner-repeat 1`).
+- `BPF verifier negative smoke` (the "negative" substance, run as part
+  of the test-mode suite): **PASS** `valid_xdp_pass`;
+  `invalid_opcode` (errno=22/EINVAL); `stack_oob_write`
+  (errno=13/EACCES); `uninitialized_register` (errno=13/EACCES) —
+  invalid BPF programs rejected as required. Plus **PASS
+  `unchecked_packet_read rejected rc=1`** from the verifier-rejection
+  smoke.
+- Log: **0 error markers** (no `make ***`, `FAILED`, `fatal`,
+  `Aborted`, `Terminated`, `did not match`, `unexpectedly
+  succeeded`); clean VM power-down.
+- All 32 files under `tests/results/4dca07ca/` are trackable
+  (`git check-ignore` reports 0 ignored); tracked into git this step:
+  `metadata.json`, `details/result.json`, `details/progress.json`, all
+  30 `details/code_compare/*.md`.
+- No ratio / geomean / rollup computed (raw sample counters only;
+  cross-start comparison is analysis per `docs/evaluation.md` §5).
+- **Open item (recorded, not gated)**: TEST_MODE does not propagate
+  in-VM on the KVM path (frozen Makefile), so the dedicated negative-
+  only suite (`negative.log`, no micro smoke) is not produced by a
+  zero-knob `make negative-test`. Forcing it needs `TEST_MODE=negative`
+  reaching in-VM (outside the zero-knob rule) or a frozen-Makefile fix.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0055-20260930T080027Z/
+  make-negative-test.log` (clean power-down) and `run-marker.txt`;
+  full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` within caps is **blocked on credentials**:
+  no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
