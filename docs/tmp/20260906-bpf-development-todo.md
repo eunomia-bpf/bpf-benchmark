@@ -6479,3 +6479,99 @@ Every gate token this chain claims was re-verified tracked on disk.
   validity gate. The chain remains at the fixed point recorded in the
   0066 close-out entry above: only the external items (AWS
   credentials, Paper-B clean-source image rebuild) remain.
+
+### Disk sweep correction: complete untracked-tree inventory; prior sweep was truncated (record-only, 2026-09-30)
+
+The "no orphan" entry above was based on a sweep cut by `head -40`,
+which missed three families of untracked result trees. This is the
+forward-only correction. **No external condition flipped this cycle**
+(read-only re-check): HEAD = `origin/master` = `b2a29ab82` (0/0); the
+same 13 WIP ` M` files remain unstaged; `bpfopt/llvm/src/llvm_mapinline.hpp`
+still ` M` (Paper-B clean-source image rebuild still blocked); AWS still
+blocked (no `~/.aws`, no `AWS_*` env, no `codex-arm64-test-…pem`); no new
+step dir past `step-0066`; KVM operational (`/dev/kvm` writable,
+`/opt/virtme-ng/bin/vng` present). Nothing is running
+(`pgrep -c -f run_target_suite` = 0). No new `make <target>` run, no new
+validity gate.
+
+- **Method correction (the load-bearing fix):** the ground-truth
+  check is **per-top-token `git ls-files -- <token-dir>/ | wc -l`
+  (count > 0 = tracked)**, *not* a per-file classifier. The earlier
+  classifier mis-labeled the six 09-30 KVM single-app trees as
+  "untracked" when `git ls-files` shows them **5/5 tracked**:
+  `corpus/results/x86_kvm_corpus_20260930_{004629_965759(katran),
+  013937_924928(bcc/set),031929_336215,035320_255208,043516_570740,
+  050405_991692}/` each track `metadata.json`, `details/result.json`,
+  `details/progress.json`, `details/apps/<app>.json`,
+  `details/loadtime-reports/<app>.jsonl`; only gitignored
+  `shim-logs/` + `loadtime-plans/` scratch stays untracked. The
+  research-log sections that say "Tracked summary files added to git"
+  for these six are **correct**. Not open.
+
+- **`corpus/results/x86_kvm_corpus_20260930_{171858_652950(status=error),
+  183425_011210(status=running,5/6,reaped~19:03Z),
+  192224_050834(status=running,0 apps,reaped~19:23Z)}/`** are
+  **deliberately kept-untracked**, documented in the `step-0065` /
+  `step-0066` receipts (a raw SIGABRT abort plus two
+  OMP-supervisor-reaped partial attempts — the reaping-hazard
+  failure mode). Nothing running now; trees are ~3h stale.
+  **Not open** (resolved by receipt; record-only).
+
+- **The 09-16→09-26 x86 KVM corpus tail (68 fully-untracked trees;
+  day counts 0916=8, 0918=4, 0919=4, 0920=1, 0921=2, 0922=1, 0923=1,
+  0924=1, 0925=10, 0926=36, plus the 3× 0930 above = 71 total) is
+  legitimate untracked scratch, not a claimed-vs-disk bug.** Decisive
+  checks: `git log --all --oneline -- <token>/` = **0 commits** for
+  every full token (never tracked on any branch). The research log and
+  `docs/implementation.md` cite these as **execution provenance**
+  ("exits 0 and writes `corpus/results/…/` with suite
+  `status: completed`"), *not* as "committed to git" — the 60-line
+  "tracked"-in-window hits were prose false-positives ("tracked by
+  shim", "gitignored build artifact"). The asymmetry with the tracked
+  `corpus/results/x86_kvm_corpus_20260916_031856_977978/` (4 tracked
+  files, also cited in `implementation.md`) is simply that that one
+  was separately committed; both are provenance citations. **Left
+  untracked; not claimed as committed; no commit.**
+
+- **NEW (the 8 families the truncated sweep never inventoried) — all
+  external/supervisor-parallel KVM WIP, record-only, no commit:**
+  - **7× `tests/results/{04653888,1b786105,27701e23,45ef4b1a,
+    7af33003,8487eb21,91832227}/native_proof_micro_20260930_*/`** —
+    32-file shape each; `metadata.status: completed`, progress 29/29,
+    `host: virtme-ng`. **Zero references** in the research log, any
+    `docs/tmp/build-and-evaluate/step-*/` receipt, or the `docs/`
+    tree. Same category as the "other 7" above (`bf2d759f` …
+    `ee13e166`) — external/supervisor-parallel KVM runs; not
+    committed or claimed here.
+  - **`micro/results/x86_kvm_micro_20260924_223349_704509/`** —
+    **100% untracked** (0 tracked files; 7 on disk: `metadata.json`,
+    `details/result.json`, `details/progress.json`,
+    `details/code_compare/simple.md`, 3×
+    `details/jit_dumps/simple__*__sample00.{jitted,xlated}.bin`),
+    `status: completed` progress 1/1, `host: virtme-ng`, zero
+    research-log refs. The ATC26-claimed sibling
+    `micro/results/x86_kvm_micro_20260924_231824_136293/` is
+    tracked; this one is not. Left untracked; not claimed; no commit.
+
+- **Re-confirmed (no change):** `tests/results/62ce5f12/` (09-29,
+  `step-0041` "kept untracked"), `tests/results/b29a899c/` (0064
+  `TEST_MODE=cli` mechanism probe), `tests/results/d6b6575f/` + the 7
+  above — external/supervisor KVM WIP.
+
+- **Corrected full untracked inventory (per-top-token `git ls-files`):**
+  `corpus/results` = 72 fully-untracked top dirs = 1× arm64 QEMU
+  `467359` (intentional `KEEP_WORKDIRS` scratch, canonical package
+  committed under `docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/`)
+  + 68× 09-16→09-26 x86 KVM scratch + 3× 09-30 reaped/aborted;
+  `micro/results` = 1 (the 09-24 KVM micro above); `tests/results` =
+  17 (`62ce5f12`, `b29a899c`, `d6b6575f` + the 7 handoff-listed
+  `bf2d759f…ee13e166` + the 7 new zero-ref KVM trees). **No claimed
+  result is missing from git; the "no orphan" conclusion still holds —
+  the correction is that the prior sweep undercounted untracked
+  *scratch/external* families, not that it missed a committed result.**
+
+- **Disposition: record-only.** The two external blockers (AWS
+  credentials; Paper-B clean-source image rebuild) remain the sole
+  outstanding *run* items. This entry only corrects the truncated
+  inventory; it commits nothing new. The chain stays at the fixed
+  point recorded in the 0066 close-out entry above.
