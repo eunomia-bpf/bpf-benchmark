@@ -6297,3 +6297,58 @@ remain open.
   external blocker, not an invented gate; re-checked 2026-09-30: no
   `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
   credentials land.
+
+### TEST_MODE propagation mechanism correction, 2026-09-30
+
+The 0063 step report
+(`docs/tmp/build-and-evaluate/step-0063-20260930T134335Z/step-report.md`,
+line 42) explains the KVM in-VM `TEST_MODE` gap by saying `RUN_MAKE_VARS`
+"is simply expanded at definition time with `$(foreach …)`" and that at
+that point `TEST_MODE` is still empty, so the `$(if …)` guard drops it.
+The *expansion type* it attributes is wrong; the *observed symptom* is
+correct.
+
+- `Makefile:193` is `RUN_MAKE_VARS = $(foreach v,$(RUN_MAKE_BASE_VAR_NAMES),…) \`
+  — a **recursive `=`** (line 193 ends with `\`, continuing onto a
+  tab-prefixed line 194 holding the `SUITE_ENV_NAMES` guarded half),
+  **not** a `:=`. A recursive variable expands at *use* time, so the
+  phrase "simply expanded at definition time" is inaccurate about the
+  type of expansion. `Makefile:167` lists `TEST_MODE` in
+  `SUITE_ENV_NAMES`; `Makefile:183` `export $(SUITE_ENV_NAMES)`; the
+  guarded `$(if $($(v)),…)` half sits on line 194.
+- The target-specific `?=` value (Makefile:226–228) is nonetheless
+  empirically dropped from the in-VM sub-make, reproduced read-only
+  against the **frozen** Makefile:
+  - P1 `make -n PLATFORM=kvm ARCH=x86 selftest` (no command-line
+    `TEST_MODE`): the captured `vng --exec … __runtime-vm-test
+    $(RUN_MAKE_VARS)` arg line carries **zero** `TEST_MODE` tokens
+    (`grep -c TEST_MODE` → 0; the `-e …=` token list shows
+    `SAMPLES`, `FUZZ_ROUNDS`, `MERLIN_COMPILETIME_MODE` but no
+    `TEST_MODE`).
+  - P2 `make -n … selftest TEST_MODE=cli`: the printed sub-make line
+    carries `-e TEST_MODE="cli"` (`grep -c TEST_MODE` → 1). A
+    separate real (non-dry-run) launch of that target booted the KVM
+    VM (`7.0.0-rc2+`) and the in-VM suite fail-fast rejected the
+    value, `[test-suite][ERROR] unsupported test mode: cli` —
+    confirming a command-line `TEST_MODE` reaches the in-VM suite
+    end-to-end. That real run's result dir `tests/results/b29a899c/…`
+    is kept untracked.
+  - `runner/suites/test.py:48` reads `args.test_mode =
+    env_str("TEST_MODE","test")`, so with the target-specific value
+    dropped the in-VM suite falls back to the `test`-mode default.
+    This is why the 0064 gate (`fc73bdc4`) ran the `test`-mode full
+    gate rather than the nominal `selftest`; its `metadata.json`
+    independently confirms `TEST_MODE` absent from the sub-make args.
+- The asymmetry (target-specific `?=` value dropped, command-line
+  value propagated) is the recorded launch-wiring behavior. With a
+  recursive `=`, target-specific variables are normally in scope at
+  recipe-expansion time, so the drop is *not* explained by
+  expansion-type; this correction records the observed fact and does
+  not assert an unverified internal mechanism.
+- Disposition: **record-only**. The launch wiring and benchmark
+  Makefile are frozen, so no Makefile patch. The 0063 wording is
+  corrected forward by this note, not by rewriting the 0063
+  entry/report.
+- AWS line: `PLATFORM=aws ARCH=arm64` remains **blocked on
+  credentials** (re-checked 2026-09-30: no `~/.aws`, no aws-cli
+  profiles, no matching `.pem`); resume when credentials land.
