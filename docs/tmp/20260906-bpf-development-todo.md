@@ -5052,3 +5052,34 @@ remain open.
 - Retained log copy + run marker:
   `docs/tmp/build-and-evaluate/step-0042-20260930T001631Z/make-micro.log`
   and `run-marker.txt`; full report in `step-report.md`.
+
+### KVM katran corpus run at `1207dbb06`, 2026-09-30
+
+- `BPFREJIT_CORPUS_APPS=katran make corpus` (default `PLATFORM=kvm ARCH=x86`,
+  default policy `SAMPLES=3 WORKLOAD_DURATION=30`, zero extra env vars),
+  launched 00:41Z, make PID 317784, `RUN_TOKEN=06e78ce0`, x86 image cached
+  from the step 0041 build; host kernel `7.3.0-070300rc3-generic`.
+- Run `corpus/results/x86_kvm_corpus_20260930_004629_965759/`
+  `status: completed` (`suite_name: macro_apps`, `samples: 3`,
+  `workload_only: False`), VM powered down cleanly, no make error markers.
+- katran `status: ok`, rejit `mode: loadtime`,
+  `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kop]`,
+  selected workload `xdp_pktgen`. Raw two-start counters
+  (`details/apps/katran.json`, raw only): `balancer_ingres` baseline
+  (id 9) `run_cnt_delta: 219,971,021` / `run_time_ns_delta: 38,647,805,320`
+  / `bytes_jited: 13,641` / `bytes_xlated: 23,840`; post_rejit (id 87)
+  `run_cnt_delta: 236,092,608` / `run_time_ns_delta: 36,630,391,333` /
+  `bytes_jited: 11,778` / `bytes_xlated: 19,392`. Raw pktgen
+  `pkts-sofar`/`errors` per workload: baseline
+  `23,985,728/25,997,023`, `24,776,575/27,529,992`,
+  `5,606,892/5,997,366`; post_rejit `25,892,525/27,086,961`,
+  `15,686,193/13,641,759`, `25,472,272/24,123,226`. No ratio or rollup —
+  analysis per `docs/evaluation.md` §5.
+- Tracked summary files added to git (same set as the 09-24 KVM runs):
+  `metadata.json`, `details/result.json`, `details/progress.json`,
+  `details/apps/katran.json`, `details/loadtime-reports/katran.jsonl`;
+  `shim-logs/` and `loadtime-plans/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0043-20260930T005037Z/make-corpus.log`
+  and `run-marker.txt`; full report in `step-report.md`.
