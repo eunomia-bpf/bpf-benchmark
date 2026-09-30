@@ -5159,3 +5159,40 @@ remain open.
   credentials**: no `codex-ec2` AWS profile and no
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials land.
+
+### KVM micro bench `cgroup_skb_hash_chain` at `42553ea42`, 2026-09-30
+
+- `make micro BENCH="cgroup_skb_hash_chain" SAMPLES=1 WARMUPS=0
+  INNER_REPEAT=10` (default `PLATFORM=kvm ARCH=x86`, same sanity knobs
+  as steps 0042/0045; zero extra env vars), launched 02:46:55Z
+  (attempt 1) / 02:50Z (attempt 2, make PID 392574), x86 image cached
+  from the step 0041 build; host kernel `7.3.0-070300rc3-generic`.
+- Attempt 1 (02:46:55Z) was killed by `SIGTERM from pid 361074 (omp)`
+  during VM boot (`qemu-system-x86_64: terminating on signal 15`),
+  before any suite work — an external session-teardown interrupt, not a
+  suite failure. No run dir created; preserved in
+  `make-micro-interrupted-attempt1.log`, noted in the run marker.
+- Run `micro/results/x86_kvm_micro_20260930_025441_553888/`
+  `status: completed` (`progress.json`: 1/1 benchmark completed), VM
+  powered down cleanly, no make error markers.
+- First micro bench with a non-XDP program type and
+  `expected_retval != 2` (prior two — `simple`,
+  `bcc_runqlat_log2_histogram_bucket` — were both staged XDP, retval
+  2). All three runtimes matched `expected_result
+  12027228624407116210` / `retval 1`. Raw per-runtime sample-0 counters
+  (`details/result.json`, raw only): `native` `compile_ns 34,931` /
+  `exec_ns 209` / `bpf_bytecode_bytes 936` / `native_code_bytes 561`;
+  `kernel` `compile_ns 1,187,083` / `exec_ns 294` / `936` / `520`
+  (+ `jited_prog_len 520`, `xlated_prog_len 936`, `exec_cycles 1,329`,
+  `tsc_freq_hz 3,686,055,316`); `llvmbpf` `compile_ns 9,658,372` /
+  `exec_ns 455` / `936` / `275` (+ `exec_cycles 1,676`, `tsc_freq_hz
+  3,686,108,108`). No ratio or rollup — analysis per
+  `docs/evaluation.md` §5.
+- Tracked summary files added to git (same set as the step 0042/0045
+  micro runs): `metadata.json`, `details/result.json`,
+  `details/progress.json`; `code_compare/` and `jit_dumps/` stay
+  ignored.
+- Retained log copies + run marker:
+  `docs/tmp/build-and-evaluate/step-0046-20260930T024655Z/make-micro.log`
+  (attempt 2), `make-micro-interrupted-attempt1.log` (attempt 1), and
+  `run-marker.txt`; full report in `step-report.md`.
