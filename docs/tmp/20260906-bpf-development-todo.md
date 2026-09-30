@@ -6254,3 +6254,46 @@ remain open.
   external blocker, not an invented gate; re-checked 2026-09-30: no
   `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
   credentials land.
+
+### KVM x86 make selftest gate (zero knobs) at d70317d34, 2026-09-30
+
+- Launch: `PLATFORM=kvm ARCH=x86 make selftest` (zero knobs),
+  14:51:47Z, prev HEAD `d70317d34` (increment 23). Nominal
+  `TEST_MODE=selftest` (Makefile:226); KVM in-VM propagation gap
+  recorded in 0055 → in-VM suite ran the default `test`-mode full
+  gate (superset; evidence still valid).
+- Result: token `tests/results/fc73bdc4/native_proof_micro_20260930_145653_760978/`
+  (32 trackable files). `metadata.json`: `status: completed`,
+  progress 29/29, `run_type: native_proof_micro`. All 29
+  `native_proof` benches matched
+  `expected_result`/`expected_retval` (runtime `native_proof`,
+  `--samples 1 --warmups 0 --inner-repeat 1` gate defaults).
+- Gate PASS lines: `unchecked_packet_read rejected rc=1`,
+  `valid_xdp_pass`, `invalid_opcode errno=22`,
+  `stack_oob_write errno=13`, `uninitialized_register errno=13`.
+  Clean `reboot: Power down`, `qemu-status=0`, 0 error markers in
+  the final log.
+- Provenance: in-VM `kernel_version 7.0.0-rc2+`, hostname
+  `virtme-ng`, CPU "Intel(R) Core(TM) Ultra 9 285K",
+  `repo_dirty: false`; host kernel `7.3.0-070300rc3-generic` —
+  first KVM x86 gate evidence since the 09-30 host-kernel change.
+  Decoded `virtme.exec=` confirms `TEST_MODE` absent from the
+  in-VM sub-make.
+- Caveats: (1) log line-count oscillation across reads (2439 →
+  9949 → 504 lines, `make: Leaving directory` interleaved mid-line
+  at line 35) = stderr interleaving from a concurrent make
+  instance, not a result defect; (2) `tests/results/d6b6575f/negative.log`
+  (14:29Z, before this launch) = a parallel/supervisor instance's
+  KVM in-VM `TEST_MODE=negative` run — external WIP, not committed
+  or claimed here; this step commits only its own token
+  `fc73bdc4`.
+- KVM x86 target-coverage now: micro/corpus/test/negative-test
+  (09-30 entries) + this selftest. The arm64 5/5 target-parity
+  matrix (0058–0063) is complete; KVM evidence continues under the
+  user's 2026-09-30 authorization.
+- `PLATFORM=aws ARCH=arm64` (the AWS line) remains **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate; re-checked 2026-09-30: no
+  `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
+  credentials land.
