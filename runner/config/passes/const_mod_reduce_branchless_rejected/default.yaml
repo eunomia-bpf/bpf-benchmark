@@ -7,7 +7,7 @@ command: |
   set -eu;
   expected_input_sha=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e;
   expected_output_sha=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5;
-  artifact="/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/const_mod_reduce_branchless_rejected/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin";
+  artifact="${BPFREJIT_REPO_ROOT:?BPFREJIT_REPO_ROOT is required}/runner/config/passes/const_mod_reduce_branchless_rejected/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin";
   actual_input_sha="$(sha256sum "${INPUT}" | awk '{print $1}')";
   if [ "$actual_input_sha" != "$expected_input_sha" ]; then echo "const_mod_reduce_branchless_rejected input hash mismatch: got $actual_input_sha, expected $expected_input_sha" >&2; exit 1; fi;
   test -f "$artifact";

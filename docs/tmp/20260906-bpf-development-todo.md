@@ -6352,3 +6352,43 @@ correct.
 - AWS line: `PLATFORM=aws ARCH=arm64` remains **blocked on
   credentials** (re-checked 2026-09-30: no `~/.aws`, no aws-cli
   profiles, no matching `.pem`); resume when credentials land.
+
+### const_mod_reduce* policy-YAML stale-prefix follow-up closed, 2026-09-30
+- **Change (increment 26):** `runner/config/passes/const_mod_reduce/default.yaml:10`
+  and `..._branchless_rejected/default.yaml:10` — replaced the stale
+  `/home/yunwei37/workspace/bpf-benchmark/` prefix on the host-prepared
+  artifact path with `${BPFREJIT_REPO_ROOT:?BPFREJIT_REPO_ROOT is required}`
+  (parity with the already-committed `map_inline/katran.yaml:51`). `BPFREJIT_REPO_ROOT`
+  is a runner-injected env var, not a shim constant (no shim reference).
+- **Host-sim proof (pre-VM):** ran the fixed command block against the 09-25
+  captured input blob (`loadtime_3078_5/input.step.0.bin`, sha256=`1d8367af…`)
+  with `BPFREJIT_REPO_ROOT="$PWD"` → rc=0, output sha256=`1929357b…`, valid JSON
+  report (`sites_applied=2`, `insn_delta=14`). Negative case: `BPFREJIT_REPO_ROOT`
+  unset → rc=1 fail-fast. The `.bin` artifacts (`..._branchless_mod65537.bin` and
+  `..._branchless_rejected/...`) are byte-identical 20448 B, sha256=`1929357b`=expected_output_sha.
+- **In-VM proof (step 0065):** isolated `make corpus BPFREJIT_CORPUS_APPS=katran
+  BPFREJIT_BENCH_PASSES=const_mod_reduce SAMPLES=1 WORKLOAD_DURATION=10` (RUN_TOKEN
+  `corpus/results/x86_kvm_corpus_20260930_171858_652950`). The built plan
+  `details/loadtime-plans/katran.json` step[0].command carries the
+  `${BPFREJIT_REPO_ROOT:?...}` prefix (stale `/home/yunwei37` gone) and
+  `loadtime_plan_done status: "ok"` — the path fix is validated in-VM.
+- **Isolated-run outcome (record-only, not clean evidence):** baseline completed
+  (`balancer_ingres` type=xdp id=9, `bytes_jited=13641`/`bytes_xlated=23840`);
+  `post_rejit: null`, app `status: "error"` — katran SIGABRTs during startup.
+  Root cause is **structural, not build-stale**: the loadtime plan builder emits a
+  single *global* step with no program targeting, and the `const_mod_reduce` step is
+  a hard input-hash gate (`set -eu; … !=1d8367af…; exit 1`). It therefore fires on
+  libbpf's trivial `insn_cnt=2` probe loads → shim `BPF_PROG_LOAD` returns `EINVAL`
+  → `bpf_object__probe_loading(): -EINVAL` → katran `can't load main bpf program`
+  → SIGABRT **before** `balancer_ingres` loads. NOT build-stale: 09-30 baseline
+  `balancer_ingres` bytecode `0325eddd…/13641/23840` is byte-identical to 09-25, and
+  the gate's `expected_input_sha=1d8367af` still matches the 09-25 captured target.
+  05-14 worked because that mode was **per-program** rejit (`enabled_passes:
+  ['noop','const_mod_reduce']`, `rejit_result.mode: None`, only prog 9 gated) so the
+  probes were not gated; the loadtime global path is a loadtime-mode-specific finding.
+  09-25 `map_inline` handled the same probes gracefully (`produced no bytecode
+  changes; passing original BPF_PROG_LOAD through`) → clean two-start.
+- **Disposition:** **record-only.** No re-run (deterministically reproduces the same
+  abort); no new gate/skip-on-mismatch logic (would invent a validity gate + change
+  the pass's fail-fast contract). No framework/app/runner change; no
+  ratio/geomean/rollup. Run dir kept untracked (raw abort, not clean evidence).
