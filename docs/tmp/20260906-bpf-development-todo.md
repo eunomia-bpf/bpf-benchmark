@@ -5616,3 +5616,51 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM micro bench `bpf_local_call_fanout_dispatch` at `cb1f966a3`, 2026-09-30
+
+- `make micro BENCH=bpf_local_call_fanout_dispatch SAMPLES=1 WARMUPS=0
+  INNER_REPEAT=10` (default `PLATFORM=kvm`, `ARCH=x86`; only the
+  BENCH selection + the documented micro knobs, consistent with the
+  session's prior micro increments); launched 07:12:51Z, make PID
+  504973, x86 image cached; host kernel `7.3.0-070300rc3-generic`.
+- `bpf_local_call_fanout_dispatch` is a BPF-to-BPF local-call
+  codegen bench (`io_mode: staged`, 392-byte input, tags `[call,
+  bpf-to-bpf, local-call, reg-pressure, pure-jit]`) — a distinct
+  codegen class from the four micro benches already evidenced
+  (`simple`, `bcc_runqlat_log2_histogram_bucket`,
+  `cgroup_skb_hash_chain`, `packet_toeplitz_rss_hash`).
+- Run `micro/results/x86_kvm_micro_20260930_071732_207339/`
+  `status: completed`; `progress.json` `completed_benchmarks: 1 /
+  total_benchmarks: 1` (in-VM suite 07:17:32Z, ~42 s; VM power-down
+  ~07:17:33Z).
+- **All 3 runtimes (native / kernel / llvmbpf) matched**
+  `expected_result: 1171593469689687806` / `expected_retval: 2`
+  (`INNER_REPEAT=10`); raw sample counters:
+  - `native`: `exec_ns=105`, `code_size` bpf 4,240 / native 291
+    bytes.
+  - `kernel`: `exec_cycles=14,784,621`; `exec_ns=249`; `code_size`
+    bpf 4,240 / native 2,193 bytes.
+  - `llvmbpf`: `exec_cycles=802`; `exec_ns=217`; `code_size`
+    bpf 4,240 / native 869 bytes.
+  - No ratio / geomean / rollup computed here (raw sample counters
+    only; cross-start comparison is analysis per
+    `docs/evaluation.md` §5).
+- Kernel JIT `exec_cycles` (14.78M) vs llvmbpf (802) — expected
+  spread for a kernel-local-call codegen bench under the in-VM
+  harness; recorded as-is.
+- BPF bytecode 4,240 bytes — largest of the five micro benches
+  evidenced this session (the local-call fanout expands to multiple
+  sub-programs); recorded as-is.
+- Tracked summary files added to git: `metadata.json`,
+  `details/result.json`, `details/progress.json`;
+  `details/code_compare/` and `details/jit_dumps/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0053-20260930T071251Z/
+  make-micro.log` (473 lines, clean power-down) and `run-marker.txt`;
+  full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` micro/corpus within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
