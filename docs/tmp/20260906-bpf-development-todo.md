@@ -5127,3 +5127,35 @@ remain open.
   `docs/tmp/build-and-evaluate/step-0044-20260930T012822Z/make-corpus.log`
   (attempt 2), `make-corpus-failed-attempt1.log` (attempt 1), and
   `run-marker.txt`; full report in `step-report.md`.
+
+### KVM micro bench `bcc_runqlat_log2_histogram_bucket` at `944ff6fb7`, 2026-09-30
+
+- `make micro BENCH="bcc_runqlat_log2_histogram_bucket" SAMPLES=1
+  WARMUPS=0 INNER_REPEAT=10` (default `PLATFORM=kvm ARCH=x86`, same
+  sanity knobs as the step 0042 `simple` run; zero extra env vars beyond
+  the bench knob), launched 02:23Z, x86 image cached from the step 0041
+  build; host kernel `7.3.0-070300rc3-generic`.
+- Run `micro/results/x86_kvm_micro_20260930_022413_595750/`
+  `status: completed` (`progress.json`: 1/1 benchmark completed), VM
+  powered down cleanly, no make error markers.
+- All three runtimes matched `expected_result 17790125373615940312` /
+  `retval 2`. Raw per-runtime sample-0 counters
+  (`details/result.json`, raw only):
+  `native` `compile_ns 33,855` / `exec_ns 1,952` /
+  `bpf_bytecode_bytes 1416` / `native_code_bytes 340`; `kernel`
+  `compile_ns 79,885,857` / `exec_ns 2,023` / `1368` / `720`
+  (+ `jited_prog_len 720`, `xlated_prog_len 1368`, `exec_cycles
+  14,822,490`, `tsc_freq_hz 3,686,168,041`); `llvmbpf`
+  `compile_ns 12,549,987` / `exec_ns 1,213` / `1416` / `434`
+  (+ `exec_cycles 4,470`, `tsc_freq_hz 3,686,226,999`). No ratio or
+  rollup — analysis per `docs/evaluation.md` §5.
+- Tracked summary files added to git (same set as the step 0042 `simple`
+  run): `metadata.json`, `details/result.json`,
+  `details/progress.json`; `code_compare/` and `jit_dumps/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0045-20260930T022311Z/make-micro.log`
+  and `run-marker.txt`; full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` micro/corpus within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials land.
