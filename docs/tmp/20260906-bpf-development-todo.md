@@ -5916,3 +5916,70 @@ remain open.
   external blocker, not an invented gate; re-checked 2026-09-30:
   no `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
   credentials land.
+
+### QEMU arm64 `make micro` full default suite (zero knobs) at
+ `840c2ed47`, 2026-09-30 (first arm64 cross-arch run on the host; local
+ QEMU path — no AWS credentials needed)
+
+- `PLATFORM=qemu ARCH=arm64 make micro` (zero knobs; `SAMPLES=3`,
+  `WARMUPS=0`, `INNER_REPEAT=100000` defaults; no `BENCH` selector →
+  full default suite `micro/config/micro_pure_jit.yaml`, all 29
+  workload-derived benchmarks, all 3 runtimes `native`/`llvmbpf`/
+  `kernel`); launched 10:05:32Z, make PID 786540, prev HEAD
+  `840c2ed47`. This is the **arm64 cross-arch counterpart of the
+  step-0057 KVM full-suite micro run** (`840c2ed47`).
+- **Key finding: the arm64 line is NOT actually blocked on AWS
+  credentials.** The local QEMU arm64 path (`micro-qemu-arm64`,
+  Makefile:278–293) is a public Makefile target needing no external
+  credentials; only `PLATFORM=aws ARCH=arm64` is the
+  credential-blocked line. All prerequisites were present on the host
+  (`qemu-system-aarch64`, arm64 kernel `Image` 42 MB, prepared
+  `qemu-arm64-root/qemu-init`, 680 MB arm64 runner-runtime image tar);
+  the arm64 build chain (kernel check, cilium daemon Go cross-build,
+  BPF artifacts, runtime image build, Docker stage #30+) still ran as
+  part of the target.
+- Run dir `micro/results/arm64_qemu_micro_19700101_000008_942047/`
+  (QEMU in-VM clock is 1970 — no RTC set in the VM; the dir name and
+  `metadata.json` `completed_at` reflect that, not a real timestamp;
+  recorded as a QEMU clock quirk, not a gate); `details/progress.json`
+  `status: completed`, `completed_benchmarks: 29 /
+  total_benchmarks: 29`, `current_benchmark: null`.
+- **All 29 × 3 runtimes × 3 samples = 261 samples matched** their
+  `expected_result`/`expected_retval` (`result`/`retval` per
+  sample); 0 mismatches; runtimes covered `native`, `llvmbpf`,
+  `kernel`.
+- Raw per-sample timing recorded for every bench × runtime × sample:
+  `compile_ns`, `exec_ns`, `wall_exec_ns`,
+  `code_size.bpf_bytecode_bytes`/`native_code_bytes`, `phases_ns
+  (memory_prepare_ns, native_load_ns)`, `timing_source:
+  clock_monotonic`, `sample_index`. `details/code_compare/`: 29
+  per-bench JIT-dump comparison `.md` files.
+- Cross-arch observation (raw, no ratio computed): arm64 sample values
+  differ from the x86 KVM full-suite run (0057) as expected — e.g.
+  `simple` `exec last` 21/39/103 ns (x86 native/llvmbpf/kernel) vs
+  arm64 `compile last` native ~6.3–8.9 ms, llvmbpf ~2.3–2.5 s, kernel
+  ~65–888 µs across the 29 benches; the deterministic per-bench
+  `result` values are the same expected values on both arches (the
+  matched-value check is arch-independent). No ratio / geomean /
+  rollup computed here — cross-arch comparison is analysis per
+  `docs/evaluation.md` §5.
+- QEMU exit clean: `qemu-status` = `0`; in-VM `sysrq: Power Off` +
+  `reboot: Power down`; 0 real error markers (the only two `panic`
+  hits in the host log are the kernel cmdline string
+  `panic=30 oops=panic`, not a fault).
+- 3 trackable files under the run dir committed (`git check-ignore`
+  confirms `details/jit_dumps/` + `details/code_compare/` stay
+  gitignored via `.gitignore` `micro/results/*/details/jit_dumps/` +
+  `micro/results/*/details/code_compare/` rules,
+  `!micro/results/**/*.json` negation for the .json files):
+  `metadata.json`, `details/result.json`, `details/progress.json`.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0058-20260930T100532Z/
+  make-micro-arm64.log` (clean QEMU power-down, `qemu-status=0`) and
+  `run-marker.txt`; full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` (the AWS line, not the local QEMU line)
+  remains **blocked on credentials**: no `codex-ec2` AWS profile and
+  no `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate; re-checked 2026-09-30: no
+  `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
+  credentials land.
