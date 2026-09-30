@@ -6106,3 +6106,45 @@ remain open.
   external blocker, not an invented gate; re-checked 2026-09-30: no
   `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
   credentials land.
+
+### QEMU arm64 `make test` gate (zero knobs) at `76f47306f`, 2026-09-30
+ (arm64 verification-gate counterpart of the KVM x86 `make test` suite
+ 0054; distinguishes a load-time-plan-specific arm64 gap from a broader one)
+
+- `PLATFORM=qemu ARCH=arm64 make test` (zero knobs; `TEST_MODE=test`,
+  `runner.suites.test` via `RUNTIME_SUITE_MODULE`, Makefile:228/233),
+  launched 12:55:39Z, make PID 899323, prev HEAD `76f47306f`. The test
+  gate loads the kop modules, runs the BPF-verifier negative suite
+  (non-fuzz), and runs the native-proof micro staged-codegen smoke.
+  `test.py:351` skips the native-loader-shim smoke on non-`x86_64`
+  (aarch64 auto-skip, recorded not patched).
+- Result dir `tests/results/44d305d7/` (token-based; nested run dir
+  `native_proof_micro_19700101_000013_259265/`; QEMU in-VM clock 1970).
+- **Gate result: PASS (5 PASS / 0 FAIL)**: BPF verifier negative smoke
+  `valid_xdp_pass`, `invalid_opcode errno=22`, `stack_oob_write
+  errno=13`, `uninitialized_register errno=13`; native_proof verifier
+  rejection `unchecked_packet_read rejected rc=1`. 5 PASS / 0 FAIL in
+  `make-test-arm64.log`.
+- **Bonus: native-proof micro staged-codegen 29/29 completed**
+  (`suite=micro_staged_codegen`, `manifest micro/config/micro_pure_jit.yaml`;
+  `progress.json status: completed` 29/29; `result.json` `benchmarks[]`
+  with `result`/`retval`/`compile_ns`/`exec_ns`, `timing_source: ktime`,
+  `cpu_model: aarch64`). No ratio/geomean/rollup computed.
+- **Cross-arch readout (analysis per `docs/evaluation.md` §5, not a
+  gate)**: the arm64 `make test` gate passes on QEMU (aarch64) — verifier,
+  kop-module load, and native-proof micro staged-codegen all work on
+  aarch64. The 0059/0060 arm64 corpus failure (all 6 apps `post_rejit:
+  null`, `BPFREJIT_SHIM_LOADTIME_PLAN` start fails) is therefore
+  **localized to the load-time-plan / post-rejit path**, not the verifier,
+  kop modules, or general test infrastructure — a sharp cross-arch
+  capability-gap readout, no framework/app change.
+- Clean QEMU power-down, `qemu-status=0`, make target exits 0. 32
+  trackable files under the run dir committed (token + nested run dir:
+  `metadata.json`, `details/progress.json`, `details/result.json`, 29×
+  `details/code_compare/*.md`).
+- `PLATFORM=aws ARCH=arm64` (the AWS line) remains **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate; re-checked 2026-09-30: no
+  `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
+  credentials land.
