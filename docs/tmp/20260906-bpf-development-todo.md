@@ -4997,3 +4997,35 @@ surface (`_STORE_XMM0`/`_LOAD_XMM0`, `_CALL_MEMCPY_{,REG}`/
 packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
 compiler/native bytes, multi-step traces, and specialization preservation
 remain open.
+
+### KVM selftest smoke at `5aa795837`, 2026-09-29
+
+- `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),
+  launched 22:56:40Z, completed 23:06:13Z (~49.5 min; host-build prefix of
+  the log rotated out, retained 504-line in-VM tail), make PID 230578, host
+  kernel `7.3.0-070300rc3-generic`, virtme-ng 1.41, `sudo -n` OK.
+- All four sections PASS in the host log: kop modules load
+  (`bpf_x86_alu: loading out-of-tree module`); native_proof micro smoke
+  29/29 benchmarks (`[bench] (1/29) simple` → `result 12345678`,
+  `compile last 444787 ns | exec last 163 ns`); `PASS unchecked_packet_read
+  rejected rc=1`; BPF verifier negative smoke `PASS valid_xdp_pass`,
+  `PASS invalid_opcode errno=22`, `PASS stack_oob_write errno=13`,
+  `PASS uninitialized_register errno=13`. VM powered down cleanly
+  (`kvm: exiting hardware virtualization`, `reboot: Power down`); no make
+  error markers in the log.
+- Driver artifact: `tests/results/62ce5f12/native_proof_micro_20260929_230257_731320/`
+  (random `RUN_TOKEN`, untracked): `metadata.json` `status: completed`,
+  `details/progress.json` `29/29 completed`, `details/result.json` 29
+  benchmarks with `simple` → `expected_result: 12345678`,
+  `expected_retval: 2`, `exec_cycles: 5686`, `details/code_compare/` 29
+  files. Suite-level `selftest.log`/`native_proof_micro.json` were not in
+  the host token dir at power-down; PASS rests on the host make log plus
+  the driver run dir.
+- Source state: the tree carried an uncommitted, supervisor-owned
+  `bpfopt/llvm/src/llvm_mapinline.hpp` (+3: `Aggressive` target machine +
+  `promote_register_allocas`); the rebuilt x86 runtime image was built from
+  that dirty source. Paper-B speculative evidence stays blocked pending a
+  clean-source image rebuild; ordinary provenance proceeded.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0041-20260929T234020Z/make-selftest.log`
+  and `run-marker.txt`; full report in `step-report.md`.
