@@ -5664,3 +5664,58 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM `make test` suite (TEST_MODE=test) at `e4471dcd2`, 2026-09-30
+
+- Plain `make test` (default `PLATFORM=kvm`, `ARCH=x86`;
+  `TEST_MODE=test` per the Makefile target, `FUZZ_ROUNDS=1000`
+  default but a no-op on the non-fuzz `test` path; zero knobs) —
+  runs `runner.suites.test` in-VM (`__runtime-vm-test`), the last
+  uncovered Make target on the KVM line alongside selftest/micro/
+  corpus; launched 07:33:35Z, make PID 519630, x86 image cached;
+  host kernel `7.3.0-070300rc3-generic`.
+- Run token `tests/results/d83499ef/`; artifact
+  `tests/results/d83499ef/native_proof_micro_20260930_073817_193862/`
+  `status: completed`, `run_type: native_proof_micro` (in-VM
+  07:38:17 → 07:38:21Z, ~46 s; VM power-down ~07:38:22Z).
+- `progress.json` `completed_benchmarks: 29 / total_benchmarks: 29`.
+- **All 29 `native_proof` benchmarks matched** their
+  `expected_result`/`expected_retval` (`runtime=native_proof`,
+  `--samples 1 --warmups 0 --inner-repeat 1`); the set spans the
+  full `micro_pure_jit.yaml` catalog, re-confirming under
+  `native_proof` the four benches already evidenced standalone this
+  session (`simple`, `bcc_runqlat_log2_histogram_bucket`,
+  `cgroup_skb_hash_chain`, `packet_toeplitz_rss_hash`).
+- Section 2 `native_proof verifier rejection smoke`:
+  **PASS `unchecked_packet_read rejected rc=1`** (the unsafe
+  `off=64` read rejected as required).
+- Section 3 `BPF verifier negative smoke`: **PASS**
+  `valid_xdp_pass`; `invalid_opcode` (errno=22/EINVAL);
+  `stack_oob_write` (errno=13/EACCES); `uninitialized_register`
+  (errno=13/EACCES).
+- Log: **0 error markers** (no `make ***`, `FAILED`, `fatal`,
+  `Aborted`, `Terminated`, `did not match`, `unexpectedly
+  succeeded`); clean VM power-down.
+- All 32 files under `tests/results/d83499ef/` are trackable
+  (`git check-ignore` reports 0 ignored; `tests/results/` is a
+  tracked tree, 485 files precedent); tracked into git this step:
+  `metadata.json`, `details/result.json`, `details/progress.json`,
+  all 30 `details/code_compare/*.md`.
+- No ratio / geomean / rollup computed here (raw sample counters
+  only; cross-start comparison is analysis per
+  `docs/evaluation.md` §5).
+- This completes Make-target coverage on the KVM line:
+  `selftest` (step 0041), `micro` (5 benches: `simple`,
+  `bcc_runqlat_log2_histogram_bucket`, `cgroup_skb_hash_chain`,
+  `packet_toeplitz_rss_hash`, `bpf_local_call_fanout_dispatch`),
+  `corpus` (all 6 apps individually + full default suite), and now
+  `test`.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0054-20260930T073335Z/
+  make-test.log` (clean power-down) and `run-marker.txt`; full
+  report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` test within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
