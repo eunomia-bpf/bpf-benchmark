@@ -6060,3 +6060,49 @@ remain open.
   external blocker, not an invented gate; re-checked 2026-09-30: no
   `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
   credentials land.
+
+### QEMU arm64 `make corpus` determinism re-run (paired against 0059) at
+ `ef51b1a98`, 2026-09-30 (arm64 whole-corpus counterpart of the KVM x86
+ variance re-run 0056; answers whether 0059's all-6-apps post-rejit
+ failure is deterministic or a flake)
+
+- `PLATFORM=qemu ARCH=arm64 make corpus` (zero knobs; same default suite,
+  `SAMPLES=3`, `WORKLOAD_DURATION=30s`), launched 12:01:11Z, make PID
+  881657, qemu PID 894443 (up 12:06–12:47), prev HEAD `ef51b1a98`.
+- Run dir `corpus/results/arm64_qemu_corpus_19700101_000006_022292/`
+  (QEMU in-VM clock 1970; suite `status: error`, `error_message: "corpus
+  suite reported errors"`).
+- **Verdict: deterministic.** All 6 apps `status: error` with the
+  **identical per-app error strings as 0059** (1:1 in
+  `step-report.md`): `bcc/set` + `otelcol-ebpf-profiler/profiling`
+  `no tracked BPF programs`; `cilium/agent` `Remote end closed
+  connection without response`; `katran` `did not expose an attached XDP
+  program on katran0`; `tetragon/observer` `exited before BPF programs
+  were tracked by shim` (fails at **baseline** again — 0 workload
+  samples, 0 tracked progs); `tracee/monitor` `failed to launch Tracee`.
+  `post_rejit: null` for all 6 in both runs.
+- Raw baseline counters re-captured this run (raw only, no
+  ratio/geomean/rollup; values differ numerically from 0059 — they are
+  timing-dependent — without affecting the failure-signature verdict):
+  `bcc/set` `sys_enter=1934466`/`sys_exit=1934356`/`sched_switch=882145`;
+  `cilium/agent` `cil_from_container=4375226`/`4370154`; `katran`
+  `balancer_ingress=17192751`; `otelcol` `native_tracer_engine=322503`;
+  `tracee` `tracepoint_raw_sys_enter=1055357`/`trace_sys_enter=1055289`/
+  `trace_sys_exit=1054367`; `tetragon` none.
+- Clean QEMU power-down, `qemu-status=0`; the make target exits 0 even
+  with the suite `status: error` (0059 established this pattern — a
+  recorded suite error is not a make failure). 14 trackable files
+  committed; `details/shim-logs/` + `details/loadtime-plans/` stay
+  gitignored (`git check-ignore` verified).
+- **The arm64 post-rejit gap is now confirmed deterministic**: two full
+  arm64 QEMU corpus runs (0059 + 0060), 6/6 apps, same per-app error
+  strings, `post_rejit` null everywhere; KVM x86 0051/0056 all-6
+  completed with `post_rejit` counters. Recorded as a cross-arch
+  capability gap (record-not-patch: no framework/app/runner change, no
+  exclusion lists, no re-gating); analysis per `docs/evaluation.md` §5.
+- `PLATFORM=aws ARCH=arm64` (the AWS line) remains **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate; re-checked 2026-09-30: no
+  `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
+  credentials land.

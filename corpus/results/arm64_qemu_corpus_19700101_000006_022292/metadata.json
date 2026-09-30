@@ -1,0 +1,39 @@
+{
+  "bpf_stats": true,
+  "config": {
+    "enabled_passes": [
+      "noop",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "ccmp",
+      "bulk_memory",
+      "prefetch",
+      "wide_mem",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "noop",
+      "const_prop",
+      "dce"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "1970-01-01T00:40:35.976534+00:00",
+  "last_updated_at": "1970-01-01T00:40:35.976230+00:00",
+  "launcher_boot_id": "d5fa1e3d-b51d-49fe-89f7-a5b834ea7030",
+  "launcher_pid": 507,
+  "launcher_start_ticks": 221,
+  "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+  "run_type": "arm64_qemu_corpus",
+  "samples": 3,
+  "started_at": "1970-01-01T00:00:06.022292+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 30.0
+}
