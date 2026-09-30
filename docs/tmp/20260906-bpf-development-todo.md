@@ -6407,3 +6407,75 @@ correct.
 - **AWS platform (both arches) is externally blocked on credentials** (read-only re-check 2026-09-30): no `~/.aws`, no `AWS_*` credential env, and the key file both `AWS_X86_KEY_PATH` (Makefile:110) and `AWS_ARM64_KEY_PATH` (Makefile:124) resolve to `/home/yunwei37/.ssh/codex-arm64-test-20260319121631.pem` is absent on this host. The Makefile knobs are wired correctly (`AWS_X86_*` → `t3.micro`/`t3.small`, `AWS_ARM64_*` → `t4g.micro`/`t4g.small`, region `us-east-1`, profile `codex-ec2`); launching = spending money + missing key → **blocked on credentials**, report-only, resume when credentials land. (Recorded, not a blocker to the local line: `AWS_X86_KEY_PATH` reuses the arm64 key filename — minor wiring inconsistency, not a blocker.)
 - **Paper-B speculative-optimization KVM evidence (a `KEEP_WORKDIRS=1` artifact-capture run) remains blocked** on a clean-source runtime-image rebuild: the current x86 runtime image (built in the 09-30 ~19:32 chain, `.cache/container-images/x86_64-runner-runtime.image.tar`) was built from the **uncommitted, AE-supervisor-owned** generic LLVM-roundtrip change in `bpfopt/llvm/src/llvm_mapinline.hpp` (+3 lines: `create_bpf_target_machine(Aggressive)` + `promote_register_allocas` in `run_llvm_roundtrip`). That is not an authorized change in this duty chain, so speculative paper evidence stays pending until it is superseded by a clean-source image rebuild (external / separate ownership; not actioned here).
 - **Disposition**: no further authorized local `make` step remains. The KVM x86 + QEMU arm64 Make-backed two-start benchmark evidence chain is complete and committed. The only outstanding items are external (AWS credentials) and the Paper-B clean-source image rebuild (separate ownership). Nothing further is locally runnable.
+
+### Disk sweep: untracked evidence-tree provenance resolved; no orphan (record-only, 2026-09-30)
+
+A full untracked-file sweep surfaced two families of completed result
+trees that are **untracked but not orphans** — each is deliberately
+untracked, so no evidence from this duty chain is missing from git.
+Every gate token this chain claims was re-verified tracked on disk.
+
+- **`corpus/results/arm64_qemu_corpus_19700101_000012_467359/`**
+  (step 0012, arm64 QEMU katran single-app `map_inline`,
+  `KEEP_WORKDIRS=1`) is **not an orphan**. Step 0012's shipped
+  commit `66261fe12` registered the evidence under the canonical
+  package `docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/`
+  (14 files tracked in HEAD; its `receipt.json` binds the raw run
+  dir). The raw `corpus/results/…/467359/` dir stays untracked as
+  `KEEP_WORKDIRS=1` scratch (raw `loadtime-workdirs/`, `shim-logs/`,
+  `make-corpus.log`); the canonical package is the tracked evidence.
+  Deliberate, not a gap.
+- **8 untracked `tests/results/<8hex>/native_proof_micro_20260930_*/`
+  trees** (32-file shape each; `metadata.status: completed`,
+  progress 29/29, `host: virtme-ng`, kernel `7.0.0-rc2+`):
+  - `b29a899c` (`native_proof_micro_20260930_155936_606137`) —
+    **explicitly kept untracked** by step 0064: the `TEST_MODE=cli`
+    real-run mechanism probe whose in-VM suite fail-fast rejected
+    the value (`[test-suite][ERROR] unsupported test mode: cli`).
+    A mechanism finding, not gate evidence.
+  - The other 7 — `bf2d759f`, `c51b46d7`, `cfd08584`, `d1f2d8be`,
+    `d7a7a31b`, `ddda2554`, `ee13e166` — have **zero references** in
+    the research log, any `docs/tmp/build-and-evaluate/step-*/`
+    receipt, or the `docs/` tree. They are external / supervisor-
+    parallel KVM runs, in the same category as
+    `tests/results/d6b6575f/negative.log` (0063 caveat: a
+    parallel/supervisor instance's KVM in-VM run — external WIP, not
+    committed or claimed here). **Left untracked; not claimed by
+    this chain.** No commit.
+- **Claimed-evidence audit (the load-bearing check that no claimed
+  result was missed):** every gate token this duty chain claims is
+  tracked on disk —
+  - KVM x86 test-family × 3: `tests/results/d83499ef/` (0054 test),
+    `4dca07ca/` (0055 negative-test), `fc73bdc4/` (0064 selftest) —
+    32 tracked files each.
+  - QEMU arm64 test-family × 3: `tests/results/44d305d7/` (0061
+    test), `3736936a/` (0062 selftest), `30da2a6e/` (0063
+    negative-test) — 32 tracked files each.
+  - KVM x86 default-policy corpus (0066):
+    `corpus/results/x86_kvm_corpus_20260930_193317_347907/` — 15
+    tracked JSON.
+  - QEMU arm64 micro (0058):
+    `micro/results/arm64_qemu_micro_19700101_000008_942047/` — 3
+    tracked files.
+  - QEMU arm64 corpus (0059/0060, recorded deterministic failure):
+    `corpus/results/arm64_qemu_corpus_19700101_000006_146493/` +
+    `_022292/` — 14 tracked files each.
+  - arm64 katran `map_inline` evidence package (step 0012,
+    `66261fe12`):
+    `docs/artifacts/evidence/rq2-katran-arm64-map-inline-retained-bytecode/`
+    — 14 tracked files.
+  **No orphan: every claimed result is committed.**
+- **Live-state re-check (read-only, 2026-09-30):** HEAD =
+  `origin/master` = `c3dc5007f` (0/0); the same 13 WIP ` M` files
+  remain unstaged; `bpfopt/llvm/src/llvm_mapinline.hpp` still ` M`
+  (Paper-B clean-source image rebuild still blocked); no new step dir
+  past `step-0066`; AWS still blocked on credentials (no `~/.aws`,
+  no `AWS_*` env, no `codex-arm64-test-…pem`); KVM operational
+  (`/dev/kvm`, `qemu-system-*`, `/opt/virtme-ng/bin/vng`).
+- **Disposition: record-only.** No evidence tree is committed — the
+  arm64 `467359` dir is intentional `KEEP_WORKDIRS` scratch; the 7
+  unclaimed 0930 test trees are external WIP; `b29a899c` is a
+  recorded mechanism probe. No new `make <target>` run, no new
+  validity gate. The chain remains at the fixed point recorded in the
+  0066 close-out entry above: only the external items (AWS
+  credentials, Paper-B clean-source image rebuild) remain.
