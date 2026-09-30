@@ -5252,3 +5252,69 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM tracee/monitor corpus run at `65a34c7cd`, 2026-09-30
+
+- `BPFREJIT_CORPUS_APPS="tracee/monitor" make corpus` (default
+  `PLATFORM=kvm ARCH=x86`; default policy `SAMPLES=3`,
+  `WORKLOAD_DURATION` 30 s, `FUZZ_ROUNDS=1000`; zero extra env vars),
+  launched 03:48:34Z, make PID 422716, x86 image cached from the step
+  0041 build; host kernel `7.3.0-070300rc3-generic`.
+- Run `corpus/results/x86_kvm_corpus_20260930_035320_255208/`
+  `status: completed` (`progress.json` status `completed`); suite
+  `details/result.json` `status: ok`, `suite_name: macro_apps`,
+  `samples: 3`; app `details/apps/tracee__monitor.json` `status: ok`,
+  `error: ''`. `rejit_result`: `mode: loadtime`,
+  `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
+  kop]`, `selected_workload: stress_ng_tracee_syscall_hot`,
+  `runner: tracee`.
+- **151 BPF programs** recorded per start (baseline and post_rejit) —
+  the largest program count of the session (vs. 53 for cilium). 56
+  programs had a nonzero `run_cnt_delta` per start. Full 151-program
+  table preserved in `details/apps/tracee__monitor.json` (tracked into
+  git this step). Top hot progs by `run_cnt_delta` (raw two-start BPF
+  counters, raw only; in-VM ids differ between starts so pairs matched
+  by `name`; `name` strings truncated to 16 chars by the kernel):
+  - baseline `tracepoint__raw_sys_enter` id 19 `run_cnt_delta
+    248,150,238` / `run_time_ns_delta 98,946,033,709` / `bytes_jited
+    8,194` / `bytes_xlated 13,768`; `tracepoint__raw_sys_exit` id 20
+    `248,150,245` / `100,255,357,349` / `8,227` / `13,824`.
+  - post_rejit `tracepoint__raw_sys_enter` id 373 `245,748,172` /
+    `97,468,963,109` / `bytes_jited 7,593` / `bytes_xlated 11,976`;
+    `tracepoint__raw_sys_exit` id 386 `245,748,176` / `96,695,526,877`
+    / `7,618` / `12,016`.
+  - `trace_ret_vfs_read` id 99 (baseline) / 1263 (post_rejit)
+    `26,831,607` / `27,000,454` runs; `trace_ret_vfs_write` id 85 /
+    1111 `6,636,561` / `6,688,343` runs. `bytes_jited` dropped for the
+    two hottest sys_enter/sys_exit tracepoint progs after the ReJIT
+    pass chain (8,194/8,227 → 7,593/7,618).
+- Raw app-side workload counters (`stress_ng_tracee_syscall_hot`,
+  7-stressor `stress-ng` run, all six runs `rc=0`, `failed: 0`,
+  `metrics untrustworthy: 0`; per-stressor raw bogo-ops, raw only):
+  - baseline: cap `1,846,802`/`1,797,365`/`1,923,882`; set
+    `151,535`/`154,866`/`152,477`; sigfd `4,568,349`/`4,517,945`/
+    `4,672,999`; eventfd `1,091,014`/`1,085,741`/`1,090,194`; kill
+    `823,490`/`836,935`/`812,020`; futex `4,328,636`/`4,394,750`/
+    `4,483,028`; prctl `11,786`/`8,708`/`8,099`.
+  - post_rejit: cap `1,875,575`/`1,863,837`/`1,808,564`; set
+    `151,571`/`150,084`/`151,152`; sigfd `4,566,239`/`4,743,076`/
+    `4,516,371`; eventfd `1,103,945`/`1,093,747`/`1,094,724`; kill
+    `820,893`/`765,786`/`794,342`; futex `4,406,154`/`4,525,774`/
+    `4,478,158`; prctl `8,150`/`9,724`/`9,980`.
+  - No ratio, geomean, or win/loss tally computed here — any
+    cross-start comparison is analysis per `docs/evaluation.md` §5.
+- Tracked summary files added to git (same set as the step 0043/0044/
+  0047 corpus runs): `metadata.json`, `details/result.json`,
+  `details/progress.json`, `details/apps/tracee__monitor.json`,
+  `details/loadtime-reports/tracee__monitor.jsonl`;
+  `details/shim-logs/` and `details/loadtime-plans/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0048-20260930T034834Z/
+  make-corpus.log` (455 lines, clean power-down) and `run-marker.txt`;
+  full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` corpus within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
