@@ -5318,3 +5318,72 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM tetragon/observer corpus run at `7c01f1340`, 2026-09-30
+
+- `BPFREJIT_CORPUS_APPS="tetragon/observer" make corpus` (default
+  `PLATFORM=kvm ARCH=x86`; default policy `SAMPLES=3`,
+  `WORKLOAD_DURATION` 30 s, `FUZZ_ROUNDS=1000`; zero extra env vars),
+  launched 04:30:26Z, make PID 439128, x86 image cached from the step
+  0041 build; host kernel `7.3.0-070300rc3-generic`.
+- Run `corpus/results/x86_kvm_corpus_20260930_043516_570740/`
+  `status: completed` (`progress.json` status `completed`); suite
+  `details/result.json` `status: ok`, `suite_name: macro_apps`,
+  `samples: 3`; app `details/apps/tetragon__observer.json` `status:
+  ok`, `error: ''`. `rejit_result`: `mode: loadtime`,
+  `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
+  kop]`, `selected_workload: stress_ng_tetragon_policy_hot`,
+  `runner: tetragon`.
+- **287 BPF programs** recorded per start (baseline and post_rejit) —
+  the largest program count of the session (vs. 151 for tracee, 53 for
+  cilium). 32 programs had a nonzero `run_cnt_delta` at baseline, 35
+  at post_rejit. Full 287-program table preserved in
+  `details/apps/tetragon__observer.json` (tracked into git this
+  step). Top hot progs by `run_cnt_delta` (raw two-start BPF counters,
+  raw only; in-VM ids differ between starts so pairs matched by
+  `name`; `name` strings truncated to 16 chars by the kernel):
+  - baseline `generic_tracepoint` id 214 `run_cnt_delta 224,546,563` /
+    `run_time_ns_delta 163,445,837,000` / `bytes_jited 14,942` /
+    `bytes_xlated 26,568`; `generic_retkprobe` id 142 `40,927,410` /
+    `1,976,902,600` / `15,275` / `26,384`; `generic_kprobe_*` id 136
+    `40,927,410` / `24,859,691,600` / `1,879` / `3,304`.
+  - post_rejit `generic_tracepoint` id 2152 `236,028,705` /
+    `122,954,311,472` / `bytes_jited 11,895` / `bytes_xlated 21,888`;
+    `generic_retkprobe` id 1569 `50,892,497` / `2,392,676,083` /
+    `15,275` / `26,384`; `generic_kprobe_*` id 1564 `50,892,497` /
+    `30,508,232,057` / `1,371` / `2,336`.
+  - `bytes_jited` dropped for the hottest tracepoint/kprobe progs
+    after the ReJIT pass chain (e.g. 14,942 → 11,895; 1,879 → 1,371);
+    full per-program detail in the tracked JSON.
+- Raw app-side workload counters (`stress_ng_tetragon_policy_hot`,
+  6-stressor `stress-ng` run, all six runs `rc=0`, `failed: 0`;
+  per-stressor raw bogo-ops, raw only):
+  - baseline: eventfd `1,935,185`/`1,787,637`/`1,858,339`; mmap
+    `805`/`796`/`769`; udp `3,306,826`/`3,193,481`/`3,230,045`;
+    sock `9,344`/`8,770`/`9,776`; sockfd `3,481,844`/`3,418,449`/
+    `3,414,332`; sockpair `1,212,312`/`1,230,939`/`1,273,602`.
+  - post_rejit: eventfd `2,696,439`/`2,236,132`/`1,842,316`; mmap
+    `963`/`898`/`816`; udp `5,543,632`/`4,992,934`/`3,388,677`;
+    sock `43,216`/`21,924`/`9,688`; sockfd `7,394,907`/`4,764,568`/
+    `3,409,259`; sockpair `2,167,331`/`1,584,325`/`1,127,976`.
+  - No ratio, geomean, or win/loss tally computed here — any
+    cross-start comparison is analysis per `docs/evaluation.md` §5.
+- In-VM BPF program ids differ between the two starts (e.g. 214 →
+  2152 for `generic_tracepoint`), so hot progs are matched by `name`,
+  not id; the generic `generic_kprobe_*` names collide across distinct
+  programs, distinguished by id in the full JSON.
+- Tracked summary files added to git (same set as the step 0043/0044/
+  0047/0048 corpus runs): `metadata.json`, `details/result.json`,
+  `details/progress.json`, `details/apps/tetragon__observer.json`,
+  `details/loadtime-reports/tetragon__observer.jsonl`;
+  `details/shim-logs/` and `details/loadtime-plans/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0049-20260930T043026Z/
+  make-corpus.log` (449 lines, clean power-down) and `run-marker.txt`;
+  full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` corpus within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
