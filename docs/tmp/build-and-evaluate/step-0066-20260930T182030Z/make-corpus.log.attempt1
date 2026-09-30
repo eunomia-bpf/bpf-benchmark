@@ -1,0 +1,25 @@
+make -C "/workspaces/repository/vendor/linux-framework" O="/workspaces/repository/vendor/build/x86/linux" ARCH=x86_64 bzImage modules -j"24"
+make[1]: Entering directory '/workspaces/repository/vendor/linux-framework'
+make[2]: Entering directory '/workspaces/repository/vendor/build/x86/linux'
+  GEN     Makefile
+  DESCEND objtool
+  DESCEND bpf/resolve_btfids
+  INSTALL libsubcmd_headers
+  INSTALL libsubcmd_headers
+  CALL    /workspaces/repository/vendor/linux-framework/scripts/checksyscalls.sh
+Kernel: arch/x86/boot/bzImage is ready  (#29)
+make[2]: Leaving directory '/workspaces/repository/vendor/build/x86/linux'
+make[1]: Leaving directory '/workspaces/repository/vendor/linux-framework'
+tmp="$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
+trap 'rm -rf "$tmp"' EXIT; \
+make -C "/workspaces/repository/vendor/linux-framework" O="/workspaces/repository/vendor/build/x86/linux" ARCH=x86_64 INSTALL_MOD_PATH="$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
+rm -rf "/workspaces/repository/vendor/build/x86/linux/modules-install"; \
+install -d "/workspaces/repository/vendor/build/x86/linux/modules-install"; \
+cp -a "$tmp/." "/workspaces/repository/vendor/build/x86/linux/modules-install/"
+make[4]: *** Deleting file '/tmp/bpfext-modules-x86.cffVep/lib/modules/7.0.0-rc2+/kernel/net/ipv6/netfilter/nf_socket_ipv6.ko'
+Terminated
+Terminated
+make[4]: *** [/workspaces/repository/vendor/linux-framework/scripts/Makefile.modinst:125: /tmp/bpfext-modules-x86.cffVep/lib/modules/7.0.0-rc2+/kernel/net/ipv6/netfilter/nf_socket_ipv6.ko] Terminated
+make[3]: *** [/workspaces/repository/vendor/linux-framework/Makefile:2007: modules_install] Terminated
+make[2]: *** [/workspaces/repository/vendor/linux-framework/Makefile:248: __sub-make] Terminated
+make[1]: *** [Makefile:248: __sub-make] Terminated

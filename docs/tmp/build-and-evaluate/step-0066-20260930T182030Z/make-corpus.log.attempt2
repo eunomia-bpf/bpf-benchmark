@@ -1,0 +1,396 @@
+WARNING: No swap limit support
+WARNING: IPv4 forwarding is disabled
+Loaded image: bpf-benchmark/runner-runtime:x86_64
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+dockerd --data-root /run/bpf-benchmark-docker/data --exec-root /run/bpf-benchmark-docker/exec --pidfile /run/bpf-benchmark-docker/docker.pid --host unix:///run/docker.sock --bridge=none --iptables=false --ip-masq=false --ip-forward=false >/run/bpf-benchmark-docker/dockerd.log 2>&1 &
+for _ in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && break; sleep 1; done
+docker info >/dev/null
+install -d "/workspaces/repository/corpus/results"
+"/workspaces/repository/runner/scripts/bpfrejit-install" --image "bpf-benchmark/runner-runtime:x86_64" "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar"
+docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host -e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root -e TARGET="x86-kvm" -e RUN_TARGET_NAME="x86-kvm" -e RUN_TOKEN="dd30b378" -e RUN_TARGET_ARCH="x86_64" -e RUN_EXECUTOR="kvm" -e RUN_REMOTE_PYTHON_BIN="python3" -e RUN_RUNTIME_PYTHON_BIN="python3" -e RUN_BPFTOOL_BIN="bpftool" -e RUN_NATIVE_REPOS_CSV="bcc,katran,tracee,tetragon" -e SAMPLES="3"      -e FUZZ_ROUNDS="1000"                -e MERLIN_COMPILETIME_MODE="none"                    -w "/workspaces/repository" -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro -v "/workspaces/repository/corpus/results:/workspaces/repository/corpus/results" "bpf-benchmark/runner-runtime:x86_64" python3 -m corpus.driver
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "event": "native_loader_mode", "post_only": false, "saved_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"]}
+{"app": "bcc/set", "event": "app_start", "runner": "bcc_set", "workload": "stress_ng_bcc_hook_hot"}
+{"app": "bcc/set", "event": "phase_start", "phase": "baseline_start", "runner": "bcc_set", "workload": "stress_ng_bcc_hook_hot"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "bcc/set", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "bcc_set", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "bcc/set", "event": "phase_done", "phase": "baseline_start", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "event": "measurement_start", "phase": "baseline", "runner": "bcc_set", "samples": 3, "workload": "stress_ng_bcc_hook_hot"}
+{"app": "bcc/set", "event": "measurement_done", "phase": "baseline", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "event": "phase_start", "phase": "baseline_stop", "runner": "bcc_set"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "runner_stop_done"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "quiesce_start"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "quiesce_done"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "bpf_stats_disabled"}
+{"app": "bcc/set", "event": "phase_done", "phase": "baseline_stop", "runner": "bcc_set", "status": "ok"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "bcc/set", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "bcc_set", "temporary_set_keys": ["BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "bcc/set", "event": "loadtime_plan_start", "runner": "bcc_set"}
+{"app": "bcc/set", "event": "loadtime_plan_done", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "event": "phase_start", "phase": "post_rejit_start", "runner": "bcc_set", "workload": "stress_ng_bcc_hook_hot"}
+{"app": "bcc/set", "event": "phase_done", "phase": "post_rejit_start", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "event": "measurement_start", "phase": "post_rejit", "runner": "bcc_set", "samples": 3, "workload": "stress_ng_bcc_hook_hot"}
+{"app": "bcc/set", "event": "measurement_done", "phase": "post_rejit", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "event": "phase_start", "phase": "post_rejit_stop", "runner": "bcc_set"}
+{"app": "bcc/set", "event": "phase_step", "phase": "post_rejit_stop", "runner": "bcc_set", "step": "runner_stop_done"}
+{"app": "bcc/set", "event": "phase_step", "phase": "post_rejit_stop", "runner": "bcc_set", "step": "quiesce_start"}
+{"app": "bcc/set", "event": "phase_step", "phase": "post_rejit_stop", "runner": "bcc_set", "step": "quiesce_done"}
+{"app": "bcc/set", "event": "phase_step", "phase": "post_rejit_stop", "runner": "bcc_set", "step": "bpf_stats_disabled"}
+{"app": "bcc/set", "event": "phase_done", "phase": "post_rejit_stop", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "error": "", "event": "app_done", "status": "ok"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "app_start", "runner": "otelcol-ebpf-profiler", "workload": "otel_mixed_workload"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_start", "phase": "baseline_start", "runner": "otelcol-ebpf-profiler", "workload": "otel_mixed_workload"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "otelcol-ebpf-profiler/profiling", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "otelcol-ebpf-profiler", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_done", "phase": "baseline_start", "runner": "otelcol-ebpf-profiler", "status": "ok"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "measurement_start", "phase": "baseline", "runner": "otelcol-ebpf-profiler", "samples": 3, "workload": "otel_mixed_workload"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "measurement_done", "phase": "baseline", "runner": "otelcol-ebpf-profiler", "status": "ok"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_start", "phase": "baseline_stop", "runner": "otelcol-ebpf-profiler"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "baseline_stop", "runner": "otelcol-ebpf-profiler", "step": "runner_stop_done"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "baseline_stop", "runner": "otelcol-ebpf-profiler", "step": "quiesce_start"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "baseline_stop", "runner": "otelcol-ebpf-profiler", "step": "quiesce_done"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "baseline_stop", "runner": "otelcol-ebpf-profiler", "step": "bpf_stats_disabled"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_done", "phase": "baseline_stop", "runner": "otelcol-ebpf-profiler", "status": "ok"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "otelcol-ebpf-profiler/profiling", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "otelcol-ebpf-profiler", "temporary_set_keys": ["BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "loadtime_plan_start", "runner": "otelcol-ebpf-profiler"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "loadtime_plan_done", "runner": "otelcol-ebpf-profiler", "status": "ok"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_start", "phase": "post_rejit_start", "runner": "otelcol-ebpf-profiler", "workload": "otel_mixed_workload"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_done", "phase": "post_rejit_start", "runner": "otelcol-ebpf-profiler", "status": "ok"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "measurement_start", "phase": "post_rejit", "runner": "otelcol-ebpf-profiler", "samples": 3, "workload": "otel_mixed_workload"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "measurement_done", "phase": "post_rejit", "runner": "otelcol-ebpf-profiler", "status": "ok"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_start", "phase": "post_rejit_stop", "runner": "otelcol-ebpf-profiler"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "post_rejit_stop", "runner": "otelcol-ebpf-profiler", "step": "runner_stop_done"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "post_rejit_stop", "runner": "otelcol-ebpf-profiler", "step": "quiesce_start"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "post_rejit_stop", "runner": "otelcol-ebpf-profiler", "step": "quiesce_done"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_step", "phase": "post_rejit_stop", "runner": "otelcol-ebpf-profiler", "step": "bpf_stats_disabled"}
+{"app": "otelcol-ebpf-profiler/profiling", "event": "phase_done", "phase": "post_rejit_stop", "runner": "otelcol-ebpf-profiler", "status": "ok"}
+{"app": "otelcol-ebpf-profiler/profiling", "error": "", "event": "app_done", "status": "ok"}
+{"app": "cilium/agent", "event": "app_start", "runner": "cilium", "workload": "cilium_endpoint_pktgen"}
+{"app": "cilium/agent", "event": "phase_start", "phase": "baseline_start", "runner": "cilium", "workload": "cilium_endpoint_pktgen"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "cilium/agent", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "cilium", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "cilium/agent", "event": "phase_done", "phase": "baseline_start", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "event": "measurement_start", "phase": "baseline", "runner": "cilium", "samples": 3, "workload": "cilium_endpoint_pktgen"}
+{"app": "cilium/agent", "event": "measurement_done", "phase": "baseline", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "event": "phase_start", "phase": "baseline_stop", "runner": "cilium"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "baseline_stop", "runner": "cilium", "step": "runner_stop_done"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "baseline_stop", "runner": "cilium", "step": "quiesce_start"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "baseline_stop", "runner": "cilium", "step": "quiesce_done"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "baseline_stop", "runner": "cilium", "step": "bpf_stats_disabled"}
+{"app": "cilium/agent", "event": "phase_done", "phase": "baseline_stop", "runner": "cilium", "status": "ok"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "cilium/agent", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "cilium", "temporary_set_keys": ["BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "cilium/agent", "event": "loadtime_plan_start", "runner": "cilium"}
+{"app": "cilium/agent", "event": "loadtime_plan_done", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "event": "phase_start", "phase": "post_rejit_start", "runner": "cilium", "workload": "cilium_endpoint_pktgen"}
+{"app": "cilium/agent", "event": "phase_done", "phase": "post_rejit_start", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "event": "measurement_start", "phase": "post_rejit", "runner": "cilium", "samples": 3, "workload": "cilium_endpoint_pktgen"}
+{"app": "cilium/agent", "event": "measurement_done", "phase": "post_rejit", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "event": "phase_start", "phase": "post_rejit_stop", "runner": "cilium"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "post_rejit_stop", "runner": "cilium", "step": "runner_stop_done"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "post_rejit_stop", "runner": "cilium", "step": "quiesce_start"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "post_rejit_stop", "runner": "cilium", "step": "quiesce_done"}
+{"app": "cilium/agent", "event": "phase_step", "phase": "post_rejit_stop", "runner": "cilium", "step": "bpf_stats_disabled"}
+{"app": "cilium/agent", "event": "phase_done", "phase": "post_rejit_stop", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "error": "", "event": "app_done", "status": "ok"}
+{"app": "tetragon/observer", "event": "app_start", "runner": "tetragon", "workload": "stress_ng_tetragon_policy_hot"}
+{"app": "tetragon/observer", "event": "phase_start", "phase": "baseline_start", "runner": "tetragon", "workload": "stress_ng_tetragon_policy_hot"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "tetragon/observer", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "tetragon", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "tetragon/observer", "event": "phase_done", "phase": "baseline_start", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "event": "measurement_start", "phase": "baseline", "runner": "tetragon", "samples": 3, "workload": "stress_ng_tetragon_policy_hot"}
+{"app": "tetragon/observer", "event": "measurement_done", "phase": "baseline", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "event": "phase_start", "phase": "baseline_stop", "runner": "tetragon"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "runner_stop_done"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "quiesce_start"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "quiesce_done"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "bpf_stats_disabled"}
+{"app": "tetragon/observer", "event": "phase_done", "phase": "baseline_stop", "runner": "tetragon", "status": "ok"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "tetragon/observer", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "tetragon", "temporary_set_keys": ["BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "tetragon/observer", "event": "loadtime_plan_start", "runner": "tetragon"}
+{"app": "tetragon/observer", "event": "loadtime_plan_done", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "event": "phase_start", "phase": "post_rejit_start", "runner": "tetragon", "workload": "stress_ng_tetragon_policy_hot"}
+{"app": "tetragon/observer", "event": "phase_done", "phase": "post_rejit_start", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "event": "measurement_start", "phase": "post_rejit", "runner": "tetragon", "samples": 3, "workload": "stress_ng_tetragon_policy_hot"}
+{"app": "tetragon/observer", "event": "measurement_done", "phase": "post_rejit", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "event": "phase_start", "phase": "post_rejit_stop", "runner": "tetragon"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "post_rejit_stop", "runner": "tetragon", "step": "runner_stop_done"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "post_rejit_stop", "runner": "tetragon", "step": "quiesce_start"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "post_rejit_stop", "runner": "tetragon", "step": "quiesce_done"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "post_rejit_stop", "runner": "tetragon", "step": "bpf_stats_disabled"}
+{"app": "tetragon/observer", "event": "phase_done", "phase": "post_rejit_stop", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "error": "", "event": "app_done", "status": "ok"}
+{"app": "katran", "event": "app_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"app": "katran", "event": "phase_start", "phase": "baseline_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "katran", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "katran", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "katran", "event": "phase_done", "phase": "baseline_start", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "measurement_start", "phase": "baseline", "runner": "katran", "samples": 3, "workload": "xdp_pktgen"}
+{"app": "katran", "event": "measurement_done", "phase": "baseline", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "phase_start", "phase": "baseline_stop", "runner": "katran"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "runner_stop_done"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "quiesce_start"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "quiesce_done"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "bpf_stats_disabled"}
+{"app": "katran", "event": "phase_done", "phase": "baseline_stop", "runner": "katran", "status": "ok"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "katran", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "katran", "temporary_set_keys": ["BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "katran", "event": "loadtime_plan_start", "runner": "katran"}
+{"app": "katran", "event": "loadtime_plan_done", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "phase_start", "phase": "post_rejit_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"app": "katran", "event": "phase_done", "phase": "post_rejit_start", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "measurement_start", "phase": "post_rejit", "runner": "katran", "samples": 3, "workload": "xdp_pktgen"}
+{"app": "katran", "event": "measurement_done", "phase": "post_rejit", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "phase_start", "phase": "post_rejit_stop", "runner": "katran"}
+{"app": "katran", "event": "phase_step", "phase": "post_rejit_stop", "runner": "katran", "step": "runner_stop_done"}
+{"app": "katran", "event": "phase_step", "phase": "post_rejit_stop", "runner": "katran", "step": "quiesce_start"}
+{"app": "katran", "event": "phase_step", "phase": "post_rejit_stop", "runner": "katran", "step": "quiesce_done"}
+{"app": "katran", "event": "phase_step", "phase": "post_rejit_stop", "runner": "katran", "step": "bpf_stats_disabled"}
+{"app": "katran", "event": "phase_done", "phase": "post_rejit_stop", "runner": "katran", "status": "ok"}
+{"app": "katran", "error": "", "event": "app_done", "status": "ok"}
+{"app": "tracee/monitor", "event": "app_start", "runner": "tracee", "workload": "stress_ng_tracee_syscall_hot"}
+{"app": "tracee/monitor", "event": "phase_start", "phase": "baseline_start", "runner": "tracee", "workload": "stress_ng_tracee_syscall_hot"}
+{"active_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "app": "tracee/monitor", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "tracee", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"child_native_env_keys": [], "event": "tracee_start", "explicit_native_env_keys": [], "parent_native_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO"], "pid": 26286}
+{"app": "tracee/monitor", "event": "phase_done", "phase": "baseline_start", "runner": "tracee", "status": "ok"}
+{"app": "tracee/monitor", "event": "measurement_start", "phase": "baseline", "runner": "tracee", "samples": 3, "workload": "stress_ng_tracee_syscall_hot"}
+  0.788488] PCI host bridge to bus 0000:00
+[    0.788927] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.789643] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.790359] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.791146] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.791933] pci_bus 0000:00: root bus resource [mem 0x380000000000-0x38007fffffff window]
+[    0.792791] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.793407] pci 0000:00:00.0: [8086:1237] type 00 class 0x060000 conventional PCI endpoint
+[    0.794729] pci 0000:00:01.0: [8086:7000] type 00 class 0x060100 conventional PCI endpoint
+[    0.796081] pci 0000:00:01.1: [8086:7010] type 00 class 0x010180 conventional PCI endpoint
+[    0.797641] pci 0000:00:01.1: BAR 4 [io  0xc200-0xc20f]
+[    0.798240] pci 0000:00:01.1: BAR 0 [io  0x01f0-0x01f7]: legacy IDE quirk
+[    0.798957] pci 0000:00:01.1: BAR 1 [io  0x03f6]: legacy IDE quirk
+[    0.799607] pci 0000:00:01.1: BAR 2 [io  0x0170-0x0177]: legacy IDE quirk
+[    0.800324] pci 0000:00:01.1: BAR 3 [io  0x0376]: legacy IDE quirk
+[    0.801135] pci 0000:00:01.3: [8086:7113] type 00 class 0x068000 conventional PCI endpoint
+[    0.802402] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    0.803172] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    0.804219] pci 0000:00:02.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.806633] pci 0000:00:02.0: BAR 0 [io  0xc000-0xc03f]
+[    0.807202] pci 0000:00:02.0: BAR 1 [mem 0xfebf7000-0xfebf7fff]
+[    0.807633] pci 0000:00:02.0: BAR 4 [mem 0x380000000000-0x380000003fff 64bit pref]
+[    0.809281] pci 0000:00:03.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.811910] pci 0000:00:03.0: BAR 0 [io  0xc040-0xc07f]
+[    0.812478] pci 0000:00:03.0: BAR 1 [mem 0xfebf8000-0xfebf8fff]
+[    0.813134] pci 0000:00:03.0: BAR 4 [mem 0x380000004000-0x380000007fff 64bit pref]
+[    0.815186] pci 0000:00:04.0: [8086:25ab] type 00 class 0x088000 conventional PCI endpoint
+[    0.816671] pci 0000:00:04.0: BAR 0 [mem 0xfebf9000-0xfebf900f]
+[    0.817767] pci 0000:00:05.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.819740] pci 0000:00:05.0: BAR 0 [io  0xc080-0xc0bf]
+[    0.820344] pci 0000:00:05.0: BAR 1 [mem 0xfebfa000-0xfebfafff]
+[    0.821005] pci 0000:00:05.0: BAR 4 [mem 0x380000008000-0x38000000bfff 64bit pref]
+[    0.822628] pci 0000:00:06.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.824562] pci 0000:00:06.0: BAR 0 [io  0xc0c0-0xc0ff]
+[    0.825588] pci 0000:00:06.0: BAR 1 [mem 0xfebfb000-0xfebfbfff]
+[    0.826246] pci 0000:00:06.0: BAR 4 [mem 0x38000000c000-0x38000000ffff 64bit pref]
+[    0.827917] pci 0000:00:07.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.829585] pci 0000:00:07.0: BAR 0 [io  0xc100-0xc13f]
+[    0.830148] pci 0000:00:07.0: BAR 1 [mem 0xfebfc000-0xfebfcfff]
+[    0.830804] pci 0000:00:07.0: BAR 4 [mem 0x380000010000-0x380000013fff 64bit pref]
+[    0.832393] pci 0000:00:08.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.834074] pci 0000:00:08.0: BAR 0 [io  0xc140-0xc17f]
+[    0.834640] pci 0000:00:08.0: BAR 1 [mem 0xfebfd000-0xfebfdfff]
+[    0.835688] pci 0000:00:08.0: BAR 4 [mem 0x380000014000-0x380000017fff 64bit pref]
+[    0.837378] pci 0000:00:09.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.838392] pci 0000:00:09.0: BAR 0 [io  0xc180-0xc1bf]
+[    0.838975] pci 0000:00:09.0: BAR 1 [mem 0xfebfe000-0xfebfefff]
+[    0.839630] pci 0000:00:09.0: BAR 4 [mem 0x380000018000-0x38000001bfff 64bit pref]
+[    0.841242] pci 0000:00:0a.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.842853] pci 0000:00:0a.0: BAR 0 [io  0xc1c0-0xc1ff]
+[    0.843416] pci 0000:00:0a.0: BAR 1 [mem 0xfebff000-0xfebfffff]
+[    0.844073] pci 0000:00:0a.0: BAR 4 [mem 0x38000001c000-0x38000001ffff 64bit pref]
+[    0.848302] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.849042] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.849726] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.850413] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.851078] ACPI: PCI: Interrupt link LNKS configured for IRQ 9
+[    0.852031] iommu: Default domain type: Translated
+[    0.852031] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.852031] pps_core: LinuxPPS API ver. 1 registered
+[    0.852031] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.852031] PTP clock support registered
+[    0.852031] EDAC MC: Ver: 3.0.0
+[    0.857868] NetLabel: Initializing
+[    0.858253] NetLabel:  domain hash size = 128
+[    0.858720] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.859324] NetLabel:  unlabeled traffic allowed by default
+[    0.859916] PCI: Using ACPI for IRQ routing
+[    0.860561] e820: register RAM buffer resource [mem 0x0009fc00-0x0009ffff]
+[    0.861286] e820: register RAM buffer resource [mem 0xbffdf000-0xbfffffff]
+[    0.862018] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.862018] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.867754] clocksource: Switched to clocksource kvm-clock
+[    0.868674] VFS: Disk quotas dquot_6.6.0
+[    0.869143] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.869902] netfs: FS-Cache loaded
+[    0.870331] pnp: PnP ACPI init
+[    0.870849] pnp: PnP ACPI: found 5 devices
+[    0.880363] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.881368] NET: Registered PF_INET protocol family
+[    0.883330] IP idents hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.897809] tcp_listen_portaddr_hash hash table entries: 32768 (order: 7, 524288 bytes, linear)
+[    0.898796] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.899644] TCP established hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.903710] TCP bind hash table entries: 65536 (order: 9, 2097152 bytes, linear)
+[    0.905912] TCP: Hash tables configured (established 524288 bind 65536)
+[    0.907611] MPTCP token hash table entries: 65536 (order: 9, 1572864 bytes, linear)
+[    0.908488] UDP hash table entries: 32768 (order: 9, 2097152 bytes, linear)
+[    0.911002] UDP-Lite hash table entries: 32768 (order: 9, 2097152 bytes, linear)
+[    0.913524] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.914140] NET: Registered PF_XDP protocol family
+[    0.914664] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.915320] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.915977] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.916705] pci_bus 0000:00: resource 7 [mem 0xc0000000-0xfebfffff window]
+[    0.917431] pci_bus 0000:00: resource 8 [mem 0x380000000000-0x38007fffffff window]
+[    0.918268] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    0.918958] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    0.919696] PCI: CLS 0 bytes, default 64
+[    0.920160] PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+[    0.920673] Trying to unpack rootfs image as initramfs...
+[    0.920852] software IO TLB: mapped [mem 0x00000000bb36b000-0x00000000bf36b000] (64MB)
+[    0.922314] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x6a464ae9873, max_idle_ns: 881590529744 ns
+[    0.961156] Freeing initrd memory: 12692K
+[    0.964347] Initialise system trusted keyrings
+[    0.965401] Key type blacklist registered
+[    0.966415] workingset: timestamp_bits=36 max_order=24 bucket_order=0
+[    0.968274] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.970449] 9p: Installing v9fs 9p2000 file system support
+[    0.971990] integrity: Platform Keyring initialized
+[    0.973243] cryptd: max_cpu_qlen set to 1000
+[    0.980895] Key type asymmetric registered
+[    0.981819] Asymmetric key parser 'x509' registered
+[    0.982956] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 248)
+[    0.984713] io scheduler mq-deadline registered
+[    0.985719] io scheduler kyber registered
+[    0.986626] io scheduler bfq registered
+[    0.998540] ACPI: \_SB_.LNKB: Enabled at IRQ 10
+[    1.010667] ACPI: \_SB_.LNKC: Enabled at IRQ 11
+[    1.022587] ACPI: \_SB_.LNKA: Enabled at IRQ 10
+[    1.053655] ACPI: \_SB_.LNKD: Enabled at IRQ 11
+[    1.071256] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    1.072081] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    1.145374] loop: module loaded
+[    1.145917] tun: Universal TUN/TAP device driver, 1.6
+[    1.146543] rtc_cmos 00:04: RTC can wake from S4
+[    1.147448] rtc_cmos 00:04: registered as rtc0
+[    1.147985] rtc_cmos 00:04: setting system clock to 2026-09-30T18:33:35 UTC (1790793215)
+[    1.148878] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    1.149684] intel_pstate: CPU model not supported
+[    1.150200] hid: raw HID events driver (C) Jiri Kosina
+[    1.152617] NET: Registered PF_INET6 protocol family
+[    1.153486] Segment Routing with IPv6
+[    1.153916] In-situ OAM (IOAM) with IPv6
+[    1.154375] NET: Registered PF_PACKET protocol family
+[    1.154944] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+[    1.156381] 9pnet: Installing 9P2000 support
+[    1.158775] IPI shorthand broadcast: enabled
+[    1.177130] sched_clock: Marking stable (1174787389, 479951)->(1242595264, -67327924)
+[    1.188514] registered taskstats version 1
+[    1.189166] Loading compiled-in X.509 certificates
+[    1.190167] Loaded X.509 cert 'Build time autogenerated kernel key: d1424aba97e5b78a90400dcad095464dbcbd105a'
+[    1.193138] Demotion targets for Node 0: null
+[    1.193706] Key type .fscrypt registered
+[    1.194128] Key type fscrypt-provisioning registered
+[    1.194681] ima: No TPM chip found, activating TPM-bypass!
+[    1.195267] ima: Allocated hash algorithm: sha256
+[    1.195779] ima: No architecture policies found
+[    1.196764] clk: Disabling unused clocks
+[    1.203108] Freeing unused decrypted memory: 2036K
+[    1.204238] Freeing unused kernel image (initmem) memory: 4024K
+[    1.204684] Write protecting the kernel read-only data: 32768k
+[    1.205843] Freeing unused kernel image (text/rodata gap) memory: 1940K
+[    1.206837] Freeing unused kernel image (rodata/data gap) memory: 1740K
+[    1.207296] Run /init as init process
+[    1.207913] virtme initramfs: loading fuse.ko...
+[    1.216216] fuse: module verification failed: signature and/or required key missing - tainting kernel
+[    1.221722] fuse: init (API version 7.45)
+[    1.222751] virtme initramfs: loading virtiofs.ko...
+[    1.225617] virtme initramfs: loading virtio_mmio.ko...
+[    1.227143] virtme initramfs: loading serio.ko...
+[    1.229031] virtme initramfs: loading i8042.ko...
+[    1.230746] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    1.232855] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    1.233596] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    1.234610] virtme initramfs: loading libps2.ko...
+[    1.236026] virtme initramfs: loading vivaldi-fmap.ko...
+[    1.236855] virtme initramfs: loading atkbd.ko...
+[    1.238810] virtme initramfs: mounting hostfs...
+[    1.239335] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
+[    1.239647] virtio-fs: tag <ROOTFS> not found
+[    1.242046] 9pnet: Limiting 'msize' to 512000 as this is the maximum supported by transport virtio
+[    1.250859] virtme initramfs: done; switching to real root
+[    1.272649] virtme-ng-init: Setting hostname to virtme-ng...
+[    1.358348] virtme-ng-init: running systemd-tmpfiles
+[    1.589616] virtme-ng-init: basic initialization done
+[    1.591759] virtme-ng-init: you have CONFIG_UEVENT_HELPER on; turn it off
+[    1.592782] 9pnet: Limiting 'msize' to 512000 as this is the maximum supported by transport virtio
+[    1.624907] virtme-ng-init: Starting systemd-udevd version 255.4-1ubuntu8.17
+[    1.626327] virtme-ng-init: triggering udev coldplug
+[    2.284751] virtme-ng-init: waiting for udev to settle
+[    2.291716] input: Power Button as /devices/platform/LNXPWRBN:00/input/input2
+[    2.297594] ACPI: button: Power Button [PWRF]
+[    2.313061] piix4_smbus 0000:00:01.3: SMBus Host Controller at 0x700, revision 0
+[    2.313746] i2c i2c-0: Memory type 0x07 not supported yet, not instantiating SPD
+[    2.315469] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input4
+[    2.318724] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input3
+[    2.321606] SCSI subsystem initialized
+[    2.324658] mousedev: PS/2 mouse device common for all mice
+[    2.415160] scsi host0: ata_piix
+[    2.416422] scsi host1: ata_piix
+[    2.417219] ata1: PATA max MWDMA2 cmd 0x1f0 ctl 0x3f6 bmdma 0xc200 irq 14 lpm-pol 0
+[    2.418452] ata2: PATA max MWDMA2 cmd 0x170 ctl 0x376 bmdma 0xc208 irq 15 lpm-pol 0
+[    2.590796] ata2: found unknown device (class 0)
+[    2.592273] ata2.00: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100
+[    2.594902] scsi 1:0:0:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5
+[    2.715712] scsi 1:0:0:0: Attached scsi generic sg0 type 5
+[    2.881846] sr 1:0:0:0: [sr0] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray
+[    2.882849] cdrom: Uniform CD-ROM driver Revision: 3.20
+[    4.475746] virtme-ng-init: udev is done
+[    4.477222] virtme-ng-init: starting script
+[    4.703227] loop0: detected capacity change from 0 to 134217728
+[    4.711983] EXT4-fs (loop0): mounted filesystem 96c09624-7f09-4180-9875-f0039dd68d19 r/w with ordered data mode. Quota mode: none.
+[    7.590678] Initializing XFRM netlink socket
+[   49.611601] bpf_x86_alu: loading out-of-tree module taints kernel.
+[   50.733197] NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030
+[   67.070243] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[   67.071971] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[   68.394205] mmap: stress-ng-sysca (1965) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[   97.097701] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[   97.098472] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[   98.599622] mmap: stress-ng-sysca (2006) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  127.114086] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  127.114868] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  128.534699] mmap: stress-ng-sysca (2082) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  157.130525] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  157.131288] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  158.526844] mmap: stress-ng-sysca (2121) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  315.281043] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  315.282753] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  316.892865] mmap: stress-ng-sysca (4142) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  346.304871] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  346.305646] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  376.986148] mmap: stress-ng-sysca (4183) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  377.323109] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  377.323881] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  378.378715] mmap: stress-ng-sysca (4222) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  407.340135] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  407.342745] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  408.486879] mmap: stress-ng-sysca (4263) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  729.543166] eth0: renamed from lxcbench0p
+[  731.263707] eth0: renamed from lxcbench1p
+[  731.429176] pktgen: no symbol version for set_freezable
+[  731.431168] pktgen: Packet Generator for packet performance testing. Version: 2.75
+[  933.564714] eth0: renamed from lxcbench0p
+[  941.404524] eth0: renamed from lxcbench1p
+[ 1382.593909] ipip: IPv4 and MPLS over IPv4 tunneling driver
+[ 1676.907073] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[ 1676.907851] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[ 1706.937129] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[ 1706.937919] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[ 1736.962424] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[ 1736.963209] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[ 1766.996401] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[ 1766.997207] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+qemu-system-x86_64: terminating on signal 15 from pid 1865444 (omp)
