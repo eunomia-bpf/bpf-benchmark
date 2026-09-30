@@ -5083,3 +5083,47 @@ remain open.
 - Retained log copy + run marker:
   `docs/tmp/build-and-evaluate/step-0043-20260930T005037Z/make-corpus.log`
   and `run-marker.txt`; full report in `step-report.md`.
+
+### KVM bcc/set corpus run at `897291237`, 2026-09-30
+
+- `BPFREJIT_CORPUS_APPS="bcc/set" make corpus` (default `PLATFORM=kvm
+  ARCH=x86`, default policy `SAMPLES=3 WORKLOAD_DURATION=30`, zero extra
+  env vars), launched 01:35Z, make PID 348425, `RUN_TOKEN=94f9b166`,
+  x86 image cached from the step 0041 build; host kernel
+  `7.3.0-070300rc3-generic`.
+- Attempt 1 (`BPFREJIT_CORPUS_APPS="bcc,set"`, make PID 334899,
+  01:26Z) **failed fast** at the driver's fail-fast check:
+  `references unknown apps: ['bcc', 'set']; available: ['bcc/set',
+  'cilium/agent', 'katran', 'otelcol-ebpf-profiler/profiling',
+  'tetragon/observer', 'tracee/monitor']` — the app key is the single
+  `app/tool` entry `bcc/set`, and the comma split it into two unknown
+  names. No run dir created, VM powered down cleanly, `make: ***
+  [Makefile:276: corpus-kvm-x86] Error 2`. Mechanical typo, not a suite
+  failure; failure preserved in
+  `step-0044-20260930T012822Z/make-corpus-failed-attempt1.log` and
+  noted in the run marker.
+- Run `corpus/results/x86_kvm_corpus_20260930_013937_924928/`
+  `status: completed` (`suite_name: macro_apps`, `samples: 3`,
+  `workload_only: False`), VM powered down cleanly, no make error
+  markers.
+- `bcc/set` `status: ok`, rejit `mode: loadtime`,
+  `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kop]`,
+  selected workload `stress_ng_bcc_hook_hot` (3 samples, all
+  `returncode: 0`). Raw two-start counters
+  (`details/apps/bcc__set.json`, raw only): `sys_enter` baseline
+  (id 75) `run_cnt_delta: 541,768,543` / `run_time_ns_delta:
+  44,316,208,484` / `bytes_jited: 108` / `bytes_xlated: 168`;
+  `sys_exit` (id 77) `541,768,554` / `47,526,478,291` / `406` / `656`;
+  post_rejit `sys_enter` (id 718) `546,561,845` / `44,314,841,636` /
+  `69` / `112`; `sys_exit` (id 908) `546,561,851` / `47,147,870,673` /
+  `262` / `408`. No ratio or rollup — analysis per
+  `docs/evaluation.md` §5.
+- Tracked summary files added to git: `metadata.json`,
+  `details/result.json`, `details/progress.json`,
+  `details/apps/bcc__set.json`, `details/loadtime-reports/bcc__set.jsonl`;
+  `shim-logs/` and `loadtime-plans/` stay ignored.
+- Retained log copies + run marker:
+  `docs/tmp/build-and-evaluate/step-0044-20260930T012822Z/make-corpus.log`
+  (attempt 2), `make-corpus-failed-attempt1.log` (attempt 1), and
+  `run-marker.txt`; full report in `step-report.md`.
