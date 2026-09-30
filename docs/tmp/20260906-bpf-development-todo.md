@@ -6192,3 +6192,65 @@ remain open.
   external blocker, not an invented gate; re-checked 2026-09-30: no
   `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
   credentials land.
+
+### QEMU arm64 `make negative-test` gate (zero knobs) at `6739525f3`,
+ 2026-09-30 (completes the arm64 target-parity matrix; target name is
+ nominal `negative` mode but the launch path actually ran the default
+ `test`-mode full gate — see TEST_MODE finding below)
+
+- `PLATFORM=qemu ARCH=arm64 make negative-test` (zero knobs; nominal
+  `TEST_MODE=negative`, `runner.suites.test`, Makefile:227/233), launched
+  13:43:35Z, make PID 928270, exited 13:50:23Z, prev HEAD `6739525f3`.
+- Result dir `tests/results/30da2a6e/` (token-based; nested run dir
+  `native_proof_micro_19700101_000013_504093/`; QEMU in-VM clock 1970).
+- **Gate result: PASS (5 PASS / 0 FAIL)**: BPF verifier negative smoke
+  `valid_xdp_pass`, `invalid_opcode errno=22`, `stack_oob_write
+  errno=13`, `uninitialized_register errno=13`; native_proof verifier
+  rejection `unchecked_packet_read rejected rc=1`. 5 PASS / 0 FAIL in
+  `make-negative-test-arm64.log` (lines 17026–17034).
+- **Bonus: native-proof micro staged-codegen 29/29 completed**
+  (`suite=micro_staged_codegen`, `progress.json status: completed`
+  29/29; `metadata.json status: completed`, `run_type=native_proof_micro`).
+  No ratio/geomean/rollup computed.
+- **FINDING (record-only, not patched)**: `TEST_MODE` does **not** reach
+  the QEMU arm64 in-VM run. The printf-baked `/qemu-run.sh` export line
+  (Makefile:235) contains `…SAMPLES='3'/FUZZ_ROUNDS='1000'/
+  MERLIN_COMPILETIME_MODE='none'` but **no `TEST_MODE`** — the
+  simply-expanded `RUN_MAKE_VARS` (Makefile:192–193) drops the
+  target-specific `TEST_MODE ?=` (Makefile:226–228) at expansion time
+  because it is still empty. In-VM `runner/suites/test.py:48`
+  (`env_str("TEST_MODE","test")`) therefore falls back to the default
+  `test` mode. Consequence: **0061/0062/0063 on QEMU arm64 ALL actually
+  executed the same default `test`-mode full gate** (the 5-PASS shape +
+  32 files + nested run dir), and the `negative`/`selftest` target names
+  were nominal-only on this launch path. This corrects 0063's pre-run
+  "thinnest gate (~4 PASS / ~2 files / no nested run dir)" prediction —
+  actuals are 5 PASS / 32 files / nested run dir. Because the full
+  `test`-mode gate is the **superset** of what `negative`/`selftest`
+  modes would run, the 0061–0063 gate evidence remains valid (uniformly
+  the full gate). Cross-arch check: the KVM x86 host sub-make
+  (Makefile:230, `__runtime-vm-test`) **also** omits `TEST_MODE` (0
+  mentions in `make -n` for all three gate targets); the in-VM
+  `__runtime-vm-test` env-inheritance path (`export $(SUITE_ENV_NAMES)`,
+  Makefile:183) is unconfirmed — left as a read-only open question, and
+  no past KVM result is re-run or re-labeled. Launch wiring is frozen, so
+  no patch is applied here; surfaced as a finding.
+- **Cross-arch readout (analysis per `docs/evaluation.md` §5, not a
+  gate)**: the arm64 **target-parity matrix is now 5/5 complete** on
+  QEMU arm64: micro (0058 clean), corpus ×2 (0059/0060 recorded failure,
+  byte-identical/deterministic), test (0061 pass), selftest (0062 pass),
+  negative-test (0063 pass) — mirroring the 5 KVM x86 targets. This
+  reaffirms the 0061 localization that the arm64 corpus post-rejit /
+  load-time-plan failure is specific to the load-time-plan/post-rejit
+  path — not the verifier, kop modules, bpf_stats, or test
+  infrastructure. No framework/app/runner changes.
+- Clean QEMU power-down, `qemu-status=0`, make target exits 0. 32
+  trackable files under the run dir committed (token + nested run dir:
+  `metadata.json`, `details/progress.json`, `details/result.json`, 29×
+  `details/code_compare/*.md`).
+- `PLATFORM=aws ARCH=arm64` (the AWS line) remains **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate; re-checked 2026-09-30: no
+  `~/.aws`, no aws-cli profiles, no matching `.pem`); resume when
+  credentials land.
