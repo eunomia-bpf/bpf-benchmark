@@ -5387,3 +5387,90 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM otelcol-ebpf-profiler/profiling corpus run at `2d0a0995a`, 2026-09-30
+
+- `BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" make corpus`
+  (default `PLATFORM=kvm ARCH=x86`; default policy `SAMPLES=3`,
+  `WORKLOAD_DURATION` 30 s, `FUZZ_ROUNDS=1000`; zero extra env vars),
+  launched 04:59:24Z, make PID 454478, x86 image cached from the step
+  0041 build; host kernel `7.3.0-070300rc3-generic`.
+- Run `corpus/results/x86_kvm_corpus_20260930_050405_991692/`
+  `status: completed` (`progress.json` status `completed`); suite
+  `details/result.json` `status: ok`, `suite_name: macro_apps`,
+  `samples: 3`; app `details/apps/otelcol-ebpf-profiler__profiling.json`
+  `status: ok`, `error: ''`. `rejit_result`: `mode: loadtime`,
+  `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
+  kop]`, `selected_workload: otel_mixed_workload`,
+  `runner: otelcol-ebpf-profiler`.
+- **13 BPF programs** recorded per start (baseline and post_rejit) —
+  the smallest program count of the session. 2 hot progs per start
+  (nonzero `run_cnt_delta`); the other 11 (per-language
+  `perf_unwind_*` + `perf_go_labels` + `custom__generic`) zero-run for
+  this workload, recorded as raw zero counters, not excluded. Full
+  13-program table in `details/apps/otelcol-ebpf-profiler__profiling.json`
+  (tracked into git this step). Hot progs by `run_cnt_delta` (raw
+  two-start BPF counters, raw only; in-VM ids differ between starts so
+  pairs matched by `name`; `name` strings truncated to 16 chars by the
+  kernel):
+  - baseline `native_tracer_e` id 17 `run_cnt_delta 723,698` /
+    `run_time_ns_delta 3,230,143,971` / `bytes_jited 3,815` /
+    `bytes_xlated 5,904`; `tracepoint__sch` id 16 `103` / `177,377` /
+    `792` / `1,320`.
+  - post_rejit `native_tracer_e` id 192 `723,217` /
+    `3,540,538,933` / `bytes_jited 3,688` / `bytes_xlated 5,584`;
+    `tracepoint__sch` id 179 `99` / `168,671` / `698` / `1,224`.
+  - Zero-run progs (both starts, `bytes_jited`/`bytes_xlated`):
+    `perf_unwind_php` 14,983/24,736 → 14,451/22,520;
+    `perf_unwind_pyt` 19,605/33,208 → 14,539/24,584;
+    `perf_unwind_rub` 17,840/30,280 → 19,610/30,632;
+    `perf_unwind_v8` 20,215/33,448 → 20,117/31,504;
+    `perf_unwind_dot` 22,797/37,440; `perf_go_labels` 1,572/2,504 →
+    1,405/2,184; `custom__generic` 3,679/5,712 → 3,549/5,400;
+    `perf_unwind_sto` 3,650/6,144 → 3,432/5,616;
+    `perf_unwind_nat` 21,868/37,024 → 20,614/33,296;
+    `perf_unwind_hot` 18,424/28,080; `perf_unwind_per` 18,264/29,640 →
+    17,686/26,752.
+- Raw app-side workload counters (`otel_mixed_workload`, 3 samples ×
+  11 components, all `rc=0`; per-language raw `int_loop ops=`
+  counters from stderr, 2 workers per sample, raw only):
+  - python3: `136,732,043`/`142,841,193` | `119,095,556`/`161,105,052`
+    | `172,740,653`/`158,097,665` (baseline s0/s1/s2);
+    `129,962,456`/`157,633,531` | `142,851,384`/`173,417,323` |
+    `119,438,991`/`162,475,486` (post_rejit s0/s1/s2).
+  - ruby: `358,220,751`/`427,129,736` | `381,323,499`/`396,586,544` |
+    `284,929,481`/`366,698,446`; post `379,956,660`/`327,097,648` |
+    `327,539,260`/`309,377,022` | `362,363,039`/`339,476,110`.
+  - nodejs: `371,542,141`/`326,937,393` | `360,851,851`/`354,774,918`
+    | `338,538,363`/`384,881,116`; post `382,425,809`/`355,494,800` |
+    `362,055,085`/`364,167,603` | `341,915,438`/`325,222,523`.
+  - perl: `148,781,768`/`145,156,042` | `162,934,308`/`193,509,254` |
+    `179,163,377`/`142,303,898`; post `146,652,385`/`184,680,612` |
+    `161,120,153`/`180,777,379` | `128,496,521`/`179,997,159`.
+  - php: `674,924,279`/`626,775,779` | `572,562,162`/`504,417,485` |
+    `572,620,368`/`571,359,687`; post `631,166,935`/`507,325,964` |
+    `599,540,707`/`525,054,643` | `696,122,711`/`610,816,875`.
+  - stress-ng cpu bogo-ops: baseline `40,256`/`41,006`/`43,036`;
+    post_rejit `40,477`/`38,962`/`48,372`.
+  - No ratio, geomean, or win/loss tally computed here — any
+    cross-start comparison is analysis per `docs/evaluation.md` §5.
+- **Completes evidence for all 6 supported corpus apps**
+  (`bcc/set`, `cilium/agent`, `katran`, `otelcol-ebpf-profiler/
+  profiling`, `tetragon/observer`, `tracee/monitor`) on the KVM x86
+  line.
+- Tracked summary files added to git (same set as the step 0043/0044/
+  0047/0048/0049 corpus runs): `metadata.json`, `details/result.json`,
+  `details/progress.json`,
+  `details/apps/otelcol-ebpf-profiler__profiling.json`,
+  `details/loadtime-reports/otelcol-ebpf-profiler__profiling.jsonl`;
+  `details/shim-logs/` and `details/loadtime-plans/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0050-20260930T045924Z/
+  make-corpus.log` (439 lines, clean power-down) and `run-marker.txt`;
+  full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` corpus within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
