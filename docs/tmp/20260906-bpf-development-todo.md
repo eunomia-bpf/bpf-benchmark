@@ -6575,3 +6575,55 @@ validity gate.
   outstanding *run* items. This entry only corrects the truncated
   inventory; it commits nothing new. The chain stays at the fixed
   point recorded in the 0066 close-out entry above.
+
+### Untracked build/packaging artifact families: no claimed evidence; record-only (2026-09-30)
+
+The untracked sweep this cycle re-listed the `corpus/`, `micro/`,
+`tests/` result roots: every family is already inventoried (no new
+result tree). The three families the log's "corrected full untracked
+inventory" (entry above, scoped to the three result roots) did not
+list are **build/packaging artifacts, not evidence trees**:
+
+- **`vendor/bpf/targets/x86/7.0.0-rc2+/` (untracked, `vmlinux.h`)** —
+  the framework-kernel CO-RE binding key under `host-native-bpf-x86`
+  (`make -C vendor/bpf … native-artifacts` regenerates it; the 09-30
+  mtime 17:16:08 matches the KVM chain's build step). Documented in
+  this log (~line 3666) and `docs/implementation.md` §273–281 as an
+  intended build output; kept untracked, consistent with all other
+  build outputs. No commit.
+- **`vendor/bpf/targets/x86/7.3.0-070300rc3-generic/` (untracked,
+  `vmlinux.h`, mtime 09-19)** — host-kernel BTF leftover from the
+  host-native-BPF experiment; the host 7.3.0 BTF lacks
+  `struct mm_struct::user_ns`, which is why tetragon breaks against
+  it (`implementation.md` §273–281). Not used by any Make target.
+  Left untracked; not claimed.
+- **`vendor/bpf/targets/arm64/7.3.0-070300rc3-generic/` (untracked,
+  `vmlinux.h`)** — same host-kernel-release key generated on this
+  host while building arm64 native BPF; a build byproduct, never a
+  claimed result. Left untracked; not claimed.
+- **`docs/artifacts/dist/atc26-ae-2.zip` + `.sha256` (untracked,
+  mtime 09-26)** — the ATC26 artifact-2 package; the *packaging
+  receipts* are tracked and documented (`docs/artifacts/package-atc26.sh`,
+  `docs/atc26-artifact-evaluation.md`, step-0011/0020–0034 step
+  reports). The dist zip is a binary packaging artifact, not
+  benchmark evidence; kept untracked. No commit.
+
+- **Re-verification (read-only):** corrected gate-token inventory —
+  clean-pathspec `git ls-files` confirms **252 tracked evidence files
+  across the 11 gate tokens, 0 mismatches** (the prior cycle's
+  `0/32` was a script bug, not a signal); all 6 KVM single-app trees
+  `5/5`; the untracked result-root families match the documented
+  inventory exactly. **No orphan; no claimed evidence missing from
+  git.**
+- **Live-state re-check:** HEAD = `origin/master` = `0d25bbdc5`;
+  the same 13 WIP ` M` files remain unstaged;
+  `bpfopt/llvm/src/llvm_mapinline.hpp` still ` M` (Paper-B
+  clean-source image rebuild still blocked); AWS still blocked (no
+  `~/.aws`, no `AWS_*` env, no key file); no step dir past
+  `step-0066`; KVM operational; nothing running.
+- **Disposition: record-only.** This entry only closes the
+  build/packaging-artifact inventory gap; it commits nothing new and
+  invents no run or gate. The two external blockers (AWS credentials;
+  Paper-B clean-source image rebuild) remain the sole outstanding
+  *run* items. The chain stays at the fixed point recorded in the
+  0066 close-out entry above.
