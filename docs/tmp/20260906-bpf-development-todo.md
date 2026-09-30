@@ -5571,3 +5571,48 @@ remain open.
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
   external blocker, not an invented gate); resume when credentials
   land.
+
+### KVM micro bench `packet_toeplitz_rss_hash` at `42e1c4e37`, 2026-09-30
+
+- `make micro BENCH=packet_toeplitz_rss_hash SAMPLES=1 WARMUPS=0
+  INNER_REPEAT=10` (default `PLATFORM=kvm`, `ARCH=x86`; only the BENCH
+  selection + the documented micro knobs, consistent with the
+  session's prior micro increments); launched 06:49:36Z, make PID
+  490235, x86 image cached; host kernel `7.3.0-070300rc3-generic`.
+- `packet_toeplitz_rss_hash` is a packet-io XDP-class hash bench
+  (`io_mode: packet`, 54-byte packet input, Toeplitz/5-tuple RSS
+  hash codegen) — a distinct codegen class from the three micro
+  benches already evidenced (`simple`,
+  `bcc_runqlat_log2_histogram_bucket`, `cgroup_skb_hash_chain`).
+- Run `micro/results/x86_kvm_micro_20260930_065534_021869/`
+  `status: completed`; `progress.json` `completed_benchmarks: 1 /
+  total_benchmarks: 1` (in-VM suite 06:55:34Z, ~42 s; VM power-down
+  ~06:56Z).
+- **All 3 runtimes (native / kernel / llvmbpf) matched**
+  `expected_result: 13526464303109995596` / `expected_retval: 2`
+  (`INNER_REPEAT=10`); raw sample counters:
+  - `native`: `exec_ns=511`, `code_size` bpf 1,808 / native 799
+    bytes.
+  - `kernel`: `exec_cycles=14,861,068` (`tsc_freq_hz` ~3.686e9);
+    `jited_prog_len=1,090`, `xlated_prog_len=1,808`;
+    `object_load_ns` ~2.72 ms.
+  - `llvmbpf`: `exec_cycles=3,557`, native 846 bytes;
+    `jit_compile_ns` ~17.4 ms.
+  - No ratio / geomean / rollup computed here (raw sample counters
+    only; cross-start comparison is analysis per
+    `docs/evaluation.md` §5).
+- Kernel JIT `exec_cycles` (14.86M) far exceeds llvmbpf's (3,557) —
+  expected for this kernel-only XDP-class bench under the in-VM
+  harness; recorded as-is.
+- Tracked summary files added to git: `metadata.json`,
+  `details/result.json`, `details/progress.json`;
+  `details/code_compare/` and `details/jit_dumps/` stay ignored.
+- Retained log copy + run marker:
+  `docs/tmp/build-and-evaluate/step-0052-20260930T064936Z/
+  make-micro.log` (473 lines, clean power-down) and `run-marker.txt`;
+  full report in `step-report.md`.
+- `PLATFORM=aws ARCH=arm64` micro/corpus within caps is **blocked on
+  credentials**: no `codex-ec2` AWS profile and no
+  `codex-arm64-test-20260319121631.pem` key on this host (genuine
+  external blocker, not an invented gate); resume when credentials
+  land.
