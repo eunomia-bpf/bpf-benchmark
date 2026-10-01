@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "operation": "x86PtrWrite",
+  "selector": "opcode_then_provenance_tag",
+  "tag_rows": [
+    {
+      "tag": "scalar",
+      "code": 0,
+      "tag_define": "KPROG_X86_PTR_WRITE_TAG_SCALAR",
+      "sim_define": "X86_SIM_TAG_SCALAR"
+    },
+    {
+      "tag": "mapPtr",
+      "code": 5,
+      "tag_define": "KPROG_X86_PTR_WRITE_TAG_MAP_PTR",
+      "sim_define": "X86_SIM_TAG_MAP_PTR"
+    },
+    {
+      "tag": "helperId",
+      "code": 7,
+      "tag_define": "KPROG_X86_PTR_WRITE_TAG_HELPER_ID",
+      "sim_define": "X86_SIM_TAG_HELPER_ID"
+    }
+  ],
+  "opcode_rows": [
+    {
+      "op": "movLoadMapPtr",
+      "op_define": "X86_OP_MOV_LOAD_MAP_PTR",
+      "op_code": "0x2c",
+      "tag": "mapPtr",
+      "writes_width64": false
+    },
+    {
+      "op": "movLoadHelperId",
+      "op_define": "X86_OP_MOV_LOAD_HELPER_ID",
+      "op_code": "0x2d",
+      "tag": "helperId",
+      "writes_width64": true
+    }
+  ]
+}

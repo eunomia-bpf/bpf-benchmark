@@ -63,6 +63,8 @@ import KProgFormal.GeneratedX86Cmov
 import KProgFormal.X86CmovHandler
 import KProgFormal.GeneratedX86Movbe
 import KProgFormal.X86MovbeHandler
+import KProgFormal.GeneratedX86PtrWrite
+import KProgFormal.X86PtrWriteHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags

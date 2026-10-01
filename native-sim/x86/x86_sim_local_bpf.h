@@ -89,6 +89,11 @@ union x86_sim_stack_mem {
 #define X86_SIM_TAG_MAP_VALUE 6U
 #define X86_SIM_TAG_HELPER_ID 7U
 
+/* The pointer-write provenance selector indexes the tag codes above, so this
+ * generated contract is included after them rather than with the other
+ * generated contracts at the top of the file. */
+#include "../formal/generated/x86_ptr_write.h"
+
 #define X86_SIM_HELPER_bpf_map_lookup_elem 1ULL
 #define X86_SIM_HELPER_bpf_map_update_elem 2ULL
 #define X86_SIM_HELPER_bpf_map_delete_elem 3ULL
@@ -360,16 +365,6 @@ struct x86_sim_state {
 
 #define X86_SIM_L_WRITE_REG_PTR(REG, VALUE)                                 \
 	X86_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), X86_SIM_TAG_SCALAR)
-
-#define X86_SIM_L_WRITE_REG_MAP_PTR(REG, VALUE)                             \
-	X86_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), X86_SIM_TAG_MAP_PTR)
-
-#define X86_SIM_L_WRITE_REG_HELPER_ID(REG, VALUE)                           \
-	do {                                                               \
-		X86_SIM_L_WRITE_REG_WIDTH((REG), (VALUE), X86_WIDTH_64);  \
-		X86_SIM_L_WRITE_REG_PTR_TAG((REG),                       \
-			(void *)(long)(VALUE), X86_SIM_TAG_HELPER_ID);    \
-	} while (0)
 
 #define X86_SIM_L_WRITE_REG_WIDTH_SHIFT(REG, VALUE, WIDTH, DST_SHIFT)       \
 	do {                                                               \
@@ -1563,13 +1558,18 @@ struct x86_sim_state {
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		if ((OP) == X86_OP_NOP) {                                  \
 			(void)0;                                           \
-		} else if ((OP) == X86_OP_MOV_LOAD_MAP_PTR) {             \
-			X86_SIM_L_WRITE_REG_MAP_PTR((DST),                \
-				(void *)(long)(IMM));                     \
-		} else if ((OP) == X86_OP_MOV_LOAD_HELPER_ID) {           \
-			X86_SIM_L_WRITE_REG_HELPER_ID((DST), (IMM));      \
-		} else if ((OP) == X86_OP_CALL_HELPER) {                  \
-			X86_SIM_BPF_CALL_ID((IMM));                       \
+		} else if ((OP) == X86_OP_MOV_LOAD_MAP_PTR ||             \
+			   (OP) == X86_OP_MOV_LOAD_HELPER_ID) {            \
+			__u8 __x86_l_pw_tag =                             \
+				KPROG_X86_PTR_WRITE_TAG(                  \
+					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
+					(OP) == X86_OP_MOV_LOAD_HELPER_ID);\
+			if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(             \
+				    __x86_l_pw_tag))                      \
+				X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), \
+							  X86_WIDTH_64);\
+			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
+				(void *)(long)(IMM), __x86_l_pw_tag);     \
 		} else if ((OP) == X86_OP_CALL_MEMCPY) {                  \
 			X86_SIM_L_EXEC_CALL_MEMCPY((IMM));                \
 		} else if ((OP) == X86_OP_CALL_MEMSET) {                  \

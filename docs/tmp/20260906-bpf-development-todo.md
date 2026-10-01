@@ -5054,15 +5054,93 @@ surface.
   108 Lean module checks and 50 host cross-checks.
 
 
-## Next after step 0041
+## Step 0042 — x86 `MOV_LOAD_MAP_PTR` / `MOV_LOAD_HELPER_ID` pointer-write composition
 
-`_MOV_LOAD_MAP_PTR`, and the rest of the x86
-surface (`_STORE_XMM0`/`_LOAD_XMM0`, `_CALL_MEMCPY_{,REG}`/
-`_CALL_MEMSET_{,REG}`, `_PUSH`/`_POP`, `_REP_MOVS`, `_ANDN{,_MEM}`,
-`_BZHI{,_MEM}`, `_CMP_{IMM,REG}_OP`), the index register decode and
-packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
-compiler/native bytes, multi-step traces, and specialization preservation
-remain open.
+- Scope: the two `X86_SIM_L_EXEC` arms for `X86_OP_MOV_LOAD_MAP_PTR`
+  (`0x2c`) and `X86_OP_MOV_LOAD_HELPER_ID` (`0x2d`) — the opcodes whose
+  register write installs pointer bits together with a provenance tag.
+  One generated contract covers both, the CMOV/MOVBE two-opcode
+  one-module precedent: the arms differ only in which fact they set, and
+  the tag is what distinguishes them.
+- This is the **first handler whose sim C actually calls the generated
+  contract** rather than restating it. The generator emits both the Lean
+  selector and the C macro; `x86_sim_local_bpf.h` now routes through
+  `KPROG_X86_PTR_WRITE_TAG` (opcode-to-tag) and
+  `KPROG_X86_PTR_WRITE_IS_HELPER_ID` (gates the helper-id arm's
+  preliminary width-64 scalar lane write), then performs the pointer
+  write through `X86_SIM_L_WRITE_REG_PTR_TAG`. The two former
+  `X86_SIM_L_EXEC` arms were merged into one so the tag is selected once;
+  the now-dead `X86_SIM_L_WRITE_REG_MAP_PTR` and
+  `X86_SIM_L_WRITE_REG_HELPER_ID` leaf macros were deleted after
+  re-grepping for other callers.
+- Two opcode facts modeled and pinned. (1) **The map-pointer arm writes
+  no width at all** — `x86_ptr_write_map_ptr_writes_no_width`, and
+  `x86_ptr_write_map_ptr_no_scalar_write` /
+  `x86_ptr_write_never_scalarizes`. (2) **The helper-id arm's width-64
+  scalar lane write is replaced bit for bit by the pointer write**, so
+  the two writes are observationally one pointer+tag write —
+  `x86_ptr_write_helper_id_absorbs_scalar`. Neither arm writes flags;
+  `X86_REG_NONE` writes nothing.
+- The tag table is **total, not partial**: three rows mirroring
+  `X86_SIM_TAG_*` (scalar 0 / mapPtr 5 / helperId 7), with the
+  out-of-range C fallthrough `KPROG_X86_PTR_WRITE_TAG_ANY 0xffU` modeled
+  by Lean's `none`, so the selector is total without inventing a fourth
+  tag. `x86_ptr_write_tag_all_reachable` pins that every tag the C chain
+  can select has a Lean counterpart and that the all-false fallthrough
+  maps to `none`; `x86_ptr_write_none_fallthrough` pins that no real
+  opcode can reach it.
+- New `generate_x86_ptr_write_spec.py` (61st generator, 282 lines)
+  emitting `KProgFormal/GeneratedX86PtrWrite.lean` +
+  `generated/x86_ptr_write.h` + `x86_ptr_write_spec.json`: the `Op` table
+  (`mapPtr`/`helperId` with opcode codes `0x2c`/`0x2d` and their two
+  opcode facts), the tag table, the selector chain (map-pointer first,
+  then helper-id, then the out-of-range code), the
+  `width64`/`writes_width64` table, and the C statement-expression
+  selector with each input evaluated once. The generator's `load()`
+  compares the whole JSON against an `EXPECTED` dict. The generated C
+  header must be included **after** the `X86_SIM_TAG_*` defines because
+  its tag `_Static_assert`s reference them, so it sits at
+  `x86_sim_local_bpf.h:92-95`, not with the other generated includes.
+- New `KProgFormal/X86PtrWriteHandler.lean` (310 lines, 19
+  theorems/examples): the tag/width-64/selector refinement lemmas plus
+  the top-level step refinement `x86_ptr_write_step_refines`, composing
+  the arms over the generated tag table, the width-64 fact, and the
+  reused `generatedX86MovPointerWrite`/`generatedX86RegWrite`
+  primitives; the asymmetry theorems
+  `x86_ptr_write_tag_all_reachable`,
+  `x86_ptr_write_map_ptr_writes_no_width`,
+  `x86_ptr_write_helper_id_absorbs_scalar`,
+  `x86_ptr_write_map_ptr_no_scalar_write`,
+  `x86_ptr_write_never_scalarizes`,
+  `x86_ptr_write_none_fallthrough`, `x86_ptr_write_step_fields`,
+  `x86_ptr_write_bits_spec_is_id`; and five `native_decide` canonical
+  examples. No `sorry`, no warnings; `KProgFormal.lean` gains the two
+  module imports.
+- Independent C oracle `test_x86_mov_load_map_ptr_host.c` (559 lines): it
+  drives the generated macros exactly as the arms do and compares against
+  a hand-written model of the arms — part 1 pins the generated tag table
+  against an independent restatement of the raw codes plus the
+  fallthrough's distinctness; part 2 exercises the selector over all four
+  fact pairs against an independent map-pointer-first nesting; part 3
+  exercises the helper-id test over all 256 tag bytes; part 4 drives the
+  whole arm over four opcodes × three destinations (incl. `X86_REG_NONE`)
+  × four immediates, comparing the whole register file, the lane-write
+  count and the flags; part 5 pins the six asymmetries (map-pointer
+  absent lane, helper-id single erased lane, flag-free, `X86_REG_NONE`
+  no-write, identical bits/different tags, all-false fallthrough).
+  **318 cases**, zero `-Wall -Wextra` warnings.
+- Full `make -C native-sim/formal check` passes with 0 errors, 61
+  generators, 109 Lean module checks and 51 host cross-checks.
+
+
+## Next after step 0042
+
+The rest of the x86 surface (`_STORE_XMM0`/`_LOAD_XMM0`,
+`_CALL_MEMCPY_{,REG}`/`_CALL_MEMSET_{,REG}`, `_PUSH`/`_POP`, `_REP_MOVS`,
+`_ANDN{,_MEM}`, `_BZHI{,_MEM}`, `_BT`/`_BT_IMM`, `_CMP_{IMM,REG}_OP`), the
+index register decode and packed-AUX layout, the
+simulator-stack-to-abstract-frame-base mapping, compiler/native bytes,
+multi-step traces, and specialization preservation remain open.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

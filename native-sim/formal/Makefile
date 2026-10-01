@@ -62,6 +62,7 @@ check:
 	python3 generate_x86_setcc_mem_spec.py --check
 	python3 generate_x86_cmov_spec.py --check
 	python3 generate_x86_movbe_spec.py --check
+	python3 generate_x86_ptr_write_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -182,6 +183,10 @@ check:
 	lake env lean KProgFormal/X86MovbeHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_movbe_host.c -o build/test_x86_movbe_host
 	./build/test_x86_movbe_host
+	lake env lean KProgFormal/GeneratedX86PtrWrite.lean
+	lake env lean KProgFormal/X86PtrWriteHandler.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_load_map_ptr_host.c -o build/test_x86_mov_load_map_ptr_host
+	./build/test_x86_mov_load_map_ptr_host
 	lake env lean KProgFormal/Arm64Flags.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 	./build/test_arm64_flags_host

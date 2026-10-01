@@ -681,12 +681,38 @@ width-64-gated ABI arm, the reversal involution, and the single-width narrowing.
 The register decode that supplies the source, the base-pointer value, and the
 flags remain outside the theorem.
 
+The `MOV_LOAD_MAP_PTR` / `MOV_LOAD_HELPER_ID` pointer-write provenance theorem
+covers the two `X86_SIM_L_EXEC` arms for `X86_OP_MOV_LOAD_MAP_PTR` (`0x2c`) and
+`X86_OP_MOV_LOAD_HELPER_ID` (`0x2d`), the opcodes whose register write installs
+pointer bits together with a provenance tag. It is the first handler whose sim C
+routes through the generated contract rather than restating it: both arms call
+`KPROG_X86_PTR_WRITE_TAG` (the generated opcode-to-tag selector) and gate the
+helper-id arm's preliminary width-64 scalar lane write on
+`KPROG_X86_PTR_WRITE_IS_HELPER_ID`, then perform the pointer write through
+`X86_SIM_L_WRITE_REG_PTR_TAG`. `x86_ptr_write_step_refines` composes the two
+arms over the generated tag table, width-64 fact, and the reused
+`generatedX86MovPointerWrite`/`generatedX86RegWrite` primitives.
+`x86_ptr_write_tag_all_reachable` pins that every tag the C chain can select has
+a Lean counterpart and that the all-false fallthrough (both opcode facts unset)
+maps to `none`, so the generated selector is total;
+`x86_ptr_write_map_ptr_writes_no_width` pins that the map-pointer arm writes no
+width at all, whereas the helper-id arm's width-64 scalar lane write is replaced
+bit for bit by the pointer write, so `x86_ptr_write_helper_id_absorbs_scalar`
+pins the two writes are observationally one pointer+tag write. Its independent
+318-case oracle exercises the tag table, the selector over all four fact pairs,
+the helper-id test over all 256 tag bytes, and the whole arm over a
+deterministic register file, with pins on the map-pointer arm's absent lane, the
+helper-id arm's single erased lane, the flag-free write, the `X86_REG_NONE`
+no-write, and the distinct provenance of identical pointer bits. The register
+decode that selects the destination and supplies the immediate remains outside
+the theorem.
+
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
+read-dispatch, the pointer-write provenance composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
