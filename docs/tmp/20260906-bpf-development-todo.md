@@ -6627,3 +6627,46 @@ list are **build/packaging artifacts, not evidence trees**:
   Paper-B clean-source image rebuild) remain the sole outstanding
   *run* items. The chain stays at the fixed point recorded in the
   0066 close-out entry above.
+
+### Filled the BR suite-geomean cell: cross-run pool of 148 retained programs (2026-10-01)
+
+Prior cycles anchored the chain's "fixed point" to the two external *run*
+blockers (AWS credentials; Paper-B clean-source image rebuild) and never
+audited the doc's own open cells. This cycle found a genuine local
+analysis-layer increment: `docs/evaluation.md` §6.2.1 had the
+All-bytecode-rewriting row's `suite` cell as `*pending*` while all seven
+per-app cells + `retained=148` were filled. That cell is sanctioned
+post-hoc analysis over on-disk raw `result.json` counters — no new run,
+validity gate, framework change, or AWS/Paper-B.
+
+- **Cell filled:** `docs/evaluation.md` line 452 `*pending*` → `0.8917`.
+  One provenance line added below the table: the row pools two on-disk
+  runs because no single 7-app run exercised this exact 6-pass set.
+- **Source trees (both S=3, status=completed, strict-BR pass set
+  `{noop, wide_mem, const_prop, dce, bounds_check_merge,
+  skb_load_bytes_spec}`):**
+  `corpus/results/x86_kvm_corpus_20260508_202653_157003` (6 apps,
+  retained=67: bcc 20, bpftrace 8, cilium 6, katran 1, otel 2,
+  tetragon 30) +
+  `corpus/results/x86_kvm_corpus_20260508_210422_770525` (tracee only,
+  retained=81). 67 + 81 = 148 = the doc's `retained` column.
+- **Method:** the sanctioned `analysis/corpus_analyze.py` (per-program
+  ratio `p_avg/b_avg`, retain `min(b_runs,p_runs) ≥ 100`, `pair_by=id`,
+  `applied_only=False`); the suite cell is the per-program geomean over
+  the union of all 148 retained programs. Every per-app cell matches the
+  doc exactly (bcc 1.0659, bpftrace 1.0155, cilium 0.9813, katran
+  0.9807, otel 0.4713, tetragon 1.0064, tracee 0.8115). The pooled 0.8917
+  sits beside the sibling suite cells (noop 0.9019, 6-pass kop 0.9009)
+  and is < 1.0, consistent with the §6.2.1 Findings; no Findings edit
+  was needed.
+- **Live-state re-check:** HEAD = `origin/master` = `44728a93c`; the
+  same 13 WIP ` M` files remain unstaged (none touched);
+  `bpfopt/llvm/src/llvm_mapinline.hpp` still ` M` (Paper-B
+  clean-source image rebuild still blocked); AWS still blocked (no
+  `~/.aws`, no `AWS_*` env, no key file); no step dir past
+  `step-0066`; KVM operational; nothing running.
+- **Disposition:** scoped doc edit committed to `docs/evaluation.md`
+  only, plus this forward-only log entry. This broke the "fixed point"
+  framing by surfacing a local analysis cell, not by inventing a run or
+  gate. The two external blockers (AWS credentials; Paper-B
+  clean-source image rebuild) remain the sole outstanding *run* items.

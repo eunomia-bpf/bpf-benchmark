@@ -449,7 +449,9 @@ pass coverage run produces.
 | `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
 | 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | 0.9951 | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9074 | 147 |
 | 6-pass kop + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
-| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 1.0659 | 1.0155 | 0.9813 | 0.9807 | **0.4713** | 1.0064 | 0.8115 | *pending* | 148 |
+| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 1.0659 | 1.0155 | 0.9813 | 0.9807 | **0.4713** | 1.0064 | 0.8115 | 0.8917 | 148 |
+
+The bytecode-rewriting row pools two on-disk runs — `x86_kvm_corpus_20260508_202653_157003` (6 apps, ret=67: bcc–tetragon) and the tracee-only `x86_kvm_corpus_20260508_210422_770525` (ret=81) — because no single 7-app run exercised this exact 6-pass set; the suite cell is the per-program geomean over all 67 + 81 = 148 retained programs.
 
 ### Findings
 
