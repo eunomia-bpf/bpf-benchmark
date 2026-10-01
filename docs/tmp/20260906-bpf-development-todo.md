@@ -6846,3 +6846,45 @@ validity gate, framework change, or AWS/Paper-B.
   if per-pass resolution is wanted. Remaining *run* blockers unchanged:
   AWS credentials; Paper-B clean-source image rebuild
   (`llvm_mapinline.hpp` still ` M`).
+
+### KVM x86 `make micro` full-suite refresh (29 benches, 3 runtimes) at b3d899262 (2026-10-01)
+
+- **Run:** `make micro SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000`
+  (default `micro/config/micro_pure_jit.yaml` suite; empty `BENCH` = all 29
+  benches; runtimes `native/llvmbpf/kernel`; default `RUNTIMES` = those
+  three, no KOP-module load), detached via `setsid nohup`. Result token
+  `micro/results/x86_kvm_micro_20261001_061549_699286/`, prev HEAD
+  `b3d899262` (the step-0070 `kop` commit), `MICRO_EXIT=0`, clean S5
+  power-down, zero reaping lines.
+- **Why this step:** the KVM micro measurement layer had not been
+  refreshed since the 09-30 09:33 tree (`x86_kvm_micro_20260930_093345_919079`)
+  while the KVM corpus layer advanced through 0066–0070. This step brings
+  the KVM micro layer to the current tree generation so both KVM layers
+  share a tree generation.
+- **Raw outcome:** 29/29 benchmarks completed, runtimes `native`/`llvmbpf`/
+  `kernel` (29 each), all 261 samples (29 × 3 × 3) match the suite's
+  declared `expected_result`/`expected_retval` (261 ok, 0 bad).
+- **Cross-check vs the 09-30 tree:** the pure-jit layer is structurally
+  unchanged. `bpf_bytecode_bytes` median-per-bench sum is identical
+  (55,872 in both trees, delta +0) — the JIT input did not change between
+  the two tree generations. Per-bench median `exec_ns` new/old geomeans:
+  kernel ×1.0014, llvmbpf ×1.0330, native ×0.9369 — all within
+  host-JIT run-to-run variance for a pure-jit suite (no codegen
+  regression). JIT codegen medians: llvmbpf 13.19 ms ≫ kernel 2.29 ms ≫
+  native 0.048 ms (expected ordering).
+- **Provenance:** host `virtme-ng`, `repo_dirty: False`,
+  `cpu_model Intel(R) Core(TM) Ultra 9 285K`; in-VM VM records
+  `repo_git_sha`/`kernel_commit` as `unknown` by design; tree tied to
+  launch's prev HEAD `b3d899262`.
+- **Provenance (step dir):**
+  `docs/tmp/build-and-evaluate/step-0071-20261001T061059Z/step-report.md`.
+- **Disposition:** scoped commit = 3 structured result-tree files
+  (`metadata.json` + `details/result.json` + `details/progress.json`) +
+  step report + this entry (5 files, per the step-0057 KVM make-micro
+  precedent). The `details/code_compare/*.md` (29) and
+  `details/jit_dumps/*.bin` are not committed. No framework/app/runner/
+  Makefile change, no new gate. Remaining *run* blockers unchanged: AWS
+  credentials; Paper-B clean-source image rebuild
+  (`llvm_mapinline.hpp` still ` M`). Remaining in-scope KVM Make-backed
+  runs: individual KOP-family named passes if per-pass resolution is
+  wanted; QEMU arm64 `make micro`/`corpus` for non-KVM evidence.
