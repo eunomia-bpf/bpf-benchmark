@@ -1,0 +1,52 @@
+{
+    "schema_version": 1,
+    "operation": "x86CallMemHandler",
+    "selector": "opcode_kind_then_count_source_and_bound_form",
+    "fixed_bound": 1024,
+    "opcode_rows": [
+        {
+            "op": "callMemcpy",
+            "op_define": "X86_OP_CALL_MEMCPY",
+            "op_code": "0x3f",
+            "kind": "copy",
+            "count_source": "imm",
+            "bound_form": "fixedBound"
+        },
+        {
+            "op": "callMemcpyReg",
+            "op_define": "X86_OP_CALL_MEMCPY_REG",
+            "op_code": "0x46",
+            "kind": "copy",
+            "count_source": "reg",
+            "bound_form": "imm"
+        },
+        {
+            "op": "callMemset",
+            "op_define": "X86_OP_CALL_MEMSET",
+            "op_code": "0x3c",
+            "kind": "fill",
+            "count_source": "imm",
+            "bound_form": "fixedBound"
+        },
+        {
+            "op": "callMemsetReg",
+            "op_define": "X86_OP_CALL_MEMSET_REG",
+            "op_code": "0x45",
+            "kind": "fill",
+            "count_source": "reg",
+            "bound_form": "imm"
+        }
+    ],
+    "kind_rows": [
+        {"kind": "copy", "kind_define": "KPROG_X86_CALLMEM_COPY"},
+        {"kind": "fill", "kind_define": "KPROG_X86_CALLMEM_FILL"}
+    ],
+    "count_source_rows": [
+        {"count_source": "imm", "count_define": "KPROG_X86_CALLMEM_COUNT_IMM"},
+        {"count_source": "reg", "count_define": "KPROG_X86_CALLMEM_COUNT_REG"}
+    ],
+    "bound_form_rows": [
+        {"bound_form": "fixedBound", "bound_define": "KPROG_X86_CALLMEM_BOUND_FIXED"},
+        {"bound_form": "imm", "bound_define": "KPROG_X86_CALLMEM_BOUND_IMM"}
+    ]
+}

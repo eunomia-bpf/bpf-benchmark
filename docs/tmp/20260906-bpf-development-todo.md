@@ -5178,13 +5178,69 @@ surface.
   generators, 113 Lean module checks and 52 host cross-checks.
 
 
-## Next after step 0043
+## Step 0044 — x86 `CALL_MEMCPY` / `CALL_MEMSET` block-copy/fill composition
 
-The rest of the x86 surface (`_CALL_MEMCPY_{,REG}`/`_CALL_MEMSET_{,REG}`,
-`_PUSH`/`_POP`, `_REP_MOVS`, `_ANDN{,_MEM}`, `_BZHI{,_MEM}`, `_BT`/`_BT_IMM`,
-`_CMP_{IMM,REG}_OP`), the index register decode and packed-AUX layout, the
-simulator-stack-to-abstract-frame-base mapping, compiler/native bytes,
-multi-step traces, and specialization preservation remain open.
+- Scope: the four `X86_SIM_L_EXEC` arms for `X86_OP_CALL_MEMCPY` (`0x3f`),
+  `X86_OP_CALL_MEMCPY_REG` (`0x46`), `X86_OP_CALL_MEMSET` (`0x3c`), and
+  `X86_OP_CALL_MEMSET_REG` (`0x45`) — one composition under three per-opcode
+  facts. The two `*_REG` bodies are *not* aliases of the immediate forms:
+  they take the length from `RDX` and the array bound from the immediate.
+- The headline fact is that the bound form and the count source are
+  *independent*: the two immediate-count bodies iterate to the hardcoded
+  literal `1024` and move `min(count, 1024)` bytes, whereas the two
+  register-count bodies are bounded by the immediate artifact and move
+  `min(RDX, immediate)` bytes — the *opposite* of their length source. In
+  codes the two selections even coincide (fixed/immediate are both `0`), so
+  only the *reading* keeps them apart; a table that collapsed the bound form
+  into the count source would still pass a raw-code equality check.
+- Files: `native-sim/formal/generate_x86_callmem_spec.py` +
+  `x86_callmem_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
+  rejects stale text) → `KProgFormal/GeneratedX86CallMem.lean`,
+  `generated/x86_callmem.h`; `KProgFormal/X86CallMemHandler.lean`; oracle
+  `test_x86_callmem_host.c`. Wired into `KProgFormal.lean` and the Makefile
+  `check` target. `x86_sim_local_bpf.h` is unchanged.
+- Generated C: four `_Static_assert` opcode-drift asserts, the
+  `KPROG_X86_CALLMEM_{COPY,FILL}`, `_COUNT_{IMM,REG}`,
+  `_BOUND_{FIXED,IMM}` code defines, `KPROG_X86_CALLMEM_FIXED_BOUND 1024U`,
+  and the three single-input selector macros `KPROG_X86_CALLMEM_KIND`,
+  `_COUNT_SOURCE`, `_BOUND_FORM`. The generator additionally validates the
+  count-source/bound-form independence invariant.
+- Lean: `X86CallMemOp` (four constructors) and `x86CallMemToOp`; independent
+  `x86CallMemKindSpec`/`CountSourceSpec`/`BoundFormSpec` + `*_refines`
+  (each closing by `cases op <;> rfl`); `x86_call_mem_kind_shapes`;
+  `x86_call_mem_bound_and_count_are_independent` (the headline reading
+  separation); the fixed-bound, bound-form, count-source, and fill-byte
+  generated refinements; `X86CallMemEffect` (a function-typed field, so no
+  `deriving`); the function-level `x86CallMemByteSpec` +
+  `x86_call_mem_byte_refines` (`funext i; cases k <;> simp only [...]`);
+  `generatedX86CallMemStep`/`x86CallMemStepSpec` + `x86_call_mem_step_refines`;
+  and `x86_call_mem_beyond_bound_unchanged`.
+- The destination-pointer-with-destination-tag `RAX` write is carried as an
+  explicit `Tag` parameter through both the generated and spec steps
+  (`KProgFormal.Tag`, `TagErasure.lean:15`).
+- Independent C oracle `test_x86_callmem_host.c`: generated tables vs. hand
+  restatements; the whole composition over a deterministic register/memory
+  model (4 opcode shapes × 6 immediates × 3 dst regs × 3 src regs × 4 `RDX`
+  lengths) comparing whole buffers, the whole register file, and the flags;
+  six pins (literal-vs-artifact bound, register-count bounded by the
+  artifact, copy-vs-fill byte behavior, bound/count canaries, the
+  destination-pointer `RAX` write with untouched GPRs, the flag-free body).
+  **875 cases**, zero `-Wall -Wextra` warnings. Mutation-tested: changing the
+  fixed-bound literal, dropping the copy's source read, skipping the `RAX`
+  write, swapping the model's bound arm, and collapsing the generated
+  `BOUND_FORM` each make it exit non-zero.
+- Full `make -C native-sim/formal check` passes with 0 errors, 63
+  generators, 115 Lean module checks and 53 host cross-checks.
+
+
+## Next after step 0044
+
+The rest of the x86 surface (`_PUSH`/`_POP`, `_REP_MOVS`, `_ANDN{,_MEM}`,
+`_BZHI{,_MEM}`, `_BT`/`_BT_IMM`, `_CMP_{IMM,REG}_OP`), the index register
+decode and packed-AUX layout, the simulator-stack-to-abstract-frame-base
+mapping, compiler/native bytes, multi-step traces, and specialization
+preservation remain open.
+
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

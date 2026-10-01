@@ -737,13 +737,45 @@ untouched register file and tags, the non-vacuous memory access, and the stack
 arm round trip. The register decode that supplies the operand and immediate
 remains outside the theorem.
 
+The `CALL_MEMCPY` / `CALL_MEMSET` block-copy/fill theorem covers the four
+`X86_SIM_L_EXEC` arms for `X86_OP_CALL_MEMCPY` (`0x3f`), `X86_OP_CALL_MEMCPY_REG`
+(`0x46`), `X86_OP_CALL_MEMSET` (`0x3c`), and `X86_OP_CALL_MEMSET_REG` (`0x45`),
+the opcodes that move a block of bytes one at a time. The four arms share one
+module because they are one composition under three per-opcode facts:
+`x86CallMemKindSpec` fixes the array body's shape (copy or fill),
+`x86CallMemCountSpec` fixes whether the moved length comes from the
+instruction-immediate artifact or the RDX register, and `x86CallMemBoundSpec`
+fixes whether the array bound is the hardcoded literal `1024` or the immediate.
+`callMemcpy`/`callMemset` (immediate count) iterate to the literal `1024` and
+move `min(count, 1024)` bytes; `callMemcpyReg`/`callMemsetReg` (RDX count) are
+bounded by the immediate artifact and move `min(RDX, immediate)` bytes. The
+headline fact is that the bound form and the count source are *independent* —
+the immediate-count bodies take the literal bound, the register-count bodies
+the artifact, the opposite of their length source — which
+`x86_call_mem_bound_and_count_are_independent` pins by reading the two
+selections apart even though their codes coincide (both fixed/immediate are
+`0`). `generated_x86_call_mem_step_refines` composes the whole arm over the
+kind, count-source, and bound-form selections plus the shared little-endian
+byte load/store at width 8; `x86_call_mem_byte_refines` is function-level (the
+destination buffer is equal as a function of the index), a copy writes the
+source byte and a fill writes the source register's low byte, and
+`x86_call_mem_beyond_bound_unchanged` pins that bytes at or beyond the bound —
+and at or beyond the count — keep their old values. `x86_call_mem_fixed_bound_is_literal`
+and `x86_call_mem_fill_byte_is_low_byte` pin the literal and the low-byte
+extraction. Its independent 875-case oracle exercises the generated tables, the
+full composition over a deterministic register and memory model, and pins the
+literal-vs-artifact bound asymmetry, the copy-vs-fill byte behavior, the
+bound/count canaries, the destination-pointer-with-destination-tag `RAX` write,
+and the untouched register file and flags. The register decode that selects the
+opcode and supplies the immediate remains outside the theorem.
+
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
-composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
+composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
@@ -757,6 +789,10 @@ operations remain in the trusted computing base.
 The two `X86_SIM_L_EXEC_{LOAD,STORE}_XMM0` handler bodies do not call the
 generated `x86_xmm0.h` macros — that header is exercised only by the host oracle
 — so both bodies remain in the trusted computing base.
+The four `X86_SIM_L_EXEC_CALL_{MEMCPY,MEMSET}{,_REG}` handler bodies do not call
+the generated `x86_callmem.h` macros — that header is exercised only by the host
+oracle — so all four bodies remain in the trusted computing base.
+
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not
 verify the C compiler or native instruction bytes.
