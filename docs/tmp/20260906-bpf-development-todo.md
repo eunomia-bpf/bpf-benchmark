@@ -6705,3 +6705,49 @@ validity gate, framework change, or AWS/Paper-B.
   step report + this entry. No framework/app/runner/Makefile change,
   no new gate. Remaining *run* blockers unchanged: AWS credentials;
   Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
+
+### Named `kop-6` KOP-class pass-group KVM x86 `make corpus` 6/6 completed at 830195d59 (2026-10-01)
+
+- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kop-6"` (S=3, 30 s, all 6
+  apps; `kop-6` = `[cond_select, bulk_memory, rotate, extract,
+  endian_fusion, prefetch]`), detached via `setsid nohup`. Result token
+  `corpus/results/x86_kvm_corpus_20261001_025602_885812/`, prev HEAD
+  `830195d59` (the step-0067 `br` commit), `CORPUS_EXIT=0`, clean
+  power-down, zero reaping lines.
+- **Why this step:** 0067 closed the `br` bytecode-rewriting group at the
+  current tree. The KOP-class named groups (`kop`, `kop-5`, `kop-6`)
+  were noted out of scope in 0067, but that over-read
+  `docs/evaluation.md` §1: KOP is a KOperation-*paper* deliverable,
+  while AGENTS.md's "Current pass list" explicitly includes the kop-class
+  as a measured pass in this framework. The KOP groups are therefore
+  in-scope framework pass space, and re-deriving the §6.2.1 KOP rows
+  (`5-pass kop` 0.9074, `6-pass kop + prefetch` 0.9009, both historical
+  2026-05-08) at the current tree is a genuine useful step. This is the
+  first KVM step exercising a KOP-class named group.
+- **Raw outcome:** 6/6 `ok` with `post_rejit`; KOP module load `status:
+  ok` with all 15 expected in-VM KOP modules loaded. KOP-site
+  application (from `details/loadtime-reports/*.jsonl`) is non-zero on
+  every app: tracee 7320, tetragon 2416, cilium 1455, otelcol 519,
+  katran 50, bcc 14 sites matched/applied.
+- **Sanctioned analysis:** `corpus_analyze.py --pair-by id` retains 0
+  (tree-generation property, as in 0066/0067). `--pair-by name-type`
+  retains 72, per-program geomean **0.9802** (39W/33L; per-app cilium
+  0.9026, tetragon 0.9269, katran 0.9676, tracee 0.9920, bcc 1.0334,
+  otelcol 1.0880). The analyzer's `applied` column is structurally 0 in
+  this tree generation (its source
+  `result.json→results[].rejit_result.per_program` is empty; the current
+  driver writes per-app payloads to `details/apps/*.json` with an empty
+  `rejit_result.per_program`), but KOP-site application is genuinely
+  non-zero via loadtime-reports — so 0.9802 measures real KOP
+  kfunc-lowering + phase variance, unlike 0067 `br`'s pure relift.
+  No doc cell overwritten; the §6.2.1 KOP rows remain the paper record.
+- **Determinism:** rep-prog baseline-side `run_cnt_delta` within sub-
+  percent across the kop-6 / br-0067 / 0066 three trees (e.g.
+  katran `balancer_ingres` 221,552,336 / 220,263,922 / 222,602,879) —
+  baseline counters remain pass-independent.
+- **Provenance:** step report:
+  `docs/tmp/build-and-evaluate/step-0068-20261001T025112Z/step-report.md`.
+- **Disposition:** scoped commit = 15 structured result-tree files +
+  step report + this entry. No framework/app/runner/Makefile change,
+  no new gate. Remaining *run* blockers unchanged: AWS credentials;
+  Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
