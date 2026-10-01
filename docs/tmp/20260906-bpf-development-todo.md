@@ -6795,3 +6795,54 @@ validity gate, framework change, or AWS/Paper-B.
   step report + this entry. No framework/app/runner/Makefile change,
   no new gate. Remaining *run* blockers unchanged: AWS credentials;
   Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
+
+### Single `kop` KOP-class pass KVM x86 `make corpus` 6/6 completed at d8483f22e (2026-10-01)
+
+- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kop"` (S=3, 30 s, all 6
+  apps; `kop` = `[kop]`, the single KOP-kfunc-lowering pass with the full
+  KOP-op lowering list), detached via `setsid nohup`. Result token
+  `corpus/results/x86_kvm_corpus_20261001_050956_828597/`, prev HEAD
+  `d8483f22e` (the step-0069 `kop-5` commit), `CORPUS_EXIT=0`, clean
+  power-down, zero reaping lines.
+- **Why this step:** the KOP-family anchor. 0068/0069 exercised the
+  KOP-*family* sub-pass groups (`kop-6` with `prefetch`, `kop-5`
+  without). This exercises the canonical single `kop` pass. Together the
+  three form the §6.2.1 "KOP-class" ablation at the current tree:
+  single `kop` → `kop-5` → `kop-6`.
+- **Raw outcome:** 6/6 `ok` with `post_rejit` (progs b/p: bcc 25/25,
+  cilium 62/53, katran 1/1, otelcol 13/13, tetragon 287/287, tracee
+  151/151). KOP module load `status: ok` with all 15 expected in-VM KOP
+  modules. KOP-site application (loadtime-reports JSONL;
+  `sites_matched == sites_applied`) — the single `kop` pass is the
+  **broadest** KOP lowering: tracee 7507, tetragon 2988, cilium 2988,
+  otelcol 1532, bcc 84, katran 70 (Σ ≈ 15,169), vs `kop-6` family Σ
+  ≈ 11,774 and `kop-5` family Σ ≈ 9,216. The single pass lowers the full
+  KOP-op list; the family sub-passes lower a transform-category subset.
+- **Sanctioned analysis:** `corpus_analyze.py --pair-by id` retains 0
+  (tree-generation property, as in 0066–0069). `--pair-by name-type`
+  retains 72, with the same retained (app, name, type) multiset as
+  0068/0069 (all 72 keys in all three KOP trees), per-program geomean
+  **0.9932** (36W/36L; CV 50.4%). KOP-family geomean ladder: `kop`
+  0.9932 → `kop-5` 0.9855 → `kop-6` 0.9802; the single `kop` pass is the
+  strongest KOP group on this corpus and has the lowest per-program ratio
+  CV, because it lowers more KOP op kinds. The analyzer's `applied`
+  column is structurally 0 in this tree generation (empty
+  `result.json → results[].rejit_result.per_program`), so KOP-site
+  application is read from loadtime-reports only — same condition as
+  0067–0069. No doc cell overwritten; the §6.2.1 KOP rows remain the
+  paper record.
+- **Determinism:** rep-prog baseline-side `run_cnt_delta` within sub-
+  percent across the kop / kop-5 / 0066 three trees (e.g. katran
+  `balancer_ingres` 223,534,877 / 222,443,576 / 222,602,879; tracee
+  `trace_sys_exit` 240,100,882 / 240,945,205 / 242,894,771) — baseline
+  counters remain pass-independent.
+- **Provenance:** step report:
+  `docs/tmp/build-and-evaluate/step-0070-20261001T050506Z/step-report.md`.
+- **Disposition:** scoped commit = 15 structured result-tree files +
+  step report + this entry. No framework/app/runner/Makefile change,
+  no new gate. Remaining in-scope KVM Make-backed runs: refresh the
+  stale KVM `make micro` layer (last KVM micro tree = 09-30 09:33,
+  older than the KVM corpus trees); individual KOP-family named passes
+  if per-pass resolution is wanted. Remaining *run* blockers unchanged:
+  AWS credentials; Paper-B clean-source image rebuild
+  (`llvm_mapinline.hpp` still ` M`).
