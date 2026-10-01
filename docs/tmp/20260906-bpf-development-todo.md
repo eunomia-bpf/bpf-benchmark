@@ -5133,12 +5133,56 @@ surface.
   generators, 109 Lean module checks and 51 host cross-checks.
 
 
-## Next after step 0042
+## Step 0043 — x86 `LOAD_XMM0` / `STORE_XMM0` pair-move composition
 
-The rest of the x86 surface (`_STORE_XMM0`/`_LOAD_XMM0`,
-`_CALL_MEMCPY_{,REG}`/`_CALL_MEMSET_{,REG}`, `_PUSH`/`_POP`, `_REP_MOVS`,
-`_ANDN{,_MEM}`, `_BZHI{,_MEM}`, `_BT`/`_BT_IMM`, `_CMP_{IMM,REG}_OP`), the
-index register decode and packed-AUX layout, the
+- Scope: the two `X86_SIM_L_EXEC` arms for `X86_OP_LOAD_XMM0` (`0x30`) and
+  `X86_OP_STORE_XMM0` (`0x31`) — the 128-bit XMM0 pair moved as two 8-byte
+  lanes. One generated contract covers both, the two-opcode one-module
+  precedent: `opcode_rows` gives each opcode its direction and base form,
+  `arm_rows` the single stack-pointer arm test, and `lane_rows` the two
+  consecutive lane offsets.
+- Base-form asymmetry is the headline: the load's `X86_REG_NONE` operand
+  *is* the whole `x86_simm(IMM)` artifact with the addressing offset
+  *discarded*; the store's is the *null pointer* with the offset *always
+  added*; every register operand agrees between the two opcodes. The
+  displacement is the whole artifact, never the immediate store's high-half
+  slice.
+- Files: `native-sim/formal/generate_x86_xmm0_spec.py` +
+  `x86_xmm0_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
+  rejects stale text) → `KProgFormal/GeneratedX86Xmm0.lean`,
+  `generated/x86_xmm0.h`; `KProgFormal/X86Xmm0Handler.lean`; oracle
+  `test_x86_xmm0_host.c`. Wired into `KProgFormal.lean` and the Makefile
+  `check` target. `x86_sim_local_bpf.h` is unchanged.
+- Generated C `KPROG_X86_XMM0_BASE_PTR` **takes four arguments** and gates on
+  `BASE_IS_NONE`; the three-argument form the first oracle draft assumed
+  could not distinguish the two `X86_REG_NONE` readings, and the oracle
+  caught exactly that divergence (`load handler mismatch … got=(1,2468…)`
+  instead of the raw `0x1234001000000008` artifact).
+- Lean: `x86Xmm0Pair` `lo`/`hi : BitVec 64`; direction/arm/lane/base-form
+  generated refinements; `generated_x86_xmm0_load_step_refines` /
+  `_store_step_refines`; `x86_xmm0_ordinary_addr_load_ignores_offset`,
+  `_store_uses_offset`, `_reg_base_agrees`; `x86_xmm0_disp_forms_whole`;
+  `x86_xmm0_pair_layout`, `x86_xmm0_lane_width_is_64`,
+  `x86_xmm0_store_bytes_above_pair_unchanged`;
+  `x86_xmm0_load_store_round_trip`.
+- Independent C oracle `test_x86_xmm0_host.c` (882 lines): generated tables
+  vs. hand restatements; the whole load and store compositions over a
+  deterministic register/memory model (2 opcodes × 4 bases × 3 index regs ×
+  2 scales × 4/3 imms) comparing whole buffers; eight pins (whole-artifact
+  displacement, base-form asymmetry, register-operand agreement, lane order,
+  `X86_REG_NONE` store placement, untouched GPRs/tags, non-vacuous access,
+  stack round trip). **283 cases**, zero `-Wall -Wextra` warnings. Mutation-
+  tested: inverting the load's base form, reusing lane 0 for lane 1, and
+  zeroing `ADDS_DISP` each make it exit non-zero.
+- Full `make -C native-sim/formal check` passes with 0 errors, 62
+  generators, 113 Lean module checks and 52 host cross-checks.
+
+
+## Next after step 0043
+
+The rest of the x86 surface (`_CALL_MEMCPY_{,REG}`/`_CALL_MEMSET_{,REG}`,
+`_PUSH`/`_POP`, `_REP_MOVS`, `_ANDN{,_MEM}`, `_BZHI{,_MEM}`, `_BT`/`_BT_IMM`,
+`_CMP_{IMM,REG}_OP`), the index register decode and packed-AUX layout, the
 simulator-stack-to-abstract-frame-base mapping, compiler/native bytes,
 multi-step traces, and specialization preservation remain open.
 

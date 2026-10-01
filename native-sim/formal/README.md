@@ -707,12 +707,43 @@ no-write, and the distinct provenance of identical pointer bits. The register
 decode that selects the destination and supplies the immediate remains outside
 the theorem.
 
+The `LOAD_XMM0` / `STORE_XMM0` pair-move theorem covers the two
+`X86_SIM_L_EXEC` arms for `X86_OP_LOAD_XMM0` (`0x30`) and `X86_OP_STORE_XMM0`
+(`0x31`), the opcodes that move the XMM0 pair as two 8-byte lanes. The two arms
+share one module because they are the two directions of one pair move:
+`generatedX86Xmm0Direction` reads the opcode's direction, `generatedX86Xmm0Arm`
+selects the stack arm from the single stack-pointer test (a `X86_REG_NONE`
+operand is the *same* ordinary arm, not a third one), and
+`generatedX86Xmm0LaneOffset` places the two lanes at offsets 0 and 8, low lane
+first. The pair is modeled as `X86Xmm0Pair` (`lo`/`hi : BitVec 64`), matching
+the two scalar state fields the sim uses. `generated_x86_xmm0_load_step_refines`
+composes the load over the arm, base-pointer, offset-adding, addressing-offset,
+and little-endian load contracts; `generated_x86_xmm0_store_step_refines`
+composes the store the same way.
+The headline fact is the ordinary arm's base-form asymmetry:
+`x86_xmm0_ordinary_addr_load_ignores_offset` pins that the load's `X86_REG_NONE`
+operand *is* the raw instruction-immediate artifact with the addressing offset
+*discarded*, whereas `x86_xmm0_ordinary_addr_store_uses_offset` pins the store's
+`X86_REG_NONE` operand is the *null pointer* with the offset *always added*;
+`x86_xmm0_ordinary_addr_reg_base_agrees` pins that every register operand
+nonetheless agrees between the two opcodes. `x86_xmm0_disp_forms_whole` fixes
+the displacement as the whole `x86_simm` artifact, never the immediate store's
+high-half slice; `x86_xmm0_pair_layout`, `x86_xmm0_lane_width_is_64`, and
+`x86_xmm0_store_bytes_above_pair_unchanged` pin the two-lane geometry. Its
+independent 283-case oracle exercises the generated tables, the full load and
+store compositions over a deterministic register and memory model, and pins the
+base-form asymmetry, the whole-artifact displacement, the lane order, the
+untouched register file and tags, the non-vacuous memory access, and the stack
+arm round trip. The register decode that supplies the operand and immediate
+remains outside the theorem.
+
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, the pointer-write provenance composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
+read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
+composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
@@ -723,6 +754,9 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
+The two `X86_SIM_L_EXEC_{LOAD,STORE}_XMM0` handler bodies do not call the
+generated `x86_xmm0.h` macros — that header is exercised only by the host oracle
+— so both bodies remain in the trusted computing base.
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not
 verify the C compiler or native instruction bytes.

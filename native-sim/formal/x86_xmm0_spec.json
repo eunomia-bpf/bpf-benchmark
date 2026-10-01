@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "operation": "x86Xmm0Handler",
+  "selector": "opcode_operand_form_then_register_identity_arm",
+  "opcode_rows": [
+    {
+      "op": "loadXmm0",
+      "op_define": "X86_OP_LOAD_XMM0",
+      "op_code": "0x30",
+      "direction": "load",
+      "base_form": "absImmPtr",
+      "disp": "signedImm"
+    },
+    {
+      "op": "storeXmm0",
+      "op_define": "X86_OP_STORE_XMM0",
+      "op_code": "0x31",
+      "direction": "store",
+      "base_form": "nullBasePlusDisp",
+      "disp": "signedImm"
+    }
+  ],
+  "arm_rows": [
+    {
+      "is_rsp": true,
+      "arm": "stackPair",
+      "arm_define": "KPROG_X86_XMM0_ARM_STACK"
+    },
+    {
+      "is_rsp": false,
+      "arm": "memoryPair",
+      "arm_define": "KPROG_X86_XMM0_ARM_MEMORY"
+    }
+  ],
+  "lane_rows": [
+    {
+      "lane": 0,
+      "lane_define": "KPROG_X86_XMM0_LANE_LO",
+      "byte_offset": 0
+    },
+    {
+      "lane": 1,
+      "lane_define": "KPROG_X86_XMM0_LANE_HI",
+      "byte_offset": 8
+    }
+  ]
+}
