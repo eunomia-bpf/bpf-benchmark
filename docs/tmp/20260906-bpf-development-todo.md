@@ -6751,3 +6751,47 @@ validity gate, framework change, or AWS/Paper-B.
   step report + this entry. No framework/app/runner/Makefile change,
   no new gate. Remaining *run* blockers unchanged: AWS credentials;
   Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
+
+### Named `kop-5` KOP-class pass-group KVM x86 `make corpus` 6/6 completed at c0da1d785 (2026-10-01)
+
+- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kop-5"` (S=3, 30 s, all 6
+  apps; `kop-5` = `[cond_select, bulk_memory, rotate, extract,
+  endian_fusion]` = `kop-6` minus `prefetch`), detached via `setsid nohup`.
+  Result token `corpus/results/x86_kvm_corpus_20261001_040643_284761/`,
+  prev HEAD `c0da1d785` (the step-0068 `kop-6` commit), `CORPUS_EXIT=0`,
+  clean power-down, zero reaping lines.
+- **Why this step:** the KOP-group ablation follow-on. 0068 exercised
+  `kop-6` (KOP family **with** `prefetch`); dropping `prefetch` isolates its
+  effect on the KOP-group geomean and completes the §6.2.1 KOP-group
+  ablation pair (`kop-5` / `kop-6`) at the current tree.
+- **Raw outcome:** 6/6 `ok` with `post_rejit` (progs b/p: bcc 25/25,
+  cilium 53/53, katran 1/1, otelcol 13/13, tetragon 287/287, tracee
+  151/151). KOP module load `status: ok` with all 15 expected in-VM KOP
+  modules. KOP-site application (loadtime-reports JSONL) non-zero on every
+  app: tracee 6172, tetragon 1989, cilium 800, otelcol 200, katran 44,
+  bcc 11 — all ≤ the `kop-6` per-app values, delta = `prefetch`.
+- **Sanctioned analysis:** `corpus_analyze.py --pair-by id` retains 0
+  (tree-generation property, as in 0066–0068). `--pair-by name-type`
+  retains 72, with the retained (app, name, type) multiset **identical** to
+  0068 `kop-6` (all 72 keys present in both), per-program geomean
+  **0.9855** (39W/33L; per-app cilium 0.9061, tetragon 0.9212, katran
+  0.9749, tracee 1.0056, bcc 1.0352, otelcol 1.1155). Ablation delta
+  `kop-6` − `kop-5` = `0.9802 − 0.9855 = −0.0053`: removing `prefetch`
+  slightly **worsens** the geomean, so `prefetch` is a small net-positive
+  contributor to the KOP pass-group on this corpus. The analyzer's
+  `applied` column is structurally 0 in this tree generation (empty
+  `result.json → results[].rejit_result.per_program`), so KOP-site
+  application is read from loadtime-reports only — same condition as
+  0067/0068. No doc cell overwritten; the §6.2.1 KOP rows remain the paper
+  record.
+- **Determinism:** rep-prog baseline-side `run_cnt_delta` within sub-
+  percent across the kop-5 / kop-6 / 0066 three trees (e.g. katran
+  `balancer_ingres` 222,443,576 / 221,552,336 / 222,602,879; tracee
+  `trace_sys_exit` 240,945,205 / 241,631,272 / 242,894,771) — baseline
+  counters remain pass-independent.
+- **Provenance:** step report:
+  `docs/tmp/build-and-evaluate/step-0069-20261001T040152Z/step-report.md`.
+- **Disposition:** scoped commit = 15 structured result-tree files +
+  step report + this entry. No framework/app/runner/Makefile change,
+  no new gate. Remaining *run* blockers unchanged: AWS credentials;
+  Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
