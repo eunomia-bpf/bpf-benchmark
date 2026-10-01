@@ -650,12 +650,43 @@ the two-level width fallback, and the high-half displacement. The register
 decode that supplies the source, the base-pointer value, and the flags
 remain outside the theorem.
 
+The `MOVBE_LOAD` / `MOVBE_STORE` handler-composition theorem covers
+`X86_SIM_L_EXEC_MOVBE_LOAD` (`X86_OP_MOVBE_LOAD`, `0x28`) and
+`X86_SIM_L_EXEC_MOVBE_STORE` (`X86_OP_MOVBE_STORE`, `0x29`).
+`x86_movbe_load_step_refines` and `x86_movbe_store_step_refines` compose the two
+bodies over the generated width, displacement, arm, and shared read-dispatch
+contracts: both forms resolve one width — the FLAGS code with a 64-bit fallback
+— used for the byte reversal, the memory access, and the written size alike, so
+`x86_movbe_one_width_rides_all` pins that a single resolved width rides the
+reversal and the access and `x86_movbe_store_both_arms_use_one_width` pins that
+the store's stack arm does not re-derive a second effective width the way the
+shared `MOV_LOAD` does; the load classifies its base through the shared read
+dispatch (`GeneratedX86MemDispatch.valueSrc`), taking the stack,
+ABI-pointer-load, or ordinary-load arm, and always scalarizes through the
+partial-register write, so `x86_movbe_load_scalarizes` pins that it has no
+pointer-preserving arm and `x86_movbe_load_no_sign_extension` pins that, unlike
+the shared `MOVSX` load, an 8-bit reversal of `0x80` stays `0x80`; the store
+takes the register-identity arm through `x86_movbe_arm_refines`, reading a
+separate 64-bit source register and reversing before the arm split.
+`x86_movbe_disp_differs_from_imm_store` pins that both forms take the whole
+instruction-immediate artifact `(s64)IMM`, never the immediate store's
+high-half slice `(s32)(IMM >> 32)`; `x86_movbe_store_load_round_trip` pins that
+the reversal is an involution, so a load of what a store of the same width
+reversed recovers the width-masked original. Its independent 4,675-case oracle
+sweeps the width space, the shared dispatch table over all eight selector
+combinations, and both handler bodies against a hand-written C model over a
+deterministic register/memory/stack model, with pins on the whole-artifact
+displacement, the 8-bit no-sign-extension, the ABI-tagged scalarizing load, the
+width-64-gated ABI arm, the reversal involution, and the single-width narrowing.
+The register decode that supplies the source, the base-pointer value, and the
+flags remain outside the theorem.
+
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM` handler compositions, the x86 little-endian memory
+read-dispatch, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare

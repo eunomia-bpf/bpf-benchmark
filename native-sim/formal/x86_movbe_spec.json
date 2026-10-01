@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "operation": "x86MovbeHandler",
+  "selector": "opcode_operand_then_register_identity_arm",
+  "opcode_rows": [
+    {
+      "op": "movbeLoad",
+      "op_define": "X86_OP_MOVBE_LOAD",
+      "op_code": "0x28",
+      "arm_family": "memoryReadDispatch"
+    },
+    {
+      "op": "movbeStore",
+      "op_define": "X86_OP_MOVBE_STORE",
+      "op_code": "0x29",
+      "arm_family": "registerStoreArm"
+    }
+  ],
+  "width_rows": [
+    {
+      "flags_width": 0,
+      "width": 8,
+      "width_define": "KPROG_X86_MOVBE_WIDTH_ABSENT"
+    },
+    {
+      "flags_width": 1,
+      "width": 1,
+      "width_define": "X86_WIDTH_8"
+    },
+    {
+      "flags_width": 2,
+      "width": 2,
+      "width_define": "X86_WIDTH_16"
+    },
+    {
+      "flags_width": 4,
+      "width": 4,
+      "width_define": "X86_WIDTH_32"
+    },
+    {
+      "flags_width": 8,
+      "width": 8,
+      "width_define": "X86_WIDTH_64"
+    }
+  ],
+  "disp_rows": [
+    {
+      "op": "movbeLoad",
+      "form": "signedImm"
+    },
+    {
+      "op": "movbeStore",
+      "form": "signedImm"
+    }
+  ],
+  "arm_rows": [
+    {
+      "is_rsp": true,
+      "arm": "stackWrite",
+      "arm_define": "KPROG_X86_MOVBE_ARM_STACK"
+    },
+    {
+      "is_rsp": false,
+      "arm": "memoryStore",
+      "arm_define": "KPROG_X86_MOVBE_ARM_MEMORY"
+    }
+  ]
+}

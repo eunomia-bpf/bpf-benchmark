@@ -4988,9 +4988,75 @@ surface.
   generators, 107 Lean module checks and 49 host cross-checks over
   4,303,967 cases.
 
-## Next after step 0040
+## Step 0041 — x86 `MOVBE_LOAD` / `MOVBE_STORE` handler composition
 
-`_MOVBE_LOAD`/`_MOVBE_STORE`, `_MOV_LOAD_MAP_PTR`, and the rest of the x86
+- Scope: `X86_SIM_L_EXEC_MOVBE_LOAD` (`X86_OP_MOVBE_LOAD`, `0x28`) and
+  `X86_SIM_L_EXEC_MOVBE_STORE` (`X86_OP_MOVBE_STORE`, `0x29`), composed in one
+  module because they share one width resolution and the chain the previous
+  steps composed — step 0037's mem-offset/mem-access pieces, step 0036's
+  register-write contract, the read dispatch of step 0039, the `x86_bswap`
+  value contract, and (for the store) step 0035's arm selection and store
+  addressing. The two forms share only the width; their arms are different —
+  the load classifies through the shared read dispatch
+  (`GeneratedX86MemDispatch.valueSrc`), the store through the local
+  register-identity arm.
+- One asymmetry dominates, plus three contrasts, all modeled and pinned:
+  (1) both forms resolve **one** width `FLAGS ? FLAGS : 64`, used for the byte
+  reversal, the memory access, and the written size alike — the store's stack
+  arm passes the same resolved width, so it does **not** re-derive an effective
+  width (`x86_movbe_store_both_arms_use_one_width`,
+  `x86_movbe_one_width_rides_all`) the way the shared `MOV_LOAD` does, and the
+  load has no second, AUX-sourced width; (2) both forms take the **whole**
+  instruction-immediate artifact `(s64)IMM` — the load passes `STORE_DISP = 0`
+  to `X86_SIM_L_READ_MEM_VALUE`, selecting `x86_simm` over the store slice —
+  pinned by `x86_movbe_disp_differs_from_imm_store` (the `0x8000001000000008`
+  witness) against step 0035's `(s32)(IMM >> 32)`; (3) the load writes through
+  `X86_SIM_L_WRITE_REG_WIDTH`, always scalarizing, so it has no
+  pointer-preserving arm (`x86_movbe_load_scalarizes`) and, unlike the shared
+  `MOVSX` load, no sign-extension arm (`x86_movbe_load_no_sign_extension`: an
+  8-bit reversal of `0x80` stays `0x80`); (4) the store reads a **separate**
+  64-bit source register `SRC` (no shift) while `DST` is the base, reverses
+  before the arm split, and writes no register and no flags.
+- New `generate_x86_movbe_spec.py` (60th generator) emitting
+  `KProgFormal/GeneratedX86Movbe.lean` + `generated/x86_movbe.h` +
+  `x86_movbe_spec.json`: the `Op` table (`movbeLoad`/`movbeStore` with their
+  opcode codes `0x28`/`0x29` and their consumed arm family), the
+  `resolveWidth` table over `Code` with the absent row
+  (`KPROG_X86_MOVBE_WIDTH_ABSENT`), the `DispForm`/`dispForm` table (both rows
+  `signedImm`), and the `Arm`/`arm` table (`stackWrite` iff the register is the
+  stack pointer). The generator's width-define validation keys on
+  `flags_width`, not on the resolved `width` — the absent row's `flags_width`
+  is 0 while its `width` is 8, so keying on `width` rejects the spec.
+- New `KProgFormal/X86MovbeHandler.lean` (519 lines, 26 theorems): the
+  width/arm-family/disp/arm refinement lemmas plus the two top-level step
+  refinements `x86_movbe_load_step_refines` and
+  `x86_movbe_store_step_refines`; the asymmetry theorems
+  `x86_movbe_resolved_not_absent`, `x86_movbe_width_absent_defaults`,
+  `x86_movbe_disp_forms_whole`, `x86_movbe_arm_stack_iff`,
+  `x86_movbe_arm_all_reachable`, `x86_movbe_load_scalarizes`,
+  `x86_movbe_load_no_sign_extension`, `x86_movbe_store_step_value_eq`,
+  `x86_movbe_store_both_arms_use_one_width`, `x86_movbe_one_width_rides_all`,
+  `x86_movbe_store_load_round_trip`; and seven `native_decide` examples. No
+  `sorry`. `KProgFormal.lean` gains the two module imports.
+- Independent C oracle `test_x86_movbe_host.c` (878 lines): part 1 sweeps the
+  width code space (6 codes) through the generated width contract and rejects
+  the absent code; part 2 sweeps the shared read dispatch over all eight
+  selector combinations against an independent predicate nesting; part 3
+  sweeps the store arm over the register-identity fact; part 4 drives the load
+  body (1,920 cases) and part 5 the store body (2,700 cases) over a
+  deterministic register/memory/stack model against a hand-written C model,
+  comparing every byte and the tag of the destination (load) or every byte of
+  both buffers (store); part 6 pins the six asymmetries. Its
+  `oracle_bswap` is a byte-reverse loop independent of
+  `kprog_x86_bswap_value`. **4,675 cases**, zero non-macro `-Wall -Wextra`
+  warnings.
+- Full `make -C native-sim/formal check` passes with 0 errors, 60 generators,
+  108 Lean module checks and 50 host cross-checks.
+
+
+## Next after step 0041
+
+`_MOV_LOAD_MAP_PTR`, and the rest of the x86
 surface (`_STORE_XMM0`/`_LOAD_XMM0`, `_CALL_MEMCPY_{,REG}`/
 `_CALL_MEMSET_{,REG}`, `_PUSH`/`_POP`, `_REP_MOVS`, `_ANDN{,_MEM}`,
 `_BZHI{,_MEM}`, `_CMP_{IMM,REG}_OP`), the index register decode and

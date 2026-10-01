@@ -61,6 +61,8 @@ import KProgFormal.GeneratedX86SetccMem
 import KProgFormal.X86SetccMemHandler
 import KProgFormal.GeneratedX86Cmov
 import KProgFormal.X86CmovHandler
+import KProgFormal.GeneratedX86Movbe
+import KProgFormal.X86MovbeHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags
