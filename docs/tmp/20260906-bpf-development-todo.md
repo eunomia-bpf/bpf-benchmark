@@ -6670,3 +6670,38 @@ validity gate, framework change, or AWS/Paper-B.
   framing by surfacing a local analysis cell, not by inventing a run or
   gate. The two external blockers (AWS credentials; Paper-B
   clean-source image rebuild) remain the sole outstanding *run* items.
+
+### Named `br` pass-group KVM x86 `make corpus` 6/6 completed at 6aa33210e (2026-10-01)
+
+- **Run:** `make corpus BPFREJIT_BENCH_PASSES="br"` (S=3, 30 s, all 6
+  apps; `br` = `[noop, wide_mem, const_prop, dce, bounds_check_merge,
+  skb_load_bytes_spec]`), detached via `setsid nohup` from the start.
+  Result token `corpus/results/x86_kvm_corpus_20261001_011124_022384/`,
+  prev HEAD `6aa33210e`, `CORPUS_EXIT=0`, clean power-down, zero
+  reaping lines.
+- **Why this step:** steps 0042–0066 were all zero-knob default
+  `full-x86`; no KVM step had ever selected a named group. This is the
+  first KVM run exercising a group token, re-deriving the §6.2.1
+  `br` conclusion at the current tree.
+- **Raw outcome:** 6/6 `ok` with `post_rejit`, including tetragon
+  without a `VMLINUX_BTF` override (KVM in-VM build uses framework
+  kernel BTF, not the host `7.3.0-070300rc3` BTF). `metadata.json`
+  `config.enabled_passes` confirms the exact `br` expansion.
+- **Sanctioned analysis:** `corpus_analyze.py --pair-by id` (default)
+  retains 0 on current two-start in-VM trees (kernel reassigns
+  `bpf_prog` ids per start; the 0066 tree behaves identically — a
+  property of this tree generation, not of the pass group).
+  `--pair-by name-type` retains 72, per-program geomean **0.9669**
+  (41W/31L; tetragon 0.8782, cilium 0.9205 best). Same <1.0 direction
+  as the §6.2.1 pooled `0.8917` (148-retained historical 2026-05-08
+  pool), on a different retained population (no bpftrace in the
+  current 6-app corpus). No doc cell overwritten; the historical row
+  remains the paper record.
+- **Provenance:** gate tokens re-verified 252 across 11 (0
+  mismatch); untracked sweep 93 result dirs in documented families;
+  `6aa33210e` confirmed in HEAD. Step report:
+  `docs/tmp/build-and-evaluate/step-0067-20261001T010526Z/step-report.md`.
+- **Disposition:** scoped commit = 15 structured result-tree files +
+  step report + this entry. No framework/app/runner/Makefile change,
+  no new gate. Remaining *run* blockers unchanged: AWS credentials;
+  Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
