@@ -769,13 +769,48 @@ bound/count canaries, the destination-pointer-with-destination-tag `RAX` write,
 and the untouched register file and flags. The register decode that selects the
 opcode and supplies the immediate remains outside the theorem.
 
+The `PUSH` / `POP` stack-step theorem covers the two `X86_SIM_L_EXEC` arms for
+`X86_OP_PUSH` (`0x12`) and `X86_OP_POP` (`0x13`), the opcodes that move one
+value between a register and the stack frame. The two arms share one module
+because they are one composition under two per-opcode facts:
+`x86PushPopStepDirectionSpec` fixes whether the stack pointer steps before the
+body's single memory access (PUSH: decrement then store) or after the load and
+destination write (POP), and `x86PushPopWidthSourceSpec` fixes whether the body
+hardcodes the 64-bit step width (PUSH) or resolves the opcode's FLAGS code with
+a 64-bit fallback (POP). `x86_push_pop_facts` pins the headline asymmetry: the
+body that pre-decrements is exactly the body that hardcodes 64, and the body
+that post-increments is exactly the body that resolves the FLAGS code —
+`x86_push_pop_push_ignores_flags` and `x86_push_pop_pop_absent_defaults` read
+the two selections apart even though their codes coincide (`preDecrement` and
+`hardcoded64` are both `0`). `x86_push_pop_step_amount_is_eight` and
+`x86_push_pop_step_independent_of_width` fix the byte amount both bodies step
+by: `stackStep` is the literal `8`, and POP steps by it whatever width its FLAGS
+code resolves to. `x86_push_pop_push_addr_is_new_rsp` and
+`x86_push_pop_pop_addr_is_old_rsp` fix the effective address each body touches
+relative to the pointer step, and `x86_push_pop_rsp_round_trip` pins that a pair
+returns the pointer. `generated_x86_push_pop_step_refines` composes the whole
+arm over the direction and width-source selections plus the shared
+`resolveWidth` table (absent FLAGS defaults to `b64`) and the shared
+little-endian byte store/load at the resolved width; the POP destination write
+goes through `generatedX86RegWrite`, and `x86_push_pop_push_has_no_dst` /
+`x86_push_pop_pop_writes_dst` pin that PUSH writes no register while POP does.
+Its independent 463-case oracle exercises the generated tables, the full
+composition over a deterministic register, stack-frame and flags model, and
+pins the direction/width-source independence, the hardcoded-vs-resolved width
+asymmetry, the eight-byte step of both directions, the push/pop round trip, the
+untouched register file, the narrow-pop partial writeback, and the untouched
+flags. The register decode that selects the opcode and supplies the FLAGS code
+remains outside the theorem.
+
+
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
-composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
+composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
+`PUSH`/`POP` stack-step composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
 load/store contract, the memory-source shift/rotate flagless composition, the
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
@@ -792,6 +827,9 @@ generated `x86_xmm0.h` macros — that header is exercised only by the host orac
 The four `X86_SIM_L_EXEC_CALL_{MEMCPY,MEMSET}{,_REG}` handler bodies do not call
 the generated `x86_callmem.h` macros — that header is exercised only by the host
 oracle — so all four bodies remain in the trusted computing base.
+The two `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
+`x86_pushpop.h` macros — that header is exercised only by the host oracle — so
+both bodies remain in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

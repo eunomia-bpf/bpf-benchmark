@@ -1,0 +1,40 @@
+{
+    "schema_version": 1,
+    "operation": "x86PushPopHandler",
+    "selector": "opcode_step_direction_then_width_source",
+    "stack_step": 8,
+    "opcode_rows": [
+        {
+            "op": "push",
+            "op_define": "X86_OP_PUSH",
+            "op_code": "0x12",
+            "step_direction": "preDecrement",
+            "width_source": "hardcoded64"
+        },
+        {
+            "op": "pop",
+            "op_define": "X86_OP_POP",
+            "op_code": "0x13",
+            "step_direction": "postIncrement",
+            "width_source": "flagsOr64"
+        }
+    ],
+    "step_direction_rows": [
+        {"step_direction": "preDecrement",
+         "step_define": "KPROG_X86_PUSH_STEP_PRE_DECREMENT",
+         "step_phase": "store"},
+        {"step_direction": "postIncrement",
+         "step_define": "KPROG_X86_PUSH_STEP_POST_INCREMENT",
+         "step_phase": "load"}
+    ],
+    "width_source_rows": [
+        {"width_source": "hardcoded64",
+         "width_define": "KPROG_X86_PUSH_WIDTH_HARDCODED_64"},
+        {"width_source": "flagsOr64",
+         "width_define": "KPROG_X86_PUSH_WIDTH_FLAGS_OR_64"}
+    ],
+    "flags_width_rows": [
+        {"flags_width": "resolved", "flags_define": "KPROG_X86_PUSH_FLAGS_RESOLVED"},
+        {"flags_width": "absent", "flags_define": "KPROG_X86_PUSH_FLAGS_ABSENT"}
+    ]
+}

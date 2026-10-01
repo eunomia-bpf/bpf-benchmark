@@ -5233,13 +5233,80 @@ surface.
   generators, 115 Lean module checks and 53 host cross-checks.
 
 
-## Next after step 0044
+## Step 0045 — x86 `PUSH` / `POP` stack-step composition
 
-The rest of the x86 surface (`_PUSH`/`_POP`, `_REP_MOVS`, `_ANDN{,_MEM}`,
-`_BZHI{,_MEM}`, `_BT`/`_BT_IMM`, `_CMP_{IMM,REG}_OP`), the index register
-decode and packed-AUX layout, the simulator-stack-to-abstract-frame-base
-mapping, compiler/native bytes, multi-step traces, and specialization
-preservation remain open.
+- Scope: the two `X86_SIM_L_EXEC` arms for `X86_OP_PUSH` (`0x12`) and
+  `X86_OP_POP` (`0x13`) — one composition under two per-opcode facts. Both
+  bodies step the stack pointer by exactly `8` bytes; the asymmetry is
+  *when* and *at what width*.
+- The headline fact is the step-direction / width-source pairing: PUSH
+  pre-decrements RSP by 8 before its store, hardcodes width 64, ignores the
+  FLAGS code, and writes no register; POP resolves `FLAGS ? FLAGS : 64`, uses
+  that one width for both its stack read and its destination write, then
+  post-increments RSP by 8. In codes the two selections coincide
+  (pre-decrement and hardcoded-64 are both `0`), so only the *reading* keeps
+  them apart; a table that collapsed the width source into the step direction
+  would still pass a raw-code equality check.
+- Files: `native-sim/formal/generate_x86_pushpop_spec.py` +
+  `x86_pushpop_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
+  rejects stale text) → `KProgFormal/GeneratedX86PushPop.lean`,
+  `generated/x86_pushpop.h`; `KProgFormal/X86PushPopHandler.lean`; oracle
+  `test_x86_pushpop_host.c`. Wired into `KProgFormal.lean` and the Makefile
+  `check` target. `x86_sim_local_bpf.h` is unchanged.
+- Generated C: two `_Static_assert` opcode-drift asserts, the
+  `KPROG_X86_PUSH_{STEP_PRE_DECREMENT,STEP_POST_INCREMENT}`,
+  `_WIDTH_{HARDCODED_64,FLAGS_OR_64}`, `_FLAGS_{RESOLVED,ABSENT}` code
+  defines, `KPROG_X86_PUSH_WIDTH_ABSENT 0U`, `KPROG_X86_PUSH_STACK_STEP 8U`,
+  and the three single-input selector macros `KPROG_X86_PUSH_STEP_DIRECTION`,
+  `_WIDTH_SOURCE`, `_FLAGS_WIDTH`.
+- Lean: `X86PushPopOp` (`push`/`pop`) and `x86PushPopToOp`; independent
+  `x86PushPopStepDirectionSpec`/`WidthSourceSpec` + `*_refines`; the headline
+  `x86_push_pop_facts` (direction/width-source independence, closed by
+  `StepDirection.noConfusion` / `WidthSource.noConfusion` — a `fun h => cases h`
+  does not discharge `≠` between two constructors of a generated inductive);
+  `x86_push_pop_flags_width_absent_iff`; `x86PushPopStepAmountSpec` +
+  `x86_push_pop_step_amount_refines` + `x86_push_pop_step_amount_is_eight`;
+  the shared-width `x86PushPopWidthCodeSpec`/`WidthSpec` +
+  `generatedX86PushPopWidth` + `x86_push_pop_width_refines` +
+  `x86_push_pop_push_ignores_flags`/`pop_absent_defaults`/`push_byte_count`
+  (the last closes with `cases flags <;> decide`);
+  `generatedX86PushPopAccessAddr`/`RspAfter` + `*_refines` +
+  `x86_push_pop_{rsp_round_trip,push_addr_is_new_rsp,pop_addr_is_old_rsp,step_independent_of_width}`;
+  the byte-level `x86PushPopByteSpec`/`x86_push_pop_byte_refines` (delegating
+  to `x86StoreByteUpdate`); `X86PushPopEffect` (a function-typed field, so no
+  `deriving`); `generatedX86PushPopStep`/`x86PushPopStepSpec` +
+  `x86_push_pop_step_refines`; `x86_push_pop_{push_has_no_dst,pop_writes_dst,pop_frame_unchanged,push_frame_updates_eight}`;
+  and the `native_decide` examples, whose POP form needs
+  `simp only [...]` then `decide` (`native_decide` cannot evaluate a
+  `BitVec`-valued proposition here).
+- The generated module imports `KProgFormal.GeneratedX86Store` and shares its
+  `Code` inductive and `resolveWidth` table (precedent
+  `GeneratedX86Cmov.lean:3-7`) rather than declaring its own; the POP
+  destination write goes through `generatedX86RegWrite`.
+- Independent C oracle `test_x86_pushpop_host.c`: generated tables vs. hand
+  restatements; the whole composition over a deterministic register,
+  stack-frame and flags model (2 opcodes × 5 FLAGS codes × 5 RSP values ×
+  3 src regs × 3 dst regs) comparing the whole register file, the whole
+  stack frame, and the flags; seven pins (PUSH ignores a narrow FLAGS code
+  and stores the whole eight bytes, POP at an absent FLAGS defaults to 64 and
+  still steps by eight, the push/pop round trip, both directions stepping the
+  same amount, PUSH touching no register but RSP, the narrow-pop partial
+  writeback, and the flag-free bodies). **463 cases**, zero `-Wall -Wextra`
+  warnings. Mutation-tested: `STACK_STEP` 8→4 and swapping the
+  `STEP_DIRECTION` arms each make it exit non-zero (a plain renumbering of
+  the two direction codes does *not* — the oracle reads the codes, so the
+  arm swap is the binding mutation).
+- Full `make -C native-sim/formal check` passes with 0 errors, 64
+  generators, 117 Lean module checks and 54 host cross-checks.
+
+
+## Next after 0045
+
+The rest of the x86 surface (`_REP_MOVS`, `_ANDN{,_MEM}`, `_BZHI{,_MEM}`,
+`_BT`/`_BT_IMM`, `_CMP_{IMM,REG}_OP`), the index register decode and
+packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
+compiler/native bytes, multi-step traces, and specialization preservation
+remain open.
 
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
