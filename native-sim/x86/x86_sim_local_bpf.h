@@ -419,7 +419,8 @@ struct x86_sim_state {
 
 #define X86_SIM_L_BARRIER_VAR(VAR) asm volatile("" : "+r"(VAR))
 
-#define X86_SIM_L_STACK_INDEX(OFF) ((__u32)((__s64)(OFF) + X86_SIM_STACK_BYTES))
+#define X86_SIM_L_STACK_INDEX(OFF)                                         \
+	KPROG_X86_STACK_INDEX(OFF, X86_SIM_STACK_BYTES)
 
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \

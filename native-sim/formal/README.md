@@ -1469,6 +1469,21 @@ field against an independent `(aux >> 8k) & 0xff` restatement over a byte grid
 and all 256 values of each single field, and pins the unused top byte
 (7,629 cases).
 
+The x86 stack-index contract binds `KPROG_X86_STACK_INDEX(OFF, CAPACITY)`, the
+map the simulator's stack helpers (`X86_SIM_L_STACK_INDEX`, and through it
+`X86_SIM_L_STACK_PTR` / `_STACK_READ` / `_STACK_WRITE`) use to resolve an
+abstract frame offset into a byte index in the fixed `X86_SIM_STACK_BYTES`
+arena: the offset is added to the arena capacity and the sum is truncated to
+the helpers' 32-bit index type, so the frame base (offset `-capacity`) lands at
+index 0 and the arena top at index `capacity`. `X86StackIndex.lean` proves the
+generated truncation equal to an independent low-32-bits statement, proves the
+frame base lands at zero and the top at the capacity, proves that two offsets
+differing by a multiple of `2^32` alias, and carries a concrete frame example.
+The host cross-check drives the *real* generated macro over a grid that
+includes the frame base, the arena top, offsets below the base, and offsets
+with the high 32 bits set, and compares it against the independent
+unsigned-64-bit low-32-bits restatement (690 cases).
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1476,6 +1491,7 @@ policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset,
 packed-AUX layout,
 register-lane AUX layout,
+x86 stack-index frame-offset mapping,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the

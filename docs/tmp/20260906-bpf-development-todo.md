@@ -6701,13 +6701,52 @@ contracts. The cheap option (a) left open by 0072 is a host oracle for
 
 ## Next after 0073
 
-Every generated contract — AArch64 and x86, including both AUX packers — now has
-a refinement theorem against an independent spec, roundtrips, and a host oracle.
-Remaining x86 open work is unchanged and still all *compositional/handwritten*:
-index-register decode into the AUX index byte; simulator-stack-to-abstract-frame
--base mapping; register/immediate/RHS objdump→AUX selection; compiler/native
-bytes; multi-step control-flow traces; specialization preservation. The next
-increment must be one of these deeper contracts.
+Every generated packer contract now has a refinement theorem against an
+independent spec, roundtrips, and a host oracle. STEP 0074 took the top
+remaining *compositional* item.
+
+## Step 0074 — x86 stack-index frame-offset contract
+
+- Scope: the affine map from an abstract frame offset to a byte index in the
+  simulator's fixed `X86_SIM_STACK_BYTES` arena. `X86_SIM_L_STACK_INDEX(OFF)` in
+  `x86_sim_local_bpf.h` computed `(__u32)((__s64)(OFF) + X86_SIM_STACK_BYTES)`
+  inline with no shared spec, no refinement theorem, and no oracle, yet it is the
+  one mapping `X86_SIM_L_STACK_PTR` (`x86_sim_local_bpf.h:494`) — the abstract
+  frame base the LEA/MOV stack arms resolve through — and every
+  `X86_SIM_L_STACK_READ`/`_WRITE` share. This closes the
+  simulator-stack-to-abstract-frame-base mapping gap.
+- New shared spec `x86_stack_index_spec.json` +
+  `generate_x86_stack_index_spec.py` → `KProgFormal/GeneratedX86StackIndex.lean`
+  (`index capacity off = (capacity + off).truncate 32`) and
+  `generated/x86_stack_index.h` (`KPROG_X86_STACK_INDEX(OFF, CAPACITY)`).
+  `x86/x86_sim.h` now includes the generated header, and
+  `X86_SIM_L_STACK_INDEX` is a thin alias `KPROG_X86_STACK_INDEX(OFF,
+  X86_SIM_STACK_BYTES)` — one machine-checked map, no inline duplicate.
+- `X86StackIndex.lean`: independent low-32-bits spec `BitVec.setWidth 32 (off +
+  capacity)`, `x86_stack_index_refines`, plus the laws the mapping must satisfy:
+  the frame base (`-capacity`) lands at index 0, the arena top (offset 0) lands
+  at the capacity, offsets differing by a multiple of `2^32` alias, and a
+  concrete 64-byte-frame example.
+- New `test_x86_stack_index_host.c`: drives the *real* generated macro over a
+  grid of the frame base, the arena top, offsets below the base, and offsets with
+  the high 32 bits set, comparing against an independent unsigned-64-bit
+  low-32-bits restatement and checking `2^32` aliasing. Success line `x86 stack
+  index host cross-check: OK (690 cases)`; exit 1 on mismatch.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs; the 30
+  runnable arms include the stack `PUSH`/`POP` paths that now go through the
+  generated map).
+- Gate: 87 generators / 164 Lean / 83 oracles / 0 errors. Mutation harness
+  `/tmp/mut_x86_stack_index.py` 10/10 DETECTED (generated C base/width/sign, a
+  generated Lean truncation/width/sign, a spec JSON base and mask-bits change
+  caught by `--check`, two independent-spec changes, and a Lean example).
+
+## Next after 0074
+
+Remaining x86 open work is unchanged and still *compositional/handwritten*:
+index-register decode into the AUX index byte; register/immediate/RHS
+objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
+specialization preservation.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
