@@ -82,6 +82,7 @@ import KProgFormal.X86BtHandler
 import KProgFormal.GeneratedX86CmpOp
 import KProgFormal.X86CmpOpHandler
 import KProgFormal.GeneratedArm64Width
+import KProgFormal.Arm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags
 import KProgFormal.GeneratedArm64Decode

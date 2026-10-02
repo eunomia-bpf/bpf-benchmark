@@ -6415,6 +6415,43 @@ under a generated contract. The remaining genuine AArch64 item is the C-to-Lean
 unsigned-semantics correspondence. On x86 the remaining open work is unchanged
 from 0056.
 
+## Step 0067 — AArch64 width/narrowing independent-spec contract
+
+- Scope: the AArch64 width contract (`GeneratedArm64Width` from
+  `arm64_width_spec.json`: `Width`, `code`, `mask`, `signMask`, `bits`,
+  `narrow`, `zero`, `sign`) had no standalone independent Lean module and no
+  host oracle; the arm64 mask/narrowing was restated inline in
+  `Arm64AluResult.lean`. The x86 side already carried the analogous
+  independent module (`X86Width.lean`). This closes that arm64 gap — the
+  concrete instance of the open "C-to-Lean unsigned-semantics correspondence"
+  item.
+- `KProgFormal/Arm64Width.lean`: independent `arm64WidthCodeSpec`,
+  `arm64WidthMaskSpec`, `arm64WidthSignMaskSpec`, `arm64WidthBitsSpec`,
+  `arm64NarrowSpec`, `arm64ZeroSpec`, `arm64SignSpec` plus
+  `arm64_width_code_refines`, `arm64_width_mask_refines`,
+  `arm64_width_sign_mask_refines`, `arm64_width_bits_refines`,
+  `arm64_narrow_refines`, `arm64_zero_refines`, `arm64_sign_refines`, and
+  `arm64_sign_mask_observes` (the sign-mask test equals the shift-based sign
+  observation, so the C `KPROG_ARM64_WIDTH_SIGN_MASK` test and the generated
+  `sign` pick the same bit).
+- Clean cutover: `Arm64AluResult.lean` now imports `Arm64Width` and drops the
+  duplicate inline `arm64WidthMaskSpec`/`arm64NarrowSpec`/`arm64_narrow_refines`
+  definitions (reused from the new module).
+- `test_arm64_width_host.c`: independent oracle built only from the width bit
+  count, verifying `KPROG_ARM64_WIDTH_MASK`/`_SIGN_MASK`/`_BITS` and
+  `KPROG_ARM64_APPLY_WIDTH` over boundary vectors and a fixed-seed random
+  stream across all four widths: 40080 cases OK.
+- Mutation test: 9/9 detected — a width mask, a sign mask, a bit count, an
+  APPLY_WIDTH mask drop, a width-code static-assert drift, a spec mask change,
+  a generated mask flip, an independent sign-mask flip, and an independent
+  bit-count change.
+
+## Next after 0067
+
+The AArch64 width/narrowing contract now has the same standalone independent
+spec module and host oracle as x86 width. On x86 the remaining open work is
+unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

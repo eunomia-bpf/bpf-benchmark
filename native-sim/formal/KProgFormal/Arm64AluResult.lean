@@ -2,29 +2,12 @@ import KProgFormal.GeneratedArm64AluResult
 import KProgFormal.GeneratedArm64Decode
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.GeneratedArm64Width
+import KProgFormal.Arm64Width
 import KProgFormal.Arm64Flags
 
 namespace KProgFormal
 
 open GeneratedArm64AluDecode (Alu)
-
-/-- Independent AArch64 width mask, restated so the narrowing used by the
-generated contracts is not itself the only definition of the mask. -/
-def arm64WidthMaskSpec : GeneratedArm64Width.Width -> BitVec 64
-  | .w8 => BitVec.ofNat 64 0xff
-  | .w16 => BitVec.ofNat 64 0xffff
-  | .w32 => BitVec.ofNat 64 0xffffffff
-  | .w64 => BitVec.ofNat 64 0xffffffffffffffff
-
-/-- Independent width narrowing: keep the low `width` bits of the operand. -/
-def arm64NarrowSpec (value : BitVec 64)
-    (width : GeneratedArm64Width.Width) : BitVec 64 :=
-  value &&& arm64WidthMaskSpec width
-
-theorem arm64_narrow_refines (value : BitVec 64)
-    (width : GeneratedArm64Width.Width) :
-    GeneratedArm64Width.narrow value width = arm64NarrowSpec value width := by
-  cases width <;> rfl
 
 /-- Independent statement of the six AArch64 ALU result formulas. SUBS/ADDS
 form the result from the operands directly; subtraction is stated as

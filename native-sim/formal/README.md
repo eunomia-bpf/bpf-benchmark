@@ -1356,6 +1356,28 @@ out of the trusted computing base; the immediate decode, the source-modifier
 rewrite (or the bare `CCMP` register read), the flag production, and the
 writeback remain outside the theorem.
 
+The AArch64 width/narrowing contract is the arm64 counterpart of the x86 width
+theorem. `GeneratedArm64Width` (from `arm64_width_spec.json`) defines the four
+width codes, the low-bit mask, the sign mask, the bit count, and the
+`narrow`/`zero`/`sign` observations; `arm64_width_code_refines`,
+`arm64_width_mask_refines`, `arm64_width_sign_mask_refines`,
+`arm64_width_bits_refines`, `arm64_narrow_refines`, `arm64_zero_refines`,
+`arm64_sign_refines` and `arm64_sign_mask_observes` prove each generated
+definition equal to an independent restatement, including that testing the
+width sign mask against the narrowed value agrees with the shift-based sign
+observation, so the C `KPROG_ARM64_WIDTH_SIGN_MASK` test and the generated
+`sign` definition pick the same bit. The host cross-check verifies
+`KPROG_ARM64_WIDTH_MASK`/`_SIGN_MASK`/`_BITS`/`KPROG_ARM64_APPLY_WIDTH` against
+an independent oracle built only from the width bit count and sweeps boundary
+vectors plus a fixed-seed random stream over all four widths; nine binding
+mutations---a width mask, a sign mask, a bit count, an APPLY_WIDTH mask drop, a
+width-code static-assert drift, a spec mask change, a generated mask flip, an
+independent sign-mask flip, and an independent bit-count change---each change
+the oracle or the refinement theorem. The x86 precedent already carried the
+same independent module (`X86Width.lean`); the arm64 side previously restated
+only the mask and narrowing inline in `Arm64AluResult.lean`, which now imports
+`Arm64Width` instead.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
