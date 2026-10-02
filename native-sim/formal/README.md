@@ -1220,6 +1220,32 @@ macro, so the load-width decision is lifted out of the trusted computing base; t
 memory read, the load-width-keyed sign-extension operand selection, and the
 destination write remain outside the theorem.
 
+The AArch64 plain-load provenance-preservation theorem covers the ordinary
+`LDR` (`ARM64_OP_LOAD`). Its handler chose between the tag-copy register write
+(which attaches the memory-read provenance tag) and the tag-dropping
+width-narrowed scalar write with an inline `width == 64 && tag != SCALAR`;
+whether a load preserves provenance is now the generated contract.
+`arm64_load_tag_refines` proves the generated `KPROG_ARM64_LOAD_TAG_PRESERVE`
+table equals an independent statement keyed on the width's bit count and the
+tag's scalar class---deliberately not a restatement of the macro's conjunction---
+so the tag survives only at doubleword width and only when it is not the bare
+scalar tag. `arm64_load_tag_sub_word_drops`, `arm64_load_tag_scalar_drops`,
+`arm64_load_tag_w64_non_scalar_preserves` and `arm64_load_tag_preserve_iff` pin
+the three cases, `arm64_load_tag_preserving_width_is_w64` shows only the
+doubleword width can carry provenance, and the opcode is pinned
+(`arm64_load_tag_code_dispatch`, `arm64_load_tag_code_in_range`). Its independent
+oracle decides preservation from the width and the tag class (never the macro's
+switch) and sweeps the opcode over all 256 byte values crossed with the four
+widths and the two tag classes in forked children, requiring each known load to
+return the oracle routing bit and each unknown opcode to abort through the
+generated unsupported arm; seven binding mutations---a preservation that ignores
+the width, one that ignores the scalar class, a moved case label, a wrongly
+inverted scalar guard, and a spec preserve-rule change, a generated guard drop and
+an independent scalar-class inversion in Lean---each change the observable path or
+the refinement theorem. The dispatch body calls the generated `arm64_load_tag.h`
+macro, so the routing decision is lifted out of the trusted computing base; the
+memory read, the tag read, and both register writes remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1244,7 +1270,8 @@ AArch64 width, generic ALU handler writeback/path
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
-provenance-path routing, and sign-extending-load width selection,
+provenance-path routing, sign-extending-load width selection, and plain-load
+provenance preservation,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

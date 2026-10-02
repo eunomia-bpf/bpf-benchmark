@@ -6197,6 +6197,50 @@ element widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants), the
 `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
 correspondence. On x86 the remaining open work is unchanged from 0056.
 
+## Step 0062 — AArch64 plain-load provenance-preservation contract
+
+- Scope: the ordinary `LDR` (`ARM64_OP_LOAD`, 0x1f, 31). The handler chose
+  between the tag-copy register write and the tag-dropping width-narrowed scalar
+  write with an inline `width == 64 && tag != SCALAR`; whether a load preserves
+  the memory-read provenance tag is now the generated contract.
+- Semantics: the tag survives a load only at doubleword width and only when it is
+  not the bare scalar tag. A sub-word load is a scalar narrowing (dropping the
+  tag) and a doubleword load of a scalar value has nothing to preserve, so only
+  the doubleword non-scalar load carries provenance.
+- Generated from `arm64_load_tag_spec.json`: `KProgFormal/GeneratedArm64LoadTag.lean`
+  + `generated/arm64_load_tag.h` (`KPROG_ARM64_LOAD_TAG_PRESERVE`). The generator
+  re-checks the opcode against `arm64_sim.h`.
+- `KProgFormal/Arm64LoadTag.lean`: `arm64_load_tag_refines` (the generated table
+  equals an independent bit-count-and-scalar-class statement),
+  `arm64_load_tag_sub_word_drops`, `arm64_load_tag_scalar_drops`,
+  `arm64_load_tag_w64_non_scalar_preserves`, `arm64_load_tag_preserve_iff`,
+  `arm64_load_tag_preserving_width_is_w64`, `arm64_load_tag_code_dispatch`,
+  `arm64_load_tag_code_in_range`, plus two examples.
+- `test_arm64_load_tag_host.c`: independent oracle deciding preservation from the
+  width and tag class (not the macro switch), sweeping all 256 opcode bytes
+  crossed with the four widths and the two tag classes in forked children: 2048
+  cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes
+  `../formal/generated/arm64_load_tag.h`, adds the
+  `ARM64_SIM_L_LOAD_TAG_PRESERVE` wrapper, and replaces the inline LOAD `if`
+  with the generated macro.
+- Mutation test: 7/7 detected — a preservation that ignores the width, one that
+  ignores the scalar class, a moved case label, a wrongly inverted scalar guard,
+  a spec preserve-rule change, a generated guard drop, and an independent
+  scalar-class inversion in Lean.
+- Full `make -C native-sim/formal check` passes with 0 errors, 81 generators,
+  151 Lean module checks, 71 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0062
+
+The AArch64 ordinary-load surface now has a provenance-preservation contract
+(`arm64_load_tag_refines`), lifting the tag-copy-versus-narrow routing out of the
+TCB. Remaining AArch64 candidates, one contract per increment: the remaining SIMD
+element widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants), the
+`MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
+correspondence. On x86 the remaining open work is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),
