@@ -876,6 +876,30 @@ count split, the count byte-masking, the count-versus-width CF, the
 SF-cleared/ZF-real asymmetry, the partial-register writeback, and the write-free
 memory. The register decode that selects the opcode remains outside the theorem.
 
+The `BT` / `BT_IMM` / `BT_MEM_IMM` theorem covers the `X86_SIM_L_EXEC_BT`,
+`X86_SIM_L_EXEC_BT_IMM` and `X86_SIM_L_EXEC_BT_MEM_IMM` arms for `X86_OP_BT`
+(`0x37`), `X86_OP_BT_IMM` (`0x42`) and `X86_OP_BT_MEM_IMM` (`0x43`), the three
+opcodes that test one bit and assign it to `CF`. All three resolve *one* width
+`FLAGS ? FLAGS : 64` and narrow the tested base to it before the bit test
+(`x86_bt_write_width_refines`); there is no second memory width. The base and
+index sources are per-opcode table entries (`x86_bt_base_source_refines`,
+`x86_bt_index_source_refines`): `BT` reads its base from a register and its
+index from `SRC`, `BT_IMM` reads its base from a register and its index from the
+literal immediate, and `BT_MEM_IMM` reads its base from memory at the resolved
+width and its index from the immediate widened to 32 bits. The headline fact is
+that index-width asymmetry (`x86_bt_imm32_drops_high_bits`): an immediate with a
+high bit set selects a different bit through the memory form than through the
+immediate form, because `BT_MEM_IMM` drops the high bits while `BT`/`BT_IMM`
+keep them. All three bodies write no register and touch only `CF`
+(`x86_bt_preserves_dst`, `x86_bt_only_cf`). `x86_bt_step_refines` composes the
+whole body over the generated base/index/width tables and the shared register
+read, memory load, `bt` bit test, and flag pass-through; its independent
+4883-case oracle exercises the generated tables, the full composition over a
+deterministic register and source-memory model, and pins the base-source split,
+the three-way index-source split, the index-width asymmetry, the `CF`-only
+write, the register-preserving write-free memory, and the absent-width default.
+The register decode that selects the opcode remains outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -886,6 +910,7 @@ read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
 `PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition, the
+`BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
 `BZHI`/`BZHI_MEM` single-width value/count-source composition, the
 `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler
 compositions, the x86 little-endian memory
@@ -913,6 +938,10 @@ host oracle — so both bodies remain in the trusted computing base.
 The `X86_SIM_L_EXEC_BZHI` and `X86_SIM_L_EXEC_BZHI_MEM` handler bodies do not
 call the generated `x86_bzhi.h` macros — that header is exercised only by the
 host oracle — so both bodies remain in the trusted computing base.
+The `X86_SIM_L_EXEC_BT`, `X86_SIM_L_EXEC_BT_IMM` and
+`X86_SIM_L_EXEC_BT_MEM_IMM` handler bodies do not call the generated `x86_bt.h`
+macros — that header is exercised only by the host oracle — so all three bodies
+remain in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

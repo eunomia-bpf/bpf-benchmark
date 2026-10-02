@@ -5479,10 +5479,77 @@ surface.
 - Full `make -C native-sim/formal check` passes with 0 errors, 67 generators,
   123 Lean module checks and 57 host cross-checks.
 
-## Next after 0048
+## Step 0049 — x86 `BT` / `BT_IMM` / `BT_MEM_IMM` base/index-source composition
 
-The rest of the x86 surface (`_BT`/`_BT_IMM`/`_BT_MEM_IMM`,
-`_CMP_{IMM,REG}_OP`), the index register decode
+- Scope: the three `X86_SIM_L_EXEC_BT` / `X86_SIM_L_EXEC_BT_IMM` /
+  `X86_SIM_L_EXEC_BT_MEM_IMM` arms for `X86_OP_BT` (`0x37`), `X86_OP_BT_IMM`
+  (`0x42`) and `X86_OP_BT_MEM_IMM` (`0x43`), the opcodes that test one bit and
+  assign it to `CF`.
+- Facts: all three resolve *one* width `FLAGS ? FLAGS : 64` and narrow the
+  tested base to it before the bit test; there is no second memory width. The
+  base and index sources are per-opcode table entries: `BT` reads its base from
+  a register and its index from `SRC`, `BT_IMM` reads its base from a register
+  and its index from the literal immediate, and `BT_MEM_IMM` reads its base
+  from memory at the resolved width and its index from the immediate widened to
+  32 bits. The headline fact is that index-width asymmetry: an immediate with a
+  high bit set selects a different bit through the memory form than through the
+  immediate form, because `BT_MEM_IMM` drops the high bits while `BT`/`BT_IMM`
+  keep them. All three bodies write no register and touch only `CF`.
+- Files: `native-sim/formal/generate_x86_bt_spec.py` + `x86_bt_spec.json`
+  (schema_version 1, three-opcode `EXPECTED` table, `--check` rejects stale
+  text) → `KProgFormal/GeneratedX86Bt.lean`, `generated/x86_bt.h`;
+  `KProgFormal/X86BtHandler.lean`; oracle `test_x86_bt_host.c`. Wired into
+  `KProgFormal.lean` and the Makefile `check` target. `x86_sim_local_bpf.h` is
+  unchanged.
+- Generated C: the three opcode-drift `_Static_assert`s, a local width-code
+  block with a 64-bit drift assert, `KPROG_X86_BT_WRITE_WIDTH_DEFAULT
+  X86_WIDTH_64`, the base-source codes + per-opcode base-source defines +
+  `KPROG_X86_BT_BASE_SOURCE(OP_IS_MEMORY)`, the three index-source codes +
+  per-opcode index-source defines + the nested
+  `KPROG_X86_BT_INDEX_SOURCE(INDEX_IS_MEMORY, INDEX_IS_REGISTER)`
+  (`MEMORY ? IMM32 : (REGISTER ? REGISTER : IMMEDIATE)`, a two-boolean
+  selector — the split cannot be a single boolean), and the FLAGS-resolving
+  `KPROG_X86_BT_WRITE_WIDTH(FLAGS)`. There is no count/mask macro: `BT` has no
+  count.
+- Lean: `BaseSource`/`IndexSource` tables +
+  `x86_bt_base_source_refines`/`x86_bt_index_source_refines`;
+  `x86BtCodeWidthSpec`/`generatedX86BtWriteWidth` + `x86_bt_write_width_refines`
+  / `x86_bt_write_width_default_refines`; `x86BtBaseSpec`/`generatedX86BtBase` +
+  `x86_bt_base_refines` (memory arm bridged through `x86_mem_load_refines`);
+  `x86BtIndexSpec`/`generatedX86BtIndex` + `x86_bt_index_refines` (imm32 arm
+  bridged through `x86_immediate_value_refines`) plus the index-width pin
+  `x86_bt_imm32_drops_high_bits`; `x86BtCfSpec`/`generatedX86BtCf` +
+  `x86_bt_cf_refines` (bridged through `x86_bt_refines_width`); `X86BtEffect`
+  (data-only, `deriving DecidableEq, Repr`; carries `dst`/`zf`/`sf`/`of`
+  through unchanged); `generatedX86BtStep`/`x86BtStepSpec` +
+  `x86_bt_step_refines`; and the write shape pins (`x86_bt_preserves_dst`,
+  `x86_bt_only_cf`, `x86_bt_base_sources`, `x86_bt_index_sources_differ`). The
+  generated module declares its own `resolveWidth` (precedent
+  `GeneratedX86Cmov.lean`); the handler does *not* import
+  `KProgFormal.X86LogicFlags` (BT touches no logic-flag production) and does
+  *not* import `KProgFormal.TagErasure`; it imports `KProgFormal.X86Bitops` for
+  the `bt` refinement lemma (reused, no new generator for the helper).
+- The final `x86_bt_step_refines` proof is `cases op <;> cases flagsCode <;>
+  simp only [...]` — the `cases` must come *before* `simp only`, as in
+  0047/0048. Concrete pins use `native_decide` after the defs are in scope.
+- Independent C oracle `test_x86_bt_host.c`: generated tables vs. hand
+  restatements; the whole composition over a deterministic register and
+  source-memory model (3 opcode forms × 5 FLAGS codes × 4 raw imms × 3
+  displacements × 3 base regs × 3 index regs × 3 dst regs) comparing the whole
+  register file, the whole memory array, and the flags; eight pins. **4883
+  cases**, zero `-Wall -Wextra` warnings. Mutation-tested with arm swaps /
+  literal changes: swapping the arms inside `KPROG_X86_BT_BASE_SOURCE`,
+  swapping the nested arms of `KPROG_X86_BT_INDEX_SOURCE`, swapping the
+  per-opcode `..._BT_MEM_IMM_INDEX_SOURCE` name, and changing
+  `KPROG_X86_BT_WRITE_WIDTH_DEFAULT` 64→32 each make it exit non-zero with a
+  distinct message.
+- Full `make -C native-sim/formal check` passes with 0 errors, 68 generators,
+  125 Lean module checks and 58 host cross-checks.
+
+
+## Next after 0049
+
+The rest of the x86 surface (`_CMP_{IMM,REG}_OP`), the index register decode
 and
 packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
 compiler/native bytes, multi-step traces, and specialization preservation
