@@ -6529,6 +6529,48 @@ module and a host oracle. On the x86 side `x86_alu_decode` is the remaining
 generated header included by no host file; on x86 the broader open work is
 unchanged from 0056.
 
+## Step 0070 — x86 ALU-decode host oracle
+
+- Scope: the x86 ALU decode contract (`generated/x86_alu_decode.h` from
+  `generate_x86_alu_decode_spec.py`, Lean `KProgFormal/X86AluDecode.lean`). It
+  was the last generated header included by *no* host file (per the 0069 scout
+  audit), and unlike the arm64 decode header the x86 header is consumed by a
+  real dispatcher (`x86_alu_result` in `x86_sim.h`).
+- New `test_x86_alu_decode_host.c`: includes `../x86/x86_sim.h` (after the
+  eight integer typedefs and `#define __always_inline inline`) so the generated
+  `X86_ALU_*` constants are checked against the macros the simulator actually
+  uses. Independently restates the 16-entry `{mnemonic, code}` table locally,
+  asserts each macro equals its table code and all codes are distinct, then
+  drives every generated code through the **real** `x86_alu_result` over a
+  6×8×4 operand/width grid and compares against an independently recomputed
+  identity (add/sub/xor/or/and/imul/inc/dec/neg/not/sbb/adc, plus shl/shr/sar/
+  rol). Pins the dispatcher contract in the oracle: the arithmetic/logical/
+  negate family is computed at full 64-bit width and `width` is consumed only
+  by the shift family (narrowing is the caller's register write), so only the
+  shift cases mask. Drives both generated handler-selector macros
+  (`KPROG_X86_ALU_USES_SBB_HANDLER`/`_ADC_HANDLER`) and checks they agree with
+  the dispatcher's own identity checks and are mutually exclusive. Exits
+  non-zero on mismatch; success line `x86 alu decode host cross-check: OK
+  (3256 cases)`.
+- Makefile: only the CC/run oracle line appended after the existing
+  `X86AluDecode.lean` line (107 already builds the Lean module); no new Lean
+  line, no new generator `--check`, no C-header change.
+- Gate: 85 generators / 161 Lean / 79 oracles / 0 errors. Mutation harness
+  `/tmp/mut_x86_alu_decode.py` 10/10 DETECTED (two generated-code duplicates
+  for SBB/ADC, the SBB handler selector rebound to ADC, four dispatcher
+  distortions in `x86_sim.h` — IMUL add-for-mul, SBB add-for-sub, NOT
+  identity, SHR→SHL result, NEG self-subtract, a spec code change caught by
+  the generator `--check`, and an independent Lean code-spec shift).
+
+## Next after 0070
+
+Every generated contract — AArch64 and x86 — now has both a standalone
+independent-spec Lean module and a host oracle. The x86 open work is unchanged
+from 0056: index-register decode + packed-AUX layout; simulator-stack-to-
+abstract-frame-base mapping; register/immediate/RHS objdump→AUX selection;
+compiler/native bytes; multi-step control-flow traces; specialization
+preservation.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

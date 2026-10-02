@@ -105,6 +105,8 @@ check:
 	lake env lean KProgFormal/X86AddResult.lean
 	lake env lean KProgFormal/X86SubResult.lean
 	lake env lean KProgFormal/X86AluDecode.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_alu_decode_host.c -o build/test_x86_alu_decode_host
+	./build/test_x86_alu_decode_host
 	lake env lean KProgFormal/X86IncDec.lean
 	lake env lean KProgFormal/X86Not.lean
 	lake env lean KProgFormal/X86ShiftCount.lean

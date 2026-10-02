@@ -1414,6 +1414,21 @@ code, three AUX-field packing distortions in the simulator header, a renamed
 spec mnemonic, two generated-code shifts, two generated-mnemonic changes, and an
 independent-list code change---each change the oracle or a refinement theorem.
 
+The x86 ALU mnemonic-to-code decode contract binds the `X86_ALU_*` constants
+that the x86 simulator dispatcher and the Lean model share.
+`X86AluDecode.lean` refines the generated table against an independent
+specification per constructor. The host cross-check includes `x86_sim.h` and
+drives every generated code through the real `x86_alu_result` dispatcher over
+an operand/width grid, comparing against an independently recomputed
+arithmetic identity; it pins the dispatcher contract (the arithmetic/logical/
+negate family is computed at full 64-bit width and `width` is consumed only by
+the shift family, narrowing being the caller's register write) and drives both
+generated handler-selector macros against the dispatcher's identity checks. Ten
+binding mutations---two generated-code duplicates, a rebound handler selector,
+four dispatcher distortions in the simulator header, a spec code change, and an
+independent Lean code-spec shift---each change the oracle or the refinement
+theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
