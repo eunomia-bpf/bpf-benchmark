@@ -5630,6 +5630,67 @@ objdump/parser-to-AUX selection relation, C-to-Lean unsigned-semantics
 correspondence, compiler/native bytes, multi-step control-flow traces, and
 specialization preservation.
 
+## Step 0051 — AArch64 `.D0` / `.Q0` vector memory-transfer contract
+
+- Scope: the four `ARM64_SIM_L_{LOAD,STORE}_{D0,Q0}_MEM` bodies
+  (`native-sim/arm64/arm64_sim_local_bpf.h:675-713`), the opcodes that move a
+  SIMD register's low 64-bit lane (`.D0`) or both 64-bit lanes (`.Q0`) to or
+  from memory (`ARM64_OP_LOAD_D0` `0x28`, `ARM64_OP_STORE_D0` `0x29`,
+  `ARM64_OP_LOAD_Q0` `0x2a`, `ARM64_OP_STORE_Q0` `0x2b`). Their dispatch is at
+  `1008-1015`; the bodies share `ARM64_SIM_L_MEM_READ`/`_MEM_WRITE` and the
+  pre/post base adjustment, but the *lane plan* is per-opcode.
+- Shared JSON spec `arm64_dq_mem_spec.json` → generated
+  `KProgFormal/GeneratedArm64DqMem.lean` + `generated/arm64_dq_mem.h` via
+  `generate_arm64_dq_mem_spec.py` (`--check` rejects stale outputs). The contract
+  fixes two independent per-opcode axes — the access direction
+  (load/store) and the ordered 64-bit lane plan (`.D0` = `[0]`, `.Q0` =
+  `[0, 8]`) — plus the lane stride (`ARM64_WIDTH_64` = 8) and the arm index of
+  the four-way `OP == LOAD_D0 / LOAD_Q0 / STORE_D0 / STORE_Q0` chain. The
+  address offset (`MEM_BASE_OFF`) and the pre/post base adjustment are
+  deliberately *not* in scope: they already have the proved
+  `arm64_mem_offset_refines` contract.
+- `KProgFormal/Arm64DqMemHandler.lean`: independent lane plan
+  `arm64DqMemPlanSpec` written as literals (`[0]` / `[0, 8]`), never the
+  generated `n * 8` formula. `arm64_dq_mem_refines` pins the generated ordered
+  lane offsets to the plan; `arm64_dq_mem_lane_count_refines` pins the generated
+  lane count to the plan length; `arm64_dq_mem_access_dispatch` and
+  `arm64_dq_mem_lane_plan` state the two per-opcode axes as conjunctions;
+  `arm64_dq_mem_q0_moves_distinct_lanes` pins the two `.Q0` lanes differ;
+  `arm64_dq_mem_arm_index_dispatch` pins the chain order; `arm64_dq_mem_lane_stride`,
+  `arm64_dq_mem_low_lane_example`, `arm64_dq_mem_high_lane_example` give the
+  concrete geometry.
+- Host oracle `test_arm64_dq_mem_host.c`: Part 1 checks the generated constants
+  and drives the `KPROG_ARM64_DQ_MEM_INDEX` selector against an independent
+  opcode-code → arm-index map; Part 2 drives both the contract step (selectors +
+  generated lane stride) and a model step restated from the raw opcode over a
+  deterministic 32-register file, memory and stack for all 4 opcodes × 32 base
+  registers × 3 flag sets × 4 index forms × 6 immediates = 9,216 cases, comparing
+  the SIMD lanes, every GPR value/tag, memory and the stack. Prints
+  `arm64 D0/Q0 mem host cross-check: OK (9216 cases)`.
+- Mutation-tested: access-direction swap, lane-count swap, lane-stride change
+  (caught by the generated C `_Static_assert`), and selector-arm swap each exit
+  non-zero.
+- No C body was edited (`arm64_sim_local_bpf.h` unchanged), so
+  `make -C native-sim/arm64 micro-proofs-build` is not required for this step.
+- Full `make -C native-sim/formal check` passes with 0 errors, 70 generators,
+  129 Lean module checks, 60 host cross-checks.
+
+## Next after 0051
+
+With 0051 the AArch64 memory transfer surface has per-opcode contracts: the
+generic read/write dispatch (`arm64_mem_dispatch_refines`), the address offset
+(`arm64_mem_offset_refines`), the byte-lane scatter (`arm64_byte_lane`), the
+stack slot-tag selection (`arm64_stack_tag`), and now the vector `.D0`/`.Q0`
+lane plan. The remaining AArch64 open surfaces are the SIMD register file
+mapping (the `__a64_v0`/`__a64_v0_hi` state fields to an abstract register
+pair), the address-decoding of pre/post against the raw `AUX`/`IMM` fields, the
+remaining SIMD element widths (`.S0`/`.H0`/`.B0` and the `.Q0` element
+variants), and the C-to-Lean unsigned-semantics correspondence. On x86 the
+remaining open work is unchanged from 0050: the index register decode and
+packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping, the
+register and immediate/RHS objdump/parser-to-AUX selection relation, compiler/
+native bytes, multi-step control-flow traces, and specialization preservation.
+
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

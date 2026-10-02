@@ -927,6 +927,33 @@ at the resolved width, the absent-width default, and register-preserving
 write-free memory. The register decode that selects the opcode remains outside
 the theorem.
 
+The AArch64 `.D0` / `.Q0` vector memory-transfer theorem covers the four bodies
+`ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`, `STORE_D0_MEM`, and `STORE_Q0_MEM` for
+`ARM64_OP_LOAD_D0` (`0x28`), `ARM64_OP_STORE_D0` (`0x29`), `ARM64_OP_LOAD_Q0`
+(`0x2a`), and `ARM64_OP_STORE_Q0` (`0x2b`), the opcodes that move a SIMD
+register's low 64-bit lane (`.D0`) or both 64-bit lanes (`.Q0`) to or from
+memory. The address offset (`MEM_BASE_OFF`) and the pre/post base adjustment
+(`MEM_PRE` / `MEM_POST`) stay in the macros with their own proved contracts, so
+the generated `arm64_dq_mem` tables fix only *which* lanes each opcode moves and
+in *what* order: two per-opcode facts, provably independent, are the access
+direction (`arm64_dq_mem_access_dispatch`) -- `LOAD_D0`/`LOAD_Q0` move memory
+into the register, `STORE_D0`/`STORE_Q0` move it out -- and the ordered lane plan
+(`arm64_dq_mem_lane_plan`) -- `.D0` moves `[0]`, `.Q0` moves `[0, 8]`, so the two
+lanes of a `.Q0` transfer are the low lane at the base offset and the high lane
+one 64-bit lane stride higher, never the same lane twice
+(`arm64_dq_mem_q0_moves_distinct_lanes`). `arm64_dq_mem_refines` pins the
+generated lane offsets to the independent plan literally, and
+`arm64_dq_mem_lane_count_refines` pins the generated lane count to the plan
+length. Its independent 9,216-case oracle drives the generated selectors and
+restates the same four bodies from the raw opcode, comparing the SIMD lanes, the
+whole GPR file, memory and the stack; four binding mutations -- an access
+direction swap, a lane count swap, a lane-stride change (caught by the C static
+assertion) and a selector-arm swap -- each change the observable result. The
+register decode that selects the opcode remains outside the theorem, and the
+four bodies do not call the generated `arm64_dq_mem.h` macros -- that header is
+exercised only by the host oracle -- so all four remain in the trusted computing
+base.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -947,7 +974,8 @@ memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
-selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, and CCMP composition,
+selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, CCMP, and
+`.D0`/`.Q0` vector memory-transfer composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
@@ -975,6 +1003,9 @@ The `X86_SIM_L_EXEC_CMP_IMM_OP` / `X86_SIM_L_EXEC_CMP_REG_OP` (and their `_AUX`)
 handler bodies do not call the generated `x86_cmpop.h` macros — that header is
 exercised only by the host oracle — so both bodies remain in the trusted
 computing base.
+The four `ARM64_SIM_L_{LOAD,STORE}_{D0,Q0}_MEM` handler bodies do not call the
+generated `arm64_dq_mem.h` macros — that header is exercised only by the host
+oracle — so all four bodies remain in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not
