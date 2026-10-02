@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "operation": "x86MemAux",
+  "word_bits": 32,
+  "field_bits": 8,
+  "fields": [
+    {
+      "name": "index",
+      "shift": 0
+    },
+    {
+      "name": "scale_log2",
+      "shift": 8
+    },
+    {
+      "name": "mem_width",
+      "shift": 16
+    },
+    {
+      "name": "op",
+      "shift": 24
+    }
+  ],
+  "index_none": "0xff"
+}

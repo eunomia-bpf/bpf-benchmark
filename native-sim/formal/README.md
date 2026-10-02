@@ -1440,11 +1440,27 @@ masked shift count), drives the *real* generated macro, and compares each of
 CF/ZF/SF/OF against an independent restatement of the shift-flag semantics over
 a value/amount/width/old-flags grid.
 
+The x86 packed-AUX layout contract binds the `KPROG_X86_MEM_AUX` packer and its
+four `KPROG_X86_MEM_AUX_*` byte decoders that `x86_sim.h` aliases its
+`X86_MEM_AUX*` / `X86_REG_AUX_*` macros to, so every simulator AUX word shares
+one machine-checked layout: index register in bits 0-7, scale exponent in bits
+8-15, memory-width code / register source lane in bits 16-23, and the ALU-opcode
+/ source-byte-shift / condition-code byte in bits 24-31. `X86MemAux.lean` proves
+the generated C-shaped masked-or packer equal to an independent little-endian
+byte concatenation, proves each of the four field roundtrips, proves the
+`X86_REG_NONE` sentinel roundtrip, and proves the four fields pairwise
+non-interfering. The host cross-check includes `x86_sim.h`, drives the *real*
+sim-path `X86_MEM_AUX`/`X86_MEM_AUX_FULL`/`X86_MEM_AUX_ALU_OP`/`X86_REG_AUX_*`
+macros and the decoders, and compares every field against an independent
+`(aux >> 8k) & 0xff` restatement over a byte grid, the sentinel, and all 256
+values of each single field (7,904 cases).
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset,
+packed-AUX layout,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the

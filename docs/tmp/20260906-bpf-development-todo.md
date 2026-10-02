@@ -6613,6 +6613,57 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 specialization preservation. The next increment must be one of these deeper
 contracts.
 
+## Step 0072 — x86 packed-AUX layout contract
+
+- Scope: the packed x86-64 AUX word — the four-byte layout (index register
+  bits 0-7, scale exponent bits 8-15, memory-width / register-source-lane bits
+  16-23, ALU-opcode / source-shift / condition byte bits 24-31) that every
+  micro-prog instruction carries. It was hand-written as plain unnamed macros
+  in `x86/x86_sim.h` with no JSON spec, no generated Lean, and no refinement,
+  yet it is a real artifact-level producer: all 43 micro-prog `*.bpf.c`
+  `#include "../x86_sim_local_bpf.h"`, and the simulator reads it back through
+  `X86_SIM_L_MEM_OFFSET` (index @0, scale @8), the memory-width paths (@16),
+  and the source-shift / ALU-opcode paths (@24).
+- New `x86_mem_aux_spec.json` + `generate_x86_mem_aux_spec.py`: emit
+  `KProgFormal/GeneratedX86MemAux.lean` (C-shaped masked-or `pack`, four byte
+  decoders, `indexNone`) and `generated/x86_mem_aux.h` (`KPROG_X86_MEM_AUX`
+  packer, `KPROG_X86_MEM_AUX_{INDEX,SCALE_LOG2,MEM_WIDTH,OP}` decoders,
+  `KPROG_X86_MEM_AUX_INDEX_NONE`). `x86_sim.h` now `#include`s the generated
+  header and aliases its `X86_MEM_AUX*` / `X86_REG_AUX_*` macros to it, so the
+  hand-written duplicate is gone and every consumer keeps its name. The
+  aliases are live because the micro-progs call the `X86_*` names, which now
+  expand to the generated packer.
+- New `KProgFormal/X86MemAux.lean`: independent spec is an explicit
+  little-endian byte concatenation (`opTag ++ memWidth ++ scaleExp ++ index`),
+  not the generated masked-or. Theorems: packer-refines-spec, four field
+  roundtrips, sentinel roundtrip, four-fields-pairwise-non-interfering, the
+  `indexNone = 0xff` pin, and two concrete byte-order / source-lane examples.
+- New `test_x86_mem_aux_host.c`: includes `../x86/x86_sim.h`, drives the
+  *real* sim-path `X86_MEM_AUX`/`X86_MEM_AUX_FULL`/`X86_MEM_AUX_ALU_OP`/
+  `X86_REG_AUX_*` macros and the decoders, and compares every field against an
+  independent `(aux >> 8k) & 0xff` restatement over a byte grid, the sentinel,
+  and all 256 values of each single field. Success line `x86 memory aux host
+  cross-check: OK (7904 cases)`; exit 1 on mismatch.
+- Makefile: generator `--check` after the x86 `--check` block; the
+  `X86MemAux.lean` line + oracle CC/run pair after `X86RegLaneAux.lean`. The C
+  header + `x86_sim.h` change rebuilt both sims (`make -C native-sim/x86
+  micro-proofs-build` and `make -C native-sim/arm64 micro-proofs-build`, both
+  rc=0).
+- Gate: 86 generators / 162 Lean / 81 oracles / 0 errors. Mutation harness
+  `/tmp/mut_x86_mem_aux.py` 9/9 DETECTED (generated packer/decoder shifts and
+  masks, a spec code change caught by `--check`, two independent Lean spec
+  changes, two live sim-alias flips, and a sentinel-define change).
+
+## Next after 0072
+
+The packed-AUX layout is now bound. Remaining x86 open work is unchanged and
+still all *compositional/handwritten*: index-register decode into the AUX index
+byte; simulator-stack-to-abstract-frame-base mapping; register/immediate/RHS
+objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
+specialization preservation. The next increment must be one of these deeper
+contracts. The cheap option (a) left open by 0072 is a host oracle for
+`x86_reg_lane_aux` (its Lean module exists but it has no oracle).
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

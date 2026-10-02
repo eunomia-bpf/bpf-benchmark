@@ -138,20 +138,35 @@
 #define X86_SKB_DATA_END_OFF 0x50LL
 #define X86_SKB_DATA_OFF 0xd0LL
 
+#include "../formal/generated/x86_mem_aux.h"
+
 #define X86_MEM_AUX(INDEX, SCALE_LOG2)                                      \
-	(((__u32)(INDEX) & 0xffU) | (((__u32)(SCALE_LOG2) & 0xffU) << 8))
+	KPROG_X86_MEM_AUX((INDEX), (SCALE_LOG2), 0U, 0U)
 #define X86_MEM_AUX_FULL(INDEX, SCALE_LOG2, MEM_WIDTH)                      \
-	(X86_MEM_AUX((INDEX), (SCALE_LOG2)) |                               \
-	 (((__u32)(MEM_WIDTH) & 0xffU) << 16))
-#define X86_REG_AUX_SRC_SHIFT(SHIFT) (((__u32)(SHIFT) & 0xffU) << 24)
-#define X86_MEM_AUX_ALU_OP(ALU) (((__u32)(ALU) & 0xffU) << 24)
-#define X86_MEM_AUX_INDEX(AUX) ((__u8)((AUX) & 0xffU))
-#define X86_MEM_AUX_SCALE_LOG2(AUX) ((__u8)(((AUX) >> 8) & 0xffU))
-#define X86_MEM_AUX_MEM_WIDTH(AUX) ((__u8)(((AUX) >> 16) & 0xffU))
-#define X86_REG_AUX_GET_SRC_SHIFT(AUX) ((__u8)(((AUX) >> 24) & 0xffU))
-#define X86_MEM_AUX_GET_ALU_OP(AUX) ((__u8)(((AUX) >> 24) & 0xffU))
+	KPROG_X86_MEM_AUX((INDEX), (SCALE_LOG2), (MEM_WIDTH), 0U)
+#define X86_REG_AUX_SRC_SHIFT(SHIFT) KPROG_X86_MEM_AUX(0U, 0U, 0U, (SHIFT))
+#define X86_MEM_AUX_ALU_OP(ALU) KPROG_X86_MEM_AUX(0U, 0U, 0U, (ALU))
+#define X86_MEM_AUX_INDEX(AUX) KPROG_X86_MEM_AUX_INDEX(AUX)
+#define X86_MEM_AUX_SCALE_LOG2(AUX) KPROG_X86_MEM_AUX_SCALE_LOG2(AUX)
+#define X86_MEM_AUX_MEM_WIDTH(AUX) KPROG_X86_MEM_AUX_MEM_WIDTH(AUX)
+#define X86_REG_AUX_GET_SRC_SHIFT(AUX) KPROG_X86_MEM_AUX_OP(AUX)
+#define X86_MEM_AUX_GET_ALU_OP(AUX) KPROG_X86_MEM_AUX_OP(AUX)
 #include "../formal/generated/x86_reg_lane_aux.h"
 
+_Static_assert(KPROG_X86_MEM_AUX_INDEX(
+	KPROG_X86_MEM_AUX(0xabU, 8U, 0x30U, 0x77U)) == 0xabU,
+	"x86 memory AUX index byte drift");
+_Static_assert(KPROG_X86_MEM_AUX_SCALE_LOG2(
+	KPROG_X86_MEM_AUX(0xabU, 8U, 0x30U, 0x77U)) == 8U,
+	"x86 memory AUX scale byte drift");
+_Static_assert(KPROG_X86_MEM_AUX_MEM_WIDTH(
+	KPROG_X86_MEM_AUX(0xabU, 8U, 0x30U, 0x77U)) == 0x30U,
+	"x86 memory AUX width byte drift");
+_Static_assert(KPROG_X86_MEM_AUX_OP(
+	KPROG_X86_MEM_AUX(0xabU, 8U, 0x30U, 0x77U)) == 0x77U,
+	"x86 memory AUX opcode byte drift");
+_Static_assert(X86_REG_AUX_SRC_SHIFT(8U) == X86_MEM_AUX_ALU_OP(8U),
+	"x86 source-shift and ALU-opcode AUX slots diverge");
 _Static_assert(KPROG_X86_REG_LANE_AUX_PAYLOAD(
 	KPROG_X86_REG_LANE_AUX(0xabU, 8U, 0U)) == 0xabU,
 	"x86 register AUX payload drift");

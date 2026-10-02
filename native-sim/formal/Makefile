@@ -87,6 +87,7 @@ check:
 	python3 generate_x86_bzhi_spec.py --check
 	python3 generate_x86_bt_spec.py --check
 	python3 generate_x86_cmpop_spec.py --check
+	python3 generate_x86_mem_aux_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -141,6 +142,9 @@ check:
 	lake env lean KProgFormal/X86AluWriteback.lean
 	lake env lean KProgFormal/X86RegRead.lean
 	lake env lean KProgFormal/X86RegLaneAux.lean
+	lake env lean KProgFormal/X86MemAux.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_mem_aux_host.c -o build/test_x86_mem_aux_host
+	./build/test_x86_mem_aux_host
 	lake env lean KProgFormal/X86UnaryWriteback.lean
 	lake env lean KProgFormal/X86MemAccess.lean
 	$(CC) -Wall -Wextra -O2 -I. test_mem_access_host.c -o build/test_mem_access_host
