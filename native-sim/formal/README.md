@@ -1061,6 +1061,33 @@ the unary value itself is lifted out of the trusted computing base; the
 surrounding register read and width-narrowed register write remain outside the
 theorem.
 
+The AArch64 CNEG condition-gated negation theorem covers the one value body
+`ARM64_OP_CNEG`, which on a taken condition writes the destination-width-negated
+source and otherwise passes the source through unchanged. The contract is the
+opcode label, the already evaluated condition result, and the width-narrowed raw
+value: `arm64_cneg_refines` proves the generated `KPROG_ARM64_CNEG_VALUE` arm
+equals an independent statement whose taken arm is the invert-and-add-one
+identity (`~~~src + 1`) -- deliberately not the subtraction operator the
+generated arm uses -- over both condition outcomes and all four destination
+widths. The opcode is pinned inside its `65` case-label range
+(`arm64_cneg_code_in_range`, `arm64_cneg_code_dispatch`), it writes no NZCV
+(`arm64_cneg_flags_unchanged`), a taken negation cancels its source
+(`arm64_cneg_taken_cancel`), an untaken condition is the identity
+(`arm64_cneg_untaken_identity`), and a word-width result carries no bits above
+bit 31 (`arm64_cneg_w32_bound`). Its independent oracle derives the destination
+width mask from a shift of one (never the macro's width-mask ladder), checks the
+negation against both the subtraction operator and the invert-and-add-one
+identity, sweeps both condition outcomes over boundary vectors and all four
+widths plus a fixed-seed random sweep, and checks that an opcode outside the
+family aborts; seven binding mutations -- a dropped condition gate, an inverted
+condition gate, and a dropped width mask in the generated C, a spec code move,
+a Lean branch swap and narrowing drop, and an independent-spec narrowing drop --
+each change the observable result or the refinement theorem. As with the
+preceding unary contract, the dispatch body calls the generated `arm64_cneg.h`
+macro, so the condition-gated negation value is lifted out of the trusted
+computing base; the surrounding register read, condition evaluation, and
+width-narrowed register write remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1082,8 +1109,8 @@ multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
-address-writeback, vector-register-file half mapping, and MVN/NEG unary-value
-composition,
+address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
+CNEG condition-gated negation composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

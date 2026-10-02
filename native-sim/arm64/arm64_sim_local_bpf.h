@@ -26,6 +26,7 @@
 #include "../formal/generated/arm64_shift.h"
 #include "../formal/generated/arm64_reduction.h"
 #include "../formal/generated/arm64_unary.h"
+#include "../formal/generated/arm64_cneg.h"
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_fmov.h"
 #include "../formal/generated/arm64_load_bytes.h"
@@ -442,6 +443,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	KPROG_ARM64_UNARY_VALUE((OP), ARM64_SIM_L_READ_REG(SRC), (WIDTH),  \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+/*
+ * Condition-gated negation (CNEG) applied to a source register. The opcode label
+ * and the width-narrowed condition-gated negation are the generated AArch64
+ * CNEG contract in formal/generated/arm64_cneg.h, which
+ * KProgFormal/Arm64Cneg.lean proves equal to an independent statement over both
+ * condition outcomes and all four destination widths. ARM64_SIM_L_READ_REG is
+ * evaluated exactly once, and no arm writes NZCV.
+ */
+#define ARM64_SIM_L_CNEG_VALUE(OP, SRC, TAKEN, WIDTH)                       \
+	KPROG_ARM64_CNEG_VALUE((OP), ARM64_SIM_L_READ_REG(SRC), (TAKEN),   \
+			       (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
@@ -810,11 +823,11 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__u64 __a64_l_result =                              \
 				ARM64_SIM_L_UNARY_VALUE((OP), (SRC), __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_CNEG) {                          \
-			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);     \
-			if (ARM64_SIM_L_EVAL_COND(AUX))                      \
-				__a64_l_value = -__a64_l_value;              \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
+		} else if (KPROG_ARM64_CNEG_HANDLED(OP)) {                   \
+			__u64 __a64_l_result =                              \
+				ARM64_SIM_L_CNEG_VALUE((OP), (SRC),          \
+					ARM64_SIM_L_EVAL_COND(AUX), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_EXTREV_HANDLED(OP)) {                 \
 			__u64 __a64_l_result =                              \
 				ARM64_SIM_L_EXTREV_VALUE((OP), (SRC), (SRC2), (IMM), __a64_l_width);\

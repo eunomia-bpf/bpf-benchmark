@@ -5902,6 +5902,58 @@ variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean
 unsigned-semantics correspondence. On x86 the remaining open work is unchanged
 from 0054.
 
+## Step 0056 — AArch64 CNEG condition-gated negation contract
+
+- Scope: the condition-gated negation arm `ARM64_OP_CNEG` (0x41, 65) formerly
+  inlined in the local dispatch, writing the source negated on a taken
+  condition or passed through unchanged otherwise. The generated arm folds the
+  destination-width mask (`narrow (if taken then 0 - src else src) width`)
+  exactly as the caller's register write does.
+- Semantics: on a taken condition the source is negated; otherwise it is
+  unchanged; both narrow to the destination width; no NZCV is written. The
+  independent statement uses the invert-and-add-one identity (`~~~src + 1`),
+  deliberately not the subtraction operator the generated arm uses.
+- Generated from `arm64_cneg_spec.json`: `KProgFormal/GeneratedArm64Cneg.lean`
+  + `generated/arm64_cneg.h` (`cneg` = 65; `HANDLED`/`VALUE` macros).
+- `KProgFormal/Arm64Cneg.lean`: `arm64_cneg_refines` (generated arm equals the
+  independent spec over both condition outcomes and all four widths),
+  `arm64_cneg_code_in_range`, `arm64_cneg_code_dispatch`,
+  `arm64_cneg_flags_unchanged`, `arm64_cneg_taken_cancel`,
+  `arm64_cneg_untaken_identity`, the `w32` bound, plus four `native_decide`
+  examples.
+- `test_arm64_cneg_host.c`: independent 40,097-case oracle deriving the width
+  mask from a shift of one (not the macro's ladder), checking the negation
+  against both the subtraction operator and the invert-and-add-one identity,
+  sweeping both condition outcomes over boundary vectors and all four widths
+  plus 40,000 fixed-seed random cases, and confirming an unsupported opcode
+  aborts.
+- Sim wiring: `arm64_sim_local_bpf.h` now includes
+  `../formal/generated/arm64_cneg.h`, adds the `ARM64_SIM_L_CNEG_VALUE`
+  wrapper, and replaces the former inline arm with the
+  `KPROG_ARM64_CNEG_HANDLED` branch — lifting the condition-gated negation
+  value out of the TCB.
+- Mutation test: 7/7 detected — dropped/inverted condition gate and dropped
+  width mask in the generated C (oracle), spec code move (generator `--check`),
+  Lean branch swap and narrowing drop, and an independent-spec narrowing drop
+  (`lake build` refinement).
+- Full `make -C native-sim/formal check` passes with 0 errors, 75 generators,
+  139 Lean module checks, 65 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0056
+
+The AArch64 condition-gated value surface now has contracts for the CSEL family
+(`arm64_csel_refines`/`arm64_csel_cond_refines`) and the single-op CNEG
+(`arm64_cneg_refines`), both lifting their value arm out of the TCB. Remaining
+AArch64 candidates, one contract per increment: `ORN_REG` (0x35, complemented
+logical — note there is no `EON_REG` in `arm64_sim.h`), the `ADRP` pair,
+`STLXR`, the `MOV_IMM`/`MOV_REG` pair, and the sign-extending loads
+`LDRSB`/`LDRSW`/`LDRSH` with writeback. The other open AArch64 surfaces are
+unchanged from 0055: the remaining SIMD element widths (`.S0`/`.H0`/`.B0` and
+the `.Q0` element variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the
+C-to-Lean unsigned-semantics correspondence. On x86 the remaining open work is
+unchanged from 0055.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),
