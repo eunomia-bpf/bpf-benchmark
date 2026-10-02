@@ -5797,6 +5797,62 @@ objdump/parser-to-AUX selection relation, compiler/native bytes, multi-step
 control-flow traces, and specialization preservation.
 
 
+## Step 0054 — AArch64 vector-register-file half-mapping contract
+
+- Scope: the mapping from the four vector memory-transfer bodies
+  (`ARM64_SIM_L_LOAD_{D0,Q0}_MEM`, `ARM64_SIM_L_STORE_{D0,Q0}_MEM`) onto the two
+  independent 64-bit vector-register state fields `__a64_v0` (low half, slot
+  offset 0) and `__a64_v0_hi` (high half, slot offset 8). A `.D0` transfer
+  touches the low half only; a `.Q0` transfer touches the low half and then the
+  high half. This is distinct from the already-proved `arm64_dq_mem_refines`,
+  which fixes the *memory* lanes a transfer touches, not which vector-register
+  state field each lane maps into.
+- Semantics: two distinct half slots (low at 0, high at 8); the `.Q0` plan
+  touches the low half before the high half, and a `.Q0` plan that aliased the
+  two halves would not satisfy the plan.
+- Generated from `arm64_vreg_spec.json`: `KProgFormal/GeneratedArm64Vreg.lean` +
+  `generated/arm64_vreg.h` (`low_offset` = 0, `high_offset` = 8, four opcodes
+  `LOAD_D0`/`LOAD_Q0`/`STORE_D0`/`STORE_Q0` with access, half count and arm
+  index); the generator's `load()` re-checks the `__a64_v0`/`__a64_v0_hi`
+  declarations in `native-sim/arm64/arm64_sim_local_bpf.h`.
+- `KProgFormal/Arm64Vreg.lean`: `arm64_vreg_refines`,
+  `arm64_vreg_half_count_refines`, `arm64_vreg_access_dispatch`,
+  `arm64_vreg_half_plan`, `arm64_vreg_halves_distinct`,
+  `arm64_vreg_q0_touches_distinct_halves`, `arm64_vreg_arm_index_dispatch`, plus
+  `arm64_vreg_low_half_example`, `arm64_vreg_high_half_example`.
+- `test_arm64_vreg_host.c`: independent 9,216-case oracle. Part 1 checks the
+  generated offset/half/access/plan/index constants against independent literals
+  including an off-set opcode; Part 2 drives the generated
+  `KPROG_ARM64_VREG_HALF_OFFSET` / per-opcode `SELECT` / `HALVES` / `ACCESS`
+  macros over every opcode crossed with all 32 base registers, the pre/post flag
+  set and a spread of immediates and seeded vector-register state pairs,
+  restating the same bodies from the raw opcode and confirming `.D0` leaves the
+  high half untouched while `.Q0` writes low-then-high.
+- Mutation test: 8/8 detected — C half-offset swap, D0 selector swap, half-count
+  swap and Q0 order reversal (oracle mismatch or C static assertion), spec
+  state-field-name swap and offset alias (generator `--check`), Lean
+  plan-literal change and generated-`halfOffset` change (`lake build`
+  refinement).
+- Full `make -C native-sim/formal check` passes with 0 errors, 73 generators,
+  135 Lean module checks, 63 host cross-checks.
+
+## Next after 0054
+
+With 0054 the AArch64 memory-transfer surface now has contracts for the generic
+dispatch (`arm64_mem_dispatch_refines`), the address offset
+(`arm64_mem_offset_refines`), the byte-lane scatter (`arm64_byte_lane`), the
+stack slot-tag selection (`arm64_stack_tag`), the vector `.D0`/`.Q0` lane plan
+(`arm64_dq_mem_refines`), the `LDP`/`STP` pair plan (`arm64_pair_mem_refines`),
+the pre/post writeback decode (`arm64_mem_prepost_*`), and now the
+vector-register-file half mapping (`arm64_vreg_*`). The remaining AArch64 open
+surfaces are the remaining SIMD element widths (`.S0`/`.H0`/`.B0` and the `.Q0`
+element variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean
+unsigned-semantics correspondence. On x86 the remaining open work is unchanged
+from 0053: the index register decode and packed-AUX layout, the
+simulator-stack-to-abstract-frame-base mapping, the register and immediate/RHS
+objdump/parser-to-AUX selection relation, compiler/native bytes, multi-step
+control-flow traces, and specialization preservation.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

@@ -1008,6 +1008,34 @@ outside the theorem, and the two bodies do not call the generated
 `arm64_mem_prepost.h` macros -- that header is exercised only by the host oracle
 -- so both remain in the trusted computing base.
 
+The AArch64 vector-register-file half-mapping theorem covers the four
+vector memory-transfer bodies `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`,
+`STORE_D0_MEM` and `STORE_Q0_MEM`, which move a SIMD register's low 64-bit half
+(`.D0`) or both halves (`.Q0`) between memory and the two independent
+vector-register state fields `__a64_v0` (low half, slot offset 0) and
+`__a64_v0_hi` (high half, slot offset 8). This contract fixes *which state field
+each half maps into and in which order the halves are touched*: a `.D0` transfer
+touches the low half only (`arm64_vreg_plan`) while a `.Q0` transfer touches the
+low half and then the high half (`arm64_vreg_refines`, `arm64_vreg_half_plan`),
+the two halves are distinct slots (`arm64_vreg_halves_distinct`) and a `.Q0`
+plan touches two distinct halves (`arm64_vreg_q0_touches_distinct_halves`), and
+the four-way `LOAD_D0 / LOAD_Q0 / STORE_D0 / STORE_Q0` chain covers each opcode
+once in the order the generated arm index names (`arm64_vreg_arm_index_dispatch`)
+with the load/store direction a per-opcode fact (`arm64_vreg_access_dispatch`).
+This is distinct from the `.D0`/`.Q0` lane-plan contract, which fixes the
+*memory* lanes a transfer touches, not the vector-register state field each lane
+maps into. Its independent oracle drives the generated
+`KPROG_ARM64_VREG_HALF_OFFSET` / per-opcode `SELECT` / `HALVES` / `ACCESS` macros
+over every opcode crossed with all 32 base registers, the pre/post flag set and a
+spread of immediates and vector-register state pairs, restating the same bodies
+from the raw opcode; eight binding mutations -- a half-offset swap, a D0/Q0
+selector swap, a half-count swap and a Q0 order reversal in the C macros, a
+state-field-name swap and an offset alias in the spec, and a plan-literal and a
+generated-offset change in Lean -- each change the observable result. The four
+bodies do not call the generated `arm64_vreg.h` macros -- that header is
+exercised only by the host oracle -- so both remain in the trusted computing
+base.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1029,8 +1057,8 @@ multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
 selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, CCMP,
-`.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, and pre/post-indexed
-address-writeback composition,
+`.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
+address-writeback, and vector-register-file half mapping composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

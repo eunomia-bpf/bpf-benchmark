@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "operation": "arm64Vreg",
+  "selector": "vector_register_file_half_mapping_and_write_order",
+  "state_fields": {
+    "low": "__a64_v0",
+    "high": "__a64_v0_hi"
+  },
+  "low_offset": 0,
+  "high_offset": 8,
+  "opcodes": [
+    {
+      "name": "loadD0",
+      "define": "ARM64_OP_LOAD_D0",
+      "code": "0x28",
+      "codeIndex": 0,
+      "access": "load",
+      "halves": "one"
+    },
+    {
+      "name": "loadQ0",
+      "define": "ARM64_OP_LOAD_Q0",
+      "code": "0x2a",
+      "codeIndex": 1,
+      "access": "load",
+      "halves": "two"
+    },
+    {
+      "name": "storeD0",
+      "define": "ARM64_OP_STORE_D0",
+      "code": "0x29",
+      "codeIndex": 2,
+      "access": "store",
+      "halves": "one"
+    },
+    {
+      "name": "storeQ0",
+      "define": "ARM64_OP_STORE_Q0",
+      "code": "0x2b",
+      "codeIndex": 3,
+      "access": "store",
+      "halves": "two"
+    }
+  ]
+}

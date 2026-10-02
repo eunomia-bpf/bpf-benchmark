@@ -30,6 +30,7 @@ check:
 	python3 generate_arm64_dq_mem_spec.py --check
 	python3 generate_arm64_pair_mem_spec.py --check
 	python3 generate_arm64_mem_prepost_spec.py --check
+	python3 generate_arm64_vreg_spec.py --check
 	python3 generate_arm64_branch_spec.py --check
 	python3 generate_arm64_branch_emit_spec.py --check
 	python3 generate_arm64_cond_spec.py --check
@@ -331,4 +332,8 @@ check:
 	lake env lean KProgFormal/Arm64MemPrepost.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_prepost_host.c -o build/test_arm64_mem_prepost_host
 	./build/test_arm64_mem_prepost_host
+	lake env lean KProgFormal/GeneratedArm64Vreg.lean
+	lake env lean KProgFormal/Arm64Vreg.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_vreg_host.c -o build/test_arm64_vreg_host
+	./build/test_arm64_vreg_host
 	lake env lean KProgFormal/Arm64Decode.lean
