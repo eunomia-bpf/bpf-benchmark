@@ -6152,6 +6152,51 @@ AArch64 surfaces are unchanged from 0059: the remaining SIMD element widths
 consequences, and the C-to-Lean unsigned-semantics correspondence. On x86 the
 remaining open work is unchanged from 0056.
 
+## Step 0061 — AArch64 sign-extending-load width contract
+
+- Scope: the three load-sign-extend opcodes `ARM64_OP_LDRSB` (0x36, 54),
+  `ARM64_OP_LDRSW` (0x39, 57), and `ARM64_OP_LDRSH` (0x3f, 63). The handlers read
+  a hardcoded memory width before sign-extending the loaded value into the
+  destination; which load width each opcode reads is now the generated contract.
+- Semantics: the load width is fixed by the opcode's numeric code alone — a byte
+  load reads a byte, a halfword load a halfword, a word load a word, independent
+  of the destination access width. The three widths are pairwise distinct, and
+  every one is below 64 so the shared sign-extension step is always load-bearing.
+- Generated from `arm64_ldrsx_spec.json`: `KProgFormal/GeneratedArm64LdrSx.lean`
+  + `generated/arm64_ldrsx.h` (`ldrSb`=54, `ldrSw`=57, `ldrSh`=63;
+  `HANDLED`/`LOAD_WIDTH` macros). The generator re-checks all three opcodes
+  against `arm64_sim.h`.
+- `KProgFormal/Arm64LdrSx.lean`: `arm64_ldrsx_width_refines` (the generated table
+  equals an independent numeric-code-keyed statement),
+  `arm64_ldrsx_width_code_determined`, `arm64_ldrsx_widths_distinct`,
+  `arm64_ldrsx_bytes_match`, `arm64_ldrsx_width_lt_64`, `arm64_ldrsx_code_dispatch`,
+  the three code-range pins, `arm64_ldrsx_flags_unchanged`, plus two examples.
+- `test_arm64_ldrsx_host.c`: independent oracle deciding the load width from the
+  numeric opcode code (not the macro switch), sweeping all 256 opcode bytes in
+  forked children (known loads return the oracle width; unknown opcodes abort
+  through the generated unsupported arm): 256 cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes `../formal/generated/arm64_ldrsx.h`,
+  adds the `ARM64_SIM_L_LDRSX_LOAD_WIDTH` wrapper, and replaces the three inline
+  `LDRSB`/`LDRSW`/`LDRSH` arms with one `KPROG_ARM64_LDRSX_HANDLED` branch whose
+  memory read is keyed on the generated `KPROG_ARM64_LDRSX_LOAD_WIDTH` and whose
+  sign-extension operand is selected from the opcode.
+- Mutation test: 7/7 detected — a byte load that reads a word, a word load that
+  reads a halfword, a moved case label, and a dropped coverage disjunct in the
+  generated C, a spec load-width swap, and a generated halfword-load that reads a
+  byte and an independent code-to-word mislabel in Lean.
+- Full `make -C native-sim/formal check` passes with 0 errors, 80 generators,
+  149 Lean module checks, 70 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0061
+
+The AArch64 sign-extending-load surface now has a load-width contract
+(`arm64_ldrsx_width_refines`), lifting the load-width decision out of the TCB.
+Remaining AArch64 candidates, one contract per increment: the remaining SIMD
+element widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants), the
+`MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
+correspondence. On x86 the remaining open work is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

@@ -93,6 +93,7 @@ union arm64_sim_gpr {
 #include "../formal/generated/arm64_adrp.h"
 #include "../formal/generated/arm64_stlxr.h"
 #include "../formal/generated/arm64_mov.h"
+#include "../formal/generated/arm64_ldrsx.h"
 #define ARM64_SIM_L_ADRP_TAG(OP)                                            \
 	KPROG_ARM64_ADRP_TAG((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 #define ARM64_SIM_L_STLXR_VALUE(OP)                                         \
@@ -101,6 +102,8 @@ union arm64_sim_gpr {
 #define ARM64_SIM_L_MOV_PTR_TAG_PATH(OP, WIDTH)                             \
 	KPROG_ARM64_MOV_PTR_TAG_PATH((OP), (WIDTH),                        \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+#define ARM64_SIM_L_LDRSX_LOAD_WIDTH(OP)                                    \
+	KPROG_ARM64_LDRSX_LOAD_WIDTH((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 struct arm64_sim_xdp_abi {
 	void *data;
@@ -1003,20 +1006,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			else                                                   \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
-		} else if ((OP) == ARM64_OP_LDRSB) {                         \
+		} else if (KPROG_ARM64_LDRSX_HANDLED(OP)) {                \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
-			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_WIDTH_8);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(ARM64_OP_SXTB, __a64_l_value, __a64_l_width), __a64_l_width);\
-			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
-		} else if ((OP) == ARM64_OP_LDRSW) {                         \
-			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
-			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_WIDTH_32);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(ARM64_OP_SXTW, __a64_l_value, __a64_l_width), __a64_l_width);\
-			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
-		} else if ((OP) == ARM64_OP_LDRSH) {                         \
-			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
-			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_WIDTH_16);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(ARM64_OP_SXTH, __a64_l_value, __a64_l_width), __a64_l_width);\
+			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_SIM_L_LDRSX_LOAD_WIDTH((OP)));\
+			__u64 __a64_l_sxop = (OP) == ARM64_OP_LDRSB ? ARM64_OP_SXTB :\
+				(OP) == ARM64_OP_LDRSW ? ARM64_OP_SXTW : ARM64_OP_SXTH;\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(__a64_l_sxop, __a64_l_value, __a64_l_width), __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_STORE) {                           \
 			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM));              \

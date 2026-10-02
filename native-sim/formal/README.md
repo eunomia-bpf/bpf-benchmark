@@ -1194,6 +1194,32 @@ the refinement theorem. The dispatch body calls the generated `arm64_mov.h`
 macro, so the routing decision is lifted out of the trusted computing base; the
 source value and tag reads and the two register writes remain outside the theorem.
 
+The AArch64 sign-extending-load width theorem covers the three load opcodes
+`ARM64_OP_LDRSB`, `ARM64_OP_LDRSW`, and `ARM64_OP_LDRSH`. Each handler read a
+hardcoded memory width before sign-extending the loaded value into the
+destination; the load width is now the generated contract. `arm64_ldrsx_width_refines`
+proves the generated `KPROG_ARM64_LDRSX_LOAD_WIDTH` table equals an independent
+statement keyed on the numeric opcode code---deliberately not a restatement of the
+macro's switch---so the byte load reads a byte, the halfword load a halfword, and
+the word load a word. The load width is fixed by the opcode's code alone
+(`arm64_ldrsx_width_code_determined`), the three widths are pairwise distinct
+(`arm64_ldrsx_widths_distinct`), the bit count matches the bytes read
+(`arm64_ldrsx_bytes_match`), every width is strictly below 64 so the shared
+sign-extension step is always load-bearing (`arm64_ldrsx_width_lt_64`), and the
+three opcodes are pinned (`arm64_ldrsx_code_dispatch` and the three independent
+range pins). Its independent oracle decides the load width from the numeric
+opcode code (never the macro's switch) and sweeps the opcode over all 256 byte
+values in forked children, requiring each known load to return the oracle width
+and each unknown opcode to abort through the generated unsupported arm; seven
+binding mutations---a byte load that reads a word, a word load that reads a
+halfword, a moved case label, and a dropped coverage disjunct in the generated C,
+a spec load-width swap, and a generated halfword-load that reads a byte and an
+independent code-to-word mislabel in Lean---each change the observable width or
+the refinement theorem. The dispatch body calls the generated `arm64_ldrsx.h`
+macro, so the load-width decision is lifted out of the trusted computing base; the
+memory read, the load-width-keyed sign-extension operand selection, and the
+destination write remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1217,8 +1243,8 @@ AArch64 width, generic ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
-relocation-tag selection, STLXR exclusive-store-status encoding, and MOV
-provenance-path routing,
+relocation-tag selection, STLXR exclusive-store-status encoding, MOV
+provenance-path routing, and sign-extending-load width selection,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

@@ -130,6 +130,8 @@ import KProgFormal.GeneratedArm64Stlxr
 import KProgFormal.Arm64Stlxr
 import KProgFormal.GeneratedArm64Mov
 import KProgFormal.Arm64Mov
+import KProgFormal.GeneratedArm64LdrSx
+import KProgFormal.Arm64LdrSx
 import KProgFormal.GeneratedArm64MemOffset
 import KProgFormal.Arm64MemOffset
 import KProgFormal.GeneratedArm64Fmov
