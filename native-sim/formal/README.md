@@ -828,6 +828,28 @@ copy width, the preserved tags, the byte-for-byte copy, and the untouched
 flags. The register decode that selects the opcode and supplies the immediate
 remains outside the theorem.
 
+The `ANDN` / `ANDN_MEM` theorem covers the `X86_SIM_L_EXEC_ANDN` and
+`X86_SIM_L_EXEC_ANDN_MEM` arms for `X86_OP_ANDN` (`0x3d`) and `X86_OP_ANDN_MEM`
+(`0x44`), the opcodes that compute `(~src1) & src2`. The destination write
+width is the FLAGS-resolved width `FLAGS ? FLAGS : 64` for both bodies
+(`x86_andn_write_width_refines`), and the second-operand source is a per-opcode
+table entry (`x86_andn_source_refines`): only the memory form reads memory at
+all. The headline fact is the memory-read width, which is *independently
+selected* and not the destination write width: the memory form reads at the AUX
+field's own width when that field names one, and falls back to the resolved
+FLAGS write width when it is absent (`x86_andn_mem_width_refines`,
+`x86_andn_mem_width_arm_refines`) — so a narrow AUX width reads narrowly while
+the destination still writes at the FLAGS width. `x86_andn_step_refines`
+composes the whole body over the generated source/write-width/memory-width
+tables and the shared register read, memory load, complement/and, logic-flag
+production, and partial-register writeback; its independent 1849-case oracle
+exercises the generated tables, the full composition over a deterministic
+register and source-memory model, and pins the register/memory source split,
+the named-AUX-versus-FLAGS-width divergence, the absent-AUX fallback, the
+CF=OF=0 logic-flag production at the write width, the partial-register
+writeback, and the write-free memory. The register decode that selects the
+opcode remains outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -836,7 +858,10 @@ logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
-`PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
+`PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
+`ANDN`/`ANDN_MEM` source-split/memory-width composition, and shared
+`MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler
+compositions, the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
@@ -855,9 +880,9 @@ oracle — so all four bodies remain in the trusted computing base.
 The two `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
 `x86_pushpop.h` macros — that header is exercised only by the host oracle — so
 both bodies remain in the trusted computing base.
-The `X86_SIM_L_EXEC_REP_MOVS` handler body does not call the generated
-`x86_rep_movs.h` macros — that header is exercised only by the host oracle — so
-the body remains in the trusted computing base.
+The `X86_SIM_L_EXEC_ANDN` and `X86_SIM_L_EXEC_ANDN_MEM` handler bodies do not
+call the generated `x86_andn.h` macros — that header is exercised only by the
+host oracle — so both bodies remain in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

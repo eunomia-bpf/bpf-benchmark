@@ -73,6 +73,8 @@ import KProgFormal.GeneratedX86PushPop
 import KProgFormal.X86PushPopHandler
 import KProgFormal.GeneratedX86RepMovs
 import KProgFormal.X86RepMovsHandler
+import KProgFormal.GeneratedX86Andn
+import KProgFormal.X86AndnHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags

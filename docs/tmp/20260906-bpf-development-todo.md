@@ -5357,10 +5357,66 @@ surface.
 - Full `make -C native-sim/formal check` passes with 0 errors, 65
   generators, 119 Lean module checks and 55 host cross-checks.
 
+## Step 0047 — x86 `ANDN` / `ANDN_MEM` source-split composition
 
-## Next after 0046
+- Scope: the two `X86_SIM_L_EXEC_ANDN` / `X86_SIM_L_EXEC_ANDN_MEM` arms for
+  `X86_OP_ANDN` (`0x3d`) and `X86_OP_ANDN_MEM` (`0x44`), the bitwise
+  `(~src1) & src2` pair. `ANDN` reads `src2` from a register (`AUX`); the
+  memory form reads it from memory.
+- Facts: the destination write width is the FLAGS-resolved `FLAGS ? FLAGS : 64`
+  for both bodies; the second-operand source is a per-opcode table entry, and
+  only the memory form consults a memory width at all. The headline fact is
+  the memory-read width: it is *independently selected* and is not the
+  destination write width — the memory form reads at `X86_MEM_AUX_MEM_WIDTH(AUX)`
+  when the AUX field names a width and falls back to the resolved FLAGS write
+  width when that field is absent or zero. CF and OF are set to 0 by the shared
+  logic-flag production; ZF/SF track the result narrowed at the *write* width.
+- Files: `native-sim/formal/generate_x86_andn_spec.py` + `x86_andn_spec.json`
+  (schema_version 1, two-opcode `EXPECTED` table, `--check` rejects stale text)
+  → `KProgFormal/GeneratedX86Andn.lean`, `generated/x86_andn.h`;
+  `KProgFormal/X86AndnHandler.lean`; oracle `test_x86_andn_host.c`. Wired into
+  `KProgFormal.lean` and the Makefile `check` target. `x86_sim_local_bpf.h` is
+  unchanged.
+- Generated C: the two opcode-drift `_Static_assert`s, a local width-code block
+  with a 64-bit drift assert, `KPROG_X86_ANDN_WRITE_WIDTH_DEFAULT X86_WIDTH_64`,
+  the two source codes + per-opcode source defines +
+  `KPROG_X86_ANDN_SOURCE(OP_IS_MEMORY)`, the two memory-width arm codes +
+  `KPROG_X86_ANDN_MEM_WIDTH_ARM(AUX_WIDTH_IS_ABSENT)`, the FLAGS-resolving
+  `KPROG_X86_ANDN_WRITE_WIDTH(FLAGS)`, and the two-input
+  `KPROG_X86_ANDN_MEM_WIDTH(AUX_WIDTH_CODE, FLAGS)`.
+- Lean: `x86AndnWriteWidthSpec`/`generatedX86AndnWriteWidth` + `*_refines`/
+  `*_absent_defaults`; `Source`/`source` + `x86_andn_source_refines`;
+  `memWidthArm` (keyed on the raw AUX `Code`, the `absent` code is 0) +
+  `x86_andn_mem_width_arm_refines`; `x86AndnMemWidthSpec`/
+  `generatedX86AndnMemWidth` + `x86_andn_mem_width_refines`;
+  `X86AndnEffect` (data-only, carries `deriving DecidableEq, Repr`);
+  `generatedX86AndnStep`/`x86AndnStepSpec` + `x86_andn_step_refines`; and the
+  narrowing pins. The `memWidthArm` takes a `Code` rather than a `Bool`, so the
+  arm theorem carries no `resolveWidth` cycle; the `auxField` arm resolves the
+  AUX code through the shared width table, the `flagsFallback` arm resolves the
+  FLAGS code to the resolved write width. The generated module declares its own
+  `resolveWidth` (precedent `GeneratedX86Cmov.lean`).
+- The final `x86_andn_step_refines` proof is `cases op <;> cases flagsCode <;>
+  cases auxCode <;> simp only [...]` — the `cases` must come *before* `simp
+  only`, or `simp` rewrites into a mangled `if true = true then …` form that no
+  longer reduces.
+- Independent C oracle `test_x86_andn_host.c`: generated tables vs. hand
+  restatements; the whole composition over a deterministic register and
+  source-memory model (2 source forms × 5 FLAGS codes × 5 AUX widths × 4
+  displacements × 3 src1 regs × 3 dst regs) comparing the whole register file,
+  the whole memory array, and the flags; seven pins. **1849 cases**, zero
+  `-Wall -Wextra` warnings. Mutation-tested with arm swaps / literal changes:
+  swapping the two `KPROG_X86_ANDN_MEM_WIDTH` result arms, changing
+  `KPROG_X86_ANDN_WRITE_WIDTH_DEFAULT` 64→32, and swapping the two per-opcode
+  source values each make it exit non-zero (a plain renumbering of the codes is
+  vacuous — the oracle reads the codes).
+- Full `make -C native-sim/formal check` passes with 0 errors, 66 generators,
+  121 Lean module checks and 56 host cross-checks.
 
-The rest of the x86 surface (`_ANDN{,_MEM}`, `_BZHI{,_MEM}`,
+
+## Next after 0047
+
+The rest of the x86 surface (`_BZHI{,_MEM}`,
 `_BT`/`_BT_IMM`/`_BT_MEM_IMM`, `_CMP_{IMM,REG}_OP`), the index register decode
 and
 packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
