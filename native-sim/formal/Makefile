@@ -25,6 +25,7 @@ check:
 	python3 generate_arm64_cneg_spec.py --check
 	python3 generate_arm64_orn_spec.py --check
 	python3 generate_arm64_adrp_spec.py --check
+	python3 generate_arm64_stlxr_spec.py --check
 	python3 generate_arm64_mem_offset_spec.py --check
 	python3 generate_arm64_fmov_spec.py --check
 	python3 generate_arm64_load_bytes_spec.py --check
@@ -316,6 +317,10 @@ check:
 	lake env lean KProgFormal/Arm64Adrp.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_adrp_host.c -o build/test_arm64_adrp_host
 	./build/test_arm64_adrp_host
+	lake env lean KProgFormal/GeneratedArm64Stlxr.lean
+	lake env lean KProgFormal/Arm64Stlxr.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
+	./build/test_arm64_stlxr_host
 	lake env lean KProgFormal/GeneratedArm64MemOffset.lean
 	lake env lean KProgFormal/Arm64MemOffset.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_offset_host.c -o build/test_arm64_mem_offset_host

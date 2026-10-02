@@ -91,8 +91,12 @@ union arm64_sim_gpr {
 #define ARM64_SIM_TAG_RELOC_ADDR 7U
 #define ARM64_SIM_TAG_RODATA_ADDR 8U
 #include "../formal/generated/arm64_adrp.h"
+#include "../formal/generated/arm64_stlxr.h"
 #define ARM64_SIM_L_ADRP_TAG(OP)                                            \
 	KPROG_ARM64_ADRP_TAG((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
+#define ARM64_SIM_L_STLXR_VALUE(OP)                                         \
+	KPROG_ARM64_STLXR_VALUE((OP), ARM64_WIDTH_32,                      \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 struct arm64_sim_xdp_abi {
 	void *data;
@@ -1013,12 +1017,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				__a64_l_width, ARM64_SIM_L_READ_REG(SRC),   \
 				ARM64_SIM_L_REG_TAG(SRC));                  \
 			ARM64_SIM_L_MEM_POST((DST), (AUX), (IMM));             \
-		} else if ((OP) == ARM64_OP_STLXR) {                           \
+		} else if (KPROG_ARM64_STLXR_HANDLED(OP)) {                \
 			ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE,        \
 				(AUX), 0, 0, __a64_l_width,                 \
 				ARM64_SIM_L_READ_REG(SRC),                  \
 				ARM64_SIM_L_REG_TAG(SRC));                  \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), 0, ARM64_WIDTH_32);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_STLXR_VALUE((OP)), ARM64_WIDTH_32);\
 		} else if ((OP) == ARM64_OP_LDP) {                             \
 			ARM64_SIM_L_MEM_PRE((SRC2), (AUX), (IMM));             \
 			__u64 __a64_l_v0 = ARM64_SIM_L_MEM_READ((SRC2), (SRC3), (AUX), (IMM), 0, __a64_l_width);\

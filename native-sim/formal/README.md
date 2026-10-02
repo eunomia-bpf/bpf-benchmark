@@ -1141,6 +1141,32 @@ relocation-tag selection is lifted out of the trusted computing base; the
 immediate page address, the register-file lookup, and the tagged-pointer write
 remain outside the theorem.
 
+The AArch64 STLXR exclusive-store-status theorem covers the one value body
+`ARM64_OP_STLXR`: the store-release-exclusive succeeds unconditionally in this
+simulator, so the status written back to the destination register is the success
+code `0`, narrowed to the word width the handler writes
+(`ARM64_SIM_L_WRITE_REG_WIDTH((DST), …, ARM64_WIDTH_32)`). `arm64_stlxr_refines`
+proves the generated `KPROG_ARM64_STLXR_VALUE` arm equals an independent
+statement that derives the status as the destination-width mask with itself
+subtracted (`narrow (mask width - mask width) width`) -- deliberately not a bare
+restatement of the literal `0` -- and `arm64_stlxr_success_zero` proves that
+status is the zero code at every width. The opcode is pinned to its case-label
+code 56 (`arm64_stlxr_code_dispatch`, `arm64_stlxr_code_in_range`),
+`arm64_stlxr_flags_unchanged` records that the handler writes no NZCV, and
+`arm64_stlxr_w32_bound` bounds the word-width status. Its independent oracle
+derives the destination width mask from a shift of one rather than the macro's
+width-mask ladder, forms the success code as that mask with itself subtracted and
+requires it zero at every width, then sweeps the opcode over all 256 byte values
+and all four destination widths in forked children, requiring each known opcode
+to return the zero status and each unknown byte to abort through the generated
+unsupported arm; six binding mutations -- a nonzero success status, a dropped
+width narrowing, and a moved case label in the generated C, a spec code move, and
+a nonzero generated status and a nonzero independent-spec code in Lean -- each
+change the observable status or the refinement theorem. The dispatch body calls
+the generated `arm64_stlxr.h` macro, so the success-status encoding is lifted out
+of the trusted computing base; the memory write, the source-register value and
+tag reads, and the status-register write remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1163,8 +1189,8 @@ compositions, and
 AArch64 width, generic ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
-CNEG condition-gated negation, ORN complemented-logical-OR composition, and
-ADRP relocation-tag selection,
+CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
+relocation-tag selection, and STLXR exclusive-store-status encoding,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

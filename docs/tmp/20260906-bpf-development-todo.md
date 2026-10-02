@@ -6054,6 +6054,56 @@ widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants),
 `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
 correspondence. On x86 the remaining open work is unchanged from 0056.
 
+
+## Step 0059 — AArch64 STLXR exclusive-store status contract
+
+- Scope: the single store-release-exclusive opcode `ARM64_OP_STLXR` (0x38, 56).
+  The handler wrote an inline success code `0` at word width; the status value is
+  now the generated contract.
+- Semantics: the store-exclusive succeeds unconditionally in this simulator, so
+  the status written back to the destination register is the success code `0`
+  narrowed to `ARM64_WIDTH_32` (the width the handler writes); no NZCV is
+  written. The memory write, the source-register value and tag reads, and the
+  status-register write stay in the TCB.
+- Generated from `arm64_stlxr_spec.json`:
+  `KProgFormal/GeneratedArm64Stlxr.lean` + `generated/arm64_stlxr.h`
+  (`stlxr`=56; `HANDLED`/`VALUE` macros). The generator re-checks the opcode
+  against `arm64_sim.h`.
+- `KProgFormal/Arm64Stlxr.lean`: `arm64_stlxr_refines` (the generated arm equals
+  an independent statement forming the status as the width mask minus itself),
+  `arm64_stlxr_success_zero`, `arm64_stlxr_code_dispatch`,
+  `arm64_stlxr_code_in_range`, `arm64_stlxr_flags_unchanged`,
+  `arm64_stlxr_w32_bound`, plus two worked examples.
+- `test_arm64_stlxr_host.c`: independent oracle deriving the width mask from a
+  shift of one (not the macro ladder), forming the success code as that mask
+  minus itself, requiring it zero at every width, then sweeping all 256 opcode
+  bytes across all four destination widths in forked children (known opcodes
+  return the zero status; unknown bytes abort through the generated unsupported
+  arm): 1028 cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes
+  `../formal/generated/arm64_stlxr.h` (after the `ARM64_SIM_TAG_*` block, beside
+  the adrp include), adds the `ARM64_SIM_L_STLXR_VALUE` wrapper, and replaces the
+  inline status write with the `KPROG_ARM64_STLXR_HANDLED` branch calling the
+  generated macro.
+- Mutation test: 6/6 detected — a nonzero success status, a dropped width
+  narrowing, and a moved case label in the generated C, a spec code move, and a
+  nonzero generated status and a nonzero independent-spec code in Lean.
+- Full `make -C native-sim/formal check` passes with 0 errors, 78 generators,
+  145 Lean module checks, 68 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0059
+
+The AArch64 exclusive-store surface now has a success-status contract
+(`arm64_stlxr_refines`), lifting the status encoding out of the TCB. Remaining
+AArch64 candidates, one contract per increment: the `MOV_IMM`/`MOV_REG` pair
+(provenance-tag propagation) and the sign-extending loads
+`LDRSB`/`LDRSW`/`LDRSH` with writeback. The other open AArch64 surfaces are
+unchanged from 0058: the remaining SIMD element widths (`.S0`/`.H0`/`.B0` and the
+`.Q0` element variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the
+C-to-Lean unsigned-semantics correspondence. On x86 the remaining open work is
+unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),
