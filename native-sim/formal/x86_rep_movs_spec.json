@@ -1,0 +1,10 @@
+{
+    "schema_version": 1,
+    "operation": "x86RepMovs",
+    "selector": "flags_resolved_copy_width_then_literal_bound_then_fixed_count_width",
+    "op_define": "X86_OP_REP_MOVS",
+    "op_code": "0x3a",
+    "copy_bound": 64,
+    "default_width": "b64",
+    "count_width": "b64"
+}

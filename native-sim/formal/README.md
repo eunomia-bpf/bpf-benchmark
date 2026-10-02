@@ -802,6 +802,32 @@ untouched register file, the narrow-pop partial writeback, and the untouched
 flags. The register decode that selects the opcode and supplies the FLAGS code
 remains outside the theorem.
 
+The `REP MOVS` block-copy theorem covers the `X86_SIM_L_EXEC_REP_MOVS` arm for
+`X86_OP_REP_MOVS` (`0x3a`), the opcode that copies `RSI`-addressed bytes to
+`RDI` a bounded number of times. The copy width is the FLAGS-resolved width
+`FLAGS ? FLAGS : 64` (`x86_rep_movs_width_refines`,
+`x86_rep_movs_width_is_flags_resolved`), the loop bound is the literal `64`
+(`x86_rep_movs_bound_refines`, `x86_rep_movs_bound_is_sixty_four`), and the
+count the body copies is the raw instruction immediate, not `RCX`
+(`x86_rep_movs_count_is_immediate`): the body copies `min 64 count` elements
+(`x86_rep_movs_element_count_refines`, `x86_rep_movs_element_count_bounded`)
+while each pointer still advances by the full raw count times the copy stride
+(`x86_rep_movs_overshoot_beyond_bound`,
+`x86_rep_movs_advance_uses_flags_width`). The trailing `RCX` writeback is
+independent of the copy width — it zeroes `RCX` at the fixed 64-bit width and
+scalarizes its tag whatever `FLAGS` resolved to
+(`x86_rep_movs_count_width_refines`, `x86_rep_movs_step_rcx_zeroed`), while the
+two pointers keep the provenance tags they were read with
+(`x86_rep_movs_tags_preserved`). `x86_rep_movs_step_refines` composes the whole
+body over the generated width/`countWidth` tables, the literal bound, and the
+shared register-write; its independent 67-case oracle exercises the generated
+tables, the full composition over a deterministic register and copy-buffer
+model, and pins the narrow-width advance, the bound-vs-raw-count saturation
+asymmetry, the zero-count no-op, the fixed 64-bit `RCX` zeroing under a narrow
+copy width, the preserved tags, the byte-for-byte copy, and the untouched
+flags. The register decode that selects the opcode and supplies the immediate
+remains outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -810,8 +836,7 @@ logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
-`PUSH`/`POP` stack-step composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
-load/store contract, the memory-source shift/rotate flagless composition, the
+`PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, and shared `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler compositions, the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
@@ -830,6 +855,9 @@ oracle — so all four bodies remain in the trusted computing base.
 The two `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
 `x86_pushpop.h` macros — that header is exercised only by the host oracle — so
 both bodies remain in the trusted computing base.
+The `X86_SIM_L_EXEC_REP_MOVS` handler body does not call the generated
+`x86_rep_movs.h` macros — that header is exercised only by the host oracle — so
+the body remains in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

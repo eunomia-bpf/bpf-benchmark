@@ -5299,11 +5299,70 @@ surface.
 - Full `make -C native-sim/formal check` passes with 0 errors, 64
   generators, 117 Lean module checks and 54 host cross-checks.
 
+## Step 0046 — x86 `REP MOVS` block-copy composition
 
-## Next after 0045
+- Scope: the single `X86_SIM_L_EXEC_REP_MOVS` arm for `X86_OP_REP_MOVS`
+  (`0x3a`), the bounded block copy that moves `RSI`-addressed bytes to `RDI`.
+- Facts: the copy width is the FLAGS-resolved width `FLAGS ? FLAGS : 64`; the
+  loop bound is the literal `64`; the count copied is the raw instruction
+  immediate (`IMM`), *not* `RCX`; the body copies `min 64 count` elements while
+  each pointer advances by the full raw count times the copy stride; and the
+  trailing `RCX` writeback zeroes `RCX` at the fixed 64-bit width, independent
+  of the FLAGS code. The two pointers keep the provenance tags they were read
+  with. `X86_SIM_L_LOAD_ADDR`/`_STORE_ADDR` are plain `KPROG_X86_MEM_LOAD`/
+  `_MEM_STORE` here (no ABI tag path), so no `BASE_IS_RSP`/`BASE_TAG`
+  classification is needed.
+- Files: `native-sim/formal/generate_x86_rep_movs_spec.py` +
+  `x86_rep_movs_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
+  rejects stale text) → `KProgFormal/GeneratedX86RepMovs.lean`,
+  `generated/x86_rep_movs.h`; `KProgFormal/X86RepMovsHandler.lean`; oracle
+  `test_x86_rep_movs_host.c`. Wired into `KProgFormal.lean` and the Makefile
+  `check` target. `x86_sim_local_bpf.h` is unchanged.
+- Generated C: the opcode-drift `_Static_assert`, a local width-code block with
+  a 64-bit drift assert, `KPROG_X86_REP_MOVS_BOUND 64U`,
+  `KPROG_X86_REP_MOVS_COPY_WIDTH_DEFAULT X86_WIDTH_64`,
+  `KPROG_X86_REP_MOVS_COUNT_WIDTH X86_WIDTH_64`, and the FLAGS-resolving
+  `KPROG_X86_REP_MOVS_WIDTH(FLAGS)` arm macro. The width macro is *not*
+  degenerate: the absent arm falls back to the 64-bit default while a narrow
+  arm stays narrow.
+- Lean: `x86RepMovsBoundSpec` + `*_refines`/`*_is_sixty_four`;
+  `x86RepMovsWidthSpec` + `generatedX86RepMovsWidth` + `*_refines`/
+  `*_is_flags_resolved`/`*_absent_defaults`;
+  `x86RepMovsElementCountSpec`/`generatedX86RepMovsElementCount` +
+  `*_refines`/`*_bounded`; `x86RepMovsStrideSpec` + `*_is_width_bytes`;
+  `generatedX86RepMovsAdvance`/`x86RepMovsAdvanceSpec` + `*_refines` +
+  `x86_rep_movs_overshoot_beyond_bound`/`*_count_is_immediate`;
+  `x86RepMovsCountWidthSpec`/`generatedX86RepMovsCountWidth` + `*_refines`;
+  `x86RepMovsRcxSpec`/`generatedX86RepMovsRcx` + `*_refines`/`*_zeroed`;
+  `X86RepMovsEffect` (data-only, so it carries `deriving DecidableEq, Repr`);
+  `generatedX86RepMovsStep`/`x86RepMovsStepSpec` + `x86_rep_movs_step_refines`;
+  the reads-apart lemmas `*_copy_width_is_flags_resolved`,
+  `*_count_is_raw_immediate`, `*_copies_at_most_bound`,
+  `*_advance_uses_flags_width`, `*_step_rcx_zeroed`, `*_tags_preserved`; and
+  the `simp only [...]` then `decide` examples (BitVec-valued props, so
+  `native_decide` fails). The generated module imports `GeneratedX86Store` and
+  shares its `Code`/`resolveWidth` (precedent `GeneratedX86Cmov.lean:3-7`);
+  the `RCX` writeback goes through `generatedX86RegWrite`.
+- Independent C oracle `test_x86_rep_movs_host.c`: generated tables vs. hand
+  restatements; the whole composition over a deterministic register and
+  copy-buffer model (5 FLAGS codes × 10 counts) comparing the whole register
+  file, the copied region, and the flags; seven pins (the narrow-width advance,
+  the bound-vs-raw-count saturation asymmetry, the zero-count no-op, the fixed
+  64-bit `RCX` zeroing under a narrow copy width, the preserved provenance
+  tags, the byte-for-byte copy, and the flag-free body). **67 cases**, zero
+  `-Wall -Wextra` warnings. Mutation-tested with arm swaps / literal changes:
+  swapping the two `KPROG_X86_REP_MOVS_WIDTH` arms, `BOUND` 64→8, and
+  `COUNT_WIDTH` 64→32 each make it exit non-zero (a plain renumbering of the
+  width codes is vacuous — the oracle reads the codes).
+- Full `make -C native-sim/formal check` passes with 0 errors, 65
+  generators, 119 Lean module checks and 55 host cross-checks.
 
-The rest of the x86 surface (`_REP_MOVS`, `_ANDN{,_MEM}`, `_BZHI{,_MEM}`,
-`_BT`/`_BT_IMM`, `_CMP_{IMM,REG}_OP`), the index register decode and
+
+## Next after 0046
+
+The rest of the x86 surface (`_ANDN{,_MEM}`, `_BZHI{,_MEM}`,
+`_BT`/`_BT_IMM`/`_BT_MEM_IMM`, `_CMP_{IMM,REG}_OP`), the index register decode
+and
 packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
 compiler/native bytes, multi-step traces, and specialization preservation
 remain open.
