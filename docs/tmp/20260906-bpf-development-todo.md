@@ -5615,12 +5615,20 @@ surface.
 
 ## Next after 0050
 
-`X86_SIM_L_EXEC_CMP_MEM` (`X86_OP_CMP_MEM_IMM` `0x1c` / `X86_OP_TEST_MEM_IMM`
-`0x1e` / `X86_OP_CMP_MEM_REG` `0x1d` / `X86_OP_TEST_MEM_REG` `0x1f`) and
-`X86_SIM_L_EXEC_CMP_REG_MEM` (register vs. memory compare), the index register
-decode and packed-AUX layout, the simulator-stack-to-abstract-frame-base
-mapping, compiler/native bytes, multi-step traces, and specialization
-preservation remain open.
+The memory-source compare/test family (`X86_SIM_L_EXEC_CMP_MEM` for
+`CMP`/`TEST [mem], rhs` and `X86_SIM_L_EXEC_CMP_REG_MEM` for `CMP reg, [mem]`)
+was already composed in step 0029 (`X86MemCompareHandler.lean`, 40784-case
+oracle), so with 0050 the register/immediate and memory compare/test surfaces
+both have refinement theorems. The x86 ALU dispatch (`x86_alu_handler_refines` /
+`x86_alu_aux_handler_refines`) and per-operation lane handlers
+(`X86AluWriteback.lean`), the memory-source and memory-destination ALU handlers,
+`IMUL`/`MULX`, `MOV`/`MOVX`/`LEA`/`STORE`, `SETCC`/`CMOV`/`MOVBE`, and the
+XMM0/push-pop/rep-movs/call-mem families are likewise already proved.
+Remaining open work is the index register decode and packed-AUX layout, the
+simulator-stack-to-abstract-frame-base mapping, the register and immediate/RHS
+objdump/parser-to-AUX selection relation, C-to-Lean unsigned-semantics
+correspondence, compiler/native bytes, multi-step control-flow traces, and
+specialization preservation.
 
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
