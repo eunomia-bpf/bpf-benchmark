@@ -30,6 +30,7 @@
 #include "../formal/generated/arm64_orn.h"
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_fmov.h"
+#include "../formal/generated/arm64_fmov_dest.h"
 #include "../formal/generated/arm64_load_bytes.h"
 #include "../formal/generated/arm64_byte_lane.h"
 #include "../formal/generated/arm64_mem_dispatch.h"
@@ -1072,8 +1073,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				KPROG_ARM64_FMOV_VALUE((AUX), __a64_v0,     \
 					ARM64_SIM_L_READ_REG(SRC),         \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
-			if ((AUX) == ARM64_FMOV_D_FROM_X ||                \
-			    (AUX) == ARM64_FMOV_S_FROM_W)                  \
+			if (KPROG_ARM64_FMOV_DEST_VECTOR((AUX),           \
+					ARM64_SIM_L_UNSUPPORTED_OPCODE()))   \
 				__a64_v0 = __a64_fmov_result;              \
 			else                                               \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST),         \

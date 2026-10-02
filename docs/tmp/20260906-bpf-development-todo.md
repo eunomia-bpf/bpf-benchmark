@@ -6286,6 +6286,48 @@ element variants), the `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lea
 unsigned-semantics correspondence. On x86 the remaining open work is unchanged
 from 0056.
 
+## Step 0064 — AArch64 FMOV destination-routing contract
+
+- Scope: the vector/register move `FMOV` (`ARM64_OP_FMOV`, 0x23, 35). The handler
+  applies the generated `KPROG_ARM64_FMOV_VALUE` selection and then decided which
+  register file receives the result with the inline disjunction
+  `AUX == D_FROM_X || AUX == S_FROM_W`; that destination routing is now the
+  generated contract.
+- Semantics: a direction routes to the vector register `v0` exactly when it is one
+  of the four in-range codes with an even parity; the two register-half
+  directions route to the general-purpose destination through the width-narrowed
+  register write.
+- Generated from `arm64_fmov_dest_spec.json`:
+  `KProgFormal/GeneratedArm64FmovDest.lean` + `generated/arm64_fmov_dest.h`
+  (`KPROG_ARM64_FMOV_DEST_VECTOR`). The generator re-checks the FMOV opcode and
+  the four direction codes against `arm64_sim.h`.
+- `KProgFormal/Arm64FmovDest.lean`: `arm64_fmov_dest_refines` (the generated
+  routing equals an independent parity-and-range statement),
+  `arm64_fmov_dest_parity`, `arm64_fmov_dest_out_of_range`,
+  `arm64_fmov_dest_complement`, the opcode lemmas, and two examples.
+- `test_arm64_fmov_dest_host.c`: independent oracle deciding the routing bit from
+  the direction code's parity and range (not the macro switch), sweeping the
+  direction over all 256 byte values in forked children: 256 cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes
+  `../formal/generated/arm64_fmov_dest.h` and replaces the inline FMOV routing
+  disjunction with the generated predicate.
+- Mutation test: 7/7 detected — two direction arms flipped onto the wrong
+  register file, a moved case label, an opcode static-assert drift, a spec
+  routing-rule change, a generated routing arm parity drop, and an independent
+  parity flip in Lean.
+- Full `make -C native-sim/formal check` passes with 0 errors, 83 generators,
+  155 Lean module checks, 73 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0064
+
+The AArch64 FMOV surface now has both a value contract (`arm64_fmov_refines`) and
+a destination-routing contract (`arm64_fmov_dest_refines`). Remaining AArch64
+candidates, one contract per increment: the remaining SIMD element widths
+(`.S0`/`.H0`/`.B0` and the `.Q0` element variants), the `MADD`/`MSUB`/`UMULH` flag
+consequences, and the C-to-Lean unsigned-semantics correspondence. On x86 the
+remaining open work is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

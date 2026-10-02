@@ -32,6 +32,7 @@ check:
 	python3 generate_arm64_pair_load_tag_spec.py --check
 	python3 generate_arm64_mem_offset_spec.py --check
 	python3 generate_arm64_fmov_spec.py --check
+	python3 generate_arm64_fmov_dest_spec.py --check
 	python3 generate_arm64_load_bytes_spec.py --check
 	python3 generate_arm64_byte_lane_spec.py --check
 	python3 generate_arm64_mem_dispatch_spec.py --check
@@ -349,6 +350,10 @@ check:
 	lake env lean KProgFormal/Arm64Fmov.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_fmov_host.c -o build/test_arm64_fmov_host
 	./build/test_arm64_fmov_host
+	lake env lean KProgFormal/GeneratedArm64FmovDest.lean
+	lake env lean KProgFormal/Arm64FmovDest.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_fmov_dest_host.c -o build/test_arm64_fmov_dest_host
+	./build/test_arm64_fmov_dest_host
 	lake env lean KProgFormal/GeneratedArm64LoadBytes.lean
 	lake env lean KProgFormal/Arm64LoadBytes.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_load_bytes_host.c -o build/test_arm64_load_bytes_host

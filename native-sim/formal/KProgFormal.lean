@@ -140,6 +140,8 @@ import KProgFormal.GeneratedArm64MemOffset
 import KProgFormal.Arm64MemOffset
 import KProgFormal.GeneratedArm64Fmov
 import KProgFormal.Arm64Fmov
+import KProgFormal.GeneratedArm64FmovDest
+import KProgFormal.Arm64FmovDest
 import KProgFormal.GeneratedArm64LoadBytes
 import KProgFormal.Arm64LoadBytes
 import KProgFormal.GeneratedArm64ByteLane

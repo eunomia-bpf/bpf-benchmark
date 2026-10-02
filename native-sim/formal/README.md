@@ -1277,6 +1277,32 @@ macro and its two slot accessors, so the routing decision is lifted out of the
 trusted computing base; the two memory reads, the two tag reads, and the four
 register writes remain outside the theorem.
 
+The AArch64 FMOV destination-routing theorem covers `ARM64_OP_FMOV`. Its handler
+applies the generated value selection to the moved value and then decides which
+register file receives it: a vector-destination direction writes `v0`, while a
+register-destination direction writes the general-purpose destination through
+the ordinary width-narrowed register write. The routing was inlined as the
+disjunction `AUX == D_FROM_X || AUX == S_FROM_W`; whether the result goes to the
+vector file is now the generated contract. `arm64_fmov_dest_refines` proves the
+generated `vectorDestination` routing equals an independent parity-and-range
+statement keyed on the direction code---deliberately not a restatement of the
+generated match arms---and `arm64_fmov_dest_parity`,
+`arm64_fmov_dest_out_of_range`, `arm64_fmov_dest_complement`,
+`arm64_fmov_dest_code_dispatch` and `arm64_fmov_dest_code_in_range` pin each
+direction, the out-of-range behaviour, the complement relation and the opcode
+layout. Its independent oracle decides the routing bit from the direction code's
+parity and range (never the macro's switch) and sweeps the direction over all 256
+byte values in forked children, requiring each in-range code to return the oracle
+bit and each out-of-range code to abort through the generated unsupported arm;
+seven binding mutations---two direction arms flipped onto the wrong register
+file, a moved case label, an opcode static-assert drift, a spec routing-rule
+change, a generated routing arm parity drop and an independent parity flip in
+Lean---each change the observable routing bit or the refinement theorem. The
+dispatch body calls the generated `arm64_fmov_dest.h` macro, so the routing
+decision is lifted out of the trusted computing base; the value selection, the
+width-narrowed register write, and the `v0` assignment remain outside the
+theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1302,7 +1328,8 @@ address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
 provenance-path routing, sign-extending-load width selection, and plain-load
-provenance preservation, and pair-load provenance routing,
+provenance preservation, pair-load provenance routing, and FMOV
+destination routing,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
