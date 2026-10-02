@@ -6748,6 +6748,50 @@ index-register decode into the AUX index byte; register/immediate/RHS
 objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 specialization preservation.
 
+## Step 0075 — x86 stack-arena storage-model contract
+
+- Scope: the arithmetic the simulator's stack helpers use to reach the arena
+  storage. The arena is a union of two overlapping views
+  (`x86_sim_local_bpf.h`): `__u8 b[X86_SIM_STACK_BYTES]` and
+  `__u64 q[(X86_SIM_STACK_BYTES + 7U) / 8U]`. `X86_SIM_L_STACK_READ`/`_WRITE`
+  index `q[INDEX >> 3]` on the 64-bit path only when `(INDEX & 7U) == 0`, and
+  otherwise split/reassemble a 64-bit value byte by byte through `b[]`. Each of
+  those steps was inline with no shared spec, no refinement theorem, and no
+  oracle. This closes the storage-model gap under the STEP 0074 frame-offset map.
+- New shared spec `x86_stack_arena_spec.json` +
+  `generate_x86_stack_arena_spec.py` → `KProgFormal/GeneratedX86StackArena.lean`
+  (`wordIndex`, `wordAligned`, `byteAt`, `assembleByte`, `words`) and
+  `generated/x86_stack_arena.h` (`KPROG_X86_STACK_WORD_INDEX`,
+  `_WORD_ALIGNED`, `_BYTE`, `_ASSEMBLE`, `_WORDS`). `x86/x86_sim.h` now
+  includes the generated header; the `union … q[]` bound, the read/write word
+  fast-path guard, word index, byte extractor/assembler, and word count are thin
+  aliases to the generated macros — one machine-checked storage model, no inline
+  duplicate.
+- `X86StackArena.lean`: independent `BitVec`-native specs
+  (`x86StackArenaWordIndexSpec`, `_WordsSpec`, `_WordAlignedSpec`,
+  `_SplitSpec`, `_ReadSpec`) with refinement theorems, the cover/tightness
+  lemmas for the rounded-up word count, the 8-aligned roundtrip, the
+  word≅byte reassembly identity, the read/split equivalence, the slot-in-range
+  bound, and concrete capacity/word examples.
+- New `test_x86_stack_arena_host.c`: drives the *real* generated macros over a
+  capacity/index/value grid plus an exhaustive two-page sweep, comparing each
+  against independent shift/mask restatements and checking a value stored
+  through the word view reloads byte-for-byte through the byte view. Success line
+  `x86 stack arena host cross-check: OK (70571 cases)`; exit 1 on mismatch.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- Gate: 88 generators / 166 Lean / 84 oracles / 0 errors. Mutation harness
+  `/tmp/mut_x86_stack_arena.py` 12/12 DETECTED (five generated-C corruptions, three
+  generated-Lean corruptions, two spec-JSON changes caught by `--check`, and two
+  independent-spec/example changes in Lean).
+
+## Next after 0075
+
+Remaining x86 open work is unchanged and still *compositional/handwritten*:
+index-register decode into the AUX index byte; register/immediate/RHS
+objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
+specialization preservation.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

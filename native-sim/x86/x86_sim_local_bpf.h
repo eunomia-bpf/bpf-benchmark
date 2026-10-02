@@ -77,7 +77,7 @@ _Static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__,
 
 union x86_sim_stack_mem {
 	__u8 b[X86_SIM_STACK_BYTES];
-	__u64 q[(X86_SIM_STACK_BYTES + 7U) / 8U];
+	__u64 q[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)];
 };
 
 #define X86_SIM_TAG_SCALAR 0U
@@ -426,33 +426,42 @@ struct x86_sim_state {
 	do {                                                               \
 		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		if (((WIDTH) ? (WIDTH) : X86_WIDTH_64) == X86_WIDTH_64 && \
-		    (__x86_stw_index & 7U) == 0) {                        \
-			__x86_stack_mem.q[__x86_stw_index >> 3] = (VALUE);\
+		    KPROG_X86_STACK_WORD_ALIGNED(__x86_stw_index)) {      \
+			__x86_stack_mem.q                               \
+				[KPROG_X86_STACK_WORD_INDEX(             \
+					__x86_stw_index)] = (VALUE);     \
 		} else {                                                  \
 			__u8 __x86_stw_width =                            \
 				(WIDTH) ? (WIDTH) : X86_WIDTH_64;         \
 			__u64 __x86_stw_narrowed = (VALUE) &              \
 				x86_width_mask(__x86_stw_width);          \
 			__x86_stack_mem.b[__x86_stw_index] =              \
-				__x86_stw_narrowed;                      \
+				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
 			if (__x86_stw_width >= X86_WIDTH_16)              \
 				__x86_stack_mem.b[__x86_stw_index + 1] =  \
-					__x86_stw_narrowed >> 8;          \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 1);   \
 			if (__x86_stw_width >= X86_WIDTH_32) {            \
 				__x86_stack_mem.b[__x86_stw_index + 2] =  \
-					__x86_stw_narrowed >> 16;         \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 2);   \
 				__x86_stack_mem.b[__x86_stw_index + 3] =  \
-					__x86_stw_narrowed >> 24;         \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 3);   \
 			}                                                 \
 			if (__x86_stw_width == X86_WIDTH_64) {            \
 				__x86_stack_mem.b[__x86_stw_index + 4] =  \
-					__x86_stw_narrowed >> 32;         \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 4);   \
 				__x86_stack_mem.b[__x86_stw_index + 5] =  \
-					__x86_stw_narrowed >> 40;         \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 5);   \
 				__x86_stack_mem.b[__x86_stw_index + 6] =  \
-					__x86_stw_narrowed >> 48;         \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 6);   \
 				__x86_stack_mem.b[__x86_stw_index + 7] =  \
-					__x86_stw_narrowed >> 56;         \
+					KPROG_X86_STACK_BYTE(             \
+						__x86_stw_narrowed, 7);   \
 			}                                                 \
 		}                                                         \
 	} while (0)
@@ -462,30 +471,40 @@ struct x86_sim_state {
 		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		__u64 __x86_str_value;                                   \
 		if (((WIDTH) ? (WIDTH) : X86_WIDTH_64) == X86_WIDTH_64 && \
-		    (__x86_str_index & 7U) == 0) {                        \
-			__x86_str_value = __x86_stack_mem.q[__x86_str_index >> 3];\
+		    KPROG_X86_STACK_WORD_ALIGNED(__x86_str_index)) {      \
+			__x86_str_value = __x86_stack_mem.q               \
+				[KPROG_X86_STACK_WORD_INDEX(             \
+					__x86_str_index)];               \
 		} else {                                                  \
 			__u8 __x86_str_width =                            \
 				(WIDTH) ? (WIDTH) : X86_WIDTH_64;         \
-			__x86_str_value = __x86_stack_mem.b[__x86_str_index];\
+			__x86_str_value =                                 \
+				__x86_stack_mem.b[__x86_str_index];       \
 			if (__x86_str_width >= X86_WIDTH_16)              \
 				__x86_str_value |=                        \
-					(__u64)__x86_stack_mem.b[__x86_str_index + 1] << 8;\
+					KPROG_X86_STACK_ASSEMBLE(         \
+						__x86_stack_mem.b[__x86_str_index + 1], 1);\
 			if (__x86_str_width >= X86_WIDTH_32) {            \
 				__x86_str_value |=                        \
-					(__u64)__x86_stack_mem.b[__x86_str_index + 2] << 16;\
+					KPROG_X86_STACK_ASSEMBLE(         \
+						__x86_stack_mem.b[__x86_str_index + 2], 2);\
 				__x86_str_value |=                        \
-					(__u64)__x86_stack_mem.b[__x86_str_index + 3] << 24;\
+					KPROG_X86_STACK_ASSEMBLE(         \
+						__x86_stack_mem.b[__x86_str_index + 3], 3);\
 			}                                                 \
 			if (__x86_str_width == X86_WIDTH_64) {            \
 				__x86_str_value |=                        \
-					(__u64)__x86_stack_mem.b[__x86_str_index + 4] << 32;\
+					KPROG_X86_STACK_ASSEMBLE(         \
+						__x86_stack_mem.b[__x86_str_index + 4], 4);\
 				__x86_str_value |=                        \
-					(__u64)__x86_stack_mem.b[__x86_str_index + 5] << 40;\
+					KPROG_X86_STACK_ASSEMBLE(         \
+						__x86_stack_mem.b[__x86_str_index + 5], 5);\
 				__x86_str_value |=                        \
-					(__u64)__x86_stack_mem.b[__x86_str_index + 6] << 48;\
+					KPROG_X86_STACK_ASSEMBLE(         \
+						__x86_stack_mem.b[__x86_str_index + 6], 6);\
 				__x86_str_value |=                        \
-					(__u64)__x86_stack_mem.b[__x86_str_index + 7] << 56;\
+					KPROG_X86_STACK_ASSEMBLE(         \
+						__x86_stack_mem.b[__x86_str_index + 7], 7);\
 			}                                                 \
 		}                                                         \
 		__x86_str_value;                                          \

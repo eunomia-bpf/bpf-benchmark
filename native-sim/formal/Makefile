@@ -54,6 +54,7 @@ check:
 	python3 generate_x86_not_spec.py --check
 	python3 generate_x86_shift_count_spec.py --check
 	python3 generate_x86_stack_index_spec.py --check
+	python3 generate_x86_stack_arena_spec.py --check
 	python3 generate_x86_shift_result_spec.py --check
 	python3 generate_x86_bswap_spec.py --check
 	python3 generate_x86_signed_spec.py --check
@@ -116,6 +117,10 @@ check:
 	lake env lean KProgFormal/X86StackIndex.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_stack_index_host.c -o build/test_x86_stack_index_host
 	./build/test_x86_stack_index_host
+	lake env lean KProgFormal/GeneratedX86StackArena.lean
+	lake env lean KProgFormal/X86StackArena.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_stack_arena_host.c -o build/test_x86_stack_arena_host
+	./build/test_x86_stack_arena_host
 	lake env lean KProgFormal/X86ShiftResult.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_ror_result_host.c -o build/test_x86_ror_result_host
 	./build/test_x86_ror_result_host

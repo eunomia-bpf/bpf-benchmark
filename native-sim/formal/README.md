@@ -1484,6 +1484,23 @@ includes the frame base, the arena top, offsets below the base, and offsets
 with the high 32 bits set, and compares it against the independent
 unsigned-64-bit low-32-bits restatement (690 cases).
 
+The x86 stack-arena storage contract binds `KPROG_X86_STACK_WORDS`,
+`KPROG_X86_STACK_WORD_INDEX`, `KPROG_X86_STACK_WORD_ALIGNED`,
+`KPROG_X86_STACK_BYTE`, and `KPROG_X86_STACK_ASSEMBLE` — the arithmetic the
+simulator's stack helpers use to reach the arena, which is a union of two
+overlapping views (`__u8 b[X86_SIM_STACK_BYTES]` and the word array
+`__u64 q[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)]`). `X86StackArena.lean`
+proves the generated word-slot shift and alignment guard equal independent
+quotient/remainder statements, proves the rounded-up word count covers the
+capacity without wasting a whole slot, proves the 8-aligned-index roundtrip,
+and proves that the little-endian byte split of a word reassembles to the word
+itself — so the 64-bit fast path through `q[]` and the byte path through `b[]`
+address the same storage. The host cross-check drives the *real* generated
+macros over a capacity/index/value grid and an exhaustive two-page sweep,
+comparing each against independent shift/mask restatements and checking that a
+value stored through the word view reloads byte-for-byte through the byte view
+(70,571 cases).
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1491,6 +1508,7 @@ policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset,
 packed-AUX layout,
 register-lane AUX layout,
+x86 stack-arena storage model,
 x86 stack-index frame-offset mapping,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move

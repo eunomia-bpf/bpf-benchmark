@@ -153,6 +153,7 @@
 #define X86_MEM_AUX_GET_ALU_OP(AUX) KPROG_X86_MEM_AUX_OP(AUX)
 #include "../formal/generated/x86_reg_lane_aux.h"
 #include "../formal/generated/x86_stack_index.h"
+#include "../formal/generated/x86_stack_arena.h"
 
 _Static_assert(KPROG_X86_MEM_AUX_INDEX(
 	KPROG_X86_MEM_AUX(0xabU, 8U, 0x30U, 0x77U)) == 0xabU,
