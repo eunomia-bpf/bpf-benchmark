@@ -6328,6 +6328,57 @@ candidates, one contract per increment: the remaining SIMD element widths
 consequences, and the C-to-Lean unsigned-semantics correspondence. On x86 the
 remaining open work is unchanged from 0056.
 
+## Step 0065 — AArch64 conditional-select pointer-path contract
+
+- Scope: the eight-member conditional-select family
+  (`KPROG_ARM64_CSEL_HANDLED`: `CSEL` 0x1c=28, `CINC` 0x1d=29, `CSET` 0x1e=30,
+  `CINV` 0x34=52, `CSINV` 0x3d=61, `CSINC` 0x3e=62, `CSETM` 0x44=68,
+  `CSNEG` 0x45=69). The handler inlined
+  `(OP) == ARM64_OP_CSEL && width == ARM64_WIDTH_64` to select between the
+  tag-copy register write (`ARM64_SIM_L_WRITE_REG_PTR_TAG`, carrying the selected
+  source register's provenance tag) and the tag-dropping width-narrowed scalar
+  write; that pointer-path routing is now the generated contract. The value
+  contract `arm64_csel_refines` does not cover the pointer path.
+- Semantics: the destination takes the pointer path exactly when the operation is
+  the plain `CSEL` and the access is doubleword width; every other family member
+  and every sub-word width drops the tag.
+- Generated from `arm64_csel_ptr_spec.json`:
+  `KProgFormal/GeneratedArm64CselPtr.lean` + `generated/arm64_csel_ptr.h`
+  (`KPROG_ARM64_CSEL_PTR_TAG_PATH`). The generator reuses the eight-opcode family
+  table in `arm64_csel_spec.json` and re-checks the opcode numbers against
+  `arm64_sim.h`.
+- `KProgFormal/Arm64CselPtr.lean`: `arm64_csel_ptr_refines` (the generated
+  `ptrTagPath` equals an independent operation-and-width statement),
+  `arm64_csel_ptr_only_csel`, `arm64_csel_ptr_csel_iff_w64`,
+  `arm64_csel_ptr_csel_sub_word_drops`, `arm64_csel_ptr_family_drops`, the opcode
+  lemmas, and three examples.
+- `test_arm64_csel_ptr_host.c`: independent oracle deciding the pointer path from
+  the opcode class and the access width (not the macro switch), sweeping the
+  opcode over all 256 byte values and all four widths in forked children: 1024
+  cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes
+  `../formal/generated/arm64_csel_ptr.h` (after the csel header) and replaces the
+  inline pointer-path test with the generated predicate.
+- Mutation test: 7/7 detected — the pointer family arm inverted, a sub-word width
+  accepted on the pointer arm, a family arm flipped onto the width test, a moved
+  case label, an opcode static-assert drift, a spec pointer-op change, and a
+  generated/independent pointer-rule divergence in Lean.
+- Full `make -C native-sim/formal check` passes with 0 errors, 84 generators,
+  157 Lean module checks, 74 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0065
+
+The AArch64 conditional-select family now has both a value contract
+(`arm64_csel_refines`) and a pointer-path routing contract
+(`arm64_csel_ptr_refines`). Remaining AArch64 candidates, one contract per
+increment: the wide immediate-vs-register RHS selection shared by the
+ADDS/SUBS/CMP/CMN/TST/ANDS/CCMP flag arms (generalizing the single-opcode
+`arm64_alu_operand` precedent to the family), and the C-to-Lean
+unsigned-semantics correspondence. `SHIFT_IMM`/`SHIFT_REG` amount selection is
+also inline but is subsumed by the shift value contract. On x86 the remaining
+open work is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

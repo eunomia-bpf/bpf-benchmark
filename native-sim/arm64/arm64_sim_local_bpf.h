@@ -20,6 +20,7 @@
 #include "../formal/generated/arm64_mul.h"
 #include "../formal/generated/arm64_extrev.h"
 #include "../formal/generated/arm64_csel.h"
+#include "../formal/generated/arm64_csel_ptr.h"
 #include "../formal/generated/arm64_branch.h"
 #include "../formal/generated/arm64_branch_emit.h"
 #include "../formal/generated/arm64_movk.h"
@@ -988,7 +989,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());           \
 		} else if (KPROG_ARM64_CSEL_HANDLED(OP)) {                   \
 			int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0;\
-			if ((OP) == ARM64_OP_CSEL && __a64_l_width == ARM64_WIDTH_64) {\
+			if (KPROG_ARM64_CSEL_PTR_TAG_PATH((OP), __a64_l_width, ARM64_SIM_L_UNSUPPORTED_OPCODE())) {\
 				if (__a64_l_taken)                        \
 					ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),\
 						ARM64_SIM_L_READ_REG_PTR(SRC),\

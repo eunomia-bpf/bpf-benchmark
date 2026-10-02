@@ -1303,6 +1303,32 @@ decision is lifted out of the trusted computing base; the value selection, the
 width-narrowed register write, and the `v0` assignment remain outside the
 theorem.
 
+The AArch64 conditional-select pointer-path theorem covers the eight-member
+`CSEL`/`CINC`/`CSET`/`CINV`/`CSINV`/`CSINC`/`CSETM`/`CSNEG` family
+(`KPROG_ARM64_CSEL_HANDLED`). Its handler inlines an
+`(OP) == ARM64_OP_CSEL && width == 64` test that selects between the tag-copy
+register write (which carries the selected source register's provenance tag) and
+the tag-dropping width-narrowed scalar write; which write path runs is now the
+generated contract. `arm64_csel_ptr_refines` proves the generated
+`ptrTagPath` table agrees with an independent statement---the plain `CSEL` at
+doubleword width is the pointer-preserving operation, every other family member
+and every sub-word width is not---and `arm64_csel_ptr_only_csel`,
+`arm64_csel_ptr_csel_iff_w64`, `arm64_csel_ptr_csel_sub_word_drops`,
+`arm64_csel_ptr_family_drops`, `arm64_csel_ptr_code_dispatch` and
+`arm64_csel_ptr_code_in_range` pin each binding case. The host cross-check
+verifies `KPROG_ARM64_CSEL_PTR_TAG_PATH` against an independent opcode-class and
+width oracle (never the macro's switch) and sweeps the opcode over all 256 byte
+values and all four widths in forked children, requiring each family opcode to
+return the oracle bit and each non-family opcode to abort through the generated
+unsupported arm; seven binding mutations---the pointer family arm inverted, a
+sub-word width accepted on the pointer arm, a family arm flipped onto the
+width test, a moved case label, an opcode static-assert drift, a spec pointer-op
+change, and a generated/independent pointer-rule divergence in Lean---each change
+the observable routing bit or the refinement theorem. The dispatch body calls
+the generated `arm64_csel_ptr.h` macro, so the pointer-path routing decision is
+lifted out of the trusted computing base; the condition evaluation, the register
+reads, the tag value, and the two register writes remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1328,8 +1354,8 @@ address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
 provenance-path routing, sign-extending-load width selection, and plain-load
-provenance preservation, pair-load provenance routing, and FMOV
-destination routing,
+provenance preservation, pair-load provenance routing, FMOV
+destination routing, and conditional-select pointer-path routing,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
