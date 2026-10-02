@@ -134,6 +134,8 @@ check:
 	$(CC) -Wall -Wextra -O2 -I. test_x86_doubleshift_host.c -o build/test_x86_doubleshift_host
 	./build/test_x86_doubleshift_host
 	lake env lean KProgFormal/X86ShiftFlags.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_shift_flags_host.c -o build/test_x86_shift_flags_host
+	./build/test_x86_shift_flags_host
 	lake env lean KProgFormal/X86ImulFlags.lean
 	lake env lean KProgFormal/X86RegWrite.lean
 	lake env lean KProgFormal/X86AluWriteback.lean

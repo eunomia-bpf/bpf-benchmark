@@ -6571,6 +6571,48 @@ abstract-frame-base mapping; register/immediate/RHS objdump→AUX selection;
 compiler/native bytes; multi-step control-flow traces; specialization
 preservation.
 
+## Step 0071 — x86 shift-flag host oracle
+
+- Scope: the x86 shift-flag contract (`generated/x86_shift_flags.h` from
+  `generate_x86_shift_flags_spec.py`, Lean `KProgFormal/X86ShiftFlags.lean`).
+  It was the last generated header with a Lean module but *no* host oracle, and
+  unlike the decode tables it is consumed by the simulated shift path: the
+  simulator wrapper `X86_SIM_L_SET_SHIFT_FLAGS` (`x86_sim_local_bpf.h:585`)
+  calls the generated `KPROG_X86_SET_SHIFT_FLAGS` for `SHL`/`SHR`/`SAR`/`ROL`.
+- New `test_x86_shift_flags_host.c`: includes `../x86/x86_sim.h` and
+  `generated/x86_shift_flags.h` (after the eight typedefs and `#define
+  __always_inline inline`) so the generated macro is checked as the simulator
+  uses it. Reproduces the wrapper's input derivation independently (width
+  narrowing via `x86_width_mask`, `x86_width_bits` bit count, sign bit,
+  `x86_shift_count` masked amount), drives the **real** generated macro, and
+  compares each of CF/ZF/SF/OF against an independent restatement of the x86
+  shift-flag semantics for shl/shr/sar/rol — including the masked-count-zero
+  preservation, the rotate ZF/SF preservation, and the defined-when-count-1 OF
+  cases. The shift *result* comes from the real `x86_alu_result`, so the
+  oracle drives the same `(value, rhs, result, width)` tuple the sim would.
+  Exits non-zero on mismatch; success line `x86 shift flags host cross-check:
+  OK (90112 cases)` (22528 tuples × 4 flag fields).
+- Makefile: only the CC/run oracle pair appended after the existing
+  `X86ShiftFlags.lean` line (136 already builds the Lean module); no new Lean
+  line, no new generator `--check`, no C-header change.
+- Gate: 85 generators / 161 Lean / 80 oracles / 0 errors. Mutation harness
+  `/tmp/mut_x86_shift_flags.py` 10/10 DETECTED (six `x86_shift_flags.h`
+  distortions — ROL CF bit, ZF forced true, SAR saturating CF inverted,
+  masked-count-zero preservation dropped, ROL OF bit, SHR CF off-by-one — a
+  generated `x86_shift_count.h` mask change, a spec policy change caught by the
+  generator `--check`, and two independent Lean shift-flag spec changes).
+
+## Next after 0071
+
+Every generated contract — AArch64 and x86 — now has both a standalone
+independent-spec Lean module and a host oracle. The remaining x86 open work is
+unchanged from 0056 and is now all *compositional/handwritten*, not a missing
+generated-header oracle: index-register decode + packed-AUX layout;
+simulator-stack-to-abstract-frame-base mapping; register/immediate/RHS
+objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
+specialization preservation. The next increment must be one of these deeper
+contracts.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

@@ -1429,11 +1429,22 @@ four dispatcher distortions in the simulator header, a spec code change, and an
 independent Lean code-spec shift---each change the oracle or the refinement
 theorem.
 
+The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
+the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
+`ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
+against an independent per-op specification of the architecturally defined
+CF/ZF/SF/OF cases (leaving the undefined cases unconstrained). The host
+cross-check includes `x86_sim.h` and `generated/x86_shift_flags.h`, reproduces
+the simulator wrapper's input derivation (width narrowing, bit count, sign bit,
+masked shift count), drives the *real* generated macro, and compares each of
+CF/ZF/SF/OF against an independent restatement of the shift-flag semantics over
+a value/amount/width/old-flags grid.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
-logical/ADD/SUB/ADC/SBB flag production, the x86 effective-address offset,
+logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
