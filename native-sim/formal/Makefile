@@ -90,6 +90,9 @@ check:
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
+	lake env lean KProgFormal/Arm64Cond.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_cond_host.c -o build/test_arm64_cond_host
+	./build/test_arm64_cond_host
 	lake env lean KProgFormal/X86ControlFlow.lean
 	lake env lean KProgFormal/X86LogicFlags.lean
 	lake env lean KProgFormal/X86Width.lean

@@ -6452,6 +6452,43 @@ The AArch64 width/narrowing contract now has the same standalone independent
 spec module and host oracle as x86 width. On x86 the remaining open work is
 unchanged from 0056.
 
+## Step 0068 — AArch64 condition-code independent-spec contract
+
+- Scope: the AArch64 condition contract (`GeneratedArm64Cond` from
+  `arm64_cond_spec.json`), previously only a fragment of `Arm64ControlFlow.lean`
+  with no dedicated host oracle.
+- Generator: extended `generate_arm64_cond_spec.py::render_lean` to also emit
+  `code : Cond -> Nat` from each condition's `code` field. `generated/arm64_cond.h`
+  stays byte-identical (only the Lean output gained the table); no new
+  `--check` line, so the generator count is unchanged.
+- New `KProgFormal/Arm64Cond.lean` (standalone): the independent `Arm64Flags`
+  record, `arm64CondSpec`, `generatedArm64Cond`, `arm64_condition_sound`,
+  `arm64_cond_code_in_range` (0..14), `arm64_cond_code_dispatch` (all fifteen
+  codes pinned), `arm64_cond_codes_distinct`, `arm64_cond_al_always`, and
+  `arm64_cond_complements`.
+- Clean cutover: `Arm64ControlFlow.lean` now imports `Arm64Cond` and keeps only
+  `branchPc` + `arm64_conditional_branch_refines`; `Arm64CcmpHandler.lean`
+  imports `Arm64Cond` directly. `Arm64BranchEmit.lean` still imports
+  `Arm64ControlFlow` (it needs only `branchPc`).
+- `test_arm64_cond_host.c`: independent switch oracle over all fifteen
+  conditions × all sixteen NZCV combinations (240 cases OK), plus a sweep of
+  every byte value outside 0..14 in forked children confirming the generated
+  unsupported arm aborts.
+- Mutation test: 10/10 detected — a HI guard drop, GE and LE polarity flips, a
+  code static-assert drift, a spec predicate change, a generated arm flip, a
+  generated code shift, an independent predicate flip, an independent
+  dispatch-value shift, and an independent range-bound change.
+- Gate: 85 generators / 161 Lean / 77 oracles / 0 errors. No C-header change,
+  so no `micro-proofs-build`.
+
+## Next after 0068
+
+The AArch64 condition contract now has the same standalone independent spec
+module and host oracle as the other contracts. `arm64_decode` remains the one
+AArch64 contract with neither a standalone module (only enum-level
+`Arm64Decode.lean` theorems) nor a host oracle; on x86 the remaining open work
+is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

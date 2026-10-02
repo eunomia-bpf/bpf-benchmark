@@ -21,6 +21,25 @@ inductive Cond
   | al
   deriving DecidableEq, Repr
 
+/-- The ARM64_COND_* condition-code number the condition carries in
+native-sim/arm64/arm64_sim.h and the generated C macro switches on. -/
+def code : Cond -> Nat
+  | .eq => 0
+  | .ne => 1
+  | .cs => 2
+  | .cc => 3
+  | .mi => 4
+  | .pl => 5
+  | .vs => 6
+  | .vc => 7
+  | .hi => 8
+  | .ls => 9
+  | .ge => 10
+  | .lt => 11
+  | .gt => 12
+  | .le => 13
+  | .al => 14
+
 def eval (n z c v : Bool) : Cond -> Bool
   | .eq => z
   | .ne => (!z)

@@ -1378,6 +1378,26 @@ same independent module (`X86Width.lean`); the arm64 side previously restated
 only the mask and narrowing inline in `Arm64AluResult.lean`, which now imports
 `Arm64Width` instead.
 
+The AArch64 condition-code contract is now a standalone module rather than a
+fragment of the branch-PC module. `GeneratedArm64Cond` (from
+`arm64_cond_spec.json`) defines the fifteen `Cond` constructors, their
+`ARM64_COND_*` `code` numbers, and the `eval` predicate; `Arm64Cond.lean`
+restates the flag semantics independently, proves the generated `eval` equal to
+that restatement (`arm64_condition_sound`), proves the code table occupies the
+contiguous 0..14 range the C macro switches on (`arm64_cond_code_in_range`),
+pins every dispatch value (`arm64_cond_code_dispatch`), and adds complement and
+always-true observations. The host cross-check verifies `KPROG_ARM64_EVAL_COND`
+against an independent switch oracle over all fifteen conditions crossed with
+all sixteen NZCV combinations, and sweeps every byte value outside 0..14 in
+forked children to confirm the unsupported arm aborts. Ten binding
+mutations---a HI guard drop, GE/LT and LE/GE polarity flips, a code
+static-assert drift, a spec predicate change, a generated arm flip, a generated
+code shift, an independent predicate flip, an independent dispatch-value shift,
+and an independent range-bound change---each change the oracle or the
+refinement theorem. The condition semantics and its soundness theorem moved out
+of `Arm64ControlFlow.lean`, which now imports `Arm64Cond` and keeps only the
+`branchPc` model and the branch refinement.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag

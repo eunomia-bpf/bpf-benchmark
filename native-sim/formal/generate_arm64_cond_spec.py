@@ -85,6 +85,9 @@ def render_expr(expr: dict[str, Any], language: str) -> str:
 
 def render_lean(conditions: list[dict[str, Any]]) -> str:
     constructors = "\n".join(f"  | {condition['name']}" for condition in conditions)
+    codes = "\n".join(
+        f"  | .{condition['name']} => {condition['code']}"
+        for condition in conditions)
     cases = "\n".join(
         f"  | .{condition['name']} => {render_expr(condition['predicate'], 'lean')}"
         for condition in conditions)
@@ -96,6 +99,11 @@ namespace KProgFormal.GeneratedArm64Cond
 inductive Cond
 {constructors}
   deriving DecidableEq, Repr
+
+/-- The ARM64_COND_* condition-code number the condition carries in
+native-sim/arm64/arm64_sim.h and the generated C macro switches on. -/
+def code : Cond -> Nat
+{codes}
 
 def eval (n z c v : Bool) : Cond -> Bool
 {cases}
