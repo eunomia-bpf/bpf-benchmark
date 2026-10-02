@@ -5691,6 +5691,58 @@ packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping, the
 register and immediate/RHS objdump/parser-to-AUX selection relation, compiler/
 native bytes, multi-step control-flow traces, and specialization preservation.
 
+## Step 0052 — AArch64 `LDP` / `STP` pair-move contract
+
+- Scope: the two `ARM64_SIM_L_LDP` / `ARM64_SIM_L_STP` bodies for
+  `ARM64_OP_LDP` (`0x21`) / `ARM64_OP_STP` (`0x22`). One contract, two
+  opcodes; the distinctive composition is the register-pair mapping (load:
+  low slot→`DST`, high slot→`SRC`; store: low from `SRC`, high from `SRC2`).
+- Out of scope (already proved): the address offset (`MEM_BASE_OFF`,
+  `arm64_mem_offset_refines`), pre/post (`MEM_PRE`/`MEM_POST`), and the
+  LDP tag-pair probe (`ARM64_SIM_L_MEM_READ_TAG`).
+- Generated from `arm64_pair_mem_spec.json`:
+  `KProgFormal/GeneratedArm64PairMem.lean` + `generated/arm64_pair_mem.h`
+  (2 opcodes, `slot_stride` = `ARM64_WIDTH_64`, `slot_count` = 2,
+  `high_slot_stride` = 8). Generator bug fixed: the two-opcode case makes the
+  middle of the `OP == LDP / STP` chain empty, so the emitted
+  `KPROG_ARM64_PAIR_MEM_INDEX` macro lost its line continuation and terminated
+  early; `index_branches` now carries its own leading newlines.
+- `KProgFormal/Arm64PairMemHandler.lean`: `arm64PairMemSlotPlanSpec` (literal
+  `[0, 8]` for both), `arm64_pair_mem_refines`, `_slot_count_refines`,
+  `_access_dispatch`, `_slot_plan`, `_slot_count`, `_moves_distinct_slots`,
+  `_slot_stride`, `_arm_index_dispatch`, `_low_slot_example`,
+  `_high_slot_example`.
+- `test_arm64_pair_mem_host.c`: independent 465,696-case oracle. Part 1 checks
+  the generated constants/selector against an independent table incl. an
+  off-set opcode; Part 2 drives the full composition (pre/post writeback,
+  read-before-write load gather so a target that is also the base reads the
+  original base, register-pair mapping, tag clearing on GPR writes) as a
+  contract step over the generated constants against a model step restated
+  from the raw opcode with the literal stride 8, comparing GPR file, tags,
+  memory and stack.
+- Mutation test: 4/4 detected — access-direction swap, slot-count swap,
+  slot-stride literal change, selector-arm swap (Lean mutation requires a
+  `lake build` rebuild).
+- Full `make -C native-sim/formal check` passes with 0 errors, 71 generators,
+  131 Lean module checks, 61 host cross-checks.
+
+## Next after 0052
+
+With 0052 the AArch64 memory transfer surface has per-opcode contracts: the
+generic read/write dispatch (`arm64_mem_dispatch_refines`), the address offset
+(`arm64_mem_offset_refines`), the byte-lane scatter (`arm64_byte_lane`), the
+stack slot-tag selection (`arm64_stack_tag`), the vector `.D0`/`.Q0` lane plan,
+and now the `LDP`/`STP` pair plan. The remaining AArch64 open surfaces are the
+SIMD register file mapping (the `__a64_v0`/`__a64_v0_hi` state fields to an
+abstract register pair), the address-decoding of pre/post against the raw
+`AUX`/`IMM` fields, the remaining SIMD element widths (`.S0`/`.H0`/`.B0` and the
+`.Q0` element variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the
+C-to-Lean unsigned-semantics correspondence. On x86 the remaining open work is
+unchanged from 0051: the index register decode and packed-AUX layout, the
+simulator-stack-to-abstract-frame-base mapping, the register and immediate/RHS
+objdump/parser-to-AUX selection relation, compiler/native bytes, multi-step
+control-flow traces, and specialization preservation.
+
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

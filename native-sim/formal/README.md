@@ -954,6 +954,34 @@ four bodies do not call the generated `arm64_dq_mem.h` macros -- that header is
 exercised only by the host oracle -- so all four remain in the trusted computing
 base.
 
+The AArch64 `LDP` / `STP` pair-move theorem covers the two bodies
+`ARM64_SIM_L_LDP` and `ARM64_SIM_L_STP` for `ARM64_OP_LDP` (`0x21`) and
+`ARM64_OP_STP` (`0x22`), the load/store-pair opcodes that move two 64-bit slots
+between memory and a register pair. As with the `.D0`/`.Q0` theorem the address
+offset (`MEM_BASE_OFF`) and the pre/post base adjustment (`MEM_PRE` /
+`MEM_POST`) stay in the macros with their own proved contracts, so the generated
+`arm64_pair_mem` tables fix only *which* slots each opcode moves and in *what*
+order. Two per-opcode facts, provably independent, are the access direction
+(`arm64_pair_mem_access_dispatch`) -- `LDP` moves memory into the register pair,
+`STP` moves it out -- and the ordered slot plan (`arm64_pair_mem_slot_plan`) --
+both opcodes move `[0, 8]`, so the pair's two slots are the low slot at the base
+offset and the high slot one 64-bit slot stride higher, never the same slot twice
+(`arm64_pair_mem_moves_distinct_slots`). The register-pair mapping is the
+distinctive composition: on a load the low slot lands in `DST` and the high slot
+in `SRC`; on a store the low slot comes from `SRC` and the high slot from `SRC2`.
+`arm64_pair_mem_refines` pins the generated slot offsets to the independent plan
+literally, and `arm64_pair_mem_slot_count_refines` pins the generated slot count
+to the plan length. Its independent multi-hundred-thousand-case oracle drives
+the generated selectors and restates both bodies from the raw opcode
+read-before-write -- gathering both slots before writing the register pair, so a
+target register that is also the base still reads the original base -- comparing
+the whole GPR file, tags, memory and the stack; four binding mutations -- an
+access-direction swap, a slot-count swap, a slot-stride change, and a
+selector-arm swap -- each change the observable result. The register decode that
+selects the opcode remains outside the theorem, and the two bodies do not call
+the generated `arm64_pair_mem.h` macros -- that header is exercised only by the
+host oracle -- so both remain in the trusted computing base.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -974,8 +1002,8 @@ memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
-selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, CCMP, and
-`.D0`/`.Q0` vector memory-transfer composition,
+selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, CCMP,
+`.D0`/`.Q0` vector memory-transfer, and `LDP`/`STP` pair-move composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
@@ -1006,6 +1034,9 @@ computing base.
 The four `ARM64_SIM_L_{LOAD,STORE}_{D0,Q0}_MEM` handler bodies do not call the
 generated `arm64_dq_mem.h` macros — that header is exercised only by the host
 oracle — so all four bodies remain in the trusted computing base.
+The two `ARM64_SIM_L_{LDP,STP}` handler bodies do not call the generated
+`arm64_pair_mem.h` macros — that header is exercised only by the host oracle —
+so both bodies remain in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64PairMem","selector":"per_opcode_access_direction_then_pair_slot_offset_plan","opcodes":[{"name":"ldp","define":"ARM64_OP_LDP","code":"0x21","codeIndex":0,"access":"load"},{"name":"stp","define":"ARM64_OP_STP","code":"0x22","codeIndex":1,"access":"store"}],"slot_stride":"ARM64_WIDTH_64","slot_count":2,"high_slot_stride":8}

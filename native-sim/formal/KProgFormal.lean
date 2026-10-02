@@ -132,3 +132,5 @@ import KProgFormal.GeneratedArm64StackTag
 import KProgFormal.Arm64StackTag
 import KProgFormal.GeneratedArm64DqMem
 import KProgFormal.Arm64DqMemHandler
+import KProgFormal.GeneratedArm64PairMem
+import KProgFormal.Arm64PairMemHandler

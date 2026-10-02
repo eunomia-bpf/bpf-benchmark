@@ -28,6 +28,7 @@ check:
 	python3 generate_arm64_mem_dispatch_spec.py --check
 	python3 generate_arm64_stack_tag_spec.py --check
 	python3 generate_arm64_dq_mem_spec.py --check
+	python3 generate_arm64_pair_mem_spec.py --check
 	python3 generate_arm64_branch_spec.py --check
 	python3 generate_arm64_branch_emit_spec.py --check
 	python3 generate_arm64_cond_spec.py --check
@@ -321,4 +322,8 @@ check:
 	lake env lean KProgFormal/Arm64DqMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
 	./build/test_arm64_dq_mem_host
+	lake env lean KProgFormal/GeneratedArm64PairMem.lean
+	lake env lean KProgFormal/Arm64PairMemHandler.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_pair_mem_host.c -o build/test_arm64_pair_mem_host
+	./build/test_arm64_pair_mem_host
 	lake env lean KProgFormal/Arm64Decode.lean
