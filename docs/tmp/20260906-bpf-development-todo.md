@@ -6241,6 +6241,51 @@ element widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants), the
 `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
 correspondence. On x86 the remaining open work is unchanged from 0056.
 
+## Step 0063 — AArch64 pair-load provenance-preservation contract
+
+- Scope: the pair load `LDP` (`ARM64_OP_LDP`, 0x21, 33). The handler reads two
+  64-bit slots, each with its own tag, and decided per slot between the tag-copy
+  register write and the tag-dropping width-narrowed scalar write, under an outer
+  pair gate `width == 64 && (tagLo != SCALAR || tagHi != SCALAR)`; whether each
+  slot preserves its tag is now the generated contract.
+- Semantics: the mask has bit 0 set exactly when the low slot preserves its tag
+  and bit 1 exactly when the high slot does; a slot preserves exactly at
+  doubleword width and when its tag is not the bare scalar tag. The gate is
+  redundant with the per-slot rule and the theorem proves that.
+- Generated from `arm64_pair_load_tag_spec.json`:
+  `KProgFormal/GeneratedArm64PairLoadTag.lean` + `generated/arm64_pair_load_tag.h`
+  (`KPROG_ARM64_PAIR_LOAD_TAG_ROUTE` and its ROUTE_LOW/ROUTE_HIGH accessors). The
+  generator re-checks the opcode against `arm64_sim.h`.
+- `KProgFormal/Arm64PairLoadTag.lean`: `arm64_pair_load_tag_refines`,
+  `arm64_pair_load_tag_gate_iff`, `arm64_pair_load_tag_both_scalar`,
+  `arm64_pair_load_tag_sub_word_drops`, the three per-slot-case lemmas,
+  `arm64_pair_load_tag_routing_width_is_w64`, `arm64_pair_load_tag_slot_count`,
+  the opcode lemmas, plus two examples.
+- `test_arm64_pair_load_tag_host.c`: independent oracle deciding each slot's bit
+  from the width and that slot's tag class (not the macro gate), sweeping all 256
+  opcode bytes crossed with the four widths and the four tag-class pairs in forked
+  children: 4096 cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes
+  `../formal/generated/arm64_pair_load_tag.h`, adds the
+  `ARM64_SIM_L_PAIR_LOAD_TAG_ROUTE` wrapper, and replaces the inline LDP gate and
+  per-slot branches with the generated routing mask and its two slot accessors.
+- Mutation test: 7/7 detected — a gate that drops the width conjunct, a high slot
+  routed by the low slot's tag, a moved case label, swapped slot route bits, a
+  spec preserve-rule change, a generated gate width-drop, and an independent
+  slot-weight swap in Lean.
+- Full `make -C native-sim/formal check` passes with 0 errors, 82 generators,
+  153 Lean module checks, 72 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0063
+
+The AArch64 pair-load surface now has a routing contract
+(`arm64_pair_load_tag_refines`). Remaining AArch64 candidates, one contract per
+increment: the remaining SIMD element widths (`.S0`/`.H0`/`.B0` and the `.Q0`
+element variants), the `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean
+unsigned-semantics correspondence. On x86 the remaining open work is unchanged
+from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

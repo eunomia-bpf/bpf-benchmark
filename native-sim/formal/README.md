@@ -1246,6 +1246,37 @@ the refinement theorem. The dispatch body calls the generated `arm64_load_tag.h`
 macro, so the routing decision is lifted out of the trusted computing base; the
 memory read, the tag read, and both register writes remain outside the theorem.
 
+The AArch64 pair-load provenance-preservation theorem covers `LDP`
+(`ARM64_OP_LDP`). Its handler read two 64-bit slots, each with its own
+memory-read provenance tag, and decided per slot whether to write through the
+tag-copy register write (attaching that slot's tag) or the tag-dropping
+width-narrowed scalar write, under an outer pair gate
+`width == 64 && (tagLo != SCALAR || tagHi != SCALAR)`; the routing decision is
+now the generated contract. `arm64_pair_load_tag_refines` proves the generated
+gate-then-per-slot `routeMask` equals an independent per-slot statement keyed on
+the width's bit count and each tag's scalar class---deliberately not phrased
+through the generated gate, so the theorem shows the gate is redundant with the
+per-slot rule---and `arm64_pair_load_tag_gate_iff`,
+`arm64_pair_load_tag_both_scalar`, `arm64_pair_load_tag_sub_word_drops`,
+`arm64_pair_load_tag_only_low_preserves`, `arm64_pair_load_tag_only_high_preserves`,
+`arm64_pair_load_tag_both_preserve` and
+`arm64_pair_load_tag_routing_width_is_w64` pin the gate and each slot case;
+`arm64_pair_load_tag_slot_count` and the opcode lemmas
+(`arm64_pair_load_tag_code_dispatch`, `arm64_pair_load_tag_code_in_range`) close
+the layout. Its independent oracle decides each slot's bit from the width and
+that slot's tag class (never the macro's gate) and sweeps the opcode over all 256
+byte values crossed with the four widths and the four tag-class pairs in forked
+children, requiring each known pair load to return a mask whose two slot bits
+match the oracle and each unknown opcode to abort through the generated
+unsupported arm; seven binding mutations---a gate that drops the width conjunct, a
+high slot routed by the low slot's tag, a moved case label, swapped slot route
+bits, and a spec preserve-rule change, a generated gate width-drop and an
+independent slot-weight swap in Lean---each change the observable mask or the
+refinement theorem. The dispatch body calls the generated `arm64_pair_load_tag.h`
+macro and its two slot accessors, so the routing decision is lifted out of the
+trusted computing base; the two memory reads, the two tag reads, and the four
+register writes remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1271,7 +1302,7 @@ address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
 provenance-path routing, sign-extending-load width selection, and plain-load
-provenance preservation,
+provenance preservation, and pair-load provenance routing,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

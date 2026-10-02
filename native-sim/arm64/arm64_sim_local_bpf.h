@@ -95,6 +95,7 @@ union arm64_sim_gpr {
 #include "../formal/generated/arm64_mov.h"
 #include "../formal/generated/arm64_ldrsx.h"
 #include "../formal/generated/arm64_load_tag.h"
+#include "../formal/generated/arm64_pair_load_tag.h"
 #define ARM64_SIM_L_ADRP_TAG(OP)                                            \
 	KPROG_ARM64_ADRP_TAG((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 #define ARM64_SIM_L_STLXR_VALUE(OP)                                         \
@@ -108,6 +109,9 @@ union arm64_sim_gpr {
 #define ARM64_SIM_L_LOAD_TAG_PRESERVE(OP, TAG, WIDTH)                       \
 	KPROG_ARM64_LOAD_TAG_PRESERVE((OP), (TAG), (WIDTH),                \
 				      ARM64_SIM_L_UNSUPPORTED_OPCODE())
+#define ARM64_SIM_L_PAIR_LOAD_TAG_ROUTE(OP, TAG_LO, TAG_HI, WIDTH)          \
+	KPROG_ARM64_PAIR_LOAD_TAG_ROUTE((OP), (TAG_LO), (TAG_HI), (WIDTH), \
+					ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 struct arm64_sim_xdp_abi {
 	void *data;
@@ -1035,19 +1039,15 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__u64 __a64_l_v1 = ARM64_SIM_L_MEM_READ((SRC2), (SRC3), (AUX), (IMM), __a64_l_width, __a64_l_width);\
 			__u8 __a64_l_t0 = ARM64_SIM_L_MEM_READ_TAG((SRC2), (SRC3), (AUX), (IMM), 0, __a64_l_width);\
 			__u8 __a64_l_t1 = ARM64_SIM_L_MEM_READ_TAG((SRC2), (SRC3), (AUX), (IMM), __a64_l_width, __a64_l_width);\
-			if (__a64_l_width == ARM64_WIDTH_64 && (__a64_l_t0 != ARM64_SIM_TAG_SCALAR || __a64_l_t1 != ARM64_SIM_TAG_SCALAR)) {\
-				if (__a64_l_t0 != ARM64_SIM_TAG_SCALAR)     \
-					ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)__a64_l_v0, __a64_l_t0);\
-				else                                       \
-					ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_v0, __a64_l_width);\
-				if (__a64_l_t1 != ARM64_SIM_TAG_SCALAR)     \
-					ARM64_SIM_L_WRITE_REG_PTR_TAG((SRC), (void *)(long)__a64_l_v1, __a64_l_t1);\
-				else                                       \
-					ARM64_SIM_L_WRITE_REG_WIDTH((SRC), __a64_l_v1, __a64_l_width);\
-			} else {                                                \
+			__u64 __a64_l_mask = ARM64_SIM_L_PAIR_LOAD_TAG_ROUTE((OP), __a64_l_t0, __a64_l_t1, __a64_l_width);\
+			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_LOW(__a64_l_mask))\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)__a64_l_v0, __a64_l_t0);\
+			else                                           \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_v0, __a64_l_width);\
+			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_HIGH(__a64_l_mask))\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((SRC), (void *)(long)__a64_l_v1, __a64_l_t1);\
+			else                                           \
 				ARM64_SIM_L_WRITE_REG_WIDTH((SRC), __a64_l_v1, __a64_l_width);\
-			}                                                     \
 			ARM64_SIM_L_MEM_POST((SRC2), (AUX), (IMM));            \
 		} else if ((OP) == ARM64_OP_STP) {                             \
 			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM));              \

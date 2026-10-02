@@ -134,6 +134,8 @@ import KProgFormal.GeneratedArm64LdrSx
 import KProgFormal.Arm64LdrSx
 import KProgFormal.GeneratedArm64LoadTag
 import KProgFormal.Arm64LoadTag
+import KProgFormal.GeneratedArm64PairLoadTag
+import KProgFormal.Arm64PairLoadTag
 import KProgFormal.GeneratedArm64MemOffset
 import KProgFormal.Arm64MemOffset
 import KProgFormal.GeneratedArm64Fmov
