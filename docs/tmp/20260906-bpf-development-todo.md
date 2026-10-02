@@ -6489,6 +6489,46 @@ AArch64 contract with neither a standalone module (only enum-level
 `Arm64Decode.lean` theorems) nor a host oracle; on x86 the remaining open work
 is unchanged from 0056.
 
+
+## Step 0069 — AArch64 mnemonic-to-code decode host oracle
+
+- Scope: the AArch64 decode contract (`generated/arm64_decode.h` from
+  `generate_arm64_decode_spec.py`, Lean `KProgFormal/Arm64Decode.lean`). It was
+  the last AArch64 generated contract with a standalone Lean module but no host
+  oracle (confirmed by a scout audit: `arm64_decode` and `x86_alu_decode` are
+  the only generated headers included by *no* host file).
+- New `test_arm64_decode_host.c`: includes `../arm64/arm64_sim.h` so the
+  generated `ARM64_{ALU,SHIFT,MOD,BITFIELD}_*` constants are checked against
+  the macros the simulator actually uses. Independently restates the four
+  mnemonic tables locally (`{mnemonic, code}` arrays, no header values),
+  asserts each macro equals its table code and every code within a table is
+  distinct, then drives the generated constants through the real shared
+  `ARM64_AUX_ALU/_SHIFT/_MOVK/_MEM/_BITFIELD/_CCMP` packing macros and reads
+  each packed field back with an independent extractor, sweeping each generated
+  code through each AUX field it belongs to plus the 0/255 field boundaries.
+  Exits non-zero on mismatch; success line `arm64 decode host cross-check: OK
+  (1410 cases)`.
+- `Arm64Decode.lean` reworked: the four `arm64*Spec` independent lists were
+  previously dead (the refinement theorems hardcoded values and never compared).
+  Each `arm64_{alu,shift,mod,bitfield}_decode_refines` now projects the
+  generated table to `(mnemonic, code)` pairs and proves it *equal* to the
+  independent list, so a drift on either side breaks the proof. Per-table
+  `arm64_{alu,shift,mod,bitfield}_codes_distinct` theorems added.
+- Makefile: only the CC/run oracle line appended after the existing
+  `Arm64Decode.lean` line; no new Lean line (405 already builds it), no new
+  generator `--check`, no C-header change.
+- Gate: 85 generators / 161 Lean / 78 oracles / 0 errors. Mutation harness
+  `/tmp/mut_arm64_decode.py` 12/12 DETECTED (generated code/mnemonic shifts, a
+  duplicate bitfield code, three AUX-field packing distortions in
+  `arm64_sim.h`, a spec mnemonic rename, and an independent-list change).
+
+## Next after 0069
+
+Every AArch64 generated contract now has both a standalone independent-spec Lean
+module and a host oracle. On the x86 side `x86_alu_decode` is the remaining
+generated header included by no host file; on x86 the broader open work is
+unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

@@ -17,46 +17,52 @@ def arm64ModSpec : List (String × Nat) :=
 def arm64BitfieldSpec : List (String × Nat) :=
   [("ubfx", 0), ("sbfx", 1), ("ubfiz", 2), ("bfxil", 3), ("bfi", 4)]
 
-/-- The generated ALU table's codes and mnemonics equal the independent list. -/
+/-- Constructor enumeration for the generated ALU table, in specification
+order; the values themselves still come from the generated `code`/`mnemonic`
+definitions. -/
+def allAlu : List GeneratedArm64AluDecode.Alu := [.add, .sub, .and, .bic, .eor, .orr]
+
+def allShift : List GeneratedArm64ShiftDecode.Shift := [.lsl, .lsr, .asr, .ror]
+
+def allMod : List GeneratedArm64ModDecode.Mod :=
+  [.none, .lsl, .lsr, .asr, .ror, .uxtw, .sxtw, .uxth, .sxth, .uxtb, .sxtb]
+
+def allBitfield : List GeneratedArm64BitfieldDecode.Bitfield :=
+  [.ubfx, .sbfx, .ubfiz, .bfxil, .bfi]
+
+/-- The generated ALU table, projected to mnemonic/code pairs, equals the
+independent specification list. A change to either a generated code or the
+independent list breaks this equality. -/
 theorem arm64_alu_decode_refines :
-    GeneratedArm64AluDecode.code .add = 0 ∧
-    GeneratedArm64AluDecode.code .sub = 1 ∧
-    GeneratedArm64AluDecode.code .and = 2 ∧
-    GeneratedArm64AluDecode.code .bic = 3 ∧
-    GeneratedArm64AluDecode.code .eor = 4 ∧
-    GeneratedArm64AluDecode.code .orr = 5 ∧
-    GeneratedArm64AluDecode.mnemonic .add = "add" ∧
-    GeneratedArm64AluDecode.mnemonic .orr = "orr" := by
-  native_decide
+    arm64AluSpec =
+      allAlu.map (fun op => (GeneratedArm64AluDecode.mnemonic op,
+                             GeneratedArm64AluDecode.code op)) := by
+    native_decide
 
-/-- The generated shift table refines the independent enumeration. -/
+/-- The generated shift table, projected to mnemonic/code pairs, equals the
+independent specification list. -/
 theorem arm64_shift_decode_refines :
-    GeneratedArm64ShiftDecode.code .lsl = 0 ∧
-    GeneratedArm64ShiftDecode.code .lsr = 1 ∧
-    GeneratedArm64ShiftDecode.code .asr = 2 ∧
-    GeneratedArm64ShiftDecode.code .ror = 3 ∧
-    GeneratedArm64ShiftDecode.mnemonic .ror = "ror" := by
-  native_decide
+    arm64ShiftSpec =
+      allShift.map (fun op => (GeneratedArm64ShiftDecode.mnemonic op,
+                               GeneratedArm64ShiftDecode.code op)) := by
+    native_decide
 
-/-- The generated modifier table refines the independent enumeration, including
-the empty (no-modifier) entry mapping to code zero. -/
+/-- The generated modifier table, projected to mnemonic/code pairs, equals the
+independent specification list, including the empty (no-modifier) mnemonic. -/
 theorem arm64_mod_decode_refines :
-    GeneratedArm64ModDecode.code .none = 0 ∧
-    GeneratedArm64ModDecode.code .lsl = 1 ∧
-    GeneratedArm64ModDecode.code .uxtw = 5 ∧
-    GeneratedArm64ModDecode.code .sxtw = 6 ∧
-    GeneratedArm64ModDecode.code .sxtb = 10 ∧
-    GeneratedArm64ModDecode.mnemonic .none = "" := by
-  native_decide
+    arm64ModSpec =
+      allMod.map (fun op => (GeneratedArm64ModDecode.mnemonic op,
+                             GeneratedArm64ModDecode.code op)) := by
+    native_decide
 
-/-- The generated bitfield table refines the independent enumeration. -/
+/-- The generated bitfield table, projected to mnemonic/code pairs, equals the
+independent specification list. -/
 theorem arm64_bitfield_decode_refines :
-    GeneratedArm64BitfieldDecode.code .ubfx = 0 ∧
-    GeneratedArm64BitfieldDecode.code .sbfx = 1 ∧
-    GeneratedArm64BitfieldDecode.code .ubfiz = 2 ∧
-    GeneratedArm64BitfieldDecode.code .bfxil = 3 ∧
-    GeneratedArm64BitfieldDecode.code .bfi = 4 := by
-  native_decide
+    arm64BitfieldSpec =
+      allBitfield.map (fun op => (GeneratedArm64BitfieldDecode.mnemonic op,
+                                  GeneratedArm64BitfieldDecode.code op)) := by
+    native_decide
+
 
 /-- Every generated ALU code is distinct, so dispatch on the numeric code
 selects exactly one operation. -/
@@ -64,6 +70,30 @@ theorem arm64_alu_codes_distinct :
     GeneratedArm64AluDecode.code .add ≠ GeneratedArm64AluDecode.code .sub ∧
     GeneratedArm64AluDecode.code .and ≠ GeneratedArm64AluDecode.code .bic ∧
     GeneratedArm64AluDecode.code .eor ≠ GeneratedArm64AluDecode.code .orr := by
+  native_decide
+
+/-- Every generated shift code is distinct, so dispatch on the numeric code
+selects exactly one shift kind. -/
+theorem arm64_shift_codes_distinct :
+    GeneratedArm64ShiftDecode.code .lsl ≠ GeneratedArm64ShiftDecode.code .lsr ∧
+    GeneratedArm64ShiftDecode.code .asr ≠ GeneratedArm64ShiftDecode.code .ror ∧
+    GeneratedArm64ShiftDecode.code .lsl ≠ GeneratedArm64ShiftDecode.code .ror := by
+  native_decide
+
+/-- Every generated modifier code is distinct, so dispatch on the numeric code
+selects exactly one extend/shift modifier. -/
+theorem arm64_mod_codes_distinct :
+    GeneratedArm64ModDecode.code .none ≠ GeneratedArm64ModDecode.code .lsl ∧
+    GeneratedArm64ModDecode.code .uxtw ≠ GeneratedArm64ModDecode.code .sxtw ∧
+    GeneratedArm64ModDecode.code .uxtb ≠ GeneratedArm64ModDecode.code .sxtb := by
+  native_decide
+
+/-- Every generated bitfield code is distinct, so dispatch on the numeric code
+selects exactly one bitfield operation. -/
+theorem arm64_bitfield_codes_distinct :
+    GeneratedArm64BitfieldDecode.code .ubfx ≠ GeneratedArm64BitfieldDecode.code .sbfx ∧
+    GeneratedArm64BitfieldDecode.code .ubfiz ≠ GeneratedArm64BitfieldDecode.code .bfxil ∧
+    GeneratedArm64BitfieldDecode.code .bfxil ≠ GeneratedArm64BitfieldDecode.code .bfi := by
   native_decide
 
 end KProgFormal

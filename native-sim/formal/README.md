@@ -1398,6 +1398,22 @@ refinement theorem. The condition semantics and its soundness theorem moved out
 of `Arm64ControlFlow.lean`, which now imports `Arm64Cond` and keeps only the
 `branchPc` model and the branch refinement.
 
+The AArch64 mnemonic-to-code decode contract binds the `ARM64_{ALU,SHIFT,MOD,
+BITFIELD}_*` constants that the encoder, the simulator constants, and the Lean
+model share. `Arm64Decode.lean` projects each generated table to
+`(mnemonic, code)` pairs and proves the projection equal to an independent
+specification list (`arm64_{alu,shift,mod,bitfield}_decode_refines`), so a drift
+in either a generated code or a mnemonic breaks the proof, and adds per-table
+distinctness lemmas so dispatch on the numeric code selects exactly one
+operation. The host cross-check includes `arm64_sim.h` and drives the generated
+constants through the real shared `ARM64_AUX_*` codec, reading every packed
+field back with an independent extractor and sweeping each generated code
+through each AUX field it belongs to, including the 0/255 field boundaries.
+Twelve binding mutations---generated ALU/MOD code shifts, a duplicate bitfield
+code, three AUX-field packing distortions in the simulator header, a renamed
+spec mnemonic, two generated-code shifts, two generated-mnemonic changes, and an
+independent-list code change---each change the oracle or a refinement theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
