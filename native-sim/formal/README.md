@@ -982,6 +982,32 @@ selects the opcode remains outside the theorem, and the two bodies do not call
 the generated `arm64_pair_mem.h` macros -- that header is exercised only by the
 host oracle -- so both remain in the trusted computing base.
 
+The AArch64 pre/post-indexed address-writeback theorem covers the two bodies
+`ARM64_SIM_L_MEM_PRE` and `ARM64_SIM_L_MEM_POST`, which apply the address-offset
+immediate to the base register before (pre-index) or after (post-index) an
+access. This contract is a *decode* of the packed memory-flag byte that both
+bodies and the offset macro share: the byte is the top byte of the packed `AUX`
+word (`aux >>> 24 & 0xff`, matching `ARM64_SIM_L_MEM_FLAGS`), `MEM_PRE` (`1`) and
+`MEM_POST` (`2`) are independent bits, and each body's gate is the matching bit
+`arm64_mem_prepost_pre_writeback` / `arm64_mem_prepost_post_writeback`. The
+offset macro (`MEM_BASE_OFF`) suppresses its immediate exactly when either bit is
+set (`arm64_mem_prepost_suppress_offset`), so `[base, imm]!` and `[base], imm`
+contribute the immediate as their own writeback rather than in the offset, and
+because the bits are independent a byte with both set applies the same immediate
+twice, once before and once after
+(`arm64_mem_prepost_delta_refines`, `arm64_mem_prepost_form_is_sum`), with the
+writeback count bounded by the two bits (`arm64_mem_prepost_form_bounded`). Its
+independent oracle drives the generated decode/select macros over every flag byte
+crossed with low-byte noise that must not leak into the flag byte and a spread of
+immediates, restating the top-byte decode, the suppression gate and the two
+gated deltas from the raw `AUX` word; three binding mutations -- a bit swap in the
+C macro, a flag-shift change, and a pre-delta gate swap -- each change the
+observable result (a fourth, a Lean bit change, is caught by the refinement
+theorem). The register and opcode decode that frame a pre/post access remain
+outside the theorem, and the two bodies do not call the generated
+`arm64_mem_prepost.h` macros -- that header is exercised only by the host oracle
+-- so both remain in the trusted computing base.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1003,7 +1029,8 @@ multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
 selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, CCMP,
-`.D0`/`.Q0` vector memory-transfer, and `LDP`/`STP` pair-move composition,
+`.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, and pre/post-indexed
+address-writeback composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
@@ -1036,6 +1063,9 @@ generated `arm64_dq_mem.h` macros — that header is exercised only by the host
 oracle — so all four bodies remain in the trusted computing base.
 The two `ARM64_SIM_L_{LDP,STP}` handler bodies do not call the generated
 `arm64_pair_mem.h` macros — that header is exercised only by the host oracle —
+so both bodies remain in the trusted computing base.
+The two `ARM64_SIM_L_MEM_{PRE,POST}` handler bodies do not call the generated
+`arm64_mem_prepost.h` macros — that header is exercised only by the host oracle —
 so both bodies remain in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`

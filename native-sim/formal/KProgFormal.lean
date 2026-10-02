@@ -134,3 +134,5 @@ import KProgFormal.GeneratedArm64DqMem
 import KProgFormal.Arm64DqMemHandler
 import KProgFormal.GeneratedArm64PairMem
 import KProgFormal.Arm64PairMemHandler
+import KProgFormal.GeneratedArm64MemPrepost
+import KProgFormal.Arm64MemPrepost

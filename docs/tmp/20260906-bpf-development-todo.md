@@ -5743,6 +5743,59 @@ simulator-stack-to-abstract-frame-base mapping, the register and immediate/RHS
 objdump/parser-to-AUX selection relation, compiler/native bytes, multi-step
 control-flow traces, and specialization preservation.
 
+## Step 0053 — AArch64 pre/post-indexed address-writeback contract
+
+- Scope: the decode of the packed memory-flag byte of an `ARM64_AUX_MEM` operand
+  into the address-writeback form used by `ARM64_SIM_L_MEM_PRE` and
+  `ARM64_SIM_L_MEM_POST`. The byte is the top byte of the packed `AUX` word
+  (`aux >>> 24 & 0xff`, matching `ARM64_SIM_L_MEM_FLAGS`); `MEM_PRE` (`1`) and
+  `MEM_POST` (`2`) are independent bits; each body's gate is the matching bit;
+  the offset macro `MEM_BASE_OFF` suppresses its immediate exactly when either
+  bit is set. This is distinct from the already-proved `arm64_mem_offset_refines`,
+  which is stated over an already-decoded `prepost : Bool`.
+- Semantics: both bits independent, so a byte with both set applies the same
+  immediate twice (once before, once after) — a `writebackFormSpec` ordinal in
+  `{0,1,2}`.
+- Generated from `arm64_mem_prepost_spec.json`:
+  `KProgFormal/GeneratedArm64MemPrepost.lean` + `generated/arm64_mem_prepost.h`
+  (`pre_bit` = 1, `post_bit` = 2, `flags_shift` = 24, `flags_mask` = 255); the
+  generator's `load()` re-checks `ARM64_MEM_PRE`/`ARM64_MEM_POST` in
+  `native-sim/arm64/arm64_sim.h`.
+- `KProgFormal/Arm64MemPrepost.lean`: `arm64_mem_prepost_flags_refines`,
+  `_pre_writeback`, `_post_writeback`, `_suppress_offset`, `_delta_refines`,
+  `_form_is_sum`, `_form_bounded`, plus `_offset_example`, `_post_example`,
+  `_both_example`.
+- `test_arm64_mem_prepost_host.c`: independent 4,608-case oracle. Part 1 checks
+  the generated bit/shift/mask constants against independent literals and
+  `native-sim/arm64/arm64_sim.h`'s `ARM64_MEM_PRE`/`ARM64_MEM_POST`; Part 2
+  drives the generated decode/select macros over every flag byte crossed with
+  low-byte noise (which must not leak into the flag byte) and a spread of
+  immediates, restating the top-byte decode, the suppression gate and the two
+  gated deltas from the raw `AUX` word.
+- Mutation test: 5/5 detected — C pre-bit change (C static assertion),
+  flag-shift 24→16 (oracle mismatch), C pre-delta gate bit swap (oracle
+  mismatch), Lean `postWriteback` bit change and Lean `writebackFormSpec` bit
+  change (refinement theorem, requires a `lake build` rebuild).
+- Full `make -C native-sim/formal check` passes with 0 errors, 72 generators,
+  133 Lean module checks, 62 host cross-checks.
+
+## Next after 0053
+
+With 0053 the AArch64 memory-flag decode surface now has contracts: the generic
+read/write dispatch (`arm64_mem_dispatch_refines`), the address offset
+(`arm64_mem_offset_refines`), the byte-lane scatter (`arm64_byte_lane`), the
+stack slot-tag selection (`arm64_stack_tag`), the vector `.D0`/`.Q0` lane plan,
+the `LDP`/`STP` pair plan, and now the pre/post writeback decode
+(`arm64_mem_prepost_*`). The remaining AArch64 open surfaces are the SIMD
+register file mapping (the `__a64_v0`/`__a64_v0_hi` state fields to an abstract
+register pair), the remaining SIMD element widths (`.S0`/`.H0`/`.B0` and the
+`.Q0` element variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the
+C-to-Lean unsigned-semantics correspondence. On x86 the remaining open work is
+unchanged from 0052: the index register decode and packed-AUX layout, the
+simulator-stack-to-abstract-frame-base mapping, the register and immediate/RHS
+objdump/parser-to-AUX selection relation, compiler/native bytes, multi-step
+control-flow traces, and specialization preservation.
+
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
