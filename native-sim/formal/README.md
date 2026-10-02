@@ -900,6 +900,33 @@ the three-way index-source split, the index-width asymmetry, the `CF`-only
 write, the register-preserving write-free memory, and the absent-width default.
 The register decode that selects the opcode remains outside the theorem.
 
+The `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` theorem covers the
+`X86_SIM_L_EXEC_CMP_IMM_OP` and `X86_SIM_L_EXEC_CMP_REG_OP` arms for
+`X86_OP_CMP_IMM` (`0x0c`), `X86_OP_CMP_REG` (`0x0d`), `X86_OP_TEST_IMM`
+(`0x0e`) and `X86_OP_TEST_REG` (`0x0f`), the four opcodes that compare or test
+without writing a register. All four resolve *one* width `FLAGS ? FLAGS : 64`
+and read their destination lane through the width/lane register read
+(`x86_cmpop_write_width_refines`). Two per-opcode facts separate them, both
+table entries (`x86_cmpop_rhs_source_refines`, `x86_cmpop_flag_kind_refines`):
+the right-hand side is the decoded immediate for the `_IMM` forms
+(`x86ImmediateValueSpec`) and the width/lane register read of `SRC` for the
+`_REG` forms, and the flag kind is the zero-borrow subtraction flags for the
+`CMP` opcodes and the logical flags of the width-narrowed conjunction for the
+`TEST` opcodes. The tables are provably independent
+(`x86_cmpop_tables_independent`): `CMP_IMM`/`TEST_IMM` share a source but differ
+in flag kind, and `CMP_IMM`/`CMP_REG` share flags but differ in source, so no
+row is a function of another. All four write no register
+(`x86_cmpop_preserves_dst`, `x86_cmpop_flag_production`). `x86_cmpop_step_refines`
+composes the whole body over the generated source/flag-kind/width tables and the
+shared register read, immediate decode, subtraction/logical flag production, and
+register pass-through; its independent 2904-case oracle exercises the generated
+tables, the full composition over a deterministic register model at both AUX
+lanes, and pins the immediate/register source split, the CMP/TEST flag-kind
+split, the destination-lane and `SRC`-lane reads, the immediate sign-extension
+at the resolved width, the absent-width default, and register-preserving
+write-free memory. The register decode that selects the opcode remains outside
+the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -912,6 +939,8 @@ composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition, the
 `BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
 `BZHI`/`BZHI_MEM` single-width value/count-source composition, the
+`CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG` register/immediate source/flag-kind
+composition, the
 `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler
 compositions, the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
@@ -942,6 +971,10 @@ The `X86_SIM_L_EXEC_BT`, `X86_SIM_L_EXEC_BT_IMM` and
 `X86_SIM_L_EXEC_BT_MEM_IMM` handler bodies do not call the generated `x86_bt.h`
 macros — that header is exercised only by the host oracle — so all three bodies
 remain in the trusted computing base.
+The `X86_SIM_L_EXEC_CMP_IMM_OP` / `X86_SIM_L_EXEC_CMP_REG_OP` (and their `_AUX`)
+handler bodies do not call the generated `x86_cmpop.h` macros — that header is
+exercised only by the host oracle — so both bodies remain in the trusted
+computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

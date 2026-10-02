@@ -5546,14 +5546,81 @@ surface.
 - Full `make -C native-sim/formal check` passes with 0 errors, 68 generators,
   125 Lean module checks and 58 host cross-checks.
 
+## Step 0050 — x86 `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` source/flag-kind composition
 
-## Next after 0049
+- Scope: the two `X86_SIM_L_EXEC_CMP_IMM_OP` / `X86_SIM_L_EXEC_CMP_REG_OP`
+  (and `_AUX`) arms serving `X86_OP_CMP_IMM` (`0x0c`), `X86_OP_CMP_REG`
+  (`0x0d`), `X86_OP_TEST_IMM` (`0x0e`) and `X86_OP_TEST_REG` (`0x0f`), the four
+  opcodes that compare or test without writing a register. The memory-source
+  `X86_SIM_L_EXEC_CMP_MEM` family (`0x1c`–`0x1f`) is a different body and out of
+  scope.
+- Facts: all four resolve *one* width `FLAGS ? FLAGS : 64` and read their
+  destination lane through the width/lane register read. Two per-opcode facts
+  separate them, both provably independent table entries: the right-hand side is
+  the decoded immediate for the `_IMM` forms and the width/lane register read of
+  `SRC` for the `_REG` forms, and the flag kind is the zero-borrow subtraction
+  flags for the `CMP` opcodes and the logical flags of the width-narrowed
+  conjunction for the `TEST` opcodes. No register is written.
+- Files: `native-sim/formal/generate_x86_cmpop_spec.py` + `x86_cmpop_spec.json`
+  (schema_version 1, four-opcode `EXPECTED` table, `--check` rejects stale text)
+  → `KProgFormal/GeneratedX86CmpOp.lean`, `generated/x86_cmpop.h`;
+  `KProgFormal/X86CmpOpHandler.lean`; oracle `test_x86_cmpop_host.c`. Wired into
+  `KProgFormal.lean` and the Makefile `check` target. `x86_sim_local_bpf.h` is
+  unchanged.
+- Generated C: the four opcode-drift `_Static_assert`s, a local width-code block
+  with a 64-bit drift assert, `KPROG_X86_CMPOP_WRITE_WIDTH_DEFAULT X86_WIDTH_64`,
+  the rhs-source codes (`RHS_IMMEDIATE`/`RHS_REGISTER`) with a per-opcode
+  `..._RHS_SOURCE` define per opcode, the flag-kind codes
+  (`FLAGS_SUB`/`FLAGS_LOGIC`) with a per-opcode `..._FLAG_KIND` define, the
+  boolean `KPROG_X86_CMPOP_RHS_SOURCE(OP_IS_REG)` and
+  `KPROG_X86_CMPOP_FLAG_KIND(OP_IS_TEST)` selectors, and the FLAGS-resolving
+  `KPROG_X86_CMPOP_WRITE_WIDTH(FLAGS)`.
+- Lean: `GeneratedX86CmpOp.Op`/`RhsSource`/`FlagKind` with `rhsSource`/
+  `flagKind`/`resolveWidth` tables; the handler's `X86CmpOp` mirror + `x86CmpOpToOp`
+  and independent `x86CmpOpRhsSourceSpec`/`x86CmpOpFlagKindSpec` (+
+  `x86_cmpop_rhs_source_refines`/`x86_cmpop_flag_kind_refines`/
+  `x86_cmpop_tables_independent`); `generatedX86CmpOpWriteWidth`/
+  `x86CmpOpCodeWidthSpec` (+ `x86_cmpop_write_width_refines`/
+  `_default_refines`); `generatedX86CmpOpRhs`/`x86CmpOpRhsSpec` (+
+  `x86_cmpop_rhs_refines`, `_IMM` arm bridged through
+  `x86_immediate_value_refines`, `_REG` arm through `x86_reg_read_at_refines`);
+  `X86CmpOpEffect` (data-only, `deriving DecidableEq, Repr`);
+  `generatedX86CmpOpStep`/`x86CmpOpStepSpec` + `x86_cmpop_step_refines` (the
+  `CMP` arm bridged through `x86_sub_step_refines`, the `TEST` arm through
+  `x86_zero_refines`/`x86_sign_refines`/`x86_logic_flags_refine`); and the shape
+  pins `x86_cmpop_preserves_dst`/`x86_cmpop_flag_production`. The handler imports
+  `GeneratedX86CmpOp`, `X86AluWriteback`, `X86Immediate`, `X86LogicFlags`,
+  `X86RegRead`, `X86SubResult`, `X86Width`, and (`Std.Tactic.BVDecide`) for
+  `native_decide`; it does *not* import `X86MemAccess` (register/immediate
+  sources only) nor `TagErasure`. No new generator for the operands or flags —
+  every read/flag bridge reuses an existing contract.
+- The final `x86_cmpop_step_refines` proof is `cases op <;> cases flagsCode <;>
+  simp only [...] <;> first | rw [x86_sub_step_refines] | rw [...]` — the
+  `cases` must come *before* `simp only`, as in 0047/0048/0049. Concrete pins use
+  `native_decide` after the defs are in scope.
+- Independent C oracle `test_x86_cmpop_host.c`: generated tables vs. hand
+  restatements; the whole composition over a deterministic register model (4
+  opcodes × 5 FLAGS codes × 4 raw imms × 3 dst regs × 3 src regs × 2 dst lanes ×
+  2 src lanes) comparing the resolved width, both operands, all four flags, the
+  whole register file, and the whole memory array; nine pins. **2904 cases**,
+  zero `-Wall -Wextra` warnings. Mutation-tested with arm swaps / literal
+  changes: swapping the arms inside `KPROG_X86_CMPOP_FLAG_KIND`, swapping the
+  arms inside `KPROG_X86_CMPOP_RHS_SOURCE`, swapping the per-opcode
+  `..._CMP_IMM_FLAG_KIND` name, and changing
+  `KPROG_X86_CMPOP_WRITE_WIDTH_DEFAULT` 64→32 each make it exit non-zero with a
+  distinct message.
+- Full `make -C native-sim/formal check` passes with 0 errors, 69 generators,
+  127 Lean module checks and 59 host cross-checks.
 
-The rest of the x86 surface (`_CMP_{IMM,REG}_OP`), the index register decode
-and
-packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
-compiler/native bytes, multi-step traces, and specialization preservation
-remain open.
+
+## Next after 0050
+
+`X86_SIM_L_EXEC_CMP_MEM` (`X86_OP_CMP_MEM_IMM` `0x1c` / `X86_OP_TEST_MEM_IMM`
+`0x1e` / `X86_OP_CMP_MEM_REG` `0x1d` / `X86_OP_TEST_MEM_REG` `0x1f`) and
+`X86_SIM_L_EXEC_CMP_REG_MEM` (register vs. memory compare), the index register
+decode and packed-AUX layout, the simulator-stack-to-abstract-frame-base
+mapping, compiler/native bytes, multi-step traces, and specialization
+preservation remain open.
 
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29

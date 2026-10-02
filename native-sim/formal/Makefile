@@ -70,6 +70,7 @@ check:
 	python3 generate_x86_andn_spec.py --check
 	python3 generate_x86_bzhi_spec.py --check
 	python3 generate_x86_bt_spec.py --check
+	python3 generate_x86_cmpop_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -222,6 +223,10 @@ check:
 	lake env lean KProgFormal/X86BtHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_bt_host.c -o build/test_x86_bt_host
 	./build/test_x86_bt_host
+	lake env lean KProgFormal/GeneratedX86CmpOp.lean
+	lake env lean KProgFormal/X86CmpOpHandler.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_cmpop_host.c -o build/test_x86_cmpop_host
+	./build/test_x86_cmpop_host
 	lake env lean KProgFormal/Arm64Flags.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
 	./build/test_arm64_flags_host

@@ -79,6 +79,8 @@ import KProgFormal.GeneratedX86Bzhi
 import KProgFormal.X86BzhiHandler
 import KProgFormal.GeneratedX86Bt
 import KProgFormal.X86BtHandler
+import KProgFormal.GeneratedX86CmpOp
+import KProgFormal.X86CmpOpHandler
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags
