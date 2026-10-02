@@ -6379,6 +6379,42 @@ unsigned-semantics correspondence. `SHIFT_IMM`/`SHIFT_REG` amount selection is
 also inline but is subsumed by the shift value contract. On x86 the remaining
 open work is unchanged from 0056.
 
+## Step 0066 — AArch64 flag-family operand-source contract
+
+- Scope: the six NZCV-producing arm pairs
+  `SUBS`/`ADDS`/`CMP`/`TST`/`ANDS`/`CCMP` (`SUBS_IMM`/`SUBS_REG` and the five
+  other pairs) in `arm64_sim_local_bpf.h`. Each arm inlined
+  `(__u64)(IMM)` vs a register expression behind
+  `(OP) == ARM64_OP_<F>_IMM`; the register expression is modifier-rewritten for
+  SUBS/ADDS/CMP/TST/ANDS and a bare `ARM64_SIM_L_READ_REG(SRC)` for CCMP.
+- Contract: `arm64_flag_operand_spec.json` -> `GeneratedArm64FlagOperand.lean`
+  (a twelve-member `FlagOp` inductive, `code`, and `immediate : FlagOp -> Bool`)
+  + `generated/arm64_flag_operand.h` (`KPROG_ARM64_FLAG_RHS(OP, IMM, REG)`). The
+  macro yields `IMM` exactly on the six immediate case labels and `REG`
+  otherwise, evaluating `OP`/`IMM`/`REG` once each. The twelve opcode numbers
+  are re-checked against `native-sim/arm64/arm64_sim.h` both in the generator
+  and by `_Static_assert`s.
+- Proof: `arm64_flag_operand_refines` proves the generated table agrees with an
+  independent membership test over a named immediate-opcode list; the
+  `immediate_iff_mem`, `reg_never_immediate`, `lists_disjoint`,
+  `pairs_exclusive`, `code_dispatch` and `code_in_range` theorems pin the
+  binding cases. Host oracle
+  (`test_arm64_flag_operand_host.c`) sweeps all 256 opcodes against an
+  independent opcode-class oracle; 5120 cases OK.
+- Wiring: dispatcher includes `../formal/generated/arm64_flag_operand.h` after
+  the `arm64_alu_operand.h` include; six inline ternaries replaced by
+  `KPROG_ARM64_FLAG_RHS`. `micro-proofs-build` rc=0; nine binding mutations all
+  DETECTED (`/tmp/mut_flag_operand.py`); post-restore `--check` OK.
+- Full `make -C native-sim/formal check` passes with 0 errors, 85 generators,
+  159 Lean modules, 75 host cross-checks.
+
+## Next after 0066
+
+The AArch64 flag-arm operand source now joins the conditional-select family
+under a generated contract. The remaining genuine AArch64 item is the C-to-Lean
+unsigned-semantics correspondence. On x86 the remaining open work is unchanged
+from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

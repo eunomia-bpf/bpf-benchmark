@@ -92,6 +92,8 @@ import KProgFormal.GeneratedArm64AluHandler
 import KProgFormal.Arm64AluHandler
 import KProgFormal.GeneratedArm64AluOperand
 import KProgFormal.Arm64AluOperandHandler
+import KProgFormal.GeneratedArm64FlagOperand
+import KProgFormal.Arm64FlagOperand
 import KProgFormal.GeneratedArm64FlagHandler
 import KProgFormal.Arm64FlagHandler
 import KProgFormal.GeneratedArm64LogicFlagHandler

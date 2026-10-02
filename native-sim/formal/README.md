@@ -1329,6 +1329,33 @@ the generated `arm64_csel_ptr.h` macro, so the pointer-path routing decision is
 lifted out of the trusted computing base; the condition evaluation, the register
 reads, the tag value, and the two register writes remain outside the theorem.
 
+The AArch64 flag-family operand-source theorem covers the six NZCV-producing arm
+pairs `SUBS`/`ADDS`/`CMP`/`TST`/`ANDS`/`CCMP` (`SUBS_IMM`/`SUBS_REG` and the
+five other pairs). Each arm inlined the same
+`(OP) == ARM64_OP_<F>_IMM ? immediate : register` selection for its right-hand
+operand; which operand the flags are produced from is now the generated
+contract. `arm64_flag_operand_refines` proves the generated twelve-member table
+agrees with an independent statement---an opcode selects the decoded immediate
+exactly when it is one of the six immediate-form opcodes, a membership test over
+a named list rather than a case per constructor---and
+`arm64_flag_operand_immediate_iff_mem`, `arm64_flag_operand_reg_never_immediate`,
+`arm64_flag_operand_lists_disjoint`, `arm64_flag_operand_pairs_exclusive`,
+`arm64_flag_operand_code_dispatch` and `arm64_flag_operand_code_in_range` pin
+each binding case. The host cross-check verifies `KPROG_ARM64_FLAG_RHS` against an
+independent opcode-class oracle (never the macro's switch) and sweeps the opcode
+over all 256 byte values crossed with distinct immediate and register values,
+requiring an immediate-form opcode to return the immediate and every other opcode
+the register expression; nine binding mutations---a generated family arm
+inverted, a non-family default upgraded to the immediate, a moved case label, a
+dropped CCMP immediate case, an opcode static-assert drift, a spec code change,
+a generated/independent immediate-arm divergence in Lean, a dropped independent
+list member, and a negated independent membership rule---each change the
+observable operand or the refinement theorem. The dispatch bodies call the
+generated `arm64_flag_operand.h` macro, so the operand-source decision is lifted
+out of the trusted computing base; the immediate decode, the source-modifier
+rewrite (or the bare `CCMP` register read), the flag production, and the
+writeback remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1355,7 +1382,8 @@ CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
 provenance-path routing, sign-extending-load width selection, and plain-load
 provenance preservation, pair-load provenance routing, FMOV
-destination routing, and conditional-select pointer-path routing,
+destination routing, conditional-select pointer-path routing, and flag-family
+operand-source selection,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
