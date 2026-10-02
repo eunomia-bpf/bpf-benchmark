@@ -6104,6 +6104,54 @@ unchanged from 0058: the remaining SIMD element widths (`.S0`/`.H0`/`.B0` and th
 C-to-Lean unsigned-semantics correspondence. On x86 the remaining open work is
 unchanged from 0056.
 
+
+## Step 0060 — AArch64 MOV provenance-path contract
+
+- Scope: the two move opcodes `ARM64_OP_MOV_IMM` (0x01, 1) and
+  `ARM64_OP_MOV_REG` (0x02, 2). The handler chose between the tag-copy register
+  write and a width-narrowed scalar write with an inline `if (width == 64)`;
+  which path runs is now the generated contract.
+- Semantics: the routing decision is fixed by the mnemonic plus the access width.
+  `MOV_IMM` always writes a width-narrowed value (its source is an immediate, so
+  it drops any provenance tag); `MOV_REG` copies the source register's tag only
+  at `ARM64_WIDTH_64` and otherwise writes a scalar, dropping the tag. The
+  surrounding reads, the tag value, and both register writes stay in the TCB.
+- Generated from `arm64_mov_spec.json`: `KProgFormal/GeneratedArm64Mov.lean` +
+  `generated/arm64_mov.h` (`movImm`=1, `movReg`=2;
+  `HANDLED`/`PTR_TAG_PATH` macros). The generator re-checks both opcodes against
+  `arm64_sim.h`.
+- `KProgFormal/Arm64Mov.lean`: `arm64_mov_path_refines` (the generated table
+  equals an independent "register-source move and doubleword width" predicate),
+  `arm64_mov_imm_never_ptr`, `arm64_mov_reg_ptr_iff_w64`,
+  `arm64_mov_reg_sub_word_drops`, `arm64_mov_width_matters`,
+  `arm64_mov_code_dispatch`, the two code-range pins, plus two worked examples.
+- `test_arm64_mov_host.c`: independent oracle deciding tag preservation from the
+  mnemonic class and the width (not the macro switch), sweeping all 256 opcode
+  bytes across all four widths in forked children (known moves return the oracle
+  path; unknown opcodes abort through the generated unsupported arm): 1024 cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes `../formal/generated/arm64_mov.h`,
+  adds the `ARM64_SIM_L_MOV_PTR_TAG_PATH` wrapper, and replaces the two inline
+  `MOV_IMM`/`MOV_REG` arms with one `KPROG_ARM64_MOV_HANDLED` branch that
+  dispatches on the generated macro.
+- Mutation test: 7/7 detected — a MOV_IMM wrongly taking the tag-copy path, a
+  MOV_REG tag-copy ignoring the width, a moved case label, and a dropped coverage
+  disjunct in the generated C, a spec code swap, and a generated sub-word
+  register-move tagging and an independent-width-condition drop in Lean.
+- Full `make -C native-sim/formal check` passes with 0 errors, 79 generators,
+  147 Lean module checks, 69 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0060
+
+The AArch64 move surface now has a provenance-path contract
+(`arm64_mov_path_refines`), lifting the tag-copy-versus-narrow routing out of the
+TCB. Remaining AArch64 candidates, one contract per increment: the
+sign-extending loads `LDRSB`/`LDRSW`/`LDRSH` with writeback. The other open
+AArch64 surfaces are unchanged from 0059: the remaining SIMD element widths
+(`.S0`/`.H0`/`.B0` and the `.Q0` element variants), `MADD`/`MSUB`/`UMULH` flag
+consequences, and the C-to-Lean unsigned-semantics correspondence. On x86 the
+remaining open work is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

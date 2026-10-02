@@ -92,10 +92,14 @@ union arm64_sim_gpr {
 #define ARM64_SIM_TAG_RODATA_ADDR 8U
 #include "../formal/generated/arm64_adrp.h"
 #include "../formal/generated/arm64_stlxr.h"
+#include "../formal/generated/arm64_mov.h"
 #define ARM64_SIM_L_ADRP_TAG(OP)                                            \
 	KPROG_ARM64_ADRP_TAG((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 #define ARM64_SIM_L_STLXR_VALUE(OP)                                         \
 	KPROG_ARM64_STLXR_VALUE((OP), ARM64_WIDTH_32,                      \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+#define ARM64_SIM_L_MOV_PTR_TAG_PATH(OP, WIDTH)                             \
+	KPROG_ARM64_MOV_PTR_TAG_PATH((OP), (WIDTH),                        \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 struct arm64_sim_xdp_abi {
@@ -814,15 +818,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		} else if (KPROG_ARM64_ADRP_HANDLED(OP)) {                 \
 			ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)(IMM),\
 				ARM64_SIM_L_ADRP_TAG((OP)));               \
-		} else if ((OP) == ARM64_OP_MOV_IMM) {                     \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __a64_l_width);\
-		} else if ((OP) == ARM64_OP_MOV_REG) {                     \
-			if (__a64_l_width == ARM64_WIDTH_64)               \
+		} else if (KPROG_ARM64_MOV_HANDLED(OP)) {                  \
+			if (ARM64_SIM_L_MOV_PTR_TAG_PATH((OP), __a64_l_width)) {\
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
 					ARM64_SIM_L_READ_REG_PTR(SRC),     \
 					ARM64_SIM_L_REG_TAG(SRC));         \
-			else                                               \
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_READ_REG(SRC), __a64_l_width);\
+			} else {                                           \
+				__u64 __a64_l_value =                      \
+					(OP) == ARM64_OP_MOV_IMM ?         \
+						(__u64)(IMM) :             \
+						ARM64_SIM_L_READ_REG(SRC); \
+				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
+			}                                                  \
 		} else if ((OP) == ARM64_OP_MOVK) {                        \
 			__u64 __a64_l_value =                              \
 				ARM64_SIM_L_MOVK_VALUE((DST), (IMM), ARM64_SIM_L_SHIFT(AUX));\

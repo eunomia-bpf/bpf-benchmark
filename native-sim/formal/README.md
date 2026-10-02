@@ -1167,6 +1167,33 @@ the generated `arm64_stlxr.h` macro, so the success-status encoding is lifted ou
 of the trusted computing base; the memory write, the source-register value and
 tag reads, and the status-register write remain outside the theorem.
 
+The AArch64 MOV provenance-path theorem covers the two move opcodes
+`ARM64_OP_MOV_IMM` and `ARM64_OP_MOV_REG`, one routing decision under two
+per-opcode facts: the simulator writes the destination register either through
+the tag-copy register write (which carries the source register's provenance) or
+through a width-narrowed scalar write (which drops it), and the choice is fixed
+by the mnemonic plus the access width. `arm64_mov_path_refines` proves the
+generated `KPROG_ARM64_MOV_PTR_TAG_PATH` table equals an independent predicate
+"register-source move and doubleword width", deliberately not a restatement of
+the macro's switch, so only the register-source move at doubleword width preserves
+provenance; `arm64_mov_imm_never_ptr`, `arm64_mov_reg_ptr_iff_w64` and
+`arm64_mov_reg_sub_word_drops` pin the three asymmetric cases, and
+`arm64_mov_width_matters` shows each move has a tag-dropping width, so the width
+is load-bearing rather than the mnemonic alone. The two opcodes are pinned
+(`arm64_mov_code_dispatch`, `arm64_mov_imm_code_in_range`,
+`arm64_mov_reg_code_in_range`). Its independent oracle decides tag preservation
+from the mnemonic class and the access width (never the macro's switch) and
+sweeps the opcode over all 256 byte values and all four widths in forked
+children, requiring each known move to return the oracle path and each unknown
+opcode to abort through the generated unsupported arm; seven binding mutations --
+a MOV_IMM that wrongly takes the tag-copy path, a MOV_REG tag-copy that ignores
+the width, a moved case label, and a dropped coverage disjunct in the generated
+C, a spec code swap, and a generated sub-word register-move tagging and an
+independent-width-condition drop in Lean -- each change the observable path or
+the refinement theorem. The dispatch body calls the generated `arm64_mov.h`
+macro, so the routing decision is lifted out of the trusted computing base; the
+source value and tag reads and the two register writes remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1190,7 +1217,8 @@ AArch64 width, generic ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
-relocation-tag selection, and STLXR exclusive-store-status encoding,
+relocation-tag selection, STLXR exclusive-store-status encoding, and MOV
+provenance-path routing,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
