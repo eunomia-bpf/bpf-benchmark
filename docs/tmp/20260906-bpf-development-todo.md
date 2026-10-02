@@ -5414,10 +5414,75 @@ surface.
   121 Lean module checks and 56 host cross-checks.
 
 
-## Next after 0047
+## Step 0048 — x86 `BZHI` / `BZHI_MEM` single-width value/count composition
 
-The rest of the x86 surface (`_BZHI{,_MEM}`,
-`_BT`/`_BT_IMM`/`_BT_MEM_IMM`, `_CMP_{IMM,REG}_OP`), the index register decode
+- Scope: the two `X86_SIM_L_EXEC_BZHI` / `X86_SIM_L_EXEC_BZHI_MEM` arms for
+  `X86_OP_BZHI` (`0x34`) and `X86_OP_BZHI_MEM` (`0x35`), the BMI2 opcodes that
+  clear the bits at or above a byte-masked bit count.
+- Facts: both bodies resolve *one* width `FLAGS ? FLAGS : 64` and use it for the
+  value read, the count comparison, and the destination write — there is no
+  second AUX-selected memory width here, unlike `ANDN_MEM`. The value and count
+  sources are per-opcode table entries: `BZHI` reads its value from `SRC` and
+  its count from `COUNT`, `BZHI_MEM` reads its value from memory at the
+  resolved width and its count from the register the AUX shift byte names. The
+  headline fact is the hand-defined flag set: `OF = SF = 0` outright while `ZF`
+  is the real zero test of the result, so SF is not the result's sign as the
+  shared logic-flag production would make it; and `CF` is the byte-masked count
+  reaching the *width's* bit count, not any property of the result. The count
+  is byte-masked, so a register holding `0x1ff` behaves as `0xff`.
+- Files: `native-sim/formal/generate_x86_bzhi_spec.py` + `x86_bzhi_spec.json`
+  (schema_version 1, two-opcode `EXPECTED` table, `--check` rejects stale text)
+  → `KProgFormal/GeneratedX86Bzhi.lean`, `generated/x86_bzhi.h`;
+  `KProgFormal/X86BzhiHandler.lean`; oracle `test_x86_bzhi_host.c`. Wired into
+  `KProgFormal.lean` and the Makefile `check` target. `x86_sim_local_bpf.h` is
+  unchanged.
+- Generated C: the two opcode-drift `_Static_assert`s, a local width-code block
+  with a 64-bit drift assert, `KPROG_X86_BZHI_WRITE_WIDTH_DEFAULT X86_WIDTH_64`,
+  the two value-source and two count-source codes + per-opcode source defines +
+  `KPROG_X86_BZHI_VALUE_SOURCE(OP_IS_MEMORY)` /
+  `KPROG_X86_BZHI_COUNT_SOURCE(OP_IS_MEMORY)`, the FLAGS-resolving
+  `KPROG_X86_BZHI_WRITE_WIDTH(FLAGS)`, and `KPROG_X86_BZHI_COUNT_MASK 0xffULL`.
+- Lean: `x86BzhiWidthSpec`/`generatedX86BzhiWidth` + `x86_bzhi_width_refines`/
+  `x86_bzhi_width_default_refines`; `ValueSource`/`CountSource` tables +
+  `x86_bzhi_value_source_refines`/`x86_bzhi_count_source_refines`;
+  `x86BzhiValueSpec`/`generatedX86BzhiValue` + `x86_bzhi_value_refines` (memory
+  arm bridged through `x86_mem_load_refines`); `x86BzhiCountSpec`/
+  `generatedX86BzhiCount` + `x86_bzhi_count_read_refines` + the byte-truncation
+  pin `x86_bzhi_count_masks_to_byte`; `x86BzhiResultSpec`/
+  `generatedX86BzhiResult` + `x86_bzhi_result_refines` (bridged through
+  `x86_bzhi_refines_width`); `x86BzhiFlagsSpec`/`generatedX86BzhiFlags` +
+  `x86_bzhi_flags_refines` (bridged through `x86_width_bits_refines`);
+  `X86BzhiEffect` (data-only, `deriving DecidableEq, Repr`);
+  `generatedX86BzhiStep`/`x86BzhiStepSpec` + `x86_bzhi_step_refines`; and the
+  narrowing pins (`x86_bzhi_clears_sf_of`, `x86_bzhi_cf_is_count_versus_width`,
+  `x86_bzhi_zf_real_sf_cleared`). The generated module declares its own
+  `resolveWidth` (precedent `GeneratedX86Cmov.lean`); the handler imports
+  `KProgFormal.X86LogicFlags` for the `X86Flags` structure and
+  `KProgFormal.X86Bitops` for the `bzhi` refinement lemmas (reused, no new
+  generator for the helper).
+- The final `x86_bzhi_step_refines` proof is `cases op <;> cases flagsCode <;>
+  simp only [...]` — the `cases` must come *before* `simp only`, as in 0047.
+  Concrete flag pins use `simp only [x86BzhiFlagsSpec, x86WidthBitsSpec] <;>
+  decide`; a `simp only` that has already rewritten the goal cleanly benefits
+  from a plain `decide` rather than a further `simp only` list.
+- Independent C oracle `test_x86_bzhi_host.c`: generated tables vs. hand
+  restatements; the whole composition over a deterministic register and
+  source-memory model (2 opcode forms × 5 FLAGS codes × 4 displacements × 3 src
+  regs × 3 count regs × 3 AUX count regs × 3 dst regs) comparing the whole
+  register file, the whole memory array, and the flags; eight pins. **3264
+  cases**, zero `-Wall -Wextra` warnings. Mutation-tested with arm swaps /
+  literal changes: swapping the arms inside `KPROG_X86_BZHI_VALUE_SOURCE` or
+  `KPROG_X86_BZHI_COUNT_SOURCE`, swapping the per-opcode value/count source
+  names, and changing `KPROG_X86_BZHI_WRITE_WIDTH_DEFAULT` 64→32 each make it
+  exit non-zero (a plain renumbering of the codes is vacuous — the oracle reads
+  the codes).
+- Full `make -C native-sim/formal check` passes with 0 errors, 67 generators,
+  123 Lean module checks and 57 host cross-checks.
+
+## Next after 0048
+
+The rest of the x86 surface (`_BT`/`_BT_IMM`/`_BT_MEM_IMM`,
+`_CMP_{IMM,REG}_OP`), the index register decode
 and
 packed-AUX layout, the simulator-stack-to-abstract-frame-base mapping,
 compiler/native bytes, multi-step traces, and specialization preservation

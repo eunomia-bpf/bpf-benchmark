@@ -850,6 +850,32 @@ CF=OF=0 logic-flag production at the write width, the partial-register
 writeback, and the write-free memory. The register decode that selects the
 opcode remains outside the theorem.
 
+The `BZHI` / `BZHI_MEM` theorem covers the `X86_SIM_L_EXEC_BZHI` and
+`X86_SIM_L_EXEC_BZHI_MEM` arms for `X86_OP_BZHI` (`0x34`) and `X86_OP_BZHI_MEM`
+(`0x35`), the BMI2 opcodes that clear the bits at or above a byte-masked bit
+count. Both bodies resolve *one* width `FLAGS ? FLAGS : 64`
+(`x86_bzhi_width_refines`) and use it for the value read, the count comparison,
+and the destination write — there is no second AUX-selected memory width here,
+unlike `ANDN_MEM`. The value and count sources are per-opcode table entries
+(`x86_bzhi_value_source_refines`, `x86_bzhi_count_source_refines`): `BZHI` reads
+its value from `SRC` and its count from `COUNT`, `BZHI_MEM` reads its value from
+memory at the resolved width and its count from the register the AUX shift byte
+names. The headline fact is the hand-defined flag set
+(`x86_bzhi_flags_refines`): `OF = SF = 0` *outright* while `ZF` is the real zero
+test of the result, so `SF` is not the result's sign as the shared logic-flag
+production would make it; and `CF` is the byte-masked count reaching the
+*width's* bit count (`x86_bzhi_cf_is_count_versus_width`), not any property of
+the result. The count is byte-masked, so a register holding `0x1ff` behaves as
+`0xff` (`x86_bzhi_count_masks_to_byte`). `x86_bzhi_step_refines` composes the
+whole body over the generated value/count/width tables and the shared register
+read, memory load, `bzhi` bit-clear, hand-defined flag set, and
+partial-register writeback; its independent 3264-case oracle exercises the
+generated tables, the full composition over a deterministic register and
+source-memory model, and pins the register/memory value split, the `COUNT`-vs-AUX
+count split, the count byte-masking, the count-versus-width CF, the
+SF-cleared/ZF-real asymmetry, the partial-register writeback, and the write-free
+memory. The register decode that selects the opcode remains outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -859,7 +885,8 @@ LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
 `PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
-`ANDN`/`ANDN_MEM` source-split/memory-width composition, and shared
+`ANDN`/`ANDN_MEM` source-split/memory-width composition, the
+`BZHI`/`BZHI_MEM` single-width value/count-source composition, the
 `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler
 compositions, the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
@@ -882,6 +909,9 @@ The two `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
 both bodies remain in the trusted computing base.
 The `X86_SIM_L_EXEC_ANDN` and `X86_SIM_L_EXEC_ANDN_MEM` handler bodies do not
 call the generated `x86_andn.h` macros — that header is exercised only by the
+host oracle — so both bodies remain in the trusted computing base.
+The `X86_SIM_L_EXEC_BZHI` and `X86_SIM_L_EXEC_BZHI_MEM` handler bodies do not
+call the generated `x86_bzhi.h` macros — that header is exercised only by the
 host oracle — so both bodies remain in the trusted computing base.
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
