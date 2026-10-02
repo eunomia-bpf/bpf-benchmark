@@ -6664,6 +6664,51 @@ specialization preservation. The next increment must be one of these deeper
 contracts. The cheap option (a) left open by 0072 is a host oracle for
 `x86_reg_lane_aux` (its Lean module exists but it has no oracle).
 
+## Step 0073 — x86 register-lane AUX contract
+
+- Scope: the packed x86 register-lane AUX word
+  (`generated/x86_reg_lane_aux.h` from `generate_x86_reg_lane_aux_spec.py`,
+  Lean `KProgFormal/X86RegLaneAux.lean`). It was the last generated packer
+  contract with only field-roundtrip theorems and *no* refinement against an
+  independent spec and *no* host oracle, yet it is live: the simulator's
+  register/immediate ALU bodies (`x86_sim_local_bpf.h:863-915`) read the ALU
+  code and the two byte lanes through `KPROG_X86_REG_LANE_AUX_PAYLOAD` /
+  `_DST_SHIFT` / `_SRC_SHIFT` on every `X86_SIM_L_EXEC_ALU_{IMM,REG}` step, and
+  the width/lane read-write macros read `_DST_SHIFT`/`_SRC_SHIFT` at
+  `1398-1467`.
+- `X86RegLaneAux.lean`: added `x86RegLaneAuxSpec` (independent little-endian
+  byte concatenation: unused top byte, source lane, destination lane, payload)
+  and `x86_reg_lane_aux_pack_refines` proving the generated masked-or packer
+  equal to it, plus `x86_reg_lane_aux_fields_non_interfering`, a concrete
+  byte-order example (`pack 2 8 0 = 0x0802`), and docstrings on the existing
+  roundtrips. The module was rewritten off the ambiguous `open` (a binder named
+  `payload` shadowed the generated `payload` decoder) to fully qualified
+  `GeneratedX86RegLaneAux.*` names.
+- New `test_x86_reg_lane_aux_host.c`: includes `../x86/x86_sim.h`, drives the
+  *real* generated packer and decoders, and compares every field against an
+  independent `(aux >> 8k) & 0xff` restatement over a byte grid, the concrete
+  dst-lane-only and both-lane shapes, and all 256 values of each single field,
+  including that the unused top byte stays zero. Success line `x86 register lane
+  aux host cross-check: OK (7629 cases)`; exit 1 on mismatch.
+- Makefile: only the CC/run oracle pair appended after the existing
+  `X86RegLaneAux.lean` line (144 already builds the Lean module); no new Lean
+  line, no new generator `--check`, no C-header change (so no sim rebuild).
+- Gate: 86 generators / 162 Lean / 82 oracles / 0 errors. Mutation harness
+  `/tmp/mut_x86_reg_lane_aux.py` 9/9 DETECTED (a generated C packer/decoder/mask
+  distortion, a generated Lean shift, a generated Python valid-shift change, a
+  spec JSON shift caught by `--check`, and three independent-spec/example
+  changes in Lean).
+
+## Next after 0073
+
+Every generated contract — AArch64 and x86, including both AUX packers — now has
+a refinement theorem against an independent spec, roundtrips, and a host oracle.
+Remaining x86 open work is unchanged and still all *compositional/handwritten*:
+index-register decode into the AUX index byte; simulator-stack-to-abstract-frame
+-base mapping; register/immediate/RHS objdump→AUX selection; compiler/native
+bytes; multi-step control-flow traces; specialization preservation. The next
+increment must be one of these deeper contracts.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

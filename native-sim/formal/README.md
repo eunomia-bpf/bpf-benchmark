@@ -1455,12 +1455,27 @@ macros and the decoders, and compares every field against an independent
 `(aux >> 8k) & 0xff` restatement over a byte grid, the sentinel, and all 256
 values of each single field (7,904 cases).
 
+The x86 register-lane AUX contract binds the `KPROG_X86_REG_LANE_AUX` packer
+and its three byte decoders that the simulator's register/immediate ALU bodies
+and its width/lane read-write macros call for the ALU code and the two byte
+lanes: the payload (ALU code or source byte) in bits 0-7, the destination byte
+lane in bits 8-15, and the source byte lane in bits 16-23, with the top byte
+unused. `X86RegLaneAux.lean` proves the generated masked-or packer equal to an
+independent little-endian byte concatenation, proves each of the three field
+roundtrips, proves the three fields pairwise non-interfering, and carries the
+typed-lane roundtrip over the two valid byte lanes. The host cross-check
+includes `x86_sim.h`, drives the *real* generated macros, and compares every
+field against an independent `(aux >> 8k) & 0xff` restatement over a byte grid
+and all 256 values of each single field, and pins the unused top byte
+(7,629 cases).
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset,
 packed-AUX layout,
+register-lane AUX layout,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the

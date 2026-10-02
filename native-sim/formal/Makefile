@@ -142,6 +142,8 @@ check:
 	lake env lean KProgFormal/X86AluWriteback.lean
 	lake env lean KProgFormal/X86RegRead.lean
 	lake env lean KProgFormal/X86RegLaneAux.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_reg_lane_aux_host.c -o build/test_x86_reg_lane_aux_host
+	./build/test_x86_reg_lane_aux_host
 	lake env lean KProgFormal/X86MemAux.lean
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_mem_aux_host.c -o build/test_x86_mem_aux_host
 	./build/test_x86_mem_aux_host
