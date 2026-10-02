@@ -5954,6 +5954,56 @@ the `.Q0` element variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the
 C-to-Lean unsigned-semantics correspondence. On x86 the remaining open work is
 unchanged from 0055.
 
+
+## Step 0057 — AArch64 ORN complemented-logical-OR contract
+
+- Scope: the complemented logical OR arm `ARM64_OP_ORN_REG` (0x35, 53)
+  formerly inlined in the local dispatch, writing the OR of the first source
+  with the bitwise complement of the already source-modified second source. The
+  generated arm folds the destination-width mask (`narrow (lhs ||| ~~~rhs)
+  width`) exactly as the caller's register write does.
+- Semantics: `lhs | ~rhs`; the independent statement is the De Morgan form
+  `~~~((~~~lhs) &&& rhs)`, deliberately not the OR-with-complement; both narrow
+  to the destination width; no NZCV is written.
+- Generated from `arm64_orn_spec.json`: `KProgFormal/GeneratedArm64Orn.lean` +
+  `generated/arm64_orn.h` (`orn_reg` = 53; `HANDLED`/`VALUE` macros).
+- `KProgFormal/Arm64Orn.lean`: `arm64_orn_refines` (generated arm equals the
+  independent De Morgan statement over all four widths),
+  `arm64_orn_de_morgan`, `arm64_orn_code_in_range`,
+  `arm64_orn_code_dispatch`, `arm64_orn_flags_unchanged`,
+  `arm64_orn_zero_rhs_all_ones`, `arm64_orn_zero_lhs_complement`, the `w32`
+  bound, plus two `native_decide` examples.
+- `test_arm64_orn_host.c`: independent 40,401-case oracle deriving the width
+  mask from a shift of one (not the macro's ladder), applying both the De Morgan
+  and direct OR-with-complement forms and requiring them equal, composing the
+  existing `KPROG_ARM64_MOD_VALUE` contract for the right-hand source
+  modification, sweeping both operands over boundary vectors and every modifier
+  code across all four widths plus 40,000 fixed-seed random cases, and
+  confirming an unsupported opcode aborts.
+- Sim wiring: `arm64_sim_local_bpf.h` now includes
+  `../formal/generated/arm64_orn.h`, adds the `ARM64_SIM_L_ORN_VALUE` wrapper,
+  and replaces the former inline arm with the `KPROG_ARM64_ORN_HANDLED` branch —
+  lifting the complemented-OR value out of the TCB.
+- Mutation test: 7/7 detected — dropped complement, swapped OR, and dropped
+  width mask in the generated C (oracle), spec code move (generator `--check`),
+  a Lean complemented-lhs swap, and an independent-spec complement drop and
+  narrowing drop (`lake build` refinement).
+- Full `make -C native-sim/formal check` passes with 0 errors, 76 generators,
+  141 Lean module checks, 66 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0057
+
+The AArch64 complemented-logical surface now has a contract for the single
+`ORN_REG` arm (`arm64_orn_refines`; note there is no `EON_REG` in
+`arm64_sim.h`), lifting its value out of the TCB. Remaining AArch64 candidates,
+one contract per increment: the `ADRP` pair, `STLXR`, the `MOV_IMM`/`MOV_REG`
+pair, and the sign-extending loads `LDRSB`/`LDRSW`/`LDRSH` with writeback. The
+other open AArch64 surfaces are unchanged from 0056: the remaining SIMD element
+widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants),
+`MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
+correspondence. On x86 the remaining open work is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

@@ -1088,6 +1088,33 @@ macro, so the condition-gated negation value is lifted out of the trusted
 computing base; the surrounding register read, condition evaluation, and
 width-narrowed register write remain outside the theorem.
 
+The AArch64 ORN complemented-logical-OR theorem covers the one value body
+`ARM64_OP_ORN_REG`, which writes the destination-width-narrowed OR of the first
+source with the bitwise complement of the already source-modified second source.
+The contract is the opcode label and the width-narrowed raw value:
+`arm64_orn_refines` proves the generated `KPROG_ARM64_ORN_VALUE` arm equals an
+independent De Morgan statement (`~~~((~~~lhs) &&& rhs)`) -- deliberately not the
+OR-with-complement the generated arm uses -- over all four destination widths,
+and `arm64_orn_de_morgan` proves the two forms agree. The opcode is pinned inside
+its `53` case-label range (`arm64_orn_code_in_range`, `arm64_orn_code_dispatch`),
+it writes no NZCV (`arm64_orn_flags_unchanged`), a zero second source yields the
+all-ones word (`arm64_orn_zero_rhs_all_ones`), a zero first source yields the
+complement of the second (`arm64_orn_zero_lhs_complement`), and a word-width
+result carries no bits above bit 31 (`arm64_orn_w32_bound`). Its independent
+oracle derives the destination width mask from a shift of one (never the macro's
+width-mask ladder), applies both the De Morgan and the direct OR-with-complement
+forms and requires them equal, composes the existing `KPROG_ARM64_MOD_VALUE`
+contract for the right-hand source modification, sweeps both operands over
+boundary vectors and every modifier code across all four widths plus a fixed-seed
+random sweep, and checks that an opcode outside the family aborts; seven binding
+mutations -- a dropped complement, a swapped OR, and a dropped width mask in the
+generated C, a spec code move, a Lean complemented-lhs swap, and an
+independent-spec complement drop and narrowing drop -- each change the observable
+result or the refinement theorem. The dispatch body calls the generated
+`arm64_orn.h` macro, so the complemented-OR value is lifted out of the trusted
+computing base; the surrounding register reads, source modification, and
+width-narrowed register write remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1110,7 +1137,7 @@ compositions, and
 AArch64 width, generic ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
-CNEG condition-gated negation composition,
+CNEG condition-gated negation, and ORN complemented-logical-OR composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

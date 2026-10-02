@@ -27,6 +27,7 @@
 #include "../formal/generated/arm64_reduction.h"
 #include "../formal/generated/arm64_unary.h"
 #include "../formal/generated/arm64_cneg.h"
+#include "../formal/generated/arm64_orn.h"
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_fmov.h"
 #include "../formal/generated/arm64_load_bytes.h"
@@ -454,6 +455,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_CNEG_VALUE(OP, SRC, TAKEN, WIDTH)                       \
 	KPROG_ARM64_CNEG_VALUE((OP), ARM64_SIM_L_READ_REG(SRC), (TAKEN),   \
 			       (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+/*
+ * Complemented logical OR (ORN_REG) applied to two source registers. The opcode
+ * label and the width-narrowed OR with a complemented second source are the
+ * generated AArch64 ORN contract in formal/generated/arm64_orn.h, which
+ * KProgFormal/Arm64Orn.lean proves equal to an independent De Morgan statement
+ * over all four destination widths. LHS and RHS are each evaluated exactly
+ * once, and no arm writes NZCV.
+ */
+#define ARM64_SIM_L_ORN_VALUE(OP, LHS, RHS, WIDTH)                          \
+	KPROG_ARM64_ORN_VALUE((OP), (LHS), (RHS), (WIDTH),                 \
+			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
@@ -933,9 +946,13 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				__a64_l_lhs, __a64_l_rhs, __a64_l_width,    \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE());           \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_ORN_REG) {                     \
-			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC) | ~ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
+		} else if (KPROG_ARM64_ORN_HANDLED(OP)) {                    \
+			__u64 __a64_l_result =                              \
+				ARM64_SIM_L_ORN_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),\
+					ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX),\
+						ARM64_SIM_L_SHIFT(AUX), __a64_l_width),\
+					__a64_l_width);                     \
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_CCMP_IMM || (OP) == ARM64_OP_CCMP_REG) {\
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST);      \
 			__u64 __a64_l_rhs = (OP) == ARM64_OP_CCMP_IMM ? (__u64)(IMM) :\
