@@ -25,6 +25,7 @@
 #include "../formal/generated/arm64_movk.h"
 #include "../formal/generated/arm64_shift.h"
 #include "../formal/generated/arm64_reduction.h"
+#include "../formal/generated/arm64_unary.h"
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_fmov.h"
 #include "../formal/generated/arm64_load_bytes.h"
@@ -429,6 +430,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	KPROG_ARM64_REDUCTION_VALUE((OP), (VALUE),                         \
 				    ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+/*
+ * Unary value (MVN/NEG) applied to a source register. The two opcode labels and
+ * the width-narrowed complement/negation are the generated AArch64 unary
+ * contract in formal/generated/arm64_unary.h, which KProgFormal/Arm64Unary.lean
+ * proves equal to an independent statement over both operations and all four
+ * destination widths. ARM64_SIM_L_READ_REG is evaluated exactly once, and no
+ * arm writes NZCV.
+ */
+#define ARM64_SIM_L_UNARY_VALUE(OP, SRC, WIDTH)                             \
+	KPROG_ARM64_UNARY_VALUE((OP), ARM64_SIM_L_READ_REG(SRC), (WIDTH),  \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
@@ -793,9 +806,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		} else if (KPROG_ARM64_MUL_HANDLED(OP)) {                    \
 			__u64 __a64_l_result = ARM64_SIM_L_MUL_VALUE((OP), (SRC), (SRC2), (SRC3));\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_MVN || (OP) == ARM64_OP_NEG) {    \
-			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);     \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), (OP) == ARM64_OP_MVN ? ~__a64_l_value : -__a64_l_value, __a64_l_width);\
+		} else if (KPROG_ARM64_UNARY_HANDLED(OP)) {                 \
+			__u64 __a64_l_result =                              \
+				ARM64_SIM_L_UNARY_VALUE((OP), (SRC), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_CNEG) {                          \
 			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);     \
 			if (ARM64_SIM_L_EVAL_COND(AUX))                      \

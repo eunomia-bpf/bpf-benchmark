@@ -118,6 +118,8 @@ import KProgFormal.GeneratedArm64Shift
 import KProgFormal.Arm64Shift
 import KProgFormal.GeneratedArm64Reduction
 import KProgFormal.Arm64Reduction
+import KProgFormal.GeneratedArm64Unary
+import KProgFormal.Arm64Unary
 import KProgFormal.GeneratedArm64MemOffset
 import KProgFormal.Arm64MemOffset
 import KProgFormal.GeneratedArm64Fmov

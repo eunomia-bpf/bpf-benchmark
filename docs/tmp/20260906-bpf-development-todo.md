@@ -5853,6 +5853,55 @@ simulator-stack-to-abstract-frame-base mapping, the register and immediate/RHS
 objdump/parser-to-AUX selection relation, compiler/native bytes, multi-step
 control-flow traces, and specialization preservation.
 
+## Step 0055 — AArch64 MVN/NEG unary-value contract
+
+- Scope: the two unary value arms `ARM64_OP_MVN` (0x0f) and `ARM64_OP_NEG`
+  (0x10) formerly inlined in the local dispatch, writing the
+  destination-width-narrowed bitwise complement or two's-complement negation of
+  a source register. The generated arm folds the destination-width mask
+  (`narrow (~src) width`, `narrow (0 - src) width`) exactly as the caller's
+  register write does, and is deliberately distinct from the family-level
+  width-narrowing theorem `arm64_alu_result`.
+- Semantics: MVN is an exclusive-or with the all-ones word; NEG is the
+  invert-and-add-one two's-complement identity; both narrow to the destination
+  width; neither writes NZCV.
+- Generated from `arm64_unary_spec.json`: `KProgFormal/GeneratedArm64Unary.lean`
+  + `generated/arm64_unary.h` (`mvn` = 15, `neg` = 16; `HANDLED`/`VALUE`
+  macros).
+- `KProgFormal/Arm64Unary.lean`: `arm64_unary_refines` (generated arm equals an
+  independent spec — MVN as `src ^^^ 0xffffffffffffffff`, NEG as `~~~src + 1` —
+  over both ops and all four widths), `arm64_unary_code_in_range`,
+  `arm64_unary_code_dispatch`, `arm64_unary_flags_unchanged`,
+  `arm64_unary_mvn_self_inverse`, `arm64_unary_neg_add_cancel`, the `w32`/`w8`
+  bounds, plus five `native_decide` examples.
+- `test_arm64_unary_host.c`: independent 40,081-case oracle deriving the width
+  mask from a shift of one (not the macro's ladder), sweeping both ops over
+  boundary vectors and all four widths plus 40,000 fixed-seed random cases, and
+  confirming an unsupported opcode aborts.
+- Sim wiring: `arm64_sim_local_bpf.h` now includes
+  `../formal/generated/arm64_unary.h`, adds the `ARM64_SIM_L_UNARY_VALUE`
+  wrapper, and replaces the two former inline arms with the
+  `KPROG_ARM64_UNARY_HANDLED` branch — lifting the unary value out of the TCB.
+- Mutation test: 5/5 detected — C case-body swap and dropped NEG width mask
+  (oracle), spec code swap (generator `--check`), Lean NEG-identity and
+  MVN-narrowing change (`lake build` refinement).
+- Full `make -C native-sim/formal check` passes with 0 errors, 74 generators,
+  137 Lean module checks, 64 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0055
+
+The AArch64 unary surface is now proved and, unlike the preceding memory
+contracts, its value arm is lifted out of the TCB. Remaining AArch64 candidates,
+one contract per increment: `CNEG` (0x1a, condition-gated negation),
+`ORN_REG`/`EON_REG` (complemented logical), the `ADRP` pair, `STLXR`, the
+`MOV_IMM`/`MOV_REG` pair, and the sign-extending loads `LDRSB`/`LDRSW`/`LDRSH`
+with writeback. The other open AArch64 surfaces are unchanged from 0054: the
+remaining SIMD element widths (`.S0`/`.H0`/`.B0` and the `.Q0` element
+variants), `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean
+unsigned-semantics correspondence. On x86 the remaining open work is unchanged
+from 0054.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

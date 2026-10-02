@@ -1036,6 +1036,31 @@ bodies do not call the generated `arm64_vreg.h` macros -- that header is
 exercised only by the host oracle -- so both remain in the trusted computing
 base.
 
+The AArch64 MVN/NEG unary-value theorem covers the two unary value bodies
+`ARM64_OP_MVN` and `ARM64_OP_NEG`, which write the destination-width-narrowed
+bitwise complement (`MVN`) or two's-complement negation (`NEG`) of a source
+register. The contract is the two opcode labels and the width-narrowed raw
+value: `arm64_unary_refines` proves the generated
+`KPROG_ARM64_UNARY_VALUE` arm equals an independent statement whose MVN arm is
+an exclusive-or with the all-ones word (`src ^^^ 0xffffffffffffffff`) and whose
+NEG arm is the invert-and-add-one identity (`~~~src + 1`) -- deliberately not
+the complement or subtraction operator the generated arm uses -- over both
+operations and all four destination widths. Both opcodes are pinned inside the
+`15..16` case-label range (`arm64_unary_code_in_range`, `arm64_unary_code_dispatch`),
+neither writes NZCV (`arm64_unary_flags_unchanged`), the doubleword complement is
+self-inverse (`arm64_unary_mvn_self_inverse`) and a doubleword negation cancels
+its source (`arm64_unary_neg_add_cancel`). Its independent oracle derives the
+destination width mask from a shift of one (never the macro's width-mask ladder),
+sweeps the two operations over boundary vectors and all four widths plus a
+fixed-seed random sweep, and checks that an opcode outside the two aborts; five
+binding mutations -- the C case-body swap, a dropped NEG width mask, a spec
+code swap, and a Lean NEG-identity and MVN-narrowing change -- each change the
+observable result or the refinement theorem. Unlike the two preceding AArch64
+contracts, the dispatch body now calls the generated `arm64_unary.h` macro, so
+the unary value itself is lifted out of the trusted computing base; the
+surrounding register read and width-narrowed register write remain outside the
+theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1056,9 +1081,9 @@ memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
-selection, ADDS/SUBS/CMN/CMP, ANDS/BICS/TST/TST-BIC, CCMP,
 `.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
-address-writeback, and vector-register-file half mapping composition,
+address-writeback, vector-register-file half mapping, and MVN/NEG unary-value
+composition,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
