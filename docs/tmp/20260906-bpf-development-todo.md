@@ -6004,6 +6004,56 @@ widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants),
 `MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
 correspondence. On x86 the remaining open work is unchanged from 0056.
 
+
+## Step 0058 — AArch64 ADRP relocation-tag selection contract
+
+- Scope: the two page-address opcodes `ARM64_OP_ADRP_GOT` (0x26, 38) and
+  `ARM64_OP_ADRP_RODATA` (0x27, 39). Both wrote through
+  `ARM64_SIM_L_WRITE_REG_PTR_TAG` with an inline `?:` choosing the provenance
+  tag; the selected tag is now the generated contract and the write stays in the
+  TCB.
+- Semantics: GOT tags the page-address write as a relocation address
+  (`ARM64_SIM_TAG_RELOC_ADDR`, 7) and RODATA as a read-only-data address
+  (`ARM64_SIM_TAG_RODATA_ADDR`, 8); no NZCV is written.
+- Generated from `arm64_adrp_spec.json`: `KProgFormal/GeneratedArm64Adrp.lean` +
+  `generated/arm64_adrp.h` (`got`=38, `rodata`=39; `HANDLED`/`TAG` macros). The
+  generator re-checks both the opcodes against `arm64_sim.h` and the tag values
+  against `arm64_sim_local_bpf.h`.
+- `KProgFormal/Arm64Adrp.lean`: `arm64_adrp_tag_refines` (the generated table
+  equals an independent Boolean-indexed base-plus-offset selection),
+  `arm64_adrp_isgot_refines` (the GOT/RODATA classification matches the opcode),
+  `arm64_adrp_code_dispatch`, `arm64_adrp_tags_distinct`,
+  `arm64_adrp_tag_in_range`.
+- `test_arm64_adrp_host.c`: independent oracle classifying the opcode itself
+  (not the macro ladder), requiring the two tags distinct and in range, and
+  exhaustively driving all 256 opcode bytes in forked children (known kinds
+  return the oracle tag; unknown bytes abort through the generated unsupported
+  arm): 257 cases.
+- Sim wiring: `arm64_sim_local_bpf.h` includes `../formal/generated/arm64_adrp.h`
+  (placed *after* the `ARM64_SIM_TAG_*` definitions, because the generated
+  header's `_Static_assert`s reference them), adds the `ARM64_SIM_L_ADRP_TAG`
+  wrapper, and replaces the inline `?:` arm with the `KPROG_ARM64_ADRP_HANDLED`
+  branch calling the generated macro.
+- Mutation test: 7/7 detected — swapped relocation tag, moved case label, spec
+  code move, spec tag change (generator `--check`), and a generated-table value
+  change, an independent-spec base change, and a flipped GOT classification
+  (`lake build` refinement).
+- Full `make -C native-sim/formal check` passes with 0 errors, 77 generators,
+  143 Lean module checks, 67 host cross-checks; `make -C native-sim/arm64
+  micro-proofs-build` rc=0.
+
+## Next after 0058
+
+The AArch64 ADRP page-address surface now has a relocation-tag contract
+(`arm64_adrp_tag_refines`), lifting the tag selection out of the TCB; the
+immediate page address and the tagged-pointer write remain outside. Remaining
+AArch64 candidates, one contract per increment: `STLXR`, the `MOV_IMM`/`MOV_REG`
+pair, and the sign-extending loads `LDRSB`/`LDRSW`/`LDRSH` with writeback. The
+other open AArch64 surfaces are unchanged from 0057: the remaining SIMD element
+widths (`.S0`/`.H0`/`.B0` and the `.Q0` element variants),
+`MADD`/`MSUB`/`UMULH` flag consequences, and the C-to-Lean unsigned-semantics
+correspondence. On x86 the remaining open work is unchanged from 0056.
+
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
 - `make selftest` (default `PLATFORM=kvm ARCH=x86`, zero extra env vars),

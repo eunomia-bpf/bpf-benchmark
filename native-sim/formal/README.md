@@ -1115,6 +1115,32 @@ result or the refinement theorem. The dispatch body calls the generated
 computing base; the surrounding register reads, source modification, and
 width-narrowed register write remain outside the theorem.
 
+The AArch64 ADRP relocation-tag theorem covers the two page-address opcodes
+`ARM64_OP_ADRP_GOT` and `ARM64_OP_ADRP_RODATA`, one contract under two per-opcode
+facts: the GOT form tags the page-address write as a relocation address
+(`ARM64_SIM_TAG_RELOC_ADDR`) and the RODATA form as a read-only-data address
+(`ARM64_SIM_TAG_RODATA_ADDR`), and both write through the same tagged-pointer
+register write. The contract is the opcode label and the selected provenance tag;
+`arm64_adrp_tag_refines` proves the generated `KPROG_ARM64_ADRP_TAG` table equals
+an independent Boolean-indexed selection (a relocation-tag base plus a GOT/RODATA
+offset), deliberately not a restatement of the two-arm match, and
+`arm64_adrp_isgot_refines` proves the GOT/RODATA classification matches the
+opcode itself. The two opcodes are pinned (`arm64_adrp_code_dispatch`), the two
+tags are distinct and inside the `ARM64_SIM_TAG_*` range
+(`arm64_adrp_tags_distinct`, `arm64_adrp_tag_in_range`), so a mislabeled split or
+a swapped tag changes the observable result. Its independent oracle classifies
+the opcode itself (never the macro's tag ladder), requires the two tags distinct
+and in range, and exhaustively drives all 256 opcode bytes in forked children,
+requiring each known kind to return the oracle's tag and each unknown byte to
+abort through the generated unsupported arm; seven binding mutations -- a swapped
+relocation tag, a moved case label, a spec code move, and a spec tag change, plus
+a generated-table value change, an independent-spec base change, and a flipped
+GOT classification in Lean -- each change the observable tag or the refinement
+theorem. The dispatch body calls the generated `arm64_adrp.h` macro, so the
+relocation-tag selection is lifted out of the trusted computing base; the
+immediate page address, the register-file lookup, and the tagged-pointer write
+remain outside the theorem.
+
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
@@ -1137,7 +1163,8 @@ compositions, and
 AArch64 width, generic ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
-CNEG condition-gated negation, and ORN complemented-logical-OR composition,
+CNEG condition-gated negation, ORN complemented-logical-OR composition, and
+ADRP relocation-tag selection,
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

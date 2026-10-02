@@ -90,6 +90,9 @@ union arm64_sim_gpr {
 #define ARM64_SIM_TAG_MAP_VALUE 6U
 #define ARM64_SIM_TAG_RELOC_ADDR 7U
 #define ARM64_SIM_TAG_RODATA_ADDR 8U
+#include "../formal/generated/arm64_adrp.h"
+#define ARM64_SIM_L_ADRP_TAG(OP)                                            \
+	KPROG_ARM64_ADRP_TAG((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 struct arm64_sim_xdp_abi {
 	void *data;
@@ -804,12 +807,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_l_width = (FLAGS) ? (FLAGS) : ARM64_WIDTH_64;  \
 		if ((OP) == ARM64_OP_NOP) {                                \
 			(void)0;                                           \
-		} else if ((OP) == ARM64_OP_ADRP_GOT ||                    \
-			   (OP) == ARM64_OP_ADRP_RODATA) {                 \
+		} else if (KPROG_ARM64_ADRP_HANDLED(OP)) {                 \
 			ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)(IMM),\
-				(OP) == ARM64_OP_ADRP_GOT ?                \
-					ARM64_SIM_TAG_RELOC_ADDR :         \
-					ARM64_SIM_TAG_RODATA_ADDR);        \
+				ARM64_SIM_L_ADRP_TAG((OP)));               \
 		} else if ((OP) == ARM64_OP_MOV_IMM) {                     \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __a64_l_width);\
 		} else if ((OP) == ARM64_OP_MOV_REG) {                     \
