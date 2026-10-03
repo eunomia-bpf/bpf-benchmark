@@ -7670,6 +7670,73 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `armIndex` edits).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0091 — AArch64 simulator routes the pre/post-indexed address-writeback bodies through the checked contract
+
+- Scope: the AArch64 simulator's two address-writeback bodies
+  `ARM64_SIM_L_MEM_PRE` and `ARM64_SIM_L_MEM_POST` previously restated the
+  flag-bit gate (`ARM64_SIM_L_MEM_FLAGS(AUX) & ARM64_MEM_PRE` / `_POST`) and
+  called no generated macro, and `ARM64_SIM_L_MEM_BASE_OFF` restated the
+  offset's suppression gate inline. They now route through the generated
+  `arm64_mem_prepost.h` decode: the offset macro passes
+  `KPROG_ARM64_MEM_PREPOST_SUPPRESS(AUX)`, and both bodies share one
+  `ARM64_SIM_L_MEM_PREPOST_STEP(BASE, DELTA)` that applies
+  `KPROG_ARM64_MEM_PREPOST_PRE_DELTA` / `_POST_DELTA` -- the immediate when the
+  matching bit is set, zero otherwise -- to the base register (or the stack
+  pointer). The step evaluates the delta once and guards on it being nonzero,
+  which is exactly the bit test because the gated delta is zero iff the bit is
+  clear, so the observable writeback is unchanged; the two bits stay
+  independent and a `MEM_PRE | MEM_POST` byte still applies the immediate twice,
+  once before and once after the access.
+- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated contract header was
+  added at `:42` (after the pair-mem include); `ARM64_SIM_L_MEM_BASE_OFF`
+  (`:617-630`) now passes `KPROG_ARM64_MEM_PREPOST_SUPPRESS(AUX)`; the shared
+  step (`:632-652`) plus the two thin wrappers `ARM64_SIM_L_MEM_PRE` (`:654`)
+  and `ARM64_SIM_L_MEM_POST` (`:658`) replace the old bodies. The wrapper
+  signatures are preserved, so all eleven `MEM_PRE` / `MEM_POST` call sites in
+  the `ARM64_SIM_L_EXEC` dispatcher (`ARM64_OP_LOAD`, the sign-extending loads,
+  `ARM64_OP_STORE`, `LDP`/`STP`) are unchanged.
+- New `test_arm64_mem_prepost_route_host.c`: includes the *simulator* header and
+  drives both real bodies directly and through the `ARM64_OP_LOAD` /
+  `ARM64_OP_STORE` dispatcher arms, over five base-register provenance classes
+  (scalar, ABI pointer, relocation address, a stack-tagged register and the
+  stack pointer itself), every pre/post flag combination, all four access
+  widths, both index modes and three immediates. The independent model restates
+  the top-byte flag decode, the suppression gate and the two gated deltas from
+  the raw `AUX` word, so a swapped delta macro, a zeroed or constant suppression
+  argument, an inverted step guard, a dropped stack-pointer branch or a
+  mis-checked flag bit is numerically distinguishable. Compares the whole GPR
+  file with its tags, the stack pointer, and the whole stack and 4 KiB memory
+  images. Success line `arm64 mem_prepost route host cross-check: OK (135170
+  cases)`; exit 1 on mismatch. Distinct from the pre-existing
+  `test_arm64_mem_prepost_host.c`, which tests the contract plus an independent
+  model but never includes the sim header.
+- Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_arm64_mem_prepost_route_host`
+  build + run pair inside `check:`, after the `test_arm64_mem_prepost_host`
+  pair.
+- `native-sim/formal/README.md`: the pre/post routing paragraph replaced the
+  TCB-exclusion ending, and the TCB binding-list clause updated to record the
+  simulator's routing of both bodies and the offset suppression gate through the
+  `KPROG_ARM64_MEM_PREPOST_*` contract.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: routing sentence added
+  after the pre/post theorem paragraph, recording the shared step and the
+  135,170-case sim-header oracle.
+- Mutation harness `mut_arm64_mem_prepost_route.py`: 28/28 DETECTED -- the
+  simulator-header distortions caught by the route oracle alone (the suppression
+  argument pinned to 0 or 1, each wrapper routed to the other delta, the step
+  guard inverted, the stack-pointer branch dropped, the writeback tag forced to
+  scalar, the generated include removed); the generated-C defects caught by the
+  generator `--check` and the route oracle (both bits swapped, the flag shift and
+  mask changed, the suppression `||` turned into `&&` and made pre-only, both
+  deltas gated on the other bit, a static-assert drift); the shared-spec
+  mutations caught by the generator `--check` (the bits, the flag shift and
+  mask, the selector); and the Lean mutations caught by the refinement module
+  (the generated pre-bit gate, the suppression composition, the form-sum
+  constant, the handler's pre-writeback statement, the form bound and the post
+  example).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

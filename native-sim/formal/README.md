@@ -1237,9 +1237,19 @@ gated deltas from the raw `AUX` word; three binding mutations -- a bit swap in t
 C macro, a flag-shift change, and a pre-delta gate swap -- each change the
 observable result (a fourth, a Lean bit change, is caught by the refinement
 theorem). The register and opcode decode that frame a pre/post access remain
-outside the theorem, and the two bodies do not call the generated
-`arm64_mem_prepost.h` macros -- that header is exercised only by the host oracle
--- so both remain in the trusted computing base.
+outside the theorem, but both bodies now call the generated `arm64_mem_prepost.h`
+macros (`KPROG_ARM64_MEM_PREPOST_PRE_DELTA` / `_POST_DELTA`, and the offset
+macro's `KPROG_ARM64_MEM_PREPOST_SUPPRESS` gate), so the writeback selection is
+the proved decode and only the untouched register/opcode decode remains in the
+trusted computing base. A second, sim-header-driven oracle plants distinct
+base-register provenance classes (scalar, ABI pointer, relocation address, a
+stack-tagged register and the stack pointer itself) and drives both real bodies
+both directly and through the `ARM64_OP_LOAD` / `ARM64_OP_STORE` dispatcher arms
+over every flag combination, both index modes, all four access widths and three
+immediates, comparing the whole register file with tags, the stack pointer and
+the memory image against an independent raw-flag model; a swapped delta macro,
+a zeroed or constant suppression argument and a mis-set flag bit are numerically
+distinguishable.
 
 The AArch64 vector-register-file half-mapping theorem covers the four
 vector memory-transfer bodies `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`,

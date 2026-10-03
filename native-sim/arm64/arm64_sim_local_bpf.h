@@ -39,6 +39,7 @@
 #include "../formal/generated/arm64_stack_tag.h"
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
+#include "../formal/generated/arm64_mem_prepost.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -616,7 +617,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_MEM_BASE_OFF(AUX, INDEX, IMM)                           \
 	({                                                                 \
 		__s64 __a64_mbo_off = (__s64)KPROG_ARM64_MEM_OFFSET(      \
-			(ARM64_SIM_L_MEM_FLAGS(AUX) & (ARM64_MEM_PRE | ARM64_MEM_POST)),\
+			KPROG_ARM64_MEM_PREPOST_SUPPRESS(AUX),            \
 			(INDEX) != ARM64_REG_NONE,                        \
 			(IMM),                                            \
 			((INDEX) != ARM64_REG_NONE                        \
@@ -628,31 +629,35 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__a64_mbo_off;                                            \
 	})
 
-#define ARM64_SIM_L_MEM_PRE(BASE, AUX, IMM)                                 \
+/* The pre/post-indexed address writeback contract is a decode of the packed
+ * memory-flag byte into which writeback a load/store performs. Both bodies
+ * route through this one step, which applies the generated per-bit delta --
+ * the immediate when the matching `MEM_PRE` / `MEM_POST` bit is set and zero
+ * otherwise -- to the base register (or the stack pointer), so the two bits
+ * stay independent and the same immediate applies twice when both are set.
+ * The address offset (`MEM_BASE_OFF`) suppresses its immediate through the
+ * same decode's `SUPPRESS` gate, so a pre/post access carries the immediate
+ * as its own writeback rather than in the offset. */
+#define ARM64_SIM_L_MEM_PREPOST_STEP(BASE, DELTA)                           \
 	do {                                                               \
-		if (ARM64_SIM_L_MEM_FLAGS(AUX) & ARM64_MEM_PRE) {         \
-			__s64 __a64_l_pre = (__s64)(IMM);                 \
-			if ((BASE) == ARM64_SP)                            \
-				__a64_sp += __a64_l_pre;                  \
-			else                                               \
+		__s64 __a64_l_pp = (__s64)(DELTA);                        \
+		if (__a64_l_pp != 0) {                                    \
+			if ((BASE) == ARM64_SP)                           \
+				__a64_sp += __a64_l_pp;                   \
+			else                                              \
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((BASE),     \
-					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_pre,\
-					ARM64_SIM_L_REG_TAG(BASE));        \
-		}                                                          \
+					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_pp,\
+					ARM64_SIM_L_REG_TAG(BASE));       \
+		}                                                         \
 	} while (0)
 
+#define ARM64_SIM_L_MEM_PRE(BASE, AUX, IMM)                                 \
+	ARM64_SIM_L_MEM_PREPOST_STEP((BASE),                                \
+		KPROG_ARM64_MEM_PREPOST_PRE_DELTA((AUX), (IMM)))
+
 #define ARM64_SIM_L_MEM_POST(BASE, AUX, IMM)                                \
-	do {                                                               \
-		if (ARM64_SIM_L_MEM_FLAGS(AUX) & ARM64_MEM_POST) {        \
-			__s64 __a64_l_post = (__s64)(IMM);                \
-			if ((BASE) == ARM64_SP)                            \
-				__a64_sp += __a64_l_post;                 \
-			else                                               \
-				ARM64_SIM_L_WRITE_REG_PTR_TAG((BASE),     \
-					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_post,\
-					ARM64_SIM_L_REG_TAG(BASE));        \
-		}                                                          \
-	} while (0)
+	ARM64_SIM_L_MEM_PREPOST_STEP((BASE),                                \
+		KPROG_ARM64_MEM_PREPOST_POST_DELTA((AUX), (IMM)))
 
 #define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)            \
 	({                                                                 \
