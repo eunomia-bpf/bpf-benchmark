@@ -7528,6 +7528,78 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   swapped, the memory displacement slice moved).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0089 — AArch64 simulator routes the LOAD/STORE {D0,Q0} vector memory-transfer group through the checked contract
+
+- Scope: the AArch64 simulator's four vector memory-transfer bodies
+  `ARM64_SIM_L_LOAD_D0_MEM` (`ARM64_OP_LOAD_D0`, `0x28`),
+  `ARM64_SIM_L_STORE_D0_MEM` (`ARM64_OP_STORE_D0`, `0x29`),
+  `ARM64_SIM_L_LOAD_Q0_MEM` (`ARM64_OP_LOAD_Q0`, `0x2a`) and
+  `ARM64_SIM_L_STORE_Q0_MEM` (`ARM64_OP_STORE_Q0`, `0x2b`) previously restated
+  the load/store direction, the lane count, and the lane offsets twice and
+  called no generated macro. They now share one `ARM64_SIM_L_DQ_MEM_STEP(OP,
+  BASE, INDEX, AUX, IMM)` that decodes the arm index through
+  `KPROG_ARM64_DQ_MEM_INDEX`, the access direction through the
+  `KPROG_ARM64_DQ_MEM_OP_*_ACCESS` aliases, the lane count through the
+  `KPROG_ARM64_DQ_MEM_OP_*_LANES` aliases, and the lane plan through
+  `KPROG_ARM64_DQ_MEM_LANE_STRIDE` / `KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE`; the
+  four opcode macros are one-line instantiations of the shared step with the
+  opcode passed as a compile-time literal, preserving their old
+  signatures/order so the `ARM64_SIM_L_EXEC` arms are unchanged (no dispatcher
+  edit). The address offset (`MEM_BASE_OFF`) and the pre/post base adjustment
+  (`MEM_PRE` / `MEM_POST`) stay in the macros with their own proved contracts,
+  so the routed step fixes only *which* lanes each opcode moves and in *what*
+  order. The reads/writes themselves stay inline; only the contract facts are
+  routed.
+- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated contract header was
+  already included at `:40`; the four bodies are replaced by the shared routed
+  step macro (block comment above it, `:740-791`) plus four one-line opcode
+  macros (`:793`, `:796`, `:799`, `:802`); the `ARM64_SIM_L_EXEC` arms at
+  `:1091`, `:1093`, `:1095`, `:1097` already called the wrapper names, so the
+  dispatcher is unchanged.
+- New `test_arm64_dq_mem_route_host.c`: includes the *simulator* header and
+  drives all four real bodies directly and through the `ARM64_SIM_L_EXEC`
+  dispatcher arms, over the four opcodes, five base-register classes (scalar,
+  ABI pointer, relocation address, a stack-pointer-register alias and the stack
+  pointer itself), every pre/post flag combination, both index modes and three
+  immediates. The planted base registers carry distinct provenance classes and
+  the planted SIMD lanes carry distinct patterns, so a body that swaps the
+  direction, selects the wrong lane count, moves the wrong lane into the high
+  half, or drops the second `.Q0` lane is numerically distinguishable at every
+  case. Compares the whole GPR file with its tags, the stack pointer, the SIMD
+  quarters, the whole stack image with its slot tags, and all 4 KiB of the
+  memory window against an independent byte-image model. Success line
+  `arm64 dq_mem route host cross-check: OK (62418 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_arm64_dq_mem_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_arm64_dq_mem_route_host` build +
+  run pair inside `check:`, after the `test_arm64_dq_mem_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the `.D0`/`.Q0`
+  theorem paragraph; the TCB binding-list clause updated to record the
+  simulator's routing of all four bodies through the `KPROG_ARM64_DQ_MEM_*`
+  contract, and the four-body "remain in the trusted computing base" exclusion
+  deleted.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: routing sentence added
+  after the `.D0`/`.Q0` theorem paragraph, recording the shared step and the
+  62,418-case sim-header oracle.
+- Mutation harness `mut_arm64_dq_mem_route.py`: 39/39 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the direction
+  flipped both ways, each D0 wrapper routed to its Q0 opcode, both lane guards
+  narrowed, the step's branch inverted, both dispatcher arms routed to the wrong
+  body, the low-lane extra offset and the high-lane extra offset changed, the
+  high-lane store writing the low value); the generated-C defects caught by the
+  generator `--check` and the route oracle (both lane counts swapped, both store
+  access aliases set to load, the high-lane stride changed, both index-chain
+  arms drifted, both opcode static-assert codes drifted, the D0 index moved, the
+  storeQ0 index moved, the lane stride narrowed); the shared-spec mutations
+  caught by the generator `--check` (the loadD0 lane count, the loadQ0 access
+  direction, the storeD0 opcode code, both stride fields, the storeQ0 code
+  index); and the Lean mutations caught by the refinement module (three
+  independent-plan edits, the access dispatch, the stride claim, and the four
+  generated `laneCount`/`transfer`/`access`/`armIndex` edits).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

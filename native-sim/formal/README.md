@@ -1148,10 +1148,28 @@ restates the same four bodies from the raw opcode, comparing the SIMD lanes, the
 whole GPR file, memory and the stack; four binding mutations -- an access
 direction swap, a lane count swap, a lane-stride change (caught by the C static
 assertion) and a selector-arm swap -- each change the observable result. The
-register decode that selects the opcode remains outside the theorem, and the
-four bodies do not call the generated `arm64_dq_mem.h` macros -- that header is
-exercised only by the host oracle -- so all four remain in the trusted computing
-base.
+register decode that selects the opcode remains outside the theorem.
+
+The four bodies named in that paragraph now share one
+`ARM64_SIM_L_DQ_MEM_STEP` that routes the access direction through
+`KPROG_ARM64_DQ_MEM_*_ACCESS`, the lane count through
+`KPROG_ARM64_DQ_MEM_*_LANES`, the arm index through
+`KPROG_ARM64_DQ_MEM_INDEX`, and the lane plan through
+`KPROG_ARM64_DQ_MEM_LANE_STRIDE` / `KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE`, so the
+four thin opcode wrappers cannot drift and the direction, lane count and lane
+stride are machine-checked facts rather than restated sequences. The independent
+`test_arm64_dq_mem_route_host.c` oracle includes the simulator header, drives all
+four real bodies — directly and through the `ARM64_SIM_L_EXEC` dispatcher arms
+that route to them — over the four opcodes, five base-register classes (scalar,
+ABI pointer, relocation address, a stack-pointer-register alias and the stack
+pointer itself), every pre/post flag combination, both index modes and three
+immediates, and compares the whole GPR file with its tags, the stack pointer, the
+SIMD quarters, the whole stack image with its slot tags, and all 4 KiB of the
+memory window against an independent byte-image model. Its planted base
+registers carry distinct provenance classes and its planted SIMD lanes carry
+distinct patterns, so a body that swaps the direction, selects the wrong lane
+count, moves the wrong lane into the high half, or drops the second `.Q0` lane is
+numerically distinguishable at every case.
 
 The AArch64 `LDP` / `STP` pair-move theorem covers the two bodies
 `ARM64_SIM_L_LDP` and `ARM64_SIM_L_STP` for `ARM64_OP_LDP` (`0x21`) and
@@ -1742,7 +1760,9 @@ memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
-`.D0`/`.Q0` vector memory-transfer, `LDP`/`STP` pair-move, pre/post-indexed
+`.D0`/`.Q0` vector memory-transfer (and the simulator's routing of all four
+bodies through the `KPROG_ARM64_DQ_MEM_*` contract), `LDP`/`STP` pair-move,
+pre/post-indexed
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
@@ -1754,9 +1774,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The four `ARM64_SIM_L_{LOAD,STORE}_{D0,Q0}_MEM` handler bodies do not call the
-generated `arm64_dq_mem.h` macros — that header is exercised only by the host
-oracle — so all four bodies remain in the trusted computing base.
 The two `ARM64_SIM_L_{LDP,STP}` handler bodies do not call the generated
 `arm64_pair_mem.h` macros — that header is exercised only by the host oracle —
 so both bodies remain in the trusted computing base.

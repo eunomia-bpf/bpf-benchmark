@@ -434,6 +434,8 @@ check:
 	lake env lean KProgFormal/Arm64DqMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
 	./build/test_arm64_dq_mem_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_dq_mem_route_host.c -o build/test_arm64_dq_mem_route_host
+	./build/test_arm64_dq_mem_route_host
 	lake env lean KProgFormal/GeneratedArm64PairMem.lean
 	lake env lean KProgFormal/Arm64PairMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_pair_mem_host.c -o build/test_arm64_pair_mem_host
