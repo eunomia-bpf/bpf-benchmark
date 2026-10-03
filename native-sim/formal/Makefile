@@ -193,6 +193,8 @@ check:
 	./build/test_x86_imul_reg_imm_handler_host
 	lake env lean KProgFormal/GeneratedX86MemOffset.lean
 	lake env lean KProgFormal/X86MemOffset.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mem_offset_route_host.c -o build/test_x86_mem_offset_route_host
+	./build/test_x86_mem_offset_route_host
 	lake env lean KProgFormal/X86LeaHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_lea_handler_host.c -o build/test_x86_lea_handler_host
 	./build/test_x86_lea_handler_host

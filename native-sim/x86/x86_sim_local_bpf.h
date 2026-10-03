@@ -403,19 +403,22 @@ struct x86_sim_state {
 #define X86_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                        \
 	X86_SIM_L_WRITE_REG_WIDTH_SHIFT((REG), (VALUE), (WIDTH), 0U)
 
+/* The public sim helper (AUX, DISP) resolves the index register through the
+ * sim's own register read and delegates the arithmetic to the machine-checked
+ * KPROG_X86_MEM_OFFSET contract, so the sim and the Lean refinement share one
+ * offset implementation rather than restating it inline. */
 #define X86_SIM_L_MEM_OFFSET(AUX, DISP)                                     \
-	({                                                                 \
-		__s64 __x86_l_off = (DISP);                               \
-		__u8 __x86_l_index = X86_MEM_AUX_INDEX(AUX);              \
-		if (__x86_l_index != X86_REG_NONE) {                      \
-			__u8 __x86_l_scale = X86_MEM_AUX_SCALE_LOG2(AUX); \
-			__u64 __x86_l_idx_value =                         \
-				X86_SIM_L_READ_REG(__x86_l_index);        \
-			__x86_l_off +=                                  \
-				(__s64)(__x86_l_idx_value << __x86_l_scale);\
-		}                                                         \
-		__x86_l_off;                                              \
-	})
+	X86_SIM_L_MEM_OFFSET_INDEXED((AUX), (DISP),                        \
+		((X86_MEM_AUX_INDEX(AUX) != X86_REG_NONE                       \
+			  ? X86_SIM_L_READ_REG(X86_MEM_AUX_INDEX(AUX))         \
+			  : 0)),                                               \
+		(X86_MEM_AUX_INDEX(AUX) != X86_REG_NONE))
+
+/* INDEX_VALUE is already read and HAS_INDEX is an integer presence flag; the
+ * generated contract decodes the scale from AUX itself. */
+#define X86_SIM_L_MEM_OFFSET_INDEXED(AUX, DISP, INDEX_VALUE, HAS_INDEX)     \
+	((__s64)KPROG_X86_MEM_OFFSET((AUX), (DISP), (INDEX_VALUE),         \
+				     (HAS_INDEX)))
 
 #define X86_SIM_L_BARRIER_VAR(VAR) asm volatile("" : "+r"(VAR))
 

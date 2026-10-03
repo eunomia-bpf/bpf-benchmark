@@ -6790,6 +6790,47 @@ specialization preservation.
 Remaining x86 open work is unchanged and still *compositional/handwritten*:
 index-register decode into the AUX index byte; register/immediate/RHS
 objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
+
+## Step 0076 — x86 simulator routes effective-address offsets through the checked contract
+
+- Scope: the x86 simulator's `X86_SIM_L_MEM_OFFSET(AUX, DISP)` helper. The
+  effective-address offset was already machine-checked (`KPROG_X86_MEM_OFFSET`
+  + `X86MemOffset.lean`), but the simulator **restated the arithmetic inline**:
+  it decoded the AUX index, read the register, and did the shift-and-add itself,
+  so the theorem bounded a macro the running simulator did not use. This closes
+  the "curated contract vs. shipped helper" gap for the offset (the arm64
+  simulator already routed through `KPROG_ARM64_MEM_OFFSET`).
+- `x86/x86_sim.h` now includes `../formal/generated/x86_mem_offset.h`.
+  `X86_SIM_L_MEM_OFFSET(AUX, DISP)` resolves the index through
+  `X86_SIM_L_READ_REG` and delegates to KPROG_X86_MEM_OFFSET via a new
+  `X86_SIM_L_MEM_OFFSET_INDEXED(AUX, DISP, INDEX_VALUE, HAS_INDEX)` — the
+  public helper is the only restatement-free caller; LEA/MOV/CMP/STORE/test and
+  the base-offset macros are unchanged and now inherit it.
+- New `test_x86_mem_offset_route_host.c`: includes the *simulator* header
+  (`x86_sim_local_bpf.h`), drives the real `X86_SIM_L_MEM_OFFSET` over
+  register-AUX forms (RAX/RSP/RBP/RDI/R15/NONE × four scales × eight register
+  values × six displacements), compares against an independent signed
+  accumulator built from the same source register value, checks the no-index
+  form ignores a poisoned register file, and checks the routed helper agrees
+  with the explicit-value helper. Success line `x86 mem offset route host
+  cross-check: OK (2305 cases)`; exit 1 on mismatch.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- Gate: 88 generators / 166 Lean / 85 oracles / 0 errors.
+- Mutation harness `mut_x86_mem_offset_route.py`: 9/9 DETECTED — four sim-side
+  routing mutations (index-register swap to RAX, disp/index operand swap,
+  forced no-index, off-by-one on the selected AUX index) caught by the route
+  oracle alone; two spec-JSON mutations (invalid `indexed` tag, widened
+  accumulation) caught by the generator `--check`; the Lean independent-spec
+  shift mutation caught by the refinement module; and two generated-C
+  mutations (shift→multiply, scale off-by-one) caught by both the generator
+  `--check` and the route oracle.
+
+## Next after 0076
+
+Remaining x86 open work is unchanged and *compositional/handwritten*: the
+index-register decode into the AUX index byte itself; register/immediate/RHS
+objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 specialization preservation.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29

@@ -474,6 +474,16 @@ write macros against an explicit power-of-two-multiply and partial-writeback
 model. The register decode that supplies the index value, the AUX bit layout,
 and the mapping from the simulator's stack region to the abstract frame base
 remain outside the theorem.
+The simulator's `X86_SIM_L_MEM_OFFSET` helper now delegates to that
+machine-checked contract instead of restating the offset arithmetic inline:
+it resolves the AUX index register through the simulator's own register read
+and calls the generated `KPROG_X86_MEM_OFFSET`, so the LEA/MOV/CMP/STORE/test
+and base-offset arms and the Lean refinement share one implementation. A host
+cross-check includes the simulator header, drives the real helper over
+register-AUX forms against an independent signed accumulator built from the
+same source register value, checks the no-index form ignores a poisoned
+register file, and checks the routed helper agrees with the explicit-value
+helper (2,305 cases).
 The register-writing MOV theorem covers `X86_SIM_L_EXEC_MOV_IMM` and
 `X86_SIM_L_EXEC_MOV_REG`. `x86_mov_imm_step_refines` composes the
 register-destination immediate move over the partial-register writeback
@@ -1505,7 +1515,7 @@ value stored through the word view reloads byte-for-byte through the byte view
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
-logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset,
+logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
 packed-AUX layout,
 register-lane AUX layout,
 x86 stack-arena storage model,
