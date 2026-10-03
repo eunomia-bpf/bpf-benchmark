@@ -1238,33 +1238,49 @@ struct x86_sim_state {
 	X86_SIM_L_EXEC_BZHI_STEP(1U, (DST), (SRC), X86_REG_NONE, (AUX),     \
 				 (FLAGS), (IMM))
 
-#define X86_SIM_L_EXEC_BT(DST, SRC, FLAGS)                                  \
+/* The three `BT` forms share one composition that routes the tested-base
+ * source and the bit-index source through the machine-checked
+ * `x86_bt.h` contract. Only the memory form reads memory; the index source is
+ * a register (`BT`), the raw immediate (`BT_IMM`), or the immediate widened to
+ * 32 bits (`BT_MEM_IMM`). The reads, the bit test, and the CF assignment stay
+ * in the composed body by contract design. */
+#define X86_SIM_L_EXEC_BT_STEP(OP_IS_MEM, INDEX_IS_MEM, INDEX_IS_REG, DST, \
+			       SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u64 __x86_l_base = X86_SIM_L_READ_REG(DST);            \
-		__u64 __x86_l_index = X86_SIM_L_READ_REG(SRC);           \
-		__x86_cf = kprog_x86_bt_value(__x86_l_base,             \
-					      __x86_l_index,            \
-					      __x86_l_width);           \
+		__u8 __x86_l_width =                                      \
+			KPROG_X86_BT_WRITE_WIDTH(FLAGS);                  \
+		__u64 __x86_l_base;                                       \
+		if (KPROG_X86_BT_BASE_SOURCE(OP_IS_MEM) ==                \
+		    KPROG_X86_BT_BASE_MEMORY)                             \
+			__x86_l_base = X86_SIM_L_READ_MEM_VALUE(          \
+				(DST), (AUX), x86_store_imm_disp(IMM),     \
+				__x86_l_width, 1);                         \
+		else                                                      \
+			__x86_l_base = X86_SIM_L_READ_REG(DST);           \
+		__u8 __x86_l_index_source =                               \
+			KPROG_X86_BT_INDEX_SOURCE(INDEX_IS_MEM,            \
+						  INDEX_IS_REG);           \
+		__u64 __x86_l_index;                                      \
+		if (__x86_l_index_source == KPROG_X86_BT_INDEX_REGISTER)  \
+			__x86_l_index = X86_SIM_L_READ_REG(SRC);          \
+		else if (__x86_l_index_source == KPROG_X86_BT_INDEX_IMM32)\
+			__x86_l_index = x86_store_imm_value(              \
+				(IMM), X86_WIDTH_32);                      \
+		else                                                      \
+			__x86_l_index = (IMM);                            \
+		__x86_cf = kprog_x86_bt_value(__x86_l_base,               \
+					      __x86_l_index,              \
+					      __x86_l_width);             \
 	} while (0)
+
+#define X86_SIM_L_EXEC_BT(DST, SRC, FLAGS)                                  \
+	X86_SIM_L_EXEC_BT_STEP(0U, 0U, 1U, (DST), (SRC), (FLAGS), 0U, 0U)
 
 #define X86_SIM_L_EXEC_BT_IMM(DST, FLAGS, IMM)                              \
-	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u64 __x86_l_base = X86_SIM_L_READ_REG(DST);            \
-		__x86_cf = kprog_x86_bt_value(__x86_l_base, (IMM),       \
-					      __x86_l_width);            \
-	} while (0)
+	X86_SIM_L_EXEC_BT_STEP(0U, 0U, 0U, (DST), 0U, (FLAGS), 0U, (IMM))
 
 #define X86_SIM_L_EXEC_BT_MEM_IMM(DST, FLAGS, AUX, IMM)                     \
-	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u64 __x86_l_base = X86_SIM_L_READ_MEM_VALUE((DST),     \
-			(AUX), x86_store_imm_disp(IMM), __x86_l_width, 1);\
-		__x86_cf = kprog_x86_bt_value(__x86_l_base,              \
-			x86_store_imm_value((IMM), X86_WIDTH_32),    \
-			__x86_l_width);                              \
-	} while (0)
+	X86_SIM_L_EXEC_BT_STEP(1U, 1U, 0U, (DST), 0U, (FLAGS), (AUX), (IMM))
 
 #define X86_SIM_L_EXEC_IMUL_IMM(DST, SRC, FLAGS, IMM)                       \
 	do {                                                               \

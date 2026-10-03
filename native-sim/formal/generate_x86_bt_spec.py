@@ -23,6 +23,14 @@ The index-width asymmetry is binding: a `BT_MEM_IMM` that fed the raw 64-bit
 immediate to the bit test (as `BT`/`BT_IMM` do) would still produce a plausible
 bit but would let high immediate bits select a bit the operand does not have.
 
+The three `X86_SIM_L_EXEC_BT` / `X86_SIM_L_EXEC_BT_IMM` /
+`X86_SIM_L_EXEC_BT_MEM_IMM` bodies route through this contract: they share one
+`X86_SIM_L_EXEC_BT_STEP` composition that selects the tested-base source through
+`KPROG_X86_BT_BASE_SOURCE`, the bit-index source through
+`KPROG_X86_BT_INDEX_SOURCE`, and the one resolved width through
+`KPROG_X86_BT_WRITE_WIDTH`, while the reads, the bit test, and the `CF`
+assignment stay in the shared composition the three bodies route through.
+
 Outputs (both regenerated whole, `--check` rejects any stale copy):
   * `KProgFormal/GeneratedX86Bt.lean`
   * `generated/x86_bt.h`
@@ -165,7 +173,8 @@ def render_c(data, opcode_rows) -> str:
         " * resolved width and the index from the immediate widened to 32 bits.",
         " * The contract selects the opcodes, the base source, and the index",
         " * source; the reads, the bit test, and the flag assignment stay in the",
-        " * C handlers.",
+        " * one shared `X86_SIM_L_EXEC_BT_STEP` composition the three bodies",
+        " * route through.",
         " */",
         op_asserts,
         "/* The FLAGS width codes, including the 0 \"absent\" code. */",

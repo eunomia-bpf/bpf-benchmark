@@ -1039,6 +1039,26 @@ the three-way index-source split, the index-width asymmetry, the `CF`-only
 write, the register-preserving write-free memory, and the absent-width default.
 The register decode that selects the opcode remains outside the theorem.
 
+The `X86_SIM_L_EXEC_BT`, `X86_SIM_L_EXEC_BT_IMM` and
+`X86_SIM_L_EXEC_BT_MEM_IMM` handler bodies now share one
+`X86_SIM_L_EXEC_BT_STEP` composition that routes the tested base through the
+machine-checked `KPROG_X86_BT_BASE_SOURCE` selector, the bit index through
+`KPROG_X86_BT_INDEX_SOURCE`, and the one resolved width through
+`KPROG_X86_BT_WRITE_WIDTH`, so the three bodies and the Lean refinement share
+one bit-test implementation rather than three restated step sequences. The
+independent `test_x86_bt_route_host.c` oracle includes the simulator header,
+drives all three real bodies — directly and through the `X86_SIM_L_EXEC`
+dispatcher arms that route to them — over all three opcodes, every FLAGS code,
+every AUX width code, four displacements, and three base / index / destination
+registers, and compares the whole register file with its tags and all four
+flags against an independent model. Its planted register low bytes carry bit 5
+and its values carry bits above bit 32, so a body that resolves the wrong
+index mask (`& 63` at 64 bits, `& 31` below) or that narrows the base to 32
+bits instead of the resolved width is numerically distinguishable; for the
+memory form it complements the tested bit of the loaded byte against the
+pointer value the base register holds, so a body that reads the base register
+instead of memory reports the opposite `CF` at every index source.
+
 The `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` theorem covers the
 `X86_SIM_L_EXEC_CMP_IMM_OP` and `X86_SIM_L_EXEC_CMP_REG_OP` arms for
 `X86_OP_CMP_IMM` (`0x0c`), `X86_OP_CMP_REG` (`0x0d`), `X86_OP_TEST_IMM`
@@ -1665,7 +1685,9 @@ the `KPROG_X86_CALLMEM_*` contract), the `PUSH`/`POP` stack-step composition
 contract), the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition (and the simulator's
 routing of both bodies through the `KPROG_X86_ANDN_*` contract), the
-`BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
+`BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition (and the
+simulator's routing of all three bodies through the `KPROG_X86_BT_*`
+contract), the
 `BZHI`/`BZHI_MEM` single-width value/count-source composition (and the
 simulator's routing of both bodies through the `KPROG_X86_BZHI_*` contract), the
 `CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG` register/immediate source/flag-kind
@@ -1688,10 +1710,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The `X86_SIM_L_EXEC_BT`, `X86_SIM_L_EXEC_BT_IMM` and
-`X86_SIM_L_EXEC_BT_MEM_IMM` handler bodies do not call the generated `x86_bt.h`
-macros — that header is exercised only by the host oracle — so all three bodies
-remain in the trusted computing base.
 The `X86_SIM_L_EXEC_CMP_IMM_OP` / `X86_SIM_L_EXEC_CMP_REG_OP` (and their `_AUX`)
 handler bodies do not call the generated `x86_cmpop.h` macros — that header is
 exercised only by the host oracle — so both bodies remain in the trusted

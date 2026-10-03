@@ -11,7 +11,8 @@
  * resolved width and the index from the immediate widened to 32 bits.
  * The contract selects the opcodes, the base source, and the index
  * source; the reads, the bit test, and the flag assignment stay in the
- * C handlers.
+ * one shared `X86_SIM_L_EXEC_BT_STEP` composition the three bodies
+ * route through.
  */
 _Static_assert(X86_OP_BT == 0x37U, "x86 bt bt opcode drift");
 _Static_assert(X86_OP_BT_IMM == 0x42U, "x86 bt btImm opcode drift");

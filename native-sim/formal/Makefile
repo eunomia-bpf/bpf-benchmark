@@ -280,6 +280,8 @@ check:
 	lake env lean KProgFormal/X86BtHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_bt_host.c -o build/test_x86_bt_host
 	./build/test_x86_bt_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_bt_route_host.c -o build/test_x86_bt_route_host
+	./build/test_x86_bt_route_host
 	lake env lean KProgFormal/GeneratedX86CmpOp.lean
 	lake env lean KProgFormal/X86CmpOpHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_cmpop_host.c -o build/test_x86_cmpop_host
