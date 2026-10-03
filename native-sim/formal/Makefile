@@ -246,6 +246,8 @@ check:
 	lake env lean KProgFormal/X86Xmm0Handler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_xmm0_host.c -o build/test_x86_xmm0_host
 	./build/test_x86_xmm0_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_xmm0_route_host.c -o build/test_x86_xmm0_route_host
+	./build/test_x86_xmm0_route_host
 	lake env lean KProgFormal/GeneratedX86CallMem.lean
 	lake env lean KProgFormal/X86CallMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_callmem_host.c -o build/test_x86_callmem_host

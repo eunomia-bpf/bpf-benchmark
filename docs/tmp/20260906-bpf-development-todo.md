@@ -6986,6 +6986,63 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   fallback forced to 32 bits, the displacement restated as the high-half
   slice).
 
+## Step 0080 — x86 simulator routes the XMM0 pair through the checked contract
+
+- Scope: the x86 simulator's `X86_SIM_L_EXEC_LOAD_XMM0` and
+  `X86_SIM_L_EXEC_STORE_XMM0` bodies. Their contract (`KPROG_X86_XMM0_*` +
+  `X86Xmm0Handler.lean`, spec `x86_xmm0_spec.json`, oracle
+  `test_x86_xmm0_host.c`) was already generated and proven, but both bodies
+  restated clauses inline — the stack-pointer arm selection, the two lane
+  offsets, and (for the load) the `X86_REG_NONE` absolute base form with its
+  discarded offset — the same "curated contract vs. shipped helper" gap 0076
+  (offset), 0077 (read dispatch), 0078 (shared `MOV_STORE`), and 0079 (MOVBE)
+  closed.
+- `x86/x86_sim.h` now includes `../formal/generated/x86_xmm0.h`. New
+  `X86_SIM_L_MEM_XMM0_ARM(BASE_REG)` = `KPROG_X86_XMM0_ARM((BASE_REG) ==
+  X86_RSP)`, the one fact either body's branch chain consults. Both bodies now
+  select the arm through an `X86_SIM_L_MEM_XMM0_ARM`-driven `switch` over
+  `KPROG_X86_XMM0_ARM_STACK` / default, place the high lane at
+  `KPROG_X86_XMM0_LANE_OFFSET(1)`, and — in the ordinary arm — resolve the base
+  form through `KPROG_X86_XMM0_BASE_FORM` (load: `1U` = `absImmPtr`; store:
+  `0U` = `nullBasePlusDisp`), the base pointer through
+  `KPROG_X86_XMM0_BASE_PTR`, and the offset-adding test through
+  `KPROG_X86_XMM0_ADDS_DISP`. The old inline `if ((SRC/DST) == X86_RSP) ...
+  else ...` ladder and the literal `+ 8` lane step are gone.
+- The two bodies keep the literal `X86_WIDTH_64` lane width: the generated
+  header deliberately has no lane-width macro (`_Static_assert(
+  KPROG_X86_XMM0_LANE_BYTES == X86_WIDTH_64)`), since the pair move is always
+  64-bit and neither body resolves a width. The header's own doc comment was
+  stale ("the sim bodies do not call it") and was corrected in
+  `generate_x86_xmm0_spec.py`; `GeneratedX86Xmm0.lean` is byte-for-byte
+  unchanged, so the generator `--check` gate rejects only a stale header.
+- New `test_x86_xmm0_route_host.c`: includes the *simulator* header and drives
+  the real bodies. The load half plants two known lanes at the effective
+  address and compares the written XMM0 pair against an independent byte model
+  (`put_lane` / `get_lane`); the store half drives the real body and compares
+  the *entire* modeled heap and modeled stack against the byte model. Both
+  halves cover the stack arm, an ordinary register base, the `X86_REG_NONE`
+  base form of each opcode (load: raw absolute immediate with the addressing
+  offset *discarded*; store: null base with the offset *added*), and indexed
+  addressing. It also checks the routed `X86_SIM_L_MEM_XMM0_ARM` against
+  `KPROG_X86_XMM0_ARM` over a register sweep, the lane offsets, and the two
+  routed base forms. Success line `x86 xmm0 route host cross-check: OK (59
+  cases)`; exit 1 on mismatch. Distinct from the pre-existing
+  `test_x86_xmm0_host.c`, which tests the contract plus an independent model
+  but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- Gate: 88 generators / 166 Lean / 89 oracles / 0 errors.
+- Mutation harness `mut_x86_xmm0_route.py`: 10/10 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the shared arm
+  identity swapped from RSP to RDI, the load's high-lane offset moved to lane
+  0, the load's base form swapped, the offset-adding test forced on); the
+  generated-C defects caught by the generator `--check` and the route oracle
+  (the arm define colliding, the high-lane offset moved to 0, the
+  absolute-immediate base form renamed); one shared-spec mutation caught by the
+  generator `--check` (the high lane's `byte_offset` moved to 0); and the Lean
+  independent-spec mutations caught by the refinement module (the arm spec
+  swapped, the lane offset moved to 0).
+
 ## Next after 0076
 
 

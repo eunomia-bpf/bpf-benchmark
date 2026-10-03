@@ -670,6 +670,11 @@ struct x86_sim_state {
  * the stack-pointer branch inline. */
 #define X86_SIM_L_MEM_MOVBE_SRC(DST)                                        \
 	KPROG_X86_MOVBE_ARM((DST) == X86_RSP)
+/* The XMM0 pair-move arm classification is the machine-checked
+ * KPROG_X86_XMM0_ARM contract, so both XMM0 bodies share its stack-pointer
+ * test rather than restating it inline. */
+#define X86_SIM_L_MEM_XMM0_ARM(BASE_REG)                                    \
+	KPROG_X86_XMM0_ARM((BASE_REG) == X86_RSP)
 
 
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
@@ -832,25 +837,41 @@ struct x86_sim_state {
 	do {                                                               \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                   \
+		__u8 __x86_l_arm = X86_SIM_L_MEM_XMM0_ARM(SRC);           \
+		__u8 __x86_l_base_none = ((SRC) == X86_REG_NONE);         \
+		__u8 __x86_l_base_form = KPROG_X86_XMM0_BASE_FORM(1U);    \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
-		if ((SRC) == X86_RSP) {                                  \
+		switch (__x86_l_arm) {                                    \
+		case KPROG_X86_XMM0_ARM_STACK: {                          \
 			void *__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);\
 			__x86_xmm0_lo = X86_SIM_L_STACK_READ(             \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				X86_WIDTH_64);                            \
 			__x86_xmm0_hi = X86_SIM_L_STACK_READ(             \
-				(__s64)(long)__x86_l_base_ptr + __x86_l_disp + 8,\
+				(__s64)(long)__x86_l_base_ptr + __x86_l_disp  \
+					+ KPROG_X86_XMM0_LANE_OFFSET(1),  \
 				X86_WIDTH_64);                            \
-		} else {                                                  \
-			void *__x86_l_base_ptr = (SRC) == X86_REG_NONE ?  \
-				(void *)(long)(IMM) : X86_SIM_L_READ_REG_PTR(SRC);\
-			void *__x86_l_addr = (SRC) == X86_REG_NONE ?      \
-				__x86_l_base_ptr :                         \
-				(__u8 *)__x86_l_base_ptr + __x86_l_disp;  \
+			break;                                            \
+		}                                                         \
+		default: {                                                \
+			void *__x86_l_base_ptr =                          \
+				KPROG_X86_XMM0_BASE_PTR(                  \
+					__x86_l_base_none, __x86_l_base_form, \
+					(IMM), X86_SIM_L_READ_REG_PTR(SRC));  \
+			void *__x86_l_addr =                              \
+				KPROG_X86_XMM0_ADDS_DISP(                 \
+					__x86_l_base_none, __x86_l_base_form) \
+					? (__u8 *)__x86_l_base_ptr        \
+						  + __x86_l_disp          \
+					: __x86_l_base_ptr;               \
 			__x86_xmm0_lo = X86_SIM_L_LOAD_ADDR(__x86_l_addr,\
-							    X86_WIDTH_64);\
+				X86_WIDTH_64);                            \
 			__x86_xmm0_hi = X86_SIM_L_LOAD_ADDR(             \
-				(__u8 *)__x86_l_addr + 8, X86_WIDTH_64);  \
+				(__u8 *)__x86_l_addr                       \
+					+ KPROG_X86_XMM0_LANE_OFFSET(1),  \
+				X86_WIDTH_64);                            \
+			break;                                            \
+		}                                                         \
 		}                                                         \
 	} while (0)
 
@@ -858,23 +879,38 @@ struct x86_sim_state {
 	do {                                                               \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                   \
+		__u8 __x86_l_arm = X86_SIM_L_MEM_XMM0_ARM(DST);           \
+		__u8 __x86_l_base_none = ((DST) == X86_REG_NONE);         \
+		__u8 __x86_l_base_form = KPROG_X86_XMM0_BASE_FORM(0U);    \
+		void *__x86_l_base_ptr = KPROG_X86_XMM0_BASE_PTR(         \
+			__x86_l_base_none, __x86_l_base_form, (IMM),      \
+			X86_SIM_L_READ_REG_PTR(DST));                     \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
-		void *__x86_l_base_ptr = (DST) == X86_REG_NONE ?         \
-			(void *)0 : X86_SIM_L_READ_REG_PTR(DST);         \
-		if ((DST) == X86_RSP) {                                  \
+		switch (__x86_l_arm) {                                    \
+		case KPROG_X86_XMM0_ARM_STACK:                            \
 			X86_SIM_L_STACK_WRITE(                            \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				X86_WIDTH_64, __x86_xmm0_lo);             \
 			X86_SIM_L_STACK_WRITE(                            \
-				(__s64)(long)__x86_l_base_ptr + __x86_l_disp + 8,\
+				(__s64)(long)__x86_l_base_ptr + __x86_l_disp  \
+					+ KPROG_X86_XMM0_LANE_OFFSET(1),  \
 				X86_WIDTH_64, __x86_xmm0_hi);             \
-		} else {                                                  \
-			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
-					     __x86_l_disp;               \
+			break;                                            \
+		default: {                                                \
+			void *__x86_l_addr =                              \
+				KPROG_X86_XMM0_ADDS_DISP(                 \
+					__x86_l_base_none, __x86_l_base_form) \
+					? (__u8 *)__x86_l_base_ptr        \
+						  + __x86_l_disp          \
+					: __x86_l_base_ptr;               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr, X86_WIDTH_64,  \
 					     __x86_xmm0_lo);              \
-			X86_SIM_L_STORE_ADDR((__u8 *)__x86_l_addr + 8,    \
-					     X86_WIDTH_64, __x86_xmm0_hi);\
+			X86_SIM_L_STORE_ADDR(                             \
+				(__u8 *)__x86_l_addr                       \
+					+ KPROG_X86_XMM0_LANE_OFFSET(1),  \
+				X86_WIDTH_64, __x86_xmm0_hi);             \
+			break;                                            \
+		}                                                         \
 		}                                                         \
 	} while (0)
 

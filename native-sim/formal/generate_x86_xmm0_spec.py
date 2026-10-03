@@ -292,8 +292,8 @@ def render_c(opcode_rows, arm_rows, lane_rows) -> str:
  * opcode's ordinary arm resolves a X86_REG_NONE operand, which is the
  * asymmetry that keeps the two opcodes from sharing one addressing rule. The
  * contract selects these; the lane values, the addressing offset, and the
- * memory accesses stay in the two C handlers. This header is consumed by the
- * host oracle only; the sim bodies do not call it.
+ * memory accesses stay in the two C handlers, which select the arm, base form,
+ * and lane offsets through these macros.
  */
 {op_asserts}
 {arm_defines}

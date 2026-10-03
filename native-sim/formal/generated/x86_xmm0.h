@@ -11,8 +11,8 @@
  * opcode's ordinary arm resolves a X86_REG_NONE operand, which is the
  * asymmetry that keeps the two opcodes from sharing one addressing rule. The
  * contract selects these; the lane values, the addressing offset, and the
- * memory accesses stay in the two C handlers. This header is consumed by the
- * host oracle only; the sim bodies do not call it.
+ * memory accesses stay in the two C handlers, which select the arm, base form,
+ * and lane offsets through these macros.
  */
 _Static_assert(X86_OP_LOAD_XMM0 == 0x30U, "x86 xmm0 loadXmm0 opcode drift");
 _Static_assert(X86_OP_STORE_XMM0 == 0x31U, "x86 xmm0 storeXmm0 opcode drift");

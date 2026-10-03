@@ -792,6 +792,20 @@ untouched register file and tags, the non-vacuous memory access, and the stack
 arm round trip. The register decode that supplies the operand and immediate
 remains outside the theorem.
 
+The two `X86_SIM_L_EXEC_{LOAD,STORE}_XMM0` handler bodies now route the
+stack-pointer arm through the machine-checked `KPROG_X86_XMM0_ARM` selector,
+the two lane offsets through `KPROG_X86_XMM0_LANE_OFFSET`, and the ordinary
+arm's base form through `KPROG_X86_XMM0_BASE_FORM` / `_ADDS_DISP` /
+`_BASE_PTR`, so the bodies and the Lean refinement share one XMM0
+implementation rather than a restated inline ladder. The independent
+`test_x86_xmm0_route_host.c` oracle includes the simulator header, drives the
+real bodies over the stack arm, a register base, the `X86_REG_NONE` base form
+of each opcode (load: raw absolute immediate with the offset discarded; store:
+null base with the offset added), and indexed addressing including an index
+riding a `X86_REG_NONE` base (the case that separates the two base forms), and
+compares the whole modeled heap and stack and the written XMM0 pair against an
+independent byte model.
+
 The `CALL_MEMCPY` / `CALL_MEMSET` block-copy/fill theorem covers the four
 `X86_SIM_L_EXEC` arms for `X86_OP_CALL_MEMCPY` (`0x3f`), `X86_OP_CALL_MEMCPY_REG`
 (`0x46`), `X86_OP_CALL_MEMSET` (`0x3c`), and `X86_OP_CALL_MEMSET_REG` (`0x45`),
@@ -1573,7 +1587,9 @@ its store body through the `KPROG_X86_STORE_*` contract), the
 `MOVBE_LOAD`/`MOVBE_STORE` handler composition (and the simulator's routing of
 both MOVBE bodies through the `KPROG_X86_MOVBE_*` contract); the pointer-write
 provenance composition, the XMM0 pair-move
-composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
+composition (and the simulator's routing of both XMM0 bodies through the
+`KPROG_X86_XMM0_*` contract), the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill
+composition, the
 `PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition, the
 `BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
@@ -1598,9 +1614,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The two `X86_SIM_L_EXEC_{LOAD,STORE}_XMM0` handler bodies do not call the
-generated `x86_xmm0.h` macros — that header is exercised only by the host oracle
-— so both bodies remain in the trusted computing base.
 The four `X86_SIM_L_EXEC_CALL_{MEMCPY,MEMSET}{,_REG}` handler bodies do not call
 the generated `x86_callmem.h` macros — that header is exercised only by the host
 oracle — so all four bodies remain in the trusted computing base.
