@@ -1086,6 +1086,24 @@ at the resolved width, the absent-width default, and register-preserving
 write-free memory. The register decode that selects the opcode remains outside
 the theorem.
 
+The four bodies named in that paragraph now share one
+`X86_SIM_L_EXEC_CMP_REG_STEP` composition that routes the right-hand-side
+source through the machine-checked `KPROG_X86_CMPOP_RHS_SOURCE` selector, the
+flag kind through `KPROG_X86_CMPOP_FLAG_KIND`, and the one resolved width
+through `KPROG_X86_CMPOP_WRITE_WIDTH`, so the four bodies and the Lean
+refinement share one compare/test step rather than four restated sequences and
+the per-opcode selector is compile-time at each wrapper. The independent
+`test_x86_cmpop_route_host.c` oracle includes the simulator header, drives all
+four real bodies — directly and through the `X86_SIM_L_EXEC` dispatcher arms
+that route to them — over both register/immediate source forms, every FLAGS
+code, both AUX lanes, and three destination / source registers, and compares
+the whole register file with its tags and all four flags against an
+independent model. Its planted registers carry the immediate-incompatible high
+word `0xa5a5…` and bits above bit 32, so a body that resolves the wrong
+right-hand side, produces the wrong flag kind (`CMP` clears `OF` and computes
+`CF` from the borrow, `TEST` clears both), or narrows to 32 bits instead of the
+resolved width is numerically distinguishable at every opcode, width, and lane.
+
 The AArch64 `.D0` / `.Q0` vector memory-transfer theorem covers the four bodies
 `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`, `STORE_D0_MEM`, and `STORE_Q0_MEM` for
 `ARM64_OP_LOAD_D0` (`0x28`), `ARM64_OP_STORE_D0` (`0x29`), `ARM64_OP_LOAD_Q0`
@@ -1691,7 +1709,8 @@ contract), the
 `BZHI`/`BZHI_MEM` single-width value/count-source composition (and the
 simulator's routing of both bodies through the `KPROG_X86_BZHI_*` contract), the
 `CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG` register/immediate source/flag-kind
-composition, the
+composition (and the simulator's routing of all four bodies through the
+`KPROG_X86_CMPOP_*` contract), the
 `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler
 compositions, the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
@@ -1710,10 +1729,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The `X86_SIM_L_EXEC_CMP_IMM_OP` / `X86_SIM_L_EXEC_CMP_REG_OP` (and their `_AUX`)
-handler bodies do not call the generated `x86_cmpop.h` macros — that header is
-exercised only by the host oracle — so both bodies remain in the trusted
-computing base.
 The four `ARM64_SIM_L_{LOAD,STORE}_{D0,Q0}_MEM` handler bodies do not call the
 generated `arm64_dq_mem.h` macros — that header is exercised only by the host
 oracle — so all four bodies remain in the trusted computing base.

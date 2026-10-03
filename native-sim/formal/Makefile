@@ -286,6 +286,8 @@ check:
 	lake env lean KProgFormal/X86CmpOpHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_cmpop_host.c -o build/test_x86_cmpop_host
 	./build/test_x86_cmpop_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_cmpop_route_host.c -o build/test_x86_cmpop_route_host
+	./build/test_x86_cmpop_route_host
 	lake env lean KProgFormal/Arm64Width.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_width_host.c -o build/test_arm64_width_host
 	./build/test_arm64_width_host

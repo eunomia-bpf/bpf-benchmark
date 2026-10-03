@@ -7377,6 +7377,77 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   index source moved to the immediate, its base source moved to the register).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0086 — x86 simulator routes the CMP_IMM/CMP_REG/TEST_IMM/TEST_REG group through the checked contract
+
+- Scope: the x86 simulator's four compare/test bodies `X86_SIM_L_EXEC_CMP_IMM_OP`
+  (`0x0c`), `X86_SIM_L_EXEC_CMP_REG_OP` (`0x0d`), `X86_SIM_L_EXEC_TEST_IMM_OP`
+  (`0x0e`) and `X86_SIM_L_EXEC_TEST_REG_OP` (`0x0f`) previously restated the
+  right-hand-side source, the flag kind, and the one width four times and called
+  no generated macro. They now share one
+  `X86_SIM_L_EXEC_CMP_REG_STEP(OP_IS_TEST, RHS_IS_REG, DST, FLAGS, AUX, SRC,
+  IMM)` composition that selects the right-hand-side source through
+  `KPROG_X86_CMPOP_RHS_SOURCE`, the flag kind through `KPROG_X86_CMPOP_FLAG_KIND`
+  and the one resolved width through `KPROG_X86_CMPOP_WRITE_WIDTH`; the four
+  opcode macros are one-line instantiations of the shared step with `RHS_IS_REG`
+  passed as a compile-time literal, preserving their old signatures/order so the
+  `X86_SIM_L_EXEC` arms are unchanged (no dispatcher edit). All four write no
+  register — only the four flags move. The reads, the subtraction/logical flag
+  production, and the immediate decode stay in the composed body by contract
+  design.
+- `native-sim/x86/x86_sim.h`: added
+  `#include "../formal/generated/x86_cmpop.h"` after the BT include.
+- `native-sim/x86/x86_sim_local_bpf.h`: the four bodies replaced by the shared
+  routed step macro (block comment above it) plus four one-line opcode macros;
+  the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
+  is unchanged.
+- `native-sim/formal/generate_x86_cmpop_spec.py`: module docstring and the
+  emitted-header prose updated to name the shared `X86_SIM_L_EXEC_CMP_REG_STEP`
+  and the three routed macros; regenerated without `--check` then verified with
+  `--check` (only `generated/x86_cmpop.h` changed — the Lean output is
+  byte-identical).
+- New `test_x86_cmpop_route_host.c`: includes the *simulator* header and drives
+  all four real bodies directly and through the `X86_SIM_L_EXEC` dispatcher arms,
+  over both register/immediate source forms, every FLAGS code, both AUX lanes,
+  and three destination/source registers. The planted registers use the
+  immediate-incompatible high word `0xa5a5…` and carry bits above bit 32, and
+  the driven immediate has bit 31 set (sign-extended at 64 bits), so a body that
+  resolves the wrong right-hand side, the wrong flag kind (`CMP` clears `OF` and
+  computes `CF` from the borrow, `TEST` clears `CF`/`OF` and narrows the
+  conjunction), or the wrong width is numerically distinguishable at every
+  opcode, width, and lane. Compares the whole register file with its tags and
+  all four flags against an independent model. Success line
+  `x86 cmpop route host cross-check: OK (47525 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_x86_cmpop_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_x86_cmpop_route_host` build +
+  run pair after the `test_x86_cmpop_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the CMP/TEST
+  theorem paragraph; the stale TCB paragraph ("The `X86_SIM_L_EXEC_CMP_IMM_OP` /
+  `X86_SIM_L_EXEC_CMP_REG_OP` (and their `_AUX`) handler bodies do not call the
+  generated `x86_cmpop.h` macros…") deleted; the binding-list clause updated to
+  record the simulator's routing of all four bodies through the
+  `KPROG_X86_CMPOP_*` contract.
+- Mutation harness `mut_x86_cmpop_route.py`: 20/20 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the
+  right-hand-side source test pinned to the register arm, the flag-kind test
+  pinned to the subtraction arm, the width hardcoded to the 64-bit code, the
+  `TEST_IMM` wrapper's flag-kind pin moved to `CMP_IMM`, its `RHS_IS_REG` pin
+  moved to the register arm, the `TEST_REG` wrapper's `RHS_IS_REG` pin moved to
+  the immediate arm, the `CMP_IMM_OP_AUX` dispatcher arm routed to the register
+  body); the generated-C defects caught by the generator `--check` and the route
+  oracle (the right-hand-side-source selector ternary inverted, the flag-kind
+  selector ternary inverted, `TEST_REG`'s flag kind moved to the subtraction
+  arm, `CMP_IMM`'s source moved to the register, the write-width default moved
+  to 32 bits, the 32-bit width code moved, the `CMP_IMM` and `TEST_REG` opcode
+  static-assert codes drifted); the shared-spec mutations caught by the
+  generator `--check` (the opcode code drifted, `CMP_IMM`'s source moved to the
+  register, `TEST_IMM`'s flag kind moved to `sub`); and the Lean
+  independent-spec mutations caught by the refinement module (`CMP_IMM`'s source
+  moved to the register, `TEST_IMM`'s flag kind moved to `sub`).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

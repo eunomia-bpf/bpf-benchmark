@@ -1552,44 +1552,45 @@ struct x86_sim_state {
 					  __x86_l_width);                    \
 	} while (0)
 
-#define X86_SIM_L_EXEC_CMP_IMM_OP_AUX(OP, DST, FLAGS, AUX, IMM)             \
+#define X86_SIM_L_EXEC_CMP_REG_STEP(OP_IS_TEST, RHS_IS_REG, DST, FLAGS,     \
+				    AUX, SRC, IMM)                      \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width =                                      \
+			KPROG_X86_CMPOP_WRITE_WIDTH(FLAGS);               \
 		__u32 __x86_l_aux = (AUX);                               \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
 			(DST), __x86_l_width,                              \
 			KPROG_X86_REG_LANE_AUX_DST_SHIFT(__x86_l_aux));      \
-		__u64 __x86_l_rhs = x86_store_imm_value((IMM), __x86_l_width);\
-		if ((OP) == X86_OP_TEST_IMM)                              \
-			X86_SIM_L_SET_LOGIC_FLAGS(__x86_l_lhs & __x86_l_rhs,\
-						  __x86_l_width);        \
+		__u64 __x86_l_rhs;                                       \
+		if (KPROG_X86_CMPOP_RHS_SOURCE(RHS_IS_REG) ==            \
+		    KPROG_X86_CMPOP_RHS_REGISTER)                        \
+			__x86_l_rhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(     \
+				(SRC), __x86_l_width,                      \
+				KPROG_X86_REG_LANE_AUX_SRC_SHIFT(          \
+					__x86_l_aux));                     \
 		else                                                      \
-			X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,\
+			__x86_l_rhs = x86_store_imm_value((IMM),          \
+							  __x86_l_width);  \
+		if (KPROG_X86_CMPOP_FLAG_KIND(OP_IS_TEST) ==             \
+		    KPROG_X86_CMPOP_FLAGS_LOGIC)                          \
+			X86_SIM_L_SET_LOGIC_FLAGS(                        \
+				__x86_l_lhs & __x86_l_rhs, __x86_l_width); \
+		else                                                      \
+			X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 				KPROG_X86_SBB_RESULT(__x86_l_lhs,          \
 					__x86_l_rhs, 0), __x86_l_width);     \
 	} while (0)
+
+#define X86_SIM_L_EXEC_CMP_IMM_OP_AUX(OP, DST, FLAGS, AUX, IMM)             \
+	X86_SIM_L_EXEC_CMP_REG_STEP((OP) == X86_OP_TEST_IMM, 0U, (DST),   \
+				    (FLAGS), (AUX), 0U, (IMM))
 
 #define X86_SIM_L_EXEC_CMP_IMM_OP(OP, DST, FLAGS, IMM)                      \
 	X86_SIM_L_EXEC_CMP_IMM_OP_AUX((OP), (DST), (FLAGS), 0U, (IMM))
 
 #define X86_SIM_L_EXEC_CMP_REG_OP_AUX(OP, DST, SRC, FLAGS, AUX)             \
-	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u32 __x86_l_aux = (AUX);                               \
-		__u64 __x86_l_lhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
-			(DST), __x86_l_width,                              \
-			KPROG_X86_REG_LANE_AUX_DST_SHIFT(__x86_l_aux));      \
-		__u64 __x86_l_rhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
-			(SRC), __x86_l_width,                              \
-			KPROG_X86_REG_LANE_AUX_SRC_SHIFT(__x86_l_aux));      \
-		if ((OP) == X86_OP_TEST_REG)                              \
-			X86_SIM_L_SET_LOGIC_FLAGS(__x86_l_lhs & __x86_l_rhs,\
-						  __x86_l_width);        \
-		else                                                      \
-			X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,\
-				KPROG_X86_SBB_RESULT(__x86_l_lhs,          \
-					__x86_l_rhs, 0), __x86_l_width);     \
-	} while (0)
+	X86_SIM_L_EXEC_CMP_REG_STEP((OP) == X86_OP_TEST_REG, 1U, (DST),   \
+				    (FLAGS), (AUX), (SRC), 0U)
 
 #define X86_SIM_L_EXEC_CMP_REG_OP(OP, DST, SRC, FLAGS)                      \
 	X86_SIM_L_EXEC_CMP_REG_OP_AUX((OP), (DST), (SRC), (FLAGS), 0U)

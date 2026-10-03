@@ -13,7 +13,8 @@
  * register is written.
  * The contract selects the opcodes, the right-hand-side source, and the
  * flag kind; the reads, the subtraction/logical flag production, and the
- * register preservation stay in the C handlers.
+ * register preservation stay in the one C step the four bodies route
+ * through.
  */
 _Static_assert(X86_OP_CMP_IMM == 0x0cU, "x86 cmpop cmpImm opcode drift");
 _Static_assert(X86_OP_CMP_REG == 0x0dU, "x86 cmpop cmpReg opcode drift");

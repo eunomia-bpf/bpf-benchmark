@@ -10,6 +10,10 @@ right-hand side — the decoded immediate for the `_IMM` forms, the width/lane
 register read of `SRC` for the `_REG` forms — and then writes one of two flag
 sets: a zero-borrow subtraction for the `CMP` opcodes or the logical flags of
 the width-narrowed conjunction for the `TEST` opcodes. No register is written.
+Both bodies share one `X86_SIM_L_EXEC_CMP_REG_STEP` composition that routes the
+right-hand-side source through `KPROG_X86_CMPOP_RHS_SOURCE`, the flag kind
+through `KPROG_X86_CMPOP_FLAG_KIND`, and the one width through
+`KPROG_X86_CMPOP_WRITE_WIDTH`.
 
 The contract pins the facts the four opcodes share and the two-per-opcode ones
 that separate them:
@@ -173,7 +177,8 @@ def render_c(data, opcode_rows) -> str:
         " * register is written.",
         " * The contract selects the opcodes, the right-hand-side source, and the",
         " * flag kind; the reads, the subtraction/logical flag production, and the",
-        " * register preservation stay in the C handlers.",
+        " * register preservation stay in the one C step the four bodies route",
+        " * through.",
         " */",
         op_asserts,
         "/* The FLAGS width codes, including the 0 \"absent\" code. */",
