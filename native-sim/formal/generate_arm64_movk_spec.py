@@ -43,7 +43,7 @@ EXPECTED = {
 }
 
 AUX_MOVK = re.compile(
-    r"^#define\s+ARM64_AUX_MOVK\(S\)\s+\(\(\(__u32\)\(S\) & 0xffU\) << 16\)\s*$",
+    r"^#define\s+ARM64_AUX_MOVK\(S\)\s+KPROG_ARM64_AUX\(0U, 0U, \(S\), 0U\)\s*$",
     re.M)
 
 
@@ -57,12 +57,17 @@ def load() -> list[dict]:
         raise SystemExit(f"invalid arm64 movk columns: {cols!r}")
     if [row["column"] for row in cols] != [0, 16, 32, 48]:
         raise SystemExit(f"invalid arm64 movk column values: {cols!r}")
-    # The AUX encoding must stay `(S & 0xff) << 16` so the shim shift field is
-    # the architectural column itself.
+    # The AUX encoding must place the MOVK column in lane 2 (bits 16-23) so the
+    # shim shift field is the architectural column itself. After STEP 0093 the
+    # packer is a thin alias of the machine-checked `KPROG_ARM64_AUX` packer, so
+    # the alias must select the third lane; the generating contract
+    # (`generate_arm64_aux_spec.py`, `KProgFormal/Arm64Aux.lean`) fixes that
+    # lane's bit offset.
     if not AUX_MOVK.search(SIM_HEADER.read_text()):
         raise SystemExit(
-            "ARM64_AUX_MOVK is not the expected `(((__u32)(S) & 0xffU) << 16)` "
-            f"form in {SIM_HEADER}")
+            "ARM64_AUX_MOVK is not the expected "
+            "`KPROG_ARM64_AUX(0U, 0U, (S), 0U)` lane-2 alias form in "
+            f"{SIM_HEADER}")
     return cols
 
 

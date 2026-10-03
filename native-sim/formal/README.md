@@ -1765,6 +1765,7 @@ policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
 packed-AUX layout,
 register-lane AUX layout,
+AArch64 packed-AUX layout,
 x86 stack-arena storage model,
 x86 stack-index frame-offset mapping,
 LEA, register-writing MOV, width-converting register MOV, shared memory
@@ -1818,6 +1819,25 @@ operations remain in the trusted computing base.
 The two `ARM64_SIM_L_MEM_{PRE,POST}` handler bodies do not call the generated
 `arm64_mem_prepost.h` macros — that header is exercised only by the host oracle —
 so both bodies remain in the trusted computing base.
+
+The AArch64 packed-AUX layout contract binds the `KPROG_ARM64_AUX` packer and
+its four `KPROG_ARM64_AUX_B0..B3` lane decoders plus the
+`KPROG_ARM64_AUX_REG_NONE` sentinel — the 32-bit operand word the simulator's
+ALU, shift, MOVK, memory, bitfield and CCMP handlers share, with lane 0 (ALU
+opcode / memory index register / bitfield kind / shift kind) in bits 0-7, lane
+1 (source modifier / bitfield LSB / CCMP NZCV) in bits 8-15, lane 2 (shift
+amount / bitfield width / MOVK column) in bits 16-23, and the memory-flag byte
+in bits 24-31. `Arm64Aux.lean` proves the four lane decoders recover exactly
+the packed bytes, that the lanes do not interfere, and that the
+`ARM64_REG_NONE` sentinel round-trips; the six simulator packers
+(`ARM64_AUX`, `_ALU`, `_SHIFT`, `_MOVK`, `_MEM`, `_BITFIELD`, `_CCMP`) and seven
+simulator decoders (`ARM64_SIM_L_MOD`, `_SHIFT`, `_MEM_INDEX`, `_MEM_FLAGS`,
+`_BITFIELD_LSB`, `_BITFIELD_WIDTH`, `_CCMP_NZCV`) are thin aliases of that one
+machine-checked layout, so the *lane assignment* the handlers share is no longer
+in the trusted computing base. The sim-header route oracle drives the real
+decoders and packers against an independent `(aux >> 8k) & 0xff` restatement and
+the host cross-check drives the generated macros directly (1,115,374 and 586,829
+cases).
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

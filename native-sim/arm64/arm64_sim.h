@@ -74,6 +74,7 @@
 #define ARM64_OP_RET 0xffU
 
 #include "../formal/generated/arm64_decode.h"
+#include "../formal/generated/arm64_aux.h"
 
 #define ARM64_FMOV_D_FROM_X 0U
 #define ARM64_FMOV_X_FROM_D 1U
@@ -83,20 +84,23 @@
 #define ARM64_MEM_PRE 1U
 #define ARM64_MEM_POST 2U
 
-#define ARM64_AUX(ALU, MOD, SHIFT)                                         \
-	(((__u32)(ALU) & 0xffU) | (((__u32)(MOD) & 0xffU) << 8) |           \
-	 (((__u32)(SHIFT) & 0xffU) << 16))
+/*
+ * The packed-operand (AUX) word: one shared little-endian 32-bit layout whose
+ * four bytes are interpreted per opcode. The byte offsets, masks and the
+ * `0xff` "no register" sentinel are the machine-checked contract in
+ * formal/generated/arm64_aux.h (KProgFormal/Arm64Aux.lean); these packers are
+ * thin aliases of the generated `KPROG_ARM64_AUX` packer, so the simulator and
+ * the model share exactly one encoding.
+ */
+#define ARM64_AUX(ALU, MOD, SHIFT) KPROG_ARM64_AUX((ALU), (MOD), (SHIFT), 0U)
 #define ARM64_AUX_ALU(A, M, S) ARM64_AUX((A), (M), (S))
-#define ARM64_AUX_SHIFT(S) ((__u32)(S) & 0xffU)
-#define ARM64_AUX_MOVK(S) (((__u32)(S) & 0xffU) << 16)
-#define ARM64_AUX_MEM(INDEX, MOD, SHIFT, FLAGS)                            \
-	(((__u32)(INDEX) & 0xffU) | (((__u32)(MOD) & 0xffU) << 8) |         \
-	 (((__u32)(SHIFT) & 0xffU) << 16) | (((__u32)(FLAGS) & 0xffU) << 24))
-#define ARM64_AUX_BITFIELD(OP, LSB, WIDTH)                                 \
-	(((__u32)(OP) & 0xffU) | (((__u32)(LSB) & 0xffU) << 8) |            \
-	 (((__u32)(WIDTH) & 0xffU) << 16))
-#define ARM64_AUX_CCMP(COND, NZCV)                                         \
-	(((__u32)(COND) & 0xffU) | (((__u32)(NZCV) & 0xffU) << 8))
+#define ARM64_AUX_SHIFT(S) KPROG_ARM64_AUX((S), 0U, 0U, 0U)
+#define ARM64_AUX_MOVK(S) KPROG_ARM64_AUX(0U, 0U, (S), 0U)
+#define ARM64_AUX_MEM(INDEX, MOD, SHIFT, FLAGS)                             \
+	KPROG_ARM64_AUX((INDEX), (MOD), (SHIFT), (FLAGS))
+#define ARM64_AUX_BITFIELD(OP, LSB, WIDTH)                                  \
+	KPROG_ARM64_AUX((OP), (LSB), (WIDTH), 0U)
+#define ARM64_AUX_CCMP(COND, NZCV) KPROG_ARM64_AUX((COND), (NZCV), 0U, 0U)
 
 #define ARM64_WIDTH_8 1U
 #define ARM64_WIDTH_16 2U

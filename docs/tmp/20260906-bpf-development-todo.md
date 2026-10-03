@@ -7809,6 +7809,67 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   theorems).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0093 — AArch64 simulator routes the packed AUX operand word through one checked layout
+
+- Scope: the AArch64 simulator's packed 32-bit operand word — the `AUX` field
+  the ALU, shift, MOVK, memory, bitfield and CCMP handlers share — had its
+  byte-lane layout restated independently in six packers
+  (`ARM64_AUX`, `_ALU`, `_SHIFT`, `_MOVK`, `_MEM`, `_BITFIELD`, `_CCMP`, all in
+  `arm64_sim.h`) and seven decoders (`ARM64_SIM_L_MOD`, `_SHIFT`, `_MEM_INDEX`,
+  `_MEM_FLAGS`, `_BITFIELD_LSB`, `_BITFIELD_WIDTH`, `_CCMP_NZCV`, all in
+  `arm64_sim_local_bpf.h`), so the shared lane assignment sat in the trusted
+  computing base. The word now has one generated layout; all thirteen
+  packers/decoders are thin aliases of the generated `KPROG_ARM64_AUX` /
+  `KPROG_ARM64_AUX_B0..B3` / `KPROG_ARM64_AUX_REG_NONE` macros.
+- Lane map (authoritative): lane 0 (bits 0-7) = ALU opcode / memory **index**
+  register / bitfield kind / **shift kind**; lane 1 (bits 8-15) = source
+  modifier / bitfield LSB / CCMP NZCV; lane 2 (bits 16-23) = ALU modifier's
+  shift amount / bitfield width / MOVK column; lane 3 (bits 24-31) = memory
+  flags. The shift *kind* is lane 0, not lane 2: the shift handler switches on
+  the low byte (`ARM64_SHIFT_LSL/LSR/ASR/ROR`), so `ARM64_AUX_SHIFT(S) =
+  KPROG_ARM64_AUX(S,0,0,0)`; the shift *amount* travels in `IMM`/`SRC2`.
+- New `native-sim/formal/arm64_aux_spec.json` (the shared spec: `operation
+  arm64Aux`, `word_bits 32`, `field_bits 8`, lanes b0@0/b1@8/b2@16/b3@24,
+  `reg_none "0xff"`) and `native-sim/formal/generate_arm64_aux_spec.py` (a
+  clone of `generate_x86_mem_aux_spec.py` with hard `EXPECTED` and `--check`,
+  emitting `KProgFormal/GeneratedArm64Aux.lean` and `generated/arm64_aux.h`).
+- New `KProgFormal/Arm64Aux.lean`: an independent little-endian concat
+  `arm64AuxSpec`, the `arm64_aux_pack_refines` refinement theorem against the
+  generated `pack` (`bv_decide`), four `_bK_roundtrip` lemmas, a
+  `_lanes_non_interfering` theorem, `_reg_none_roundtrip` /
+  `_reg_none_is_0xff`, a `pack 1 2 3 4 = 0x04030201` example, the lane-0 shared
+  interpretation definitions/theorems, and `_lane1_lane2_disjoint`.
+- New `test_arm64_aux_host.c` (contract oracle; includes only `arm64_sim.h`) and
+  `test_arm64_aux_route_host.c` (sim-header oracle driving the real
+  `ARM64_SIM_L_*` decoders and `ARM64_AUX_*` packers, each against an
+  independent `(aux >> 8k) & 0xff` restatement and with distinct CCMP
+  condition/NZCV grid values, so a lane swap is observable). Success lines
+  `arm64 aux host cross-check: OK (586829 cases)` and `arm64 aux route host
+  cross-check: OK (1115374 cases)`.
+- `native-sim/arm64/arm64_sim.h` / `arm64_sim_local_bpf.h`: the generated
+  `arm64_aux.h` include added (`arm64_sim.h:77`; the redundant duplicate in
+  `arm64_sim_local_bpf.h` removed — `arm64_sim.h` supplies it), the six packers
+  and seven decoders aliased, and the lane-map comment blocks corrected.
+- `generate_arm64_movk_spec.py:45-46` regex updated to the new alias text; its
+  `--check` passes. `KProgFormal.lean` imports the two new modules.
+- Because `arm64_sim*.h` and generated `arm64_aux.h` changed, the sim was
+  rebuilt: `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog
+  `ok`).
+- `native-sim/formal/Makefile`: the generator `--check`, the lean pair and the
+  two oracle build+run pairs added inside `check:`.
+- `native-sim/formal/README.md`: the AArch64 packed-AUX layout paragraph and the
+  contract-inventory list entry added.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: two routing sentences
+  added after the VREG paragraph.
+- Mutation harness `mut_arm64_aux_route.py`: 44/44 DETECTED — the simulator-header
+  lane misroutes, the ALU/MOD/shift/bitfield/MEM lane swaps, the shift-kind
+  lane-2 repack, the CCMP lane swap and the load-bearing include removal caught
+  by the route oracle; the generated-C packer/decoder defects caught by the
+  generator `--check` and the route oracle; the spec, frozen-expectation and
+  header-guard defects caught by `--check`; and the generated/handwritten Lean
+  defects caught by the refinement module.
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

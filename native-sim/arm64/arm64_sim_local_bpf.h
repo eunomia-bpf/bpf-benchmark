@@ -330,13 +330,22 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_WRITE_REG_MAP_PTR(REG, VALUE)                            \
 	ARM64_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), ARM64_SIM_TAG_MAP_PTR)
 
-#define ARM64_SIM_L_MOD(AUX) (((AUX) >> 8) & 0xffU)
-#define ARM64_SIM_L_SHIFT(AUX) (((AUX) >> 16) & 0xffU)
-#define ARM64_SIM_L_MEM_INDEX(AUX) ((AUX) & 0xffU)
-#define ARM64_SIM_L_MEM_FLAGS(AUX) (((AUX) >> 24) & 0xffU)
-#define ARM64_SIM_L_BITFIELD_LSB(AUX) (((AUX) >> 8) & 0xffU)
-#define ARM64_SIM_L_BITFIELD_WIDTH(AUX) (((AUX) >> 16) & 0xffU)
-#define ARM64_SIM_L_CCMP_NZCV(AUX) (((AUX) >> 8) & 0xffU)
+/*
+ * AUX lane decoders: the byte offsets are the machine-checked contract in
+ * formal/generated/arm64_aux.h (KProgFormal/Arm64Aux.lean). Lane 1 carries the
+ * source modifier, the bitfield LSB or the CCMP NZCV; lane 2 carries the ALU
+ * modifier's shift amount or the bitfield width; lane 0 carries the ALU opcode,
+ * the memory index, the bitfield kind and the shift *kind* (the
+ * `ARM64_OP_SHIFT_*` handler switches on the low byte); lane 3 the memory
+ * flags.
+ */
+#define ARM64_SIM_L_MOD(AUX) KPROG_ARM64_AUX_B1(AUX)
+#define ARM64_SIM_L_SHIFT(AUX) KPROG_ARM64_AUX_B2(AUX)
+#define ARM64_SIM_L_MEM_INDEX(AUX) KPROG_ARM64_AUX_B0(AUX)
+#define ARM64_SIM_L_MEM_FLAGS(AUX) KPROG_ARM64_AUX_B3(AUX)
+#define ARM64_SIM_L_BITFIELD_LSB(AUX) KPROG_ARM64_AUX_B1(AUX)
+#define ARM64_SIM_L_BITFIELD_WIDTH(AUX) KPROG_ARM64_AUX_B2(AUX)
+#define ARM64_SIM_L_CCMP_NZCV(AUX) KPROG_ARM64_AUX_B1(AUX)
 
 /*
  * Bitfield-composition (UBFX/SBFX/UBFIZ/BFXIL/BFI) value. The five numeric

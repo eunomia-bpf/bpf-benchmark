@@ -43,6 +43,7 @@ check:
 	python3 generate_arm64_pair_mem_spec.py --check
 	python3 generate_arm64_mem_prepost_spec.py --check
 	python3 generate_arm64_vreg_spec.py --check
+	python3 generate_arm64_aux_spec.py --check
 	python3 generate_arm64_branch_spec.py --check
 	python3 generate_arm64_branch_emit_spec.py --check
 	python3 generate_arm64_cond_spec.py --check
@@ -454,6 +455,12 @@ check:
 	./build/test_arm64_vreg_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
 	./build/test_arm64_vreg_route_host
+	lake env lean KProgFormal/GeneratedArm64Aux.lean
+	lake env lean KProgFormal/Arm64Aux.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 test_arm64_aux_host.c -o build/test_arm64_aux_host
+	./build/test_arm64_aux_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_aux_route_host.c -o build/test_arm64_aux_route_host
+	./build/test_arm64_aux_route_host
 	lake env lean KProgFormal/Arm64Decode.lean
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 test_arm64_decode_host.c -o build/test_arm64_decode_host
 	./build/test_arm64_decode_host

@@ -164,3 +164,5 @@ import KProgFormal.GeneratedArm64MemPrepost
 import KProgFormal.Arm64MemPrepost
 import KProgFormal.GeneratedArm64Vreg
 import KProgFormal.Arm64Vreg
+import KProgFormal.GeneratedArm64Aux
+import KProgFormal.Arm64Aux
