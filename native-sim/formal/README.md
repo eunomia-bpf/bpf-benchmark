@@ -513,6 +513,22 @@ simulator header, drives the real body over the immediate and register forms,
 every width, flat and indexed addressing, the register-form AUX shift, and both
 arms, and compares the entire modeled heap and stack against an independent
 byte model, plus the routed selector against `KPROG_X86_STORE_ARM` (77 cases).
+The simulator's `MOVBE_LOAD` / `MOVBE_STORE` bodies now route their clauses
+through the machine-checked `KPROG_X86_MOVBE_*` contract instead of restating
+them inline. New `X86_SIM_L_MEM_MOVBE_SRC(DST)` delegates the
+stack-versus-memory arm to `KPROG_X86_MOVBE_ARM((DST) == X86_RSP)` — the same
+plain two-way arm as the store path, with no ABI arm and no sign extension —
+and `X86_SIM_L_EXEC_MOVBE_STORE` resolves the width
+(`KPROG_X86_MOVBE_WIDTH`) and the whole-artifact displacement
+(`KPROG_X86_MOVBE_DISP`) through the generated contract, switching the arm on
+the routed selector; `X86_SIM_L_EXEC_MOVBE_LOAD` resolves the same width and
+hands it to the shared read body. One resolved width drives the byte reversal,
+the memory access, and the written size in both forms. A host cross-check
+includes the simulator header, drives the real load and store bodies over every
+width, flat and indexed addressing, and both arms, and compares the entire
+modeled heap and stack against an independent byte model plus the written
+destination register value and tag against the byte-reversed model, and the
+routed selector against `KPROG_X86_MOVBE_ARM` (71 cases).
 The register-writing MOV theorem covers `X86_SIM_L_EXEC_MOV_IMM` and
 `X86_SIM_L_EXEC_MOV_REG`. `x86_mov_imm_step_refines` composes the
 register-destination immediate move over the partial-register writeback
@@ -1553,7 +1569,9 @@ LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch (and the simulator's routing of its read path through
 `KPROG_X86_MEM_READ_SRC`), and the
 shared store (`MOV_STORE`) handler composition (and the simulator's routing of
-its store body through the `KPROG_X86_STORE_*` contract); the pointer-write
+its store body through the `KPROG_X86_STORE_*` contract), the
+`MOVBE_LOAD`/`MOVBE_STORE` handler composition (and the simulator's routing of
+both MOVBE bodies through the `KPROG_X86_MOVBE_*` contract); the pointer-write
 provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
 `PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the

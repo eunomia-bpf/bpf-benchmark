@@ -665,6 +665,11 @@ struct x86_sim_state {
  * body no longer restates the stack-pointer branch inline. */
 #define X86_SIM_L_MEM_STORE_SRC(DST)                                        \
 	KPROG_X86_STORE_ARM((DST) == X86_RSP)
+/* The MOVBE store-target classification is the machine-checked
+ * KPROG_X86_MOVBE_ARM contract, so the MOVBE store body no longer restates
+ * the stack-pointer branch inline. */
+#define X86_SIM_L_MEM_MOVBE_SRC(DST)                                        \
+	KPROG_X86_MOVBE_ARM((DST) == X86_RSP)
 
 
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
@@ -790,7 +795,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_MOVBE_LOAD(DST, SRC, FLAGS, AUX, IMM)               \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = KPROG_X86_MOVBE_WIDTH(FLAGS);        \
 		__u64 __x86_l_value = X86_SIM_L_READ_MEM_VALUE((SRC),     \
 			(AUX), (IMM), __x86_l_width, 0);                  \
 		X86_SIM_L_WRITE_REG_WIDTH((DST),                          \
@@ -800,23 +805,26 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_MOVBE_STORE(DST, SRC, FLAGS, AUX, IMM)              \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = KPROG_X86_MOVBE_WIDTH(FLAGS);        \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
-			x86_simm(IMM));                                   \
+			KPROG_X86_MOVBE_DISP(IMM));                       \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		void *__x86_l_base_ptr = (DST) == X86_REG_NONE ?          \
 			(void *)0 : X86_SIM_L_READ_REG_PTR(DST);          \
 		__u64 __x86_l_value = x86_bswap(                          \
 			X86_SIM_L_READ_REG(SRC), __x86_l_width);          \
-		if ((DST) == X86_RSP)                                     \
+		switch (X86_SIM_L_MEM_MOVBE_SRC(DST)) {                   \
+		case KPROG_X86_MOVBE_ARM_STACK:                           \
 			X86_SIM_L_STACK_WRITE(                            \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				__x86_l_width, __x86_l_value);             \
-		else {                                                    \
+			break;                                            \
+		default:                                                  \
 			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
 					     __x86_l_disp;               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr, __x86_l_width, \
 					     __x86_l_value);              \
+			break;                                            \
 		}                                                         \
 	} while (0)
 

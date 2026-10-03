@@ -236,6 +236,8 @@ check:
 	lake env lean KProgFormal/X86MovbeHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_movbe_host.c -o build/test_x86_movbe_host
 	./build/test_x86_movbe_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_movbe_route_host.c -o build/test_x86_movbe_route_host
+	./build/test_x86_movbe_route_host
 	lake env lean KProgFormal/GeneratedX86PtrWrite.lean
 	lake env lean KProgFormal/X86PtrWriteHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_load_map_ptr_host.c -o build/test_x86_mov_load_map_ptr_host

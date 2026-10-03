@@ -6932,6 +6932,60 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   module (the arm predicate forced true, and the displacement slice shifted to
   16 bits).
 
+## Step 0079 — x86 simulator routes the MOVBE pair through the checked contract
+
+- Scope: the x86 simulator's `X86_SIM_L_EXEC_MOVBE_LOAD` and
+  `X86_SIM_L_EXEC_MOVBE_STORE` bodies. Their contract (`KPROG_X86_MOVBE_*` +
+  `X86MovbeHandler.lean`, spec `x86_movbe_spec.json`, oracle
+  `test_x86_movbe_host.c`) was already generated and proven, but both bodies
+  restated clauses inline — the width fallback in both, and the stack-pointer
+  arm selection in the store — the same "curated contract vs. shipped helper"
+  gap 0076 (offset), 0077 (read dispatch), and 0078 (shared `MOV_STORE`) closed.
+- `x86/x86_sim.h` now includes `../formal/generated/x86_movbe.h`. New
+  `X86_SIM_L_MEM_MOVBE_SRC(DST)` = `KPROG_X86_MOVBE_ARM((DST) == X86_RSP)`,
+  the same plain two-way arm as the store path (no ABI arm, no sign extension).
+  `X86_SIM_L_EXEC_MOVBE_LOAD` now resolves its width through
+  `KPROG_X86_MOVBE_WIDTH(FLAGS)` and hands it to the shared read body.
+  `X86_SIM_L_EXEC_MOVBE_STORE` resolves the width through
+  `KPROG_X86_MOVBE_WIDTH(FLAGS)`, the displacement through
+  `KPROG_X86_MOVBE_DISP(IMM)` (via `X86_SIM_L_MEM_OFFSET`), and selects the arm
+  through an `X86_SIM_L_MEM_MOVBE_SRC`-driven `switch` whose `STACK` arm calls
+  `X86_SIM_L_STACK_WRITE` and whose `default` arm calls `X86_SIM_L_STORE_ADDR`.
+  The old inline `(FLAGS) ? (FLAGS) : X86_WIDTH_64` and the
+  `if ((DST) == X86_RSP) ... else ...` ladder are gone.
+- One resolved width drives the byte reversal, the memory access, and the
+  written size in both forms; the contract calls the stack arm's width a
+  re-derivation of the same `FLAGS ? FLAGS : 64` (`x86_movbe_resolve_width_refines`
+  / `x86_movbe_resolved_not_absent`), so the two arms deliberately share one
+  width expression rather than being "unified" further.
+- New `test_x86_movbe_route_host.c`: includes the *simulator* header and drives
+  the real `X86_SIM_L_EXEC_MOVBE_STORE` over all four widths, flat and indexed
+  addressing modes, and both the stack and memory arms, comparing the *entire*
+  modeled heap and modeled stack against an independent byte model
+  (`put_le` + `bswap_model`); the load half plants source bytes at the
+  effective address (displacement plus scaled index) and compares the written
+  destination register value — including the 32-bit zero-extension and the
+  narrower-width lane merge — and tag against the byte-reversed model; it also
+  checks the routed `X86_SIM_L_MEM_MOVBE_SRC` against `KPROG_X86_MOVBE_ARM` for
+  a register sweep and the width default over the FLAGS codes. Success line
+  `x86 movbe route host cross-check: OK (71 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_x86_movbe_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- Gate: 88 generators / 166 Lean / 88 oracles / 0 errors.
+- Mutation harness `mut_x86_movbe_route.py`: 10/10 DETECTED — four
+  simulator-header distortions caught by the route oracle alone (both bodies'
+  width forced to 32, the store arm identity swapped from RSP to RDI, the
+  store displacement moved to the high-half slice); three generated-C defects
+  caught by the generator `--check` and the route oracle (the width default
+  changed to 32 bits, the displacement slice moved to `>> 32`, the two arm
+  defines colliding); one shared-spec mutation caught by the generator
+  `--check` (a `disp_row`'s `form` switched to `immHighHalf`); and two Lean
+  independent-spec mutations caught by the refinement module (the width
+  fallback forced to 32 bits, the displacement restated as the high-half
+  slice).
+
 ## Next after 0076
 
 
