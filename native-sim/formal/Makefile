@@ -452,6 +452,8 @@ check:
 	lake env lean KProgFormal/Arm64Vreg.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_vreg_host.c -o build/test_arm64_vreg_host
 	./build/test_arm64_vreg_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
+	./build/test_arm64_vreg_route_host
 	lake env lean KProgFormal/Arm64Decode.lean
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 test_arm64_decode_host.c -o build/test_arm64_decode_host
 	./build/test_arm64_decode_host

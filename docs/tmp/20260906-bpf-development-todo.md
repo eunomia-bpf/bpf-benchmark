@@ -7737,6 +7737,78 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   example).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0092 — AArch64 simulator routes the vector-register-file half mapping through the checked contract
+
+- Scope: the AArch64 simulator's four vector memory-transfer bodies
+  `ARM64_SIM_L_LOAD_D0_MEM` / `LOAD_Q0_MEM` / `STORE_D0_MEM` / `STORE_Q0_MEM`
+  previously picked the target state field by name -- the low transfer wrote
+  `__a64_v0` and, for a `.Q0`, a second transfer wrote `__a64_v0_hi` -- and
+  called no `arm64_vreg.h` macro, so the *state field* half mapping and the
+  order the halves are touched sat in the trusted computing base while only the
+  *memory* lane half was routed (Step 0089). The four bodies now route the whole
+  half plan through the generated `arm64_vreg.h` contract: the shared
+  `ARM64_SIM_L_DQ_MEM_STEP` computes `__a64_vreg_idx = KPROG_ARM64_VREG_INDEX(OP)`,
+  selects the half count from the per-opcode `KPROG_ARM64_VREG_OP_*_HALVES`
+  constants, and loops over the plan positions, taking each position's half from
+  the per-opcode `KPROG_ARM64_VREG_OP_*_SELECT` and mapping it through
+  `KPROG_ARM64_VREG_HALF_OFFSET` into the low `__a64_v0` or high `__a64_v0_hi`
+  field. The commutativity of the top byte of the plan means the loop performs
+  exactly the same reads/writes in the same order (low half first, high half
+  second for `.Q0`; low only for `.D0`) and with the same memory lanes as
+  before -- the second low-lane/`HIGH_LANE_STRIDE` split is preserved as
+  `__a64_dq_extra` (`p == 0` ? 0 : `lanes > 1` ? `HIGH_LANE_STRIDE` : 0) -- so
+  the observable access sequence is unchanged and the previously routed DQ lane
+  plan is not regressed.
+- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated `arm64_vreg.h` include
+  was added at `:43` (after the pre/post include); `ARM64_SIM_L_DQ_MEM_STEP`
+  (`:747-834`) gained the VREG half-plan selection and the plan loop, the four
+  one-line wrappers `ARM64_SIM_L_LOAD_D0_MEM` (`:838`), `LOAD_Q0_MEM` (`:841`),
+  `STORE_D0_MEM` (`:844`) and `STORE_Q0_MEM` (`:847`) keep their signatures, and
+  the four `ARM64_SIM_L_EXEC` vector arms are unchanged.
+- New `test_arm64_vreg_route_host.c`: includes the *simulator* header and drives
+  the four real bodies directly and through the four `ARM64_SIM_L_EXEC`
+  dispatcher arms, over all four opcodes crossed with the five planted
+  base-register provenance classes (scalar, ABI pointer, relocation address, a
+  stack-tagged register and the stack pointer), every pre/post flag combination,
+  both index modes and three immediates. The independent model restates the
+  direction and lane count from the generated `arm64_dq_mem.h` constants and the
+  half count, half plan and destination state field from the generated
+  `arm64_vreg.h` constants over a flat byte image, so a pinned arm index, a
+  dropped high half, a D0/Q0 selector swap, a swapped high state field or a
+  flattened half offset is numerically distinguishable. Compares the whole GPR
+  file with its tags, the stack pointer, the two vector state fields, the whole
+  stack image with its slot tags and the whole 4 KiB memory window. Success line
+  `arm64 vreg route host cross-check: OK (62445 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_arm64_vreg_host.c` (9,216 cases), which
+  tests the contract plus an independent model over all 32 base registers but
+  never includes the sim header.
+- Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_arm64_vreg_route_host` build +
+  run pair inside `check:`, after the `test_arm64_vreg_host` pair.
+- `native-sim/formal/README.md`: the VREG routing paragraph replaced the
+  TCB-exclusion ending, recording the shared step's half-plan selection and the
+  62,445-case sim-header oracle.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: routing sentence added
+  after the VREG theorem paragraph, recording the shared step and the
+  62,445-case sim-header oracle.
+- Mutation harness `mut_arm64_vreg_route.py`: 32/32 DETECTED -- the
+  simulator-header distortions caught by the route oracle alone (the arm index
+  pinned, the `.Q0` plan and selector redirected to the `.D0` arm, the high half
+  dropped from the loop bound, the half offset flattened to the low slot, both
+  high-field assignments swapped to the low field, the high-lane stride zeroed,
+  the generated include removed); the generated-C defects caught by the
+  generator `--check` and the route oracle (a half count changed in either
+  direction, the load access redirected to store, the arm index changed, the
+  index totality default changed, both `.Q0` selectors collapsed to the low
+  half, the two half offsets aliased and swapped, a static-assert drift); the
+  shared-spec mutations caught by the generator `--check` (both half offsets,
+  a `.Q0` half count, an access direction, the selector); and the Lean mutations
+  caught by the refinement module (the generated plan, half offset, half count
+  and arm index; the handler's plan spec, distinct-offset and high-example
+  theorems).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

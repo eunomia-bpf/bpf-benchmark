@@ -40,6 +40,7 @@
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
+#include "../formal/generated/arm64_vreg.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -747,10 +748,15 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
  * contract fixes, per opcode, the access direction (load into / store from the
  * SIMD register), the number of 64-bit lanes moved, and the lane offset plan
  * (every transferred lane is one `ARM64_WIDTH_64` access, the high lane of a
- * `.Q0` transfer eight bytes above the low one). The four bodies route through
- * this one step, which selects all three facts from the generated
- * `KPROG_ARM64_DQ_MEM_*` per-opcode constants, so the direction, lane count and
- * lane plan and the four C bodies cannot drift. */
+ * `.Q0` transfer eight bytes above the low one). The vector-register-file
+ * contract additionally fixes which 64-bit state field each moved half maps
+ * into (`__a64_v0` low, `__a64_v0_hi` high) and in which order the halves are
+ * touched. The four bodies route through this one step: the memory direction,
+ * lane count and per-position lane offset are selected from the generated
+ * `KPROG_ARM64_DQ_MEM_*` per-opcode constants, and the half count, half plan
+ * and destination state field from the generated `KPROG_ARM64_VREG_*` per-opcode
+ * constants, so neither the memory facts nor the register-file facts and the
+ * four C bodies can drift. */
 #define ARM64_SIM_L_DQ_MEM_STEP(OP, BASE, INDEX, AUX, IMM)                  \
 	do {                                                               \
 		__u32 __a64_dq_idx = KPROG_ARM64_DQ_MEM_INDEX(OP);         \
@@ -772,27 +778,58 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__a64_dq_idx == KPROG_ARM64_DQ_MEM_OP_STORE_D0_INDEX ?\
 			KPROG_ARM64_DQ_MEM_OP_STORE_D0_LANES :          \
 			KPROG_ARM64_DQ_MEM_OP_STORE_Q0_LANES;           \
+		__u32 __a64_vreg_idx = KPROG_ARM64_VREG_INDEX(OP);         \
+		unsigned __a64_vreg_plan = __a64_vreg_idx ==          \
+				KPROG_ARM64_VREG_OP_LOAD_D0_INDEX ?     \
+			KPROG_ARM64_VREG_OP_LOAD_D0_HALVES :            \
+			__a64_vreg_idx == KPROG_ARM64_VREG_OP_LOAD_Q0_INDEX ?\
+			KPROG_ARM64_VREG_OP_LOAD_Q0_HALVES :            \
+			__a64_vreg_idx == KPROG_ARM64_VREG_OP_STORE_D0_INDEX ?\
+			KPROG_ARM64_VREG_OP_STORE_D0_HALVES :           \
+			KPROG_ARM64_VREG_OP_STORE_Q0_HALVES;            \
+		unsigned __a64_vreg_p;                                \
 		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));                 \
-		if (__a64_dq_load) {                                       \
-			__a64_v0 = ARM64_SIM_L_MEM_READ((BASE), (INDEX),  \
-				(AUX), (IMM), 0,                         \
-				KPROG_ARM64_DQ_MEM_LANE_STRIDE);          \
-			if (__a64_dq_lanes > 1U)                          \
-				__a64_v0_hi = ARM64_SIM_L_MEM_READ((BASE),\
-					(INDEX), (AUX), (IMM),            \
-					KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE,\
-					KPROG_ARM64_DQ_MEM_LANE_STRIDE);   \
-		} else {                                                   \
-			ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), (AUX),     \
-				(IMM), 0, KPROG_ARM64_DQ_MEM_LANE_STRIDE,  \
-				__a64_v0, ARM64_SIM_TAG_SCALAR);           \
-			if (__a64_dq_lanes > 1U)                          \
-				ARM64_SIM_L_MEM_WRITE((BASE), (INDEX),     \
-					(AUX), (IMM),                      \
-					KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE,\
-					KPROG_ARM64_DQ_MEM_LANE_STRIDE,    \
+		for (__a64_vreg_p = 0U; __a64_vreg_p < __a64_vreg_plan;  \
+		     __a64_vreg_p++) {                                 \
+			unsigned __a64_vreg_half = __a64_vreg_idx ==  \
+					KPROG_ARM64_VREG_OP_LOAD_D0_INDEX ?\
+				KPROG_ARM64_VREG_OP_LOAD_D0_SELECT(__a64_vreg_p) :\
+				__a64_vreg_idx == KPROG_ARM64_VREG_OP_LOAD_Q0_INDEX ?\
+				KPROG_ARM64_VREG_OP_LOAD_Q0_SELECT(__a64_vreg_p) :\
+				__a64_vreg_idx == KPROG_ARM64_VREG_OP_STORE_D0_INDEX ?\
+				KPROG_ARM64_VREG_OP_STORE_D0_SELECT(__a64_vreg_p) :\
+				KPROG_ARM64_VREG_OP_STORE_Q0_SELECT(__a64_vreg_p);\
+			__s64 __a64_vreg_off = (__s64)                \
+				KPROG_ARM64_VREG_HALF_OFFSET(__a64_vreg_half);\
+			__s64 __a64_dq_extra = __a64_vreg_p == 0U ?   \
+				0 :                                   \
+				__a64_dq_lanes > 1U ?                 \
+					(__s64)KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE :\
+					0;                            \
+			if (__a64_dq_load) {                          \
+				__u64 __a64_dq_value =                \
+					ARM64_SIM_L_MEM_READ((BASE), (INDEX),\
+						(AUX), (IMM),         \
+						__a64_dq_extra,       \
+						KPROG_ARM64_DQ_MEM_LANE_STRIDE);\
+				if (__a64_vreg_off == (__s64)         \
+						KPROG_ARM64_VREG_HIGH_OFFSET)\
+					__a64_v0_hi = __a64_dq_value; \
+				else                                  \
+					__a64_v0 = __a64_dq_value;    \
+			} else if (__a64_vreg_off == (__s64)          \
+					KPROG_ARM64_VREG_HIGH_OFFSET) { \
+				ARM64_SIM_L_MEM_WRITE((BASE), (INDEX),\
+					(AUX), (IMM), __a64_dq_extra,\
+					KPROG_ARM64_DQ_MEM_LANE_STRIDE,\
 					__a64_v0_hi, ARM64_SIM_TAG_SCALAR);\
-		}                                                          \
+			} else {                                      \
+				ARM64_SIM_L_MEM_WRITE((BASE), (INDEX),\
+					(AUX), (IMM), __a64_dq_extra,\
+					KPROG_ARM64_DQ_MEM_LANE_STRIDE,\
+					__a64_v0, ARM64_SIM_TAG_SCALAR);\
+			}                                             \
+		}                                                     \
 		ARM64_SIM_L_MEM_POST((BASE), (AUX), (IMM));                \
 	} while (0)
 

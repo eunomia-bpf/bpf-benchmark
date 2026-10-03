@@ -1275,9 +1275,23 @@ from the raw opcode; eight binding mutations -- a half-offset swap, a D0/Q0
 selector swap, a half-count swap and a Q0 order reversal in the C macros, a
 state-field-name swap and an offset alias in the spec, and a plan-literal and a
 generated-offset change in Lean -- each change the observable result. The four
-bodies do not call the generated `arm64_vreg.h` macros -- that header is
-exercised only by the host oracle -- so both remain in the trusted computing
-base.
+bodies now route through the generated `arm64_vreg.h` macros: the shared
+`ARM64_SIM_L_DQ_MEM_STEP` selects the half count and per-position half from the
+`KPROG_ARM64_VREG_INDEX` chain and the per-opcode `HALVES` / `SELECT`
+constants, maps each half through `KPROG_ARM64_VREG_HALF_OFFSET` into the low
+`__a64_v0` or high `__a64_v0_hi` state field, and touches the halves in the
+generated plan order, so the field mapping and write order are the proved
+contract and only the untouched opcode decode remains in the trusted computing
+base. A second, sim-header-driven oracle drives the four real bodies both
+directly and through the `ARM64_SIM_L_EXEC` dispatcher arms over every opcode
+crossed with the five planted base-provenance classes (scalar, ABI pointer,
+relocation address, stack-tagged register and the stack pointer), the pre/post
+flag set, both index modes and three immediates, comparing the whole register
+file with tags, the stack pointer, the two vector state fields, the whole stack
+image with its slot tags and the whole memory window against an independent
+raw-opcode model; a pinned arm index, a dropped high half, a swapped half
+selector or a flattened half offset is numerically distinguishable at every
+case.
 
 The AArch64 MVN/NEG unary-value theorem covers the two unary value bodies
 `ARM64_OP_MVN` and `ARM64_OP_NEG`, which write the destination-width-narrowed
