@@ -1195,9 +1195,25 @@ target register that is also the base still reads the original base -- comparing
 the whole GPR file, tags, memory and the stack; four binding mutations -- an
 access-direction swap, a slot-count swap, a slot-stride change, and a
 selector-arm swap -- each change the observable result. The register decode that
-selects the opcode remains outside the theorem, and the two bodies do not call
-the generated `arm64_pair_mem.h` macros -- that header is exercised only by the
-host oracle -- so both remain in the trusted computing base.
+The AArch64 `LDP` / `STP` pair-move bodies now share one
+`ARM64_SIM_L_PAIR_MEM_STEP` that routes the access direction through
+`KPROG_ARM64_PAIR_MEM_*_ACCESS` (via the `KPROG_ARM64_PAIR_MEM_INDEX` arm
+selector), the slot count through `KPROG_ARM64_PAIR_MEM_SLOT_COUNT`, and the slot
+plan through the parameterized slot-index-times-access-width offset, so the two
+thin opcode wrappers cannot drift and the direction, slot count and slot stride
+are machine-checked facts rather than restated sequences. The independent
+`test_arm64_pair_mem_route_host.c` oracle includes the simulator header, drives
+both real bodies -- directly and through the `ARM64_SIM_L_EXEC` dispatcher arms
+that route to them -- over both opcodes, five base-register classes (scalar, ABI
+pointer, relocation address, a stack-pointer-register alias and the stack pointer
+itself), every pre/post flag combination, all four access widths, both index
+modes and three immediates, and compares the whole GPR file with its tags, the
+stack pointer, the whole stack image with its slot tags, and all 4 KiB of the
+memory window against an independent byte-image model. A body that swaps the
+direction or the arm, selects the wrong slot count or stride, drops the second
+slot, or takes the low store value from the high source register is numerically
+distinguishable at every case. The register decode that selects the opcode
+remains outside the theorem.
 
 The AArch64 pre/post-indexed address-writeback theorem covers the two bodies
 `ARM64_SIM_L_MEM_PRE` and `ARM64_SIM_L_MEM_POST`, which apply the address-offset
@@ -1761,8 +1777,9 @@ multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
 AArch64 width, generic ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer (and the simulator's routing of all four
-bodies through the `KPROG_ARM64_DQ_MEM_*` contract), `LDP`/`STP` pair-move,
-pre/post-indexed
+bodies through the `KPROG_ARM64_DQ_MEM_*` contract), `LDP`/`STP` pair-move
+(and the simulator's routing of both bodies through the `KPROG_ARM64_PAIR_MEM_*`
+contract), pre/post-indexed
 address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
@@ -1774,9 +1791,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The two `ARM64_SIM_L_{LDP,STP}` handler bodies do not call the generated
-`arm64_pair_mem.h` macros — that header is exercised only by the host oracle —
-so both bodies remain in the trusted computing base.
 The two `ARM64_SIM_L_MEM_{PRE,POST}` handler bodies do not call the generated
 `arm64_mem_prepost.h` macros — that header is exercised only by the host oracle —
 so both bodies remain in the trusted computing base.

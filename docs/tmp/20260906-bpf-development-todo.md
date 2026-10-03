@@ -7600,6 +7600,76 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   generated `laneCount`/`transfer`/`access`/`armIndex` edits).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0090 — AArch64 simulator routes the LDP/STP register-pair memory-transfer group through the checked contract
+
+- Scope: the AArch64 simulator's two register-pair memory-transfer bodies
+  `ARM64_SIM_L_LDP` (`ARM64_OP_LDP`, `0x21`) and `ARM64_SIM_L_STP`
+  (`ARM64_OP_STP`, `0x22`) previously restated the access direction, the slot
+  count (two) and the slot offset (the high slot one access width above the low
+  slot) and called no generated macro. They now share one
+  `ARM64_SIM_L_PAIR_MEM_STEP(OP, DST, SRC, SRC2, BASE, INDEX, AUX, IMM, WIDTH)`
+  that selects the arm through `KPROG_ARM64_PAIR_MEM_INDEX` and the access
+  direction through the `KPROG_ARM64_PAIR_MEM_OP_*_ACCESS` aliases, the slot
+  count through `KPROG_ARM64_PAIR_MEM_SLOT_COUNT`, and the slot plan through the
+  parameterized `slot index * access width` high-slot offset (`__a64_pm_hi =
+  (WIDTH)`), so a 32-bit `LDP`/`STP` keeps its 4-byte stride rather than the
+  64-bit `HIGH_SLOT_STRIDE` the contract names literally. `MEM_PRE` /
+  `MEM_POST`, the address offset (`MEM_BASE_OFF`) and the byte reads/writes stay
+  inline, so the routed step fixes only *which* slots each opcode moves, in
+  *what* direction and order.
+- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated contract header was
+  added at `:41` (after the DQ include); the shared routed step macro plus the
+  two thin wrappers `ARM64_SIM_L_LDP`/`ARM64_SIM_L_STP` replace the old bodies
+  (`:806-877`); the `ARM64_SIM_L_EXEC` arms (`:1139`, `:1142`) pass `(DST)`,
+  `(SRC)`, `(SRC2)`, `(SRC3)` with `__a64_l_width`, unchanged in shape from
+  before because the wrapper signatures are preserved (the LDP arm reads the
+  base from SRC2 and the STP arm from DST, matching the pre-existing dispatch).
+- New `test_arm64_pair_mem_route_host.c`: includes the *simulator* header and
+  drives both real bodies directly and through the `ARM64_SIM_L_EXEC`
+  dispatcher arms, over both opcodes, five base-register classes (scalar, ABI
+  pointer, relocation address, a stack-pointer-register alias and the stack
+  pointer itself), every pre/post flag combination, all four access widths, both
+  index modes and three immediates. The planted base registers carry distinct
+  provenance classes, so a body that swaps the direction or the arm, selects the
+  wrong slot count or stride, drops the second slot, or takes the low store
+  value from the high source register is numerically distinguishable at every
+  case. Compares the whole GPR file with its tags, the stack pointer, the whole
+  stack image with its slot tags, and all 4 KiB of the memory window against an
+  independent byte-image model. Success line
+  `arm64 pair_mem route host cross-check: OK (122891 cases)`; exit 1 on
+  mismatch. Distinct from the pre-existing `test_arm64_pair_mem_host.c`, which
+  tests the contract plus an independent model but never includes the sim
+  header.
+- Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_arm64_pair_mem_route_host`
+  build + run pair inside `check:`, after the `test_arm64_pair_mem_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the `LDP`/`STP`
+  theorem paragraph; the TCB binding-list clause updated to record the
+  simulator's routing of both bodies through the `KPROG_ARM64_PAIR_MEM_*`
+  contract, and the two-body "remain in the trusted computing base" exclusion
+  deleted.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: routing sentence added
+  after the `LDP`/`STP` theorem paragraph, recording the shared step and the
+  122,891-case sim-header oracle.
+- Mutation harness `mut_arm64_pair_mem_route.py`: 37/37 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the step
+  direction flipped, each wrapper routed to the other opcode, the high-slot
+  offset pinned to 8, both slot guards narrowed, the tag route low/high swapped,
+  both dispatcher arms routed to the wrong body, the pre-index writeback turned
+  into a post-index one, the low store value taken from SRC2); the generated-C
+  defects caught by the generator `--check` and the route oracle (both index
+  aliases moved, both access aliases swapped, the slot count changed, the slot
+  stride narrowed, the high-slot stride changed, both opcode static-assert codes
+  drifted, the index chain swapped); the shared-spec mutations caught by the
+  generator `--check` (the LDP opcode code, the STP access direction, the slot
+  count, the high-slot stride, the LDP code index, the slot stride); and the
+  Lean mutations caught by the refinement module (the independent plan for each
+  opcode, a duplicated slot, the access dispatch, the slot-stride claim, the arm
+  index dispatch, and the four generated `slotCount`/`slotOffset`/`access`/
+  `armIndex` edits).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

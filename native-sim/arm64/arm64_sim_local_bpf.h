@@ -38,6 +38,7 @@
 #include "../formal/generated/arm64_mem_dispatch.h"
 #include "../formal/generated/arm64_stack_tag.h"
 #include "../formal/generated/arm64_dq_mem.h"
+#include "../formal/generated/arm64_pair_mem.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -802,6 +803,79 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_STORE_Q0_MEM(BASE, INDEX, AUX, IMM)                      \
 	ARM64_SIM_L_DQ_MEM_STEP(ARM64_OP_STORE_Q0, (BASE), (INDEX), (AUX), (IMM))
 
+/* The `LDP` / `STP` pair-move contract fixes, per opcode, the access direction
+ * (LDP loads a register pair from memory, STP stores one to memory), the number
+ * of slots moved, and the slot plan (both slots are one access width apart).
+ * The two bodies route through this one step, which selects the direction and
+ * the slot count from the generated `KPROG_ARM64_PAIR_MEM_*` constants; the
+ * access width, the address offset (`MEM_BASE_OFF`) and the pre/post base
+ * adjustment (`MEM_PRE` / `MEM_POST`) stay in their own proved macros. The
+ * second slot's byte offset is the parameterized `slot index * access width`,
+ * so a 32-bit `LDP`/`STP` keeps its 4-byte slot stride. */
+#define ARM64_SIM_L_PAIR_MEM_STEP(OP, DST, SRC, SRC2, BASE, INDEX, AUX, IMM, WIDTH)\
+	do {                                                               \
+		__u32 __a64_pm_access = KPROG_ARM64_PAIR_MEM_INDEX(OP) ==  \
+				KPROG_ARM64_PAIR_MEM_OP_LDP_INDEX ?        \
+			KPROG_ARM64_PAIR_MEM_OP_LDP_ACCESS :               \
+			KPROG_ARM64_PAIR_MEM_OP_STP_ACCESS;                \
+		int __a64_pm_load = __a64_pm_access ==                 \
+			KPROG_ARM64_PAIR_MEM_ACCESS_LOAD;                  \
+		unsigned __a64_pm_slots = KPROG_ARM64_PAIR_MEM_SLOT_COUNT;\
+		unsigned __a64_pm_hi = (WIDTH);                        \
+		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));             \
+		if (__a64_pm_load) {                                   \
+			__u64 __a64_pm_v0 = ARM64_SIM_L_MEM_READ((BASE),\
+				(INDEX), (AUX), (IMM), 0, (WIDTH));        \
+			__u64 __a64_pm_v1 = __a64_pm_slots > 1U ?      \
+				ARM64_SIM_L_MEM_READ((BASE), (INDEX),      \
+					(AUX), (IMM), __a64_pm_hi,         \
+					(WIDTH)) : 0;                  \
+			__u8 __a64_pm_t0 = ARM64_SIM_L_MEM_READ_TAG((BASE),\
+				(INDEX), (AUX), (IMM), 0, (WIDTH));        \
+			__u8 __a64_pm_t1 = __a64_pm_slots > 1U ?       \
+				ARM64_SIM_L_MEM_READ_TAG((BASE), (INDEX),  \
+					(AUX), (IMM), __a64_pm_hi,         \
+					(WIDTH)) : 0;                  \
+			__u64 __a64_pm_mask =                          \
+				ARM64_SIM_L_PAIR_LOAD_TAG_ROUTE((OP),      \
+					__a64_pm_t0, __a64_pm_t1, (WIDTH));\
+			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_LOW(__a64_pm_mask))\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),   \
+					(void *)(long)__a64_pm_v0,     \
+					__a64_pm_t0);                  \
+			else                                           \
+				ARM64_SIM_L_WRITE_REG_WIDTH((DST),     \
+					__a64_pm_v0, (WIDTH));         \
+			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_HIGH(__a64_pm_mask))\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((SRC),   \
+					(void *)(long)__a64_pm_v1,     \
+					__a64_pm_t1);                  \
+			else                                           \
+				ARM64_SIM_L_WRITE_REG_WIDTH((SRC),     \
+					__a64_pm_v1, (WIDTH));         \
+		} else {                                               \
+			ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), (AUX),  \
+				(IMM), 0, (WIDTH),                     \
+				ARM64_SIM_L_READ_REG(SRC),             \
+				ARM64_SIM_L_REG_TAG(SRC));             \
+			if (__a64_pm_slots > 1U)                       \
+				ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), \
+					(AUX), (IMM), __a64_pm_hi,     \
+					(WIDTH),                       \
+					ARM64_SIM_L_READ_REG(SRC2),    \
+					ARM64_SIM_L_REG_TAG(SRC2));    \
+		}                                                      \
+		ARM64_SIM_L_MEM_POST((BASE), (AUX), (IMM));            \
+	} while (0)
+
+#define ARM64_SIM_L_LDP(DST, SRC, BASE, INDEX, AUX, IMM, WIDTH)              \
+	ARM64_SIM_L_PAIR_MEM_STEP(ARM64_OP_LDP, (DST), (SRC),                 \
+		ARM64_REG_NONE, (BASE), (INDEX), (AUX), (IMM), (WIDTH))
+
+#define ARM64_SIM_L_STP(BASE, SRC, SRC2, INDEX, AUX, IMM, WIDTH)             \
+	ARM64_SIM_L_PAIR_MEM_STEP(ARM64_OP_STP, ARM64_REG_NONE, (SRC),        \
+		(SRC2), (BASE), (INDEX), (AUX), (IMM), (WIDTH))
+
 #define ARM64_SIM_L_SET_SUB_FLAGS(LHS, RHS, WIDTH)                          \
 	KPROG_ARM64_SET_SUB_FLAGS(__a64_n, __a64_z, __a64_c, __a64_v,       \
 				  (LHS), (RHS), (WIDTH))
@@ -1063,31 +1137,11 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				ARM64_SIM_L_REG_TAG(SRC));                  \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_STLXR_VALUE((OP)), ARM64_WIDTH_32);\
 		} else if ((OP) == ARM64_OP_LDP) {                             \
-			ARM64_SIM_L_MEM_PRE((SRC2), (AUX), (IMM));             \
-			__u64 __a64_l_v0 = ARM64_SIM_L_MEM_READ((SRC2), (SRC3), (AUX), (IMM), 0, __a64_l_width);\
-			__u64 __a64_l_v1 = ARM64_SIM_L_MEM_READ((SRC2), (SRC3), (AUX), (IMM), __a64_l_width, __a64_l_width);\
-			__u8 __a64_l_t0 = ARM64_SIM_L_MEM_READ_TAG((SRC2), (SRC3), (AUX), (IMM), 0, __a64_l_width);\
-			__u8 __a64_l_t1 = ARM64_SIM_L_MEM_READ_TAG((SRC2), (SRC3), (AUX), (IMM), __a64_l_width, __a64_l_width);\
-			__u64 __a64_l_mask = ARM64_SIM_L_PAIR_LOAD_TAG_ROUTE((OP), __a64_l_t0, __a64_l_t1, __a64_l_width);\
-			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_LOW(__a64_l_mask))\
-				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)__a64_l_v0, __a64_l_t0);\
-			else                                           \
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_v0, __a64_l_width);\
-			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_HIGH(__a64_l_mask))\
-				ARM64_SIM_L_WRITE_REG_PTR_TAG((SRC), (void *)(long)__a64_l_v1, __a64_l_t1);\
-			else                                           \
-				ARM64_SIM_L_WRITE_REG_WIDTH((SRC), __a64_l_v1, __a64_l_width);\
-			ARM64_SIM_L_MEM_POST((SRC2), (AUX), (IMM));            \
+			ARM64_SIM_L_LDP((DST), (SRC), (SRC2), (SRC3),          \
+				(AUX), (IMM), __a64_l_width);                  \
 		} else if ((OP) == ARM64_OP_STP) {                             \
-			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM));              \
-			ARM64_SIM_L_MEM_WRITE((DST), (SRC3), (AUX), (IMM), 0,\
-				__a64_l_width, ARM64_SIM_L_READ_REG(SRC),   \
-				ARM64_SIM_L_REG_TAG(SRC));                  \
-			ARM64_SIM_L_MEM_WRITE((DST), (SRC3), (AUX), (IMM),   \
-				__a64_l_width, __a64_l_width,               \
-				ARM64_SIM_L_READ_REG(SRC2),                 \
-				ARM64_SIM_L_REG_TAG(SRC2));                 \
-			ARM64_SIM_L_MEM_POST((DST), (AUX), (IMM));             \
+			ARM64_SIM_L_STP((DST), (SRC), (SRC2), (SRC3),          \
+				(AUX), (IMM), __a64_l_width);                  \
 		} else if ((OP) == ARM64_OP_LOAD_D0) {                         \
 			ARM64_SIM_L_LOAD_D0_MEM((SRC), (SRC2), (AUX), (IMM));  \
 		} else if ((OP) == ARM64_OP_STORE_D0) {                        \
