@@ -9,6 +9,13 @@ its bit count from `X86_SIM_L_READ_REG(COUNT) & 0xff`; `BZHI_MEM` reads its
 value from memory at the *resolved width* (not a second AUX width, unlike
 `ANDN_MEM`) and its count from the register named by
 `X86_REG_AUX_GET_SRC_SHIFT(AUX) & 0xff`, with the count byte-masked to 0xff.
+The two `X86_SIM_L_EXEC_BZHI` / `X86_SIM_L_EXEC_BZHI_MEM` bodies route through
+this contract: they share one `X86_SIM_L_EXEC_BZHI_STEP` composition that
+selects the value source through `KPROG_X86_BZHI_VALUE_SOURCE`, the count
+source through `KPROG_X86_BZHI_COUNT_SOURCE`, the byte mask through
+`KPROG_X86_BZHI_COUNT_MASK`, and the one shared width through
+`KPROG_X86_BZHI_WRITE_WIDTH`, while the reads, the masked bit-clear, the flag
+production, and the register writeback stay in the composed body.
 
 Outputs, from `x86_bzhi_spec.json` (schema_version 1):
   * `KProgFormal/GeneratedX86Bzhi.lean` — the opcode/source/value/count tables.
@@ -153,8 +160,10 @@ def render_c(data, opcode_rows) -> str:
         " * the value from `SRC` and the count from `COUNT`; `BZHI_MEM` reads the",
         " * value from memory at the resolved width and the count from the register",
         " * the AUX shift byte names. The contract selects the opcodes, the value",
-        " * source, and the count source; the reads, the masked bit-clear, the flag",
-        " * production, and the register writeback stay in the C handlers.",
+        " * source, the count source, and the one shared width; the reads, the",
+        " * masked bit-clear, the flag production, and the register writeback stay",
+        " * in the one shared `X86_SIM_L_EXEC_BZHI_STEP` composition the two bodies",
+        " * route through.",
         " */",
         op_asserts,
         "/* The FLAGS width codes, including the 0 \"absent\" code. */",

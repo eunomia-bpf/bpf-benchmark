@@ -7230,6 +7230,80 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   body swapped).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0084 — x86 simulator routes the BZHI/BZHI_MEM pair through the checked contract
+
+- Scope: the x86 simulator's two single-width bit-clear bodies
+  `X86_SIM_L_EXEC_BZHI` (`0x34`) and `X86_SIM_L_EXEC_BZHI_MEM` (`0x35`)
+  previously restated the value/count split and the one width twice and called
+  no generated macro. They now share one
+  `X86_SIM_L_EXEC_BZHI_STEP(OP_IS_MEM, DST, SRC, COUNT, AUX, FLAGS, IMM)`
+  composition that selects the value source through
+  `KPROG_X86_BZHI_VALUE_SOURCE`, the count source through
+  `KPROG_X86_BZHI_COUNT_SOURCE`, the count byte mask through
+  `KPROG_X86_BZHI_COUNT_MASK`, and the one width both the memory read and the
+  destination write use through `KPROG_X86_BZHI_WRITE_WIDTH` (unlike
+  `ANDN_MEM`, `BZHI_MEM` has no independent read width);
+  `X86_SIM_L_EXEC_BZHI` and `X86_SIM_L_EXEC_BZHI_MEM` are now one-line
+  instantiations of the shared step, preserving their old signatures/order so
+  the `X86_SIM_L_EXEC` arms are unchanged. The reads, the masked bit-clear, the
+  flag production, and the writeback stay in the composed body by contract
+  design (the header selects facts, no body macro).
+- `native-sim/formal/generate_x86_bzhi_spec.py`: module docstring and the
+  emitted-header prose updated to name the two handlers and the shared routed
+  composition; regenerated without `--check` then verified with `--check`
+  (only `generated/x86_bzhi.h` changed — the Lean output is byte-identical,
+  `-Wcomment` count 0).
+- `native-sim/x86/x86_sim.h`: added
+  `#include "../formal/generated/x86_bzhi.h"` after the ANDN include.
+- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+  routed step macro (block comment above it) plus two one-line opcode macros;
+  the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
+  is unchanged.
+- New `test_x86_bzhi_route_host.c`: includes the *simulator* header and drives
+  both real bodies directly and through the `X86_SIM_L_EXEC` dispatcher arms,
+  over both opcodes, every FLAGS code, every AUX width code, four
+  displacements, and several value/count/destination registers, planting per
+  opcode a count whose low byte differs per register and whose high bit is set
+  (its upper bytes carry `0x5a`), so a body that reads its value or count from
+  the wrong place lands on a different byte-masked count, a body that skips the
+  mask clears different bits, and a mask wider than `0xff` is caught by the
+  count-versus-width CF. Compares the whole register file with its tags and all
+  four flags against an independent model. Success line
+  `x86 bzhi route host cross-check: OK (356405 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_x86_bzhi_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_x86_bzhi_route_host` build +
+  run pair after the `test_x86_bzhi_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the BZHI
+  theorem paragraph; the stale TCB paragraph ("The `X86_SIM_L_EXEC_BZHI` and
+  `X86_SIM_L_EXEC_BZHI_MEM` handler bodies do not call the generated
+  `x86_bzhi.h` macros…") deleted; the binding-list clause updated to record
+  the simulator's routing of both bodies through the `KPROG_X86_BZHI_*`
+  contract.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: routing sentence pair
+  inserted after the BZHI oracle paragraph; structural balance re-verified
+  (0 tabs; the introduced `(`/`)` and `{`/`}` deltas are equal; `$` count
+  unchanged).
+- Mutation harness `mut_x86_bzhi_route.py`: 26/26 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the
+  value-source test inverted, the count-source test inverted, the write width
+  hardcoded to `8`, the count mask hardcoded to `0x7f` in *each* of the two
+  count-source branches, `BZHI` tagged as the memory body, `BZHI_MEM` tagged as
+  the register body, the dispatcher BZHI_MEM arm routed to the register body,
+  the dispatcher BZHI arm routed to the memory body); the generated-C defects
+  caught by the generator `--check` and the route oracle (the value-source
+  register/memory defines colliding, the count-source register/AUX-shift defines
+  colliding, the per-opcode value/count-source defines colliding, the
+  write-width default colliding, the 64-bit width code moved, the count mask
+  colliding, both opcode static-assert codes drifted); one shared-spec mutation
+  caught by the generator `--check` (the count mask moved to `7f`); and the Lean
+  independent-spec mutations caught by the refinement module (`BZHI`'s value
+  source moved to `memoryRead`, `BZHI_MEM`'s count source moved to `register`,
+  the 64-bit code mapping moved to `w32`, the count mask moved to `7f`).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

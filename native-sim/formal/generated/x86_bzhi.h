@@ -10,8 +10,10 @@
  * the value from `SRC` and the count from `COUNT`; `BZHI_MEM` reads the
  * value from memory at the resolved width and the count from the register
  * the AUX shift byte names. The contract selects the opcodes, the value
- * source, and the count source; the reads, the masked bit-clear, the flag
- * production, and the register writeback stay in the C handlers.
+ * source, the count source, and the one shared width; the reads, the
+ * masked bit-clear, the flag production, and the register writeback stay
+ * in the one shared `X86_SIM_L_EXEC_BZHI_STEP` composition the two bodies
+ * route through.
  */
 _Static_assert(X86_OP_BZHI == 0x34U, "x86 bzhi bzhi opcode drift");
 _Static_assert(X86_OP_BZHI_MEM == 0x35U, "x86 bzhi bzhiMem opcode drift");

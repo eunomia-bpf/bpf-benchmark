@@ -997,6 +997,24 @@ count split, the count byte-masking, the count-versus-width CF, the
 SF-cleared/ZF-real asymmetry, the partial-register writeback, and the write-free
 memory. The register decode that selects the opcode remains outside the theorem.
 
+The two `X86_SIM_L_EXEC_BZHI` and `X86_SIM_L_EXEC_BZHI_MEM` handler bodies now
+share one `X86_SIM_L_EXEC_BZHI_STEP` composition that routes the value source
+through the machine-checked `KPROG_X86_BZHI_VALUE_SOURCE` selector, the count
+source through `KPROG_X86_BZHI_COUNT_SOURCE`, the byte mask through
+`KPROG_X86_BZHI_COUNT_MASK`, and the one width both the read and the write use
+through `KPROG_X86_BZHI_WRITE_WIDTH`, so the two bodies and the Lean refinement
+share one bit-clear implementation rather than two restated step sequences. The
+independent `test_x86_bzhi_route_host.c` oracle includes the simulator header,
+drives both real bodies — directly and through the `X86_SIM_L_EXEC` dispatcher
+arms that route to them — over both opcodes, every FLAGS code, every AUX width
+code, several displacements, and several value/count/destination registers, and
+compares the whole register file with its tags and all four flags against an
+independent model. It plants per opcode a count whose low byte differs per
+register and whose high bit is set, so a body that reads its count (or its
+value) from the wrong place lands on a different byte-masked count and a body
+that skips the mask clears different bits, with the count's upper bytes
+carrying bits a mask wider than `0xff` would fold into the CF comparison.
+
 The `BT` / `BT_IMM` / `BT_MEM_IMM` theorem covers the `X86_SIM_L_EXEC_BT`,
 `X86_SIM_L_EXEC_BT_IMM` and `X86_SIM_L_EXEC_BT_MEM_IMM` arms for `X86_OP_BT`
 (`0x37`), `X86_OP_BT_IMM` (`0x42`) and `X86_OP_BT_MEM_IMM` (`0x43`), the three
@@ -1648,7 +1666,8 @@ contract), the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition (and the simulator's
 routing of both bodies through the `KPROG_X86_ANDN_*` contract), the
 `BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
-`BZHI`/`BZHI_MEM` single-width value/count-source composition, the
+`BZHI`/`BZHI_MEM` single-width value/count-source composition (and the
+simulator's routing of both bodies through the `KPROG_X86_BZHI_*` contract), the
 `CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG` register/immediate source/flag-kind
 composition, the
 `MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler
@@ -1669,9 +1688,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The `X86_SIM_L_EXEC_BZHI` and `X86_SIM_L_EXEC_BZHI_MEM` handler bodies do not
-call the generated `x86_bzhi.h` macros — that header is exercised only by the
-host oracle — so both bodies remain in the trusted computing base.
 The `X86_SIM_L_EXEC_BT`, `X86_SIM_L_EXEC_BT_IMM` and
 `X86_SIM_L_EXEC_BT_MEM_IMM` handler bodies do not call the generated `x86_bt.h`
 macros — that header is exercised only by the host oracle — so all three bodies

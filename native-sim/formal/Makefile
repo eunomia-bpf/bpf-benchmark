@@ -274,6 +274,8 @@ check:
 	lake env lean KProgFormal/X86BzhiHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_bzhi_host.c -o build/test_x86_bzhi_host
 	./build/test_x86_bzhi_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_bzhi_route_host.c -o build/test_x86_bzhi_route_host
+	./build/test_x86_bzhi_route_host
 	lake env lean KProgFormal/GeneratedX86Bt.lean
 	lake env lean KProgFormal/X86BtHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_bt_host.c -o build/test_x86_bt_host

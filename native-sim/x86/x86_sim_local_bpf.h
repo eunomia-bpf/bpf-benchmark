@@ -1192,12 +1192,34 @@ struct x86_sim_state {
 		}                                                         \
 	} while (0)
 
-#define X86_SIM_L_EXEC_BZHI(DST, SRC, COUNT, FLAGS)                         \
+/*
+ * `BZHI` (register value and count) and `BZHI_MEM` (memory value, AUX-named
+ * count) share one composition whose value source, count source, byte mask,
+ * and single resolved width come from the machine-checked x86_bzhi.h
+ * contract; the reads, the masked bit-clear, the flag production, and the
+ * writeback stay here.
+ */
+#define X86_SIM_L_EXEC_BZHI_STEP(OP_IS_MEM, DST, SRC, COUNT, AUX, FLAGS, IMM) \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width =                                      \
+			KPROG_X86_BZHI_WRITE_WIDTH(FLAGS);                \
 		__u32 __x86_l_bits = x86_width_bits(__x86_l_width);       \
-		__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);             \
-		__u64 __x86_l_count = X86_SIM_L_READ_REG(COUNT) & 0xff;  \
+		__u64 __x86_l_src;                                        \
+		__u64 __x86_l_count;                                      \
+		if (KPROG_X86_BZHI_VALUE_SOURCE(OP_IS_MEM) ==             \
+		    KPROG_X86_BZHI_VALUE_MEMORY)                          \
+			__x86_l_src = X86_SIM_L_READ_MEM_VALUE(           \
+				(SRC), (AUX), (IMM), __x86_l_width, 0);   \
+		else                                                      \
+			__x86_l_src = X86_SIM_L_READ_REG(SRC);            \
+		if (KPROG_X86_BZHI_COUNT_SOURCE(OP_IS_MEM) ==             \
+		    KPROG_X86_BZHI_COUNT_AUX_SHIFT)                       \
+			__x86_l_count = X86_SIM_L_READ_REG(               \
+				X86_REG_AUX_GET_SRC_SHIFT(AUX)) &         \
+				KPROG_X86_BZHI_COUNT_MASK;                \
+		else                                                      \
+			__x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+				KPROG_X86_BZHI_COUNT_MASK;                \
 		__u64 __x86_l_result =                                   \
 			kprog_x86_bzhi_value(__x86_l_src, __x86_l_count,  \
 					     __x86_l_width);              \
@@ -1209,24 +1231,12 @@ struct x86_sim_state {
 					  __x86_l_width);                    \
 	} while (0)
 
+#define X86_SIM_L_EXEC_BZHI(DST, SRC, COUNT, FLAGS)                         \
+	X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+
 #define X86_SIM_L_EXEC_BZHI_MEM(DST, SRC, FLAGS, AUX, IMM)                  \
-	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u32 __x86_l_bits = x86_width_bits(__x86_l_width);       \
-		__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),\
-			(IMM), __x86_l_width, 0);                         \
-		__u64 __x86_l_count = X86_SIM_L_READ_REG(                 \
-			X86_REG_AUX_GET_SRC_SHIFT(AUX)) & 0xff;           \
-		__u64 __x86_l_result =                                   \
-			kprog_x86_bzhi_value(__x86_l_src, __x86_l_count,  \
-					     __x86_l_width);              \
-		__x86_cf = __x86_l_count >= __x86_l_bits;                 \
-		__x86_of = 0;                                             \
-		__x86_sf = 0;                                             \
-		__x86_zf = __x86_l_result == 0;                           \
-		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,          \
-					  __x86_l_width);                    \
-	} while (0)
+	X86_SIM_L_EXEC_BZHI_STEP(1U, (DST), (SRC), X86_REG_NONE, (AUX),     \
+				 (FLAGS), (IMM))
 
 #define X86_SIM_L_EXEC_BT(DST, SRC, FLAGS)                                  \
 	do {                                                               \
