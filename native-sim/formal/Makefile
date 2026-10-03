@@ -258,6 +258,8 @@ check:
 	lake env lean KProgFormal/X86PushPopHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_pushpop_host.c -o build/test_x86_pushpop_host
 	./build/test_x86_pushpop_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_pushpop_route_host.c -o build/test_x86_pushpop_route_host
+	./build/test_x86_pushpop_route_host
 	lake env lean KProgFormal/GeneratedX86RepMovs.lean
 	lake env lean KProgFormal/X86RepMovsHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_rep_movs_host.c -o build/test_x86_rep_movs_host

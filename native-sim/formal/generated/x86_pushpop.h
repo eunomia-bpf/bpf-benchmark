@@ -11,7 +11,8 @@
  * hardcodes 64, the body that post-increments is the one that resolves the
  * FLAGS code. Neither body writes a flag. The contract selects these; the
  * stack-pointer arithmetic, the stack helper's byte framing, and the
- * destination-register writeback stay in the two C handlers.
+ * destination-register writeback stay in the one shared
+ * `X86_SIM_L_EXEC_PUSH_POP_STEP` composition the two bodies route through.
  */
 _Static_assert(X86_OP_PUSH == 0x12U, "x86 pushpop push opcode drift");
 _Static_assert(X86_OP_POP == 0x13U, "x86 pushpop pop opcode drift");

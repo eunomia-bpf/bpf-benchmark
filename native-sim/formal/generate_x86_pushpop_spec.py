@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Generate the x86-64 `PUSH` / `POP` handler-composition contract.
 
-`PUSH` (`X86_OP_PUSH`, `0x12`) and `POP` (`X86_OP_POP`, `0x13`) are the two
-stack-transfer bodies `X86_SIM_L_EXEC` dispatches. They share this contract
-because they are the same operation read backwards, and the two facts that
-distinguish them are exactly the plausible bugs:
+This contract models the two stack-transfer handlers `X86_SIM_L_EXEC_PUSH` and
+`X86_SIM_L_EXEC_POP` that `X86_OP_PUSH` (`0x12`) and `X86_OP_POP` (`0x13`)
+route to. They share this contract because they are the same operation read
+backwards, and the two facts that distinguish them are exactly the plausible
+bugs:
 
   * the step *direction* — `PUSH` pre-decrements the stack pointer before its
     store, `POP` reads and writes its destination before post-incrementing the
@@ -20,8 +21,8 @@ function of the opcode. Neither body writes a flag, and neither writes a
 register tag directly.
 
 The contract selects these facts; the stack-pointer arithmetic, the stack
-helper's byte framing, and the destination-register writeback stay in the two C
-handlers.
+helper's byte framing, and the destination-register writeback stay in the one
+shared `X86_SIM_L_EXEC_PUSH_POP_STEP` composition the two bodies route through.
 
 Outputs (both regenerated whole, `--check` rejects any stale copy):
   * `KProgFormal/GeneratedX86PushPop.lean`
@@ -245,7 +246,8 @@ def render_c(opcode_rows, step_rows, width_rows, flags_rows) -> str:
  * hardcodes 64, the body that post-increments is the one that resolves the
  * FLAGS code. Neither body writes a flag. The contract selects these; the
  * stack-pointer arithmetic, the stack helper's byte framing, and the
- * destination-register writeback stay in the two C handlers.
+ * destination-register writeback stay in the one shared
+ * `X86_SIM_L_EXEC_PUSH_POP_STEP` composition the two bodies route through.
  */
 {op_asserts}
 /* The FLAGS width codes, including the 0 "absent" code. */

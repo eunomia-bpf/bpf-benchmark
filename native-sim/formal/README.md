@@ -886,6 +886,25 @@ untouched register file, the narrow-pop partial writeback, and the untouched
 flags. The register decode that selects the opcode and supplies the FLAGS code
 remains outside the theorem.
 
+The two `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies now share one
+`X86_SIM_L_EXEC_PUSH_POP_STEP` composition that routes the step direction
+through the machine-checked `KPROG_X86_PUSH_STEP_DIRECTION` selector, the
+body that honours the FLAGS code through `KPROG_X86_PUSH_WIDTH_SOURCE`, the
+absent-FLAGS default through `KPROG_X86_PUSH_FLAGS_WIDTH`, and the stack step
+amount through `KPROG_X86_PUSH_STACK_STEP`, so the two bodies and the Lean
+refinement share one stack-transfer implementation rather than two restated
+step sequences. The independent `test_x86_pushpop_route_host.c` oracle
+includes the simulator header, drives both real bodies — directly and through
+the `X86_SIM_L_EXEC` dispatcher arms that route to them — over both directions,
+every FLAGS code, and a range of stack pointers, and compares the whole
+register file, the whole stack frame, the stack pointer, and the flags against
+an independent model. It plants per opcode a case where each routed fact is
+numerically distinguishable from the wrong selection: a `PUSH` carrying a
+narrow FLAGS code that must still move the stack pointer by eight and store all
+eight bytes, a `POP` carrying the absent code that must still read and write
+eight bytes, and a direction swap that must move the stack pointer the opposite
+way.
+
 The `REP MOVS` block-copy theorem covers the `X86_SIM_L_EXEC_REP_MOVS` arm for
 `X86_OP_REP_MOVS` (`0x3a`), the opcode that copies `RSI`-addressed bytes to
 `RDI` a bounded number of times. The copy width is the FLAGS-resolved width
@@ -1605,8 +1624,9 @@ provenance composition, the XMM0 pair-move
 composition (and the simulator's routing of both XMM0 bodies through the
 `KPROG_X86_XMM0_*` contract), the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill
 composition (and the simulator's routing of all four call-memory bodies through
-the `KPROG_X86_CALLMEM_*` contract), the
-`PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
+the `KPROG_X86_CALLMEM_*` contract), the `PUSH`/`POP` stack-step composition
+(and the simulator's routing of both bodies through the `KPROG_X86_PUSH_*`
+contract), the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition, the
 `BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
 `BZHI`/`BZHI_MEM` single-width value/count-source composition, the
@@ -1630,9 +1650,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The two `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
-`x86_pushpop.h` macros — that header is exercised only by the host oracle — so
-both bodies remain in the trusted computing base.
 The `X86_SIM_L_EXEC_ANDN` and `X86_SIM_L_EXEC_ANDN_MEM` handler bodies do not
 call the generated `x86_andn.h` macros — that header is exercised only by the
 host oracle — so both bodies remain in the trusted computing base.

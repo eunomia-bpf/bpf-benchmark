@@ -7097,6 +7097,66 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   moved from `fill` to `copy`, `MEMCPY_REG`'s bound form moved from `imm` to
   `fixedBound`).
 
+## Step 0082 — x86 simulator routes the PUSH/POP pair through the checked contract
+
+- Scope: the x86 simulator's two stack-transfer bodies
+  `X86_SIM_L_EXEC_PUSH` (`0x12`) and `X86_SIM_L_EXEC_POP` (`0x13`) previously
+  restated the stack-pointer step twice and called no generated macro. They now
+  share one `X86_SIM_L_EXEC_PUSH_POP_STEP(IS_POP, DST, SRC, FLAGS)` composition
+  that selects the step direction through `KPROG_X86_PUSH_STEP_DIRECTION`, which
+  body honours the opcode's FLAGS code through `KPROG_X86_PUSH_WIDTH_SOURCE`,
+  the absent-FLAGS default through `KPROG_X86_PUSH_FLAGS_WIDTH`, and the byte
+  amount through `KPROG_X86_PUSH_STACK_STEP`; `X86_SIM_L_EXEC_PUSH` and
+  `X86_SIM_L_EXEC_POP` are now one-line instantiations of the shared step. The
+  stack-pointer arithmetic, the stack helper's byte framing, the destination
+  writeback, and the flags-free property stay in the composed body by contract
+  design (the header selects four facts, no body macro).
+- `native-sim/formal/generate_x86_pushpop_spec.py`: module docstring and the
+  emitted-header prose updated to name the two handlers and the shared routed
+  composition; regenerated without `--check` then verified with `--check`
+  (`REGEN-OK`; only `generated/x86_pushpop.h` changed — the Lean output is
+  byte-identical).
+- `native-sim/x86/x86_sim.h`: added
+  `#include "../formal/generated/x86_pushpop.h"` after the CALL_MEM include.
+- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+  routed step macro (block comment above it) plus two one-line opcode macros;
+  the `X86_SIM_L_EXEC` `X86_OP_PUSH` / `X86_OP_POP` arms now call the wrappers.
+- New `test_x86_pushpop_route_host.c`: includes the *simulator* header and
+  drives both real bodies directly and through the `X86_SIM_L_EXEC` dispatcher
+  arms, over both directions, every FLAGS code (`0`, 8, 16, 32, 64) and a range
+  of stack pointers, planting per opcode a case where each routed fact is
+  numerically distinguishable from the wrong selection (a narrow-FLAGS `PUSH`
+  that must still step by eight and store eight bytes, an absent-FLAGS `POP`
+  that must still read and write eight bytes, and a direction swap). Compares
+  the whole register file, the whole stack frame, the stack pointer, and the
+  flags against an independent model. Success line
+  `x86 pushpop route host cross-check: OK (31504 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_x86_pushpop_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- `native-sim/formal/Makefile`: added the `test_x86_pushpop_route_host` build +
+  run pair after the `test_x86_pushpop_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the PUSH/POP
+  theorem paragraph; the stale TCB paragraph ("The two
+  `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
+  `x86_pushpop.h` macros…") deleted; the binding-list clause updated to record
+  the simulator's routing of both bodies through the `KPROG_X86_PUSH_*`
+  contract.
+- Mutation harness `mut_x86_pushpop_route.py`: 17/17 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the direction
+  test inverted, the width-source test inverted, the absent-FLAGS test
+  inverted, the stack-step literal hardcoded to `16`, `PUSH` tagged as the POP
+  body, `POP` tagged as the PUSH body, the dispatcher `POP` arm routed to the
+  PUSH body); the generated-C defects caught by the generator `--check` and the
+  route oracle (the pre-decrement define colliding, the post-increment define
+  colliding, the hardcoded-width define colliding, the absent-FLAGS define
+  colliding, the absent-width define colliding, the stack-step literal moved to
+  `16`); one shared-spec mutation caught by the generator `--check`
+  (`stack_step` moved to `16`); and the Lean independent-spec mutations caught
+  by the refinement module (`PUSH`'s direction moved to `postIncrement`,
+  `POP`'s width source moved to `hardcoded64`, the step amount moved to `16`).
+
 ## Next after 0076
 
 

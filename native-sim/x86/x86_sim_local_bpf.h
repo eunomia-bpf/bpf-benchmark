@@ -1619,23 +1619,53 @@ struct x86_sim_state {
 				__x86_l_disp, X86_WIDTH_8, __x86_l_value);\
 	} while (0)
 
-#define X86_SIM_L_EXEC_PUSH(SRC)                                             \
-	do {                                                               \
-		__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);            \
-		__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr - 8;                \
-		X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr,         \
-				      X86_WIDTH_64, __x86_l_value);       \
+/* The two stack-transfer bodies compose the machine-checked
+ * KPROG_X86_PUSH_* contract: the step direction, the width source, and the
+ * absent-FLAGS default select when the stack pointer steps, which body
+ * honours the FLAGS code, and what an absent code resolves to, while the
+ * shared stack-step literal fixes the byte amount both step by; the bodies
+ * and the Lean refinement share one stack-transfer composition rather than
+ * two restated step sequences. */
+#define X86_SIM_L_EXEC_PUSH_POP_STEP(IS_POP, DST, SRC, FLAGS)               \
+	do {                                                                \
+		__u8 __x86_l_pp_dir = KPROG_X86_PUSH_STEP_DIRECTION(IS_POP); \
+		__u8 __x86_l_pp_wsrc = KPROG_X86_PUSH_WIDTH_SOURCE(IS_POP);  \
+		__u8 __x86_l_pp_flags_width =                             \
+			KPROG_X86_PUSH_FLAGS_WIDTH(                       \
+				(FLAGS) == KPROG_X86_PUSH_WIDTH_ABSENT);  \
+		__u8 __x86_l_pp_width =                                   \
+			(__x86_l_pp_wsrc ==                               \
+			 KPROG_X86_PUSH_WIDTH_HARDCODED_64) ?             \
+				X86_WIDTH_64 :                            \
+			(__x86_l_pp_flags_width ==                        \
+			 KPROG_X86_PUSH_FLAGS_ABSENT) ?                   \
+				X86_WIDTH_64 : (FLAGS);                   \
+		__u64 __x86_l_pp_step =                                   \
+			(__u64)KPROG_X86_PUSH_STACK_STEP;                 \
+		if (__x86_l_pp_dir ==                                     \
+		    KPROG_X86_PUSH_STEP_PRE_DECREMENT) {                  \
+			__u64 __x86_l_pp_value = X86_SIM_L_READ_REG(SRC); \
+			__x86_rsp.ptr =                                   \
+				(__u8 *)__x86_rsp.ptr - __x86_l_pp_step;  \
+			X86_SIM_L_STACK_WRITE(                            \
+				(__s64)(long)__x86_rsp.ptr,               \
+				__x86_l_pp_width, __x86_l_pp_value);      \
+		} else {                                                  \
+			__u64 __x86_l_pp_value = X86_SIM_L_STACK_READ(    \
+				(__s64)(long)__x86_rsp.ptr,               \
+				__x86_l_pp_width);                        \
+			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
+				__x86_l_pp_value, __x86_l_pp_width);      \
+			__x86_rsp.ptr =                                   \
+				(__u8 *)__x86_rsp.ptr + __x86_l_pp_step;  \
+		}                                                         \
 	} while (0)
 
+#define X86_SIM_L_EXEC_PUSH(SRC)                                             \
+	X86_SIM_L_EXEC_PUSH_POP_STEP(0U, X86_REG_NONE, (SRC), 0U)
+
 #define X86_SIM_L_EXEC_POP(DST, FLAGS)                                       \
-	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u64 __x86_l_value = X86_SIM_L_STACK_READ(               \
-			(__s64)(long)__x86_rsp.ptr, __x86_l_width);       \
-		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,           \
-					  __x86_l_width);                    \
-		__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr + 8;                \
-	} while (0)
+	X86_SIM_L_EXEC_PUSH_POP_STEP(1U, (DST), X86_REG_NONE, (FLAGS))
 
 #define X86_SIM_L_EXEC(OP, DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
@@ -1904,16 +1934,9 @@ struct x86_sim_state {
 							  __x86_l_width);    \
 			}                                                   \
 		} else if ((OP) == X86_OP_PUSH) {                         \
-			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);    \
-			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr - 8;        \
-			X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr, X86_WIDTH_64,\
-					      __x86_l_value);              \
+			X86_SIM_L_EXEC_PUSH((SRC));                       \
 		} else if ((OP) == X86_OP_POP) {                          \
-			__u64 __x86_l_value = X86_SIM_L_STACK_READ(        \
-				(__s64)(long)__x86_rsp.ptr, __x86_l_width);\
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
-						  __x86_l_width);        \
-			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr + 8;        \
+			X86_SIM_L_EXEC_POP((DST), (FLAGS));               \
 		}                                                         \
 	} while (0)
 
