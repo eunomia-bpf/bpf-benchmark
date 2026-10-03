@@ -484,6 +484,19 @@ register-AUX forms against an independent signed accumulator built from the
 same source register value, checks the no-index form ignores a poisoned
 register file, and checks the routed helper agrees with the explicit-value
 helper (2,305 cases).
+The simulator's memory read path now routes its read-source classification
+through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
+restating the stack/ABI/ordinary predicate ladder inline. The new
+`X86_SIM_L_MEM_READ_SRC` resolves the base register's tag through the
+simulator's own register read and delegates to the generated contract; both
+`X86_SIM_L_READ_MEM_VALUE` and the `X86_SIM_L_EXEC_MOV_LOAD` arm chain switch
+on it (the MOV_LOAD ABI arm keeps its opcode-and-width-64 refinement that falls
+back to an ordinary load and write). This mirrors the arm64 read path, which
+already routed through its peer contract. A host cross-check includes the
+simulator header, drives the real helpers over stack/ABI/ordinary bases and the
+ordinary/MOVSX/ABI/ABI-off-width/stack MOV_LOAD cases, and compares both the
+written value and the destination register tag against an independent byte
+reader and the contract's classification (62 cases).
 The register-writing MOV theorem covers `X86_SIM_L_EXEC_MOV_IMM` and
 `X86_SIM_L_EXEC_MOV_REG`. `x86_mov_imm_step_refines` composes the
 register-destination immediate move over the partial-register writeback
@@ -1521,7 +1534,8 @@ register-lane AUX layout,
 x86 stack-arena storage model,
 x86 stack-index frame-offset mapping,
 LEA, register-writing MOV, width-converting register MOV, shared memory
-read-dispatch, the pointer-write provenance composition, the XMM0 pair-move
+read-dispatch (and the simulator's routing of its read path through
+`KPROG_X86_MEM_READ_SRC`), the pointer-write provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
 `PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition, the

@@ -155,6 +155,7 @@
 #include "../formal/generated/x86_stack_index.h"
 #include "../formal/generated/x86_mem_offset.h"
 #include "../formal/generated/x86_stack_arena.h"
+#include "../formal/generated/x86_mem_dispatch.h"
 
 _Static_assert(KPROG_X86_MEM_AUX_INDEX(
 	KPROG_X86_MEM_AUX(0xabU, 8U, 0x30U, 0x77U)) == 0xabU,

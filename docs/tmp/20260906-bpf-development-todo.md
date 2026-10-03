@@ -6826,6 +6826,54 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   mutations (shift→multiply, scale off-by-one) caught by both the generator
   `--check` and the route oracle.
 
+## Step 0077 — x86 simulator routes the memory read dispatch through the checked contract
+
+- Scope: the x86 simulator's memory read path. The read-source classification
+  (stack read vs. ABI pointer load vs. ordinary load) was already
+  machine-checked (`KPROG_X86_MEM_READ_SRC` + `X86MemDispatch.lean`) and the
+  **arm64** simulator already routed through its peer
+  (`KPROG_ARM64_MEM_SRC_*`), but the x86 simulator restated the predicate
+  ladder inline in two helpers, so the theorem bounded a contract the running
+  simulator did not call. This closes the same "curated contract vs. shipped
+  helper" gap that 0076 closed for the offset.
+- `x86/x86_sim.h` now includes `../formal/generated/x86_mem_dispatch.h`. New
+  `X86_SIM_L_MEM_READ_SRC(BASE_REG, MEM_WIDTH)` resolves the base tag through
+  `X86_SIM_L_REG_TAG` and delegates to the generated `KPROG_X86_MEM_READ_SRC`
+  with `((BASE_REG) == X86_RSP)`. Both routed helpers now `switch` on it:
+  `X86_SIM_L_READ_MEM_VALUE` (stack read / pointer load / ordinary load) and
+  `X86_SIM_L_EXEC_MOV_LOAD` (its ABI arm keeps the opcode-plus-width-64
+  refinement that falls back to an ordinary load and write, exactly as the
+  contract comment states; the MOVSX sign-extend stays in the ordinary arm).
+  The now-dead `__x86_l_base_tag` local in the MOV_LOAD macro was removed.
+- New `test_x86_mem_dispatch_route_host.c`: includes the *simulator* header and
+  drives the real `X86_SIM_L_READ_MEM_VALUE` over stack/ABI/ordinary bases
+  (four widths × the scale/offset grid) against an independent byte reader and
+  the contract's classification; drives the real `X86_SIM_L_EXEC_MOV_LOAD`
+  over ordinary, MOVSX, ABI-at-width-64, ABI-off-width-64, and stack bases,
+  checking both the written value and the destination register tag; plus an
+  ABI-width-gate probe and a no-index-ignores-registers check. Success line
+  `x86 mem dispatch route host cross-check: OK (62 cases)`; exit 1 on
+  mismatch. This is distinct from the pre-existing
+  `test_x86_mem_read_dispatch_host.c`, which tests the contract plus an
+  independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- Gate: 88 generators / 166 Lean / 86 oracles / 0 errors.
+- Mutation harness `mut_x86_mem_dispatch_route.py`: 12/12 DETECTED — six
+  simulator-header routing distortions caught by the route oracle alone (the
+  `== X86_RSP` identity swapped for a non-stack register, the register-tag
+  argument dropped to a scalar tag, the RSP identity forced true, the read
+  helper's stack arm replaced by an ordinary load, the MOV_LOAD opcode/width-64
+  refinement inverted, and the MOV_LOAD stack displacement shifted by one);
+  two generated-C defects caught by the generator `--check`, the pre-existing
+  dispatch oracle, and the route oracle (the width-64 gate inverted, the ABI
+  source define colliding with the ordinary one); two shared-spec mutations
+  caught by the generator `--check` (an ABI row's source define flipped to the
+  ordinary load, and an RSP row's source tag changed to the ABI pointer load);
+  and two Lean independent-spec mutations caught by the refinement module (the
+  ABI/width predicate conjoined instead of gated, and the RSP-first branch
+  disabled).
+
 ## Next after 0076
 
 Remaining x86 open work is unchanged and *compositional/handwritten*: the

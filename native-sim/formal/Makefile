@@ -208,6 +208,8 @@ check:
 	lake env lean KProgFormal/X86MemDispatch.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_read_dispatch_host.c -o build/test_x86_mem_read_dispatch_host
 	./build/test_x86_mem_read_dispatch_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mem_dispatch_route_host.c -o build/test_x86_mem_dispatch_route_host
+	./build/test_x86_mem_dispatch_route_host
 	lake env lean KProgFormal/GeneratedX86MovLoad.lean
 	lake env lean KProgFormal/X86MovLoadHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_load_host.c -o build/test_x86_mov_load_host

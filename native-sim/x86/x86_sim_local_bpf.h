@@ -653,10 +653,17 @@ struct x86_sim_state {
 #define X86_SIM_L_EVAL_CC(CC)                                               \
 	KPROG_X86_EVAL_CC((CC), __x86_cf, __x86_zf, __x86_sf, __x86_of)
 
+/* The read-dispatch classification (stack read vs. ABI pointer load vs.
+ * ordinary load) is the machine-checked KPROG_X86_MEM_READ_SRC contract — the
+ * same contract the arm64 read path routes through — so the sim no longer
+ * restates the predicate ladder inline. */
+#define X86_SIM_L_MEM_READ_SRC(BASE_REG, MEM_WIDTH)                         \
+	KPROG_X86_MEM_READ_SRC(((BASE_REG) == X86_RSP),                     \
+		X86_SIM_L_REG_TAG(BASE_REG), (MEM_WIDTH))
+
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 	({                                                                 \
 		void *__x86_l_base_ptr = (void *)0;                      \
-		__u8 __x86_l_base_tag = X86_SIM_L_REG_TAG(BASE_REG);     \
 		__u8 __x86_l_mem_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);\
 		__s64 __x86_l_disp = (STORE_DISP) ?                      \
 			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
@@ -667,19 +674,23 @@ struct x86_sim_state {
 		__u64 __x86_l_value;                                     \
 		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
 				     __x86_l_disp;                       \
-		if ((BASE_REG) == X86_RSP) {                              \
+		switch (X86_SIM_L_MEM_READ_SRC(BASE_REG,                 \
+					       __x86_l_mem_width)) {     \
+		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				__x86_l_mem_width);                       \
-		} else if (__x86_l_base_tag == X86_SIM_TAG_ABI &&         \
-			   __x86_l_mem_width == X86_WIDTH_64) {          \
+			break;                                           \
+		case KPROG_X86_MEM_SRC_ABI_PTR_LOAD:                     \
 			__x86_l_value =                                  \
 				(__u64)(long)X86_SIM_L_LOAD_PTR_ADDR(     \
 					__x86_l_addr);                    \
-		} else {                                                  \
+			break;                                           \
+		default:                                                 \
 			__x86_l_value = X86_SIM_L_LOAD_ADDR(             \
 				(void *)(long)__x86_l_addr,              \
 				__x86_l_mem_width);                      \
+			break;                                           \
 		}                                                         \
 		__x86_l_value;                                            \
 	})
@@ -690,7 +701,6 @@ struct x86_sim_state {
 		__u8 __x86_l_write_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;\
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
 		void *__x86_l_base_ptr = (void *)0;                      \
-		__u8 __x86_l_base_tag = X86_SIM_L_REG_TAG(SRC);          \
 		__u64 __x86_l_value = 0;                                 \
 		if (!__x86_l_mem_width)                                  \
 			__x86_l_mem_width = __x86_l_write_width;          \
@@ -699,16 +709,24 @@ struct x86_sim_state {
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
 				     __x86_l_disp;                       \
-		if ((SRC) == X86_RSP) {                                   \
+		switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
+		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				X86_SIM_L_MEM_EFFECTIVE_WIDTH((AUX), (FLAGS)));\
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
-		} else if ((OP) == X86_OP_MOV_LOAD &&                    \
-			   __x86_l_mem_width == X86_WIDTH_64 &&          \
-			   __x86_l_write_width == X86_WIDTH_64 &&        \
-			   __x86_l_base_tag == X86_SIM_TAG_ABI) {        \
+			break;                                           \
+		case KPROG_X86_MEM_SRC_ABI_PTR_LOAD:                     \
+			if ((OP) != X86_OP_MOV_LOAD ||                    \
+			    __x86_l_write_width != X86_WIDTH_64) {        \
+				__x86_l_value = X86_SIM_L_LOAD_ADDR(      \
+					(void *)(long)__x86_l_addr,       \
+					__x86_l_mem_width);               \
+				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
+					__x86_l_value, __x86_l_write_width);\
+				break;                                    \
+			}                                                 \
 			__u8 __x86_l_ptr_tag = KPROG_ABI_LOAD_TAG(       \
 				__x86_sim_abi_kind, __x86_l_disp,          \
 				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,    \
@@ -716,7 +734,8 @@ struct x86_sim_state {
 			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
 				X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr),    \
 				__x86_l_ptr_tag);                        \
-		} else {                                                  \
+			break;                                           \
+		default:                                                 \
 			__x86_l_value = X86_SIM_L_LOAD_ADDR(             \
 				(void *)(long)__x86_l_addr,              \
 				__x86_l_mem_width);                       \
@@ -725,6 +744,7 @@ struct x86_sim_state {
 					__x86_l_value, __x86_l_mem_width);  \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
+			break;                                           \
 		}                                                         \
 	} while (0)
 
