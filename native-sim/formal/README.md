@@ -953,6 +953,24 @@ CF=OF=0 logic-flag production at the write width, the partial-register
 writeback, and the write-free memory. The register decode that selects the
 opcode remains outside the theorem.
 
+The two `X86_SIM_L_EXEC_ANDN` and `X86_SIM_L_EXEC_ANDN_MEM` handler bodies now
+share one `X86_SIM_L_EXEC_ANDN_STEP` composition that routes the second-operand
+source through the machine-checked `KPROG_X86_ANDN_SOURCE` selector, the
+destination write width through `KPROG_X86_ANDN_WRITE_WIDTH`, and the
+*independently selected* memory-read width through `KPROG_X86_ANDN_MEM_WIDTH`,
+so the two bodies and the Lean refinement share one complement-and
+implementation rather than two restated step sequences. The independent
+`test_x86_andn_route_host.c` oracle includes the simulator header, drives both
+real bodies — directly and through the `X86_SIM_L_EXEC` dispatcher arms that
+route to them — over both opcodes, every FLAGS code, every AUX memory-width
+code, several displacements, and several source/destination registers, and
+compares the whole register file with its tags and all four flags against an
+independent model. It plants per opcode a case where each routed fact is
+numerically distinguishable from the wrong selection: a memory form carrying a
+named AUX width that differs from the FLAGS write width, so a body reading at
+the write width would load the wrong bytes, an absent AUX width that must fall
+back to the resolved FLAGS width, and a register-versus-memory source pair.
+
 The `BZHI` / `BZHI_MEM` theorem covers the `X86_SIM_L_EXEC_BZHI` and
 `X86_SIM_L_EXEC_BZHI_MEM` arms for `X86_OP_BZHI` (`0x34`) and `X86_OP_BZHI_MEM`
 (`0x35`), the BMI2 opcodes that clear the bits at or above a byte-masked bit
@@ -1627,7 +1645,8 @@ composition (and the simulator's routing of all four call-memory bodies through
 the `KPROG_X86_CALLMEM_*` contract), the `PUSH`/`POP` stack-step composition
 (and the simulator's routing of both bodies through the `KPROG_X86_PUSH_*`
 contract), the `REP_MOVS` block-copy composition, the
-`ANDN`/`ANDN_MEM` source-split/memory-width composition, the
+`ANDN`/`ANDN_MEM` source-split/memory-width composition (and the simulator's
+routing of both bodies through the `KPROG_X86_ANDN_*` contract), the
 `BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
 `BZHI`/`BZHI_MEM` single-width value/count-source composition, the
 `CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG` register/immediate source/flag-kind
@@ -1650,9 +1669,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The `X86_SIM_L_EXEC_ANDN` and `X86_SIM_L_EXEC_ANDN_MEM` handler bodies do not
-call the generated `x86_andn.h` macros — that header is exercised only by the
-host oracle — so both bodies remain in the trusted computing base.
 The `X86_SIM_L_EXEC_BZHI` and `X86_SIM_L_EXEC_BZHI_MEM` handler bodies do not
 call the generated `x86_bzhi.h` macros — that header is exercised only by the
 host oracle — so both bodies remain in the trusted computing base.

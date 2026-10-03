@@ -21,6 +21,13 @@ tracked the `FLAGS` code (as the write width does) would still produce a
 plausible value, but would read the wrong number of bytes whenever the AUX
 field names a width the `FLAGS` code does not.
 
+The two `X86_SIM_L_EXEC_ANDN` / `X86_SIM_L_EXEC_ANDN_MEM` bodies route through
+this contract: they share one `X86_SIM_L_EXEC_ANDN_STEP` composition that
+selects the second-operand source through `KPROG_X86_ANDN_SOURCE`, the
+destination write width through `KPROG_X86_ANDN_WRITE_WIDTH`, and the
+memory-read width through `KPROG_X86_ANDN_MEM_WIDTH`, while the complement/and,
+the flag production, and the register writeback stay in the composed body.
+
 Outputs (both regenerated whole, `--check` rejects any stale copy):
   * `KProgFormal/GeneratedX86Andn.lean`
   * `generated/x86_andn.h`
@@ -175,8 +182,9 @@ def render_c(data, opcode_rows, arm_rows) -> str:
         " * back to the resolved FLAGS width when that field is absent - a second,",
         " * independently selected width that is *not* the destination write width.",
         " * The contract selects the two opcodes, the second-operand source, and the",
-        " * memory-width arm; the register read, the memory load, the complement/and,",
-        " * the flag production, and the register writeback stay in the C handlers.",
+        " * memory-width arm; the complement/and, the flag production, and the",
+        " * register writeback stay in the one shared `X86_SIM_L_EXEC_ANDN_STEP`",
+        " * composition the two bodies route through.",
         " */",
         op_asserts,
         "/* The FLAGS width codes, including the 0 \"absent\" code. */",

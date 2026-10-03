@@ -7157,6 +7157,79 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   by the refinement module (`PUSH`'s direction moved to `postIncrement`,
   `POP`'s width source moved to `hardcoded64`, the step amount moved to `16`).
 
+## Step 0083 — x86 simulator routes the ANDN/ANDN_MEM pair through the checked contract
+
+- Scope: the x86 simulator's two complement-and bodies
+  `X86_SIM_L_EXEC_ANDN` (`0x3d`) and `X86_SIM_L_EXEC_ANDN_MEM` (`0x44`)
+  previously restated the source split and the two width selections twice and
+  called no generated macro. They now share one
+  `X86_SIM_L_EXEC_ANDN_STEP(OP_IS_MEM, DST, SRC, AUX, FLAGS, IMM)` composition
+  that selects the second-operand source through `KPROG_X86_ANDN_SOURCE`, the
+  destination write width through `KPROG_X86_ANDN_WRITE_WIDTH`, and the
+  independently selected memory-read width through `KPROG_X86_ANDN_MEM_WIDTH`;
+  `X86_SIM_L_EXEC_ANDN` and `X86_SIM_L_EXEC_ANDN_MEM` are now one-line
+  instantiations of the shared step. The complement/and, the flag production,
+  and the writeback stay in the composed body by contract design (the header
+  selects three facts, no body macro).
+- `native-sim/formal/generate_x86_andn_spec.py`: module docstring and the
+  emitted-header prose updated to name the two handlers and the shared routed
+  composition; regenerated without `--check` then verified with `--check`
+  (only `generated/x86_andn.h` changed — the Lean output is byte-identical).
+- `native-sim/x86/x86_sim.h`: added
+  `#include "../formal/generated/x86_andn.h"` after the PUSH/POP include.
+- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+  routed step macro (block comment above it) plus two one-line opcode macros;
+  the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
+  is unchanged. **The memory-form local width variable is named
+  `__x86_l_andn_mem_width`, not `__x86_l_mem_width`:** `X86_SIM_L_READ_MEM_VALUE`
+  declares its own `__x86_l_mem_width` as its first statement, so passing the
+  outer width under that name made the inner declaration shadow it and
+  initialise from an uninitialised variable (`-Wuninitialized`), reading the
+  memory at a garbage width. The rename removes the shadow.
+- New `test_x86_andn_route_host.c`: includes the *simulator* header and drives
+  both real bodies directly and through the `X86_SIM_L_EXEC` dispatcher arms,
+  over both opcodes, every FLAGS code (`0`, 8, 16, 32, 64), every AUX
+  memory-width code, four displacements, and several source/destination
+  registers, planting per opcode a case where each routed fact is numerically
+  distinguishable from the wrong selection (a memory form carrying a named AUX
+  width that differs from the FLAGS write width, an absent AUX width that must
+  fall back to the resolved FLAGS width, and a register-versus-memory source
+  pair). Compares the whole register file with its tags and all four flags
+  against an independent model. Success line
+  `x86 andn route host cross-check: OK (356404 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_x86_andn_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_x86_andn_route_host` build +
+  run pair after the `test_x86_andn_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the ANDN
+  theorem paragraph; the stale TCB paragraph ("The `X86_SIM_L_EXEC_ANDN` and
+  `X86_SIM_L_EXEC_ANDN_MEM` handler bodies do not call the generated
+  `x86_andn.h` macros…") deleted; the binding-list clause updated to record
+  the simulator's routing of both bodies through the `KPROG_X86_ANDN_*`
+  contract.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: routing sentence pair
+  inserted after the ANDN oracle paragraph; structural balance re-verified
+  (0 tabs; the introduced `(`/`)` and `{`/`}` deltas are equal; `$` count
+  unchanged).
+- Mutation harness `mut_x86_andn_route.py`: 19/19 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the source
+  test inverted, the memory width hardcoded to `8`, the write width hardcoded
+  to `8`, `ANDN` tagged as the memory body, `ANDN_MEM` tagged as the register
+  body, the dispatcher ANDN_MEM arm routed to the register body, the dispatcher
+  ANDN arm routed to the memory body); the generated-C defects caught by the
+  generator `--check` and the route oracle (the source-register define
+  colliding, the source-memory define colliding, the AUX memory-width arm
+  colliding, the FLAGS memory-width arm colliding, the write-width default
+  colliding, the 64-bit width code moved to `4`, both opcode static-assert
+  codes drifted); one shared-spec mutation caught by the generator `--check`
+  (`write_width_default` moved to `b8`); and the Lean independent-spec
+  mutations caught by the refinement module (`ANDN`'s source moved to
+  `memoryRead`, the 64-bit code mapping moved to `w32`, the memory-width arm
+  body swapped).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

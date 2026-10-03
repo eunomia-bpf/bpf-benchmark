@@ -1414,36 +1414,40 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_CALL_MEMCPY_REG(IMM)                                 \
 	X86_SIM_L_EXEC_CALL_MEM_STEP((IMM), 1U, 1U)
 
-#define X86_SIM_L_EXEC_ANDN(DST, SRC, AUX, FLAGS)                           \
+/*
+ * `ANDN` (register second operand) and `ANDN_MEM` (memory second operand)
+ * share one composition whose second-operand source, destination write width,
+ * and memory-read width come from the machine-checked x86_andn.h contract;
+ * the complement/and, the flag production, and the writeback stay here.
+ */
+#define X86_SIM_L_EXEC_ANDN_STEP(OP_IS_MEM, DST, SRC, AUX, FLAGS, IMM)      \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u64 __x86_l_src1 = X86_SIM_L_READ_REG(SRC);            \
-		__u64 __x86_l_src2 = X86_SIM_L_READ_REG(AUX);            \
-		__u64 __x86_l_result = (~__x86_l_src1) & __x86_l_src2;   \
-		__x86_cf = 0;                                             \
-		__x86_of = 0;                                             \
+		__u8 __x86_l_width =                                      \
+			KPROG_X86_ANDN_WRITE_WIDTH(FLAGS);                \
+		__u64 __x86_l_src1 = X86_SIM_L_READ_REG(SRC);             \
+		__u64 __x86_l_src2;                                       \
+		if (KPROG_X86_ANDN_SOURCE(OP_IS_MEM) ==                   \
+		    KPROG_X86_ANDN_SOURCE_MEMORY) {                       \
+			__u8 __x86_l_andn_mem_width =                      \
+				KPROG_X86_ANDN_MEM_WIDTH(                 \
+					X86_MEM_AUX_MEM_WIDTH(AUX),       \
+					(FLAGS));                         \
+			__x86_l_src2 = X86_SIM_L_READ_MEM_VALUE(          \
+				X86_REG_AUX_GET_SRC_SHIFT(AUX), (AUX),    \
+				(IMM), __x86_l_andn_mem_width, 1);        \
+		} else                                                    \
+			__x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+		__u64 __x86_l_result = (~__x86_l_src1) & __x86_l_src2;    \
 		X86_SIM_L_SET_LOGIC_FLAGS(__x86_l_result, __x86_l_width); \
 		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,          \
 					  __x86_l_width);                    \
 	} while (0)
 
+#define X86_SIM_L_EXEC_ANDN(DST, SRC, AUX, FLAGS)                           \
+	X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+
 #define X86_SIM_L_EXEC_ANDN_MEM(DST, SRC, FLAGS, AUX, IMM)                  \
-	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u8 __x86_l_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX);     \
-		if (!__x86_l_mem_width)                                  \
-			__x86_l_mem_width = __x86_l_width;                \
-		__u64 __x86_l_src1 = X86_SIM_L_READ_REG(SRC);            \
-		__u64 __x86_l_src2 = X86_SIM_L_READ_MEM_VALUE(           \
-			X86_REG_AUX_GET_SRC_SHIFT(AUX), (AUX), (IMM),     \
-			__x86_l_mem_width, 1);                            \
-		__u64 __x86_l_result = (~__x86_l_src1) & __x86_l_src2;   \
-		__x86_cf = 0;                                             \
-		__x86_of = 0;                                             \
-		X86_SIM_L_SET_LOGIC_FLAGS(__x86_l_result, __x86_l_width); \
-		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,          \
-					  __x86_l_width);                    \
-	} while (0)
+	X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
 
 #define X86_SIM_L_EXEC_CMP_MEM(OP, DST, SRC, FLAGS, AUX, IMM)               \
 	do {                                                               \

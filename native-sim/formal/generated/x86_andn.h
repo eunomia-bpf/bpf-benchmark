@@ -10,8 +10,9 @@
  * back to the resolved FLAGS width when that field is absent - a second,
  * independently selected width that is *not* the destination write width.
  * The contract selects the two opcodes, the second-operand source, and the
- * memory-width arm; the register read, the memory load, the complement/and,
- * the flag production, and the register writeback stay in the C handlers.
+ * memory-width arm; the complement/and, the flag production, and the
+ * register writeback stay in the one shared `X86_SIM_L_EXEC_ANDN_STEP`
+ * composition the two bodies route through.
  */
 _Static_assert(X86_OP_ANDN == 0x3dU, "x86 andn andn opcode drift");
 _Static_assert(X86_OP_ANDN_MEM == 0x44U, "x86 andn andnMem opcode drift");
