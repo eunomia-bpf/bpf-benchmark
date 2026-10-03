@@ -705,6 +705,28 @@ the two-level width fallback, and the high-half displacement. The register
 decode that supplies the source, the base-pointer value, and the flags
 remain outside the theorem.
 
+The two bodies named in that paragraph now share one
+`X86_SIM_L_EXEC_CMOV_STEP` composition that routes the condition through the
+machine-checked `KPROG_X86_CMOV_CONDITION` / `KPROG_X86_CMOV_MEM_CONDITION`
+selectors, the write width through `KPROG_X86_CMOV_WIDTH`, the memory access
+width through `KPROG_X86_CMOV_MEM_WIDTH`, the displacement through the shared
+memory read, and the writeback arm through `KPROG_X86_CMOV_WRITEBACK`, so the
+register form (which samples the pointer and provenance at 64 bits) and the
+memory form (which scalarizes at every width) cannot drift and the per-opcode
+condition source is a compile-time literal at each wrapper. The independent
+`test_x86_cmov_route_host.c` oracle includes the simulator header, drives both
+real bodies — directly and through the `X86_SIM_L_EXEC` dispatcher arms that
+route to them — over the whole-word and source-shift condition spaces, every
+`FLAGS` code, the AUX memory-width byte, four displacements, both index modes
+and both scales, and every destination / source register, and compares the
+whole register file with its tags and all four flags against an independent
+model. Its planted registers give the source register a provenance tag
+distinct from scalar at 64 bits, so a body that scalarizes the register form's
+64-bit write, takes the memory form's whole-word condition instead of its
+source-shift byte (one AUX word naming two different conditions), skips the
+memory-width fallback, or inverts the writeback arm is numerically
+distinguishable at every case.
+
 The `MOVBE_LOAD` / `MOVBE_STORE` handler-composition theorem covers
 `X86_SIM_L_EXEC_MOVBE_LOAD` (`X86_OP_MOVBE_LOAD`, `0x28`) and
 `X86_SIM_L_EXEC_MOVBE_STORE` (`X86_OP_MOVBE_STORE`, `0x29`).
@@ -1711,7 +1733,10 @@ simulator's routing of both bodies through the `KPROG_X86_BZHI_*` contract), the
 `CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG` register/immediate source/flag-kind
 composition (and the simulator's routing of all four bodies through the
 `KPROG_X86_CMPOP_*` contract), the
-`MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`CMOV`/`CMOV_MEM`/`MOVBE` handler
+`CMOV`/`CMOV_MEM` whole-word/source-shift condition, two-level access-width,
+and source-provenance writeback composition (and the simulator's routing of
+both bodies through the `KPROG_X86_CMOV_*` contract), the
+`MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`MOVBE` handler
 compositions, the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare

@@ -1595,37 +1595,47 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_CMP_REG_OP(OP, DST, SRC, FLAGS)                      \
 	X86_SIM_L_EXEC_CMP_REG_OP_AUX((OP), (DST), (SRC), (FLAGS), 0U)
 
-#define X86_SIM_L_EXEC_CMOV(DST, SRC, FLAGS, AUX)                           \
+/* The `CMOV` / `CMOV_MEM` handler-composition contract selects the condition
+ * (whole AUX word for the register form, the source-shift byte at bits 24..31
+ * for the memory form), the write width, the memory access width, the
+ * displacement, and the 64-bit-vs-narrow writeback arm. The two bodies route
+ * through this one step so the register form (which samples the pointer and
+ * provenance at 64 bits) and the memory form (which scalarizes at every width)
+ * cannot drift: at 64 bits the memory form passes a scalar source tag, which
+ * writes exactly the bits and tag the scalarizing partial-register write did. */
+#define X86_SIM_L_EXEC_CMOV_STEP(RHS_IS_MEM, DST, SRC, FLAGS, AUX, IMM)     \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		if (X86_SIM_L_EVAL_CC(AUX)) {                             \
-			if (__x86_l_width == X86_WIDTH_64)                \
+		__u32 __x86_l_cc = (RHS_IS_MEM) ?                         \
+			(__u32)KPROG_X86_CMOV_MEM_CONDITION(AUX) :        \
+			(__u32)KPROG_X86_CMOV_CONDITION(AUX);             \
+		if (X86_SIM_L_EVAL_CC(__x86_l_cc)) {                      \
+			__u8 __x86_l_width = KPROG_X86_CMOV_WIDTH(FLAGS); \
+			__u8 __x86_l_cmw = (RHS_IS_MEM) ?                 \
+				KPROG_X86_CMOV_MEM_WIDTH(AUX, FLAGS) :    \
+				__x86_l_width;                            \
+			__u64 __x86_l_value = (RHS_IS_MEM) ?              \
+				X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),   \
+					(IMM), __x86_l_cmw, 1) :          \
+				X86_SIM_L_READ_REG(SRC);                  \
+			__u8 __x86_l_wb = KPROG_X86_CMOV_WRITEBACK(       \
+				__x86_l_width == X86_WIDTH_64);           \
+			if (__x86_l_wb ==                                 \
+			    KPROG_X86_CMOV_WRITEBACK_POINTER_TAG)         \
 				X86_SIM_L_WRITE_REG_PTR_TAG((DST),        \
-					X86_SIM_L_READ_REG_PTR(SRC),      \
-					X86_SIM_L_REG_TAG(SRC));          \
-			else {                                            \
-				__u64 __x86_l_value =                    \
-					X86_SIM_L_READ_REG(SRC);          \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),         \
+					(void *)(long)__x86_l_value,      \
+					(RHS_IS_MEM) ? X86_SIM_TAG_SCALAR :\
+						X86_SIM_L_REG_TAG(SRC));  \
+			else                                              \
+				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
 					__x86_l_value, __x86_l_width);    \
-			}                                                 \
 		}                                                         \
 	} while (0)
 
+#define X86_SIM_L_EXEC_CMOV(DST, SRC, FLAGS, AUX)                           \
+	X86_SIM_L_EXEC_CMOV_STEP(0U, (DST), (SRC), (FLAGS), (AUX), 0ULL)
+
 #define X86_SIM_L_EXEC_CMOV_MEM(DST, SRC, FLAGS, AUX, IMM)                  \
-	do {                                                               \
-		__u8 __x86_l_cc = X86_REG_AUX_GET_SRC_SHIFT(AUX);        \
-		if (X86_SIM_L_EVAL_CC(__x86_l_cc)) {                     \
-			__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;\
-			__u8 __x86_l_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX);\
-			if (!__x86_l_mem_width)                          \
-				__x86_l_mem_width = __x86_l_width;        \
-			__u64 __x86_l_value = X86_SIM_L_READ_MEM_VALUE(   \
-				(SRC), (AUX), (IMM), __x86_l_mem_width, 1);\
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
-						  __x86_l_width);        \
-		}                                                         \
-	} while (0)
+	X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
 
 #define X86_SIM_L_EXEC_SETCC(DST, AUX)                                       \
 	X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),                               \
@@ -1812,18 +1822,7 @@ struct x86_sim_state {
 			X86_SIM_L_EXEC_CMP_REG_MEM((DST), (SRC), (FLAGS), \
 						   (AUX), (IMM));        \
 		} else if ((OP) == X86_OP_CMOV) {                         \
-			if (X86_SIM_L_EVAL_CC(AUX)) {                      \
-				if (__x86_l_width == X86_WIDTH_64)        \
-					X86_SIM_L_WRITE_REG_PTR_TAG((DST), \
-						X86_SIM_L_READ_REG_PTR(SRC),\
-						X86_SIM_L_REG_TAG(SRC));\
-				else {                                    \
-					__u64 __x86_l_value =            \
-						X86_SIM_L_READ_REG(SRC);  \
-					X86_SIM_L_WRITE_REG_WIDTH((DST), \
-						__x86_l_value, __x86_l_width);\
-				}                                       \
-			}                                                   \
+			X86_SIM_L_EXEC_CMOV((DST), (SRC), (FLAGS), (AUX));\
 		} else if ((OP) == X86_OP_CMOV_MEM) {                    \
 			X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
 						(AUX), (IMM));            \

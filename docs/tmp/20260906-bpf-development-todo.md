@@ -7448,6 +7448,86 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   moved to the register, `TEST_IMM`'s flag kind moved to `sub`).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0087 — x86 simulator routes the CMOV/CMOV_MEM pair through the checked contract
+
+- Scope: the x86 simulator's two conditional-move bodies
+  `X86_SIM_L_EXEC_CMOV` (`X86_OP_CMOV`, `0x15`) and
+  `X86_SIM_L_EXEC_CMOV_MEM` (`X86_OP_CMOV_MEM`, `0x40`) previously restated the
+  condition source, the write width, the memory access width, the displacement,
+  and the 64-bit-vs-narrow writeback twice and called no generated macro. They
+  now share one `X86_SIM_L_EXEC_CMOV_STEP(RHS_IS_MEM, DST, SRC, FLAGS, AUX,
+  IMM)` composition that selects the condition through
+  `KPROG_X86_CMOV_CONDITION` / `KPROG_X86_CMOV_MEM_CONDITION`, the write width
+  through `KPROG_X86_CMOV_WIDTH`, the memory access width through
+  `KPROG_X86_CMOV_MEM_WIDTH`, and the writeback arm through
+  `KPROG_X86_CMOV_WRITEBACK`; the two opcode macros are one-line
+  instantiations of the shared step with `RHS_IS_MEM` passed as a compile-time
+  literal, preserving their old signatures/order so the `X86_SIM_L_EXEC` arms
+  are unchanged (no dispatcher edit). The register form samples the pointer and
+  provenance tag at 64 bits while the memory form scalarizes at every width —
+  at 64 bits the memory form passes `X86_SIM_TAG_SCALAR`, which writes exactly
+  the bits and tag the scalarizing partial-register write did, so the two forms
+  reconcile through the one routed writeback. The reads, the effective-address
+  offset, the memory read dispatch, and the flag-free property stay in the
+  composed body by contract design.
+- `native-sim/x86/x86_sim.h`: added
+  `#include "../formal/generated/x86_cmov.h"` after the cmpop include.
+- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+  routed step macro (block comment above it) plus two one-line opcode macros;
+  the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
+  is unchanged. The memory access width local is named `__x86_l_cmw`, NOT
+  `__x86_l_mem_width`, because `X86_SIM_L_READ_MEM_VALUE` declares its own
+  `__x86_l_mem_width` inside its statement-expression and a same-named argument
+  would self-initialize.
+- New `test_x86_cmov_route_host.c`: includes the *simulator* header and drives
+  both real bodies directly and through the `X86_SIM_L_EXEC` dispatcher arms,
+  over the whole-word and source-shift condition spaces, every FLAGS code, the
+  AUX memory-width byte, four displacements, both index modes, both scales, and
+  every destination/source register. The planted register file gives the source
+  register a provenance tag distinct from scalar at 64 bits, so a body that
+  scalarizes the register form's 64-bit write, takes the memory form's
+  whole-word condition instead of its source-shift byte (one AUX word naming
+  two different conditions), skips the memory-width fallback, or inverts the
+  writeback arm is numerically distinguishable at every case. Compares the
+  whole register file with its tags and all four flags against an independent
+  model. Success line
+  `x86 cmov route host cross-check: OK (26526735 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_x86_cmov_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `native-sim/formal/Makefile`: added the `test_x86_cmov_route_host` build +
+  run pair after the `test_x86_cmpop_route_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the CMOV /
+  CMOV_MEM theorem paragraph; the binding-list clause updated to record the
+  simulator's routing of both bodies through the `KPROG_X86_CMOV_*` contract.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: CMOV theorem plus
+  routing paragraph added after the MOVBE paragraph, recording the two facts
+  (the register form's whole-word condition and 64-bit provenance-preserving
+  arm against the memory form's source-shift byte and two-level access-width
+  fallback) and the 26,526,735-case sim-header oracle with its binding
+  mutations.
+- Mutation harness `mut_x86_cmov_route.py`: 26/26 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the memory
+  form's condition moved to the whole AUX word, the register form's condition
+  moved to the memory source-shift byte, the write width hardcoded, the memory
+  access width taken from the write width instead of the AUX memory-width
+  byte, the writeback arm hardcoded to the pointer-tag arm, both dispatcher
+  arms routed to the wrong body, the register form's writeback tag scalarized,
+  the 64-bit writeback test inverted); the generated-C defects caught by the
+  generator `--check` and the route oracle (the register condition narrowed to
+  its low byte, the memory condition shift moved to bits 16..23, the memory
+  access-width fallback removed, the width default moved to 32 bits, the
+  displacement shift moved, the writeback pointer-tag code moved, the writeback
+  arms swapped, the `CMOV` and `CMOV_MEM` opcode static-assert codes drifted);
+  the shared-spec mutations caught by the generator `--check` (the `CMOV`
+  opcode code drifted, the `CMOV` condition source moved to the source shift,
+  the 64-bit writeback moved to scalarize, the memory-width fallback removed,
+  the displacement field shift moved); and the Lean independent-spec mutations
+  caught by the refinement module (the condition source swapped, the writeback
+  swapped, the memory displacement slice moved).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 
