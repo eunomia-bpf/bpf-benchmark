@@ -838,6 +838,21 @@ bound/count canaries, the destination-pointer-with-destination-tag `RAX` write,
 and the untouched register file and flags. The register decode that selects the
 opcode and supplies the immediate remains outside the theorem.
 
+The four `X86_SIM_L_EXEC_CALL_{MEMCPY,MEMSET}{,_REG}` handler bodies now share
+one `X86_SIM_L_EXEC_CALL_MEM_STEP` composition that routes the array shape
+through the machine-checked `KPROG_X86_CALLMEM_KIND` selector, the
+copied/filled length's source through `KPROG_X86_CALLMEM_COUNT_SOURCE`, and the
+array bound through `KPROG_X86_CALLMEM_BOUND_FORM` / `_FIXED_BOUND`, so the four
+bodies and the Lean refinement share one block-copy/fill implementation rather
+than four restated loop ladders. The independent `test_x86_callmem_route_host.c`
+oracle includes the simulator header, drives the four real bodies over flat and
+overflowing counts and both count sources, and compares the whole modeled heap
+and the result-register write against an independent byte model, planting per
+opcode a case where each routed fact is numerically distinguishable from the
+wrong selection (an artifact-exceeds-`1024` immediate case that a bound-form
+swap would run past the literal, and an `RDX`-exceeds-artifact register case
+that both a bound-form and a count-source swap would move).
+
 The `PUSH` / `POP` stack-step theorem covers the two `X86_SIM_L_EXEC` arms for
 `X86_OP_PUSH` (`0x12`) and `X86_OP_POP` (`0x13`), the opcodes that move one
 value between a register and the stack frame. The two arms share one module
@@ -1589,7 +1604,8 @@ both MOVBE bodies through the `KPROG_X86_MOVBE_*` contract); the pointer-write
 provenance composition, the XMM0 pair-move
 composition (and the simulator's routing of both XMM0 bodies through the
 `KPROG_X86_XMM0_*` contract), the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill
-composition, the
+composition (and the simulator's routing of all four call-memory bodies through
+the `KPROG_X86_CALLMEM_*` contract), the
 `PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition, the
 `BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition, the
@@ -1614,9 +1630,6 @@ plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
-The four `X86_SIM_L_EXEC_CALL_{MEMCPY,MEMSET}{,_REG}` handler bodies do not call
-the generated `x86_callmem.h` macros — that header is exercised only by the host
-oracle — so all four bodies remain in the trusted computing base.
 The two `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
 `x86_pushpop.h` macros — that header is exercised only by the host oracle — so
 both bodies remain in the trusted computing base.

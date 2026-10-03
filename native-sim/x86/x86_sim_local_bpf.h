@@ -1356,77 +1356,63 @@ struct x86_sim_state {
 		X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0, X86_WIDTH_64);      \
 	} while (0)
 
-#define X86_SIM_L_EXEC_CALL_MEMSET(IMM)                                      \
-	do {                                                               \
-		void *__x86_l_dst_ptr = X86_SIM_L_READ_REG_PTR(X86_RDI);  \
-		__u64 __x86_l_value = X86_SIM_L_READ_REG(X86_RSI) & 0xff; \
-		__u64 __x86_l_count = (IMM);                             \
-		__u32 __x86_l_i;                                         \
-		for (__x86_l_i = 0; __x86_l_i < 1024; __x86_l_i++) {      \
-			if (__x86_l_i < __x86_l_count)                    \
-				X86_SIM_L_STORE_ADDR(                     \
-					(__u8 *)__x86_l_dst_ptr + __x86_l_i,\
-					X86_WIDTH_8, __x86_l_value);      \
-		}                                                         \
-		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_l_dst_ptr,     \
-					    X86_SIM_L_REG_TAG(X86_RDI));  \
+/* The four block-copy/block-fill bodies compose the machine-checked
+ * KPROG_X86_CALLMEM_* contract: the kind, count-source, and bound-form
+ * selectors choose the array shape, the copied/filled length's source, and the
+ * array bound, so the four bodies and the Lean refinement share one block-copy
+ * composition rather than four restated loop ladders. */
+#define X86_SIM_L_EXEC_CALL_MEM_STEP(IMM, OP_IS_COPY, OP_IS_REG)            \
+	do {                                                                \
+		void *__x86_l_dst_ptr = X86_SIM_L_READ_REG_PTR(X86_RDI);    \
+		void *__x86_l_src_ptr = X86_SIM_L_READ_REG_PTR(X86_RSI);    \
+		__u64 __x86_l_value = X86_SIM_L_READ_REG(X86_RSI);          \
+		__u64 __x86_l_count;                                        \
+		__u64 __x86_l_bound;                                        \
+		__u32 __x86_l_i;                                            \
+		if (KPROG_X86_CALLMEM_COUNT_SOURCE(OP_IS_REG) ==            \
+		    KPROG_X86_CALLMEM_COUNT_REG)                            \
+			__x86_l_count = X86_SIM_L_READ_REG(X86_RDX);        \
+		else                                                        \
+			__x86_l_count = (IMM);                              \
+		__x86_l_bound =                                             \
+			KPROG_X86_CALLMEM_BOUND_FORM(OP_IS_REG) ==          \
+					KPROG_X86_CALLMEM_BOUND_FIXED       \
+				? (__u64)KPROG_X86_CALLMEM_FIXED_BOUND      \
+				: (__u64)(IMM);                             \
+		for (__x86_l_i = 0; __x86_l_i < __x86_l_bound;              \
+		     __x86_l_i++) {                                         \
+			if (__x86_l_i < __x86_l_count) {                    \
+				__u64 __x86_l_byte;                         \
+				if (KPROG_X86_CALLMEM_KIND(OP_IS_COPY) ==   \
+				    KPROG_X86_CALLMEM_COPY)                 \
+					__x86_l_byte =                      \
+						X86_SIM_L_LOAD_ADDR(        \
+							(__u8 *)__x86_l_src_ptr + \
+								__x86_l_i,  \
+							X86_WIDTH_8);       \
+				else                                        \
+					__x86_l_byte = __x86_l_value & 0xff; \
+				X86_SIM_L_STORE_ADDR(                       \
+					(__u8 *)__x86_l_dst_ptr +           \
+						__x86_l_i,                  \
+					X86_WIDTH_8, __x86_l_byte);         \
+			}                                                   \
+		}                                                           \
+		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_l_dst_ptr,       \
+					    X86_SIM_L_REG_TAG(X86_RDI));    \
 	} while (0)
 
-#define X86_SIM_L_EXEC_CALL_MEMSET_REG(IMM)                                  \
-	do {                                                               \
-		void *__x86_l_dst_ptr = X86_SIM_L_READ_REG_PTR(X86_RDI);  \
-		__u64 __x86_l_value = X86_SIM_L_READ_REG(X86_RSI) & 0xff; \
-		__u64 __x86_l_count = X86_SIM_L_READ_REG(X86_RDX);       \
-		__u32 __x86_l_i;                                         \
-		for (__x86_l_i = 0; __x86_l_i < (IMM); __x86_l_i++) {    \
-			if (__x86_l_i < __x86_l_count)                    \
-				X86_SIM_L_STORE_ADDR(                     \
-					(__u8 *)__x86_l_dst_ptr + __x86_l_i,\
-					X86_WIDTH_8, __x86_l_value);      \
-		}                                                         \
-		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_l_dst_ptr,     \
-					    X86_SIM_L_REG_TAG(X86_RDI));  \
-	} while (0)
+#define X86_SIM_L_EXEC_CALL_MEMSET(IMM)                                     \
+	X86_SIM_L_EXEC_CALL_MEM_STEP((IMM), 0U, 0U)
 
-#define X86_SIM_L_EXEC_CALL_MEMCPY(IMM)                                      \
-	do {                                                               \
-		void *__x86_l_dst_ptr = X86_SIM_L_READ_REG_PTR(X86_RDI);  \
-		void *__x86_l_src_ptr = X86_SIM_L_READ_REG_PTR(X86_RSI);  \
-		__u64 __x86_l_count = (IMM);                             \
-		__u32 __x86_l_i;                                         \
-		for (__x86_l_i = 0; __x86_l_i < 1024; __x86_l_i++) {      \
-			if (__x86_l_i < __x86_l_count) {                  \
-				__u64 __x86_l_value = X86_SIM_L_LOAD_ADDR(\
-					(__u8 *)__x86_l_src_ptr + __x86_l_i,\
-					X86_WIDTH_8);                    \
-				X86_SIM_L_STORE_ADDR(                     \
-					(__u8 *)__x86_l_dst_ptr + __x86_l_i,\
-					X86_WIDTH_8, __x86_l_value);      \
-			}                                                 \
-		}                                                         \
-		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_l_dst_ptr,     \
-					    X86_SIM_L_REG_TAG(X86_RDI));  \
-	} while (0)
+#define X86_SIM_L_EXEC_CALL_MEMSET_REG(IMM)                                 \
+	X86_SIM_L_EXEC_CALL_MEM_STEP((IMM), 0U, 1U)
 
-#define X86_SIM_L_EXEC_CALL_MEMCPY_REG(IMM)                                  \
-	do {                                                               \
-		void *__x86_l_dst_ptr = X86_SIM_L_READ_REG_PTR(X86_RDI);  \
-		void *__x86_l_src_ptr = X86_SIM_L_READ_REG_PTR(X86_RSI);  \
-		__u64 __x86_l_count = X86_SIM_L_READ_REG(X86_RDX);       \
-		__u32 __x86_l_i;                                         \
-		for (__x86_l_i = 0; __x86_l_i < (IMM); __x86_l_i++) {    \
-			if (__x86_l_i < __x86_l_count) {                  \
-				__u64 __x86_l_value = X86_SIM_L_LOAD_ADDR(\
-					(__u8 *)__x86_l_src_ptr + __x86_l_i,\
-					X86_WIDTH_8);                    \
-				X86_SIM_L_STORE_ADDR(                     \
-					(__u8 *)__x86_l_dst_ptr + __x86_l_i,\
-					X86_WIDTH_8, __x86_l_value);      \
-			}                                                 \
-		}                                                         \
-		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_l_dst_ptr,     \
-					    X86_SIM_L_REG_TAG(X86_RDI));  \
-	} while (0)
+#define X86_SIM_L_EXEC_CALL_MEMCPY(IMM)                                     \
+	X86_SIM_L_EXEC_CALL_MEM_STEP((IMM), 1U, 0U)
+
+#define X86_SIM_L_EXEC_CALL_MEMCPY_REG(IMM)                                 \
+	X86_SIM_L_EXEC_CALL_MEM_STEP((IMM), 1U, 1U)
 
 #define X86_SIM_L_EXEC_ANDN(DST, SRC, AUX, FLAGS)                           \
 	do {                                                               \

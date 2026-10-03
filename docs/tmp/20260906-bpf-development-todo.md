@@ -7043,6 +7043,60 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   independent-spec mutations caught by the refinement module (the arm spec
   swapped, the lane offset moved to 0).
 
+## Step 0081 — x86 simulator routes the CALL_MEMCPY/CALL_MEMSET quartet through the checked contract
+
+- Scope: the x86 simulator's four block-copy/block-fill bodies
+  `X86_SIM_L_EXEC_CALL_MEMCPY` (`0x3f`), `X86_SIM_L_EXEC_CALL_MEMCPY_REG`
+  (`0x46`), `X86_SIM_L_EXEC_CALL_MEMSET` (`0x3c`), and
+  `X86_SIM_L_EXEC_CALL_MEMSET_REG` (`0x45`) previously restated the array loop
+  four times and called no generated macro. They now share one
+  `X86_SIM_L_EXEC_CALL_MEM_STEP(IMM, OP_IS_COPY, OP_IS_REG)` composition that
+  selects the array shape through `KPROG_X86_CALLMEM_KIND`, the copied/filled
+  length's source through `KPROG_X86_CALLMEM_COUNT_SOURCE`, and the array bound
+  through `KPROG_X86_CALLMEM_BOUND_FORM` / `KPROG_X86_CALLMEM_FIXED_BOUND`; each
+  opcode macro is now a one-line instantiation of the shared step. The element
+  width (`X86_WIDTH_8`), the byte addressing, and the RAX/RDI-tag write stay in
+  the composed body by contract design (the header selects three facts, no
+  width macro and no body macro).
+- `native-sim/x86/x86_sim.h`: added
+  `#include "../formal/generated/x86_callmem.h"` after the XMM0 include.
+- `native-sim/x86/x86_sim_local_bpf.h`: the four bodies replaced by the shared
+  routed step macro (block comment above it) plus four one-line opcode macros.
+- New `test_x86_callmem_route_host.c`: includes the *simulator* header and
+  drives the four real bodies. Per opcode it plants a case where each routed
+  fact is numerically distinguishable from the wrong selection — an
+  artifact-exceeds-`1024` immediate case (a bound-form swap to the artifact
+  would run past the literal) and an `RDX`-exceeds-artifact register case
+  (both a bound-form swap to the literal and a count-source swap to the
+  artifact would move a different region) — plus flat, small, and zero counts,
+  the source-register low-byte truncation on the fill path, and the
+  destination-pointer-with-RDI-tag result write. Compares the whole modeled
+  heap and the result-register write against an independent byte model. Success
+  line `x86 callmem route host cross-check: OK (52 cases)`; exit 1 on mismatch.
+  Distinct from the pre-existing `test_x86_callmem_host.c`, which tests the
+  contract plus an independent model but never includes the sim header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- `native-sim/formal/Makefile`: added the `test_x86_callmem_route_host` build +
+  run pair after the `test_x86_callmem_host` pair.
+- `native-sim/formal/README.md`: routing paragraph added after the CALL_MEM
+  theorem paragraph; the stale TCB paragraph ("The four
+  `X86_SIM_L_EXEC_CALL_{MEMCPY,MEMSET}{,_REG}` handler bodies do not call the
+  generated `x86_callmem.h` macros…") deleted; the binding-list clause updated
+  to record the simulator's routing of all four call-memory bodies through the
+  `KPROG_X86_CALLMEM_*` contract.
+- Mutation harness `mut_x86_callmem_route.py`: 11/11 DETECTED — the
+  simulator-header distortions caught by the route oracle alone (the shared
+  kind test inverted, the count-source test inverted, the bound-form test
+  inverted, the `MEMSET` macro retagged as a register opcode); the generated-C
+  defects caught by the generator `--check` and the route oracle (the copy
+  define colliding, the register-count define colliding, the fixed-bound define
+  colliding, the literal `1024` moved to `0`); one shared-spec mutation caught
+  by the generator `--check` (`fixed_bound` moved to `0`); and the Lean
+  independent-spec mutations caught by the refinement module (`MEMSET`'s kind
+  moved from `fill` to `copy`, `MEMCPY_REG`'s bound form moved from `imm` to
+  `fixedBound`).
+
 ## Next after 0076
 
 
