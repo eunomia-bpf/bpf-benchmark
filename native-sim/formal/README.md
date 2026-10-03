@@ -497,6 +497,22 @@ simulator header, drives the real helpers over stack/ABI/ordinary bases and the
 ordinary/MOVSX/ABI/ABI-off-width/stack MOV_LOAD cases, and compares both the
 written value and the destination register tag against an independent byte
 reader and the contract's classification (62 cases).
+The simulator's shared `MOV_STORE` body now routes every clause of its
+handler composition through the machine-checked `KPROG_X86_STORE_*` contract
+instead of restating them inline. New `X86_SIM_L_MEM_STORE_SRC(DST)` delegates
+the stack-versus-memory arm to `KPROG_X86_STORE_ARM((DST) == X86_RSP)`, and
+`X86_SIM_L_EXEC_STORE` resolves the width (`KPROG_X86_STORE_WIDTH`), the
+displacement form (`KPROG_X86_STORE_DISP`), the value source
+(`KPROG_X86_STORE_VALUE`), and the AUX source shift
+(`KPROG_X86_STORE_SRC_SHIFT` / `KPROG_X86_STORE_SHIFTED_VALUE`) through the
+generated contract, switching the arm on the routed selector. This is a plain
+two-way arm, unlike the read path's three-way source: the store has no ABI arm
+and no sign extension, and both arms keep the same `FLAGS ? FLAGS : 64` width
+expression the contract calls a re-derivation. A host cross-check includes the
+simulator header, drives the real body over the immediate and register forms,
+every width, flat and indexed addressing, the register-form AUX shift, and both
+arms, and compares the entire modeled heap and stack against an independent
+byte model, plus the routed selector against `KPROG_X86_STORE_ARM` (77 cases).
 The register-writing MOV theorem covers `X86_SIM_L_EXEC_MOV_IMM` and
 `X86_SIM_L_EXEC_MOV_REG`. `x86_mov_imm_step_refines` composes the
 register-destination immediate move over the partial-register writeback
@@ -1535,7 +1551,10 @@ x86 stack-arena storage model,
 x86 stack-index frame-offset mapping,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch (and the simulator's routing of its read path through
-`KPROG_X86_MEM_READ_SRC`), the pointer-write provenance composition, the XMM0 pair-move
+`KPROG_X86_MEM_READ_SRC`), and the
+shared store (`MOV_STORE`) handler composition (and the simulator's routing of
+its store body through the `KPROG_X86_STORE_*` contract); the pointer-write
+provenance composition, the XMM0 pair-move
 composition, the `CALL_MEMCPY`/`CALL_MEMSET` block-copy/fill composition, the
 `PUSH`/`POP` stack-step composition, the `REP_MOVS` block-copy composition, the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition, the

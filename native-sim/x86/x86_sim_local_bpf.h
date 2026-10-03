@@ -660,6 +660,12 @@ struct x86_sim_state {
 #define X86_SIM_L_MEM_READ_SRC(BASE_REG, MEM_WIDTH)                         \
 	KPROG_X86_MEM_READ_SRC(((BASE_REG) == X86_RSP),                     \
 		X86_SIM_L_REG_TAG(BASE_REG), (MEM_WIDTH))
+/* The store-target classification (stack write vs. ordinary little-endian
+ * store) is the machine-checked KPROG_X86_STORE_ARM contract, so the store
+ * body no longer restates the stack-pointer branch inline. */
+#define X86_SIM_L_MEM_STORE_SRC(DST)                                        \
+	KPROG_X86_STORE_ARM((DST) == X86_RSP)
+
 
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 	({                                                                 \
@@ -750,31 +756,36 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_STORE(OP, DST, SRC, FLAGS, AUX, IMM)                 \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__s64 __x86_l_disp = (OP) == X86_OP_MOV_STORE_IMM ?       \
-			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+		__u8 __x86_l_width = KPROG_X86_STORE_WIDTH(FLAGS);        \
+		__s64 __x86_l_disp =                                      \
+			KPROG_X86_STORE_DISP((OP) == X86_OP_MOV_STORE_IMM, IMM);\
 		void *__x86_l_base_ptr = (void *)0;                      \
-		__u64 __x86_l_value = (OP) == X86_OP_MOV_STORE_IMM ?      \
-			x86_store_imm_value((IMM), __x86_l_width) :       \
-			X86_SIM_L_READ_REG(SRC);                          \
-		if ((OP) == X86_OP_MOV_STORE_REG &&                       \
-		    X86_REG_AUX_GET_SRC_SHIFT(AUX) != 0)                  \
-			__x86_l_value >>= X86_REG_AUX_GET_SRC_SHIFT(AUX); \
+		__u64 __x86_l_value =                                     \
+			KPROG_X86_STORE_VALUE(                            \
+				(OP) == X86_OP_MOV_STORE_IMM, (IMM),      \
+				__x86_l_width, X86_SIM_L_READ_REG(SRC));  \
+		__x86_l_value = KPROG_X86_STORE_SHIFTED_VALUE(            \
+			__x86_l_value,                                    \
+			KPROG_X86_STORE_SRC_SHIFT(                        \
+				(OP) == X86_OP_MOV_STORE_IMM, (AUX)));    \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp); \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		if ((DST) != X86_REG_NONE)                               \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);   \
-		if ((DST) == X86_RSP)                                     \
+		switch (X86_SIM_L_MEM_STORE_SRC(DST)) {                   \
+		case KPROG_X86_STORE_ARM_STACK:                           \
 			X86_SIM_L_STACK_WRITE(                            \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				X86_SIM_L_EFFECTIVE_WIDTH(FLAGS),          \
 				__x86_l_value);                            \
-		else {                                                    \
+			break;                                           \
+		default:                                                 \
 			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
 					     __x86_l_disp;               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
 					     __x86_l_width, __x86_l_value);\
-			}                                                         \
+			break;                                           \
+		}                                                         \
 		} while (0)
 
 #define X86_SIM_L_EXEC_MOVBE_LOAD(DST, SRC, FLAGS, AUX, IMM)               \

@@ -6874,7 +6874,66 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   ABI/width predicate conjoined instead of gated, and the RSP-first branch
   disabled).
 
+## Step 0078 — x86 simulator routes the shared MOV_STORE body through the checked contract
+
+- Scope: the x86 simulator's one live store helper, `X86_SIM_L_EXEC_STORE`
+  (shared by `X86_OP_MOV_STORE_IMM` / `X86_OP_MOV_STORE_REG`, one call site).
+  Its contract (`KPROG_X86_STORE_*` + `X86StoreHandler.lean`, spec
+  `x86_store_spec.json`, oracle `test_x86_store_host.c`) was already generated
+  and proven, but the helper restated all five clauses inline — the width
+  fallback, the two displacement slices, the two value sources, the AUX
+  source-shift gate, and the stack-pointer arm selection. This closes the same
+  "curated contract vs. shipped helper" gap 0076 (offset) and 0077 (read
+  dispatch) closed.
+- `x86/x86_sim.h` now includes `../formal/generated/x86_store.h`. New
+  `X86_SIM_L_MEM_STORE_SRC(DST)` = `KPROG_X86_STORE_ARM((DST) == X86_RSP)`
+  (a plain two-way arm, unlike the read path's three-way source; the store has
+  no ABI arm and no sign extension). `X86_SIM_L_EXEC_STORE` now resolves every
+  clause through the generated macros — `KPROG_X86_STORE_WIDTH(FLAGS)`,
+  `KPROG_X86_STORE_DISP((OP) == X86_OP_MOV_STORE_IMM, IMM)`,
+  `KPROG_X86_STORE_VALUE(...)` fed by `X86_SIM_L_READ_REG(SRC)`,
+  `KPROG_X86_STORE_SHIFTED_VALUE(value, KPROG_X86_STORE_SRC_SHIFT(...))`, and
+  an `X86_SIM_L_MEM_STORE_SRC`-driven `switch` whose `STACK` arm calls
+  `X86_SIM_L_STACK_WRITE` and whose `default` arm calls `X86_SIM_L_STORE_ADDR`.
+  The old inline `if (OP == MOV_STORE_REG && shift != 0) value >>= shift` and
+  the `if ((DST) == X86_RSP) ... else ...` ladder are gone.
+- The two arms keep their distinct width *expressions* deliberately: the memory
+  arm writes at `KPROG_X86_STORE_WIDTH(FLAGS)` while the stack arm passes
+  `X86_SIM_L_EFFECTIVE_WIDTH(FLAGS)`; both are `FLAGS ? FLAGS : 64`, and the
+  contract comment itself calls the stack arm a re-derivation of the same
+  resolution — they are semantically identical and were not "unified" without
+  evidence.
+- New `test_x86_store_route_host.c`: includes the *simulator* header and drives
+  the real `X86_SIM_L_EXEC_STORE` over the immediate and register forms, all
+  four widths (plus an absent-FLAGS case), flat and indexed addressing modes,
+  the register-form AUX source shift, and both the stack and memory arms, then
+  compares the *entire* modeled heap and modeled stack against an independent
+  byte model (`put_le` + a restated width-aware immediate rule + the
+  `immHighHalf`/`signedImm` displacement split) built from the raw inputs; it
+  also checks the routed `X86_SIM_L_MEM_STORE_SRC` against
+  `KPROG_X86_STORE_ARM` for a register sweep and the width default over the
+  FLAGS codes. Success line `x86 store route host cross-check: OK (77 cases)`;
+  exit 1 on mismatch. Distinct from the pre-existing `test_x86_store_host.c`,
+  which tests the contract plus an independent model but never includes the sim
+  header.
+- Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- Gate: 88 generators / 166 Lean / 87 oracles / 0 errors.
+- Mutation harness `mut_x86_store_route.py`: 12/12 DETECTED — six
+  simulator-header distortions caught by the route oracle alone (the `== X86_RSP`
+  arm identity swapped for RDI, the disp-form opcode argument flipped, the
+  value-source opcode argument flipped, the AUX shift gate inverted, the stack
+  arm's effective width shifted by one, and the memory arm's width forced to
+  64); three generated-C defects caught by the generator `--check` and the
+  route oracle (the displacement slice moved from `>> 32` to `>> 16`, the two
+  arm defines colliding, the width default changed to 32 bits); one shared-spec
+  mutation caught by the generator `--check` (a `disp_row`'s `is_store_imm`
+  flipped); and two Lean independent-spec mutations caught by the refinement
+  module (the arm predicate forced true, and the displacement slice shifted to
+  16 bits).
+
 ## Next after 0076
+
 
 Remaining x86 open work is unchanged and *compositional/handwritten*: the
 index-register decode into the AUX index byte itself; register/immediate/RHS
