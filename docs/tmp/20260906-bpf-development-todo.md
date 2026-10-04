@@ -8090,6 +8090,50 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+
+## Step 0098 — x86 simulator routes the `CMOV_MEM` displacement through the checked contract
+
+- Scope: `X86_SIM_L_EXEC_CMOV_STEP`'s memory arm (`X86_SIM_L_EXEC_CMOV_MEM`,
+  `X86_OP_CMOV_MEM`, `0x40`) in `native-sim/x86/x86_sim_local_bpf.h`. The
+  shared memory read call at lines 1625-1626 changes from
+  `X86_SIM_L_READ_MEM_VALUE((SRC), (AUX), (IMM), __x86_l_cmw, 1)` — the
+  whole-artifact slice with the store-displacement flag set — to
+  `X86_SIM_L_READ_MEM_VALUE((SRC), (AUX), KPROG_X86_CMOV_MEM_DISP(IMM),
+  __x86_l_cmw, 0)`, the generated high-half slice with the flag cleared
+  (`STORE_DISP=0` makes `X86_SIM_L_READ_MEM_VALUE` apply `x86_simm`, the
+  identity on the already-computed `__s64`). This is the last unconsumed
+  function-like generated macro in the x86 residual set
+  (`KPROG_X86_CMOV_CONDITION_BYTE` is the truncating counterexample model and
+  `KPROG_X86_ANDN_MEM_WIDTH_ARM` is a false positive inside `ANDN_MEM_WIDTH`).
+- Equivalence is the point: `KPROG_X86_CMOV_MEM_DISP(IMM)` expands to
+  `((__s64)(__s32)((IMM) >> 32))`, byte-identical to `x86_store_imm_disp(IMM)`
+  (`x86/x86_sim.h:304`, `(return (__s32)(value >> 32);`) that the flag-set call
+  already computed. `X86CmovHandler.lean`'s `x86_cmov_mem_disp_refines` already
+  pins this as `x86CmovMemDispSpec imm = x86StoreDispSpec true imm` by `rfl`, so
+  no Lean module changed.
+- Route oracle `native-sim/formal/test_x86_cmov_route_host.c`: extended, not
+  added — `check_mem`'s displacement parameter is renamed `slice` and the
+  instruction artifact's low half becomes the non-zero `0x18`, so a body that
+  takes the whole-artifact slice reads `+0x18` while the routed route reads
+  `+0`; the independent model keeps the high-half slice. Both in bounds, so the
+  misroute is a numeric mismatch, not a fault. Case count unchanged at
+  `x86 cmov route host cross-check: OK (26526735 cases)`.
+- `generate_x86_cmov_spec.py --check` rc=0; `lake env lean
+  KProgFormal/GeneratedX86Cmov.lean` rc=0; `lake env lean
+  KProgFormal/X86CmovHandler.lean` rc=0 (invoked separately).
+- Mutation harness `mut_x86_cmov_route.py`: 9/9 as expected — the spec/generator/
+  generated-header displacement shift and slice defects caught by the generator
+  `--check` (and, for the header, by both oracles); the generated-Lean condition
+  shift and the hand-Lean displacement slice caught by the refinement modules;
+  the simulator's whole-artifact misroute (run rc=-11, out-of-bounds address) and
+  slice-as-store flag misroute caught by the route oracle; and the pre-route
+  revert `(IMM), __x86_l_cmw, 1` — the same arithmetic without the contract call
+  — SURVIVING as the equivalent rewrite it is. Post-restore sources
+  byte-identical and both oracles re-run clean.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

@@ -22,6 +22,8 @@
  *     fallbacks and the two widths separately observable.
  *   - The displacement is the immediate's *high* half sign-extended
  *     (`KPROG_X86_CMOV_MEM_DISP`), not the whole-artifact slice.
+ *     The artifact's low half is planted non-zero, so a body that used the
+ *     whole-artifact slice differs from the routed high-half slice.
  *   - The 64-bit-vs-narrow writeback arm (`KPROG_X86_CMOV_WRITEBACK`): the
  *     register form preserves the source's provenance tag at 64 bits and
  *     scalarizes below; the memory form scalarizes at every width. The source
@@ -303,13 +305,17 @@ static void check_reg(__u32 aux_word, unsigned flags, unsigned dst,
  * the addressing mode.
  */
 static void check_mem(unsigned src, unsigned base_tag, __u8 cc_byte,
-		      unsigned mw_code, unsigned flags, __s64 disp,
+		      unsigned mw_code, unsigned flags, __s64 slice,
 		      unsigned has_index, unsigned scale, unsigned via)
 {
 	__u32 aux = ((__u32)cc_byte << 24) | ((__u32)mw_code << 16) |
 		    (has_index ? (__u32)X86_RDI : (__u32)X86_REG_NONE) |
 		    ((__u32)scale << 8);
-	__u64 imm = ((__u64)(__u32)(__s32)disp << 32) | 0x18ULL;
+	/* The instruction artifact: the displacement slice in its high half
+	 * and a distinct, non-zero low half, so a body that took the
+	 * whole-artifact slice (`x86_simm`) instead of the routed
+	 * `KPROG_X86_CMOV_MEM_DISP` reads a different displacement. */
+	__u64 imm = ((__u64)(__u32)slice << 32) | 0xa5a5a5a5ULL;
 	unsigned w = flags ? flags : X86_WIDTH_64;
 	unsigned mem_width = mw_code ? mw_code : w;
 	unsigned taken;
@@ -358,7 +364,7 @@ static void check_mem(unsigned src, unsigned base_tag, __u8 cc_byte,
 	/* ---- independent model ---- */
 	taken = model_cc_true(cc_byte, 1U, 1U, 0U, 0U);
 	if (taken) {
-		value = model_read_mem(src, aux, disp, mem_width, base_tag);
+		value = model_read_mem(src, aux, slice, mem_width, base_tag);
 		if (w == X86_WIDTH_64) {
 			mreg[dst] = value;
 			mtag[dst] = X86_SIM_TAG_SCALAR;

@@ -1623,7 +1623,7 @@ struct x86_sim_state {
 				__x86_l_width;                            \
 			__u64 __x86_l_value = (RHS_IS_MEM) ?              \
 				X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),   \
-					(IMM), __x86_l_cmw, 1) :          \
+					KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0) : \
 				X86_SIM_L_READ_REG(SRC);                  \
 			__u8 __x86_l_wb = KPROG_X86_CMOV_WRITEBACK(       \
 				__x86_l_width == X86_WIDTH_64);           \

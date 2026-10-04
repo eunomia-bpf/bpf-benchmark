@@ -753,7 +753,8 @@ The two bodies named in that paragraph now share one
 machine-checked `KPROG_X86_CMOV_CONDITION` / `KPROG_X86_CMOV_MEM_CONDITION`
 selectors, the write width through `KPROG_X86_CMOV_WIDTH`, the memory access
 width through `KPROG_X86_CMOV_MEM_WIDTH`, the displacement through the shared
-memory read, and the writeback arm through `KPROG_X86_CMOV_WRITEBACK`, so the
+memory read as the generated `KPROG_X86_CMOV_MEM_DISP`, and the writeback arm
+through `KPROG_X86_CMOV_WRITEBACK`, so the
 register form (which samples the pointer and provenance at 64 bits) and the
 memory form (which scalarizes at every width) cannot drift and the per-opcode
 condition source is a compile-time literal at each wrapper. The independent
@@ -761,9 +762,12 @@ condition source is a compile-time literal at each wrapper. The independent
 real bodies — directly and through the `X86_SIM_L_EXEC` dispatcher arms that
 route to them — over the whole-word and source-shift condition spaces, every
 `FLAGS` code, the AUX memory-width byte, four displacements, both index modes
-and both scales, and every destination / source register, and compares the
-whole register file with its tags and all four flags against an independent
-model. Its planted registers give the source register a provenance tag
+and both scales, and every destination / source register. It plants a non-zero
+low half in the memory form's instruction artifact, so a displacement taken
+from the whole-artifact slice instead of the routed `KPROG_X86_CMOV_MEM_DISP`
+high half reads a different address, and compares the whole register file with
+its tags and all four flags against an independent model. Its planted registers
+give the source register a provenance tag
 distinct from scalar at 64 bits, so a body that scalarizes the register form's
 64-bit write, takes the memory form's whole-word condition instead of its
 source-shift byte (one AUX word naming two different conditions), skips the
@@ -1855,7 +1859,8 @@ simulator's routing of both bodies through the `KPROG_X86_BZHI_*` contract), the
 composition (and the simulator's routing of all four bodies through the
 `KPROG_X86_CMPOP_*` contract), the
 `CMOV`/`CMOV_MEM` whole-word/source-shift condition, two-level access-width,
-and source-provenance writeback composition (and the simulator's routing of
+high-half displacement, and source-provenance writeback composition (and the
+simulator's routing of
 both bodies through the `KPROG_X86_CMOV_*` contract), the
 `MOV_LOAD` two-width-resolution/arm-select/read-dispatch composition (and the
 simulator's routing of the `MOV_LOAD` body through the `KPROG_X86_MOV_LOAD_*`
