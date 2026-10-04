@@ -971,6 +971,21 @@ copy width, the preserved tags, the byte-for-byte copy, and the untouched
 flags. The register decode that selects the opcode and supplies the immediate
 remains outside the theorem.
 
+The body named in that paragraph now routes through the generated contract:
+`X86_SIM_L_EXEC_REP_MOVS` resolves the copy width through
+`KPROG_X86_REP_MOVS_WIDTH`, bounds its element loop by
+`KPROG_X86_REP_MOVS_BOUND`, and zeroes `RCX` at
+`KPROG_X86_REP_MOVS_COUNT_WIDTH`, so the FLAGS width resolution, the literal
+loop bound and the fixed 64-bit count-write width are compile-time expansions of
+the machine-checked macros rather than committed literals. The independent
+`test_x86_rep_movs_route_host.c` oracle includes the simulator header, drives
+the real body over all five `FLAGS` codes and counts from zero through past the
+literal bound, with separate source/destination windows and distinct provenance
+tags on `RSI`/`RDI`, and compares the whole modeled register file with its tags,
+`RCX`, and both buffers byte for byte against an independent forward-order
+element model. It also restates the closed width-resolution, bound and count
+width tables against the routed selectors.
+
 The `ANDN` / `ANDN_MEM` theorem covers the `X86_SIM_L_EXEC_ANDN` and
 `X86_SIM_L_EXEC_ANDN_MEM` arms for `X86_OP_ANDN` (`0x3d`) and `X86_OP_ANDN_MEM`
 (`0x44`), the opcodes that compute `(~src1) & src2`. The destination write
@@ -1802,7 +1817,8 @@ composition (and the simulator's routing of both XMM0 bodies through the
 composition (and the simulator's routing of all four call-memory bodies through
 the `KPROG_X86_CALLMEM_*` contract), the `PUSH`/`POP` stack-step composition
 (and the simulator's routing of both bodies through the `KPROG_X86_PUSH_*`
-contract), the `REP_MOVS` block-copy composition, the
+contract), the `REP_MOVS` block-copy composition (and the simulator's routing
+of the body through the `KPROG_X86_REP_MOVS_*` contract), the
 `ANDN`/`ANDN_MEM` source-split/memory-width composition (and the simulator's
 routing of both bodies through the `KPROG_X86_ANDN_*` contract), the
 `BT`/`BT_IMM`/`BT_MEM_IMM` base/index-source/width composition (and the

@@ -19,6 +19,7 @@
 #include "../formal/generated/x86_mem_access.h"
 #include "../formal/generated/x86_reg_write.h"
 #include "../formal/generated/x86_reg_read.h"
+#include "../formal/generated/x86_rep_movs.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -1367,14 +1368,15 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_REP_MOVS(FLAGS, IMM)                                  \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = KPROG_X86_REP_MOVS_WIDTH(FLAGS);    \
 		__u64 __x86_l_count = (IMM);                             \
 		void *__x86_l_src_ptr = X86_SIM_L_READ_REG_PTR(X86_RSI); \
 		void *__x86_l_dst_ptr = X86_SIM_L_READ_REG_PTR(X86_RDI); \
 		__u8 __x86_l_src_tag = X86_SIM_L_REG_TAG(X86_RSI);       \
 		__u8 __x86_l_dst_tag = X86_SIM_L_REG_TAG(X86_RDI);       \
 		__u32 __x86_l_i;                                         \
-		for (__x86_l_i = 0; __x86_l_i < 64; __x86_l_i++)          \
+		for (__x86_l_i = 0; __x86_l_i < KPROG_X86_REP_MOVS_BOUND; \
+			__x86_l_i++)                                             \
 			X86_SIM_L_REP_MOVS_ONE(__x86_l_width, __x86_l_i); \
 		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSI,                     \
 			(__u8 *)__x86_l_src_ptr + __x86_l_count * __x86_l_width,\
@@ -1382,7 +1384,8 @@ struct x86_sim_state {
 		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDI,                     \
 			(__u8 *)__x86_l_dst_ptr + __x86_l_count * __x86_l_width,\
 			__x86_l_dst_tag);                                \
-		X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0, X86_WIDTH_64);      \
+		X86_SIM_L_WRITE_REG_WIDTH(X86_RCX, 0,                     \
+			KPROG_X86_REP_MOVS_COUNT_WIDTH);                         \
 	} while (0)
 
 /* The four block-copy/block-fill bodies compose the machine-checked

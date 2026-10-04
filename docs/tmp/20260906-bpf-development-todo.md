@@ -7997,6 +7997,44 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0096 — x86 simulator routes the `REP MOVS` body through the checked contract
+
+- Scope: `X86_SIM_L_EXEC_REP_MOVS`, the `X86_OP_REP_MOVS` (`0x3a`) body that
+  copies `RSI`-addressed elements to `RDI`. It restated the whole generated
+  `x86_rep_movs.h` contract inline: the FLAGS width resolution, the literal `64`
+  loop bound, and the fixed 64-bit `RCX` writeback width. It now resolves the
+  copy width through `KPROG_X86_REP_MOVS_WIDTH(FLAGS)`, bounds the element loop
+  by `KPROG_X86_REP_MOVS_BOUND`, and zeroes `RCX` at
+  `KPROG_X86_REP_MOVS_COUNT_WIDTH`, so the three committed literals are
+  compile-time expansions of the machine-checked macros. The element guard
+  (`__x86_l_i < __x86_l_count`), the byte load/store, and the raw-count pointer
+  arithmetic stay in the body.
+- Route oracle `native-sim/formal/test_x86_rep_movs_route_host.c` (new, 284
+  lines): includes `../x86/x86_sim_local_bpf.h`, drives the real body over all
+  five FLAGS codes and eleven counts from `0` through `200` (crossing the
+  literal bound), with a plain copy, an offset copy, and a wider destination
+  window, plus distinct `RSI`/`RDI` provenance tags, and compares the whole
+  modeled register file (bits and tags), `RCX`, and both buffers byte for byte
+  against an independent forward-order element model. It also restates the
+  closed width-resolution/bound/count-width tables against the routed selectors.
+  Prints `x86 rep_movs route host cross-check: OK (127 cases)`.
+- `native-sim/formal/Makefile`: the route-oracle build+run pair added inside
+  `check:` directly after the `test_x86_rep_movs_host` pair.
+- `native-sim/formal/README.md`: the `REP MOVS` routing paragraph and the
+  contract-inventory list entry added.
+- Mutation harness `mut_x86_rep_movs_route.py`: 16/16 DETECTED — the spec
+  bound/count-width/default-width and generator-constant defects caught by the
+  generator `--check`; the generated-header bound/count-width/width-default
+  defects caught by the generator `--check` and both oracles; the generated/hand
+  Lean bound and absent-width defects caught by the refinement modules; and the
+  simulator's loop-bound, width-resolution and count-write-width misroutes
+  caught by the route oracle. Post-restore sources byte-identical and both
+  oracles re-run clean.
+- `generate_x86_rep_movs_spec.py --check` rc=0.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 
