@@ -23,6 +23,7 @@
 #include "../formal/generated/x86_setcc.h"
 #include "../formal/generated/x86_setcc_mem.h"
 #include "../formal/generated/x86_branch_emit.h"
+#include "../formal/generated/x86_mem_index.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -407,16 +408,18 @@ struct x86_sim_state {
 #define X86_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                        \
 	X86_SIM_L_WRITE_REG_WIDTH_SHIFT((REG), (VALUE), (WIDTH), 0U)
 
-/* The public sim helper (AUX, DISP) resolves the index register through the
- * sim's own register read and delegates the arithmetic to the machine-checked
- * KPROG_X86_MEM_OFFSET contract, so the sim and the Lean refinement share one
- * offset implementation rather than restating it inline. */
+/* The public sim helper (AUX, DISP) resolves the index register presence
+ * through the machine-checked KPROG_X86_MEM_INDEX_PRESENT bridge and the value
+ * through the sim's own register read, then delegates the arithmetic to the
+ * machine-checked KPROG_X86_MEM_OFFSET contract, so the sim and the Lean
+ * refinements share one presence selector and one offset implementation rather
+ * than restating them inline. */
 #define X86_SIM_L_MEM_OFFSET(AUX, DISP)                                     \
-	X86_SIM_L_MEM_OFFSET_INDEXED((AUX), (DISP),                        \
-		((X86_MEM_AUX_INDEX(AUX) != X86_REG_NONE                       \
-			  ? X86_SIM_L_READ_REG(X86_MEM_AUX_INDEX(AUX))         \
-			  : 0)),                                               \
-		(X86_MEM_AUX_INDEX(AUX) != X86_REG_NONE))
+	X86_SIM_L_MEM_OFFSET_INDEXED((AUX), (DISP),                         \
+		(KPROG_X86_MEM_INDEX_PRESENT(X86_MEM_AUX_INDEX(AUX))            \
+			  ? X86_SIM_L_READ_REG(X86_MEM_AUX_INDEX(AUX))          \
+			  : 0),                                                 \
+		KPROG_X86_MEM_INDEX_PRESENT(X86_MEM_AUX_INDEX(AUX)))
 
 /* INDEX_VALUE is already read and HAS_INDEX is an integer presence flag; the
  * generated contract decodes the scale from AUX itself. */

@@ -499,6 +499,19 @@ register-AUX forms against an independent signed accumulator built from the
 same source register value, checks the no-index form ignores a poisoned
 register file, and checks the routed helper agrees with the explicit-value
 helper (2,305 cases).
+The index-register presence decision shared by that helper is itself a generated
+contract: `generate_x86_mem_index_spec.py` emits `KPROG_X86_MEM_INDEX_PRESENT`
+and `KPROG_X86_MEM_INDEX_ARM`, `X86MemIndex.lean` proves the presence predicate
+equals an independent `decide (indexByte != 0xff)` (the `X86_REG_NONE`
+sentinel), that the two arms invert each other and are both reachable, and that
+the two presence cases are exactly the two `hasIndex` cases
+`KPROG_X86_MEM_OFFSET` consumes. `X86_SIM_L_MEM_OFFSET` now resolves both its
+presence flag and its index-value selector through that bridge, so the sentinel
+test is no longer restated in the simulator. A generated-header oracle drives
+the presence and arm macros over all 256 index bytes against an independent
+`byte != 0xff` test (512 cases), and a sim-header route oracle drives the real
+helper over register-AUX forms and the sentinel against an independent
+presence/value oracle (957 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
