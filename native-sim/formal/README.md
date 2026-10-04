@@ -1355,6 +1355,24 @@ the memory image against an independent raw-flag model; a swapped delta macro,
 a zeroed or constant suppression argument and a mis-set flag bit are numerically
 distinguishable.
 
+The AArch64 load/store index-register presence decision shared by that offset
+macro is itself a generated contract: `generate_arm64_mem_index_spec.py` emits
+`KPROG_ARM64_MEM_INDEX_PRESENT` and `KPROG_ARM64_MEM_INDEX_ARM`, and
+`Arm64MemIndex.lean` proves the presence predicate equals an independent
+`decide (indexByte != 0xff)` (the `ARM64_REG_NONE` sentinel), that the two arms
+invert each other and are both reachable, that the two presence cases are
+exactly the two `hasIndex` cases `KPROG_ARM64_MEM_OFFSET` consumes, and -- with
+no x86 analogue -- that the memory-index sentinel narrows to the `AUX` layout's
+`ARM64_REG_NONE` sentinel (`arm64_mem_index_sentinel_is_aux_reg_none`), so the
+two independently generated sentinels cannot drift. `ARM64_SIM_L_MEM_BASE_OFF`
+now resolves both its presence flag and its index-value selector through that
+bridge, so the sentinel test is no longer restated in the simulator. A
+generated-header oracle drives the presence and arm macros over all 256 index
+bytes against an independent `byte != 0xff` test (512 cases), and a sim-header
+route oracle drives the real macro over index operands (deliberately allowed to
+disagree with the `AUX` index lane), the sentinel and every raw flag byte
+against an independent presence/value oracle (22,115 cases).
+
 The AArch64 vector-register-file half-mapping theorem covers the four
 vector memory-transfer bodies `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`,
 `STORE_D0_MEM` and `STORE_Q0_MEM`, which move a SIMD register's low 64-bit half

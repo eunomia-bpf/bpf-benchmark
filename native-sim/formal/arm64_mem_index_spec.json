@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "operation": "arm64MemIndex",
+  "index_byte_bits": 8,
+  "sentinel": 255,
+  "arms": [
+    {"name": "present", "code": 0, "absent": false},
+    {"name": "absent", "code": 1, "absent": true}
+  ]
+}

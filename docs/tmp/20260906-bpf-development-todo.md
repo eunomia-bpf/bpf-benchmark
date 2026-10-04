@@ -8282,6 +8282,59 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Full gate `make -C native-sim/formal check` rc=0 (113 `cross-check: OK`; the
   count rose from 111 because the two new oracle files were added).
 
+## Step 0102 — AArch64 memory-index presence bridged through a machine-checked sentinel contract
+
+- Scope: the AArch64 mirror of Step 0101 — the index-register *presence decode*
+  into the `AUX` index lane, the last C-side clause of the load/store address
+  offset that Step 0076 left outside the theorem. The simulator's
+  `ARM64_SIM_L_MEM_BASE_OFF` in `native-sim/arm64/arm64_sim_local_bpf.h` tested
+  the sentinel `(INDEX) != ARM64_REG_NONE` inline, twice, for the `HAS_INDEX`
+  flag and the index-value selector. Both now come from the generated
+  `KPROG_ARM64_MEM_INDEX_PRESENT(INDEX)`; the register read
+  `ARM64_SIM_L_MOD_VALUE` and the immediate stay in the composed body.
+- Shared spec `native-sim/formal/arm64_mem_index_spec.json`; generator
+  `generate_arm64_mem_index_spec.py` emits `generated/arm64_mem_index.h`
+  (`KPROG_ARM64_MEM_INDEX_PRESENT`, `KPROG_ARM64_MEM_INDEX_ARM`, the two arm
+  codes, the `0xff` sentinel) and `KProgFormal/GeneratedArm64MemIndex.lean`
+  (`Arm`, `arm`, `absent`, `present`, `indexSentinel`).
+  `generate_arm64_mem_index_spec.py --check` rc=0.
+- Refinement `KProgFormal/Arm64MemIndex.lean` against the independent model:
+  `arm64_mem_index_present_refines` (generated presence equals an independent
+  `decide (indexByte != 0xff)`, the sentinel boundary included),
+  `arm64_mem_index_arm_refines` (arm selector equals the literal-sentinel table),
+  `arm64_mem_index_sentinel_is_0xff` / `…_is_absent` (the sentinel is the
+  all-ones byte and the absent arm, pinning the C constant),
+  `…_sentinel_is_aux_reg_none` (`indexSentinel.setWidth 32 = regNone`, `rfl` —
+  the cross-contract pin with no x86 analogue, closing drift between the
+  memory-index and AUX-layout sentinels), `…_absent_complement` (the two arms
+  invert each other and are total), `…_consumes_has_index` (the two presence
+  cases are exactly the two `hasIndex` cases `KPROG_ARM64_MEM_OFFSET` consumes),
+  `…_case_dispatch` (both arms reachable, sentinel plus its two neighbours), and
+  concrete canonical examples. Both Lean modules elaborate rc=0.
+- Two host oracles. `test_arm64_mem_index_host.c` includes only the generated
+  header, drives the presence and arm macros over all 256 index bytes plus the
+  sentinel value, and compares against an independent `byte != 0xff` test and the
+  arm table: `arm64 mem index host cross-check: OK (512 cases)`.
+  `test_arm64_mem_index_route_host.c` includes the simulator header and drives
+  the *real* `ARM64_SIM_L_MEM_BASE_OFF` over index operands (deliberately allowed
+  to disagree with the `AUX` index lane), the sentinel and every raw flag byte
+  against an independent presence/value oracle: `arm64 mem index route host
+  cross-check: OK (22115 cases)`. Both wired into `formal/Makefile` (new rows;
+  gate `cross-check: OK` count reflects the two new oracle files).
+- Mutation harness `/tmp/mut_arm64_mem_index.py`: 14/14 as expected. Generator
+  `--check` catches the spec-operation, spec-sentinel, arm-order,
+  generator-sentinel, generator-arm and generated-header/Lean-sentinel defects;
+  the Lean modules catch the independent-spec and hand-refinement defects; the
+  route oracle catches the inverted-presence behavioural defects; and a presence
+  defect consistent across the generator *and both* regenerated artifacts
+  (`--check` blind) is caught only by the refinement theorem via a rebuilt olean.
+  The raw-sentinel-test equivalence SURVIVES, as it must. Post-restore sources
+  byte-identical and both oracles re-run clean.
+- Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/arm64 micro-proofs-build` rc=0.
+- Full gate `make -C native-sim/formal check` rc=0 (115 `cross-check: OK`; the
+  count rose from 113 because the two new oracle files were added).
+
 ## Next after 0076
 
 
@@ -8289,8 +8342,9 @@ Remaining x86 open work is *compositional/handwritten*:
 register/immediate/RHS objdump→AUX selection; compiler/native bytes;
 specialization preservation. The index-register decode into the AUX index byte
 is no longer wholly open: the sentinel *presence* decision over that byte is
-now a machine-checked contract (Step 0101), leaving the register-value read
-inside the composed body. "Multi-step control-flow traces" is likewise no
+now a machine-checked contract for both x86 (Step 0101) and AArch64 (Step 0102),
+leaving the register-value read inside the composed body. "Multi-step
+control-flow traces" is likewise no
 longer wholly open: the per-conditional-edge predicate *and* its emitted
 `goto`/label shape are now bridged for both x86 (Step 0100) and AArch64; what
 remains is a whole-program trace theorem chaining those edges.
