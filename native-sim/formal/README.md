@@ -593,6 +593,24 @@ provenance tag is bridged to the declarative `abiTagSpec` policy
 provenance macros against an explicit handler model. The register decode that
 supplies the base pointer, register identity and tag, and the effective-address
 computation remain outside the theorem.
+
+The body named in that paragraph now routes through the generated contract:
+`X86_SIM_L_EXEC_MOV_LOAD` resolves both widths through
+`KPROG_X86_MOV_LOAD_WRITE_WIDTH` and `KPROG_X86_MOV_LOAD_MEM_WIDTH`, selects its
+arm through `KPROG_X86_MOV_LOAD_ARM`, and classifies its value source through
+the shared `KPROG_X86_MEM_READ_SRC` dispatch, so the 64-bit write default, the
+memory-width fallback to the write width, the stack-first arm precedence, the
+ABI-pointer arm's opcode-and-both-widths-64 gate, and the stack arm's
+memory-width read are compile-time expansions of the machine-checked macros
+rather than committed literals. The independent `test_x86_mov_load_route_host.c`
+oracle includes the simulator header, drives the real body over the three load
+opcodes, all five `FLAGS` and five AUX memory-width codes, flat, indexed (all
+four scales), stack and ABI (`XDP`/`SKB` offsets) modes, the overlap case, and
+the sign-extending arm, and compares the whole modeled register file with its
+tags, the heap and the stack against independent byte models. Its planted bases
+separate an ABI-tagged register from the stack pointer and from an ordinary
+pointer at every case.
+
 The shared `MOV_STORE` handler-composition theorem covers
 `X86_SIM_L_EXEC_STORE`, the single body shared by `X86_OP_MOV_STORE_IMM`
 (`0x07`) and `X86_OP_MOV_STORE_REG` (`0x08`). `x86_store_step_refines`
@@ -1798,7 +1816,10 @@ composition (and the simulator's routing of all four bodies through the
 `CMOV`/`CMOV_MEM` whole-word/source-shift condition, two-level access-width,
 and source-provenance writeback composition (and the simulator's routing of
 both bodies through the `KPROG_X86_CMOV_*` contract), the
-`MOV_LOAD`/`MOV_STORE`/`SETCC`/`SETCC_MEM`/`MOVBE` handler
+`MOV_LOAD` two-width-resolution/arm-select/read-dispatch composition (and the
+simulator's routing of the `MOV_LOAD` body through the `KPROG_X86_MOV_LOAD_*`
+and `KPROG_X86_MEM_READ_SRC` contracts), the
+`MOV_STORE`/`SETCC`/`SETCC_MEM`/`MOVBE` handler
 compositions, the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare

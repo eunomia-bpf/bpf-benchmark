@@ -93,6 +93,10 @@ union x86_sim_stack_mem {
  * generated contract is included after them rather than with the other
  * generated contracts at the top of the file. */
 #include "../formal/generated/x86_ptr_write.h"
+/* The `MOV_LOAD` handler-composition contract needs the ABI memory tag and the
+ * AUX memory-width decoder, so it is included here rather than with the other
+ * generated contracts at the top of the file. */
+#include "../formal/generated/x86_mov_load.h"
 
 #define X86_SIM_HELPER_bpf_map_lookup_elem 1ULL
 #define X86_SIM_HELPER_bpf_map_update_elem 2ULL
@@ -118,10 +122,6 @@ union x86_sim_stack_mem {
 
 #define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                    \
 	((WIDTH) ? (WIDTH) : X86_WIDTH_64)
-
-#define X86_SIM_L_MEM_EFFECTIVE_WIDTH(AUX, FLAGS)                           \
-	(X86_MEM_AUX_MEM_WIDTH(AUX) ? X86_MEM_AUX_MEM_WIDTH(AUX) :          \
-				      X86_SIM_L_EFFECTIVE_WIDTH(FLAGS))
 
 #define X86_SIM_L_FOR_EACH_GPR(X)                                           \
 	X(X86_RAX, rax)                                                     \
@@ -713,13 +713,17 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_MOV_LOAD(OP, DST, SRC, FLAGS, AUX, IMM)              \
 	do {                                                               \
-		__u8 __x86_l_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX);      \
-		__u8 __x86_l_write_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;\
+		__u8 __x86_l_write_width =                                 \
+			KPROG_X86_MOV_LOAD_WRITE_WIDTH(FLAGS);             \
+		__u8 __x86_l_mem_width =                                   \
+			KPROG_X86_MOV_LOAD_MEM_WIDTH((FLAGS), (AUX));      \
+		__u8 __x86_l_arm = KPROG_X86_MOV_LOAD_ARM(                 \
+			(SRC) == X86_RSP, (OP) == X86_OP_MOV_LOAD,         \
+			__x86_l_mem_width, __x86_l_write_width,            \
+			X86_SIM_L_REG_TAG(SRC));                           \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
 		void *__x86_l_base_ptr = (void *)0;                      \
 		__u64 __x86_l_value = 0;                                 \
-		if (!__x86_l_mem_width)                                  \
-			__x86_l_mem_width = __x86_l_write_width;          \
 		if ((SRC) != X86_REG_NONE)                               \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
@@ -729,13 +733,12 @@ struct x86_sim_state {
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
-				X86_SIM_L_MEM_EFFECTIVE_WIDTH((AUX), (FLAGS)));\
+				__x86_l_mem_width);                       \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
 			break;                                           \
 		case KPROG_X86_MEM_SRC_ABI_PTR_LOAD:                     \
-			if ((OP) != X86_OP_MOV_LOAD ||                    \
-			    __x86_l_write_width != X86_WIDTH_64) {        \
+			if (__x86_l_arm != KPROG_X86_MOV_LOAD_ARM_ABI_PTR) {\
 				__x86_l_value = X86_SIM_L_LOAD_ADDR(      \
 					(void *)(long)__x86_l_addr,       \
 					__x86_l_mem_width);               \

@@ -7949,6 +7949,54 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   rc=0 (every micro-prog `ok`).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0095 — x86 simulator routes the shared `MOV_LOAD` body through the checked contract
+
+- Scope: `X86_SIM_L_EXEC_MOV_LOAD`, the single body shared by
+  `X86_OP_MOV_LOAD` (`0x06`), `X86_OP_MOV_LOAD_SCALAR` (`0x25`), and
+  `X86_OP_MOVSX_LOAD` (`0x22`), restated the whole generated
+  `x86_mov_load.h` contract inline: the 64-bit write default, the memory-width
+  fallback to the write width, the stack-first arm precedence, the ABI-pointer
+  arm's opcode *and* both-widths-64 gate, and the read-source classification.
+  It now resolves both widths through `KPROG_X86_MOV_LOAD_WRITE_WIDTH` /
+  `KPROG_X86_MOV_LOAD_MEM_WIDTH`, selects its arm through
+  `KPROG_X86_MOV_LOAD_ARM`, classifies its value source through the shared
+  `KPROG_X86_MEM_READ_SRC` dispatch, and reads the stack arm at the routed
+  `__x86_l_mem_width`, so the two x86-specific asymmetries are compile-time
+  expansions of the machine-checked macros rather than committed literals. The
+  ABI case gate is inverted (`if (__x86_l_arm != KPROG_X86_MOV_LOAD_ARM_ABI_PTR)`)
+  to keep the scalar fall-through for the ABI base reached at a narrow width.
+- `native-sim/x86/x86_sim_local_bpf.h`: `#include "../formal/generated/x86_mov_load.h"`
+  added after the `x86_ptr_write.h` include (the contract needs
+  `X86_MEM_AUX_MEM_WIDTH` from `x86_mem_aux.h` and `X86_SIM_TAG_ABI` from this
+  header, so it is included by the handler rather than at the top of the file);
+  the handler body rewritten; the now-dead `X86_SIM_L_MEM_EFFECTIVE_WIDTH`
+  helper deleted (its only caller was the rewritten body); `X86_SIM_L_EFFECTIVE_WIDTH`
+  kept (live callers at the MOVBE and store arms).
+- New `native-sim/formal/test_x86_mov_load_route_host.c` (sim-header route
+  oracle): includes `../x86/x86_sim_local_bpf.h`, drives the real
+  `X86_SIM_L_EXEC_MOV_LOAD` over the three load opcodes, all five `FLAGS` and
+  five AUX memory-width codes, flat, indexed (all four scales), stack and ABI
+  (`XDP`/`SKB` offsets 0/8/208/80) modes, the overlap case, and the
+  sign-extending arm, and cross-checks the whole modeled register file with its
+  tags, the heap, and the stack against independent byte models, plus
+  `check_read_src_macro()` / `check_arm_macro()` sweeps of the routed macros.
+  Success line `x86 mov-load route host cross-check: OK (713 cases)`.
+- `native-sim/formal/Makefile`: the route-oracle build+run pair added inside
+  `check:` directly after the `test_x86_mov_load_host` pair.
+- `native-sim/formal/README.md`: the `MOV_LOAD` routing paragraph and the
+  contract-inventory list entry added.
+- Mutation harness `mut_x86_mov_load_route.py`: 20/20 DETECTED — the spec
+  width-row, generator write-default/mem-fallback/arm-gate, generated-header
+  write-default/arm-write-gate/arm-rsp-precedence and read-dispatch-gate
+  defects caught by the generator `--check` and both oracles; the
+  generated/handwritten Lean width, arm and stack-width defects caught by the
+  refinement modules; and the simulator's arm-test, opcode, width-argument,
+  ABI-gate, stack-read-width and read-source-width misroutes caught by the route
+  oracle. Post-restore sources byte-identical and both oracles re-run clean.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 
