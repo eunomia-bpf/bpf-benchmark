@@ -1,0 +1,154 @@
+From 9028b2244bcb4f448641858e1f09186df62a7480 Mon Sep 17 00:00:00 2001
+From: Yusheng Zheng <yunwei356@gmail.com>
+Date: Sat, 3 Oct 2026 04:19:34 +0000
+Subject: [RFC PATCH bpf-next v1 0/5] bpf: Add verified kinsn support
+
+Ordinary kfunc calls cross a call boundary even when an operation can be
+expressed in a few machine instructions. The BPF JIT translates a verified
+instruction stream in one pass and cannot generally select target-specific
+idioms from a longer BPF sequence. Let a registered kernel descriptor
+supply a short BPF proof and a bounded native emitter for such operations.
+The related paper calls this interface Kops; the kernel interface here is
+named kinsn.
+
+A program requests a kinsn through a kfunc call preceded by a sidecar MOV
+instruction with a 52-bit payload. Registration binds the descriptor to an
+explicit kfunc BTF ID and retains the ordinary kfunc allow policy. The
+verifier substitutes the descriptor's proof sequence, checks its control
+flow and the lowered program, then restores the sidecar and call. The JIT
+emits native bytes on x86-64 or arm64 and preserves registers used only by
+the proof. A weak bpf_jit_supports_kinsn() defaults to false so unsupported
+JITs reject the request.
+
+Only kernel code can register a descriptor. The descriptor owner must show
+that each native emitter has the same observable behavior as its verified
+proof for every accepted payload. The verifier checks the proof, not that
+equivalence. Reviewers' feedback is particularly welcome on the descriptor
+API shape, how to review and test native emitter equivalence, and the new
+MOV src_reg sidecar encoding in relation to the standardized BPF ISA.
+
+The series' selftests passed on x86-64 KVM and arm64 TCG (Cortex-A76) at
+bpf_jit_harden=0 and 2: test_progs -t kinsn passed 23/23 subtests,
+including the NETFILTER-only kfunc filter rejection, and
+kinsn_registration loaded a dedicated module to check that a descriptor
+with KF_SLEEPABLE is rejected at registration. The module is separate
+from bpf_testmod so a failed negative assertion cannot block unrelated
+tests. With the BPF CI rootfs and selftests kernel config, the full
+test_progs run reported 801/7,175 passed, 7,644 skipped, and 3/3 failed
+on the official tip; the series reported 803/7,198 passed, 7,948 skipped,
+and the same 3/3 failed. There were zero new failing test groups. The
+shared failures were d_path, map_kptr_race, and tracing_struct; none is
+on the generic BPF CI denylist.
+
+Six operation families were exercised on both architectures. Inline JIT
+images contained no call instruction, and native results matched the BPF
+proof over 100,000 random inputs and eight edge cases per family on each
+architecture. The arm64 path also executed natively under TCG. Four
+intentionally wrong emitters for bulk copy, extraction, endian conversion,
+and prefetch were caught on both architectures. Prefetch preserved the
+observed 64-byte memory contents and program results.
+
+Performance was measured on x86-64 KVM with QEMU and vCPUs pinned to host
+P-cores. Every program performed at least 1,024 operations per run. After
+a 1,000-repeat warmup, each variant had ten trials of one million repeats
+of BPF_PROG_TEST_RUN. Times below are median [min,max] ns per operation.
+Changing predicates used a fresh random seed per run. The ordinary-
+kfunc JIT image has one real call per iteration of the 1,024-iteration
+loop, so its throughput timing includes call and return.
+
+Each row is ordered pure BPF, kinsn, ordinary kfunc.
+
+Throughput         pure BPF           kinsn              kfunc
+rotate             1.696[1.683,1.705] 1.498[1.489,1.505] 1.478[1.469,1.489]
+select changing    3.422[3.392,3.440] 1.943[1.929,1.959] 1.992[1.963,2.010]
+select predictable 1.313[1.309,1.321] 1.304[1.291,1.318] 1.299[1.294,1.305]
+extract            1.160[1.154,1.179] 1.151[1.146,1.169] 1.197[1.186,1.222]
+endian             1.124[1.109,1.151] 1.116[1.107,1.145] 1.121[1.109,1.149]
+
+Dependent chain    pure BPF           kinsn              kfunc
+rotate             0.415[0.408,0.418] 0.224[0.220,0.227] 0.299[0.299,0.302]
+select changing    3.363[3.348,3.377] 1.809[1.797,1.821] 1.875[1.865,1.896]
+select const pred  0.253[0.245,0.262] 0.545[0.543,0.547] 0.602[0.600,0.605]
+select run pred    0.274[0.273,0.276] 0.542[0.538,0.545] 0.521[0.516,0.523]
+extract            1.721[1.688,1.726] 1.702[1.687,1.728] 1.688[1.684,1.706]
+endian             1.510[1.500,1.525] 1.519[1.503,1.548] 1.510[1.502,1.538]
+
+The throughput shape uses independent operations. Kinsn speeds up rotate
+and changing-predicate select against pure BPF. The ordinary kfunc ties
+kinsn for rotate and is about 2.5% slower for changing select. Predictable
+select, extraction, and endian conversion are near ties. Bulk copy at 16,
+32, 64, 128, and 256 bytes also tied pure BPF within about 1%. On random
+64-MiB BPF array lookups, prefetch measured 9.828/10.060 for pure
+BPF/kinsn, a 2.3% kinsn loss. The hint immediately precedes the load
+and has no useful lead time. Bulk copy and prefetch have no ordinary
+kfunc comparison because pointer and memory effects differ.
+
+In the dependent-chain shape, each operation consumes the preceding
+result; that table comes from a single boot. Kinsn is faster than both
+alternatives for rotate and changing select, and ties for extraction and
+endian conversion. Across three boots, pure-BPF changing select ranged
+from 3.36 to 3.79 ns per operation and kinsn from 1.81 to 1.86.
+Predictable select is a clear kinsn loss, about 2x slower than pure BPF.
+With a verifier-known constant predicate (const pred), the verifier
+removes the dead pure-BPF branch, which a kinsn cannot benefit from. With
+a run-invariant predicate the verifier cannot know (run pred), the
+correctly predicted pure-BPF branch is still faster than the kinsn
+conditional move. The ordinary kfunc is within about 10% of kinsn in both
+predictable cases. No shape was tuned to select favorable numbers; the
+run-invariant row was added to separate verifier constant folding from
+branch prediction.
+
+The changing-select verifier proof also has a load-time cost. In the
+throughput shape, pure BPF and kinsn each loaded in about 8.8 ms,
+compared with about 1.9 ms for an ordinary kfunc. The dependent chain
+loaded in about 12.6 ms for pure BPF and kinsn versus 2.2 ms for the
+kfunc. Host-side cpu_core counters on pinned QEMU vCPU threads counted
+4.95 billion branch misses in 229 billion instructions for pure BPF and
+10.2 million in 215 billion instructions for kinsn across steady changing-
+select intervals. The counters include other vCPU work, but the difference
+supports branch avoidance as the cause of the changing-select speedup.
+The guest vPMU did not expose a branch-miss event. Arm64 TCG was used for
+functional validation only; no arm64 timing is claimed. The out-of-tree
+benchmark module and loader are available on request.
+
+The related paper is available at https://arxiv.org/abs/2606.24213.
+
+Yusheng Zheng (5):
+  bpf: Add verified kinsn descriptors and proof lowering
+  bpf, x86: Emit registered kinsn in the JIT
+  bpf, arm64: Emit registered kinsn in the JIT
+  selftests/bpf: Exercise kinsn calls and verifier rules
+  Documentation/bpf: Document verified kinsn descriptors
+
+ Documentation/bpf/index.rst                     |   1 +
+ Documentation/bpf/kinsn.rst                     |  77 ++++++
+ arch/arm64/net/bpf_jit_comp.c                   |  56 ++++-
+ arch/x86/net/bpf_jit_comp.c                     |  45 ++++
+ include/linux/bpf.h                             |  55 +++++
+ include/linux/bpf_verifier.h                    |  16 ++
+ include/linux/btf.h                             |   4 +
+ include/linux/filter.h                          |   1 +
+ include/uapi/linux/bpf.h                        |   5 +
+ kernel/bpf/btf.c                                | 116 ++++++++-
+ kernel/bpf/core.c                               |   8 +
+ kernel/bpf/disasm.c                             |  11 +
+ kernel/bpf/fixups.c                             | 244 +++++++++++++++++-
+ kernel/bpf/verifier.c                           |  77 ++++--
+ tools/include/uapi/linux/bpf.h                  |   5 +
+ tools/testing/selftests/bpf/Makefile            |   2 +-
+ tools/testing/selftests/bpf/prog_tests/kinsn.c  |  12 +
+ .../bpf/prog_tests/kinsn_registration.c         |  20 ++
+ tools/testing/selftests/bpf/progs/kinsn.c       | 239 ++++++++++++++++++
+ tools/testing/selftests/bpf/test_kmods/Makefile |   2 +-
+ .../test_kmods/bpf_test_kinsn_registration.c    |  68 +++++
+ .../selftests/bpf/test_kmods/bpf_testmod.c      | 247 +++++++++++++++++++
+ 22 files changed, 1291 insertions(+), 20 deletions(-)
+ create mode 100644 Documentation/bpf/kinsn.rst
+ create mode 100644 tools/testing/selftests/bpf/prog_tests/kinsn.c
+ create mode 100644 tools/testing/selftests/bpf/progs/kinsn.c
+
+
+base-commit: 2b5440b31cafad2fb4b4a83efb780a6d7430a385
+-- 
+2.51.1
+

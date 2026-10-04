@@ -1,0 +1,688 @@
+From 70b7b52e255851d095e225b8e379f2f9b1cae319 Mon Sep 17 00:00:00 2001
+From: Yusheng Zheng <yunwei356@gmail.com>
+Date: Sat, 3 Oct 2026 00:06:47 +0000
+Subject: [RFC PATCH bpf-next v1 4/5] selftests/bpf: Exercise kinsn calls and
+ verifier rules
+
+Kinsn proof lowering and native emission need coverage for pairing, payload
+decoding, filtering, register preservation, and invalid proofs. Add test
+kfuncs with registered descriptors and x86-64 and arm64 emitters. Exercise
+successful calls, multiple descriptors, and verifier rejections through
+test_progs. Keep the test kfunc definitions in the standard kfunc
+definition section.
+---
+ tools/testing/selftests/bpf/Makefile            |   2 +-
+ tools/testing/selftests/bpf/prog_tests/kinsn.c  |  12 +
+ .../bpf/prog_tests/kinsn_registration.c         |  20 ++
+ tools/testing/selftests/bpf/progs/kinsn.c       | 239 ++++++++++++++++++
+ tools/testing/selftests/bpf/test_kmods/Makefile |   2 +-
+ .../test_kmods/bpf_test_kinsn_registration.c    |  68 +++++
+ .../selftests/bpf/test_kmods/bpf_testmod.c      | 247 +++++++++++++++++++
+ 7 files changed, 588 insertions(+), 2 deletions(-)
+
+diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
+index afa589a27b151..d45b4847168c8 100644
+--- a/tools/testing/selftests/bpf/Makefile
++++ b/tools/testing/selftests/bpf/Makefile
+@@ -47,7 +47,7 @@ TEST_PROGS := test_kmod.sh \
+ TEST_PROGS_EXTENDED := \
+ 	ima_setup.sh verify_sig_setup.sh
+ 
+-TEST_KMODS := bpf_testmod.ko bpf_test_no_cfi.ko bpf_test_modorder_x.ko \
++TEST_KMODS := bpf_testmod.ko bpf_test_no_cfi.ko bpf_test_kinsn_registration.ko bpf_test_modorder_x.ko \
+ 	bpf_test_modorder_y.ko bpf_test_rqspinlock.ko
+ TEST_KMOD_TARGETS = $(addprefix $(OUTPUT)/,$(TEST_KMODS))
+ 
+diff --git a/tools/testing/selftests/bpf/prog_tests/kinsn.c b/tools/testing/selftests/bpf/prog_tests/kinsn.c
+new file mode 100644
+index 0000000000000..485e8f1495b36
+--- /dev/null
++++ b/tools/testing/selftests/bpf/prog_tests/kinsn.c
+@@ -0,0 +1,12 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <test_progs.h>
++#include "kinsn.skel.h"
++
++void test_kinsn(void)
++{
++#if defined(__x86_64__) || defined(__aarch64__)
++	RUN_TESTS(kinsn);
++#else
++	test__skip(); /* This architecture has no kinsn emitter. */
++#endif
++}
+diff --git a/tools/testing/selftests/bpf/prog_tests/kinsn_registration.c b/tools/testing/selftests/bpf/prog_tests/kinsn_registration.c
+new file mode 100644
+index 0000000000000..a11985b05a68b
+--- /dev/null
++++ b/tools/testing/selftests/bpf/prog_tests/kinsn_registration.c
+@@ -0,0 +1,20 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <test_progs.h>
++#include <testing_helpers.h>
++
++void test_kinsn_registration(void)
++{
++	int fd, err;
++
++	fd = open("bpf_test_kinsn_registration.ko", O_RDONLY);
++	if (!ASSERT_GE(fd, 0, "open"))
++		return;
++
++	err = finit_module(fd, "", 0);
++	close(fd);
++	if (!ASSERT_OK(err, "finit_module"))
++		return;
++
++	err = delete_module("bpf_test_kinsn_registration", 0);
++	ASSERT_OK(err, "delete_module");
++}
+diff --git a/tools/testing/selftests/bpf/progs/kinsn.c b/tools/testing/selftests/bpf/progs/kinsn.c
+new file mode 100644
+index 0000000000000..990a20bbde160
+--- /dev/null
++++ b/tools/testing/selftests/bpf/progs/kinsn.c
+@@ -0,0 +1,239 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <linux/bpf.h>
++#include <bpf/bpf_helpers.h>
++#include "../../../include/linux/filter.h"
++#include "bpf_misc.h"
++
++extern __u64 bpf_testmod_kinsn_42(void) __ksym;
++extern __u64 bpf_testmod_kinsn_7(void) __ksym;
++extern __u64 bpf_testmod_kinsn_filtered(void) __ksym;
++
++extern void bpf_kfunc_common_test(void)
++	__ksym;
++
++#define KINSN_SIDECAR(payload) \
++	BPF_RAW_INSN(BPF_ALU64 | BPF_MOV | BPF_K, (payload) & 0xf, \
++		     BPF_PSEUDO_KINSN_SIDECAR, ((payload) >> 4) & 0xffff, \
++		     (payload) >> 20)
++#define PACKED_PAYLOAD 0x123456781234fULL
++
++char _license[] SEC("license") = "GPL";
++
++void __kfunc_btf_root(void)
++{
++	asm volatile ("" : : "r"(&bpf_testmod_kinsn_42),
++			    "r"(&bpf_testmod_kinsn_7),
++			    "r"(&bpf_testmod_kinsn_filtered),
++			    "r"(&bpf_kfunc_common_test));
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void basic(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void packed_payload(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(PACKED_PAYLOAD)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void forward_jump_to_region_end(void)
++{
++	asm volatile ("r2 = *(u32 *)(r1 + 0);"
++		".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(3)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void two_regions(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void two_regions_varlen(void)
++{
++	asm volatile ("r2 = *(u32 *)(r1 + 0);"
++		".8byte %[jump_sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		".8byte %[plain_sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(jump_sidecar, KINSN_SIDECAR(3)),
++		    __imm_insn(plain_sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(7)
++__naked void second_kinsn_kfunc(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_7];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_testmod_kinsn_7) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(7)
++__naked void two_kinsn_kfuncs(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_7];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_testmod_kinsn_42),
++		    __imm(bpf_testmod_kinsn_7) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void stack_only_in_proof(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(4)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void r6_only_in_proof(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(5)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("netfilter")
++__failure __msg("calling kernel function bpf_testmod_kinsn_filtered is not allowed")
++__naked void filtered_kinsn(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_filtered];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_testmod_kinsn_filtered) : __clobber_all);
++}
++
++SEC("socket")
++__success __retval(42)
++__naked void ordinary_kfunc_then_kinsn(void)
++{
++	asm volatile ("call %[bpf_kfunc_common_test];"
++		".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_kfunc_common_test),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__failure __msg("kinsn call must be preceded by sidecar payload")
++__naked void missing_sidecar(void)
++{
++	asm volatile ("call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__failure __msg("kinsn sidecar must immediately precede kinsn call")
++__naked void orphan_sidecar(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)) : __clobber_all);
++}
++
++SEC("socket")
++__failure __msg("kinsn sidecar must immediately precede kinsn call")
++__naked void sidecar_before_ordinary_kfunc(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_kfunc_common_test];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(0)),
++		    __imm(bpf_kfunc_common_test) : __clobber_all);
++}
++
++SEC("socket")
++__failure __msg("R2 !read_ok")
++__naked void unsafe_proof(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(1)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++SEC("socket")
++__failure __msg("invalid kinsn proof payload")
++__naked void invalid_payload(void)
++{
++	asm volatile (".8byte %[sidecar];"
++		"call %[bpf_testmod_kinsn_42];"
++		"exit;"
++		: : __imm_insn(sidecar, KINSN_SIDECAR(2)),
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all);
++}
++
++#define INVALID_PROOF_TEST(name, payload, message) \
++SEC("socket") __failure __msg(message) \
++__naked void name(void) \
++{ \
++	asm volatile ( \
++		".8byte %[sidecar];" \
++		"call %[bpf_testmod_kinsn_42];" \
++		"exit;" \
++		: : __imm_insn(sidecar, KINSN_SIDECAR(payload)), \
++		    __imm(bpf_testmod_kinsn_42) : __clobber_all); \
++}
++
++INVALID_PROOF_TEST(backward_proof_jump, 6,
++		   "kinsn proof jump must stay forward and within its region")
++INVALID_PROOF_TEST(out_of_region_proof_jump, 7,
++		   "kinsn proof jump must stay forward and within its region")
++INVALID_PROOF_TEST(may_goto_proof, 8,
++		   "kinsn proof sequence cannot contain calls, exits, may_goto or gotox")
++INVALID_PROOF_TEST(gotox_proof, 9,
++		   "kinsn proof sequence cannot contain calls, exits, may_goto or gotox")
++INVALID_PROOF_TEST(call_proof, 10,
++		   "kinsn proof sequence cannot contain calls, exits, may_goto or gotox")
++INVALID_PROOF_TEST(exit_proof, 11,
++		   "kinsn proof sequence cannot contain calls, exits, may_goto or gotox")
++INVALID_PROOF_TEST(pseudo_ldimm64_proof, 12,
++		   "kinsn proof sequence cannot contain pseudo ldimm64")
+diff --git a/tools/testing/selftests/bpf/test_kmods/Makefile b/tools/testing/selftests/bpf/test_kmods/Makefile
+index 031c7454ce65f..cd4f6281e34f5 100644
+--- a/tools/testing/selftests/bpf/test_kmods/Makefile
++++ b/tools/testing/selftests/bpf/test_kmods/Makefile
+@@ -18,7 +18,7 @@ else
+ Q = @
+ endif
+ 
+-MODULES = bpf_testmod.ko bpf_test_no_cfi.ko bpf_test_modorder_x.ko \
++MODULES = bpf_testmod.ko bpf_test_no_cfi.ko bpf_test_kinsn_registration.ko bpf_test_modorder_x.ko \
+ 	bpf_test_modorder_y.ko bpf_test_rqspinlock.ko
+ 
+ $(foreach m,$(MODULES),$(eval obj-m += $(m:.ko=.o)))
+diff --git a/tools/testing/selftests/bpf/test_kmods/bpf_test_kinsn_registration.c b/tools/testing/selftests/bpf/test_kmods/bpf_test_kinsn_registration.c
+new file mode 100644
+index 0000000000000..68789c7d94234
+--- /dev/null
++++ b/tools/testing/selftests/bpf/test_kmods/bpf_test_kinsn_registration.c
+@@ -0,0 +1,68 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <linux/bpf.h>
++#include <linux/btf.h>
++#include <linux/btf_ids.h>
++#include <linux/filter.h>
++#include <linux/init.h>
++#include <linux/module.h>
++
++__bpf_kfunc_start_defs();
++
++__bpf_kfunc u64 bpf_test_kinsn_flagged(void)
++{
++	return 42;
++}
++
++__bpf_kfunc_end_defs();
++
++static int flagged_kinsn_proof(u64 payload, struct bpf_insn *insns)
++{
++	if (payload)
++		return -EINVAL;
++	insns[0] = BPF_MOV64_IMM(BPF_REG_0, 42);
++	return 1;
++}
++
++static const struct bpf_kinsn flagged_kinsn = {
++	.owner = THIS_MODULE,
++	.max_insn_cnt = 1,
++	.max_emit_bytes = 8,
++	.instantiate_insn = flagged_kinsn_proof,
++};
++
++BTF_KFUNCS_START(flagged_kinsn_ids)
++BTF_ID_FLAGS(func, bpf_test_kinsn_flagged, KF_SLEEPABLE)
++BTF_KFUNCS_END(flagged_kinsn_ids)
++
++BTF_ID_LIST(flagged_kinsn_list)
++BTF_ID(func, bpf_test_kinsn_flagged)
++
++static const struct bpf_kinsn * const flagged_kinsns[] = {
++	&flagged_kinsn,
++};
++
++static const struct btf_kfunc_id_set flagged_kinsn_set = {
++	.owner = THIS_MODULE,
++	.set = &flagged_kinsn_ids,
++	.kinsn_descs = flagged_kinsns,
++	.kinsn_ids = flagged_kinsn_list,
++	.kinsn_cnt = ARRAY_SIZE(flagged_kinsns),
++};
++
++static int __init bpf_test_kinsn_registration_init(void)
++{
++	int ret;
++
++	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC, &flagged_kinsn_set);
++	return ret == -EINVAL ? 0 : ret ?: -EINVAL;
++}
++
++static void __exit bpf_test_kinsn_registration_exit(void)
++{
++}
++
++module_init(bpf_test_kinsn_registration_init);
++module_exit(bpf_test_kinsn_registration_exit);
++
++MODULE_DESCRIPTION("BPF flagged kinsn registration test module");
++MODULE_LICENSE("GPL");
+diff --git a/tools/testing/selftests/bpf/test_kmods/bpf_testmod.c b/tools/testing/selftests/bpf/test_kmods/bpf_testmod.c
+index 93847ca6293b4..d8d5bd4a48323 100644
+--- a/tools/testing/selftests/bpf/test_kmods/bpf_testmod.c
++++ b/tools/testing/selftests/bpf/test_kmods/bpf_testmod.c
+@@ -925,15 +925,256 @@ BTF_ID_FLAGS(func, bpf_kfunc_kasan_poison)
+ BTF_ID_FLAGS(func, bpf_kfunc_kasan_unpoison)
+ BTF_ID_FLAGS(func, bpf_testmod_oob_alloc, KF_ACQUIRE | KF_RET_NULL)
+ BTF_ID_FLAGS(func, bpf_testmod_oob_free, KF_RELEASE)
++BTF_ID_FLAGS(func, bpf_testmod_kinsn_7)
++BTF_ID_FLAGS(func, bpf_testmod_kinsn_42)
+ BTF_KFUNCS_END(bpf_testmod_common_kfunc_ids)
+ 
++BTF_KFUNCS_START(bpf_testmod_netfilter_kfunc_ids)
++BTF_ID_FLAGS(func, bpf_testmod_kinsn_filtered)
++BTF_KFUNCS_END(bpf_testmod_netfilter_kfunc_ids)
++
+ BTF_ID_LIST(bpf_testmod_dtor_ids)
+ BTF_ID(struct, bpf_testmod_ctx)
+ BTF_ID(func, bpf_testmod_ctx_release_dtor)
+ 
++__bpf_kfunc_start_defs();
++
++__bpf_kfunc u64 bpf_testmod_kinsn_42(void)
++{
++	return 42;
++}
++
++__bpf_kfunc u64 bpf_testmod_kinsn_7(void)
++{
++	return 7;
++}
++
++__bpf_kfunc u64 bpf_testmod_kinsn_filtered(void)
++{
++	return 7;
++}
++
++__bpf_kfunc_end_defs();
++
++#define TEST_KINSN_PACKED_PAYLOAD 0x123456781234fULL
++#define TEST_KINSN_STACK_PAYLOAD 4
++#define TEST_KINSN_R6_PAYLOAD 5
++
++static int test_kinsn_proof(u64 payload, struct bpf_insn *insns)
++{
++	if (payload == 6 || payload == 7) {
++		insns[0] = BPF_JMP_A(payload == 6 ? -1 : 1);
++		return 1;
++	}
++	if (payload == 8) {
++		insns[0] = BPF_RAW_INSN(BPF_JMP | BPF_JCOND, 0, 0, 1, 0);
++		return 1;
++	}
++	if (payload == 9) {
++		insns[0] = BPF_RAW_INSN(BPF_JMP | BPF_JA | BPF_X, 0, 0, 1, 0);
++		return 1;
++	}
++	if (payload == 10) {
++		insns[0] = BPF_EMIT_CALL(BPF_FUNC_get_prandom_u32);
++		return 1;
++	}
++	if (payload == 11) {
++		insns[0] = BPF_EXIT_INSN();
++		return 1;
++	}
++	if (payload == 12) {
++		insns[0] = BPF_RAW_INSN(BPF_LD | BPF_DW | BPF_IMM,
++					0, BPF_PSEUDO_MAP_FD, 0, 0);
++		insns[1] = BPF_RAW_INSN(0, 0, 0, 0, 0);
++		return 2;
++	}
++	if (payload != 0 && payload != 1 && payload != 3 &&
++	    payload != TEST_KINSN_STACK_PAYLOAD &&
++	    payload != TEST_KINSN_R6_PAYLOAD &&
++	    payload != TEST_KINSN_PACKED_PAYLOAD)
++		return -EINVAL;
++	if (payload == TEST_KINSN_STACK_PAYLOAD) {
++		insns[0] = BPF_MOV64_IMM(BPF_REG_0, 42);
++		insns[1] = BPF_STX_MEM(BPF_DW, BPF_REG_FP, BPF_REG_0, -8);
++		insns[2] = BPF_LDX_MEM(BPF_DW, BPF_REG_0, BPF_REG_FP, -8);
++		return 3;
++	}
++	if (payload == TEST_KINSN_R6_PAYLOAD) {
++		insns[0] = BPF_MOV64_IMM(BPF_REG_6, 42);
++		insns[1] = BPF_MOV64_REG(BPF_REG_0, BPF_REG_6);
++		return 2;
++	}
++	if (payload == 3) {
++		insns[0] = BPF_MOV64_IMM(BPF_REG_0, 42);
++		insns[1] = BPF_JMP_IMM(BPF_JEQ, BPF_REG_2, 0, 1);
++		insns[2] = BPF_MOV64_IMM(BPF_REG_0, 42);
++		return 3;
++	}
++	insns[0] = payload == 1 ? BPF_MOV64_REG(BPF_REG_0, BPF_REG_2) :
++			     BPF_MOV64_IMM(BPF_REG_0, 42);
++	return 1;
++}
++
++#ifdef CONFIG_X86_64
++static int test_kinsn_emit_x86(u8 *image, u64 payload,
++			       const struct bpf_prog *prog, const u8 *final_ip)
++{
++	static const u8 mov_42[] = { 0xb8, 42, 0, 0, 0 };
++	static const u8 stack_roundtrip[] = {
++		0xb8, 42, 0, 0, 0, /* mov eax, 42 */
++		0x48, 0x89, 0x45, 0xf8, /* mov [rbp-8], rax */
++		0x48, 0x8b, 0x45, 0xf8, /* mov rax, [rbp-8] */
++	};
++	static const u8 r6_roundtrip[] = {
++		0xbb, 42, 0, 0, 0, /* mov ebx, 42 */
++		0x48, 0x89, 0xd8, /* mov rax, rbx */
++	};
++
++	if (payload == TEST_KINSN_STACK_PAYLOAD) {
++		memcpy(image, stack_roundtrip, sizeof(stack_roundtrip));
++		return sizeof(stack_roundtrip);
++	}
++	if (payload == TEST_KINSN_R6_PAYLOAD) {
++		memcpy(image, r6_roundtrip, sizeof(r6_roundtrip));
++		return sizeof(r6_roundtrip);
++	}
++	if (payload && payload != 3 && payload != TEST_KINSN_PACKED_PAYLOAD)
++		return -EINVAL;
++	memcpy(image, mov_42, sizeof(mov_42));
++	return sizeof(mov_42);
++}
++#endif
++
++#ifdef CONFIG_ARM64
++static int test_kinsn_emit_arm64(u32 *image, u64 payload,
++				 const struct bpf_prog *prog, const u32 *final_ip)
++{
++	if (payload == TEST_KINSN_STACK_PAYLOAD) {
++		image[0] = 0xd2800548; /* movz x8, #42: BPF R0 */
++		image[1] = 0xf81f8328; /* stur x8, [x25, #-8]: BPF FP */
++		image[2] = 0xf85f8328; /* ldur x8, [x25, #-8] */
++		return 3;
++	}
++	if (payload == TEST_KINSN_R6_PAYLOAD) {
++		image[0] = 0xd2800553; /* movz x19, #42: BPF R6 */
++		image[1] = 0xaa1303e8; /* mov x8, x19: BPF R0 */
++		return 2;
++	}
++	if (payload && payload != 3 && payload != TEST_KINSN_PACKED_PAYLOAD)
++		return -EINVAL;
++	image[0] = 0xd2800548; /* movz x8, #42: BPF R0 */
++	return 1;
++}
++#endif
++
++static const struct bpf_kinsn test_kinsn_42 = {
++	.owner = THIS_MODULE,
++	.max_insn_cnt = 3,
++	.max_emit_bytes = 16,
++	.instantiate_insn = test_kinsn_proof,
++#ifdef CONFIG_X86_64
++	.emit_x86 = test_kinsn_emit_x86,
++#endif
++#ifdef CONFIG_ARM64
++	.emit_arm64 = test_kinsn_emit_arm64,
++#endif
++};
++
++static int test_kinsn_7_proof(u64 payload, struct bpf_insn *insns)
++{
++	if (payload)
++		return -EINVAL;
++	insns[0] = BPF_MOV64_IMM(BPF_REG_0, 7);
++	return 1;
++}
++
++#ifdef CONFIG_X86_64
++static int test_kinsn_7_emit_x86(u8 *image, u64 payload,
++				 const struct bpf_prog *prog, const u8 *final_ip)
++{
++	static const u8 mov_7[] = { 0xb8, 7, 0, 0, 0 };
++
++	if (payload)
++		return -EINVAL;
++	memcpy(image, mov_7, sizeof(mov_7));
++	return sizeof(mov_7);
++}
++#endif
++
++#ifdef CONFIG_ARM64
++static int test_kinsn_7_emit_arm64(u32 *image, u64 payload,
++				   const struct bpf_prog *prog, const u32 *final_ip)
++{
++	if (payload)
++		return -EINVAL;
++	image[0] = 0xd28000e8; /* movz x8, #7: BPF R0 */
++	return 1;
++}
++#endif
++
++static const struct bpf_kinsn test_kinsn_7 = {
++	.owner = THIS_MODULE,
++	.max_insn_cnt = 1,
++	.max_emit_bytes = 8,
++	.instantiate_insn = test_kinsn_7_proof,
++#ifdef CONFIG_X86_64
++	.emit_x86 = test_kinsn_7_emit_x86,
++#endif
++#ifdef CONFIG_ARM64
++	.emit_arm64 = test_kinsn_7_emit_arm64,
++#endif
++};
++
++static const struct bpf_kinsn test_kinsn_filtered = {
++	.owner = THIS_MODULE,
++	.max_insn_cnt = 1,
++	.max_emit_bytes = 8,
++	.instantiate_insn = test_kinsn_7_proof,
++#ifdef CONFIG_X86_64
++	.emit_x86 = test_kinsn_7_emit_x86,
++#endif
++#ifdef CONFIG_ARM64
++	.emit_arm64 = test_kinsn_7_emit_arm64,
++#endif
++};
++
++/* This list keeps descriptor order independent of sorted BTF_SET8 pairs. */
++BTF_ID_LIST(bpf_testmod_kinsn_ids)
++BTF_ID(func, bpf_testmod_kinsn_7)
++BTF_ID(func, bpf_testmod_kinsn_42)
++
++static const struct bpf_kinsn * const bpf_testmod_kinsns[] = {
++	&test_kinsn_7,
++	&test_kinsn_42,
++};
++
++BTF_ID_LIST(bpf_testmod_filtered_kinsn_ids)
++BTF_ID(func, bpf_testmod_kinsn_filtered)
++
++static const struct bpf_kinsn * const bpf_testmod_filtered_kinsns[] = {
++	&test_kinsn_filtered,
++};
++
++static int bpf_testmod_kinsn_filter(const struct bpf_prog *prog, u32 kfunc_id)
++{
++	return -EACCES;
++}
++
+ static const struct btf_kfunc_id_set bpf_testmod_common_kfunc_set = {
+ 	.owner = THIS_MODULE,
+ 	.set   = &bpf_testmod_common_kfunc_ids,
++	.kinsn_descs = bpf_testmod_kinsns,
++	.kinsn_ids = bpf_testmod_kinsn_ids,
++	.kinsn_cnt = ARRAY_SIZE(bpf_testmod_kinsns),
++};
++
++static const struct btf_kfunc_id_set bpf_testmod_netfilter_kfunc_set = {
++	.owner = THIS_MODULE,
++	.set = &bpf_testmod_netfilter_kfunc_ids,
++	.filter = bpf_testmod_kinsn_filter,
++	.kinsn_descs = bpf_testmod_filtered_kinsns,
++	.kinsn_ids = bpf_testmod_filtered_kinsn_ids,
++	.kinsn_cnt = ARRAY_SIZE(bpf_testmod_filtered_kinsns),
+ };
+ 
+ __bpf_kfunc u64 bpf_kfunc_call_test1(struct sock *sk, u32 a, u64 b, u32 c, u64 d)
+@@ -2440,6 +2681,12 @@ static int bpf_testmod_init(void)
+ 	int ret;
+ 
+ 	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC, &bpf_testmod_common_kfunc_set);
++	if (ret)
++		return ret;
++	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_NETFILTER,
++					&bpf_testmod_netfilter_kfunc_set);
++	if (ret)
++		return ret;
+ 	ret = ret ?: register_btf_kfunc_id_set(BPF_PROG_TYPE_SCHED_CLS, &bpf_testmod_kfunc_set);
+ 	ret = ret ?: register_btf_kfunc_id_set(BPF_PROG_TYPE_TRACING, &bpf_testmod_kfunc_set);
+ 	ret = ret ?: register_btf_kfunc_id_set(BPF_PROG_TYPE_SYSCALL, &bpf_testmod_kfunc_set);
+-- 
+2.51.1
+

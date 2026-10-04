@@ -1,0 +1,113 @@
+From c7d8541ba443f0d08a64b146d134e7ff67c6073c Mon Sep 17 00:00:00 2001
+From: Yusheng Zheng <yunwei356@gmail.com>
+Date: Sat, 3 Oct 2026 00:06:47 +0000
+Subject: [RFC PATCH bpf-next v1 3/5] bpf, arm64: Emit registered kinsn in the
+ JIT
+
+Arm64 needs a native emitter before the verifier may accept kinsn calls.
+Consume the restored sidecar and call, bound emitted instructions, and
+retain registers used only by the proof sequence. Initialize the BPF frame
+pointer when a proof alone uses R10, and advertise kinsn support once these
+paths are available.
+---
+ arch/arm64/net/bpf_jit_comp.c | 56 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 55 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
+index 17134138fb5c1..63db1b3cf8fff 100644
+--- a/arch/arm64/net/bpf_jit_comp.c
++++ b/arch/arm64/net/bpf_jit_comp.c
+@@ -376,7 +376,10 @@ static void find_used_callee_regs(struct jit_ctx *ctx)
+ 	int i;
+ 	const struct bpf_prog *prog = ctx->prog;
+ 	const struct bpf_insn *insn = &prog->insnsi[0];
+-	int reg_used = 0;
++	int reg_used = prog->aux->kinsn_callee_regs;
++
++	if (reg_used & BIT(BPF_REG_FP - BPF_REG_6))
++		ctx->fp_used = true;
+ 
+ 	for (i = 0; i < prog->len; i++, insn++) {
+ 		if (insn->dst_reg == BPF_REG_6 || insn->src_reg == BPF_REG_6)
+@@ -1348,6 +1351,31 @@ static void emit_kfunc_arg_moves(struct jit_ctx *ctx, const struct btf_func_mode
+ 	}
+ }
+ 
++static int emit_kinsn_desc_call_arm64(struct jit_ctx *ctx,
++				      const struct bpf_prog *bpf_prog,
++				      const struct bpf_kinsn *kinsn,
++				      u64 payload)
++{
++	const u32 *final_ip;
++	u32 insns[32];
++	int n_insns, i;
++
++	if (!kinsn->emit_arm64)
++		return -EOPNOTSUPP;
++	if (kinsn->max_emit_bytes > sizeof(insns) ||
++	    kinsn->max_emit_bytes % sizeof(insns[0]))
++		return -E2BIG;
++	final_ip = ctx->ro_image ? (const u32 *)&ctx->ro_image[ctx->idx] : NULL;
++	n_insns = kinsn->emit_arm64(insns, payload, bpf_prog, final_ip);
++	if (n_insns < 0)
++		return n_insns;
++	if (n_insns > kinsn->max_emit_bytes / sizeof(insns[0]))
++		return -EFAULT;
++	for (i = 0; i < n_insns; i++)
++		emit(insns[i], ctx);
++	return 0;
++}
++
+ /* JITs an eBPF instruction.
+  * Returns:
+  * 0  - successfully JITed an 8-byte eBPF instruction.
+@@ -1383,6 +1411,9 @@ static int build_insn(const struct bpf_verifier_env *env, const struct bpf_insn
+ 	if (bpf_insn_is_indirect_target(env, ctx->prog, i))
+ 		emit_bti(A64_BTI_J, ctx);
+ 
++	if (bpf_kinsn_is_sidecar_insn(insn))
++		return 0;
++
+ 	switch (code) {
+ 	/* dst = src */
+ 	case BPF_ALU | BPF_MOV | BPF_X:
+@@ -1766,6 +1797,24 @@ static int build_insn(const struct bpf_verifier_env *env, const struct bpf_insn
+ 			break;
+ 		}
+ 
++		/* Try to inline a kinsn call via module-provided ARM64 emit */
++		if (insn->src_reg == BPF_PSEUDO_KFUNC_CALL) {
++			const struct bpf_kinsn *kinsn;
++			u64 payload;
++
++			ret = bpf_jit_get_kinsn_payload(ctx->prog, insn,
++							&kinsn, &payload);
++			if (ret && ret != -ENOENT)
++				return ret;
++			if (!ret) {
++				ret = emit_kinsn_desc_call_arm64(ctx, ctx->prog,
++								 kinsn, payload);
++				if (ret)
++					return ret;
++				break;
++			}
++		}
++
+ 		ret = bpf_jit_get_func_addr(ctx->prog, insn, extra_pass,
+ 					    &func_addr, &func_addr_fixed);
+ 		if (ret < 0)
+@@ -2460,6 +2509,11 @@ bool bpf_jit_supports_kfunc_call(void)
+ 	return true;
+ }
+ 
++bool bpf_jit_supports_kinsn(void)
++{
++	return true;
++}
++
+ bool bpf_jit_supports_kfunc_ret_reg_pair(void)
+ {
+ 	return true;
+-- 
+2.51.1
+
