@@ -1373,6 +1373,30 @@ route oracle drives the real macro over index operands (deliberately allowed to
 disagree with the `AUX` index lane), the sentinel and every raw flag byte
 against an independent presence/value oracle (22,115 cases).
 
+The AArch64 write-register destination-presence decision shared by the three
+writeback bodies `ARM64_SIM_L_WRITE_REG_WIDTH`, `ARM64_SIM_L_WRITE_REG_PTR` and
+`ARM64_SIM_L_WRITE_REG_PTR_TAG` is itself a generated contract:
+`generate_arm64_reg_presence_spec.py` emits `KPROG_ARM64_REG_WRITABLE`,
+`KPROG_ARM64_REG_CLASS` and the `KPROG_ARM64_REG_XZR` / `KPROG_ARM64_REG_NONE`
+sentinels, and `Arm64RegPresence.lean` proves the presence predicate equals an
+independent `decide (reg != 31 && reg != 0xff)`, that the class selector equals
+the literal-number table (both boundaries included), that all three classes are
+reachable, and -- pinning the constants the simulator decode fixes -- that the
+zero-register number is `31` (`ARM64_XZR`), the no-register number is the
+all-ones byte (`ARM64_REG_NONE`), and the sentinel is the memory-index sentinel
+(`arm64_reg_presence_none_is_index_sentinel`), so the destination-presence and
+memory-index decoders cannot disagree about "no register". All three writeback
+bodies now guard their GPR dispatch on `KPROG_ARM64_REG_WRITABLE(REG)`, so the
+`(REG) != ARM64_XZR && (REG) != ARM64_REG_NONE` test is no longer restated in
+the simulator (the `SP` branch stays separate, evaluated before the guard). A
+generated-header oracle drives the presence and class macros over all 256
+register numbers against an independent `reg != 31 && reg != 0xff` test and the
+class table (512 cases), and a sim-header route oracle drives the three real
+writeback bodies over all 256 register numbers, all four widths and both pointer
+forms, comparing the whole register file with tags and the stack pointer against
+an independent model that writes only when the number is neither `31` nor `0xff`
+(6,913 cases).
+
 The AArch64 vector-register-file half-mapping theorem covers the four
 vector memory-transfer bodies `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`,
 `STORE_D0_MEM` and `STORE_Q0_MEM`, which move a SIMD register's low 64-bit half
@@ -1942,7 +1966,8 @@ AArch64 width, generic ALU handler writeback/path
 bodies through the `KPROG_ARM64_DQ_MEM_*` contract), `LDP`/`STP` pair-move
 (and the simulator's routing of both bodies through the `KPROG_ARM64_PAIR_MEM_*`
 contract), pre/post-indexed
-address-writeback, vector-register-file half mapping, MVN/NEG unary-value, and
+address-writeback, load/store index-register presence, write-register
+destination presence, vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
 provenance-path routing, sign-extending-load width selection, and plain-load

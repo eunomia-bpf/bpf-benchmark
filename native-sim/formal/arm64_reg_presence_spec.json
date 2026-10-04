@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "operation": "arm64RegPresence",
+  "reg_bits": 8,
+  "xzr_number": 31,
+  "none_number": 255,
+  "classes": [
+    {"name": "gpr", "code": 0, "writable": true},
+    {"name": "zero", "code": 1, "writable": false},
+    {"name": "none", "code": 2, "writable": false}
+  ]
+}

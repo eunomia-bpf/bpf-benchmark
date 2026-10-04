@@ -32,6 +32,7 @@
 #include "../formal/generated/arm64_orn.h"
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_mem_index.h"
+#include "../formal/generated/arm64_reg_presence.h"
 #include "../formal/generated/arm64_fmov.h"
 #include "../formal/generated/arm64_fmov_dest.h"
 #include "../formal/generated/arm64_load_bytes.h"
@@ -291,7 +292,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
 		if ((REG) == ARM64_SP) {                                  \
 			__a64_sp = (__s64)__a64_l_next;                   \
-		} else if ((REG) != ARM64_XZR && (REG) != ARM64_REG_NONE) {\
+		} else if (KPROG_ARM64_REG_WRITABLE(REG)) {                \
 			if ((WIDTH) == ARM64_WIDTH_32) {                  \
 				switch (REG) {                            \
 				ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG32_CASE)\
@@ -310,7 +311,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	do {                                                               \
 		void *__a64_l_next_ptr = (void *)(VALUE);                \
 		__u8 __a64_l_next_tag = ARM64_SIM_TAG_SCALAR;            \
-		if ((REG) != ARM64_XZR && (REG) != ARM64_REG_NONE) {      \
+		if (KPROG_ARM64_REG_WRITABLE(REG)) {                      \
 			switch (REG) {                                    \
 			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG_PTR_CASE)\
 			default: break;                                   \
@@ -322,7 +323,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	do {                                                               \
 		void *__a64_l_next_ptr = (void *)(VALUE);                \
 		__u8 __a64_l_next_tag = (TAG);                           \
-		if ((REG) != ARM64_XZR && (REG) != ARM64_REG_NONE) {      \
+		if (KPROG_ARM64_REG_WRITABLE(REG)) {                      \
 			switch (REG) {                                    \
 			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG_PTR_CASE)\
 			default: break;                                   \

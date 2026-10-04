@@ -34,6 +34,7 @@ check:
 	python3 generate_arm64_pair_load_tag_spec.py --check
 	python3 generate_arm64_mem_offset_spec.py --check
 	python3 generate_arm64_mem_index_spec.py --check
+	python3 generate_arm64_reg_presence_spec.py --check
 	python3 generate_arm64_fmov_spec.py --check
 	python3 generate_arm64_fmov_dest_spec.py --check
 	python3 generate_arm64_load_bytes_spec.py --check
@@ -439,6 +440,12 @@ check:
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_index_route_host.c -o build/test_arm64_mem_index_route_host
 	./build/test_arm64_mem_index_route_host
 	lake env lean KProgFormal/GeneratedArm64Fmov.lean
+	lake env lean KProgFormal/GeneratedArm64RegPresence.lean
+	lake env lean KProgFormal/Arm64RegPresence.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_reg_presence_host.c -o build/test_arm64_reg_presence_host
+	./build/test_arm64_reg_presence_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_reg_presence_route_host.c -o build/test_arm64_reg_presence_route_host
+	./build/test_arm64_reg_presence_route_host
 	lake env lean KProgFormal/Arm64Fmov.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_fmov_host.c -o build/test_arm64_fmov_host
 	./build/test_arm64_fmov_host

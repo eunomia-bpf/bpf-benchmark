@@ -8335,6 +8335,62 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Full gate `make -C native-sim/formal check` rc=0 (115 `cross-check: OK`; the
   count rose from 113 because the two new oracle files were added).
 
+## Step 0103 — AArch64 write-register destination-presence bridged through a machine-checked contract
+
+- Scope: the *write-register destination-presence* decision — whether a decoded
+  AArch64 register number names a destination a write lands in. The simulator's
+  three writeback bodies `ARM64_SIM_L_WRITE_REG_WIDTH`,
+  `ARM64_SIM_L_WRITE_REG_PTR` and `ARM64_SIM_L_WRITE_REG_PTR_TAG` in
+  `native-sim/arm64/arm64_sim_local_bpf.h` each tested
+  `(REG) != ARM64_XZR && (REG) != ARM64_REG_NONE` inline before dispatching the
+  GPR switch. All three now guard on the generated
+  `KPROG_ARM64_REG_WRITABLE(REG)`; the `SP` branch (the preceding
+  `(REG) == ARM64_SP` test, evaluated first) stays separate, and the dispatch
+  `switch`, the width handling and the value computation stay in the composed
+  body.
+- Shared spec `native-sim/formal/arm64_reg_presence_spec.json`; generator
+  `generate_arm64_reg_presence_spec.py` emits `generated/arm64_reg_presence.h`
+  (`KPROG_ARM64_REG_WRITABLE`, `KPROG_ARM64_REG_CLASS`, the three class codes,
+  the `KPROG_ARM64_REG_XZR`/`KPROG_ARM64_REG_NONE` sentinels) and
+  `KProgFormal/GeneratedArm64RegPresence.lean` (`Class`, `classify`, `writable`,
+  `xzrNumber`, `noneNumber`). `generate_arm64_reg_presence_spec.py --check` rc=0.
+- Refinement `KProgFormal/Arm64RegPresence.lean` against the independent model:
+  `arm64_reg_presence_writable_refines` (generated presence equals an independent
+  `decide (reg != 31 && reg != 0xff)`, both boundaries included),
+  `arm64_reg_presence_class_refines` (class selector equals the literal-number
+  table), `arm64_reg_presence_xzr_is_31` / `…_none_is_0xff` (the two lane
+  constants, `rfl`, pinning the C values), `…_none_is_index_sentinel`
+  (`noneNumber = indexSentinel`, `rfl` — the cross-contract pin: the
+  destination-presence and memory-index decoders cannot disagree about "no
+  register"), `…_zero_discards` / `…_none_discards` / `…_gpr_receives` (the three
+  arms), `…_case_dispatch` (all three classes reachable, zero plus sentinel plus
+  ordinary numbers), and concrete canonical examples. Both Lean modules
+  elaborate rc=0.
+- Two host oracles. `test_arm64_reg_presence_host.c` includes only the generated
+  header, drives the presence and class macros over all 256 register numbers plus
+  both sentinel values, and compares against an independent
+  `reg != 31 && reg != 0xff` test and the class table: `arm64 reg presence host
+  cross-check: OK (512 cases)`. `test_arm64_reg_presence_route_host.c` includes
+  the simulator header and drives the *real* three writeback bodies over all 256
+  register numbers, all four widths and both pointer forms, comparing the whole
+  register file with tags and the stack pointer against an independent model that
+  writes only when the number is neither `31` nor `0xff`: `arm64 reg presence
+  route host cross-check: OK (6913 cases)`. Both wired into `formal/Makefile`
+  (new rows; gate `cross-check: OK` count reflects the two new oracle files).
+- Mutation harness `/tmp/mut_arm64_reg_presence.py`: 18/18 as expected. Generator
+  `--check` catches the spec-operation, spec-number, class-order,
+  generator-number, generator-flag and generated-header/Lean-constant defects;
+  the Lean modules catch the independent-spec and hand-refinement defects; the
+  route oracle catches the inverted-presence behavioural defect; and a class
+  defect consistent across the generator *and both* regenerated artifacts
+  (`--check` blind) is caught only by the refinement theorem via a rebuilt olean.
+  The raw-sentinel-test equivalence SURVIVES, as it must. Post-restore sources
+  byte-identical and both oracles re-run clean.
+- Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/arm64 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0 (117 `cross-check: OK`; the
+  count rose from 115 because the two new oracle files were added).
+
 ## Next after 0076
 
 
@@ -8348,6 +8404,12 @@ control-flow traces" is likewise no
 longer wholly open: the per-conditional-edge predicate *and* its emitted
 `goto`/label shape are now bridged for both x86 (Step 0100) and AArch64; what
 remains is a whole-program trace theorem chaining those edges.
+
+The AArch64 *write-register destination-presence* decision is likewise no longer
+open: the `XZR`/sentinel presence test the three writeback bodies shared is now
+a machine-checked contract (Step 0103), leaving the GPR dispatch `switch`, the
+width handling and the value computation inside the composed body, and the `SP`
+branch as a separate architectural case.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 
