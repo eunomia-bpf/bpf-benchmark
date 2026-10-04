@@ -683,6 +683,31 @@ the source-shift decode, the whole-artifact displacement, the constant width,
 the null-base arm, the unsupported parity codes, and the scaled-index offset.
 The register decode that supplies the destination identity, the base-pointer
 value and the flags remain outside the theorem.
+
+The two bodies named in those paragraphs now route through the generated
+contracts. `X86_SIM_L_EXEC_SETCC_STEP` — the extracted composition both the
+`X86_SIM_L_EXEC_SETCC` macro and the `X86_OP_SETCC` dispatcher arm call —
+decodes the destination shift, selects the byte lane through
+`KPROG_X86_SETCC_LANE`, reads the condition from the AUX payload byte, and hands
+the lane to the write helper's own `== 8` branch, so the lane is the contract's
+equality test rather than a restated one; `X86_SIM_L_EXEC_SETCC_MEM` reads the
+condition through `KPROG_X86_SETCC_MEM_CONDITION`, forms the base through
+`KPROG_X86_SETCC_MEM_BASE`, selects the arm through `KPROG_X86_SETCC_MEM_ARM`
+over the destination's equality with `KPROG_X86_SETCC_MEM_RSP_REG`, and writes
+at the constant `KPROG_X86_SETCC_MEM_WIDTH_CODE`. The independent
+`test_x86_setcc_route_host.c` oracle includes the simulator header, sweeps the
+accepted condition codes and an out-of-subset code, the whole destination-shift
+byte space, all 16 destination registers, all 16 flag nibbles and both dispatch
+routes, and compares the destination register and tag against an independent
+lane-selected write model, pinning that `KPROG_X86_SETCC_LANE` is an equality
+test and the two lane codes (2,433,038 cases). The independent
+`test_x86_setcc_mem_route_host.c` oracle sweeps the condition byte, the
+destination register space, the constant width code, several displacements, the
+index register and scale, all 16 flag nibbles and both dispatch routes, drives
+the real body over a deterministic heap and 64-byte stack frame, and compares
+every heap and stack byte against an independent addressing model with its own
+arm selection, plus dedicated probes for the null-base arm, the indexed stack
+destination, and the selector tables (8,958,727 cases).
 The `CMOV` / `CMOV_MEM` handler-composition theorem covers
 `X86_SIM_L_EXEC_CMOV` (`X86_OP_CMOV`, `0x15`) and
 `X86_SIM_L_EXEC_CMOV_MEM` (`X86_OP_CMOV_MEM`, `0x40`).
@@ -1836,7 +1861,9 @@ both bodies through the `KPROG_X86_CMOV_*` contract), the
 simulator's routing of the `MOV_LOAD` body through the `KPROG_X86_MOV_LOAD_*`
 and `KPROG_X86_MEM_READ_SRC` contracts), the
 `MOV_STORE`/`SETCC`/`SETCC_MEM`/`MOVBE` handler
-compositions, the x86 little-endian memory
+compositions (and the simulator's routing of both `SETCC` bodies through the
+`KPROG_X86_SETCC_*` and `KPROG_X86_SETCC_MEM_*` contracts),
+the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and

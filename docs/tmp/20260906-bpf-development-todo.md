@@ -8035,6 +8035,61 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0097 — x86 simulator routes the `SETCC` / `SETCC_MEM` bodies through the checked contract
+
+- Scope: `X86_SIM_L_EXEC_SETCC` (`X86_OP_SETCC`, `0x16`) and
+  `X86_SIM_L_EXEC_SETCC_MEM` (`X86_OP_SETCC_MEM`, `0x3e`). Both restated the
+  generated `x86_setcc.h` / `x86_setcc_mem.h` contract inline: the destination
+  byte-lane equality test, the condition source byte, the constant one-byte
+  access width, the null-base selector, and the stack-arm selector. The register
+  form's composition is extracted to `X86_SIM_L_EXEC_SETCC_STEP(DST, AUX)` and
+  called by both the `X86_SIM_L_EXEC_SETCC` macro (the micro-prog codegen
+  surface, name and 2-arg signature preserved) and the `X86_OP_SETCC`
+  dispatcher arm, exactly as the `CMOV` step did. It decodes the destination
+  shift, selects the lane through `KPROG_X86_SETCC_LANE`, reads the condition
+  from the AUX payload byte, and passes the lane to
+  `X86_SIM_L_WRITE_REG_WIDTH_SHIFT`'s own `== 8` branch, so the lane is the
+  contract's equality test, not a restated one. The memory form reads the
+  condition through `KPROG_X86_SETCC_MEM_CONDITION`, forms the base through
+  `KPROG_X86_SETCC_MEM_BASE`, selects the arm through
+  `KPROG_X86_SETCC_MEM_ARM` over the destination's equality with
+  `KPROG_X86_SETCC_MEM_RSP_REG`, and writes at the constant
+  `KPROG_X86_SETCC_MEM_WIDTH_CODE`. The addressing decode and value production
+  stay in the body.
+- Route oracle `native-sim/formal/test_x86_setcc_route_host.c` (new): includes
+  `../x86/x86_sim_local_bpf.h`, sweeps the accepted condition codes and an
+  out-of-subset code, the whole destination-shift byte space, all 16 destination
+  registers, all 16 flag nibbles and both dispatch routes, and compares the
+  destination register and tag against an independent lane-selected write model,
+  pinning that `KPROG_X86_SETCC_LANE` is an equality test and the lane codes.
+  Prints `x86 setcc route host cross-check: OK (2433038 cases)`.
+- Route oracle `native-sim/formal/test_x86_setcc_mem_route_host.c` (new):
+  sweeps the condition byte, the destination register space, the constant width
+  code, several displacements, the index register and scale, all 16 flag nibbles
+  and both dispatch routes, drives the real body over a deterministic heap and
+  64-byte stack frame, and compares every heap and stack byte against an
+  independent addressing model with its own arm selection, plus dedicated probes
+  for the null-base arm, the indexed stack destination, and the selector tables.
+  Prints `x86 setcc_mem route host cross-check: OK (8958727 cases)`.
+- `native-sim/formal/Makefile`: the route-oracle build+run pairs added inside
+  `check:` directly after the `test_x86_setcc_host` and
+  `test_x86_setcc_mem_host` pairs.
+- `native-sim/formal/README.md`: the `SETCC`/`SETCC_MEM` routing paragraph and
+  the contract-inventory list entry added.
+- Mutation harness `mut_setcc_route.py`: 17/17 DETECTED — the memory spec
+  condition-shift/rsp-code/width-code and generator-constant defects caught by
+  the generator `--check`; the generated-header lane-high/lane-equality/width/
+  rsp/null-register defects caught by the generator `--check` and both oracles;
+  the generated/hand Lean condition-shift, rsp-register and lane-equality
+  defects caught by the refinement modules; and the simulator's lane-consumption,
+  condition-source and arm-selector misroutes caught by the route oracle.
+  Post-restore sources byte-identical and both oracles re-run clean.
+- `generate_x86_setcc_spec.py --check` and
+  `generate_x86_setcc_mem_spec.py --check` rc=0.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 

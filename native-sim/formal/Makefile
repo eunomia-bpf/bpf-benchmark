@@ -229,10 +229,14 @@ check:
 	lake env lean KProgFormal/X86SetccHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_setcc_host.c -o build/test_x86_setcc_host
 	./build/test_x86_setcc_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_setcc_route_host.c -o build/test_x86_setcc_route_host
+	./build/test_x86_setcc_route_host
 	lake env lean KProgFormal/GeneratedX86SetccMem.lean
 	lake env lean KProgFormal/X86SetccMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_setcc_mem_host.c -o build/test_x86_setcc_mem_host
 	./build/test_x86_setcc_mem_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_setcc_mem_route_host.c -o build/test_x86_setcc_mem_route_host
+	./build/test_x86_setcc_mem_route_host
 	lake env lean KProgFormal/GeneratedX86Cmov.lean
 	lake env lean KProgFormal/X86CmovHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_cmov_host.c -o build/test_x86_cmov_host

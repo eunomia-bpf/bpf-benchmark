@@ -20,6 +20,8 @@
 #include "../formal/generated/x86_reg_write.h"
 #include "../formal/generated/x86_reg_read.h"
 #include "../formal/generated/x86_rep_movs.h"
+#include "../formal/generated/x86_setcc.h"
+#include "../formal/generated/x86_setcc_mem.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -1643,27 +1645,59 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_CMOV_MEM(DST, SRC, FLAGS, AUX, IMM)                  \
 	X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
 
+/* The `SETCC` / `SETCC_MEM` handler-composition contracts select the
+ * destination byte lane, the condition code, the constant one-byte access
+ * width, the base pointer and the store arm. The register form reads the
+ * condition from the AUX payload byte (bits 0..7) and the lane from the
+ * destination-shift byte (bits 8..15); the memory form reads the condition
+ * from the source-shift byte (bits 24..31), forms a process-null base for the
+ * absent register, and picks the stack helper from the register number. The
+ * lane the register form selects is the contract's equality test, consumed by
+ * the write helper's own `== 8` branch, so the C and the Lean step agree on
+ * which byte receives the condition rather than restating the test. */
+#define X86_SIM_L_EXEC_SETCC_STEP(DST, AUX)                                  \
+	do {                                                                \
+		__u8 __x86_l_sc_shift =                                     \
+			KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX);              \
+		__u8 __x86_l_sc_lane = KPROG_X86_SETCC_LANE(                \
+			__x86_l_sc_shift);                                   \
+		X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),                      \
+			X86_SIM_L_EVAL_CC(                                  \
+				KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)),        \
+			X86_WIDTH_8,                                        \
+			__x86_l_sc_lane == KPROG_X86_SETCC_LANE_HIGH        \
+				? 8U : 0U);                                 \
+	} while (0)
+
 #define X86_SIM_L_EXEC_SETCC(DST, AUX)                                       \
-	X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),                               \
-		X86_SIM_L_EVAL_CC(KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)),       \
-		X86_WIDTH_8, KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX))
+	X86_SIM_L_EXEC_SETCC_STEP((DST), (AUX))
 
 #define X86_SIM_L_EXEC_SETCC_MEM(DST, AUX, IMM)                              \
 	do {                                                               \
-		__u8 __x86_l_cc = X86_REG_AUX_GET_SRC_SHIFT(AUX);        \
-		__u64 __x86_l_value = X86_SIM_L_EVAL_CC(__x86_l_cc);     \
-		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),         \
-			x86_simm(IMM));                                  \
-		void *__x86_l_base_ptr = (DST) == X86_REG_NONE ?         \
-			(void *)0 : X86_SIM_L_READ_REG_PTR(DST);         \
-		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
-		if ((DST) == X86_RSP)                                    \
-			X86_SIM_L_STACK_WRITE(                           \
-				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
-				X86_WIDTH_8, __x86_l_value);             \
-		else                                                     \
-			X86_SIM_L_STORE_ADDR((__u8 *)__x86_l_base_ptr +   \
-				__x86_l_disp, X86_WIDTH_8, __x86_l_value);\
+		__u8 __x86_l_scm_cc =                                      \
+			KPROG_X86_SETCC_MEM_CONDITION(AUX);                 \
+		__u64 __x86_l_scm_value = X86_SIM_L_EVAL_CC(               \
+			__x86_l_scm_cc);                                   \
+		__s64 __x86_l_scm_disp = X86_SIM_L_MEM_OFFSET((AUX),       \
+			x86_simm(IMM));                                    \
+		void *__x86_l_scm_base = KPROG_X86_SETCC_MEM_BASE(DST) ==  \
+			KPROG_X86_SETCC_MEM_BASE_NULL                      \
+				? (void *)0 : X86_SIM_L_READ_REG_PTR(DST);         \
+		X86_SIM_L_BARRIER_VAR(__x86_l_scm_disp);                    \
+		if (KPROG_X86_SETCC_MEM_ARM((DST) ==                       \
+				KPROG_X86_SETCC_MEM_RSP_REG) ==              \
+		    KPROG_X86_SETCC_MEM_ARM_STACK)                         \
+			X86_SIM_L_STACK_WRITE(                              \
+				(__s64)(long)__x86_l_scm_base +              \
+					__x86_l_scm_disp,                    \
+				KPROG_X86_SETCC_MEM_WIDTH_CODE,              \
+				__x86_l_scm_value);                          \
+		else                                                        \
+			X86_SIM_L_STORE_ADDR(                               \
+				(__u8 *)__x86_l_scm_base +                   \
+					__x86_l_scm_disp,                    \
+				KPROG_X86_SETCC_MEM_WIDTH_CODE,              \
+				__x86_l_scm_value);                          \
 	} while (0)
 
 /* The two stack-transfer bodies compose the machine-checked
@@ -1833,11 +1867,7 @@ struct x86_sim_state {
 			X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
 						(AUX), (IMM));            \
 		} else if ((OP) == X86_OP_SETCC) {                        \
-			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),               \
-				X86_SIM_L_EVAL_CC(                           \
-					KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)), \
-				X86_WIDTH_8,                                  \
-				KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));        \
+			X86_SIM_L_EXEC_SETCC_STEP((DST), (AUX));           \
 		} else if ((OP) == X86_OP_SETCC_MEM) {                    \
 			X86_SIM_L_EXEC_SETCC_MEM((DST), (AUX), (IMM));    \
 		} else if ((OP) == X86_OP_BSWAP) {                        \
