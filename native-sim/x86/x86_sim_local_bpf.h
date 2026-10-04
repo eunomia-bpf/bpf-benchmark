@@ -24,6 +24,7 @@
 #include "../formal/generated/x86_setcc_mem.h"
 #include "../formal/generated/x86_branch_emit.h"
 #include "../formal/generated/x86_mem_index.h"
+#include "../formal/generated/x86_reg_presence.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -692,7 +693,7 @@ struct x86_sim_state {
 			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp);\
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
-		if ((BASE_REG) != X86_REG_NONE)                          \
+		if (KPROG_X86_REG_PRESENT(BASE_REG))                     \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(BASE_REG);\
 		__u64 __x86_l_value;                                     \
 		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
@@ -731,7 +732,7 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
 		void *__x86_l_base_ptr = (void *)0;                      \
 		__u64 __x86_l_value = 0;                                 \
-		if ((SRC) != X86_REG_NONE)                               \
+		if (KPROG_X86_REG_PRESENT(SRC))                          \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
@@ -790,7 +791,7 @@ struct x86_sim_state {
 				(OP) == X86_OP_MOV_STORE_IMM, (AUX)));    \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp); \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
-		if ((DST) != X86_REG_NONE)                               \
+		if (KPROG_X86_REG_PRESENT(DST))                          \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);   \
 		switch (X86_SIM_L_MEM_STORE_SRC(DST)) {                   \
 		case KPROG_X86_STORE_ARM_STACK:                           \
@@ -824,7 +825,7 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			KPROG_X86_MOVBE_DISP(IMM));                       \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
-		void *__x86_l_base_ptr = (DST) == X86_REG_NONE ?          \
+		void *__x86_l_base_ptr = KPROG_X86_REG_ABSENT(DST) ?      \
 			(void *)0 : X86_SIM_L_READ_REG_PTR(DST);          \
 		__u64 __x86_l_value = x86_bswap(                          \
 			X86_SIM_L_READ_REG(SRC), __x86_l_width);          \
@@ -848,7 +849,7 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                   \
 		__u8 __x86_l_arm = X86_SIM_L_MEM_XMM0_ARM(SRC);           \
-		__u8 __x86_l_base_none = ((SRC) == X86_REG_NONE);         \
+		__u8 __x86_l_base_none = KPROG_X86_REG_ABSENT(SRC);       \
 		__u8 __x86_l_base_form = KPROG_X86_XMM0_BASE_FORM(1U);    \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		switch (__x86_l_arm) {                                    \
@@ -890,7 +891,7 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                   \
 		__u8 __x86_l_arm = X86_SIM_L_MEM_XMM0_ARM(DST);           \
-		__u8 __x86_l_base_none = ((DST) == X86_REG_NONE);         \
+		__u8 __x86_l_base_none = KPROG_X86_REG_ABSENT(DST);       \
 		__u8 __x86_l_base_form = KPROG_X86_XMM0_BASE_FORM(0U);    \
 		void *__x86_l_base_ptr = KPROG_X86_XMM0_BASE_PTR(         \
 			__x86_l_base_none, __x86_l_base_form, (IMM),      \
@@ -929,10 +930,10 @@ struct x86_sim_state {
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		__s64 __x86_l_off = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
 		X86_SIM_L_BARRIER_VAR(__x86_l_off);                     \
-		void *__x86_l_src_ptr = (SRC) == X86_REG_NONE ? (void *)0 :\
+		void *__x86_l_src_ptr = KPROG_X86_REG_ABSENT(SRC) ? (void *)0 :\
 					   X86_SIM_L_READ_REG_PTR(SRC);    \
 		__u8 __x86_l_src_tag = X86_SIM_L_REG_TAG(SRC);           \
-		if (__x86_l_width == X86_WIDTH_64 && (SRC) == X86_REG_NONE &&\
+		if (__x86_l_width == X86_WIDTH_64 && KPROG_X86_REG_ABSENT(SRC) &&\
 		    (AUX) == X86_LEA_AUX_RODATA) {                        \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __x86_l_width);\
 		} else {                                                  \
@@ -1099,7 +1100,7 @@ struct x86_sim_state {
 		X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, 1, __x86_l_result,   \
 					__x86_l_alu, __x86_l_width);     \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
-		if ((DST) != X86_REG_NONE)                                \
+		if (KPROG_X86_REG_PRESENT(DST))                           \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
 		if ((DST) == X86_RSP)                                     \
 			X86_SIM_L_STACK_WRITE(                            \
@@ -1144,7 +1145,7 @@ struct x86_sim_state {
 				__x86_l_result, __x86_l_alu, __x86_l_width); \
 		}                                                         \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
-		if ((DST) != X86_REG_NONE)                                \
+		if (KPROG_X86_REG_PRESENT(DST))                           \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
 		if ((DST) == X86_RSP)                                     \
 			X86_SIM_L_STACK_WRITE(                            \
@@ -1188,7 +1189,7 @@ struct x86_sim_state {
 				__x86_l_result, __x86_l_alu, __x86_l_width); \
 		}                                                         \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
-		if ((DST) != X86_REG_NONE)                                \
+		if (KPROG_X86_REG_PRESENT(DST))                           \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
 		if ((DST) == X86_RSP)                                     \
 			X86_SIM_L_STACK_WRITE(                            \
@@ -1353,7 +1354,7 @@ struct x86_sim_state {
 		}                                                         \
 		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_low,             \
 					  __x86_l_width);                    \
-		if ((AUX) != X86_REG_NONE)                                \
+		if (KPROG_X86_REG_PRESENT(AUX))                           \
 			X86_SIM_L_WRITE_REG_WIDTH((AUX), __x86_l_high,    \
 						  __x86_l_width);        \
 	} while (0)

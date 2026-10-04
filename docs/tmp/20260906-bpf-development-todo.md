@@ -8391,6 +8391,68 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Full gate `make -C native-sim/formal check` rc=0 (117 `cross-check: OK`; the
   count rose from 115 because the two new oracle files were added).
 
+## Step 0104 — x86-64 operand-register presence bridged through a machine-checked contract
+
+- Scope: the x86 mirror of Step 0103 — the *operand-register presence* decision,
+  whether a decoded x86-64 register number names a register at all. x86-64 has
+  no zero register, so the contract is a single-sentinel present/absent pair
+  rather than AArch64's zero/sentinel pair. The memory-read source resolution,
+  the MULX second-destination guard, the MOVBE base-pointer selection, the two
+  LEA source-presence clauses, and the base-pointer guards of the three
+  `ALU`-memory writeback bodies in `native-sim/x86/x86_sim_local_bpf.h` each
+  restated `(REG) != X86_REG_NONE` (present) or `(REG) == X86_REG_NONE`
+  (absent) inline. All twelve sites now route those tests through the generated
+  `KPROG_X86_REG_PRESENT(REG)` / `KPROG_X86_REG_ABSENT(REG)`; the address
+  arithmetic, width handling and value computation stay in the composed bodies.
+  Argument-only sites that merely pass `X86_REG_NONE` (the two `MOVBE_STORE`
+  argument sites and one other) stay raw and are out of scope.
+- Shared spec `native-sim/formal/x86_reg_presence_spec.json`; generator
+  `generate_x86_reg_presence_spec.py` emits `generated/x86_reg_presence.h`
+  (`KPROG_X86_REG_PRESENT`, `KPROG_X86_REG_ABSENT`, `KPROG_X86_REG_ARM`, the two
+  arm codes, the `KPROG_X86_REG_SENTINEL` sentinel) and
+  `KProgFormal/GeneratedX86RegPresence.lean` (`Arm`, `arm`, `present`, `absent`,
+  `sentinel`). The generated header is self-contained (no cross-include), as the
+  x86 and AArch64 memory-index mirrors. `generate_x86_reg_presence_spec.py
+  --check` rc=0.
+- Refinement `KProgFormal/X86RegPresence.lean` against the independent model:
+  `x86_reg_presence_present_refines` (generated presence equals an independent
+  `decide (reg != 0xff)`), `x86_reg_presence_absent_refines` (the absence
+  predicate equals the independent `decide (reg = 0xff)`),
+  `…_sentinel_is_0xff` / `…_sentinel_is_absent` (`rfl`), `…_sentinel_is_index_sentinel`
+  (`sentinel = indexSentinel`, `rfl` — the cross-contract pin: the
+  operand-presence and packed-`AUX` memory-index decoders cannot disagree about
+  "no register") and `…_sentinel_is_index_none` (`rfl`), `…_arm_refines` (the
+  arm selector equals the literal-sentinel table), `…_absent_complement`
+  (presence and absence are complementary and total), `…_case_dispatch` (both
+  arms reachable), and concrete canonical examples. Both Lean modules elaborate
+  rc=0.
+- Two host oracles. `test_x86_reg_presence_host.c` includes only the generated
+  header, drives the presence, absence and arm macros over all 256 register
+  numbers against an independent `reg != 0xff` test, checks complementarity and
+  the arm gap, and pins the sentinel against the simulator's own `X86_REG_NONE`
+  and the memory-index sentinel: `x86 reg presence host cross-check: OK (768
+  cases)`. `test_x86_reg_presence_route_host.c` includes the simulator header
+  and drives the *real* bodies over the present/absent/non-GPR/stack cases,
+  every width, and both pointer forms, comparing the whole register file with
+  tags and the modeled heap and stack against an independent model:
+  `x86 reg presence route host cross-check: OK (891 cases)`. Both wired into
+  `formal/Makefile` (new rows; gate `cross-check: OK` count rose from 117 to
+  119 because the two new oracle files were added).
+- Mutation harness `/tmp/mut_x86_reg_presence.py`: generator `--check` catches
+  the spec-operation, spec-sentinel, arm-order, generator-sentinel-value,
+  generator-present-flag and generated-header/Lean-constant defects; the Lean
+  modules catch the independent-spec and hand-refinement defects; the route
+  oracle catches the inverted-presence behavioural defect (all four routed
+  `PRESENT(DST)` guards at once); and a classifier defect consistent across the
+  generator *and both* regenerated artifacts (`--check` blind) is caught only by
+  the refinement theorem via a rebuilt olean. The raw-sentinel-test equivalence
+  SURVIVES, as it must. Post-restore sources byte-identical and both oracles
+  re-run clean.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0 (119 `cross-check: OK`).
+
+
 ## Next after 0076
 
 

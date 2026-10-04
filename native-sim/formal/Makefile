@@ -97,6 +97,7 @@ check:
 	python3 generate_x86_cmpop_spec.py --check
 	python3 generate_x86_mem_aux_spec.py --check
 	python3 generate_x86_mem_index_spec.py --check
+	python3 generate_x86_reg_presence_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -214,6 +215,12 @@ check:
 	./build/test_x86_mem_index_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mem_index_route_host.c -o build/test_x86_mem_index_route_host
 	./build/test_x86_mem_index_route_host
+	lake env lean KProgFormal/GeneratedX86RegPresence.lean
+	lake env lean KProgFormal/X86RegPresence.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_presence_host.c -o build/test_x86_reg_presence_host
+	./build/test_x86_reg_presence_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_reg_presence_route_host.c -o build/test_x86_reg_presence_route_host
+	./build/test_x86_reg_presence_route_host
 	lake env lean KProgFormal/X86LeaHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_lea_handler_host.c -o build/test_x86_lea_handler_host
 	./build/test_x86_lea_handler_host

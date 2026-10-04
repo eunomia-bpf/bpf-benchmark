@@ -512,6 +512,30 @@ the presence and arm macros over all 256 index bytes against an independent
 `byte != 0xff` test (512 cases), and a sim-header route oracle drives the real
 helper over register-AUX forms and the sentinel against an independent
 presence/value oracle (957 cases).
+The x86-64 operand-register presence decision that the memory-read/write paths
+and the `MULX`/`MOVBE`/`LEA`/`ALU`-memory bodies guarded on a restated
+`(REG) != X86_REG_NONE` test is now a generated contract:
+`generate_x86_reg_presence_spec.py` emits `KPROG_X86_REG_PRESENT`,
+`KPROG_X86_REG_ABSENT`, `KPROG_X86_REG_ARM` and the `KPROG_X86_REG_SENTINEL`
+sentinel, and `X86RegPresence.lean` proves the presence predicate equals an
+independent `decide (reg != 0xff)` and the absence predicate the independent
+`decide (reg = 0xff)`, that the two arms invert each other and are both
+reachable, and -- pinning the constant the simulator decode fixes -- that the
+sentinel is `0xff` and equals the packed-`AUX` memory-index sentinel
+(`x86_reg_presence_sentinel_is_index_sentinel`), so the operand-presence and
+index-presence decoders cannot disagree about "no register". x86-64 has no
+zero register, so unlike the AArch64 mirror the contract has a single sentinel
+rather than a zero/sentinel pair. The routed sites replace the inline sentinel
+test in the read source-resolution, the MULX second-destination guard, the
+MOVBE base-pointer selection, the two LEA source-presence clauses, and the
+base-pointer guards of the three `ALU`-memory writeback bodies. A
+generated-header oracle drives the presence, absence and arm macros over all
+256 register numbers against an independent `reg != 0xff` test, checks the
+complementarity and arm gaps, and pins the sentinel against the simulator's own
+`X86_REG_NONE` and the memory-index sentinel (768 cases); a sim-header route
+oracle drives the real bodies over the present/absent/non-GPR/stack cases, every
+width, and both pointer forms, comparing the whole register file with tags and
+the modeled heap and stack against an independent model (891 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -1909,6 +1933,8 @@ value stored through the word view reloads byte-for-byte through the byte view
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
+x86 operand-register presence (and the simulator's routing of its memory-read,
+MULX, MOVBE, LEA and ALU-memory bodies through it),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,
