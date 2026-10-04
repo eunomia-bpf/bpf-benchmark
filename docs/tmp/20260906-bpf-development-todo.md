@@ -8183,13 +8183,67 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
 - Full gate `make -C native-sim/formal check` rc=0 (109 `cross-check: OK`).
 
+## Step 0100 — x86 conditional-branch emission bridged through a machine-checked emitted-shape contract
+
+- Scope: the x86 control-transfer *emission* shape, previously only asserted. The
+  simulator's `X86_SIM_X86_JCC_IMPL` in `native-sim/x86/x86_sim_local_bpf.h`
+  selected a backward edge (target ≤ current) through the raw inline test
+  `(TARGET) <= (CURRENT)`. It now routes that choice through the generated
+  `KPROG_X86_BRANCH_BACKWARD((CURRENT), (TARGET))`, the exact x86 analogue of the
+  already-machine-checked AArch64 `KPROG_ARM64_BRANCH_BACKWARD` bridge (this is
+  the roadmap's "multi-step control-flow traces" gap, addressed one conditional
+  edge at a time). Both the forward (`if (taken) goto target;` + fall-through)
+  and backward (`if (!taken) goto fallthrough; goto target;`) shapes are named by
+  one generated contract.
+- Shared spec `native-sim/formal/x86_branch_emit_spec.json`; generator
+  `generate_x86_branch_emit_spec.py` emits `generated/x86_branch_emit.h`
+  (`KPROG_X86_BRANCH_BACKWARD`, the ordering test) and
+  `KProgFormal/GeneratedX86BranchEmit.lean` (`Shape`, `backward`, `shape`,
+  `nextPc`). `generate_x86_branch_emit_spec.py --check` rc=0.
+- Refinement `KProgFormal/X86BranchEmit.lean` against the independent
+  architectural model: `x86_branch_emit_shape_refines` (generated shape equals
+  the independent `decide (target ≤ current)` predicate, including the equality
+  boundary), `x86_branch_emit_refines` (the emitted `nextPc` equals
+  `branchPc`, the same architectural model `X86ControlFlow.lean`'s condition and
+  conditional-branch refinements use), `x86_branch_emit_shape_irrelevant` (both
+  shapes select the same next PC for every predicate value---so the direction is
+  how the jump is written, not whether it is taken), and the taken/not-taken
+  lemmas. Both Lean modules elaborate rc=0.
+- Two host oracles. `test_x86_branch_emit_host.c` (90 cases) pins the direction
+  to an independent address-ordering oracle over an address grid including the
+  equality boundary. `test_x86_branch_emit_route_host.c` includes the simulator
+  header and drives the *real* `X86_SIM_X86_JCC` macro over the 14 accepted and 4
+  unsupported/out-of-range condition codes, forward/equal/backward/wrap-around
+  address pairs, and all 16 flag nibbles, comparing the selected next PC against
+  the architectural model: `x86 branch emit route host cross-check: OK (1827
+  cases)`. Both wired into `formal/Makefile` (new rows; gate `cross-check: OK`
+  count reflects the two new oracle files).
+- Mutation harness `/tmp/mut_x86_branch_emit_route.py`: 13/13 as expected.
+  Generator `--check` catches the spec-operation, shape-order, generator-shape,
+  generator-nextPc, and generated-header direction defects; the Lean modules
+  catch the generated-shape/nextPc and independent-spec defects; the route oracle
+  catches the backward-arm predicate negation; and two defects consistent across
+  the generator *and both* regenerated artifacts (`--check` blind) are caught
+  only by the refinement theorem via a rebuilt olean. Two equivalence claims
+  SURVIVE as they must: inlining the raw ordering test, and swapping the
+  direction operands (behaviour-preserving by
+  `x86_branch_emit_shape_irrelevant`). Post-restore sources byte-identical and
+  both oracles re-run clean.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0 (111 `cross-check: OK`; the
+  count rose from 109 because the two new oracle files were added).
+
 ## Next after 0076
 
 
-Remaining x86 open work is unchanged and *compositional/handwritten*: the
-index-register decode into the AUX index byte itself; register/immediate/RHS
-objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
-specialization preservation.
+Remaining x86 open work is *compositional/handwritten*: the index-register
+decode into the AUX index byte itself; register/immediate/RHS objdump→AUX
+selection; compiler/native bytes; specialization preservation. "Multi-step
+control-flow traces" is no longer wholly open: the per-conditional-edge
+predicate *and* its emitted `goto`/label shape are now bridged for both x86
+(Step 0100) and AArch64; what remains is a whole-program trace theorem chaining
+those edges.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

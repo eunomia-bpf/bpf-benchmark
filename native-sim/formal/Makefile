@@ -85,6 +85,7 @@ check:
 	python3 generate_x86_movbe_spec.py --check
 	python3 generate_x86_ptr_write_spec.py --check
 	python3 generate_x86_xmm0_spec.py --check
+	python3 generate_x86_branch_emit_spec.py --check
 	python3 generate_x86_callmem_spec.py --check
 	python3 generate_x86_pushpop_spec.py --check
 	python3 generate_x86_rep_movs_spec.py --check
@@ -100,6 +101,12 @@ check:
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_cond_host.c -o build/test_arm64_cond_host
 	./build/test_arm64_cond_host
 	lake env lean KProgFormal/X86ControlFlow.lean
+	lake env lean KProgFormal/GeneratedX86BranchEmit.lean
+	lake env lean KProgFormal/X86BranchEmit.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_branch_emit_host.c -o build/test_x86_branch_emit_host
+	./build/test_x86_branch_emit_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_branch_emit_route_host.c -o build/test_x86_branch_emit_route_host
+	./build/test_x86_branch_emit_route_host
 	lake env lean KProgFormal/X86LogicFlags.lean
 	lake env lean KProgFormal/X86Width.lean
 	lake env lean KProgFormal/X86Immediate.lean

@@ -22,6 +22,7 @@
 #include "../formal/generated/x86_rep_movs.h"
 #include "../formal/generated/x86_setcc.h"
 #include "../formal/generated/x86_setcc_mem.h"
+#include "../formal/generated/x86_branch_emit.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -2138,7 +2139,7 @@ X86_SIM_CONCAT(__x86_sim_jcc_fallthrough_, ID):                              \
 
 #define X86_SIM_X86_JCC_IMPL(CC, CURRENT, TARGET, LABEL, ID)                \
 	do {                                                               \
-		if ((TARGET) <= (CURRENT)) {                                \
+		if (KPROG_X86_BRANCH_BACKWARD((CURRENT), (TARGET))) {         \
 			X86_SIM_X86_JCC_BACKWARD((CC), LABEL, ID);         \
 		} else if (X86_SIM_L_EVAL_CC(CC)) {                        \
 			X86_SIM_X86_JMP((CURRENT), (TARGET), LABEL);       \

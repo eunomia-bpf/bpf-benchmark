@@ -99,6 +99,21 @@ The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
 conditions are outside the accepted simulator subset.
+The x86 condition-to-next-PC refinement is additionally bridged to the emitted
+code: `generate_x86_branch_emit_spec.py` emits `KPROG_X86_BRANCH_BACKWARD`, the
+address-ordering test the simulator's `X86_SIM_X86_JCC_IMPL` now routes its
+backward-edge choice through (forward edge: `if (taken) goto target;` with a
+fall-through; backward edge: `if (!taken) goto fallthrough; goto target;`).
+`X86BranchEmit.lean` proves the emitted shape selects exactly `branchPc`, that
+the two shapes select the same next PC (`x86_branch_emit_shape_irrelevant`, so
+the direction only decides *how* the jump is written), and that a taken branch
+reaches the target and a not-taken branch falls through for either shape — the
+exact x86 analogue of the AArch64 emitted-shape bridge. Its host cross-check
+(90 cases) pins the direction to an independent ordering oracle including the
+equality boundary, and an 1827-case sim-header route oracle drives the real
+`X86_SIM_X86_JCC` macro over every accepted and unsupported condition code, both
+directions, and an equal-address edge, comparing the selected next PC against
+the architectural model.
 The legal x86 width encodings, masks, bit counts, narrowing, and zero/sign
 observations are generated into the actual C helpers and Lean. Lean checks
 their per-width model against an independent enumeration, while C static
@@ -1883,6 +1898,10 @@ and `KPROG_X86_MEM_READ_SRC` contracts), the
 compositions (and the simulator's routing of both `SETCC` bodies through the
 `KPROG_X86_SETCC_*` and `KPROG_X86_SETCC_MEM_*` contracts, the register form's
 condition byte through the `KPROG_X86_SETCC_COND_MATCHED` fold),
+the x86 conditional-branch emitted-shape contract (and the simulator's routing
+of `X86_SIM_X86_JCC_IMPL`'s backward-edge choice through
+`KPROG_X86_BRANCH_BACKWARD`, proved equal to the architectural `branchPc` for
+both shapes),
 the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
@@ -1960,7 +1979,8 @@ This is still a deliberately bounded proof. It does not establish full
 equivalence between the simulator and native instruction bytes, cover complete
 instruction decoding/dispatch, multi-step control-flow traces, helpers, or the
 full workload-derived instruction subsets, or prove the paper's complete
-O1--O4 obligations. The proved branch predicates and AArch64 emitted-shape
-bridge are local control-flow refinements, not a whole-program trace theorem.
+O1--O4 obligations. The proved branch predicates and the AArch64 and x86
+emitted-shape bridges are local control-flow refinements (one conditional edge
+at a time), not a whole-program trace theorem.
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.
