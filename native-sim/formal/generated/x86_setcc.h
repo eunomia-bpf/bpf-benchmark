@@ -16,6 +16,7 @@ _Static_assert(X86_CC_GE == 13U, "x86 condition code drift");
 _Static_assert(X86_CC_LE == 14U, "x86 condition code drift");
 _Static_assert(X86_CC_G == 15U, "x86 condition code drift");
 #define KPROG_X86_SETCC_COND_NONE 0xffffU
+_Static_assert(KPROG_X86_SETCC_COND_NONE == 0xffffU, "x86 setcc no-match sentinel drift");
 /*
  * The raw condition byte is one of the supported `X86_CC_*` codes, or
  * KPROG_X86_SETCC_COND_NONE for a code outside the accepted subset. The fold

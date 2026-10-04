@@ -655,7 +655,12 @@ rather than the high one. Its independent 590,726-case oracle sweeps the whole
 256-value condition byte space and the whole 256-value destination-shift space
 against the real `KPROG_X86_EVAL_CC` expression and a restated write helper,
 and drives the full handler over a deterministic 16-register model comparing
-every byte and tag. The register decode that supplies the destination identity
+every byte and tag. `x86_setcc_cond_matched_refines` lifts the simulator's
+routing of the payload byte through the `KPROG_X86_SETCC_COND_MATCHED` fold to
+that same raw evaluation: the fold's identity on the accepted subset and the
+no-match sentinel elsewhere are swept against every flag assignment, so a
+transposed fold arm or a sentinel that collided with an accepted code fails the
+proof. The register decode that supplies the destination identity
 and the flags remain outside the theorem.
 The `SETCC_MEM` handler-composition theorem covers `X86_SIM_L_EXEC_SETCC_MEM`
 (`X86_OP_SETCC_MEM`, `0x3e`). `x86_setcc_mem_step_refines` composes the
@@ -688,9 +693,18 @@ The two bodies named in those paragraphs now route through the generated
 contracts. `X86_SIM_L_EXEC_SETCC_STEP` — the extracted composition both the
 `X86_SIM_L_EXEC_SETCC` macro and the `X86_OP_SETCC` dispatcher arm call —
 decodes the destination shift, selects the byte lane through
-`KPROG_X86_SETCC_LANE`, reads the condition from the AUX payload byte, and hands
-the lane to the write helper's own `== 8` branch, so the lane is the contract's
-equality test rather than a restated one; `X86_SIM_L_EXEC_SETCC_MEM` reads the
+`KPROG_X86_SETCC_LANE`, reads the condition from the AUX payload byte through
+the contract's `KPROG_X86_SETCC_COND_MATCHED` fold, and hands the lane to the
+write helper's own `== 8` branch, so the lane is the contract's equality test
+rather than a restated one. The matched fold is the identity on the accepted
+condition subset and the no-match sentinel elsewhere; both the sentinel and
+every unaccepted byte are rejected by `KPROG_X86_EVAL_CC`'s promoted comparison,
+so the route is the raw evaluation, which
+`x86_setcc_cond_matched_refines` in `X86SetccHandler.lean` machine-checks by
+sweeping every payload byte against every flag assignment (the handler's table
+`x86MatchedCodeTable` is written from the architectural condition names, so a
+transposed generated arm or a sentinel that collided with an accepted code
+fails the proof rather than the oracle); `X86_SIM_L_EXEC_SETCC_MEM` reads the
 condition through `KPROG_X86_SETCC_MEM_CONDITION`, forms the base through
 `KPROG_X86_SETCC_MEM_BASE`, selects the arm through `KPROG_X86_SETCC_MEM_ARM`
 over the destination's equality with `KPROG_X86_SETCC_MEM_RSP_REG`, and writes
@@ -1867,7 +1881,8 @@ simulator's routing of the `MOV_LOAD` body through the `KPROG_X86_MOV_LOAD_*`
 and `KPROG_X86_MEM_READ_SRC` contracts), the
 `MOV_STORE`/`SETCC`/`SETCC_MEM`/`MOVBE` handler
 compositions (and the simulator's routing of both `SETCC` bodies through the
-`KPROG_X86_SETCC_*` and `KPROG_X86_SETCC_MEM_*` contracts),
+`KPROG_X86_SETCC_*` and `KPROG_X86_SETCC_MEM_*` contracts, the register form's
+condition byte through the `KPROG_X86_SETCC_COND_MATCHED` fold),
 the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare

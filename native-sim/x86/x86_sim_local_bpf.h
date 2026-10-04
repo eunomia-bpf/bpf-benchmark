@@ -1654,7 +1654,11 @@ struct x86_sim_state {
  * absent register, and picks the stack helper from the register number. The
  * lane the register form selects is the contract's equality test, consumed by
  * the write helper's own `== 8` branch, so the C and the Lean step agree on
- * which byte receives the condition rather than restating the test. */
+ * which byte receives the condition rather than restating the test. The
+ * register form's condition byte passes through the contract's matched fold
+ * before the evaluation, which is the identity on the accepted subset and
+ * the no-match sentinel elsewhere; the Lean refinement pins that route to
+ * the raw evaluation. */
 #define X86_SIM_L_EXEC_SETCC_STEP(DST, AUX)                                  \
 	do {                                                                \
 		__u8 __x86_l_sc_shift =                                     \
@@ -1662,8 +1666,9 @@ struct x86_sim_state {
 		__u8 __x86_l_sc_lane = KPROG_X86_SETCC_LANE(                \
 			__x86_l_sc_shift);                                   \
 		X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),                      \
-			X86_SIM_L_EVAL_CC(                                  \
-				KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)),        \
+			X86_SIM_L_EVAL_CC(                                           \
+				KPROG_X86_SETCC_COND_MATCHED(                               \
+					KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX))),                     \
 			X86_WIDTH_8,                                        \
 			__x86_l_sc_lane == KPROG_X86_SETCC_LANE_HIGH        \
 				? 8U : 0U);                                 \

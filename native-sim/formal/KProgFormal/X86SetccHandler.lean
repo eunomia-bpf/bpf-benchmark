@@ -88,6 +88,70 @@ theorem x86_setcc_raw_unsupported (cc : BitVec 8) (flags : X86Flags)
     generatedX86SetccRaw flags cc = false := by
   simp [generatedX86SetccRaw, GeneratedX86Setcc.evalRaw, h]
 
+/-- The condition the executed matched fold's result denotes, stated over the
+16-bit word the C macro's promoted comparison sees. Each accepted code maps to
+the architectural condition of the same name; the no-match sentinel and every
+code outside the accepted subset map to `none`. The table is deliberately
+independent of the generated one: it is written from the architectural
+condition names, so a transposition in the generated fold fails the refinement
+below. -/
+def x86MatchedCodeTable (code : BitVec 16) : Option X86SetccCond :=
+  if code = 0 then some .o
+  else if code = 1 then some .no
+  else if code = 2 then some .b
+  else if code = 3 then some .ae
+  else if code = 4 then some .e
+  else if code = 5 then some .ne
+  else if code = 6 then some .be
+  else if code = 7 then some .a
+  else if code = 8 then some .s
+  else if code = 9 then some .ns
+  else if code = 12 then some .l
+  else if code = 13 then some .ge
+  else if code = 14 then some .le
+  else if code = 15 then some .g
+  else none
+
+/-- The whole routed condition: the matched fold's result interpreted through
+the architectural condition table, with the sentinel and any unaccepted code
+false, exactly as the C `KPROG_X86_EVAL_CC` default arm yields. -/
+def x86MatchedCondSpec (flags : X86Flags) (code : BitVec 16) : Bool :=
+  match x86MatchedCodeTable code with
+  | some cond => x86CondSpec flags cond
+  | none => false
+
+/-- The routed condition fold refines the raw condition evaluation for every
+payload byte. This is the machine-checked content of the simulator's
+`KPROG_X86_SETCC_COND_MATCHED` route: the generated matched fold is the
+identity on the accepted subset and the sentinel elsewhere, the sentinel and
+every unaccepted byte are rejected by the architectural table, and the accepted
+identity is the same condition the generated raw table denotes; the sweep
+covers every payload byte crossed with every flag assignment, so a transposed
+arm in the generated fold, a sentinel that collided with an accepted code, or a
+gap in the accepted subset all break it. -/
+theorem x86_setcc_cond_matched_refines (flags : X86Flags)
+    (payload : BitVec 8) :
+    x86MatchedCondSpec flags
+        (GeneratedX86Setcc.condMatchedCode payload) =
+      generatedX86SetccRaw flags payload := by
+  cases flags with
+  | mk cf zf sf of => decide +kernel +revert
+
+/-- Accepted matched codes hold on the architectural condition they name. -/
+theorem x86_setcc_cond_matched_accepted :
+    x86MatchedCondSpec ⟨true, false, true, false⟩ 12 = true := by
+  native_decide
+
+/-- The no-match sentinel is rejected, like the C default arm. -/
+theorem x86_setcc_cond_matched_sentinel_rejected :
+    x86MatchedCondSpec ⟨true, true, true, true⟩ 0xffff = false := by
+  native_decide
+
+/-- A parity code the subset drops is rejected too. -/
+theorem x86_setcc_cond_matched_parity_rejected :
+    x86MatchedCondSpec ⟨true, true, true, true⟩ 10 = false := by
+  native_decide
+
 /-- The lane table is an equality test, not a truthiness test: any destination
 shift other than exactly 8 selects the low byte. -/
 theorem x86_setcc_lane_not_eight (dstShift : BitVec 8) (h : dstShift != 8) :

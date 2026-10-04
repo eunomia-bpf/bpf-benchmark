@@ -48,6 +48,28 @@ def evalRaw (cf zf sf of : Bool) (cc : BitVec 8) : Bool :=
   match condOf cc with
   | some cond => evalCond cf zf sf of cond
   | none => false
+/-- The matched condition fold `KPROG_X86_SETCC_COND_MATCHED`: a code inside the
+accepted subset maps to itself, every other byte to the no-match sentinel. The
+identity on the subset is what makes routing the simulator's condition through
+this fold behaviour-preserving; the sentinel is rejected by every
+`KPROG_X86_EVAL_CC` arm, so a byte outside the subset keeps that macro's
+default. -/
+def condMatchedCode (cc : BitVec 8) : BitVec 16 :=
+  if cc = 0 then 0
+  else if cc = 1 then 1
+  else if cc = 2 then 2
+  else if cc = 3 then 3
+  else if cc = 4 then 4
+  else if cc = 5 then 5
+  else if cc = 6 then 6
+  else if cc = 7 then 7
+  else if cc = 8 then 8
+  else if cc = 9 then 9
+  else if cc = 12 then 12
+  else if cc = 13 then 13
+  else if cc = 14 then 14
+  else if cc = 15 then 15
+  else BitVec.ofNat 16 65535
 /-- The destination byte lane the handler writes. -/
 inductive Lane where
   | low

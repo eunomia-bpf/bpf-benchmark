@@ -8134,6 +8134,55 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0099 — x86 simulator routes the `SETCC` register-form condition byte through the checked matched fold
+
+- Scope: `X86_SIM_L_EXEC_SETCC_STEP` (`X86_SIM_L_EXEC_SETCC`, `X86_OP_SETCC`,
+  `0x16`) in `native-sim/x86/x86_sim_local_bpf.h`. The condition argument to
+  `X86_SIM_L_EVAL_CC` changes from the raw AUX payload byte
+  (`KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)`) to the generated matched fold
+  `KPROG_X86_SETCC_COND_MATCHED(KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX))`. This is
+  the last unconsumed function-like generated macro in the x86 residual set.
+  `X86_SIM_L_EXEC_SETCC_MEM` is deliberately left out of scope: its condition is
+  the AUX source-shift byte at bits 24..31 (`KPROG_X86_SETCC_MEM_CONDITION`), a
+  different byte with different semantics, already routed in Step 0097.
+- Equivalence is the point: `KPROG_X86_SETCC_COND_MATCHED` is the identity on
+  the 14 accepted condition codes and `KPROG_X86_SETCC_COND_NONE` (`0xffffU`)
+  elsewhere. As a promoted `int` the sentinel matches no `KPROG_X86_EVAL_CC`
+  arm and takes its `: 0` default, exactly the raw byte's behaviour for every
+  out-of-subset code, so the fold is the raw evaluation. This is machine-checked,
+  not asserted.
+- Generator `native-sim/formal/generate_x86_setcc_spec.py` gains
+  `MATCHED_NONE = 0xFFFF`; `render_lean` splices a `condMatchedCode` definition
+  (14 `else if cc = N then N` arms from `COND_ORDER`, defaulting to the
+  sentinel) after `evalRaw`; `render_c` emits `#define
+  KPROG_X86_SETCC_COND_NONE {cond_none}` followed by a reflecting
+  `_Static_assert`, so the sentinel value and the header cannot drift.
+  `generate_x86_setcc_spec.py --check` rc=0.
+- `KProgFormal/X86SetccHandler.lean` gains `x86MatchedCodeTable` (an independent
+  16-bit table over the architectural condition names, so a transposed generated
+  arm fails), `x86MatchedCondSpec`, `x86_setcc_cond_matched_refines` (proved by
+  `cases flags … decide +kernel +revert`, sweeping every payload byte against
+  every flag assignment), and three `native_decide` examples. The generated
+  olean is rebuilt (`lake build KProgFormal.GeneratedX86Setcc`) before the
+  handler module is elaborated.
+- Route oracle `test_x86_setcc_route_host.c` unchanged and still passes: the
+  cross-check compares the routed body against the independent lane-selected
+  write model, and the fold is the raw evaluation, so the case count is
+  unchanged at `x86 setcc route host cross-check: OK (2433038 cases)`. Handler
+  oracle `test_x86_setcc_host.c` unchanged at 590,726 cases.
+- Mutation harness `/tmp/mut_x86_setcc_cond_matched_route.py`: 13/13 as expected.
+  Generator `--check` catches the spec/generator/generated-header cond-code,
+  fold-arm and sentinel defects; the hand-Lean table-arm defect is caught by the
+  refinement modules; the route oracle catches the payload-bump misroute; and
+  two defects consistent across the generator *and both* regenerated artifacts
+  (`--check` blind) are caught only by the handler's refinement theorem via a
+  rebuilt olean. The pre-route revert to the raw payload byte SURVIVES, as the
+  equivalence claim it is. Post-restore sources byte-identical and both oracles
+  re-run clean.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0 (109 `cross-check: OK`).
+
 ## Next after 0076
 
 
