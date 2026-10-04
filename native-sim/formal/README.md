@@ -1768,6 +1768,9 @@ register-lane AUX layout,
 AArch64 packed-AUX layout,
 x86 stack-arena storage model,
 x86 stack-index frame-offset mapping,
+AArch64 stack-arena storage model (word-slot shift, alignment guard, and
+rounded-up word/tag-slot count for the `b`/`q` union) and AArch64
+stack-index frame-offset mapping,
 LEA, register-writing MOV, width-converting register MOV, shared memory
 read-dispatch (and the simulator's routing of its read path through
 `KPROG_X86_MEM_READ_SRC`), and the
@@ -1838,6 +1841,32 @@ in the trusted computing base. The sim-header route oracle drives the real
 decoders and packers against an independent `(aux >> 8k) & 0xff` restatement and
 the host cross-check drives the generated macros directly (1,115,374 and 586,829
 cases).
+
+The AArch64 stack-arena storage contract binds `KPROG_ARM64_STACK_WORD_INDEX`,
+`KPROG_ARM64_STACK_WORD_ALIGNED`, `KPROG_ARM64_STACK_WORDS`, and
+`KPROG_ARM64_STACK_TAG_SLOTS` — the arithmetic the simulator's stack helpers
+use to reach the arena, a union of two overlapping views
+(`__u8 b[ARM64_SIM_STACK_BYTES]` and
+`__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)]`, 160 bytes and 20
+qwords when the arena is enabled). `Arm64StackArena.lean` proves the generated
+word-slot shift and alignment guard equal independent quotient/remainder
+statements, proves the rounded-up word count covers the capacity without
+wasting a whole slot, proves a word-aligned index times eight round-trips, and
+proves the word arena's byte 0 is the value's low byte, so the 64-bit fast path
+through `q[]` and the byte path through `b[]` reach the same storage. The
+AArch64 stack-index contract binds `KPROG_ARM64_STACK_INDEX(OFF, BIAS)` and
+`KPROG_ARM64_STACK_PTR_INDEX(OFF, BIAS)`, the map from an abstract frame offset
+to a byte index in the biased arena: the offset is added to the bias
+(`ARM64_SIM_STACK_BIAS`, 96) and truncated to the helpers' 32-bit index type, so
+the frame base lands at index 0 and an offset of zero at byte `bias`.
+`Arm64StackIndex.lean` proves the generated truncation equal to an independent
+low-32-bits statement, proves the frame base lands at zero, proves the index is
+affine in the offset, and proves that two offsets differing by a multiple of
+`2^32` alias. The host cross-checks drive the *real* generated macros over
+capacity/index/value grids and exhaustive sweeps (70,558 and 536 cases), and the
+sim-header route oracle drives the real `ARM64_SIM_L_STACK_{INDEX,WRITE,
+WRITE_TAG,READ,READ_TAG,PTR}` helpers against an independently maintained byte
+and tag arena over the full frame window, every width and tag (2,754,329 cases).
 
 The correspondence between C unsigned bit operations and Lean `BitVec`
 operations remains a trusted language-semantics premise; these theorems do not

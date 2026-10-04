@@ -37,6 +37,8 @@
 #include "../formal/generated/arm64_byte_lane.h"
 #include "../formal/generated/arm64_mem_dispatch.h"
 #include "../formal/generated/arm64_stack_tag.h"
+#include "../formal/generated/arm64_stack_arena.h"
+#include "../formal/generated/arm64_stack_index.h"
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
@@ -153,18 +155,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #ifdef ARM64_SIM_ENABLE_STACK
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
 	union {                                                            \
-		__u8 b[160];                                              \
-		__u64 q[20];                                              \
+		__u8 b[ARM64_SIM_STACK_BYTES];                            \
+		__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];  \
 	} __a64_stack = {};                                            \
-	__u8 __a64_stack_tag[20] = {};                                  \
+	__u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)] = {};\
 	__s64 __a64_sp = 0
 #else
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
 	union {                                                            \
 		__u8 b[1];                                                \
-		__u64 q[1];                                               \
-	} __a64_stack = {};                                             \
-	__u8 __a64_stack_tag[1] = {};                                   \
+		__u64 q[KPROG_ARM64_STACK_WORDS(1U)];                     \
+	} __a64_stack = {};                                            \
+	__u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(1U)] = {};     \
 	__s64 __a64_sp = 0
 #endif
 
@@ -506,7 +508,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	KPROG_ARM64_ORN_VALUE((OP), (LHS), (RHS), (WIDTH),                 \
 			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
-#define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
+#define ARM64_SIM_L_STACK_INDEX(OFF)                                       \
+	KPROG_ARM64_STACK_INDEX(OFF, ARM64_SIM_STACK_BIAS)
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
 	({                                                                 \
@@ -514,8 +517,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
 		if (__a64_str_width == ARM64_WIDTH_64 &&                  \
-		    (__a64_str_index & 7U) == 0) {                        \
-			__a64_str_value = __a64_stack.q[__a64_str_index >> 3];\
+		    KPROG_ARM64_STACK_WORD_ALIGNED(__a64_str_index)) {    \
+			__a64_str_value =                                  \
+				__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_str_index)];\
 		} else {                                                   \
 			__a64_str_value =                                  \
 				KPROG_ARM64_LOAD_BYTES(&__a64_stack.b[__a64_str_index],\
@@ -529,8 +533,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u32 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_srt_width = (WIDTH);                           \
 		KPROG_ARM64_STACK_TAG(__a64_srt_width == ARM64_WIDTH_64,  \
-				      (__a64_srt_index & 7U) == 0)        \
-			? __a64_stack_tag[__a64_srt_index >> 3]           \
+				      KPROG_ARM64_STACK_WORD_ALIGNED(__a64_srt_index))\
+			? __a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index)]\
 			: ARM64_SIM_TAG_SCALAR;                           \
 	})
 
@@ -540,12 +544,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_stw_width = (WIDTH);                           \
 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
 		if (KPROG_ARM64_STACK_TAG(__a64_stw_width == ARM64_WIDTH_64,\
-					  (__a64_stw_index & 7U) == 0)) {  \
-			__a64_stack.q[__a64_stw_index >> 3] = __a64_stw_value;\
-			__a64_stack_tag[__a64_stw_index >> 3] = (TAG);    \
+					  KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index))) {\
+			__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = __a64_stw_value;\
+			__a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = (TAG);\
 		} else {                                                   \
-			if ((__a64_stw_index & 7U) == 0)                   \
-				__a64_stack_tag[__a64_stw_index >> 3] = ARM64_SIM_TAG_SCALAR;\
+			if (KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index))\
+				__a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = ARM64_SIM_TAG_SCALAR;\
 			__a64_stack.b[__a64_stw_index] =                   \
 				KPROG_ARM64_BYTE_AT(0, __a64_stw_value,    \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
@@ -582,7 +586,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	ARM64_SIM_L_STACK_WRITE_TAG((OFF), (WIDTH), (VALUE), ARM64_SIM_TAG_SCALAR)
 
 #define ARM64_SIM_L_STACK_PTR(OFF)                                         \
-	((void *)&__a64_stack.b[ARM64_SIM_STACK_BIAS + (__s64)(long)(OFF)])
+	((void *)&__a64_stack.b[KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS)])
 
 #define ARM64_SIM_L_HELPER_ARG_PTR(REG)                                    \
 	(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK ?                 \

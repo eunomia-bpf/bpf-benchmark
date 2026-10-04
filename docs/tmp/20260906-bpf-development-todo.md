@@ -7870,6 +7870,85 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   defects caught by the refinement module.
 - Full gate `make -C native-sim/formal check` rc=0.
 
+## Step 0094 — AArch64 simulator routes its stack arena and frame-index map through checked contracts
+
+- Scope: the AArch64 simulator's stack storage is a union arena of two
+  overlapping views (`__u8 b[ARM64_SIM_STACK_BYTES]` and
+  `__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)]`), and its stack
+  helpers (`ARM64_SIM_L_STACK_INDEX`, `_WRITE_TAG`, `_WRITE`, `_READ`,
+  `_READ_TAG`, `_PTR`) resolved an abstract frame offset to a byte index and to
+  a word slot / alignment guard / rounded-up slot count with arithmetic
+  restated inline in `arm64_sim_local_bpf.h`. The arena geometry and the
+  frame-offset→index map now come from two generated contracts, so the storage
+  arithmetic is no longer in the trusted computing base.
+- New `native-sim/formal/arm64_stack_arena_spec.json` (`operation
+  arm64StackArena`, `word_shift 3`, `word_mask "0x7"`, `capacity_round
+  "ceil8"`, `arena_alias "b-q-union"`) and `generate_arm64_stack_arena_spec.py`
+  (hard `EXPECTED` + `--check`, emitting `KProgFormal/GeneratedArm64StackArena.
+  lean` — `wordIndex`/`wordAligned`/`words` — and `generated/arm64_stack_arena.
+  h` — `KPROG_ARM64_STACK_WORD_INDEX`, `_WORD_ALIGNED`, `_WORDS`,
+  `_STACK_TAG_SLOTS`).
+- New `native-sim/formal/arm64_stack_index_spec.json` (`operation
+  arm64StackIndex`, `index_base "bias"`, `index_step 1`, `accumulate
+  "wrapping64"`, `index_mask_bits 32`) and `generate_arm64_stack_index_spec.py`
+  (`--check`, emitting `KProgFormal/GeneratedArm64StackIndex.lean` — `index
+  bias off := (bias + off).truncate 32`, `ptrIndex bias off := bias + off` — and
+  `generated/arm64_stack_index.h` — `KPROG_ARM64_STACK_INDEX(OFF, BIAS)`,
+  `KPROG_ARM64_STACK_PTR_INDEX(OFF, BIAS)`).
+- New `KProgFormal/Arm64StackArena.lean`: independent `arm64StackArenaWordIndex
+  Spec` (`index / 8`), `_WordAlignedSpec` (`index % 8 == 0`), `_WordsSpec`
+  (`cap>>>3 + remainder term`); refinement theorems
+  `arm64_stack_arena_word_index_refines`, `_word_aligned_refines`,
+  `_words_refines` (hypothesis `capacity ≤ BitVec.ofNat 32 (2^32 - 8)` for the
+  `+7` fold), `_views_coincide` (aligned index round-trip), `_lane0_agrees`
+  (the word path's byte 0 is the value's low byte), and the canonical examples
+  160→20, 1→1, 161→21, 96→slot 12, 1/159 unaligned, roundtrip.
+- New `KProgFormal/Arm64StackIndex.lean`: independent `arm64StackIndexSpec`
+  (`BitVec.setWidth 32 (bias + off)`); refinement `arm64_stack_index_refines`
+  (`unfold index arm64StackIndexSpec BitVec.truncate; bv_decide`),
+  `_frame_base` (`index bias (-bias) = 0`), `_base_is_bias`, `_step`,
+  `_mod_2_32`, `_ptr_truncation`/`_ptr_sum` (`rfl`), and the concrete bias-96
+  examples.
+- New `test_arm64_stack_arena_host.c` (contract oracle; generated macros only)
+  and `test_arm64_stack_index_host.c` (contract oracle; drives the real
+  generated macros against an independent unsigned-64 low-32 restatement over
+  frame base, arena top, below-base and high-32-bit-set offsets). Success lines
+  `arm64 stack arena host cross-check: OK (70558 cases)` and `arm64 stack index
+  host cross-check: OK (536 cases)`.
+- New `test_arm64_stack_arena_route_host.c` (sim-header oracle): includes the
+  real `arm64_sim_local_bpf.h` with `ARM64_SIM_ENABLE_STACK`, declares the real
+  stack, keeps an independent byte+tag arena model, and drives the real
+  `ARM64_SIM_L_STACK_{WRITE_TAG,WRITE,READ,READ_TAG,PTR}` macros, comparing the
+  whole simulator byte image, tag image, read value and read tag against the
+  model over the full frame window, every width and tag, plus sequential,
+  subword and pointer-distance sweeps. Success line `arm64 stack arena route
+  host cross-check: OK (2754329 cases)`.
+- `native-sim/arm64/arm64_sim.h`: `ARM64_SIM_STACK_BYTES 160U` added next to
+  `ARM64_SIM_STACK_BIAS 96LL`, so the arena capacity is named once.
+  `arm64_sim_local_bpf.h`: both `ARM64_SIM_L_DECLARE_STACK()` branches now use
+  `ARM64_SIM_STACK_BYTES`, `KPROG_ARM64_STACK_WORDS(...)` and
+  `KPROG_ARM64_STACK_TAG_SLOTS(...)` instead of the literals 160/20/1, and the
+  two generated headers are included.
+- `KProgFormal.lean` imports the four new modules. `native-sim/formal/Makefile`:
+  the two generator `--check`s, the four `lake env lean` lines, and the three
+  oracle build+run blocks added inside `check:`.
+- `native-sim/formal/README.md`: the AArch64 stack-arena/stack-index paragraph
+  and the contract-inventory list entry added.
+- `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: two routing sentences
+  added after the AUX paragraph.
+- Mutation harness `mut_arm64_stack_arena_route.py`: 23/23 DETECTED — the
+  spec/genpy word-shift, mask, round and pointer defects caught by `--check`;
+  the generated C slot/alignment/word-count/tag-slot and index/pointer-sign
+  defects caught by `--check`, the contract oracles and the route oracle; the
+  generated/handwritten Lean defects caught by the refinement modules; and the
+  simulator's stack-index bias, read-alignment guard, pointer-bias,
+  `ARM64_SIM_STACK_BYTES`, arena `b[]` size and tag-array declaration misroutes
+  caught by the route oracle.
+- Because `arm64_sim.h`, `arm64_sim_local_bpf.h` and both generated headers
+  changed, the sim was rebuilt: `make -C native-sim/arm64 micro-proofs-build`
+  rc=0 (every micro-prog `ok`).
+- Full gate `make -C native-sim/formal check` rc=0.
+
 ## Next after 0076
 
 
