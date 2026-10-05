@@ -116,7 +116,7 @@ Latest authoritative datasets are all complete: micro stage1, micro stage2,
 six-app corpus with BPF stats enabled, six-app corpus with BPF stats disabled,
 and six-app workload-only no-agent/no-eBPF baseline.
 
-![Corpus workload and BPF per-run cost](eval-native-corpus-combined-side-by-side-ns-bars.png)
+![Corpus workload and BPF per-run cost](../../figures/eval-native-corpus-combined-side-by-side-ns-bars.png)
 
 *Figure 1: Corpus end-to-end workload throughput and aggregate BPF per-run
 cost. The left subplot normalizes workload throughput to the no-agent/no-eBPF
@@ -124,9 +124,9 @@ baseline for each app. The right subplot reports raw aggregate BPF `ns/run`
 for the retained counter population (`run_cnt_delta >= 100`). For workload
 throughput, higher is better. For BPF `ns/run`, lower is better.*
 
-![Micro stage1 runtime](eval-native-micro-stage1-runtime.png)
+![Micro stage1 runtime](../../figures/eval-native-micro-stage1-runtime.png)
 
-![Micro stage2 runtime](eval-native-micro-stage2-runtime.png)
+![Micro stage2 runtime](../../figures/eval-native-micro-stage2-runtime.png)
 
 *Figures 2-3: Micro runtime normalized to kernel eBPF. Lower is faster.*
 

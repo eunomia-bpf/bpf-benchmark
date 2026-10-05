@@ -16,9 +16,9 @@ Validated result paths:
 - arm64 pure: `micro/results/aws_arm64_micro_20260521_023726_510990`; status=completed, programs=29, samples=[1], inner=[10], mismatches=0
 - arm64 stage2: `micro/results/aws_arm64_micro_20260521_024750_386500`; status=completed, programs=13, samples=[1], inner=[10], mismatches=0
 
-![AWS micro native_kernel speedup over kernel_bpf](../figures/aws-micro-native-kernel-vs-kernel-bpf-20260521.png)
+![AWS micro native_kernel speedup over kernel_bpf](../../figures/aws-micro-native-kernel-vs-kernel-bpf-20260521.png)
 
-![Micro native runtime KVM/AWS trend](../figures/micro-native-kernel-kvm-aws-trend-20260521.png)
+![Micro native runtime KVM/AWS trend](../../figures/micro-native-kernel-kvm-aws-trend-20260521.png)
 
 ## Trend read
 
