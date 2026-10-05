@@ -114,7 +114,7 @@ Conclusions:
 The native_lab attach pipeline added by this POC (event-driven
 `perf_event_open` + `PERF_EVENT_IOC_SET_BPF` for kprobe/uprobe,
 `bpf_raw_tracepoint_open` for raw_tp) is the runner-side change
-flagged in `stage2-status-20260518.md` as a "mechanical extension" of
+flagged in [`stage2-status-20260518.md`](../../docs/archive/kprog/stage2-status-20260518.md) as a "mechanical extension" of
 the existing TEST_RUN pipeline. The `bpf_x86_native_lab` kop module
 itself is unchanged; the stub program produced by `load_stub_prog` is
 the same `(sidecar; call kop)*N; exit` shape used by the bench's

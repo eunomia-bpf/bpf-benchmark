@@ -308,11 +308,11 @@ Ordering: #1 is the biggest win and worth doing first. #2 is medium.
 | `native-sim/test/Makefile` | build .bpf.o + .native.o |
 | `native-sim/test/run_stage2.sh` | in-VM sweep driver |
 | `native-sim/test/include/native_helpers.h` | helper externs + map macro stand-ins for MICRO_NATIVE |
-| `native-sim/x86/native_lab/docs/helpers-maps-design.md` | full design doc |
-| `native-sim/x86/native_lab/docs/stage2-status-20260518.md` | this file |
+| `docs/archive/kprog/helpers-maps-design.md` | full design doc |
+| `docs/archive/kprog/stage2-status-20260518.md` | this file |
 | `native-sim/x86/native_lab/native_link/src/main.rs` | linker: ELF reloc parsing, trampoline + pool emit |
 | `native-sim/x86/native_lab/results/stage2_sweep.txt` | raw sweep output |
-| `module/x86/bpf_x86_native_lab.c` | kernel module + side-band relocs file (deprecated, kept harmless) |
+| `kinsn/module/x86/bpf_x86_native_lab.c` | kernel module + side-band relocs file (deprecated, kept harmless) |
 | `runner/src/native_lab_runner.cpp` | runner: companion .bpf.o load, map ptr extraction, linker invocation |
 | `runner/src/common.cpp` | CLI option parsing additions |
 | `runner/include/micro_exec.hpp` | cli_options additions |

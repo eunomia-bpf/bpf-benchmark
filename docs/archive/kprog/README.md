@@ -12,6 +12,7 @@ at their original paths.
 | [arm64_native_kernel_all_apps_plan_20260529.md](arm64_native_kernel_all_apps_plan_20260529.md) | AArch64 corpus plan |
 | [aws_micro_native_kernel_vs_kernel_bpf_20260521.md](aws_micro_native_kernel_vs_kernel_bpf_20260521.md) | AWS micro comparison |
 | [eval_native_20260527.md](eval_native_20260527.md) | Earlier native evaluation draft |
+| [helpers-maps-design.md](helpers-maps-design.md) | Stage 2 helpers and maps mechanism detail |
 | [micro_native_runtime_report_20260514.md](micro_native_runtime_report_20260514.md) | Micro runtime report |
 | [native-formal-eval-todo-20260529.md](native-formal-eval-todo-20260529.md) | Formal evaluation tasks |
 | [native-loader-boundary-cleanup-20260528.md](native-loader-boundary-cleanup-20260528.md) | Loader boundary cleanup plan |
@@ -21,3 +22,4 @@ at their original paths.
 | [native_app_artifact_pipeline.md](native_app_artifact_pipeline.md) | Earlier artifact pipeline design |
 | [native_eval_20260529.py](native_eval_20260529.py), [summary](native_eval_20260529_summary.md) | Post-hoc May analysis and output |
 | [native_eval_20260614.py](native_eval_20260614.py), [summary](native_eval_20260614_summary.md) | Post-hoc June analysis and output |
+| [stage2-status-20260518.md](stage2-status-20260518.md) | Stage 2 status and follow-up plan |

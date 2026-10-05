@@ -2,7 +2,8 @@
 
 Last updated: 2026-06-26
 
-本文档是 `docs/source-opt/` 的执行手册。目标是系统性探索：在不使用
+本文档是源码优化实验的执行手册和结果索引；每次尝试的记录保存在
+[`docs/archive/shared/source-opt/`](../archive/shared/source-opt/README.md)。目标是系统性探索：在不使用
 `kop`、`bpfopt`、ReJIT、shim、LD_PRELOAD 或 native-loader 的前提下，
 只重写真实应用的 eBPF 源码，观察真实 app loader 加载优化后 BPF 程序时
 workload 是否改善。
@@ -14,7 +15,7 @@ workload 是否改善。
 - 每个 app 至少完成 1 个 clean-source baseline run 和 5 个独立源码优化
   attempt。
 - 每个 attempt 结束后，app 源码必须回到 attempt 前状态；只保留
-  `docs/source-opt/<app-slug>/YYYYMMDD-HHMMSS-<attempt-slug>/` 下的 patch、
+  `docs/archive/shared/source-opt/<app-slug>/YYYYMMDD-HHMMSS-<attempt-slug>/` 下的 patch、
   记录和结果路径。
 - agent 不运行 `git add`、`git commit`、`git push`。除只读状态检查外，不用
   git 命令修改工作区。
@@ -209,7 +210,7 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 
 ## 标准命令
 
-正式 run 参数对齐 `docs/eval_kop.md` 的 app-by-app corpus 设置，但禁用 ReJIT
+正式 run 参数对齐 `docs/kinsn/evaluation.md` 的 app-by-app corpus 设置，但禁用 ReJIT
 和 shim：
 
 ```sh
@@ -251,7 +252,7 @@ make corpus
 每个 app 有一个汇总目录，每次源码优化有独立 attempt 目录：
 
 ```text
-docs/source-opt/
+docs/archive/shared/source-opt/
   README.md
   <app-slug>/
     SUMMARY.md
@@ -413,7 +414,7 @@ attempt 文件含义：
    - 运行 `df -h . /var/lib/docker 2>/dev/null || df -h .`。
    - 如果有无关未提交改动，记录并避免触碰；如果影响目标 app，停止等待人工确认。
 2. 建立 app 汇总目录：
-   - 创建 `docs/source-opt/<app-slug>/SUMMARY.md`。
+   - 创建 `docs/archive/shared/source-opt/<app-slug>/SUMMARY.md`。
    - 记录目标 app、起点状态、baseline result、5 个 attempt 的状态。
 3. 跑 clean-source baseline：
    - 不改源码。
