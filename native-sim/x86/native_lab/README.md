@@ -71,7 +71,7 @@ native-sim/x86/native_lab/
                                       (gitignored)
 ```
 
-The kernel-side kop module lives at `module/x86/bpf_x86_native_lab.c`
+The kernel-side kop module lives at `kinsn/module/x86/bpf_x86_native_lab.c`
 because the project's existing kop build pipeline auto-scans that
 directory. Conceptually it's part of this research line; physically it
 sits with the other kop modules so `make host-kop-x86` picks it up.

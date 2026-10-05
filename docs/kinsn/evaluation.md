@@ -153,7 +153,7 @@ Latest authoritative datasets are complete: six corpus apps with BPF stats
 enabled and six corpus apps with BPF stats disabled. All app artifacts
 completed with `status=ok` and empty app error strings.
 
-![KOperation corpus workload, BPF cost, and apply coverage](figures/eval-kop-corpus-20260604.png)
+![KOperation corpus workload, BPF cost, and apply coverage](../figures/eval-kop-corpus-20260604.png)
 
 *Figure 1: x86 KVM kop corpus result. Workload throughput uses
 post/baseline ratios from stats-off artifacts, higher is better. BPF cost uses
@@ -280,7 +280,7 @@ The tuned run used the same setup as the authoritative corpus runs:
 `corpus/results/x86_kvm_corpus_20260604_232313_992341`; the stats-off artifact
 is `corpus/results/x86_kvm_corpus_20260605_004607_636479`.
 
-![Per-app tuned kop result](figures/eval-kop-tuned-3app-20260605.png)
+![Per-app tuned kop result](../figures/eval-kop-tuned-3app-20260605.png)
 
 *Figure 2: per-app tuned kop result for Cilium, Katran, and Tracee.
 Workload ratios use stats-off artifacts, higher is better. BPF cost ratios use
@@ -631,7 +631,7 @@ Artifact:
 The reference coverage-max artifact without `ccmp` is
 `corpus/results/aws_arm64_corpus_20260605_085337_334187`.
 
-![arm64 AWS kop follow-up](figures/eval-kop-arm64-aws-20260605.png)
+![arm64 AWS kop follow-up](../figures/eval-kop-arm64-aws-20260605.png)
 
 *Figure 3: arm64 AWS coverage-max follow-up. OTel and Tetragon are shown as
 `n/a` for workload/BPF ratios because they failed naturally during startup or
@@ -765,14 +765,14 @@ Cilium/Katran native evidence.
 
 Post-hoc script and generated data:
 
-- Script: `docs/tmp/kop_eval_20260604.py`
-- Summary: `docs/tmp/kop_eval_20260604_summary.md`
+- Script: `docs/archive/shared/kop_eval_20260604.py`
+- Summary: `docs/archive/kinsn/kop_eval_20260604_summary.md`
 - Figure: `docs/figures/eval-kop-corpus-20260604.png`
 - Tuned 3-app figure:
   `docs/figures/eval-kop-tuned-3app-20260605.png`
-- arm64 follow-up script: `docs/tmp/kop_arm64_eval_20260605.py`
+- arm64 follow-up script: `docs/archive/shared/kop_arm64_eval_20260605.py`
 - arm64 follow-up summary:
-  `docs/tmp/kop_arm64_eval_20260605_summary.md`
+  `docs/archive/kinsn/kop_arm64_eval_20260605_summary.md`
 - arm64 follow-up figure:
   `docs/figures/eval-kop-arm64-aws-20260605.png`
 
@@ -821,7 +821,7 @@ above.
 **2026-06-03 all-force result.** Artifact
 `corpus/results/x86_kvm_corpus_20260603_175429_964295`; smoke alias artifact
 `corpus/results/x86_kvm_corpus_20260603_185015_116803`; post-hoc script
-`docs/tmp/kop_all_force_eval_20260603.py`; figure
+`docs/archive/shared/kop_all_force_eval_20260603.py`; figure
 `docs/figures/eval-kop-all-force-corpus-20260603.png`. It completed all six
 apps with `status=ok`, applied `27,085` sites across `631` applied loadtime
 rows, and reported `1.081x` workload geomean, `0.938x` all-qualified BPF
@@ -832,7 +832,7 @@ still too narrow for real corpus bytecode shapes.
 
 **2026-06-02 LEA result.** Artifact
 `corpus/results/x86_kvm_corpus_20260602_141656_778399`; post-hoc script
-`docs/tmp/kop_eval_20260602.py`; figure
+`docs/archive/shared/kop_eval_20260602.py`; figure
 `docs/figures/eval-kop-lea-corpus-20260602.png`. This SAMPLES=1 LEA-only
 run completed all six apps with `status=ok`, applied `22,476` LEA sites, and
 reported `1.187x` workload geomean, `0.860x` all-qualified BPF geomean, and

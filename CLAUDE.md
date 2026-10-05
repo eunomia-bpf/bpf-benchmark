@@ -99,7 +99,7 @@ current state first and collapse only duplicated/obsolete narrative.
 
 Active architecture: stock-kernel userspace path in `bpfopt/shim/` (full
 design in `docs/rejit-speculative-optimization-ebpf_idea.md`); historical
-daemon/ReJIT designs under `docs/tmp/` are not authoritative — no
+daemon/ReJIT designs under `docs/archive/` are not authoritative — no
 `bpfrejit-daemon`, `BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`, or
 project-fork syscall dependency. `libbpfrejit_shim.so` is injected into the
 app process and intercepts its BPF syscalls, capturing the original

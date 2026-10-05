@@ -6,7 +6,7 @@
 
 ## 结论摘要
 
-- 当前 `tests/unittest/` 一共 **24** 个 test source（`23` 个 `rejit_*.c` + `1` 个 `module/rejit_*.c`），由 [`tests/unittest/Makefile`](../../../tests/unittest/Makefile) 自动发现。
+- 当前 `tests/unittest/` 一共 **24** 个 test source（`23` 个 `rejit_*.c` + `1` 个 `module/rejit_*.c`），由 [`tests/unittest/Makefile`](../../../../tests/unittest/Makefile) 自动发现。
 - **REJIT syscall 主路径覆盖较强**：有 PoC、21 个 prog_type、12 个 hotswap 场景、tail call、swap/metadata、并发、若干 kernel bug regression。
 - **kernel module unittest 明显不均衡**：`rotate/select/extract/endian/barrier` 有一定覆盖；`x86/arm64 bulk_memory` 和 `arm64 bpf_ldp` **完全没有 unittest 命中**。
 - **daemon 集成在当前 unittest 中是空白**：没有任何 `tests/unittest/*` 直接启动 `bpfrejit-daemon` 的 `apply/apply-all/watch/serve` 路径。最接近的只是“模拟 daemon pass pattern”或“回放 past daemon bug”的测试。

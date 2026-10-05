@@ -49,23 +49,23 @@ This is not safe.
 
 - The prepared state owns the loaded `bpf_object`, program FDs, program info,
   REJIT state, and per-program fixture state
-  ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2558)).
+  ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2558)).
 
 - Runtime measurement mutates shared state before and during execution:
   - fixture initialization writes into object maps
-    ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2751),
-    [runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L334));
+    ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2751),
+    [runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L334));
   - runtime map I/O updates `input_map` and `result_map`
-    ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L3141));
+    ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L3141));
   - daemon REJIT and bytecode REJIT mutate the loaded program FD and cached
     `program_info/rejit_*` fields in-place
-    ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2797),
-    [runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2824),
-    [runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L3097),
-    [runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L3346));
+    ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2797),
+    [runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2824),
+    [runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L3097),
+    [runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L3346));
   - attach-mode measurement temporarily attaches the program and enables BPF
     runtime stats
-    ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2945)).
+    ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2945)).
 
 Two concurrent jobs sharing one prepared handle would race on map contents,
 REJIT state, and derived metadata even before considering benchmark noise.
@@ -79,7 +79,7 @@ Reasons:
 
 - `prepare_kernel()` performs real kernel work: `bpf_object__open_file`,
   `bpf_object__load`, program discovery, and sometimes REJIT application
-  ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L3416)).
+  ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L3416)).
   That is not a cheap bookkeeping stage; it allocates maps/programs and drives
   verifier/JIT activity while the measured job is active.
 
@@ -87,14 +87,14 @@ Reasons:
   `run_kernel()` path already contains a comment explaining that even an idle
   gap between stock and REJIT phases was enough to cause CPU-frequency
   regression, so daemon REJIT is forced before measurement
-  ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L3714)).
+  ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L3714)).
   A background prepare thread would add more concurrent activity, not less.
 
 - The measurement path records `rdtsc`-derived wall time and optionally perf
   counters around the measured callback
-  ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L414),
-  [runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L453),
-  [runner/src/perf_counters.cpp](../../../runner/src/perf_counters.cpp#L82)).
+  ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L414),
+  [runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L453),
+  [runner/src/perf_counters.cpp](../../../../runner/src/perf_counters.cpp#L82)).
   Concurrent prepare work can perturb:
   - CPU scheduling and runnable pressure
   - turbo/frequency behavior
@@ -118,7 +118,7 @@ the corpus benchmark.
 `prepared_kernel_store` retains `prepared_kernel_handle`s until group cleanup
 ([runner/src/batch_runner.cpp](../../../runner/src/batch_runner.cpp#L140)).
 Each handle keeps the loaded `bpf_object`, program FDs, and map FDs alive
-([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2569)).
+([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2569)).
 
 Today the scheduler intentionally keeps one active prepared group at a time
 ([runner/src/batch_runner.cpp](../../../runner/src/batch_runner.cpp#L1129),
@@ -138,12 +138,12 @@ Risks:
 Runtime execution rewrites per-object state:
 
 - `result_map` is reset before each test run
-  ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L381)).
+  ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L381)).
 - `input_map` / `result_map` are updated for map-mode jobs
-  ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L3141)).
+  ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L3141)).
 - fixture loading writes object maps
-  ([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L1278),
-  [runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2751)).
+  ([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L1278),
+  [runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2751)).
 
 This makes same-handle overlap unsafe, and it also means pipelined lifetime
 management must never accidentally allow two jobs to share one prepared state
@@ -152,9 +152,9 @@ concurrently.
 ### Instruction-image and I-cache effects
 
 REJIT changes the program image in-place on the loaded program FD
-([runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2797),
-[runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L2824),
-[runner/src/kernel_runner.cpp](../../../runner/src/kernel_runner.cpp#L3346)).
+([runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2797),
+[runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L2824),
+[runner/src/kernel_runner.cpp](../../../../runner/src/kernel_runner.cpp#L3346)).
 
 Even when two jobs use different prepared handles, concurrent `bpf_object__load`
 / verifier / JIT work can perturb shared instruction and last-level cache state

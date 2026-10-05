@@ -79,6 +79,18 @@ Microbenchmarks isolate pure-bytecode execution, helpers, maps, packet parsing,
 branch behavior, and architecture-sensitive lowering under
 `BPF_PROG_TEST_RUN`.
 
+## Research Projects
+
+| Project | Code | Current design | Current results | Build and run |
+| --- | --- | --- | --- | --- |
+| **kprog**: native whole-program execution | [`native-sim/`](native-sim/README.md) (loader, linker, simulator, Lean) | [design](docs/kprog/design.md) | [evaluation](docs/kprog/evaluation.md) | [project guide](docs/kprog/README.md) |
+| **kinsn**: verified inline kfuncs | [`kinsn/module/`](kinsn/module/), [`bpfopt/llvm/`](bpfopt/llvm/README.md) | [design](docs/kinsn/design.md) | [evaluation](docs/kinsn/evaluation.md) | [project guide](docs/kinsn/README.md) |
+| **Speculative ReJIT** | [`bpfopt/`](bpfopt/), [`runner/`](runner/) | [design](docs/rejit-speculative-optimization-ebpf_idea.md) | [evaluation](docs/evaluation.md) | [project guide](docs/rejit/README.md) |
+| **Shared framework** | [`corpus/`](corpus/), [`micro/`](micro/), [`bpfperf/`](bpfperf/), [`analysis/`](analysis/) | [design](docs/shared/design.md) | [results guide](docs/shared/evaluation.md) | [Make targets](#running-benchmarks) |
+
+Historical plans and dated reports are grouped in the [archive](docs/archive/README.md).
+The [moved-path table](docs/MOVED.md) maps every renamed file for external references.
+
 ## Repository Layout
 
 ```text
@@ -88,14 +100,15 @@ bpf-benchmark/
 ├── corpus/                   # Production app corpus, workloads, results
 ├── micro/                    # Microbenchmark programs, configs, results
 ├── bpfopt/                   # Bytecode optimizer, loader, target probing tools
-├── module/                   # KOperation native-operation modules for x86 and arm64
+├── kinsn/module/             # Inline-kfunc modules for x86 and arm64
+├── native-sim/               # kprog simulator, native loader/linker, Lean proofs
 ├── analysis/                 # Post-hoc analysis utilities
 ├── tests/                    # Selftests and negative tests
 ├── docs/                     # Design notes, reports, and paper material
 └── vendor/                   # Vendored kernel, libbpf, llvmbpf, app deps
 ```
 
-The low-level optimizer design notes are documented under [`docs/tmp/`](docs/tmp/).
+The current designs and historical notes are linked in the project table above.
 Runtime image layering and host/runtime boundaries are documented in
 [`runner/containers/README.md`](runner/containers/README.md).
 
@@ -214,7 +227,7 @@ Results are written to:
 
 - `micro/results/`
 - `corpus/results/`
-- `docs/tmp/` for analysis reports only, not raw JSON results
+- `docs/archive/` for historical reports, not raw JSON results
 
 Executor logs and transient staging state live under `.cache/`; those
 directories are not benchmark result roots.

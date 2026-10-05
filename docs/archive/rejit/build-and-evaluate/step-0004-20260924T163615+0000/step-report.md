@@ -29,7 +29,7 @@ commands, and scope decisions are in
 [`experiment-001/plan-review.md`](experiment-001/plan-review.md).
 
 The new analysis-side tool
-[`analysis/speculative_workload_history.py`](../../../../analysis/speculative_workload_history.py)
+[`analysis/speculative_workload_history.py`](../../../../../analysis/speculative_workload_history.py)
 reads a declared Git revision, selects app artifacts deterministically, checks
 the completed load-time lifecycle and exact policy, parses raw pktgen or
 stress-ng output, reports invalid rows, maps each artifact to its introducing
@@ -66,7 +66,7 @@ of per-site engagement.
 
 The speculative paper's RQ1 placeholder now contains a four-row result table,
 raw interval provenance, run-level uncertainty, and the non-causal scope.  Its
-README and the parent [`docs/evaluation.md`](../../../evaluation.md) now point
+README and the parent [`docs/evaluation.md`](../../../../evaluation.md) now point
 to the verified frontier.  No title, thesis, RQ meaning, mechanism claim, or
 paper structure changed.
 

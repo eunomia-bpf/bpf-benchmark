@@ -118,4 +118,4 @@ make -C bpfopt/shim host-selftest
 
 The paper-line design hub is
 `docs/rejit-speculative-optimization-ebpf_idea.md`. Historical daemon and early
-shim PoCs under `docs/tmp/` are background records, not current specifications.
+shim PoCs under `docs/archive/` are background records, not current specifications.

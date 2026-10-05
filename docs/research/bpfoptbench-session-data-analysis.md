@@ -48,7 +48,7 @@ The analysis used five local sources:
 | Source | What It Provides | Main Limitation |
 |---|---|---|
 | `corpus/results/*/details/result.json` | Historical and current benchmark artifacts. | Mixed legacy/v3 schemas; older artifacts include summaries that are no longer allowed in framework code. |
-| `docs/tmp/*.md` and `docs/tmp/active/*.md` | Human analysis of pass signal, policy iteration, and corpus stability. | Post-hoc notes, not a frozen benchmark dataset. |
+| `docs/archive/shared/*.md` and `docs/archive/shared/active/*.md` | Human analysis of pass signal, policy iteration, and corpus stability. | Post-hoc notes, not a frozen benchmark dataset. |
 | `~/.codex/history.jsonl` and `~/.codex/session_index.jsonl` | Local prompt/session history related to this repo and adjacent eBPF agent work. | Useful for task taxonomy, not scored outcomes. Raw prompts should not be quoted into a public artifact. |
 | `~/.agentsight/monitor/monitor-2026-W25.db` | Current-week agent process monitor metadata. | No direct `bpf-benchmark`/`bpfopt`/`rejit`/`kop` cwd or command matches in the tracked sessions. |
 | BPFix/verifier-repair data from the adjacent verifier-agent project | Evidence that structured verifier feedback can help repair tasks. | It is a different benchmark problem; it should be cited only as methodological precedent. |
@@ -105,7 +105,7 @@ The strongest existing performance evidence is not "optimizer wins"; it is
 
 ### Noop And ReJIT Floors
 
-`docs/tmp/pass_signal_audit_20260508.md` records completed no-op and
+`docs/archive/shared/pass_signal_audit_20260508.md` records completed no-op and
 skip-ReJIT floor measurements:
 
 | Run | Retained Programs | Method B Ratio | W/L/T | Interpretation |
@@ -137,7 +137,7 @@ performance improvement.
 
 ### Corpus-Wide Flat Result
 
-`docs/tmp/corpus-performance-analysis-20260428.md` records a cleaner full-corpus
+`docs/archive/shared/corpus-performance-analysis-20260428.md` records a cleaner full-corpus
 run:
 
 | Metric | Value |
@@ -157,8 +157,8 @@ agent benchmark should expose.
 
 ### Policy Iteration Evidence
 
-`docs/tmp/2026-03-11/corpus-tuned-policy-comparison.md` and
-`docs/tmp/active/policy-iteration-rounds.md` show that policy selection matters:
+`docs/archive/shared/2026-03-11/corpus-tuned-policy-comparison.md` and
+`docs/archive/shared/active/policy-iteration-rounds.md` show that policy selection matters:
 
 | Evidence | Result |
 |---|---|

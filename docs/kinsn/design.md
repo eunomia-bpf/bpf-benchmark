@@ -6,9 +6,9 @@
 > 共用 `bpfrejit-daemon`;该 daemon 已删除。本文后部仍出现 daemon/ReJIT
 > 的内容是 KOperation 旧实验沿革,不能用于描述当前 speculative paper。
 >
-> 本文档是 KOperation 论文线索的单一 hub。详细机制设计见 `docs/tmp/kop-design.md`,
-> 形式化语义见 `docs/tmp/kop-formal-semantics.md`,工程实现细节见各 pass 的
-> `docs/tmp/*kop*` 调研报告。
+> 本文档是 KOperation 论文线索的单一 hub。详细机制设计见 `docs/archive/kinsn/kop-design.md`,
+> 形式化语义见 `docs/archive/kinsn/kop-formal-semantics.md`,工程实现细节见各 pass 的
+> `docs/archive/kinsn/` 中的 kop 调研报告。
 
 ## 项目背景:三个姐妹 idea
 
@@ -18,8 +18,8 @@ corpus、micro 套件和测量基础设施),但用不同的设计解决不同的
 | # | Idea | Hub 文档 |
 |---|---|---|
 | 1 | Speculative eBPF optimization(纯用户态) | `docs/rejit-speculative-optimization-ebpf_idea.md` |
-| 2 | **KOperation**(本文档)—— 新 OS 抽象,让 eBPF 贴近硬件 | `docs/kop_idea.md` |
-| 3 | NativeBPF(eBPF 里的 x86/arm native simulator) | `docs/nativebpf_idea.md` |
+| 2 | **KOperation**(本文档)—— 新 OS 抽象,让 eBPF 贴近硬件 | `docs/kinsn/design.md` |
+| 3 | NativeBPF(eBPF 里的 x86/arm native simulator) | `docs/kprog/design.md` |
 
 这三个 idea 不是同一个设计的递进版本。每个各自挑了一个不同的问题、一个在 trust /
 内核暴露面 / 覆盖面空间里不同的位置,以及一个不同的设计核心。
@@ -91,7 +91,7 @@ eBPF 指令扩展面**。
 
 ## 4. 机制速写
 
-详细机制设计见 `docs/tmp/kop-design.md`。这里是简短速写:
+详细机制设计见 `docs/archive/kinsn/kop-design.md`。这里是简短速写:
 
 - `struct bpf_kop` 是每条 kop 的 descriptor:
   - `instantiate_insn(payload, insn_buf)`:产出 canonical BPF-visible proof sequence。
@@ -108,13 +108,13 @@ eBPF 指令扩展面**。
   引用它 kfunc 的程序,JIT 也永远看不到它们。在程序已加载之后再卸载,在飞的程序继续
   执行已经 emit 出的 native 代码。
 
-形式化语义:`docs/tmp/kop-formal-semantics.md`。
+形式化语义:`docs/archive/kinsn/kop-formal-semantics.md`。
 
 ### 4.1 内核源码触点(rejit-v2 分支 / kop 子集)
 
 `vendor/linux-framework/rejit-v2` 分支的 kop 子集——即仅 kop 的内核暴露面——触及
 以下文件。(REJIT 专属文件属于正交的 speculative-optimization 论文线,本篇刻意排除;
-见 `docs/nativebpf_idea.md` 中关于 kernel-ABI 变体的讨论,以及内核 worktree 里的
+见 `docs/kprog/design.md` 中关于 kernel-ABI 变体的讨论,以及内核 worktree 里的
 `docs/kop-only` 分支。)
 
 | 文件 | 职责 |
@@ -149,8 +149,8 @@ kop 暴露面是刻意有界的。覆盖决策由 corpus 证据驱动:只有当�
 | `bpf_ldp128` / `bpf_stp128` | **仅 arm64** | 已实现 | ARM64 corpus store-pair 密度高;当前 JIT 0 个 LDP/STP | `arm64_ldp_stp_kop_design_20260326.md`、`arm64_bpf_ldp_module_report_20260326.md`;x86 dispatch 到 `rep movsb`(见 `x86_128bit_wide_loadstore_design_20260326.md`) |
 | `bpf_bulk_memory` | x86 / arm64 | 已实现 | corpus 40 / 74 / 360 / 464 B 连续 copy/zero runs | `simd_kop_design_20260324.md`;x86 用 `rep movsb/stosb`,ARM64 用 LDP/STP,均 no-FPU |
 | `bpf_ccmp` | arm64 | 已设计(第一波) | **4957 sites,6228 条省下的分支** | `arm64_kop_research_20260329.md`;受限的第一波,避免通用变长 compare-chain |
-| `bpf_prefetch` (PrefetchV2) | x86 / arm64 | 已实现,默认 pass | 17391 个 `map_lookup_elem` + 21 个 `map_lookup_percpu_elem` 潜在 site;hot+missy site 预期 2.5-25ns/exec | `docs/tmp/p89_prefetchv2_impl.md`、`memory_hints_kop_research_20260329.md`、`prefetch_kop_design_20260329.md` |
-| `bpf_lea{32,64}` | **仅 x86** | 实验性 | Katran `lea` 122 applied,bytes 13629→13277,BPF counter ratio 1.0487 | `docs/tmp/lea_kop_design_census_20260513.md`(详 §5.1 收窄决定) |
+| `bpf_prefetch` (PrefetchV2) | x86 / arm64 | 已实现,默认 pass | 17391 个 `map_lookup_elem` + 21 个 `map_lookup_percpu_elem` 潜在 site;hot+missy site 预期 2.5-25ns/exec | `docs/archive/shared/p89_prefetchv2_impl.md`、`memory_hints_kop_research_20260329.md`、`prefetch_kop_design_20260329.md` |
+| `bpf_lea{32,64}` | **仅 x86** | 实验性 | Katran `lea` 122 applied,bytes 13629→13277,BPF counter ratio 1.0487 | `docs/archive/kinsn/lea_kop_design_census_20260513.md`(详 §5.1 收窄决定) |
 
 **明确不做 / 推迟**(附理由 + 调研引用):
 
@@ -164,15 +164,15 @@ kop 暴露面是刻意有界的。覆盖决策由 corpus 证据驱动:只有当�
 | UBFX / BFI | UBFX 321 total / 74 with-copy;BFI 0 | UBFX 应扩展现有 `extract` pass 覆盖 copy form;BFI 0 site 不做。`arm64_kop_research_20260329.md` |
 | RDTSC / RDTSCP | 不适合默认 | cycles 不是 portable monotonic ns;不适合 `bpf_ktime_get_ns()` 透明 rewrite;若做应显式 opt-in。`rdtsc_adc_kop_research_20260329.md` |
 | ADC / SBB | 917 个 `.bpf.o` 扫描:add carry-chain 0、sub borrow-chain 0 | 短期不进默认 pipeline。`rdtsc_adc_kop_research_20260329.md` |
-| SETcc / CSET | **supported runtime corpus 9417 sites**(Tetragon 8832、Cilium 401、Calico 91、BCC 79);raw census 28653 sites | 比较结果直接存 0/1,不需要 branch+mov。standalone boolean-set 不被现 `COND_SELECT` 覆盖,应独立 kop。**调研完成待实现**:`docs/tmp/setcc_cset_kop_research_20260430.md` |
-| ANDN | 957 个 `.bpf.o` 扫描:去重后 45 sites(Tracee 30 + Cilium 14) | 全部需 liveness proof;热路径上限 ~1.0M site/s × 2 cycles ≈ 0.07% 单核增量。不做第一波。`docs/tmp/andn_kop_research_20260430.md` |
-| BLSI / BLSR / BLSMSK | 957 个 `.bpf.o` 扫描:BLSI 3 + BLSR 3 + BLSMSK 0(全部来自已移除 scx_lavd_main);supported app 为 0 | 当前 8-app corpus 无 exact site,后续 phase。`docs/tmp/bls_kop_research_20260430.md` |
+| SETcc / CSET | **supported runtime corpus 9417 sites**(Tetragon 8832、Cilium 401、Calico 91、BCC 79);raw census 28653 sites | 比较结果直接存 0/1,不需要 branch+mov。standalone boolean-set 不被现 `COND_SELECT` 覆盖,应独立 kop。**调研完成待实现**:`docs/archive/kinsn/setcc_cset_kop_research_20260430.md` |
+| ANDN | 957 个 `.bpf.o` 扫描:去重后 45 sites(Tracee 30 + Cilium 14) | 全部需 liveness proof;热路径上限 ~1.0M site/s × 2 cycles ≈ 0.07% 单核增量。不做第一波。`docs/archive/kinsn/andn_kop_research_20260430.md` |
+| BLSI / BLSR / BLSMSK | 957 个 `.bpf.o` 扫描:BLSI 3 + BLSR 3 + BLSMSK 0(全部来自已移除 scx_lavd_main);supported app 为 0 | 当前 8-app corpus 无 exact site,后续 phase。`docs/archive/kinsn/bls_kop_research_20260430.md` |
 | PAUSE / YIELD | corpus 几乎无 BPF-level busy-wait | 内核 BPF spinlock helper 内部已有 PAUSE/WFE,kop 无增量价值。`pause_yield_kop_research_20260329.md` |
 | FPU SIMD (x86) | x86 corpus 绝大多数 copy/store ≤128B,break-even ≥数百字节 | `kernel_fpu_begin/end` XSAVE/XRSTOR ~200-800 cycles,pair load/store 远超收益。`simd_fpu_kop_deep_research_20260326.md` |
 | NEON SIMD (arm64) | 仅 ≥1KiB + `may_use_simd()` 可考虑 | no-FPU LDP/STP 优先;Linux crypto 模式(per-op fpu_begin/end)不适用于 BPF 细粒度调用。同上 |
 | NT store | corpus 无明确 streaming write 场景 | 不值得。`memory_hints_kop_research_20260329.md` |
-| Region kop(寄存器扩展) | Cilium/Calico Jenkins/hash 信号,Tetragon byte-pack/decoder;上界 census 24/1/175 clusters | 高寄存器压力代码段包装为 region kop。首版限定 pure scalar N→1 无内存/stack/packet/map 写、无 helper/call,等 kop v3 / region ABI 收敛。`docs/tmp/region_kop_research_20260430.md` |
-| 除法强度削减(常量除数 → shift+mul) | 957 .bpf.o:DIV/MOD 共 1269 sites,K 812 / X 457;Cilium `/1e9` 占 553 | 纯 bytecode 需 64×64→128 mulhi emulation,先等 per-site profile 或 native mulhi/kop。`docs/tmp/division_reduction_research_20260430.md` |
+| Region kop(寄存器扩展) | Cilium/Calico Jenkins/hash 信号,Tetragon byte-pack/decoder;上界 census 24/1/175 clusters | 高寄存器压力代码段包装为 region kop。首版限定 pure scalar N→1 无内存/stack/packet/map 写、无 helper/call,等 kop v3 / region ABI 收敛。`docs/archive/kinsn/region_kop_research_20260430.md` |
+| 除法强度削减(常量除数 → shift+mul) | 957 .bpf.o:DIV/MOD 共 1269 sites,K 812 / X 457;Cilium `/1e9` 占 553 | 纯 bytecode 需 64×64→128 mulhi emulation,先等 per-site profile 或 native mulhi/kop。`docs/archive/shared/division_reduction_research_20260430.md` |
 
 决策规则:一条新 kop 必须具备非平凡的受支持 corpus site 数量(粗略下限:数百个)、
 在插入点处有可隔离出来的、大于插入带来的 I-cache 与 verifier 重跑成本的性能收益,以及
@@ -180,7 +180,7 @@ kop 暴露面是刻意有界的。覆盖决策由 corpus 证据驱动:只有当�
 
 ### 5.1 LEA / 地址生成的收窄决定(2026-05-13)
 
-详细 design doc:`docs/tmp/lea_kop_design_census_20260513.md`。
+详细 design doc:`docs/archive/kinsn/lea_kop_design_census_20260513.md`。
 
 **状态**:作为一个仅 x86 的 kop 实验实现。在项目"不改核心 JIT"政策下,**不走核心
 内核 JIT peephole 路线**。ARM64 不实现 LEA,也不应对外暴露 `bpf_lea{32,64}`。
@@ -314,7 +314,7 @@ workload profile data.
   kop 数量增长,审计成本随之累积。
 - 一个与 native emit 不等价的 proof sequence,会对任何使用该 kop 的程序静默违反 verifier
   soundness。每条 kop 的形式化语义文档与 translation-validation 工作
-  (`docs/tmp/kop-formal-semantics.md`)是缓解办法。
+  (`docs/archive/kinsn/kop-formal-semantics.md`)是缓解办法。
 - 随 workload 自适应的插入需要可靠的 per-site profile 数据。idea #1 的 `bpfprof
   --per-site` pipeline 是其来源;如果某个部署上 PMU 数据不可靠,策略敏感的 kop 必须
   回退到一个保守默认值,而不是去猜。
@@ -324,12 +324,12 @@ workload profile data.
 
 ## 10. 交叉引用
 
-- 机制设计:`docs/tmp/kop-design.md`
-- 形式化语义与 translation validation:`docs/tmp/kop-formal-semantics.md`
-- proof lowering 设计:`docs/tmp/20260323/kop_v2_instantiate_design_20260323.md`
-- 实现审计:`docs/tmp/20260323/kop_implementation_review_20260323.md`
-- 每条 kop 的调研与决策:`docs/tmp/*kop*`(rotate、cond_select、extract、endian、
+- 机制设计:`docs/archive/kinsn/kop-design.md`
+- 形式化语义与 translation validation:`docs/archive/kinsn/kop-formal-semantics.md`
+- proof lowering 设计:`docs/archive/kinsn/20260323/kop_v2_instantiate_design_20260323.md`
+- 实现审计:`docs/archive/kinsn/20260323/kop_implementation_review_20260323.md`
+- 每条 kop 的调研与决策:`docs/archive/kinsn/`(rotate、cond_select、extract、endian、
   prefetch、ccmp、lea、bls、andn、setcc_cset、simd_fpu、bulk_memory、ldp_stp、
   register_realloc、region_kop 等)
 - Speculative-optimization 姐妹论文:`docs/rejit-speculative-optimization-ebpf_idea.md`
-- NativeBPF 姐妹论文:`docs/nativebpf_idea.md`
+- NativeBPF 姐妹论文:`docs/kprog/design.md`
