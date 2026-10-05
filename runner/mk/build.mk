@@ -76,8 +76,8 @@ HOST_KERNEL_BUILD_DIR_X86 := $(VENDOR_BUILD_DIR)/x86/linux
 HOST_KERNEL_BUILD_DIR_ARM64 := $(VENDOR_BUILD_DIR)/arm64/linux
 HOST_KERNEL_CONFIG_CONTEXT_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/bpf-benchmark-kernel-config-context
 HOST_KERNEL_CONFIG_CONTEXT_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/bpf-benchmark-kernel-config-context
-HOST_KOP_DIR_X86 := $(ROOT_DIR)/module/x86/build
-HOST_KOP_DIR_ARM64 := $(ROOT_DIR)/module/arm64/build
+HOST_KOP_DIR_X86 := $(ROOT_DIR)/kinsn/module/x86/build
+HOST_KOP_DIR_ARM64 := $(ROOT_DIR)/kinsn/module/arm64/build
 HOST_KERNEL_IMAGE_X86 := $(X86_RUNTIME_KERNEL_IMAGE)
 HOST_KERNEL_VMLINUX_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/vmlinux
 HOST_KERNEL_MODULES_ORDER_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/modules.order
@@ -163,11 +163,11 @@ $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) $(HOST_KERNEL_VMLINUX_ARM64)
 
 host-kop-x86: host-kernel-x86
 	install -d "$(HOST_KOP_DIR_X86)"
-	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_KOP_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
+	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/kinsn/module/x86" MO="$(HOST_KOP_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
 
 host-kop-arm64: host-kernel-arm64
 	install -d "$(HOST_KOP_DIR_ARM64)"
-	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KOP_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
+	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/kinsn/module/arm64" MO="$(HOST_KOP_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
 
 host-native-link:
 	cargo build --release --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"

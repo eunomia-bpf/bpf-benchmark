@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from . import ROOT_DIR, run_command
-from .workspace_layout import RUNTIME_KOP_MODULE_DIR, inside_runtime_image
+from .workspace_layout import RUNTIME_KOP_MODULE_DIR, inside_runtime_image, kop_module_dir
 
 
 _KOP_MODULE_ARCH_DIRS = {
@@ -49,7 +49,7 @@ def resolve_kop_module_dir(module_dir: Path | None = None) -> Path:
     arch_dir = _KOP_MODULE_ARCH_DIRS.get(platform.machine())
     if arch_dir is None:
         raise RuntimeError(f"unsupported architecture for kop modules: {platform.machine()}")
-    return ROOT_DIR / "module" / arch_dir
+    return kop_module_dir(ROOT_DIR, arch_dir)
 
 
 def _loaded_bpf_modules_from_lsmod() -> tuple[list[str], str] | None:

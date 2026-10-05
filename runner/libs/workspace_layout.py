@@ -78,7 +78,7 @@ def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
 def kop_module_dir(workspace: Path, target_arch: str) -> Path:
     if inside_runtime_image():
         return RUNTIME_KOP_MODULE_DIR
-    return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
+    return workspace / "kinsn" / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
     if inside_runtime_image():

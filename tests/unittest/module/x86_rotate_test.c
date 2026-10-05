@@ -56,7 +56,13 @@ struct bpf_insn {
 	s32 imm;
 };
 
-struct bpf_prog;
+struct bpf_prog_aux {
+	bool priv_stack_ptr;
+};
+
+struct bpf_prog {
+	const struct bpf_prog_aux *aux;
+};
 
 #define BPF_LDX_MEM(SIZE, DST, SRC, OFF) \
 	((struct bpf_insn){ TEST_BPF_LDX_MEM, (DST), (SRC), (OFF), (SIZE) })
@@ -169,10 +175,10 @@ struct bpf_kop {
 	int max_emit_bytes;
 	int (*instantiate_insn)(u64 payload, struct bpf_insn *insn_buf);
 	int (*emit_x86)(u8 *image, u32 *off, bool emit, u64 payload,
-			const struct bpf_prog *prog);
+			const struct bpf_prog *prog, const u8 *final_ip);
 };
 
-#include "../../../module/x86/bpf_x86_rotate.c"
+#include "../../../kinsn/module/x86/bpf_x86_rotate.c"
 
 static u64 rotate_imm_payload(u8 form, u8 dst_reg, u8 src_reg, u8 shift)
 {
@@ -254,7 +260,7 @@ static void test_emit_rol_imm_widths(void)
 	len = emit_rolq_x86(image, &off, true,
 			    rotate_imm_payload(X86_ROTATE_FORM_IMM,
 					       BPF_REG_0, BPF_REG_0, 13),
-			    NULL);
+			    NULL, NULL);
 	require_int("rolq imm len", len, sizeof(expected_rolq));
 	require_int("rolq imm off", off, sizeof(expected_rolq));
 	require_bytes("rolq imm bytes", image, expected_rolq,
@@ -265,7 +271,7 @@ static void test_emit_rol_imm_widths(void)
 	len = emit_roll_x86(image, &off, true,
 			    rotate_imm_payload(X86_ROTATE_FORM_IMM,
 					       BPF_REG_0, BPF_REG_0, 13),
-			    NULL);
+			    NULL, NULL);
 	require_int("roll imm len", len, sizeof(expected_roll));
 	require_int("roll imm off", off, sizeof(expected_roll));
 	require_bytes("roll imm bytes", image, expected_roll,
@@ -275,7 +281,7 @@ static void test_emit_rol_imm_widths(void)
 	len = emit_rolq_x86(NULL, &off, false,
 			    rotate_imm_payload(X86_ROTATE_FORM_IMM,
 					       BPF_REG_0, BPF_REG_0, 13),
-			    NULL);
+			    NULL, NULL);
 	require_int("rolq sizing len", len, sizeof(expected_rolq));
 	require_int("rolq sizing off", off, sizeof(expected_rolq));
 }
@@ -291,7 +297,7 @@ static void test_emit_rol_cl_widths(void)
 	len = emit_rolq_x86(image, &off, true,
 			    rotate_rr_payload(X86_ROTATE_FORM_RR,
 					      BPF_REG_0, BPF_REG_4),
-			    NULL);
+			    NULL, NULL);
 	require_int("rolq cl len", len, sizeof(expected_rolq));
 	require_int("rolq cl off", off, sizeof(expected_rolq));
 	require_bytes("rolq cl bytes", image, expected_rolq,
@@ -302,7 +308,7 @@ static void test_emit_rol_cl_widths(void)
 	len = emit_roll_x86(image, &off, true,
 			    rotate_rr_payload(X86_ROTATE_FORM_RR,
 					      BPF_REG_0, BPF_REG_4),
-			    NULL);
+			    NULL, NULL);
 	require_int("roll cl len", len, sizeof(expected_roll));
 	require_int("roll cl off", off, sizeof(expected_roll));
 	require_bytes("roll cl bytes", image, expected_roll,
@@ -319,7 +325,7 @@ static void test_emit_rorxl_keeps_distinct_src(void)
 	len = emit_rotate32_x86(image, &off, true,
 				rotate_imm_payload(X86_ROTATE_FORM_IMM,
 						   BPF_REG_0, BPF_REG_1, 8),
-				NULL);
+				NULL, NULL);
 	require_int("rorxl len", len, sizeof(expected));
 	require_int("rorxl off", off, sizeof(expected));
 	require_bytes("rorxl bytes", image, expected, sizeof(expected));

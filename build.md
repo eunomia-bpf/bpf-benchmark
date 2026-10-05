@@ -26,7 +26,7 @@ Forbidden contents:
   bpftool, Katran BPF objects, and kernel `linux` build trees.
 - `vendor/build/<app>-build-*` and `vendor/build/<app>-*.yaml`: vendor-owned
   app builder intermediates that should not enter the Docker context.
-- `module/x86/build` and `module/arm64/build`: kop Kbuild `MO=` outputs.
+- `kinsn/module/x86/build` and `kinsn/module/arm64/build`: kop Kbuild `MO=` outputs.
 - `micro/programs/build-x86` and `micro/programs/build-arm64`: micro BPF/native
   programs plus generated `kernel_offsets.h`.
 - `native-sim/test/build-x86` and `native-sim/test/build-arm64`: stage2 helper

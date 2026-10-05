@@ -629,7 +629,7 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                        ? (uint32_t)attach_prog_resolved : 0;
     /* Drop func_info / line_info / core_relos for fresh re-load.
      *
-     * Per audit (docs/tmp/20260519-shim-audit/REPORT.md §2,§4): replaying
+     * Per audit (docs/archive/shared/20260519-shim-audit/REPORT.md §2,§4): replaying
      * the original loader's func_info/line_info after a transformed
      * bytecode produces 'func_info BTF section doesn't match subprog
      * layout' (kernel check_btf_func) because the new bytecode has
