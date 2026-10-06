@@ -251,45 +251,19 @@ static int instantiate_mov_imm(u64 payload, struct bpf_insn *insn_buf, bool is64
 
 static int instantiate_movb_imm(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 dst_reg, value_reg;
-	u32 scratch_mask;
+	u8 dst_reg;
 	s32 imm;
-	bool arch_reg, dst_stacked;
-	int cnt = 0;
+	bool arch_reg;
 	int err;
 
 	err = decode_imm_any(payload, &dst_reg, &imm, &arch_reg);
 	if (err)
 		return err;
-	if (imm < 0 || imm > 0xff)
+	if (!kop_x86_reg_is_bpf_writable(dst_reg) || imm < 0 || imm > 0xff)
 		return -EINVAL;
-
-	dst_stacked = arch_reg ? kop_x86_arch_reg_uses_stack_slot(dst_reg) :
-				  kop_x86_reg_uses_stack_slot(dst_reg);
-	if (!dst_stacked &&
-	    !kop_x86_is_scratch(dst_reg)) {
-		insn_buf[0] = BPF_ALU64_IMM(BPF_AND, dst_reg, -256);
-		insn_buf[1] = BPF_ALU64_IMM(BPF_OR, dst_reg, imm);
-		return 2;
-	}
-
-	value_reg = kop_x86_scratch_avoid(dst_reg, 0, 0);
-	scratch_mask = KOP_X86_SCRATCH_MASK(value_reg);
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read64_arch(insn_buf, &cnt, value_reg, dst_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, value_reg, dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, value_reg, -256);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_OR, value_reg, imm);
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, dst_reg, value_reg,
-				       scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, dst_reg, value_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	insn_buf[0] = BPF_ALU64_IMM(BPF_AND, dst_reg, -256);
+	insn_buf[1] = BPF_ALU64_IMM(BPF_OR, dst_reg, imm);
+	return 2;
 }
 
 static int instantiate_movzx_rr(u64 payload, struct bpf_insn *insn_buf, u32 mask)
@@ -379,13 +353,23 @@ static int instantiate_mov_sib(u64 payload, struct bpf_insn *insn_buf, u8 size)
 	return cnt;
 }
 
+static int mov_store_temp(u8 src_reg, u8 base_reg)
+{
+	u8 reg;
+
+	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
+		if (reg != src_reg && reg != base_reg)
+			return reg;
+	}
+	return -EINVAL;
+}
+
 static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf,
 				 u8 size, bool arch_base)
 {
-	u8 src_reg, base_reg, addr_reg, value_reg, byte_lane;
-	u32 scratch_mask = 0;
+	u8 src_reg, base_reg, byte_lane;
 	s16 offset;
-	int cnt = 0;
+	int temp;
 	int err;
 
 	err = decode_store(payload,
@@ -399,47 +383,15 @@ static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf,
 		insn_buf[0] = BPF_STX_MEM(size, base_reg, src_reg, offset);
 		return 1;
 	}
-	if (!arch_base && src_reg != BPF_REG_10 &&
-	    !kop_x86_reg_uses_stack_slot(src_reg) && src_reg >= BPF_REG_10)
-		return -EINVAL;
-
-	addr_reg = base_reg;
-	value_reg = src_reg;
-	if ((arch_base && kop_x86_arch_reg_uses_stack_slot(base_reg)) ||
-	    (!arch_base && kop_x86_reg_uses_stack_slot(base_reg))) {
-		addr_reg = kop_x86_scratch_avoid(src_reg, 0, 0);
-		scratch_mask |= KOP_X86_SCRATCH_MASK(addr_reg);
-	}
-	if ((arch_base && kop_x86_arch_reg_uses_stack_slot(src_reg)) ||
-	    (!arch_base && kop_x86_reg_uses_stack_slot(src_reg)) || byte_lane) {
-		value_reg = kop_x86_scratch_avoid(addr_reg, src_reg, 0);
-		scratch_mask |= KOP_X86_SCRATCH_MASK(value_reg);
-	}
-	if (scratch_mask) {
-		kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-		if (addr_reg != base_reg) {
-			if (arch_base)
-				kop_x86_read64_arch(insn_buf, &cnt, addr_reg,
-						      base_reg);
-			else
-				kop_x86_read64(insn_buf, &cnt, addr_reg,
-						 base_reg);
-		}
-	}
-	if (value_reg != src_reg) {
-		if (arch_base)
-			kop_x86_read64_arch(insn_buf, &cnt, value_reg,
-					      src_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, value_reg, src_reg);
-		if (byte_lane)
-			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, value_reg, 8);
-	}
-
-	insn_buf[cnt++] = BPF_STX_MEM(size, addr_reg, value_reg, offset);
-	if (scratch_mask)
-		kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	temp = mov_store_temp(src_reg, base_reg);
+	if (temp < 0)
+		return temp;
+	insn_buf[0] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp, KOP_X86_PROOF_RHS_OFF);
+	insn_buf[1] = BPF_MOV64_REG(temp, src_reg);
+	insn_buf[2] = BPF_ALU64_IMM(BPF_RSH, temp, 8);
+	insn_buf[3] = BPF_STX_MEM(BPF_B, base_reg, temp, offset);
+	insn_buf[4] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10, KOP_X86_PROOF_RHS_OFF);
+	return 5;
 }
 
 static int instantiate_mov_imm_store(u64 payload, struct bpf_insn *insn_buf,
@@ -839,38 +791,36 @@ static int emit_mov_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static void emit_store_reg_prefix(u8 *buf, u32 *len, u8 size, u8 src_reg,
-				  u8 base_reg, u8 byte_lane)
+				  u8 base_reg)
 {
 	u32 before_rex;
 
 	if (size == BPF_H)
 		kop_emit_u8(buf, len, 0x66);
 	before_rex = *len;
-	if (!byte_lane)
-		kop_emit_rex(buf, len, size == BPF_DW,
-			       kop_x86_ext(src_reg), false,
-			       kop_x86_ext(base_reg));
-	if (size == BPF_B && !byte_lane && *len == before_rex &&
-	    kop_x86_needs_rex8(src_reg))
+	kop_emit_rex(buf, len, size == BPF_DW,
+		     kop_x86_ext(src_reg), false, kop_x86_ext(base_reg));
+	if (size == BPF_B && *len == before_rex && kop_x86_needs_rex8(src_reg))
 		kop_emit_u8(buf, len, 0x40);
 	kop_emit_u8(buf, len, size == BPF_B ? 0x88 : 0x89);
 }
 
-static __always_inline int x86_high_byte_code(u8 reg)
+static void emit_mov_store_slot(u8 *buf, u32 *len, u8 temp, u8 frame, bool load)
 {
-	if (kop_x86_ext(reg) || kop_x86_code(reg) > 3)
-		return -EINVAL;
-	return kop_x86_code(reg) + 4;
+	kop_emit_rex(buf, len, true, kop_x86_ext(temp), false, kop_x86_ext(frame));
+	kop_emit_u8(buf, len, load ? 0x8b : 0x89);
+	kop_emit_modrm_mem(buf, len, temp, frame, KOP_X86_PROOF_RHS_OFF);
 }
 
 static int emit_store_reg_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			      const struct bpf_prog *prog, u8 size,
-			      bool arch_base)
+			      const struct bpf_prog *prog, u8 size, bool arch_base)
 {
-	u8 buf[16];
-	u8 src_reg, base_reg, modrm_src, byte_lane;
+	u8 buf[32];
+	u8 src_reg, base_reg, byte_lane;
+	u8 frame = kop_x86_reg_for_prog(prog, BPF_REG_10);
 	s16 offset;
 	u32 len = 0;
+	int temp = -1;
 	int err;
 
 	err = decode_store(payload,
@@ -880,31 +830,34 @@ static int emit_store_reg_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return err;
 	if (byte_lane && size != BPF_B)
 		return -EINVAL;
-
-	if (!arch_base) {
-		src_reg = kop_x86_reg_for_prog(prog, src_reg);
-		base_reg = kop_x86_reg_for_prog(prog, base_reg);
+	if (byte_lane) {
+		temp = mov_store_temp(src_reg, base_reg);
+		if (temp < 0)
+			return temp;
+		temp = kop_x86_reg_for_prog(prog, temp);
 	}
+	src_reg = kop_x86_reg_for_prog(prog, src_reg);
+	base_reg = kop_x86_reg_for_prog(prog, base_reg);
 	if (!kop_x86_valid(src_reg) || !kop_x86_valid(base_reg))
 		return -EINVAL;
-	if (byte_lane && kop_x86_ext(base_reg))
-		return -EINVAL;
-
-	if (byte_lane) {
-		err = x86_high_byte_code(src_reg);
-		if (err < 0)
-			return err;
-		modrm_src = err;
-	} else {
-		modrm_src = src_reg;
+	if (temp >= 0) {
+		/* Extract bits 15:8 in a live temporary. This also supports high-byte
+		 * stores with extended bases, which cannot encode AH/CH/DH/BH.
+		 */
+		emit_mov_store_slot(buf, &len, temp, frame, false);
+		kop_emit_rex_rr(buf, &len, true, src_reg, temp);
+		kop_emit_u8(buf, &len, 0x89);
+		kop_emit_u8(buf, &len, 0xc0 | (kop_x86_code(src_reg) << 3) | kop_x86_code(temp));
+		kop_emit_rex_rr(buf, &len, true, 0, temp);
+		kop_emit_u8(buf, &len, 0xc1);
+		kop_emit_u8(buf, &len, 0xe8 | kop_x86_code(temp));
+		kop_emit_u8(buf, &len, 8);
+		src_reg = temp;
 	}
-
-	emit_store_reg_prefix(buf, &len, size, src_reg, base_reg, byte_lane);
-	if (byte_lane)
-		kop_emit_modrm_mem_raw(buf, &len, modrm_src, base_reg, offset);
-	else
-		kop_emit_modrm_mem(buf, &len, modrm_src, base_reg, offset);
-
+	emit_store_reg_prefix(buf, &len, size, src_reg, base_reg);
+	kop_emit_modrm_mem(buf, &len, src_reg, base_reg, offset);
+	if (temp >= 0)
+		emit_mov_store_slot(buf, &len, temp, frame, true);
 	return kop_emit_finish(image, off, emit, buf, len);
 }
 
@@ -930,8 +883,7 @@ static int emit_mov_imm_store_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (size == BPF_H && (imm < -32768 || imm > 0xffff))
 		return -EINVAL;
 
-	if (!arch_base)
-		base_reg = kop_x86_reg_for_prog(prog, base_reg);
+	base_reg = kop_x86_reg_for_prog(prog, base_reg);
 	if (!kop_x86_valid(base_reg))
 		return -EINVAL;
 
@@ -966,11 +918,10 @@ static int emit_movb_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	err = decode_imm_any(payload, &dst_reg, &imm, &arch_reg);
 	if (err)
 		return err;
-	if (imm < 0 || imm > 0xff)
+	if (!kop_x86_reg_is_bpf_writable(dst_reg) || imm < 0 || imm > 0xff)
 		return -EINVAL;
 
-	if (!arch_reg)
-		dst_reg = kop_x86_reg_for_prog(prog, dst_reg);
+	dst_reg = kop_x86_reg_for_prog(prog, dst_reg);
 	if (!kop_x86_valid(dst_reg))
 		return -EINVAL;
 
@@ -1223,7 +1174,7 @@ static int emit_movsxd_x86(u8 *image, u32 *off, bool emit, u64 payload,
 const struct bpf_kop bpf_x86_movb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 16,
+	.max_emit_bytes = 32,
 	.instantiate_insn = instantiate_movb,
 	.emit_x86 = emit_movb_x86,
 };
