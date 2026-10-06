@@ -84,7 +84,7 @@ branch behavior, and architecture-sensitive lowering under
 | Project | Code | Current design | Current results | Build and run |
 | --- | --- | --- | --- | --- |
 | **kprog**: native whole-program execution | [`kprog/`](kprog/README.md) (loader, linker, simulator, Lean) | [design](kprog/docs/design.md) | [evaluation](kprog/docs/evaluation.md) | [project guide](kprog/docs/README.md) |
-| **kinsn**: verified inline kfuncs | [`kinsn/module/`](kinsn/module/), [`bpfopt/llvm/`](bpfopt/llvm/README.md) | [design](kinsn/docs/design.md) | [evaluation](kinsn/docs/evaluation.md) | [project guide](kinsn/docs/README.md) |
+| **kinsn**: verified inline kfuncs | [`kinsn/`](kinsn/README.md) (modules, proofs, selector) | [design](kinsn/docs/design.md) | [evaluation](kinsn/docs/evaluation.md) | [project guide](kinsn/docs/README.md) |
 | **Speculative ReJIT** | [`bpfopt/`](bpfopt/), [`runner/`](runner/) | [design](rejit/docs/design.md) | [evaluation](rejit/docs/evaluation.md) | [project guide](rejit/README.md) |
 | **Shared framework** | [`corpus/`](corpus/), [`micro/`](micro/), [`bpfperf/`](bpfperf/), [`analysis/`](analysis/) | [design](docs/shared/design.md) | [results guide](docs/shared/evaluation.md) | [Make targets](#running-benchmarks) |
 

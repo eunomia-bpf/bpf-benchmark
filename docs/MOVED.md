@@ -4202,3 +4202,11 @@ Archived paths retain historical content; their internal references may describe
 | `native-sim/x86/x86_sim.h` | `kprog/x86/x86_sim.h` |
 | `native-sim/x86/x86_sim_hardcoded.bpf.c` | `kprog/x86/x86_sim_hardcoded.bpf.c` |
 | `native-sim/x86/x86_sim_local_bpf.h` | `kprog/x86/x86_sim_local_bpf.h` |
+
+## kinsn project entry and RFC design
+
+| Old path | New path |
+| --- | --- |
+| `kinsn/docs/design.md` (paper-prototype hub) | `kinsn/docs/archive/paper-prototype-design.md` |
+
+The current `kinsn/docs/design.md` describes the separate upstream RFC.
