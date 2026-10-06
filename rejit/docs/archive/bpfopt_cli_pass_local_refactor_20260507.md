@@ -12,7 +12,7 @@ Shared framework args remain in `bpfopt/src/main.rs`:
 - `--report`
 - `--platform`
 - `--prog-type`
-- `--koperation`
+- `--kinsn`
 - `--target`
 - `--verifier-states`
 - `--func-info` / `--func-info-rec-size`

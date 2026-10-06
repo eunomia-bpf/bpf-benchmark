@@ -9,7 +9,7 @@ Result: supported; the rewrite reconciliation is architecture-symmetric (arm64 K
 Steps 0008-0011 retired four `map_inline` policy shapes across four
 applications — Cilium's `.rodata.config` path, Katran's overlay/hint path,
 Tracee's hint-free path, and Tetragon's hint-free multi-map path.  **Every one
-of the four sets was x86 only.**  AArch64 had been explored for `kop`-class
+of the four sets was x86 only.**  AArch64 had been explored for `kinsn`-class
 passes and for RQ3 Katran site arms, but no *retained-bytecode* set existed on
 the arm64 axis, so the reconciliation claim ("the retained before/after
 bytecode lengths match the reported instruction counts and the images differ")

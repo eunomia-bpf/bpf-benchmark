@@ -7,7 +7,7 @@ Date: 2026-09-29 UTC (run 22:56:40Z → 23:06:13Z)
 Smoke-validate the full KVM x86 stack after a host-kernel change. The last
 documented runtime status predates the current host kernel
 `7.3.0-070300rc3-generic`; selftest is the cheapest full-stack check
-(kop modules → native-proof micro → verifier negative smokes) before
+(kinsn modules → native-proof micro → verifier negative smokes) before
 resuming the `make micro` / `make corpus` line, so it ran first.
 
 - Command: `make selftest` — default `PLATFORM=kvm ARCH=x86`, default
@@ -27,7 +27,7 @@ resuming the `make micro` / `make corpus` line, so it ran first.
 
 All four selftest sections PASS (host make log, in-VM tail):
 
-1. **kop modules** — `bpf_x86_alu: loading out-of-tree module taints kernel.`
+1. **kinsn modules** — `bpf_x86_alu: loading out-of-tree module taints kernel.`
 2. **native_proof micro smoke** — 29/29 benchmarks completed
    (`[bench] (29/29)` line in log; `details/progress.json`
    `completed_benchmarks: 29 / 29, status: completed`). Anchor:
@@ -73,7 +73,7 @@ Artifact validated: `tests/results/62ce5f12/native_proof_micro_20260929_230257_7
 - Top-level suite files (`selftest.log`, `native_proof_micro.json`) were not
   present in the host token dir at power-down; suite PASS rests on the host
   make log lines plus the driver run dir (metadata/progress/result).
-- Pre-existing host-side `tests/results/x86-kvm_test/run-contract.json`
+- Pre-existing host-side `tests/results/aborted/x86-kvm_test/run-contract.json`
   (mtime 08:57) is stale and not from this run (random token used).
 - One cosmetic interleaving in the tail: a stray `make: Leaving
   directory '/workspaces/repository'` line inside the `[bench] (10/29)`

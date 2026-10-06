@@ -1,8 +1,8 @@
-# KOperation ReJIT Corpus Evaluation
+# Kinsn ReJIT Corpus Evaluation
 
 Last updated: 2026-06-07
 
-This is the paper-facing evaluation note for kop-based ReJIT on the x86 KVM
+This is the paper-facing evaluation note for kinsn-based ReJIT on the x86 KVM
 corpus. The benchmark framework records raw counters and workload payloads
 only; all ratios, tables, figures, and interpretation below are post-hoc
 analysis. Detailed commands, artifact paths, debugging history, and caveats
@@ -10,7 +10,7 @@ are preserved in the appendices.
 
 ## Paper Framing
 
-KOperation ReJIT replaces selected BPF bytecode patterns with calls to in-kernel
+Kinsn ReJIT replaces selected BPF bytecode patterns with calls to in-kernel
 kfunc-like instruction modules. The evaluation is narrower than the native
 execution evaluation: it asks whether the LLVM/bytecode selector can find real
 corpus patterns, whether the transformed programs still pass ReJIT and run
@@ -19,16 +19,16 @@ itself in measured BPF and workload costs.
 
 The current research questions are:
 
-- **RQ1 Correctness:** does the kop umbrella pass preserve real corpus app
+- **RQ1 Correctness:** does the kinsn umbrella pass preserve real corpus app
   startup, loadtime ReJIT, and measured workload execution?
-- **RQ2 Apply coverage:** which kop families are actually applied on the
+- **RQ2 Apply coverage:** which kinsn families are actually applied on the
   x86 corpus, and are rotate/extract/endian/bulk-memory patterns still missing?
-- **RQ3 BPF per-program cost:** among retained BPF counter rows, does kop
+- **RQ3 BPF per-program cost:** among retained BPF counter rows, does kinsn
   reduce per-program `ns/run` relative to the baseline eBPF JIT?
-- **RQ4 End-to-end workload impact:** does kop improve application workload
+- **RQ4 End-to-end workload impact:** does kinsn improve application workload
   throughput after BPF stats overhead is removed?
 
-Headline result: **on x86 KVM, the expanded kop selector applies `39,327`
+Headline result: **on x86 KVM, the expanded kinsn selector applies `39,327`
 sites across all six corpus apps with zero loadtime skips or errors.**
 Coverage now includes the previously missing families: rotate (`64` sites),
 extract (`92`), endian_fusion (`1,112`), and bulk_memory (`11,343`). Workload
@@ -37,10 +37,10 @@ per-program cost is essentially neutral/slightly negative (`1.009x`
 post/baseline all-qualified geomean; lower is faster).
 
 The narrow claim supported by the current x86 KVM data is: the policy is not
-filtering these kop families out, and the selector now reaches real corpus
+filtering these kinsn families out, and the selector now reaches real corpus
 bytecode shapes for rotate, extract, endian fusion, and bulk memory. The
 current data does **not** support claiming a broad BPF-counter speedup from
-all-force kop; the coverage fix is real, but the kfunc call path and selected
+all-force kinsn; the coverage fix is real, but the kfunc call path and selected
 site mix are near neutral overall.
 
 ## Experimental Setup
@@ -58,15 +58,15 @@ masking which app failed.
 Two corpus datasets are used:
 
 - **BPF stats on:** `BPFREJIT_CORPUS_BPF_STATS=1`, used for BPF per-program
-  `ns/run` counters and loadtime kop apply reports.
+  `ns/run` counters and loadtime kinsn apply reports.
 - **BPF stats off:** `BPFREJIT_CORPUS_BPF_STATS=0`, used for workload
   throughput without BPF stats overhead.
 
-The kop command template was:
+The kinsn command template was:
 
 ```sh
 BPFREJIT_CORPUS_APPS='<app>' \
-BPFREJIT_BENCH_PASSES=kop \
+BPFREJIT_BENCH_PASSES=kinsn \
 BPFREJIT_CORPUS_BPF_STATS='<0-or-1>' \
 SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1 \
 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
@@ -77,15 +77,15 @@ make corpus
 
 Policy/gate status:
 
-- `corpus/config/benchmark_config.yaml` maps `kop` to the single kop
-  umbrella pass and keeps the kop-class pass names in the `full-x86` list.
-- `runner/config/passes/kop/default.yaml` is the default kop entrypoint.
+- `corpus/config/benchmark_config.yaml` maps `kinsn` to the single kinsn
+  umbrella pass and keeps the kinsn-class pass names in the `full-x86` list.
+- `runner/config/passes/kinsn/default.yaml` is the default kinsn entrypoint.
   The authoritative x86 artifacts in this note used the then-current umbrella
-  default and did not use app-specific kop YAML disables or per-program
+  default and did not use app-specific kinsn YAML disables or per-program
   overrides. Later follow-up YAMLs make the pass-local policy explicit.
-- `bpfopt/llvm/src/main.cpp` treats `kop`, `rotate`, `cond_select`,
+- `bpfopt/llvm/src/main.cpp` treats `kinsn`, `rotate`, `cond_select`,
   `extract`, `endian_fusion`, `bulk_memory`, `lea`, `prefetch`, and `ccmp` as
-  kop passes. The `kop` umbrella default is
+  kinsn passes. The `kinsn` umbrella default is
   `all=force,movbe-load=disable` for LLVM selector mode, while bytecode
   recovery is enabled for the umbrella bytecode families
   (`rotate`, `extract`, `endian_fusion`, `bulk_memory`, and `prefetch`). This
@@ -96,14 +96,14 @@ Policy/gate status:
   to report ccmp sites. `prefetch` is enabled in the target list but had zero
   x86 corpus hits in this run.
 - Current post-evaluation tooling also supports a pass-local
-  `--bytecode-kop-mode` override for controlled ablations, and new
-  per-program kop reports include a `kop_policy` provenance block with the
+  `--bytecode-kinsn-mode` override for controlled ablations, and new
+  per-program kinsn reports include a `kinsn_policy` provenance block with the
   effective LLVM selector arguments and bytecode-family enables. The older
-  authoritative artifacts above predate `kop_policy`, so their effective
+  authoritative artifacts above predate `kinsn_policy`, so their effective
   policy is reconstructed from `loadtime-plans/*.json` plus the bpfopt default
   described here.
 - The current runner YAML is now explicitly policy-bearing for follow-up
-  experiments. On x86, `prefetch` is disabled in the default `kop` command
+  experiments. On x86, `prefetch` is disabled in the default `kinsn` command
   after the prefetch smoke regressions, and Cilium/Katran/Tracee keep their
   app-specific no-bulk/no-prefetch overrides. On arm64, the default and the
   Cilium/Katran/Tracee app overrides disable `bulk_memory`, `endian_fusion`,
@@ -121,7 +121,7 @@ components or threads. For the OTEL mixed workload, it sums each worker's
 `bogo ops/s`. These units are app-local, so only ratios within the same app
 are meaningful.
 
-Corpus BPF per-program cost uses the kop paper-grade paired-row method:
+Corpus BPF per-program cost uses the kinsn paper-grade paired-row method:
 
 ```text
 baseline_avg_ns_per_run = baseline_run_time_ns_delta / baseline_run_cnt_delta
@@ -132,7 +132,7 @@ ratio = post_avg_ns_per_run / baseline_avg_ns_per_run
 Rows with `min(baseline_runs, post_runs) < 100` are dropped. Programs are
 paired by `(name, type, occurrence index)` after grouping each phase by BPF
 program name and type. The reported BPF aggregate is the per-program geomean
-of retained ratios; lower than `1.0x` means lower BPF cost after kop.
+of retained ratios; lower than `1.0x` means lower BPF cost after kinsn.
 
 The "direct applied" BPF subset is a conservative automated subset: retained
 counter rows whose truncated `bpftool` name matches a program with
@@ -142,8 +142,8 @@ for tail-call descendants. Tail-called programs can report zero own
 
 Loadtime apply coverage is read from raw loadtime reports. The report's
 `sites_applied`, `sites_matched`, `sites_skipped`,
-`kop_calls_by_family`, and `kop_calls_by_name` fields are checked
-post-hoc for consistency. Newer reports also include `kop_policy`, which is
+`kinsn_calls_by_family`, and `kinsn_calls_by_name` fields are checked
+post-hoc for consistency. Newer reports also include `kinsn_policy`, which is
 used only to audit which selector policy produced a program's transformed
 bytecode. No framework code computes these summaries.
 
@@ -153,12 +153,12 @@ Latest authoritative datasets are complete: six corpus apps with BPF stats
 enabled and six corpus apps with BPF stats disabled. All app artifacts
 completed with `status=ok` and empty app error strings.
 
-![KOperation corpus workload, BPF cost, and apply coverage](../../docs/figures/eval-kop-corpus-20260604.png)
+![Kinsn corpus workload, BPF cost, and apply coverage](../../docs/figures/eval-kinsn-corpus-20260604.png)
 
-*Figure 1: x86 KVM kop corpus result. Workload throughput uses
+*Figure 1: x86 KVM kinsn corpus result. Workload throughput uses
 post/baseline ratios from stats-off artifacts, higher is better. BPF cost uses
 per-program geomean post/baseline `ns/run` from stats-on artifacts, lower is
-better. Apply coverage is decoded from loadtime reports and split by kop
+better. Apply coverage is decoded from loadtime reports and split by kinsn
 family.*
 
 Workload throughput. The `post/baseline` headline is the unweighted geomean
@@ -199,7 +199,7 @@ Loadtime apply coverage:
 | `tracee` | 182 | 169 | 14833 | 14833 | 0 | 0 |
 | `total` | 759 | 631 | 39327 | 39327 | 0 | 0 |
 
-Applied kop families:
+Applied kinsn families:
 
 | App | LEA | cond_select | rotate | extract | endian_fusion | bulk_memory | prefetch | total |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -211,9 +211,9 @@ Applied kop families:
 | `tracee` | 7841 | 23 | 0 | 0 | 16 | 6953 | 0 | 14833 |
 | `total` | 25728 | 988 | 64 | 92 | 1112 | 11343 | 0 | 39327 |
 
-Representative x86 kop names by family:
+Representative x86 kinsn names by family:
 
-| Family | Sites | Representative emitted koperation |
+| Family | Sites | Representative emitted kinsn |
 | --- | ---: | --- |
 | `lea` | 25728 | `bpf_x86_leaq`, `bpf_x86_leal` |
 | `cond_select` | 988 | `bpf_x86_cmp_cmovb`, `bpf_x86_cmp_cmove`, `bpf_x86_cmp_cmovne` |
@@ -225,7 +225,7 @@ Representative x86 kop names by family:
 
 ## RQ Answers
 
-**RQ1 Correctness.** The authoritative kop corpus completed all six x86 KVM
+**RQ1 Correctness.** The authoritative kinsn corpus completed all six x86 KVM
 apps in both stats-on and stats-off modes with `status=ok`, empty app error
 strings, and three measured workload samples per phase. Loadtime reports show
 `39,327` matched/applied sites, `0` skipped sites, and `0` report errors.
@@ -241,7 +241,7 @@ memory coverage. OTEL, Cilium, Tetragon, Katran, and Tracee all contribute
 non-LEA/non-cond-select coverage. `ccmp` remains arm64-only, and `prefetch`
 had no x86 corpus hit in this run.
 
-**RQ3 BPF per-program cost.** KOperation is near neutral/slightly slower on the
+**RQ3 BPF per-program cost.** Kinsn is near neutral/slightly slower on the
 current retained BPF counter population: `1.009x` all-qualified cost and
 `1.010x` direct-self-applied cost. BCC and Katran improve (`0.961x`,
 `0.940x` all-qualified), Cilium and Tetragon are neutral (`1.009x`,
@@ -259,30 +259,30 @@ differences.
 
 ## Per-App Tuned Result
 
-After the full-kop corpus run, the best workload-oriented policy among the
-tested full versus no-bulk configurations kept the umbrella `kop` pass but
+After the full-kinsn corpus run, the best workload-oriented policy among the
+tested full versus no-bulk configurations kept the umbrella `kinsn` pass but
 disabled `bulk_memory` for Cilium, Katran, and Tracee only:
 
 ```sh
-bpfopt --pass kop ... -- \
-  --kop-mode all=force,wide-load=disable,indexed-load=disable,movbe-load=disable \
-  --bytecode-kop-mode bulk_memory=disable
+bpfopt --pass kinsn ... -- \
+  --kinsn-mode all=force,wide-load=disable,indexed-load=disable,movbe-load=disable \
+  --bytecode-kinsn-mode bulk_memory=disable
 ```
 
 This is implemented as app-specific pass config under
-`runner/config/passes/kop/{cilium,katran,tracee}.yaml`; the default
-`runner/config/passes/kop/default.yaml` is not changed into no-bulk.
+`runner/config/passes/kinsn/{cilium,katran,tracee}.yaml`; the default
+`runner/config/passes/kinsn/default.yaml` is not changed into no-bulk.
 
 The tuned run used the same setup as the authoritative corpus runs:
 `SAMPLES=3`, `WORKLOAD_DURATION=180`, `WARMUPS=1`,
-`BPFREJIT_BENCH_PASSES=kop`, and the app subset
+`BPFREJIT_BENCH_PASSES=kinsn`, and the app subset
 `tracee/monitor,cilium/agent,katran`. The stats-on artifact is
 `corpus/results/x86_kvm_corpus_20260604_232313_992341`; the stats-off artifact
 is `corpus/results/x86_kvm_corpus_20260605_004607_636479`.
 
-![Per-app tuned kop result](../../docs/figures/eval-kop-tuned-3app-20260605.png)
+![Per-app tuned kinsn result](../../docs/figures/eval-kinsn-tuned-3app-20260605.png)
 
-*Figure 2: per-app tuned kop result for Cilium, Katran, and Tracee.
+*Figure 2: per-app tuned kinsn result for Cilium, Katran, and Tracee.
 Workload ratios use stats-off artifacts, higher is better. BPF cost ratios use
 stats-on artifacts, lower is better. This figure is not a full-corpus result;
 it isolates the three app-specific no-bulk overrides.*
@@ -290,7 +290,7 @@ it isolates the three app-specific no-bulk overrides.*
 Workload throughput improved on all three tuned apps, with a `1.061x`
 three-app geomean:
 
-| App | full-kop workload ratio | tuned workload ratio | tuned sample ratios | workload note |
+| App | full-kinsn workload ratio | tuned workload ratio | tuned sample ratios | workload note |
 | --- | ---: | ---: | --- | --- |
 | `cilium` | 1.074x | 1.114x | 1.102x, 1.128x, 1.112x | strongest tuned workload win, no pktgen errors |
 | `katran` | 1.030x | 1.052x | 1.070x, 1.041x, 1.044x | stable packet-path win; raw pktgen errors remain workload payload fields |
@@ -323,9 +323,9 @@ a failed selector-tuning attempt and not used as the reported tuned policy.
 ## 2026-06-05 Selector Follow-Up
 
 This follow-up is narrower than the main x86 KVM result above. It was run to
-answer two implementation questions: whether any additional x86 kop names can
+answer two implementation questions: whether any additional x86 kinsn names can
 be reached by real corpus bytecode, and whether the arm64 target can apply
-real corpus kop sites before spending AWS time. These runs used
+real corpus kinsn sites before spending AWS time. These runs used
 `SAMPLES=1` or `WORKLOAD_DURATION=30` smoke settings except for the AWS arm64
 performance run, so they do not replace the authoritative x86 tables above.
 
@@ -341,7 +341,7 @@ Artifact:
 (`SAMPLES=1`, `WORKLOAD_DURATION=30`, all six apps).
 
 Result: all six apps completed `status=ok`. The new `bpf_x86_movbe16` selector
-applied `268` sites: Cilium `44`, Tetragon `220`, and Tracee `4`. Total kop
+applied `268` sites: Cilium `44`, Tetragon `220`, and Tracee `4`. Total kinsn
 coverage in this smoke run was `31,799` sites:
 
 | App | sites applied | Notable families/names |
@@ -434,13 +434,13 @@ Artifact:
 | `packed_header_bitfield_decode` | 277 | 242 | `1.145x` | 4 |
 
 The three-case geomean is `1.116x`; all samples matched. This proves the new
-kop names and selector path apply. It is still not pure machine-code novelty:
+kinsn names and selector path apply. It is still not pure machine-code novelty:
 the stock kernel JIT already emits BMI2 `shlx`/`shrx` for some variable-shift
 BPF operations, so this result is selector/kfunc coverage evidence first.
 
 A current Cilium/Katran x86 KVM smoke with the same code also completed:
 `corpus/results/x86_kvm_corpus_20260607_073922_108307`
-(`SAMPLES=1`, `WORKLOAD_DURATION=10`, `BPFREJIT_BENCH_PASSES=kop`,
+(`SAMPLES=1`, `WORKLOAD_DURATION=10`, `BPFREJIT_BENCH_PASSES=kinsn`,
 `BPFREJIT_CORPUS_APPS="cilium/agent,katran"`). Both apps finished `status=ok`.
 Cilium applied `102` new BMI2 shift sites (`bpf_x86_shlxl=84`,
 `bpf_x86_shrxl=18`) on top of the existing LEA/endian/cond-select/extract mix,
@@ -473,8 +473,8 @@ SAMPLES=3 authoritative corpus, but they prove BZHI is no longer micro-only.
 ### arm64 QEMU smoke
 
 The arm64 target initially exposed a real policy/selector bug: the LLVM
-selector was still allowed to emit x86 pseudo-koperation such as `bpf_x86_leaq`
-when the target JSON contained only arm64 koperation. The fix disables LLVM kop
+selector was still allowed to emit x86 pseudo-kinsn such as `bpf_x86_leaq`
+when the target JSON contained only arm64 kinsn. The fix disables LLVM kinsn
 selection for arm64-only targets and uses arm64 bytecode recovery for rotate,
 extract, and endian operations. The x86 per-app no-bulk overrides are also
 guarded by `RUN_TARGET_ARCH`, so arm64 does not inherit the x86 no-bulk
@@ -484,19 +484,19 @@ QEMU smoke command:
 
 ```sh
 PLATFORM=qemu ARCH=arm64 SAMPLES=1 WORKLOAD_DURATION=30 \
-  BPFREJIT_BENCH_PASSES=kop \
+  BPFREJIT_BENCH_PASSES=kinsn \
   BPFREJIT_CORPUS_APPS="katran,cilium/agent,tracee/monitor" \
   make corpus
 ```
 
 Artifact:
-`corpus/results/arm64_qemu_corpus_19700101_000005_560691`.
+`corpus/results/arm64_qemu_corpus_recorded_20260605_vmclock_000005_560691`.
 
 Result: Cilium and Katran completed `status=ok`; Tracee reached loadtime
 reports but failed post startup under QEMU. The smoke confirmed real arm64
 apply:
 
-| App | status | sites applied | arm64 koperation |
+| App | status | sites applied | arm64 kinsn |
 | --- | --- | ---: | --- |
 | `cilium/agent` | ok | 364 | `bpf_arm64_rev16_w` 318, `bpf_arm64_rev_w` 22, `bpf_arm64_rev_x` 22, `bpf_arm64_ubfm_x` 2 |
 | `katran` | ok | 30 | `bpf_arm64_extr_w` 20, `bpf_arm64_rev16_w` 5, `bpf_arm64_rev_w` 4, `bpf_arm64_ubfm_x` 1 |
@@ -510,7 +510,7 @@ Command:
 
 ```sh
 PLATFORM=aws ARCH=arm64 SAMPLES=3 WORKLOAD_DURATION=30 \
-  BPFREJIT_BENCH_PASSES=kop \
+  BPFREJIT_BENCH_PASSES=kinsn \
   make corpus
 ```
 
@@ -523,7 +523,7 @@ post-ReJIT startup or event handling. No app was filtered out:
 
 | App | status | sites applied | Notes |
 | --- | --- | ---: | --- |
-| `bcc/set` | ok | 0 | no arm64 kop coverage in this run |
+| `bcc/set` | ok | 0 | no arm64 kinsn coverage in this run |
 | `cilium/agent` | ok | 768 | endian_fusion `766`, extract `2` |
 | `katran` | ok | 30 | rotate `20`, endian_fusion `9`, extract `1` |
 | `otelcol-ebpf-profiler/profiling` | error | 0 | post failed loading `perf_unwind_native` |
@@ -534,7 +534,7 @@ For the three apps that completed, workload and BPF-counter results were mixed:
 
 | App | workload ratio | BPF cost ratio | Interpretation |
 | --- | ---: | ---: | --- |
-| `bcc/set` | 0.979x | 0.942x | no kop applied, so this is noise/control rather than kop evidence |
+| `bcc/set` | 0.979x | 0.942x | no kinsn applied, so this is noise/control rather than kinsn evidence |
 | `cilium/agent` | 0.974x | 1.003x over 2 retained rows | high arm64 endian coverage, but no performance win in this run |
 | `katran` | 1.020x | 0.987x over 1 retained row | positive arm64 signal on the hot XDP program |
 
@@ -560,8 +560,8 @@ The AWS arm64 policy evidence is:
 | `corpus/results/aws_arm64_corpus_20260605_094729_221231` | coverage-max with bulk/prefetch/endian | `0.978x` | `0.995x` | bulk `8685`, prefetch `1810`, endian `791`, extract `3`, rotate `20` | more coverage but worse performance |
 
 That comparison is why the current arm64 runner config explicitly passes
-`--bytecode-kop-mode bulk_memory=disable,endian_fusion=disable,prefetch=disable`
-for the default `kop` command and for the Cilium/Katran/Tracee app configs.
+`--bytecode-kinsn-mode bulk_memory=disable,endian_fusion=disable,prefetch=disable`
+for the default `kinsn` command and for the Cilium/Katran/Tracee app configs.
 The choice is per-benchmark policy: the selectors remain available for micro
 coverage and explicit ablations, but they are not used in the arm64 app
 performance policy.
@@ -569,7 +569,7 @@ performance policy.
 The full arm64 micro result remains positive and should be reported as a
 separate selector-capability result. Artifact
 `micro/results/aws_arm64_micro_20260606_001225_821028` has all-29 geomean
-`1.208x` and kop-bearing geomean `1.222x` over 27 benchmarks. It applied
+`1.208x` and kinsn-bearing geomean `1.222x` over 27 benchmarks. It applied
 `bpf_arm64_extr_x=387`, `bpf_arm64_ldr_w=198`, `bpf_arm64_ubfm_x=144`,
 `bpf_arm64_ldrh=114`, `bpf_arm64_rev16_w=39`, `bpf_arm64_stp_x=21`,
 `bpf_arm64_rev_w=15`, and `bpf_arm64_ldp_x=6`. The negative micro cases also
@@ -579,11 +579,11 @@ with `ldr_w/stp_x` sites, and `bitmap_popcount_scan` was `0.966x` with
 default.
 
 A 2026-06-07 local arm64 QEMU smoke was run to check the validation path:
-`corpus/results/arm64_qemu_corpus_19700101_000005_357787`
+`corpus/results/arm64_qemu_corpus_recorded_20260610_vmclock_000005_357787`
 (`SAMPLES=1`, `WORKLOAD_DURATION=10`, Cilium/Katran). Both apps completed
 `status=ok`, with raw workload ratios `1.003x` for Cilium and `1.017x` for
 Katran. The loadtime reports show this smoke used a stale extracted QEMU
-rootfs/runtime image: `kop_policy.pass_args` was empty and only `prefetch`
+rootfs/runtime image: `kinsn_policy.pass_args` was empty and only `prefetch`
 was disabled, so it is not counted as validation of the new conservative
 arm64 YAML. The result is retained only as a QEMU smoke/path check; the arm64
 performance conclusion above remains based on the AWS artifacts.
@@ -593,11 +593,11 @@ performance conclusion above remains based on the AWS artifacts.
 The final arm64 follow-up added bytecode recovery for adjacent pair
 loads/stores (`bpf_arm64_ldp_x`, `bpf_arm64_stp_x`), map-lookup fallthrough
 prefetch (`bpf_arm64_prfm_pldl1keep`), wider `ubfm` extract shapes, and a
-strict boolean-chain `ccmp` recovery. The kop target/prober YAMLs were also
+strict boolean-chain `ccmp` recovery. The kinsn target/prober YAMLs were also
 updated so the arm64 pair-memory names and x86 `bpf_x86_roll` are visible to
 the runner.
 
-The current arm64 `kop` umbrella default is conservative: it keeps the
+The current arm64 `kinsn` umbrella default is conservative: it keeps the
 coverage-safe rotate/extract path and does not force the high-overhead
 endian/bulk/prefetch families under the default umbrella policy. A conservative
 AWS rerun completed BCC, Cilium, Katran, OTEL, and Tracee, with Tetragon
@@ -606,7 +606,7 @@ failing naturally:
 Artifact:
 `corpus/results/aws_arm64_corpus_20260605_080836_924256`
 (`PLATFORM=aws ARCH=arm64 SAMPLES=3 WORKLOAD_DURATION=30
-BPFREJIT_BENCH_PASSES=kop make corpus`).
+BPFREJIT_BENCH_PASSES=kinsn make corpus`).
 
 | App | status | sites applied | workload ratio | BPF cost ratio |
 | --- | --- | ---: | ---: | ---: |
@@ -631,7 +631,7 @@ Artifact:
 The reference coverage-max artifact without `ccmp` is
 `corpus/results/aws_arm64_corpus_20260605_085337_334187`.
 
-![arm64 AWS kop follow-up](../../docs/figures/eval-kop-arm64-aws-20260605.png)
+![arm64 AWS kinsn follow-up](../../docs/figures/eval-kinsn-arm64-aws-20260605.png)
 
 *Figure 3: arm64 AWS coverage-max follow-up. OTel and Tetragon are shown as
 `n/a` for workload/BPF ratios because they failed naturally during startup or
@@ -650,7 +650,7 @@ corpus does not expose that shape after BPF round-trip.
 | `rotate` | 20 |
 | `extract` | 3 |
 
-| KOperation | sites |
+| Kinsn | sites |
 | --- | ---: |
 | `bpf_arm64_stp_x` | 6656 |
 | `bpf_arm64_ldp_x` | 2029 |
@@ -685,16 +685,16 @@ site count without a defensible cost model.
 The important corrective result is coverage, not headline speedup. Earlier
 corpus artifacts reported zero rotate/extract/endian/bulk-memory sites because
 the selector was too narrow for real BPF bytecode after round-trip through the
-corpus loader path. The current run uses the kop umbrella pass plus bytecode
+corpus loader path. The current run uses the kinsn umbrella pass plus bytecode
 recovery, so patterns that do not survive as the narrow original MachineInstr
 tree can still be recovered from final BPF bytecode. This is why Katran and
 Tetragon now expose `rorxl`, why OTEL/Tetragon/Katran expose `bextrq`/`shrdq`,
 why Cilium and Katran expose endian-fusion patterns, and why bulk-memory
-`mov*` koperation appear broadly.
+`mov*` kinsn appear broadly.
 
 This run also clarifies policy versus selector behavior. There is no
 benchmark-level policy filter preventing these pass names from running under
-`kop`. On x86, the current default is still not a no-bulk policy, but it
+`kinsn`. On x86, the current default is still not a no-bulk policy, but it
 does disable `prefetch` after the prefetch smoke regressions; Cilium, Katran,
 and Tracee additionally use app-specific no-bulk/no-prefetch overrides. On
 arm64, the umbrella runner policy is deliberately more conservative after the
@@ -706,7 +706,7 @@ reached `3024` `bpf_x86_prefetcht0` sites, so the old zero was a
 selector/dataflow gap, not a corpus gate.
 
 A default-name coverage audit gives the same answer. The default target YAML
-now contains `61` kop names after the BMI2 shift and BZHI follow-ups; the
+now contains `61` kinsn names after the BMI2 shift and BZHI follow-ups; the
 authoritative x86 full-corpus reports applied `17` x86 names because it predates
 those follow-ups. The x86 names that are enabled but still zero in the
 authoritative corpus are `bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`,
@@ -727,14 +727,14 @@ proof before they are worth forcing.
 
 A follow-up no-bulk ablation was used only to guide selector tuning. It added
 a controlled way to disable `bulk_memory` while keeping the single umbrella
-kop pass, and it confirmed that `bulk_memory` can dominate regressions in
+kinsn pass, and it confirmed that `bulk_memory` can dominate regressions in
 some apps. On the five apps that completed under that ablation, BPF
-per-program geomean improved from `1.009x` full-kop to `0.966x` no-bulk
+per-program geomean improved from `1.009x` full-kinsn to `0.966x` no-bulk
 over the matched retained rows; Tracee improved from `1.028x` to `0.920x`,
 Cilium from `1.009x` to `0.935x`, and Katran from `0.940x` to `0.936x`.
 However, Tetragon failed under no-bulk with a load-time `EINVAL`, and BCC/OTEL
 regressed. This is not a replacement default policy; it motivates per-app or
-per-program tuning with full-kop as the fallback.
+per-program tuning with full-kinsn as the fallback.
 
 The later per-app tuned rerun above keeps that fallback model: the default
 stays broader than no-bulk, while Cilium, Katran, and Tracee use app-specific
@@ -765,16 +765,16 @@ Cilium/Katran native evidence.
 
 Post-hoc script and generated data:
 
-- Script: `docs/archive/shared/kop_eval_20260604.py`
-- Summary: `kinsn/docs/archive/kop_eval_20260604_summary.md`
-- Figure: `docs/figures/eval-kop-corpus-20260604.png`
+- Script: `docs/archive/shared/kinsn_eval_20260604.py`
+- Summary: `kinsn/docs/archive/kinsn_eval_20260604_summary.md`
+- Figure: `docs/figures/eval-kinsn-corpus-20260604.png`
 - Tuned 3-app figure:
-  `docs/figures/eval-kop-tuned-3app-20260605.png`
-- arm64 follow-up script: `docs/archive/shared/kop_arm64_eval_20260605.py`
+  `docs/figures/eval-kinsn-tuned-3app-20260605.png`
+- arm64 follow-up script: `docs/archive/shared/kinsn_arm64_eval_20260605.py`
 - arm64 follow-up summary:
-  `kinsn/docs/archive/kop_arm64_eval_20260605_summary.md`
+  `kinsn/docs/archive/kinsn_arm64_eval_20260605_summary.md`
 - arm64 follow-up figure:
-  `docs/figures/eval-kop-arm64-aws-20260605.png`
+  `docs/figures/eval-kinsn-arm64-aws-20260605.png`
 
 Authoritative stats-on/stats-off artifacts:
 
@@ -804,7 +804,7 @@ Negative/diagnostic selector-tuning artifacts:
 | `x86 prefetch/SHD selector smoke` | `corpus/results/x86_kvm_corpus_20260605_070536_784629` | SAMPLES=1, 10s; all six apps ok; `bpf_x86_prefetcht0` applied 3024 sites and `bpf_x86_shrdq` applied 3 sites |
 | `x86 roll selector smoke` | `corpus/results/x86_kvm_corpus_20260605_082448_492730` | SAMPLES=1, 10s; `bpf_x86_roll` applied 20 Katran sites; Tetragon failed naturally |
 | `x86 Tetragon roll follow-up` | `corpus/results/x86_kvm_corpus_20260605_084211_375649` | Tetragon-only repeat; reproduced `generic_kprobe_filter_arg` EINVAL before any roll/SHD/BMI1 hit |
-| `arm64 QEMU apply smoke` | `corpus/results/arm64_qemu_corpus_19700101_000005_560691` | SAMPLES=1, 30s; Cilium/Katran ok; confirmed arm64 `rev`/`extr`/`ubfm` apply |
+| `arm64 QEMU apply smoke` | `corpus/results/arm64_qemu_corpus_recorded_20260605_vmclock_000005_560691` | SAMPLES=1, 30s; Cilium/Katran ok; confirmed arm64 `rev`/`extr`/`ubfm` apply |
 | `arm64 AWS corpus follow-up` | `corpus/results/aws_arm64_corpus_20260605_053223_453376` | SAMPLES=3, 30s; BCC/Cilium/Katran ok; OTel/Tetragon/Tracee failed naturally |
 | `arm64 AWS conservative follow-up` | `corpus/results/aws_arm64_corpus_20260605_080836_924256` | SAMPLES=3, 30s; BCC/Cilium/Katran/OTel/Tracee ok; Katran positive; Tetragon failed naturally |
 | `arm64 AWS coverage-max without ccmp` | `corpus/results/aws_arm64_corpus_20260605_085337_334187` | SAMPLES=3, 30s; forced rotate/extract/endian/bulk/prefetch/cond_select; 11,339 sites |
@@ -814,15 +814,15 @@ Negative/diagnostic selector-tuning artifacts:
 ## Previous Results
 
 These older results are retained for history and for explaining why the
-selector expansion mattered. They are not the current authoritative kop
+selector expansion mattered. They are not the current authoritative kinsn
 result because they predate the full bytecode recovery coverage measured
 above.
 
 **2026-06-03 all-force result.** Artifact
 `corpus/results/x86_kvm_corpus_20260603_175429_964295`; smoke alias artifact
 `corpus/results/x86_kvm_corpus_20260603_185015_116803`; post-hoc script
-`docs/archive/shared/kop_all_force_eval_20260603.py`; figure
-`docs/figures/eval-kop-all-force-corpus-20260603.png`. It completed all six
+`docs/archive/shared/kinsn_all_force_eval_20260603.py`; figure
+`docs/figures/eval-kinsn-all-force-corpus-20260603.png`. It completed all six
 apps with `status=ok`, applied `27,085` sites across `631` applied loadtime
 rows, and reported `1.081x` workload geomean, `0.938x` all-qualified BPF
 geomean, and `0.933x` direct-self-applied BPF geomean. Its family split was
@@ -832,15 +832,15 @@ still too narrow for real corpus bytecode shapes.
 
 **2026-06-02 LEA result.** Artifact
 `corpus/results/x86_kvm_corpus_20260602_141656_778399`; post-hoc script
-`docs/archive/shared/kop_eval_20260602.py`; figure
-`docs/figures/eval-kop-lea-corpus-20260602.png`. This SAMPLES=1 LEA-only
+`docs/archive/shared/kinsn_eval_20260602.py`; figure
+`docs/figures/eval-kinsn-lea-corpus-20260602.png`. This SAMPLES=1 LEA-only
 run completed all six apps with `status=ok`, applied `22,476` LEA sites, and
 reported `1.187x` workload geomean, `0.860x` all-qualified BPF geomean, and
 `0.873x` direct-self-applied BPF geomean. It proved the x86 LEA policy path
 was no longer a no-op, but it did not test the broader selector families.
 
-**2026-05-31 kop-6 result.** Command:
-`BPFREJIT_BENCH_PASSES=kop-6 SAMPLES=3 WORKLOAD_DURATION=180 TIMEOUT=7200 make corpus`.
+**2026-05-31 kinsn-6 result.** Command:
+`BPFREJIT_BENCH_PASSES=kinsn-6 SAMPLES=3 WORKLOAD_DURATION=180 TIMEOUT=7200 make corpus`.
 This run completed all six apps with `status=ok`; its key result was fused
 x86 `cond_select` coverage (`320` sites across `82` programs) and a
 direct-self-applied BPF geomean of `0.944x`. The all-qualified BPF geomean was
@@ -854,13 +854,13 @@ configurations; the explicit all-LLVM-selector path failed Cilium verifier
 startup, so the per-app YAML was returned to the conservative
 no-bulk/no-prefetch form.
 
-**2026-06-07 new-kop census note.** Native/codegen census found no support
+**2026-06-07 new-kinsn census note.** Native/codegen census found no support
 for adding x86 `tzcnt/lzcnt/bsf/bsr` or arm64 `rbit/clz/ctz` for the current
-Cilium/Katran-focused kop evaluation. The synthetic `bitmap_popcount_scan`
+Cilium/Katran-focused kinsn evaluation. The synthetic `bitmap_popcount_scan`
 selector is retained because it applies `bpf_x86_popcntq` and gives `2.24x`
 micro speedup, but it remains micro-only evidence because Katran/Cilium BPF
 objects did not contain the matching SWAR popcount shape. The same follow-up
-added x86 BMI2 variable-shift koperation; focused micro applies `shlxq/shrxq`, and
+added x86 BMI2 variable-shift kinsn; focused micro applies `shlxq/shrxq`, and
 the Cilium/Katran smoke applies `102` `shlxl/shrxl` Cilium sites while Katran
 continues to use its existing rotate/endian/extract/LEA mix. A later focused
 native census made x86 `bzhi` and arm64 `bfi`/`bfxil` the next plausible new

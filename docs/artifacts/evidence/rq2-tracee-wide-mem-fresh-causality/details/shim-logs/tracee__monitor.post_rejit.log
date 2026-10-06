@@ -1,7 +1,7 @@
 [506.555933 pid=12507 tid=12507] shim_init pid=12507 exe=/artifacts/tracee/bin/tracee
 [506.556393 pid=12507 tid=12511] socket: listening on /var/run/bpfrejit/shim-12507.sock
 [506.794804 pid=12507 tid=12517] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
-[506.817019 pid=12507 tid=12517] kopprober wrote target=/tmp/target.json
+[506.817019 pid=12507 tid=12517] kinsnprober wrote target=/tmp/target.json
 [506.836120 pid=12507 tid=12517] loadtime policy prog= policy_hash=39f82ae52884c235 branch_profile_hash=13453716aec57bda insn_cnt=2
 [506.866051 pid=12507 tid=12517] loadtime step prog= step=wide_mem elapsed_ms=12
 [506.867217 pid=12507 tid=12517] loadtime optimized prog= insns=2->6 maps=0 workdir=/workspaces/repository/corpus/results/x86_kvm_corpus_20260926_152627_089782/details/loadtime-workdirs/loadtime_12507_0

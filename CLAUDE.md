@@ -149,7 +149,7 @@ failure artifacts under `details/failure-artifacts/`), `BENCH`/`WARMUPS`/
 `INNER_REPEAT` (micro-only), `FUZZ_ROUNDS` (test), `AWS_<ARM64|X86>_*` (AWS
 deploy params) — compose on one invocation for isolated per-pass/per-app
 runs; never bypass the Makefile. Current pass list is in
-`corpus/config/benchmark_config.yaml`: kop-class (kfunc lowering), bytecode
+`corpus/config/benchmark_config.yaml`: kinsn-class (kfunc lowering), bytecode
 rewriting (pure BPF→BPF), and profile-guided (`branch_flip`, not default).
 
 **AWS cost cap**: bench suites use `t3.small`/`t4g.small`, the kernel test
@@ -162,7 +162,7 @@ non-time-critical runs.
 **Container**: no host bind mount of the workspace — everything ships via
 image layers; only bind-mount system paths (`/sys`, `/sys/fs/bpf`,
 `/lib/modules`, `/boot`) and result output dirs. Docker layers are ordered
-stable-to-frequent (base OS/apt → pre-built app artifacts → kernel/kop
+stable-to-frequent (base OS/apt → pre-built app artifacts → kernel/kinsn
 modules → C++ runner/micro .bpf.o/test artifacts → C shim/bpfopt CLI →
 Python/configs/corpus data) so changing Python never triggers recompilation
 (`RUNNER_RUNTIME_IMAGE_SOURCE_FILES` in `build.mk` lists only files that

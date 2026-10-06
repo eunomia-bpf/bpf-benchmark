@@ -7,7 +7,7 @@
 [1156.170629 pid=3648 tid=3662] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=.test
 [1156.171014 pid=3648 tid=3662]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=96
 [1156.171661 pid=3648 tid=3662] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=MIT expected_attach=0 attach_btf_id=0 prog_btf_fd=4294967295 attach_btf_obj_fd=0 attach_prog_fd=0
-[1156.197565 pid=3648 tid=3662] kopprober wrote target=/tmp/target.json
+[1156.197565 pid=3648 tid=3662] kinsnprober wrote target=/tmp/target.json
 [1156.203237 pid=3648 tid=3652] socket: cmd=list_progs len=22
 [1156.241076 pid=3648 tid=3662] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
 [1156.303423 pid=3648 tid=3662] loadtime step prog= step=lea elapsed_ms=23

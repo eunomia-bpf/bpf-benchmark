@@ -184,7 +184,7 @@
    - `program.set_map_ids(...)`
    - `install_mock_map(...)`
    - `ctx.prog_type = ...`
-   - `ctx.kop_registry...`
+   - `ctx.kinsn_registry...`
    - `prog.inject_profiling(...)`
 5. 跑 pass 或 pass pipeline
 6. 断言：

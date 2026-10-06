@@ -4,13 +4,13 @@
   "insn_count_after": 1334,
   "insn_count_before": 1301,
   "insn_delta": 33,
-  "kop_calls_by_family": {
+  "kinsn_calls_by_family": {
     "lea": 10
   },
-  "kop_calls_by_name": {
+  "kinsn_calls_by_name": {
     "bpf_x86_leaq": 10
   },
-  "kop_payload_shapes": {
+  "kinsn_payload_shapes": {
     "bpf_x86_leaq|dst=r2|base=r5|index=none|scale=0|disp=-48": 1,
     "bpf_x86_leaq|dst=r3|base=r1|index=none|scale=0|disp=34": 1,
     "bpf_x86_leaq|dst=r3|base=r2|index=none|scale=0|disp=14": 1,
@@ -20,7 +20,7 @@
     "bpf_x86_leaq|dst=r8|base=r7|index=none|scale=0|disp=-40": 3,
     "bpf_x86_leaq|dst=r8|base=r9|index=none|scale=0|disp=-40": 1
   },
-  "kop_policy": {
+  "kinsn_policy": {
     "bytecode_families": {
       "bitops": false,
       "bulk_memory": false,
@@ -34,9 +34,9 @@
     "bytecode_family_overrides": {},
     "llvm_args": [
       "bpfopt",
-      "-bpf-enable-kop-select",
+      "-bpf-enable-kinsn-select",
       "-bpf-stack-size=4096",
-      "-bpf-kop-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
+      "-bpf-kinsn-mode=all=disable,preemit-lea=force,scaled-index-mem=force"
     ],
     "pass_args": []
   },

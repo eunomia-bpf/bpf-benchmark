@@ -29,7 +29,7 @@ load-time ReJIT protocol on a real, multi-attachment BPF graph.
 - `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]`, `selected_workload: stress_ng_tetragon_policy_hot`,
+  kinsn]`, `selected_workload: stress_ng_tetragon_policy_hot`,
   `runner: tetragon`.
 - **287 BPF programs** recorded per start (baseline and post_rejit).
   32 programs had a nonzero `run_cnt_delta` at baseline, 35 at

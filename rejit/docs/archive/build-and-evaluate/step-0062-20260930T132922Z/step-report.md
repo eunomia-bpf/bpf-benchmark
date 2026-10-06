@@ -3,7 +3,7 @@
 - **Command**: `PLATFORM=qemu ARCH=arm64 make selftest` (zero knobs;
   `TEST_MODE=selftest`; `runner.suites.test`, Makefile:226/233).
 - **Purpose**: completes the arm64 target-parity matrix (KVM x86 ran all 5
-  targets). Selftest mode = kop modules + native-proof micro smoke +
+  targets). Selftest mode = kinsn modules + native-proof micro smoke +
   native-proof negative smoke + BPF-verifier negative suite (non-fuzz),
   plus `ensure_bpf_stats_enabled` (`_mode_needs_bpf_stats`,
   `test.py:487`), i.e. the full selftest path. The arm64 counterpart of the
@@ -40,7 +40,7 @@ completed`, `run_type=native_proof_micro`. No ratio/geomean/rollup computed.
   corpus ×2 (0059/0060 recorded failure, deterministic), test (0061 pass),
   selftest (0062 pass). Only `negative-test` remains.
 - Reaffirms the 0061 localization: the arm64 corpus post-rejit failure is
-  specific to the load-time-plan/post-rejit path, not the verifier, kop
+  specific to the load-time-plan/post-rejit path, not the verifier, kinsn
   modules, bpf_stats, or test infrastructure. No framework/app change.
 
 ## Make + QEMU hygiene

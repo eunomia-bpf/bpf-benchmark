@@ -1,7 +1,7 @@
 # BPF development TODO — 2026-09-06 (updated 2026-09-09)
 
 This is a current handoff for the stock-kernel userspace optimization line. It
-does not replace older experiment logs, and it does not merge the KOperation
+does not replace older experiment logs, and it does not merge the Kinsn
 paper rebuttal backlog into this line of work.
 
 ## Current evidence
@@ -223,7 +223,7 @@ pass-policy change is justified from these separated batches alone.
    priority. Keep all failures and raw results. Do not filter programs, alter
    workloads, or add new measurement-validity gates.
 
-The older branch-layout and KOperation documents remain historical evidence for
+The older branch-layout and Kinsn documents remain historical evidence for
 their own paper lines. Revisit them only when those lines are explicitly chosen;
 they are not prerequisites for the current stock-kernel speculative work.
 
@@ -264,14 +264,14 @@ above.
 
 统一 research skills 源为 https://github.com/yunwei37/academic-writing-skills.git，必须用真实 git submodule，核验远端 revision；外层另一任务观察到的 HEAD 为 867d61c2fd50c506b5727067186b5ee4ff120f0d，仅供定位。当前 Workspace 中的独立本地 OpenCode 辅助 Agent PID176326 已受托只安装此 submodule，创建 .agents/skills 与 .claude/skills 的相对链接、保留已有skills并提交/push接入，不碰你的构建和实现。它会把结果写到 /workspaces/.agent-state/bpf-development/research-skills-install-result.md。你可以自主协调它或后续本地模型的非重叠工作，不要重复接入。接入后阅读 auto-research-orchestrator 及引用、现有paper/用户意图/实验状态，从当前阶段继续；当前用户最少复杂度和持续推进要求优先，不因技能文字新增人为停工规则，不调用用户未点名的 iter-refine-ideas。
 
-用户还问：“kprog 的 simluator 支持 x86 / arm 都支持了吗? 效果咋样? simulatoir 的形式化验证怎样了?” 请核验真实支持面，区分历史结果与本轮复现，说明机器检查证明和缺口，并据此推进研究。外层只读证据供你核实：kprog/README.md 仍称 arm64 placeholder，但 arm64/README.md 和实现代码已有 subset；两架构 20260523-134121 结果表各29行ok是旧证据；论文 documents/5-formal-verification.tex 与 sections/5-koperation.tex 是 KOperation/双lowering Lean证明，不等于NativeBPF simulator整体fidelity。请结合当前源码与 active main.tex 澄清、修正文档并补足有效验证，保留核心研究方向及原始失败/结果。收到后在原会话回复中明确确认，并将当前研究阶段、架构支持/效果/证明边界及继续行动写入你现有研究记录。
+用户还问：“kprog 的 simluator 支持 x86 / arm 都支持了吗? 效果咋样? simulatoir 的形式化验证怎样了?” 请核验真实支持面，区分历史结果与本轮复现，说明机器检查证明和缺口，并据此推进研究。外层只读证据供你核实：kprog/README.md 仍称 arm64 placeholder，但 arm64/README.md 和实现代码已有 subset；两架构 20260523-134121 结果表各29行ok是旧证据；论文 documents/5-formal-verification.tex 与 sections/5-kinsn.tex 是 Kinsn/双lowering Lean证明，不等于NativeBPF simulator整体fidelity。请结合当前源码与 active main.tex 澄清、修正文档并补足有效验证，保留核心研究方向及原始失败/结果。收到后在原会话回复中明确确认，并将当前研究阶段、架构支持/效果/证明边界及继续行动写入你现有研究记录。
 
 
 ### 用户后续明确补充：两篇论文与未完成形式化继续实现
 
-用户原话：“你也要让里面的 codex 开始去吧 speculative 和 kprogs 的论文都得写一下”；“形式化还没做完的继续去做”。BPF现有子模块 docs/speculative-optimization -> https://github.com/yunwei37/speculative-optimization.git 属于本项目既有paper子模块，不创建新Workspace。请同一原Codex统筹并实际更新 docs/kprog-simulator-in-ebpf/main.tex 对应稿件和 speculative 稿件，允许本地模型并行负责非重叠写作/独立检查，分别保持两篇科学故事和数据，不把两路线或KOperation混成一篇。不能仅写TODO；缺失结果明确占位，已有结果核验后使用，不为写作打断实际长实验。
+用户原话：“你也要让里面的 codex 开始去吧 speculative 和 kprogs 的论文都得写一下”；“形式化还没做完的继续去做”。BPF现有子模块 docs/speculative-optimization -> https://github.com/yunwei37/speculative-optimization.git 属于本项目既有paper子模块，不创建新Workspace。请同一原Codex统筹并实际更新 docs/kprog-simulator-in-ebpf/main.tex 对应稿件和 speculative 稿件，允许本地模型并行负责非重叠写作/独立检查，分别保持两篇科学故事和数据，不把两路线或Kinsn混成一篇。不能仅写TODO；缺失结果明确占位，已有结果核验后使用，不为写作打断实际长实验。
 
-kprog仍优先实现和形式化。请实际推进尚缺的证明代码与可复现机器检查，按现有设计处理 ISA fidelity、specialization preservation、verifier-visible boundaries 和 artifact binding；工具、可信ISA语义及模型分工由你选。区分机器检查已覆盖、假设和尚未证明内容，x86/ARM支持面如实写清。当前kprog main.tex 引用4-safety条件refinement与5-evaluation-plan，未引用旧KOperation Lean章节；旧Lean文字不能充当simulator整体证明，native preview速度也不能冒充verified execution。论文、证明代码和实际实验需一起推进。OSDI为质量目标，不保证录用；保持用户核心方向，模型不可用则你直接继续。
+kprog仍优先实现和形式化。请实际推进尚缺的证明代码与可复现机器检查，按现有设计处理 ISA fidelity、specialization preservation、verifier-visible boundaries 和 artifact binding；工具、可信ISA语义及模型分工由你选。区分机器检查已覆盖、假设和尚未证明内容，x86/ARM支持面如实写清。当前kprog main.tex 引用4-safety条件refinement与5-evaluation-plan，未引用旧Kinsn Lean章节；旧Lean文字不能充当simulator整体证明，native preview速度也不能冒充verified execution。论文、证明代码和实际实验需一起推进。OSDI为质量目标，不保证录用；保持用户核心方向，模型不可用则你直接继续。
 
 [Operator resource update, not experiment evidence]
 The existing spark-gateway/qwen3.8-27b-nvfp4-200k model is configured in this Workspace. Another owning QA task recently verified the same 27B backend with real Bash tools and continuation (OMP litellm provider; no fallback), and earlier shared-runner OpenCode tool execution passed on 27B. This is recent evidence, not a guarantee of the current request. The default Qwen Next helper request here had an actual API error. You may autonomously choose the existing 27B alias for useful non-overlapping paper/proof collaboration with existing credentials, or continue directly if unavailable. No global default or credential change is needed. The user specifically wants actual kprog and speculative manuscript updates alongside unfinished proof implementation; these need not wait for selftest to finish.
@@ -494,16 +494,16 @@ preserves the failed attempts and their logs as part of the experiment record.
   PID 1; that failure remains in
   `/workspaces/.agent-state/bpf-development/kprog-arm64-qemu-preflight-20260908-rerun11.log`.
 - The repaired public preflight exited zero and wrote completed metadata at
-  `micro/results/arm64_qemu_micro_19700101_000014_909678/metadata.json`.
+  `micro/results/arm64_qemu_micro_recorded_20260915_vmclock_000014_909678/metadata.json`.
 - A first full run completed all 29 positive cases but rejected the unsafe
   proof at the fixture's unrelated packet store. Its raw metadata is preserved
-  at `tests/results/08063080/native_proof_micro_19700101_000023_397290/metadata.json`;
+  at `tests/results/08063080/native_proof_micro_recorded_20260915_vmclock_000023_397290/metadata.json`;
   it is recorded as a contradictory negative-control result, not relabeled as
   successful evidence.
 - After the fixture and exact oracle repair, the public invocation
   `PLATFORM=qemu ARCH=arm64 JOBS=16 TIMEOUT=1800 make selftest` exited zero.
   Metadata at
-  `tests/results/e4a8b96d/native_proof_micro_19700101_000021_547969/metadata.json`
+  `tests/results/e4a8b96d/native_proof_micro_recorded_20260915_vmclock_000021_547969/metadata.json`
   is `completed` with exactly 29 cases; an independent check confirms every
   sample's result and return value match its configured expectation. The
   target verifier reports the exact offset-64 one-byte rejection, the negative
@@ -650,7 +650,7 @@ no new speculative-optimization performance evidence.
 
 - The native-lab slots on x86-64 and AArch64 now retain the uploaded verifier
   proof and a non-wrapping 32-bit mutation generation alongside native bytes
-  and relocations. The KOP sidecar carries a 9-bit slot id and the generation;
+  and relocations. The KINSN sidecar carries a 9-bit slot id and the generation;
   verifier instantiation and native emission both reject a stale generation.
   Every blob, relocation, or proof write advances the generation before
   mutation, and exhaustion returns `EOVERFLOW` rather than allowing an ABA
@@ -658,18 +658,18 @@ no new speculative-optimization performance evidence.
   mode for historical comparisons.
 - The loader separately opens and stock-verifier-loads the relocated proof,
   uploads that same instruction vector to the native slot, reads the resulting
-  generation, and constructs a bound KOP stub. It rejects proof calls, nested
-  KOPs, pseudo `ldimm64`, empty proofs, and proofs above the implemented bound.
-  Every proof `EXIT` is redirected to its KOP-region boundary; for multi-chunk
+  generation, and constructs a bound KINSN stub. It rejects proof calls, nested
+  KINSN, pseudo `ldimm64`, empty proofs, and proofs above the implemented bound.
+  Every proof `EXIT` is redirected to its KINSN-region boundary; for multi-chunk
   blobs the full CFG is placed on the final chunk and leading chunks use the
   verifier-safe `r0 = 0` continuation.
 - Successful stub loads no longer request a full verifier trace. A failed
   silent load is retried only to collect a bounded diagnostic log while
   preserving the primary errno. This fixed real success-path `ENOSPC` on
   loop-heavy proofs without hiding actual load failures.
-- The kernel verifier's two KOP proof scratch sites now allocate from the
+- The kernel verifier's two KINSN proof scratch sites now allocate from the
   descriptor's `max_insn_cnt`, removing the unrelated fixed 256-instruction
-  ceiling. ARM JIT KOP emission likewise allocates bounded scratch from
+  ceiling. ARM JIT KINSN emission likewise allocates bounded scratch from
   `max_emit_bytes` instead of rejecting every descriptor above its former
   fixed 64-instruction/256-byte stack buffer; all return paths free it.
 
@@ -682,7 +682,7 @@ no new speculative-optimization performance evidence.
   `micro/results/x86_kvm_micro_20260909_114315_763230/metadata.json`. They
   preserve the loop-final-EXIT assumption, proof placement, uninitialized-R0,
   and verifier-log `ENOSPC` failures; the partial corrected run remains under
-  `micro/results/x86_kvm_micro_20260909_104608_695915/`.
+  `micro/results/aborted/x86_kvm_micro_20260909_104608_695915/`.
 - ARM attempts under
   `micro/results/arm64_qemu_micro_19700101_000021_338346/` and
   `micro/results/arm64_qemu_micro_19700101_000022_284039/` preserve the stale
@@ -724,7 +724,7 @@ no new speculative-optimization performance evidence.
 - After rebuilding the changed kernel and fixing the ARM JIT scratch defect,
   `PLATFORM=qemu ARCH=arm64 RUNTIMES=native_kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1 TIMEOUT=7200 make micro`
   exited zero and wrote
-  `micro/results/arm64_qemu_micro_19700101_000024_077043/metadata.json`.
+  `micro/results/arm64_qemu_micro_recorded_20260915_vmclock_000024_077043/metadata.json`.
   Independent JSON validation found status `completed`, exactly 29 programs
   and 29 samples, 29 matching results, 29 matching return values, and positive
   proof-open/proof-verifier-load phases for all 29 samples. The guest powered
@@ -2142,8 +2142,8 @@ not establish complete native-byte semantic equivalence.
   recorded as provenance for the completed contract, not as a paper-grade
   speedup (SAMPLES=1, one app, one pass, ~2% spread across threads).
 - Root cause of the earlier failures, now isolated: the default `full-x86`
-  policy's `kop` step fails inside the load-time shim
-  (`loadtime bpfopt step kop failed`, e.g. on the trivial `libbpf_nametest`
+  policy's `kinsn` step fails inside the load-time shim
+  (`loadtime bpfopt step kinsn failed`, e.g. on the trivial `libbpf_nametest`
   2-instruction program), and with `noop,map_inline` the `map_inline` step fails
   on `balancer_ingres` (`loadtime bpfopt step map_inline failed`). In both cases
   the shim reports the failure and the app aborts, so the two-start comparison
@@ -2183,11 +2183,11 @@ not establish complete native-byte semantic equivalence.
   Neither pass is in the default `benchmark_config.yaml` policy, so they do not
   block the current corpus path, but they will fail the same way if they are ever
   enabled. They are left unchanged here and recorded as a known follow-up.
-- The remaining default-policy blocker is the `kop` step. It fails because the
+- The remaining default-policy blocker is the `kinsn` step. It fails because the
   host `bpfopt` (and the copy baked into the runtime image) is linked against
-  the system LLVM-18, which does not carry the `-bpf-enable-kop-select` /
-  `-bpf-kop-mode` options the kop pass needs; those live in the experimental
-  `llvm-backend/llvm` fork under `llvm-backend/build-bpf-kop`, which is only
+  the system LLVM-18, which does not carry the `-bpf-enable-kinsn-select` /
+  `-bpf-kinsn-mode` options the kinsn pass needs; those live in the experimental
+  `llvm-backend/llvm` fork under `llvm-backend/build-bpf-kinsn`, which is only
   partially built (no `libLLVM`). Building that fork and pointing
   `LLVM_DIR`/`RUN_LLVM_DIR` at it is the environment prerequisite for the
   default policy; it is a long build and was not completed in this session.
@@ -2553,21 +2553,21 @@ not establish complete native-byte semantic equivalence.
   paths, the vector/`.D0`/`.Q0` paths, and native-byte equivalence. All the
   hand-written scalar value helpers in the emitted AArch64 handler are now gone.
 
-### Default-policy kop environment prerequisite resolved, 2026-09-16
+### Default-policy kinsn environment prerequisite resolved, 2026-09-16
 
-- The `kop` step's load-time failure was an LLVM-backend prerequisite, and it is
-  now built. `llvm-backend/build-bpf-kop` (the fork carrying
-  `lib/Target/BPF/BPFKopSelect.cpp` and the `-bpf-enable-kop-select` /
-  `-bpf-kop-mode` options) had only four static libraries; `ninja -C
-  llvm-backend/build-bpf-kop -j12` completed the full build (2116/2116 targets,
+- The `kinsn` step's load-time failure was an LLVM-backend prerequisite, and it is
+  now built. `llvm-backend/build-bpf-kinsn` (the fork carrying
+  `lib/Target/BPF/BPFKinsnSelect.cpp` and the `-bpf-enable-kinsn-select` /
+  `-bpf-kinsn-mode` options) had only four static libraries; `ninja -C
+  llvm-backend/build-bpf-kinsn -j12` completed the full build (2116/2116 targets,
   exit 0, 124 static libs including `libLLVMBPFCodeGen.a` and the
   `lib/cmake/llvm/LLVMConfig.cmake` package).
 - Building `bpfopt` against it works: `cmake -S bpfopt/llvm -B <build>
-  -DLLVM_DIR=/workspaces/repository/llvm-backend/build-bpf-kop/lib/cmake/llvm`
+  -DLLVM_DIR=/workspaces/repository/llvm-backend/build-bpf-kinsn/lib/cmake/llvm`
   configures and builds (exit 0), and the resulting `bpfopt` recognizes
-  `-bpf-enable-kop-select` (previously the system LLVM-18 build reported
-  `Unknown command line argument '-bpf-enable-kop-select'`). `runner/mk/build.mk`
-  already points `BPFOPT_LLVM_BUILD_X86` at `bpfopt/llvm/build-kop` and takes
+  `-bpf-enable-kinsn-select` (previously the system LLVM-18 build reported
+  `Unknown command line argument '-bpf-enable-kinsn-select'`). `runner/mk/build.mk`
+  already points `BPFOPT_LLVM_BUILD_X86` at `bpfopt/llvm/build-kinsn` and takes
   `RUNNER_LLVM_DIR` from `LLVM_DIR`/`RUN_LLVM_DIR`, so the default policy can be
   enabled by building the fork and setting `LLVM_DIR` to its `lib/cmake/llvm`
   (no repository change required).
@@ -2575,38 +2575,38 @@ not establish complete native-byte semantic equivalence.
   image with the fork-LLVM `bpfopt` and re-run
   `BPFREJIT_BENCH_PASSES="default" make corpus` (the separate `map_inline`
   overlay fix and the `VMLINUX_BTF` framework-kernel override already apply).
-- The default corpus policy now runs the fork-LLVM `bpfopt` and reaches `kop`
+- The default corpus policy now runs the fork-LLVM `bpfopt` and reaches `kinsn`
   end to end. With the runtime image rebuilt from the fork-LLVM `bpfopt`,
   `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10` (framework-kernel
   `VMLINUX_BTF`, `LLVM_DIR=<fork>`) runs the `full-x86` group
-  `[noop, map_inline, const_prop, dce, kop, wide_mem, bounds_check_merge,
-  skb_load_bytes_spec, noop, const_prop, dce]` and `kop` now **applies 71 of 71
+  `[noop, map_inline, const_prop, dce, kinsn, wide_mem, bounds_check_merge,
+  skb_load_bytes_spec, noop, const_prop, dce]` and `kinsn` now **applies 71 of 71
   matched sites** on `balancer_ingres` (xdp), shrinking it 2217 -> 2174
-  instructions. Before this, `kop` aborted the app on the first program. The
+  instructions. Before this, `kinsn` aborted the app on the first program. The
   per-pass applied-site totals recorded in the run's load-time report are
-  `noop: 3`, `map_inline: 16`, `const_prop: 1`, `dce: 1`, `kop: 71`.
+  `noop: 3`, `map_inline: 16`, `const_prop: 1`, `dce: 1`, `kinsn: 71`.
 - The `full-x86` policy then fails at `wide_mem`
-  (`loadtime bpfopt step wide_mem failed` on `balancer_ingres`, after `kop`
+  (`loadtime bpfopt step wide_mem failed` on `balancer_ingres`, after `kinsn`
   succeeded), so the two-start comparison still does not complete for the full
   group; the app exits before the workloads run. This is a new, more advanced
-  failure point than the previous `kop` blocker and it is an optimizer-pass
-  interaction (the `wide_mem` byte-ladder collapse on kop-modified bytecode),
+  failure point than the previous `kinsn` blocker and it is an optimizer-pass
+  interaction (the `wide_mem` byte-ladder collapse on kinsn-modified bytecode),
   not a framework or measurement-validity issue. It is reproduced outside the VM
   on the balancer `.text`: `wide_mem` alone applies 1 site cleanly (224 -> 51
-  insns), while `wide_mem` on `kop`-modified bytecode reports
+  insns), while `wide_mem` on `kinsn`-modified bytecode reports
   `Invalid offset 33 for movsx at pc 11` (the local reproduction uses a
   synthetic target map, so this is an indication, not the exact in-VM state).
-  Running the same policy without `wide_mem` (i.e. through `kop`) is the next
+  Running the same policy without `wide_mem` (i.e. through `kinsn`) is the next
   measurement to complete.
-- **Completed two-start KVM corpus through `kop`, 2026-09-16.** Running the
+- **Completed two-start KVM corpus through `kinsn`, 2026-09-16.** Running the
   `full-x86` prefix without `wide_mem`,
-  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,kop`, exits 0 and writes
+  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,kinsn`, exits 0 and writes
   `corpus/results/x86_kvm_corpus_20260916_172134_395628/` with suite
   `status: "completed"`, app `status: "ok"`, error empty, and
   `rejit_result.status: "ok"` over passes `[noop, map_inline, const_prop, dce,
-  kop]`. Applied sites: `noop: 3`, `map_inline: 16`, `const_prop: 1`, `dce: 1`,
-  `kop: 71`. This is the first completed two-start corpus in this workspace in
-  which the `kop` koperation pass applies sites under the load-time contract.
+  kinsn]`. Applied sites: `noop: 3`, `map_inline: 16`, `const_prop: 1`, `dce: 1`,
+  `kinsn: 71`. This is the first completed two-start corpus in this workspace in
+  which the `kinsn` kinsn pass applies sites under the load-time contract.
 - Raw `balancer_ingres` counters: baseline 169.00 ns/run
   (`run_cnt_delta = 26,174,496`), post-ReJIT 146.01 ns/run
   (`run_cnt_delta = 27,903,858`), ratio 0.864 (faster). Raw pktgen thread pps:
@@ -2617,12 +2617,12 @@ not establish complete native-byte semantic equivalence.
   outliers, consistent with the earlier `map_inline` run's treatment.) Single
   sample, one app, one pass group: provenance plus a consistent direction, not a
   paper-grade speedup.
-- Next: the `full-x86` group still fails at `wide_mem` on `kop`-modified
+- Next: the `full-x86` group still fails at `wide_mem` on `kinsn`-modified
   bytecode. Diagnosing that interaction (the `wide_mem` byte-ladder collapse
-  assuming pre-`kop` instruction shapes) would let the entire default group
+  assuming pre-`kinsn` instruction shapes) would let the entire default group
   complete in one two-start comparison.
 - Root cause of the `wide_mem` failure is now located precisely. Every
-  non-kop-non-specialized pass (including `wide_mem`, `const_prop`, `dce`,
+  non-kinsn-non-specialized pass (including `wide_mem`, `const_prop`, `dce`,
   `bounds_check_merge`, `skb_load_bytes_spec`) goes through
   `run_llvm_roundtrip` (`bpfopt/llvm/src/main.cpp` -> `run_llvm_roundtrip` in
   `bpfopt/llvm/src/llvm_mapinline.hpp`), which regenerates an LLVM module and
@@ -2632,7 +2632,7 @@ not establish complete native-byte semantic equivalence.
   `"Invalid offset <n> for movsx at pc <pc>"` at
   `vendor/llvmbpf/src/compiler.cpp` (the `is_mov_sx` / `CreateSExt` chain). So
   the failure is the LLVM-roundtrip front end rejecting an instruction shape
-  that the `kop` output (or the input the pass sees after `kop`) contains, not a
+  that the `kinsn` output (or the input the pass sees after `kinsn`) contains, not a
   measurement or framework problem. A faithful in-VM reproduction would need
   `KEEP_WORKDIRS=1` to retain `/tmp/loadtime_<pid>_5/step5.log`; the local
   reproduction is unreliable because it must supply a synthetic `--target` map.
@@ -2640,35 +2640,35 @@ not establish complete native-byte semantic equivalence.
   group with `KEEP_WORKDIRS=1` retained
   `corpus/results/x86_kvm_corpus_20260916_180914_166297/details/loadtime-workdirs/loadtime_2792_5/`,
   whose `step5.log` reads exactly `error: Invalid offset -32623 for movsx at pc
-  7`. `input.bin` in that workdir is the `kop` step's output (2174 instructions;
-  `report.4.json` records `pass: kop, sites_applied: 71, insn_count_before:
+  7`. `input.bin` in that workdir is the `kinsn` step's output (2174 instructions;
+  `report.4.json` records `pass: kinsn, sites_applied: 71, insn_count_before:
   2217, insn_count_after: 2174`). Decoding it shows the failing word at pc 7 is
   `code=0xb7` (`BPF_MOV64_IMM`) with `off=-32623, imm=14`, immediately followed
-  by `pc8 code=0x85` (`BPF_CALL`): this is a **kop koperation payload pair**
+  by `pc8 code=0x85` (`BPF_CALL`): this is a **kinsn kinsn payload pair**
   (`MOV64_IMM` carrying the encoded payload + `CALL`), the wire form described
-  by `read_kop_sidecar_payload`/`decode_kop_payload` in
-  `bpfopt/llvm/src/main.cpp`. The `kop` pass itself knows this and bypasses the
-  LLVM roundtrip when the input already carries kop calls
-  (`if (kop_pass && count_kop_calls(input) > 0) output = input;`), but every
+  by `read_kinsn_sidecar_payload`/`decode_kinsn_payload` in
+  `bpfopt/llvm/src/main.cpp`. The `kinsn` pass itself knows this and bypasses the
+  LLVM roundtrip when the input already carries kinsn calls
+  (`if (kinsn_pass && count_kinsn_calls(input) > 0) output = input;`), but every
   other LLVM-roundtrip pass (`wide_mem`, `const_prop`, `dce`,
   `bounds_check_merge`, `skb_load_bytes_spec`) has no such guard, so running any
-  of them on `kop` output feeds a kop payload word into `llvmbpf`'s `movsx`
-  decoder and fails. This is a pass-ordering / kop-payload-awareness defect in
+  of them on `kinsn` output feeds a kinsn payload word into `llvmbpf`'s `movsx`
+  decoder and fails. This is a pass-ordering / kinsn-payload-awareness defect in
   the optimizer, not a measurement-validity issue: the `full-x86` group lists
-  `kop` before `wide_mem`, which cannot work. The two viable fixes are (a) order
-  `kop` after the pure-bytecode passes, or (b) make the pure-bytecode passes
-  detect and preserve kop payload pairs. Verified alternative ordering
-  (kop moved to the end of the group) is recorded with its own run.
-- **Entire `full-x86` group completes with `kop` ordered last, 2026-09-16.**
+  `kinsn` before `wide_mem`, which cannot work. The two viable fixes are (a) order
+  `kinsn` after the pure-bytecode passes, or (b) make the pure-bytecode passes
+  detect and preserve kinsn payload pairs. Verified alternative ordering
+  (kinsn moved to the end of the group) is recorded with its own run.
+- **Entire `full-x86` group completes with `kinsn` ordered last, 2026-09-16.**
   `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,wide_mem,
-  bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kop` exits 0 and
+  bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kinsn` exits 0 and
   writes `corpus/results/x86_kvm_corpus_20260916_184607_120414/` with suite
   `status: "completed"`, app `status: "ok"`, error empty, and
   `rejit_result.status: "ok"` over all eleven passes. This confirms the
-  ordering hypothesis: moving `kop` after the LLVM-roundtrip passes makes the
-  whole group run, because the pure-bytecode passes then never see a kop payload
+  ordering hypothesis: moving `kinsn` after the LLVM-roundtrip passes makes the
+  whole group run, because the pure-bytecode passes then never see a kinsn payload
   word. Applied sites: `noop: 4`, `map_inline: 16`, `const_prop: 2`, `dce: 2`,
-  `wide_mem: 1`, `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kop: 71`.
+  `wide_mem: 1`, `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kinsn: 71`.
 - Raw `balancer_ingres`: baseline 175.79 ns/run
   (`run_cnt_delta = 25,818,384`), post-ReJIT 146.95 ns/run
   (`run_cnt_delta = 28,317,888`), ratio 0.836 (faster); `bytes_xlated` 23,840 ->
@@ -2677,14 +2677,14 @@ not establish complete native-byte semantic equivalence.
   949,317 = 2,838,183; sum ratio 1.097. Single sample, one app, eleven passes:
   provenance plus a consistent direction, not a paper-grade speedup.
 - The ordering change was applied to the `full-x86` group in
-  `corpus/config/benchmark_config.yaml` (`kop` moved to the end) and committed as
+  `corpus/config/benchmark_config.yaml` (`kinsn` moved to the end) and committed as
   `557a5af54`; the repository default now completes without a
   `BPFREJIT_BENCH_PASSES` override. The arm64 `full` group in the same file has
   the identical hazard (its `rotate`/`cond_select`/`extract`/`endian_fusion`/
-  `ccmp`/`bulk_memory`/`prefetch` koperation passes precede `wide_mem`) and was
+  `ccmp`/`bulk_memory`/`prefetch` kinsn passes precede `wide_mem`) and was
   deliberately left unchanged pending an arm64/KVM verification, since the
   reproduction here is x86. Reordering it the same way is the expected fix.
-  The other alternative, making the pure-bytecode passes kop-payload-aware, is
+  The other alternative, making the pure-bytecode passes kinsn-payload-aware, is
   still open.
 
 ### AArch64 memory address-offset refinement, 2026-09-16
@@ -2798,7 +2798,7 @@ not establish complete native-byte semantic equivalence.
 
 ### Default `make corpus` completes end to end, 2026-09-16
 
-- With the `full-x86` ordering fix committed (`557a5af54`, `kop` moved after the
+- With the `full-x86` ordering fix committed (`557a5af54`, `kinsn` moved after the
   LLVM-roundtrip passes), the repository default policy now completes with **no
   `BPFREJIT_BENCH_PASSES` override**:
   `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 JOBS=8
@@ -2807,10 +2807,10 @@ not establish complete native-byte semantic equivalence.
   `corpus/results/x86_kvm_corpus_20260916_192529_199370/` with suite
   `status: "completed"` and app `status: "ok"`. The run reports all eleven
   passes `[noop, map_inline, const_prop, dce, wide_mem, bounds_check_merge,
-  skb_load_bytes_spec, noop, const_prop, dce, kop]` with
+  skb_load_bytes_spec, noop, const_prop, dce, kinsn]` with
   `rejit_result.status: "ok"`.
 - Applied sites: `noop: 4`, `map_inline: 16`, `const_prop: 2`, `dce: 2`,
-  `wide_mem: 1`, `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kop: 71`.
+  `wide_mem: 1`, `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kinsn: 71`.
   Raw `balancer_ingres`: 170.86 ns/run (`run_cnt_delta = 26,219,225`) ->
   148.00 ns/run (`run_cnt_delta = 27,925,025`), ratio 0.866; `bytes_xlated`
   23,840 -> 19,016 and `bytes_jited` 13,641 -> 11,545. pktgen throughput
@@ -2888,11 +2888,11 @@ not establish complete native-byte semantic equivalence.
   completes with **two apps `status: "ok"`** under the all-passes policy:
   - `katran`: `status: ok`; applied sites `noop: 4`, `map_inline: 16`,
     `const_prop: 2`, `dce: 2`, `wide_mem: 1`, `bounds_check_merge: 1`,
-    `skb_load_bytes_spec: 1`, `kop: 71`; `balancer_ingres` 169.58 -> 146.87
+    `skb_load_bytes_spec: 1`, `kinsn: 71`; `balancer_ingres` 169.58 -> 146.87
     ns/run (ratio 0.866).
   - `bcc/set`: `status: ok`; the multi-program BCC bundle applies
     `noop: 55`, `map_inline: 60`, `const_prop: 28`, `dce: 26`, `wide_mem: 13`,
-    `bounds_check_merge: 13`, `skb_load_bytes_spec: 13`, `kop: 72` across its
+    `bounds_check_merge: 13`, `skb_load_bytes_spec: 13`, `kinsn: 72` across its
     thirteen BPF programs (`sys_enter`/`sys_exit` tracepoints,
     `sched_switch`/`sched_wakeup` tracepoints, `kprobe__cap_cap`,
     `fentry_vfs_*`, `block_rq_*`). Per-program raw `run_time_ns_delta /
@@ -3460,7 +3460,7 @@ not establish complete native-byte semantic equivalence.
   control-flow traces. All x86 value helpers are now generated with proven
   contracts.
 
-### Default corpus completes on the current tree; kop output rejected by the verifier, 2026-09-18
+### Default corpus completes on the current tree; kinsn output rejected by the verifier, 2026-09-18
 
 - The repository default policy now completes end to end on the current working
   tree with **no command-line overrides at all**:
@@ -3473,27 +3473,27 @@ not establish complete native-byte semantic equivalence.
   `VMLINUX_BTF`/`KERNEL_RELEASE` pin to `host-native-bpf-x86` (the exact fix this
   log previously recorded as needing authorization), so the framework-kernel BTF
   is now used by default and no override is needed.
-- **The `kop` step's optimized bytecode is rejected by the stock verifier.** The
+- **The `kinsn` step's optimized bytecode is rejected by the stock verifier.** The
   shim log for that run records `loadtime verifier probe rejected candidate after
-  step kop errno=13`, after which it correctly passes the original
+  step kinsn errno=13`, after which it correctly passes the original
   `BPF_PROG_LOAD` through (`PROG_LOAD -> fd=19 errno=0 kernel_prog_id=86`). So
-  although the plan contains all eleven steps including `kop` at index 10, no kop
+  although the plan contains all eleven steps including `kinsn` at index 10, no kinsn
   site is installed: the xdp `balancer_ingres` step list ends at step 9 (`dce`),
   and the applied-site totals for the run are `noop: 4`, `map_inline: 4`,
   `const_prop: 2`, `dce: 2`, `wide_mem: 1`, `bounds_check_merge: 1`,
-  `skb_load_bytes_spec: 1`, `kop: 0`. This is a **correctness signal about the kop
+  `skb_load_bytes_spec: 1`, `kinsn: 0`. This is a **correctness signal about the kinsn
   pass output**, not a framework or measurement-validity problem: the shim did
   exactly the right thing (reject the candidate, keep the original), and the
   verifier error is the ground truth to act on.
-- Contrast with the earlier committed `kop`-through run
-  (`corpus/results/x86_kvm_corpus_20260916_172134_395628/`, 71 kop sites
+- Contrast with the earlier committed `kinsn`-through run
+  (`corpus/results/x86_kvm_corpus_20260916_172134_395628/`, 71 kinsn sites
   installed, `balancer_ingres` 169.00 -> 146.01 ns/run). The two runs differ in
   the concurrent `bpfopt/llvm/src/*` and `bpfopt/shim/*` WIP now in the tree, so
-  the kop backend changed between them. The current tree's kop output does not
+  the kinsn backend changed between them. The current tree's kinsn output does not
   survive the verifier; the earlier one did.
-- Raw counters for the completed (kop-not-installed) run: `balancer_ingres`
+- Raw counters for the completed (kinsn-not-installed) run: `balancer_ingres`
   170.63 ns/run baseline -> 169.48 ns/run post, pktgen throughput 2,575,546 ->
-  2,621,341 pps. Consistent with kop contributing nothing on this tree.
+  2,621,341 pps. Consistent with kinsn contributing nothing on this tree.
 - Note on follow-up evidence capture: a second `KEEP_WORKDIRS=1` run
   (`corpus/results/x86_kvm_corpus_20260918_074332_118383/`) failed before the BPF
   work for an unrelated environmental reason (`modprobe tunnel4 failed: Module
@@ -3548,8 +3548,8 @@ not establish complete native-byte semantic equivalence.
   WORKLOAD_DURATION=10 JOBS=6 IMAGE_BUILD_JOBS=6 make corpus`) four times to get
   authoritative two-start KVM evidence on the current tree. Results, in order:
   1. `CORPUS_EXIT 0` (`x86_kvm_corpus_20260918_063928_597786/`): suite
-     `completed`, app `ok`; `kop` output **verifier-rejected**
-     (`verifier probe rejected candidate after step kop errno=13`), so no kop site
+     `completed`, app `ok`; `kinsn` output **verifier-rejected**
+     (`verifier probe rejected candidate after step kinsn errno=13`), so no kinsn site
      installed. Full numbers in the section above.
   2. `CORPUS_EXIT 2`: `cp: cannot create .../modules-install/lib/modules/
      7.0.0-rc2+/kernel/drivers/iommu/virtio-iommu.ko: No such file or directory`
@@ -3563,12 +3563,12 @@ not establish complete native-byte semantic equivalence.
      `status: "error"`. The baseline phase did complete a full measurement
      (`measure_start` -> `measure_finish`) with `balancer_ingres` 172.83 ns/run
      and pktgen ~2,536,629 pps, but there is no post-ReJIT counterpart.
-- **New kop failure mode in run 4**: the post-ReJIT shim log records
-  `loadtime optimization failed: loadtime bpfopt step kop failed;
+- **New kinsn failure mode in run 4**: the post-ReJIT shim log records
+  `loadtime optimization failed: loadtime bpfopt step kinsn failed;
   log=/tmp/loadtime_2819_2/step10.log` on the trivial 2-instruction
   `socket_filter` and `tracepoint` programs. This differs from run 1's
-  verifier-rejection of the optimized candidate: here the `bpfopt --pass kop`
-  subprocess itself fails. Both are failures of the current tree's kop backend
+  verifier-rejection of the optimized candidate: here the `bpfopt --pass kinsn`
+  subprocess itself fails. Both are failures of the current tree's kinsn backend
   and both leave the original bytecode in place (the framework behaves
   correctly); they are recorded as raw failures, not measurement-validity gates.
 - **Two environment-level blockers, both outside the optimizer:**
@@ -3582,40 +3582,40 @@ not establish complete native-byte semantic equivalence.
     shim. Run 1 on the same tree started katran fine, so it is intermittent.
 - The authoritative **completed** evidence on the current tree remains run 1
   (`x86_kvm_corpus_20260918_063928_597786/`): default policy, no overrides, all
-  eleven passes, suite `completed`, `kop` rejected by the verifier.
+  eleven passes, suite `completed`, `kinsn` rejected by the verifier.
 
-### Root cause of the x86 `kop` step failure, fixed 2026-09-18
+### Root cause of the x86 `kinsn` step failure, fixed 2026-09-18
 
-- Scope correction: run 1's kop steps actually **ran** (the loadtime report has
-  all `kop_*` fields, `sites_applied: 0`, `elapsed_ms` ~6-7 per program); its
+- Scope correction: run 1's kinsn steps actually **ran** (the loadtime report has
+  all `kinsn_*` fields, `sites_applied: 0`, `elapsed_ms` ~6-7 per program); its
   "verifier rejection" is a separate, later-stage effect on an optimized
-  candidate, not an argument-parsing failure. The `bpfopt step kop failed`
+  candidate, not an argument-parsing failure. The `bpfopt step kinsn failed`
   mode (run 4) is the argument-parsing failure described here, and it appeared
   with the x86 `bpfopt` rebuilt at 2026-09-18 07:33, which was linked against
   the devcontainer's unpatched LLVM 18.
-- The kop backend's options `-bpf-enable-kop-select` and `-bpf-kop-mode` are
+- The kinsn backend's options `-bpf-enable-kinsn-select` and `-bpf-kinsn-mode` are
   registered only by the patched BPF backend in `llvm-backend/llvm/llvm/`
-  (`BPFKopSelect.cpp`). `runner/mk/build.mk` built the x86 binary with
+  (`BPFKinsnSelect.cpp`). `runner/mk/build.mk` built the x86 binary with
   `-DLLVM_DIR="$(RUNNER_LLVM_DIR)"`, which defaults to
   `/usr/lib/llvm-18/lib/cmake/llvm`. The arm64 rule already used the in-repo
-  cross-built `llvm-backend/build-bpf-kop-arm64`, so **kop worked on arm64 and
+  cross-built `llvm-backend/build-bpf-kinsn-arm64`, so **kinsn worked on arm64 and
   failed on x86**.
-- Evidence: `strings` finds `enable-kop-select` in
-  `llvm-backend/build-bpf-kop/lib/libLLVMBPFCodeGen.a` but not in
+- Evidence: `strings` finds `enable-kinsn-select` in
+  `llvm-backend/build-bpf-kinsn/lib/libLLVMBPFCodeGen.a` but not in
   `/usr/lib/llvm-18/lib/libLLVMBPFCodeGen.a`; the old binary printed
-  `Unknown command line argument '-bpf-enable-kop-select'` and
-  `'-bpf-kop-mode=all=force,movbe-load=disable'` and exited 1, exactly the
-  `kop` failures the shim logged (that string is `main.cpp`'s default kop-mode
-  for the `kop` pass). Nothing was wrong with the pass logic or the framework.
+  `Unknown command line argument '-bpf-enable-kinsn-select'` and
+  `'-bpf-kinsn-mode=all=force,movbe-load=disable'` and exited 1, exactly the
+  `kinsn` failures the shim logged (that string is `main.cpp`'s default kinsn-mode
+  for the `kinsn` pass). Nothing was wrong with the pass logic or the framework.
 - Fix (commit `677aef815`): `host-bpfopt-llvm-x86` now depends on
   `host-llvm-x86`, a new target that builds `llvm-libraries` in
-  `llvm-backend/build-bpf-kop`, and the x86 bpfopt rule passes
-  `-DLLVM_DIR="$(NATIVE_KOP_LLVM_DIR)"` — the same pattern as arm64.
+  `llvm-backend/build-bpf-kinsn`, and the x86 bpfopt rule passes
+  `-DLLVM_DIR="$(NATIVE_KINSN_LLVM_DIR)"` — the same pattern as arm64.
   `RUNNER_LLVM_DIR` is untouched because the runner's llvmbpf build still uses
   system LLVM 18.
 - Verification: on a 2-instruction `socket_filter` and `tracepoint` program the
   pass went `EXIT 1` -> `EXIT 0` with a well-formed report; the previously
-  failing `--pass kop` command now runs.
+  failing `--pass kinsn` command now runs.
 
 ### Root cause of the `modules_install` cp failures, 2026-09-19
 
@@ -3671,22 +3671,22 @@ not establish complete native-byte semantic equivalence.
   `tetragon/.../vmlinux_generated_x86.h`, `bcc/libbpf-tools/x86/vmlinux.h`) now
   define `mm_struct.user_ns`.
 
-### First completed default corpus run with `kop` installed, 2026-09-19
+### First completed default corpus run with `kinsn` installed, 2026-09-19
 
 - Run `corpus/results/x86_kvm_corpus_20260919_225748_512435/`, default policy
   (`BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 JOBS=6
   IMAGE_BUILD_JOBS=6 make corpus`), on the tree with both fixes above
-  (`1a66f51b3` x86 VMLINUX_BTF, `677aef815` x86 kop LLVM). Suite `completed`,
+  (`1a66f51b3` x86 VMLINUX_BTF, `677aef815` x86 kinsn LLVM). Suite `completed`,
   app `katran` `status: ok`, `error: ""`.
-- **`kop` finally applied sites**: on the real katran `xdp` program,
+- **`kinsn` finally applied sites**: on the real katran `xdp` program,
   `sites_matched: 71`, `sites_applied: 71`, `insn_count 2216 -> 2175`, with
-  `kop_calls_by_name = {bpf_x86_bextrq: 1, bpf_x86_bswapl: 4, bpf_x86_leaq: 41,
+  `kinsn_calls_by_name = {bpf_x86_bextrq: 1, bpf_x86_bswapl: 4, bpf_x86_leaq: 41,
   bpf_x86_roll: 20, bpf_x86_rolw: 5}`. The six trivial programs
   (`socket_filter` x3, `kprobe`, `cgroup_sock`) correctly applied `0` (no
-  matching sites). This is the first corpus run on this tree in which `kop`
+  matching sites). This is the first corpus run on this tree in which `kinsn`
   installs optimized bytecode end to end through the stock verifier.
-- **No kop failure signatures**: `0` occurrences of
-  `Unknown command line argument`, `bpfopt step kop failed`, or
+- **No kinsn failure signatures**: `0` occurrences of
+  `Unknown command line argument`, `bpfopt step kinsn failed`, or
   `verifier probe rejected` in `details/shim-logs/katran.post_rejit.log`;
   `rejit_result.status: ok`.
 - Two-start measurement (both phases present): `balancer_ingres` (xdp)
@@ -3695,7 +3695,7 @@ not establish complete native-byte semantic equivalence.
   aggregation.
 - Other passes applied on the same program: `noop: 4`, `map_inline: 16`,
   `const_prop: 2`, `dce: 2`, `wide_mem: 1`, `bounds_check_merge: 1`,
-  `skb_load_bytes_spec: 1`, `kop: 71` sites.
+  `skb_load_bytes_spec: 1`, `kinsn: 71` sites.
 - Run series context: `corpus_v11` attempt 1 still hit the SeaweedFS FUSE
   `modules_install` `cp` drop (`acpi_ipmi.ko`); attempt 2 cleared it (kernel
   `#6` built clean) and completed. The FUSE drop remains the only recurring
@@ -3713,7 +3713,7 @@ not establish complete native-byte semantic equivalence.
   `otelcol-ebpf-profiler__profiling` error (native app exited before programs
   were tracked), `tracee__monitor` error (Tracee launch failure). All six report
   `rejit_result.status: ok`.
-- **`kop` applied sites in all six apps** (programs already carrying kop calls
+- **`kinsn` applied sites in all six apps** (programs already carrying kinsn calls
   are preserved; counts are newly applied sites):
   `tracee/monitor 3089` (`leaq 2841`, `leal 191`, `shlxq 52`, `cmp_cmovb 4`,
   `rolw 1`), `tetragon/observer 2824` (`leaq 2367`, `movq 234`, `movl 142`,
@@ -3721,19 +3721,19 @@ not establish complete native-byte semantic equivalence.
   `rolw 390`, `leal 246`, `cmp_cmovb 126`, `rorxl 28`, `bextrq 20`, `shlxl 19`,
   `movbe16 9`), `otelcol 463` (`leaq 212`, `leal 121`, `cmp_cmovb 115`,
   `bswapl 5`, `bswapq 5`, `shrxq 4`, `shlxq 1`), `katran 71`, `bcc/set 72`.
-  Total ~8,499 applied kop sites across the six apps.
+  Total ~8,499 applied kinsn sites across the six apps.
 - Remaining observed failures, recorded raw (framework leaves the original
   bytecode in place and reports them; not measurement gates):
-  - `cilium/agent`: `40` `bpfopt step kop failed` on `cil_to_netdev` and
-    `tail_nodeport_n` (kop runs after `noop/map_inline/const_prop/dce/...`), plus
-    `verifier probe rejected candidate after step kop errno=13` on a few
-    programs. `19` kop reports carry the diagnostic
-    `bytecode_kop_recovery_applied=1` (a partial-recovery path that still yields
+  - `cilium/agent`: `40` `bpfopt step kinsn failed` on `cil_to_netdev` and
+    `tail_nodeport_n` (kinsn runs after `noop/map_inline/const_prop/dce/...`), plus
+    `verifier probe rejected candidate after step kinsn errno=13` on a few
+    programs. `19` kinsn reports carry the diagnostic
+    `bytecode_kinsn_recovery_applied=1` (a partial-recovery path that still yields
     applied sites, e.g. `sched_cls` 17 sites on 565->570 insns).
-  - `otelcol`: `2` `step kop failed`.
+  - `otelcol`: `2` `step kinsn failed`.
   - `tetragon/observer`, `tracee/monitor`: `2` optimization failures each, on
-    `map_inline`/`const_prop` rather than kop.
-  - These are real remaining defects in the kop pass for specific
+    `map_inline`/`const_prop` rather than kinsn.
+  - These are real remaining defects in the kinsn pass for specific
     already-optimized bytecode, distinct from the argument-parsing bug fixed in
     `677aef815`; they need the failing input bytecode captured (the framework's
     `/tmp/loadtime_*` workdirs are removed) to reproduce offline.
@@ -3742,32 +3742,32 @@ not establish complete native-byte semantic equivalence.
   80.42, `sys_exit` 88.61 -> 86.50 ns/run; `tetragon/observer`
   `generic_tracepoint` 426.65 ns/run baseline. Raw counters only.
 
-### Remaining kop step failures: root-caused, 2026-09-20
+### Remaining kinsn step failures: root-caused, 2026-09-20
 
-I reproduced the failing `kop` steps offline from the checked-in canonicalized
+I reproduced the failing `kinsn` steps offline from the checked-in canonicalized
 fixtures (`bpfopt/testbin/<app>/<n>/canonicalize_output.bin`) by running the
 configured pass chain (`noop, const_prop, dce, wide_mem, bounds_check_merge,
-skb_load_bytes_spec`) and then `kop`. Two independent defects, neither of which
+skb_load_bytes_spec`) and then `kinsn`. Two independent defects, neither of which
 is the argument-parsing bug fixed in `677aef815`:
 
 1. **`bpf_x86_movw` was not probed — FIXED (`ccf9d3852`).**
-   `mov_store_target_for_width(2)` in `bpfopt/llvm/src/bpf_kop_bytecode.hpp`
+   `mov_store_target_for_width(2)` in `bpfopt/llvm/src/bpf_kinsn_bytecode.hpp`
    emits `bpf_x86_movw` for a 2-byte memcpy store, and
    `module/x86/bpf_x86_mov.c` registers it as a kfunc, but the name was missing
-   from `kopprober`'s `DEFAULT_KOP_NAMES` and from every runner pass yaml.
-   `kopprober` writes only the kfuncs it finds, so `target.json` had no entry and
-   `append_kop_pair` threw `target.json has no kop entry for bpf_x86_movw`,
+   from `kinsnprober`'s `DEFAULT_KINSN_NAMES` and from every runner pass yaml.
+   `kinsnprober` writes only the kfuncs it finds, so `target.json` had no entry and
+   `append_kinsn_pair` threw `target.json has no kinsn entry for bpf_x86_movw`,
    failing the whole step. Fix: add the name to both lists.
    Evidence: sweeping all 500 canonicalized program fixtures from
-   `bpfopt/testbin` through the chain, the old name list failed 4 kop steps and
+   `bpfopt/testbin` through the chain, the old name list failed 4 kinsn steps and
    2 were this bug; with `movw` probed only the 2 unrelated stack failures
    remain. Two concrete programs were repaired:
    `bpfopt/testbin/bcc_set/569_sys_dup_exit_tail` and
    `bpfopt/testbin/bcc_set/582_syscall__accept4` both threw
-   `target.json has no kop entry for bpf_x86_movw` with the old name list; with
+   `target.json has no kinsn entry for bpf_x86_movw` with the old name list; with
    `movw` probed they apply `108` sites (`movw: 16`) and `73` sites
-   (`movw: 8`) respectively. Since all nine kop-family passes share
-   `apply_bytecode_kop_recovery`, the eight sibling yamls were updated too
+   (`movw: 8`) respectively. Since all nine kinsn-family passes share
+   `apply_bytecode_kinsn_recovery`, the eight sibling yamls were updated too
    (commit `da730ae39`).
 
 2. **LLVM roundtrip leaks stack-frame bytes — OPEN, in the llvmbpf submodule.**
@@ -3778,9 +3778,9 @@ is the argument-parsing bug fixed in `677aef815`:
    `257 -> 337 -> 369 -> 417 -> 449 -> 489 -> 513` with the 7th invocation
    failing. Distinct r10 slots grow `16 -> 24 -> 26 -> 28 -> 29`, i.e. each
    roundtrip allocates new slots and extends the frame downward.
-   - The pipeline runs six passes before `kop`, so a program whose raw frame is
-     `257` bytes reaches `257 + ~256 = 513` and `kop` (step 11, last) then fails.
-     The raw bytecode alone is fine: `kop` on the un-passed fixture succeeds
+   - The pipeline runs six passes before `kinsn`, so a program whose raw frame is
+     `257` bytes reaches `257 + ~256 = 513` and `kinsn` (step 11, last) then fails.
+     The raw bytecode alone is fine: `kinsn` on the un-passed fixture succeeds
      (`EXIT 0`).
    - Failure surfaces from `vendor/llvmbpf/src/compiler.cpp:389`
      (`Kernel-compatible lift requires N bytes of stack, exceeding the kernel
@@ -3796,7 +3796,7 @@ is the argument-parsing bug fixed in `677aef815`:
      but it only repairs *out-of-range* spills (`ref->off < -512`); a frame that
      grows to exactly fill `512` bytes is considered valid and is not reclaimed.
 
-Effect on the six-app run: `cilium/agent` `40` kop failures and `otelcol` `2`
+Effect on the six-app run: `cilium/agent` `40` kinsn failures and `otelcol` `2`
 are consistent with these two causes. Both are recorded as raw failures; the
 framework leaves the original bytecode in place and continues.
 
@@ -3804,13 +3804,13 @@ framework leaves the original bytecode in place and continues.
 
 - Static verification of the `bpf_x86_movw` fix:
   - All 46 string literals of `bpf_{x86,arm64}_*` across
-    `bpfopt/llvm/src/bpf_kop_bytecode.hpp` and `bpf_bytecode.hpp` are now present
-    in `kopprober`'s `DEFAULT_KOP_NAMES` (only `bpf_x86_movw` was missing).
-  - Every `const char *name` passed to `append_kop_pair` resolves to a literal or
+    `bpfopt/llvm/src/bpf_kinsn_bytecode.hpp` and `bpf_bytecode.hpp` are now present
+    in `kinsnprober`'s `DEFAULT_KINSN_NAMES` (only `bpf_x86_movw` was missing).
+  - Every `const char *name` passed to `append_kinsn_pair` resolves to a literal or
     to `bmi2_shift_name`/`bzhi_name_for_opcode`/`mov_store_target_for_width`,
     each of which returns only literals; no name is built dynamically, so the
     literal scan is exhaustive.
-  - `kopprober` rebuilds clean and its binary now contains `bpf_x86_movw`;
+  - `kinsnprober` rebuilds clean and its binary now contains `bpf_x86_movw`;
     `bpfopt` CLI suite still `42/42 OK`.
   - Two concrete repaired programs: `bcc_set/569_sys_dup_exit_tail` (108 sites,
     `movw: 16`) and `bcc_set/582_syscall__accept4` (73 sites, `movw: 8`).
@@ -3838,19 +3838,19 @@ framework leaves the original bytecode in place and continues.
   `corpus_v14` attempt 2 `EXIT 0`, all six app result files written. Attempt 1
   hit the FUSE `modules_install` drop once; the pre-create + retry loop cleared
   it (`modules_install` `EXIT 0`, 842 `.ko`).
-- **`kop` applied sites rose in `cilium/agent` from `1980` to `2494` (`+514`)**
+- **`kinsn` applied sites rose in `cilium/agent` from `1980` to `2494` (`+514`)**
   versus the pre-fix run `x86_kvm_corpus_20260920_045430_754822`. All other apps
   are unchanged (`bcc/set 72`, `katran 71`, `otelcol 463`, `tetragon 2824`,
   `tracee 3089`), which is the expected signature: only the programs whose
   lowering emitted `bpf_x86_movw` changed, and cilium has by far the most such
   programs.
-- Remaining `cilium/agent` kop step failures (`42`) are on `cil_to_netdev`,
+- Remaining `cilium/agent` kinsn step failures (`42`) are on `cil_to_netdev`,
   `tail_nodeport_n`, `cilium_nodeport`, `cilium_calls_*`, `cil_bpf_policy`,
   i.e. the large-frame programs, consistent with the open llvmbpf roundtrip
   stack-growth defect rather than the fixed name gap. The checked-in
   `193_cil_to_netdev` fixture (1307 insns, 313-byte frame) succeeds offline; the
   live program is 1897 insns and its frame exceeds 512 after the pass chain.
-- `bytecode_kop_recovery_applied` diagnostics: 39 (was 36); still a
+- `bytecode_kinsn_recovery_applied` diagnostics: 39 (was 36); still a
   partial-recovery path, not a failure.
 - App statuses identical to the pre-fix run: `bcc/set`, `katran`,
   `tetragon/observer` `ok`; `cilium/agent`, `otelcol`, `tracee/monitor` `error`
@@ -3866,9 +3866,9 @@ framework leaves the original bytecode in place and continues.
   sweep: previously failing lowerings now install sites, and the residual
   failures are the separate, upstream, still-open stack-growth defect.
 
-### Residual kop failures: kernel-stack off-by-one in llvmbpf, fixed 2026-09-21
+### Residual kinsn failures: kernel-stack off-by-one in llvmbpf, fixed 2026-09-21
 
-- The remaining `kop` step failures (`cilium/agent` `42`, `otelcol` `2`) all
+- The remaining `kinsn` step failures (`cilium/agent` `42`, `otelcol` `2`) all
   carried the same error from `vendor/llvmbpf/src/compiler.cpp`:
   `Kernel-compatible lift requires N bytes of stack, exceeding the kernel limit`.
 - Root cause is a **one-off in `compute_kernel_stack_bytes`** (line 105-107):
@@ -3879,7 +3879,7 @@ framework leaves the original bytecode in place and continues.
   `520` and the `> EBPF_STACK_SIZE` check rejects, although the frame fits the
   512-byte limit exactly.
 - Measured across **every** canonicalized program fixture in `bpfopt/testbin`
-  (500-541 programs depending on which pass chain completes): the two kop
+  (500-541 programs depending on which pass chain completes): the two kinsn
   failures (`202_cil_lxc_policy`, `211_cil_lxc_policy`) have a **true** frame
   requirement of exactly `512` but an overcounted `513`; the largest true frame
   among passing programs is `496`. There is no fixture whose true requirement
@@ -3889,7 +3889,7 @@ framework leaves the original bytecode in place and continues.
   project-owned branch (`origin/codex/bpfopt-llvm-roundtrip-20260515`, all recent
   commits project-authored), so landing a fix there follows existing practice;
   the parent records the new pin.
-- Verification with the fix: sweeping all fixtures, kop step failures `2 -> 0`
+- Verification with the fix: sweeping all fixtures, kinsn step failures `2 -> 0`
   with no previously passing program changed; the two repaired programs each
   apply `49` sites; `bpfopt` CLI suite `42/42 OK`; `kprog/x86`
   `micro-proofs-build` `30/30`.
@@ -3903,8 +3903,8 @@ framework leaves the original bytecode in place and continues.
 - Run `corpus/results/x86_kvm_corpus_20260921_211712_637406/`, default policy,
   `corpus_v15` attempt 2 `EXIT 0` (attempt 1 hit the FUSE `modules_install`
   drop once). All six app result files written.
-- **`kop` step failures are now `0` in all six apps** (previously
-  `cilium/agent 42`, `otelcol 2`). `kop` applied sites across the fix series:
+- **`kinsn` step failures are now `0` in all six apps** (previously
+  `cilium/agent 42`, `otelcol 2`). `kinsn` applied sites across the fix series:
 
   | run | bcc | cilium | katran | otel | tetragon | tracee | total |
   |---|---|---|---|---|---|---|---|
@@ -3920,13 +3920,13 @@ framework leaves the original bytecode in place and continues.
   bcc/set `sys_enter` `77.28`, `sys_exit` `82.59` ns/run post-ReJIT; tetragon
   baseline `generic_tracepoint` `494.80`, `generic_kprobe` `607.61` ns/run. Raw
   counters only.
-- With this run both kop defects found this session are fixed and confirmed by
+- With this run both kinsn defects found this session are fixed and confirmed by
   measurement: the missing `bpf_x86_movw` probe and the llvmbpf kernel-stack
   off-by-one.
 
 ### Tracee app-level failure is pre-existing, not caused by this session
 
-- After the two kop fixes, the only remaining app error in the six-app run
+- After the two kinsn fixes, the only remaining app error in the six-app run
   `x86_kvm_corpus_20260921_211712_637406` is `tracee/monitor`:
   `failed to launch Tracee: ... ebpf.(*Tracee).initBPF: failed to load BPF
   object: invalid argument`, with libbpf reporting
@@ -3947,7 +3947,7 @@ framework leaves the original bytecode in place and continues.
   of `vendor/repos/tracee/pkg/ebpf/c/vmlinux.h` (unchanged since 2026-09-02), so
   the x86 `VMLINUX_BTF` fix (`1a66f51b3`) does not affect it.
 - Recorded as an observed app-level failure outside the optimizer; it does not
-  gate the kop results, which are counted from the shim's own per-program
+  gate the kinsn results, which are counted from the shim's own per-program
   reports and are now zero-failure.
 
 ### Investigated and rejected: raising `-bpf-stack-size` for generic passes
@@ -3957,15 +3957,15 @@ framework leaves the original bytecode in place and continues.
   `Looks like the BPF stack limit is exceeded ... -mllvm -bpf-stack-size`
   diagnostic from `llvm-backend/llvm/llvm/lib/Target/BPF/BPFRegisterInfo.cpp:62`
   (`WarnSize`), where `BPFStackSizeOption` defaults to `512`.
-- Hypothesis: the asymmetry is real — `configure_llvm_kop_select` passes
+- Hypothesis: the asymmetry is real — `configure_llvm_kinsn_select` passes
   `-bpf-stack-size=4096`, while generic passes never call
   `ParseCommandLineOptions`, so they run with the 512 default even though the
   lifted register machine needs backend spill space. Confirming evidence: the
-  same fixture **succeeds** under `kop` (which sets 4096) and fails under
+  same fixture **succeeds** under `kinsn` (which sets 4096) and fails under
   `const_prop`/`noop` (512).
 - Change tried: add a `configure_llvm_roundtrip_args()` that parses
-  `-bpf-stack-size=4096` once for the non-kop passes (placed after the existing
-  dispatch so the kop path keeps its single parse, since
+  `-bpf-stack-size=4096` once for the non-kinsn passes (placed after the existing
+  dispatch so the kinsn path keeps its single parse, since
   `ParseCommandLineOptions` resets prior occurrences). It compiles and the
   fixture's `const_prop` then gets past the backend check.
 - **Rejected on measurement.** A/B on all `542` canonicalized fixtures with a
@@ -4025,7 +4025,7 @@ framework leaves the original bytecode in place and continues.
   behaviour/policy change to the shim and needs explicit user authorization.
   Recorded here so the decision is visible and reversible.
 - Scope note: this is an **application-survival** effect of a step failure, not
-  a measurement-validity gate. It does not affect the kop site counts, which the
+  a measurement-validity gate. It does not affect the kinsn site counts, which the
   shim records per program from its own reports (now zero-failure).
 
 ### Systematic finding: the LLVM roundtrip inflates the r10 frame by ~45 bytes
@@ -4056,7 +4056,7 @@ framework leaves the original bytecode in place and continues.
   per-call reservation rather than a byte-faithful copy — consistent with both
   the instruction-count drop (`7490 -> 6122`) and the deeper offsets
   (`-2, -16, -24` becoming `-120, -128, -16, -24`).
-- Consequence for the goal: `kop` runs **last** (step 11), after ~9 roundtrips,
+- Consequence for the goal: `kinsn` runs **last** (step 11), after ~9 roundtrips,
   so any program whose frame lands near 512 loses all optimization. It is
   therefore worth reducing the lift's stack demand rather than raising the
   kernel limit (which was measured to have no effect — see the rejected-change
@@ -4072,14 +4072,14 @@ framework leaves the original bytecode in place and continues.
 ### Measured and rejected: raising the limit AND relaxing the remapper guard
 
 - Tested the combination suggested above: (1) `configure_llvm_roundtrip_args()`
-  parsing `-bpf-stack-size=4096` for non-kop passes, and (2) replacing the
+  parsing `-bpf-stack-size=4096` for non-kinsn passes, and (2) replacing the
   remapper's strict per-offset width guard (`inconsistent out-of-range stack
   slot width`) with "keep the widest width seen at that offset" so it can
   attempt a remap instead of throwing.
 - **Rejected on measurement.** A/B on all `542` fixtures, patched binary vs the
   committed baseline binary, again gave identical totals: `541 OK / 1 FAIL`
   both ways; no improved fixture, no regressed fixture. The single failure just
-  moved from `const_prop` to `kop`, i.e. from one correct rejection to another.
+  moved from `const_prop` to `kinsn`, i.e. from one correct rejection to another.
 - Reason: the failing program's lift genuinely needs more than the 512-byte
   frame at every stage; no amount of tolerance in the *reclaim* step creates
   space for it. `bpfopt/llvm/src/main.cpp` was reverted again and the rebuilt
@@ -8542,7 +8542,7 @@ branch as a separate architectural case.
   launched 22:56:40Z, completed 23:06:13Z (~49.5 min; host-build prefix of
   the log rotated out, retained 504-line in-VM tail), make PID 230578, host
   kernel `7.3.0-070300rc3-generic`, virtme-ng 1.41, `sudo -n` OK.
-- All four sections PASS in the host log: kop modules load
+- All four sections PASS in the host log: kinsn modules load
   (`bpf_x86_alu: loading out-of-tree module`); native_proof micro smoke
   29/29 benchmarks (`[bench] (1/29) simple` → `result 12345678`,
   `compile last 444787 ns | exec last 163 ns`); `PASS unchecked_packet_read
@@ -8602,7 +8602,7 @@ branch as a separate architectural case.
   `workload_only: False`), VM powered down cleanly, no make error markers.
 - katran `status: ok`, rejit `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
-  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kop]`,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kinsn]`,
   selected workload `xdp_pktgen`. Raw two-start counters
   (`details/apps/katran.json`, raw only): `balancer_ingres` baseline
   (id 9) `run_cnt_delta: 219,971,021` / `run_time_ns_delta: 38,647,805,320`
@@ -8646,7 +8646,7 @@ branch as a separate architectural case.
   markers.
 - `bcc/set` `status: ok`, rejit `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
-  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kop]`,
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kinsn]`,
   selected workload `stress_ng_bcc_hook_hot` (3 samples, all
   `returncode: 0`). Raw two-start counters
   (`details/apps/bcc__set.json`, raw only): `sys_enter` baseline
@@ -8749,7 +8749,7 @@ branch as a separate architectural case.
   `error: ''`. `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]`, `selected_workload: cilium_endpoint_pktgen`, `runner:
+  kinsn]`, `selected_workload: cilium_endpoint_pktgen`, `runner:
   cilium`.
 - **53 BPF programs** recorded per start (baseline and post_rejit),
   keyed by in-VM program id. Hot pair is `cil_from_container` (LXC
@@ -8805,7 +8805,7 @@ branch as a separate architectural case.
   `error: ''`. `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]`, `selected_workload: stress_ng_tracee_syscall_hot`,
+  kinsn]`, `selected_workload: stress_ng_tracee_syscall_hot`,
   `runner: tracee`.
 - **151 BPF programs** recorded per start (baseline and post_rejit) —
   the largest program count of the session (vs. 53 for cilium). 56
@@ -8871,7 +8871,7 @@ branch as a separate architectural case.
   ok`, `error: ''`. `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]`, `selected_workload: stress_ng_tetragon_policy_hot`,
+  kinsn]`, `selected_workload: stress_ng_tetragon_policy_hot`,
   `runner: tetragon`.
 - **287 BPF programs** recorded per start (baseline and post_rejit) —
   the largest program count of the session (vs. 151 for tracee, 53 for
@@ -8940,7 +8940,7 @@ branch as a separate architectural case.
   `status: ok`, `error: ''`. `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]`, `selected_workload: otel_mixed_workload`,
+  kinsn]`, `selected_workload: otel_mixed_workload`,
   `runner: otelcol-ebpf-profiler`.
 - **13 BPF programs** recorded per start (baseline and post_rejit) —
   the smallest program count of the session. 2 hot progs per start
@@ -9033,7 +9033,7 @@ branch as a separate architectural case.
 - **All 6 apps `status: ok`, `error: ''`**; `rejit_result` per app
   `mode: loadtime`, default x86 pass chain `[noop, map_inline,
   const_prop, dce, wide_mem, bounds_check_merge,
-  skb_load_bytes_spec, noop, const_prop, dce, kop]`. Per-app BPF
+  skb_load_bytes_spec, noop, const_prop, dce, kinsn]`. Per-app BPF
   program counts recorded per start (baseline / post_rejit) + hot
   counts: bcc/set 25/25 (17/17 hot); cilium/agent 53/56 (8/4 hot);
   katran 1/1 (1/1 hot); otelcol-ebpf-profiler/profiling 13/13 (2/2
@@ -9339,7 +9339,7 @@ branch as a separate architectural case.
   x86_kvm_corpus`, `samples: 3`, `workload_seconds: 30.0`;
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]` (same pass list as step 0051); `details/progress.json`
+  kinsn]` (same pass list as step 0051); `details/progress.json`
   `status: completed`, `completed_at 2026-09-30T09:16:38Z`.
 - **All 6 apps `status: ok`, 0 `error`**, raw two-start BPF counters
   (sum `run_cnt_delta` baseline → post_rejit; sum `run_time_ns_delta`
@@ -9476,7 +9476,7 @@ branch as a separate architectural case.
   the arm64 build chain (kernel check, cilium daemon Go cross-build,
   BPF artifacts, runtime image build, Docker stage #30+) still ran as
   part of the target.
-- Run dir `micro/results/arm64_qemu_micro_19700101_000008_942047/`
+- Run dir `micro/results/arm64_qemu_micro_recorded_20260930_vmclock_000008_942047/`
   (QEMU in-VM clock is 1970 — no RTC set in the VM; the dir name and
   `metadata.json` `completed_at` reflect that, not a real timestamp;
   recorded as a QEMU clock quirk, not a gate); `details/progress.json`
@@ -9536,7 +9536,7 @@ branch as a separate architectural case.
   full-corpus runs 0051/0056 (`42e1c4e37`/`c37b6b539`), exercising the
   local QEMU arm64 path (`corpus-qemu-arm64`, Makefile:278–293) — no
   external credentials.
-- Run dir `corpus/results/arm64_qemu_corpus_19700101_000006_146493/`
+- Run dir `corpus/results/arm64_qemu_corpus_recorded_20260930_vmclock_000006_146493/`
   (QEMU in-VM clock is 1970 — no RTC; `metadata.json` `completed_at:
   None`, `generated_at` 1970, `run_type: arm64_qemu_corpus` — recorded
   as a QEMU clock quirk, not a gate).
@@ -9607,7 +9607,7 @@ branch as a separate architectural case.
 - `PLATFORM=qemu ARCH=arm64 make corpus` (zero knobs; same default suite,
   `SAMPLES=3`, `WORKLOAD_DURATION=30s`), launched 12:01:11Z, make PID
   881657, qemu PID 894443 (up 12:06–12:47), prev HEAD `ef51b1a98`.
-- Run dir `corpus/results/arm64_qemu_corpus_19700101_000006_022292/`
+- Run dir `corpus/results/arm64_qemu_corpus_recorded_20260930_vmclock_000006_022292/`
   (QEMU in-VM clock 1970; suite `status: error`, `error_message: "corpus
   suite reported errors"`).
 - **Verdict: deterministic.** All 6 apps `status: error` with the
@@ -9652,7 +9652,7 @@ branch as a separate architectural case.
 - `PLATFORM=qemu ARCH=arm64 make test` (zero knobs; `TEST_MODE=test`,
   `runner.suites.test` via `RUNTIME_SUITE_MODULE`, Makefile:228/233),
   launched 12:55:39Z, make PID 899323, prev HEAD `76f47306f`. The test
-  gate loads the kop modules, runs the BPF-verifier negative suite
+  gate loads the kinsn modules, runs the BPF-verifier negative suite
   (non-fuzz), and runs the native-proof micro staged-codegen smoke.
   `test.py:351` skips the native-loader-shim smoke on non-`x86_64`
   (aarch64 auto-skip, recorded not patched).
@@ -9670,11 +9670,11 @@ branch as a separate architectural case.
   `cpu_model: aarch64`). No ratio/geomean/rollup computed.
 - **Cross-arch readout (analysis per `rejit/docs/evaluation.md` §5, not a
   gate)**: the arm64 `make test` gate passes on QEMU (aarch64) — verifier,
-  kop-module load, and native-proof micro staged-codegen all work on
+  kinsn-module load, and native-proof micro staged-codegen all work on
   aarch64. The 0059/0060 arm64 corpus failure (all 6 apps `post_rejit:
   null`, `BPFREJIT_SHIM_LOADTIME_PLAN` start fails) is therefore
   **localized to the load-time-plan / post-rejit path**, not the verifier,
-  kop modules, or general test infrastructure — a sharp cross-arch
+  kinsn modules, or general test infrastructure — a sharp cross-arch
   capability-gap readout, no framework/app change.
 - Clean QEMU power-down, `qemu-status=0`, make target exits 0. 32
   trackable files under the run dir committed (token + nested run dir:
@@ -9689,12 +9689,12 @@ branch as a separate architectural case.
 
 ### QEMU arm64 `make selftest` gate (zero knobs) at `d098e6530`,
  2026-09-30 (completes the arm64 target-parity matrix; selftest mode =
- kop modules + native-proof smokes + BPF-negative suite + bpf_stats)
+ kinsn modules + native-proof smokes + BPF-negative suite + bpf_stats)
 
 - `PLATFORM=qemu ARCH=arm64 make selftest` (zero knobs; `TEST_MODE=
   selftest`, `runner.suites.test`, Makefile:226/233), launched
   13:29:22Z, make PID 914605, exited 13:36:03Z, prev HEAD `d098e6530`.
-  Selftest is the fullest gate mode — kop modules + native-proof micro
+  Selftest is the fullest gate mode — kinsn modules + native-proof micro
   smoke + native-proof negative smoke + BPF-verifier negative suite
   (non-fuzz) + `ensure_bpf_stats_enabled` (`_mode_needs_bpf_stats`,
   `test.py:487`), which `test` mode also needs but `negative` mode does
@@ -9718,7 +9718,7 @@ branch as a separate architectural case.
   ×2 (0059/0060 recorded failure, deterministic), test (0061 pass),
   selftest (0062 pass); only `negative-test` remains. This reaffirms the
   0061 localization that the arm64 corpus post-rejit failure is specific
-  to the load-time-plan/post-rejit path — not the verifier, kop modules,
+  to the load-time-plan/post-rejit path — not the verifier, kinsn modules,
   bpf_stats, or test infrastructure. No framework/app/runner changes.
 - Clean QEMU power-down, `qemu-status=0`, make target exits 0. 32
   trackable files under the run dir committed (token + nested run dir:
@@ -9780,7 +9780,7 @@ branch as a separate architectural case.
   negative-test (0063 pass) — mirroring the 5 KVM x86 targets. This
   reaffirms the 0061 localization that the arm64 corpus post-rejit /
   load-time-plan failure is specific to the load-time-plan/post-rejit
-  path — not the verifier, kop modules, bpf_stats, or test
+  path — not the verifier, kinsn modules, bpf_stats, or test
   infrastructure. No framework/app/runner changes.
 - Clean QEMU power-down, `qemu-status=0`, make target exits 0. 32
   trackable files under the run dir committed (token + nested run dir:
@@ -9820,7 +9820,7 @@ branch as a separate architectural case.
 - Caveats: (1) log line-count oscillation across reads (2439 →
   9949 → 504 lines, `make: Leaving directory` interleaved mid-line
   at line 35) = stderr interleaving from a concurrent make
-  instance, not a result defect; (2) `tests/results/d6b6575f/negative.log`
+  instance, not a result defect; (2) `tests/results/aborted/d6b6575f/negative.log`
   (14:29Z, before this launch) = a parallel/supervisor instance's
   KVM in-VM `TEST_MODE=negative` run — external WIP, not committed
   or claimed here; this step commits only its own token
@@ -9932,7 +9932,7 @@ correct.
   ratio/geomean/rollup. Run dir kept untracked (raw abort, not clean evidence).
 
 ### KVM x86 `make corpus` default policy (zero knobs) completed 6/6 at 8d4626452, 2026-09-30
-- **Command**: `make corpus` zero-knob (`PLATFORM=kvm ARCH=x86` defaults; `SAMPLES=3`, `WORKLOAD_DURATION=30`; full x86 pass chain `noop,map_inline,const_prop,dce,wide_mem,bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kop`; 6 apps), at `8d4626452`.
+- **Command**: `make corpus` zero-knob (`PLATFORM=kvm ARCH=x86` defaults; `SAMPLES=3`, `WORKLOAD_DURATION=30`; full x86 pass chain `noop,map_inline,const_prop,dce,wide_mem,bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kinsn`; 6 apps), at `8d4626452`.
 - **Result**: `corpus/results/x86_kvm_corpus_20260930_193317_347907/` — **completed, 6/6 apps `ok` with `post_rejit` present, all `rejit_result: ok` (loadtime mode)**; `metadata.json`/`result.json`/`progress.json` = `completed`/`ok`/`completed` (`completed_at 20:07:27Z`); clean `reboot: Power down` (in-VM t≈2091.9s ≈ 35 min; `7.0.0-rc2+`, `virtme-ng`, 8 cpus / 64 GiB).
 - **Per-app raw counters (post `run_cnt_delta`; no ratios here — analysis per `rejit/docs/evaluation.md` §5)**: bcc/set `sys_exit` 552,276,514; cilium/agent `cil_from_contai` 60,003,594; katran `balancer_ingres` 234,540,480 (jit 11778 / xlat 19392 B); otelcol `native_tracer_e` 722,726; tetragon `generic_tracepo` 239,664,899; tracee `trace_sys_exit` 244,714,905.
 - **Determinism pairing** vs 0051 (`x86_kvm_corpus_20260930_053929_108492`) and 0056 (`x86_kvm_corpus_20260930_084230_227783`), same-prog post `run_cnt_delta`: bcc 552.3M/553.4M/552.1M; cilium 60.0M/61.3M/60.5M; katran 234.5M/231.9M/233.0M; otelcol 722.7K/722.7K/723.4K; tetragon 239.7M/237.1M/240.2M; tracee 244.7M/243.1M/243.0M — same order of magnitude, sub-percent to low-single-percent spread across the three same-tree runs (raw triplets only; tracee prog named `trace_sys_exit` in 0066 vs `tracepoint__raw` in 0051/0056, same magnitude — recorded caveat).
@@ -9953,7 +9953,7 @@ trees that are **untracked but not orphans** — each is deliberately
 untracked, so no evidence from this duty chain is missing from git.
 Every gate token this chain claims was re-verified tracked on disk.
 
-- **`corpus/results/arm64_qemu_corpus_19700101_000012_467359/`**
+- **`corpus/results/arm64_qemu_corpus_recorded_20261006_vmclock_000012_467359/`**
   (step 0012, arm64 QEMU katran single-app `map_inline`,
   `KEEP_WORKDIRS=1`) is **not an orphan**. Step 0012's shipped
   commit `66261fe12` registered the evidence under the canonical
@@ -9976,7 +9976,7 @@ Every gate token this chain claims was re-verified tracked on disk.
     the research log, any `docs/tmp/build-and-evaluate/step-*/`
     receipt, or the `docs/` tree. They are external / supervisor-
     parallel KVM runs, in the same category as
-    `tests/results/d6b6575f/negative.log` (0063 caveat: a
+    `tests/results/aborted/d6b6575f/negative.log` (0063 caveat: a
     parallel/supervisor instance's KVM in-VM run — external WIP, not
     committed or claimed here). **Left untracked; not claimed by
     this chain.** No commit.
@@ -9993,10 +9993,10 @@ Every gate token this chain claims was re-verified tracked on disk.
     `corpus/results/x86_kvm_corpus_20260930_193317_347907/` — 15
     tracked JSON.
   - QEMU arm64 micro (0058):
-    `micro/results/arm64_qemu_micro_19700101_000008_942047/` — 3
+    `micro/results/arm64_qemu_micro_recorded_20260930_vmclock_000008_942047/` — 3
     tracked files.
   - QEMU arm64 corpus (0059/0060, recorded deterministic failure):
-    `corpus/results/arm64_qemu_corpus_19700101_000006_146493/` +
+    `corpus/results/arm64_qemu_corpus_recorded_20260930_vmclock_000006_146493/` +
     `_022292/` — 14 tracked files each.
   - arm64 katran `map_inline` evidence package (step 0012,
     `66261fe12`):
@@ -10093,7 +10093,7 @@ validity gate.
 
 - **Re-confirmed (no change):** `tests/results/62ce5f12/` (09-29,
   `step-0041` "kept untracked"), `tests/results/b29a899c/` (0064
-  `TEST_MODE=cli` mechanism probe), `tests/results/d6b6575f/` + the 7
+  `TEST_MODE=cli` mechanism probe), `tests/results/aborted/d6b6575f/` + the 7
   above — external/supervisor KVM WIP.
 
 - **Corrected full untracked inventory (per-top-token `git ls-files`):**
@@ -10194,7 +10194,7 @@ validity gate, framework change, or AWS/Paper-B.
   the union of all 148 retained programs. Every per-app cell matches the
   doc exactly (bcc 1.0659, bpftrace 1.0155, cilium 0.9813, katran
   0.9807, otel 0.4713, tetragon 1.0064, tracee 0.8115). The pooled 0.8917
-  sits beside the sibling suite cells (noop 0.9019, 6-pass kop 0.9009)
+  sits beside the sibling suite cells (noop 0.9019, 6-pass kinsn 0.9009)
   and is < 1.0, consistent with the §6.2.1 Findings; no Findings edit
   was needed.
 - **Live-state re-check:** HEAD = `origin/master` = `44728a93c`; the
@@ -10244,26 +10244,26 @@ validity gate, framework change, or AWS/Paper-B.
   no new gate. Remaining *run* blockers unchanged: AWS credentials;
   Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
 
-### Named `kop-6` KOP-class pass-group KVM x86 `make corpus` 6/6 completed at 830195d59 (2026-10-01)
+### Named `kinsn-6` KINSN-class pass-group KVM x86 `make corpus` 6/6 completed at 830195d59 (2026-10-01)
 
-- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kop-6"` (S=3, 30 s, all 6
-  apps; `kop-6` = `[cond_select, bulk_memory, rotate, extract,
+- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kinsn-6"` (S=3, 30 s, all 6
+  apps; `kinsn-6` = `[cond_select, bulk_memory, rotate, extract,
   endian_fusion, prefetch]`), detached via `setsid nohup`. Result token
   `corpus/results/x86_kvm_corpus_20261001_025602_885812/`, prev HEAD
   `830195d59` (the step-0067 `br` commit), `CORPUS_EXIT=0`, clean
   power-down, zero reaping lines.
 - **Why this step:** 0067 closed the `br` bytecode-rewriting group at the
-  current tree. The KOP-class named groups (`kop`, `kop-5`, `kop-6`)
+  current tree. The KINSN-class named groups (`kinsn`, `kinsn-5`, `kinsn-6`)
   were noted out of scope in 0067, but that over-read
-  `rejit/docs/evaluation.md` §1: KOP is a KOperation-*paper* deliverable,
-  while AGENTS.md's "Current pass list" explicitly includes the kop-class
-  as a measured pass in this framework. The KOP groups are therefore
-  in-scope framework pass space, and re-deriving the §6.2.1 KOP rows
-  (`5-pass kop` 0.9074, `6-pass kop + prefetch` 0.9009, both historical
+  `rejit/docs/evaluation.md` §1: KINSN is a Kinsn-*paper* deliverable,
+  while AGENTS.md's "Current pass list" explicitly includes the kinsn-class
+  as a measured pass in this framework. The KINSN groups are therefore
+  in-scope framework pass space, and re-deriving the §6.2.1 KINSN rows
+  (`5-pass kinsn` 0.9074, `6-pass kinsn + prefetch` 0.9009, both historical
   2026-05-08) at the current tree is a genuine useful step. This is the
-  first KVM step exercising a KOP-class named group.
-- **Raw outcome:** 6/6 `ok` with `post_rejit`; KOP module load `status:
-  ok` with all 15 expected in-VM KOP modules loaded. KOP-site
+  first KVM step exercising a KINSN-class named group.
+- **Raw outcome:** 6/6 `ok` with `post_rejit`; KINSN module load `status:
+  ok` with all 15 expected in-VM KINSN modules loaded. KINSN-site
   application (from `details/loadtime-reports/*.jsonl`) is non-zero on
   every app: tracee 7320, tetragon 2416, cilium 1455, otelcol 519,
   katran 50, bcc 14 sites matched/applied.
@@ -10275,12 +10275,12 @@ validity gate, framework change, or AWS/Paper-B.
   this tree generation (its source
   `result.json→results[].rejit_result.per_program` is empty; the current
   driver writes per-app payloads to `details/apps/*.json` with an empty
-  `rejit_result.per_program`), but KOP-site application is genuinely
-  non-zero via loadtime-reports — so 0.9802 measures real KOP
+  `rejit_result.per_program`), but KINSN-site application is genuinely
+  non-zero via loadtime-reports — so 0.9802 measures real KINSN
   kfunc-lowering + phase variance, unlike 0067 `br`'s pure relift.
-  No doc cell overwritten; the §6.2.1 KOP rows remain the paper record.
+  No doc cell overwritten; the §6.2.1 KINSN rows remain the paper record.
 - **Determinism:** rep-prog baseline-side `run_cnt_delta` within sub-
-  percent across the kop-6 / br-0067 / 0066 three trees (e.g.
+  percent across the kinsn-6 / br-0067 / 0066 three trees (e.g.
   katran `balancer_ingres` 221,552,336 / 220,263,922 / 222,602,879) —
   baseline counters remain pass-independent.
 - **Provenance:** step report:
@@ -10290,40 +10290,40 @@ validity gate, framework change, or AWS/Paper-B.
   no new gate. Remaining *run* blockers unchanged: AWS credentials;
   Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
 
-### Named `kop-5` KOP-class pass-group KVM x86 `make corpus` 6/6 completed at c0da1d785 (2026-10-01)
+### Named `kinsn-5` KINSN-class pass-group KVM x86 `make corpus` 6/6 completed at c0da1d785 (2026-10-01)
 
-- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kop-5"` (S=3, 30 s, all 6
-  apps; `kop-5` = `[cond_select, bulk_memory, rotate, extract,
-  endian_fusion]` = `kop-6` minus `prefetch`), detached via `setsid nohup`.
+- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kinsn-5"` (S=3, 30 s, all 6
+  apps; `kinsn-5` = `[cond_select, bulk_memory, rotate, extract,
+  endian_fusion]` = `kinsn-6` minus `prefetch`), detached via `setsid nohup`.
   Result token `corpus/results/x86_kvm_corpus_20261001_040643_284761/`,
-  prev HEAD `c0da1d785` (the step-0068 `kop-6` commit), `CORPUS_EXIT=0`,
+  prev HEAD `c0da1d785` (the step-0068 `kinsn-6` commit), `CORPUS_EXIT=0`,
   clean power-down, zero reaping lines.
-- **Why this step:** the KOP-group ablation follow-on. 0068 exercised
-  `kop-6` (KOP family **with** `prefetch`); dropping `prefetch` isolates its
-  effect on the KOP-group geomean and completes the §6.2.1 KOP-group
-  ablation pair (`kop-5` / `kop-6`) at the current tree.
+- **Why this step:** the KINSN-group ablation follow-on. 0068 exercised
+  `kinsn-6` (KINSN family **with** `prefetch`); dropping `prefetch` isolates its
+  effect on the KINSN-group geomean and completes the §6.2.1 KINSN-group
+  ablation pair (`kinsn-5` / `kinsn-6`) at the current tree.
 - **Raw outcome:** 6/6 `ok` with `post_rejit` (progs b/p: bcc 25/25,
   cilium 53/53, katran 1/1, otelcol 13/13, tetragon 287/287, tracee
-  151/151). KOP module load `status: ok` with all 15 expected in-VM KOP
-  modules. KOP-site application (loadtime-reports JSONL) non-zero on every
+  151/151). KINSN module load `status: ok` with all 15 expected in-VM KINSN
+  modules. KINSN-site application (loadtime-reports JSONL) non-zero on every
   app: tracee 6172, tetragon 1989, cilium 800, otelcol 200, katran 44,
-  bcc 11 — all ≤ the `kop-6` per-app values, delta = `prefetch`.
+  bcc 11 — all ≤ the `kinsn-6` per-app values, delta = `prefetch`.
 - **Sanctioned analysis:** `corpus_analyze.py --pair-by id` retains 0
   (tree-generation property, as in 0066–0068). `--pair-by name-type`
   retains 72, with the retained (app, name, type) multiset **identical** to
-  0068 `kop-6` (all 72 keys present in both), per-program geomean
+  0068 `kinsn-6` (all 72 keys present in both), per-program geomean
   **0.9855** (39W/33L; per-app cilium 0.9061, tetragon 0.9212, katran
   0.9749, tracee 1.0056, bcc 1.0352, otelcol 1.1155). Ablation delta
-  `kop-6` − `kop-5` = `0.9802 − 0.9855 = −0.0053`: removing `prefetch`
+  `kinsn-6` − `kinsn-5` = `0.9802 − 0.9855 = −0.0053`: removing `prefetch`
   slightly **worsens** the geomean, so `prefetch` is a small net-positive
-  contributor to the KOP pass-group on this corpus. The analyzer's
+  contributor to the KINSN pass-group on this corpus. The analyzer's
   `applied` column is structurally 0 in this tree generation (empty
-  `result.json → results[].rejit_result.per_program`), so KOP-site
+  `result.json → results[].rejit_result.per_program`), so KINSN-site
   application is read from loadtime-reports only — same condition as
-  0067/0068. No doc cell overwritten; the §6.2.1 KOP rows remain the paper
+  0067/0068. No doc cell overwritten; the §6.2.1 KINSN rows remain the paper
   record.
 - **Determinism:** rep-prog baseline-side `run_cnt_delta` within sub-
-  percent across the kop-5 / kop-6 / 0066 three trees (e.g. katran
+  percent across the kinsn-5 / kinsn-6 / 0066 three trees (e.g. katran
   `balancer_ingres` 222,443,576 / 221,552,336 / 222,602,879; tracee
   `trace_sys_exit` 240,945,205 / 241,631,272 / 242,894,771) — baseline
   counters remain pass-independent.
@@ -10334,43 +10334,43 @@ validity gate, framework change, or AWS/Paper-B.
   no new gate. Remaining *run* blockers unchanged: AWS credentials;
   Paper-B clean-source image rebuild (`llvm_mapinline.hpp` still ` M`).
 
-### Single `kop` KOP-class pass KVM x86 `make corpus` 6/6 completed at d8483f22e (2026-10-01)
+### Single `kinsn` KINSN-class pass KVM x86 `make corpus` 6/6 completed at d8483f22e (2026-10-01)
 
-- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kop"` (S=3, 30 s, all 6
-  apps; `kop` = `[kop]`, the single KOP-kfunc-lowering pass with the full
-  KOP-op lowering list), detached via `setsid nohup`. Result token
+- **Run:** `make corpus BPFREJIT_BENCH_PASSES="kinsn"` (S=3, 30 s, all 6
+  apps; `kinsn` = `[kinsn]`, the single KINSN-kfunc-lowering pass with the full
+  KINSN-op lowering list), detached via `setsid nohup`. Result token
   `corpus/results/x86_kvm_corpus_20261001_050956_828597/`, prev HEAD
-  `d8483f22e` (the step-0069 `kop-5` commit), `CORPUS_EXIT=0`, clean
+  `d8483f22e` (the step-0069 `kinsn-5` commit), `CORPUS_EXIT=0`, clean
   power-down, zero reaping lines.
-- **Why this step:** the KOP-family anchor. 0068/0069 exercised the
-  KOP-*family* sub-pass groups (`kop-6` with `prefetch`, `kop-5`
-  without). This exercises the canonical single `kop` pass. Together the
-  three form the §6.2.1 "KOP-class" ablation at the current tree:
-  single `kop` → `kop-5` → `kop-6`.
+- **Why this step:** the KINSN-family anchor. 0068/0069 exercised the
+  KINSN-*family* sub-pass groups (`kinsn-6` with `prefetch`, `kinsn-5`
+  without). This exercises the canonical single `kinsn` pass. Together the
+  three form the §6.2.1 "KINSN-class" ablation at the current tree:
+  single `kinsn` → `kinsn-5` → `kinsn-6`.
 - **Raw outcome:** 6/6 `ok` with `post_rejit` (progs b/p: bcc 25/25,
   cilium 62/53, katran 1/1, otelcol 13/13, tetragon 287/287, tracee
-  151/151). KOP module load `status: ok` with all 15 expected in-VM KOP
-  modules. KOP-site application (loadtime-reports JSONL;
-  `sites_matched == sites_applied`) — the single `kop` pass is the
-  **broadest** KOP lowering: tracee 7507, tetragon 2988, cilium 2988,
-  otelcol 1532, bcc 84, katran 70 (Σ ≈ 15,169), vs `kop-6` family Σ
-  ≈ 11,774 and `kop-5` family Σ ≈ 9,216. The single pass lowers the full
-  KOP-op list; the family sub-passes lower a transform-category subset.
+  151/151). KINSN module load `status: ok` with all 15 expected in-VM KINSN
+  modules. KINSN-site application (loadtime-reports JSONL;
+  `sites_matched == sites_applied`) — the single `kinsn` pass is the
+  **broadest** KINSN lowering: tracee 7507, tetragon 2988, cilium 2988,
+  otelcol 1532, bcc 84, katran 70 (Σ ≈ 15,169), vs `kinsn-6` family Σ
+  ≈ 11,774 and `kinsn-5` family Σ ≈ 9,216. The single pass lowers the full
+  KINSN-op list; the family sub-passes lower a transform-category subset.
 - **Sanctioned analysis:** `corpus_analyze.py --pair-by id` retains 0
   (tree-generation property, as in 0066–0069). `--pair-by name-type`
   retains 72, with the same retained (app, name, type) multiset as
-  0068/0069 (all 72 keys in all three KOP trees), per-program geomean
-  **0.9932** (36W/36L; CV 50.4%). KOP-family geomean ladder: `kop`
-  0.9932 → `kop-5` 0.9855 → `kop-6` 0.9802; the single `kop` pass is the
-  strongest KOP group on this corpus and has the lowest per-program ratio
-  CV, because it lowers more KOP op kinds. The analyzer's `applied`
+  0068/0069 (all 72 keys in all three KINSN trees), per-program geomean
+  **0.9932** (36W/36L; CV 50.4%). KINSN-family geomean ladder: `kinsn`
+  0.9932 → `kinsn-5` 0.9855 → `kinsn-6` 0.9802; the single `kinsn` pass is the
+  strongest KINSN group on this corpus and has the lowest per-program ratio
+  CV, because it lowers more KINSN op kinds. The analyzer's `applied`
   column is structurally 0 in this tree generation (empty
-  `result.json → results[].rejit_result.per_program`), so KOP-site
+  `result.json → results[].rejit_result.per_program`), so KINSN-site
   application is read from loadtime-reports only — same condition as
-  0067–0069. No doc cell overwritten; the §6.2.1 KOP rows remain the
+  0067–0069. No doc cell overwritten; the §6.2.1 KINSN rows remain the
   paper record.
 - **Determinism:** rep-prog baseline-side `run_cnt_delta` within sub-
-  percent across the kop / kop-5 / 0066 three trees (e.g. katran
+  percent across the kinsn / kinsn-5 / 0066 three trees (e.g. katran
   `balancer_ingres` 223,534,877 / 222,443,576 / 222,602,879; tracee
   `trace_sys_exit` 240,100,882 / 240,945,205 / 242,894,771) — baseline
   counters remain pass-independent.
@@ -10380,7 +10380,7 @@ validity gate, framework change, or AWS/Paper-B.
   step report + this entry. No framework/app/runner/Makefile change,
   no new gate. Remaining in-scope KVM Make-backed runs: refresh the
   stale KVM `make micro` layer (last KVM micro tree = 09-30 09:33,
-  older than the KVM corpus trees); individual KOP-family named passes
+  older than the KVM corpus trees); individual KINSN-family named passes
   if per-pass resolution is wanted. Remaining *run* blockers unchanged:
   AWS credentials; Paper-B clean-source image rebuild
   (`llvm_mapinline.hpp` still ` M`).
@@ -10390,9 +10390,9 @@ validity gate, framework change, or AWS/Paper-B.
 - **Run:** `make micro SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000`
   (default `micro/config/micro_pure_jit.yaml` suite; empty `BENCH` = all 29
   benches; runtimes `native/llvmbpf/kernel`; default `RUNTIMES` = those
-  three, no KOP-module load), detached via `setsid nohup`. Result token
+  three, no KINSN-module load), detached via `setsid nohup`. Result token
   `micro/results/x86_kvm_micro_20261001_061549_699286/`, prev HEAD
-  `b3d899262` (the step-0070 `kop` commit), `MICRO_EXIT=0`, clean S5
+  `b3d899262` (the step-0070 `kinsn` commit), `MICRO_EXIT=0`, clean S5
   power-down, zero reaping lines.
 - **Why this step:** the KVM micro measurement layer had not been
   refreshed since the 09-30 09:33 tree (`x86_kvm_micro_20260930_093345_919079`)
@@ -10424,5 +10424,5 @@ validity gate, framework change, or AWS/Paper-B.
   Makefile change, no new gate. Remaining *run* blockers unchanged: AWS
   credentials; Paper-B clean-source image rebuild
   (`llvm_mapinline.hpp` still ` M`). Remaining in-scope KVM Make-backed
-  runs: individual KOP-family named passes if per-pass resolution is
+  runs: individual KINSN-family named passes if per-pass resolution is
   wanted; QEMU arm64 `make micro`/`corpus` for non-KVM evidence.

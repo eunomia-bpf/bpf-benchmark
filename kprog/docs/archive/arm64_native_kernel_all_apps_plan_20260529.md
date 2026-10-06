@@ -137,7 +137,7 @@ pipeline:
 - `kprog/x86/native_lab/native_link` supports both x86_64 and AArch64 ELF
   inputs; the arm64 binary is cross-built at
   `kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link`.
-- `runner/mk/build.mk` already builds arm64 kernel, kop module, shim, runner,
+- `runner/mk/build.mk` already builds arm64 kernel, kinsn module, shim, runner,
   native-loader shared library, micro programs, stage2 programs, sim proofs,
   bpfopt, and app binaries/BPF objects for the arm64 runtime image.
 
@@ -1553,7 +1553,7 @@ PLATFORM=qemu ARCH=arm64 \
 QEMU result path:
 
 ```text
-corpus/results/arm64_qemu_corpus_19700101_000004_568820
+corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_568820
 ```
 
 Raw correctness data:
@@ -1566,7 +1566,7 @@ Raw correctness data:
   - `warmups`: `1`
   - `workload_seconds`: `10.0`
   - `bpf_stats`: `true`
-- KOperation module load data:
+- Kinsn module load data:
   - `loaded_count`: `11`
   - `failed_modules`: `[]`
   - loaded modules:
@@ -1656,7 +1656,7 @@ PLATFORM=qemu ARCH=arm64 \
 QEMU result path:
 
 ```text
-corpus/results/arm64_qemu_corpus_19700101_000004_927776
+corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_927776
 ```
 
 Raw correctness data:
@@ -1667,9 +1667,9 @@ Raw correctness data:
   - `skip_rejit`: `true`
   - `samples`: `1`
   - `workload_seconds`: `10.0`
-  - kop module load status: `ok`
-  - kop `loaded_count`: `11`
-  - kop `failed_modules`: `[]`
+  - kinsn module load status: `ok`
+  - kinsn `loaded_count`: `11`
+  - kinsn `failed_modules`: `[]`
 - `details/apps/bcc__set.json` raw app fields:
   - `status`: `error`
   - `error`: `BCC tool vfsstat exited before BPF programs were tracked by shim`
@@ -1929,7 +1929,7 @@ PLATFORM=qemu ARCH=arm64 \
 ```
 
 - Result directory:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_789573`
+  `corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_789573`
 - `make corpus`: exit `0`
 - `details/result.json`:
   - `status`: `error`
@@ -2101,7 +2101,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_808748`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_808748`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline workload:
@@ -2166,7 +2166,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_668882`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_668882`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline workload:
@@ -2244,7 +2244,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_620570`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_620570`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline workload:
@@ -2346,7 +2346,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - Artifact:
-  `micro/results/arm64_qemu_micro_19700101_000007_733722`.
+  `micro/results/arm64_qemu_micro_recorded_20260530_vmclock_000007_733722`.
 - Suite status: `completed`.
 - Suite name: `micro_staged_codegen`.
 - Run type: `arm64_qemu_micro`.
@@ -2431,27 +2431,27 @@ Status: all requested final validations completed.
 Corpus app validation artifacts:
 
 - Tracee:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_787802`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_787802`
 - BCC:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_804880`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_804880`
 - Katran:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_808748`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_808748`
 - Cilium:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_668882`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_668882`
 - Tetragon:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_562503`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_562503`
 - OTel eBPF profiler:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_620570`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_620570`
 
 Micro validation artifact:
 
-- `micro/results/arm64_qemu_micro_19700101_000007_733722`
+- `micro/results/arm64_qemu_micro_recorded_20260530_vmclock_000007_733722`
 
 Kernel state:
 
 - `git -C vendor/linux-framework status --short`: empty output.
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 - No kernel source file was changed by this ARM64 completion work.
 
 Result:
@@ -2525,7 +2525,7 @@ Result:
 
 ```text
 make exit 0
-artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_910692
+artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_910692
 details/result.json status=ok
 details/result.json error=null
 skip_rejit=true
@@ -2609,7 +2609,7 @@ Result:
 
 ```text
 make exit 0
-artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_086825
+artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_086825
 details/result.json status=error
 details/result.json skip_rejit=true
 details/result.json samples=1
@@ -2722,7 +2722,7 @@ qemu-system-aarch64: terminating on signal 15
 make exit 2
 qemu-status absent
 completed result.json absent
-partial_run_dir=.cache/qemu-arm64-root/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_706988
+partial_run_dir=.cache/qemu-arm64-root/home/yunwei37/workspace/bpf-benchmark/corpus/results/aborted/arm64_qemu_corpus_recorded_20260529_vmclock_000004_706988
 partial progress.json status=running
 partial progress.json workload_seconds=10.0
 ```
@@ -2790,7 +2790,7 @@ Result:
 
 ```text
 make exit 0
-artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000003_966886
+artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000003_966886
 details/result.json status=error
 details/result.json skip_rejit=true
 details/result.json samples=1
@@ -2904,7 +2904,7 @@ Result:
 
 ```text
 make exit 0
-artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_717532
+artifact_run_dir=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_717532
 details/result.json status=error
 details/result.json skip_rejit=true
 details/result.json samples=1
@@ -3230,7 +3230,7 @@ Result:
 
 ```text
 make exit 0
-artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_696979
+artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_696979
 details/result.json status=error
 details/result.json error=null
 skip_rejit=true
@@ -3446,7 +3446,7 @@ PLATFORM=qemu ARCH=arm64 \
 Artifact:
 
 ```text
-/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_749235
+/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_749235
 ```
 
 Result:
@@ -3546,7 +3546,7 @@ PLATFORM=qemu ARCH=arm64 \
 Artifact:
 
 ```text
-/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000003_989442
+/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000003_989442
 ```
 
 Result:
@@ -3645,7 +3645,7 @@ PLATFORM=qemu ARCH=arm64 \
 Artifact:
 
 ```text
-/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_110874
+/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_110874
 ```
 
 Result:
@@ -3777,7 +3777,7 @@ PLATFORM=qemu ARCH=arm64 \
 Artifact:
 
 ```text
-/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_828072
+/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000004_828072
 ```
 
 Result:
@@ -4111,7 +4111,7 @@ Result data:
 
 ```text
 make_exit=0
-artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000005_208304
+artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000005_208304
 suite_status=error
 app_status=error
 baseline_workloads=1
@@ -4308,7 +4308,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 ```text
 make_exit=0
-artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000005_112957
+artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260529_vmclock_000005_112957
 suite_status=error
 app_status=error
 baseline_status=ok
@@ -4699,7 +4699,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 ```text
 exit=2
-artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_488342
+artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_488342
 metadata.status=error
 app.status=error
 baseline_workloads=0
@@ -4951,7 +4951,7 @@ micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
 native-link Build ID: ca1f609fa71ea1a47d9d10ad29cf7aa1155b5ca8
 bpfopt Build ID: 147a2eee8acbc77defda63d25021d8c456e1f5ce
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 micro proof build-only during image target: 29 benchmarks, all ok
 ```
 
@@ -5086,7 +5086,7 @@ Technical decision:
   layer that owns native branch relocation after variable-length rewriting.
 - Do not change kernel source. `git -C vendor/linux-framework status --short`
   remained empty, and kernel HEAD stayed
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 - Do not change loader or native-loader semantics. The Phase 46 shim dump is
   still temporary diagnostics only and is disabled unless
   `BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT` is set.
@@ -5117,7 +5117,7 @@ make host-native-bpf-arm64
 exit=0
 native-link arm64 Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 ```
 
 Local Cilium link verification:
@@ -5189,7 +5189,7 @@ shim Build ID: a4a9530ce8acfd0e8737b64488921321ea20dfd7
 native_loader Build ID: 9dac070616bb76a8ee20ac511615e8a3cf6de2b6
 micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 ```
 
 Build observation:
@@ -5211,7 +5211,7 @@ Cilium smoke result:
 
 ```text
 exit=0
-artifact=corpus/results/arm64_qemu_corpus_19700101_000005_688075
+artifact=corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_688075
 metadata.status=completed
 metadata.samples=1
 metadata.workload_seconds=1.0
@@ -5240,7 +5240,7 @@ Cilium 10 second result:
 
 ```text
 exit=0
-artifact=corpus/results/arm64_qemu_corpus_19700101_000004_761540
+artifact=corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_761540
 metadata.status=completed
 metadata.samples=1
 metadata.workload_seconds=10.0
@@ -5322,7 +5322,7 @@ native-link Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
 native_loader Build ID: 9dac070616bb76a8ee20ac511615e8a3cf6de2b6
 micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 micro proof build-only during image target: 29 benchmarks, all ok
 ```
 
@@ -5338,7 +5338,7 @@ Final-image Cilium smoke result:
 
 ```text
 exit=0
-artifact=corpus/results/arm64_qemu_corpus_19700101_000005_372917
+artifact=corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_372917
 metadata.status=completed
 metadata.samples=1
 metadata.workload_seconds=1.0
@@ -5381,7 +5381,7 @@ Result:
 
 ```text
 exit=0
-artifact=corpus/results/arm64_qemu_corpus_19700101_000004_632054
+artifact=corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_632054
 metadata.status=completed
 metadata.samples=1
 metadata.workload_seconds=10.0
@@ -5397,7 +5397,7 @@ native_errors=0
 jit_dump_lines=0
 prog_array_updates=0
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 ```
 
 Technical decision:
@@ -5430,7 +5430,7 @@ Failure data:
 
 ```text
 exit=0
-artifact=corpus/results/arm64_qemu_corpus_19700101_000004_517037
+artifact=corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_517037
 metadata.status=error
 app.status=error
 app.error="native app exited before BPF programs were tracked by shim"
@@ -5490,7 +5490,7 @@ exit=0
 data_objects=[{"native_object":"vendor/build/native-bpf/arm64/6.15.11-061511-generic/native/otel/native_stack_trace.native.o"}]
 objects=26
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 ```
 
 Next tests:
@@ -5525,7 +5525,7 @@ Result:
 exit=0
 native-link arm64 Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 ```
 
 OTEL staged manifest verification:
@@ -5660,7 +5660,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 Artifact:
 
 ```text
-corpus/results/arm64_qemu_corpus_19700101_000005_500852
+corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_500852
 metadata.status: error
 app.status: error
 app.error: native app exited before BPF programs were tracked by shim
@@ -5778,7 +5778,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 Artifact:
 
 ```text
-corpus/results/arm64_qemu_corpus_19700101_000005_458293
+corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_458293
 metadata.status: error
 metadata.generated_at: 1970-01-01T00:01:50.807902+00:00
 metadata.samples: 1
@@ -5883,7 +5883,7 @@ image tar sha256: f4bac2d1f59c43eef74fcb4c7515833c30b29eab0d8bcfa524b4b42c7c291b
 image tar size: 1970936832
 image tar mtime: 2026-05-29 21:03:45 -0700
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
 ```
 
 Build IDs:
@@ -5934,7 +5934,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 Result artifact:
 
 ```text
-corpus/results/arm64_qemu_corpus_19700101_000005_695831
+corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_695831
 metadata.status: error
 generated_at: 1970-01-01T00:01:46.053926+00:00
 samples: 1
@@ -6013,7 +6013,7 @@ Technical decision:
 - Do not edit kernel source based only on this artifact.
 - Do not skip or filter `custom__generic`.
 - Do not change shim behavior.
-- Continue by inspecting the ARM64 JIT and verifier kop paths read-only, then
+- Continue by inspecting the ARM64 JIT and verifier kinsn paths read-only, then
   prefer a minimal native-link/loader-side fix if the failure is triggered by
   something the loader can encode differently while preserving x86 behavior.
 
@@ -6157,7 +6157,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next step:
 
@@ -6185,7 +6185,7 @@ Result:
 
 - Exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_642513`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_642513`.
 - Metadata:
   - `status`: `completed`
   - `run_type`: `arm64_qemu_corpus`
@@ -6195,7 +6195,7 @@ Result:
   - `completed_at`: `1970-01-01T00:02:20.974477+00:00`
 - App payload:
   - file:
-    `corpus/results/arm64_qemu_corpus_19700101_000005_642513/details/apps/otelcol-ebpf-profiler__profiling.json`
+    `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_642513/details/apps/otelcol-ebpf-profiler__profiling.json`
   - `status`: `ok`
   - `error`: empty string
   - baseline workload entries: `1`
@@ -6224,7 +6224,7 @@ Result:
     `perf_unwind_sto`, `perf_unwind_nat`, `perf_unwind_hot`,
     `perf_unwind_per`, `perf_unwind_php`, `perf_unwind_pyt`,
     `perf_unwind_rub`, `perf_unwind_v8`.
-- KOperation/native modules:
+- Kinsn/native modules:
   - expected modules: 11
   - loaded modules: 11
   - failed modules: empty list
@@ -6290,7 +6290,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 Artifact:
 
-- `corpus/results/arm64_qemu_corpus_19700101_000005_549033`
+- `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_549033`
 
 Validation result:
 
@@ -6342,7 +6342,7 @@ Validation result:
 - Kernel source status after the run:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -6379,7 +6379,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 Artifact:
 
-- `corpus/results/arm64_qemu_corpus_19700101_000004_674568`
+- `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_674568`
 
 Validation result:
 
@@ -6429,7 +6429,7 @@ Validation result:
 - Kernel source status after the run:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -6459,7 +6459,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 Initial artifact:
 
-- `corpus/results/arm64_qemu_corpus_19700101_000004_988918`
+- `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_988918`
 
 Initial validation result:
 
@@ -6544,7 +6544,7 @@ Rebuild validation:
 - Kernel source status after rebuild:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -6575,7 +6575,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 Artifact:
 
-- `corpus/results/arm64_qemu_corpus_19700101_000005_360511`
+- `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_360511`
 
 Validation result:
 
@@ -6630,7 +6630,7 @@ Validation result:
 - Kernel source status after the run:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -6660,7 +6660,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_703877`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_703877`.
 - App status: `error`.
 - Baseline startup and baseline workload completed.
 - Post/native startup failed under the bounded Tracee startup timeout:
@@ -6759,7 +6759,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 Observed failure data:
 
-- Artifact: `corpus/results/arm64_qemu_corpus_19700101_000004_864653`.
+- Artifact: `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_864653`.
 - QEMU wrapper exit code: 0.
 - App status: `error`.
 - Baseline startup and baseline workload completed.
@@ -6856,7 +6856,7 @@ Runtime image validation:
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 
 Next command:
 
@@ -6882,7 +6882,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_491724`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_491724`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline startup: `ok`.
@@ -6954,7 +6954,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_656648`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_656648`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline startup/workload: `ok`.
@@ -7037,7 +7037,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_562503`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_562503`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline startup/workload: `ok`.
@@ -7105,7 +7105,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_787802`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_787802`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline workload:
@@ -7159,7 +7159,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_804880`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_804880`.
 - Suite status: `ok`.
 - App status: `ok`.
 - Baseline workload:
@@ -7211,7 +7211,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 
 Observed failure data:
 
-- Artifact: `corpus/results/arm64_qemu_corpus_19700101_000004_621256`.
+- Artifact: `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_621256`.
 - QEMU wrapper exit code: 0.
 - Baseline startup/workload: `ok`.
 - Post/native startup: `error`.
@@ -7312,7 +7312,7 @@ Runtime image validation:
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 
 Next command:
 
@@ -7379,7 +7379,7 @@ Validation result:
 - Kernel source status:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -7452,7 +7452,7 @@ Kernel submodule check:
 
 - `git -C vendor/linux-framework status --short`: empty output
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -7484,7 +7484,7 @@ Test result:
 - The QEMU run did not complete, so the artifact first remained under:
   `.cache/qemu-arm64-root/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000005_286265`
 - Preserved copy:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_286265_panic_x20_mask_gap`
+  `corpus/results/invalid/arm64_qemu_corpus_recorded_20260530_vmclock_000005_286265_panic_x20_mask_gap`
 - `progress.json` status:
   `running`
 - `metadata.json` status:
@@ -7610,7 +7610,7 @@ Result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -7634,7 +7634,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 Test result:
 
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_868648`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_868648`
 - Baseline phase: completed.
 - Post/native phase: Tracee startup exceeded the bounded startup timeout and
   exited with code `-9`.
@@ -7745,7 +7745,7 @@ PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 Validation result:
 
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_573700`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_573700`
 - Baseline phase: completed.
 - Post/native phase: failed fast with exit code `97`.
 - Post/native loader-log elapsed time:
@@ -7875,7 +7875,7 @@ Result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -7984,7 +7984,7 @@ Kernel state:
 
 - `git -C vendor/linux-framework status --short`: empty output
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next validation command:
 
@@ -8009,7 +8009,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule check stayed clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - latest kernel commit:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Diagnosis correction:
 
@@ -8211,7 +8211,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -8237,7 +8237,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_582123`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_582123`.
 - App status: `error`.
 - Baseline startup completed:
   - `phase_start baseline_start`
@@ -8416,7 +8416,7 @@ Kernel submodule:
 
 - `git -C vendor/linux-framework status --short`: empty output.
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Required next validation:
 
@@ -8457,7 +8457,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -8479,7 +8479,7 @@ Result:
 
 - Make/QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_820831`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_820831`.
 - Metadata:
   - `status`: `error`
   - `error_message`: `corpus suite reported errors`
@@ -8490,7 +8490,7 @@ Result:
   - `generated_at`: `1970-01-01T00:00:42.481673+00:00`
 - App payload:
   - file:
-    `corpus/results/arm64_qemu_corpus_19700101_000004_820831/details/apps/tracee__monitor.json`
+    `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_820831/details/apps/tracee__monitor.json`
   - `status`: `error`
   - `selected_workload`: `stress_ng_tracee_syscall_hot`
   - `baseline`: `null`
@@ -8499,7 +8499,7 @@ Result:
   - `error`:
     `shim socket /var/run/bpfrejit/shim-565.sock request failed: [Errno 111] Connection refused`
 - Module state:
-  - expected kop/native modules loaded successfully.
+  - expected kinsn/native modules loaded successfully.
   - `bpf_arm64_native_lab` was loaded.
   - failed module list was empty.
 
@@ -8545,7 +8545,7 @@ Result:
 
 - Make/QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000004_767506`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_767506`.
 - App result from QEMU console:
   - `status`: `error`
   - phase: `baseline`
@@ -8642,7 +8642,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -8872,7 +8872,7 @@ Validation result:
 
 - Exit code from the Make/QEMU wrapper: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_435848`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_435848`.
 - App status: `error`.
 - Runner-visible error:
   `failed to launch Tracee: /artifacts/tracee/bin/tracee ... command exited with code 1`.
@@ -8954,7 +8954,7 @@ Results:
 - Both shim builds only reported the pre-existing `shim_reload.h` snprintf
   truncation warning at `shim_reload.h:603`; no new compile errors.
 - Kernel submodule remains clean, with HEAD:
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 
 Next command:
 
@@ -9076,7 +9076,7 @@ Validation result:
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9109,7 +9109,7 @@ Result:
 
 - Make/QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_768109`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_768109`.
 - App result:
   - `status`: `error`
   - phase: `baseline`
@@ -9219,7 +9219,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9237,7 +9237,7 @@ Diagnostic run result before this change:
 - Command was the Phase 66 Tracee debug command.
 - Make/QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_446114`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_446114`.
 - Tracee command included:
   `--logging level=debug --logging filters.include.libbpf`.
 - App failed during startup before `measurement_start`:
@@ -9307,7 +9307,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9342,7 +9342,7 @@ Result:
 
 - Make/QEMU wrapper exit code: 0.
 - Artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000005_749283`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_749283`.
 - App result:
   - `status`: `error`
   - phase: `baseline`
@@ -9474,7 +9474,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9520,7 +9520,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -9555,7 +9555,7 @@ Validation result:
 
 - QEMU wrapper exit code: 0.
 - App result artifact:
-  `corpus/results/arm64_qemu_corpus_19700101_000006_267907`.
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000006_267907`.
 - App status: `error`.
 - Baseline startup and baseline workload completed:
   - baseline workload return code: 0
@@ -9605,7 +9605,7 @@ Technical decision:
   keeps the "no build in QEMU" constraint visible instead of silently falling
   back to proof generation inside the guest.
 - No kernel source change is needed. The kernel submodule remains clean at
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 
 ### Phase 84 - Use prebuilt native-link proof objects from runtime image
 
@@ -9691,7 +9691,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -9725,19 +9725,19 @@ Note:
 Final validation matrix:
 
 - Tracee: passed,
-  `corpus/results/arm64_qemu_corpus_19700101_000004_787802`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_787802`
 - BCC: passed,
-  `corpus/results/arm64_qemu_corpus_19700101_000004_804880`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_804880`
 - Katran: passed,
-  `corpus/results/arm64_qemu_corpus_19700101_000004_808748`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_808748`
 - Cilium: passed,
-  `corpus/results/arm64_qemu_corpus_19700101_000004_668882`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_668882`
 - Tetragon: passed,
-  `corpus/results/arm64_qemu_corpus_19700101_000005_562503`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000005_562503`
 - OTel eBPF profiler: passed,
-  `corpus/results/arm64_qemu_corpus_19700101_000004_620570`
+  `corpus/results/arm64_qemu_corpus_recorded_20260530_vmclock_000004_620570`
 - Micro: passed,
-  `micro/results/arm64_qemu_micro_19700101_000007_733722`
+  `micro/results/arm64_qemu_micro_recorded_20260530_vmclock_000007_733722`
 
 Final commands completed:
 
@@ -9778,7 +9778,7 @@ Final kernel state:
 
 - `git -C vendor/linux-framework status --short`: empty output.
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 - No kernel source file was changed by this ARM64 native-kernel completion work.
 
 ### Phase 105 - Remove temporary diagnostic environment knobs

@@ -97,7 +97,7 @@ Therefore, any program unload/reload after `rejit_refresh` and before the post-R
 Successful OTEL result showing tail-call targets in stats:
 
 ```text
-corpus/results/x86_kvm_corpus_20260510_034728_154696/details/apps/otelcol-ebpf-profiler__profiling.json:50-57
+corpus/results/aborted/x86_kvm_corpus_20260510_034728_154696/details/apps/otelcol-ebpf-profiler__profiling.json:50-57
 id=48 name=perf_unwind_python type=perf_event run_cnt_delta=0 run_time_ns_delta=0
 
 same file:113-120

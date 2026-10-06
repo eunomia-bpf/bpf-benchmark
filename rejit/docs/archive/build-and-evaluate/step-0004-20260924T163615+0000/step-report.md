@@ -7,7 +7,7 @@ Gates: EXPERIMENT complete; targeted WRITE complete; REVIEW complete
 ## Objective and instruction alignment
 
 This step advances the independent speculative-optimization paper while OMP
-uses the shared KVM for AE/KOperation work and another Codex owns kprog.  It
+uses the shared KVM for AE/Kinsn work and another Codex owns kprog.  It
 does not touch frozen workloads, runners, Makefiles, pass policy, KVM state, or
 kprog/AE files.  It addresses the user's explicit requirement to verify the
 experiment-093, single-pass Cilium, corrected Tracee/BCC, and Katran numbers
@@ -85,7 +85,7 @@ The independent result review classified the run as **valid**, the narrow
 hypothesis as **supported**, research value as **supporting**, and paper impact
 as **additional RQ1 evidence** rather than mechanism proof or RQ closure.  Its
 wording corrections were applied.  Scientific contract and paper separation
-from KOperation/kprog remain unchanged.
+from Kinsn/kprog remain unchanged.
 
 No new repository rule or skill is warranted: this step used an ordinary
 analysis-side script and the existing raw-result contract.  Detailed history

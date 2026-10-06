@@ -2,7 +2,7 @@
 
 Date: 2026-09-26
 Experiment: extend the **fresh causality-triplet** treatment to a **genuinely
-distinct pass pipeline** — the kop-family `lea` pass, the first triplet whose
+distinct pass pipeline** — the kinsn-family `lea` pass, the first triplet whose
 rewrite is not the shared generic O3 relift under a different name — by
 measuring it on Cilium, the densest `lea` producer of the supported apps, with
 the same one-optimized-run-plus-two-matched-no-pass-controls shape and the same
@@ -24,20 +24,20 @@ controlled measurement under another name".
 `lea` is such a pass. Two independent properties separate it from the generic
 aliases, both read from the source rather than inferred from the label:
 
-- `bpfopt` selects per-name LLVM codegen policy for kop passes;
-  `default_kop_mode_for_pass` gives `lea` →
+- `bpfopt` selects per-name LLVM codegen policy for kinsn passes;
+  `default_kinsn_mode_for_pass` gives `lea` →
   `all=disable,preemit-lea=force,scaled-index-mem=force`, so the codegen is
   selected by the pass name.
-- The pass consumes a real per-site `--target` kop map that the shim synthesizes
-  with `kopprober` (`bpfopt/shim/shim_loadtime.h`), whereas the generic
+- The pass consumes a real per-site `--target` kinsn map that the shim synthesizes
+  with `kinsnprober` (`bpfopt/shim/shim_loadtime.h`), whereas the generic
   names run `run_llvm_roundtrip(input, nullptr)` and apply the same generic
   repairs.
 
 The densest producer was **measured, not copied**: probing the 179 retained
-Cilium inputs on the isolated single-pass basis gives per-kop-sub-pass applied
-totals `kop 4980`, `lea 2416`, `endian_fusion 768`, `prefetch 648`,
+Cilium inputs on the isolated single-pass basis gives per-kinsn-sub-pass applied
+totals `kinsn 4980`, `lea 2416`, `endian_fusion 768`, `prefetch 648`,
 `bulk_memory 589`, `cond_select 334`, `extract 2`, `rotate 0`, so `lea` is the
-densest genuinely-distinct kop axis and this controlled measurement sits on
+densest genuinely-distinct kinsn axis and this controlled measurement sits on
 2416 applied sites. `rotate` (0) and `extract` (2) would have been token
 populations; `cond_select`/`endian_fusion`/`bulk_memory`/`prefetch` are smaller
 than `lea`.
@@ -157,11 +157,11 @@ Latitude, stated plainly.
   matched controls show it is restart drift. The row's claim is the controlled
   measurement, exactly as with the Tracee `wide_mem` and Tetragon `dce`
   triplets.
-- 2416 applied sites is the **largest genuinely-distinct kop population
+- 2416 applied sites is the **largest genuinely-distinct kinsn population
   available** and an order of magnitude above the largest generic-name triplet
   (254), so the distinct-pipeline claim is shown on a dense population.
 - This is the first triplet whose pass is **not the shared generic relift**: the
-  per-name codegen policy and the consumed `--target` kop map are the mechanism,
+  per-name codegen policy and the consumed `--target` kinsn map are the mechanism,
   and the `+686` instruction change against the generic relift's reduction is
   the visible signature. The retained `target.json` makes the rewrite replayable
   from the archive.

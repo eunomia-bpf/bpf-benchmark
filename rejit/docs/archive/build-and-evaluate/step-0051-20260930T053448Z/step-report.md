@@ -29,7 +29,7 @@ from the step 0041 build; host kernel `7.3.0-070300rc3-generic`.
   tetragon/observer, tracee/monitor. `rejit_result` per app:
   `mode: loadtime`, default x86 pass chain `[noop, map_inline,
   const_prop, dce, wide_mem, bounds_check_merge,
-  skb_load_bytes_spec, noop, const_prop, dce, kop]`.
+  skb_load_bytes_spec, noop, const_prop, dce, kinsn]`.
 
   Per-app BPF program counts recorded per start (baseline /
   post_rejit), and top hot programs by `run_cnt_delta` (raw two-start

@@ -19,7 +19,7 @@ Canonical AWS targets were used:
 | --- | --- | ---: | --- | --- |
 | corpus | `source /home/yunwei37/workspace/.venv/bin/activate && make aws-x86-benchmark AWS_X86_BENCH_MODE=corpus AWS_X86_BENCH_SAMPLES=1` | 2 | results produced; suite failed on recorded ReJIT/verify errors | `corpus/results/aws_x86_corpus_20260429_114243_566474` |
 | e2e | `source /home/yunwei37/workspace/.venv/bin/activate && make aws-x86-benchmark AWS_X86_BENCH_MODE=e2e` | 2 | all five case result dirs produced; suite failed on recorded ReJIT/verify errors | `e2e/results/*_20260429_12*` / `*_13*` |
-| test | `source /home/yunwei37/workspace/.venv/bin/activate && make aws-x86-test` | 0 | PASS | `tests/results/run.aws-x86.test.f2b70fff` |
+| test | `source /home/yunwei37/workspace/.venv/bin/activate && make aws-x86-test` | 0 | PASS | `tests/results/aborted/run.aws-x86.test.f2b70fff` |
 
 Run logs:
 
@@ -39,7 +39,7 @@ Observed for corpus and e2e:
 - kernel `7.0.0-rc2` and modules installed, instance rebooted, 2 GiB swap configured
 - benchmark containers ran with real app startup and synced results back
 
-`aws-x86-test` used the default test target contract (`t3.micro`), installed the same kernel, synced `tests/results/run.aws-x86.test.f2b70fff/run-contract.json`, and exited 0.
+`aws-x86-test` used the default test target contract (`t3.micro`), installed the same kernel, synced `tests/results/aborted/run.aws-x86.test.f2b70fff/run-contract.json`, and exited 0.
 
 ## Corpus
 
@@ -57,7 +57,7 @@ Corpus status: `error`. Results were written to `corpus/results/aws_x86_corpus_2
 | final ReJIT applied programs | 28 |
 | final ReJIT not_applied programs | 491 |
 
-KOperation module load was OK: `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` were resident; `failed_modules=[]`.
+Kinsn module load was OK: `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` were resident; `failed_modules=[]`.
 
 Corpus app status:
 
@@ -160,7 +160,7 @@ Detailed bpftrace and bcc ratios:
 
 ## Test Target
 
-`make aws-x86-test` completed with exit 0. It synced `tests/results/run.aws-x86.test.f2b70fff/run-contract.json`, installed and booted kernel `7.0.0-rc2`, and terminated the EC2 instance cleanly.
+`make aws-x86-test` completed with exit 0. It synced `tests/results/aborted/run.aws-x86.test.f2b70fff/run-contract.json`, installed and booted kernel `7.0.0-rc2`, and terminated the EC2 instance cleanly.
 
 ## Error Summary
 

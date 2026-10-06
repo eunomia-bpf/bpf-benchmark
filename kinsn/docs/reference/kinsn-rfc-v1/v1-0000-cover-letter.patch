@@ -8,7 +8,7 @@ expressed in a few machine instructions. The BPF JIT translates a verified
 instruction stream in one pass and cannot generally select target-specific
 idioms from a longer BPF sequence. Let a registered kernel descriptor
 supply a short BPF proof and a bounded native emitter for such operations.
-The related paper calls this interface Kops; the kernel interface here is
+The related paper calls this interface Kinsn; the kernel interface here is
 named kinsn.
 
 A program requests a kinsn through a kfunc call preceded by a sidecar MOV

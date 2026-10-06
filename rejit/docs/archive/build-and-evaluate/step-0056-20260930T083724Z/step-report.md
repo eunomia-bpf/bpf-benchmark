@@ -21,7 +21,7 @@ This is the second whole-corpus run on the same host kernel
 - Top `metadata.json`: `status: completed`, `run_type:
   x86_kvm_corpus`, `samples: 3`, `workload_seconds: 30.0`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
-  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kop]`
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kinsn]`
   (same pass list as step 0051).
 - `details/progress.json`: `status: completed`, `completed_at
   2026-09-30T09:16:38Z`.

@@ -18,19 +18,19 @@
 - The runner first loads each simulator proof object through the stock kernel
   verifier, then supplies its instructions to `libnativeloader`.
 - Each native chunk and its proof are uploaded into one native-lab slot. Every
-  slot mutation advances a nonzero generation. The KOP sidecar carries the
+  slot mutation advances a nonzero generation. The KINSN sidecar carries the
   slot id, ABI mask, and generation; both proof instantiation and native
   emission reject a stale generation.
 - For a multi-chunk native blob, leading chunks carry the verifier-safe
   continuation `r0 = 0` and the final chunk carries the verifier-visible
   simulator body. Placing the CFG last lets redirected proof exits reach the
-  stub's real exit without traversing another KOP. The kernel verifier now
-  allocates KOP proof scratch space from the operation's declared maximum
+  stub's real exit without traversing another KINSN. The kernel verifier now
+  allocates KINSN proof scratch space from the operation's declared maximum
   instead of the former 256-instruction fixed buffer.
-- Native program exits are represented inside a KOP proof region as direct
+- Native program exits are represented inside a KINSN proof region as direct
   jumps to the instruction immediately after that region. This preserves
   multi-exit and loop-shaped CFGs without allowing an actual `BPF_EXIT` inside
-  a proof sequence; no-call and no-nested-KOP restrictions remain explicit.
+  a proof sequence; no-call and no-nested-KINSN restrictions remain explicit.
 - Generations fail closed at counter exhaustion instead of wrapping to an old
   value, preventing an ABA match after repeated slot mutations.
 
@@ -92,9 +92,9 @@
   loop-heavy proof into `ENOSPC` merely by requesting its full verifier trace.
 - A corrected repeated attempt was deliberately interrupted after its second
   multi-chunk failure; its partial raw directory is
-  `micro/results/x86_kvm_micro_20260909_104608_695915/`. It showed that putting
+  `micro/results/aborted/x86_kvm_micro_20260909_104608_695915/`. It showed that putting
   the full loop-shaped proof on the first native chunk made all proof exits
-  continue into another KOP and caused verifier-state/log expansion. Moving
+  continue into another KINSN and caused verifier-state/log expansion. Moving
   the full proof to the final chunk removed that expansion. The next focused
   Make reproducer,
   `micro/results/x86_kvm_micro_20260909_111713_283313/metadata.json`, then
@@ -151,7 +151,7 @@ as errno 524. Both runs were stopped after repeated same-cause failures.
 The ARM JIT now allocates its emit scratch from the descriptor's bounded
 `max_emit_bytes` value and frees it on every return path. After rebuilding the
 kernel, the final public command exited zero and wrote
-`micro/results/arm64_qemu_micro_19700101_000024_077043/metadata.json`.
+`micro/results/arm64_qemu_micro_recorded_20260915_vmclock_000024_077043/metadata.json`.
 Independent JSON validation found status `completed`, exactly 29 programs and
 29 native samples, 29 matching results, 29 matching return values, and proof
 open/verifier-load phases in all 29 samples. The guest powered down normally.

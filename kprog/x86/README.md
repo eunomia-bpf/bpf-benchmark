@@ -284,7 +284,7 @@ make micro RUNTIMES="native kernel native_lab" \
 
 Earlier failed result file:
 
-- `micro/results/x86_kvm_micro_20260520_040517_640313/metadata.json`
+- `micro/results/invalid/x86_kvm_micro_20260520_040517_640313/metadata.json`
 - This run completed native userspace / kernel eBPF / native kernel for 28
   programs but failed at raw runtime case `cgroup_skb_hash_chain/native_lab`
   warmup: result `0` instead of

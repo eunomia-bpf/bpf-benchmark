@@ -217,7 +217,7 @@
 [200.714342 pid=1017 tid=1021] socket: cmd=list_progs len=22
 [200.950933 pid=1017 tid=1021] socket: cmd=list_progs len=22
 [221.565295 pid=1017 tid=1017] loadtime step prog=balancer_ingres step=map_inline elapsed_ms=24466
-[221.572886 pid=1017 tid=1017] loadtime optimized prog=balancer_ingres insns=2542->2272 maps=14 workdir=/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000012_467359/details/loadtime-workdirs/loadtime_1017_5
+[221.572886 pid=1017 tid=1017] loadtime optimized prog=balancer_ingres insns=2542->2272 maps=14 workdir=/workspaces/repository/corpus/results/arm64_qemu_corpus_recorded_20261006_vmclock_000012_467359/details/loadtime-workdirs/loadtime_1017_5
 [222.424851 pid=1017 tid=1017]   PROG_LOAD -> fd=45 errno=0 kernel_prog_id=27
 [289.277909 pid=1017 tid=1021] socket: cmd=measure_start len=25
 [332.020459 pid=1017 tid=1021] socket: cmd=measure_finish len=26

@@ -34,7 +34,7 @@ not a suite failure; no diagnosis of the suite needed for the retry.
   cleanly; no make error markers in the 478-line retained log.
 - `bcc/set` `status: ok` (no `error`); rejit `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
-  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kop]`;
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kinsn]`;
   selected workload `stress_ng_bcc_hook_hot` (3 stress-ng samples, all
   `returncode: 0`; raw per-run metric lines: `stress-ng: metrc: [pid]
   stressor bogo ops real time usr time sys time bogo ops/s ...`, no

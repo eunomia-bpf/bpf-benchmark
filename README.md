@@ -19,8 +19,8 @@ the next decision.
 This repository is the execution substrate and artifact workspace for the
 `bpf-bench` paper draft in
 [`docs/ebpf27-bpfoptbench/`](docs/ebpf27-bpfoptbench/). It also provides the
-artifact and evaluation harness for KOperation (short for *kernel operation*) and its paper,
-[`KOperation: Safely Extending the eBPF Compilation Pipeline with Native Operations`](docs/paper/main.tex).
+artifact and evaluation harness for Kinsn (short for *kernel operation*) and its paper,
+[`Kinsn: Safely Extending the eBPF Compilation Pipeline with Native Operations`](docs/paper/main.tex).
 The current `bpf-bench` instantiation covers six production eBPF applications,
 146 comparable BPF program measurements, and 42 microbenchmark tasks, with
 correctness and integrity checks designed to prevent reward hacking.
@@ -52,10 +52,10 @@ The benchmark action space spans multiple layers:
 - source-level application/eBPF changes
 - LLVM and BPF bytecode transformations
 - post-load bytecode policy selection through `bpfopt`
-- kernel JIT and KOperation-backed native-operation choices
+- kernel JIT and Kinsn-backed native-operation choices
 - suite-wide, per-app, and per-program policy selection
 
-`bpfopt` and KOperation-backed native operations are action backends in this
+`bpfopt` and Kinsn-backed native operations are action backends in this
 repository, but the `bpf-bench` contribution is broader: a benchmark and
 auto-research framework for agentic eBPF optimization under real verifier, JIT,
 application, and workload feedback.
@@ -192,7 +192,7 @@ make corpus SAMPLES=3
 
 Pass families currently include:
 
-- KOperation-backed native-operation passes: `kop`, `rotate`, `cond_select`,
+- Kinsn-backed native-operation passes: `kinsn`, `rotate`, `cond_select`,
   `ccmp`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`
 - bytecode rewriting passes: `noop`, `wide_mem`, `map_inline`, `const_prop`,
   `dce`, `bounds_check_merge`, `skb_load_bytes_spec`

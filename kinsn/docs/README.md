@@ -10,7 +10,7 @@
 
 The kernel RFC is maintained in a separate kernel tree. This repository holds
 the userspace selector, module sources, policy, and benchmark integration.
-From the repository root, `make host-kop-x86` builds the x86 modules after the
+From the repository root, `make host-kinsn-x86` builds the x86 modules after the
 kernel build dependency; `make host-bpfopt-llvm-x86` builds the selector.
 Use `make test`, `make micro`, or `make corpus` for supported checks and
 measurements. AWS arm64 uses `PLATFORM=aws ARCH=arm64 make test` and the

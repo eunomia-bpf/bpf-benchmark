@@ -83,7 +83,7 @@ Actual: 5 PASS / 32 files / nested run dir — i.e. the **full default
   negative-test (0063 pass). The matrix mirrors the 5 KVM x86 targets.
 - Reaffirms the 0061 localization: the arm64 corpus post-rejit/load-time-
   plan failure remains the single open capability issue — specific to the
-  load-time-plan/post-rejit path, **not** the verifier, kop modules,
+  load-time-plan/post-rejit path, **not** the verifier, kinsn modules,
   bpf_stats, or test infrastructure. No framework/app/runner change.
 - The TEST_MODE launch-wiring gap above is a recorded finding (frozen
   wiring), not a new validity/admission gate; no ratio, geomean, or rollup

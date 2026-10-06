@@ -240,22 +240,22 @@ done
 # Re-add only the cited files so no shipped reference dangles.
 CITED_DOCS=(
     docs/tmp/20260906-bpf-development-todo.md
-    docs/tmp/arm64_kop_micro_20260606_summary.md
-    docs/tmp/kop_ablation_20260605_summary.md
-    docs/tmp/kop_all_force_eval_20260603.py
-    docs/tmp/kop_arm64_eval_20260605.py
-    docs/tmp/kop_arm64_eval_20260605_summary.md
-    docs/tmp/kop_eval_20260602.py
-    docs/tmp/kop_eval_20260604.py
-    docs/tmp/kop_eval_20260604_summary.md
+    docs/tmp/arm64_kinsn_micro_20260606_summary.md
+    docs/tmp/kinsn_ablation_20260605_summary.md
+    docs/tmp/kinsn_all_force_eval_20260603.py
+    docs/tmp/kinsn_arm64_eval_20260605.py
+    docs/tmp/kinsn_arm64_eval_20260605_summary.md
+    docs/tmp/kinsn_eval_20260602.py
+    docs/tmp/kinsn_eval_20260604.py
+    docs/tmp/kinsn_eval_20260604_summary.md
     docs/tmp/micro-bench-status-20260520-archive.md
     docs/tmp/micro_characterization_20260606_summary.md
     docs/tmp/native_eval_20260529.py
     docs/tmp/native_eval_20260614.py
     docs/tmp/native_eval_20260614_summary.md
-    docs/tmp/plot_arm64_kop_micro_20260605.py
-    docs/tmp/plot_arm64_kop_micro_20260606.py
-    docs/tmp/plot_kop_micro_20260527.py
+    docs/tmp/plot_arm64_kinsn_micro_20260605.py
+    docs/tmp/plot_arm64_kinsn_micro_20260606.py
+    docs/tmp/plot_kinsn_micro_20260527.py
     docs/tmp/plot_micro_characterization_20260606.py
     docs/tmp/q5_widemem_kernel_panic_20260507.md
 )
@@ -337,8 +337,8 @@ speedup.
 The archive carries a fifth non-\`map_inline\` triplet and the first on a
 genuinely distinct pass pipeline rather than another name for the generic O3
 relift: a fresh, provenance-complete Cilium \`lea\` run plus two matched no-pass
-controls. \`lea\` is a kop-family pass that dispatches on the pass name
-(per-name LLVM codegen policy) and consumes a real per-site \`--target\` kop map
+controls. \`lea\` is a kinsn-family pass that dispatches on the pass name
+(per-name LLVM codegen policy) and consumes a real per-site \`--target\` kinsn map
 synthesized by the shim, so its 2416 applied sites across 131 changed load
 instances and its 159,896 -> 160,582 instruction change are a distinct rewrite,
 not the shared generic relift; its control-corrected ratio is 0.9827x over 3+3
@@ -480,7 +480,7 @@ required=(
     README-ARTIFACT.md ARTIFACT_MANIFEST.json LICENSE THIRD_PARTY_NOTICES.md
     CITATION.cff .zenodo.json CHANGELOG.md Makefile
     docs/atc26-artifact-evaluation.md docs/artifacts/render_claim_table.py
-    docs/paper/scripts/plot_evaluation_koperation.py
+    docs/paper/scripts/plot_evaluation_kinsn.py
     docs/paper/scripts/plot_rq3_policy_probes.py
     docs/paper/scripts/plot_app_case_studies.py
     kprog/formal/lean-toolchain vendor/llvmbpf/CMakeLists.txt
@@ -564,13 +564,13 @@ required=(
     corpus/results/aws_arm64_corpus_20260605_080836_924256/details/apps/katran.json
     corpus/results/aws_arm64_corpus_20260605_094729_221231/details/apps/katran.json
     corpus/results/x86_kvm_corpus_20260529_040554_604387/details/apps/cilium__agent.json
-    docs/tmp/kop_ablation_20260605_summary.md
+    docs/tmp/kinsn_ablation_20260605_summary.md
     corpus/results/x86_kvm_corpus_20260924_064817_392000/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/x86_kvm_corpus_20260924_074900_275227/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/x86_kvm_corpus_20260924_085901_647044/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/x86_kvm_corpus_20260924_095500_223221/details/loadtime-reports/cilium__agent.jsonl
     corpus/results/x86_kvm_corpus_20260924_114427_040291/details/loadtime-reports/cilium__agent.jsonl
-    corpus/results/arm64_qemu_corpus_19700101_000011_781867/details/loadtime-reports/katran.jsonl
+    corpus/results/arm64_qemu_corpus_recorded_20260924_vmclock_000011_781867/details/loadtime-reports/katran.jsonl
     docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/receipt.json
     docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/make-corpus.log
     docs/artifacts/evidence/rq2-katran-map-inline-fresh-causality/details/loadtime-reports/katran.jsonl
@@ -607,7 +607,7 @@ required=(
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/details/loadtime-workdirs/loadtime_2109_103/input.step.0.bin
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/controls/nullA/metadata.json
     docs/artifacts/evidence/rq2-tetragon-map-inline-fresh-causality/controls/nullB/metadata.json
-    corpus/results/arm64_qemu_corpus_19700101_000011_741370/details/loadtime-reports/katran.jsonl
+    corpus/results/arm64_qemu_corpus_recorded_20260924_vmclock_000011_741370/details/loadtime-reports/katran.jsonl
     docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality/receipt.json
     docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality/make-corpus.log
     docs/artifacts/evidence/rq2-tetragon-wide-mem-fresh-causality/details/loadtime-reports/tetragon__observer.jsonl

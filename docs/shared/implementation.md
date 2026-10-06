@@ -280,49 +280,49 @@ increment is committed and pushed immediately). Current state:
   kernel, so x86 should match arm64. `runner/mk/build.mk` is frozen, so the fix
   is not applied and the command-line override is used instead.
 - With the default policy, `make corpus` previously aborted in the load-time
-  shim because the `kop` pass could not run: `bpfopt` linked the system LLVM-18,
-  which lacks the `-bpf-enable-kop-select`/`-bpf-kop-mode` options carried by
-  the `llvm-backend/llvm` fork's `lib/Target/BPF/BPFKopSelect.cpp`. That
+  shim because the `kinsn` pass could not run: `bpfopt` linked the system LLVM-18,
+  which lacks the `-bpf-enable-kinsn-select`/`-bpf-kinsn-mode` options carried by
+  the `llvm-backend/llvm` fork's `lib/Target/BPF/BPFKinsnSelect.cpp`. That
   prerequisite is now satisfied in this workspace: `ninja -C
-  llvm-backend/build-bpf-kop -j12` completed the fork LLVM build (2116/2116,
+  llvm-backend/build-bpf-kinsn -j12` completed the fork LLVM build (2116/2116,
   124 static libs, `libLLVMBPFCodeGen.a`, `lib/cmake/llvm/LLVMConfig.cmake`),
   and `cmake -S bpfopt/llvm -B <build> -DLLVM_DIR=<fork>/lib/cmake/llvm` builds
-  a `bpfopt` that recognizes `-bpf-enable-kop-select` (the LLVM-18 build reports
+  a `bpfopt` that recognizes `-bpf-enable-kinsn-select` (the LLVM-18 build reports
   `Unknown command line argument`). `runner/mk/build.mk` already routes
-  `BPFOPT_LLVM_BUILD_X86` to `bpfopt/llvm/build-kop` and honors
+  `BPFOPT_LLVM_BUILD_X86` to `bpfopt/llvm/build-kinsn` and honors
   `LLVM_DIR`/`RUN_LLVM_DIR`, so no repository change is needed; exercising the
   default corpus policy still requires rebuilding the runtime image with the
   fork-LLVM `bpfopt`. `bcc/set` and `cilium/agent` additionally fail at
   application startup (BCC `capable` skeleton load `-22`; Cilium XDP compile
   canceled); those remain raw failures.
 - With the fork-LLVM `bpfopt` in the runtime image, the default `full-x86`
-  prefix through `kop` now completes a two-start load-time comparison:
-  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,kop` exits 0 and writes
+  prefix through `kinsn` now completes a two-start load-time comparison:
+  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,kinsn` exits 0 and writes
   `corpus/results/x86_kvm_corpus_20260916_172134_395628/` with suite
   `status: "completed"` and app `status: "ok"`. Applied sites: `noop: 3`,
-  `map_inline: 16`, `const_prop: 1`, `dce: 1`, `kop: 71`. Raw
+  `map_inline: 16`, `const_prop: 1`, `dce: 1`, `kinsn: 71`. Raw
   `balancer_ingres`: 169.00 ns/run -> 146.01 ns/run (ratio 0.864); pktgen
   throughput 2,620,975 -> 2,799,206 pps (ratio 1.068). Single sample, one app:
   provenance plus a consistent direction, not paper-grade.
-- The entire default `full-x86` group completes once `kop` is ordered after the
+- The entire default `full-x86` group completes once `kinsn` is ordered after the
   LLVM-roundtrip passes:
   `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,wide_mem,
-  bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kop` exits 0 and
+  bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kinsn` exits 0 and
   writes `corpus/results/x86_kvm_corpus_20260916_184607_120414/` with suite
   `status: "completed"` and app `status: "ok"`. Applied sites: `noop: 4`,
   `map_inline: 16`, `const_prop: 2`, `dce: 2`, `wide_mem: 1`,
-  `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kop: 71`. Raw
+  `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kinsn: 71`. Raw
   `balancer_ingres`: 175.79 -> 146.95 ns/run (ratio 0.836), `bytes_xlated`
   23,840 -> 19,016, `bytes_jited` 13,641 -> 11,545; pktgen throughput
   2,586,855 -> 2,838,183 pps (ratio 1.097). The original order in
-  `corpus/config/benchmark_config.yaml` (`kop` before `wide_mem`) cannot work:
-  the `kop` pass emits koperation payload pairs (a `BPF_MOV64_IMM` carrying the
+  `corpus/config/benchmark_config.yaml` (`kinsn` before `wide_mem`) cannot work:
+  the `kinsn` pass emits kinsn payload pairs (a `BPF_MOV64_IMM` carrying the
   encoded payload followed by `BPF_CALL`), and every other LLVM-roundtrip pass
   feeds those words to the `llvmbpf` compiler, which misreads the payload word
   as `movsx` and fails (`Invalid offset -32623 for movsx at pc 7`, confirmed from
-  the retained `KEEP_WORKDIRS=1` workdir). The `kop` pass itself bypasses the
-  roundtrip for kop-bearing input; the pure-bytecode passes do not.
-- The `full-x86` ordering fix is committed (`557a5af54`, `kop` moved after the
+  the retained `KEEP_WORKDIRS=1` workdir). The `kinsn` pass itself bypasses the
+  roundtrip for kinsn-bearing input; the pure-bytecode passes do not.
+- The `full-x86` ordering fix is committed (`557a5af54`, `kinsn` moved after the
   LLVM-roundtrip passes), so the repository default policy now completes with no
   `BPFREJIT_BENCH_PASSES` override:
   `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10` exits 0 and
@@ -333,8 +333,8 @@ increment is committed and pushed immediately). Current state:
 - The default policy across all six apps
   (`corpus/results/x86_kvm_corpus_20260916_214505_768159/`, `CORPUS_EXIT 0`)
   leaves two apps `status: "ok"`: `katran` (`balancer_ingres` 169.58 -> 146.87
-  ns/run, `kop: 71` sites) and `bcc/set` (thirteen tracing programs, 342 applied
-  sites total: `map_inline: 60`, `kop: 72`, `noop: 55`, `const_prop: 28`,
+  ns/run, `kinsn: 71` sites) and `bcc/set` (thirteen tracing programs, 342 applied
+  sites total: `map_inline: 60`, `kinsn: 72`, `noop: 55`, `const_prop: 28`,
   `dce: 26`, `wide_mem: 13`, `bounds_check_merge: 13`,
   `skb_load_bytes_spec: 13`). The remaining four (`cilium/agent`,
   `otelcol-ebpf-profiler/profiling`, `tetragon/observer`, `tracee/monitor`) fail

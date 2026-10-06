@@ -235,17 +235,17 @@ def median_object_compile_ns(data: dict, runtime: str) -> dict[str, float]:
     return rows
 
 
-def kop_applied_in_sample(sample: dict) -> int:
+def kinsn_applied_in_sample(sample: dict) -> int:
     count = 0
     for program in ((sample.get("rejit_result") or {}).get("per_program") or {}).values():
         for result in program.get("passes") or []:
             summary = result.get("bpfopt_summary") or {}
-            if summary.get("pass") == "kop":
+            if summary.get("pass") == "kinsn":
                 count += int(summary.get("sites_applied") or 0)
     return count
 
 
-def median_kop_applied(data: dict, runtime: str) -> dict[str, float]:
+def median_kinsn_applied(data: dict, runtime: str) -> dict[str, float]:
     rows: dict[str, float] = {}
     for bench in data.get("benchmarks") or []:
         if not isinstance(bench, dict):
@@ -253,7 +253,7 @@ def median_kop_applied(data: dict, runtime: str) -> dict[str, float]:
         for run in bench.get("runs") or []:
             if not isinstance(run, dict) or run.get("runtime") != runtime:
                 continue
-            counts = [kop_applied_in_sample(s)
+            counts = [kinsn_applied_in_sample(s)
                       for s in run.get("samples") or [] if isinstance(s, dict)]
             if counts:
                 rows[bench["name"]] = statistics.median(counts)
@@ -338,7 +338,7 @@ def micro_claim_rows(root: Path) -> list[Row]:
                 continue
             for run in bench.get("runs") or []:
                 if isinstance(run, dict) and run.get("runtime") == "kernel_rejit":
-                    counts = [kop_applied_in_sample(sample) for sample in run.get("samples") or []]
+                    counts = [kinsn_applied_in_sample(sample) for sample in run.get("samples") or []]
                     if counts and statistics.median(counts) > 0:
                         applied_names.append(bench["name"])
                     break
@@ -350,18 +350,18 @@ def micro_claim_rows(root: Path) -> list[Row]:
             )
             status = PASS if f"{value:.3f}" == "1.222" and provenance_ok else PARTIAL
             rows.append(Row(
-                "RQ1 arm64 27 KOperation-bearing cases (1.222x)",
+                "RQ1 arm64 27 Kinsn-bearing cases (1.222x)",
                 status,
                 f"median kernel/kernel_rejit exec_ns, geomean={value:.6f}x over "
-                f"{len(applied_names)} cases with median applied kop sites > 0; "
+                f"{len(applied_names)} cases with median applied kinsn sites > 0; "
                 f"run metadata/progress valid={provenance_ok}; "
                 "historical git_sha=unknown; source: RQ1 arm64 result.json",
             ))
         else:
-            rows.append(Row("RQ1 arm64 27 KOperation-bearing cases (1.222x)",
-                            UNAVAILABLE, f"KOperation-bearing cases={len(applied_names)}, expected 27"))
+            rows.append(Row("RQ1 arm64 27 Kinsn-bearing cases (1.222x)",
+                            UNAVAILABLE, f"Kinsn-bearing cases={len(applied_names)}, expected 27"))
     else:
-        rows.append(Row("RQ1 arm64 27 KOperation-bearing cases (1.222x)",
+        rows.append(Row("RQ1 arm64 27 Kinsn-bearing cases (1.222x)",
                         UNAVAILABLE, "RQ1 arm64 result.json missing"))
     if isinstance(arm, dict):
         kernel_bytes = median_native_bytes(arm, "kernel")
@@ -451,8 +451,8 @@ def micro_claim_rows(root: Path) -> list[Row]:
 FRESH_LOADTIME_RUNS = (
     ("RQ1 x86 fresh paired object-load overhead (full-x86 policy)",
      "micro/results/x86_kvm_micro_20260924_231824_136293", "full-x86", ""),
-    ("RQ1 x86 fresh paired object-load overhead (kop policy)",
-     "micro/results/x86_kvm_micro_20260925_002201_525373", "kop", ""),
+    ("RQ1 x86 fresh paired object-load overhead (kinsn policy)",
+     "micro/results/x86_kvm_micro_20260925_002201_525373", "kinsn", ""),
     ("RQ1 x86 repeated-sample paired object-load overhead (full-x86 policy)",
      "micro/results/x86_kvm_micro_20260926_105108_035832", "full-x86",
      "INNER_REPEAT=100000"),
@@ -513,16 +513,16 @@ def fresh_loadtime_rows(root: Path) -> list[Row]:
 
 
 # The same two fresh runs also carry a within-run paired kernel/kernel_rejit
-# exec_ns series with real applied kop sites, so they support the paper's RQ1
+# exec_ns series with real applied kinsn sites, so they support the paper's RQ1
 # exec-speedup quantity directly (same definition as the arm64 row): geomean
-# stock/candidate median exec_ns over the 27 non-simple cases that applied kop
+# stock/candidate median exec_ns over the 27 non-simple cases that applied kinsn
 # sites. The paper's own 27-case population is a different generation, so the
 # status only asserts the derivation, not a reproduction of 1.242x.
 FRESH_EXEC_RUNS = (
     ("RQ1 x86 fresh paired exec speedup (full-x86 policy)",
      "micro/results/x86_kvm_micro_20260924_231824_136293", "full-x86"),
-    ("RQ1 x86 fresh paired exec speedup (kop policy)",
-     "micro/results/x86_kvm_micro_20260925_002201_525373", "kop"),
+    ("RQ1 x86 fresh paired exec speedup (kinsn policy)",
+     "micro/results/x86_kvm_micro_20260925_002201_525373", "kinsn"),
 )
 
 
@@ -536,11 +536,11 @@ def fresh_exec_speedup_rows(root: Path) -> list[Row]:
         stock = median_runtime_ns(data, "kernel")
         rejit = median_runtime_ns(data, "kernel_rejit")
         paper_cases = sorted((stock.keys() & rejit.keys()) - {"simple", "simple_packet"})
-        applied = median_kop_applied(data, "kernel_rejit")
+        applied = median_kinsn_applied(data, "kernel_rejit")
         bearing = [n for n in paper_cases if applied.get(n, 0) > 0]
         if len(bearing) != 27:
             rows.append(Row(label, UNAVAILABLE,
-                            f"kop-bearing non-simple cases={len(bearing)}, expected 27: {rel}"))
+                            f"kinsn-bearing non-simple cases={len(bearing)}, expected 27: {rel}"))
             continue
         value = math.exp(sum(math.log(stock[n] / rejit[n]) for n in bearing) / len(bearing))
         provenance_ok = micro_run_provenance_ok(root, rel, "x86_kvm_micro", "x86_64")
@@ -548,7 +548,7 @@ def fresh_exec_speedup_rows(root: Path) -> list[Row]:
             label,
             PASS if provenance_ok else PARTIAL,
             f"median kernel/kernel_rejit exec_ns, geomean={value:.6f}x over "
-            f"{len(bearing)} kop-bearing non-simple cases (median applied kop sites > 0); "
+            f"{len(bearing)} kinsn-bearing non-simple cases (median applied kinsn sites > 0); "
             f"same-policy different-generation ReJIT policy={policy}; "
             f"run metadata/progress valid={provenance_ok}; single sample per runtime; "
             f"source={rel}/details/result.json",
@@ -562,8 +562,8 @@ def fresh_exec_speedup_rows(root: Path) -> list[Row]:
 FRESH_CODESIZE_RUNS = (
     ("RQ1 x86 fresh paired code size (full-x86 policy)",
      "micro/results/x86_kvm_micro_20260924_231824_136293", "full-x86"),
-    ("RQ1 x86 fresh paired code size (kop policy)",
-     "micro/results/x86_kvm_micro_20260925_002201_525373", "kop"),
+    ("RQ1 x86 fresh paired code size (kinsn policy)",
+     "micro/results/x86_kvm_micro_20260925_002201_525373", "kinsn"),
 )
 
 
@@ -606,22 +606,22 @@ NATIVE_EVIDENCE_DIR = "docs/artifacts/evidence/rq4-cilium-native-loader"
 # ladder retained no per-pass loadtime reports, so site counts were declared;
 # these runs retain details/loadtime-reports/cilium__agent.jsonl.
 CILIUM_SITE_ARMS = (
-    ("RQ3 Cilium coverage-max applied sites", "corpus/results/x86_kvm_corpus_20260924_064817_392000", "kop_all_prefetch"),
-    ("RQ3 Cilium no-prefetch applied sites", "corpus/results/x86_kvm_corpus_20260924_074900_275227", "kop_all_no_prefetch"),
-    ("RQ3 Cilium no-bulk applied sites", "corpus/results/x86_kvm_corpus_20260924_085901_647044", "kop_all_no_bulk_prefetch"),
-    ("RQ3 Cilium no-bulk/no-prefetch applied sites", "corpus/results/x86_kvm_corpus_20260924_095500_223221", "kop_all_no_bulk_no_prefetch"),
+    ("RQ3 Cilium coverage-max applied sites", "corpus/results/x86_kvm_corpus_20260924_064817_392000", "kinsn_all_prefetch"),
+    ("RQ3 Cilium no-prefetch applied sites", "corpus/results/x86_kvm_corpus_20260924_074900_275227", "kinsn_all_no_prefetch"),
+    ("RQ3 Cilium no-bulk applied sites", "corpus/results/x86_kvm_corpus_20260924_085901_647044", "kinsn_all_no_bulk_prefetch"),
+    ("RQ3 Cilium no-bulk/no-prefetch applied sites", "corpus/results/x86_kvm_corpus_20260924_095500_223221", "kinsn_all_no_bulk_no_prefetch"),
 )
-# Fresh rerun of the RQ2 Cilium run's own pass policy (`kop`), retained with
+# Fresh rerun of the RQ2 Cilium run's own pass policy (`kinsn`), retained with
 # its report stream so the RQ2 applied-site count is derived rather than
-# declared. Note the fresh `kop` policy no longer enables bulk_memory.
+# declared. Note the fresh `kinsn` policy no longer enables bulk_memory.
 CILIUM_RQ2_SITE_RUN = "corpus/results/x86_kvm_corpus_20260924_114427_040291"
 # Fresh isolated reruns of the two RQ3 Katran ARM64 policies, retained with
 # their report streams so the Katran applied-site counts are derived rather
 # than declared. These run under local arm64 QEMU; the June runs used AWS.
 KATRAN_SITE_ARMS = (
-    ("RQ3 Katran conservative applied sites", "corpus/results/arm64_qemu_corpus_19700101_000011_781867",
-     ["kop"]),
-    ("RQ3 Katran coverage-max applied sites", "corpus/results/arm64_qemu_corpus_19700101_000011_741370",
+    ("RQ3 Katran conservative applied sites", "corpus/results/arm64_qemu_corpus_recorded_20260924_vmclock_000011_781867",
+     ["kinsn"]),
+    ("RQ3 Katran coverage-max applied sites", "corpus/results/arm64_qemu_corpus_recorded_20260924_vmclock_000011_741370",
      ["rotate", "extract", "endian_fusion", "bulk_memory", "prefetch", "cond_select", "ccmp"]),
 )
 # Controlled per-pass throughput causality from the May 2026 matched batch
@@ -777,7 +777,7 @@ def loadtime_sites(path: Path) -> tuple[int, dict[str, int]] | None:
     """Sum per-pass sites_applied from a retained shim loadtime report stream.
 
     Returns None when the stream is absent or unparsable. The count is the same
-    quantity docs/tmp/kop_all_force_eval_20260603.py sums over
+    quantity docs/tmp/kinsn_all_force_eval_20260603.py sums over
     details/loadtime-reports/<stem>.jsonl.
     """
     try:
@@ -953,7 +953,7 @@ def native_loader_rows(root: Path) -> list[Row]:
 def cilium_claim_rows(root: Path) -> list[Row]:
     """Derive selected RQ2/RQ4 Cilium claims from retained three-sample raw JSON."""
     rows: list[Row] = []
-    rq2 = cilium_app(root, CILIUM_RQ2, passes=["kop"], bpf_stats=False)
+    rq2 = cilium_app(root, CILIUM_RQ2, passes=["kinsn"], bpf_stats=False)
     baseline = phase_pps(rq2, "baseline") if rq2 else []
     post = phase_pps(rq2, "post_rejit") if rq2 else []
     if len(baseline) == len(post) == 3 and min(baseline + post) > 0:
@@ -974,13 +974,13 @@ def cilium_claim_rows(root: Path) -> list[Row]:
                         "original per-pass loadtime report is not retained; app JSON alone cannot prove site count"))
     else:
         total, per_pass = derived_rq2
-        single = per_pass.get("kop") == total and total > 0
+        single = per_pass.get("kinsn") == total and total > 0
         rows.append(Row(
             f"RQ2 Cilium x86 applied sites ({total} fresh)",
             PASS if single else PARTIAL,
-            f"the June run's own `kop` policy, rerun in {CILIUM_RQ2_SITE_RUN}: sum of "
+            f"the June run's own `kinsn` policy, rerun in {CILIUM_RQ2_SITE_RUN}: sum of "
             f"report.sites_applied = {total}, {per_pass}; the June 4086 count remains declared because "
-            f"its report stream is gone and the fresh `kop` policy no longer enables bulk_memory",
+            f"its report stream is gone and the fresh `kinsn` policy no longer enables bulk_memory",
         ))
 
     on = cilium_app(root, CILIUM_RQ4_ON, bpf_stats=True)
@@ -1016,15 +1016,15 @@ def cilium_claim_rows(root: Path) -> list[Row]:
     rows.extend(native_loader_rows(root))
     for label, run, run_type, app_file, policy, sites, wl_claim, cost_claim in (
         ("RQ3 Cilium coverage-max throughput (1.114x)", "corpus/results/x86_kvm_corpus_20260605_145112_835705",
-         "x86_kvm_corpus", "cilium__agent.json", "kop_all_prefetch", 4697, "1.114", "0.776"),
+         "x86_kvm_corpus", "cilium__agent.json", "kinsn_all_prefetch", 4697, "1.114", "0.776"),
         ("RQ3 Cilium no-prefetch throughput (1.055x)", "corpus/results/x86_kvm_corpus_20260605_141420_746952",
-         "x86_kvm_corpus", "cilium__agent.json", "kop_all_no_prefetch", 4086, "1.055", "0.871"),
+         "x86_kvm_corpus", "cilium__agent.json", "kinsn_all_no_prefetch", 4086, "1.055", "0.871"),
         ("RQ3 Cilium no-bulk throughput (1.037x)", "corpus/results/x86_kvm_corpus_20260605_164411_317423",
-         "x86_kvm_corpus", "cilium__agent.json", "kop_all_no_bulk_prefetch", 4136, "1.037", "0.918"),
+         "x86_kvm_corpus", "cilium__agent.json", "kinsn_all_no_bulk_prefetch", 4136, "1.037", "0.918"),
         ("RQ3 Cilium no-bulk/no-prefetch throughput (0.999x)", "corpus/results/x86_kvm_corpus_20260605_160715_129437",
-         "x86_kvm_corpus", "cilium__agent.json", "kop_all_no_bulk_no_prefetch", 3512, "0.999", "0.991"),
+         "x86_kvm_corpus", "cilium__agent.json", "kinsn_all_no_bulk_no_prefetch", 3512, "0.999", "0.991"),
         ("RQ3 Katran conservative throughput (1.073x)", "corpus/results/aws_arm64_corpus_20260605_080836_924256",
-         "aws_arm64_corpus", "katran.json", "kop", 21, "1.073", "0.941"),
+         "aws_arm64_corpus", "katran.json", "kinsn", 21, "1.073", "0.941"),
         ("RQ3 Katran coverage-max throughput (0.995x)", "corpus/results/aws_arm64_corpus_20260605_094729_221231",
          "aws_arm64_corpus", "katran.json", None, 62, "0.995", "1.006"),
     ):
@@ -1625,14 +1625,14 @@ def dce_tetragon_causality_rows(
 
 # Fresh provenance-complete Cilium `lea` causality triplet, the fifth
 # non-`map_inline` triplet and the first on a genuinely distinct pass pipeline
-# rather than another name for the generic O3 relift. `lea` is a kop-family
+# rather than another name for the generic O3 relift. `lea` is a kinsn-family
 # pass: `bpfopt` selects per-name LLVM codegen policy for it
 # (`all=disable,preemit-lea=force,scaled-index-mem=force`) and it consumes a real
-# per-site `--target` kop map that the shim synthesizes with `kopprober`, unlike
+# per-site `--target` kinsn map that the shim synthesizes with `kinsnprober`, unlike
 # `noop`/`dce`/`wide_mem`/`bounds_check_merge`/`skb_load_bytes_spec`/`const_prop`
 # which are byte-identical to each other. Cilium carries the densest retained
 # `lea` population of the supported apps (2416 applied sites over 131 changed
-# load instances on the isolated single-pass basis, against the `lea`/`kop`
+# load instances on the isolated single-pass basis, against the `lea`/`kinsn`
 # sub-pass totals for other apps), so a controlled measurement there has the
 # most sites behind it. Cilium's fresh workload is two kernel-pktgen components,
 # so the derived scalar is the sum over both components' pktgen pps, the same
@@ -1747,7 +1747,7 @@ def katran_site_rows(root: Path) -> list[Row]:
 # inline and control does not return), so the split below is the qualified
 # population's attribution, not a claim about self-applied sites.
 CILIUM_ATTRIBUTION_ARMS = CILIUM_SITE_ARMS + (
-    ("RQ2 Cilium x86 kop applied sites", CILIUM_RQ2_SITE_RUN, "kop"),
+    ("RQ2 Cilium x86 kinsn applied sites", CILIUM_RQ2_SITE_RUN, "kinsn"),
 )
 
 
@@ -2044,10 +2044,10 @@ CILIUM_SITE_ARMS_ORDERED = tuple(
 
 # June ladder run dirs by arm label, in the paper's coverage-narrowing order.
 CILIUM_JUNE_ARMS = (
-    ("coverage-max", "corpus/results/x86_kvm_corpus_20260605_145112_835705", "kop_all_prefetch"),
-    ("no-prefetch", "corpus/results/x86_kvm_corpus_20260605_141420_746952", "kop_all_no_prefetch"),
-    ("no-bulk", "corpus/results/x86_kvm_corpus_20260605_164411_317423", "kop_all_no_bulk_prefetch"),
-    ("no-bulk/no-prefetch", "corpus/results/x86_kvm_corpus_20260605_160715_129437", "kop_all_no_bulk_no_prefetch"),
+    ("coverage-max", "corpus/results/x86_kvm_corpus_20260605_145112_835705", "kinsn_all_prefetch"),
+    ("no-prefetch", "corpus/results/x86_kvm_corpus_20260605_141420_746952", "kinsn_all_no_prefetch"),
+    ("no-bulk", "corpus/results/x86_kvm_corpus_20260605_164411_317423", "kinsn_all_no_bulk_prefetch"),
+    ("no-bulk/no-prefetch", "corpus/results/x86_kvm_corpus_20260605_160715_129437", "kinsn_all_no_bulk_no_prefetch"),
 )
 
 
@@ -2119,7 +2119,7 @@ def corpus_evidence(
 ) -> list[Row]:
     d = root / rel
     claims = [
-        f"KVM corpus: rejit/KOperation coverage ({claim_label})",
+        f"KVM corpus: rejit/Kinsn coverage ({claim_label})",
         f"KVM corpus: full workload success ({claim_label})",
     ]
     if not d.is_dir():
@@ -2686,7 +2686,7 @@ def self_test() -> int:
         (rq3 / "metadata.json").write_text(json.dumps({
             "status": "error", "run_type": "x86_kvm_corpus", "suite": "corpus",
             "samples": 3, "workload_seconds": 30.0, "bpf_stats": True,
-            "config": {"enabled_passes": ["kop_all_prefetch"]},
+            "config": {"enabled_passes": ["kinsn_all_prefetch"]},
         }))
         (rq3 / "details/progress.json").write_text(json.dumps({"status": "error"}))
         def _wl(pps: int) -> dict:
@@ -2723,7 +2723,7 @@ def self_test() -> int:
         (arm / "metadata.json").write_text(json.dumps({
             "status": "completed", "run_type": "x86_kvm_corpus", "suite": "corpus",
             "samples": 3, "workload_seconds": 30.0, "bpf_stats": True,
-            "config": {"enabled_passes": ["kop_all_prefetch"]},
+            "config": {"enabled_passes": ["kinsn_all_prefetch"]},
         }))
         (arm / "details/progress.json").write_text(json.dumps({"status": "completed"}))
         (arm / "details/apps/cilium__agent.json").write_text(json.dumps({
@@ -2737,8 +2737,8 @@ def self_test() -> int:
                 f"{[(r.claim, r.status) for r in site_rows]}"
             )
         (reports / "cilium__agent.jsonl").write_text("\n".join(json.dumps({
-            "step": "kop_all_prefetch", "step_index": 0,
-            "report": {"pass": "kop", "sites_applied": sites},
+            "step": "kinsn_all_prefetch", "step_index": 0,
+            "report": {"pass": "kinsn", "sites_applied": sites},
         }) for sites in (2000, 1017)) + "\n")
         site_rows = [r for r in cilium_site_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
         if len(site_rows) != 1 or site_rows[0].status != PASS or "3017 sites" not in site_rows[0].claim:
@@ -2747,9 +2747,9 @@ def self_test() -> int:
                 f"{[(r.claim, r.status) for r in site_rows]}"
             )
         (reports / "cilium__agent.jsonl").write_text(
-            json.dumps({"step": "kop_all_prefetch", "report": {"pass": "kop", "sites_applied": 10}})
+            json.dumps({"step": "kinsn_all_prefetch", "report": {"pass": "kinsn", "sites_applied": 10}})
             + "\n"
-            + json.dumps({"step": "other_step", "report": {"pass": "kop", "sites_applied": 10}})
+            + json.dumps({"step": "other_step", "report": {"pass": "kinsn", "sites_applied": 10}})
             + "\n"
         )
         site_rows = [r for r in cilium_site_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
@@ -2759,7 +2759,7 @@ def self_test() -> int:
                 f"{[(r.claim, r.status) for r in site_rows]}"
             )
 
-        # RQ2 applied-site row: derived from the fresh `kop` rerun's report.
+        # RQ2 applied-site row: derived from the fresh `kinsn` rerun's report.
         rq2_arm = root / CILIUM_RQ2_SITE_RUN / "details/loadtime-reports"
         rq2_rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ2 Cilium x86 applied sites")]
         if len(rq2_rows) != 1 or rq2_rows[0].status != UNAVAILABLE:
@@ -2769,11 +2769,11 @@ def self_test() -> int:
             )
         rq2_arm.mkdir(parents=True)
         (rq2_arm / "cilium__agent.jsonl").write_text(json.dumps({
-            "step": "kop", "report": {"pass": "kop", "sites_applied": 2988}}) + "\n")
+            "step": "kinsn", "report": {"pass": "kinsn", "sites_applied": 2988}}) + "\n")
         rq2_rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ2 Cilium x86 applied sites")]
         if len(rq2_rows) != 1 or rq2_rows[0].status != PASS or "2988 fresh" not in rq2_rows[0].claim:
             failures.append(
-                "RQ2 site row with retained `kop` report expected PASS/2988, got "
+                "RQ2 site row with retained `kinsn` report expected PASS/2988, got "
                 f"{[(r.claim, r.status) for r in rq2_rows]}"
             )
 
@@ -2833,7 +2833,7 @@ def self_test() -> int:
         kat_dir = root / kat_label / "details/loadtime-reports"
         kat_dir.mkdir(parents=True)
         (kat_dir / "katran.jsonl").write_text(json.dumps({
-            "step": "kop", "report": {"pass": "kop", "sites_applied": 21}}) + "\n")
+            "step": "kinsn", "report": {"pass": "kinsn", "sites_applied": 21}}) + "\n")
         kat_rows = [r for r in katran_site_rows(root) if r.claim.startswith("RQ3 Katran conservative")]
         if len(kat_rows) != 1 or kat_rows[0].status != PARTIAL or "21 sites" not in kat_rows[0].claim:
             failures.append(
@@ -3052,8 +3052,8 @@ def self_test() -> int:
                 f"{(row.status, row.evidence)!r}")
 
         # Fresh paired exec-speedup row: same run, derived from the paired
-        # exec_ns series restricted to the 27 non-simple kop-bearing cases.
-        def write_fresh_exec(rejit_ns: int, kop_sites: int) -> None:
+        # exec_ns series restricted to the 27 non-simple kinsn-bearing cases.
+        def write_fresh_exec(rejit_ns: int, kinsn_sites: int) -> None:
             d = root / fresh_rel
             (d / "details").mkdir(parents=True, exist_ok=True)
             (d / "metadata.json").write_text(json.dumps({
@@ -3071,7 +3071,7 @@ def self_test() -> int:
                     {"runtime": "kernel_rejit", "samples": [
                         {"phases_ns": {"object_load_ns": 1000}, "exec_ns": rejit_ns,
                          "rejit_result": {"per_program": {"1": {"passes": [
-                             {"bpfopt_summary": {"pass": "kop", "sites_applied": kop_sites}}]}}}}]},
+                             {"bpfopt_summary": {"pass": "kinsn", "sites_applied": kinsn_sites}}]}}}}]},
                 ]})
             (d / "details/result.json").write_text(json.dumps({"benchmarks": benches}))
 
@@ -3081,7 +3081,7 @@ def self_test() -> int:
 
         write_fresh_exec(1000, 5)
         row = fresh_exec_row()
-        if (row.status != PASS or "27 kop-bearing" not in row.evidence
+        if (row.status != PASS or "27 kinsn-bearing" not in row.evidence
                 or f"policy={fresh_policy}" not in row.evidence):
             failures.append(
                 f"fresh exec row with 27 bearing cases expected PASS, got {(row.status, row.evidence)!r}")
@@ -3527,7 +3527,7 @@ def self_test() -> int:
 
         # The map_inline run must be exactly the `map_inline` policy and 3
         # samples/60 s; a no-pass or short run is not the measured arm.
-        write_causality_run("mi", passes=("kop",))
+        write_causality_run("mi", passes=("kinsn",))
         row = causality_row()
         if row.status != UNAVAILABLE or "matched map_inline run" not in row.evidence:
             failures.append(
@@ -3671,7 +3671,7 @@ def self_test() -> int:
         write_fresh_causality(ctl_a_passes=("map_inline",))
         if fresh_row().status != PARTIAL:
             failures.append("fresh causality controls must be no-pass runs")
-        write_fresh_causality(mi_passes=("kop",))
+        write_fresh_causality(mi_passes=("kinsn",))
         if fresh_row().status != UNAVAILABLE and fresh_row().status != PARTIAL:
             failures.append("fresh causality must require the map_inline pass")
         write_fresh_causality(retain_bytecode=False)
@@ -3979,8 +3979,8 @@ def self_test() -> int:
         if dce_tetragon_row().status != PASS:
             failures.append("restored Tetragon dce causality must return to PASS")
         # The Cilium lea row is the fifth labelled non-map_inline triplet and
-        # the first on a genuinely distinct pass pipeline (kop-family `lea`,
-        # which dispatches on the pass name and consumes a real `--target` kop
+        # the first on a genuinely distinct pass pipeline (kinsn-family `lea`,
+        # which dispatches on the pass name and consumes a real `--target` kinsn
         # map) rather than another name for the generic O3 relift. Cilium's rate
         # is the two-component kernel-pktgen sum, so it asserts the row names
         # that shape, accepts `lea`, rejects the alias `wide_mem`, and is gated

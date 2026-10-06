@@ -7,7 +7,7 @@
 [479.591168 pid=2077 tid=2089] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=.test
 [479.591392 pid=2077 tid=2089]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=3548
 [479.591670 pid=2077 tid=2089] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=MIT expected_attach=0 attach_btf_id=0 prog_btf_fd=4294967295 attach_btf_obj_fd=0 attach_prog_fd=0
-[479.611191 pid=2077 tid=2089] kopprober wrote target=/tmp/target.json
+[479.611191 pid=2077 tid=2089] kinsnprober wrote target=/tmp/target.json
 [479.624808 pid=2077 tid=2089] loadtime policy prog= policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda insn_cnt=2
 [479.654106 pid=2077 tid=2089] loadtime step prog= step=wide_mem elapsed_ms=15
 [479.654179 pid=2077 tid=2089] loadtime prog= produced no bytecode changes; passing original BPF_PROG_LOAD through

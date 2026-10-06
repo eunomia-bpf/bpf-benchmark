@@ -31,7 +31,7 @@ load-time ReJIT protocol on a perf-event/uprobe BPF graph.
 - `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]`, `selected_workload: otel_mixed_workload`,
+  kinsn]`, `selected_workload: otel_mixed_workload`,
   `runner: otelcol-ebpf-profiler`.
 - **13 BPF programs** recorded per start (baseline and post_rejit) —
   the smallest program count of the session. 2 hot programs

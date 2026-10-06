@@ -21,7 +21,7 @@
 > - **⚠️ Unit test 质量标准见 `CLAUDE.md` 的 "Unit Test Quality"**：非必要不加 unit test。新增测试必须能说明失败时定位哪一类 bug。合理测试覆盖逻辑分支、状态变化、计算/转换、边界、错误路径、外部 ABI/layout/序列化约定或 bug 回归。ABI/layout 测试不能只验 `size_of`，必须验字段 offset 或编码格式。禁止 trivial getter/setter、std/upstream lib 行为、自身重言、mock 测 mock、可读性测试、纯 const alias 和重复覆盖率测试。慢测试或真实系统依赖测试应放到集成/端到端层级，不要伪装成 unit test。
 > - **当前架构约束见 §4，Benchmark 设计约束见 §5.35。** `rejit/docs/archive/bpfopt_design_v3.md` 是已淘汰的 daemon/ReJIT 设计，不再是规范。
 > **当前数据状态（2026-07-10）**：stock-kernel shim 的 `branch_flip` 六应用结果尚不可复现为稳定收益。2026-07-01 完整运行的 per-program geomean 为 **1.054x speedup**，但 2026-07-04 的六应用拼接复跑为 **0.899x**，Tracee 与 Tetragon 明显回退；详见 `rejit/docs/archive/20260710/speculative-optimization-branch-flip-rerun.md`。因此论文当前不能声称稳定加速。
-> **历史数据（非当前 speculative 论文证据）**：v1 native-rewrite、2026-04 v2 daemon/ReJIT、20-app、bpftrace/SCX 和 kop 数据均属于旧架构或其他论文线，只保留作实验沿革，不得用于当前摘要或贡献结论。
+> **历史数据（非当前 speculative 论文证据）**：v1 native-rewrite、2026-04 v2 daemon/ReJIT、20-app、bpftrace/SCX 和 kinsn 数据均属于旧架构或其他论文线，只保留作实验沿革，不得用于当前摘要或贡献结论。
 
 ---
 
@@ -118,7 +118,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 ### 1.6 设计目标
 
-1. **零内核改动**:stock kernel,没有 REJIT syscall,没有 out-of-tree daemon,没有 kop 内核模块,BTF/CO-RE 全保留。新增优化 = 新 `bpfopt` pass + 新 yaml,完全用户态。
+1. **零内核改动**:stock kernel,没有 REJIT syscall,没有 out-of-tree daemon,没有 kinsn 内核模块,BTF/CO-RE 全保留。新增优化 = 新 `bpfopt` pass + 新 yaml,完全用户态。
 2. **可扩展(Extensible)**:每个 pass 是一个独立 CLI 调用,pass 间用 file pipeline 串接。Runner 通过 yaml 描述命令模板,shim 不需要任何 pass 知识。
 3. **透明(Transparent)**:对所有 eBPF 应用、loader 和其他 eBPF 工具完全透明 — `LD_PRELOAD=libbpfrejit_shim.so` 注入 + 控制 app 启动。不需要 .bpf.o,不需要改应用代码。(静态 Go 二进制 fallback 见 PoC-E。)
 4. **安全(Safe)**:每次重新提交都过 stock verifier。bpfopt 不影响内核安全模型。
@@ -228,7 +228,7 @@ bpfopt 的 Insight 3(吃 verifier 已算出来的 tnum/range 当 ground truth、
 ### 1.11 核心设计约束
 
 1. **Safety / correctness 架构分离**:stock kernel verifier 是 safety 的唯一 authority。bpfopt 不写 validator,不证 pass 正确性 — verifier 接受即 safety 保证(§1.4 Insight 3)。
-2. **零内核改动**:不加 syscall、不动 verifier、不加 kop 模块。任何 6.x stock kernel 都能跑。
+2. **零内核改动**:不加 syscall、不动 verifier、不加 kinsn 模块。任何 6.x stock kernel 都能跑。
 3. **透明 LD_PRELOAD shim**:不需要 .bpf.o、不需要改应用/loader,不需要 detach/reattach。静态 Go 二进制走 vendor-replace fallback(PoC-E)。
 4. **稳态零开销**:inline guard 1-2 条 BPF 指令,verifier 接受后跟原始 program 同样路径执行;guard miss 才走 inline slow path。
 5. **Fail-safe**:每次 candidate `BPF_PROG_LOAD` 走 stock verifier。失败就丢弃,保留上一次成功版本;原程序持续运行,不破坏 in-flight invocation。
@@ -242,7 +242,7 @@ bpfopt 的 Insight 3(吃 verifier 已算出来的 tnum/range 当 ground truth、
 
 ### 3.1 性能优化变换
 
-> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kop 框架的 pass)。所有依赖 kop 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `kinsn/docs/design.md`,**不在本论文范围**。
+> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kinsn 框架的 pass)。所有依赖 kinsn 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `kinsn/docs/design.md`,**不在本论文范围**。
 
 #### Speculative 分类(本论文 framing)
 

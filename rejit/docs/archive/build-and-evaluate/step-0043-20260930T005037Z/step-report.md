@@ -18,7 +18,7 @@ HEAD `1207dbb06` (= `origin/master` after step 0042). make PID 317784,
   30.0`, `workload_only: False`, `skip_rejit: False`.
 - katran `status: ok` (no `error`); rejit `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
-  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kop]`;
+  bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce, kinsn]`;
   selected workload `xdp_pktgen`.
 - Raw two-start counters (`details/apps/katran.json`, raw only, no
   ratios):

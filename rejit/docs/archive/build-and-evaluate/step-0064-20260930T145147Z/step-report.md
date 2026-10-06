@@ -57,7 +57,7 @@
      directory '/workspaces/repository'`). This is log
      interleaving from a concurrent make instance writing to
      stderr simultaneously, not a defect in the result.
-  2. `tests/results/d6b6575f/negative.log` (128 bytes, 14:29Z —
+  2. `tests/results/aborted/d6b6575f/negative.log` (128 bytes, 14:29Z —
      before this run's 14:51 launch) holds exactly the 4
      negative-smoke PASS lines = a **parallel/supervisor instance**
      ran a KVM in-VM `TEST_MODE=negative` run during this window.

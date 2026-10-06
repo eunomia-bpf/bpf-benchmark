@@ -78,7 +78,7 @@ the sample count read from the run itself:
 | run | samples/case | paired cases | open+load geomean | bare `object_load_ns` geomean |
 |---|---|---|---|---|
 | `..._20260924_231824_136293` (full-x86) | 1 | 29 | 1.132157 (1.13×) | 1.161575 (1.16×) |
-| `..._20260925_002201_525373` (kop) | 1 | 29 | 1.193679 (1.19×) | 1.223405 (1.22×) |
+| `..._20260925_002201_525373` (kinsn) | 1 | 29 | 1.193679 (1.19×) | 1.223405 (1.22×) |
 | `..._20260926_105108_035832` (full-x86, paper protocol) | 3 | 29 | **1.140258 (1.14×)** | **1.169998 (1.17×)** |
 
 All three fresh rows stay `PARTIAL` against the paper's 0.99×, and the new row

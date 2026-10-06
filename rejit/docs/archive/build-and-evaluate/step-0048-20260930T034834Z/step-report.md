@@ -28,7 +28,7 @@ two-start load-time ReJIT protocol on a real, multi-attachment
 - `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]`, `selected_workload: stress_ng_tracee_syscall_hot`,
+  kinsn]`, `selected_workload: stress_ng_tracee_syscall_hot`,
   `runner: tracee`.
 - **151 BPF programs** recorded per start (baseline and post_rejit) —
   the largest program count of the session (vs. 53 for cilium). 56

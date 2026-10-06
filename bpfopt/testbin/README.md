@@ -54,20 +54,20 @@ bpfopt/testbin/bcc_set/10_vfs_create/
 Standard standalone CLI invocation:
 
 ```sh
-bpfopt/llvm/build-kop/bpfopt --pass <name> \
+bpfopt/llvm/build-kinsn/bpfopt --pass <name> \
     --input bpfopt/testbin/<app>/<prog_id>_<name>/canonicalize_output.bin \
     --output /tmp/test_out.bin \
     --report /tmp/test_report.json \
     --prog-type <prog_type>
 ```
 
-For kop passes that need `--target`, see "Augmenting with target.json" below.
+For kinsn passes that need `--target`, see "Augmenting with target.json" below.
 
-## Augmenting with target.json (for kop passes)
+## Augmenting with target.json (for kinsn passes)
 
-The noop dump only ran `noop`, which doesn't need `--target`. To run kop passes
+The noop dump only ran `noop`, which doesn't need `--target`. To run kinsn passes
 (rotate / cond_select / ccmp / extract / endian_fusion / bulk_memory / prefetch),
-you need a `target.json` describing kop capabilities. Example from a previous
+you need a `target.json` describing kinsn capabilities. Example from a previous
 multi-pass run is at `/tmp/dce_target.json` (preserved during P1-F invest).
 
 To get a fresh target.json, run a multi-pass corpus with one prog and KEEP_WORKDIRS=1,

@@ -19,7 +19,7 @@ the credential-blocked line).
 
 ## Result
 
-- Run dir `corpus/results/arm64_qemu_corpus_19700101_000006_146493/`
+- Run dir `corpus/results/arm64_qemu_corpus_recorded_20260930_vmclock_000006_146493/`
   (QEMU in-VM clock is 1970 — no RTC; `metadata.json` `completed_at:
   None`, `generated_at` 1970, `run_type: arm64_qemu_corpus` — recorded
   as a QEMU clock quirk, not a gate).
@@ -78,7 +78,7 @@ here — cross-arch / cross-runtime comparison is analysis per
 - `make-corpus-arm64.log` (this dir): retained host log (clean QEMU
   power-down, `qemu-status=0`).
 - `run-marker.txt` (this dir).
-- `corpus/results/arm64_qemu_corpus_19700101_000006_146493/` (14
+- `corpus/results/arm64_qemu_corpus_recorded_20260930_vmclock_000006_146493/` (14
   trackable files: `metadata.json`, `details/progress.json`,
   `details/result.json`, 6× `details/apps/*.json`, 5×
   `details/loadtime-reports/*.jsonl` — tetragon's `.jsonl` absent because

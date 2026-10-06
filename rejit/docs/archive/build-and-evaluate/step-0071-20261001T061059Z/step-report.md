@@ -1,7 +1,7 @@
 # Step 0071 — KVM x86 `make micro` full-suite refresh (29 benches, 3 runtimes)
 
 - **Date:** 2026-10-01 06:10–06:18 UTC
-- **Prev HEAD:** `b3d899262` (step-0070 KVM corpus `kop` commit)
+- **Prev HEAD:** `b3d899262` (step-0070 KVM corpus `kinsn` commit)
 - **Run:** `make micro SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 JOBS=8
   IMAGE_BUILD_JOBS=8` (default = `micro/config/micro_pure_jit.yaml` suite,
   empty `BENCH` = all 29 benches, runtimes `native/llvmbpf/kernel`),

@@ -11,21 +11,21 @@ post-ReJIT was faster.
 ## Artifacts
 
 - Real per-site PMU profile root:
-  `corpus/results/branch_profile_root_20260703_040500_pgohold`
+  `corpus/results/aborted/branch_profile_root_20260703_040500_pgohold`
 - Raw PMU profile captures:
-  `corpus/results/branch_profile_raw_20260702_195718`
-  `corpus/results/branch_profile_raw_20260703_033844_pgohold`
-  `corpus/results/branch_profile_raw_20260703_034310_pgohold`
+  `corpus/results/aborted/branch_profile_raw_20260702_195718`
+  `corpus/results/aborted/branch_profile_raw_20260703_033844_pgohold`
+  `corpus/results/aborted/branch_profile_raw_20260703_034310_pgohold`
 - Historical complete branch_flip-only run:
   `corpus/results/x86_docker_corpus_20260701_213659_735606`
 - Historical complete branch_flip + map_inline run:
   `corpus/results/x86_docker_corpus_20260701_223045_655842`
 - Latest partial six-app branch_flip rerun:
-  `corpus/results/x86_docker_corpus_20260704_043453_163431`
+  `corpus/results/aborted/x86_docker_corpus_20260704_043453_163431`
 - Tracee-only completion used to fill the missing app:
   `corpus/results/x86_docker_corpus_20260704_185159_405412`
 - Later katran/tracee repro attempt:
-  `corpus/results/x86_docker_corpus_20260709_211125_030456`
+  `corpus/results/aborted/x86_docker_corpus_20260709_211125_030456`
 
 `20260704_043453` and `20260709_211125` still have
 `metadata.status=running` because the host Docker runner exited before suite

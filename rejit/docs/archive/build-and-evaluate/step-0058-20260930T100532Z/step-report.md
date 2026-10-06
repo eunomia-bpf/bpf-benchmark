@@ -25,7 +25,7 @@ of the target.
 
 ## Result
 
-- Run dir `micro/results/arm64_qemu_micro_19700101_000008_942047/`
+- Run dir `micro/results/arm64_qemu_micro_recorded_20260930_vmclock_000008_942047/`
   (the QEMU in-VM clock is 1970 — no RTC set in the VM; the dir name
   and `metadata.json` `completed_at` reflect that, not a real timestamp;
   recorded as a QEMU clock quirk, not a gate).
@@ -63,7 +63,7 @@ computed here — cross-arch comparison is analysis per
 - `make-micro-arm64.log` (this dir): retained host log (clean QEMU
   power-down, `qemu-status=0`).
 - `run-marker.txt` (this dir).
-- `micro/results/arm64_qemu_micro_19700101_000008_942047/` (3
+- `micro/results/arm64_qemu_micro_recorded_20260930_vmclock_000008_942047/` (3
   trackable files: `metadata.json`, `details/result.json`,
   `details/progress.json`; `git check-ignore` confirms
   `details/jit_dumps/` + `details/code_compare/` stay gitignored via

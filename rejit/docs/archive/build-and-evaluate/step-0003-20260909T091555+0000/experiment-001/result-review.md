@@ -49,7 +49,7 @@ presented as the ratio aggregate.
 Within the native path, the median across per-program median proof-open times
 is 31.490 us and the corresponding proof-verifier-load value is 2.529 ms. The
 reported `native_kernel` load time also includes companion handling, native
-linking/cache lookup, upload, relocation, and the KOP-expanded verifier/JIT
+linking/cache lookup, upload, relocation, and the KINSN-expanded verifier/JIT
 load, so the 2.529 ms value is not the complete binding cost.
 
 ## Failures that changed the implementation
@@ -98,7 +98,7 @@ PLATFORM=qemu ARCH=arm64 RUNTIMES=native_kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT
 ```
 
 Raw metadata is preserved at
-`micro/results/arm64_qemu_micro_19700101_000024_077043/metadata.json`.
+`micro/results/arm64_qemu_micro_recorded_20260915_vmclock_000024_077043/metadata.json`.
 Independent validation found `completed`, 29 programs, 29 samples, 29 matching
 results, 29 matching return values, and proof-open plus proof-verifier-load
 phases in every sample. The guest powered down normally.
@@ -106,7 +106,7 @@ phases in every sample. The guest powered down normally.
 This run required two implementation fixes that are preserved by failed raw
 attempts. A stale incremental kernel at
 `micro/results/arm64_qemu_micro_19700101_000021_338346/` retained the old
-256-instruction KOP proof buffer. After a normal incremental kernel rebuild,
+256-instruction KINSN proof buffer. After a normal incremental kernel rebuild,
 `micro/results/arm64_qemu_micro_19700101_000022_284039/` reached ARM native JIT
 emission and returned errno 524 because the JIT used a fixed 64-instruction
 scratch while the native-lab descriptor declares a bounded 16-KiB chunk. The

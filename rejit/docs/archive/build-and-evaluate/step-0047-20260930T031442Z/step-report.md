@@ -26,8 +26,8 @@ BPF graph.
 - `rejit_result`: `mode: loadtime`,
   `enabled_passes: [noop, map_inline, const_prop, dce, wide_mem,
   bounds_check_merge, skb_load_bytes_spec, noop, const_prop, dce,
-  kop]` (the full default pass chain, incl. the kfunc lowering pass
-  `kop`), `selected_workload: cilium_endpoint_pktgen`,
+  kinsn]` (the full default pass chain, incl. the kfunc lowering pass
+  `kinsn`), `selected_workload: cilium_endpoint_pktgen`,
   `runner: cilium`.
 - **53 BPF programs** recorded per start (baseline and post_rejit),
   keyed by in-VM program id. Hot pair is `cil_from_container` (the

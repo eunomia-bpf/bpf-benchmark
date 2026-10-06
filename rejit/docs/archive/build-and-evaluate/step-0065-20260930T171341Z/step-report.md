@@ -17,7 +17,7 @@
 `corpus/results/x86_kvm_corpus_20260930_171858_652950/`
 
 - `metadata.json`: `status: error`, `error_message: "corpus suite reported errors"`, `run_type: x86_kvm_corpus`, `config.enabled_passes: ["const_mod_reduce"]`, `samples: 1`, `workload_seconds: 10.0`, `bpf_stats: true`.
-- `details/result.json`: `status: "error"`, `suite_name: "macro_apps"`, `skip_rejit: false`, `samples: 1`, 15/15 kop modules loaded (`status: ok`).
+- `details/result.json`: `status: "error"`, `suite_name: "macro_apps"`, `skip_rejit: false`, `samples: 1`, 15/15 kinsn modules loaded (`status: ok`).
 - `details/apps/katran.json`: `status: "error"`, `post_rejit: null`, `error: "native app exited before BPF programs were tracked by shim"`.
 - 4 trackable JSONs (`metadata.json`, `result.json`, `progress.json`, `details/apps/katran.json`); the heavy `shim-logs/` + `loadtime-plans/` are gitignored. **Kept untracked** (consistent with the ~94 other untracked result dirs; raw abort, not clean evidence).
 

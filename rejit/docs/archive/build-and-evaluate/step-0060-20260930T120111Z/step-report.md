@@ -6,10 +6,10 @@
 - **Purpose**: arm64 counterpart of the KVM x86 corpus variance re-run
   (0056, `c37b6b539`). Tests whether step 0059's all-6-apps `post_rejit`
   failure is **deterministic** (genuine arm64 capability gap) or a one-off
-  flake. Paired against 0059 (`corpus/results/arm64_qemu_corpus_19700101_000006_146493`).
+  flake. Paired against 0059 (`corpus/results/arm64_qemu_corpus_recorded_20260930_vmclock_000006_146493`).
 - **Prev HEAD**: `ef51b1a98` (= `origin/master`). Launched 12:01:11Z, make
   PID 881657, qemu PID 894443 (up 12:06 → 12:47).
-- **Run dir**: `corpus/results/arm64_qemu_corpus_19700101_000006_022292/`
+- **Run dir**: `corpus/results/arm64_qemu_corpus_recorded_20260930_vmclock_000006_022292/`
   (QEMU in-VM clock is 1970 — no RTC; dir suffix is the in-VM pid).
 
 ## Verdict: deterministic

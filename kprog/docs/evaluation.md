@@ -640,7 +640,7 @@ python3 kprog/docs/archive/native_eval_20260614.py
 - 2026-05-27: The first smoke after that fd-reuse fix was interrupted because
   baseline `tetragon/observer` stayed in runner-side `list_progs` polling.
   Artifact directory:
-  `corpus/results/x86_kvm_corpus_20260527_000825_189724/`.
+  `corpus/results/aborted/x86_kvm_corpus_20260527_000825_189724/`.
   The bug was an over-fix in the shim: when a new map/link/perf/raw-tracepoint
   fd reused a closed program fd, the shim deleted the old `prog_entry`
   entirely. That prevents bad app-visible info redirects, but it also removes

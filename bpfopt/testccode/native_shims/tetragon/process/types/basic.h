@@ -714,7 +714,7 @@ filter_char_buf_equal(struct selector_arg_filter *filter, char *arg_str, uint or
 
 	asm volatile("%[len] &= %1;\n"
 		     : [len] "+r"(len)
-		     : "i"(STRING_MAPS_HEAP_MASK));
+		     : "aborted/i"(STRING_MAPS_HEAP_MASK));
 #ifdef __LARGE_BPF_PROG
 	if (index <= 5)
 		probe_read(&heap[1], len, arg_str);
@@ -728,7 +728,7 @@ filter_char_buf_equal(struct selector_arg_filter *filter, char *arg_str, uint or
 	if (padded_len > len) {
 		asm volatile("%[len] &= %1;\n"
 			     : [len] "+r"(len)
-			     : "i"(STRING_MAPS_HEAP_MASK));
+			     : "aborted/i"(STRING_MAPS_HEAP_MASK));
 #ifdef __LARGE_BPF_PROG
 		if (index <= 5)
 			probe_read(heap + len + 1, (padded_len - len) & STRING_MAPS_COPY_MASK, zero_heap);
@@ -775,7 +775,7 @@ filter_char_buf_prefix(struct selector_arg_filter *filter, char *arg_str, uint a
 	// Force the verifier to recheck the arg_len after register spilling on 4.19.
 	asm volatile("%[arg_len] &= %[mask] ;\n"
 		     : [arg_len] "+r"(arg_len)
-		     : [mask] "i"(STRING_PREFIX_MAX_LENGTH - 1));
+		     : [mask] "aborted/i"(STRING_PREFIX_MAX_LENGTH - 1));
 
 	probe_read(arg->data, arg_len & (STRING_PREFIX_MAX_LENGTH - 1), arg_str);
 
@@ -2070,7 +2070,7 @@ get_arg(struct msg_generic_kprobe *e, __u32 index)
 
 	asm volatile("%[index] &= %[mask];\n"
 		     : [index] "+r"(index)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+		     : [mask] "aborted/i"(MAX_POSSIBLE_ARGS_MASK));
 	argoff = e->argsoff[index];
 	asm volatile("%[argoff] &= 0x7ff;\n" : [argoff] "+r"(argoff));
 	return &e->args[argoff];
@@ -2349,7 +2349,7 @@ installfd(struct msg_generic_kprobe *e, int fd, int name, bool follow)
 	 */
 	asm volatile("%[fd] &= %[mask];\n"
 		     : [fd] "+r"(fd)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+		     : [mask] "aborted/i"(MAX_POSSIBLE_ARGS_MASK));
 	if (fd >= MAX_POSSIBLE_ARGS)
 		return 0;
 
@@ -2369,7 +2369,7 @@ installfd(struct msg_generic_kprobe *e, int fd, int name, bool follow)
 
 		asm volatile("%[name] &= %[mask];\n"
 			     : [name] "+r"(name)
-			     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+			     : [mask] "aborted/i"(MAX_POSSIBLE_ARGS_MASK));
 		if (name >= MAX_POSSIBLE_ARGS)
 			return 0;
 
@@ -2424,7 +2424,7 @@ copyfd(struct msg_generic_kprobe *e, int oldfd, int newfd)
 
 	asm volatile("%[oldfd] &= %[mask];\n"
 		     : [oldfd] "+r"(oldfd)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+		     : [mask] "aborted/i"(MAX_POSSIBLE_ARGS_MASK));
 	if (oldfd >= MAX_POSSIBLE_ARGS)
 		return 0;
 	if (!is_arg_ok(e, oldfd))
@@ -2441,7 +2441,7 @@ copyfd(struct msg_generic_kprobe *e, int oldfd, int newfd)
 	if (val) {
 		asm volatile("%[newfd] &= %[mask];\n"
 			     : [newfd] "+r"(newfd)
-			     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+			     : [mask] "aborted/i"(MAX_POSSIBLE_ARGS_MASK));
 		if (newfd >= MAX_POSSIBLE_ARGS)
 			return 0;
 		if (!is_arg_ok(e, newfd))
@@ -2581,7 +2581,7 @@ tracksock(struct msg_generic_kprobe *e, int socki, bool track)
 	 */
 	asm volatile("%[socki] &= %[mask];\n"
 		     : [socki] "+r"(socki)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+		     : [mask] "aborted/i"(MAX_POSSIBLE_ARGS_MASK));
 	if (socki >= MAX_POSSIBLE_ARGS)
 		return 0;
 

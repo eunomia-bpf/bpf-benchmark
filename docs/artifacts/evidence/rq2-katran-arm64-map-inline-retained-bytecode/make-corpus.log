@@ -1603,7 +1603,7 @@ make[2]: Entering directory '/workspaces/repository/module/arm64/build'
   GEN     Makefile
 make[2]: Leaving directory '/workspaces/repository/module/arm64/build'
 make[1]: Leaving directory '/workspaces/repository/vendor/build/arm64/linux'
-CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="-C link-arg=--sysroot=/workspaces/repository/.cache/aarch64-sysroot -C link-arg=-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -C link-arg=-Wl,-rpath-link=/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu" cargo build --release --workspace --target "aarch64-unknown-linux-gnu" --target-dir "/workspaces/repository/bpfopt/target" --manifest-path "/workspaces/repository/bpfopt/Cargo.toml" -p kopprober
+CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="-C link-arg=--sysroot=/workspaces/repository/.cache/aarch64-sysroot -C link-arg=-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -C link-arg=-Wl,-rpath-link=/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu" cargo build --release --workspace --target "aarch64-unknown-linux-gnu" --target-dir "/workspaces/repository/bpfopt/target" --manifest-path "/workspaces/repository/bpfopt/Cargo.toml" -p kinsnprober
     Updating crates.io index
  Downloading crates ...
   Downloaded anstyle-query v1.1.5
@@ -2197,7 +2197,7 @@ make[2]: Nothing to be done for 'all'.
 make[2]: Leaving directory '/workspaces/repository/vendor/linux-framework/tools/bpf/bpftool'
 install -m 0755 "/workspaces/repository/vendor/build/.bpftool/arm64/bpftool" "/workspaces/repository/vendor/build/arm64/bpftool/bin/bpftool"
 make[1]: Leaving directory '/workspaces/repository/vendor'
-cmake --build "/workspaces/repository/llvm-backend/build-bpf-kop-arm64" --target llvm-libraries -j"24"
+cmake --build "/workspaces/repository/llvm-backend/build-bpf-kinsn-arm64" --target llvm-libraries -j"24"
 ninja: no work to do.
 make -C "/workspaces/repository/micro/programs" OUTPUT_DIR="/workspaces/repository/micro/programs/build-arm64" KERNEL_VMLINUX="/workspaces/repository/vendor/build/arm64/linux/vmlinux" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="-I/usr/aarch64-linux-gnu/include -I/workspaces/repository/.cache/aarch64-sysroot/usr/include -I/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu" all
 make[1]: Entering directory '/workspaces/repository/micro/programs'
@@ -2238,7 +2238,7 @@ make[1]: Entering directory '/workspaces/repository/vendor/libbpf/src'
 make[1]: '/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a' is up to date.
   INSTALL  bpf.h libbpf.h btf.h libbpf_common.h libbpf_legacy.h bpf_helpers.h bpf_helper_defs.h bpf_tracing.h bpf_endian.h bpf_core_read.h skel_internal.h libbpf_version.h usdt.bpf.h
 make[1]: Leaving directory '/workspaces/repository/vendor/libbpf/src'
-PKG_CONFIG_LIBDIR="/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig" PKG_CONFIG_SYSROOT_DIR="/workspaces/repository/.cache/aarch64-sysroot" cmake -S "/workspaces/repository/runner" -B "/workspaces/repository/runner/build-arm64-llvmbpf" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="aarch64-linux-gnu-gcc" -DCMAKE_CXX_COMPILER="aarch64-linux-gnu-g++" -DMICRO_REPO_ROOT="/workspaces/repository" -DMICRO_LIBBPF_PREFIX="/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix" -DMICRO_LIBBPF_LIBRARY="/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" -DMICRO_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-arm64" -DMICRO_EXEC_ENABLE_LLVMBPF=1 -DLLVM_DIR="/workspaces/repository/llvm-backend/build-bpf-kop-arm64/lib/cmake/llvm" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_FIND_ROOT_PATH="/workspaces/repository/.cache/aarch64-sysroot;/workspaces/repository/.cache/sysroots/arm64-llvm15;/usr/aarch64-linux-gnu" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH -DCMAKE_EXE_LINKER_FLAGS="-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -L/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/llvm-15/lib"
+PKG_CONFIG_LIBDIR="/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig" PKG_CONFIG_SYSROOT_DIR="/workspaces/repository/.cache/aarch64-sysroot" cmake -S "/workspaces/repository/runner" -B "/workspaces/repository/runner/build-arm64-llvmbpf" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="aarch64-linux-gnu-gcc" -DCMAKE_CXX_COMPILER="aarch64-linux-gnu-g++" -DMICRO_REPO_ROOT="/workspaces/repository" -DMICRO_LIBBPF_PREFIX="/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix" -DMICRO_LIBBPF_LIBRARY="/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" -DMICRO_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-arm64" -DMICRO_EXEC_ENABLE_LLVMBPF=1 -DLLVM_DIR="/workspaces/repository/llvm-backend/build-bpf-kinsn-arm64/lib/cmake/llvm" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_FIND_ROOT_PATH="/workspaces/repository/.cache/aarch64-sysroot;/workspaces/repository/.cache/sysroots/arm64-llvm15;/usr/aarch64-linux-gnu" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH -DCMAKE_EXE_LINKER_FLAGS="-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -L/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/llvm-15/lib"
 -- Configuring done (0.1s)
 -- Generating done (0.6s)
 -- Build files have been written to: /workspaces/repository/runner/build-arm64-llvmbpf
@@ -2439,21 +2439,21 @@ katran_lb_consistent_hash_select: ok: compile=100.186s proof_insns=815 direct_in
 | `tc_packet_checksum_fold` | ok | 7.158 | 89 |  | 0.000 | 0.000 |  |
 | `cgroup_skb_hash_chain` | ok | 24.147 | 427 |  | 0.000 | 0.000 |  |
 make[1]: Leaving directory '/workspaces/repository/native-sim/arm64'
-PKG_CONFIG_LIBDIR="/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig" PKG_CONFIG_SYSROOT_DIR="/workspaces/repository/.cache/aarch64-sysroot" cmake -S "/workspaces/repository/bpfopt/llvm" -B "/workspaces/repository/bpfopt/llvm/build-kop-arm64" -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR="/workspaces/repository/llvm-backend/build-bpf-kop-arm64/lib/cmake/llvm" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_FIND_ROOT_PATH="/workspaces/repository/.cache/aarch64-sysroot;/workspaces/repository/.cache/sysroots/arm64-llvm15;/usr/aarch64-linux-gnu" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH -DCMAKE_EXE_LINKER_FLAGS="-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -L/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/llvm-15/lib"
+PKG_CONFIG_LIBDIR="/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig" PKG_CONFIG_SYSROOT_DIR="/workspaces/repository/.cache/aarch64-sysroot" cmake -S "/workspaces/repository/bpfopt/llvm" -B "/workspaces/repository/bpfopt/llvm/build-kinsn-arm64" -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR="/workspaces/repository/llvm-backend/build-bpf-kinsn-arm64/lib/cmake/llvm" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_FIND_ROOT_PATH="/workspaces/repository/.cache/aarch64-sysroot;/workspaces/repository/.cache/sysroots/arm64-llvm15;/usr/aarch64-linux-gnu" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH -DCMAKE_EXE_LINKER_FLAGS="-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -L/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/sysroots/arm64-llvm15/usr/lib/llvm-15/lib"
 -- Configuring done (0.1s)
 -- Generating done (1.3s)
--- Build files have been written to: /workspaces/repository/bpfopt/llvm/build-kop-arm64
-cmake --build "/workspaces/repository/bpfopt/llvm/build-kop-arm64" -j"24"
-gmake[1]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
-gmake[2]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
-gmake[3]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
-gmake[3]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
+-- Build files have been written to: /workspaces/repository/bpfopt/llvm/build-kinsn-arm64
+cmake --build "/workspaces/repository/bpfopt/llvm/build-kinsn-arm64" -j"24"
+gmake[1]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
+gmake[2]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
+gmake[3]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
+gmake[3]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
 [ 71%] Built target llvmbpf_vm
-gmake[3]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
-gmake[3]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
+gmake[3]: Entering directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
+gmake[3]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
 [100%] Built target bpfopt-llvm
-gmake[2]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
-gmake[1]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kop-arm64'
+gmake[2]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
+gmake[1]: Leaving directory '/workspaces/repository/bpfopt/llvm/build-kinsn-arm64'
 cargo build --release --manifest-path "/workspaces/repository/native-sim/x86/native_lab/native_link/Cargo.toml"
     Finished `release` profile [optimized] target(s) in 0.28s
 make -C "/workspaces/repository/vendor/bpf" ARCH=arm64 GOARCH=arm64 \
@@ -18646,7 +18646,7 @@ docker build --platform linux/arm64 \
 	--build-context runner-runtime-host-kernel-config="/workspaces/repository/vendor/build/arm64/linux/bpf-benchmark-kernel-config-context" \
 	--build-context runner-runtime-host-kernel-offsets="/workspaces/repository/micro/programs/build-arm64" \
 	--build-context runner-runtime-host-kernel-modules="/workspaces/repository/vendor/build/arm64/linux/modules-install/lib/modules" \
-		--build-context runner-runtime-host-kop-artifacts="/workspaces/repository/module/arm64/build" \
+		--build-context runner-runtime-host-kinsn-artifacts="/workspaces/repository/module/arm64/build" \
 		--build-context runner-runtime-host-shim="/workspaces/repository/bpfopt/shim/build-arm64" \
 		--build-context runner-runtime-host-native-bpf="/workspaces/repository/vendor/build/native-bpf/arm64/stage" \
 		--build-context runner-runtime-host-merlin="/workspaces/repository/vendor/build/merlin-runtime-context" \
@@ -18655,8 +18655,8 @@ docker build --platform linux/arm64 \
 	--build-arg VENDOR_BUILD_ARCH=arm64 \
 	--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
 	--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
-	--build-arg BPFOPT_HOST_BIN="bpfopt/llvm/build-kop-arm64/bpfopt" \
-	--build-arg KOPPROBER_HOST_BIN="bpfopt/target/aarch64-unknown-linux-gnu/release/kopprober" \
+	--build-arg BPFOPT_HOST_BIN="bpfopt/llvm/build-kinsn-arm64/bpfopt" \
+	--build-arg KINSNPROBER_HOST_BIN="bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober" \
 	--build-arg BPFPROF_HOST_BIN="runner/assets/bpfprof-arm64-unavailable" \
 	--build-arg NATIVE_LINK_HOST_BIN="native-sim/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link" \
 	-t "bpf-benchmark/runner-runtime:arm64" -f "/workspaces/repository/runner/containers/runner-runtime.Dockerfile" "/workspaces/repository"
@@ -18716,9 +18716,9 @@ docker build --platform linux/arm64 \
 #14 transferring runner-runtime-host-micro-programs: 2B done
 #14 DONE 0.2s
 
-#15 [context runner-runtime-host-kop-artifacts] load .dockerignore
-#15 transferring runner-runtime-host-kop-artifacts: 0.3s
-#15 transferring runner-runtime-host-kop-artifacts: 2B 0.3s done
+#15 [context runner-runtime-host-kinsn-artifacts] load .dockerignore
+#15 transferring runner-runtime-host-kinsn-artifacts: 0.3s
+#15 transferring runner-runtime-host-kinsn-artifacts: 2B 0.3s done
 #15 DONE 0.4s
 
 #4 [internal] load metadata for docker.io/library/ubuntu:24.04
@@ -18759,8 +18759,8 @@ docker build --platform linux/arm64 \
 #24 transferring runner-runtime-host-stage2-programs: 3.04MB 0.5s done
 #24 DONE 0.6s
 
-#25 [context runner-runtime-host-kop-artifacts] load from client
-#25 transferring runner-runtime-host-kop-artifacts: 15.54MB 0.6s done
+#25 [context runner-runtime-host-kinsn-artifacts] load from client
+#25 transferring runner-runtime-host-kinsn-artifacts: 15.54MB 0.6s done
 #25 DONE 0.7s
 
 #26 [context runner-runtime-host-native-bpf] load from client
@@ -18915,10 +18915,10 @@ docker build --platform linux/arm64 \
 #63 merging 0.2s done
 #63 DONE 0.2s
 
-#64 [runner-runtime 16/36] COPY --link --chmod=0755 bpfopt/llvm/build-kop-arm64/bpfopt /usr/local/bin/bpfopt
+#64 [runner-runtime 16/36] COPY --link --chmod=0755 bpfopt/llvm/build-kinsn-arm64/bpfopt /usr/local/bin/bpfopt
 #64 DONE 0.3s
 
-#65 [runner-runtime 17/36] COPY --link --chmod=0755     bpfopt/target/aarch64-unknown-linux-gnu/release/kopprober     runner/assets/bpfprof-arm64-unavailable     native-sim/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link     /usr/local/bin/
+#65 [runner-runtime 17/36] COPY --link --chmod=0755     bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober     runner/assets/bpfprof-arm64-unavailable     native-sim/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link     /usr/local/bin/
 #65 DONE 0.1s
 
 #66 [runner-runtime 18/36] COPY --link vendor/merlin_bpf_clang.py /usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py
@@ -18939,7 +18939,7 @@ docker build --platform linux/arm64 \
 #69 0.226 + ldconfig
 #69 DONE 0.4s
 
-#70 [runner-runtime 22/36] COPY --link --from=runner-runtime-host-kop-artifacts / /artifacts/kop
+#70 [runner-runtime 22/36] COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
 #70 DONE 0.0s
 
 #71 [runner-runtime 23/36] COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
@@ -19247,8 +19247,8 @@ rm -f "/workspaces/repository/.cache/qemu-arm64-root/qemu-status"
 {"app": "katran", "error": "", "event": "app_done", "status": "ok"}
 {
   "status": "ok",
-  "artifact_run_dir": "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000012_467359",
-  "artifact_metadata": "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000012_467359/metadata.json"
+  "artifact_run_dir": "/workspaces/repository/corpus/results/arm64_qemu_corpus_recorded_20261006_vmclock_000012_467359",
+  "artifact_metadata": "/workspaces/repository/corpus/results/arm64_qemu_corpus_recorded_20261006_vmclock_000012_467359/metadata.json"
 }
 [  339.025287] sysrq: Power Off
 [  339.032828] reboot: Power down

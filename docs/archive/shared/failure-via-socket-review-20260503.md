@@ -39,10 +39,10 @@ Fix applied:
   - `docs/tmp/p63_review_recent_changes.md`
   - `docs/tmp/p89_post_audit.md`
   - `docs/tmp/p89_post_audit_fix.md`
-  - `corpus/results/x86_kvm_corpus_20260501_001656_447379/details/progress.json`
-  - `corpus/results/x86_kvm_corpus_20260501_001656_447379/metadata.json`
-  - `corpus/results/x86_kvm_corpus_20260502_222716_584585/details/progress.json`
-  - `corpus/results/x86_kvm_corpus_20260502_222716_584585/metadata.json`
+  - `corpus/results/aborted/x86_kvm_corpus_20260501_001656_447379/details/progress.json`
+  - `corpus/results/aborted/x86_kvm_corpus_20260501_001656_447379/metadata.json`
+  - `corpus/results/aborted/x86_kvm_corpus_20260502_222716_584585/details/progress.json`
+  - `corpus/results/aborted/x86_kvm_corpus_20260502_222716_584585/metadata.json`
 
 Evidence after fix:
 - Daemon-local grep for the requested old-mechanism identifiers returned no matches.

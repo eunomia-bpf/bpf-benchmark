@@ -100,7 +100,7 @@ KFuse 的链融合、BCF 的 proof-guided verifier 都相邻,但不重合。
 
 - **核心 contribution**：多层 eBPF 优化框架，在 LLVM IR 和 BPF bytecode 两层做定制优化，提升 compactness 和 runtime performance，并与 K2 比较。
 - **优化层次**：source/LLVM IR/BPF bytecode，pre-load。
-- **和 BpfReJIT 的关系**：Merlin 的“multi-tier”直接支持我们论点：单靠 LLVM 默认 BPF backend 不够。BpfReJIT 的差异是 late optimization，可以利用 map values、verifier states、profile 和 target kop capability。
+- **和 BpfReJIT 的关系**：Merlin 的“multi-tier”直接支持我们论点：单靠 LLVM 默认 BPF backend 不够。BpfReJIT 的差异是 late optimization，可以利用 map values、verifier states、profile 和 target kinsn capability。
 
 ### Understanding Performance of eBPF Maps, eBPF@SIGCOMM 2024
 
@@ -112,7 +112,7 @@ KFuse 的链融合、BCF 的 proof-guided verifier 都相邻,但不重合。
 
 - **核心 contribution**：将网络函数中共享的高成本行为抽象为稳定 in-kernel library，用 Rust 和 metadata-assisted verifier 降低 eBPF 实现复杂度和交互开销。
 - **优化层次**：in-kernel library/API，应用侧重写。
-- **和 BpfReJIT 的关系**：eNetSTL 是“扩展 kernel primitive”路线，BpfReJIT 是“优化已加载程序”路线。kop 与 eNetSTL 类似，都把平台/内核侧能力做成小接口，但 kop 是 codegen target 而不是通用 NF library。
+- **和 BpfReJIT 的关系**：eNetSTL 是“扩展 kernel primitive”路线，BpfReJIT 是“优化已加载程序”路线。kinsn 与 eNetSTL 类似，都把平台/内核侧能力做成小接口，但 kinsn 是 codegen target 而不是通用 NF library。
 
 ### Demystifying Performance of eBPF Network Applications, PACMNET/CoNEXT 2025
 
@@ -205,13 +205,13 @@ KFuse 的链融合、BCF 的 proof-guided verifier 都相邻,但不重合。
 
 - **核心 contribution**：在 AArch64 上用硬件特性隔离 BPF 程序，试图以 isolation-based approach 支撑复杂 BPF。
 - **优化层次**：hardware-assisted runtime isolation。
-- **和 BpfReJIT 的关系**：HIVE 是替代安全模型；BpfReJIT 是保留 Linux verifier。HIVE 给 kop 的启发是硬件特性应当有明确、可验证的共享语义。
+- **和 BpfReJIT 的关系**：HIVE 是替代安全模型；BpfReJIT 是保留 Linux verifier。HIVE 给 kinsn 的启发是硬件特性应当有明确、可验证的共享语义。
 
 ### VeriFence, RAID 2024
 
 - **核心 contribution**：扩展 BPF verifier，在检测到 Spectre-PHT/STL 风险时插入 speculation barriers，并让 JIT 后端按架构 lower 或删除。
 - **优化层次**：verifier-cooperative bytecode instrumentation + JIT lowering。
-- **和 BpfReJIT 的关系**：这是 “verifier-aware rewrite + arch-aware lowering” 的安全版。BpfReJIT 的 kop/pass 可以看作性能版：userspace 选择 rewrite，kernel verifier/JIT 决定是否可执行。
+- **和 BpfReJIT 的关系**：这是 “verifier-aware rewrite + arch-aware lowering” 的安全版。BpfReJIT 的 kinsn/pass 可以看作性能版：userspace 选择 rewrite，kernel verifier/JIT 决定是否可执行。
 
 ### BMC, NSDI 2021
 
@@ -259,7 +259,7 @@ KFuse 的链融合、BCF 的 proof-guided verifier 都相邻,但不重合。
 | LLVM IR | Merlin | 能利用 SSA、高级 CFG、LLVM pass 生态 | load 前一次性优化；缺少 runtime map/profile/verifier feedback |
 | BPF bytecode, post-LLVM pre-load | K2, Merlin bytecode stage, EPSO | 精确面向 verifier 和 BPF ISA；可做超优化和 peephole | 需要对象文件或重部署；没有 live deployment facts |
 | Post-verification program set | KFuse | 利用已 verify 程序链结构，优化 tail-call/chain overhead | 目标是多程序合并，不是优化单个 program 的内部 codegen |
-| BPF bytecode, post-load in-kernel | BpfReJIT | 可用 runtime profile、map values、verifier states、target kop；透明优化 live program | 必须新增 kernel syscall/metadata path；每个候选仍需 verifier 接受 |
+| BPF bytecode, post-load in-kernel | BpfReJIT | 可用 runtime profile、map values、verifier states、target kinsn；透明优化 live program | 必须新增 kernel syscall/metadata path；每个候选仍需 verifier 接受 |
 | Verifier-inserted rewrite/hardening | VeriFence | verifier 知道安全风险，可插入 barrier 并交给 JIT lower | 主要用于安全；优化策略放 kernel 会增加 upstream/复杂度成本 |
 | Kernel JIT/native code | Jitterbug, BeeBox, arch JIT patches | 最低层、可用具体 ISA | 难移植、难 upstream、正确性风险高；不适合快速迭代策略 |
 | Alternative runtime/sandbox | bpftime, HIVE, MOAT, Rex | 可绕开 kernel JIT 限制或换安全模型 | 改执行模型或 deployment model，不完全透明于 kernel eBPF fast path |
@@ -271,7 +271,7 @@ KFuse 的链融合、BCF 的 proof-guided verifier 都相邻,但不重合。
 | 减指令数 / code size | K2, Merlin, EPSO | bytecode peephole、DCE、const_prop 后清理 |
 | 减跳转 / chain overhead | KFuse, K2/Merlin CFG 优化 | branch_flip、tail-call specialization、bounds_check_merge |
 | inline 常量 / stable values | Merlin 部分 IR 优化，BpfReJIT map_inline 设计 | frozen/stable map value inline、verifier-state const propagation |
-| hardware-specific instructions | Program Warping, hXDP, BeeBox/VeriFence JIT lowering | kop: rotate/cmov/extract/endian/bulk memory/prefetch |
+| hardware-specific instructions | Program Warping, hXDP, BeeBox/VeriFence JIT lowering | kinsn: rotate/cmov/extract/endian/bulk memory/prefetch |
 | profile-guided optimization | 通用 PGO 文献，Demystifying 指出 workload sensitivity | branch_flip 必须用真实 per-site PMU profile；hot/cold path selection |
 | specialization | BMC/DINT/SPRIGHT 暴露应用 hot path | 按 app/prog/map/profile 做 post-load specialization |
 | sandbox/hardening | HIVE, MOAT, BeeBox, VeriFence | 用 ReJIT pass 做 runtime hardening 或 emergency neutralization |
@@ -304,7 +304,7 @@ BpfReJIT 当前可以定位为：
   reload/reattach。
 - **安全模型**：不绕过 verifier；userspace optimizer 负责 semantic correctness，kernel verifier 负责 kernel safety。
 - **kernel-side extension**：speculative paper 不需要 kernel extension;
-  KOperation 属于独立论文线。
+  Kinsn 属于独立论文线。
 
 最接近的论文：
 
@@ -329,7 +329,7 @@ BpfReJIT 当前可以定位为：
 |---|---|---:|---|
 | BpfReJIT：application-local deployment-aware optimizer | 区别于 K2/Merlin/EPSO 的 detached pre-load artifact；区别于 KFuse 的 chain merge；保持 app loader | 中 | OSDI/SOSP/EuroSys |
 | Stock `BPF_PROG_LOAD` + attachment-specific reload | 无私有 syscall；live coverage 由真实 attach population 决定 | 中 | OSDI/SOSP |
-| kop 架构：可插拔 kernel-side inline emit contract | 区别于直接扩 kernel JIT peephole；新 ISA 能力以 module/contract 暴露 | 中/大 | OSDI/SOSP/ASPLOS |
+| kinsn 架构：可插拔 kernel-side inline emit contract | 区别于直接扩 kernel JIT peephole；新 ISA 能力以 module/contract 暴露 | 中/大 | OSDI/SOSP/ASPLOS |
 | Verifier-gated optimization loop | 每个 candidate 走真实 stock verifier/JIT；失败保留为证据 | 中 | OSDI/SOSP/PLDI |
 | Deployment-aware BPF optimization policy | 用 map values、hardware、profile、app hotness 选择 pass，回应 Demystifying 的 workload sensitivity | 中 | OSDI/SOSP/NSDI |
 
@@ -383,7 +383,7 @@ NSDI/SIGCOMM 需要更强网络场景和 production traces；Security 方向需�
 - 不为 speculative 路线新增 ReJIT/original-bytecode syscall;由 in-app shim
   捕获 original load context。
 - 改进 verifier log/state 的结构化输出,减少 fragile log parsing。
-- KOperation/JIT backend hooks 属于独立 KOperation 论文线,不得与 stock-kernel
+- Kinsn/JIT backend hooks 属于独立 Kinsn 论文线,不得与 stock-kernel
   speculative contribution 合并。
 
 ### libbpf

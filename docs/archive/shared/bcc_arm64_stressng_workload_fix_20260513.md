@@ -43,7 +43,7 @@ This is not evidence that the `rename` stressor is incompatible with AL2023 ARM6
 
 Latest working x86 BCC result found:
 
-- `corpus/results/x86_kvm_corpus_20260513_044032_268548/details/apps/bcc__set.json`
+- `corpus/results/aborted/x86_kvm_corpus_20260513_044032_268548/details/apps/bcc__set.json`
 - status: `ok`
 - selected workload: `stress_ng_os_io_network`
 - both baseline and post-ReJIT workload commands returned `0`

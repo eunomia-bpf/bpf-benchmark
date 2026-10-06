@@ -135,7 +135,7 @@ struct bpf_array_aux {
 **当前（分层）**: verify 并行，JIT+swap+poke 串行  
 **合并后（全局）**: verify + JIT + swap + poke 全部串行
 
-**实测数据**（来自 `corpus/results/x86_kvm_corpus_20260503_212536_397107/details/daemon.stderr.log`，453 次 REJIT_EXIT 样本）:
+**实测数据**（来自 `corpus/results/aborted/x86_kvm_corpus_20260503_212536_397107/details/daemon.stderr.log`，453 次 REJIT_EXIT 样本）:
 
 | 统计量 | elapsed_us |
 |--------|-----------|

@@ -23,7 +23,7 @@ Fix validated by this run:
   `ctx_out.cb[0..1]`, matching kernel BPF `__sk_buff.cb[]` semantics and the
   proof loader.
 - The earlier failed full run
-  `micro/results/x86_kvm_micro_20260520_040517_640313/metadata.json` failed
+  `micro/results/invalid/x86_kvm_micro_20260520_040517_640313/metadata.json` failed
   `cgroup_skb_hash_chain/native_lab` because it read the result from packet
   bytes instead of skb cb. That failure is now fixed.
 

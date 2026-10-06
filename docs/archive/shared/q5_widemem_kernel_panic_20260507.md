@@ -9,7 +9,7 @@ Constraints observed: no changes were made to `vendor/linux-framework`; this is 
 ## Sources
 
 - Queue log: `docs/tmp/bench_queue_post_refactor_20260507.log`
-- Q5 partial result dir: `corpus/results/x86_kvm_corpus_20260507_231837_529348`
+- Q5 partial result dir: `corpus/results/aborted/x86_kvm_corpus_20260507_231837_529348`
 - Q5 metadata: `enabled_passes=["wide_mem"]`, `samples=3`, `workload_seconds=30.0`, `started_at=2026-05-07T23:18:37.529348Z`
 - Q5 app JSONs that reached disk: `bcc__set.json`, `otelcol-ebpf-profiler__profiling.json`, `cilium__agent.json`
 - Tetragon proxy data: `corpus/results/x86_kvm_corpus_20260507_200821_664435/details/apps/tetragon__observer.json`. Q5 panicked before `tetragon__observer.json` was written, so this successful same-day 287-program Tetragon run is used only to identify the stable program set and wide_mem shape. Q5 log's `program_count=287` matches this proxy exactly.
@@ -167,7 +167,7 @@ old: rD = *(u8 *)(base + off)
 new: rD = *(u16/u32/u64 *)(base + off)
 ```
 
-It is a pure BPF bytecode rewrite. It does not emit a `KFUNC_INLINE_EMIT` call and does not depend on a wide-memory kop module. The relevant emission is a single `BpfInsn::ldx_mem(size, dst, base, off)` at line `314`.
+It is a pure BPF bytecode rewrite. It does not emit a `KFUNC_INLINE_EMIT` call and does not depend on a wide-memory kinsn module. The relevant emission is a single `BpfInsn::ldx_mem(size, dst, base, off)` at line `314`.
 
 Safety filters in the pass:
 

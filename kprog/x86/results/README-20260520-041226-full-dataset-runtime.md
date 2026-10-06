@@ -45,7 +45,7 @@ Comparison to the older pre-local-simulator full run:
 The earlier failed full native userspace / kernel eBPF / native kernel attempt
 is also recorded:
 
-- `micro/results/x86_kvm_micro_20260520_040517_640313/metadata.json`
+- `micro/results/invalid/x86_kvm_micro_20260520_040517_640313/metadata.json`
 - It completed native userspace / kernel eBPF / native kernel for 28 programs,
   but failed raw runtime case `cgroup_skb_hash_chain/native_lab` warmup with
   result `0` instead of

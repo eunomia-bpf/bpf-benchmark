@@ -47,7 +47,7 @@
   "schema_version": 1,
   "scope": "Fresh local arm64 QEMU single-pass map_inline run for Katran only. It retains, for the one changed load instance (balancer_ingress, an XDP program), the per-step input and output bytecode plus the optimizer report, so the rewrite's before/after instruction counts and applied-site totals are derived rather than declared. It exercises the overlay/hint policy path (--inline-hint anchors plus overlays/katran/*.json) that targets ctl_array, vip_map, ch_rings, reals and the LPM NULL-entry hints. It is a single startup with SAMPLES=1 under the local arm64 QEMU executor and does not re-measure the paper's declared Katran site figures; the two are never merged.",
   "source_commit": "8f90c5a1200b71c21bf7ba54130e6095cf9e56c7",
-  "source_run": "corpus/results/arm64_qemu_corpus_19700101_000012_467359",
+  "source_run": "corpus/results/arm64_qemu_corpus_recorded_20261006_vmclock_000012_467359",
   "started_at": "1970-01-01T00:00:12.467359+00:00",
   "suite_status": "completed",
   "workload_seconds": 30.0

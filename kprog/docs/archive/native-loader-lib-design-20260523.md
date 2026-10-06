@@ -306,7 +306,7 @@ artifact locations only; framework code must not compute performance rollups.
   `corpus/results/x86_kvm_corpus_20260524_022538_934769`,
   `corpus/results/x86_kvm_corpus_20260524_023927_400132`,
   `corpus/results/x86_kvm_corpus_20260524_025357_924766`,
-  `corpus/results/x86_kvm_corpus_20260524_030419_873922`.
+  `corpus/results/aborted/x86_kvm_corpus_20260524_030419_873922`.
 - `otelcol-ebpf-profiler/profiling` post-keeper rerun:
   the same single-app command passed. Artifact:
   `corpus/results/x86_kvm_corpus_20260524_223229_404846`. The suite and app
@@ -362,7 +362,7 @@ artifact locations only; framework code must not compute performance rollups.
   `bpf_map_lookup_elem` from `trace_security_bpf_prog` because x86 native-link
   misclassified real maps named `bpf_attach_tmp_map` and `bpf_attach_map` as
   helper GOT symbols. Artifact:
-  `corpus/results/x86_kvm_corpus_20260524_131518_330347`.
+  `corpus/results/aborted/x86_kvm_corpus_20260524_131518_330347`.
 - `tracee/monitor` native-loader corpus smoke after the x86 map-priority fix:
   the same single-app command passed. Artifact:
   `corpus/results/x86_kvm_corpus_20260524_133325_153376`. The shim log records
@@ -466,7 +466,7 @@ argument cannot be traced, the linker still exits 1.
 OTEL then exposed a helper-argument schema bug in the loader itself:
 `custom__generic` failed native-link with an unknown `perf_progs` GOT
 relocation in
-`corpus/results/x86_kvm_corpus_20260524_030419_873922`. The source scanner
+`corpus/results/aborted/x86_kvm_corpus_20260524_030419_873922`. The source scanner
 was recording only the map fd in BPF register `r1` for every helper. That is
 valid for `bpf_map_lookup_elem`/`update`/`delete`, but wrong for
 `bpf_tail_call(ctx, map, index)` and
@@ -478,7 +478,7 @@ same typed map path as other app maps.
 
 The next OTEL run showed the same `perf_progs` symbol can still be absent even
 after using the helper-specific map argument register. The failing artifact is
-`corpus/results/x86_kvm_corpus_20260524_031700_105083`; its shim log shows
+`corpus/results/aborted/x86_kvm_corpus_20260524_031700_105083`; its shim log shows
 `BPF_MAP_CREATE` for `perf_progs`, but the native-link command for
 `custom__generic` did not contain `--map perf_progs=...`. The likely cause is
 the source bytecode encoding: libbpf can load programs with
@@ -815,7 +815,7 @@ without node-port service enablement, so Cilium's real loader DCEs
 not broader than the app-level loaded program for this corpus configuration.
 
 The next Cilium retry,
-`corpus/results/x86_kvm_corpus_20260524_061810_988986`, got past that native
+`corpus/results/aborted/x86_kvm_corpus_20260524_061810_988986`, got past that native
 linking mismatch and successfully replaced `cil_xdp_entry` with a native
 `native_lab_stub`, but the first real XDP packet path oopsed at
 `native_lab_stub+0x1c3`. The faulting address had only the low 32 bits of the
@@ -832,7 +832,7 @@ so the compatibility layer must do it explicitly. Cilium native XDP now reads
 proof-linked Cilium native artifacts.
 
 The following Cilium retry,
-`corpus/results/x86_kvm_corpus_20260524_062559_315571`, moved the crash from
+`corpus/results/aborted/x86_kvm_corpus_20260524_062559_315571`, moved the crash from
 packet-pointer access to an early `.rodata.config` access. The native JIT dump
 showed `movabs rax, ffffcb6e00386076; cmpb $0,(rax)` for
 `__config_tracing_ip_option_type` at offset `0x76` in `.rodata.config`. The
@@ -855,7 +855,7 @@ embedded into the native blob. The retained fd count is logged on every
 replacement so later corpus failures can distinguish link correctness from
 lifetime-retention bugs.
 
-`corpus/results/x86_kvm_corpus_20260524_070021_118713` proved the lifetime
+`corpus/results/aborted/x86_kvm_corpus_20260524_070021_118713` proved the lifetime
 fix: `cil_xdp_entry` was replaced twice and survived into the next Cilium load
 phase. The next blocking items are loader/linker metadata gaps:
 
@@ -874,7 +874,7 @@ phase. The next blocking items are loader/linker metadata gaps:
   ambiguous open process map names still fail fast.
 
 The next Cilium retry,
-`corpus/results/x86_kvm_corpus_20260524_070922_976848`, successfully replaced
+`corpus/results/aborted/x86_kvm_corpus_20260524_070922_976848`, successfully replaced
 `cil_xdp_entry` and `tail_drop_notif`. It then exposed:
 
 - helper id 99 (`bpf_skc_lookup_tcp`), which is context-typed in the kernel.
@@ -896,7 +896,7 @@ The next Cilium retry,
   as `anon_inode:bpf-map`; other retention errors still fail the native
   replacement.
 
-`corpus/results/x86_kvm_corpus_20260524_071652_551718` showed that the
+`corpus/results/aborted/x86_kvm_corpus_20260524_071652_551718` showed that the
 remaining Cilium failures were mostly configuration-width mismatches:
 
 - The corpus runner starts Cilium with `--enable-ipv6=false` and
@@ -921,7 +921,7 @@ remaining Cilium failures were mostly configuration-width mismatches:
   `__config_security_label` before native-link kernel mode validates
   RIP-relative data references.
 
-`corpus/results/x86_kvm_corpus_20260524_072820_934011` found the next Cilium
+`corpus/results/aborted/x86_kvm_corpus_20260524_072820_934011` found the next Cilium
 object-scope gaps:
 
 - The first native Cilium option alignment still left
@@ -944,7 +944,7 @@ alignment removes that mismatch; if not, the remaining work is to make
 native-link handle native helper-call sites that can only be safely lowered to
 the generic helper call because no source-ordinal map metadata exists.
 
-`corpus/results/x86_kvm_corpus_20260524_073757_942006` moved past the earlier
+`corpus/results/aborted/x86_kvm_corpus_20260524_073757_942006` moved past the earlier
 lookup-site and per-cluster map failures: `cil_xdp_entry`, a host nodeport
 tail program, and an LXC ARP tail program were replaced. The next Cilium
 truncated-name collision was `cilium_nodeport_neigh4`: libbpf truncates both
@@ -954,7 +954,7 @@ truncated-name collision was `cilium_nodeport_neigh4`: libbpf truncates both
 then treats the neighbor maps as Cilium object-scoped newest-open maps after
 shape validation.
 
-`corpus/results/x86_kvm_corpus_20260524_074321_625214` exposed a separate
+`corpus/results/aborted/x86_kvm_corpus_20260524_074321_625214` exposed a separate
 retention scalability bug. `cil_to_host` reached fd numbers above 3600, and the
 shim's previous "retain all current process BPF map fds" policy tried to dup
 every open map before invoking native-loader. Cilium's app-level loader can have
@@ -985,7 +985,7 @@ metadata gaps:
   uses `bpf_sock_addr_sk_lookup_udp`, and the native-link helper-id table maps
   ids 85/86 back to `bpf_sk_lookup_udp` / `bpf_sk_release`.
 
-`corpus/results/x86_kvm_corpus_20260524_080158_511240` got past the fd
+`corpus/results/aborted/x86_kvm_corpus_20260524_080158_511240` got past the fd
 retention and UDP socket helper gaps, then failed several Cilium host/tail
 programs with `x86 bpf_map_lookup_elem native call ... is missing
 --lookup-site metadata`. The concrete examples were `cil_host_policy`,
@@ -1002,7 +1002,7 @@ when no source/site/map metadata can be matched, while still using exact
 not an app-loader fallback: the native fd is still loaded, and unknown map
 shape simply disables that one call-site inline optimization.
 
-`corpus/results/x86_kvm_corpus_20260524_081253_448783` confirmed that the
+`corpus/results/aborted/x86_kvm_corpus_20260524_081253_448783` confirmed that the
 generic lookup path fixed those missing-site failures: `cil_host_policy` and
 `tail_handle_ipv4_from_netdev` were replaced successfully. The next failure was
 `tail_handle_snat_fwd_ipv4` in kernel-mode relink:
@@ -1015,7 +1015,7 @@ configuration mismatch rather than a loader lifetime issue. The Cilium native
 build now removes `-DENABLE_EGRESS_GATEWAY=1` so host SNAT/native objects match
 the corpus runner's enabled feature set.
 
-`corpus/results/x86_kvm_corpus_20260524_082241_966541` got further after the
+`corpus/results/aborted/x86_kvm_corpus_20260524_082241_966541` got further after the
 egress-gateway fix, but still showed three Cilium map references from native
 paths wider than the actual runner configuration:
 
@@ -1134,7 +1134,7 @@ second policy (`datagram`) when `generic_kprobe_process_event` referenced
 `ARRAY key=4 value=80 entries=1`, matching both Tetragon source and the shim's
 map-create trace.
 
-`corpus/results/x86_kvm_corpus_20260524_213823_386885` confirmed that
+`corpus/results/aborted/x86_kvm_corpus_20260524_213823_386885` confirmed that
 `policy_stats` was no longer a link/schema blocker: Tetragon reached 248 native
 fd replacements with no native-loader failures before the VM panicked while
 running the `datagram` policy path under `__sk_free`. The panic signatures were
@@ -1162,7 +1162,7 @@ map references until app exit rather than trying to mirror per-program close
 lifetime; that is the conservative app-level loader behavior while native blobs
 hold verifier-invisible direct map/value pointers.
 
-`corpus/results/x86_kvm_corpus_20260524_083558_419282` moved past the remaining
+`corpus/results/aborted/x86_kvm_corpus_20260524_083558_419282` moved past the remaining
 Cilium feature-map mismatches and loaded many native host/LXC programs, but the
 VM later crashed in a native replacement for `cil_from_host`:
 `native_lab_stub+0x931/0xdaa` faulted while dereferencing a pointer derived from
@@ -1181,7 +1181,7 @@ That trades away one unsafe optimization for correctness across real corpus app
 loaders and avoids coupling native-link to kernel-internal hash map layouts.
 
 The follow-up Cilium retry
-`corpus/results/x86_kvm_corpus_20260524_084750_142667` showed the same visible
+`corpus/results/aborted/x86_kvm_corpus_20260524_084750_142667` showed the same visible
 fault address, but after disassembling the panic bytes the failing sequence was
 not hash lookup. It was the x86 `bpf_tail_call` inline sequence generated for
 `cil_from_host`: compare `prog_array->max_entries`, load the BPF JIT
@@ -1220,7 +1220,7 @@ deletes stale staged `.native.o` aliases before installing the current symbol
 set; otherwise an earlier wider build can leave obsolete IPv6 tail aliases that
 the shim would still discover.
 
-`corpus/results/x86_kvm_corpus_20260524_091700_298133` then failed in a new
+`corpus/results/aborted/x86_kvm_corpus_20260524_091700_298133` then failed in a new
 place: `cil_xdp_entry` faulted at native stub offset `0x22` while reading the
 absolute address patched for `__config_tracing_ip_option_type`. This matched
 the native JIT dump for the second XDP replacement. The root cause was native
@@ -1279,7 +1279,7 @@ remaining endpoint timeout had two distinct causes:
   native-link does not depend on the companion oracle to discover those
   addresses.
 
-`corpus/results/x86_kvm_corpus_20260524_100441_908658` got past native-link
+`corpus/results/aborted/x86_kvm_corpus_20260524_100441_908658` got past native-link
 and native-loader failures, then crashed at runtime in a native
 `tail_nodeport_rev_dnat_ipv4` replacement. The panic bytes showed the native
 program reading a packet pointer from `ctx->data` at fake `struct __sk_buff`
@@ -1304,7 +1304,7 @@ native-safe accessors or are skipped under `MICRO_NATIVE`. A forced
 `make -B -C vendor/bpf native-cilium` after this change passed, including the
 proof-link stage.
 
-`corpus/results/x86_kvm_corpus_20260524_101850_953210` still crashed the VM,
+`corpus/results/aborted/x86_kvm_corpus_20260524_101850_953210` still crashed the VM,
 but the crash signature changed: the faulting RIP was an NX vmalloc/data page
 entered from Cilium `tail_handle_ipv4_cont`, and the local reproduction of the
 linked blob showed a literal `call *%r12` at the matching offset. The source
@@ -1373,7 +1373,7 @@ rewrites expanded a short branch to exactly the i8 edge and iced failed with
 `Branch distance is too far away`. Native-link now has a near-branch
 re-encoding fallback for local x86 blocks.
 
-The follow-up Cilium run (`corpus/results/x86_kvm_corpus_20260524_111329_901522`)
+The follow-up Cilium run (`corpus/results/aborted/x86_kvm_corpus_20260524_111329_901522`)
 then loaded farther and crashed in native `tail_ipv4_ct_eg` during pktgen. The
 panic RIP landed inside a `movabs` immediate, not at an instruction boundary.
 Local reproduction with `tail_ipv4_ct_egress` showed why: kernel-link mode
@@ -1389,7 +1389,7 @@ original target, and final-encodes with instruction IPs reset to the dry-run
 new offsets. A manual `tail_ipv4_ct_egress` link/disasm check found 195 local
 branches and zero targets outside instruction starts after this fix.
 
-`corpus/results/x86_kvm_corpus_20260524_112704_659739` then completed Cilium
+`corpus/results/aborted/x86_kvm_corpus_20260524_112704_659739` then completed Cilium
 baseline measurement but crashed during the post-rejit phase in native
 `cil_xdp_entry` at the first `.rodata.config` byte load. The native stub's
 first `movabs` immediate was the expected Cilium config value address:
@@ -1430,7 +1430,7 @@ real function symbol. Local verification with `balancer_ingres.native.o`
 shows the first proof object now emits `jhash - 4`, and a second proof pass
 keeps all three reachable symbols.
 
-`corpus/results/x86_kvm_corpus_20260524_121101_645894` then got past
+`corpus/results/aborted/x86_kvm_corpus_20260524_121101_645894` then got past
 native-link and loaded Katran's native XDP program, but the VM panicked in
 `native_lab_stub+0x8b` while `balancer_ingres` was processing an XDP packet.
 The faulting register held `0x0000000093977100`; the linked disassembly showed
@@ -1797,7 +1797,7 @@ This also removes the arm64-only prelinked-blob smoke artifact under
 the old blob path and could not exercise the shared loader library.
 
 Terminology correction: `native_lab_stub` is the kernel-visible BPF program name
-for the tiny `(sidecar; kop-call)*N; exit` wrapper that the native-lab kop
+for the tiny `(sidecar; kinsn-call)*N; exit` wrapper that the native-lab kinsn
 JIT expands with uploaded native bytes. It is not a separate user-space loader
 stub, and the hot path should not be described as a normal kfunc call per event.
 BPF entry/stats accounting is also not native-only overhead; ordinary JITed BPF
@@ -1899,7 +1899,7 @@ Validation:
 
 - `cargo fmt --manifest-path kprog/x86/native_lab/native_link/Cargo.toml`
   passed.
-- `make host-rust-x86 host-kop-x86 host-runner-x86` passed.
+- `make host-rust-x86 host-kinsn-x86 host-runner-x86` passed.
 - Focused micro rerun:
   `SUITE=micro/config/micro_stage2.yaml RUNTIMES="native_kernel kernel" BENCH=helper_only_uid_gid SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 TIMEOUT=1200 make micro`
   passed in `micro/results/x86_kvm_micro_20260525_200806_839921`.

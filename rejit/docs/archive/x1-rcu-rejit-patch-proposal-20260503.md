@@ -31,7 +31,7 @@ inside the previous JIT image. `prog_array_map_poke_run()` eventually calls
 
 Local artifact:
 
-- `corpus/results/x86_kvm_corpus_20260503_212536_397107/details/daemon.stderr.log`
+- `corpus/results/aborted/x86_kvm_corpus_20260503_212536_397107/details/daemon.stderr.log`
 - `metadata.json` shows this was `x86_kvm_corpus`, `22` macro apps, all passes
   enabled, status still `running`.
 - `progress.json` shows the run stopped at `apps_done = 11`, `last_app =

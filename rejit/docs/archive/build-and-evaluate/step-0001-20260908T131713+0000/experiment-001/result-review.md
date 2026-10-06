@@ -20,13 +20,13 @@ measurement.
 2. After deriving the guest path from `BPFREJIT_IMAGE_WORKSPACE`, the public
    `PLATFORM=qemu ARCH=arm64 ... make micro` preflight exited zero. Its
    `simple` result was `12345678` with return value 2 and completed metadata at
-   `micro/results/arm64_qemu_micro_19700101_000014_909678/metadata.json`.
+   `micro/results/arm64_qemu_micro_recorded_20260915_vmclock_000014_909678/metadata.json`.
 3. The first full selftest accepted and test-ran all 29 positive artifacts,
    but the negative artifact was first rejected at an unrelated unsafe
    four-byte store at packet offset 1. That made the outcome contradictory to
    the planned exact negative oracle even though the then-broad test reported
    success. The raw metadata remains at
-   `tests/results/08063080/native_proof_micro_19700101_000023_397290/metadata.json`.
+   `tests/results/08063080/native_proof_micro_recorded_20260915_vmclock_000023_397290/metadata.json`.
 4. The negative source was reduced to the single unchecked read and the test
    oracle was tightened to the exact diagnostic
    `invalid access to packet, off=64 size=1`. Rebuilding showed a three-native-
@@ -35,7 +35,7 @@ measurement.
 5. The final public invocation
    `PLATFORM=qemu ARCH=arm64 JOBS=16 TIMEOUT=1800 make selftest` exited zero.
    Its metadata is
-   `tests/results/e4a8b96d/native_proof_micro_19700101_000021_547969/metadata.json`,
+   `tests/results/e4a8b96d/native_proof_micro_recorded_20260915_vmclock_000021_547969/metadata.json`,
    and its complete console log is retained at
    `/workspaces/.agent-state/bpf-development/kprog-arm64-qemu-selftest-final-20260908.log`.
 

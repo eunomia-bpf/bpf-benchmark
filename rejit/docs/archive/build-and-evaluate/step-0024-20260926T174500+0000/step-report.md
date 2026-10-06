@@ -29,7 +29,7 @@ run `x86_kvm_corpus_20260923_114624_121697`, the per-step `sites_applied` sums t
 `katran: 2`, with Cilium unparsable. The figure was **measured, not copied** —
 the per-step counts for that run are `{noop: 410, map_inline: 108, const_prop:
 318, dce: 308, wide_mem: 154, bounds_check_merge: 154, skb_load_bytes_spec:
-154, kop: 2753}` — and the default-policy stream is labelled as such, because the
+154, kinsn: 2753}` — and the default-policy stream is labelled as such, because the
 triplet itself is an **isolated single-pass** run and earlier passes shrink
 `dce`'s input. As with the `wide_mem` triplets, the row's own site count (254
 applied sites) is derived from the isolated run's retained report stream, not

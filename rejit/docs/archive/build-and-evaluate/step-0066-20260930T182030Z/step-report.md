@@ -1,6 +1,6 @@
 # Step 0066: fresh KVM x86 default-policy (zero-knob) `make corpus` full 6-app two-start benchmark
 
-- **Command**: `make corpus` (zero knobs: `PLATFORM=kvm ARCH=x86` defaults, `SAMPLES=3` default, `WORKLOAD_DURATION=30` default; full x86 pass chain `noop,map_inline,const_prop,dce,wide_mem,bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kop`; all 6 apps).
+- **Command**: `make corpus` (zero knobs: `PLATFORM=kvm ARCH=x86` defaults, `SAMPLES=3` default, `WORKLOAD_DURATION=30` default; full x86 pass chain `noop,map_inline,const_prop,dce,wide_mem,bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kinsn`; all 6 apps).
 - **Launched**: `Wed Sep 30 18:20:30Z` (run-marker `run-marker.txt` carries the full attempt trail).
 - **prev HEAD**: `8d4626452` (docs: step 0065 record + const_mod_reduce stale-prefix fix; `origin/master` in lockstep).
 - **Purpose**: determinism/variance re-run paired against 0051 (`corpus/results/x86_kvm_corpus_20260930_053929_108492/`) and 0056 (`corpus/results/x86_kvm_corpus_20260930_084230_227783/`, `metadata: completed`), both the same zero-knob invocation at the same tree.
@@ -13,8 +13,8 @@ Three launches were reaped by the OMP supervisor before the ~35 min suite could 
 | attempt | launched (UTC) | outcome | evidence |
 |---|---|---|---|
 | 1 | 18:20:30 | reaped ~18:26Z during host `modules_install` | log tail `Terminated`; kernel build had finished; VM never booted; no result dir; no OOM (journal clean) |
-| 2 | 18:30:14 | booted; **5/6 apps completed `ok` with `post_rejit`**; reaped ~19:03Z | log line 396: `qemu-system-x86_64: terminating on signal 15 from pid 1865444 (omp)`; partial dir `corpus/results/x86_kvm_corpus_20260930_183425_011210/` retained (metadata stuck `status: running`, `apps_done: 5`, `last_app: katran ok`) |
-| 3 | 19:14:10 | VM booted, suite just started; reaped ~19:23Z | log line 467: `qemu-system-x86_64: terminating on signal 15 from pid 1881935 (omp)`; partial dir `corpus/results/x86_kvm_corpus_20260930_192224_050834/` (progress `running`, 0 apps) |
+| 2 | 18:30:14 | booted; **5/6 apps completed `ok` with `post_rejit`**; reaped ~19:03Z | log line 396: `qemu-system-x86_64: terminating on signal 15 from pid 1865444 (omp)`; partial dir `corpus/results/aborted/x86_kvm_corpus_20260930_183425_011210/` retained (metadata stuck `status: running`, `apps_done: 5`, `last_app: katran ok`) |
+| 3 | 19:14:10 | VM booted, suite just started; reaped ~19:23Z | log line 467: `qemu-system-x86_64: terminating on signal 15 from pid 1881935 (omp)`; partial dir `corpus/results/aborted/x86_kvm_corpus_20260930_192224_050834/` (progress `running`, 0 apps) |
 | 4 | 19:28:57 (19:33:17 in-VM start) | **completed** | result dir `corpus/results/x86_kvm_corpus_20260930_193317_347907/` |
 
 ### Root cause of the reaping

@@ -6,7 +6,7 @@
 - **Purpose**: arm64 verification-gate counterpart of the KVM x86 `make test`
   suite (increment 14, `7a0da65f0`). Distinguishes a *load-time-plan /
   post-rejit-specific* arm64 gap from a broader one. The test-mode gate loads
-  the kop modules, runs the BPF-verifier negative suite (non-fuzz), and runs
+  the kinsn modules, runs the BPF-verifier negative suite (non-fuzz), and runs
   the native-proof micro staged-codegen smoke. `test.py:351` skips the
   native-loader-shim smoke on non-`x86_64` (aarch64 auto-skip, recorded not
   patched).
@@ -43,11 +43,11 @@ result. No ratio/geomean/rollup computed.
 ## Cross-arch readout (analysis per `rejit/docs/evaluation.md` §5, not a gate)
 
 - **The arm64 `make test` gate passes** on QEMU (aarch64). The verifier,
-  kop-module load, and native-proof micro staged-codegen all work on
+  kinsn-module load, and native-proof micro staged-codegen all work on
   aarch64.
 - The 0059/0060 arm64 corpus failure (all 6 apps `post_rejit: null`,
   `BPFREJIT_SHIM_LOADTIME_PLAN` start fails) is therefore **localized to the
-  load-time-plan / post-rejit path**, not to the verifier, kop modules, or
+  load-time-plan / post-rejit path**, not to the verifier, kinsn modules, or
   general test infrastructure. This sharpens the recorded arm64 capability
   gap: it is a post-rejit load-time-plan defect on aarch64, not a broad
   platform-level inability.

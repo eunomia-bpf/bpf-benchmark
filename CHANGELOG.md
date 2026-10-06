@@ -14,8 +14,8 @@ Zenodo version before it counts as an available archive.
 Optimizer fixes (both in `bpfopt/llvm/src/main.cpp`):
 
 - Out-of-range stack-slot remap at the widest width (`1df5b1369`).
-- Give the generic (non-`kop`) LLVM roundtrip the same `-bpf-stack-size=4096`
-budget that `kop` already used (`42cceb67e`), so the remapper can squeeze the
+- Give the generic (non-`kinsn`) LLVM roundtrip the same `-bpf-stack-size=4096`
+budget that `kinsn` already used (`42cceb67e`), so the remapper can squeeze the
 relaid-out stack back into the 512-byte BPF frame. This fixed the real failure
 in the previous six-app run: `const_prop` step failure on the Tracee program
 `trace_security_`.
@@ -41,7 +41,7 @@ Added for artifact evaluation:
 - RQ3 policy-probe reconciliation: the paper's prose paired the 3512-site
   no-bulk/no-prefetch policy with the coverage-max 1.114x throughput, which
   inverts the measured ladder. `docs/paper/sections/7-evaluation.tex`,
-  `docs/paper/figures/sec-6-koperation-micro-rq3.tex`,
+  `docs/paper/figures/sec-6-kinsn-micro-rq3.tex`,
   `docs/paper/extended-abstract.tex`, the RQ2/RQ3 table, and the Q8 rebuttal
   notes now report the monotone Cilium ladder (coverage-max 4697 sites/1.114x
   at 0.776x BPF cost; no-prefetch 4086/1.055x/0.871x; no-bulk
@@ -54,7 +54,7 @@ Added for artifact evaluation:
   embedded constants.
 - `docs/artifacts/render_claim_table.py` derives all six RQ3 throughput/cost
   points from the retained app JSON. Applied-site counts remain declared from
-  `kinsn/docs/archive/kop_ablation_20260605_summary.md`, which is now shipped.
+  `kinsn/docs/archive/kinsn_ablation_20260605_summary.md`, which is now shipped.
 - Formal-proof evidence refresh: the retained `Semantic proofs` receipt and log
   were regenerated at commit `68a77fe0e` (`make -C kprog/formal check`,
   exit 0: 52 generator `--check` runs, 80 Lean module checks, 30 host
@@ -181,23 +181,23 @@ Added for artifact evaluation:
   62-case run that reproduces 0.99x promotes it without an edit.
 - Fresh x86 paired load-time runs on the current micro generation:
   `micro/results/x86_kvm_micro_20260924_231824_136293` (default `full-x86`
-  policy) and `micro/results/x86_kvm_micro_20260925_002201_525373` (`kop`
+  policy) and `micro/results/x86_kvm_micro_20260925_002201_525373` (`kinsn`
   policy), both `SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 RUNTIMES="kernel
   kernel_rejit" make micro`, exit 0, suite/progress `completed`. Their raw
   `metadata.json`, `details/progress.json`, and `details/result.json` are now
   tracked. `docs/artifacts/render_claim_table.py` derives six new rows from
   them. Two are object-load overhead rows: the paired `object_load_ns` geomean
-  is 1.161575x (`full-x86`) and 1.223405x (`kop`), i.e. PARTIAL against the
+  is 1.161575x (`full-x86`) and 1.223405x (`kinsn`), i.e. PARTIAL against the
   paper's 0.99x, because the current 29-case generation differs from the
   paper's 62-name population (60 of its names are absent from the current
   micro config) and the ReJIT policy stack is a different generation. Two are
   exec-speedup rows using the paper's RQ1 definition (geomean
   kernel/kernel_rejit median `exec_ns` over the 27 non-simple cases with
-  median applied kop sites > 0): 1.081422x (`full-x86`, 532 applied kop sites
-  plus the pure-bytecode passes) and 1.213995x (`kop`, 525 kop sites). Two are
+  median applied kinsn sites > 0): 1.081422x (`full-x86`, 532 applied kinsn sites
+  plus the pure-bytecode passes) and 1.213995x (`kinsn`, 525 kinsn sites). Two are
   code-size rows using the paper's RQ1 definition (geomean
   kernel_rejit/kernel median `native_code_bytes` over all 29 cases): 0.893127x
-  (`full-x86`) and 0.896642x (`kop`). All four derive `PASS` because their
+  (`full-x86`) and 0.896642x (`kinsn`). All four derive `PASS` because their
   provenance is valid; the values are same-policy different-generation, not a
   reproduction of the paper's 1.242x speedup or 0.772x code size. The paper's
   62-case row is unchanged and never merged with these fresh runs.
@@ -232,11 +232,11 @@ Optimizer fixes verified during artifact preparation (both with measured
 evidence recorded in `docs/archive/shared/20260906-bpf-development-todo.md`):
 
 - `bpfopt`: probe `bpf_x86_movw` so 2-byte memcpy stores lower, instead of
-  failing the whole `kop` step with `target.json has no kop entry`.
+  failing the whole `kinsn` step with `target.json has no kinsn entry`.
 - `vendor/llvmbpf`: compute kernel stack bytes from the deepest accessed byte.
   The previous `(-off) + width - 1` overcount rejected programs whose deepest
   access is exactly at `-512`.
-- `runner/mk/build.mk`: link x86 `bpfopt` against the patched in-repo kop LLVM,
+- `runner/mk/build.mk`: link x86 `bpfopt` against the patched in-repo kinsn LLVM,
   bind x86 native BPF artifacts to the framework kernel BTF, avoid duplicate
   kernel builds in one runtime-image DAG, and stage serial `modules_install`
   output on the container-local filesystem before copying it to a FUSE-backed
@@ -247,7 +247,7 @@ paper's Xeon/AWS numbers were re-measured):
 
 - Full 6-app default corpus run `corpus/results/x86_kvm_corpus_20260921_211712_637406`:
   all six ReJIT results report `ok`, but the suite status is `error` because the
-  Tracee workload failed to launch. This is KOperation coverage evidence only;
+  Tracee workload failed to launch. This is Kinsn coverage evidence only;
   it is not evidence of full workload success.
 - Fresh Katran KVM smoke `corpus/results/x86_kvm_corpus_20260922_213414_889964`:
   exact documented command exited 0 in 5,946 seconds; suite `completed`, app

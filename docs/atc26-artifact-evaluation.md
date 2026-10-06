@@ -1,4 +1,4 @@
-# BPF-Ext / KOperation — ATC 2026 Artifact Evaluation Guide
+# BPF-Ext / Kinsn — ATC 2026 Artifact Evaluation Guide
 
 This document is the **artifact "read me"** for the accepted ATC 2026 paper
 *"BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native
@@ -11,7 +11,7 @@ see the metadata caveat below. Follow this evaluator-facing guide in order.
   [Paper metadata](#1-paper-metadata)). No metadata is invented here.
 
 > **Status / honesty note.** This repository contains the framework, optimizer,
-  KOperation modules, Lean 4 proofs, and measurement harness. The formal check,
+  Kinsn modules, Lean 4 proofs, and measurement harness. The formal check,
   a single-app Katran KVM smoke, and a fresh full six-application corpus run
   have completed: the six-app run `x86_kvm_corpus_20260923_114624_121697`
   finished with suite status `completed` and all six workloads `ok`. An earlier
@@ -40,7 +40,7 @@ see the metadata caveat below. Follow this evaluator-facing guide in order.
 
 > **Note on the LaTeX source.** The in-repo source under `docs/paper/` (**supporting
 > material only**) has since diverged from the accepted version: it currently
-> carries a different title (`\tool: ...`, where `\tool` expands to *KOperation*)
+> carries a different title (`\tool: ...`, where `\tool` expands to *Kinsn*)
 > and a different author block. The accepted-paper metadata above is
 > authoritative for the AE submission; do not read the current `main.tex` as a
 > verbatim record of the accepted paper.
@@ -57,8 +57,8 @@ The artifact contains four components. Each maps to a part of the paper.
 
 | Component | Path | Paper relation |
 |---|---|---|
-| `bpfopt` bytecode optimizer + stock-kernel userspace shim | `bpfopt/` (`shim/`, `llvm/`, `kopprober/`) | \S\ref{sec:implementation}; the load-time lowering/restore stage |
-| KOperation native-operation kernel modules | `kinsn/module/x86/`, `kinsn/module/arm64/` | \S\ref{sec:koperation}; the seven hardware-idiom descriptor families |
+| `bpfopt` bytecode optimizer + stock-kernel userspace shim | `bpfopt/` (`shim/`, `llvm/`, `kinsnprober/`) | \S\ref{sec:implementation}; the load-time lowering/restore stage |
+| Kinsn native-operation kernel modules | `kinsn/module/x86/`, `kinsn/module/arm64/` | \S\ref{sec:kinsn}; the seven hardware-idiom descriptor families |
 | Lean 4 semantic proofs + host cross-checks | `kprog/formal/`, `kprog/x86/`, `kprog/arm64/` | abstract + \S\ref{sec:implementation}; "each native emit computes the same result as its proof sequence" |
 | Make-backed benchmark harness (micro + production corpus) | `Makefile`, `runner/`, `micro/`, `corpus/` | \S\ref{sec:evaluation} (RQ1–RQ4) |
 
@@ -332,7 +332,7 @@ BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 \
 This is a genuine two-start load-time experiment: the framework starts the real
 upstream application (never a synthetic loader), captures its `BPF_PROG_LOAD`
 calls through the injected shim, runs the configured `bpfopt` pass chain
-(including the KOperation-backed `kop` pass), submits optimized bytecode
+(including the Kinsn-backed `kinsn` pass), submits optimized bytecode
 through the application's normal stock-kernel `BPF_PROG_LOAD` path, and measures
 the workload in both phases.
 
@@ -367,7 +367,7 @@ corpus/results/<arch>_<platform>_corpus_<timestamp>/
 `bytes_xlated`. The per-program average cost is
 `run_time_ns_delta / run_cnt_delta`; programs with `run_cnt_delta == 0` in either
 phase must be skipped. `details/loadtime-reports/*.jsonl` contains
-`sites_matched` / `sites_applied` per pass and the `kop_calls_by_name` histogram.
+`sites_matched` / `sites_applied` per pass and the `kinsn_calls_by_name` histogram.
 
 **The framework writes raw counters only.** No ratios, geomeans, or summaries are
 computed in framework code (this is a documented repository invariant); all
@@ -383,9 +383,9 @@ status**:
 
 | Run directory | Top-level status | Per-app | What it does and does not support |
 |---|---|---|---|
-| `docs/artifacts/evidence/kvm-six-app-coverage/` (source run `x86_kvm_corpus_20260921_211712_637406`) | `error` | 5/6 apps `ok`; `tracee/monitor` `error` | **Tracked compact evidence.** Supports *rejit/KOperation coverage*: all six retained app records report `rejit_result.status: ok`. Does **not** support a claim of full workload success, because the Tracee workload launch failed. `receipt.json` binds every retained JSON by SHA256 and states that the original shell command was not retained. |
-| `docs/artifacts/evidence/kvm-katran-smoke/` (source run `x86_kvm_corpus_20260922_213414_889964`) | `completed` | Katran `status: ok`; `rejit_result.status: ok` | **Fresh tracked KVM smoke.** The exact command exited 0 after 5,946 seconds. `receipt.json` binds the command, source commit, log, and retained JSON files by SHA256. Supports both Katran rejit/KOperation coverage and a complete successful single-app workload run. |
-| `docs/artifacts/evidence/kvm-six-app-success/` (source run `x86_kvm_corpus_20260923_114624_121697`) | `completed` | all six apps `ok`; all six `rejit_result.status: ok` | **Fresh tracked full six-application corpus run.** The exact command `SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus` exited 0 after 1,162 seconds. `receipt.json` binds the command, source commit, normalized log, and every retained JSON by SHA256. Supports six successful workloads and full ReJIT/KOperation coverage under the default `full-x86` policy. It is a single-sample 10 s run, not a paper-scale Xeon/AWS rerun. |
+| `docs/artifacts/evidence/kvm-six-app-coverage/` (source run `x86_kvm_corpus_20260921_211712_637406`) | `error` | 5/6 apps `ok`; `tracee/monitor` `error` | **Tracked compact evidence.** Supports *rejit/Kinsn coverage*: all six retained app records report `rejit_result.status: ok`. Does **not** support a claim of full workload success, because the Tracee workload launch failed. `receipt.json` binds every retained JSON by SHA256 and states that the original shell command was not retained. |
+| `docs/artifacts/evidence/kvm-katran-smoke/` (source run `x86_kvm_corpus_20260922_213414_889964`) | `completed` | Katran `status: ok`; `rejit_result.status: ok` | **Fresh tracked KVM smoke.** The exact command exited 0 after 5,946 seconds. `receipt.json` binds the command, source commit, log, and retained JSON files by SHA256. Supports both Katran rejit/Kinsn coverage and a complete successful single-app workload run. |
+| `docs/artifacts/evidence/kvm-six-app-success/` (source run `x86_kvm_corpus_20260923_114624_121697`) | `completed` | all six apps `ok`; all six `rejit_result.status: ok` | **Fresh tracked full six-application corpus run.** The exact command `SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus` exited 0 after 1,162 seconds. `receipt.json` binds the command, source commit, normalized log, and every retained JSON by SHA256. Supports six successful workloads and full ReJIT/Kinsn coverage under the default `full-x86` policy. It is a single-sample 10 s run, not a paper-scale Xeon/AWS rerun. |
 | `docs/artifacts/evidence/rq4-cilium-native-loader/` (source run `x86_kvm_corpus_20260924_164153_955835`) | `completed` | Cilium `status: ok` | **Fresh tracked native-loader run.** The exact command `BPFREJIT_CORPUS_APPS="cilium/agent" BPFREJIT_SHIM_NATIVE_LOADER=post SAMPLES=3 WORKLOAD_DURATION=30 JOBS=8 IMAGE_BUILD_JOBS=8 TIMEOUT=3600 make corpus` exited 0 after 2,846 seconds. `receipt.json` binds the command, source commit, normalized log, post-phase shim log, staged manifest and retained JSON files by SHA256. Supports the derived RQ4 loader counts (179 loads / 135 replacements / 0 pass-throughs / 33 feature-probe skips / 11 pre-init loads) and the 89-object staged manifest; it does not reproduce the paper's declared 113/22 loader split. |
 | `docs/artifacts/evidence/rq2-cilium-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_081752_606800`) | `completed` | Cilium `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after ~290 s inside the guest. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the 122 changed load instances by SHA256. Supports the derived rewrite evidence (122/122 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 3,787 applied sites; 159,896 → 111,826 instructions); it is a single startup and does not reproduce the paper's declared 4,086-site full-scale run. |
 | `docs/artifacts/evidence/rq2-katran-map-inline-retained-bytecode/` (source run `x86_kvm_corpus_20260925_101028_808501`) | `completed` | Katran `status: ok` | **Fresh tracked retained-bytecode run.** The exact command `BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=map_inline SAMPLES=1 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 make corpus` exited 0 after 3m29s. `receipt.json` binds the command, source commit, normalized log, report stream, and the retained per-step bytecode for the one changed load instance by SHA256. Supports the derived rewrite evidence for the overlay/hint policy path (`--inline-hint` anchors plus `overlays/katran/*.json`): 1/1 changed workdir whose retained before/after bytecode lengths match the reported instruction counts and whose images differ, 16 applied sites, 2,554 → 2,284 instructions (−270). Does **not** support a population-scale claim; the fresh 16-site figure is not merged with the paper's declared Katran site figures. |
@@ -403,15 +403,15 @@ status**:
 | `docs/artifacts/evidence/rq2-cilium-wide-mem-fresh-causality/` (source run `x86_kvm_corpus_20260926_133930_796763` plus no-pass controls `x86_kvm_corpus_20260926_135405_708186`, `x86_kvm_corpus_20260926_140808_071557`) | `completed` | Cilium `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet on the same labelled generic pass name as the Tetragon `wide_mem` row, on a second application.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=wide_mem SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode by SHA256. Supports the derived rewrite evidence (164/164 changed workdirs whose retained before/after bytecode lengths match the reported instruction counts and whose images differ; 164 applied sites; 159,896 to 156,508 instructions) and the controlled throughput causality (raw 1.1232x, no-pass control median 1.0234x, control-corrected 1.0974x over 3+3 samples at 60 s). This triplet's derived rate is the sum over two kernel-pktgen components, a different workload rate shape from the Tetragon `wide_mem` triplet's component-less stress-ng column, so the derivation is shown to hold independent of rate shape; the pass-name axis it repeats is the Tetragon row's, not a new one (the distinct-pipeline axis is the Cilium `lea` triplet below). |
 | `docs/artifacts/evidence/rq2-tracee-wide-mem-fresh-causality/` (source run `x86_kvm_corpus_20260926_152627_089782` plus no-pass controls `x86_kvm_corpus_20260926_154230_879447`, `x86_kvm_corpus_20260926_155641_973127`) | `completed` | Tracee `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet on the same labelled generic pass name, on a third application.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=tracee/monitor BPFREJIT_BENCH_PASSES=wide_mem SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step `input.step.0.bin` / `output.next.0.bin` / `report.0.json` of every changed load instance. Its 142 applied sites are the smallest of the three `wide_mem` triplets (Tetragon 254, Cilium 164), so it shows the derivation does not need a large rewritten population. Its row is gated on `enabled_passes == ["wide_mem"]` and on Tracee's own app record. |
 | `docs/artifacts/evidence/rq2-tetragon-dce-fresh-causality/` (source run `x86_kvm_corpus_20260926_164707_409188` plus no-pass controls `x86_kvm_corpus_20260926_170758_323681`, `x86_kvm_corpus_20260926_173231_340346`) | `completed` | Tetragon `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet under a different labelled pass name on the same application as the Tetragon `wide_mem` row.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_BENCH_PASSES=dce SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode for all 254 changed load instances. The retained stream gives 264 report rows, 254 changed load instances and 254 applied sites (instruction counts 373,141 -> 343,261, -29,880), and the controlled throughput derivation gives raw 0.9526x, no-pass control median 0.9443x (controls 0.9458x, 0.9427x) and control-corrected 1.0088x over 3+3 samples at 60 s. `dce` and `wide_mem` are two names for the same shared generic relift (they are byte-identical on this application, the same 254 sites and the same 373,141 -> 343,261 counts), so this row adds a labelled policy run on the largest `dce`-named population rather than a different rewrite. Its row is gated on `enabled_passes == ["dce"]` and on Tetragon's own app record. |
-| `docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/` (source run `x86_kvm_corpus_20260926_210350_394038` plus no-pass controls `x86_kvm_corpus_20260926_212638_174173`, `x86_kvm_corpus_20260926_215101_823717`) | `completed` | Cilium `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet on the first genuinely distinct pass pipeline, not another labelled generic run.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=lea SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `lea` is a kop-family pass: unlike the generic relift aliases it dispatches on the pass name (per-name LLVM codegen policy `all=disable,preemit-lea=force,scaled-index-mem=force`) and consumes a real per-site `--target` kop map that the shim synthesizes with `kopprober`, so its rewrite is genuinely distinct. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode (plus the consumed `target.json`) for all 131 changed load instances. The retained stream gives 169 report rows, 131 changed load instances and 2416 applied sites (instruction counts 159,896 -> 160,582, +686), and the controlled throughput derivation gives raw 1.0236x, no-pass control median 1.0416x (controls 1.1049x, 0.9783x) and control-corrected 0.9827x over 3+3 samples at 60 s. Cilium carries the densest retained `lea` population of the supported apps. Its row is gated on `enabled_passes == ["lea"]` and on Cilium's own app record. |
+| `docs/artifacts/evidence/rq2-cilium-lea-fresh-causality/` (source run `x86_kvm_corpus_20260926_210350_394038` plus no-pass controls `x86_kvm_corpus_20260926_212638_174173`, `x86_kvm_corpus_20260926_215101_823717`) | `completed` | Cilium `status: ok`; both controls `passes: []`, `rejit_result.status: skipped` | **Fresh provenance-complete causality triplet on the first genuinely distinct pass pipeline, not another labelled generic run.** The exact commands `env PLATFORM=kvm ARCH=x86 BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_BENCH_PASSES=lea SAMPLES=3 WORKLOAD_DURATION=60 KEEP_WORKDIRS=1 make corpus -o runtime-kernel-image` and the two controls with `SKIP_REJIT=norejit BPFREJIT_BENCH_PASSES=,`. `lea` is a kinsn-family pass: unlike the generic relift aliases it dispatches on the pass name (per-name LLVM codegen policy `all=disable,preemit-lea=force,scaled-index-mem=force`) and consumes a real per-site `--target` kinsn map that the shim synthesizes with `kinsnprober`, so its rewrite is genuinely distinct. `receipt.json` binds the command, source commit, normalized console log, report stream, and the retained per-step bytecode (plus the consumed `target.json`) for all 131 changed load instances. The retained stream gives 169 report rows, 131 changed load instances and 2416 applied sites (instruction counts 159,896 -> 160,582, +686), and the controlled throughput derivation gives raw 1.0236x, no-pass control median 1.0416x (controls 1.1049x, 0.9783x) and control-corrected 0.9827x over 3+3 samples at 60 s. Cilium carries the densest retained `lea` population of the supported apps. Its row is gated on `enabled_passes == ["lea"]` and on Cilium's own app record. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
 **Labelled pass names vs distinct pipelines.** `bpfopt` documents (its
 `bpfopt/llvm/README.md`) and its dispatcher implements one pipeline per
 genuinely distinct pass: `map_inline` performs a pass-specific IR rewrite before
-O3; the kop family (`kop`, `rotate`, `cond_select`, `extract`, `endian_fusion`,
-`bulk_memory`, `lea`, `prefetch`, `ccmp`) reads a real per-site `--target` kop
+O3; the kinsn family (`kinsn`, `rotate`, `cond_select`, `extract`, `endian_fusion`,
+`bulk_memory`, `lea`, `prefetch`, `ccmp`) reads a real per-site `--target` kinsn
 map and selects per-name LLVM codegen policy; `branch_flip` and the four
 specialization passes have their own pipelines. Every *other* pass name —
 including `noop`, `dce`, `wide_mem`, `bounds_check_merge`, `skb_load_bytes_spec`
@@ -478,7 +478,7 @@ metric rows.
 | RQ1 x86 | micro speedup/geomean, code-size shrink | `make micro SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000` | `micro/results/` | Yes (x86, on a KVM host) |
 | RQ1 arm64 | ARM64 micro speedup | `PLATFORM=aws ARCH=arm64 make micro` | `micro/results/` | Yes (needs AWS) |
 | RQ1 overhead | open+load (`compile_ns`) ratio; bare `object_load_ns` reported alongside | included in `make micro` | `micro/results/` | Command path yes; retained 62-case row `PASS` on the paper-matched open+load quantity (bare `object_load_ns` rounds to 1.00×), fresh-generation repeated-sample row `PARTIAL` at 1.14× |
-| RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; throughput derives from retained JSON; the 4086 count is a full-scale run, with the same-policy `kop` rerun deriving 2988 fresh |
+| RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; throughput derives from retained JSON; the 4086 count is a full-scale run, with the same-policy `kinsn` rerun deriving 2988 fresh |
 | RQ3 policy | site-count vs profitability | four-arm Cilium ladder + two-arm Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points and all six fresh site counts (Cilium 4017/3512/3517/2988; Katran 21/64) derive from retained raw JSON; the June per-pass site reports are missing, so the June site counts are declared and the fresh ladder's ordering diverges from June's |
 | RQ4 native bound | 2.358×, 488.7→262.3 ns/run | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; the paper's 113/22/89 loader counts stay declared, and a fresh native-post run derives 179 loads / 135 replacements / 0 pass-through / 33 feature-probe skips / 11 pre-init loads plus 89 manifest objects across 6 native objects |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
@@ -499,16 +499,16 @@ for the unavailable `aws` platform here), retaining
 `details/loadtime-reports/katran.jsonl` from which the renderer derives
 21 (conservative) and 64 (coverage-max) applied sites. The June and historical
 RQ2 site counts remain declared from
-`kinsn/docs/archive/kop_ablation_20260605_summary.md` because their runs retained no
+`kinsn/docs/archive/kinsn_ablation_20260605_summary.md` because their runs retained no
 per-pass report:
 
 ```bash
-for arm in kop_all_prefetch kop_all_no_prefetch \
-           kop_all_no_bulk_prefetch kop_all_no_bulk_no_prefetch; do
+for arm in kinsn_all_prefetch kinsn_all_no_prefetch \
+           kinsn_all_no_bulk_prefetch kinsn_all_no_bulk_no_prefetch; do
   BPFREJIT_BENCH_PASSES=$arm BPFREJIT_CORPUS_APPS=cilium/agent \
     SAMPLES=3 WORKLOAD_DURATION=30 make corpus
 done
-PLATFORM=qemu ARCH=arm64 BPFREJIT_BENCH_PASSES=kop \
+PLATFORM=qemu ARCH=arm64 BPFREJIT_BENCH_PASSES=kinsn \
   BPFREJIT_CORPUS_APPS=katran SAMPLES=3 WORKLOAD_DURATION=30 make corpus
 PLATFORM=qemu ARCH=arm64 \
   BPFREJIT_BENCH_PASSES=rotate,extract,endian_fusion,bulk_memory,prefetch,cond_select,ccmp \
@@ -535,7 +535,7 @@ corpus; `make terminate` stops managed remote instances.
 
 The paper's plots are produced by scripts in `docs/paper/scripts/`:
 
-- `docs/paper/scripts/plot_evaluation_koperation.py` -- derives the RQ1 micro
+- `docs/paper/scripts/plot_evaluation_kinsn.py` -- derives the RQ1 micro
   figures from the three retained RQ1 JSON datasets
 - `docs/paper/scripts/plot_characterization_pure_percase.py` -- derives the
   Section 3 characterization from the two retained pure-bytecode JSON datasets
@@ -545,14 +545,14 @@ The paper's plots are produced by scripts in `docs/paper/scripts/`:
   rendering of the same six raw points; it reuses the RQ3 derivation above
 
 The RQ1, RQ3, and application scripts emit the PDFs referenced from
-`docs/paper/figures/sec-6-koperation-micro-rq1.tex`,
-`docs/paper/figures/sec-6-koperation-micro-rq3.tex`, and
+`docs/paper/figures/sec-6-kinsn-micro-rq1.tex`,
+`docs/paper/figures/sec-6-kinsn-micro-rq3.tex`, and
 `extended-abstract.tex`, respectively. They are **analysis-side**;
 per the repository rule, no aggregation lives in the measurement framework.
 For RQ1, `docs/artifacts/render_claim_table.py` calculates the accepted
 paper's x86 27-case execution geomean from the retained x86 pair, excluding
 the baseline-only `simple` and `simple_packet` cases (1.241736×, displayed
-as 1.242×). It derives ARM64's 27 KOperation-bearing execution cases as
+as 1.242×). It derives ARM64's 27 Kinsn-bearing execution cases as
 1.222042× (displayed as 1.222×). Generated native-code size uses **all 29**
 cases: 0.771807× x86 and 0.879116× ARM64, displayed as 0.772× and
 0.879×. The older plotting script includes all 29 x86 cases for execution
@@ -571,9 +571,9 @@ one decision line per classified load). Its retained staged manifest holds
 89 object entries across 6 distinct native objects. These are a fresh
 host/toolchain generation; they are reported beside, and never merged with,
 the paper's declared 113/22/89.
-The RQ2 run's own pass policy (`kop`) was rerun with its report stream retained
+The RQ2 run's own pass policy (`kinsn`) was rerun with its report stream retained
 (`corpus/results/x86_kvm_corpus_20260924_114427_040291`), deriving 2988 sites;
-the fresh `kop` policy no longer enables `bulk_memory`, so 2988 is a
+the fresh `kinsn` policy no longer enables `bulk_memory`, so 2988 is a
 same-policy fresh-generation count rather than a reproduction of 4086.
 The RQ3 family ladder reads the six retained corpus run directories and
 derives workload ratios as `mean(post pps)/mean(baseline pps)` and BPF cost
@@ -603,15 +603,15 @@ the reverse (no-bulk+no-prefetch fastest at 1.138190×, coverage-max slowest at
 row derives both orderings from retained raw JSON and reports the divergence;
 the fresh ladder is shipped as separate evidence and does not replace the June
 values. The Katran and the historical RQ2 counts (21/62, 4086) remain
-**declared** from `kinsn/docs/archive/kop_ablation_20260605_summary.md`, since no
+**declared** from `kinsn/docs/archive/kinsn_ablation_20260605_summary.md`, since no
 `details/loadtime-reports/` tree survives for those runs and the figures
 annotate them as declared.
 
 The **Katran** applied-site counts are derived the same way from two fresh
 local-QEMU ARM64 reruns of the paper's two policies
-(`corpus/results/arm64_qemu_corpus_19700101_000011_781867`,
-`..._000011_741370`). The conservative `kop` arm derives 21 sites
-(`{'kop': 21}`; families `rotate 20, extract 1`), exactly matching the declared
+(`corpus/results/arm64_qemu_corpus_recorded_20260924_vmclock_000011_781867`,
+`..._000011_741370`). The conservative `kinsn` arm derives 21 sites
+(`{'kinsn': 21}`; families `rotate 20, extract 1`), exactly matching the declared
 per-app 21. The coverage-max seven-family arm derives 64 sites across its
 seven steps (`rotate 20, extract 1, endian_fusion 9, bulk_memory 28, prefetch 6`,
 `cond_select 0, ccmp 0`), against the declared 62 — a same-policy
@@ -643,8 +643,8 @@ A search across all current Git May/June `details/loadtime-reports`,
 runs; the original June 4 Cilium result commit contains only app, result,
 progress, and metadata JSON. The 4086 site count remains a historical summary
 until its original per-pass raw log is recovered. Two fresh reruns of the RQ2
-run's own `kop` policy and of the no-prefetch family set retain their report
-streams and derive 2988 and 3512 sites respectively; the fresh `kop` policy no
+run's own `kinsn` policy and of the no-prefetch family set retain their report
+streams and derive 2988 and 3512 sites respectively; the fresh `kinsn` policy no
 longer enables `bulk_memory`, so both are same-policy different-generation
 counts, not reproductions of 4086.
 
@@ -652,7 +652,7 @@ Two further fresh x86 paired load-time runs were taken on the current micro
 generation (`SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 RUNTIMES="kernel
 kernel_rejit" make micro`): `x86_kvm_micro_20260924_231824_136293` under the
 default `full-x86` policy and `x86_kvm_micro_20260925_002201_525373` under
-`kop`. A third run repeats the paper's own micro protocol —
+`kinsn`. A third run repeats the paper's own micro protocol —
 `SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000` —
 `x86_kvm_micro_20260926_105108_035832` under `full-x86`. None of the three runs
 reproduces the paper's 62-name population — the current config retains only 2
@@ -660,7 +660,7 @@ names in common with either May 14 run — so the renderer derives separate rows
 from these runs' own paired series. Each object-load
 overhead row reports *both* the paper-matched open+load geomean and the bare
 `object_load_ns` geomean over the same 29 paired cases: 1.132157×/1.161575×
-(`full-x86`, 1 sample), 1.193679×/1.223405× (`kop`, 1 sample), and
+(`full-x86`, 1 sample), 1.193679×/1.223405× (`kinsn`, 1 sample), and
 1.140258×/1.169998× (repeated-sample `full-x86`). All three are `PARTIAL`
 against the paper's 0.99×. The repeated-sample run shows the third sample does
 not close the gap: the fresh generation's 1.14×–1.19× is not sampling noise, and
@@ -668,11 +668,11 @@ the per-case dominated ratios (`simple_packet` 2.155×, `simple` 1.890×) point 
 a near-constant per-case `bpfopt` subprocess cost inside the timed load region.
 Two rows apply the paper's RQ1 exec-speedup definition (geomean
 kernel/kernel_rejit median `exec_ns` over the 27 non-simple cases whose median
-applied kop sites exceed zero) and yield 1.081422× (`full-x86`, 532 applied kop
-sites plus the pure-bytecode passes) and 1.213995× (`kop`, 525 applied kop
+applied kinsn sites exceed zero) and yield 1.081422× (`full-x86`, 532 applied kinsn
+sites plus the pure-bytecode passes) and 1.213995× (`kinsn`, 525 applied kinsn
 sites). Two apply the paper's RQ1 code-size definition (geomean
 kernel_rejit/kernel median `native_code_bytes` over all 29 cases) and yield
-0.893127× (`full-x86`) and 0.896642× (`kop`). All four speedup/size rows are
+0.893127× (`full-x86`) and 0.896642× (`kinsn`). All four speedup/size rows are
 `PASS` on provenance, but they are same-policy different-generation values, not
 reproductions of the paper's 1.242× speedup or 0.772× code size. The paper's
 62-case row is never merged with them.
@@ -692,11 +692,11 @@ assuming a command or retained directory succeeded.
 1. **Some programs cannot be lifted within the 512-byte BPF frame.** The LLVM
    roundtrip that the optimizer uses re-lays out the stack and inflates the frame
    by ~45 bytes on average (measured over all 542 checked-in program fixtures;
-   405 grew, 137 unchanged, none shrank). `kop` runs last in the pipeline, so a
+   405 grew, 137 unchanged, none shrank). `kinsn` runs last in the pipeline, so a
    program starting near the limit can lose all optimization. Two bpfopt fixes
    committed on 2026-09-23 addressed this: an out-of-range stack-slot remap at
-   the widest width (`1df5b1369`) and giving the generic (non-`kop`) roundtrip
-   passes the same 4096-byte LLVM stack budget that `kop` already used
+   the widest width (`1df5b1369`) and giving the generic (non-`kinsn`) roundtrip
+   passes the same 4096-byte LLVM stack budget that `kinsn` already used
    (`42cceb67e`), so the remapper can squeeze the layout back into the 512-byte
    BPF frame. Quantified in `docs/archive/shared/20260906-bpf-development-todo.md`.
 2. **`tracee/monitor` app-level errors are fixed for the default policy.** The
@@ -706,7 +706,7 @@ assuming a command or retained directory succeeded.
    `trace_security_` and the workload launch errored (run
    `x86_kvm_corpus_20260921_211712_637406`). In the fresh run
    `x86_kvm_corpus_20260923_114624_121697` the same program completes all 11
-   plan steps (`kop` applies 57/57 sites at step 10) and every app reports
+   plan steps (`kinsn` applies 57/57 sites at step 10) and every app reports
    `status: ok`. A single-sample run is not a paper-scale measurement; treat the
    per-program reports as optimization evidence, not throughput evidence.
 3. **`branch_flip`** is production code but is intentionally **not** in the
@@ -728,7 +728,7 @@ assuming a command or retained directory succeeded.
    0.995157×/0.997839× (both 1.00×). The renderer reports both and gates the
    row on the paper-matched open+load value.
 6. **Katran's per-app applied-site count differs from the corpus-wide family
-   sum.** `kinsn/docs/archive/kop_ablation_20260605_summary.md` records 21 Katran sites in
+   sum.** `kinsn/docs/archive/kinsn_ablation_20260605_summary.md` records 21 Katran sites in
    its per-app table (line 55) but 24 in its corpus-wide family tally (rotate 20
    + extract 4). The paper quotes the per-app 21; the two are different
    aggregations of the same run and the discrepancy is unresolved because the
@@ -737,16 +737,16 @@ assuming a command or retained directory succeeded.
    counts are derived.** No `details/loadtime-reports/` tree survives for the
    June ladder, so its annotated counts (4697/4086/4136/3512), the June Katran
    counts (21/62) and the RQ2 4086 count are **declared** from
-   `kinsn/docs/archive/kop_ablation_20260605_summary.md`. Five fresh Cilium reruns retain
+   `kinsn/docs/archive/kinsn_ablation_20260605_summary.md`. Five fresh Cilium reruns retain
    their report streams: the four RQ3 policy arms
    (`corpus/results/x86_kvm_corpus_20260924_{064817_392000,074900_275227,085901_647044,095500_223221}`)
-   derive 4017/3512/3517/2988, and a rerun of the RQ2 run's own `kop` policy
+   derive 4017/3512/3517/2988, and a rerun of the RQ2 run's own `kinsn` policy
    (`corpus/results/x86_kvm_corpus_20260924_114427_040291`) derives 2988. Two
    fresh local-QEMU ARM64 reruns retain `details/loadtime-reports/katran.jsonl`:
-   the conservative `kop` arm (`corpus/results/arm64_qemu_corpus_19700101_000011_781867`)
+   the conservative `kinsn` arm (`corpus/results/arm64_qemu_corpus_recorded_20260924_vmclock_000011_781867`)
    derives 21, and the seven-family coverage-max arm
-   (`corpus/results/arm64_qemu_corpus_19700101_000011_741370`) derives 64. The
-   fresh `kop` policy no longer enables `bulk_memory`. These are a different
+   (`corpus/results/arm64_qemu_corpus_recorded_20260924_vmclock_000011_741370`) derives 64. The
+   fresh `kinsn` policy no longer enables `bulk_memory`. These are a different
    host/toolchain generation (the ARM64 arms also ran under local QEMU rather
    than AWS), so do not treat the derived counts as reproducing the June
    numbers.
@@ -771,8 +771,8 @@ Makefile                      # the ONLY supported benchmark entrypoint
 bpfopt/
   shim/                       # LD_PRELOAD shim; intercepts BPF syscalls in-process
   llvm/                       # the optimizer CLI (one named pass per invocation)
-  kopprober/                  # probes loaded KOperation BTF and writes target.json
-module/{x86,arm64}/           # KOperation native-operation kernel modules
+  kinsnprober/                  # probes loaded Kinsn BTF and writes target.json
+module/{x86,arm64}/           # Kinsn native-operation kernel modules
 kprog/
   formal/                     # Lean 4 proofs, JSON specs, generators, host checks
   x86/, arm64/                # architecture simulators with proven contracts
@@ -798,7 +798,7 @@ evidence status, not an AEC decision.
 |---|---|---|
 | Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. An `atc26-ae-2` candidate ZIP was built by `docs/artifacts/package-atc26.sh` and replay-verified from clean extraction. | The `atc26-ae-2` candidate must be **published** on Zenodo, and an independent evaluator must verify that published ZIP from clean extraction, before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
 | Functional | Component map, environment, dependencies, safety notes, no-VM formal path, a completed six-application KVM corpus run and a completed fresh Cilium native-loader run are documented above. The `atc26-ae-2` candidate passed the packager's clean-extraction replay (`make lint`, `py_compile`, renderer `--self-test`, table generation and manifest parse). | An independent evaluation must confirm the **published** ZIP through the documented proof/build/smoke path; a build-time self-test in the authors' checkout alone is weaker evidence. |
-| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. The fresh x86 paired runs additionally derive same-policy different-generation RQ1 rows: exec speedup 1.081× (`full-x86`) and 1.214× (`kop`) over their 27 kop-bearing non-simple cases, and code size 0.893× (`full-x86`) and 0.897× (`kop`) over all 29 cases; their paired open+load ratios are 1.132×/1.194× (single-sample) and 1.140× on a third run repeating the paper's `SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000` protocol, so repeated sampling does not close the fresh-generation gap -- self-contained paired runs, but not reproductions of the paper's 1.242× speedup or 0.772× code size. The retained May 14 pair derives the paper's 0.99× load-overhead claim on the open+load (`compile_ns`) quantity over the 62-name intersection (0.994270×/0.990300×), while the bare `object_load_ns` field those same runs report rounds to 1.00×. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). Five fresh Cilium reruns retain their shim report streams: the four RQ3 arms derive applied-site counts 4017/3512/3517/2988 and a rerun of the RQ2 run's own `kop` policy derives 2988; two fresh local-QEMU ARM64 Katran reruns derive 21 (conservative) and 64 (coverage-max); the renderer derives a `PARTIAL` June-vs-fresh ordering divergence row and, for each of the five retained report streams, a caller-vs-tail-descendant attribution row splitting applied sites into directly attached callers (1019/876/869/717) versus zero-self tail targets (2929/2571/2583/2212) plus the 15-char name-join residual. A fresh native-post Cilium run retains its post-phase shim log, from which the renderer derives 179 intercepted loads, 135 native replacements, 0 pass-throughs, 33 feature-probe skips, 11 pre-init loads and 89 manifest objects across 6 native objects. The formal, Katran-smoke, six-app-success and native-loader receipts are hashed in `docs/artifacts/evidence/`. | The fresh site counts are a different host/toolchain generation (the ARM64 arms under local QEMU, not AWS), so they do not reproduce the June 4697/4086/4136/3512 and 21/62 counts, which remain **declared**. The fresh native-loader counts likewise do not reproduce the paper's declared 113/22/89 loader split. |
+| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. The fresh x86 paired runs additionally derive same-policy different-generation RQ1 rows: exec speedup 1.081× (`full-x86`) and 1.214× (`kinsn`) over their 27 kinsn-bearing non-simple cases, and code size 0.893× (`full-x86`) and 0.897× (`kinsn`) over all 29 cases; their paired open+load ratios are 1.132×/1.194× (single-sample) and 1.140× on a third run repeating the paper's `SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000` protocol, so repeated sampling does not close the fresh-generation gap -- self-contained paired runs, but not reproductions of the paper's 1.242× speedup or 0.772× code size. The retained May 14 pair derives the paper's 0.99× load-overhead claim on the open+load (`compile_ns`) quantity over the 62-name intersection (0.994270×/0.990300×), while the bare `object_load_ns` field those same runs report rounds to 1.00×. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). Five fresh Cilium reruns retain their shim report streams: the four RQ3 arms derive applied-site counts 4017/3512/3517/2988 and a rerun of the RQ2 run's own `kinsn` policy derives 2988; two fresh local-QEMU ARM64 Katran reruns derive 21 (conservative) and 64 (coverage-max); the renderer derives a `PARTIAL` June-vs-fresh ordering divergence row and, for each of the five retained report streams, a caller-vs-tail-descendant attribution row splitting applied sites into directly attached callers (1019/876/869/717) versus zero-self tail targets (2929/2571/2583/2212) plus the 15-char name-join residual. A fresh native-post Cilium run retains its post-phase shim log, from which the renderer derives 179 intercepted loads, 135 native replacements, 0 pass-throughs, 33 feature-probe skips, 11 pre-init loads and 89 manifest objects across 6 native objects. The formal, Katran-smoke, six-app-success and native-loader receipts are hashed in `docs/artifacts/evidence/`. | The fresh site counts are a different host/toolchain generation (the ARM64 arms under local QEMU, not AWS), so they do not reproduce the June 4697/4086/4136/3512 and 21/62 counts, which remain **declared**. The fresh native-loader counts likewise do not reproduce the paper's declared 113/22/89 loader split. |
 
 `docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
 numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to
@@ -812,7 +812,7 @@ The renderer additionally attributes each retained Cilium report stream's
 applied sites to directly attached callers versus tail-call descendants, by
 joining report `prog_name` against the application's own `baseline.bpf[*]`
 runtime counters on the shim's 15-character truncated name. Across the four
-RQ3 arms (the fifth, the RQ2 `kop` rerun, matches the no-bulk/no-prefetch arm
+RQ3 arms (the fifth, the RQ2 `kinsn` rerun, matches the no-bulk/no-prefetch arm
 exactly at 2988/717/2212/59) the result is identical in structure: 4 directly
 attached caller programs (`cil_from_contai`, `cil_from_netdev`, `cil_to_netdev`,
 `cil_xdp_entry`, each with nonzero `run_cnt_delta`; 1019/876/869/717 sites) and
@@ -1200,9 +1200,9 @@ rather than another name for the shared generic O3 relift
 (`x86_kvm_corpus_20260926_210350_394038`) plus two matched no-pass controls
 (`x86_kvm_corpus_20260926_212638_174173`, `x86_kvm_corpus_20260926_215101_823717`),
 each with its own make-console log and the optimized run retaining per-step
-bytecode. Unlike the `wide_mem` and `dce` triplets, `lea` is a kop-family pass
+bytecode. Unlike the `wide_mem` and `dce` triplets, `lea` is a kinsn-family pass
 that dispatches on the pass name (per-name LLVM codegen policy) and consumes a
-real per-site `--target` kop map the shim synthesizes with `kopprober`, so this
+real per-site `--target` kinsn map the shim synthesizes with `kinsnprober`, so this
 triplet is direct evidence for a rewrite the generic aliases do not perform, and
 its retained workdirs carry the consumed `target.json` so the rewrite is
 replayable from the archive. Cilium is the densest `lea` producer of the
@@ -1238,7 +1238,7 @@ Tracee program `trace_security_`. This establishes six successful workloads, but
 it is a single-sample 10-second configuration, not a paper-scale Xeon/AWS rerun.
 The earlier six-app preparation run `x86_kvm_corpus_20260921_211712_637406` has
 top-level status `error`; its hash-bound compact evidence
-(`docs/artifacts/evidence/kvm-six-app-coverage/`) supports ReJIT/KOperation
+(`docs/artifacts/evidence/kvm-six-app-coverage/`) supports ReJIT/Kinsn
 *coverage* only and is retained as the honest negative record. The separate
 Katran smoke `x86_kvm_corpus_20260922_213414_889964` supports one successful
 workload.
