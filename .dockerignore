@@ -100,6 +100,9 @@ vendor/linux
 vendor/linux/**
 vendor/linux-baseline
 vendor/linux-baseline/**
+# Runtime kernels and modules are supplied through dedicated build contexts.
+vendor/linux-framework
+vendor/linux-framework/**
 vendor/linux-framework/.cache
 vendor/linux-framework/.bpfrejit_kernel_build.stamp
 vendor/linux-framework/.build.lock

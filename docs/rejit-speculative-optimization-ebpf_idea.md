@@ -663,3 +663,4 @@ CI:        GitHub Actions ARM64 + x86(manual trigger)
 - **当前任务**：用 `git log --oneline` 查看
 - **2026-05-05 changed flag deletion follow-up**：`docs/tmp/changed-flag-deletion-20260505.md`
 - **调研报告**：`docs/tmp/` 按日期组织
+- **2026-09-17 RQ3 → RQ1 → RQ2 新实验（未完成）**：已核对当前生产实现和实验入口；`make negative-test` 前置运行在 `host-native-bpf-x86` 的 Tetragon 构建中退出 2（生成头文件缺少 `mm_struct.user_ns`），尚未进入 VM。无新的语义或性能测量。完整命令、版本、原始日志、独立计划审阅和待授权的最小实验扩展/构建修复范围见 `docs/tmp/20260917-speculative-rqs/results.md`；保留已有生成头文件 WIP，历史数据仅作定位线索。

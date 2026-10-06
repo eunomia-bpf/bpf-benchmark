@@ -353,7 +353,10 @@ $(ARM64_QEMU_ROOT_READY): arm64-runner-runtime-image-tar $(RUNNER_DIR)/scripts/q
 		trap - EXIT; \
 			rm -rf "$(ARM64_QEMU_ROOT)"; \
 			mv "$(ARM64_QEMU_ROOT_TMP)" "$(ARM64_QEMU_ROOT)"
-	install -m 0755 "$(RUNNER_DIR)/scripts/qemu-arm64-init" "$(ARM64_QEMU_ROOT)/qemu-init"
+	sed "s|__BPFREJIT_IMAGE_WORKSPACE__|$(ROOT_DIR)|g" "$(RUNNER_DIR)/scripts/qemu-arm64-init" \
+		>"$(ARM64_QEMU_ROOT)/qemu-init.tmp"
+	install -m 0755 "$(ARM64_QEMU_ROOT)/qemu-init.tmp" "$(ARM64_QEMU_ROOT)/qemu-init"
+	rm -f "$(ARM64_QEMU_ROOT)/qemu-init.tmp"
 
 all: test micro corpus
 
