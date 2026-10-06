@@ -73,8 +73,8 @@ def cselBpf (dst yes no cond : BPF.Reg) : List BPF.MInsn :=
   [.branch .eq .w64 cond (.imm 0) 2, .core (BPF.mov64 dst (.reg yes)),
    .ja 1, .core (BPF.mov64 dst (.reg no))]
 
-/-- arm64/bpf_arm64_csel.c:emit_csel_ne_arm64; cond_reg is decoded but
-    the emitted CSEL reads NZCV, not that register. -/
+/-- Raw CSEL instruction used by the pre-fix emit_csel_ne_arm64 at 69f9a30f6.
+    The current complete emitter is ModuleCsel.arm (TST followed by CSEL). -/
 def cselArm (m : ARMRegMap) (dst yes no : BPF.Reg) : List ARM64.MInsn :=
   [.cselNE (m.map dst) (m.map yes) (m.map no)]
 
