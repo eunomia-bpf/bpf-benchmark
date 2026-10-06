@@ -121,6 +121,27 @@ assertions bind the numeric encodings. The x86 logical-result flag
 transition is also generated into C and Lean. Its
 composition theorem covers `CF=OF=0`, `ZF=zero`, and `SF=sign` through the
 condition-to-next-PC decision using those observations.
+
+The decoded width code a body operates at — where an unused width field (code
+0) falls back to the 64-bit default — is likewise a generated contract rather
+than a restatement. `generate_x86_width_spec.py` emits
+`KPROG_X86_WIDTH_ABSENT_CODE`, `KPROG_X86_WIDTH_EFFECTIVE_DEFAULT` and
+`KPROG_X86_WIDTH_EFFECTIVE` alongside the width tables, and the generated Lean
+`effective` resolves a decoded code to the code a body operates at. `X86Width.lean`
+proves that resolution equal to an independent `if c = 0 then 8 else c`, that the
+absent code names no width (`x86_absent_code_names_no_width`), that the fallback
+code is exactly the 64-bit width's code (`x86_default_code_is_w64`, pinned to the
+generated decode so it cannot drift), and that the resolution is the identity on
+every real width (`x86_effective_identity_on_width`); the earlier mask, bit-count,
+narrowing, zero and sign theorems remain. Every site in `x86_sim_local_bpf.h`
+that restated `WIDTH ? WIDTH : X86_WIDTH_64` now routes through
+`X86_SIM_L_EFFECTIVE_WIDTH`, whose kernel is the generated
+`KPROG_X86_WIDTH_EFFECTIVE`. A generated-header oracle sweeps the full decoded
+code domain (0..255) plus the width codes and the absent code's neighbours
+against the independent model and the pinned width table (1,280 cases); a
+sim-header route oracle drives every routed register/stack/flag/ALU/move/compare/
+`IMUL`/`MULX` body and compares the whole modeled register file with tags, the
+flags, the modeled heap and the stack against an independent model (518 cases).
 The x86 subtraction flag transition is generated into the central C handler
 and Lean. For already narrowed operands/result and a width sign mask, Lean
 checks carry/borrow, zero, sign, and signed-overflow flags against an
@@ -1931,7 +1952,9 @@ value stored through the word view reloads byte-for-byte through the byte view
 
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
-policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
+policy, both ISA flag-to-control-flow decisions, x86 width narrowing and the
+x86 effective-width resolution (and the simulator's routing of its
+register/stack/flag/ALU/move/compare bodies through it), x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
 x86 operand-register presence (and the simulator's routing of its memory-read,
 MULX, MOVBE, LEA and ALU-memory bodies through it),

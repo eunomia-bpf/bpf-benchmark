@@ -8452,6 +8452,69 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C native-sim/x86 micro-proofs-build` rc=0 (30 `ok` rows).
 - Full gate `make -C native-sim/formal check` rc=0 (119 `cross-check: OK`).
 
+## Step 0105 — x86-64 effective-width resolution bridged through a machine-checked contract
+
+- Scope: the *effective-width resolution* — a decoded width code of 0 (an unused
+  width field) means the 64-bit default. Every register read/write, stack
+  traffic site, flag producer, and ALU/move/compare/`IMUL`/`MULX` body in
+  `native-sim/x86/x86_sim_local_bpf.h` restated `WIDTH ? WIDTH : X86_WIDTH_64`
+  inline (31 sites). All now route through `X86_SIM_L_EFFECTIVE_WIDTH`, whose
+  kernel is the generated `KPROG_X86_WIDTH_EFFECTIVE`; the address arithmetic,
+  width handling, and value computation stay in the composed bodies. The
+  per-opcode fallbacks (`KPROG_X86_STORE_WIDTH`, `_CMPOP_WRITE_WIDTH`,
+  `_MOV_LOAD_*`, `_MOVBE_WIDTH`, `_BZHI_WRITE_WIDTH`, `_BT_WRITE_WIDTH`,
+  `_CMOV_WIDTH`, `_REP_MOVS_WIDTH`, the `PUSH_POP` step, `MOVX_REG`'s source
+  width, and `IMUL_MEM_IMM`'s inner memory-width fallback) are separate
+  decisions and stay out of scope, as in Step 0104.
+- Shared spec `native-sim/formal/x86_width_spec.json` gained an `effective`
+  block (`absent_code` 0, `default_name` `w64`); `generate_x86_width_spec.py`
+  validates it (absent code 0, not colliding with a width code, default a
+  64-bit width) and emits `KPROG_X86_WIDTH_ABSENT_CODE`,
+  `KPROG_X86_WIDTH_EFFECTIVE_DEFAULT`, `KPROG_X86_WIDTH_EFFECTIVE` and the Lean
+  `absentCode`/`defaultCode`/`effective` definitions. `generate_x86_width_spec.py
+  --check` rc=0.
+- Refinement `KProgFormal/X86Width.lean` against an independent spec (extended):
+  `x86_effective_refines` (generated `effective` equals the independent
+  `if c = 0 then 8 else c`, `rfl`), `x86_effective_absent_is_default`,
+  `x86_absent_code_names_no_width` (no width's code is the absent code),
+  `x86_default_code_is_w64` (the fallback code pinned against the generated
+  decode so it cannot drift), and `x86_effective_identity_on_width` (the
+  resolution is the identity on every real width). Lean modules elaborate rc=0.
+- Two host oracles. `test_x86_width_effective_host.c` includes only the
+  generated header, pins the absent code, the default macro, and the width
+  codes, and sweeps the full decoded-code domain (0..255) plus the width codes
+  and the absent code's neighbours against an independent `code ? code : 64-bit
+  code` model and the pinned width table: `x86 width effective host cross-check:
+  OK (1280 cases)`. `test_x86_width_effective_route_host.c` includes the
+  simulator header and drives the *real* routed bodies across every width, the
+  present/absent register forms, stack, heap, flags, ALU/move/compare/`IMUL`/
+  `MULX`, comparing the whole register file with tags, the flags, and the
+  modeled heap/stack against an independent model: `x86 width effective route
+  host cross-check: OK (518 cases)`. Both wired into `formal/Makefile` (new
+  rows; gate `cross-check: OK` count rose from 119 to 121).
+- **Latent bug found and fixed.** While driving the `IMUL_MEM_IMM` body the
+  oracle surfaced a real shadowing defect (not a warning artifact): the leaf
+  `X86_SIM_L_READ_MEM_VALUE` declared a local `__x86_l_mem_width` and
+  `X86_SIM_L_EXEC_IMUL_MEM_IMM` passed its own same-named variable as the
+  `WIDTH` argument, so the statement-expression's initializer self-referenced
+  an *uninitialized* inner variable — the memory load width was indeterminate.
+  The leaf's local is renamed `__x86_l_read_mem_width`, removing the shadowing.
+  The route oracle reports zero warnings under `-Wall -Wextra` and is clean
+  under ASan+UBSan.
+- Mutation harness `/tmp/mut_x86_width_effective.py`: 17 mutations, all as
+  expected. The generator `--check` catches the spec-op / spec-absent /
+  spec-collision / spec-default / spec-width-code / generator-inversion /
+  generator-default / generated-Lean and generated-C header defects; the hand
+  module catches the independent-spec and refinement defects; the route oracle
+  catches the pinned-width and dropped-default behavioural defects; and a
+  defect consistent across generator *and* both regenerated artifacts
+  (`--check` blind) is caught only by the refinement theorem over a rebuilt
+  olean. The inline-restatement equivalence SURVIVES, as it must. Post-restore
+  sources byte-identical.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C native-sim/formal check` rc=0 (121 `cross-check: OK`).
+
 
 ## Next after 0076
 

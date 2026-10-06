@@ -21,4 +21,14 @@ _Static_assert(X86_WIDTH_64 == 8U, "x86 width code drift");
 	((WIDTH) == X86_WIDTH_32 ? 32U : \
 	 64U)))
 #define KPROG_X86_APPLY_WIDTH(VALUE, WIDTH) ((VALUE) & KPROG_X86_WIDTH_MASK(WIDTH))
+/* The decoded width code that means "absent": a body that leaves its width
+ * field empty falls back to the default code. */
+#define KPROG_X86_WIDTH_ABSENT_CODE 0U
+#define KPROG_X86_WIDTH_EFFECTIVE_DEFAULT X86_WIDTH_64
+/* Resolve a decoded width code to the code a body operates at: the absent code
+ * (0) falls back to the 64-bit default, every other code is used as
+ * decoded. The operand is evaluated as the body evaluates it. */
+#define KPROG_X86_WIDTH_EFFECTIVE(CODE)                                     \
+	((CODE) != KPROG_X86_WIDTH_ABSENT_CODE ? (CODE) :                     \
+	 KPROG_X86_WIDTH_EFFECTIVE_DEFAULT)
 #endif

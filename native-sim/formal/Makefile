@@ -112,6 +112,7 @@ check:
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_branch_emit_route_host.c -o build/test_x86_branch_emit_route_host
 	./build/test_x86_branch_emit_route_host
 	lake env lean KProgFormal/X86LogicFlags.lean
+	lake env lean KProgFormal/GeneratedX86Width.lean
 	lake env lean KProgFormal/X86Width.lean
 	lake env lean KProgFormal/X86Immediate.lean
 	lake env lean KProgFormal/X86SubFlags.lean
@@ -221,6 +222,10 @@ check:
 	./build/test_x86_reg_presence_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_reg_presence_route_host.c -o build/test_x86_reg_presence_route_host
 	./build/test_x86_reg_presence_route_host
+	$(CC) -Wall -Wextra -O2 -I. test_x86_width_effective_host.c -o build/test_x86_width_effective_host
+	./build/test_x86_width_effective_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../native-sim -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_width_effective_route_host.c -o build/test_x86_width_effective_route_host
+	./build/test_x86_width_effective_route_host
 	lake env lean KProgFormal/X86LeaHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_lea_handler_host.c -o build/test_x86_lea_handler_host
 	./build/test_x86_lea_handler_host
