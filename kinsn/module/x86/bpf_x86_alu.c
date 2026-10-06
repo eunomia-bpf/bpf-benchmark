@@ -391,86 +391,109 @@ static int instantiate_x86_logic_narrow(const struct kop_x86_alu_payload *alu,
 	return cnt;
 }
 
+static int x86_alu_narrow_temp(const struct kop_x86_alu_payload *alu)
+{
+	bool reg_src = alu->form == KOP_X86_ALU_FORM_RR ||
+		       alu->form == KOP_X86_ALU_FORM_ARCH_RR;
+	u8 reg;
+
+	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
+		if (reg != alu->dst_reg && (!reg_src || reg != alu->src_reg))
+			return reg;
+	}
+	return -EINVAL;
+}
+
+static int instantiate_narrow_shift_leaf(const struct kop_x86_alu_payload *alu,
+					struct bpf_insn *insn_buf, u8 op,
+					u8 width, u8 temp, u8 count)
+{
+	u32 mask = (1U << width) - 1;
+
+	insn_buf[0] = BPF_ALU64_IMM(BPF_AND, alu->dst_reg, mask);
+	insn_buf[1] = BPF_ALU64_IMM(op, alu->dst_reg, count);
+	insn_buf[2] = BPF_ALU64_IMM(BPF_AND, alu->dst_reg, mask);
+	insn_buf[3] = BPF_ALU64_REG(BPF_OR, alu->dst_reg, temp);
+	return 4;
+}
+
+/* Capture all five CL count bits before the chosen leaf writes dst, including
+ * dst=CL. The one saved high-lane temporary is untouched by the dispatch.
+ */
+static int instantiate_narrow_shift_tree(const struct kop_x86_alu_payload *alu,
+					struct bpf_insn *insn_buf, u8 op,
+					u8 width, u8 temp, u8 depth, u8 base)
+{
+	int cnt = 0;
+	int branch;
+	int join;
+
+	if (!depth)
+		return instantiate_narrow_shift_leaf(alu, insn_buf, op, width, temp, base);
+	branch = cnt++;
+	cnt += instantiate_narrow_shift_tree(alu, insn_buf + cnt, op,
+					    width, temp, depth - 1, base);
+	join = cnt++;
+	insn_buf[branch] = BPF_JMP_IMM(BPF_JSET, BPF_REG_4,
+				      1U << (depth - 1), cnt - branch - 1);
+	cnt += instantiate_narrow_shift_tree(alu, insn_buf + cnt, op, width,
+					    temp, depth - 1, base + (1U << (depth - 1)));
+	insn_buf[join] = BPF_JMP_A(cnt - join - 1);
+	return cnt;
+}
+
 static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 				      u8 op, u8 width)
 {
-	struct kop_x86_alu_payload decoded;
-	const struct kop_x86_alu_payload *alu = &decoded;
-	u8 value_reg = KOP_X86_SCRATCH0;
-	u8 high_reg = KOP_X86_SCRATCH1;
-	u8 src_reg = KOP_X86_SCRATCH2;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2);
-	s32 preserve_mask;
-	u32 low_mask;
-	bool arch_reg;
+	struct kop_x86_alu_payload alu;
+	bool reg_src;
+	int temp;
 	int cnt = 0;
 	int err;
 
-	err = decode_x86_alu_payload(payload, &decoded);
+	err = decode_x86_alu_payload(payload, &alu);
 	if (err)
 		return err;
 	if (width != 8 && width != 16)
 		return -EINVAL;
-	if (alu->form != KOP_X86_ALU_FORM_RR &&
-	    alu->form != KOP_X86_ALU_FORM_ARCH_RR &&
-	    alu->form != KOP_X86_ALU_FORM_IMM &&
-	    alu->form != KOP_X86_ALU_FORM_ARCH_IMM)
+	reg_src = alu.form == KOP_X86_ALU_FORM_RR ||
+		  alu.form == KOP_X86_ALU_FORM_ARCH_RR;
+	if (!reg_src && alu.form != KOP_X86_ALU_FORM_IMM &&
+	    alu.form != KOP_X86_ALU_FORM_ARCH_IMM)
 		return -EINVAL;
-
 	if (op == BPF_AND || op == BPF_OR)
-		return instantiate_x86_logic_narrow(alu, insn_buf, op, width);
-
-	low_mask = width == 8 ? 0xff : 0xffff;
-	preserve_mask = width == 8 ? -256 : -65536;
-	arch_reg = x86_alu_uses_arch_reg(alu->form);
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read64_arch(insn_buf, &cnt, value_reg, alu->dst_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, value_reg, alu->dst_reg);
-	insn_buf[cnt++] = BPF_MOV64_REG(high_reg, value_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, preserve_mask);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, value_reg, low_mask);
-
-	if (alu->form == KOP_X86_ALU_FORM_RR ||
-	    alu->form == KOP_X86_ALU_FORM_ARCH_RR) {
-		if (arch_reg)
-			kop_x86_read64_arch(insn_buf, &cnt, src_reg,
-					      alu->src_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, src_reg,
-					 alu->src_reg);
-		if (x86_alu_is_shift(op)) {
-			if (alu->src_reg != BPF_REG_4)
-				return -EINVAL;
-			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, src_reg, 31);
-		} else {
-			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, src_reg,
-							low_mask);
-		}
-		err = emit_bpf_alu_reg(&insn_buf[cnt++], op, 64, value_reg,
-				       src_reg);
-	} else {
-		if (x86_alu_is_shift(op) &&
-		    (alu->imm < 0 || alu->imm >= 32))
+		return instantiate_x86_logic_narrow(&alu, insn_buf, op, width);
+	if (x86_alu_is_shift(op)) {
+		if ((reg_src && alu.src_reg != BPF_REG_4) ||
+		    (!reg_src && (alu.imm < 0 || alu.imm >= 32)))
 			return -EINVAL;
-		err = emit_bpf_alu_imm(&insn_buf[cnt++], op, 64, value_reg,
-				       alu->imm);
+	} else if (!reg_src && (alu.imm < 0 || alu.imm >= (1U << width))) {
+		return -EINVAL;
 	}
-	if (err)
-		return err;
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, value_reg, low_mask);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, value_reg, high_reg);
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, alu->dst_reg,
-				       value_reg, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, alu->dst_reg, value_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	temp = x86_alu_narrow_temp(&alu);
+	if (temp < 0)
+		return temp;
+	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp, KOP_X86_PROOF_RHS_OFF);
+	insn_buf[cnt++] = BPF_MOV64_REG(temp, alu.dst_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, temp, -(1U << width));
+	if (x86_alu_is_shift(op)) {
+		if (reg_src)
+			cnt += instantiate_narrow_shift_tree(&alu, insn_buf + cnt,
+							    op, width, temp, 5, 0);
+		else
+			cnt += instantiate_narrow_shift_leaf(&alu, insn_buf + cnt,
+							    op, width, temp, alu.imm);
+	} else {
+		if (reg_src)
+			err = emit_bpf_alu_reg(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.src_reg);
+		else
+			err = emit_bpf_alu_imm(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.imm);
+		if (err)
+			return err;
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, alu.dst_reg, (1U << width) - 1);
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, alu.dst_reg, temp);
+	}
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10, KOP_X86_PROOF_RHS_OFF);
 	return cnt;
 }
 
@@ -928,9 +951,10 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 {
 	struct kop_x86_alu_payload decoded;
 	const struct kop_x86_alu_payload *alu = &decoded;
-	u8 buf[8];
+	u8 buf[24];
 	u8 dst_reg, src_reg;
-	bool arch_reg;
+	int temp = -1;
+	u8 frame = kop_x86_reg_for_prog(prog, BPF_REG_10);
 	u32 len = 0;
 	int err;
 
@@ -945,11 +969,16 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 	    alu->form != KOP_X86_ALU_FORM_ARCH_IMM)
 		return -EINVAL;
 
-	arch_reg = x86_alu_uses_arch_reg(alu->form);
-	dst_reg = arch_reg ? alu->dst_reg :
-			     kop_x86_reg_for_prog(prog, alu->dst_reg);
+	dst_reg = kop_x86_reg_for_prog(prog, alu->dst_reg);
 	if (!kop_x86_valid(dst_reg))
 		return -EINVAL;
+
+	if (op != BPF_AND && op != BPF_OR) {
+		temp = x86_alu_narrow_temp(alu);
+		if (temp < 0)
+			return temp;
+		emit_alu_temp_slot(buf, &len, kop_x86_reg_for_prog(prog, temp), frame, false);
+	}
 
 	if (width == 16)
 		kop_emit_u8(buf, &len, 0x66);
@@ -969,10 +998,9 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 			}
 			kop_emit_u8(buf, &len, 0xc0 | (imm_group << 3) |
 				      kop_x86_code(dst_reg));
-			return kop_emit_finish(image, off, emit, buf, len);
+			goto finish;
 		}
-		src_reg = arch_reg ? alu->src_reg :
-				     kop_x86_reg_for_prog(prog, alu->src_reg);
+		src_reg = kop_x86_reg_for_prog(prog, alu->src_reg);
 		if (!kop_x86_valid(src_reg))
 			return -EINVAL;
 		if (width == 8)
@@ -983,7 +1011,7 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 		kop_emit_u8(buf, &len, 0xc0 |
 			      (kop_x86_code(src_reg) << 3) |
 			      kop_x86_code(dst_reg));
-		return kop_emit_finish(image, off, emit, buf, len);
+		goto finish;
 	}
 
 	if (x86_alu_is_shift(op)) {
@@ -999,7 +1027,7 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 		kop_emit_u8(buf, &len, 0xc0 | (imm_group << 3) |
 			      kop_x86_code(dst_reg));
 		kop_emit_u8(buf, &len, (u8)alu->imm);
-		return kop_emit_finish(image, off, emit, buf, len);
+		goto finish;
 	}
 
 	if (width == 8) {
@@ -1021,6 +1049,9 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 		kop_emit_u8(buf, &len, (u8)(alu->imm >> 8));
 	}
 
+finish:
+	if (temp >= 0)
+		emit_alu_temp_slot(buf, &len, kop_x86_reg_for_prog(prog, temp), frame, true);
 	return kop_emit_finish(image, off, emit, buf, len);
 }
 
@@ -1322,7 +1353,7 @@ static int emit_divl_x86(u8 *image, u32 *off, bool emit,
 const struct bpf_kop bpf_x86_addb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_addb,
 	.emit_x86 = emit_addb_x86,
 };
@@ -1402,23 +1433,23 @@ const struct bpf_kop bpf_x86_orb_desc = {
 const struct bpf_kop bpf_x86_subb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_subb,
 	.emit_x86 = emit_subb_x86,
 };
 
 const struct bpf_kop bpf_x86_shlb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
+	.max_insn_cnt = 194,
+	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_shlb,
 	.emit_x86 = emit_shlb_x86,
 };
 
 const struct bpf_kop bpf_x86_shrb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
+	.max_insn_cnt = 194,
+	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_shrb,
 	.emit_x86 = emit_shrb_x86,
 };
