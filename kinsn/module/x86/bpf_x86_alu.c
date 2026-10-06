@@ -547,6 +547,40 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 	return cnt;
 }
 
+/* Register logic on a narrow destination can be expressed by independent
+ * source-bit tests. This preserves every other register and all upper bits,
+ * including self operands, without any scratch slot contract.
+ */
+static int instantiate_x86_logic_narrow(const struct kop_x86_alu_payload *alu,
+				        struct bpf_insn *insn_buf, u8 op, u8 width)
+{
+	u32 low_mask = (1U << width) - 1;
+	u32 mask;
+	int bit;
+	int cnt = 0;
+
+	if (alu->form == KOP_X86_ALU_FORM_IMM ||
+	    alu->form == KOP_X86_ALU_FORM_ARCH_IMM) {
+		if (alu->imm < 0 || alu->imm > low_mask)
+			return -EINVAL;
+		insn_buf[cnt++] = BPF_ALU64_IMM(op, alu->dst_reg,
+				 op == BPF_AND ? alu->imm | ~low_mask : alu->imm);
+		return cnt;
+	}
+
+	for (bit = 0; bit < width; bit++) {
+		mask = 1U << bit;
+		insn_buf[cnt++] = BPF_JMP_IMM(BPF_JSET, alu->src_reg, mask, 1);
+		if (op == BPF_AND) {
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, alu->dst_reg, ~mask);
+		} else {
+			insn_buf[cnt++] = BPF_JMP_A(1);
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_OR, alu->dst_reg, mask);
+		}
+	}
+	return cnt;
+}
+
 static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 				      u8 op, u8 width)
 {
@@ -574,6 +608,9 @@ static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 	    alu->form != KOP_X86_ALU_FORM_IMM &&
 	    alu->form != KOP_X86_ALU_FORM_ARCH_IMM)
 		return -EINVAL;
+
+	if (op == BPF_AND || op == BPF_OR)
+		return instantiate_x86_logic_narrow(alu, insn_buf, op, width);
 
 	low_mask = width == 8 ? 0xff : 0xffff;
 	preserve_mask = width == 8 ? -256 : -65536;
@@ -1461,7 +1498,7 @@ const struct bpf_kop bpf_x86_addb_desc = {
 
 const struct bpf_kop bpf_x86_andb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 16,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_andb,
 	.emit_x86 = emit_andb_x86,
@@ -1517,7 +1554,7 @@ const struct bpf_kop bpf_x86_xorw_desc = {
 
 const struct bpf_kop bpf_x86_orw_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 48,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_orw,
 	.emit_x86 = emit_orw_x86,
@@ -1525,7 +1562,7 @@ const struct bpf_kop bpf_x86_orw_desc = {
 
 const struct bpf_kop bpf_x86_orb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 24,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_orb,
 	.emit_x86 = emit_orb_x86,
