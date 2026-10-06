@@ -119,54 +119,66 @@ static int instantiate_shrxq(u64 payload, struct bpf_insn *insn_buf)
 	return instantiate_bmi2_shift(payload, insn_buf, true, false);
 }
 
+/* As for shift dispatch, all count tests occur before the destination
+ * changes. BZHI uses only count[7:0]; a high bit in that byte selects MOV.
+ * Low counts select a pair of shifts that keeps exactly the low count bits.
+ */
+static void instantiate_bzhi_dispatch(struct bpf_insn *insn_buf, int *cnt,
+				      u8 dst_reg, u8 src_reg, u8 cnt_reg,
+				      bool is64, u8 depth, u8 count)
+{
+	int test, jump, high;
+
+	if (!depth) {
+		if (!count) {
+			insn_buf[(*cnt)++] = is64 ? BPF_MOV64_IMM(dst_reg, 0) :
+						  BPF_MOV32_IMM(dst_reg, 0);
+			return;
+		}
+		insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, src_reg);
+		insn_buf[(*cnt)++] = is64 ?
+			BPF_ALU64_IMM(BPF_LSH, dst_reg, 64 - count) :
+			BPF_ALU32_IMM(BPF_LSH, dst_reg, 32 - count);
+		insn_buf[(*cnt)++] = is64 ?
+			BPF_ALU64_IMM(BPF_RSH, dst_reg, 64 - count) :
+			BPF_ALU32_IMM(BPF_RSH, dst_reg, 32 - count);
+		return;
+	}
+
+	depth--;
+	test = (*cnt)++;
+	instantiate_bzhi_dispatch(insn_buf, cnt, dst_reg, src_reg, cnt_reg, is64,
+				  depth, count);
+	jump = (*cnt)++;
+	high = *cnt;
+	instantiate_bzhi_dispatch(insn_buf, cnt, dst_reg, src_reg, cnt_reg, is64,
+				  depth, count + (1U << depth));
+	insn_buf[test] = BPF_JMP_IMM(BPF_JSET, cnt_reg, 1U << depth,
+				   high - test - 1);
+	insn_buf[jump] = BPF_JMP_A(*cnt - jump - 1);
+}
+
 static int instantiate_bzhi(u64 payload, struct bpf_insn *insn_buf, bool is64)
 {
 	u8 dst_reg, src_reg, cnt_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2);
-	u32 restore_mask;
-	int j_count_ge, write_label;
+	int jump, high;
 	int cnt = 0;
 	int err;
 
 	err = decode_bmi2_shift_payload(payload, &dst_reg, &src_reg, &cnt_reg);
 	if (err)
 		return err;
-	restore_mask = scratch_mask;
-	if (kop_x86_is_scratch(dst_reg))
-		restore_mask &= ~KOP_X86_SCRATCH_MASK(dst_reg);
 
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH0, src_reg, is64,
-		       false);
-	kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH1, cnt_reg, is64,
-		       false);
-	j_count_ge = cnt;
-	insn_buf[cnt++] = BPF_JMP_IMM(BPF_JGE, KOP_X86_SCRATCH1,
-				      is64 ? 64 : 32, 0);
-	insn_buf[cnt++] = is64 ?
-		BPF_MOV64_IMM(KOP_X86_SCRATCH2, 1) :
-		BPF_MOV32_IMM(KOP_X86_SCRATCH2, 1);
-	insn_buf[cnt++] = is64 ?
-		BPF_ALU64_REG(BPF_LSH, KOP_X86_SCRATCH2,
-			      KOP_X86_SCRATCH1) :
-		BPF_ALU32_REG(BPF_LSH, KOP_X86_SCRATCH2,
-			      KOP_X86_SCRATCH1);
-	insn_buf[cnt++] = is64 ?
-		BPF_ALU64_IMM(BPF_ADD, KOP_X86_SCRATCH2, -1) :
-		BPF_ALU32_IMM(BPF_ADD, KOP_X86_SCRATCH2, -1);
-	insn_buf[cnt++] = is64 ?
-		BPF_ALU64_REG(BPF_AND, KOP_X86_SCRATCH0,
-			      KOP_X86_SCRATCH2) :
-		BPF_ALU32_REG(BPF_AND, KOP_X86_SCRATCH0,
-			      KOP_X86_SCRATCH2);
-	write_label = cnt;
-	kop_x86_write(insn_buf, &cnt, dst_reg, KOP_X86_SCRATCH0,
-			scratch_mask, is64, false);
-	kop_x86_restore_scratch(insn_buf, &cnt, restore_mask);
-
-	insn_buf[j_count_ge].off = write_label - j_count_ge - 1;
+	cnt++;
+	instantiate_bzhi_dispatch(insn_buf, &cnt, dst_reg, src_reg, cnt_reg, is64,
+				  is64 ? 6 : 5, 0);
+	jump = cnt++;
+	high = cnt;
+	insn_buf[cnt++] = is64 ? BPF_MOV64_REG(dst_reg, src_reg) :
+				BPF_MOV32_REG(dst_reg, src_reg);
+	insn_buf[0] = BPF_JMP_IMM(BPF_JSET, cnt_reg, is64 ? 0xc0 : 0xe0,
+				 high - 1);
+	insn_buf[jump] = BPF_JMP_A(cnt - jump - 1);
 	return cnt;
 }
 
@@ -354,7 +366,7 @@ const struct bpf_kop bpf_x86_shrxq_desc = {
 
 const struct bpf_kop bpf_x86_bzhil_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 159,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_bzhil,
 	.emit_x86 = emit_bzhil_x86,
@@ -362,7 +374,7 @@ const struct bpf_kop bpf_x86_bzhil_desc = {
 
 const struct bpf_kop bpf_x86_bzhiq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 319,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_bzhiq,
 	.emit_x86 = emit_bzhiq_x86,
