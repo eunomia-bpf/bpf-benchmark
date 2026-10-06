@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "modprobe ip6_tunnel failed: modprobe: FATAL: Module ip6_tunnel not found in directory /artifacts/lib/modules/7.0.0-rc2+",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "error"
+}

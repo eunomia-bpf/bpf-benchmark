@@ -1,0 +1,11 @@
+schema_version: 2
+suite_name: macro_apps
+
+apps:
+  - bcc/set
+  - otelcol-ebpf-profiler/profiling
+  - cilium/agent
+  - tetragon/observer
+  - katran
+
+  - tracee/monitor
