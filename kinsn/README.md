@@ -19,4 +19,6 @@ Builds and runs use the repository [Make entrypoints](../README.md#running-bench
 
 ## Renames
 
-`Kops`, `KOperation`, and `kop` → `kinsn` (with `KINSN`/`Kinsn` casing in identifiers); `kopprober` → `kinsnprober`. [docs/MOVED.md](../docs/MOVED.md) records the old and new paths, including result directories. Earlier paper names and immutable external references remain recognizable there.
+`Kops`, `KOperation`, and `kop` → `kinsn` (with `KINSN`/`Kinsn` casing in identifiers); `kopprober` → `kinsnprober`; `nokop` → `nokinsn`. [docs/MOVED.md](../docs/MOVED.md) records the old and new paths, including result directories. Earlier paper names and immutable external references remain recognizable there.
+
+The LLVM fork is now [`eunomia-bpf/bpf-kinsn-llvm`](https://github.com/eunomia-bpf/bpf-kinsn-llvm); GitHub redirects its earlier `bpf-kop-llvm` URL.

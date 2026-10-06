@@ -5017,3 +5017,17 @@ All descendant files are preserved under the same relative names. `recorded_YYYY
 | `docs/kprog-simulator-in-ebpf/tables/sec-6-koperation-case-studies.tex` | `docs/kprog-simulator-in-ebpf/tables/sec-6-kinsn-case-studies.tex` |
 | `docs/kprog-simulator-in-ebpf/tables/sec-6-koperation-micro.tex` | `docs/kprog-simulator-in-ebpf/tables/sec-6-kinsn-micro.tex` |
 | `llvm-backend/llvm/llvm/lib/Target/BPF/BPFKopSelect.cpp` | `llvm-backend/llvm/llvm/lib/Target/BPF/BPFKinsnSelect.cpp` |
+
+## Verification of the 2026-10-06 migration
+
+The identifier migration updated 5,776 text artifacts in the main repository, plus the LLVM and prototype-kernel forks and the four paper submodules. The LLVM fork was renamed from `eunomia-bpf/bpf-kop-llvm` to `eunomia-bpf/bpf-kinsn-llvm`; its submodule URL and revision now use the new repository. Embedded compressed archives, binary historical artwork, immutable external URLs, generated caches, and historical Git names remain intact; substring matches inside opaque data are not identifiers.
+
+The indexes cover 4,526 run containers: 3,632 corpus, 773 micro, and 121 test containers. They retain all 117,319 previously tracked result files. Collection status moved 503 containers into `aborted/` and 72 into `invalid/`; 85 VM-clock directory names use explicit recorded-date markers. Fourteen earlier result-directory names also changed from `kop` to `kinsn`. Directory mappings above apply to all descendant files.
+
+Before/after comparison found no numeric change in nine summary documents (3,052 numeric tokens), all 85 current-evaluation-cited corpus analyses, or 4,839,202 numeric values across 4,929 valid JSON/JSONL artifacts. All 416 embedded archive values were compared exactly and retained. Five malformed artifacts retain their original content apart from labels; they are not synthesized into valid results. Of the 85 corpus analyses, 84 complete and one empty-result analysis returns the same pre-existing failure.
+
+Five archived generators cannot fully regenerate their coverage summaries because the cited `details/loadtime-reports/*.jsonl` inputs were never checked in: `kinsn_eval_20260531.py`, `kinsn_eval_20260602.py`, `kinsn_eval_20260604.py`, `kinsn_all_force_eval_20260603.py`, and `kinsn_lea_all_force_eval_20260602.py`. Their existing summary documents are retained and numerically compared; the other five generators ran before and after the migration.
+
+Static validation passed for bpfopt/LLVM and the shim, x86 and arm64 kprog tools, both kinsn module builds with `-Werror`, the native linker and binding library on both architectures, both full Lean builds, userspace unit tests, the full simulator formal/host checks, and `make lint`. Kinsn's axiom audit reports zero non-standard axioms. Kprog's audit of 6,212 declarations fails on `Lean.ofReduceBool` from Std's bit-vector tactic; 308 concrete proof steps now use kernel-reduced `decide`, and the remaining trust requirement is documented in `kprog/formal/README.md`.
+
+Current Markdown documentation and result indexes have no broken local links or anchors (129 pages, 6,071 links before this note). Of 36 external links checked, 30 return HTTP 200 and six return HTTP 403/429; none returns 404. No VM, QEMU, or benchmark was run. Expected-abort host tests ran with a temporary process-level core-dump control; their signal assertions and repository source were unchanged.
