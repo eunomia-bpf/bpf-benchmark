@@ -55,206 +55,14 @@ static __always_inline bool kop_x86_needs_rex8(u8 reg)
 	}
 }
 
-#define KOP_X86_SCRATCH_R6_OFF	-40
-#define KOP_X86_SCRATCH_R7_OFF	-32
-#define KOP_X86_SCRATCH_R8_OFF	-24
 #define KOP_X86_PROOF_LHS_OFF		-16
 #define KOP_X86_PROOF_RHS_OFF		-8
-#define KOP_X86_STACK_BYTES		40
 
-#define KOP_X86_SCRATCH0		BPF_REG_6
-#define KOP_X86_SCRATCH1		BPF_REG_7
-#define KOP_X86_SCRATCH2		BPF_REG_8
-#define KOP_X86_SCRATCH_MASK(REG)	(1U << (REG))
 #define KOP_X86_SAVE_RESTORE_INSN_CNT	6
 
 static __always_inline bool kop_x86_reg_is_bpf_writable(u8 reg)
 {
 	return reg < BPF_REG_10;
-}
-
-static __always_inline bool kop_x86_is_scratch(u8 reg)
-{
-	return reg >= KOP_X86_SCRATCH0 && reg <= KOP_X86_SCRATCH2;
-}
-
-static __always_inline bool kop_x86_reg_uses_stack_slot(u8 reg)
-{
-	(void)reg;
-	return false;
-}
-
-static __always_inline bool kop_x86_arch_reg_uses_stack_slot(u8 reg)
-{
-	return kop_x86_is_scratch(reg);
-}
-
-static __always_inline s16 kop_x86_scratch_off(u8 reg)
-{
-	switch (reg) {
-	case KOP_X86_SCRATCH0:
-		return KOP_X86_SCRATCH_R6_OFF;
-	case KOP_X86_SCRATCH1:
-		return KOP_X86_SCRATCH_R7_OFF;
-	case KOP_X86_SCRATCH2:
-		return KOP_X86_SCRATCH_R8_OFF;
-	default:
-		return 0;
-	}
-}
-
-static __always_inline u8 kop_x86_scratch_avoid(u8 a, u8 b, u8 c)
-{
-	u8 reg;
-
-	for (reg = KOP_X86_SCRATCH0; reg <= KOP_X86_SCRATCH2; reg++) {
-		if (reg != a && reg != b && reg != c)
-			return reg;
-	}
-	return KOP_X86_SCRATCH0;
-}
-
-static __always_inline u8 kop_x86_scratch_avoid4(u8 a, u8 b, u8 c, u8 d)
-{
-	u8 reg;
-
-	for (reg = KOP_X86_SCRATCH0; reg <= KOP_X86_SCRATCH2; reg++) {
-		if (reg != a && reg != b && reg != c && reg != d)
-			return reg;
-	}
-	return KOP_X86_SCRATCH0;
-}
-
-static __always_inline void kop_x86_save_scratch(struct bpf_insn *insn_buf,
-						   int *cnt, u32 mask)
-{
-	if (mask & KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0))
-		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10,
-						 KOP_X86_SCRATCH0,
-						 KOP_X86_SCRATCH_R6_OFF);
-	if (mask & KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1))
-		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10,
-						 KOP_X86_SCRATCH1,
-						 KOP_X86_SCRATCH_R7_OFF);
-	if (mask & KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2))
-		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10,
-						 KOP_X86_SCRATCH2,
-						 KOP_X86_SCRATCH_R8_OFF);
-}
-
-static __always_inline void kop_x86_restore_scratch(struct bpf_insn *insn_buf,
-						      int *cnt, u32 mask)
-{
-	if (mask & KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2))
-		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, KOP_X86_SCRATCH2,
-						 BPF_REG_10,
-						 KOP_X86_SCRATCH_R8_OFF);
-	if (mask & KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1))
-		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, KOP_X86_SCRATCH1,
-						 BPF_REG_10,
-						 KOP_X86_SCRATCH_R7_OFF);
-	if (mask & KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0))
-		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, KOP_X86_SCRATCH0,
-						 BPF_REG_10,
-						 KOP_X86_SCRATCH_R6_OFF);
-}
-
-static __always_inline void kop_x86_read(struct bpf_insn *insn_buf,
-					   int *cnt, u8 dst_reg, u8 src_reg,
-					   bool width64, bool arch_regs)
-{
-	bool stacked = arch_regs ? kop_x86_arch_reg_uses_stack_slot(src_reg) :
-				   kop_x86_reg_uses_stack_slot(src_reg);
-
-	if (stacked)
-		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, dst_reg, BPF_REG_10,
-						 kop_x86_scratch_off(src_reg));
-	else if (dst_reg != src_reg) {
-		if (width64)
-			insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, src_reg);
-		else
-			insn_buf[(*cnt)++] = BPF_MOV32_REG(dst_reg, src_reg);
-	}
-}
-
-static __always_inline void kop_x86_read64(struct bpf_insn *insn_buf,
-					     int *cnt, u8 dst_reg, u8 src_reg)
-{
-	kop_x86_read(insn_buf, cnt, dst_reg, src_reg, true, false);
-}
-
-static __always_inline void kop_x86_read32(struct bpf_insn *insn_buf,
-					     int *cnt, u8 dst_reg, u8 src_reg)
-{
-	kop_x86_read(insn_buf, cnt, dst_reg, src_reg, false, false);
-}
-
-static __always_inline void kop_x86_write(struct bpf_insn *insn_buf,
-					      int *cnt, u8 dst_reg,
-					      u8 value_reg, u32 saved_mask,
-					      bool width64, bool arch_regs)
-{
-	bool stacked = arch_regs ? kop_x86_arch_reg_uses_stack_slot(dst_reg) :
-				   kop_x86_reg_uses_stack_slot(dst_reg);
-
-	if (stacked)
-		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, value_reg,
-						 kop_x86_scratch_off(dst_reg));
-	else if (dst_reg != value_reg) {
-		if (width64)
-			insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, value_reg);
-		else
-			insn_buf[(*cnt)++] = BPF_MOV32_REG(dst_reg, value_reg);
-	}
-	(void)saved_mask;
-}
-
-static __always_inline void kop_x86_write64(struct bpf_insn *insn_buf,
-					      int *cnt, u8 dst_reg,
-					      u8 value_reg, u32 saved_mask)
-{
-	kop_x86_write(insn_buf, cnt, dst_reg, value_reg, saved_mask, true,
-			false);
-}
-
-static __always_inline void kop_x86_write32(struct bpf_insn *insn_buf,
-					      int *cnt, u8 dst_reg,
-					      u8 value_reg, u32 saved_mask)
-{
-	kop_x86_write(insn_buf, cnt, dst_reg, value_reg, saved_mask, false,
-			false);
-}
-
-static __always_inline void kop_x86_read64_arch(struct bpf_insn *insn_buf,
-						  int *cnt, u8 dst_reg,
-						  u8 src_reg)
-{
-	kop_x86_read(insn_buf, cnt, dst_reg, src_reg, true, true);
-}
-
-static __always_inline void kop_x86_read32_arch(struct bpf_insn *insn_buf,
-						  int *cnt, u8 dst_reg,
-						  u8 src_reg)
-{
-	kop_x86_read(insn_buf, cnt, dst_reg, src_reg, false, true);
-}
-
-static __always_inline void kop_x86_write64_arch(struct bpf_insn *insn_buf,
-						   int *cnt, u8 dst_reg,
-						   u8 value_reg,
-						   u32 saved_mask)
-{
-	kop_x86_write(insn_buf, cnt, dst_reg, value_reg, saved_mask, true,
-			true);
-}
-
-static __always_inline void kop_x86_write32_arch(struct bpf_insn *insn_buf,
-						   int *cnt, u8 dst_reg,
-						   u8 value_reg,
-						   u32 saved_mask)
-{
-	kop_x86_write(insn_buf, cnt, dst_reg, value_reg, saved_mask, false,
-			true);
 }
 
 static __always_inline bool kop_bpf_gpr_valid(u8 reg)
@@ -322,11 +130,6 @@ static __always_inline void kop_emit_rex8(u8 *buf, u32 *len, u8 reg, u8 rm,
 static __always_inline void kop_emit_rex8_rm(u8 *buf, u32 *len, u8 rm)
 {
 	kop_emit_rex8(buf, len, 0, rm, false, false, true);
-}
-
-static __always_inline void kop_emit_rex8_mem(u8 *buf, u32 *len, u8 base)
-{
-	kop_emit_rex8(buf, len, 0, base, false, false, false);
 }
 
 static __always_inline void kop_emit_rex8_rr(u8 *buf, u32 *len,
