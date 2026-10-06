@@ -5,7 +5,7 @@ namespace BPF
 abbrev State := Machine.State Reg
 
 inductive Cond where
-  | eq | ne | ge | gt | bitSet
+  | eq | ne | ge | gt | bitSet | signedLt
   deriving DecidableEq, Repr
 
 def Cond.eval {w : Nat} (c : Cond) (a b : BitVec w) : Bool :=
@@ -15,6 +15,7 @@ def Cond.eval {w : Nat} (c : Cond) (a b : BitVec w) : Bool :=
   | .ge => decide (b.toNat ≤ a.toNat)
   | .gt => decide (b.toNat < a.toNat)
   | .bitSet => !((a &&& b) == 0)
+  | .signedLt => decide (a.toInt < b.toInt)
 
 def Cond.test (c : Cond) (w : Width) (a b : BitVec 64) : Bool :=
   match w with
