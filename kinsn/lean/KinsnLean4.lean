@@ -23,6 +23,7 @@ import KinsnLean4.Kinsn.ModuleCmov
 import KinsnLean4.Kinsn.ModuleByteorder
 import KinsnLean4.Kinsn.ModuleNot
 import KinsnLean4.Kinsn.ModuleImul
+import KinsnLean4.Kinsn.ModuleMovWide
 import KinsnLean4.Kinsn.ModuleMovStore
 import KinsnLean4.Kinsn.ModuleMovsxd
 import KinsnLean4.Kinsn.ModuleMovzx

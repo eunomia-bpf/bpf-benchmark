@@ -15,7 +15,6 @@
 #define X86_FORM_SIB		5
 #define X86_FORM_STORE		6
 #define X86_FORM_STORE_IMM	7
-#define X86_FORM_FRAME		8
 #define X86_FORM_ARCH_MEM	9
 #define X86_FORM_ARCH_STORE	10
 #define X86_FORM_ARCH_STORE_IMM	11
@@ -167,20 +166,6 @@ static __always_inline int decode_imm_any(u64 payload, u8 *dst_reg,
 	return 0;
 }
 
-static __always_inline int decode_frame(u64 payload, u8 *dst_reg, u8 *src_reg)
-{
-	payload = kop_payload_decode(payload);
-	if (mov_payload_form(payload) != X86_FORM_FRAME || payload >> 12)
-		return -EINVAL;
-
-	*dst_reg = kop_payload_reg(payload, 4);
-	*src_reg = kop_payload_reg(payload, 8);
-	if ((*dst_reg == BPF_REG_10 && *src_reg == KOP_X86_REG_RSP) ||
-	    (*dst_reg == KOP_X86_REG_RSP && *src_reg == BPF_REG_10))
-		return 0;
-	return -EINVAL;
-}
-
 static __always_inline int decode_sib(u64 payload, u8 *dst_reg, u8 *base_reg,
 				      u8 *index_reg, u8 *scale_log2,
 				      s16 *offset, bool allow_stack_dst)
@@ -226,54 +211,6 @@ static __always_inline int decode_store_imm(u64 payload, u8 expected_form,
 	return 0;
 }
 
-static __always_inline int instantiate_movq_value(u8 dst_reg, u8 src_reg,
-						  struct bpf_insn *insn_buf,
-						  bool dst_arch,
-						  bool src_arch,
-						  bool dst_raw_bpf,
-						  bool src_raw_bpf)
-{
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-	bool src_stacked = !src_raw_bpf &&
-			    (src_arch ? kop_x86_arch_reg_uses_stack_slot(src_reg) :
-					kop_x86_reg_uses_stack_slot(src_reg));
-	bool dst_stacked = !dst_raw_bpf &&
-			    (dst_arch ? kop_x86_arch_reg_uses_stack_slot(dst_reg) :
-					kop_x86_reg_uses_stack_slot(dst_reg));
-	int cnt = 0;
-
-	if (!src_stacked && !dst_stacked) {
-		insn_buf[0] = BPF_MOV64_REG(dst_reg, src_reg);
-		return 1;
-	}
-	if (!dst_stacked) {
-		if (src_raw_bpf)
-			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, src_reg);
-		else if (src_arch)
-			kop_x86_read64_arch(insn_buf, &cnt, dst_reg, src_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, dst_reg, src_reg);
-		return cnt ? cnt : 1;
-	}
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (src_raw_bpf)
-		insn_buf[cnt++] = BPF_MOV64_REG(KOP_X86_SCRATCH0, src_reg);
-	else if (src_arch)
-		kop_x86_read64_arch(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				      src_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				  src_reg);
-	if (dst_arch)
-		kop_x86_write64_arch(insn_buf, &cnt, dst_reg,
-				       KOP_X86_SCRATCH0, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, dst_reg,
-				  KOP_X86_SCRATCH0, scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
-}
-
 static int instantiate_movq_reg(u64 payload, struct bpf_insn *insn_buf)
 {
 	struct mov_rr_payload rr;
@@ -282,124 +219,34 @@ static int instantiate_movq_reg(u64 payload, struct bpf_insn *insn_buf)
 	err = decode_rr_any(payload, &rr);
 	if (err)
 		return err;
-
-	return instantiate_movq_value(rr.dst_reg, rr.src_reg, insn_buf,
-				      rr.dst_arch, rr.src_arch,
-				      rr.dst_raw_bpf, rr.src_raw_bpf);
+	insn_buf[0] = BPF_MOV64_REG(rr.dst_reg, rr.src_reg);
+	return 1;
 }
 
 static int instantiate_movl_reg(u64 payload, struct bpf_insn *insn_buf)
 {
 	struct mov_rr_payload rr;
-	u8 value_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-	bool src_stacked, dst_stacked;
-	int cnt = 0;
 	int err;
 
 	err = decode_rr_any(payload, &rr);
 	if (err)
 		return err;
-
-	src_stacked = !rr.src_raw_bpf &&
-		       (rr.src_arch ? kop_x86_arch_reg_uses_stack_slot(rr.src_reg) :
-				      kop_x86_reg_uses_stack_slot(rr.src_reg));
-	dst_stacked = !rr.dst_raw_bpf &&
-		       (rr.dst_arch ? kop_x86_arch_reg_uses_stack_slot(rr.dst_reg) :
-				      kop_x86_reg_uses_stack_slot(rr.dst_reg));
-	if (!dst_stacked && !src_stacked) {
-		insn_buf[0] = BPF_STX_MEM(BPF_W, BPF_REG_10, rr.src_reg,
-					  KOP_X86_PROOF_LHS_OFF);
-		insn_buf[1] = BPF_MOV64_IMM(rr.dst_reg, 0);
-		insn_buf[2] = BPF_LDX_MEM(BPF_W, rr.dst_reg, BPF_REG_10,
-					  KOP_X86_PROOF_LHS_OFF);
-		return 3;
-	}
-
-	value_reg = dst_stacked ? KOP_X86_SCRATCH0 : rr.dst_reg;
-	if (dst_stacked)
-		kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (rr.src_raw_bpf)
-		insn_buf[cnt++] = BPF_MOV32_REG(value_reg, rr.src_reg);
-	else if (rr.src_arch)
-		kop_x86_read32_arch(insn_buf, &cnt, value_reg, rr.src_reg);
-	else
-		kop_x86_read32(insn_buf, &cnt, value_reg, rr.src_reg);
-	insn_buf[cnt++] = BPF_MOV32_REG(value_reg, value_reg);
-	if (dst_stacked) {
-		if (rr.dst_arch)
-			kop_x86_write32_arch(insn_buf, &cnt, rr.dst_reg,
-					       value_reg, scratch_mask);
-		else
-			kop_x86_write32(insn_buf, &cnt, rr.dst_reg,
-					  value_reg, scratch_mask);
-		kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	}
-	return cnt;
+	insn_buf[0] = BPF_MOV32_REG(rr.dst_reg, rr.src_reg);
+	return 1;
 }
 
 static int instantiate_mov_imm(u64 payload, struct bpf_insn *insn_buf, bool is64)
 {
 	u8 dst_reg;
 	s32 imm;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-	bool arch_reg, dst_stacked;
-	int cnt = 0;
+	bool arch_reg;
 	int err;
 
 	err = decode_imm_any(payload, &dst_reg, &imm, &arch_reg);
 	if (err)
 		return err;
-
-	dst_stacked = arch_reg ? kop_x86_arch_reg_uses_stack_slot(dst_reg) :
-				  kop_x86_reg_uses_stack_slot(dst_reg);
-	if (!dst_stacked) {
-		insn_buf[0] = is64 ? BPF_MOV64_IMM(dst_reg, imm) :
-				      BPF_MOV32_IMM(dst_reg, imm);
-		return 1;
-	}
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	insn_buf[cnt++] = is64 ? BPF_MOV64_IMM(KOP_X86_SCRATCH0, imm) :
-				  BPF_MOV32_IMM(KOP_X86_SCRATCH0, imm);
-	if (is64) {
-		if (arch_reg)
-			kop_x86_write64_arch(insn_buf, &cnt, dst_reg,
-					       KOP_X86_SCRATCH0,
-					       scratch_mask);
-		else
-			kop_x86_write64(insn_buf, &cnt, dst_reg,
-					  KOP_X86_SCRATCH0, scratch_mask);
-	} else {
-		if (arch_reg)
-			kop_x86_write32_arch(insn_buf, &cnt, dst_reg,
-					       KOP_X86_SCRATCH0,
-					       scratch_mask);
-		else
-			kop_x86_write32(insn_buf, &cnt, dst_reg,
-					  KOP_X86_SCRATCH0, scratch_mask);
-	}
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
-}
-
-static int instantiate_movq_frame(u64 payload, struct bpf_insn *insn_buf)
-{
-	u8 dst_reg, src_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-	int cnt = 0;
-	int err;
-
-	err = decode_frame(payload, &dst_reg, &src_reg);
-	if (err)
-		return err;
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kop_x86_read64_arch(insn_buf, &cnt, KOP_X86_SCRATCH0, src_reg);
-	kop_x86_write64_arch(insn_buf, &cnt, dst_reg, KOP_X86_SCRATCH0,
-			       scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	insn_buf[0] = is64 ? BPF_MOV64_IMM(dst_reg, imm) : BPF_MOV32_IMM(dst_reg, imm);
+	return 1;
 }
 
 static int instantiate_movb_imm(u64 payload, struct bpf_insn *insn_buf)
@@ -710,8 +557,6 @@ static int instantiate_movq(u64 payload, struct bpf_insn *insn_buf)
 		return instantiate_mov_imm_store(payload, insn_buf, BPF_DW, false);
 	case X86_FORM_ARCH_STORE_IMM:
 		return instantiate_mov_imm_store(payload, insn_buf, BPF_DW, true);
-	case X86_FORM_FRAME:
-		return instantiate_movq_frame(payload, insn_buf);
 	default:
 		return -EINVAL;
 	}
@@ -842,31 +687,6 @@ static int emit_mov_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		kop_emit_u8(buf, &len, 0xc0 | kop_x86_code(dst_reg));
 		kop_emit_s32(buf, &len, imm);
 	}
-
-	return kop_emit_finish(image, off, emit, buf, len);
-}
-
-static int emit_movq_frame_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			       const struct bpf_prog *prog)
-{
-	u8 dst_reg, src_reg;
-	u8 buf[4];
-	u32 len = 0;
-	int err;
-
-	(void)prog;
-
-	err = decode_frame(payload, &dst_reg, &src_reg);
-	if (err)
-		return err;
-	if (!kop_x86_valid(dst_reg) || !kop_x86_valid(src_reg))
-		return -EINVAL;
-
-	kop_emit_rex_rr(buf, &len, true, src_reg, dst_reg);
-	kop_emit_u8(buf, &len, 0x89);
-	kop_emit_u8(buf, &len, 0xc0 |
-		      (kop_x86_code(src_reg) << 3) |
-		      kop_x86_code(dst_reg));
 
 	return kop_emit_finish(image, off, emit, buf, len);
 }
@@ -1282,8 +1102,6 @@ static int emit_movq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	case X86_FORM_ARCH_STORE_IMM:
 		return emit_mov_imm_store_x86(image, off, emit, payload, prog,
 					      BPF_DW, true);
-	case X86_FORM_FRAME:
-		return emit_movq_frame_x86(image, off, emit, payload, prog);
 	default:
 		return -EINVAL;
 	}

@@ -43,6 +43,7 @@ inductive MInsn where
   | inc (bits : Nat) (dst : GPReg)
   | shd (bits : Nat) (left : Bool) (dst src : GPReg) (count : Nat)
   | popcnt (dst src : GPReg)
+  | movImm32Z (dst : GPReg) (imm : BitVec 32)
   | mov32 (dst src : GPReg)
   | movzx (bits : Nat) (dst src : GPReg)
   | movswl (dst src : GPReg)
@@ -121,6 +122,7 @@ def MInsn.step (i : MInsn) (s : State) : State :=
       else (d >>> n) ||| (v <<< (bits - n))))
   | .popcnt dst src => s.set dst (BitVec.ofNat 64
       ((List.range 64).filter (fun i => (s.regs src).getLsbD i)).length)
+  | .movImm32Z dst imm => s.set dst (BitVec.setWidth 64 imm)
   | .mov32 dst src => s.set dst (BitVec.setWidth 64 (BitVec.setWidth 32 (s.regs src)))
   | .movzx bits dst src => s.set dst (BitVec.setWidth 64 (BitVec.setWidth bits (s.regs src)))
   | .movswl dst src => s.set dst (BitVec.setWidth 64
@@ -164,7 +166,7 @@ def MInsn.writes : MInsn → List GPReg
   | .aluMem _ _ d _ _ _ _ | .aluNarrow _ _ d _ | .inc _ d
   | .aluImmNarrow _ _ d _ | .aluMemNarrow _ _ d _ _
   | .shd _ _ d _ _ | .popcnt d _ => [d]
-  | .mov32 d _ | .movzx _ d _ | .movswl d _ | .loadIndex _ d _ _ _ _ _
+  | .movImm32Z d _ | .mov32 d _ | .movzx _ d _ | .movswl d _ | .loadIndex _ d _ _ _ _ _
   | .loadIndexSx32 d _ _ _ _ | .rolCL _ d
   | .shiftCLWidth _ _ d | .shiftImmWidth _ _ d _ => [d]
 
