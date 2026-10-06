@@ -772,77 +772,27 @@ static int instantiate_movzwl(u64 payload, struct bpf_insn *insn_buf)
 static int instantiate_movsxd(u64 payload, struct bpf_insn *insn_buf)
 {
 	struct mov_rr_payload rr;
-	u8 dst_reg, base_reg, index_reg, scale_log2;
-	u8 addr_reg = KOP_X86_SCRATCH0;
-	u8 index_eval_reg = KOP_X86_SCRATCH1;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
-	s16 offset;
-	int add_count;
-	int cnt = 0;
+	u8 dst_reg;
+	u8 form = mov_payload_form(kop_payload_decode(payload));
+	int cnt;
 	int err;
-	bool arch_regs;
 
-	if (mov_payload_form(kop_payload_decode(payload)) == X86_FORM_RR ||
-	    mov_payload_form(kop_payload_decode(payload)) == X86_FORM_ARCH_RR) {
+	if (form == X86_FORM_RR || form == X86_FORM_ARCH_RR) {
 		err = decode_rr_any(payload, &rr);
 		if (err)
 			return err;
-		scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-		kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-		if (rr.src_arch)
-			kop_x86_read64_arch(insn_buf, &cnt,
-					      KOP_X86_SCRATCH0,
-					      rr.src_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0,
-					 rr.src_reg);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH,
-						KOP_X86_SCRATCH0, 32);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ARSH,
-						KOP_X86_SCRATCH0, 32);
-		if (rr.dst_arch)
-			kop_x86_write64_arch(insn_buf, &cnt, rr.dst_reg,
-					       KOP_X86_SCRATCH0,
-					       scratch_mask);
-		else
-			kop_x86_write64(insn_buf, &cnt, rr.dst_reg,
-					  KOP_X86_SCRATCH0, scratch_mask);
-		kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-		return cnt;
-	}
-
-	err = decode_sib(payload, &dst_reg, &base_reg, &index_reg, &scale_log2,
-			 &offset, false);
-	if (err)
-		return err;
-	arch_regs = mov_payload_form(kop_payload_decode(payload)) ==
-		    X86_FORM_ARCH_SIB;
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_regs) {
-		kop_x86_read64_arch(insn_buf, &cnt, addr_reg, base_reg);
-		kop_x86_read64_arch(insn_buf, &cnt, index_eval_reg,
-				      index_reg);
+		dst_reg = rr.dst_reg;
+		insn_buf[0] = BPF_MOV64_REG(dst_reg, rr.src_reg);
+		cnt = 1;
 	} else {
-		kop_x86_read64(insn_buf, &cnt, addr_reg, base_reg);
-		kop_x86_read64(insn_buf, &cnt, index_eval_reg, index_reg);
+		cnt = instantiate_mov_sib(payload, insn_buf, BPF_W);
+		if (cnt < 0)
+			return cnt;
+		dst_reg = kop_payload_reg(kop_payload_decode(payload), 4);
 	}
-	add_count = 1 << scale_log2;
-	while (add_count--)
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg,
-						index_eval_reg);
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_W, KOP_X86_SCRATCH0, addr_reg,
-				      offset);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, KOP_X86_SCRATCH0, 32);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ARSH, KOP_X86_SCRATCH0, 32);
-	if (arch_regs)
-		kop_x86_write64_arch(insn_buf, &cnt, dst_reg,
-				       KOP_X86_SCRATCH0, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, dst_reg,
-				  KOP_X86_SCRATCH0, scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, 32);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ARSH, dst_reg, 32);
 	return cnt;
 }
 

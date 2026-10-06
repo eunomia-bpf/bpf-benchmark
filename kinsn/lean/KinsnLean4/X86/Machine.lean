@@ -49,6 +49,7 @@ inductive MInsn where
   | storeImm (bytes : Nat) (base : GPReg) (off value : BitVec 64)
   | loadIndex (bytes : Nat) (dst base index : GPReg) (scale : Nat)
       (off : BitVec 64) (be : Bool)
+  | loadIndexSx32 (dst base index : GPReg) (scale : Nat) (off : BitVec 64)
   | rolCL (bits : Nat) (dst : GPReg)
   | shiftImmWidth (bits : Nat) (op : ShiftOp) (dst : GPReg) (count : Nat)
   | shiftCLWidth (bits : Nat) (op : ShiftOp) (dst : GPReg)
@@ -130,6 +131,10 @@ def MInsn.step (i : MInsn) (s : State) : State :=
     let v := Machine.loadLE s.mem a n
     (s.read a n).set dst (if be then writeWidth (8 * n) (s.regs dst) (reverseLoad n v)
       else v)
+  | .loadIndexSx32 dst base index scale off =>
+    let a := s.regs base + (s.regs index <<< scale) + off
+    let v := Machine.loadLE s.mem a 4
+    (s.read a 4).set dst (BitVec.signExtend 64 (BitVec.setWidth 32 v))
   | .rolCL bits dst => s.set dst (writeWidth bits (s.regs dst) (BitVec.setWidth 64
       ((BitVec.setWidth bits (s.regs dst)).rotateLeft ((s.regs .rcx).toNat % bits))))
   | .shiftImmWidth bits op dst count =>
@@ -159,7 +164,8 @@ def MInsn.writes : MInsn → List GPReg
   | .aluMem _ _ d _ _ _ _ | .aluNarrow _ _ d _ | .inc _ d
   | .aluImmNarrow _ _ d _ | .aluMemNarrow _ _ d _ _
   | .shd _ _ d _ _ | .popcnt d _ => [d]
-  | .mov32 d _ | .movzx _ d _ | .movswl d _ | .loadIndex _ d _ _ _ _ _ | .rolCL _ d
+  | .mov32 d _ | .movzx _ d _ | .movswl d _ | .loadIndex _ d _ _ _ _ _
+  | .loadIndexSx32 d _ _ _ _ | .rolCL _ d
   | .shiftCLWidth _ _ d | .shiftImmWidth _ _ d _ => [d]
 
 def mexec (p : List MInsn) (s : State) : State := p.foldl (fun s i => i.step s) s
