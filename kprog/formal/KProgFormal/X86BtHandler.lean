@@ -163,7 +163,7 @@ theorem x86_bt_imm32_drops_high_bits :
       x86BtIndexSpec .btImm 0 0x100000001 = 0x100000001 ∧
       x86BtIndexSpec .btImm 0 0x100000001 ≠
         x86BtIndexSpec .btMemImm 0 0x100000001 := by
-  refine ⟨?_, ?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_, ?_⟩ <;> decide
 
 /-- The tested bit the generated body computes, restated through the independent
 `bt` contract at the resolved width. -/
@@ -287,14 +287,14 @@ theorem x86_bt_w8_example :
       ⟨0xdead, .scalar⟩ false false false).cf = true ∧
       (x86BtStepSpec .bt .b8 0x08 3 0 (fun _ => 0)
         ⟨0xdead, .scalar⟩ false false false).dst = ⟨0xdead, .scalar⟩ := by
-  refine ⟨?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_⟩ <;> decide
 
 /-- An 8-bit `BT` with an index at or above the width tests a bit the byte does
 not have and never carries. -/
 theorem x86_bt_handler_wide_index_false :
     (x86BtStepSpec .bt .b8 0xff 8 0 (fun _ => 0)
       ⟨0, .scalar⟩ false false false).cf = false := by
-  native_decide
+  decide
 
 /-- The memory form narrows its loaded base to the resolved width before the
 test: a byte whose bit 8 is set does not carry a 32-bit `BT_MEM_IMM`, because
@@ -302,5 +302,5 @@ the index 8 selects a bit the loaded word does not have under a 1-byte width. -/
 theorem x86_bt_mem_imm_w8_example :
     (x86BtStepSpec .btMemImm .b8 0 0 8 (fun _ => 0xff)
       ⟨0, .scalar⟩ false false false).cf = false := by
-  native_decide
+  decide
 end KProgFormal

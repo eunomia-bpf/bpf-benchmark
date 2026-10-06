@@ -60,27 +60,27 @@ theorem arm64_alu_operand_handler_refines (state : Arm64AluHandlerState)
 
 theorem arm64_alu_immediate_bypasses_modifier :
     GeneratedArm64AluOperand.rhs .immediate 5 .sxtb 0x80 63 .w64 = 5 := by
-  native_decide
+  decide
 
 theorem arm64_alu_register_sxtb_feeds_pointer_add :
     generatedArm64AluOperandHandler
       { dst := { bits := 0x55, tag := .scalar }, sp := 0x80 }
       .register .add .gpr 0x100 0 0xff .packet .sxtb 0 .w64 =
       { dst := { bits := 0xff, tag := .packet }, sp := 0x80 } := by
-  native_decide
+  decide
 
 theorem arm64_alu_register_lsl_w32_scalarizes_and_narrows :
     generatedArm64AluOperandHandler
       { dst := { bits := 0x55, tag := .packet }, sp := 0x80 }
       .register .orr .gpr 0 0 1 .mapValue .lsl 31 .w32 =
       { dst := { bits := 0x80000000, tag := .scalar }, sp := 0x80 } := by
-  native_decide
+  decide
 
 theorem arm64_alu_immediate_sp_write_uses_selected_rhs :
     generatedArm64AluOperandHandler
       { dst := { bits := 0x55, tag := .packet }, sp := 0x100 }
       .immediate .sub .sp 0x100 8 0xffff .stack .ror 17 .w64 =
       { dst := { bits := 0x55, tag := .packet }, sp := 0xf8 } := by
-  native_decide
+  decide
 
 end KProgFormal

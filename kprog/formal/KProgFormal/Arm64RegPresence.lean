@@ -75,7 +75,7 @@ theorem arm64_reg_presence_case_dispatch :
       writable (0x00 : BitVec 8) = true ∧
       writable (0x1e : BitVec 8) = true := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;>
-    unfold writable classify xzrNumber noneNumber <;> native_decide
+    unfold writable classify xzrNumber noneNumber <;> decide
 
 /-- Canonical examples: the class selector and the presence predicate on the two
 boundaries and on plain register numbers, pinning the boundary against concrete
@@ -88,6 +88,6 @@ theorem arm64_reg_presence_examples :
       writable (0x1f : BitVec 8) = false ∧
       writable (0xff : BitVec 8) = false ∧
       writable (0x07 : BitVec 8) = true := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> decide
 
 end KProgFormal

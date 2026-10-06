@@ -84,7 +84,7 @@ theorem x86_add_high8_example :
         flags := { cf := false, zf := false, sf := false, of := false } }
       0x0000000000000102 .w8 .high .high).dst.bits =
       0x1122334455668001 := by
-  native_decide
+  decide
 
 /-- Register-destination ADD-immediate after lane selection and decoding of the
 raw artifact immediate. This is the value/flags/writeback slice used by the C
@@ -128,7 +128,7 @@ theorem x86_add_imm64_sign_extension_example :
       0xffffffff .w64 .low =
       { dst := { bits := 0, tag := .scalar },
         flags := { cf := true, zf := true, sf := false, of := false } } := by
-  native_decide
+  decide
 
 def generatedX86AdcHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=
@@ -199,7 +199,7 @@ theorem x86_adc_high8_consumes_incoming_carry :
         flags := { cf := true, zf := false, sf := false, of := false } }
       0x0000000000000102 .w8 .high .high).dst.bits =
       0x1122334455668101 := by
-  native_decide
+  decide
 
 /-- Register-destination ADC-immediate after lane selection and raw immediate
 decoding. The carry used by both result and flags is captured from the same
@@ -245,7 +245,7 @@ theorem x86_adc_imm64_carry_boundary_example :
       0xffffffff .w64 .low =
       { dst := { bits := 0, tag := .scalar },
         flags := { cf := true, zf := true, sf := false, of := false } } := by
-  native_decide
+  decide
 
 def generatedX86SubHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=
@@ -312,7 +312,7 @@ theorem x86_sub_high8_example :
         flags := { cf := false, zf := false, sf := false, of := false } }
       0x0000000000000102 .w8 .high .high).dst.bits =
       0x112233445566ff01 := by
-  native_decide
+  decide
 
 /-- Register-destination SUB-immediate after lane selection and decoding of the
 raw artifact immediate. -/
@@ -355,7 +355,7 @@ theorem x86_sub_imm64_sign_extension_example :
       0xffffffff .w64 .low =
       { dst := { bits := 1, tag := .scalar },
         flags := { cf := true, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 def generatedX86SbbHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=
@@ -426,7 +426,7 @@ theorem x86_sbb_high8_consumes_incoming_borrow :
         flags := { cf := true, zf := false, sf := false, of := false } }
       0x0000000000000102 .w8 .high .high).dst.bits =
       0x112233445566fe01 := by
-  native_decide
+  decide
 
 /-- Register-destination SBB-immediate after lane selection and raw immediate
 decoding. The borrow used by the result and flags is captured from
@@ -472,7 +472,7 @@ theorem x86_sbb_imm64_borrow_boundary_example :
       0xffffffff .w64 .low =
       { dst := { bits := 0, tag := .scalar },
         flags := { cf := true, zf := true, sf := false, of := false } } := by
-  native_decide
+  decide
 
 /-- CMP observes the selected register lanes and replaces flags with the
 generated subtraction flags, while preserving the complete destination. -/
@@ -518,7 +518,7 @@ theorem x86_cmp_high8_observes_high_lanes :
       { dst := { bits := 0x112233445566aa01, tag := .scalar },
         flags := { cf := true, zf := false, sf := true, of := true } }
       0x000000000000aa02 .w8 .high .high).flags.zf = true := by
-  native_decide
+  decide
 
 /-- Register-destination CMP-immediate after lane selection and raw immediate
 decoding. It replaces flags with the generated zero-borrow subtraction flags
@@ -567,7 +567,7 @@ theorem x86_cmp_imm64_sign_extension_example :
       0xffffffff .w64 .low =
       { dst := { bits := 0, tag := .packet },
         flags := { cf := true, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 /-- TEST observes the selected register lanes, derives logic flags from their
 bitwise conjunction, and preserves the complete destination register. -/
@@ -612,7 +612,7 @@ theorem x86_test_high8_observes_high_lanes :
         flags := { cf := true, zf := true, sf := false, of := true } }
       0x000000000000f002 .w8 .high .high).flags
     flags.zf = false /\ flags.sf = true := by
-  native_decide
+  decide
 
 /-- Register-destination TEST-immediate after lane selection and raw immediate
 decoding. It replaces flags from the width-local conjunction and preserves the
@@ -659,7 +659,7 @@ theorem x86_test_imm_high8_example :
       0x80 .w8 .high =
       { dst := { bits := 0x1122334455668001, tag := .packet },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
-  native_decide
+  decide
 
 /-- Register-register AND after both selected lanes are observed. The C
 `X86_SIM_L_EXEC_ALU_REG` generic branch computes the width-local logical result
@@ -702,7 +702,7 @@ theorem x86_and_reg_high8_example :
       0x0f00 .w8 .high .high =
       { dst := { bits := 0x1122334455660f00, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 def generatedX86OrRegLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
     (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
@@ -739,7 +739,7 @@ theorem x86_or_reg_high8_example :
       0x8000 .w8 .high .high =
       { dst := { bits := 0x11223344556680ff, tag := .scalar },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
-  native_decide
+  decide
 
 def generatedX86XorRegLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
     (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
@@ -776,7 +776,7 @@ theorem x86_xor_reg64_example :
       0x0000000000765432 .w64 .low .low =
       { dst := { bits := 0x0000000000646064, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 /-- Register-destination AND/OR/XOR-immediate after lane selection and raw
 immediate decoding. The C handler computes the width-local logical result from
 the selected-lane operand, replaces the destination lane, and takes the four
@@ -877,7 +877,7 @@ theorem x86_and_imm_high8_example :
       0x0f .w8 .high =
       { dst := { bits := 0x1122334455660f00, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 theorem x86_or_imm_high8_example :
     generatedX86OrImmLaneHandler
@@ -886,7 +886,7 @@ theorem x86_or_imm_high8_example :
       0x80 .w8 .high =
       { dst := { bits := 0x11223344556680ff, tag := .scalar },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
-  native_decide
+  decide
 
 theorem x86_xor_imm64_sign_extension_example :
     generatedX86XorImmLaneHandler
@@ -895,7 +895,7 @@ theorem x86_xor_imm64_sign_extension_example :
       0xffffffff .w64 .low =
       { dst := { bits := 0xffffffffaaaaaaaa, tag := .scalar },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
-  native_decide
+  decide
 
 /-- Register-destination SHL/SHR/SAR/ROL-immediate after lane selection and
 raw immediate decoding. The C handler computes the generated shift result
@@ -981,7 +981,7 @@ theorem x86_shl_imm64_wide_count_example :
                flags := { cf := false, zf := false, sf := false, of := false } }
     (generatedX86ShiftImmLaneHandler .shl s 96 .w64 .low).dst.bits =
       0x100000000 := by
-  native_decide
+  decide
 
 theorem x86_rol_imm_high8_example :
     generatedX86ShiftImmLaneHandler .rol
@@ -990,7 +990,7 @@ theorem x86_rol_imm_high8_example :
       2 .w8 .high =
       { dst := { bits := 0x1122334455660400, tag := .scalar },
         flags := { cf := false, zf := true, sf := true, of := true } } := by
-  native_decide
+  decide
 
 /- Register-destination SHL/SHR/SAR/ROL-register: after decoded byte lanes
 select the destination operand and the source operand (the shift count). The
@@ -1070,7 +1070,7 @@ theorem x86_shl_reg_high8_example :
       0x0000000000000300 .w8 .high .high =
       { dst := { bits := 0x1122334455660800, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 theorem x86_sar_reg_high8_sign_fill_example :
     generatedX86ShiftRegLaneHandler .sar
@@ -1079,7 +1079,7 @@ theorem x86_sar_reg_high8_sign_fill_example :
       0x0000000000000100 .w8 .high .high =
       { dst := { bits := 0x112233445566c000, tag := .scalar },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
-  native_decide
+  decide
 
 /-- Register-destination IMUL-immediate after lane selection and raw immediate
 decoding. The full 64-bit product is written back width-narrowed; the overflow
@@ -1117,7 +1117,7 @@ theorem x86_imul_imm_w16_overflow_example :
       2 .w16 .low
     out.dst.bits = 0xfffe ∧
       out.flags = { cf := true, zf := false, sf := false, of := true } := by
-  native_decide
+  decide
 
 theorem x86_imul_imm_w64_in_range_example :
     let out := generatedX86ImulImmLaneHandler
@@ -1126,7 +1126,7 @@ theorem x86_imul_imm_w64_in_range_example :
       0x10 .w64 .low
     out.dst.bits = 0x1000 ∧
       out.flags = { cf := false, zf := false, sf := false, of := false } := by
-  native_decide
+  decide
 
 /-- The register-register IMUL slice after decoded byte lanes select both
 operands. For wider operands the lane parameters are architecturally ignored;
@@ -1163,7 +1163,7 @@ theorem x86_imul_reg_w16_overflow_example :
       0x0002 .w16 .low .low
     out.dst.bits = 0xfffe ∧
       out.flags = { cf := true, zf := false, sf := false, of := true } := by
-  native_decide
+  decide
 
 theorem x86_imul_reg_w8_in_range_example :
     let out := generatedX86ImulRegLaneHandler
@@ -1172,7 +1172,7 @@ theorem x86_imul_reg_w8_in_range_example :
       0x0002 .w8 .low .low
     out.dst.bits = 0xfe ∧
       out.flags = { cf := true, zf := false, sf := false, of := true } := by
-  native_decide
+  decide
 
 
 end KProgFormal

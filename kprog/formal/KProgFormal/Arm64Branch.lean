@@ -92,21 +92,21 @@ theorem arm64_branch_code_dispatch :
 /-- Canonical example: CBZ is taken for a zero register. -/
 theorem arm64_branch_cbz_example :
     arm64BranchTakenSpec .cbz 0 0 = true := by
-  native_decide
+  decide
 
 /-- Canonical example: CBZ is not taken for a nonzero register. -/
 theorem arm64_branch_cbz_untaken_example :
     arm64BranchTakenSpec .cbz 1 0 = false := by
-  native_decide
+  decide
 
 /-- Canonical example: TBNZ is taken when the tested bit is set. -/
 theorem arm64_branch_tbnz_example :
     arm64BranchTakenSpec .tbnz 0x4 2 = true := by
-  native_decide
+  decide
 
 /-- Canonical example: TBZ is taken when the tested bit is clear. -/
 theorem arm64_branch_tbz_example :
     arm64BranchTakenSpec .tbz 0x4 1 = true := by
-  native_decide
+  decide
 
 end KProgFormal

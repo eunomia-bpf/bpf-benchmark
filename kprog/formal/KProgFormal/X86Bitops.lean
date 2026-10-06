@@ -96,17 +96,17 @@ theorem x86_bzhi_max_index_keeps (src : BitVec 64) :
 theorem x86_bt_example :
     GeneratedX86Bitops.bt 0x8 3 8 = true ∧
     GeneratedX86Bitops.bt 0x8 2 8 = false := by
-  refine ⟨?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_⟩ <;> decide
 
 /-- Canonical example: an 8-bit `bt` with an offset at or above the width tests a
 bit the byte does not have, and always yields false. -/
 theorem x86_bt_wide_index_false :
     GeneratedX86Bitops.bt 0xff 8 1 = false ∧
     GeneratedX86Bitops.bt 0xff 31 1 = false := by
-  refine ⟨?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_⟩ <;> decide
 
 /-- Canonical example: `bzhi` keeps the low `count` bits. -/
 theorem x86_bzhi_example :
-    GeneratedX86Bitops.bzhi 0xffff 4 8 = 0xf := by native_decide
+    GeneratedX86Bitops.bzhi 0xffff 4 8 = 0xf := by decide
 
 end KProgFormal

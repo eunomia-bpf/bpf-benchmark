@@ -172,7 +172,7 @@ theorem x86_mulx_w64_max_example :
       { dst := { bits := 0x0000000000000001, tag := .scalar },
         aux := { bits := 0xfffffffffffffffe, tag := .scalar },
         flags := { cf := true, zf := true, sf := true, of := true } } := by
-  native_decide
+  decide
 
 /-- The 32-bit `MULX` of two maximal low words: the single product is
 `0xfffffffe00000001`, so the low half is one and the high half is
@@ -187,7 +187,7 @@ theorem x86_mulx_w32_max_example :
       { dst := { bits := 0x0000000000000001, tag := .scalar },
         aux := { bits := 0x00000000fffffffe, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 /-- A `MULX` with no auxiliary destination leaves the auxiliary register
 untouched, including its provenance tag, while still writing and scalarizing the
@@ -201,7 +201,7 @@ theorem x86_mulx_aux_absent_example :
       { dst := { bits := 0x0000000a00000008, tag := .scalar },
         aux := { bits := 0x0000000000000005, tag := .helperId },
         flags := { cf := false, zf := true, sf := false, of := false } } := by
-  native_decide
+  decide
 
 /-- A 16-bit `MULX` takes the 64-bit limb branch of the C arm, as the width
 discriminates only on the 32-bit form: the high half comes from the ladder, not
@@ -216,6 +216,6 @@ theorem x86_mulx_w16_limb_branch_example :
       { dst := { bits := 0xaabbccddeeff000f, tag := .scalar },
         aux := { bits := 0x1122334455660008, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 end KProgFormal

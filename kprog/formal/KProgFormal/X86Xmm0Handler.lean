@@ -524,7 +524,7 @@ theorem x86_xmm0_load_none_example :
       (generatedX86Xmm0LoadStep false true .loadXmm0
         (fun _ => 0) (fun _ => 0) 0x2000 0xdeadbeef false 0 0).addr =
         0x2000 := by
-  native_decide
+  decide
 
 /-- Canonical example: a stack-pointer load reads both lanes from the stack byte
 function, one lane width apart, at the same width. -/
@@ -540,7 +540,7 @@ theorem x86_xmm0_load_stack_example :
       (generatedX86Xmm0LoadStep true false .loadXmm0
         (fun _ => 0xa5) (fun _ => 0xa5) 0 0x1000000000000000
         false 0 0).arm = Arm.stackPair := by
-  native_decide
+  decide
 
 /-- Canonical example: a `X86_REG_NONE` store writes the pair to the addressing
 offset itself (the null base plus the offset), not to the raw artifact. -/
@@ -557,7 +557,7 @@ theorem x86_xmm0_store_none_example :
         { lo := 0x8877665544332211, hi := 0x0807060504030201 }
         (fun _ => 0xcc) (fun _ => 0x5a) 0x1234 0xdeadbeef false 0 0).bytes
         8 = 0x01 := by
-  native_decide
+  decide
 
 /-- Canonical example: a stack-pointer store writes both lanes to the stack byte
 function, one lane width apart. -/
@@ -568,7 +568,7 @@ theorem x86_xmm0_store_stack_example :
       (generatedX86Xmm0StoreStep true false .storeXmm0
         { lo := 0x11, hi := 0x22 } (fun _ => 0x5a) (fun _ => 0x5a)
         0 0x100000008 false 0 0).addr = 0x100000008 := by
-  native_decide
+  decide
 
 /-- Canonical example: the two opcodes' ordinary arms differ for a
 `X86_REG_NONE` operand with a nonzero offset — the load's address is the raw
@@ -578,7 +578,7 @@ theorem x86_xmm0_base_form_asymmetry_example :
         0x8000 ∧
       generatedX86Xmm0OrdinaryAddr .storeXmm0 true 0x8000 0x1111 0x40 =
         0x40 := by
-  native_decide
+  decide
 
 /-- Canonical example: with a register operand the two opcodes' ordinary arms
 agree, both being the register pointer plus the offset. -/
@@ -587,6 +587,6 @@ theorem x86_xmm0_reg_base_agrees_example :
         0x1151 ∧
       generatedX86Xmm0OrdinaryAddr .storeXmm0 false 0x8000 0x1111 0x40 =
         0x1151 := by
-  native_decide
+  decide
 
 end KProgFormal

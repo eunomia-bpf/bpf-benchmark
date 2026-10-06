@@ -98,6 +98,6 @@ theorem x86_mem_logic_xor_w16_example :
         { cf := true, zf := false, sf := true, of := true }
         old 0xffff .w16).flags =
         { cf := false, zf := true, sf := false, of := false } := by
-  native_decide
+  decide
 
 end KProgFormal

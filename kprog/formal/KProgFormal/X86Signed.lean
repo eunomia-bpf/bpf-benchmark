@@ -75,11 +75,11 @@ theorem x86_abs_width_bounded (value : BitVec 64) :
 /-- Canonical example: sign-extending a 64-bit value is the identity. -/
 theorem x86_sign_extend_w64_example :
     x86SignExtendSpec 0x8000000000000000 .w64 = 0x8000000000000000 := by
-  native_decide
+  decide
 
 /-- Canonical example: the magnitude of -5 in the 8-bit domain is 5. -/
 theorem x86_abs_width_w8_example :
-    GeneratedX86Signed.absWidth 0xfb .w8 = 5 := by native_decide
+    GeneratedX86Signed.absWidth 0xfb .w8 = 5 := by decide
 
 /-- **Cross-contract agreement.** The IMUL flag contract
 (`GeneratedX86ImulFlags.signedAbs`) and this contract's magnitude were generated

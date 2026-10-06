@@ -49,34 +49,34 @@ theorem arm64_movk_column_dispatch :
 nothing else above it in an otherwise-empty destination. -/
 theorem arm64_movk_col0_example :
     arm64MovkValueSpec .col0 0 0x1234 = 0x1234 := by
-  native_decide
+  decide
 
 /-- Canonical example: inserting at column 16 places the immediate in the second
 halfword. -/
 theorem arm64_movk_col16_example :
     arm64MovkValueSpec .col16 0 0x1234 = 0x12340000 := by
-  native_decide
+  decide
 
 /-- Canonical example: inserting at column 32 places the immediate in the third
 halfword. -/
 theorem arm64_movk_col32_example :
     arm64MovkValueSpec .col32 0 0x1234 = 0x123400000000 := by
-  native_decide
+  decide
 
 /-- Canonical example: inserting at column 48 places the immediate in the top
 halfword. -/
 theorem arm64_movk_col48_example :
     arm64MovkValueSpec .col48 0 0x1234 = 0x1234000000000000 := by
-  native_decide
+  decide
 
 /-- Canonical example: MOVK keeps the destination bits outside the column. -/
 theorem arm64_movk_preserves_other_bits_example :
     arm64MovkValueSpec .col16 0xffffffffffffffff 0x0 = 0xffffffff0000ffff := by
-  native_decide
+  decide
 
 /-- Canonical example: only the low 16 bits of a wider immediate are inserted. -/
 theorem arm64_movk_narrows_immediate_example :
     arm64MovkValueSpec .col0 0 0xffffffffffffabcd = 0xabcd := by
-  native_decide
+  decide
 
 end KProgFormal

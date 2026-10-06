@@ -84,7 +84,7 @@ theorem x86_reg_presence_case_dispatch :
       present (0x00 : BitVec 8) = true ∧
       absent (arm (0xff : BitVec 8)) = true ∧
       absent (arm (0x07 : BitVec 8)) = false := by
-  refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> decide
 
 /-- Canonical examples: the arm selector and both predicates on the sentinel and
 on plain register numbers, pinning the boundary against concrete values. -/
@@ -95,6 +95,6 @@ theorem x86_reg_presence_examples :
       present (0xff : BitVec 8) = false ∧ present (0x07 : BitVec 8) = true ∧
       absent (arm (0xff : BitVec 8)) = true ∧
       absent (arm (0x07 : BitVec 8)) = false := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> decide
 
 end KProgFormal

@@ -37,7 +37,7 @@ theorem arm64_alu_decode_refines :
     arm64AluSpec =
       allAlu.map (fun op => (GeneratedArm64AluDecode.mnemonic op,
                              GeneratedArm64AluDecode.code op)) := by
-    native_decide
+    decide
 
 /-- The generated shift table, projected to mnemonic/code pairs, equals the
 independent specification list. -/
@@ -45,7 +45,7 @@ theorem arm64_shift_decode_refines :
     arm64ShiftSpec =
       allShift.map (fun op => (GeneratedArm64ShiftDecode.mnemonic op,
                                GeneratedArm64ShiftDecode.code op)) := by
-    native_decide
+    decide
 
 /-- The generated modifier table, projected to mnemonic/code pairs, equals the
 independent specification list, including the empty (no-modifier) mnemonic. -/
@@ -53,7 +53,7 @@ theorem arm64_mod_decode_refines :
     arm64ModSpec =
       allMod.map (fun op => (GeneratedArm64ModDecode.mnemonic op,
                              GeneratedArm64ModDecode.code op)) := by
-    native_decide
+    decide
 
 /-- The generated bitfield table, projected to mnemonic/code pairs, equals the
 independent specification list. -/
@@ -61,7 +61,7 @@ theorem arm64_bitfield_decode_refines :
     arm64BitfieldSpec =
       allBitfield.map (fun op => (GeneratedArm64BitfieldDecode.mnemonic op,
                                   GeneratedArm64BitfieldDecode.code op)) := by
-    native_decide
+    decide
 
 
 /-- Every generated ALU code is distinct, so dispatch on the numeric code
@@ -70,7 +70,7 @@ theorem arm64_alu_codes_distinct :
     GeneratedArm64AluDecode.code .add ≠ GeneratedArm64AluDecode.code .sub ∧
     GeneratedArm64AluDecode.code .and ≠ GeneratedArm64AluDecode.code .bic ∧
     GeneratedArm64AluDecode.code .eor ≠ GeneratedArm64AluDecode.code .orr := by
-  native_decide
+  decide
 
 /-- Every generated shift code is distinct, so dispatch on the numeric code
 selects exactly one shift kind. -/
@@ -78,7 +78,7 @@ theorem arm64_shift_codes_distinct :
     GeneratedArm64ShiftDecode.code .lsl ≠ GeneratedArm64ShiftDecode.code .lsr ∧
     GeneratedArm64ShiftDecode.code .asr ≠ GeneratedArm64ShiftDecode.code .ror ∧
     GeneratedArm64ShiftDecode.code .lsl ≠ GeneratedArm64ShiftDecode.code .ror := by
-  native_decide
+  decide
 
 /-- Every generated modifier code is distinct, so dispatch on the numeric code
 selects exactly one extend/shift modifier. -/
@@ -86,7 +86,7 @@ theorem arm64_mod_codes_distinct :
     GeneratedArm64ModDecode.code .none ≠ GeneratedArm64ModDecode.code .lsl ∧
     GeneratedArm64ModDecode.code .uxtw ≠ GeneratedArm64ModDecode.code .sxtw ∧
     GeneratedArm64ModDecode.code .uxtb ≠ GeneratedArm64ModDecode.code .sxtb := by
-  native_decide
+  decide
 
 /-- Every generated bitfield code is distinct, so dispatch on the numeric code
 selects exactly one bitfield operation. -/
@@ -94,6 +94,6 @@ theorem arm64_bitfield_codes_distinct :
     GeneratedArm64BitfieldDecode.code .ubfx ≠ GeneratedArm64BitfieldDecode.code .sbfx ∧
     GeneratedArm64BitfieldDecode.code .ubfiz ≠ GeneratedArm64BitfieldDecode.code .bfxil ∧
     GeneratedArm64BitfieldDecode.code .bfxil ≠ GeneratedArm64BitfieldDecode.code .bfi := by
-  native_decide
+  decide
 
 end KProgFormal

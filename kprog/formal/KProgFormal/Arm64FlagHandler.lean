@@ -82,7 +82,7 @@ theorem arm64_adds_w32_overflow_writeback :
       .writeback .add .gpr 0x7fffffff 1 .w32 =
       { regs := { dst := { bits := 0x80000000, tag := .scalar }, sp := 0x80 },
         flags := { n := true, z := false, c := false, v := true } } := by
-  native_decide
+  decide
 
 theorem arm64_subs_xzr_discards_result_but_sets_flags :
     generatedArm64FlagHandler
@@ -91,7 +91,7 @@ theorem arm64_subs_xzr_discards_result_but_sets_flags :
       .writeback .sub .zero 1 2 .w64 =
       { regs := { dst := { bits := 0x55, tag := .packet }, sp := 0x80 },
         flags := { n := true, z := false, c := false, v := false } } := by
-  native_decide
+  decide
 
 theorem arm64_cmp_preserves_register_and_sp_state :
     (generatedArm64FlagHandler
@@ -99,7 +99,7 @@ theorem arm64_cmp_preserves_register_and_sp_state :
         flags := { n := true, z := false, c := false, v := true } }
       .compare .sub .gpr 7 7 .w64).regs =
       { dst := { bits := 0xfeed, tag := .mapValue }, sp := 0x80 } := by
-  native_decide
+  decide
 
 theorem arm64_cmn_sets_carry_without_writeback :
     generatedArm64FlagHandler
@@ -108,6 +108,6 @@ theorem arm64_cmn_sets_carry_without_writeback :
       .compare .add .gpr 0xffffffffffffffff 1 .w64 =
       { regs := { dst := { bits := 0xfeed, tag := .packet }, sp := 0x80 },
         flags := { n := false, z := true, c := true, v := false } } := by
-  native_decide
+  decide
 
 end KProgFormal

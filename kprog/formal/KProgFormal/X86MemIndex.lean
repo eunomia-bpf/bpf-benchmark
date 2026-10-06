@@ -68,7 +68,7 @@ theorem x86_mem_index_case_dispatch :
       present (0xfe : BitVec 8) = true ∧
       present (0x00 : BitVec 8) = true := by
   refine ⟨?_, ?_, ?_⟩ <;>
-    unfold present arm indexSentinel <;> native_decide
+    unfold present arm indexSentinel <;> decide
 
 /-- Canonical examples: the arm selector on the sentinel and on plain register
 numbers, pinning the boundary against concrete values. -/
@@ -76,6 +76,6 @@ theorem x86_mem_index_examples :
     arm (0xff : BitVec 8) = .absent ∧ arm (0x00 : BitVec 8) = .present ∧
       arm (0x07 : BitVec 8) = .present ∧
       present (0xff : BitVec 8) = false ∧ present (0x07 : BitVec 8) = true := by
-  refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> decide
 
 end KProgFormal

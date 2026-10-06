@@ -86,34 +86,34 @@ theorem arm64_shift_code_dispatch :
 /-- Canonical example: a 64-bit LSL by 4. -/
 theorem arm64_shift_lsl_example :
     arm64ShiftValueSpec .lsl 1 4 .w64 = 16 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit LSR masks the operand to the word first. -/
 theorem arm64_shift_lsr_w32_example :
     arm64ShiftValueSpec .lsr 0x1_0000_0000 4 .w32 = 0 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit ASR of a negative word sign-extends. -/
 theorem arm64_shift_asr_w32_example :
     arm64ShiftValueSpec .asr 0x80000000 4 .w32 = 0xfffffffff8000000 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 64-bit ROR by 8 rotates the byte order. -/
 theorem arm64_shift_ror_w64_example :
     arm64ShiftValueSpec .ror 0x0102030405060708 8 .w64 =
       0x0801020304050607 := by
-  native_decide
+  decide
 
 /-- Canonical example: the 32-bit amount is hardware-masked to 5 bits, so a
 32-bit LSL by 36 shifts by 4. -/
 theorem arm64_shift_w32_amount_masked_example :
     arm64ShiftValueSpec .lsl 3 36 .w32 = 48 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 64-bit ASR of the most negative value saturates. -/
 theorem arm64_shift_asr_w64_example :
     arm64ShiftValueSpec .asr 0x8000000000000000 4 .w64 =
       0xf800000000000000 := by
-  native_decide
+  decide
 
 end KProgFormal

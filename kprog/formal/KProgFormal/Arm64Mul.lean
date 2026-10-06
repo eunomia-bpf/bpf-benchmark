@@ -324,47 +324,47 @@ theorem arm64_mul_code_dispatch :
 /-- Canonical example: MADD multiplies and adds the accumulator. -/
 theorem arm64_madd_example :
     arm64MulValueSpec .madd 3 4 5 = 17 := by
-  native_decide
+  decide
 
 /-- Canonical example: MSUB subtracts the product from the accumulator. -/
 theorem arm64_msub_example :
     arm64MulValueSpec .msub 3 4 5 = 0xfffffffffffffff9 := by
-  native_decide
+  decide
 
 /-- Canonical example: UMULL keeps only the low 32 bits of each operand, so the
 64-bit product of two all-ones words is `2^33 - 2`. -/
 theorem arm64_umull_example :
     arm64MulValueSpec .umull 0xffffffffffffffff 2 0 = 0x1fffffffe := by
-  native_decide
+  decide
 
 /-- Canonical example: UMADDL widens both low words and adds the accumulator. -/
 theorem arm64_umaddl_example :
     arm64MulValueSpec .umaddl 0xffffffff 0xffffffff 1 =
       0xfffffffe00000002 := by
-  native_decide
+  decide
 
 /-- Canonical example: SMADDL sign-extends both low words, so `0xffffffff` is
 `-1` and the doubled product is `-2`. -/
 theorem arm64_smaddl_example :
     arm64MulValueSpec .smaddl 0xffffffff 2 0 = 0xfffffffffffffffe := by
-  native_decide
+  decide
 
 /-- Canonical example: dividing by zero yields zero rather than trapping. -/
 theorem arm64_udiv_zero_example :
     arm64MulValueSpec .udiv 7 0 0 = 0 ∧
     arm64MulValueSpec .udiv 100 7 0 = 14 := by
-  native_decide
+  decide
 
 /-- Canonical example: UMULH of two all-ones words is the high half of
 `(2^64 - 1)^2`, i.e. `2^64 - 2`. -/
 theorem arm64_umulh_example :
     arm64MulValueSpec .umulh 0xffffffffffffffff 0xffffffffffffffff 0 =
       0xfffffffffffffffe := by
-  native_decide
+  decide
 
 /-- Canonical example: MUL writes the low half of the 64-bit product. -/
 theorem arm64_mul_example :
     arm64MulValueSpec .mul 0x100000000 3 0 = 0x300000000 := by
-  native_decide
+  decide
 
 end KProgFormal

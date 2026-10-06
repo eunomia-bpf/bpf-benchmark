@@ -7,6 +7,11 @@ the x86-64 and AArch64 native simulators. Run it with:
 make check
 ```
 
+Concrete examples use kernel-reduced `decide`. The bit-vector proofs use
+Std’s `bv_decide`, which introduces `Lean.ofReduceBool` for LRAT verification.
+Those proofs depend on compiler evaluation in addition to Lean’s three standard
+logical axioms and do not meet a zero-non-standard-axiom requirement.
+
 `KProgFormal.TagErasure` models a bounded fragment drawn from the simulators:
 a 64-bit move, a pointer-shaped 64-bit add, an x86-shaped scalarizing integer
 multiply-immediate, and a 64-bit load of the packet or packet-end pointer from

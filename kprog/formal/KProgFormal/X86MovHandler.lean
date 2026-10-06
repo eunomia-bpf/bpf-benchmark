@@ -190,7 +190,7 @@ theorem x86_mov_imm64_example :
       { dst := { bits := 0xdeadbeefdeadbeef, tag := .mapValue } }
       0x0000000000004000 .w64 .low =
       { dst := { bits := 0x0000000000004000, tag := .scalar } } := by
-  native_decide
+  decide
 
 /-- Canonical example: an 8-bit `mov ah, imm` merges the immediate into the
 destination's high byte and leaves the other seven bytes intact. -/
@@ -199,7 +199,7 @@ theorem x86_mov_imm_high8_example :
       { dst := { bits := 0x1122334455667788, tag := .stack } }
       0x00000000000000aa .w8 .high =
       { dst := { bits := 0x112233445566aa88, tag := .scalar } } := by
-  native_decide
+  decide
 
 /-- Canonical example: a 64-bit `mov rsp`-sourced register move resolves through
 the abstract frame base and tags the destination as stack provenance. -/
@@ -209,7 +209,7 @@ theorem x86_mov_reg_stack_example :
       { bits := 0x0000000000000000, tag := .scalar, isRsp := true }
       .w64 .low .low 0x0000000000007000 =
       { dst := { bits := 0x0000000000007000, tag := .stack } } := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit `mov r32, r32` zero-extends the source's low half
 and scalarizes provenance, discarding both the incoming destination upper bits
@@ -220,7 +220,7 @@ theorem x86_mov_reg_w32_example :
       { bits := 0xffffffff00001234, tag := .packet, isRsp := false }
       .w32 .low .low 0 =
       { dst := { bits := 0x0000000000001234, tag := .scalar } } := by
-  native_decide
+  decide
 
 /-- Canonical example: an 8-bit `mov r8, rh`-style lane-to-lane move selects the
 source's high byte and the destination's low byte, so the pair of decoded lanes
@@ -231,6 +231,6 @@ theorem x86_mov_reg_lane_example :
       { bits := 0x112233445566aa88, tag := .scalar, isRsp := false }
       .w8 .low .high 0 =
       { dst := { bits := 0xffffffffffffffaa, tag := .scalar } } := by
-  native_decide
+  decide
 
 end KProgFormal

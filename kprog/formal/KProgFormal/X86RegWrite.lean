@@ -128,7 +128,7 @@ theorem x86_reg_write_high8_updates_only_ah_lane (old : X86RegValue)
 theorem x86_reg_write_high8_counterexample_fixed :
     (generatedX86RegWriteAt { bits := 0x1122334455667788, tag := .scalar }
       0xaa .w8 .high).bits = 0x112233445566aa88 := by
-  native_decide
+  decide
 
 theorem x86_reg_write32_zero_extends (old : X86RegValue)
     (value : BitVec 64) :

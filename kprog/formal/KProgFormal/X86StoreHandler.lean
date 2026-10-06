@@ -407,7 +407,7 @@ displacements, which is what keeps the two opcodes from being unifiable. -/
 theorem x86_store_disp_forms_differ :
     x86StoreDispSpec true 0x8000001000000008 = 0xffffffff80000010 ∧
       x86StoreDispSpec false 0x8000001000000008 = 0x8000001000000008 := by
-  native_decide
+  decide
 
 /-- The immediate store's value is the width-aware low-32-bit rule, so at width
 64 the sign bit of the artifact's low half is extended; the register store's
@@ -419,7 +419,7 @@ theorem x86_store_value_sources_differ :
         0xdeadbeefdeadbeef ∧
       x86StoreValueSpec false 0x0000000080000001 0xdeadbeefdeadbeef .w16 =
         0xdeadbeefdeadbeef := by
-  native_decide
+  decide
 
 /-- Canonical example: an immediate 16-bit store writes the artifact's low half
 sign-extended and width-masked, little-endian into the addressed bytes, and
@@ -441,7 +441,7 @@ theorem x86_store_imm_w16_example :
       (generatedX86StoreStep .movStoreImm false .w16
         old (fun _ => 0x5a) 0x0000000012348001 0x1111111111111111
         0x00 0x4000 false 0 7).addr = 0x4000 := by
-  native_decide
+  decide
 
 /-- Canonical example: a register store shifts its 64-bit source right by the
 AUX source-shift byte and then masks into the narrow access width, while an
@@ -454,7 +454,7 @@ theorem x86_store_reg_shift_example :
       (generatedX86StoreStep .movStoreImm false .w32
         (fun _ => 0xa5) (fun _ => 0x5a) 0x0000000010000008 0x00000000abcd1234
         0x08 0x2000 false 0 0).value = 0x10000008 := by
-  native_decide
+  decide
 
 /-- Canonical example: a stack-pointer destination takes the stack arm and
 writes the stack frame, at the same width and with the same value as the memory
@@ -469,6 +469,6 @@ theorem x86_store_stack_arm_example :
       (generatedX86StoreStep .movStoreImm true .w8
         (fun _ => 0x11) (fun i => 0xa5 + (i : X86MemByte)) 0x0000000012340011
         0 0 0x20 false 0 0).bytes 1 = 0xa6 := by
-  native_decide
+  decide
 
 end KProgFormal

@@ -34,7 +34,7 @@ theorem x86_alu_mnemonic_refines (alu : X86Alu) :
 theorem x86_alu_handler_refines (alu : X86Alu) :
     GeneratedX86AluDecode.handler alu = x86AluHandlerSpec alu := by
   cases alu <;>
-    native_decide
+    decide
 
 /-- Packing a typed ALU code into the register-lane AUX and extracting its
 payload selects the same carry-sensitive handler as the independent mapping. -/
@@ -46,6 +46,6 @@ theorem x86_alu_aux_handler_refines (alu : X86Alu)
           (BitVec.ofNat 32 (GeneratedX86AluDecode.code alu))
           dstShift srcShift)) = x86AluHandlerSpec alu := by
   rw [x86_reg_lane_aux_payload_roundtrip]
-  cases alu <;> native_decide
+  cases alu <;> decide
 
 end KProgFormal

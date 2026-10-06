@@ -222,7 +222,7 @@ store's `(s32)((IMM) >> 32)` displacement has and this contract does not. -/
 theorem x86_ptr_write_bits_whole_artifact_example :
     x86PtrWriteBitsSpec 0x80000010deadbeef = 0x80000010deadbeef ∧
       x86StoreDispSpec true 0x80000010deadbeef = 0xffffffff80000010 := by
-  native_decide
+  decide
 
 /-- A `X86_REG_NONE` destination writes nothing at all: neither the pointer
 bits nor the tag of the destination change, the C register switch's
@@ -276,7 +276,7 @@ theorem x86_ptr_write_map_ptr_example :
       { dst := { bits := 0xdeadbeefdeadbeef, tag := .stack } }
       .mapPtr false 0x0000000000000042 =
       { dst := { bits := 0x0000000000000042, tag := .mapPtr } } := by
-  native_decide
+  decide
 
 /-- Canonical example: the helper-id opcode installs the whole immediate and the
 helper-id tag; the width-64 scalar lane write it performs first is invisible in
@@ -286,7 +286,7 @@ theorem x86_ptr_write_helper_id_example :
       { dst := { bits := 0, tag := .abi } }
       .helperId false 0x0000000000000007 =
       { dst := { bits := 0x0000000000000007, tag := .helperId } } := by
-  native_decide
+  decide
 
 /-- Canonical example: a `X86_REG_NONE` destination is left untouched, so a
 resolved-but-unencoded register costs no state change. -/
@@ -295,7 +295,7 @@ theorem x86_ptr_write_none_example :
       { dst := { bits := 0x1122334455667788, tag := .mapValue } }
       .mapPtr true 0xff =
       { dst := { bits := 0x1122334455667788, tag := .mapValue } } := by
-  native_decide
+  decide
 
 /-- Canonical example: the two opcodes install different tags for the same
 immediate, so the tag table is observable — the map-pointer and helper-id
@@ -305,6 +305,6 @@ theorem x86_ptr_write_tag_differs_example :
         .mapPtr false 0x10).dst.tag ≠
       (generatedX86PtrWriteStep { dst := { bits := 0, tag := .scalar } }
         .helperId false 0x10).dst.tag := by
-  native_decide
+  decide
 
 end KProgFormal

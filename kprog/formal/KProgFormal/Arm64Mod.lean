@@ -128,33 +128,33 @@ theorem arm64_mod_fed_alu_refines (mod : Mod) (lhs value shift : BitVec 64)
 /-- Canonical example: UXTB keeps the low byte and clears the rest. -/
 theorem arm64_uxtb_example :
     arm64ModValueSpec .uxtb 0x1ff 0 .w64 = 0xff := by
-  native_decide
+  decide
 
 /-- Canonical example: SXTB sign-extends the low byte. -/
 theorem arm64_sxtb_example :
     arm64ModValueSpec .sxtb 0x80 0 .w64 = 0xffffffffffffff80 := by
-  native_decide
+  decide
 
 /-- Canonical example: a zero-shift SXTW is the plain 32-bit sign extension. -/
 theorem arm64_sxtw_example :
     arm64ModValueSpec .sxtw 0xffffffff 0 .w64 = 0xffffffffffffffff := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit LSL by 32 shifts by the hardware-masked amount
 0, so the low word is unchanged, while the 64-bit form shifts by 32. -/
 theorem arm64_lsl_shift_masking_example :
     arm64ModValueSpec .lsl 1 32 .w32 = 1 ∧
     arm64ModValueSpec .lsl 1 32 .w64 = 4294967296 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 64-bit ROR by 8 rotates the byte order of the word. -/
 theorem arm64_ror_w64_example :
     arm64ModValueSpec .ror 0x0102030405060708 8 .w64 = 0x0801020304050607 := by
-  native_decide
+  decide
 
 /-- Canonical example: the identity arm leaves the operand untouched. -/
 theorem arm64_mod_none_example :
     arm64ModValueSpec .none 0xdeadbeef 63 .w32 = 0xdeadbeef := by
-  native_decide
+  decide
 
 end KProgFormal

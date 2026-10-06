@@ -111,7 +111,7 @@ theorem x86_mem_shl_w32_example :
       1 .w32 =
       { dst := { bits := 0x0000000000000002, tag := .scalar },
         flags := { cf := true, zf := true, sf := true, of := true } } := by
-  native_decide
+  decide
 
 /-- An 8-bit `SARX` reads `0x80` from the low byte, shifts it arithmetically
 right by one, and sign-fills to `0xc0` while preserving the destination's upper
@@ -124,7 +124,7 @@ theorem x86_mem_sar_w8_example :
       1 .w8 =
       { dst := { bits := 0x11223344556600c0, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 /-- An 8-bit `RORX` by one moves the low bit to the top: `0x81` becomes
 `0xc0`, and the destination's other seven bytes survive. -/
@@ -136,6 +136,6 @@ theorem x86_mem_rorx_w8_example :
       1 .w8 =
       { dst := { bits := 0x11223344556600c0, tag := .scalar },
         flags := { cf := false, zf := true, sf := true, of := false } } := by
-  native_decide
+  decide
 
 end KProgFormal

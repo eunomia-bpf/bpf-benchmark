@@ -59,11 +59,11 @@ theorem arm64_byte_lane_load_inverse (width : LoadWidth) (value : BitVec 64) :
 /-- Canonical example: lane 2 of a word is that word's third byte. -/
 theorem arm64_byte_lane_example :
     GeneratedArm64ByteLane.byteAt .lane2 0x0123456789abcdef = 0xab := by
-  native_decide
+  decide
 
 /-- Canonical example: the top lane is the most significant byte. -/
 theorem arm64_byte_lane_top_example :
     GeneratedArm64ByteLane.byteAt .lane7 0x0123456789abcdef = 0x01 := by
-  native_decide
+  decide
 
 end KProgFormal

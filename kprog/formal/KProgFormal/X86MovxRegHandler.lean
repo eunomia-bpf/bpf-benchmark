@@ -142,7 +142,7 @@ theorem x86_cdqe_example :
       { dst := { bits := 0x1122334480000001, tag := .mapValue } }
       0x1122334480000001 .movsx .w32 .w64 =
       { dst := { bits := 0xffffffff80000001, tag := .scalar } } := by
-  native_decide
+  decide
 
 /-- Canonical example: `movsxd rax, eax` of a positive 32-bit value leaves the
 upper half zero and scalarizes the provenance. -/
@@ -151,7 +151,7 @@ theorem x86_movsxd_positive_example :
       { dst := { bits := 0xffffffffffffffff, tag := .packet } }
       0x000000007fffffff .movsx .w32 .w64 =
       { dst := { bits := 0x000000007fffffff, tag := .scalar } } := by
-  native_decide
+  decide
 
 /-- Canonical example: a `movzx r32, r8`-shaped zero extension of the low byte
 `0xff` yields `0x000000ff` and discards the source's upper bits. -/
@@ -160,7 +160,7 @@ theorem x86_movzx_w8_w32_example :
       { dst := { bits := 0xdeadbeefdeadbeef, tag := .stack } }
       0x11223344556688ff .movzx .w8 .w32 =
       { dst := { bits := 0x00000000000000ff, tag := .scalar } } := by
-  native_decide
+  decide
 
 /-- Canonical example: `movsx r32, r8` of the low byte `0x80` produces the
 sign-extended `-128`, because the source width — not the destination width —
@@ -170,7 +170,7 @@ theorem x86_movsx_w8_w32_example :
       { dst := { bits := 0xffffffffffffffff, tag := .scalar } }
       0x0000000000000080 .movsx .w8 .w32 =
       { dst := { bits := 0x00000000ffffff80, tag := .scalar } } := by
-  native_decide
+  decide
 
 /-- Canonical example: a 16-bit MOVZX whose source and destination widths agree
 merges the narrowed source into the destination's low half and keeps the
@@ -180,6 +180,6 @@ theorem x86_movzx_w16_identity_example :
       { dst := { bits := 0xdeadbeefdead0000, tag := .stack } }
       0xffffffffffffaa88 .movzx .w16 .w16 =
       { dst := { bits := 0xdeadbeefdeadaa88, tag := .scalar } } := by
-  native_decide
+  decide
 
 end KProgFormal

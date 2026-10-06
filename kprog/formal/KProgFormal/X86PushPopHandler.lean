@@ -388,7 +388,7 @@ theorem x86_push_pop_push_example :
       ⟨0, .scalar⟩).width = .w64 ∧
     (x86PushPopStepSpec .push .b8 0x100 (fun _ => 0) 0x1122334455667788
       ⟨0, .scalar⟩).dst = none := by
-  native_decide
+  decide
 
 /-- Canonical example: a 16-bit `POP` reads the low sixteen bits of the frame
 little-endian, writes them over the destination's low half while preserving its
@@ -430,6 +430,6 @@ theorem x86_push_pop_round_trip_example :
       popped.addr = pushed.addr ∧
       popped.value = 0x1122334455667788 ∧
       popped.dst = some ⟨0x1122334455667788, .scalar⟩ := by
-  native_decide
+  decide
 
 end KProgFormal

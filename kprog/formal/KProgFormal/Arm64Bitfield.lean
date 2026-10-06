@@ -98,37 +98,37 @@ theorem arm64_bitfield_field_magnitude (field : BitVec 8) :
 `lsb = 8`. -/
 theorem arm64_ubfx_example :
     arm64BitfieldValueSpec .ubfx 0x0000000000abcdef01 0 8 16 = 0xcdef := by
-  native_decide
+  decide
 
 /-- Canonical example: SBFX propagates the sign of a four-bit field, so the
 field `1111` becomes all ones. -/
 theorem arm64_sbfx_example :
     arm64BitfieldValueSpec .sbfx 0xf 0 0 4 = 0xffffffffffffffff := by
-  native_decide
+  decide
 
 /-- Canonical example: UBFIZ places the masked source at the field position and
 clears everything else. -/
 theorem arm64_ubfiz_example :
     arm64BitfieldValueSpec .ubfiz 0xff 0 8 8 = 0xff00 := by
-  native_decide
+  decide
 
 /-- Canonical example: BFXIL keeps the destination's complement half and drops
 the extracted field into the low bits. -/
 theorem arm64_bfxil_example :
     arm64BitfieldValueSpec .bfxil 0xaa 0xffffffffffff0000 0 8 =
       0xffffffffffff00aa := by
-  native_decide
+  decide
 
 /-- Canonical example: BFI drops the masked source into a field that starts
 above bit zero. -/
 theorem arm64_bfi_example :
     arm64BitfieldValueSpec .bfi 0xb 0x0 4 4 = 0xb0 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 64-bit field consumes the whole source. -/
 theorem arm64_ubfx_width64_example :
     arm64BitfieldValueSpec .ubfx 0x0123456789abcdef 0 0 64 =
       0x0123456789abcdef := by
-  native_decide
+  decide
 
 end KProgFormal

@@ -36,7 +36,7 @@ theorem x86_not_high8_preserves_other_bits_and_flags :
       .w8 .high =
       { dst := { bits := 0x1122334455665501, tag := .scalar },
         flags := { cf := true, zf := false, sf := true, of := false } } := by
-  native_decide
+  decide
 
 /-- Register INC after decoded lane selection. The selected lane is incremented,
 the result is written back to that lane, and the incoming carry flag is
@@ -73,7 +73,7 @@ theorem x86_inc_high8_wraps_and_preserves_carry :
       .w8 .high =
       { dst := { bits := 0x1122334455660001, tag := .scalar },
         flags := { cf := true, zf := true, sf := false, of := false } } := by
-  native_decide
+  decide
 
 /-- Register DEC after decoded lane selection. The selected lane is decremented,
 the result is written back to that lane, and the incoming carry flag is
@@ -110,7 +110,7 @@ theorem x86_dec_high8_overflow_and_preserves_carry :
       .w8 .high =
       { dst := { bits := 0x1122334455667f01, tag := .scalar },
         flags := { cf := true, zf := false, sf := false, of := true } } := by
-  native_decide
+  decide
 
 /-- Register NEG after decoded lane selection. The selected lane is subtracted
 from zero, written back to that lane, and all modeled arithmetic flags are
@@ -147,6 +147,6 @@ theorem x86_neg_high8_signed_min_overflow :
       .w8 .high =
       { dst := { bits := 0x1122334455668001, tag := .scalar },
         flags := { cf := true, zf := false, sf := true, of := true } } := by
-  native_decide
+  decide
 
 end KProgFormal

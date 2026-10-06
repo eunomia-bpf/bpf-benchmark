@@ -53,11 +53,11 @@ theorem arm64_stlxr_w32_bound (op : Stlxr) :
 /-- Canonical example: the success status is zero at doubleword width. -/
 theorem arm64_stlxr_example :
     arm64StlxrSpec .stlxr .w64 = 0 := by
-  native_decide
+  decide
 
 /-- Canonical example: the success status is zero at word width. -/
 theorem arm64_stlxr_w32_example :
     arm64StlxrSpec .stlxr .w32 = 0 := by
-  native_decide
+  decide
 
 end KProgFormal

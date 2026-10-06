@@ -147,6 +147,6 @@ theorem x86_rol_w8_count8_updates_cf :
     let old : X86Flags := { cf := false, zf := true, sf := true, of := false }
     (generatedX86ShiftFlags .rol 1 8
       (GeneratedX86ShiftResult.rol 1 8 .w8) .w8 old).cf = true := by
-  native_decide
+  decide
 
 end KProgFormal

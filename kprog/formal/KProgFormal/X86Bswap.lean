@@ -48,16 +48,16 @@ theorem x86_bswap_w32_clears_high (v : BitVec 64) :
 /-- Canonical example: a 64-bit reversal swaps the byte order. -/
 theorem x86_bswap_w64_example :
     value 0x0123456789abcdef .w64 = 0xefcdab8967452301 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit reversal reverses the low four bytes only. -/
 theorem x86_bswap_w32_example :
     value 0x0123456789abcdef .w32 = 0xefcdab89 := by
-  native_decide
+  decide
 
 /-- Canonical example: a one-byte access is unchanged (the low byte). -/
 theorem x86_bswap_w8_example :
     value 0x0123456789abcdef .w8 = 0xef := by
-  native_decide
+  decide
 
 end KProgFormal

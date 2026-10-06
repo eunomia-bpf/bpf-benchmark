@@ -406,14 +406,14 @@ theorem x86_setcc_mem_condition_source_differs :
     GeneratedX86SetccMem.conditionCode 0x05000004 = 5 ∧
       GeneratedX86RegLaneAux.payload 0x05000004 = 4 ∧
       GeneratedX86RegLaneAux.dstShift 0x05000004 = 0 := by
-  native_decide
+  decide
 
 /-- The memory form's displacement is the whole artifact, while the immediate
 store's is the artifact's high half: the same field yields different addresses. -/
 theorem x86_setcc_mem_disp_differs_from_imm_store :
     x86SetccMemDispSpec 0xdeadbeef00000008 = 0xdeadbeef00000008 ∧
       x86StoreDispSpec true 0xdeadbeef00000008 = 0xffffffffdeadbeef := by
-  native_decide
+  decide
 
 /-- The constant width survives both inputs the handler could have consulted: a
 nonzero AUX memory-width byte (`0x40` in bits 16..23) and a nonzero FLAGS code
@@ -421,7 +421,7 @@ that would otherwise force 64 bits both leave the width at the 8-bit code. -/
 theorem x86_setcc_mem_width_ignores_inputs :
     x86SetccMemWidthSpec 0x00400000 0x08 = .w8 ∧
       x86SetccMemWidthSpec 0x00000000 0x00 = .w8 := by
-  native_decide
+  decide
 
 /-- A null-base destination takes the ordinary memory arm: the base test and the
 arm test are tests of the same register number, and `X86_REG_NONE` is not
@@ -430,7 +430,7 @@ theorem x86_setcc_mem_null_base_takes_memory_arm :
     GeneratedX86SetccMem.isNoneReg 0xff = true ∧
       GeneratedX86SetccMem.arm (GeneratedX86SetccMem.isRspReg 0xff) =
         Arm.memoryStore := by
-  native_decide
+  decide
 
 /-- Canonical example: an `e` condition on a set zero flag writes one into the
 addressed byte, little-endian, leaving the second byte alone, and the effective
@@ -451,7 +451,7 @@ theorem x86_setcc_mem_example :
         old (fun _ => 0x5a) ⟨false, true, false, false⟩ 0x04000000 0x00
         0xfffffffffffffff8 0x2000 false 0 0).addr =
         0x2000 + 0xfffffffffffffff8 := by
-  native_decide
+  decide
 
 /-- Canonical example: a stack-pointer destination writes the stack frame
 instead of process memory, at the same one-byte width and with the same
@@ -467,7 +467,7 @@ theorem x86_setcc_mem_stack_arm_example :
       (generatedX86SetccMemStep 5 false true
         (fun _ => 0x11) old ⟨false, true, false, false⟩ 0x05000000 0x00
         0x08 0x4000 false 0 0).bytes 1 = old 1 := by
-  native_decide
+  decide
 
 /-- Canonical example: an unsupported parity code writes the C default zero
 through the same one-byte path. -/
@@ -478,6 +478,6 @@ theorem x86_setcc_mem_unsupported_example :
       (generatedX86SetccMemStep 10 false false
         (fun _ => 0xa5) (fun _ => 0x5a) ⟨true, true, true, true⟩ 0x0a000000
         0x00 0 0x40 false 0 0).bytes 0 = 0x00 := by
-  native_decide
+  decide
 
 end KProgFormal

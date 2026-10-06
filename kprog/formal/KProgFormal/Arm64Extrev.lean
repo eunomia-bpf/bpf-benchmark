@@ -211,48 +211,48 @@ theorem arm64_extrev_code_dispatch :
 theorem arm64_ext_rev_extr_w64_example :
     arm64ExtrevExtrSpec 0x0123456789abcdef 0xfedcba9876543210 8 64 =
       0xeffedcba98765432 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit EXTR narrows to the low word, so the result has
 no bits above bit 31. -/
 theorem arm64_ext_rev_extr_w32_example :
     arm64ExtrevExtrSpec 0x11223344 0x55667788 4 32 = 0x45566778 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 64-bit REV reverses all eight bytes. -/
 theorem arm64_ext_rev_rev_w64_example :
     arm64ExtrevRev64Spec 0x0102030405060708 = 0x0807060504030201 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit REV reverses only the low four bytes. -/
 theorem arm64_ext_rev_rev_w32_example :
     arm64ExtrevRev32Spec 0x11223344 = 0x44332211 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 64-bit REV16 swaps the bytes within each 16-bit unit
 but leaves the units in place. -/
 theorem arm64_ext_rev_rev16_w64_example :
     arm64ExtrevRev16W64Spec 0x0102030405060708 = 0x0201040306050807 := by
-  native_decide
+  decide
 
 /-- Canonical example: a 32-bit REV16 swaps the bytes of the two low halves. -/
 theorem arm64_ext_rev_rev16_w32_example :
     arm64ExtrevRev16W32Spec 0x11223344 = 0x22114433 := by
-  native_decide
+  decide
 
 /-- Canonical example: SXTB propagates the sign of a set low byte. -/
 theorem arm64_ext_rev_sxtb_example :
     arm64ExtrevSignExtSpec 0x80 8 = 0xffffffffffffff80 := by
-  native_decide
+  decide
 
 /-- Canonical example: SXTH propagates the sign of a set low halfword. -/
 theorem arm64_ext_rev_sxth_example :
     arm64ExtrevSignExtSpec 0x8000 16 = 0xffffffffffff8000 := by
-  native_decide
+  decide
 
 /-- Canonical example: SXTW propagates the sign of a set low word. -/
 theorem arm64_ext_rev_sxtw_example :
     arm64ExtrevSignExtSpec 0x80000000 32 = 0xffffffff80000000 := by
-  native_decide
+  decide
 
 end KProgFormal

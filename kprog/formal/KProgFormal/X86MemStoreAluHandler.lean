@@ -114,6 +114,6 @@ theorem x86_mem_dest_adc_w16_store_example :
         { cf := true, zf := false, sf := true, of := true }
         old 0 .w16).flags =
         { cf := true, zf := true, sf := false, of := false } := by
-  native_decide
+  decide
 
 end KProgFormal

@@ -76,10 +76,10 @@ theorem x86_doubleshift_zero_count (dst src : BitVec 64) :
 
 /-- Canonical example: a 64-bit SHLD by 4 moves the top nibble of `src` in. -/
 theorem x86_shld_w64_example :
-    GeneratedX86DoubleShift.shld 0xf0 0x0f 4 8 = 0xf00 := by native_decide
+    GeneratedX86DoubleShift.shld 0xf0 0x0f 4 8 = 0xf00 := by decide
 
 /-- Canonical example: an 8-bit SHRD by 4 fills from the top of `src`. -/
 theorem x86_shrd_w8_example :
-    GeneratedX86DoubleShift.shrd 0xf0 0x0f 4 1 = 0xff := by native_decide
+    GeneratedX86DoubleShift.shrd 0xf0 0x0f 4 1 = 0xff := by decide
 
 end KProgFormal

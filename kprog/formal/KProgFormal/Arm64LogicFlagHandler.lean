@@ -68,7 +68,7 @@ theorem arm64_ands_w32_writes_scalar_and_sets_negative :
       .writeback .and .gpr 0xffffffff80000000 0xffffffff .w32 =
       { regs := { dst := { bits := 0x80000000, tag := .scalar }, sp := 0x80 },
         flags := { n := true, z := false, c := false, v := false } } := by
-  native_decide
+  decide
 
 theorem arm64_bics_xzr_discards_result_but_sets_zero :
     generatedArm64LogicFlagHandler
@@ -77,7 +77,7 @@ theorem arm64_bics_xzr_discards_result_but_sets_zero :
       .writeback .bic .zero 0xff 0xff .w64 =
       { regs := { dst := { bits := 0x55, tag := .mapValue }, sp := 0x80 },
         flags := { n := false, z := true, c := false, v := false } } := by
-  native_decide
+  decide
 
 theorem arm64_tst_preserves_register_and_sp_state :
     (generatedArm64LogicFlagHandler
@@ -85,7 +85,7 @@ theorem arm64_tst_preserves_register_and_sp_state :
         flags := { n := true, z := false, c := true, v := true } }
       .test .and .gpr 0xf0 0x0f .w64).regs =
       { dst := { bits := 0xfeed, tag := .packetEnd }, sp := 0x80 } := by
-  native_decide
+  decide
 
 theorem arm64_tst_bic_sets_flags_without_writeback :
     generatedArm64LogicFlagHandler
@@ -94,6 +94,6 @@ theorem arm64_tst_bic_sets_flags_without_writeback :
       .test .bic .gpr 0xff 0x0f .w8 =
       { regs := { dst := { bits := 0xfeed, tag := .stack }, sp := 0x80 },
         flags := { n := true, z := false, c := false, v := false } } := by
-  native_decide
+  decide
 
 end KProgFormal

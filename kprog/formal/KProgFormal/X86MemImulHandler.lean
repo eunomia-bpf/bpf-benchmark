@@ -129,7 +129,7 @@ theorem x86_mem_imul_w16_overflow_example :
       2 .w16 .w16 =
       { dst := { bits := 0x000000000000fffe, tag := .scalar },
         flags := { cf := true, zf := false, sf := false, of := true } } := by
-  native_decide
+  decide
 
 /-- An 8-bit memory operand inside a 64-bit `IMUL` is sign-extended before the
 multiply: the loaded `0xff` becomes all ones, so the product is `-3` and the
@@ -144,7 +144,7 @@ theorem x86_mem_imul_narrow_mem_sign_extends_example :
       3 .w64 .w8 =
       { dst := { bits := 0xfffffffffffffffd, tag := .scalar },
         flags := { cf := false, zf := true, sf := true, of := false } } := by
-  native_decide
+  decide
 
 /-- An 8-bit `IMUL` whose operands have opposite signs gets one extra bit of
 headroom: `-128 * 2` still overflows the 8-bit signed range, so CF/OF are set
@@ -158,7 +158,7 @@ theorem x86_mem_imul_w8_mixed_sign_overflow_example :
       2 .w8 .w8 =
       { dst := { bits := 0x1122334455660000, tag := .scalar },
         flags := { cf := true, zf := true, sf := true, of := true } } := by
-  native_decide
+  decide
 
 /-- An in-range 8-bit `IMUL` with an all-zero flag word stays entirely clear and
 merges the product into the destination's low byte. -/
@@ -170,6 +170,6 @@ theorem x86_mem_imul_w8_in_range_example :
       2 .w8 .w8 =
       { dst := { bits := 0x1122334455660020, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  native_decide
+  decide
 
 end KProgFormal

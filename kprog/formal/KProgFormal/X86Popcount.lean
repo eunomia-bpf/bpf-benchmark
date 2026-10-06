@@ -36,18 +36,18 @@ theorem x86_popcount_bounded (x : BitVec 64) :
 
 /-- The population count of zero is zero. -/
 theorem x86_popcount_zero :
-    GeneratedX86Popcount.value 0 = 0 := by native_decide
+    GeneratedX86Popcount.value 0 = 0 := by decide
 
 /-- Canonical example: one bit set. -/
 theorem x86_popcount_one :
-    GeneratedX86Popcount.value 0x8000000000000000 = 1 := by native_decide
+    GeneratedX86Popcount.value 0x8000000000000000 = 1 := by decide
 
 /-- Canonical example: all bits set. -/
 theorem x86_popcount_full :
-    GeneratedX86Popcount.value 0xffffffffffffffff = 64 := by native_decide
+    GeneratedX86Popcount.value 0xffffffffffffffff = 64 := by decide
 
 /-- Canonical example: an alternating pattern. -/
 theorem x86_popcount_alternating :
-    GeneratedX86Popcount.value 0x5555555555555555 = 32 := by native_decide
+    GeneratedX86Popcount.value 0x5555555555555555 = 32 := by decide
 
 end KProgFormal
