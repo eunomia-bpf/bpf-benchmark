@@ -40,6 +40,8 @@ inductive MInsn where
   | aluNarrow (op : AluOp) (bits : Nat) (dst src : GPReg)
   | aluImmNarrow (op : AluOp) (bits : Nat) (dst : GPReg) (imm : BitVec 64)
   | aluMemNarrow (op : AluOp) (bits : Nat) (dst base : GPReg) (off : BitVec 64)
+  | aluMemIndexNarrow (op : AluOp) (bits : Nat) (dst base index : GPReg)
+      (scale : Nat) (off : BitVec 64)
   | inc (bits : Nat) (dst : GPReg)
   | shd (bits : Nat) (left : Bool) (dst src : GPReg) (count : Nat)
   | popcnt (dst src : GPReg)
@@ -112,6 +114,10 @@ def MInsn.step (i : MInsn) (s : State) : State :=
     let a := s.regs base + off
     (s.read a (bits / 8)).set dst
       (writeWidth bits (s.regs dst) (op.eval (s.regs dst) (Machine.loadLE s.mem a (bits / 8))))
+  | .aluMemIndexNarrow op bits dst base index scale off =>
+    let a := s.regs base + (s.regs index <<< scale) + off
+    (s.read a (bits / 8)).set dst
+      (writeWidth bits (s.regs dst) (op.eval (s.regs dst) (Machine.loadLE s.mem a (bits / 8))))
   | .inc bits dst => s.set dst (writeWidth bits (s.regs dst) (s.regs dst + 1))
   | .shd bits left dst src count =>
     let n := count % bits
@@ -164,7 +170,7 @@ def MInsn.writes : MInsn → List GPReg
   | .bswap32 d | .not _ d | .imul d _ | .shift _ _ d _ _ | .bzhi _ d _ _
   | .blsi d _ | .blsr d _ | .lea _ d _ _ _ _ => [d]
   | .aluMem _ _ d _ _ _ _ | .aluNarrow _ _ d _ | .inc _ d
-  | .aluImmNarrow _ _ d _ | .aluMemNarrow _ _ d _ _
+  | .aluImmNarrow _ _ d _ | .aluMemNarrow _ _ d _ _ | .aluMemIndexNarrow _ _ d _ _ _ _
   | .shd _ _ d _ _ | .popcnt d _ => [d]
   | .movImm32Z d _ | .mov32 d _ | .movzx _ d _ | .movswl d _ | .loadIndex _ d _ _ _ _ _
   | .loadIndexSx32 d _ _ _ _ | .rolCL _ d

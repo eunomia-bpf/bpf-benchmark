@@ -26,6 +26,7 @@ import KinsnLean4.Kinsn.ModuleMovzx
 import KinsnLean4.Kinsn.ModuleMovswl
 import KinsnLean4.Kinsn.ModuleNarrowLogic
 import KinsnLean4.Kinsn.ModuleShd
+import KinsnLean4.Kinsn.ModuleNarrowXor
 import KinsnLean4.Kinsn.ModuleByteAlu
 import KinsnLean4.Kinsn.ModuleAluWide
 import KinsnLean4.Kinsn.ModuleAluShift
