@@ -27,7 +27,8 @@ static __always_inline int decode_rotate_payload(u64 payload,
 	*shift = kop_payload_u8(payload, 8) & shift_mask;
 	*tmp_reg = kop_payload_reg(payload, 16);
 
-	if (*dst_reg > BPF_REG_10 || *src_reg > BPF_REG_10 || *tmp_reg > BPF_REG_10)
+	if (*dst_reg >= BPF_REG_10 || *src_reg > BPF_REG_10 ||
+	    *tmp_reg > BPF_REG_10 || (*shift && *tmp_reg == BPF_REG_10))
 		return -EINVAL;
 	if (*tmp_reg == *dst_reg || *tmp_reg == *src_reg)
 		return -EINVAL;
@@ -119,12 +120,20 @@ static inline u32 a64_extr_w(u8 rd, u8 rn, u8 rm, u8 lsb)
 	       (u32)rd;
 }
 
+static inline u32 a64_lsr(bool is64, u8 rd, u8 rn, u8 shift)
+{
+	return (is64 ? 0xD3400000U : 0x53000000U) |
+	       ((u32)shift << 16) | ((is64 ? 63U : 31U) << 10) |
+	       ((u32)rn << 5) | (u32)rd;
+}
+
 static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 			     u64 payload, const struct bpf_prog *prog,
 			     bool is64)
 {
 	u8 dst_reg, src_reg, tmp_reg, shift;
 	u32 insn;
+	int cnt = 0;
 	int err;
 
 	(void)prog;
@@ -138,14 +147,27 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 
 	dst_reg = kop_arm64_reg(dst_reg);
 	src_reg = kop_arm64_reg(src_reg);
-	if (dst_reg == 0xff || src_reg == 0xff)
+	tmp_reg = kop_arm64_reg(tmp_reg);
+	if (dst_reg == 0xff || src_reg == 0xff || tmp_reg == 0xff)
 		return -EINVAL;
+
+	/* The proof writes the decoded temporary too; expose the same value. */
+	if (shift) {
+		err = kop_arm64_emit_one(image, idx, emit,
+					 a64_lsr(is64, tmp_reg, src_reg, (is64 ? 64 : 32) - shift));
+		if (err < 0)
+			return err;
+		cnt += err;
+	}
 
 	if (is64)
 		insn = a64_extr_x(dst_reg, src_reg, src_reg, (-shift) & 63);
 	else
 		insn = a64_extr_w(dst_reg, src_reg, src_reg, (-shift) & 31);
-	return kop_arm64_emit_one(image, idx, emit, insn);
+	err = kop_arm64_emit_one(image, idx, emit, insn);
+	if (err < 0)
+		return err;
+	return cnt + err;
 }
 
 static int emit_rotate64_arm64(u32 *image, int *idx, bool emit,
@@ -169,7 +191,7 @@ static int emit_rotate32_arm64(u32 *image, int *idx, bool emit,
 const struct bpf_kop bpf_arm64_extr_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_rotate64,
 	.emit_arm64 = emit_rotate64_arm64,
 };
@@ -177,7 +199,7 @@ const struct bpf_kop bpf_arm64_extr_x_desc = {
 const struct bpf_kop bpf_arm64_extr_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_rotate32,
 	.emit_arm64 = emit_rotate32_arm64,
 };

@@ -24,6 +24,7 @@ inductive MInsn where
   | ccmpZero (w32 failNE : Bool) (r : GPReg)
   | cselNE (dst yes no : GPReg)
   | cset (dst : GPReg) (ne : Bool)
+  | lsrW (dst src : GPReg) (count : BitVec 5)
   | extrW (dst src : GPReg) (lsb : BitVec 5)
   | rev16W (dst src : GPReg)
   deriving Repr
@@ -55,6 +56,8 @@ def MInsn.step (i : MInsn) (s : State) : State :=
       else { z := !failNE } }
   | .cselNE dst yes no => s.set dst (if !s.flags.z then s.armGet yes else s.armGet no)
   | .cset dst ne => s.set dst (if (if ne then !s.flags.z else s.flags.z) then 1 else 0)
+  | .lsrW dst src n => s.set dst (BitVec.setWidth 64
+      ((BitVec.setWidth 32 (s.armGet src)) >>> n.toNat))
   | .extrW dst src n => s.set dst (BitVec.setWidth 64
       ((BitVec.setWidth 32 (s.armGet src)).rotateRight n.toNat))
   | .rev16W dst src =>
@@ -64,7 +67,7 @@ def MInsn.step (i : MInsn) (s : State) : State :=
 
 def MInsn.writes : MInsn → List GPReg
   | .core i => [i.dstReg]
-  | .load _ d _ _ | .cselNE d _ _ | .cset d _ | .extrW d _ _ | .rev16W d _ => [d]
+  | .load _ d _ _ | .cselNE d _ _ | .cset d _ | .extrW d _ _ | .lsrW d _ _ | .rev16W d _ => [d]
   | .ldp lo hi _ _ => [lo, hi]
   | _ => []
 

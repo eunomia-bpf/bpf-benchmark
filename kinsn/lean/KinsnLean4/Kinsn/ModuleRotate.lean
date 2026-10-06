@@ -22,8 +22,9 @@ def bpf (w : BPF.Width) (dst src tmp : BPF.Reg) (n : Nat) : List BPF.MInsn :=
      .core (.alu .rsh w tmp (BPF.immN (width - n))),
      .core (.alu .or w dst (.reg tmp))]
 
-/-- arm64/bpf_arm64_extr.c:emit_rotate_arm64; EXTR with Rn=Rm=src,
-    lsb=(-shift)&(width-1), including zero. -/
+/-- The EXTR leaf of arm64/bpf_arm64_extr.c:emit_rotate_arm64, with Rn=Rm=src,
+    lsb=(-shift)&(width-1), including zero. The complete emitted block, including
+    the temporary update, is certified in ModuleArmRotate. -/
 def arm (w : BPF.Width) (dst src : ARM64.GPReg) (n : Nat) : List ARM64.MInsn :=
   match w with
   | .w64 => [.core (.extr dst src src (BitVec.ofNat 6 ((64 - n) % 64)))]
@@ -88,7 +89,8 @@ theorem arm_writes (w : BPF.Width) (dst src r : ARM64.GPReg) (n : Nat) :
   cases w <;> simp [arm, ARM64.mwrites, ARM64.MInsn.writes, ARM64.Insn.dstReg]
 
 /-- arm64/bpf_arm64_extr.c:instantiate_rotate32/64 and emit_rotate32/64_arm64.
-    The BPF temporary is excluded from register observation, but every memory
+    Retained abstract EXTR-leaf proof: the temporary is excluded from register
+    observation. ModuleArmRotate certifies the complete module block. Every memory
     byte and the entire ordered access trace are equal. -/
 theorem arm_refines (m : ARMRegMap) (w : BPF.Width) (dst src tmp : BPF.Reg)
     (n : Nat) (hn : n < (if w = .w64 then 64 else 32))

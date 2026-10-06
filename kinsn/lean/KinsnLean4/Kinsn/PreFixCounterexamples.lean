@@ -1,6 +1,7 @@
 import KinsnLean4.Kinsn.Catalog
 import KinsnLean4.Kinsn.ModuleFlags
 import KinsnLean4.Kinsn.ModuleRegister
+import KinsnLean4.Kinsn.ModuleRotate
 
 /-! Pre-fix C snapshot at commit `69f9a30f6`. These counterexamples are historical
 records, not models of the corrected module code.
@@ -420,5 +421,19 @@ theorem divl_overflow_mismatch :
 theorem divl_zero_mismatch :
     (BPF.mexec divlBpf (state [(.r0, 7)])).regs .r0 = 0 ∧
     nativeDiv32 0 7 0 = none := by decide +kernel
+
+/-- Pre-fix arm64/bpf_arm64_extr.c wrote the decoded temporary only in the
+    verifier expansion. Both witnesses use the real ARM register map. -/
+theorem extr_w_temporary_mismatch :
+    let s := state [(.r1, 0x80000000)]
+    (BPF.mexec (ModuleRotate.bpf .w32 .r0 .r1 .r2 1) s).regs .r2 = 1 ∧
+    (ARM64.mexec (ModuleRotate.arm .w32 .x7 .x0 1) (liftArm s)).armGet .x1 = 0 := by
+  decide +kernel
+
+theorem extr_x_temporary_mismatch :
+    let s := state [(.r1, 0x8000000000000000)]
+    (BPF.mexec (ModuleRotate.bpf .w64 .r0 .r1 .r2 1) s).regs .r2 = 1 ∧
+    (ARM64.mexec (ModuleRotate.arm .w64 .x7 .x0 1) (liftArm s)).armGet .x1 = 0 := by
+  decide +kernel
 
 end Kinsn.Counterexamples

@@ -30,6 +30,7 @@ import KinsnLean4.Kinsn.ModuleNarrowXor
 import KinsnLean4.Kinsn.ModuleMovb
 import KinsnLean4.Kinsn.ModulePopcnt
 import KinsnLean4.Kinsn.ModuleDivl
+import KinsnLean4.Kinsn.ModuleArmRotate
 import KinsnLean4.Kinsn.ModuleByteAlu
 import KinsnLean4.Kinsn.ModuleAluWide
 import KinsnLean4.Kinsn.ModuleAluShift

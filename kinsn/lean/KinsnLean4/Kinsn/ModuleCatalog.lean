@@ -4,6 +4,7 @@ import KinsnLean4.Kinsn.ModuleMemory
 import KinsnLean4.Kinsn.ModulePrefetch
 import KinsnLean4.Kinsn.ModuleFlags
 import KinsnLean4.Kinsn.ModuleRotate
+import KinsnLean4.Kinsn.ModuleArmRotate
 import KinsnLean4.Kinsn.ModuleRegister
 import KinsnLean4.Kinsn.ModuleEndian
 import KinsnLean4.Kinsn.ModuleLea
@@ -84,19 +85,21 @@ def bpf_arm64_ubfm_x (dst : BPF.Reg) (start width : Nat)
 theorem bpf_arm64_extr_w_refines (dst src tmp : BPF.Reg) (n : Nat) (hn : n < 32)
     (hts : tmp ≠ src) (htd : tmp ≠ dst) (b : BPF.State) (a : ARM64.State)
     (hi : observeBpf b = observeArm Catalog.armMap a) :
-    Machine.Sim Catalog.armReg Machine.State.armGet [tmp]
-      (BPF.mexec (ModuleRotate.bpf .w32 dst src tmp n) b)
-      (ARM64.mexec (ModuleRotate.arm .w32 (Catalog.armReg dst) (Catalog.armReg src) n) a) :=
-  ModuleRotate.arm_refines Catalog.armMap .w32 dst src tmp n hn hts htd b a hi
+    observeBpf (BPF.mexec (ModuleRotate.bpf .w32 dst src tmp n) b) =
+      observeArm Catalog.armMap (ARM64.mexec
+        (ModuleArmRotate.native .w32 (Catalog.armReg dst) (Catalog.armReg src)
+          (Catalog.armReg tmp) n) a) :=
+  (ModuleArmRotate.cert Catalog.armMap .w32 dst src tmp n hn hts htd).arm_refines b a hi
 
 /-- arm64/bpf_arm64_extr.c:instantiate_rotate64/emit_rotate64_arm64. -/
 theorem bpf_arm64_extr_x_refines (dst src tmp : BPF.Reg) (n : Nat) (hn : n < 64)
     (hts : tmp ≠ src) (htd : tmp ≠ dst) (b : BPF.State) (a : ARM64.State)
     (hi : observeBpf b = observeArm Catalog.armMap a) :
-    Machine.Sim Catalog.armReg Machine.State.armGet [tmp]
-      (BPF.mexec (ModuleRotate.bpf .w64 dst src tmp n) b)
-      (ARM64.mexec (ModuleRotate.arm .w64 (Catalog.armReg dst) (Catalog.armReg src) n) a) :=
-  ModuleRotate.arm_refines Catalog.armMap .w64 dst src tmp n hn hts htd b a hi
+    observeBpf (BPF.mexec (ModuleRotate.bpf .w64 dst src tmp n) b) =
+      observeArm Catalog.armMap (ARM64.mexec
+        (ModuleArmRotate.native .w64 (Catalog.armReg dst) (Catalog.armReg src)
+          (Catalog.armReg tmp) n) a) :=
+  (ModuleArmRotate.cert Catalog.armMap .w64 dst src tmp n hn hts htd).arm_refines b a hi
 
 /-- arm64/bpf_arm64_prfm.c:instantiate_prfm_pldl1keep/emit_prfm_pldl1keep_arm64. -/
 def bpf_arm64_prfm_pldl1keep (base : BPF.Reg) : ArmStateEquiv Catalog.armMap :=
@@ -182,11 +185,12 @@ theorem arm_rotate_payload_refines (w : BPF.Width) (p : BitVec 64)
     let src := Payload.reg (Payload.regField p 4) hs
     let tmp := Payload.reg (Payload.regField p 16) ht
     let n := (Payload.byteField p 8).toNat % (if w = .w64 then 64 else 32)
-    Machine.Sim Catalog.armReg Machine.State.armGet [tmp]
-      (BPF.mexec (ModuleRotate.bpf w dst src tmp n) b)
-      (ARM64.mexec (ModuleRotate.arm w (Catalog.armReg dst) (Catalog.armReg src) n) a) := by
+    observeBpf (BPF.mexec (ModuleRotate.bpf w dst src tmp n) b) =
+      observeArm Catalog.armMap (ARM64.mexec
+        (ModuleArmRotate.native w (Catalog.armReg dst) (Catalog.armReg src)
+          (Catalog.armReg tmp) n) a) := by
   dsimp only
-  apply ModuleRotate.arm_refines Catalog.armMap w _ _ _ _ _ hss hds b a hi
+  apply (ModuleArmRotate.cert Catalog.armMap w _ _ _ _ ?_ hss hds).arm_refines b a hi
   exact Nat.mod_lt _ (by cases w <;> decide)
 
 end Kinsn.ModuleCatalog
