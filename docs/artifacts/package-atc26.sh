@@ -31,7 +31,9 @@ git -C "$ROOT_DIR" archive --format=tar "$COMMIT" -- . \
     ':(exclude)tmp-*' \
     ':(exclude)docs/shared/source-opt' \
     ':(exclude)docs/reference' \
+    ':(exclude)kinsn/docs/reference' \
     ':(exclude)docs/shared/research' \
+    ':(exclude)llvm-backend/docs/llvm-bpf-backend.md' \
     ':(exclude)docs/ebpf27-bpfoptbench' \
     ':(exclude)docs/kprog-simulator-in-ebpf' \
     ':(exclude)docs/speculative-optimization' \
