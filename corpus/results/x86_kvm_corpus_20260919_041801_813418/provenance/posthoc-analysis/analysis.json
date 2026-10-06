@@ -1,0 +1,1115 @@
+[
+  {
+    "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_035700_452954",
+    "metadata": {
+      "bpf_stats": false,
+      "completed_at": "2026-09-19T04:10:03.769556+00:00",
+      "config": {
+        "enabled_passes": [
+          "context_specialize"
+        ]
+      },
+      "details_dir": "details",
+      "generated_at": "2026-09-19T04:10:03.769568+00:00",
+      "last_updated_at": "2026-09-19T04:10:03.769556+00:00",
+      "launcher_boot_id": "7d9986c7-d244-4781-ae28-ebae10469786",
+      "launcher_pid": 1839,
+      "launcher_start_ticks": 25335,
+      "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+      "run_type": "x86_kvm_corpus",
+      "samples": 1,
+      "started_at": "2026-09-19T03:57:00.452954+00:00",
+      "status": "completed",
+      "suite": "corpus",
+      "workload_only": false,
+      "workload_seconds": 30.0
+    },
+    "apps": [
+      {
+        "app": "bcc/set",
+        "status": "ok",
+        "error": "",
+        "artifact": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_035700_452954/details/apps/bcc__set.json",
+        "rewrites": {
+          "report_rows": 77,
+          "changed_load_instances": 1,
+          "sites_matched": 1,
+          "sites_applied": 1,
+          "report_errors": []
+        },
+        "original_preflight_rejections": [],
+        "candidate_errors": [],
+        "rejected_candidate_reports": [],
+        "deployment": {
+          "successful_changed_loads": 1,
+          "failed_changed_loads": [],
+          "unmatched_log_events": 0
+        },
+        "baseline": {
+          "unit": "bogo_ops/whole_workload_second",
+          "rate": 657516.1047956133,
+          "operations": 19741338,
+          "workload_seconds": 30.02411325899999,
+          "stressors": [
+            {
+              "name": "syscall",
+              "operations": 514,
+              "reported_real_seconds": 30.01,
+              "reported_ops_per_s": 17.13
+            },
+            {
+              "name": "cap",
+              "operations": 11296406,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 376546.94
+            },
+            {
+              "name": "set",
+              "operations": 848094,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 28269.76
+            },
+            {
+              "name": "sockfd",
+              "operations": 7596324,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 253203.97
+            }
+          ]
+        },
+        "treatment": {
+          "unit": "bogo_ops/whole_workload_second",
+          "rate": 725987.5839537862,
+          "operations": 22290559,
+          "workload_seconds": 30.70377440699997,
+          "stressors": [
+            {
+              "name": "syscall",
+              "operations": 514,
+              "reported_real_seconds": 30.69,
+              "reported_ops_per_s": 16.75
+            },
+            {
+              "name": "cap",
+              "operations": 13409017,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 446967.04
+            },
+            {
+              "name": "set",
+              "operations": 988173,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 32939.1
+            },
+            {
+              "name": "sockfd",
+              "operations": 7892855,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 263091.21
+            }
+          ]
+        },
+        "change_percent": 10.413658107957225
+      },
+      {
+        "app": "tracee/monitor",
+        "status": "ok",
+        "error": "",
+        "artifact": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_035700_452954/details/apps/tracee__monitor.json",
+        "rewrites": {
+          "report_rows": 162,
+          "changed_load_instances": 2,
+          "sites_matched": 2,
+          "sites_applied": 2,
+          "report_errors": []
+        },
+        "original_preflight_rejections": [],
+        "candidate_errors": [],
+        "rejected_candidate_reports": [],
+        "deployment": {
+          "successful_changed_loads": 2,
+          "failed_changed_loads": [],
+          "unmatched_log_events": 0
+        },
+        "baseline": {
+          "unit": "bogo_ops/whole_workload_second",
+          "rate": 479422.0525358772,
+          "operations": 14397091,
+          "workload_seconds": 30.030097539000053,
+          "stressors": [
+            {
+              "name": "cap",
+              "operations": 1998321,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 66610.57
+            },
+            {
+              "name": "set",
+              "operations": 168554,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 5618.47
+            },
+            {
+              "name": "sigfd",
+              "operations": 5467685,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 182248.03
+            },
+            {
+              "name": "eventfd",
+              "operations": 1203156,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 40104.98
+            },
+            {
+              "name": "kill",
+              "operations": 916881,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 30563.58
+            },
+            {
+              "name": "futex",
+              "operations": 4633968,
+              "reported_real_seconds": 60.0,
+              "reported_ops_per_s": 77231.83
+            },
+            {
+              "name": "prctl",
+              "operations": 8526,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 284.2
+            }
+          ]
+        },
+        "treatment": {
+          "unit": "bogo_ops/whole_workload_second",
+          "rate": 623206.9240063457,
+          "operations": 18712757,
+          "workload_seconds": 30.026555032000033,
+          "stressors": [
+            {
+              "name": "cap",
+              "operations": 3134020,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 104467.37
+            },
+            {
+              "name": "set",
+              "operations": 220796,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 7359.86
+            },
+            {
+              "name": "sigfd",
+              "operations": 7957984,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 265259.06
+            },
+            {
+              "name": "eventfd",
+              "operations": 1598820,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 53293.66
+            },
+            {
+              "name": "kill",
+              "operations": 1196461,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 39881.77
+            },
+            {
+              "name": "futex",
+              "operations": 4595864,
+              "reported_real_seconds": 60.0,
+              "reported_ops_per_s": 76597.37
+            },
+            {
+              "name": "prctl",
+              "operations": 8812,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 293.73
+            }
+          ]
+        },
+        "change_percent": 29.99129278887487
+      }
+    ]
+  },
+  {
+    "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418",
+    "metadata": {
+      "bpf_stats": false,
+      "completed_at": "2026-09-19T04:35:30.046205+00:00",
+      "config": {
+        "enabled_passes": [
+          "map_inline"
+        ]
+      },
+      "details_dir": "details",
+      "generated_at": "2026-09-19T04:35:30.046213+00:00",
+      "last_updated_at": "2026-09-19T04:35:30.046205+00:00",
+      "launcher_boot_id": "6428cdc9-c434-4099-a61c-86c6d77c2742",
+      "launcher_pid": 1867,
+      "launcher_start_ticks": 43961,
+      "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+      "run_type": "x86_kvm_corpus",
+      "samples": 1,
+      "started_at": "2026-09-19T04:18:01.813418+00:00",
+      "status": "completed",
+      "suite": "corpus",
+      "workload_only": false,
+      "workload_seconds": 30.0
+    },
+    "apps": [
+      {
+        "app": "cilium/agent",
+        "status": "ok",
+        "error": "",
+        "artifact": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/apps/cilium__agent.json",
+        "rewrites": {
+          "report_rows": 169,
+          "changed_load_instances": 122,
+          "sites_matched": 3787,
+          "sites_applied": 3787,
+          "report_errors": []
+        },
+        "original_preflight_rejections": [
+          "[714.806228 pid=3945 tid=3957] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_6/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[715.466896 pid=3945 tid=3957] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_7/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[721.885951 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_17/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[726.342119 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_25/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[735.731336 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_40/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[737.266527 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_42/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[737.907052 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_43/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[738.446401 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_45/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[738.990352 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_46/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[740.067069 pid=3945 tid=3960] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_3945_47/verifier_log_initial.log; passing original BPF_PROG_LOAD through"
+        ],
+        "candidate_errors": [],
+        "rejected_candidate_reports": [],
+        "deployment": {
+          "successful_changed_loads": 122,
+          "failed_changed_loads": [],
+          "unmatched_log_events": 0
+        },
+        "baseline": {
+          "unit": "sender_pps",
+          "rate": 1576821,
+          "errors": 0,
+          "components": [
+            {
+              "name": "cilium_endpoint_pktgen_forward",
+              "pps": 771777,
+              "errors": 0
+            },
+            {
+              "name": "cilium_endpoint_pktgen_reverse",
+              "pps": 805044,
+              "errors": 0
+            }
+          ]
+        },
+        "treatment": {
+          "unit": "sender_pps",
+          "rate": 1623352,
+          "errors": 0,
+          "components": [
+            {
+              "name": "cilium_endpoint_pktgen_forward",
+              "pps": 794992,
+              "errors": 0
+            },
+            {
+              "name": "cilium_endpoint_pktgen_reverse",
+              "pps": 828360,
+              "errors": 0
+            }
+          ]
+        },
+        "change_percent": 2.950937360676953
+      },
+      {
+        "app": "otelcol-ebpf-profiler/profiling",
+        "status": "ok",
+        "error": "",
+        "artifact": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/apps/otelcol-ebpf-profiler__profiling.json",
+        "rewrites": {
+          "report_rows": 16,
+          "changed_load_instances": 13,
+          "sites_matched": 1078,
+          "sites_applied": 1078,
+          "report_errors": []
+        },
+        "original_preflight_rejections": [],
+        "candidate_errors": [
+          "[524.309758 pid=2019 tid=2026] loadtime verifier probe rejected candidate after step map_inline errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_2019_11/verifier_log_step0.log; passing original BPF_PROG_LOAD through"
+        ],
+        "rejected_candidate_reports": [
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_2019_11/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_2019_11/verifier_log_step0.log",
+            "sites_matched": 141,
+            "sites_rewritten_but_not_deployed": 141,
+            "insn_count_before": 7974,
+            "insn_count_after": 3545
+          }
+        ],
+        "deployment": {
+          "successful_changed_loads": 13,
+          "failed_changed_loads": [],
+          "unmatched_log_events": 0
+        },
+        "baseline": {
+          "unit": "language_loop_ops/s",
+          "rate": 108297433.11641905,
+          "languages": {
+            "python3": 10022149.004802842,
+            "ruby": 23974597.566719875,
+            "nodejs": 20690243.160205536,
+            "perl": 10331910.164821006,
+            "php": 43278533.21986979
+          },
+          "workers": [
+            {
+              "language": "python3",
+              "worker": 0,
+              "operations": 149685008,
+              "seconds": 30.01001,
+              "rate": 4987835.992057317
+            },
+            {
+              "language": "python3",
+              "worker": 1,
+              "operations": 151029481,
+              "seconds": 30.000018,
+              "rate": 5034313.012745526
+            },
+            {
+              "language": "ruby",
+              "worker": 0,
+              "operations": 321665193,
+              "seconds": 30.00001,
+              "rate": 10722169.525943492
+            },
+            {
+              "language": "ruby",
+              "worker": 1,
+              "operations": 397572987,
+              "seconds": 30.000011,
+              "rate": 13252428.040776385
+            },
+            {
+              "language": "nodejs",
+              "worker": 0,
+              "operations": 313910776,
+              "seconds": 30.000154,
+              "rate": 10463638.819987392
+            },
+            {
+              "language": "nodejs",
+              "worker": 1,
+              "operations": 306799204,
+              "seconds": 30.000105,
+              "rate": 10226604.340218142
+            },
+            {
+              "language": "perl",
+              "worker": 0,
+              "operations": 164778681,
+              "seconds": 30.008764,
+              "rate": 5491018.590435781
+            },
+            {
+              "language": "perl",
+              "worker": 1,
+              "operations": 145246774,
+              "seconds": 30.004137,
+              "rate": 4840891.574385226
+            },
+            {
+              "language": "php",
+              "worker": 0,
+              "operations": 664009482,
+              "seconds": 30.000004,
+              "rate": 22133646.44884714
+            },
+            {
+              "language": "php",
+              "worker": 1,
+              "operations": 634346730,
+              "seconds": 30.000006,
+              "rate": 21144886.771022648
+            }
+          ],
+          "native_stress": [
+            {
+              "stressor": "cpu",
+              "operations": 41718,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 1390.59
+            }
+          ]
+        },
+        "treatment": {
+          "unit": "language_loop_ops/s",
+          "rate": 108914030.62480915,
+          "languages": {
+            "python3": 9501487.665972423,
+            "ruby": 21716549.39947181,
+            "nodejs": 22908471.639892593,
+            "perl": 11319238.31524346,
+            "php": 43468283.604228854
+          },
+          "workers": [
+            {
+              "language": "python3",
+              "worker": 0,
+              "operations": 147139459,
+              "seconds": 30.000014,
+              "rate": 4904646.344498373
+            },
+            {
+              "language": "python3",
+              "worker": 1,
+              "operations": 137905304,
+              "seconds": 30.000014,
+              "rate": 4596841.32147405
+            },
+            {
+              "language": "ruby",
+              "worker": 0,
+              "operations": 279835481,
+              "seconds": 30.000007,
+              "rate": 9327847.19016899
+            },
+            {
+              "language": "ruby",
+              "worker": 1,
+              "operations": 371661153,
+              "seconds": 30.000007,
+              "rate": 12388702.209302818
+            },
+            {
+              "language": "nodejs",
+              "worker": 0,
+              "operations": 346780893,
+              "seconds": 30.000088,
+              "rate": 11559329.192634368
+            },
+            {
+              "language": "nodejs",
+              "worker": 1,
+              "operations": 340475170,
+              "seconds": 30.000079,
+              "rate": 11349142.447258223
+            },
+            {
+              "language": "perl",
+              "worker": 0,
+              "operations": 164290496,
+              "seconds": 30.00661,
+              "rate": 5475143.51004662
+            },
+            {
+              "language": "perl",
+              "worker": 1,
+              "operations": 175322850,
+              "seconds": 30.000001,
+              "rate": 5844094.805196839
+            },
+            {
+              "language": "php",
+              "worker": 0,
+              "operations": 630872654,
+              "seconds": 30.000004,
+              "rate": 21029085.662788577
+            },
+            {
+              "language": "php",
+              "worker": 1,
+              "operations": 673176028,
+              "seconds": 30.000004,
+              "rate": 22439197.941440273
+            }
+          ],
+          "native_stress": [
+            {
+              "stressor": "cpu",
+              "operations": 36316,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 1210.51
+            }
+          ]
+        },
+        "change_percent": 0.5693556076507011
+      },
+      {
+        "app": "tetragon/observer",
+        "status": "ok",
+        "error": "",
+        "artifact": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/apps/tetragon__observer.json",
+        "rewrites": {
+          "report_rows": 150,
+          "changed_load_instances": 78,
+          "sites_matched": 95,
+          "sites_applied": 95,
+          "report_errors": []
+        },
+        "original_preflight_rejections": [
+          "[1082.764405 pid=7129 tid=7145] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_3/verifier_log_initial.log; passing original BPF_PROG_LOAD through",
+          "[1092.118162 pid=7129 tid=7140] loadtime original bytecode rejected by verifier errno=13 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_15/verifier_log_initial.log; passing original BPF_PROG_LOAD through"
+        ],
+        "candidate_errors": [
+          "[1094.054719 pid=7129 tid=7140] loadtime optimization failed: loadtime bpfopt step map_inline failed; log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_18/step0.log",
+          "[1094.567066 pid=7129 tid=7140] loadtime optimization failed: loadtime bpfopt step map_inline failed; log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_19/step0.log",
+          "[1105.970606 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_27/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1108.578455 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_28/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1118.173076 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_34/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1121.948448 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_36/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1129.419400 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_40/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1137.605522 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_44/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1152.928277 pid=7129 tid=7141] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_51/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1155.393221 pid=7129 tid=7141] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_52/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1163.834916 pid=7129 tid=7136] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_56/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1170.323635 pid=7129 tid=7136] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_59/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1180.039270 pid=7129 tid=7136] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_64/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1182.332894 pid=7129 tid=7141] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_65/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1193.056153 pid=7129 tid=7141] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_70/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1199.957289 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_74/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1202.611684 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_75/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1217.541397 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_82/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1221.592172 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_84/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1230.109352 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_87/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1236.486670 pid=7129 tid=7143] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_90/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1248.017013 pid=7129 tid=7143] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_96/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1258.659630 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_101/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1262.665744 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_103/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1271.516455 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_108/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1273.900465 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_109/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1283.512154 pid=7129 tid=7139] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_113/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1288.144191 pid=7129 tid=7136] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_115/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1298.354025 pid=7129 tid=7142] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_120/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1305.855257 pid=7129 tid=7135] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_123/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1311.477998 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_125/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1322.008026 pid=7129 tid=7142] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_130/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1326.501319 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_132/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1329.024939 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_133/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1349.146726 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_142/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1359.464333 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_147/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1364.936864 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_149/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1370.260904 pid=7129 tid=7144] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_151/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1384.635719 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_158/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1386.973468 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_159/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1396.814074 pid=7129 tid=7141] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_163/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1402.590508 pid=7129 tid=7143] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_165/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1409.037001 pid=7129 tid=7143] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_168/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1418.272070 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_173/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1429.445741 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_177/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1437.294974 pid=7129 tid=7145] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_181/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1443.617269 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_184/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1451.194729 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_187/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1457.712244 pid=7129 tid=7140] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_191/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1469.010899 pid=7129 tid=7142] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_196/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1471.550827 pid=7129 tid=7142] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_197/verifier_log_step0.log; passing original BPF_PROG_LOAD through",
+          "[1481.954931 pid=7129 tid=7141] loadtime verifier probe rejected candidate after step map_inline errno=22 log=/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_201/verifier_log_step0.log; passing original BPF_PROG_LOAD through"
+        ],
+        "rejected_candidate_reports": [
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_27/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_27/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 1412,
+            "insn_count_after": 1076
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_28/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_28/verifier_log_step0.log",
+            "sites_matched": 3,
+            "sites_rewritten_but_not_deployed": 3,
+            "insn_count_before": 2806,
+            "insn_count_after": 2401
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_34/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_34/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_36/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_36/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_40/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_40/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_44/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_44/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_51/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_51/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_52/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_52/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_56/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_56/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_59/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_59/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_64/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_64/verifier_log_step0.log",
+            "sites_matched": 1,
+            "sites_rewritten_but_not_deployed": 1,
+            "insn_count_before": 3356,
+            "insn_count_after": 2929
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_65/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_65/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_70/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_70/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_74/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_74/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_75/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_75/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_82/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_82/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_84/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_84/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_87/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_87/verifier_log_step0.log",
+            "sites_matched": 1,
+            "sites_rewritten_but_not_deployed": 1,
+            "insn_count_before": 3356,
+            "insn_count_after": 2929
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_90/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_90/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_96/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_96/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_101/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_101/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_103/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_103/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_108/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_108/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_109/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_109/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_113/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_113/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_115/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_115/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_120/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_120/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_123/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_123/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_125/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_125/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_130/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_130/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_132/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_132/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_133/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_133/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_142/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_142/verifier_log_step0.log",
+            "sites_matched": 1,
+            "sites_rewritten_but_not_deployed": 1,
+            "insn_count_before": 3356,
+            "insn_count_after": 2929
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_147/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_147/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_149/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_149/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_151/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_151/verifier_log_step0.log",
+            "sites_matched": 1,
+            "sites_rewritten_but_not_deployed": 1,
+            "insn_count_before": 3356,
+            "insn_count_after": 2929
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_158/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_158/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_159/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_159/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_163/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_163/verifier_log_step0.log",
+            "sites_matched": 1,
+            "sites_rewritten_but_not_deployed": 1,
+            "insn_count_before": 3356,
+            "insn_count_after": 2929
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_165/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_165/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_168/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_168/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_173/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_173/verifier_log_step0.log",
+            "sites_matched": 1,
+            "sites_rewritten_but_not_deployed": 1,
+            "insn_count_before": 3356,
+            "insn_count_after": 2929
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_177/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_177/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_181/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_181/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_184/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_184/verifier_log_step0.log",
+            "sites_matched": 1,
+            "sites_rewritten_but_not_deployed": 1,
+            "insn_count_before": 3356,
+            "insn_count_after": 2929
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_187/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_187/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_191/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_191/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_196/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_196/verifier_log_step0.log",
+            "sites_matched": 2,
+            "sites_rewritten_but_not_deployed": 2,
+            "insn_count_before": 4051,
+            "insn_count_after": 3755
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_197/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_197/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          },
+          {
+            "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_201/report.0.json",
+            "verifier_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260919_041801_813418/details/loadtime-workdirs/loadtime_7129_201/verifier_log_step0.log",
+            "sites_matched": 6,
+            "sites_rewritten_but_not_deployed": 6,
+            "insn_count_before": 2919,
+            "insn_count_after": 2464
+          }
+        ],
+        "deployment": {
+          "successful_changed_loads": 78,
+          "failed_changed_loads": [],
+          "unmatched_log_events": 0
+        },
+        "baseline": {
+          "unit": "bogo_ops/whole_workload_second",
+          "rate": 356014.87644517916,
+          "operations": 10705949,
+          "workload_seconds": 30.071633822999956,
+          "stressors": [
+            {
+              "name": "eventfd",
+              "operations": 2103754,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 70124.53
+            },
+            {
+              "name": "mmap",
+              "operations": 726,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 24.2
+            },
+            {
+              "name": "udp",
+              "operations": 3244178,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 108136.85
+            },
+            {
+              "name": "sock",
+              "operations": 10762,
+              "reported_real_seconds": 30.01,
+              "reported_ops_per_s": 358.67
+            },
+            {
+              "name": "sockfd",
+              "operations": 3831766,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 127722.44
+            },
+            {
+              "name": "sockpair",
+              "operations": 1514763,
+              "reported_real_seconds": 30.05,
+              "reported_ops_per_s": 50412.82
+            }
+          ]
+        },
+        "treatment": {
+          "unit": "bogo_ops/whole_workload_second",
+          "rate": 916403.0026167593,
+          "operations": 27528525,
+          "workload_seconds": 30.039758623000125,
+          "stressors": [
+            {
+              "name": "eventfd",
+              "operations": 7521698,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 250721.38
+            },
+            {
+              "name": "mmap",
+              "operations": 8531,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 284.35
+            },
+            {
+              "name": "udp",
+              "operations": 6832555,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 227750.0
+            },
+            {
+              "name": "sock",
+              "operations": 73955,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 2465.02
+            },
+            {
+              "name": "sockfd",
+              "operations": 9948457,
+              "reported_real_seconds": 30.0,
+              "reported_ops_per_s": 331608.27
+            },
+            {
+              "name": "sockpair",
+              "operations": 3143329,
+              "reported_real_seconds": 30.03,
+              "reported_ops_per_s": 104687.11
+            }
+          ]
+        },
+        "change_percent": 157.40581735434063
+      }
+    ]
+  }
+]

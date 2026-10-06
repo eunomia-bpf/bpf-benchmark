@@ -351,6 +351,13 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_BITFIELD_WIDTH(AUX) KPROG_ARM64_AUX_B2(AUX)
 #define ARM64_SIM_L_CCMP_NZCV(AUX) KPROG_ARM64_AUX_B1(AUX)
 
+/* The width a body operates at when its decoded width field is absent (the
+ * code 0): the same resolution the Lean `effective` def and the C contract
+ * state. The composed body restated this fallback inline; it now shares one
+ * kernel. */
+#define ARM64_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                  \
+	arm64_width_effective(WIDTH)
+
 /*
  * Bitfield-composition (UBFX/SBFX/UBFIZ/BFXIL/BFI) value. The five numeric
  * kinds, their shared mask/sign-extension locals and their field-placement
@@ -984,7 +991,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 
 #define ARM64_SIM_L_EXEC(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)         \
 	do {                                                               \
-		__u8 __a64_l_width = (FLAGS) ? (FLAGS) : ARM64_WIDTH_64;  \
+		__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);\
 		if ((OP) == ARM64_OP_NOP) {                                \
 			(void)0;                                           \
 		} else if (KPROG_ARM64_ADRP_HANDLED(OP)) {                 \

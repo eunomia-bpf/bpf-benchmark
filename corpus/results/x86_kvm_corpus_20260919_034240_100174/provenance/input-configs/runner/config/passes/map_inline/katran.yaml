@@ -1,0 +1,102 @@
+# map_inline overrides for katran/balancer_ingress.
+#
+# Phased Route A rollout — see docs/tmp/katran_optimization_upper_bound.md
+# §17 for the full plan. Each phase is gated on (a) actually inlining and
+# (b) being semantically safe (BPF kernel data path does not write the map).
+#
+# Current phase: 4 (ctl_array + vip_map + ch_rings + reals + LPM NULL
+# entry hints, plus map-in-map outer-only folds for lru_mapping/global_lru_maps).
+# Runtime-key hints are workload-phase-stable deployment context. The fixed
+# benchmark flow therefore permits direct key/value specialization.
+#
+# `--inline-hint=<anchor>:<hex_key_bytes>` is map_inline pass-local — placed
+# AFTER `--` so MapInlineCliArgs parses it. A map-name anchor covers all lookup
+# sites for that map. There is one hint kind; the hex bytes identify the hinted
+# map-entry key whose snapshotted value may be used.
+#
+# Hinted now
+#   phase 1: ctl_array[0]   router MAC, key=0x00000000  (loader-only writes)
+#   phase 2: vip_map[VIP+port+UDP]  benchmark single VIP (phase-stable)
+#   phase 3: ch_rings  uniform overlay all entries → real_id 1
+#            reals[1]  sparse overlay, REAL_IP 10.200.0.2 → real_definition
+#   phase 4: lpm_src_v4/v6 empty snapshots → lookup miss/NULL
+#            lru_mapping/global_lru_maps outer lookup → const inner map_ptr
+#
+# Phase 3 needs runtime overlay injection because snapshot capture size-skipped
+# ch_rings/reals (33M-entry array). _inject_katran.sh resolves map_id by name
+# from MAP_VALUES/map-*.show.json and writes overlays.json keyed by current
+# run's map_ids (overlay templates are static; map_ids change per run).
+#
+# Not yet hinted
+#   vip_to_down_rea outer: benchmark map is empty, so an outer-only hint would
+#   be an operator error until the deployment populates it.
+#
+# Excluded (BPF kernel writes the map → snapshot value would be stale)
+#   stats / reals_stats / lru_miss_stats / vip_miss_stats / quic_stats_map
+#   fallback_cache / lru_mapping inner / global_lru_maps / fallback_glru
+#   stable_rt_stats / decap_vip_stats / tpr_stats_map / server_id_stats
+#   flow_debug_map
+#
+# Other katran progs (e.g. xdp_root) get the plain default command via the
+# `programs.default` fallback below.
+log_level: 1
+programs:
+  balancer_ingress:
+    # Phase 3 overlay injection inlined: scan ${MAP_VALUES}/map-*.show.json
+    # to resolve ch_rings/reals map_id by name (per-run id changes), then
+    # build overlays.json keyed by current run's id from the static templates
+    # under runner/config/passes/map_inline/overlays/katran/. The overlay dir is
+    # resolved from the injected workspace root so the step is relocatable.
+    command: |
+      OVERLAY_DIR="${BPFREJIT_REPO_ROOT:?BPFREJIT_REPO_ROOT is required}/runner/config/passes/map_inline/overlays/katran";
+      CH=; RE=; SI=; VIP=;
+      for f in ${MAP_VALUES}/map-*.show.json; do
+        n=$(jq -r .name "$f"); i=$(jq -r .id "$f");
+        case "$n" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; vip_map) VIP=$i ;; esac;
+      done;
+      VIP_KEY=0a6401010000000000000000000000001f901100;
+      jq -n --arg c "$CH" --arg r "$RE" --arg s "$SI" --arg v "$VIP"
+        --slurpfile co "$OVERLAY_DIR/ch_rings.json"
+        --slurpfile ro "$OVERLAY_DIR/reals.json"
+        --slurpfile so "$OVERLAY_DIR/server_id_map.json"
+        --slurpfile vo "$OVERLAY_DIR/vip_map_xdp_pktgen.json"
+        '($c | if . == "" then {} else {(.): $co[0]} end) + ($r | if . == "" then {} else {(.): $ro[0]} end) + ($s | if . == "" then {} else {(.): $so[0]} end) + ($v | if . == "" then {} else {(.): $vo[0]} end)'
+        > ${MAP_VALUES}/overlays.json &&
+      bpfopt --pass map_inline
+        --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
+        --prog-type ${PROG_TYPE}
+        --
+        --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
+        --stability phase-stable
+        --assume-hint-key
+        --inline-hint=ctl_array:00000000
+        --inline-hint=vip_map:$VIP_KEY
+        --inline-hint=ch_rings:00000000
+        --inline-hint=reals:01000000
+        --inline-hint=server_id_map:00000000
+        # lpm_src_v4/v6 hints commented: katran is built without
+        # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program
+        # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts
+        # on hint anchor not in metadata (correct: catches typos and
+        # mis-applied hints early). Uncomment if a future build turns on
+        # source-IP routing.
+        # --inline-hint=lpm_src_v4:00000000
+        # --inline-hint=lpm_src_v6:00000000
+        # lru_mapping/global_lru_maps outer-only hints commented: katran
+        # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer
+        # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this:
+        # `attachLrus()` iterates empty forwardingCores_ → zero update_elem.
+        # bpfopt fail-fasts when hinted outer key has no live inner map
+        # (correct: hint claims something kernel snapshot disproves).
+        # Uncomment only if benchmark configures forwarding cores OR an
+        # alternative test deploys populated map-in-map.
+        # --inline-hint=lru_mapping:00000000
+        # --inline-hint=global_lru_maps:00000000
+  default:
+    command: |
+      bpfopt --pass map_inline
+        --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
+        --prog-type ${PROG_TYPE}
+        --
+        --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
+        --stability phase-stable

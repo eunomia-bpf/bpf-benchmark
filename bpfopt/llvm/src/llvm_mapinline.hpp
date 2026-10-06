@@ -202,6 +202,9 @@ std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
 {
 	auto module = generate_llvm_module(input);
 	return module.withModuleDo([&](llvm::Module &module) {
+		auto machine = create_bpf_target_machine(
+			llvm::CodeGenOptLevel::Aggressive);
+		promote_register_allocas(module, *machine);
 		return extract_relocated_text(emit_bpf_object(module), input,
 					      kop_targets);
 	});

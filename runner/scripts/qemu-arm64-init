@@ -26,7 +26,9 @@ ulimit -l unlimited 2>/dev/null || true
 
 export HOME=/root
 export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1
-export BPFREJIT_IMAGE_WORKSPACE=/workspaces/repository
+# The Makefile substitutes this placeholder with the packaging checkout's
+# absolute root so the QEMU arm64 path does not embed an author-specific path.
+export BPFREJIT_IMAGE_WORKSPACE="${BPFREJIT_IMAGE_WORKSPACE:-__BPFREJIT_IMAGE_WORKSPACE__}"
 export BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/arm64
 export BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so
 export BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1
