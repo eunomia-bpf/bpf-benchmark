@@ -1,0 +1,1840 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 193791874,
+        "run_time_ns_delta": 16777149721,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 193792147,
+        "run_time_ns_delta": 9480881035,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 281964,
+        "run_time_ns_delta": 16464490,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 25451,
+        "run_time_ns_delta": 1261027,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 3636345,
+        "run_time_ns_delta": 276142396,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 5537019,
+        "run_time_ns_delta": 194213743,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 1203908,
+        "run_time_ns_delta": 48327161,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 9706858,
+        "run_time_ns_delta": 500025173,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 7429,
+        "run_time_ns_delta": 1181863,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 2546169,
+        "run_time_ns_delta": 557826584,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 1344,
+        "run_time_ns_delta": 265738,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 4763779,
+        "run_time_ns_delta": 716183904,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 3351161,
+        "run_time_ns_delta": 303793878,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 152236,
+        "run_time_ns_delta": 37521388,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 31099,
+        "run_time_ns_delta": 3518835,
+        "type": "kprobe"
+      },
+      "35": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 35,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 31099,
+        "run_time_ns_delta": 25126003,
+        "type": "kprobe"
+      },
+      "36": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 36,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 420679,
+        "run_time_ns_delta": 98845143,
+        "type": "tracepoint"
+      },
+      "37": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 37,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 119028,
+        "run_time_ns_delta": 44613681,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 120263,
+        "run_time_ns_delta": 43476473,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 121492,
+        "run_time_ns_delta": 20920712,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21926",
+          "--sctp-port",
+          "22026",
+          "--sock-port",
+          "22126",
+          "--sockfd-port",
+          "22226",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/h49"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.072722483999996,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [11593] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [11593] setting to a 10 secs run per stressor\nstress-ng: info:  [11593] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [11593] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [11725] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [14507] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [13728] dentry: 354148 dentries allocated\nstress-ng: metrc: [11593] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11593]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11593] cap             1732120     10.06      0.54      5.69    172196.90      278275.05\nstress-ng: metrc: [11593] eventfd          230860     10.00      0.14      1.51     23076.14      139571.89\nstress-ng: metrc: [11593] get                6213     10.00      0.10      2.40       621.23        2483.95\nstress-ng: metrc: [11593] prctl              8387     10.03      2.26      1.46       836.09        2255.09\nstress-ng: metrc: [11593] set               93432     10.10      0.34      3.67      9254.27       23282.55\nstress-ng: metrc: [11593] dup                1348     10.10      0.38      0.35       133.44        1859.87\nstress-ng: metrc: [11593] kill              19886     10.13      0.02      2.57      1962.95        7667.99\nstress-ng: metrc: [11593] sigfd           3553815     10.08      0.62      6.12    352549.91      527479.02\nstress-ng: metrc: [11593] signal                0     10.01      0.01      0.19         0.00           0.00\nstress-ng: metrc: [11593] pty                 208     10.09      0.20      5.93        20.61          33.92\nstress-ng: metrc: [11593] itimer              664     10.09      0.57      5.45        65.79         110.29\nstress-ng: metrc: [11593] timerfd          515072     10.24      0.24      2.94     50314.72      161795.83\nstress-ng: metrc: [11593] fork              10230     10.05      1.26      1.77      1017.81        3370.28\nstress-ng: metrc: [11593] vfork             92034     10.01      1.02      1.51      9196.28       36377.08\nstress-ng: metrc: [11593] clone              2270     10.11      0.87      3.88       224.61         478.01\nstress-ng: metrc: [11593] ptrace           593740     10.01      0.17      2.40     59320.27      231051.96\nstress-ng: metrc: [11593] futex            792888     20.04      0.43      5.83     39568.60      126632.86\nstress-ng: metrc: [11593] sem             1627486     10.05      0.08      0.63    161964.92     2282144.15\nstress-ng: metrc: [11593] aio               14059     10.22      0.00      0.08      1375.79      186350.14\nstress-ng: metrc: [11593] aiol               9735     10.34      0.11      0.48       941.70       16468.21\nstress-ng: metrc: [11593] hdd               43388     10.17      0.68      0.54      4264.86       35573.99\nstress-ng: metrc: [11593] io                   39     10.28      0.00      0.06         3.80         698.49\nstress-ng: metrc: [11593] iomix              7805     10.90      0.28      3.37       716.18        2136.56\nstress-ng: metrc: [11593] io-uring          21348     10.33      0.00      1.13      2067.34       18779.81\nstress-ng: metrc: [11593] sync-file           111     10.12      0.02      0.36        10.96         292.11\nstress-ng: metrc: [11593] epoll             20737     10.28      0.06      0.89      2016.93       21829.91\nstress-ng: metrc: [11593] netdev          1038821     10.07      0.13      1.64    103187.73      586165.02\nstress-ng: metrc: [11593] sctp              25287     10.00      0.03      0.86      2527.58       28385.70\nstress-ng: metrc: [11593] sock               2317     10.03      0.02      1.43       231.00        1599.98\nstress-ng: metrc: [11593] sockdiag       49931612     10.03      0.17      5.45   4976047.19     8876906.19\nstress-ng: metrc: [11593] sockfd           350578     10.18      0.11      1.37     34448.38      236525.28\nstress-ng: metrc: [11593] sockpair            705     10.12      0.03      0.10        69.68        5383.08\nstress-ng: metrc: [11593] sockmany          31098     10.17      0.04      0.95      3059.05       31572.66\nstress-ng: metrc: [11593] udp              475746     10.05      0.20      4.53     47339.49      100399.91\nstress-ng: metrc: [11593] udp-flood       2875434     10.02      0.25      4.16    286897.90      651914.68\nstress-ng: metrc: [11593] mmap               3713     10.07      0.12      4.26       368.78         847.94\nstress-ng: metrc: [11593] mprotect       10861122     10.13      2.41     22.04   1071722.04      444269.24\nstress-ng: metrc: [11593] mremap             4684     10.09      0.05      3.03       464.14        1522.35\nstress-ng: metrc: [11593] madvise             151     10.10      0.24      3.99        14.95          35.71\nstress-ng: metrc: [11593] access            12765     10.11      0.12      1.41      1262.19        8344.28\nstress-ng: metrc: [11593] chdir                29     10.38      0.15      1.82         2.79          14.74\nstress-ng: metrc: [11593] chmod               401     10.10      0.00      0.31        39.69        1272.95\nstress-ng: metrc: [11593] chown               295     10.17      0.00      0.18        29.00        1674.15\nstress-ng: metrc: [11593] dentry            14336     10.19      0.02      0.45      1407.06       30503.23\nstress-ng: metrc: [11593] dir               29760     10.40      0.09      2.92      2860.19        9879.03\nstress-ng: metrc: [11593] dirmany           33023     10.11      0.00      0.76      3267.63       43553.67\nstress-ng: metrc: [11593] fallocate             2     10.07      0.02      0.00         0.20          85.49\nstress-ng: metrc: [11593] file-ioctl        79176     10.08      0.09      1.46      7850.89       51033.68\nstress-ng: metrc: [11593] filename           5977     10.11      0.07      1.22       591.43        4655.69\nstress-ng: metrc: [11593] flock           1381533     10.09      0.28      1.07    136866.16     1022733.53\nstress-ng: metrc: [11593] fpunch              542     10.12      0.02      0.98        53.57         543.89\nstress-ng: metrc: [11593] fstat              8582     10.01      0.13      1.87       857.74        4284.18\nstress-ng: metrc: [11593] getdent          489280     10.01      0.24      3.30     48879.77      138256.99\nstress-ng: metrc: [11593] hdd               35128     10.07      0.55      0.48      3487.59       34365.16\nstress-ng: metrc: [11593] inotify              22     10.11      0.03      0.01         2.18         473.41\nstress-ng: metrc: [11593] open               8192     10.11      0.00      0.17       810.61       48730.29\nstress-ng: metrc: [11593] rename           112730     10.08      0.06      0.74     11187.14      140888.20\nstress-ng: metrc: [11593] touch            168708     10.14      0.11      4.55     16639.15       36188.03\nstress-ng: metrc: [11593] utime             57853     10.08      0.09      1.12      5742.16       47951.81\nstress-ng: metrc: [11593] link                  7     10.10      0.08      0.76         0.69           8.33\nstress-ng: metrc: [11593] symlink               4     10.31      0.03      1.17         0.39           3.32\nstress-ng: metrc: [11593] mknod                14     10.13      0.01      0.00         1.38        2455.71\nstress-ng: metrc: [11593] fcntl             11429     10.08      0.01      0.29      1134.07       37340.40\nstress-ng: info:  [11593] skipped: 4: exec (4)\nstress-ng: info:  [11593] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [11593] failed: 0\nstress-ng: info:  [11593] metrics untrustworthy: 0\nstress-ng: info:  [11593] successful run completed in 11.06 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 169479975,
+        "run_time_ns_delta": 12349349713,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 169480229,
+        "run_time_ns_delta": 12468392966,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 304421,
+        "run_time_ns_delta": 17827809,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 24671,
+        "run_time_ns_delta": 1296951,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 3631666,
+        "run_time_ns_delta": 155396328,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 4976019,
+        "run_time_ns_delta": 160958071,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 1607608,
+        "run_time_ns_delta": 110544944,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 8917272,
+        "run_time_ns_delta": 471447386,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 5623,
+        "run_time_ns_delta": 802509,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 2419186,
+        "run_time_ns_delta": 513724404,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 978,
+        "run_time_ns_delta": 162511,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 4882211,
+        "run_time_ns_delta": 724310129,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 3361503,
+        "run_time_ns_delta": 302309938,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 117211,
+        "run_time_ns_delta": 29514474,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 114235,
+        "run_time_ns_delta": 9283807,
+        "type": "kprobe"
+      },
+      "35": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 35,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 114235,
+        "run_time_ns_delta": 79734595,
+        "type": "kprobe"
+      },
+      "36": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 36,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 1100004,
+        "run_time_ns_delta": 347745331,
+        "type": "tracepoint"
+      },
+      "37": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 37,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 140878,
+        "run_time_ns_delta": 54177781,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 141671,
+        "run_time_ns_delta": 51626174,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 142616,
+        "run_time_ns_delta": 24818954,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21926",
+          "--sctp-port",
+          "22026",
+          "--sock-port",
+          "22126",
+          "--sockfd-port",
+          "22226",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/h49"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.317114003,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [5879] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [5879] setting to a 10 secs run per stressor\nstress-ng: info:  [5879] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [5879] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [6009] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [7376] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [7284] dentry: 256171 dentries allocated\nstress-ng: metrc: [5879] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5879]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5879] cap             1020228     10.07      0.39      3.34    101347.38      274102.98\nstress-ng: metrc: [5879] eventfd          320305     10.03      0.38      1.99     31948.90      135444.68\nstress-ng: metrc: [5879] get                4815     10.00      0.09      2.04       481.40        2255.08\nstress-ng: metrc: [5879] prctl              6345     10.00      1.94      1.24       634.22        1997.02\nstress-ng: metrc: [5879] set               81479     10.02      0.29      3.22      8129.27       23249.02\nstress-ng: metrc: [5879] dup                1235     10.13      0.44      0.39       121.91        1485.58\nstress-ng: metrc: [5879] kill              21255     10.06      0.08      3.94      2113.09        5290.97\nstress-ng: metrc: [5879] sigfd           2568368     10.09      0.31      3.34    254529.18      703125.01\nstress-ng: metrc: [5879] signal                0     10.03      0.02      0.00         0.00           0.00\nstress-ng: metrc: [5879] pty                 149     10.08      0.27      5.42        14.78          26.21\nstress-ng: metrc: [5879] itimer              305     10.03      0.29      2.17        30.41         123.90\nstress-ng: metrc: [5879] timerfd          650240     10.17      0.26      3.57     63967.43      169782.64\nstress-ng: metrc: [5879] fork               8060     10.02      1.27      1.60       804.34        2804.93\nstress-ng: metrc: [5879] vfork             70294     10.01      0.88      1.37      7024.15       31181.55\nstress-ng: metrc: [5879] clone              1816     10.11      0.89      4.05       179.54         367.58\nstress-ng: metrc: [5879] ptrace           330654     10.01      0.13      1.74     33027.06      176119.89\nstress-ng: metrc: [5879] futex           1425580     20.03      0.98      8.33     71182.80      153130.53\nstress-ng: metrc: [5879] sem             1084530     10.06      0.09      0.45    107842.80     2020018.96\nstress-ng: metrc: [5879] aio               11012     10.25      0.06      0.01      1074.19      171692.29\nstress-ng: metrc: [5879] aiol              11775     10.37      0.17      0.57      1135.92       15923.80\nstress-ng: metrc: [5879] hdd               47859     10.24      0.68      0.64      4675.64       36346.28\nstress-ng: metrc: [5879] io                    8     10.35      0.02      0.02         0.77         179.76\nstress-ng: metrc: [5879] iomix              7946     10.72      0.22      2.82       741.53        2613.50\nstress-ng: metrc: [5879] io-uring          21328     10.35      0.00      1.11      2061.39       19062.29\nstress-ng: metrc: [5879] sync-file           129     10.15      0.09      0.33        12.72         309.23\nstress-ng: metrc: [5879] epoll              3304     10.20      0.03      0.16       324.02       17298.88\nstress-ng: metrc: [5879] netdev          1208898     10.02      0.16      1.93    120682.95      579216.31\nstress-ng: metrc: [5879] sctp              11381     10.00      0.04      0.01      1138.04      211021.08\nstress-ng: metrc: [5879] sock               6999     10.01      0.21      4.05       699.04        1643.42\nstress-ng: metrc: [5879] sockdiag       45772857     10.04      0.06      4.85   4558678.99     9327126.98\nstress-ng: metrc: [5879] sockfd           450793     10.12      0.09      1.84     44550.86      234050.64\nstress-ng: metrc: [5879] sockpair           1203     10.09      0.05      0.10       119.27        8034.14\nstress-ng: metrc: [5879] sockmany         114231     10.06      0.11      3.18     11360.22       34706.99\nstress-ng: metrc: [5879] udp              209238     10.02      0.16      3.23     20886.34       61789.38\nstress-ng: metrc: [5879] udp-flood       2191027     10.02      0.35      3.37    218705.80      588888.55\nstress-ng: metrc: [5879] mmap               2963     10.03      0.11      3.39       295.39         847.55\nstress-ng: metrc: [5879] mprotect       10018697     10.08      2.31     22.95    994265.84      396590.86\nstress-ng: metrc: [5879] mremap             4977     10.03      0.06      3.33       496.05        1469.10\nstress-ng: metrc: [5879] madvise             147     10.06      0.31      3.95        14.62          34.53\nstress-ng: metrc: [5879] access            14555     10.23      0.15      1.58      1423.10        8407.95\nstress-ng: metrc: [5879] chdir               103     10.50      0.33      3.51         9.81          26.85\nstress-ng: metrc: [5879] chmod               342     10.25      0.01      0.23        33.37        1415.17\nstress-ng: metrc: [5879] chown               376     10.24      0.00      0.07        36.71        5200.48\nstress-ng: metrc: [5879] dentry            10240     10.24      0.06      0.28      1000.36       30773.11\nstress-ng: metrc: [5879] dir               32768     10.46      0.14      3.27      3132.64        9615.47\nstress-ng: metrc: [5879] dirmany           32314     10.16      0.00      0.79      3180.65       40898.36\nstress-ng: metrc: [5879] fallocate             4     10.20      0.02      0.03         0.39          92.55\nstress-ng: metrc: [5879] file-ioctl       101764     10.10      0.12      1.78     10075.13       53490.80\nstress-ng: metrc: [5879] filename           6213     10.17      0.04      1.26       610.64        4783.97\nstress-ng: metrc: [5879] flock           2180001     10.11      0.35      1.80    215585.75     1010733.71\nstress-ng: metrc: [5879] fpunch             1325     10.13      0.01      1.97       130.86         671.42\nstress-ng: metrc: [5879] fstat              6562     10.01      0.09      1.61       655.43        3855.68\nstress-ng: metrc: [5879] getdent          249446     10.01      0.13      2.18     24926.60      107895.84\nstress-ng: metrc: [5879] hdd               41945     10.12      0.63      0.53      4142.75       36196.27\nstress-ng: metrc: [5879] inotify              17     10.58      0.03      0.03         1.61         268.43\nstress-ng: metrc: [5879] open               6144     10.09      0.05      0.10       608.62       41919.97\nstress-ng: metrc: [5879] rename           160570     10.12      0.14      1.02     15859.13      138939.36\nstress-ng: metrc: [5879] touch            194532     10.14      0.25      4.40     19188.34       41810.19\nstress-ng: metrc: [5879] utime             60244     10.08      0.06      1.20      5973.67       47776.79\nstress-ng: metrc: [5879] link                  8     10.14      0.03      1.05         0.79           7.44\nstress-ng: metrc: [5879] symlink               5     10.15      0.10      1.17         0.49           3.95\nstress-ng: metrc: [5879] mknod                 6     10.07      0.01      0.00         0.60         781.86\nstress-ng: metrc: [5879] fcntl             20984     10.08      0.02      0.52      2081.69       39202.21\nstress-ng: info:  [5879] skipped: 4: exec (4)\nstress-ng: info:  [5879] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [5879] failed: 0\nstress-ng: info:  [5879] metrics untrustworthy: 0\nstress-ng: info:  [5879] successful run completed in 11.30 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-3/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-3/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-3/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-3/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 10,
+          "prog_name": "vfs_create",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "11": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-9/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-9/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-9/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-9/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 11,
+          "prog_name": "vfs_fsync_range",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "12": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 50,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-5/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-5/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-5/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-5/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 12,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 12,
+          "prog_name": "vfs_open",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "13": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 11,
+              "insn_count_before": 11,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-0/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-0/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-0/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-0/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 13,
+        "program": {
+          "final_insn_count": 11,
+          "orig_insn_count": 11,
+          "prog_id": 13,
+          "prog_name": "vfs_read",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "14": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 46,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-8/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-8/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-8/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-8/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 14,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 14,
+          "prog_name": "vfs_write",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "19": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 43,
+              "insn_count_before": 43,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-7/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-7/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-7/report_step1.json --prog-type kprobe --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-7/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 19,
+        "program": {
+          "final_insn_count": 43,
+          "orig_insn_count": 43,
+          "prog_id": 19,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "22": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 4,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-10/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-10/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-10/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-10/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 22,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 22,
+          "prog_name": "__x64_sys_open",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "23": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-16/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-16/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-16/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-16/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 23,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "24": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 108,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-2/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-2/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-2/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-2/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 24,
+        "program": {
+          "final_insn_count": 80,
+          "orig_insn_count": 80,
+          "prog_id": 24,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "27": {
+        "passes": [
+          {
+            "bpfopt_ms": 62,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-11/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-11/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-11/report_step1.json --prog-type raw_tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-11/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 27,
+        "program": {
+          "final_insn_count": 138,
+          "orig_insn_count": 138,
+          "prog_id": 27,
+          "prog_name": "sched_switch",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "28": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 47,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-12/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-12/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-12/report_step1.json --prog-type raw_tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-12/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 28,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 28,
+          "prog_name": "sched_wakeup",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "29": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-17/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-17/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-17/report_step1.json --prog-type raw_tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-17/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 29,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 29,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "32": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-18/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-18/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-18/report_step1.json --prog-type kprobe --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-18/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 15,
+          "orig_insn_count": 15,
+          "prog_id": 32,
+          "prog_name": "trace_connect_e",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "35": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-6/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-6/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-6/report_step1.json --prog-type kprobe --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-6/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 35,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 35,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "36": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-14/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-14/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-14/report_step1.json --prog-type tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-14/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 36,
+        "program": {
+          "final_insn_count": 205,
+          "orig_insn_count": 205,
+          "prog_id": 36,
+          "prog_name": "sock__inet_sock",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "37": {
+        "passes": [
+          {
+            "bpfopt_ms": 47,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-15/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-15/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-15/report_step1.json --prog-type kprobe --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-15/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 37,
+        "program": {
+          "final_insn_count": 87,
+          "orig_insn_count": 87,
+          "prog_id": 37,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "38": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 56,
+              "insn_count_before": 56,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-13/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-13/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-13/report_step1.json --prog-type tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-13/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 56,
+          "orig_insn_count": 56,
+          "prog_id": 38,
+          "prog_name": "trace_pid_start",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "39": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 77,
+              "insn_count_before": 77,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-19/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-19/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-19/report_step1.json --prog-type kprobe --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-19/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 39,
+        "program": {
+          "final_insn_count": 77,
+          "orig_insn_count": 77,
+          "prog_id": 39,
+          "prog_name": "trace_req_start",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "40": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-20/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-20/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-20/report_step1.json --prog-type tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-20/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 103,
+          "orig_insn_count": 103,
+          "prog_id": 40,
+          "prog_name": "trace_req_compl",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "6": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 14,
+              "insn_count_before": 14,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-1/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-1/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-1/report_step1.json --prog-type tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-1/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 6,
+        "program": {
+          "final_insn_count": 14,
+          "orig_insn_count": 14,
+          "prog_id": 6,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "7": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 44,
+              "insn_count_before": 44,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-4/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-4/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-4/report_step1.json --prog-type tracepoint --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-4/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          }
+        ],
+        "prog_id": 7,
+        "program": {
+          "final_insn_count": 44,
+          "orig_insn_count": 44,
+          "prog_id": 7,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

@@ -1145,7 +1145,7 @@
   },
   "rejit_result": {
     "enabled_passes": [
-      "kop_all_prefetch"
+      "kinsn_all_prefetch"
     ],
     "mode": "loadtime",
     "plan_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260924_055034_080806/details/loadtime-plans/cilium__agent.json",

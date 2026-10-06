@@ -1,0 +1,31 @@
+{
+  "aborted_at": "2026-04-03T01:11:54.302182+00:00",
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "details_dir": "details",
+  "error_message": "previous benchmark launcher pid 199 belongs to boot_id=7d96ca36-60b2-4be7-a7b5-5e3157c78822, current boot_id=41bddd15-3716-4b90-ba43-c08bd1472bda",
+  "filters": [
+    "biosnoop"
+  ],
+  "generated_at": "2026-04-03T00:57:50.678164+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-03T01:11:54.302182+00:00",
+  "launcher_boot_id": "7d96ca36-60b2-4be7-a7b5-5e3157c78822",
+  "launcher_pid": 199,
+  "launcher_start_ticks": 190,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "optimization_summary": null,
+  "output_hint_json": "corpus/results/vm_corpus.json",
+  "output_hint_md": "corpus/results/vm_corpus.md",
+  "run_type": "vm_corpus",
+  "samples": 30,
+  "selected_rejit_passes": [
+    "map_inline",
+    "const_prop",
+    "dce"
+  ],
+  "started_at": "2026-04-03T00:57:49.876771+00:00",
+  "status": "aborted",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

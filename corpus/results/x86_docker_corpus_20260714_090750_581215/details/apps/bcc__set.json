@@ -735,7 +735,7 @@
       }
     ]
   },
-  "error": "live execute_plan failed for programs: {\"19810\": \"failed to spawn kopprober rc=2\", \"19811\": \"failed to spawn kopprober rc=2\", \"19830\": \"failed to spawn kopprober rc=2\", \"19840\": \"failed to spawn kopprober rc=2\", \"19846\": \"failed to spawn kopprober rc=2\", \"19847\": \"failed to spawn kopprober rc=2\", \"19848\": \"failed to spawn kopprober rc=2\", \"19885\": \"failed to spawn kopprober rc=2\"}",
+  "error": "live execute_plan failed for programs: {\"19810\": \"failed to spawn kinsnprober rc=2\", \"19811\": \"failed to spawn kinsnprober rc=2\", \"19830\": \"failed to spawn kinsnprober rc=2\", \"19840\": \"failed to spawn kinsnprober rc=2\", \"19846\": \"failed to spawn kinsnprober rc=2\", \"19847\": \"failed to spawn kinsnprober rc=2\", \"19848\": \"failed to spawn kinsnprober rc=2\", \"19885\": \"failed to spawn kinsnprober rc=2\"}",
   "post_rejit": null,
   "rejit_result": {},
   "runner": "bcc_set",

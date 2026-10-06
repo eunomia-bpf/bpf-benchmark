@@ -1,0 +1,25 @@
+{
+  "config": {
+    "enabled_passes": [
+      "bulk_memory",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-04-30T13:47:38.854711+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-30T13:47:38.854702+00:00",
+  "launcher_boot_id": "f7594916-5453-490a-a95e-48a68ad2a994",
+  "launcher_pid": 1881,
+  "launcher_start_ticks": 41094,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/p89_tetragon_suite.yaml",
+  "run_type": "x86_kvm_p89_kinsn_tetragon_debug",
+  "samples": 1,
+  "started_at": "2026-04-30T13:47:38.850952+00:00",
+  "status": "running",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

@@ -1,0 +1,32 @@
+{
+  "details_dir": "details",
+  "error_message": "failed to load bpf_bulk_memory: insmod: ERROR: could not insert module /var/tmp/bpf-benchmark-aws-x86/corpus/run.aws-x86.corpus.ed5b9358/module/x86/bpf_bulk_memory.ko: Invalid module format",
+  "filters": [],
+  "generated_at": "2026-04-14T00:34:44.533758+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-04-14T00:34:44.533630+00:00",
+  "launcher_boot_id": "c43e8c55-491e-4799-97b6-517205e2ebaa",
+  "launcher_pid": 29095,
+  "launcher_start_ticks": 31219,
+  "manifest": "/var/tmp/bpf-benchmark-aws-x86/corpus/run.aws-x86.corpus.ed5b9358/corpus/config/macro_apps.yaml",
+  "optimization_summary": null,
+  "run_type": "aws_x86_corpus",
+  "samples": 1,
+  "selected_rejit_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "started_at": "2026-04-14T00:34:44.496845+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}
