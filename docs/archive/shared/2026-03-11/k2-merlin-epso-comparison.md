@@ -91,7 +91,7 @@
    - 做法：对 6 个代表性 benchmark，同时关闭 `InstCombinePass` 和 `SimplifyCFGPass`
    - 目的：给出 bytecode/IR 侧“剩余可动空间”的一个上界
 3. **已有 backend-side evidence**
-   - characterization：`docs/micro-bench-status.md`、`docs/paper-comparison.md`
+   - characterization：`docs/shared/micro-bench-status.md`、`docs/paper-comparison.md`
    - rigorous recompile：`docs/tmp/rigorous-benchmark-results.md`
    - fixed-kernel baselines：`docs/tmp/kernel-fixed-baselines-per-directive.md`
 
@@ -106,7 +106,7 @@
 
 ### 4.1 suite-level 量化
 
-来源：`docs/micro-bench-status.md`、`docs/paper-comparison.md`
+来源：`docs/shared/micro-bench-status.md`、`docs/paper-comparison.md`
 
 | 证据 | 数值 | 含义 |
 |------|------|------|

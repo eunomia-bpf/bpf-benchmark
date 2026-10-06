@@ -208,7 +208,7 @@ If llvmbpf got materially faster after correct timing, then the original kernel-
   - `causal_isolation_authoritative.json`
   - pass-ablation / no-cmov / similar llvmbpf exec studies if cited
 - **All derived analysis docs / tables / figures that use llvmbpf exec ratios**
-  - `docs/micro-bench-status.md`
+  - `docs/shared/micro-bench-status.md`
   - `docs/paper-comparison.md`
   - `docs/paper/paper.tex`
   - `micro/results/archive/pure_jit_authoritative_analysis.md`

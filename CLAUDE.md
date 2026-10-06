@@ -65,7 +65,7 @@ tally, CI, or rollup is forbidden in framework code — delete on sight
 `geometric_mean()`, `bootstrap_geometric_mean_ci()`, `win_counts()`,
 `comparison_summary()`, or anything reducing ratios to a scalar. That
 analysis (ratio, the `min_runs ≥ 100` filter, geomean, tail-call accounting)
-lives in `docs/evaluation.md` §5. Don't add `workload_miss`, `limitations`,
+lives in `rejit/docs/evaluation.md` §5. Don't add `workload_miss`, `limitations`,
 or other informational-only result fields — a failure is an error, not a
 metadata note.
 
@@ -98,7 +98,7 @@ current state first and collapse only duplicated/obsolete narrative.
 ## Shim & Bytecode Architecture
 
 Active architecture: stock-kernel userspace path in `bpfopt/shim/` (full
-design in `docs/rejit-speculative-optimization-ebpf_idea.md`); historical
+design in `rejit/docs/design.md`); historical
 daemon/ReJIT designs under `docs/archive/` are not authoritative — no
 `bpfrejit-daemon`, `BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`, or
 project-fork syscall dependency. `libbpfrejit_shim.so` is injected into the

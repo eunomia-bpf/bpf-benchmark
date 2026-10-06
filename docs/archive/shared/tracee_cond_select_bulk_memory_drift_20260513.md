@@ -8,7 +8,7 @@ Compared runs:
 
 - Old/doc-matching run: `corpus/results/x86_kvm_corpus_20260507_025319_683029/details/apps/tracee__monitor.json`
 - Current run: `corpus/results/x86_kvm_corpus_20260512_224334_908950/details/apps/tracee__monitor.json`
-- Documentation baseline: `docs/evaluation.md:309` has `tracee/monitor` `cond_select` 391/400 and `bulk_memory` 117/214.
+- Documentation baseline: `rejit/docs/evaluation.md:309` has `tracee/monitor` `cond_select` 391/400 and `bulk_memory` 117/214.
 
 The May 7 run is an exact match for the doc baseline:
 

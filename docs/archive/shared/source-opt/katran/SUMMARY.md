@@ -7,7 +7,7 @@ Status: phase3-in-progress
 Start state:
 
 - Started: 2026-06-25
-- Initial worktree status: `M docs/source-opt/README.md`
+- Initial worktree status: `M docs/shared/source-opt/README.md`
 - Initial disk: `/dev/nvme0n1p2 915G 683G 187G 79% /`
 - Benchmark contract: single-app `make corpus`, `SKIP_REJIT=all`,
   `SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1`,

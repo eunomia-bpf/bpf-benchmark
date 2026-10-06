@@ -27,7 +27,7 @@ Removed `llvmbpf` from the live corpus benchmark pipeline. The corpus-facing sta
 - `corpus/README.md`
   - Updated the real-world script descriptions to state `kernel` vs `kernel-recompile`.
 
-- `docs/micro-bench-status.md`
+- `docs/shared/micro-bench-status.md`
   - Added a note that the two corpus external-validation script paths have been repurposed to `kernel` vs `kernel-recompile`.
   - Kept the old `llvmbpf` results as historical context instead of rewriting that research section.
 

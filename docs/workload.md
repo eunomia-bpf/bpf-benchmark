@@ -252,7 +252,7 @@ the per-app JSON recorded an application failure.
 3. Tracee needs a 60s x3 no-eBPF vs eBPF-no-state confirmation pair.
 4. Tetragon needs a 60s x3 confirmation pair because existing 60s x1 pairs
    disagree widely, 34.16% vs 64.59%.
-5. `docs/evaluation.md` is stale for workload names; it still describes older
+5. `rejit/docs/evaluation.md` is stale for workload names; it still describes older
    workloads such as `stress_ng_os_io_network`, `network_lossy_multi`, and
    `xdp_traffic` for apps whose current workload has changed. This file should
    be used as the current workload-tuning record until that evaluation document

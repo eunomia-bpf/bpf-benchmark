@@ -51,7 +51,7 @@ Recorded with `git submodule status` at the artifact-definition commit.
 |---|---|---|
 | clang / llc 18 | compiling benchmark BPF objects | Apache-2.0 with LLVM Exceptions |
 | gcc / aarch64-linux-gnu-gcc 13 | host cross-checks, kernel modules | GPL-3.0 with GCC Runtime Library Exception |
-| Rust (`cargo`, via rustup) | `bpfopt/kopprober`, `native-sim/.../native_link` | MIT OR Apache-2.0 |
+| Rust (`cargo`, via rustup) | `bpfopt/kopprober`, `kprog/.../native_link` | MIT OR Apache-2.0 |
 | Go | building benchmark applications | BSD-3-Clause |
 | CMake, Ninja | builds | BSD-3-Clause / Apache-2.0 |
 | Python 3 + PyYAML | harness, generators, plot scripts | PSF-2.0 / MIT |

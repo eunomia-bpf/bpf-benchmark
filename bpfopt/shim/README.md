@@ -117,5 +117,5 @@ make -C bpfopt/shim host-selftest
 | `shim_measure.h` | Raw measurement support |
 
 The paper-line design hub is
-`docs/rejit-speculative-optimization-ebpf_idea.md`. Historical daemon and early
+`rejit/docs/design.md`. Historical daemon and early
 shim PoCs under `docs/archive/` are background records, not current specifications.

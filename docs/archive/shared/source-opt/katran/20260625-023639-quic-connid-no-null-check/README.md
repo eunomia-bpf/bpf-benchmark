@@ -15,4 +15,4 @@
 - Run command: see `run-command.sh`.
 - Result path: `corpus/results/x86_kvm_corpus_20260625_094328_513110`
 - Follow-up: completed; katran source restored with
-  `patch -p1 -R < docs/source-opt/katran/20260625-023639-quic-connid-no-null-check/source.diff`.
+  `patch -p1 -R < docs/shared/source-opt/katran/20260625-023639-quic-connid-no-null-check/source.diff`.

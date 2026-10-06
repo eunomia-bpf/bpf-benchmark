@@ -6,5 +6,5 @@ Formal run:
 
 Restore:
 
-- Reverse patch: `patch -d vendor/repos/cilium -p1 -R < docs/source-opt/cilium-agent/20260626-114554-phase3-policy-established-fastpath/source.diff`
-- Restore build log: `docs/source-opt/cilium-agent/20260626-114554-phase3-policy-established-fastpath/restore-build.log`
+- Reverse patch: `patch -d vendor/repos/cilium -p1 -R < docs/shared/source-opt/cilium-agent/20260626-114554-phase3-policy-established-fastpath/source.diff`
+- Restore build log: `docs/shared/source-opt/cilium-agent/20260626-114554-phase3-policy-established-fastpath/restore-build.log`

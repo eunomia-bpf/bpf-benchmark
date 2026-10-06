@@ -24,13 +24,13 @@ settings live in the root [`Makefile`](../../Makefile) and
 
 The runner records raw per-program counters, application workload metrics,
 stdout/stderr, and lifecycle events in `result.json`. It does not calculate
-paper summaries. [`docs/evaluation.md` §5](../evaluation.md) defines the
+paper summaries. [`rejit/docs/evaluation.md` §5](../../rejit/docs/evaluation.md) defines the
 post-hoc ratio and aggregation method. The current corpus app list and pass
 policy live in [`corpus/config/`](../../corpus/config/); per-pass policy lives
 in [`runner/config/passes/`](../../runner/config/passes/).
 
 Build outputs stay next to their owning component as specified in
-[`build.md`](../../build.md). Runtime image layering and host boundaries are
+[`docs/build.md`](../build.md). Runtime image layering and host boundaries are
 described in the [container guide](../../runner/containers/README.md).
 Earlier design decisions and investigations are in the
 [shared archive](../archive/shared/README.md).

@@ -118,7 +118,7 @@ Group geomean speedup for these three is `0.989x`. That is not a strong systemat
 
 ### 2. Byte-recompose-heavy / memory-local cases: `memory_pair_sum`, `stride_load_4`, `stride_load_16`
 
-Prior analysis says byte-load recomposition remains the largest kernel gap: `50.7%` of instruction surplus in `docs/micro-bench-status.md`, with isolated runtime penalty quantified at `0.447x` for `load_byte_recompose` in `micro/results/causal_isolation_analysis.md`. The optimization plan explicitly says byte-recompose optimization is **not** yet implemented in `7.0-rc2`, so any VM-side improvement here should be treated as indirect rather than as evidence that the pattern disappeared.
+Prior analysis says byte-load recomposition remains the largest kernel gap: `50.7%` of instruction surplus in `docs/shared/micro-bench-status.md`, with isolated runtime penalty quantified at `0.447x` for `load_byte_recompose` in `micro/results/causal_isolation_analysis.md`. The optimization plan explicitly says byte-recompose optimization is **not** yet implemented in `7.0-rc2`, so any VM-side improvement here should be treated as indirect rather than as evidence that the pattern disappeared.
 
 | Benchmark | Host kernel (ns) | VM kernel (ns) | Kernel speedup | Host L/K | Estimated VM L/K | Interpretation |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -155,7 +155,7 @@ That pattern is consistent with a kernel that got generally better in several pl
 
 - `micro/results/pure_jit_authoritative.json`
 - `tmp/vm_authoritative.json`
-- `docs/micro-bench-status.md`
+- `docs/shared/micro-bench-status.md`
 - `docs/paper.md`
 - `docs/kernel-jit-optimization-plan.md`
 - `micro/results/causal_isolation_analysis.md`

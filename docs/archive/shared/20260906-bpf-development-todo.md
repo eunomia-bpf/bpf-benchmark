@@ -260,11 +260,11 @@ above.
 
 用户原话：“让里面的 codex 带着本地模型去快速推进, 确保迭代到符合 osdi 的程度. 然后我们的 research skills 也得作为 submdoule 安装到这两个 repo 里面”。本 Workspace 负责 BPF benchmark/kprog；eBPFOS 由它自己的 Workspace 负责。
 
-请原会话 Codex 接收并确认此目标，沿用当前研究阶段持续推进 kprog/native-sim，实现、实验/证明、独立检查由你结合可用本地模型自主分工。模型不可用则你直接继续。不要重做 bootstrap、搬迁论文、新增控制器/调度器/停工门槛或固定预算，不中断当前真实长构建。OSDI 是系统研究和论证质量目标，不是录用保证；研究产物不能由安装、日志或报告替代。
+请原会话 Codex 接收并确认此目标，沿用当前研究阶段持续推进 kprog/kprog，实现、实验/证明、独立检查由你结合可用本地模型自主分工。模型不可用则你直接继续。不要重做 bootstrap、搬迁论文、新增控制器/调度器/停工门槛或固定预算，不中断当前真实长构建。OSDI 是系统研究和论证质量目标，不是录用保证；研究产物不能由安装、日志或报告替代。
 
 统一 research skills 源为 https://github.com/yunwei37/academic-writing-skills.git，必须用真实 git submodule，核验远端 revision；外层另一任务观察到的 HEAD 为 867d61c2fd50c506b5727067186b5ee4ff120f0d，仅供定位。当前 Workspace 中的独立本地 OpenCode 辅助 Agent PID176326 已受托只安装此 submodule，创建 .agents/skills 与 .claude/skills 的相对链接、保留已有skills并提交/push接入，不碰你的构建和实现。它会把结果写到 /workspaces/.agent-state/bpf-development/research-skills-install-result.md。你可以自主协调它或后续本地模型的非重叠工作，不要重复接入。接入后阅读 auto-research-orchestrator 及引用、现有paper/用户意图/实验状态，从当前阶段继续；当前用户最少复杂度和持续推进要求优先，不因技能文字新增人为停工规则，不调用用户未点名的 iter-refine-ideas。
 
-用户还问：“kprog 的 simluator 支持 x86 / arm 都支持了吗? 效果咋样? simulatoir 的形式化验证怎样了?” 请核验真实支持面，区分历史结果与本轮复现，说明机器检查证明和缺口，并据此推进研究。外层只读证据供你核实：native-sim/README.md 仍称 arm64 placeholder，但 arm64/README.md 和实现代码已有 subset；两架构 20260523-134121 结果表各29行ok是旧证据；论文 documents/5-formal-verification.tex 与 sections/5-koperation.tex 是 KOperation/双lowering Lean证明，不等于NativeBPF simulator整体fidelity。请结合当前源码与 active main.tex 澄清、修正文档并补足有效验证，保留核心研究方向及原始失败/结果。收到后在原会话回复中明确确认，并将当前研究阶段、架构支持/效果/证明边界及继续行动写入你现有研究记录。
+用户还问：“kprog 的 simluator 支持 x86 / arm 都支持了吗? 效果咋样? simulatoir 的形式化验证怎样了?” 请核验真实支持面，区分历史结果与本轮复现，说明机器检查证明和缺口，并据此推进研究。外层只读证据供你核实：kprog/README.md 仍称 arm64 placeholder，但 arm64/README.md 和实现代码已有 subset；两架构 20260523-134121 结果表各29行ok是旧证据；论文 documents/5-formal-verification.tex 与 sections/5-koperation.tex 是 KOperation/双lowering Lean证明，不等于NativeBPF simulator整体fidelity。请结合当前源码与 active main.tex 澄清、修正文档并补足有效验证，保留核心研究方向及原始失败/结果。收到后在原会话回复中明确确认，并将当前研究阶段、架构支持/效果/证明边界及继续行动写入你现有研究记录。
 
 
 ### 用户后续明确补充：两篇论文与未完成形式化继续实现
@@ -314,7 +314,7 @@ remaining shared-template publication dependency for the work below.
 - Removed the stale `test_recompile` hook: it silently skipped a path under
   `tests/kernel/` even though that component no longer exists anywhere in the
   repository.
-- Added `native-sim/formal`, a Lean 4.19 model that separates architectural
+- Added `kprog/formal`, a Lean 4.19 model that separates architectural
   bits from verifier-facing provenance tags. It machine-checks one-step and
   list-level refinement for two registers and the shared MOV, add-immediate,
   multiply-immediate, and packet/packet-end ABI-load fragment. A mutation that
@@ -345,7 +345,7 @@ remaining shared-template publication dependency for the work below.
   the suite reported `PASS unchecked_packet_read rejected rc=1`. The four
   existing verifier-negative cases also passed. This is a functional KVM
   smoke, not a throughput benchmark or paper-grade performance result.
-- After moving the negative policy to its shared `native-sim/test/` location,
+- After moving the negative policy to its shared `kprog/test/` location,
   the same public command was run again against the final tree and exited 0.
   Its 29/29 raw result is
   `tests/results/827ac6f0/native_proof_micro_20260908_123347_809195/metadata.json`;
@@ -362,7 +362,7 @@ remaining shared-template publication dependency for the work below.
   instructions and its disassembly contains `r2 = *(u8 *)(r1 + 0x40)`, so the
   unsafe access was not optimized away. This is current cross-build evidence;
   no new ARM64 guest verifier/runtime result is claimed.
-- `make -C native-sim/formal check` and direct Python bytecode compilation of
+- `make -C kprog/formal check` and direct Python bytecode compilation of
   `runner/suites/test.py` pass. The root `make lint` still exits 2 because it
   descends into the unmodified vendored LLVM tree and invokes Python 3 on
   `polly/lib/External/isl/imath/tools/findthreshold.py`, a Python 2 script with
@@ -412,10 +412,10 @@ throughput benchmark is claimed here.
   theorem was internally consistent but could not substantiate C-handler
   correspondence.
 - Replaced that operation with `ptrAdd64(dst, src, rhs)` and added
-  `native-sim/formal/ptr_add_spec.json`. Its small generator emits both the
+  `kprog/formal/ptr_add_spec.json`. Its small generator emits both the
   Lean bits/tag transition and the C macros actually used by the x86
   non-stack LEA and AArch64 non-scalar ADD branches. `make -C
-  native-sim/formal check` first rejects stale generated files, then builds the
+  kprog/formal check` first rejects stale generated files, then builds the
   theorem. The check and Lake build exit 0.
 - This is a real but narrow mechanical connection: source-plus-offset bits and
   copy-source-tag policy now share one declarative AST. The renderer,
@@ -459,7 +459,7 @@ preserves the failed attempts and their logs as part of the experiment record.
 
 ### Implementation and proof correspondence
 
-- Added `native-sim/formal/abi_load_spec.json` and a checked generator for the
+- Added `kprog/formal/abi_load_spec.json` and a checked generator for the
   entry-ABI provenance transition. The same source now emits the Lean policy
   and the C macro invoked by both simulator implementations. It distinguishes
   XDP from `__sk_buff`, grants packet provenance only to their concrete
@@ -733,7 +733,7 @@ no new speculative-optimization performance evidence.
   performance. Raw 1970 guest timestamps are preserved and are not used as
   provenance; the external command/result record supplies the environment
   interpretation. No ARM timing ratio is reported.
-- `make -C native-sim/formal check` exits zero after these changes, and both
+- `make -C kprog/formal check` exits zero after these changes, and both
   manuscripts build with their existing non-fatal layout warnings.
 
 ### Remaining scope after this milestone
@@ -769,7 +769,7 @@ is speculative-optimization evidence.
   generated contract and proves its composition through the condition table:
   after width narrowing, `CF=OF=0`, `ZF=zero`, and `SF=sign` select the same
   next PC as the independent specification.
-- Each step passed `make -C native-sim/formal check`. Both C-changing x86
+- Each step passed `make -C kprog/formal check`. Both C-changing x86
   steps also passed `make host-x86-sim-proofs`: the preserved negative proof
   artifact and all 29 workload-derived proof artifacts compiled successfully.
   Independent read-only review found no blocker in any step.
@@ -1010,9 +1010,9 @@ binding still do not establish semantic equivalence of every native byte.
   complete destination bits and tag; targeted theorems cover 64-bit signed
   immediate comparison and high-byte TEST.
 
-Every proof state passed the full `make -C native-sim/formal check`, including
+Every proof state passed the full `make -C kprog/formal check`, including
 all generated-source freshness checks and the complete Lean build. The C
-contract state additionally passed `make -C native-sim/x86 micro-proofs-build`:
+contract state additionally passed `make -C kprog/x86 micro-proofs-build`:
 the preserved negative artifact and all 29 workload-derived artifacts built.
 Textual probes for `inc ah`, `dec ah`, and `neg ah` selected RAX, width 8,
 destination shift 8, and the intended ALU opcode. Independent read-only review
@@ -1054,12 +1054,12 @@ not establish complete native-byte semantic equivalence.
   96-bit immediate (count masks to 32) → `0x100000000`; and high-byte ROL
   of `0x01` by 2 → `0x04` with the rotate flag transition preserving
   ZF/SF and keeping OF at its old value for masked count ≠ 1.
-- Verification: full `make -C native-sim/formal check` passed (freshness +
+- Verification: full `make -C kprog/formal check` passed (freshness +
   complete Lean build, ~33 s). The step is Lean-only (no C diff), but as
-  integration insurance `make -C native-sim/x86 micro-proofs-build` was
+  integration insurance `make -C kprog/x86 micro-proofs-build` was
   re-run with the host clang at `/usr/lib/llvm-18/bin` (not on default
   PATH): negative artifact + all 29 workload-derived artifacts built.
-- `native-sim/formal/README.md` gains the matching paragraph after the
+- `kprog/formal/README.md` gains the matching paragraph after the
   arithmetic-immediate composition paragraph.
 - These theorems do not establish objdump/text-parsing or
   native-byte-level equivalence; they close the immediate-form AND/OR/XOR
@@ -1081,13 +1081,13 @@ not establish complete native-byte semantic equivalence.
   `0xff` with `0x0f` → `0x0f`, high-byte OR of `0x00` with `0x80` →
   `0x80` setting the width sign bit, and 64-bit XOR of `0x123456` with
   `0x765432` → `0x646064`.
-- Verification: full `make -C native-sim/formal check` passed
+- Verification: full `make -C kprog/formal check` passed
   (freshness + complete Lean build, ~34 s). Lean-only step (no C/JSON
-  diff); as integration insurance `make -C native-sim/x86
+  diff); as integration insurance `make -C kprog/x86
   micro-proofs-build` was re-run with the host clang at
   `/usr/lib/llvm-18/bin`: negative artifact + all 29 workload-derived
   artifacts built.
-- `native-sim/formal/README.md` gains the matching register-register
+- `kprog/formal/README.md` gains the matching register-register
   paragraph after the logical-immediate one.
 - Open x86 boundary after this increment: register-register shift
   handlers (second lane read feeding the count), IMUL immediate, memory
@@ -1111,13 +1111,13 @@ not establish complete native-byte semantic equivalence.
   `x86_alu_aux_handler_refines` proves packing a typed ALU code into the
   AUX and extracting its payload selects the same handler via the committed
   `x86_reg_lane_aux_payload_roundtrip`.
-- `native-sim/x86/x86_sim_local_bpf.h` routes its four SBB/ADC sites
+- `kprog/x86/x86_sim_local_bpf.h` routes its four SBB/ADC sites
   (immediate, register, memory, and the ADD-flag shared paths) through the
   generated predicates instead of open-coded `== X86_ALU_SBB/ADC` compares;
   behaviour is unchanged, the C now derives handler selection from the
   same artifact as the Lean side.
-- Verification: full `make -C native-sim/formal check` passed (freshness +
-  complete Lean build, ~30 s) and `make -C native-sim/x86
+- Verification: full `make -C kprog/formal check` passed (freshness +
+  complete Lean build, ~30 s) and `make -C kprog/x86
   micro-proofs-build` passed with host clang at `/usr/lib/llvm-18/bin`
   (negative artifact + all 29 workload-derived artifacts).
 - This increment is a carried-over WIP from an interrupted run of this
@@ -1128,14 +1128,14 @@ not establish complete native-byte semantic equivalence.
 
 ### Track negative-proof micro-prog fixtures, 2026-09-11
 
-- `native-sim/x86/micro-prog/unchecked_packet_read.bpf.c` and
-  `native-sim/arm64/micro-prog/unchecked_packet_read.bpf.c` were untracked
+- `kprog/x86/micro-prog/unchecked_packet_read.bpf.c` and
+  `kprog/arm64/micro-prog/unchecked_packet_read.bpf.c` were untracked
   while every one of the 29 workload-derived siblings in each `micro-prog/`
   is tracked. `run_micro_sim_batch.py` (`source_dir = <arch>/micro-prog`,
   `src = config.source_dir / f"{bench.name}.bpf.c"`) consumes these as
   hand-authored source for the `kprog_negative_stage2` suite, and both
   arch `Makefile`s set `NEGATIVE_PROGRAM := unchecked_packet_read`; the
-  tracked home `native-sim/test/unchecked_packet_read.bpf.c` (added by
+  tracked home `kprog/test/unchecked_packet_read.bpf.c` (added by
   `179119708`, which wired the micro-prog negative build) was committed
   without the two arch copies. A fresh clone would therefore break
   `kprog-negative-proof-build` (the target this chain uses as build
@@ -1144,7 +1144,7 @@ not establish complete native-byte semantic equivalence.
 - Both copies carry the correct arch-local include
   (`../x86_sim_local_bpf.h` / `../arm64_sim_local_bpf.h`) and are distinct
   per-arch programs. They were already proven functional by this session's
-  two `make -C native-sim/x86 micro-proofs-build` runs (each exercised
+  two `make -C kprog/x86 micro-proofs-build` runs (each exercised
   `kprog-negative-proof-build` end-to-end, exit 0).
 
 ### Register-register shift handler refinement, 2026-09-11
@@ -1171,12 +1171,12 @@ not establish complete native-byte semantic equivalence.
   `0x01` by the high-byte count `0x03` -> `0x08` (all flags false), and
   high-byte SAR of `0x80` by the high-byte count `0x01` -> `0xC0`
   sign-fill (SF set, OF false).
-- Verification: full `make -C native-sim/formal check` passed
+- Verification: full `make -C kprog/formal check` passed
   (freshness + complete Lean build, ~33 s). As integration insurance
-  `make -C native-sim/x86 run` was re-run after installing host clang 18:
+  `make -C kprog/x86 run` was re-run after installing host clang 18:
   the BPF object builds and the loader loads `x86_sim_hardcoded_xdp`
   (fd=4).
-- `native-sim/formal/README.md` gains the matching register-register shift
+- `kprog/formal/README.md` gains the matching register-register shift
   paragraph after the register-register logical one.
 - Open x86 boundary after this increment: IMUL (register-register and
   immediate), memory lanes and stores, the objdump/parser-to-AUX
@@ -1186,7 +1186,7 @@ not establish complete native-byte semantic equivalence.
 
 ### x86 IMUL immediate and register-register handler refinement, 2026-09-13
 
-- Shared contract: `native-sim/formal/x86_imul_flags_spec.json` (unchanged)
+- Shared contract: `kprog/formal/x86_imul_flags_spec.json` (unchanged)
   generates `KProgFormal/GeneratedX86ImulFlags.lean` and
   `generated/x86_imul_flags.h` via `generate_x86_imul_flags_spec.py`.
   `GeneratedX86ImulFlags.signedAbs` expresses the width-narrowed signed
@@ -1216,21 +1216,21 @@ not establish complete native-byte semantic equivalence.
   refine proofs use `x86_reg_read_at_refines`, `x86_immediate_value_refines`,
   `x86_reg_write_at_refines`, and `x86_imul_flags_apply_refines`. Concrete
   `native_decide` examples pin the w16/w8 overflow and in-range cases.
-- `native-sim/x86/x86_sim_local_bpf.h`: adds the generated-header include and
+- `kprog/x86/x86_sim_local_bpf.h`: adds the generated-header include and
   rewrites `X86_SIM_L_SET_IMUL_FLAGS` to the house delegation pattern
   (compute the same locals, then call `KPROG_X86_SET_IMUL_FLAGS`), mirroring
   the SBB/shift macros above it. Behavior-preserving; all three call sites
   (register, immediate, memory-immediate) route through the generated macro.
-- Host cross-check `native-sim/formal/test_imul_flags_host.c`: compiles the
+- Host cross-check `kprog/formal/test_imul_flags_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an independent `__int128` signed-product range oracle over 15
   explicit boundary vectors plus a fixed-seed (0x12345678) 20000-case sweep
   across all four widths. Result: `OK (15 vectors + 20000 sweep cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line + `lake build` + new `lake env lean KProgFormal/X86ImulFlags.lean`
-  line; ~26 s). `make -C native-sim/x86 build` produces the BPF object from
+  line; ~26 s). `make -C kprog/x86 build` produces the BPF object from
   `x86_sim_hardcoded.bpf.c` (which includes the changed header); the same
-  translation unit also compiles natively. `make -C native-sim/x86
+  translation unit also compiles natively. `make -C kprog/x86
   micro-proofs-build` rebuilds the negative artifact and all 29
   workload-derived artifacts, all `ok`.
 - Open x86 boundary after this increment: memory lanes and stores, the
@@ -1245,39 +1245,39 @@ not establish complete native-byte semantic equivalence.
   `X86_SIM_L_STORE_ADDR` (typed `__u16`/`__u32`/`__u64` casts) had no shared
   source with a proof contract, and the earlier unary/ALU ledger listed
   "memory access/store" as an open boundary.
-- Generator: `native-sim/formal/generate_x86_mem_access_spec.py` reads
+- Generator: `kprog/formal/generate_x86_mem_access_spec.py` reads
   `x86_mem_access_spec.json` (widths 8/16/32/64 with per-width byte lists) and
-  emits `native-sim/formal/generated/x86_mem_access.h`
+  emits `kprog/formal/generated/x86_mem_access.h`
   (`KPROG_X86_MEM_LOAD(ADDR, WIDTH)`, `KPROG_X86_MEM_STORE(ADDR, WIDTH, VALUE)`)
-  and `native-sim/formal/KProgFormal/GeneratedX86MemAccess.lean`
+  and `kprog/formal/KProgFormal/GeneratedX86MemAccess.lean`
   (`assemble`/`load`/`storeByte`/`store`/`byteCount` over
   `GeneratedX86Width.Width`). `--check` diffing plus a `make check` line keep
   the outputs fresh.
-- C wiring: `native-sim/x86/x86_sim_local_bpf.h` includes the generated header
+- C wiring: `kprog/x86/x86_sim_local_bpf.h` includes the generated header
   and now defines `X86_SIM_L_LOAD_ADDR`/`X86_SIM_L_STORE_ADDR` as direct
   delegations to the generated macros, so sim C and the proof contract share
   one forwarded source. Semantics are unchanged for the four legal widths
   (byte-wise little-endian load; byte-wise store replacing the typed casts,
   bit-identical on little-endian and now endian-explicit).
-- Lean bridge: `native-sim/formal/KProgFormal/X86MemAccess.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/X86MemAccess.lean` proves
   `x86_mem_assemble_refines` (generated `assemble` = independent little-endian
   byte-sum spec), `x86_mem_load_refines` (generated `load` = byte-sum narrowed
   by the mask, via the width-mask bridge), `x86_mem_store_byte_refines`
   (generated `storeByte` = independent width-masked extraction), and
   `x86_mem_byte_count`; concrete example theorems pin known encodings. No
   `sorry`/`admit`.
-- Host cross-check `native-sim/formal/test_mem_access_host.c`: compiles the
+- Host cross-check `kprog/formal/test_mem_access_host.c`: compiles the
   generated macros with zero warnings under `-Wall -Wextra` and compares them
   against an independent byte-level load/store oracle over 5 explicit boundary
   vectors x 4 widths plus a fixed-seed (0x12345678) 20000-case sweep over all
   widths (load and store each). Result: `OK (40020 cases)`; a deliberately
   broken oracle (`8*i+1`) fails, so the check is real.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line + new `lake env lean KProgFormal/X86MemAccess.lean` line + the
-  host cross-check step; ~26 s). `make -C native-sim/x86 build` produces the
+  host cross-check step; ~26 s). `make -C kprog/x86 build` produces the
   BPF object from `x86_sim_hardcoded.bpf.c` (which includes the changed header)
-  and the same translation unit compiles natively. `make -C native-sim/x86 run`
-  loads the object (`load-only`, fd=4). `make -C native-sim/x86
+  and the same translation unit compiles natively. `make -C kprog/x86 run`
+  loads the object (`load-only`, fd=4). `make -C kprog/x86
   kprog-negative-proof-build` rebuilds the negative artifact, `ok`.
 - Open x86 boundary after this increment: decoder selection of the access
   width, operand-form selection into the load/store handlers, the
@@ -1293,23 +1293,23 @@ not establish complete native-byte semantic equivalence.
   increment ledger listed "AArch64 flag production" as an open boundary. The
   `arm64_width_mask`/`arm64_width_bits`/`arm64_sign_bit`/`arm64_apply_width`
   helpers were likewise hand-written.
-- Generators: `native-sim/formal/generate_arm64_width_spec.py` reads
+- Generators: `kprog/formal/generate_arm64_width_spec.py` reads
   `arm64_width_spec.json` and emits `generated/arm64_width.h`
   (`KPROG_ARM64_WIDTH_MASK`/`_SIGN_MASK`/`_BITS`, `KPROG_ARM64_APPLY_WIDTH`)
   plus `KProgFormal/GeneratedArm64Width.lean`;
-  `native-sim/formal/generate_arm64_flags_spec.py` reads
+  `kprog/formal/generate_arm64_flags_spec.py` reads
   `arm64_flags_spec.json` and emits `generated/arm64_flags.h`
   (`KPROG_ARM64_SET_{ADD,SUB,LOGIC}_FLAGS`) plus
   `KProgFormal/GeneratedArm64Flags.lean` (`applyAdd`/`applySub`/`applyLogic`).
   Both have `--check` modes and `make check` lines.
-- C wiring: `native-sim/arm64/arm64_sim.h` includes the generated width header
+- C wiring: `kprog/arm64/arm64_sim.h` includes the generated width header
   and its four helpers now delegate to the generated macros;
-  `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated flags header
+  `kprog/arm64/arm64_sim_local_bpf.h` includes the generated flags header
   and the three `ARM64_SIM_L_SET_*_FLAGS` macros now delegate to
   `KPROG_ARM64_SET_*_FLAGS`. Behavior is unchanged: ADD C is the unsigned
   carry-out, SUB C is not-borrow (`lhs >= rhs`), logical clears C/V, N/Z from
   the width-narrowed result, V from the sign-consistent overflow observation.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Flags.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Flags.lean` proves
   `arm64_add_flags_refines`, `arm64_sub_flags_refines`, and
   `arm64_logic_flags_refines` equal to an independently written `Arm64NzcSpec`
   statement over already width-narrowed operands, plus canonical example
@@ -1317,7 +1317,7 @@ not establish complete native-byte semantic equivalence.
   `0x7fffffff + 1` w32 (V and N set, no carry-out), `1 - 2` (borrow), and a
   logical result that clears C/V. No `sorry`/`admit`. The three generated
   modules plus the bridge are in the `KProgFormal.lean` root import list.
-- Host cross-check `native-sim/formal/test_arm64_flags_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_flags_host.c`: compiles the
   generated macros with zero warnings under `-Wall -Wextra` and compares them
   against an independent `__int128` carry/overflow oracle over 12 explicit
   boundary vectors x 4 widths x {add, sub, logic} plus a fixed-seed
@@ -1326,12 +1326,12 @@ not establish complete native-byte semantic equivalence.
   check is real. (Two oracle bugs were found and fixed during bring-up: a
   `__u64`-width shift before widening, and an incorrect sign extension; the
   generated macro was correct throughout.)
-- Verification: full `make -C native-sim/formal check` green (two new generator
+- Verification: full `make -C kprog/formal check` green (two new generator
   `--check` lines, the `Arm64Flags.lean` lean line, and the arm64 host
-  cross-check step; ~28 s). `make -C native-sim/arm64 build` produces the BPF
+  cross-check step; ~28 s). `make -C kprog/arm64 build` produces the BPF
   object from `arm64_sim_hardcoded.bpf.c` (which includes the changed headers)
-  and `make -C native-sim/arm64 run` loads it (`load-only`, fd=4).
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  and `make -C kprog/arm64 run` loads it (`load-only`, fd=4).
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
   workload-derived artifacts, all `ok`.
 - Open AArch64 boundary after this increment: instruction decode into the
   flag-setting handlers, `MADD`/`MSUB`/`UMULH` flag consequences if any,
@@ -1342,32 +1342,32 @@ not establish complete native-byte semantic equivalence.
 
 - Gap: the AArch64 ALU/shift/modifier/bitfield mnemonic-to-code mapping lived in
   three independent hand-written copies - the `ARM64_ALU_*`/`ARM64_SHIFT_*`/
-  `ARM64_MOD_*`/`ARM64_BITFIELD_*` `#define`s in `native-sim/arm64/arm64_sim.h`
+  `ARM64_MOD_*`/`ARM64_BITFIELD_*` `#define`s in `kprog/arm64/arm64_sim.h`
   and the `ALU`/`SHIFT`/`MOD`/`BITFIELD` dicts in the arm64 proof generator -
   with no shared source or proof contract. The previous increment's open
   AArch64 boundary named "instruction decode into the flag-setting handlers".
-- Generator: `native-sim/formal/generate_arm64_decode_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_decode_spec.py` reads
   `arm64_decode_spec.json` and emits the shared contract in four forms:
   `generated/arm64_decode.h` (`ARM64_ALU_*`/`ARM64_SHIFT_*`/`ARM64_MOD_*`/
   `ARM64_BITFIELD_*`), `KProgFormal/GeneratedArm64Decode.lean` (four
   `inductive`+`code`/`mnemonic` modules), and
-  `native-sim/arm64/micro-prog/generated_arm64_decode.py` (the four dicts). It
+  `kprog/arm64/micro-prog/generated_arm64_decode.py` (the four dicts). It
   has a `--check` mode and a `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim.h` now `#include`s the generated header
+- C wiring: `kprog/arm64/arm64_sim.h` now `#include`s the generated header
   instead of the 29 hand-written `#define`s. Behavior is unchanged: the same
   numeric codes feed `ARM64_SIM_L_EXEC_ALU`, the shift handler, and the
   bitfield handler. Python: the generator imports the four dicts from the
   generated module at the top of the file rather than re-declaring them.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Decode.lean` states four
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Decode.lean` states four
   independent mnemonic/code enumerations and proves each generated table equal
   to it (`arm64_alu_decode_refines`, `arm64_shift_decode_refines`,
   `arm64_mod_decode_refines`, `arm64_bitfield_decode_refines`) plus
   `arm64_alu_codes_distinct`, all by `native_decide`. No `sorry`/`admit`. Both
   new modules are in the `KProgFormal.lean` root import list and the bridge has
   a `lean` line in the Makefile.
-- Verification: full `make -C native-sim/formal check` green (generator
+- Verification: full `make -C kprog/formal check` green (generator
   `--check` line, generated module build, `Arm64Decode.lean` line; ~40 s).
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
   workload-derived artifacts against the changed header, all `ok`, no failures.
   Committed and pushed as `970b5ac04`.
 - Open AArch64 boundary after this increment: the register-lane ALU handler
@@ -1385,7 +1385,7 @@ not establish complete native-byte semantic equivalence.
   half of `SUBS`/`ADDS`/`ANDS`/`TST`/`BICS` were produced by two independent
   expression copies. The previous increment's open AArch64 boundary named "the
   register-lane ALU handler composition".
-- Generator: `native-sim/formal/generate_arm64_alu_result_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_alu_result_spec.py` reads
   `arm64_alu_result_spec.json` and emits the shared op-step result contract in
   two forms: `generated/arm64_alu_result.h` (`KPROG_ALU64_RESULT(OP, LHS, RHS,
   UNSUPPORTED)`, a statement expression switching on the numeric codes
@@ -1396,7 +1396,7 @@ not establish complete native-byte semantic equivalence.
   emitted numeric case labels cannot silently diverge from the generated
   `arm64_decode.h` `ARM64_ALU_*` constants. It has a `--check` mode and a
   `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header. `ARM64_SIM_L_EXEC_ALU` computes `__a64_alu_result` through
   `KPROG_ALU64_RESULT`; the `SUBS`/`ADDS`/`TST`/`TST_BIC`/`BICS`/`ANDS`
   handlers compute their result through the same macro, so their value and
@@ -1404,7 +1404,7 @@ not establish complete native-byte semantic equivalence.
   pointer-tag fast path in `ARM64_SIM_L_EXEC_ALU` is untouched (tagged ADD never
   uses the scalar result), and `ORN_REG` plus the flags-only `CMN`/`CMP` remain
   as before (`ORN` is not one of the six table operations).
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64AluResult.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64AluResult.lean` proves
   `arm64_alu_result_refines` (the generated `result` equals an independently
   written `arm64AluResultSpec` whose SUB is stated as add-of-two's-complement
   and whose BIC uses an explicit complement mask), `arm64_alu_result_code_in_range`
@@ -1419,21 +1419,21 @@ not establish complete native-byte semantic equivalence.
   `0xffffffffffffffff + 1` w64 (wrap to zero, C and Z set). No `sorry`/`admit`.
   Both new modules are in the `KProgFormal.lean` root import list and the bridge
   has a `lean` line in the Makefile.
-- Host cross-check `native-sim/formal/test_arm64_alu_result_host.c`: compiles
+- Host cross-check `kprog/formal/test_arm64_alu_result_host.c`: compiles
   the generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an independent oracle over 12 explicit boundary vectors x 6 ops plus a
   fixed-seed 20000-iteration sweep x 6 ops, and forks a child that evaluates the
   macro with an unsupported code and an `abort()` argument, requiring
   `WIFSIGNALED && WTERMSIG == SIGABRT` so the `default` branch cannot silently
   return zero. Result: `OK (120073 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, `Arm64AluResult.lean` lean line, and the arm64 alu-result host
   cross-check step; ~33 s), including the pre-existing `arm64 flag host
   cross-check: OK (60144 cases)` and `x86 memory-access host cross-check: OK
-  (40020 cases)`. `make -C native-sim/arm64 build` produces the BPF object from
+  (40020 cases)`. `make -C kprog/arm64 build` produces the BPF object from
   `arm64_sim_hardcoded.bpf.c` (which includes the changed header) and `make -C
-  native-sim/arm64 run` loads it (`load-only`, fd=4). `make -C
-  native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  kprog/arm64 run` loads it (`load-only`, fd=4). `make -C
+  kprog/arm64 micro-proofs-build` rebuilds all 30 workload-derived
   artifacts, all `ok`.
 - Open AArch64 boundary after this increment: the source-modifier composition
   (`ARM64_SIM_L_MOD_VALUE` feeding `EXEC_ALU`/`SUBS`/`ADDS`/`ANDS`), the
@@ -1455,7 +1455,7 @@ not establish complete native-byte semantic equivalence.
   restated separately in the `arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror`
   helpers. The previous increment's open AArch64 boundary named exactly this
   source-modifier composition.
-- Generator: `native-sim/formal/generate_arm64_mod_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_mod_spec.py` reads
   `arm64_mod_spec.json` and emits the shared modifier contract in two forms:
   `generated/arm64_mod.h` (`KPROG_ARM64_MOD_VALUE(MOD, VALUE, SHIFT, WIDTH)`, a
   statement expression switching on the numeric codes `0U..10U`, with no
@@ -1469,7 +1469,7 @@ not establish complete native-byte semantic equivalence.
   coverage assert per code, so a modifier added to the table without an arm is a
   compile error rather than a runtime fallthrough. It has a `--check` mode and a
   `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header and `ARM64_SIM_L_MOD_VALUE` now delegates to
   `KPROG_ARM64_MOD_VALUE((MOD), ARM64_SIM_L_READ_REG(REG), (SHIFT), (WIDTH))`,
   preserving the `({ … })` statement-expression shape and evaluating
@@ -1478,7 +1478,7 @@ not establish complete native-byte semantic equivalence.
   amount mask, and the same `amount == 0` rotate guards. The helpers
   `arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror` stay live for the distinct
   `ARM64_SHIFT_*` `ARG` path and for other callers, so they were not rerouted.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Mod.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Mod.lean` proves
   `arm64_mod_refines` (the generated `value` equals an independently written
   `arm64ModValueSpec` that restates the shift arms through `narrow`, the
   sign-extending arms as a masked complement-and-subtract, the unsigned-extending
@@ -1510,7 +1510,7 @@ not establish complete native-byte semantic equivalence.
   `width = .w32`. A third modelling constraint: the shift amount is a `BitVec 64`
   (C's `__u8` field zero-extended), because `BitVec 8` amounts prevent the reifier
   from synthesizing the shift identities and it abstracts the operands instead.
-- Host cross-check `native-sim/formal/test_arm64_mod_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_mod_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an independent oracle (plain C shifts, the C rotate form with its
   `amount == 0` guard, and truncating/sign-extending casts) over 15 boundary
@@ -1519,7 +1519,7 @@ not establish complete native-byte semantic equivalence.
   exactly the eleven modifier codes and rejects code 11. Result: `OK (225292
   cases)`. The extend arms are swept only over the architectural shift domain
   (`shift < 64`) because C `<<` is undefined above that.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, `Arm64Mod.lean` lean line, and the arm64 mod host cross-check
   step; ~43 s), alongside the arm64 flags (`OK (60144 cases)`), arm64 ALU result
   (`OK (120073 cases)`), and x86 memory-access (`OK (40020 cases)`) cross-checks.
@@ -1528,10 +1528,10 @@ not establish complete native-byte semantic equivalence.
   `generated/arm64_mod.h` (the 64-bit shift-amount mask, the LSL width mask, the
   SXTB sign-extension source, the 32-bit rotate domain, and the 64-bit rotate
   distance) each make the host cross-check exit 1 with a printed mismatch.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
-  artifacts, all `ok`; `make -C native-sim/arm64 build` produces the BPF object
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C kprog/arm64 build` produces the BPF object
   from `arm64_sim_hardcoded.bpf.c` (which includes the changed header) and `make
-  -C native-sim/arm64 run` loads it (`load-only`, fd=4).
+  -C kprog/arm64 run` loads it (`load-only`, fd=4).
 - Open AArch64 boundary after this increment: the bitfield/extract/rev handler
   compositions (`ARM64_SIM_L_BITFIELD_*`, the `UBFX`/`SBFX`/`UBFIZ`/`BFXIL`/`BFI`
   decode table already exists), `MADD`/`MSUB`/`UMULH` flag consequences if any,
@@ -1550,7 +1550,7 @@ not establish complete native-byte semantic equivalence.
   domain but were restated independently of the decode table's bitfield codes.
   The previous increment's open AArch64 boundary named exactly this bitfield
   composition.
-- Generator: `native-sim/formal/generate_arm64_bitfield_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_bitfield_spec.py` reads
   `arm64_bitfield_spec.json` and emits the shared contract in two forms:
   `generated/arm64_bitfield.h` (`KPROG_ARM64_BITFIELD_VALUE(KIND, SRC, DST, LSB,
   BITS, UNSUPPORTED)`, a statement expression switching on the numeric codes
@@ -1566,7 +1566,7 @@ not establish complete native-byte semantic equivalence.
   one coverage assert per code, so a kind added to the table without an arm is a
   compile error instead of a silent fallthrough. It has a `--check` mode and a
   `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header and the 24-line handler chain is replaced by a delegation to
   `ARM64_SIM_L_BITFIELD_VALUE`, which passes `ARM64_SIM_L_UNSUPPORTED_OPCODE()`
   as the unsupported arm. Behavior is unchanged for the five in-table kinds
@@ -1576,7 +1576,7 @@ not establish complete native-byte semantic equivalence.
   been double-evaluated. The macro takes an explicit unsupported argument
   (unlike the total `KPROG_ARM64_MOD_VALUE`) because a code outside the table
   must reach the caller's trap.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Bitfield.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Bitfield.lean` proves
   `arm64_bitfield_refines` (the generated `value` equals an independently
   written `arm64BitfieldValueSpec` over all five kinds and the architectural
   domain), `arm64_bitfield_mask_refines` (the generated `((1 << bits) - 1)` mask
@@ -1604,7 +1604,7 @@ not establish complete native-byte semantic equivalence.
   needs `set_option maxHeartbeats 4000000 in`, and that option must precede the
   docstring, not sit between docstring and `theorem`. A narrowing-commutation
   theorem for bitfield has no true naive form and was deliberately not added.
-- Host cross-check `native-sim/formal/test_arm64_bitfield_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_bitfield_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an independent oracle written as a pure bit-level model (per-bit
   extraction/insertion/sign-extension over architectural positions, no
@@ -1618,7 +1618,7 @@ not establish complete native-byte semantic equivalence.
   modelled UBFIZ/BFI as the bare shifted mask instead of `(src & mask) << lsb`,
   which reported 41448 mismatches against a correct macro; the model now derives
   each result bit from the source bit at the corresponding field position.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the arm64 bitfield host cross-check step;
   ~51 s), alongside the arm64 mod (`OK (225292 cases)`), arm64 ALU result
   (`OK (120073 cases)`), arm64 flags (`OK (60144 cases)`), and x86 memory-access
@@ -1630,14 +1630,14 @@ not establish complete native-byte semantic equivalence.
   SBFX xor/subtract, mask shift width, field shift amount, the three `lsb >= 64`
   guard boundaries, both destination-complement masks, the UBFX mask, the
   subject shift guard, and the `HANDLED` chain), while the pristine header stays
-  `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
-  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`
+  `OK`. `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C kprog/arm64 build`
   produces the BPF object from `arm64_sim_hardcoded.bpf.c` (which includes the
-  changed header) and `make -C native-sim/arm64 run` loads it (`load-only`,
+  changed header) and `make -C kprog/arm64 run` loads it (`load-only`,
   fd=4).
 - Open AArch64 boundary after this increment: the `MADD`/`MSUB`/`UMULH` flag
   consequences if any (the multiply block in
-  `native-sim/arm64/arm64_sim_local_bpf.h`), condition-to-next-PC beyond the
+  `kprog/arm64/arm64_sim_local_bpf.h`), condition-to-next-PC beyond the
   earlier condition contract, and native bytes. These theorems do not establish
   native-byte equivalence, and the Lean bitfield contract is stated over
   `BitVec 64` while the C macro operates on `__u64`; the host cross-check bridges
@@ -1647,16 +1647,16 @@ not establish complete native-byte semantic equivalence.
 
 - Gap: the eight multiply-family arms (MADD, MSUB, MUL, UMULL, UDIV, UMULH,
   UMADDL, SMADDL) were two hand-written if/else-if chains inside
-  `ARM64_SIM_L_EXEC_ALU` in `native-sim/arm64/arm64_sim_local_bpf.h`. UMULH
+  `ARM64_SIM_L_EXEC_ALU` in `kprog/arm64/arm64_sim_local_bpf.h`. UMULH
   additionally called a private `arm64_umulh` helper in
-  `native-sim/arm64/arm64_sim.h`, whose partial-product ladder existed nowhere
+  `kprog/arm64/arm64_sim.h`, whose partial-product ladder existed nowhere
   else and had no independent statement. The two chains read
   `ARM64_SIM_L_READ_REG(SRC3)` once per condition test in the MADD/MSUB arm, so
   a side-effecting read could have been evaluated more than once. The previous
   increment's open AArch64 boundary named the multiply block and its
   `MADD`/`MSUB`/`UMULH` flag question; the flag question is answered here (see
   below) and the value contract is now generated and proved.
-- Generator: `native-sim/formal/generate_arm64_mul_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_mul_spec.py` reads
   `arm64_mul_spec.json` and emits the shared contract in two forms:
   `generated/arm64_mul.h` (`KPROG_ARM64_MUL_VALUE(OP, LHS, RHS, ADDEND,
   UNSUPPORTED)`, a statement expression switching on the eight raw numeric
@@ -1666,23 +1666,23 @@ not establish complete native-byte semantic equivalence.
   and `value`, deliberately not reusing or extending the decode table's
   inductive). The family is **not contiguous** in the ARM64_OP_* space, so the C
   macro uses the raw architectural opcode values as case labels rather than an
-  internal dense kind index; `load()` parses `native-sim/arm64/arm64_sim.h` for
+  internal dense kind index; `load()` parses `kprog/arm64/arm64_sim.h` for
   `ARM64_OP_*` and exits 1 if the spec's codes drift from the simulator's
   constants, so the numeric labels cannot silently diverge. The emitted
   `_Static_assert`s pin the same eight values at compile time and
   `KPROG_ARM64_MUL_HANDLED(OP)` has one arm and one coverage assert per code.
   It has a `--check` mode and a `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header, gains the `ARM64_SIM_L_MUL_VALUE(OP, SRC, SRC2, SRC3)` wrapper (which
   hoists all three register reads exactly once each), and the 20-line two-chain
   handler is replaced by a single `else if (KPROG_ARM64_MUL_HANDLED(OP))` branch
   that delegates to the generated macro and hands the result to the unchanged
   `ARM64_SIM_L_WRITE_REG_WIDTH`. Behavior is unchanged for the eight in-table
   opcodes. The now-redundant `arm64_umulh` helper is deleted from
-  `arm64_sim.h`; a `grep` over `native-sim/` confirmed it had exactly one caller
+  `arm64_sim.h`; a `grep` over `kprog/` confirmed it had exactly one caller
   (the replaced handler) and no doc or test reference, so removing it leaves no
   dangling caller and no duplicated implementation.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Mul.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Mul.lean` proves
   `arm64_mul_refines` (the generated `value` equals an independently written
   `arm64MulValueSpec` over all eight operations and all operand values),
   `arm64_mul_width_refines` (narrowing commutes with the refinement),
@@ -1738,7 +1738,7 @@ not establish complete native-byte semantic equivalence.
   `arm64_mul_flags_unchanged` proves the C macro's (absent) flag write matches
   it. The generated flag contract covers only the ADD/SUB/logical families, so
   this is a documentary obligation recorded here rather than a new spec family.
-- Host cross-check `native-sim/formal/test_arm64_mul_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_mul_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an independent oracle (no `arm64_sim.h`, no partial-product ladder).
   The UMULH oracle is architectural: it reads the high word of an
@@ -1750,7 +1750,7 @@ not establish complete native-byte semantic equivalence.
   all eight ops, then a `fork`/`waitpid` check that an opcode outside the family
   (`9U`) aborts with `SIGABRT` through the generated `default:` arm. Result:
   `OK (160161 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the arm64 mul host cross-check step),
   alongside the arm64 bitfield (`OK (126246 cases)`), arm64 mod
   (`OK (225292 cases)`), arm64 ALU result (`OK (120073 cases)`), arm64 flags
@@ -1763,10 +1763,10 @@ not establish complete native-byte semantic equivalence.
   UMULH carry shift `32`→`31`, UMADDL accumulator dropped, SMADDL lhs
   sign→zero extension) each make the host cross-check exit 1 with a printed
   `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
-  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C kprog/arm64 build`
   produces the BPF object from `arm64_sim_hardcoded.bpf.c` (which includes the
-  changed headers) and `make -C native-sim/arm64 run` loads it (`load-only`,
+  changed headers) and `make -C kprog/arm64 run` loads it (`load-only`,
   fd=4).
 - Open AArch64 boundary after this increment: the extract/reverse/extend
   (`EXTR`/`REV`/`SXT*`/`UXT*`-style) handler composition, condition-to-next-PC
@@ -1779,14 +1779,14 @@ not establish complete native-byte semantic equivalence.
 
 - Gap: the six AArch64 extract/reverse/extend arms were two hand-written
   if/else-if chains inside `ARM64_SIM_L_EXEC_ALU` in
-  `native-sim/arm64/arm64_sim_local_bpf.h`. EXTR carried its own local
+  `kprog/arm64/arm64_sim_local_bpf.h`. EXTR carried its own local
   `arm64_width_bits`/immediate-mask computation and read both source registers
   inline; REV/REV16/SXTB/SXTH/SXTW called the private `arm64_reverse_bytes`,
   `arm64_reverse_bytes16` and `arm64_sign_extend` helpers in
-  `native-sim/arm64/arm64_sim.h`, whose byte ladders existed nowhere else and had
+  `kprog/arm64/arm64_sim.h`, whose byte ladders existed nowhere else and had
   no independent statement. The previous increment's open AArch64 boundary named
   exactly this extract/reverse/extend composition.
-- Generator: `native-sim/formal/generate_arm64_extrev_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_extrev_spec.py` reads
   `arm64_extrev_spec.json` and emits the shared contract in two forms:
   `generated/arm64_extrev.h` (`KPROG_ARM64_EXTREV_VALUE(OP, SRC, SRC2, SHIFT,
   WIDTH, UNSUPPORTED)`, a statement expression switching on the six raw numeric
@@ -1796,7 +1796,7 @@ not establish complete native-byte semantic equivalence.
   the `rev`/`rev16`/`signExtend` helper definitions, `code`, `mnemonic` and
   `value`). The family is not contiguous in the ARM64_OP_* space, so the C macro
   uses the raw architectural opcode values as case labels; `load()` parses
-  `ARM64_OP_*` out of `native-sim/arm64/arm64_sim.h` and exits 1 on drift, and
+  `ARM64_OP_*` out of `kprog/arm64/arm64_sim.h` and exits 1 on drift, and
   the emitted `_Static_assert`s pin the same six values at compile time.
   `KPROG_ARM64_EXTREV_HANDLED(OP)` has one arm and one coverage assert per code.
   It has a `--check` mode and a `make check` line.
@@ -1807,7 +1807,7 @@ not establish complete native-byte semantic equivalence.
   refinement therefore states EXTR at all four widths (the shared macro spans
   them) and states REV/REV16 at the word and doubleword arms the macro selects,
   which is the emitted domain.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header, gains the `ARM64_SIM_L_EXTREV_VALUE(OP, SRC, SRC2, SHIFT, WIDTH)`
   wrapper, and replaces the two chains with a single
   `else if (KPROG_ARM64_EXTREV_HANDLED(OP))` branch that delegates to the
@@ -1815,10 +1815,10 @@ not establish complete native-byte semantic equivalence.
   `ARM64_SIM_L_WRITE_REG_WIDTH`. Behavior is unchanged for the six in-table
   opcodes, and `ARM64_SIM_L_READ_REG` is now evaluated exactly once per operand.
   The `arm64_reverse_bytes` and `arm64_reverse_bytes16` helpers are deleted; a
-  `grep` over `native-sim/` confirmed their only callers were the replaced
+  `grep` over `kprog/` confirmed their only callers were the replaced
   branches. `arm64_sign_extend` is retained because the LDRSB/LDRSW/LDRSH
   handlers still use it.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Extrev.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Extrev.lean` proves
   `arm64_extrev_extr_w{8,16,32,64}_refines` (the generated EXTR arm narrowed to
   each width equals an independent statement over the 128-bit
   `src : src2` concatenation's rotation), `arm64_extrev_rev_w{32,64}_refines`
@@ -1857,7 +1857,7 @@ not establish complete native-byte semantic equivalence.
   opcode exists, so `arm64ExtrevFlagsSpec` is the identity and
   `arm64_extrev_flags_unchanged` proves it. This is a documentary obligation, not
   a new spec family.
-- Host cross-check `native-sim/formal/test_arm64_extrev_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_extrev_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an independent oracle built on architectural primitives only (no
   `arm64_sim.h`, no reuse of the header's ladders): EXTR against an
@@ -1876,7 +1876,7 @@ not establish complete native-byte semantic equivalence.
   draft compared against an unmasked architectural value and reported 35058
   mismatches against a correct macro; masking both operands and the result to
   the architectural width is what makes it exact.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the arm64 extract/reverse/extend host
   cross-check step; the earlier steps stay green: arm64 mul `OK (160161 cases)`,
   arm64 bitfield `OK (126246 cases)`, arm64 mod `OK (225292 cases)`, arm64 ALU
@@ -1888,11 +1888,11 @@ not establish complete native-byte semantic equivalence.
   (EXTR unmasked shift, EXTR swapped sources, REV32 byte shift, REV64 low-byte
   shift, REV16-32 mask, SXTB body width, SXTW sign position, `default` arm not
   aborting) each make the host cross-check exit 1 with a printed `MISMATCH`,
-  while the pristine header stays `OK`. `make -C native-sim/arm64
+  while the pristine header stays `OK`. `make -C kprog/arm64
   micro-proofs-build` rebuilds all 30 workload-derived artifacts, all `ok`;
-  `make -C native-sim/arm64 build` produces the BPF object from
+  `make -C kprog/arm64 build` produces the BPF object from
   `arm64_sim_hardcoded.bpf.c` (which includes the changed headers) and
-  `make -C native-sim/arm64 run` loads it (`load-only`, fd=4).
+  `make -C kprog/arm64 run` loads it (`load-only`, fd=4).
 - Real KVM evidence (the environment became available this session: `/dev/kvm`
   writable, `dockerd` running, `vng` 1.41, `qemu-system-*`, and both runner image
   tars present). `make micro BENCH="simple" SAMPLES=1 WARMUPS=0 INNER_REPEAT=10`
@@ -1924,8 +1924,8 @@ not establish complete native-byte semantic equivalence.
   `qemu-system-{x86_64,aarch64}`, the framework x86 `bzImage`, and both runner
   image tars. Two public Make-backed runs were therefore attempted to establish
   real KVM evidence for the current tree (commit `9476539f0`, the AArch64
-  extract/reverse/extend increment; its diff touches only `native-sim/arm64/**`
-  and `native-sim/formal/**`, which the x86 corpus path does not consume).
+  extract/reverse/extend increment; its diff touches only `kprog/arm64/**`
+  and `kprog/formal/**`, which the x86 corpus path does not consume).
 - `make micro BENCH="simple" SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` completed exit 0
   and wrote `micro/results/x86_kvm_micro_20260915_194201_705027/`
   (`details/result.json`). The `simple` program ran on the `native`, `kernel` and
@@ -1976,7 +1976,7 @@ not establish complete native-byte semantic equivalence.
 
 - Gap: the eight AArch64 conditional-select arms (CSEL, CINC, CSET, CSETM,
   CINV, CSINV, CSINC, CSNEG) were three hand-written if/else-if chains inside
-  `ARM64_SIM_L_EXEC_ALU` in `native-sim/arm64/arm64_sim_local_bpf.h`. They
+  `ARM64_SIM_L_EXEC_ALU` in `kprog/arm64/arm64_sim_local_bpf.h`. They
   restated the condition evaluation (`ARM64_SIM_L_EVAL_COND`) at each site and
   read each source register inline, so a side-effecting operand read could be
   evaluated more than once, and the value selection had no independently stated
@@ -1984,7 +1984,7 @@ not establish complete native-byte semantic equivalence.
   register-lane handler compositions; this is the largest emitted one after the
   already-shared families (30 CSEL sites, 35 CCMP_REG, 14 CCMP_IMM, 3 CSET,
   2 CINC in the 29 micro kernels).
-- Generator: `native-sim/formal/generate_arm64_csel_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_csel_spec.py` reads
   `arm64_csel_spec.json` and emits the shared contract in two forms:
   `generated/arm64_csel.h` (`KPROG_ARM64_CSEL_VALUE(OP, SRC, SRC2, TAKEN,
   UNSUPPORTED)`, a statement expression switching on the eight raw numeric
@@ -1995,11 +1995,11 @@ not establish complete native-byte semantic equivalence.
   `value`, whose arms are `if taken then <first> else <second>`). The family is
   not contiguous in the ARM64_OP_* space, so the C macro uses the raw
   architectural opcode values as case labels; `load()` parses `ARM64_OP_*` out
-  of `native-sim/arm64/arm64_sim.h` and exits 1 on drift, and the emitted
+  of `kprog/arm64/arm64_sim.h` and exits 1 on drift, and the emitted
   `_Static_assert`s pin the same eight values at compile time.
   `KPROG_ARM64_CSEL_HANDLED(OP)` has one arm and one coverage assert per code.
   It has a `--check` mode and a `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header, gains the `ARM64_SIM_L_CSEL_VALUE(OP, SRC, SRC2, TAKEN)` wrapper, and
   replaces the three chains with a single `else if (KPROG_ARM64_CSEL_HANDLED(OP))`
   branch. The condition result is computed once into `__a64_l_taken`. **CSEL at
@@ -2010,7 +2010,7 @@ not establish complete native-byte semantic equivalence.
   generated value macro and the width-narrowing register write.
   `ARM64_SIM_L_READ_REG` is now evaluated exactly once per source operand in the
   delegated arms.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Csel.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Csel.lean` proves
   `arm64_csel_refines` (the generated ternary `value` equals an independently
   stated bit-mask mux `arm64CselMux`, for all eight operations and both
   condition outcomes), `arm64_csel_cond_refines` (the same composition when the
@@ -2035,7 +2035,7 @@ not establish complete native-byte semantic equivalence.
 - Flag obligation: all eight arms write no NZCV (the family only reads flags), so
   `arm64CselFlagsSpec` is the identity and `arm64_csel_flags_unchanged` proves
   it. This is a documentary obligation, not a new spec family.
-- Host cross-check `native-sim/formal/test_arm64_csel_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_csel_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an independent oracle that computes each arm's two candidate values
   with architectural arithmetic and selects with a bit mask (never the macro's
@@ -2045,7 +2045,7 @@ not establish complete native-byte semantic equivalence.
   sweep (seed `0x0123456789abcdef`, distinct from the other increments' seeds),
   then a `fork`/`waitpid` check that opcode `9U` aborts with `SIGABRT` through
   the generated `default:` arm. Result: `OK (160161 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the arm64 conditional-select host
   cross-check step; earlier steps stay green: arm64 extract/reverse/extend
   `OK (120145 cases)`, arm64 mul `OK (160161 cases)`, arm64 bitfield
@@ -2059,14 +2059,14 @@ not establish complete native-byte semantic equivalence.
   CSETM mask, CINV no complement, CSINV complement-first, CSINC wrong addend,
   CSNEG wrong source, `default` arm not aborting) each make the host cross-check
   exit 1 with a printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
-  artifacts, all `ok`; `make -C native-sim/arm64 build` produces the BPF object
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C kprog/arm64 build` produces the BPF object
   from `arm64_sim_hardcoded.bpf.c` (which includes the changed headers) and
-  `make -C native-sim/arm64 run` loads it (`load-only`, fd=4).
+  `make -C kprog/arm64 run` loads it (`load-only`, fd=4).
 - Dead-code follow-up: the extract/reverse/extend cutover had left
   `arm64_width_mask`, `arm64_width_bits` and `arm64_sign_bit` with no caller
   (only their definitions remained). They were removed in a separate commit
-  (`native-sim: drop dead AArch64 width helpers after extract cutover`) after
+  (`kprog: drop dead AArch64 width helpers after extract cutover`) after
   the arm64 build, the 30 micro-proof artifacts, and the full formal check all
   stayed green.
 - Open AArch64 boundary after this increment: the load/store handler
@@ -2080,9 +2080,9 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 sign-extending-load composition, 2026-09-16
 
 - Gap: the LDRSB/LDRSW/LDRSH handlers in
-  `native-sim/arm64/arm64_sim_local_bpf.h` widened a byte/halfword/word memory
+  `kprog/arm64/arm64_sim_local_bpf.h` widened a byte/halfword/word memory
   read through the private `arm64_sign_extend` helper in
-  `native-sim/arm64/arm64_sim.h`. That helper was the last caller of the private
+  `kprog/arm64/arm64_sim.h`. That helper was the last caller of the private
   `arm64_bits_mask` helper, and the same sign-extension formula is already
   generated and proved in the extract/reverse/extend contract's SXTB/SXTH/SXTW
   arms.
@@ -2096,16 +2096,16 @@ not establish complete native-byte semantic equivalence.
   generated arm instead of restating it.
 - Dead code removed: with the last caller gone, `arm64_sign_extend` and its only
   dependent `arm64_bits_mask` were deleted from `arm64_sim.h`. A `grep` over
-  `native-sim/` confirmed neither had another caller. This leaves
-  `native-sim/arm64/arm64_sim.h` with no private sign-extension or byte-reversal
+  `kprog/` confirmed neither had another caller. This leaves
+  `kprog/arm64/arm64_sim.h` with no private sign-extension or byte-reversal
   helper; the remaining helpers (`arm64_apply_width`, `arm64_ror32/64`,
   `arm64_lsl/lsr/asr/ror`, the popcount/horizontal-add vector helpers, and
   `arm64_width_*` removal earlier) all still have callers.
-- Verification: full `make -C native-sim/formal check` green with no new lines
+- Verification: full `make -C kprog/formal check` green with no new lines
   needed (the composition reuses the proved contract); `make -C
-  native-sim/arm64 build` exit 0; `make -C native-sim/arm64 micro-proofs-build`
+  kprog/arm64 build` exit 0; `make -C kprog/arm64 micro-proofs-build`
   rebuilds all 30 workload-derived artifacts, all `ok`; `make -C
-  native-sim/arm64 run` loads the object (`load-only`, fd=4). No new mutation
+  kprog/arm64 run` loads the object (`load-only`, fd=4). No new mutation
   checks were added because no new generated artifact was introduced; the
   existing `test_arm64_extrev_host.c` mutation suite already covers the SXTB/
   SXTH/SXTW arms that the load handlers now use.
@@ -2249,14 +2249,14 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 compare-and-branch predicate refinement, 2026-09-16
 
 - Gap: the `CBZ`/`CBNZ`/`TBZ`/`TBNZ` control transfers in
-  `native-sim/arm64/arm64_sim_local_bpf.h` each restated their taken/not-taken
+  `kprog/arm64/arm64_sim_local_bpf.h` each restated their taken/not-taken
   test inline (`(__a64_l_value == 0) == (ZERO)` and
   `((__a64_l_value >> (BIT)) & 1ULL)`), with the taken sense encoded in a
   `ZERO` selector argument rather than in a named predicate. These are the
   most-emitted control transfers in the corpus (35 `CBZ`, 8 `CBNZ`, 5 `TBZ`,
   3 `TBNZ` sites in the 29 micro kernels) and the remaining half of the
   condition-to-next-PC boundary the previous increments named.
-- Generator: `native-sim/formal/generate_arm64_branch_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_branch_spec.py` reads
   `arm64_branch_spec.json` and emits the shared contract in two forms:
   `generated/arm64_branch.h` (`KPROG_ARM64_BRANCH_TEST(KIND, VALUE, BIT)`, a
   statement expression switching on the four contiguous predicate kinds
@@ -2268,7 +2268,7 @@ not establish complete native-byte semantic equivalence.
   labels are `0U..3U` and there is no `arm64_sim.h` drift cross-check for them.
   The bit arms mask `BIT` with `& 63`, matching the 64-bit register domain.
   It has a `--check` mode and a `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header and the four macros now delegate their predicate to
   `KPROG_ARM64_BRANCH_TEST` while keeping the exact `goto`/fall-through label
   structure the generator emits. `CBZ`/`CBNZ` pass `KPROG_ARM64_BRANCH_CBZ`/
@@ -2276,7 +2276,7 @@ not establish complete native-byte semantic equivalence.
   selector is gone: the taken sense is now the kind. Behavior is unchanged for
   all four transfers (verified by the 30 recompiled workload artifacts), and the
   tested register is read exactly once.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Branch.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Branch.lean` proves
   `arm64_branch_refines` (the generated predicate equals an independent
   statement over the four kinds, stating the bit arms through `Nat` division and
   remainder rather than the generated shift/mask pair), `arm64_branch_next_pc_refines`
@@ -2299,14 +2299,14 @@ not establish complete native-byte semantic equivalence.
   bridge and the `arm64BranchBitOf` magnitude lemma. A third: `bv_decide`
   abstracts the symbolic bit extract (`BitVec.extractLsb' …`) as opaque, so it
   cannot prove these arms; the `Nat` reduction route is required.
-- Host cross-check `native-sim/formal/test_arm64_branch_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_branch_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an oracle that tests the register directly. It sweeps an 8-value ×
   8-bit-index table (zero, one, all-ones, `1<<63`, `1<<31`, single bits,
   out-of-domain indices 64 and 127) over all four kinds, then a fixed-seed
   20000-iteration LCG sweep (seed `0xfedcba9876543210`), and checks the macro is
   total over the four contiguous kinds. Result: `OK (80256 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the arm64 branch host cross-check step;
   the csel step stays `OK (160161 cases)`, extract/reverse/extend
   `OK (120145 cases)`, mul `OK (160161 cases)`, bitfield `OK (126246 cases)`,
@@ -2316,11 +2316,11 @@ not establish complete native-byte semantic equivalence.
   independent semantic mutations of `generated/arm64_branch.h` (CBZ inverted,
   CBNZ inverted, TBZ inverted, TBNZ inverted, bit mask narrowed to `& 31`) each
   make the host cross-check exit 1 with a printed `MISMATCH`, while the pristine
-  header stays `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all
+  header stays `OK`. `make -C kprog/arm64 micro-proofs-build` rebuilds all
   30 workload-derived artifacts, all `ok` (the first attempt showed 14
   `compile-fail` because the new `arm64_branch.h` include had not yet been added
   to `arm64_sim_local_bpf.h`; adding it fixed all 14). `make -C
-  native-sim/arm64 build` produces the BPF object and `make -C native-sim/arm64
+  kprog/arm64 build` produces the BPF object and `make -C kprog/arm64
   run` loads it (`load-only`, fd=4).
 - Open AArch64 boundary after this increment: the load/store address and tag
   paths, the vector/`.D0`/`.Q0` paths, and native-byte equivalence. Both halves
@@ -2332,7 +2332,7 @@ not establish complete native-byte semantic equivalence.
 
 ### AArch64 move-wide insertion refinement, 2026-09-16
 
-- Gap: the `MOVK` handler in `native-sim/arm64/arm64_sim_local_bpf.h` inlined a
+- Gap: the `MOVK` handler in `kprog/arm64/arm64_sim_local_bpf.h` inlined a
   variable-shift mask/insert pair (`0xffffULL << shift`,
   `(dst & ~mask) | ((imm << shift) & mask)`) with no independent statement. MOVK
   is the largest remaining non-memory, non-control handler in the emitted
@@ -2347,24 +2347,24 @@ not establish complete native-byte semantic equivalence.
   variable-shift MOVK (verified: it reports a spurious counterexample on both
   the pre-mask and post-mask forms), while the four-column case split closes
   every arm.
-- Generator: `native-sim/formal/generate_arm64_movk_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_movk_spec.py` reads
   `arm64_movk_spec.json` and emits `generated/arm64_movk.h`
   (`KPROG_ARM64_MOVK_INSERT(DST, IMM, SHIFT, UNSUPPORTED)`, a statement
   expression that resolves the column mask in a four-case switch with an
   explicit `default: UNSUPPORTED;`) and
   `KProgFormal/GeneratedArm64Movk.lean` (a self-contained
   `namespace GeneratedArm64Movk` with `inductive MovkShift`, `column` and
-  `value`). `load()` re-reads `native-sim/arm64/arm64_sim.h` and exits 1 unless
+  `value`). `load()` re-reads `kprog/arm64/arm64_sim.h` and exits 1 unless
   `ARM64_AUX_MOVK(S)` is still the `(((__u32)(S) & 0xffU) << 16)` form, so the
   contract's column set stays tied to the AUX encoding the shim reads back with
   `ARM64_SIM_L_SHIFT(AUX)`. It has a `--check` mode and a `make check` line.
-- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+- C wiring: `kprog/arm64/arm64_sim_local_bpf.h` includes the generated
   header, gains `ARM64_SIM_L_MOVK_VALUE(DST, IMM, SHIFT)`, and the handler now
   delegates to it, keeping the width-narrowing register write. Behavior is
   unchanged for the four columns (the delegated expression is the same
   clear-then-insert), and `ARM64_SIM_L_READ_REG(DST)` is now evaluated exactly
   once.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Movk.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Movk.lean` proves
   `arm64_movk_refines` (the generated masked-shift insertion equals an
   independent statement that narrows the immediate with `&&& 0xffff` and shifts
   it into place, over all four columns), `arm64_movk_width_refines` (narrowing
@@ -2381,7 +2381,7 @@ not establish complete native-byte semantic equivalence.
   (`imm <<< s`) is not a valid architectural MOVK; the `&&& 0xffff` narrowing is
   what distinguishes the independent form from the generated one, so it is
   load-bearing rather than cosmetic.
-- Host cross-check `native-sim/formal/test_arm64_movk_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_movk_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an oracle that writes the destination into a byte array and overwrites
   the two bytes of the target halfword with the low two immediate bytes (never
@@ -2390,7 +2390,7 @@ not establish complete native-byte semantic equivalence.
   `0x0f1e2d3c4b5a6978`), then a `fork`/`waitpid` check that column `8` aborts
   with `SIGABRT` through the generated unsupported arm. Result:
   `OK (20145 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the arm64 movk host cross-check step;
   the csel step stays `OK (160161 cases)`, extrev `OK (120145 cases)`, branch
   `OK (80256 cases)`, mul `OK (160161 cases)`, bitfield `OK (126246 cases)`,
@@ -2403,9 +2403,9 @@ not establish complete native-byte semantic equivalence.
   column-32 mask shift, destination OR-ed instead of clear-then-set,
   destination complement dropped, unsupported column not aborting) each make the
   host cross-check exit 1 with a printed `MISMATCH`, while the pristine header
-  stays `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
-  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`
-  produces the BPF object and `make -C native-sim/arm64 run` loads it
+  stays `OK`. `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C kprog/arm64 build`
+  produces the BPF object and `make -C kprog/arm64 run` loads it
   (`load-only`, fd=4).
 - Open AArch64 boundary after this increment: the load/store address and tag
   paths, the vector/`.D0`/`.Q0` paths, the ALU op-step register-lane
@@ -2414,7 +2414,7 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 shift-family refinement, 2026-09-16
 
 - Gap: the `ARM64_OP_SHIFT_IMM`/`ARM64_OP_SHIFT_REG` handler in
-  `native-sim/arm64/arm64_sim_local_bpf.h` dispatched to four hand-written
+  `kprog/arm64/arm64_sim_local_bpf.h` dispatched to four hand-written
   helpers, `arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror` (plus
   `arm64_ror32`/`arm64_ror64`), with no independent statement. The shift table
   had only a decode contract (mnemonic -> `ARM64_SHIFT_*` code), which is the
@@ -2425,7 +2425,7 @@ not establish complete native-byte semantic equivalence.
   `arm64_decode_spec.json` and exits 1 unless the spec's `(mnemonic, macro,
   code)` rows still equal the decode table's `shift` rows, which keeps the Lean
   `Shift` codes and the C `case 0U..3U` tags pinned to one owner.
-- Generator: `native-sim/formal/generate_arm64_shift_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_shift_spec.py` reads
   `arm64_shift_spec.json` and emits `generated/arm64_shift.h`
   (`KPROG_ARM64_SHIFT_VALUE(SHIFT, VALUE, AMOUNT, WIDTH, UNSUPPORTED)`, a
   statement expression switching on the shift kind with an explicit
@@ -2441,7 +2441,7 @@ not establish complete native-byte semantic equivalence.
   hand-written helpers were then dead (each had exactly the one handler call
   site) and were deleted from `arm64_sim.h` (`arm64_apply_width` stays; it has
   other callers).
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Shift.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Shift.lean` proves
   `arm64_shift_refines` (the generated form equals an independent statement over
   all four kinds and both widths), `arm64_shift_amount_masked` (only the low
   amount bits matter), `arm64_shift_code_in_range`, `arm64_shift_code_dispatch`,
@@ -2461,7 +2461,7 @@ not establish complete native-byte semantic equivalence.
   amount as a `BitVec` in both sides and writes rotation as a shift pair, which
   is why the independent ROR arm is also a shift pair (its distinctness comes
   from the left-complement ordering, not from `rotateRight`).
-- Host cross-check `native-sim/formal/test_arm64_shift_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_shift_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an oracle written against a byte/width model (masked amount, explicit
   width mask, arithmetic shift in the width's signed domain, right rotation of
@@ -2474,7 +2474,7 @@ not establish complete native-byte semantic equivalence.
   sign-extends into the high bits and the caller's width write narrows, so the
   oracle was corrected to match the architectural contract. Final result:
   `OK (20513 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the shift host cross-check step; the
   movk step stays `OK (20145 cases)`, branch `OK (80256 cases)`). Mutation
   checks: changing a code in `arm64_shift_spec.json` or in
@@ -2484,9 +2484,9 @@ not establish complete native-byte semantic equivalence.
   ASR as an unsigned shift, wrong 32-bit rotation width, short 64-bit rotation,
   unsupported kind not aborting) each make the host cross-check exit 1 with a
   printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
-  artifacts, all `ok`; `make -C native-sim/arm64 build` produces the BPF object
-  and `make -C native-sim/arm64 run` loads it.
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C kprog/arm64 build` produces the BPF object
+  and `make -C kprog/arm64 run` loads it.
 - Open AArch64 boundary after this increment: the load/store address and tag
   paths, the vector/`.D0`/`.Q0` paths, the ALU op-step register-lane
   compositions that remain hand-written, and native-byte equivalence.
@@ -2494,15 +2494,15 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 byte-lane reduction refinement, 2026-09-16
 
 - Gap: the vector-register lane reductions `ARM64_OP_CNT` and `ARM64_OP_UADDLV`
-  in `native-sim/arm64/arm64_sim_local_bpf.h` called two hand-written helpers,
+  in `kprog/arm64/arm64_sim_local_bpf.h` called two hand-written helpers,
   `arm64_replicate_byte_popcounts` and `arm64_horizontal_add_u8`, with no
   independent statement. These are the last two hand-written value helpers in
   the AArch64 emitted handler after the shift-family increment.
 - Contract shape: both reductions are byte-lane folds over the eight bytes of
   the 64-bit value, so the contract is stated over the byte lanes and carries
   the `ARM64_OP_CNT`/`ARM64_OP_UADDLV` numbers, which `load()` re-checks against
-  `native-sim/arm64/arm64_sim.h`.
-- Generator: `native-sim/formal/generate_arm64_reduction_spec.py` reads
+  `kprog/arm64/arm64_sim.h`.
+- Generator: `kprog/formal/generate_arm64_reduction_spec.py` reads
   `arm64_reduction_spec.json` and emits `generated/arm64_reduction.h`
   (`KPROG_ARM64_REDUCTION_VALUE(OP, VALUE, UNSUPPORTED)`, a statement
   expression switching on the opcode with an explicit `default: UNSUPPORTED;`)
@@ -2514,7 +2514,7 @@ not establish complete native-byte semantic equivalence.
   `ARM64_SIM_L_REDUCTION_VALUE(OP, VALUE)`, and the `CNT`/`UADDLV` handlers now
   delegate to `KPROG_ARM64_REDUCTION_HANDLED`/the macro. The two helpers were
   then dead and were deleted from `arm64_sim.h`.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Reduction.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Reduction.lean` proves
   `arm64_reduction_refines` (the generated value equals an independent byte-lane
   statement for both reductions), `arm64_reduction_code_in_range`, the CNT lane
   bound (every replicated popcount is at most 8, so lanes never carry into each
@@ -2532,13 +2532,13 @@ not establish complete native-byte semantic equivalence.
   difficulty. Also, a single `switch` whose arms both declared the accumulator
   broke the host compile (`redefinition`), so the accumulator is declared once
   before the switch and reset per arm.
-- Host cross-check `native-sim/formal/test_arm64_reduction_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_reduction_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it
   against an oracle that walks the eight bits of each byte lane directly. It
   sweeps an 8-value x 2-op boundary table, then a fixed-seed 20000-iteration LCG
   sweep (seed `0x7c3e9d15a2b8064f`), then a `fork`/`waitpid` check that an
   unsupported opcode (0) aborts with `SIGABRT`. Result: `OK (20017 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, and the reduction host cross-check step;
   shift `OK (20513 cases)`, movk `OK (20145 cases)`). Mutation checks: changing
   a code in `arm64_reduction_spec.json` makes `--check` exit 1; five independent
@@ -2546,8 +2546,8 @@ not establish complete native-byte semantic equivalence.
   CNT lane-6 result byte, UADDLV dropping the top byte, UADDLV wrong lane shift,
   unsupported opcode not aborting) each make the host cross-check exit 1 with a
   printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
-  artifacts, all `ok`; `make -C native-sim/arm64 build`/`run` produce and load
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C kprog/arm64 build`/`run` produce and load
   the BPF object.
 - Open AArch64 boundary after this increment: the load/store address and tag
   paths, the vector/`.D0`/`.Q0` paths, and native-byte equivalence. All the
@@ -2690,13 +2690,13 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 memory address-offset refinement, 2026-09-16
 
 - Gap: `ARM64_SIM_L_MEM_BASE_OFF` in
-  `native-sim/arm64/arm64_sim_local_bpf.h` computed the offset a load/store adds
+  `kprog/arm64/arm64_sim_local_bpf.h` computed the offset a load/store adds
   to its base register with an inline if/if-accumulate, the last hand-written
   value computation in the memory handler.
 - Contract shape: the offset has two independent boolean inputs (pre/post-index,
   indexed or not) and is a 64-bit two's-complement accumulation, so the contract
   is a four-case table over `(prepost, hasIndex)` with `BitVec 64` addition.
-- Generator: `native-sim/formal/generate_arm64_mem_offset_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_mem_offset_spec.py` reads
   `arm64_mem_offset_spec.json` and emits `generated/arm64_mem_offset.h`
   (`KPROG_ARM64_MEM_OFFSET(PREPOST, HAS_INDEX, IMM, INDEX)`) and
   `KProgFormal/GeneratedArm64MemOffset.lean` (`value` and an independent
@@ -2705,7 +2705,7 @@ not establish complete native-byte semantic equivalence.
   `ARM64_SIM_L_MEM_BASE_OFF` now delegates, keeping the `(INDEX) !=
   ARM64_REG_NONE` guard for the source-modified index value. Behavior is
   unchanged for all four addressing forms.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64MemOffset.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64MemOffset.lean` proves
   `arm64_mem_offset_refines` (the generated form equals the independent case
   table over all four forms), `arm64_mem_offset_case_dispatch`, and
   `arm64_mem_offset_prepost_ignores_immediate`, plus three `native_decide`
@@ -2719,20 +2719,20 @@ not establish complete native-byte semantic equivalence.
   signed statements were not provable here (`bv_decide` abstracts
   `BitVec.ofInt 64 (a.toInt + b.toInt)`), confirming the wrapping formulation is
   the right one.
-- Host cross-check `native-sim/formal/test_arm64_mem_offset_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_mem_offset_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it to an
   oracle that accumulates in `__int128` (a different expression tree). It sweeps
   a 2x2 x 7-imm x 6-index boundary table, then a fixed-seed 20000-iteration LCG
   sweep (seed `0x2b9d4c77e1a05f38`). Result: `OK (20168 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, mem-offset host cross-check step; reduction
   `OK (20017 cases)`). Mutation checks: changing a flag in
   `arm64_mem_offset_spec.json` makes `--check` exit 1; three independent semantic
   mutations of `generated/arm64_mem_offset.h` (pre/post keeps the immediate,
   index subtracted, index replaced by the immediate) each make the host
   cross-check exit 1 with a printed `MISMATCH`, while the pristine header stays
-  `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
-  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`/`run`
+  `OK`. `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C kprog/arm64 build`/`run`
   produce and load the BPF object.
 - Open AArch64 boundary after this increment: the remaining load/store tag paths
   (`ARM64_SIM_L_MEM_PRE`/`POST` writeback and the pointer-tag propagation), the
@@ -2741,14 +2741,14 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 FMOV direction refinement, 2026-09-16
 
 - Gap: the `ARM64_OP_FMOV` handler in
-  `native-sim/arm64/arm64_sim_local_bpf.h` selected between the vector register
+  `kprog/arm64/arm64_sim_local_bpf.h` selected between the vector register
   `v0` and the general-purpose register with an inline two-branch if/else over
   the four `ARM64_FMOV_*` direction codes, with no independent statement.
 - Contract shape: the direction is the only free choice, so the contract is a
   four-arm selection over the `ARM64_FMOV_D_FROM_X`/`X_FROM_D`/`S_FROM_W`/
   `W_FROM_S` codes, which `load()` re-checks against
-  `native-sim/arm64/arm64_sim.h`.
-- Generator: `native-sim/formal/generate_arm64_fmov_spec.py` reads
+  `kprog/arm64/arm64_sim.h`.
+- Generator: `kprog/formal/generate_arm64_fmov_spec.py` reads
   `arm64_fmov_spec.json` and emits `generated/arm64_fmov.h`
   (`KPROG_ARM64_FMOV_VALUE(DIR, V0, SRC, UNSUPPORTED)`, a statement expression
   switching on the direction with an explicit `default: UNSUPPORTED;`) and
@@ -2760,7 +2760,7 @@ not establish complete native-byte semantic equivalence.
   keeps the architectural split: the two vector-destination directions assign
   `v0`, the two register-destination directions write the destination register
   at the destination width.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64Fmov.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64Fmov.lean` proves
   `arm64_fmov_refines` (the generated selection composed with the caller's width
   write equals an independent statement that narrows the selected value to the
   destination width), `arm64_fmov_code_in_range`,
@@ -2774,21 +2774,21 @@ not establish complete native-byte semantic equivalence.
   .x_from_d ∨ dir = .w_from_s`) rather than by enumeration. The refinement
   therefore has to relate the generated per-arm selection to a width-applied
   predicate form, not restate it.
-- Host cross-check `native-sim/formal/test_arm64_fmov_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_fmov_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it to an
   oracle keyed off a separate `vector_destination[4]` table (never the macro's
   switch). It sweeps the 4 directions x 6 x 6 value pairs, then a fixed-seed
   20000-iteration LCG sweep (seed `0x4e8b1d63f2079ac5`), then a `fork`/`waitpid`
   check that direction `4` aborts with `SIGABRT`. Result: `OK (20145 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, fmov host cross-check step; mem offset
   `OK (20168 cases)`). Mutation checks: changing a code in
   `arm64_fmov_spec.json` makes `--check` exit 1; five independent semantic
   mutations of `generated/arm64_fmov.h` (each of the four direction arms
   selecting the wrong register, and the unsupported direction not aborting) each
   make the host cross-check exit 1 with a printed `MISMATCH`, while the pristine
-  header stays `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all
-  30 workload-derived artifacts, all `ok`; `make -C native-sim/arm64
+  header stays `OK`. `make -C kprog/arm64 micro-proofs-build` rebuilds all
+  30 workload-derived artifacts, all `ok`; `make -C kprog/arm64
   build`/`run` produce and load the BPF object.
 - Open AArch64 boundary after this increment: the load/store pre/post-index
   writeback (`ARM64_SIM_L_MEM_PRE`/`POST`) and pointer-tag propagation, the
@@ -2823,13 +2823,13 @@ not establish complete native-byte semantic equivalence.
 
 ### AArch64 byte-ladder load refinement, 2026-09-16
 
-- Gap: `ARM64_SIM_L_LOAD_ADDR` in `native-sim/arm64/arm64_sim_local_bpf.h`
+- Gap: `ARM64_SIM_L_LOAD_ADDR` in `kprog/arm64/arm64_sim_local_bpf.h`
   assembled a little-endian byte/halfword/word/doubleword from memory with a
   hand-written width-gated ladder and no independent statement, the last
   hand-written value computation in the AArch64 memory path.
 - Contract shape: the load width is one of the four `ARM64_WIDTH_*` codes, so
   the ladder has a closed byte-count set (1, 2, 4, 8) and no unsupported arm.
-- Generator: `native-sim/formal/generate_arm64_load_bytes_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_load_bytes_spec.py` reads
   `arm64_load_bytes_spec.json` and emits `generated/arm64_load_bytes.h`
   (`KPROG_ARM64_LOAD_BYTES(ADDR, WIDTH)`, the unrolled width-gated ladder) and
   `KProgFormal/GeneratedArm64LoadBytes.lean` (a self-contained namespace with
@@ -2838,7 +2838,7 @@ not establish complete native-byte semantic equivalence.
 - C wiring: `arm64_sim_local_bpf.h` includes the generated header and
   `ARM64_SIM_L_LOAD_ADDR` now delegates to the macro. The emitted ladder is the
   same unrolled byte-OR sequence as before, so the compiled shape is unchanged.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64LoadBytes.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64LoadBytes.lean` proves
   `arm64_load_bytes_refines` (the generated lane assembly equals an independent
   *masked truncation* of the whole word, not a lane restatement),
   `arm64_load_bytes_width_dispatch`, `arm64_load_bytes_upper_cleared`, and three
@@ -2849,21 +2849,21 @@ not establish complete native-byte semantic equivalence.
   chain. Generating the C as an unrolled ladder (not a runtime loop) keeps the
   emitted BPF instruction shape identical to the hand-written form, which matters
   for the load path's verifier behavior.
-- Host cross-check `native-sim/formal/test_arm64_load_bytes_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_load_bytes_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it to an
   oracle that assembles the in-range bytes through a byte pointer, plus a
   high-bytes-cleared invariant. It sweeps six byte patterns over all four widths,
   then a fixed-seed 20000-iteration LCG sweep on a heap buffer (seed
   `0x9a2f5c81e4b70d36`). Result: `OK (20024 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, load-bytes host cross-check step; fmov
   `OK (20145 cases)`). Mutation checks: changing a byte count in
   `arm64_load_bytes_spec.json` makes `--check` exit 1; four independent semantic
   mutations of `generated/arm64_load_bytes.h` (byte-2 lane shift, W64 gate
   widened, W16 gate widened, top byte dropped) each make the host cross-check
   exit 1 with a printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
-  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`/`run`
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C kprog/arm64 build`/`run`
   produce and load the BPF object.
 - Open AArch64 boundary after this increment: the remaining memory tag-dispatch
   bodies (`ARM64_SIM_L_MEM_READ`/`WRITE` tag selection, the pre/post-index
@@ -2876,7 +2876,7 @@ not establish complete native-byte semantic equivalence.
   `KPROG_ARM64_LOAD_BYTES(&__a64_stack.b[__a64_str_index], width)`, so the stack
   ladder is covered by the same refined contract as the memory ladder and the
   duplicated code is gone (14 lines removed, 4 added). `make -C
-  native-sim/arm64 micro-proofs-build` rebuilds all 30 artifacts, all `ok`;
+  kprog/arm64 micro-proofs-build` rebuilds all 30 artifacts, all `ok`;
   `build`/`run` produce and load the BPF object.
 
 ### Default policy across all six apps, 2026-09-16
@@ -2914,12 +2914,12 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 byte-lane scatter refinement, 2026-09-16
 
 - Gap: the stack byte scatter in `ARM64_SIM_L_STACK_WRITE_TAG`
-  (`native-sim/arm64/arm64_sim_local_bpf.h`) extracted each byte lane with an
+  (`kprog/arm64/arm64_sim_local_bpf.h`) extracted each byte lane with an
   inline `(__u8)(value >> 8*i)` expression, the mirror of the load ladder and
   the last hand-written per-byte extraction in the AArch64 memory path.
 - Contract shape: the eight lanes are the closed set the scatter uses, so the
   contract is an eight-way lane enumeration with the shift `8*lane`.
-- Generator: `native-sim/formal/generate_arm64_byte_lane_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_byte_lane_spec.py` reads
   `arm64_byte_lane_spec.json` and emits `generated/arm64_byte_lane.h`
   (`KPROG_ARM64_BYTE_AT(LANE, VALUE, UNSUPPORTED)`, an eight-case switch
   resolving the lane shift, `default: UNSUPPORTED;`) and
@@ -2932,8 +2932,8 @@ not establish complete native-byte semantic equivalence.
   call site passes a constant lane, so clang folds each switch to a single
   shift; the emitted `arm64_sim_hardcoded.bpf.o` is **byte-identical** to the
   pre-change object (same 11,168-byte size, `.text` disassembly diff shows only
-  the filename header), and `make -C native-sim/arm64 run` still loads it.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64ByteLane.lean` proves
+  the filename header), and `make -C kprog/arm64 run` still loads it.
+- Lean bridge: `kprog/formal/KProgFormal/Arm64ByteLane.lean` proves
   `arm64_byte_lane_refines` (the generated shift-then-narrow equals an
   independent mask-shift form), `arm64_byte_lane_shift_dispatch`,
   `arm64_byte_lane_load_inverse`, and two `native_decide` examples. No
@@ -2950,19 +2950,19 @@ not establish complete native-byte semantic equivalence.
   between two generated contracts is provable in one `cases width` chain with
   `bv_decide`, so cross-contract composition does not need a shared
   intermediate definition.
-- Host cross-check `native-sim/formal/test_arm64_byte_lane_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_byte_lane_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra` and compares it to an
   oracle that reads the lane through the value's byte view (never the macro's
   shift). It sweeps seven boundary words over all eight lanes, then a fixed-seed
   20000-iteration LCG sweep (seed `0xc4a1f70e95d3826b`), then a `fork`/`waitpid`
   check that lane `8` aborts with `SIGABRT`. Result: `OK (20057 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, byte-lane host cross-check step; load bytes
   `OK (20024 cases)`). Mutation checks: changing a lane index in
   `arm64_byte_lane_spec.json` makes `--check` exit 1; four independent semantic
   mutations of `generated/arm64_byte_lane.h` (lane-0/3/5 shift and unsupported
   lane not aborting) each make the host cross-check exit 1 with a printed
-  `MISMATCH`, while the pristine header stays `OK`. `make -C native-sim/arm64
+  `MISMATCH`, while the pristine header stays `OK`. `make -C kprog/arm64
   micro-proofs-build` rebuilds all 30 workload-derived artifacts, all `ok`.
 - Open AArch64 boundary after this increment: the memory tag-dispatch bodies
   (`ARM64_SIM_L_MEM_READ`/`WRITE` tag selection, pre/post-index writeback and
@@ -2971,7 +2971,7 @@ not establish complete native-byte semantic equivalence.
 
 ### AArch64 memory tag-dispatch refinement, 2026-09-16
 
-- Gap: `ARM64_SIM_L_MEM_READ_TAG` in `native-sim/arm64/arm64_sim_local_bpf.h`
+- Gap: `ARM64_SIM_L_MEM_READ_TAG` in `kprog/arm64/arm64_sim_local_bpf.h`
   classified a load by the base register's memory space (stack / ABI /
   reloc-address / ordinary) and the access width with an inline `if/else` chain
   that had no independent statement, and `ARM64_SIM_L_MEM_READ`'s value-source
@@ -2980,7 +2980,7 @@ not establish complete native-byte semantic equivalence.
   spaces and the two width cases (32/64), so each predicate is total and has no
   unsupported arm. The ABI packet tag itself stays in the already-generated
   `KPROG_ABI_LOAD_TAG`; this contract selects *which* tag source applies.
-- Generator: `native-sim/formal/generate_arm64_mem_dispatch_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_mem_dispatch_spec.py` reads
   `arm64_mem_dispatch_spec.json` and emits `generated/arm64_mem_dispatch.h`
   (`KPROG_ARM64_MEM_READ_SRC` / `KPROG_ARM64_MEM_READ_TAG`, each a total
   predicate returning a `KPROG_ARM64_MEM_SRC_*` / `KPROG_ARM64_MEM_TAG_*`
@@ -2996,23 +2996,23 @@ not establish complete native-byte semantic equivalence.
   exactly the operations the chain did (stack helper, `KPROG_ABI_LOAD_TAG`,
   reloc map-pointer with the zero-offset check, scalar default). The emitted
   `xdp` program section is byte-identical to the pre-change object (both
-  16 bytes), and `make -C native-sim/arm64 run` still loads it. The value-source
+  16 bytes), and `make -C kprog/arm64 run` still loads it. The value-source
   predicate is generated and available for the `MEM_READ` body; its
   field-projection refinement is proved even though the read body still uses its
   own chain (recorded as the remaining wiring).
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64MemDispatch.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64MemDispatch.lean` proves
   `arm64_mem_dispatch_src_refines` and `arm64_mem_dispatch_tag_refines` (each
   generated table equals an independent **predicate-nesting** statement, not a
   table restatement), `arm64_mem_dispatch_no_widening` (off width 64 only the
   stack space changes the selection — the property the C chain's later
   width-64 gates rely on), `arm64_mem_dispatch_stack_width_independent`, and
   `arm64_mem_dispatch_reloc`. No `sorry`/`admit`.
-- Host cross-check `native-sim/formal/test_arm64_mem_dispatch_host.c`: compiles
+- Host cross-check `kprog/formal/test_arm64_mem_dispatch_host.c`: compiles
   the generated predicates with zero warnings under `-Wall -Wextra` and compares
   them to an independent predicate-nesting oracle over **every** (is_sp, tag,
   width) combination (2 x 9 x 4 = 72), also asserting the two classifications
   select the same space family. Result: `OK (72 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, mem-dispatch host cross-check step; byte
   lane `OK (20057 cases)`). Mutation checks: changing a space's `w64_only` flag
   in `arm64_mem_dispatch_spec.json` makes `--check` exit 1; four independent
@@ -3020,7 +3020,7 @@ not establish complete native-byte semantic equivalence.
   dropped, tag stack space mapped to scalar, reloc tag mapped to the ABI family,
   source normal fallback mapped to reloc) each make the host cross-check exit 1
   with a printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30
   workload-derived artifacts, all `ok`; `build`/`run` produce and load the BPF
   object.
 - Follow-on wiring (same increment, 2026-09-16, committed `695c946e5`):
@@ -3038,13 +3038,13 @@ not establish complete native-byte semantic equivalence.
 ### AArch64 stack slot-tag refinement, 2026-09-16
 
 - Gap: `ARM64_SIM_L_STACK_READ_TAG` and the tag-slot gate in
-  `ARM64_SIM_L_STACK_WRITE_TAG` (`native-sim/arm64/arm64_sim_local_bpf.h`)
+  `ARM64_SIM_L_STACK_WRITE_TAG` (`kprog/arm64/arm64_sim_local_bpf.h`)
   decided with an inline `width == 64 && (index & 7) == 0` conjunction whether a
   stack slot carries its stored tag, with no independent statement.
 - Contract shape: the two conditions (access is 64-bit, slot is qword-aligned)
   are a closed pair, so the contract is a four-case classification plus the
   selection predicate; the predicate is total.
-- Generator: `native-sim/formal/generate_arm64_stack_tag_spec.py` reads
+- Generator: `kprog/formal/generate_arm64_stack_tag_spec.py` reads
   `arm64_stack_tag_spec.json` and emits `generated/arm64_stack_tag.h`
   (`KPROG_ARM64_STACK_TAG(IS_W64, IS_ALIGNED)`) and
   `KProgFormal/GeneratedArm64StackTag.lean` (a namespace with `Case`,
@@ -3054,7 +3054,7 @@ not establish complete native-byte semantic equivalence.
   read tag now selects on the predicate, and the stack write's slot-tag gate
   uses it too. The emitted `xdp` program section stays byte-identical to the
   pre-change object and `build`/`run` load the object.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64StackTag.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64StackTag.lean` proves
   `arm64_stack_tag_classify_total`, `arm64_stack_tag_refines` (classify-then-
   table equals the independent `isW64 && isAligned` conjunction),
   `arm64_stack_tag_dispatch`, and `arm64_stack_tag_unaligned_never`. No
@@ -3065,17 +3065,17 @@ not establish complete native-byte semantic equivalence.
   match a, b with | ...`. Also, a constructor named `of` collides with Lean core
   notation — `classify` is used instead. Arm order is right-to-left (last binder
   varies fastest), which matters for naming the cases correctly.
-- Host cross-check `native-sim/formal/test_arm64_stack_tag_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_stack_tag_host.c`: compiles the
   generated predicate with zero warnings under `-Wall -Wextra` and compares it
   to a plain-conjunction oracle over four widths x eight offsets plus the four
   explicit combinations. Result: `OK (36 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, stack-tag host cross-check step; mem dispatch
   `OK (72 cases)`). Mutation checks: changing the tagged flag in
   `arm64_stack_tag_spec.json` makes `--check` exit 1; four independent mutations
   of `generated/arm64_stack_tag.h` (OR instead of AND, alignment dropped, width
   dropped, result inverted) each make the host cross-check exit 1 with a printed
-  `MISMATCH`, while the pristine header stays `OK`. `make -C native-sim/arm64
+  `MISMATCH`, while the pristine header stays `OK`. `make -C kprog/arm64
   micro-proofs-build` rebuilds all 30 workload-derived artifacts, all `ok`.
 - `make micro BENCH=simple` note: the suite currently stops in
   `host-native-bpf-x86` (upstream tetragon `_(&mm->user_ns)` against the host
@@ -3090,7 +3090,7 @@ not establish complete native-byte semantic equivalence.
 
 ### x86 ROR result refinement, 2026-09-17
 
-- Gap: `x86_ror` in `native-sim/x86/x86_sim.h` implemented the right-rotate used
+- Gap: `x86_ror` in `kprog/x86/x86_sim.h` implemented the right-rotate used
   by the `RORX`/`RORX_MEM` handlers (and `x86_alu_result` has no ROR arm, so it
   is the only x86 right-rotate path) with an inline shift pair and no
   independent statement. The generated x86 shift-result contract covered
@@ -3102,7 +3102,7 @@ not establish complete native-byte semantic equivalence.
 - C wiring: `x86_ror` is now a one-line delegation to
   `kprog_x86_ror_result`, matching how `x86_alu_result` already delegates
   SHL/SHR/SAR/ROL to the generated functions.
-- Lean bridge: `native-sim/formal/KProgFormal/X86ShiftResult.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/X86ShiftResult.lean` proves
   `x86_ror_result_refines` and two `native_decide` examples. No `sorry`/`admit`.
 - Independence: the spec is `x86RorResultSpec`, which states x86 ROR as **the
   generated `rol` applied at the complementary count `bits - k`** — the defining
@@ -3111,7 +3111,7 @@ not establish complete native-byte semantic equivalence.
   generated `rol`) and, in the host cross-check, doubles as an executable
   invariant (`ror(v,k) == rol(v, w-k)`) checked on every one of the 20,320
   cases, not just asserted once.
-- Host cross-check `native-sim/formal/test_x86_ror_result_host.c`: this is the
+- Host cross-check `kprog/formal/test_x86_ror_result_host.c`: this is the
   first host test that compiles `generated/x86_shift_result.h` (the only
   generated header that defines `__always_inline` functions), so it supplies the
   attribute for the host build. It compares the generated function to an oracle
@@ -3119,14 +3119,14 @@ not establish complete native-byte semantic equivalence.
   macro's shift pair). It sweeps 8 operands x 10 shifts x 4 widths, then a
   fixed-seed 20000-iteration LCG sweep (seed `0x3f8c2ea97164b0d5`). Result:
   `OK (20320 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new host-test step
+- Verification: full `make -C kprog/formal check` green (new host-test step
   in the `check` target; arm64 steps unchanged). Mutation checks: dropping `ror`
   from `x86_shift_result_spec.json` makes `--check` exit 1; four independent
   mutations of the generated ROR function (shift direction flipped, complementary
   count off by one, count mask widened, operand not narrowed) each make the host
   cross-check exit 1 with a printed `MISMATCH`, while the pristine header stays
-  `OK`. `make -C native-sim/x86 micro-proofs-build` rebuilds all 30
-  workload-derived artifacts, all `ok`; `make -C native-sim/x86 build`/`run`
+  `OK`. `make -C kprog/x86 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C kprog/x86 build`/`run`
   produce and load the object.
 - Open x86 proof surface after this increment: `x86_bswap`, `x86_popcount64`,
   `x86_shld`/`x86_shrd`, `x86_sign_extend`, `x86_signed_abs_width`, the
@@ -3134,10 +3134,10 @@ not establish complete native-byte semantic equivalence.
 
 ### x86 BSWAP byte-reversal refinement, 2026-09-17
 
-- Gap: `x86_bswap` in `native-sim/x86/x86_sim.h` implemented the byte reversal
+- Gap: `x86_bswap` in `kprog/x86/x86_sim.h` implemented the byte reversal
   used by the `BSWAP`, `MOVBE_LOAD`, and `MOVBE_STORE` handlers (three call
   sites) with an inline mask/shift ladder and no independent statement.
-- Contract: `native-sim/formal/generate_x86_bswap_spec.py` reads
+- Contract: `kprog/formal/generate_x86_bswap_spec.py` reads
   `x86_bswap_spec.json` and emits `generated/x86_bswap.h`
   (`kprog_x86_bswap_value`) and `KProgFormal/GeneratedX86Bswap.lean`. It has a
   `--check` mode and a `make check` line.
@@ -3145,7 +3145,7 @@ not establish complete native-byte semantic equivalence.
   one-line delegation. (The edit initially merged the helper's closing brace
   into `x86_popcount64`; the region was repaired and `x86_popcount64` restored
   verbatim before the build.)
-- Lean bridge: `native-sim/formal/KProgFormal/X86Bswap.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/X86Bswap.lean` proves
   `x86_bswap_refines` (the generated ladder equals an independent per-byte
   **lane-extraction** assembly), `x86_bswap_involutive` (applying the reversal
   twice restores the width-masked value), `x86_bswap_w32_clears_high`, and three
@@ -3155,14 +3155,14 @@ not establish complete native-byte semantic equivalence.
   reverse lane order, sharing no mask constants with the generated form. The
   involution theorem is a property the ladder form does not state and is checked
   executably in the host cross-check on every case.
-- Host cross-check `native-sim/formal/test_x86_bswap_host.c`: compiles the
+- Host cross-check `kprog/formal/test_x86_bswap_host.c`: compiles the
   generated function with zero warnings under `-Wall -Wextra`, compares it to an
   oracle that reverses the width's bytes through a byte array, and asserts both
   the width invariant (no byte above the width survives) and involution. It
   sweeps seven boundary words over all four widths, then a fixed-seed
   20000-iteration LCG sweep (seed `0x1a6f83c2d50947be`). Result:
   `OK (20028 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, bswap host cross-check step; the x86 ROR step
   still `OK (20320 cases)`). Mutation checks: changing a width's byte count in
   `x86_bswap_spec.json` makes `--check` exit 1; four independent mutations of
@@ -3171,7 +3171,7 @@ not establish complete native-byte semantic equivalence.
   cross-check exit 1 with a printed `MISMATCH`, while the pristine header stays
   `OK`. A fifth candidate mutation (`& 0xff00` widened to `& 0xffff` in the
   16-bit arm) was confirmed semantically equivalent and rejected as a mutation,
-  not a coverage gap. `make -C native-sim/x86 micro-proofs-build` rebuilds all 30
+  not a coverage gap. `make -C kprog/x86 micro-proofs-build` rebuilds all 30
   workload-derived artifacts, all `ok`; `build`/`run` produce and load the
   object.
 - Open x86 proof surface after this increment: `x86_popcount64`,
@@ -3181,17 +3181,17 @@ not establish complete native-byte semantic equivalence.
 ### x86 signed-value refinement (sign extension and magnitude), 2026-09-17
 
 - Gap: `x86_sign_extend` (six call sites) and `x86_signed_abs_width` (the two
-  IMUL-magnitude operands, `native-sim/x86/x86_sim.h`) implemented the width
+  IMUL-magnitude operands, `kprog/x86/x86_sim.h`) implemented the width
   sign extension and the width-domain magnitude with inline width `if` chains
   and no independent statements.
-- Contract: `native-sim/formal/generate_x86_signed_spec.py` reads
+- Contract: `kprog/formal/generate_x86_signed_spec.py` reads
   `x86_signed_spec.json` and emits `generated/x86_signed.h`
   (`kprog_x86_sign_extend_value`, `kprog_x86_abs_width_value`) and
   `KProgFormal/GeneratedX86Signed.lean`. It has a `--check` mode and a
   `make check` line.
 - C wiring: `x86_sim.h` includes the generated header and both helpers are
   one-line delegations.
-- Lean bridge: `native-sim/formal/KProgFormal/X86Signed.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/X86Signed.lean` proves
   `x86_sign_extend_refines` and `x86_abs_width_refines` (each generated form
   equals an independent statement: `BitVec.signExtend` of the narrowed low lane,
   and a negate-then-narrow magnitude, neither sharing the generated
@@ -3204,14 +3204,14 @@ not establish complete native-byte semantic equivalence.
   discharges it immediately. A drafted `toNat`-bounded version was replaced for
   this reason, and a `sign_clear` theorem whose `.w64` arm was a reflexive
   `if p then x else x` was deleted as a tautology and replaced by the real bound.
-- Host cross-check `native-sim/formal/test_x86_signed_host.c`: compiles the
+- Host cross-check `kprog/formal/test_x86_signed_host.c`: compiles the
   generated functions with zero warnings under `-Wall -Wextra` and compares them
   to oracles that widen through the width's explicit `__s*` C type and take the
   magnitude through a signed reinterpretation, asserting both are idempotent. It
   sweeps nine boundary operands over all four widths, then a fixed-seed
   20000-iteration LCG sweep (seed `0x6d41b0e793f28ac5`). Result:
   `OK (20036 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, signed host cross-check step; the x86 BSWAP
   step still `OK (20028 cases)`). Mutation checks: changing a width's bit count
   in `x86_signed_spec.json` makes `--check` exit 1; five independent mutations of
@@ -3219,7 +3219,7 @@ not establish complete native-byte semantic equivalence.
   from the wrong type, 64-bit extension narrowing, magnitude dropping the sign
   test, magnitude forgetting to re-narrow) each make the host cross-check exit 1
   with a printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
+  `make -C kprog/x86 micro-proofs-build` rebuilds all 30 workload-derived
   artifacts, all `ok`; `build`/`run` produce and load the object.
 - Open x86 proof surface after this increment: `x86_popcount64`,
   `x86_shld`/`x86_shrd`, the objdump/parser-to-AUX relation, and
@@ -3241,16 +3241,16 @@ not establish complete native-byte semantic equivalence.
 
 ### x86 POPCNT refinement, 2026-09-17
 
-- Gap: `x86_popcount64` in `native-sim/x86/x86_sim.h` implemented the 64-bit
+- Gap: `x86_popcount64` in `kprog/x86/x86_sim.h` implemented the 64-bit
   population count used by the POPCNT handler with the standard SWAR reduction
   and no independent statement.
-- Contract: `native-sim/formal/generate_x86_popcount_spec.py` reads
+- Contract: `kprog/formal/generate_x86_popcount_spec.py` reads
   `x86_popcount_spec.json` and emits `generated/x86_popcount.h`
   (`kprog_x86_popcount_value`) and `KProgFormal/GeneratedX86Popcount.lean`. It
   has a `--check` mode and a `make check` line.
 - C wiring: `x86_sim.h` includes the generated header and `x86_popcount64` is a
   one-line delegation.
-- Lean bridge: `native-sim/formal/KProgFormal/X86Popcount.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/X86Popcount.lean` proves
   `x86_popcount_refines` (the SWAR reduction equals an independent
   **lane-grouped bit walk**: eight byte lanes, each counted bit by bit and
   summed), `x86_popcount_bounded` (`BitVec.ule` against 64), and four
@@ -3267,21 +3267,21 @@ not establish complete native-byte semantic equivalence.
   ((x >> 1) & 0x55)` borrows across nibble boundaries at `b = 0xff`, so
   "stage-2 lane value == lane popcount" is false; only the completed reduction is
   the true statement. Recorded so the stage-2 shortcut is not retried.
-- Host cross-check `native-sim/formal/test_x86_popcount_host.c`: compiles the
+- Host cross-check `kprog/formal/test_x86_popcount_host.c`: compiles the
   generated function with zero warnings under `-Wall -Wextra` and compares it to
   a one-bit-at-a-time oracle, checking the `<= 64` bound and, on every random
   iteration, additive consistency `popcount(x & ~y) + popcount(x & y) ==
   popcount(x)`. It sweeps nine boundary words, then a fixed-seed
   20000-iteration LCG sweep (seed `0x8e27c4a1f60d3b95`). Result:
   `OK (40009 cases)`.
-- Verification: full `make -C native-sim/formal check` green (new generator
+- Verification: full `make -C kprog/formal check` green (new generator
   `--check` line, two `lean` lines, popcount host cross-check step; the x86
   signed step still `OK (20036 cases)`). Mutation checks: changing a field in
   `x86_popcount_spec.json` makes `--check` exit 1; four independent mutations of
   `generated/x86_popcount.h` (stage-1 mask, stage-2 shift, stage-3 nibble mask,
   byte-gather multiply constant) each make the host cross-check exit 1 with a
   printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
+  `make -C kprog/x86 micro-proofs-build` rebuilds all 30 workload-derived
   artifacts, all `ok`; `build`/`run` produce and load the object.
 - Open x86 proof surface after this increment: `x86_shld`/`x86_shrd` (see the
   corrected analysis in the signed-value section: the `amount >= bits` branch is
@@ -3338,22 +3338,22 @@ not establish complete native-byte semantic equivalence.
   property is already owned by the mem-offset contract. Recorded so the same
   contract is not rebuilt. All generated files, the spec, the generator, the two
   Lean modules, and the `arm64_sim_local_bpf.h` include were removed; `make -C
-  native-sim/arm64 build` is green and `git status` shows no residual change.
+  kprog/arm64 build` is green and `git status` shows no residual change.
 
 ### x86 BT/BZHI refinement, 2026-09-17
 
 - Gap: the `X86_SIM_L_EXEC_BT*` (three macros) and `X86_SIM_L_EXEC_BZHI*` (two
-  macros) handlers in `native-sim/x86/x86_sim_local_bpf.h` computed the indexed
+  macros) handlers in `kprog/x86/x86_sim_local_bpf.h` computed the indexed
   bit and the zero-high-bits result with inline expressions and no independent
   statements.
-- Contract: `native-sim/formal/generate_x86_bitops_spec.py` reads
+- Contract: `kprog/formal/generate_x86_bitops_spec.py` reads
   `x86_bitops_spec.json` and emits `generated/x86_bitops.h`
   (`kprog_x86_bt_value`, `kprog_x86_bzhi_value`) and
   `KProgFormal/GeneratedX86Bitops.lean`. It has a `--check` mode and a
   `make check` line.
 - C wiring: `x86_sim.h` includes the generated header and all five macros now
   delegate their value computation to the generated helpers.
-- Lean bridge: `native-sim/formal/KProgFormal/X86Bitops.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/X86Bitops.lean` proves
   `x86_bt_refines`, `x86_bzhi_refines` (each against an independent
   exponent-built mask rather than the generated match table),
   `x86_bzhi_within_width`, `x86_bzhi_max_index_keeps`, and three `native_decide`
@@ -3382,21 +3382,21 @@ not establish complete native-byte semantic equivalence.
   loaded machine and failed a from-scratch build; it now passes
   `bv_decide (config := { timeout := 120 })`. Both are recorded because they make
   `make check` non-deterministic on a cold cache.
-- Host cross-check `native-sim/formal/test_x86_bitops_host.c`: compiles the
+- Host cross-check `kprog/formal/test_x86_bitops_host.c`: compiles the
   generated helpers with zero warnings under `-Wall -Wextra` and compares them to
   an oracle that tests the indexed bit through a shifted one-bit mask and builds
   the `bzhi` kept mask from the index. It sweeps eight operands x four widths x
   all 64 indices, then a fixed-seed 20000-iteration LCG sweep (seed
   `0x5b13f8a2e64c07d9`), plus the within-width and max-index invariants. Result:
   `OK (22048 cases)`.
-- Verification: full `make -C native-sim/formal check` green **from a clean
+- Verification: full `make -C kprog/formal check` green **from a clean
   `.lake`** (`MAKE 0`, popcount `OK (40009 cases)`, bitops `OK (22048 cases)`).
   Mutation checks: changing a width's index mask in `x86_bitops_spec.json` makes
   `--check` exit 1; five independent mutations of `generated/x86_bitops.h` (BT
   index mask widened, BT base not narrowed, BZHI count mask dropped, BZHI result
   not narrowed, BZHI clearing the low bits) each make the host cross-check exit 1
   with a printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
+  `make -C kprog/x86 micro-proofs-build` rebuilds all 30 workload-derived
   artifacts, all `ok`; `build`/`run` produce and load the object.
 - Open x86 proof surface after this increment: `x86_shld`/`x86_shrd`, the
   objdump/parser-to-AUX relation, compiler/native-byte correspondence, and
@@ -3404,18 +3404,18 @@ not establish complete native-byte semantic equivalence.
 
 ### x86 SHLD/SHRD double-shift refinement, 2026-09-17
 
-- Gap: `x86_shld` and `x86_shrd` in `native-sim/x86/x86_sim.h` implemented the
+- Gap: `x86_shld` and `x86_shrd` in `kprog/x86/x86_sim.h` implemented the
   double-precision shifts used by the `X86_OP_SHLD_IMM`/`SHRD_IMM` handlers with
   inline shift pairs and no independent statements. This closes the last
   documented open x86 helper.
-- Contract: `native-sim/formal/generate_x86_doubleshift_spec.py` reads
+- Contract: `kprog/formal/generate_x86_doubleshift_spec.py` reads
   `x86_doubleshift_spec.json` and emits `generated/x86_doubleshift.h`
   (`kprog_x86_shld_value`, `kprog_x86_shrd_value`) and
   `KProgFormal/GeneratedX86DoubleShift.lean`. It has a `--check` mode and a
   `make check` line.
 - C wiring: `x86_sim.h` includes the generated header and both helpers are
   one-line delegations.
-- Lean bridge: `native-sim/formal/KProgFormal/X86DoubleShift.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/X86DoubleShift.lean` proves
   `x86_shld_refines` and `x86_shrd_refines` (each against the independent
   doubled-word statement: shift the `(dst:src)` / `(src:dst)` 2b-bit word and take
   its high / low half), `x86_doubleshift_zero_count`, and two `native_decide`
@@ -3439,21 +3439,21 @@ not establish complete native-byte semantic equivalence.
   `widthMask`/`countMask`, which removes the diamond; the refinement module then
   builds its independent mask from `2 ^ (8 * code)`. With both shifts
   code-parameterised the full `make check` is green from a clean `.lake`.
-- Host cross-check `native-sim/formal/test_x86_doubleshift_host.c`: compiles the
+- Host cross-check `kprog/formal/test_x86_doubleshift_host.c`: compiles the
   generated helpers with zero warnings under `-Wall -Wextra` and compares them to
   oracles that build the doubled words in `unsigned __int128` and shift them
   there (never the macro's OR-of-two-shifts). It sweeps seven operands x four
   widths x all 64 counts x seven sources, then a fixed-seed 20000-iteration LCG
   sweep (seed `0x2c95e1b734af680d`), plus the within-width invariant. Result:
   `OK (32544 cases)`.
-- Verification: full `make -C native-sim/formal check` green **from a clean
+- Verification: full `make -C kprog/formal check` green **from a clean
   `.lake`** (`MAKE 0`; popcount `OK (40009 cases)`, bitops `OK (22048 cases)`,
   doubleshift `OK (32544 cases)`). Mutation checks: flipping an operation's
   direction in `x86_doubleshift_spec.json` makes `--check` exit 1; five
   independent mutations of `generated/x86_doubleshift.h` (SHLD direction, SHLD
   fill amount, SHRD direction, SHRD wide-count arm, zero-count guard) each make
   the host cross-check exit 1 with a printed `MISMATCH`, while the pristine header
-  stays `OK`. `make -C native-sim/x86 micro-proofs-build` rebuilds all 30
+  stays `OK`. `make -C kprog/x86 micro-proofs-build` rebuilds all 30
   workload-derived artifacts, all `ok`; `build`/`run` produce and load the object.
 - Open x86 proof surface after this increment: the objdump/parser-to-AUX
   selection relation, compiler/native-byte correspondence, and multi-step
@@ -3504,11 +3504,11 @@ not establish complete native-byte semantic equivalence.
 
 ### AArch64 branch-emission bridge, 2026-09-18
 
-- Gap (explicitly named as open in `docs/implementation.md`): the proved
+- Gap (explicitly named as open in `docs/shared/implementation.md`): the proved
   condition and compare-and-branch predicates were stated over an abstract
   `branchPc`, with no link to the `goto`/label code the generator actually emits
   for control transfers.
-- Contract: `native-sim/formal/generate_arm64_branch_emit_spec.py` reads
+- Contract: `kprog/formal/generate_arm64_branch_emit_spec.py` reads
   `arm64_branch_emit_spec.json` and emits `generated/arm64_branch_emit.h`
   (`KPROG_ARM64_BRANCH_BACKWARD(CURRENT, TARGET)`) and
   `KProgFormal/GeneratedArm64BranchEmit.lean` (`Shape`, `backward`, `shape`,
@@ -3517,7 +3517,7 @@ not establish complete native-byte semantic equivalence.
   `arm64_sim_local_bpf.h` (`ARM64_SIM_A64_JCC_IMPL`, `ARM64_SIM_A64_CBZ_IMPL`,
   `ARM64_SIM_A64_TBZ_IMPL` — the `if ((TARGET) <= (CURRENT))` shape selector)
   now call the generated macro. Behaviour is unchanged; `build`/`run` stay green.
-- Lean bridge: `native-sim/formal/KProgFormal/Arm64BranchEmit.lean` proves
+- Lean bridge: `kprog/formal/KProgFormal/Arm64BranchEmit.lean` proves
   `arm64_branch_emit_shape_refines` (the generated shape equals the independent
   address-ordering predicate), **`arm64_branch_emit_refines`** (for both emitted
   shapes the selected next PC equals `branchPc`), plus
@@ -3525,18 +3525,18 @@ not establish complete native-byte semantic equivalence.
   `arm64_branch_emit_not_taken`. Together with the existing
   `arm64_condition_sound`/`arm64_branch_next_pc_refines`, this closes the chain
   predicate -> emitted code -> architectural next PC. No `sorry`/`admit`.
-- Host cross-check `native-sim/formal/test_arm64_branch_emit_host.c`: compiles the
+- Host cross-check `kprog/formal/test_arm64_branch_emit_host.c`: compiles the
   generated macro with zero warnings under `-Wall -Wextra`, compares the direction
   test to a plain address-comparison oracle, and — for every ordered pair of eight
   addresses and both predicate values — checks the emitted shape selects the same
   next PC as the architectural model. Result: `OK (64 cases)`.
-- Verification: full `make -C native-sim/formal check` green (`MAKE 0`; branch
+- Verification: full `make -C kprog/formal check` green (`MAKE 0`; branch
   emit `OK (64 cases)`). Mutation checks: flipping a shape flag in
   `arm64_branch_emit_spec.json` makes `--check` exit 1; three independent
   mutations of `generated/arm64_branch_emit.h` (strict-less direction test,
   reversed direction test, inverted result) each make the host cross-check exit 1
   with a printed `MISMATCH`, while the pristine header stays `OK`.
-  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  `make -C kprog/arm64 micro-proofs-build` rebuilds all 30 workload-derived
   artifacts, all `ok`.
 - Open AArch64 boundary after this increment: the ALU op-step and register-lane
   handler compositions that remain hand-written, the vector/`.D0`/`.Q0` paths, and
@@ -3814,8 +3814,8 @@ framework leaves the original bytecode in place and continues.
     `bpfopt` CLI suite still `42/42 OK`.
   - Two concrete repaired programs: `bcc_set/569_sys_dup_exit_tail` (108 sites,
     `movw: 16`) and `bcc_set/582_syscall__accept4` (73 sites, `movw: 8`).
-  - `make -C native-sim/x86 micro-proofs-build` 30/30 OK;
-    `make -C native-sim/formal check` 25 host cross-checks OK, no errors.
+  - `make -C kprog/x86 micro-proofs-build` 30/30 OK;
+    `make -C kprog/formal check` 25 host cross-checks OK, no errors.
 - **KVM re-run to confirm the fix in a measured corpus run did not complete**:
   `corpus_v13` ran four attempts, and every one failed in `host-kernel-x86`
   `modules_install` with the SeaweedFS FUSE `mkdir`-drop (`acpi_ipmi.ko`,
@@ -3891,7 +3891,7 @@ framework leaves the original bytecode in place and continues.
   the parent records the new pin.
 - Verification with the fix: sweeping all fixtures, kop step failures `2 -> 0`
   with no previously passing program changed; the two repaired programs each
-  apply `49` sites; `bpfopt` CLI suite `42/42 OK`; `native-sim/x86`
+  apply `49` sites; `bpfopt` CLI suite `42/42 OK`; `kprog/x86`
   `micro-proofs-build` `30/30`.
 - Supersedes the earlier "stack-growth" reading: the frame does grow a little
   per roundtrip (`256 -> 336 -> 368 -> 416 -> 448 -> 488 -> 512` true bytes) but
@@ -4110,11 +4110,11 @@ framework leaves the original bytecode in place and continues.
   and provenance tag. Concrete theorems pin tagged pointer ADD, tagged SUB
   scalarization, SP ADD, and 32-bit zero extension. There is no `sorry` or
   `admit`.
-- Machine checks: `make -C native-sim/formal check` exits 0, including the new
+- Machine checks: `make -C kprog/formal check` exits 0, including the new
   168-case independent C path oracle and the complete pre-existing Lean/C
   suite. With the workspace's installed toolchains made explicit through
   `RUSTUP_HOME=/usr/local/rustup`, `CARGO_HOME=/usr/local/cargo`, and
-  `PATH=/usr/lib/llvm-18/bin:$PATH`, `make -C native-sim/arm64
+  `PATH=/usr/lib/llvm-18/bin:$PATH`, `make -C kprog/arm64
   micro-proofs-build` exits 0: the negative proof artifact and all 29
   workload-derived artifacts compile `ok`.
 - Preserved boundary: the theorem begins after instruction decoding,
@@ -4143,10 +4143,10 @@ framework leaves the original bytecode in place and continues.
   preserve the complete modeled GPR/SP state and replace only NZCV. Concrete
   theorems pin 32-bit signed overflow, discarded XZR result with live flags,
   CMP state preservation, and CMN carry/zero. There is no `sorry` or `admit`.
-- Machine checks: the full `make -C native-sim/formal check` exits 0. The new
+- Machine checks: the full `make -C kprog/formal check` exits 0. The new
   independent host oracle checks 64 ADD/SUB family, width, and boundary-vector
   combinations in both writeback and compare modes. With the installed
-  Rust/Clang paths made explicit, `make -C native-sim/arm64
+  Rust/Clang paths made explicit, `make -C kprog/arm64
   micro-proofs-build` exits 0 for the negative artifact and all 29
   workload-derived artifacts.
 - Preserved boundary: the theorem begins after typed operands, width,
@@ -4176,9 +4176,9 @@ framework leaves the original bytecode in place and continues.
   Concrete theorems pin 32-bit negative writeback, discarded XZR results with
   live flags, TST state preservation, and TST-BIC flags. There is no `sorry` or
   `admit`.
-- Machine checks: `make -C native-sim/formal check` exits 0, including a new
+- Machine checks: `make -C kprog/formal check` exits 0, including a new
   independent 64-case AND/BIC, four-width boundary-vector C oracle. With the
-  installed Rust/Clang paths made explicit, `make -C native-sim/arm64
+  installed Rust/Clang paths made explicit, `make -C kprog/arm64
   micro-proofs-build` exits 0 for the negative artifact and all 29
   workload-derived artifacts.
 - Preserved boundary: the theorem begins after typed operands, width,
@@ -4209,10 +4209,10 @@ framework leaves the original bytecode in place and continues.
   (whose high nibble is ignored). Concrete theorems pin true SUB flags, false
   fallback flags, 32-bit SUB overflow, and high-nibble irrelevance. There is no
   `sorry` or `admit`.
-- Machine checks: `make -C native-sim/formal check` exits 0, including an
+- Machine checks: `make -C kprog/formal check` exits 0, including an
   independent 122880-case C oracle that exhausts all incoming flag states,
   conditions, widths, boundary operands, and 4-bit fallbacks. With the installed
-  Rust/Clang paths explicit, `make -C native-sim/arm64 micro-proofs-build` exits
+  Rust/Clang paths explicit, `make -C kprog/arm64 micro-proofs-build` exits
   0 for the negative artifact and all 29 workload-derived artifacts.
 - Preserved boundary: the theorem begins after operand/register selection and
   AUX condition/fallback decoding are supplied. It does not prove those parser
@@ -4242,10 +4242,10 @@ framework leaves the original bytecode in place and continues.
   immediate bypass, signed-byte extension feeding pointer ADD, 32-bit shifted
   register scalarization, and immediate SP writeback. There is no `sorry` or
   `admit`.
-- Machine checks: `make -C native-sim/formal check` exits 0, including a new
+- Machine checks: `make -C kprog/formal check` exits 0, including a new
   independent 5632-case C oracle over both forms, all modifiers/widths, and
   boundary values/shifts. With the installed Rust/Clang paths explicit,
-  `make -C native-sim/arm64 micro-proofs-build` exits 0 for the negative
+  `make -C kprog/arm64 micro-proofs-build` exits 0 for the negative
   artifact and all 29 workload-derived artifacts.
 - Preserved boundary: the theorem begins after the parser has supplied typed
   opcode, width, selected register value/tag, destination class, and packed-AUX
@@ -4368,7 +4368,7 @@ framework leaves the original bytecode in place and continues.
   actual generated load, shift-result, and writeback macros against a
   byte-loop model for 21,024 boundary and fixed-seed cases, including the
   architectural 32-bit zero-extension into the 64-bit destination. Full
-  `make -C native-sim/formal check` passes with 0 errors. Effective-address
+  `make -C kprog/formal check` passes with 0 errors. Effective-address
   derivation, count register selection, bit/compare/multiply memory handlers,
   compiler/native bytes, multi-step traces, and specialization preservation
   remain outside the theorem.
@@ -4395,7 +4395,7 @@ framework leaves the original bytecode in place and continues.
   generated load, bit-helper, and writeback macros against a byte-loop model for
   20,512 boundary and fixed-seed cases, including the masked-to-63/31 bit index,
   the byte-masked count, and the architectural 32-bit zero-extension. Full
-  `make -C native-sim/formal check` passes with 0 errors. Effective-address
+  `make -C kprog/formal check` passes with 0 errors. Effective-address
   derivation, decoded second-operand selection (immediate vs register),
   compare/multiply memory handlers, compiler/native bytes, multi-step traces,
   and specialization preservation remain outside the theorem.
@@ -4427,7 +4427,7 @@ framework leaves the original bytecode in place and continues.
   and expressing a sign-filled operand in the 128-bit domain needed a 64-bit
   signed cast in between; the first run failed on that alone (11,198 flag
   mismatches with every destination equal), confirming the generated side and
-  the oracle differ on exactly one axis. Full `make -C native-sim/formal check`
+  the oracle differ on exactly one axis. Full `make -C kprog/formal check`
   passes with 0 errors and 37 host cross-checks. Register-source multiply
   handlers, effective-address derivation, packed-AUX/effective-width decoding,
   compare memory handlers, compiler/native bytes, multi-step traces, and
@@ -4460,7 +4460,7 @@ framework leaves the original bytecode in place and continues.
   unmasked operands and passed the width where the mask belongs, failing with
   39,262 mismatches exactly on mask boundaries. The generated side was correct
   throughout — the oracle was fixed, never the macro. Full
-  `make -C native-sim/formal check` passes with 0 errors and 38 host
+  `make -C kprog/formal check` passes with 0 errors and 38 host
   cross-checks. Register-source multiply handlers, effective-address derivation,
   packed-AUX/effective-width decoding, compiler/native bytes, multi-step traces,
   and specialization preservation remain outside the theorem.
@@ -4494,7 +4494,7 @@ framework leaves the original bytecode in place and continues.
   limb ladder — and checks them against the real `KPROG_X86_WRITE_REG8/16/32/64`
   macros for 41,296 boundary and fixed-seed cases across all four widths, each
   swept with and without the auxiliary destination. Zero warnings. Full
-  `make -C native-sim/formal check` passes with 0 errors and 39 host
+  `make -C kprog/formal check` passes with 0 errors and 39 host
   cross-checks. Register-source multiply handlers, effective-address derivation,
   packed-AUX/effective-width decoding, compiler/native bytes, multi-step traces,
   and specialization preservation remain outside the theorem.
@@ -4532,7 +4532,7 @@ framework leaves the original bytecode in place and continues.
   rather than sign-extending — and disagreed with the generated side on CF/OF
   whenever the narrowed lhs had its sign bit set: 294 mismatches, all CF/OF-only,
   `dst` always matching. The oracle was fixed; the generated macro was never
-  touched. Zero warnings. Full `make -C native-sim/formal check` passes with 0
+  touched. Zero warnings. Full `make -C kprog/formal check` passes with 0
   errors and 40 host cross-checks. The AUX-payload `X86_SIM_L_EXEC_ALU_REG` IMUL
   path, effective-address derivation, packed-AUX/effective-width decoding,
   compiler/native bytes, multi-step traces, and specialization preservation
@@ -4582,7 +4582,7 @@ framework leaves the original bytecode in place and continues.
   all on the 64-bit RSP arm and all short by exactly `src_ptr`; the sim adds the
   raw RSP value to the offset before `X86_SIM_L_STACK_PTR` indexes. The oracle
   was fixed; the generated macro and the Lean module were never touched. Zero
-  warnings. Full `make -C native-sim/formal check` passes with 0 errors, 53
+  warnings. Full `make -C kprog/formal check` passes with 0 errors, 53
   generators and 41 host cross-checks. The index register decode and packed-AUX
   layout, the mapping from the simulator's stack region to the abstract frame
   base, the `MOV`/`CMOV`/`SETCC`/`STORE`/`XMM`/`CALL`/`PUSH`/`REP_MOVS` matrix,
@@ -4591,7 +4591,7 @@ framework leaves the original bytecode in place and continues.
 - Commit `601c76544`, pushed to `origin/master`.
 - Step 0033 (2026-09-27): proved the register-writing `MOV` handlers
   `X86_SIM_L_EXEC_MOV_IMM{,_AUX}` and `X86_SIM_L_EXEC_MOV_REG{,_AUX}` in the
-  new `native-sim/formal/KProgFormal/X86MovHandler.lean` (236 lines, local
+  new `kprog/formal/KProgFormal/X86MovHandler.lean` (236 lines, local
   `X86MovState {dst}` and `X86MovSrc {bits, tag, isRsp}`). `x86_mov_imm_step_refines`
   composes the immediate form over the generated `GeneratedX86RegWrite.writeAt`
   partial-register writeback (destination width + explicit byte lane), with
@@ -4615,7 +4615,7 @@ framework leaves the original bytecode in place and continues.
   100,448 boundary and fixed-seed cases. First draft warned on an unused
   `old_tag` parameter in `oracle_mov_imm`; fixed with the same `(void)old_tag;`
   precedent as `test_x86_lea_handler_host.c`. Zero warnings. Full
-  `make -C native-sim/formal check` passes with 0 errors, 53 generators, 94 Lean
+  `make -C kprog/formal check` passes with 0 errors, 53 generators, 94 Lean
   module checks and 42 host cross-checks over 1,975,148 cases. The memory-touching
   `MOV` forms, `CMOV`/`SETCC`/`STORE`/`XMM`/`CALL`/`PUSH`/`REP_MOVS`/`ANDN`/`BZHI`/
   `MOVBE`/`CMP_*_OP`, the index register decode and packed-AUX layout, the
@@ -4626,7 +4626,7 @@ framework leaves the original bytecode in place and continues.
 - Step 0034 (2026-09-27): proved the width-converting register-source `MOV`
   handlers `X86_OP_MOVZX_REG` and `X86_OP_MOVSX_REG` — the shared body
   `X86_SIM_L_EXEC_MOVX_REG`, which also carries bare `cdqe` and `movsxd` — in
-  the new `native-sim/formal/KProgFormal/X86MovxRegHandler.lean` (local
+  the new `kprog/formal/KProgFormal/X86MovxRegHandler.lean` (local
   `X86MovxState {dst}`, `inductive X86MovxOp | movzx | movsx`).
   `x86_movx_reg_step_refines` composes the source register's raw 64-bit value
   through the already-proved `GeneratedX86Width.narrow` (MOVZX) or
@@ -4652,7 +4652,7 @@ framework leaves the original bytecode in place and continues.
   `KPROG_X86_APPLY_WIDTH`/`kprog_x86_sign_extend_value` and `KPROG_X86_WRITE_REG*`
   macros against an independent sign-bit model over a 25-pair width-code grid,
   a `cdqe` decoding block, an LCG sweep, and a `movsxd`-identity block: 62,409
-  cases, zero warnings. Full `make -C native-sim/formal check` passes with 0
+  cases, zero warnings. Full `make -C kprog/formal check` passes with 0
   errors, 53 generators, 95 Lean module checks and 43 host cross-checks over
   2,037,557 cases. The memory-touching `MOV` forms, `CMOV`/`SETCC`/`STORE`/`XMM`/
   `CALL`/`PUSH`/`REP_MOVS`/`ANDN`/`BZHI`/`MOVBE`/`CMP_*_OP`, the index register
@@ -4665,7 +4665,7 @@ framework leaves the original bytecode in place and continues.
 - Step 0035 (2026-09-28): proved the shared x86 memory read-dispatch
   classification of `X86_SIM_L_READ_MEM_VALUE`, the one read body behind the
   plain load and store families, in the new
-  `native-sim/formal/KProgFormal/X86MemDispatch.lean`. A new generator
+  `kprog/formal/KProgFormal/X86MemDispatch.lean`. A new generator
   `generate_x86_mem_dispatch_spec.py` (54th) emits a closed eight-row table
   `GeneratedX86MemDispatch.valueSrc : Bool -> Bool -> Bool -> ValueSrc` over
   the three facts the body consults — stack-pointer register identity, ABI
@@ -4696,7 +4696,7 @@ framework leaves the original bytecode in place and continues.
   over a deterministic memory/register/stack model — 16 base registers × 4 tags
   × 4 widths × 7 displacements × 2 `STORE_DISP` plus an indexed block — against
   an explicit read-body model: 3,650 cases, zero warnings. Full
-  `make -C native-sim/formal check` passes with 0 errors, 54 generators, 97 Lean
+  `make -C kprog/formal check` passes with 0 errors, 54 generators, 97 Lean
   module checks and 44 host cross-checks over 2,041,207 cases. The concrete
   memory-load forms that compose on top of this dispatch (`MOV_LOAD`/
   `MOVSX_LOAD`/`MOV_LOAD_SCALAR`/`MOVBE_LOAD`/`MOVBE_STORE`/`MOV_STORE_*`) and
@@ -4710,7 +4710,7 @@ framework leaves the original bytecode in place and continues.
 - Step 0036 (2026-09-28): proved the shared x86 `MOV_LOAD` handler
   composition `X86_SIM_L_EXEC_MOV_LOAD`, the single body behind
   `X86_OP_MOV_LOAD`, `X86_OP_MOV_LOAD_SCALAR` and `X86_OP_MOVSX_LOAD`, in the
-  new `native-sim/formal/KProgFormal/X86MovLoadHandler.lean`. A new generator
+  new `kprog/formal/KProgFormal/X86MovLoadHandler.lean`. A new generator
   `generate_x86_mov_load_spec.py` (55th) emits a closed width-resolution table
   `GeneratedX86MovLoad.resolveWidth` over the five `X86_WIDTH_*` codes
   (including the 0 "absent" code) and a closed 32-row arm table
@@ -4748,14 +4748,14 @@ framework leaves the original bytecode in place and continues.
   5 AUX codes × 5 FLAGS codes × 3 displacement classes × 2 ABI kinds × 3
   destination values, plus an ABI-arm provenance pin — against an explicit
   handler model that restates the arms from the raw fields: 86,461 cases, zero
-  warnings. Full `make -C native-sim/formal check` passes with 0 errors, 55
+  warnings. Full `make -C kprog/formal check` passes with 0 errors, 55
   generators, 99 Lean module checks and 45 host cross-checks over 2,127,668
   cases. Commit `5d7b435c2` (code increment, 10 files).
 
 - Step 0037 (2026-09-28): proved the shared x86 `MOV_STORE` handler
   composition `X86_SIM_L_EXEC_STORE`, the single body behind
   `X86_OP_MOV_STORE_IMM` (`0x07`) and `X86_OP_MOV_STORE_REG` (`0x08`), in the
-  new `native-sim/formal/KProgFormal/X86StoreHandler.lean`. A new generator
+  new `kprog/formal/KProgFormal/X86StoreHandler.lean`. A new generator
   `generate_x86_store_spec.py` (56th) emits a closed width-resolution table
   `GeneratedX86Store.resolveWidth` over the five `X86_WIDTH_*` codes
   (including the 0 "absent" code, which defaults to 64 bits) plus three
@@ -4791,7 +4791,7 @@ framework leaves the original bytecode in place and continues.
   store-body model, snapshotting and restoring the pristine buffers around
   every pair and comparing every resulting memory and stack byte: 48,013
   cases, zero warnings. Five independent model mutations each make the oracle
-  exit 1, so the sweep is non-vacuous. Full `make -C native-sim/formal check`
+  exit 1, so the sweep is non-vacuous. Full `make -C kprog/formal check`
   passes with 0 errors, 56 generators, 101 Lean module checks and 46 host
   cross-checks over 2,175,681 cases. Commit `ff267c8b5` (code increment, 10
   files).
@@ -4839,7 +4839,7 @@ framework leaves the original bytecode in place and continues.
   generated `KPROG_X86_WRITE_REG8` helper over every byte shift. 590,726
   cases, zero warnings. Eight model mutations plus two mutations of the *real
   generated headers* each make the oracle exit 1.
-- Full `make -C native-sim/formal check` passes with 0 errors, 57 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 57 generators,
   103 Lean module checks and 47 host cross-checks over 2,766,407 cases.
 
 ## Next after step 0038
@@ -4908,7 +4908,7 @@ the pointer tag at `w64`.
   and each of `WIDTH_CODE`, `NONE_REG`, `RSP_REG` tripping the generated
   `_Static_assert` drift checks); mutating the JSON opcode `0x3e` → `0x3f`
   makes `--check` exit 1.
-- Full `make -C native-sim/formal check` passes with 0 errors, 58 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 58 generators,
   105 Lean module checks and 48 host cross-checks over 3,819,598 cases.
 
 ## Next after step 0039
@@ -4984,7 +4984,7 @@ surface.
   mem-width shift, and the JSON opcode `0x15` → `0x25` drift check);
   relabeling the numeric `POINTER_TAG`/`SCALARIZE` codes alone does **not**
   trip the oracle — the codes are a shared label both sides derive.
-- Full `make -C native-sim/formal check` passes with 0 errors, 59
+- Full `make -C kprog/formal check` passes with 0 errors, 59
   generators, 107 Lean module checks and 49 host cross-checks over
   4,303,967 cases.
 
@@ -5050,7 +5050,7 @@ surface.
   `oracle_bswap` is a byte-reverse loop independent of
   `kprog_x86_bswap_value`. **4,675 cases**, zero non-macro `-Wall -Wextra`
   warnings.
-- Full `make -C native-sim/formal check` passes with 0 errors, 60 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 60 generators,
   108 Lean module checks and 50 host cross-checks.
 
 
@@ -5129,7 +5129,7 @@ surface.
   absent lane, helper-id single erased lane, flag-free, `X86_REG_NONE`
   no-write, identical bits/different tags, all-false fallthrough).
   **318 cases**, zero `-Wall -Wextra` warnings.
-- Full `make -C native-sim/formal check` passes with 0 errors, 61
+- Full `make -C kprog/formal check` passes with 0 errors, 61
   generators, 109 Lean module checks and 51 host cross-checks.
 
 
@@ -5147,7 +5147,7 @@ surface.
   added*; every register operand agrees between the two opcodes. The
   displacement is the whole artifact, never the immediate store's high-half
   slice.
-- Files: `native-sim/formal/generate_x86_xmm0_spec.py` +
+- Files: `kprog/formal/generate_x86_xmm0_spec.py` +
   `x86_xmm0_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
   rejects stale text) → `KProgFormal/GeneratedX86Xmm0.lean`,
   `generated/x86_xmm0.h`; `KProgFormal/X86Xmm0Handler.lean`; oracle
@@ -5174,7 +5174,7 @@ surface.
   stack round trip). **283 cases**, zero `-Wall -Wextra` warnings. Mutation-
   tested: inverting the load's base form, reusing lane 0 for lane 1, and
   zeroing `ADDS_DISP` each make it exit non-zero.
-- Full `make -C native-sim/formal check` passes with 0 errors, 62
+- Full `make -C kprog/formal check` passes with 0 errors, 62
   generators, 113 Lean module checks and 52 host cross-checks.
 
 
@@ -5193,7 +5193,7 @@ surface.
   codes the two selections even coincide (fixed/immediate are both `0`), so
   only the *reading* keeps them apart; a table that collapsed the bound form
   into the count source would still pass a raw-code equality check.
-- Files: `native-sim/formal/generate_x86_callmem_spec.py` +
+- Files: `kprog/formal/generate_x86_callmem_spec.py` +
   `x86_callmem_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
   rejects stale text) → `KProgFormal/GeneratedX86CallMem.lean`,
   `generated/x86_callmem.h`; `KProgFormal/X86CallMemHandler.lean`; oracle
@@ -5229,7 +5229,7 @@ surface.
   fixed-bound literal, dropping the copy's source read, skipping the `RAX`
   write, swapping the model's bound arm, and collapsing the generated
   `BOUND_FORM` each make it exit non-zero.
-- Full `make -C native-sim/formal check` passes with 0 errors, 63
+- Full `make -C kprog/formal check` passes with 0 errors, 63
   generators, 115 Lean module checks and 53 host cross-checks.
 
 
@@ -5247,7 +5247,7 @@ surface.
   (pre-decrement and hardcoded-64 are both `0`), so only the *reading* keeps
   them apart; a table that collapsed the width source into the step direction
   would still pass a raw-code equality check.
-- Files: `native-sim/formal/generate_x86_pushpop_spec.py` +
+- Files: `kprog/formal/generate_x86_pushpop_spec.py` +
   `x86_pushpop_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
   rejects stale text) → `KProgFormal/GeneratedX86PushPop.lean`,
   `generated/x86_pushpop.h`; `KProgFormal/X86PushPopHandler.lean`; oracle
@@ -5296,7 +5296,7 @@ surface.
   `STEP_DIRECTION` arms each make it exit non-zero (a plain renumbering of
   the two direction codes does *not* — the oracle reads the codes, so the
   arm swap is the binding mutation).
-- Full `make -C native-sim/formal check` passes with 0 errors, 64
+- Full `make -C kprog/formal check` passes with 0 errors, 64
   generators, 117 Lean module checks and 54 host cross-checks.
 
 ## Step 0046 — x86 `REP MOVS` block-copy composition
@@ -5312,7 +5312,7 @@ surface.
   with. `X86_SIM_L_LOAD_ADDR`/`_STORE_ADDR` are plain `KPROG_X86_MEM_LOAD`/
   `_MEM_STORE` here (no ABI tag path), so no `BASE_IS_RSP`/`BASE_TAG`
   classification is needed.
-- Files: `native-sim/formal/generate_x86_rep_movs_spec.py` +
+- Files: `kprog/formal/generate_x86_rep_movs_spec.py` +
   `x86_rep_movs_spec.json` (schema_version 1, literal `EXPECTED`, `--check`
   rejects stale text) → `KProgFormal/GeneratedX86RepMovs.lean`,
   `generated/x86_rep_movs.h`; `KProgFormal/X86RepMovsHandler.lean`; oracle
@@ -5354,7 +5354,7 @@ surface.
   swapping the two `KPROG_X86_REP_MOVS_WIDTH` arms, `BOUND` 64→8, and
   `COUNT_WIDTH` 64→32 each make it exit non-zero (a plain renumbering of the
   width codes is vacuous — the oracle reads the codes).
-- Full `make -C native-sim/formal check` passes with 0 errors, 65
+- Full `make -C kprog/formal check` passes with 0 errors, 65
   generators, 119 Lean module checks and 55 host cross-checks.
 
 ## Step 0047 — x86 `ANDN` / `ANDN_MEM` source-split composition
@@ -5371,7 +5371,7 @@ surface.
   when the AUX field names a width and falls back to the resolved FLAGS write
   width when that field is absent or zero. CF and OF are set to 0 by the shared
   logic-flag production; ZF/SF track the result narrowed at the *write* width.
-- Files: `native-sim/formal/generate_x86_andn_spec.py` + `x86_andn_spec.json`
+- Files: `kprog/formal/generate_x86_andn_spec.py` + `x86_andn_spec.json`
   (schema_version 1, two-opcode `EXPECTED` table, `--check` rejects stale text)
   → `KProgFormal/GeneratedX86Andn.lean`, `generated/x86_andn.h`;
   `KProgFormal/X86AndnHandler.lean`; oracle `test_x86_andn_host.c`. Wired into
@@ -5410,7 +5410,7 @@ surface.
   `KPROG_X86_ANDN_WRITE_WIDTH_DEFAULT` 64→32, and swapping the two per-opcode
   source values each make it exit non-zero (a plain renumbering of the codes is
   vacuous — the oracle reads the codes).
-- Full `make -C native-sim/formal check` passes with 0 errors, 66 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 66 generators,
   121 Lean module checks and 56 host cross-checks.
 
 
@@ -5430,7 +5430,7 @@ surface.
   shared logic-flag production would make it; and `CF` is the byte-masked count
   reaching the *width's* bit count, not any property of the result. The count
   is byte-masked, so a register holding `0x1ff` behaves as `0xff`.
-- Files: `native-sim/formal/generate_x86_bzhi_spec.py` + `x86_bzhi_spec.json`
+- Files: `kprog/formal/generate_x86_bzhi_spec.py` + `x86_bzhi_spec.json`
   (schema_version 1, two-opcode `EXPECTED` table, `--check` rejects stale text)
   → `KProgFormal/GeneratedX86Bzhi.lean`, `generated/x86_bzhi.h`;
   `KProgFormal/X86BzhiHandler.lean`; oracle `test_x86_bzhi_host.c`. Wired into
@@ -5476,7 +5476,7 @@ surface.
   names, and changing `KPROG_X86_BZHI_WRITE_WIDTH_DEFAULT` 64→32 each make it
   exit non-zero (a plain renumbering of the codes is vacuous — the oracle reads
   the codes).
-- Full `make -C native-sim/formal check` passes with 0 errors, 67 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 67 generators,
   123 Lean module checks and 57 host cross-checks.
 
 ## Step 0049 — x86 `BT` / `BT_IMM` / `BT_MEM_IMM` base/index-source composition
@@ -5495,7 +5495,7 @@ surface.
   high bit set selects a different bit through the memory form than through the
   immediate form, because `BT_MEM_IMM` drops the high bits while `BT`/`BT_IMM`
   keep them. All three bodies write no register and touch only `CF`.
-- Files: `native-sim/formal/generate_x86_bt_spec.py` + `x86_bt_spec.json`
+- Files: `kprog/formal/generate_x86_bt_spec.py` + `x86_bt_spec.json`
   (schema_version 1, three-opcode `EXPECTED` table, `--check` rejects stale
   text) → `KProgFormal/GeneratedX86Bt.lean`, `generated/x86_bt.h`;
   `KProgFormal/X86BtHandler.lean`; oracle `test_x86_bt_host.c`. Wired into
@@ -5543,7 +5543,7 @@ surface.
   per-opcode `..._BT_MEM_IMM_INDEX_SOURCE` name, and changing
   `KPROG_X86_BT_WRITE_WIDTH_DEFAULT` 64→32 each make it exit non-zero with a
   distinct message.
-- Full `make -C native-sim/formal check` passes with 0 errors, 68 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 68 generators,
   125 Lean module checks and 58 host cross-checks.
 
 ## Step 0050 — x86 `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` source/flag-kind composition
@@ -5561,7 +5561,7 @@ surface.
   `SRC` for the `_REG` forms, and the flag kind is the zero-borrow subtraction
   flags for the `CMP` opcodes and the logical flags of the width-narrowed
   conjunction for the `TEST` opcodes. No register is written.
-- Files: `native-sim/formal/generate_x86_cmpop_spec.py` + `x86_cmpop_spec.json`
+- Files: `kprog/formal/generate_x86_cmpop_spec.py` + `x86_cmpop_spec.json`
   (schema_version 1, four-opcode `EXPECTED` table, `--check` rejects stale text)
   → `KProgFormal/GeneratedX86CmpOp.lean`, `generated/x86_cmpop.h`;
   `KProgFormal/X86CmpOpHandler.lean`; oracle `test_x86_cmpop_host.c`. Wired into
@@ -5609,7 +5609,7 @@ surface.
   `..._CMP_IMM_FLAG_KIND` name, and changing
   `KPROG_X86_CMPOP_WRITE_WIDTH_DEFAULT` 64→32 each make it exit non-zero with a
   distinct message.
-- Full `make -C native-sim/formal check` passes with 0 errors, 69 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 69 generators,
   127 Lean module checks and 59 host cross-checks.
 
 
@@ -5633,7 +5633,7 @@ specialization preservation.
 ## Step 0051 — AArch64 `.D0` / `.Q0` vector memory-transfer contract
 
 - Scope: the four `ARM64_SIM_L_{LOAD,STORE}_{D0,Q0}_MEM` bodies
-  (`native-sim/arm64/arm64_sim_local_bpf.h:675-713`), the opcodes that move a
+  (`kprog/arm64/arm64_sim_local_bpf.h:675-713`), the opcodes that move a
   SIMD register's low 64-bit lane (`.D0`) or both 64-bit lanes (`.Q0`) to or
   from memory (`ARM64_OP_LOAD_D0` `0x28`, `ARM64_OP_STORE_D0` `0x29`,
   `ARM64_OP_LOAD_Q0` `0x2a`, `ARM64_OP_STORE_Q0` `0x2b`). Their dispatch is at
@@ -5671,8 +5671,8 @@ specialization preservation.
   (caught by the generated C `_Static_assert`), and selector-arm swap each exit
   non-zero.
 - No C body was edited (`arm64_sim_local_bpf.h` unchanged), so
-  `make -C native-sim/arm64 micro-proofs-build` is not required for this step.
-- Full `make -C native-sim/formal check` passes with 0 errors, 70 generators,
+  `make -C kprog/arm64 micro-proofs-build` is not required for this step.
+- Full `make -C kprog/formal check` passes with 0 errors, 70 generators,
   129 Lean module checks, 60 host cross-checks.
 
 ## Next after 0051
@@ -5723,7 +5723,7 @@ native bytes, multi-step control-flow traces, and specialization preservation.
 - Mutation test: 4/4 detected — access-direction swap, slot-count swap,
   slot-stride literal change, selector-arm swap (Lean mutation requires a
   `lake build` rebuild).
-- Full `make -C native-sim/formal check` passes with 0 errors, 71 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 71 generators,
   131 Lean module checks, 61 host cross-checks.
 
 ## Next after 0052
@@ -5760,14 +5760,14 @@ control-flow traces, and specialization preservation.
   `KProgFormal/GeneratedArm64MemPrepost.lean` + `generated/arm64_mem_prepost.h`
   (`pre_bit` = 1, `post_bit` = 2, `flags_shift` = 24, `flags_mask` = 255); the
   generator's `load()` re-checks `ARM64_MEM_PRE`/`ARM64_MEM_POST` in
-  `native-sim/arm64/arm64_sim.h`.
+  `kprog/arm64/arm64_sim.h`.
 - `KProgFormal/Arm64MemPrepost.lean`: `arm64_mem_prepost_flags_refines`,
   `_pre_writeback`, `_post_writeback`, `_suppress_offset`, `_delta_refines`,
   `_form_is_sum`, `_form_bounded`, plus `_offset_example`, `_post_example`,
   `_both_example`.
 - `test_arm64_mem_prepost_host.c`: independent 4,608-case oracle. Part 1 checks
   the generated bit/shift/mask constants against independent literals and
-  `native-sim/arm64/arm64_sim.h`'s `ARM64_MEM_PRE`/`ARM64_MEM_POST`; Part 2
+  `kprog/arm64/arm64_sim.h`'s `ARM64_MEM_PRE`/`ARM64_MEM_POST`; Part 2
   drives the generated decode/select macros over every flag byte crossed with
   low-byte noise (which must not leak into the flag byte) and a spread of
   immediates, restating the top-byte decode, the suppression gate and the two
@@ -5776,7 +5776,7 @@ control-flow traces, and specialization preservation.
   flag-shift 24→16 (oracle mismatch), C pre-delta gate bit swap (oracle
   mismatch), Lean `postWriteback` bit change and Lean `writebackFormSpec` bit
   change (refinement theorem, requires a `lake build` rebuild).
-- Full `make -C native-sim/formal check` passes with 0 errors, 72 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 72 generators,
   133 Lean module checks, 62 host cross-checks.
 
 ## Next after 0053
@@ -5814,7 +5814,7 @@ control-flow traces, and specialization preservation.
   `generated/arm64_vreg.h` (`low_offset` = 0, `high_offset` = 8, four opcodes
   `LOAD_D0`/`LOAD_Q0`/`STORE_D0`/`STORE_Q0` with access, half count and arm
   index); the generator's `load()` re-checks the `__a64_v0`/`__a64_v0_hi`
-  declarations in `native-sim/arm64/arm64_sim_local_bpf.h`.
+  declarations in `kprog/arm64/arm64_sim_local_bpf.h`.
 - `KProgFormal/Arm64Vreg.lean`: `arm64_vreg_refines`,
   `arm64_vreg_half_count_refines`, `arm64_vreg_access_dispatch`,
   `arm64_vreg_half_plan`, `arm64_vreg_halves_distinct`,
@@ -5833,7 +5833,7 @@ control-flow traces, and specialization preservation.
   state-field-name swap and offset alias (generator `--check`), Lean
   plan-literal change and generated-`halfOffset` change (`lake build`
   refinement).
-- Full `make -C native-sim/formal check` passes with 0 errors, 73 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 73 generators,
   135 Lean module checks, 63 host cross-checks.
 
 ## Next after 0054
@@ -5885,8 +5885,8 @@ control-flow traces, and specialization preservation.
 - Mutation test: 5/5 detected — C case-body swap and dropped NEG width mask
   (oracle), spec code swap (generator `--check`), Lean NEG-identity and
   MVN-narrowing change (`lake build` refinement).
-- Full `make -C native-sim/formal check` passes with 0 errors, 74 generators,
-  137 Lean module checks, 64 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 74 generators,
+  137 Lean module checks, 64 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0055
@@ -5936,8 +5936,8 @@ from 0054.
   width mask in the generated C (oracle), spec code move (generator `--check`),
   Lean branch swap and narrowing drop, and an independent-spec narrowing drop
   (`lake build` refinement).
-- Full `make -C native-sim/formal check` passes with 0 errors, 75 generators,
-  139 Lean module checks, 65 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 75 generators,
+  139 Lean module checks, 65 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0056
@@ -5988,8 +5988,8 @@ unchanged from 0055.
   width mask in the generated C (oracle), spec code move (generator `--check`),
   a Lean complemented-lhs swap, and an independent-spec complement drop and
   narrowing drop (`lake build` refinement).
-- Full `make -C native-sim/formal check` passes with 0 errors, 76 generators,
-  141 Lean module checks, 66 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 76 generators,
+  141 Lean module checks, 66 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0057
@@ -6038,8 +6038,8 @@ correspondence. On x86 the remaining open work is unchanged from 0056.
   code move, spec tag change (generator `--check`), and a generated-table value
   change, an independent-spec base change, and a flipped GOT classification
   (`lake build` refinement).
-- Full `make -C native-sim/formal check` passes with 0 errors, 77 generators,
-  143 Lean module checks, 67 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 77 generators,
+  143 Lean module checks, 67 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0058
@@ -6088,8 +6088,8 @@ correspondence. On x86 the remaining open work is unchanged from 0056.
 - Mutation test: 6/6 detected — a nonzero success status, a dropped width
   narrowing, and a moved case label in the generated C, a spec code move, and a
   nonzero generated status and a nonzero independent-spec code in Lean.
-- Full `make -C native-sim/formal check` passes with 0 errors, 78 generators,
-  145 Lean module checks, 68 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 78 generators,
+  145 Lean module checks, 68 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0059
@@ -6137,8 +6137,8 @@ unchanged from 0056.
   MOV_REG tag-copy ignoring the width, a moved case label, and a dropped coverage
   disjunct in the generated C, a spec code swap, and a generated sub-word
   register-move tagging and an independent-width-condition drop in Lean.
-- Full `make -C native-sim/formal check` passes with 0 errors, 79 generators,
-  147 Lean module checks, 69 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 79 generators,
+  147 Lean module checks, 69 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0060
@@ -6184,8 +6184,8 @@ remaining open work is unchanged from 0056.
   reads a halfword, a moved case label, and a dropped coverage disjunct in the
   generated C, a spec load-width swap, and a generated halfword-load that reads a
   byte and an independent code-to-word mislabel in Lean.
-- Full `make -C native-sim/formal check` passes with 0 errors, 80 generators,
-  149 Lean module checks, 70 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 80 generators,
+  149 Lean module checks, 70 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0061
@@ -6228,8 +6228,8 @@ correspondence. On x86 the remaining open work is unchanged from 0056.
   ignores the scalar class, a moved case label, a wrongly inverted scalar guard,
   a spec preserve-rule change, a generated guard drop, and an independent
   scalar-class inversion in Lean.
-- Full `make -C native-sim/formal check` passes with 0 errors, 81 generators,
-  151 Lean module checks, 71 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 81 generators,
+  151 Lean module checks, 71 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0062
@@ -6273,8 +6273,8 @@ correspondence. On x86 the remaining open work is unchanged from 0056.
   routed by the low slot's tag, a moved case label, swapped slot route bits, a
   spec preserve-rule change, a generated gate width-drop, and an independent
   slot-weight swap in Lean.
-- Full `make -C native-sim/formal check` passes with 0 errors, 82 generators,
-  153 Lean module checks, 72 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 82 generators,
+  153 Lean module checks, 72 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0063
@@ -6315,8 +6315,8 @@ from 0056.
   register file, a moved case label, an opcode static-assert drift, a spec
   routing-rule change, a generated routing arm parity drop, and an independent
   parity flip in Lean.
-- Full `make -C native-sim/formal check` passes with 0 errors, 83 generators,
-  155 Lean module checks, 73 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 83 generators,
+  155 Lean module checks, 73 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0064
@@ -6363,8 +6363,8 @@ remaining open work is unchanged from 0056.
   accepted on the pointer arm, a family arm flipped onto the width test, a moved
   case label, an opcode static-assert drift, a spec pointer-op change, and a
   generated/independent pointer-rule divergence in Lean.
-- Full `make -C native-sim/formal check` passes with 0 errors, 84 generators,
-  157 Lean module checks, 74 host cross-checks; `make -C native-sim/arm64
+- Full `make -C kprog/formal check` passes with 0 errors, 84 generators,
+  157 Lean module checks, 74 host cross-checks; `make -C kprog/arm64
   micro-proofs-build` rc=0.
 
 ## Next after 0065
@@ -6392,7 +6392,7 @@ open work is unchanged from 0056.
   + `generated/arm64_flag_operand.h` (`KPROG_ARM64_FLAG_RHS(OP, IMM, REG)`). The
   macro yields `IMM` exactly on the six immediate case labels and `REG`
   otherwise, evaluating `OP`/`IMM`/`REG` once each. The twelve opcode numbers
-  are re-checked against `native-sim/arm64/arm64_sim.h` both in the generator
+  are re-checked against `kprog/arm64/arm64_sim.h` both in the generator
   and by `_Static_assert`s.
 - Proof: `arm64_flag_operand_refines` proves the generated table agrees with an
   independent membership test over a named immediate-opcode list; the
@@ -6405,7 +6405,7 @@ open work is unchanged from 0056.
   the `arm64_alu_operand.h` include; six inline ternaries replaced by
   `KPROG_ARM64_FLAG_RHS`. `micro-proofs-build` rc=0; nine binding mutations all
   DETECTED (`/tmp/mut_flag_operand.py`); post-restore `--check` OK.
-- Full `make -C native-sim/formal check` passes with 0 errors, 85 generators,
+- Full `make -C kprog/formal check` passes with 0 errors, 85 generators,
   159 Lean modules, 75 host cross-checks.
 
 ## Next after 0066
@@ -6646,8 +6646,8 @@ contracts.
   cross-check: OK (7904 cases)`; exit 1 on mismatch.
 - Makefile: generator `--check` after the x86 `--check` block; the
   `X86MemAux.lean` line + oracle CC/run pair after `X86RegLaneAux.lean`. The C
-  header + `x86_sim.h` change rebuilt both sims (`make -C native-sim/x86
-  micro-proofs-build` and `make -C native-sim/arm64 micro-proofs-build`, both
+  header + `x86_sim.h` change rebuilt both sims (`make -C kprog/x86
+  micro-proofs-build` and `make -C kprog/arm64 micro-proofs-build`, both
   rc=0).
 - Gate: 86 generators / 162 Lean / 81 oracles / 0 errors. Mutation harness
   `/tmp/mut_x86_mem_aux.py` 9/9 DETECTED (generated packer/decoder shifts and
@@ -6733,7 +6733,7 @@ remaining *compositional* item.
   low-32-bits restatement and checking `2^32` aliasing. Success line `x86 stack
   index host cross-check: OK (690 cases)`; exit 1 on mismatch.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs; the 30
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs; the 30
   runnable arms include the stack `PUSH`/`POP` paths that now go through the
   generated map).
 - Gate: 87 generators / 164 Lean / 83 oracles / 0 errors. Mutation harness
@@ -6779,7 +6779,7 @@ specialization preservation.
   through the word view reloads byte-for-byte through the byte view. Success line
   `x86 stack arena host cross-check: OK (70571 cases)`; exit 1 on mismatch.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
 - Gate: 88 generators / 166 Lean / 84 oracles / 0 errors. Mutation harness
   `/tmp/mut_x86_stack_arena.py` 12/12 DETECTED (five generated-C corruptions, three
   generated-Lean corruptions, two spec-JSON changes caught by `--check`, and two
@@ -6815,7 +6815,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with the explicit-value helper. Success line `x86 mem offset route host
   cross-check: OK (2305 cases)`; exit 1 on mismatch.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
 - Gate: 88 generators / 166 Lean / 85 oracles / 0 errors.
 - Mutation harness `mut_x86_mem_offset_route.py`: 9/9 DETECTED — four sim-side
   routing mutations (index-register swap to RAX, disp/index operand swap,
@@ -6857,7 +6857,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `test_x86_mem_read_dispatch_host.c`, which tests the contract plus an
   independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
 - Gate: 88 generators / 166 Lean / 86 oracles / 0 errors.
 - Mutation harness `mut_x86_mem_dispatch_route.py`: 12/12 DETECTED — six
   simulator-header routing distortions caught by the route oracle alone (the
@@ -6917,7 +6917,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   which tests the contract plus an independent model but never includes the sim
   header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
 - Gate: 88 generators / 166 Lean / 87 oracles / 0 errors.
 - Mutation harness `mut_x86_store_route.py`: 12/12 DETECTED — six
   simulator-header distortions caught by the route oracle alone (the `== X86_RSP`
@@ -6972,7 +6972,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_movbe_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
 - Gate: 88 generators / 166 Lean / 88 oracles / 0 errors.
 - Mutation harness `mut_x86_movbe_route.py`: 10/10 DETECTED — four
   simulator-header distortions caught by the route oracle alone (both bodies'
@@ -7030,7 +7030,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `test_x86_xmm0_host.c`, which tests the contract plus an independent model
   but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
 - Gate: 88 generators / 166 Lean / 89 oracles / 0 errors.
 - Mutation harness `mut_x86_xmm0_route.py`: 10/10 DETECTED — the
   simulator-header distortions caught by the route oracle alone (the shared arm
@@ -7058,9 +7058,9 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   width (`X86_WIDTH_8`), the byte addressing, and the RAX/RDI-tag write stay in
   the composed body by contract design (the header selects three facts, no
   width macro and no body macro).
-- `native-sim/x86/x86_sim.h`: added
+- `kprog/x86/x86_sim.h`: added
   `#include "../formal/generated/x86_callmem.h"` after the XMM0 include.
-- `native-sim/x86/x86_sim_local_bpf.h`: the four bodies replaced by the shared
+- `kprog/x86/x86_sim_local_bpf.h`: the four bodies replaced by the shared
   routed step macro (block comment above it) plus four one-line opcode macros.
 - New `test_x86_callmem_route_host.c`: includes the *simulator* header and
   drives the four real bodies. Per opcode it plants a case where each routed
@@ -7076,10 +7076,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_callmem_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
-- `native-sim/formal/Makefile`: added the `test_x86_callmem_route_host` build +
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- `kprog/formal/Makefile`: added the `test_x86_callmem_route_host` build +
   run pair after the `test_x86_callmem_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the CALL_MEM
+- `kprog/formal/README.md`: routing paragraph added after the CALL_MEM
   theorem paragraph; the stale TCB paragraph ("The four
   `X86_SIM_L_EXEC_CALL_{MEMCPY,MEMSET}{,_REG}` handler bodies do not call the
   generated `x86_callmem.h` macros…") deleted; the binding-list clause updated
@@ -7111,14 +7111,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   stack-pointer arithmetic, the stack helper's byte framing, the destination
   writeback, and the flags-free property stay in the composed body by contract
   design (the header selects four facts, no body macro).
-- `native-sim/formal/generate_x86_pushpop_spec.py`: module docstring and the
+- `kprog/formal/generate_x86_pushpop_spec.py`: module docstring and the
   emitted-header prose updated to name the two handlers and the shared routed
   composition; regenerated without `--check` then verified with `--check`
   (`REGEN-OK`; only `generated/x86_pushpop.h` changed — the Lean output is
   byte-identical).
-- `native-sim/x86/x86_sim.h`: added
+- `kprog/x86/x86_sim.h`: added
   `#include "../formal/generated/x86_pushpop.h"` after the CALL_MEM include.
-- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+- `kprog/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
   routed step macro (block comment above it) plus two one-line opcode macros;
   the `X86_SIM_L_EXEC` `X86_OP_PUSH` / `X86_OP_POP` arms now call the wrappers.
 - New `test_x86_pushpop_route_host.c`: includes the *simulator* header and
@@ -7134,10 +7134,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_pushpop_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (43 micro-progs).
-- `native-sim/formal/Makefile`: added the `test_x86_pushpop_route_host` build +
+  `make -C kprog/x86 micro-proofs-build` rc=0 (43 micro-progs).
+- `kprog/formal/Makefile`: added the `test_x86_pushpop_route_host` build +
   run pair after the `test_x86_pushpop_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the PUSH/POP
+- `kprog/formal/README.md`: routing paragraph added after the PUSH/POP
   theorem paragraph; the stale TCB paragraph ("The two
   `X86_SIM_L_EXEC_{PUSH,POP}` handler bodies do not call the generated
   `x86_pushpop.h` macros…") deleted; the binding-list clause updated to record
@@ -7171,13 +7171,13 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   instantiations of the shared step. The complement/and, the flag production,
   and the writeback stay in the composed body by contract design (the header
   selects three facts, no body macro).
-- `native-sim/formal/generate_x86_andn_spec.py`: module docstring and the
+- `kprog/formal/generate_x86_andn_spec.py`: module docstring and the
   emitted-header prose updated to name the two handlers and the shared routed
   composition; regenerated without `--check` then verified with `--check`
   (only `generated/x86_andn.h` changed — the Lean output is byte-identical).
-- `native-sim/x86/x86_sim.h`: added
+- `kprog/x86/x86_sim.h`: added
   `#include "../formal/generated/x86_andn.h"` after the PUSH/POP include.
-- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+- `kprog/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
   routed step macro (block comment above it) plus two one-line opcode macros;
   the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
   is unchanged. **The memory-form local width variable is named
@@ -7200,10 +7200,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_andn_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_x86_andn_route_host` build +
+  `make -C kprog/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_x86_andn_route_host` build +
   run pair after the `test_x86_andn_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the ANDN
+- `kprog/formal/README.md`: routing paragraph added after the ANDN
   theorem paragraph; the stale TCB paragraph ("The `X86_SIM_L_EXEC_ANDN` and
   `X86_SIM_L_EXEC_ANDN_MEM` handler bodies do not call the generated
   `x86_andn.h` macros…") deleted; the binding-list clause updated to record
@@ -7228,7 +7228,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   mutations caught by the refinement module (`ANDN`'s source moved to
   `memoryRead`, the 64-bit code mapping moved to `w32`, the memory-width arm
   body swapped).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0084 — x86 simulator routes the BZHI/BZHI_MEM pair through the checked contract
 
@@ -7248,14 +7248,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   the `X86_SIM_L_EXEC` arms are unchanged. The reads, the masked bit-clear, the
   flag production, and the writeback stay in the composed body by contract
   design (the header selects facts, no body macro).
-- `native-sim/formal/generate_x86_bzhi_spec.py`: module docstring and the
+- `kprog/formal/generate_x86_bzhi_spec.py`: module docstring and the
   emitted-header prose updated to name the two handlers and the shared routed
   composition; regenerated without `--check` then verified with `--check`
   (only `generated/x86_bzhi.h` changed — the Lean output is byte-identical,
   `-Wcomment` count 0).
-- `native-sim/x86/x86_sim.h`: added
+- `kprog/x86/x86_sim.h`: added
   `#include "../formal/generated/x86_bzhi.h"` after the ANDN include.
-- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+- `kprog/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
   routed step macro (block comment above it) plus two one-line opcode macros;
   the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
   is unchanged.
@@ -7273,10 +7273,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_bzhi_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_x86_bzhi_route_host` build +
+  `make -C kprog/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_x86_bzhi_route_host` build +
   run pair after the `test_x86_bzhi_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the BZHI
+- `kprog/formal/README.md`: routing paragraph added after the BZHI
   theorem paragraph; the stale TCB paragraph ("The `X86_SIM_L_EXEC_BZHI` and
   `X86_SIM_L_EXEC_BZHI_MEM` handler bodies do not call the generated
   `x86_bzhi.h` macros…") deleted; the binding-list clause updated to record
@@ -7302,7 +7302,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   independent-spec mutations caught by the refinement module (`BZHI`'s value
   source moved to `memoryRead`, `BZHI_MEM`'s count source moved to `register`,
   the 64-bit code mapping moved to `w32`, the count mask moved to `7f`).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0085 — x86 simulator routes the BT/BT_IMM/BT_MEM_IMM trio through the checked contract
 
@@ -7321,13 +7321,13 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (`DST`) is the tested base for the register forms and the base pointer for
   the memory form, and only `CF` is written. The reads, the `bt` bit test, and
   the flag assignment stay in the composed body by contract design.
-- `native-sim/formal/generate_x86_bt_spec.py`: module docstring and the
+- `kprog/formal/generate_x86_bt_spec.py`: module docstring and the
   emitted-header prose updated to name the three handlers and the shared routed
   composition; regenerated without `--check` then verified with `--check` (only
   `generated/x86_bt.h` changed — the Lean output is byte-identical).
-- `native-sim/x86/x86_sim.h`: added
+- `kprog/x86/x86_sim.h`: added
   `#include "../formal/generated/x86_bt.h"` after the BZHI include.
-- `native-sim/x86/x86_sim_local_bpf.h`: the three bodies replaced by the shared
+- `kprog/x86/x86_sim_local_bpf.h`: the three bodies replaced by the shared
   routed step macro (block comment above it) plus three one-line opcode macros;
   the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
   is unchanged.
@@ -7347,10 +7347,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_bt_host.c`, which tests the contract
   plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_x86_bt_route_host` build + run
+  `make -C kprog/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_x86_bt_route_host` build + run
   pair after the `test_x86_bt_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the BT theorem
+- `kprog/formal/README.md`: routing paragraph added after the BT theorem
   paragraph; the stale TCB paragraph ("The `X86_SIM_L_EXEC_BT`,
   `X86_SIM_L_EXEC_BT_IMM` and `X86_SIM_L_EXEC_BT_MEM_IMM` handler bodies do not
   call the generated `x86_bt.h` macros…") deleted; the binding-list clause
@@ -7375,7 +7375,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   immediate, the write-width default moved to `b32`); and the Lean
   independent-spec mutations caught by the refinement module (`BT_MEM_IMM`'s
   index source moved to the immediate, its base source moved to the register).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0086 — x86 simulator routes the CMP_IMM/CMP_REG/TEST_IMM/TEST_REG group through the checked contract
 
@@ -7394,13 +7394,13 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   register — only the four flags move. The reads, the subtraction/logical flag
   production, and the immediate decode stay in the composed body by contract
   design.
-- `native-sim/x86/x86_sim.h`: added
+- `kprog/x86/x86_sim.h`: added
   `#include "../formal/generated/x86_cmpop.h"` after the BT include.
-- `native-sim/x86/x86_sim_local_bpf.h`: the four bodies replaced by the shared
+- `kprog/x86/x86_sim_local_bpf.h`: the four bodies replaced by the shared
   routed step macro (block comment above it) plus four one-line opcode macros;
   the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
   is unchanged.
-- `native-sim/formal/generate_x86_cmpop_spec.py`: module docstring and the
+- `kprog/formal/generate_x86_cmpop_spec.py`: module docstring and the
   emitted-header prose updated to name the shared `X86_SIM_L_EXEC_CMP_REG_STEP`
   and the three routed macros; regenerated without `--check` then verified with
   `--check` (only `generated/x86_cmpop.h` changed — the Lean output is
@@ -7420,10 +7420,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_cmpop_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_x86_cmpop_route_host` build +
+  `make -C kprog/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_x86_cmpop_route_host` build +
   run pair after the `test_x86_cmpop_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the CMP/TEST
+- `kprog/formal/README.md`: routing paragraph added after the CMP/TEST
   theorem paragraph; the stale TCB paragraph ("The `X86_SIM_L_EXEC_CMP_IMM_OP` /
   `X86_SIM_L_EXEC_CMP_REG_OP` (and their `_AUX`) handler bodies do not call the
   generated `x86_cmpop.h` macros…") deleted; the binding-list clause updated to
@@ -7446,7 +7446,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   register, `TEST_IMM`'s flag kind moved to `sub`); and the Lean
   independent-spec mutations caught by the refinement module (`CMP_IMM`'s source
   moved to the register, `TEST_IMM`'s flag kind moved to `sub`).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0087 — x86 simulator routes the CMOV/CMOV_MEM pair through the checked contract
 
@@ -7470,9 +7470,9 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   reconcile through the one routed writeback. The reads, the effective-address
   offset, the memory read dispatch, and the flag-free property stay in the
   composed body by contract design.
-- `native-sim/x86/x86_sim.h`: added
+- `kprog/x86/x86_sim.h`: added
   `#include "../formal/generated/x86_cmov.h"` after the cmpop include.
-- `native-sim/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
+- `kprog/x86/x86_sim_local_bpf.h`: the two bodies replaced by the shared
   routed step macro (block comment above it) plus two one-line opcode macros;
   the `X86_SIM_L_EXEC` arms already called the wrapper names, so the dispatcher
   is unchanged. The memory access width local is named `__x86_l_cmw`, NOT
@@ -7495,10 +7495,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_x86_cmov_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `x86_sim.h` / `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_x86_cmov_route_host` build +
+  `make -C kprog/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_x86_cmov_route_host` build +
   run pair after the `test_x86_cmpop_route_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the CMOV /
+- `kprog/formal/README.md`: routing paragraph added after the CMOV /
   CMOV_MEM theorem paragraph; the binding-list clause updated to record the
   simulator's routing of both bodies through the `KPROG_X86_CMOV_*` contract.
 - `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: CMOV theorem plus
@@ -7526,7 +7526,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   the displacement field shift moved); and the Lean independent-spec mutations
   caught by the refinement module (the condition source swapped, the writeback
   swapped, the memory displacement slice moved).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0089 — AArch64 simulator routes the LOAD/STORE {D0,Q0} vector memory-transfer group through the checked contract
 
@@ -7550,7 +7550,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   so the routed step fixes only *which* lanes each opcode moves and in *what*
   order. The reads/writes themselves stay inline; only the contract facts are
   routed.
-- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated contract header was
+- `kprog/arm64/arm64_sim_local_bpf.h`: the generated contract header was
   already included at `:40`; the four bodies are replaced by the shared routed
   step macro (block comment above it, `:740-791`) plus four one-line opcode
   macros (`:793`, `:796`, `:799`, `:802`); the `ARM64_SIM_L_EXEC` arms at
@@ -7572,10 +7572,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Distinct from the pre-existing `test_arm64_dq_mem_host.c`, which tests the
   contract plus an independent model but never includes the sim header.
 - Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_arm64_dq_mem_route_host` build +
+  `make -C kprog/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_arm64_dq_mem_route_host` build +
   run pair inside `check:`, after the `test_arm64_dq_mem_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the `.D0`/`.Q0`
+- `kprog/formal/README.md`: routing paragraph added after the `.D0`/`.Q0`
   theorem paragraph; the TCB binding-list clause updated to record the
   simulator's routing of all four bodies through the `KPROG_ARM64_DQ_MEM_*`
   contract, and the four-body "remain in the trusted computing base" exclusion
@@ -7598,7 +7598,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   index); and the Lean mutations caught by the refinement module (three
   independent-plan edits, the access dispatch, the stride claim, and the four
   generated `laneCount`/`transfer`/`access`/`armIndex` edits).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0090 — AArch64 simulator routes the LDP/STP register-pair memory-transfer group through the checked contract
 
@@ -7617,7 +7617,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `MEM_POST`, the address offset (`MEM_BASE_OFF`) and the byte reads/writes stay
   inline, so the routed step fixes only *which* slots each opcode moves, in
   *what* direction and order.
-- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated contract header was
+- `kprog/arm64/arm64_sim_local_bpf.h`: the generated contract header was
   added at `:41` (after the DQ include); the shared routed step macro plus the
   two thin wrappers `ARM64_SIM_L_LDP`/`ARM64_SIM_L_STP` replace the old bodies
   (`:806-877`); the `ARM64_SIM_L_EXEC` arms (`:1139`, `:1142`) pass `(DST)`,
@@ -7641,10 +7641,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   tests the contract plus an independent model but never includes the sim
   header.
 - Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_arm64_pair_mem_route_host`
+  `make -C kprog/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_arm64_pair_mem_route_host`
   build + run pair inside `check:`, after the `test_arm64_pair_mem_host` pair.
-- `native-sim/formal/README.md`: routing paragraph added after the `LDP`/`STP`
+- `kprog/formal/README.md`: routing paragraph added after the `LDP`/`STP`
   theorem paragraph; the TCB binding-list clause updated to record the
   simulator's routing of both bodies through the `KPROG_ARM64_PAIR_MEM_*`
   contract, and the two-body "remain in the trusted computing base" exclusion
@@ -7668,7 +7668,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   opcode, a duplicated slot, the access dispatch, the slot-stride claim, the arm
   index dispatch, and the four generated `slotCount`/`slotOffset`/`access`/
   `armIndex` edits).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0091 — AArch64 simulator routes the pre/post-indexed address-writeback bodies through the checked contract
 
@@ -7687,7 +7687,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   clear, so the observable writeback is unchanged; the two bits stay
   independent and a `MEM_PRE | MEM_POST` byte still applies the immediate twice,
   once before and once after the access.
-- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated contract header was
+- `kprog/arm64/arm64_sim_local_bpf.h`: the generated contract header was
   added at `:42` (after the pair-mem include); `ARM64_SIM_L_MEM_BASE_OFF`
   (`:617-630`) now passes `KPROG_ARM64_MEM_PREPOST_SUPPRESS(AUX)`; the shared
   step (`:632-652`) plus the two thin wrappers `ARM64_SIM_L_MEM_PRE` (`:654`)
@@ -7711,11 +7711,11 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `test_arm64_mem_prepost_host.c`, which tests the contract plus an independent
   model but never includes the sim header.
 - Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_arm64_mem_prepost_route_host`
+  `make -C kprog/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_arm64_mem_prepost_route_host`
   build + run pair inside `check:`, after the `test_arm64_mem_prepost_host`
   pair.
-- `native-sim/formal/README.md`: the pre/post routing paragraph replaced the
+- `kprog/formal/README.md`: the pre/post routing paragraph replaced the
   TCB-exclusion ending, and the TCB binding-list clause updated to record the
   simulator's routing of both bodies and the offset suppression gate through the
   `KPROG_ARM64_MEM_PREPOST_*` contract.
@@ -7735,7 +7735,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (the generated pre-bit gate, the suppression composition, the form-sum
   constant, the handler's pre-writeback statement, the form bound and the post
   example).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0092 — AArch64 simulator routes the vector-register-file half mapping through the checked contract
 
@@ -7759,7 +7759,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `__a64_dq_extra` (`p == 0` ? 0 : `lanes > 1` ? `HIGH_LANE_STRIDE` : 0) -- so
   the observable access sequence is unchanged and the previously routed DQ lane
   plan is not regressed.
-- `native-sim/arm64/arm64_sim_local_bpf.h`: the generated `arm64_vreg.h` include
+- `kprog/arm64/arm64_sim_local_bpf.h`: the generated `arm64_vreg.h` include
   was added at `:43` (after the pre/post include); `ARM64_SIM_L_DQ_MEM_STEP`
   (`:747-834`) gained the VREG half-plan selection and the plan loop, the four
   one-line wrappers `ARM64_SIM_L_LOAD_D0_MEM` (`:838`), `LOAD_Q0_MEM` (`:841`),
@@ -7783,10 +7783,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   tests the contract plus an independent model over all 32 base registers but
   never includes the sim header.
 - Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- `native-sim/formal/Makefile`: added the `test_arm64_vreg_route_host` build +
+  `make -C kprog/arm64 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- `kprog/formal/Makefile`: added the `test_arm64_vreg_route_host` build +
   run pair inside `check:`, after the `test_arm64_vreg_host` pair.
-- `native-sim/formal/README.md`: the VREG routing paragraph replaced the
+- `kprog/formal/README.md`: the VREG routing paragraph replaced the
   TCB-exclusion ending, recording the shared step's half-plan selection and the
   62,445-case sim-header oracle.
 - `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: routing sentence added
@@ -7807,7 +7807,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   caught by the refinement module (the generated plan, half offset, half count
   and arm index; the handler's plan spec, distinct-offset and high-example
   theorems).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0093 — AArch64 simulator routes the packed AUX operand word through one checked layout
 
@@ -7828,9 +7828,9 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   flags. The shift *kind* is lane 0, not lane 2: the shift handler switches on
   the low byte (`ARM64_SHIFT_LSL/LSR/ASR/ROR`), so `ARM64_AUX_SHIFT(S) =
   KPROG_ARM64_AUX(S,0,0,0)`; the shift *amount* travels in `IMM`/`SRC2`.
-- New `native-sim/formal/arm64_aux_spec.json` (the shared spec: `operation
+- New `kprog/formal/arm64_aux_spec.json` (the shared spec: `operation
   arm64Aux`, `word_bits 32`, `field_bits 8`, lanes b0@0/b1@8/b2@16/b3@24,
-  `reg_none "0xff"`) and `native-sim/formal/generate_arm64_aux_spec.py` (a
+  `reg_none "0xff"`) and `kprog/formal/generate_arm64_aux_spec.py` (a
   clone of `generate_x86_mem_aux_spec.py` with hard `EXPECTED` and `--check`,
   emitting `KProgFormal/GeneratedArm64Aux.lean` and `generated/arm64_aux.h`).
 - New `KProgFormal/Arm64Aux.lean`: an independent little-endian concat
@@ -7846,18 +7846,18 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   condition/NZCV grid values, so a lane swap is observable). Success lines
   `arm64 aux host cross-check: OK (586829 cases)` and `arm64 aux route host
   cross-check: OK (1115374 cases)`.
-- `native-sim/arm64/arm64_sim.h` / `arm64_sim_local_bpf.h`: the generated
+- `kprog/arm64/arm64_sim.h` / `arm64_sim_local_bpf.h`: the generated
   `arm64_aux.h` include added (`arm64_sim.h:77`; the redundant duplicate in
   `arm64_sim_local_bpf.h` removed — `arm64_sim.h` supplies it), the six packers
   and seven decoders aliased, and the lane-map comment blocks corrected.
 - `generate_arm64_movk_spec.py:45-46` regex updated to the new alias text; its
   `--check` passes. `KProgFormal.lean` imports the two new modules.
 - Because `arm64_sim*.h` and generated `arm64_aux.h` changed, the sim was
-  rebuilt: `make -C native-sim/arm64 micro-proofs-build` rc=0 (every micro-prog
+  rebuilt: `make -C kprog/arm64 micro-proofs-build` rc=0 (every micro-prog
   `ok`).
-- `native-sim/formal/Makefile`: the generator `--check`, the lean pair and the
+- `kprog/formal/Makefile`: the generator `--check`, the lean pair and the
   two oracle build+run pairs added inside `check:`.
-- `native-sim/formal/README.md`: the AArch64 packed-AUX layout paragraph and the
+- `kprog/formal/README.md`: the AArch64 packed-AUX layout paragraph and the
   contract-inventory list entry added.
 - `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: two routing sentences
   added after the VREG paragraph.
@@ -7868,7 +7868,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   generator `--check` and the route oracle; the spec, frozen-expectation and
   header-guard defects caught by `--check`; and the generated/handwritten Lean
   defects caught by the refinement module.
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0094 — AArch64 simulator routes its stack arena and frame-index map through checked contracts
 
@@ -7881,14 +7881,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   restated inline in `arm64_sim_local_bpf.h`. The arena geometry and the
   frame-offset→index map now come from two generated contracts, so the storage
   arithmetic is no longer in the trusted computing base.
-- New `native-sim/formal/arm64_stack_arena_spec.json` (`operation
+- New `kprog/formal/arm64_stack_arena_spec.json` (`operation
   arm64StackArena`, `word_shift 3`, `word_mask "0x7"`, `capacity_round
   "ceil8"`, `arena_alias "b-q-union"`) and `generate_arm64_stack_arena_spec.py`
   (hard `EXPECTED` + `--check`, emitting `KProgFormal/GeneratedArm64StackArena.
   lean` — `wordIndex`/`wordAligned`/`words` — and `generated/arm64_stack_arena.
   h` — `KPROG_ARM64_STACK_WORD_INDEX`, `_WORD_ALIGNED`, `_WORDS`,
   `_STACK_TAG_SLOTS`).
-- New `native-sim/formal/arm64_stack_index_spec.json` (`operation
+- New `kprog/formal/arm64_stack_index_spec.json` (`operation
   arm64StackIndex`, `index_base "bias"`, `index_step 1`, `accumulate
   "wrapping64"`, `index_mask_bits 32`) and `generate_arm64_stack_index_spec.py`
   (`--check`, emitting `KProgFormal/GeneratedArm64StackIndex.lean` — `index
@@ -7923,16 +7923,16 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   model over the full frame window, every width and tag, plus sequential,
   subword and pointer-distance sweeps. Success line `arm64 stack arena route
   host cross-check: OK (2754329 cases)`.
-- `native-sim/arm64/arm64_sim.h`: `ARM64_SIM_STACK_BYTES 160U` added next to
+- `kprog/arm64/arm64_sim.h`: `ARM64_SIM_STACK_BYTES 160U` added next to
   `ARM64_SIM_STACK_BIAS 96LL`, so the arena capacity is named once.
   `arm64_sim_local_bpf.h`: both `ARM64_SIM_L_DECLARE_STACK()` branches now use
   `ARM64_SIM_STACK_BYTES`, `KPROG_ARM64_STACK_WORDS(...)` and
   `KPROG_ARM64_STACK_TAG_SLOTS(...)` instead of the literals 160/20/1, and the
   two generated headers are included.
-- `KProgFormal.lean` imports the four new modules. `native-sim/formal/Makefile`:
+- `KProgFormal.lean` imports the four new modules. `kprog/formal/Makefile`:
   the two generator `--check`s, the four `lake env lean` lines, and the three
   oracle build+run blocks added inside `check:`.
-- `native-sim/formal/README.md`: the AArch64 stack-arena/stack-index paragraph
+- `kprog/formal/README.md`: the AArch64 stack-arena/stack-index paragraph
   and the contract-inventory list entry added.
 - `docs/kprog-simulator-in-ebpf/sections/4-safety.tex`: two routing sentences
   added after the AUX paragraph.
@@ -7945,9 +7945,9 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `ARM64_SIM_STACK_BYTES`, arena `b[]` size and tag-array declaration misroutes
   caught by the route oracle.
 - Because `arm64_sim.h`, `arm64_sim_local_bpf.h` and both generated headers
-  changed, the sim was rebuilt: `make -C native-sim/arm64 micro-proofs-build`
+  changed, the sim was rebuilt: `make -C kprog/arm64 micro-proofs-build`
   rc=0 (every micro-prog `ok`).
-- Full gate `make -C native-sim/formal check` rc=0.
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0095 — x86 simulator routes the shared `MOV_LOAD` body through the checked contract
 
@@ -7965,14 +7965,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   expansions of the machine-checked macros rather than committed literals. The
   ABI case gate is inverted (`if (__x86_l_arm != KPROG_X86_MOV_LOAD_ARM_ABI_PTR)`)
   to keep the scalar fall-through for the ABI base reached at a narrow width.
-- `native-sim/x86/x86_sim_local_bpf.h`: `#include "../formal/generated/x86_mov_load.h"`
+- `kprog/x86/x86_sim_local_bpf.h`: `#include "../formal/generated/x86_mov_load.h"`
   added after the `x86_ptr_write.h` include (the contract needs
   `X86_MEM_AUX_MEM_WIDTH` from `x86_mem_aux.h` and `X86_SIM_TAG_ABI` from this
   header, so it is included by the handler rather than at the top of the file);
   the handler body rewritten; the now-dead `X86_SIM_L_MEM_EFFECTIVE_WIDTH`
   helper deleted (its only caller was the rewritten body); `X86_SIM_L_EFFECTIVE_WIDTH`
   kept (live callers at the MOVBE and store arms).
-- New `native-sim/formal/test_x86_mov_load_route_host.c` (sim-header route
+- New `kprog/formal/test_x86_mov_load_route_host.c` (sim-header route
   oracle): includes `../x86/x86_sim_local_bpf.h`, drives the real
   `X86_SIM_L_EXEC_MOV_LOAD` over the three load opcodes, all five `FLAGS` and
   five AUX memory-width codes, flat, indexed (all four scales), stack and ABI
@@ -7981,9 +7981,9 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   tags, the heap, and the stack against independent byte models, plus
   `check_read_src_macro()` / `check_arm_macro()` sweeps of the routed macros.
   Success line `x86 mov-load route host cross-check: OK (713 cases)`.
-- `native-sim/formal/Makefile`: the route-oracle build+run pair added inside
+- `kprog/formal/Makefile`: the route-oracle build+run pair added inside
   `check:` directly after the `test_x86_mov_load_host` pair.
-- `native-sim/formal/README.md`: the `MOV_LOAD` routing paragraph and the
+- `kprog/formal/README.md`: the `MOV_LOAD` routing paragraph and the
   contract-inventory list entry added.
 - Mutation harness `mut_x86_mov_load_route.py`: 20/20 DETECTED — the spec
   width-row, generator write-default/mem-fallback/arm-gate, generated-header
@@ -7994,8 +7994,8 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   ABI-gate, stack-read-width and read-source-width misroutes caught by the route
   oracle. Post-restore sources byte-identical and both oracles re-run clean.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
-- Full gate `make -C native-sim/formal check` rc=0.
+  `make -C kprog/x86 micro-proofs-build` rc=0 (every micro-prog `ok`).
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0096 — x86 simulator routes the `REP MOVS` body through the checked contract
 
@@ -8009,7 +8009,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   compile-time expansions of the machine-checked macros. The element guard
   (`__x86_l_i < __x86_l_count`), the byte load/store, and the raw-count pointer
   arithmetic stay in the body.
-- Route oracle `native-sim/formal/test_x86_rep_movs_route_host.c` (new, 284
+- Route oracle `kprog/formal/test_x86_rep_movs_route_host.c` (new, 284
   lines): includes `../x86/x86_sim_local_bpf.h`, drives the real body over all
   five FLAGS codes and eleven counts from `0` through `200` (crossing the
   literal bound), with a plain copy, an offset copy, and a wider destination
@@ -8018,9 +8018,9 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   against an independent forward-order element model. It also restates the
   closed width-resolution/bound/count-width tables against the routed selectors.
   Prints `x86 rep_movs route host cross-check: OK (127 cases)`.
-- `native-sim/formal/Makefile`: the route-oracle build+run pair added inside
+- `kprog/formal/Makefile`: the route-oracle build+run pair added inside
   `check:` directly after the `test_x86_rep_movs_host` pair.
-- `native-sim/formal/README.md`: the `REP MOVS` routing paragraph and the
+- `kprog/formal/README.md`: the `REP MOVS` routing paragraph and the
   contract-inventory list entry added.
 - Mutation harness `mut_x86_rep_movs_route.py`: 16/16 DETECTED — the spec
   bound/count-width/default-width and generator-constant defects caught by the
@@ -8032,8 +8032,8 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   oracles re-run clean.
 - `generate_x86_rep_movs_spec.py --check` rc=0.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0.
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0097 — x86 simulator routes the `SETCC` / `SETCC_MEM` bodies through the checked contract
 
@@ -8056,14 +8056,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `KPROG_X86_SETCC_MEM_RSP_REG`, and writes at the constant
   `KPROG_X86_SETCC_MEM_WIDTH_CODE`. The addressing decode and value production
   stay in the body.
-- Route oracle `native-sim/formal/test_x86_setcc_route_host.c` (new): includes
+- Route oracle `kprog/formal/test_x86_setcc_route_host.c` (new): includes
   `../x86/x86_sim_local_bpf.h`, sweeps the accepted condition codes and an
   out-of-subset code, the whole destination-shift byte space, all 16 destination
   registers, all 16 flag nibbles and both dispatch routes, and compares the
   destination register and tag against an independent lane-selected write model,
   pinning that `KPROG_X86_SETCC_LANE` is an equality test and the lane codes.
   Prints `x86 setcc route host cross-check: OK (2433038 cases)`.
-- Route oracle `native-sim/formal/test_x86_setcc_mem_route_host.c` (new):
+- Route oracle `kprog/formal/test_x86_setcc_mem_route_host.c` (new):
   sweeps the condition byte, the destination register space, the constant width
   code, several displacements, the index register and scale, all 16 flag nibbles
   and both dispatch routes, drives the real body over a deterministic heap and
@@ -8071,10 +8071,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   independent addressing model with its own arm selection, plus dedicated probes
   for the null-base arm, the indexed stack destination, and the selector tables.
   Prints `x86 setcc_mem route host cross-check: OK (8958727 cases)`.
-- `native-sim/formal/Makefile`: the route-oracle build+run pairs added inside
+- `kprog/formal/Makefile`: the route-oracle build+run pairs added inside
   `check:` directly after the `test_x86_setcc_host` and
   `test_x86_setcc_mem_host` pairs.
-- `native-sim/formal/README.md`: the `SETCC`/`SETCC_MEM` routing paragraph and
+- `kprog/formal/README.md`: the `SETCC`/`SETCC_MEM` routing paragraph and
   the contract-inventory list entry added.
 - Mutation harness `mut_setcc_route.py`: 17/17 DETECTED — the memory spec
   condition-shift/rsp-code/width-code and generator-constant defects caught by
@@ -8087,14 +8087,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - `generate_x86_setcc_spec.py --check` and
   `generate_x86_setcc_mem_spec.py --check` rc=0.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0.
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0.
 
 
 ## Step 0098 — x86 simulator routes the `CMOV_MEM` displacement through the checked contract
 
 - Scope: `X86_SIM_L_EXEC_CMOV_STEP`'s memory arm (`X86_SIM_L_EXEC_CMOV_MEM`,
-  `X86_OP_CMOV_MEM`, `0x40`) in `native-sim/x86/x86_sim_local_bpf.h`. The
+  `X86_OP_CMOV_MEM`, `0x40`) in `kprog/x86/x86_sim_local_bpf.h`. The
   shared memory read call at lines 1625-1626 changes from
   `X86_SIM_L_READ_MEM_VALUE((SRC), (AUX), (IMM), __x86_l_cmw, 1)` — the
   whole-artifact slice with the store-displacement flag set — to
@@ -8111,7 +8111,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   already computed. `X86CmovHandler.lean`'s `x86_cmov_mem_disp_refines` already
   pins this as `x86CmovMemDispSpec imm = x86StoreDispSpec true imm` by `rfl`, so
   no Lean module changed.
-- Route oracle `native-sim/formal/test_x86_cmov_route_host.c`: extended, not
+- Route oracle `kprog/formal/test_x86_cmov_route_host.c`: extended, not
   added — `check_mem`'s displacement parameter is renamed `slice` and the
   instruction artifact's low half becomes the non-zero `0x18`, so a body that
   takes the whole-artifact slice reads `+0x18` while the routed route reads
@@ -8131,13 +8131,13 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   — SURVIVING as the equivalent rewrite it is. Post-restore sources
   byte-identical and both oracles re-run clean.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0.
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0.
 
 ## Step 0099 — x86 simulator routes the `SETCC` register-form condition byte through the checked matched fold
 
 - Scope: `X86_SIM_L_EXEC_SETCC_STEP` (`X86_SIM_L_EXEC_SETCC`, `X86_OP_SETCC`,
-  `0x16`) in `native-sim/x86/x86_sim_local_bpf.h`. The condition argument to
+  `0x16`) in `kprog/x86/x86_sim_local_bpf.h`. The condition argument to
   `X86_SIM_L_EVAL_CC` changes from the raw AUX payload byte
   (`KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)`) to the generated matched fold
   `KPROG_X86_SETCC_COND_MATCHED(KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX))`. This is
@@ -8151,7 +8151,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   arm and takes its `: 0` default, exactly the raw byte's behaviour for every
   out-of-subset code, so the fold is the raw evaluation. This is machine-checked,
   not asserted.
-- Generator `native-sim/formal/generate_x86_setcc_spec.py` gains
+- Generator `kprog/formal/generate_x86_setcc_spec.py` gains
   `MATCHED_NONE = 0xFFFF`; `render_lean` splices a `condMatchedCode` definition
   (14 `else if cc = N then N` arms from `COND_ORDER`, defaulting to the
   sentinel) after `evalRaw`; `render_c` emits `#define
@@ -8180,13 +8180,13 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   equivalence claim it is. Post-restore sources byte-identical and both oracles
   re-run clean.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0 (109 `cross-check: OK`).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (109 `cross-check: OK`).
 
 ## Step 0100 — x86 conditional-branch emission bridged through a machine-checked emitted-shape contract
 
 - Scope: the x86 control-transfer *emission* shape, previously only asserted. The
-  simulator's `X86_SIM_X86_JCC_IMPL` in `native-sim/x86/x86_sim_local_bpf.h`
+  simulator's `X86_SIM_X86_JCC_IMPL` in `kprog/x86/x86_sim_local_bpf.h`
   selected a backward edge (target ≤ current) through the raw inline test
   `(TARGET) <= (CURRENT)`. It now routes that choice through the generated
   `KPROG_X86_BRANCH_BACKWARD((CURRENT), (TARGET))`, the exact x86 analogue of the
@@ -8195,7 +8195,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   edge at a time). Both the forward (`if (taken) goto target;` + fall-through)
   and backward (`if (!taken) goto fallthrough; goto target;`) shapes are named by
   one generated contract.
-- Shared spec `native-sim/formal/x86_branch_emit_spec.json`; generator
+- Shared spec `kprog/formal/x86_branch_emit_spec.json`; generator
   `generate_x86_branch_emit_spec.py` emits `generated/x86_branch_emit.h`
   (`KPROG_X86_BRANCH_BACKWARD`, the ordering test) and
   `KProgFormal/GeneratedX86BranchEmit.lean` (`Shape`, `backward`, `shape`,
@@ -8230,20 +8230,20 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `x86_branch_emit_shape_irrelevant`). Post-restore sources byte-identical and
   both oracles re-run clean.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0 (111 `cross-check: OK`; the
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (111 `cross-check: OK`; the
   count rose from 109 because the two new oracle files were added).
 
 ## Step 0101 — x86 memory-index presence bridged through a machine-checked sentinel contract
 
 - Scope: the index-register *presence decode* into the AUX index byte, the last
   C-side clause of the offset helper that Step 0076 left outside the theorem. The
-  simulator's `X86_SIM_L_MEM_OFFSET` in `native-sim/x86/x86_sim_local_bpf.h` tested
+  simulator's `X86_SIM_L_MEM_OFFSET` in `kprog/x86/x86_sim_local_bpf.h` tested
   the sentinel `X86_MEM_AUX_INDEX(AUX) != X86_REG_NONE` inline, twice, for the
   presence flag and the index-value selector. Both now come from the generated
   `KPROG_X86_MEM_INDEX_PRESENT(X86_MEM_AUX_INDEX(AUX))`; the register read
   `X86_SIM_L_READ_REG` stays in the composed body.
-- Shared spec `native-sim/formal/x86_mem_index_spec.json`; generator
+- Shared spec `kprog/formal/x86_mem_index_spec.json`; generator
   `generate_x86_mem_index_spec.py` emits `generated/x86_mem_index.h`
   (`KPROG_X86_MEM_INDEX_PRESENT`, `KPROG_X86_MEM_INDEX_ARM`, the two arm codes,
   the `0xff` sentinel) and `KProgFormal/GeneratedX86MemIndex.lean` (`Arm`, `arm`,
@@ -8278,8 +8278,8 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   SURVIVES, as it must. Post-restore sources byte-identical and both oracles re-run
   clean.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0 (113 `cross-check: OK`; the
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 micro-prog `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (113 `cross-check: OK`; the
   count rose from 111 because the two new oracle files were added).
 
 ## Step 0102 — AArch64 memory-index presence bridged through a machine-checked sentinel contract
@@ -8287,12 +8287,12 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Scope: the AArch64 mirror of Step 0101 — the index-register *presence decode*
   into the `AUX` index lane, the last C-side clause of the load/store address
   offset that Step 0076 left outside the theorem. The simulator's
-  `ARM64_SIM_L_MEM_BASE_OFF` in `native-sim/arm64/arm64_sim_local_bpf.h` tested
+  `ARM64_SIM_L_MEM_BASE_OFF` in `kprog/arm64/arm64_sim_local_bpf.h` tested
   the sentinel `(INDEX) != ARM64_REG_NONE` inline, twice, for the `HAS_INDEX`
   flag and the index-value selector. Both now come from the generated
   `KPROG_ARM64_MEM_INDEX_PRESENT(INDEX)`; the register read
   `ARM64_SIM_L_MOD_VALUE` and the immediate stay in the composed body.
-- Shared spec `native-sim/formal/arm64_mem_index_spec.json`; generator
+- Shared spec `kprog/formal/arm64_mem_index_spec.json`; generator
   `generate_arm64_mem_index_spec.py` emits `generated/arm64_mem_index.h`
   (`KPROG_ARM64_MEM_INDEX_PRESENT`, `KPROG_ARM64_MEM_INDEX_ARM`, the two arm
   codes, the `0xff` sentinel) and `KProgFormal/GeneratedArm64MemIndex.lean`
@@ -8331,8 +8331,8 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   The raw-sentinel-test equivalence SURVIVES, as it must. Post-restore sources
   byte-identical and both oracles re-run clean.
 - Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/arm64 micro-proofs-build` rc=0.
-- Full gate `make -C native-sim/formal check` rc=0 (115 `cross-check: OK`; the
+  `make -C kprog/arm64 micro-proofs-build` rc=0.
+- Full gate `make -C kprog/formal check` rc=0 (115 `cross-check: OK`; the
   count rose from 113 because the two new oracle files were added).
 
 ## Step 0103 — AArch64 write-register destination-presence bridged through a machine-checked contract
@@ -8341,14 +8341,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   AArch64 register number names a destination a write lands in. The simulator's
   three writeback bodies `ARM64_SIM_L_WRITE_REG_WIDTH`,
   `ARM64_SIM_L_WRITE_REG_PTR` and `ARM64_SIM_L_WRITE_REG_PTR_TAG` in
-  `native-sim/arm64/arm64_sim_local_bpf.h` each tested
+  `kprog/arm64/arm64_sim_local_bpf.h` each tested
   `(REG) != ARM64_XZR && (REG) != ARM64_REG_NONE` inline before dispatching the
   GPR switch. All three now guard on the generated
   `KPROG_ARM64_REG_WRITABLE(REG)`; the `SP` branch (the preceding
   `(REG) == ARM64_SP` test, evaluated first) stays separate, and the dispatch
   `switch`, the width handling and the value computation stay in the composed
   body.
-- Shared spec `native-sim/formal/arm64_reg_presence_spec.json`; generator
+- Shared spec `kprog/formal/arm64_reg_presence_spec.json`; generator
   `generate_arm64_reg_presence_spec.py` emits `generated/arm64_reg_presence.h`
   (`KPROG_ARM64_REG_WRITABLE`, `KPROG_ARM64_REG_CLASS`, the three class codes,
   the `KPROG_ARM64_REG_XZR`/`KPROG_ARM64_REG_NONE` sentinels) and
@@ -8387,8 +8387,8 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   The raw-sentinel-test equivalence SURVIVES, as it must. Post-restore sources
   byte-identical and both oracles re-run clean.
 - Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/arm64 micro-proofs-build` rc=0 (30 `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0 (117 `cross-check: OK`; the
+  `make -C kprog/arm64 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (117 `cross-check: OK`; the
   count rose from 115 because the two new oracle files were added).
 
 ## Step 0104 — x86-64 operand-register presence bridged through a machine-checked contract
@@ -8399,14 +8399,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   rather than AArch64's zero/sentinel pair. The memory-read source resolution,
   the MULX second-destination guard, the MOVBE base-pointer selection, the two
   LEA source-presence clauses, and the base-pointer guards of the three
-  `ALU`-memory writeback bodies in `native-sim/x86/x86_sim_local_bpf.h` each
+  `ALU`-memory writeback bodies in `kprog/x86/x86_sim_local_bpf.h` each
   restated `(REG) != X86_REG_NONE` (present) or `(REG) == X86_REG_NONE`
   (absent) inline. All twelve sites now route those tests through the generated
   `KPROG_X86_REG_PRESENT(REG)` / `KPROG_X86_REG_ABSENT(REG)`; the address
   arithmetic, width handling and value computation stay in the composed bodies.
   Argument-only sites that merely pass `X86_REG_NONE` (the two `MOVBE_STORE`
   argument sites and one other) stay raw and are out of scope.
-- Shared spec `native-sim/formal/x86_reg_presence_spec.json`; generator
+- Shared spec `kprog/formal/x86_reg_presence_spec.json`; generator
   `generate_x86_reg_presence_spec.py` emits `generated/x86_reg_presence.h`
   (`KPROG_X86_REG_PRESENT`, `KPROG_X86_REG_ABSENT`, `KPROG_X86_REG_ARM`, the two
   arm codes, the `KPROG_X86_REG_SENTINEL` sentinel) and
@@ -8449,15 +8449,15 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   SURVIVES, as it must. Post-restore sources byte-identical and both oracles
   re-run clean.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0 (119 `cross-check: OK`).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (119 `cross-check: OK`).
 
 ## Step 0105 — x86-64 effective-width resolution bridged through a machine-checked contract
 
 - Scope: the *effective-width resolution* — a decoded width code of 0 (an unused
   width field) means the 64-bit default. Every register read/write, stack
   traffic site, flag producer, and ALU/move/compare/`IMUL`/`MULX` body in
-  `native-sim/x86/x86_sim_local_bpf.h` restated `WIDTH ? WIDTH : X86_WIDTH_64`
+  `kprog/x86/x86_sim_local_bpf.h` restated `WIDTH ? WIDTH : X86_WIDTH_64`
   inline (31 sites). All now route through `X86_SIM_L_EFFECTIVE_WIDTH`, whose
   kernel is the generated `KPROG_X86_WIDTH_EFFECTIVE`; the address arithmetic,
   width handling, and value computation stay in the composed bodies. The
@@ -8466,7 +8466,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `_CMOV_WIDTH`, `_REP_MOVS_WIDTH`, the `PUSH_POP` step, `MOVX_REG`'s source
   width, and `IMUL_MEM_IMM`'s inner memory-width fallback) are separate
   decisions and stay out of scope, as in Step 0104.
-- Shared spec `native-sim/formal/x86_width_spec.json` gained an `effective`
+- Shared spec `kprog/formal/x86_width_spec.json` gained an `effective`
   block (`absent_code` 0, `default_name` `w64`); `generate_x86_width_spec.py`
   validates it (absent code 0, not colliding with a width code, default a
   64-bit width) and emits `KPROG_X86_WIDTH_ABSENT_CODE`,
@@ -8512,8 +8512,8 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   olean. The inline-restatement equivalence SURVIVES, as it must. Post-restore
   sources byte-identical.
 - Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
-  `make -C native-sim/x86 micro-proofs-build` rc=0 (30 `ok` rows).
-- Full gate `make -C native-sim/formal check` rc=0 (121 `cross-check: OK`).
+  `make -C kprog/x86 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (121 `cross-check: OK`).
 
 
 ## Next after 0076
@@ -8613,7 +8613,7 @@ branch as a separate architectural case.
   `23,985,728/25,997,023`, `24,776,575/27,529,992`,
   `5,606,892/5,997,366`; post_rejit `25,892,525/27,086,961`,
   `15,686,193/13,641,759`, `25,472,272/24,123,226`. No ratio or rollup —
-  analysis per `docs/evaluation.md` §5.
+  analysis per `rejit/docs/evaluation.md` §5.
 - Tracked summary files added to git (same set as the 09-24 KVM runs):
   `metadata.json`, `details/result.json`, `details/progress.json`,
   `details/apps/katran.json`, `details/loadtime-reports/katran.jsonl`;
@@ -8656,7 +8656,7 @@ branch as a separate architectural case.
   post_rejit `sys_enter` (id 718) `546,561,845` / `44,314,841,636` /
   `69` / `112`; `sys_exit` (id 908) `546,561,851` / `47,147,870,673` /
   `262` / `408`. No ratio or rollup — analysis per
-  `docs/evaluation.md` §5.
+  `rejit/docs/evaluation.md` §5.
 - Tracked summary files added to git: `metadata.json`,
   `details/result.json`, `details/progress.json`,
   `details/apps/bcc__set.json`, `details/loadtime-reports/bcc__set.jsonl`;
@@ -8686,7 +8686,7 @@ branch as a separate architectural case.
   14,822,490`, `tsc_freq_hz 3,686,168,041`); `llvmbpf`
   `compile_ns 12,549,987` / `exec_ns 1,213` / `1416` / `434`
   (+ `exec_cycles 4,470`, `tsc_freq_hz 3,686,226,999`). No ratio or
-  rollup — analysis per `docs/evaluation.md` §5.
+  rollup — analysis per `rejit/docs/evaluation.md` §5.
 - Tracked summary files added to git (same set as the step 0042 `simple`
   run): `metadata.json`, `details/result.json`,
   `details/progress.json`; `code_compare/` and `jit_dumps/` stay ignored.
@@ -8725,7 +8725,7 @@ branch as a separate architectural case.
   `tsc_freq_hz 3,686,055,316`); `llvmbpf` `compile_ns 9,658,372` /
   `exec_ns 455` / `936` / `275` (+ `exec_cycles 1,676`, `tsc_freq_hz
   3,686,108,108`). No ratio or rollup — analysis per
-  `docs/evaluation.md` §5.
+  `rejit/docs/evaluation.md` §5.
 - Tracked summary files added to git (same set as the step 0042/0045
   micro runs): `metadata.json`, `details/result.json`,
   `details/progress.json`; `code_compare/` and `jit_dumps/` stay
@@ -8773,7 +8773,7 @@ branch as a separate architectural case.
   - post_rejit: sample 0 `20,853,949`/`20,853,437`; sample 1
     `20,037,542`/`19,972,009`; sample 2 `19,800,446`/`19,806,227`.
   - No ratio, geomean, or win/loss tally computed here — any
-    cross-start comparison is analysis per `docs/evaluation.md` §5.
+    cross-start comparison is analysis per `rejit/docs/evaluation.md` §5.
 - In-VM BPF program ids differ between the two starts (147/163 →
   2058/2214 for the same named program), so the hot pair is matched by
   `name`, not id.
@@ -8841,7 +8841,7 @@ branch as a separate architectural case.
     `820,893`/`765,786`/`794,342`; futex `4,406,154`/`4,525,774`/
     `4,478,158`; prctl `8,150`/`9,724`/`9,980`.
   - No ratio, geomean, or win/loss tally computed here — any
-    cross-start comparison is analysis per `docs/evaluation.md` §5.
+    cross-start comparison is analysis per `rejit/docs/evaluation.md` §5.
 - Tracked summary files added to git (same set as the step 0043/0044/
   0047 corpus runs): `metadata.json`, `details/result.json`,
   `details/progress.json`, `details/apps/tracee__monitor.json`,
@@ -8906,7 +8906,7 @@ branch as a separate architectural case.
     sock `43,216`/`21,924`/`9,688`; sockfd `7,394,907`/`4,764,568`/
     `3,409,259`; sockpair `2,167,331`/`1,584,325`/`1,127,976`.
   - No ratio, geomean, or win/loss tally computed here — any
-    cross-start comparison is analysis per `docs/evaluation.md` §5.
+    cross-start comparison is analysis per `rejit/docs/evaluation.md` §5.
 - In-VM BPF program ids differ between the two starts (e.g. 214 →
   2152 for `generic_tracepoint`), so hot progs are matched by `name`,
   not id; the generic `generic_kprobe_*` names collide across distinct
@@ -8992,7 +8992,7 @@ branch as a separate architectural case.
   - stress-ng cpu bogo-ops: baseline `40,256`/`41,006`/`43,036`;
     post_rejit `40,477`/`38,962`/`48,372`.
   - No ratio, geomean, or win/loss tally computed here — any
-    cross-start comparison is analysis per `docs/evaluation.md` §5.
+    cross-start comparison is analysis per `rejit/docs/evaluation.md` §5.
 - **Completes evidence for all 6 supported corpus apps**
   (`bcc/set`, `cilium/agent`, `katran`, `otelcol-ebpf-profiler/
   profiling`, `tetragon/observer`, `tracee/monitor`) on the KVM x86
@@ -9089,7 +9089,7 @@ branch as a separate architectural case.
     s0 cap `1,777,597`, futex `4,537,498`; post_rejit s0 cap
     `1,823,916`, futex `4,590,194`; all `failed: 0`.
   - No ratio, geomean, or win/loss tally computed here — any
-    cross-start comparison is analysis per `docs/evaluation.md` §5.
+    cross-start comparison is analysis per `rejit/docs/evaluation.md` §5.
 - cilium/agent recorded 56 progs post_rejit vs. 53 baseline (a few
   extra progs appeared in the second start) — recorded as-is, not
   excluded.
@@ -9138,7 +9138,7 @@ branch as a separate architectural case.
     `jit_compile_ns` ~17.4 ms.
   - No ratio / geomean / rollup computed here (raw sample counters
     only; cross-start comparison is analysis per
-    `docs/evaluation.md` §5).
+    `rejit/docs/evaluation.md` §5).
 - Kernel JIT `exec_cycles` (14.86M) far exceeds llvmbpf's (3,557) —
   expected for this kernel-only XDP-class bench under the in-VM
   harness; recorded as-is.
@@ -9183,7 +9183,7 @@ branch as a separate architectural case.
     bpf 4,240 / native 869 bytes.
   - No ratio / geomean / rollup computed here (raw sample counters
     only; cross-start comparison is analysis per
-    `docs/evaluation.md` §5).
+    `rejit/docs/evaluation.md` §5).
 - Kernel JIT `exec_cycles` (14.78M) vs llvmbpf (802) — expected
   spread for a kernel-local-call codegen bench under the in-VM
   harness; recorded as-is.
@@ -9241,7 +9241,7 @@ branch as a separate architectural case.
   all 30 `details/code_compare/*.md`.
 - No ratio / geomean / rollup computed here (raw sample counters
   only; cross-start comparison is analysis per
-  `docs/evaluation.md` §5).
+  `rejit/docs/evaluation.md` §5).
 - This completes Make-target coverage on the KVM line:
   `selftest` (step 0041), `micro` (5 benches: `simple`,
   `bcc_runqlat_log2_histogram_bucket`, `cgroup_skb_hash_chain`,
@@ -9303,7 +9303,7 @@ branch as a separate architectural case.
   `metadata.json`, `details/result.json`, `details/progress.json`, all
   30 `details/code_compare/*.md`.
 - No ratio / geomean / rollup computed (raw sample counters only;
-  cross-start comparison is analysis per `docs/evaluation.md` §5).
+  cross-start comparison is analysis per `rejit/docs/evaluation.md` §5).
 - **Open item (recorded, not gated)**: TEST_MODE does not propagate
   in-VM on the KVM path (frozen Makefile), so the dedicated negative-
   only suite (`negative.log`, no micro smoke) is not produced by a
@@ -9330,7 +9330,7 @@ branch as a separate architectural case.
   08:42:30 → 09:16:38Z, ~34 min; VM power-down at in-VM ~2090 s).
 - **Purpose: paired variance data point against the canonical
   step-0051 full-corpus run (`42e1c4e37`)** — the paper's primary
-  measurement is workload throughput, and `docs/evaluation.md` §5
+  measurement is workload throughput, and `rejit/docs/evaluation.md` §5
   analysis (ratios, `min_runs ≥ 100` filter, geomean, tail-call
   accounting) needs ≥2 raw runs of the primary metric. This is the
   second whole-corpus run on the same host kernel
@@ -9387,7 +9387,7 @@ branch as a separate architectural case.
 - No ratio / geomean / rollup computed here (raw two-start BPF
   counters + raw per-sample workload counters only; the
   step-0051 ↔ step-0056 paired delta is analysis per
-  `docs/evaluation.md` §5).
+  `rejit/docs/evaluation.md` §5).
 - Retained log copy + run marker:
   `docs/tmp/build-and-evaluate/step-0056-20260930T083724Z/
   make-corpus.log` (clean power-down) and `run-marker.txt`; full
@@ -9443,7 +9443,7 @@ branch as a separate architectural case.
 - No ratio / geomean / rollup computed here (raw per-sample
   `result`/`retval`/`compile_ns`/`exec_ns`/`code_size` only;
   cross-runtime / cross-bench comparison is analysis per
-  `docs/evaluation.md` §5).
+  `rejit/docs/evaluation.md` §5).
 - Retained log copy + run marker:
   `docs/tmp/build-and-evaluate/step-0057-20260930T092904Z/
   make-micro.log` (clean power-down) and `run-marker.txt`; full
@@ -9500,7 +9500,7 @@ branch as a separate architectural case.
   `result` values are the same expected values on both arches (the
   matched-value check is arch-independent). No ratio / geomean /
   rollup computed here — cross-arch comparison is analysis per
-  `docs/evaluation.md` §5.
+  `rejit/docs/evaluation.md` §5.
 - QEMU exit clean: `qemu-status` = `0`; in-VM `sysrq: Power Off` +
   `reboot: Power down`; 0 real error markers (the only two `panic`
   hits in the host log are the kernel cmdline string
@@ -9591,7 +9591,7 @@ branch as a separate architectural case.
   gap** (surfaces naturally in each app's `error` field and the suite
   `status: error`; recorded additively, not hidden/gated/dropped).
   Cross-arch / cross-runtime comparison is analysis per
-  `docs/evaluation.md` §5 — no ratio / geomean / rollup computed here.
+  `rejit/docs/evaluation.md` §5 — no ratio / geomean / rollup computed here.
 - `PLATFORM=aws ARCH=arm64` (the AWS line, not the local QEMU line)
   remains **blocked on credentials**: no `codex-ec2` AWS profile and
   no `codex-arm64-test-20260319121631.pem` key on this host (genuine
@@ -9637,7 +9637,7 @@ branch as a separate architectural case.
   strings, `post_rejit` null everywhere; KVM x86 0051/0056 all-6
   completed with `post_rejit` counters. Recorded as a cross-arch
   capability gap (record-not-patch: no framework/app/runner change, no
-  exclusion lists, no re-gating); analysis per `docs/evaluation.md` §5.
+  exclusion lists, no re-gating); analysis per `rejit/docs/evaluation.md` §5.
 - `PLATFORM=aws ARCH=arm64` (the AWS line) remains **blocked on
   credentials**: no `codex-ec2` AWS profile and no
   `codex-arm64-test-20260319121631.pem` key on this host (genuine
@@ -9668,7 +9668,7 @@ branch as a separate architectural case.
   `progress.json status: completed` 29/29; `result.json` `benchmarks[]`
   with `result`/`retval`/`compile_ns`/`exec_ns`, `timing_source: ktime`,
   `cpu_model: aarch64`). No ratio/geomean/rollup computed.
-- **Cross-arch readout (analysis per `docs/evaluation.md` §5, not a
+- **Cross-arch readout (analysis per `rejit/docs/evaluation.md` §5, not a
   gate)**: the arm64 `make test` gate passes on QEMU (aarch64) — verifier,
   kop-module load, and native-proof micro staged-codegen all work on
   aarch64. The 0059/0060 arm64 corpus failure (all 6 apps `post_rejit:
@@ -9711,7 +9711,7 @@ branch as a separate architectural case.
   (`suite=micro_staged_codegen`, `progress.json status: completed`
   29/29; `metadata.json status: completed`, `run_type=native_proof_micro`).
   No ratio/geomean/rollup computed.
-- **Cross-arch readout (analysis per `docs/evaluation.md` §5, not a
+- **Cross-arch readout (analysis per `rejit/docs/evaluation.md` §5, not a
   gate)**: the selftest mode (which re-enables bpf_stats on top of 0061's
   gate set) **passes on aarch64 QEMU**. The target-parity matrix now
   covers every KVM target on the arm64 line: micro (0058 clean), corpus
@@ -9773,7 +9773,7 @@ branch as a separate architectural case.
   Makefile:183) is unconfirmed — left as a read-only open question, and
   no past KVM result is re-run or re-labeled. Launch wiring is frozen, so
   no patch is applied here; surfaced as a finding.
-- **Cross-arch readout (analysis per `docs/evaluation.md` §5, not a
+- **Cross-arch readout (analysis per `rejit/docs/evaluation.md` §5, not a
   gate)**: the arm64 **target-parity matrix is now 5/5 complete** on
   QEMU arm64: micro (0058 clean), corpus ×2 (0059/0060 recorded failure,
   byte-identical/deterministic), test (0061 pass), selftest (0062 pass),
@@ -9934,7 +9934,7 @@ correct.
 ### KVM x86 `make corpus` default policy (zero knobs) completed 6/6 at 8d4626452, 2026-09-30
 - **Command**: `make corpus` zero-knob (`PLATFORM=kvm ARCH=x86` defaults; `SAMPLES=3`, `WORKLOAD_DURATION=30`; full x86 pass chain `noop,map_inline,const_prop,dce,wide_mem,bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kop`; 6 apps), at `8d4626452`.
 - **Result**: `corpus/results/x86_kvm_corpus_20260930_193317_347907/` — **completed, 6/6 apps `ok` with `post_rejit` present, all `rejit_result: ok` (loadtime mode)**; `metadata.json`/`result.json`/`progress.json` = `completed`/`ok`/`completed` (`completed_at 20:07:27Z`); clean `reboot: Power down` (in-VM t≈2091.9s ≈ 35 min; `7.0.0-rc2+`, `virtme-ng`, 8 cpus / 64 GiB).
-- **Per-app raw counters (post `run_cnt_delta`; no ratios here — analysis per `docs/evaluation.md` §5)**: bcc/set `sys_exit` 552,276,514; cilium/agent `cil_from_contai` 60,003,594; katran `balancer_ingres` 234,540,480 (jit 11778 / xlat 19392 B); otelcol `native_tracer_e` 722,726; tetragon `generic_tracepo` 239,664,899; tracee `trace_sys_exit` 244,714,905.
+- **Per-app raw counters (post `run_cnt_delta`; no ratios here — analysis per `rejit/docs/evaluation.md` §5)**: bcc/set `sys_exit` 552,276,514; cilium/agent `cil_from_contai` 60,003,594; katran `balancer_ingres` 234,540,480 (jit 11778 / xlat 19392 B); otelcol `native_tracer_e` 722,726; tetragon `generic_tracepo` 239,664,899; tracee `trace_sys_exit` 244,714,905.
 - **Determinism pairing** vs 0051 (`x86_kvm_corpus_20260930_053929_108492`) and 0056 (`x86_kvm_corpus_20260930_084230_227783`), same-prog post `run_cnt_delta`: bcc 552.3M/553.4M/552.1M; cilium 60.0M/61.3M/60.5M; katran 234.5M/231.9M/233.0M; otelcol 722.7K/722.7K/723.4K; tetragon 239.7M/237.1M/240.2M; tracee 244.7M/243.1M/243.0M — same order of magnitude, sub-percent to low-single-percent spread across the three same-tree runs (raw triplets only; tracee prog named `trace_sys_exit` in 0066 vs `tracepoint__raw` in 0051/0056, same magnitude — recorded caveat).
 - **Launch-lifecycle finding (recorded, not patched)**: attempts 1–3 (18:20:30/18:30:14/19:14:10Z, session-owned async jobs) were all SIGTERMed at session disposal by OMP's `cancelAndReapOwnerJobs` (`qemu-system-x86_64: terminating on signal 15 from pid …(omp)`; attempt 2 reached 5/6 apps before reaping; attempt 3 was 0 apps). Attempt 4 launched **detached** (`setsid nohup make corpus … & < /dev/null`; new session/pgid, reparents to init) so the reaper can't reach it → survived three duty-poll session restarts and completed. The frozen `make` target path / launch wiring was **not** modified; only the process lifecycle was detached. No new validity gate added.
 - **Disposition**: clean 6/6 completed KVM x86 default-policy two-start benchmark at `8d4626452` (valid evidence, not record-only). Committed the trackable JSON subset (6 `details/apps/*.json` + 6 `loadtime-reports/*.jsonl` + `result.json` + `progress.json` + `metadata.json` + step report + this entry) per the 0051 precedent (`42e1c4e37`); `shim-logs/`/`loadtime-plans/` stay gitignored.
@@ -10061,7 +10061,7 @@ validity gate.
   legitimate untracked scratch, not a claimed-vs-disk bug.** Decisive
   checks: `git log --all --oneline -- <token>/` = **0 commits** for
   every full token (never tracked on any branch). The research log and
-  `docs/implementation.md` cite these as **execution provenance**
+  `docs/shared/implementation.md` cite these as **execution provenance**
   ("exits 0 and writes `corpus/results/…/` with suite
   `status: completed`"), *not* as "committed to git" — the 60-line
   "tracked"-in-window hits were prose false-positives ("tracked by
@@ -10126,7 +10126,7 @@ list are **build/packaging artifacts, not evidence trees**:
   the framework-kernel CO-RE binding key under `host-native-bpf-x86`
   (`make -C vendor/bpf … native-artifacts` regenerates it; the 09-30
   mtime 17:16:08 matches the KVM chain's build step). Documented in
-  this log (~line 3666) and `docs/implementation.md` §273–281 as an
+  this log (~line 3666) and `docs/shared/implementation.md` §273–281 as an
   intended build output; kept untracked, consistent with all other
   build outputs. No commit.
 - **`vendor/bpf/targets/x86/7.3.0-070300rc3-generic/` (untracked,
@@ -10171,13 +10171,13 @@ list are **build/packaging artifacts, not evidence trees**:
 Prior cycles anchored the chain's "fixed point" to the two external *run*
 blockers (AWS credentials; Paper-B clean-source image rebuild) and never
 audited the doc's own open cells. This cycle found a genuine local
-analysis-layer increment: `docs/evaluation.md` §6.2.1 had the
+analysis-layer increment: `rejit/docs/evaluation.md` §6.2.1 had the
 All-bytecode-rewriting row's `suite` cell as `*pending*` while all seven
 per-app cells + `retained=148` were filled. That cell is sanctioned
 post-hoc analysis over on-disk raw `result.json` counters — no new run,
 validity gate, framework change, or AWS/Paper-B.
 
-- **Cell filled:** `docs/evaluation.md` line 452 `*pending*` → `0.8917`.
+- **Cell filled:** `rejit/docs/evaluation.md` line 452 `*pending*` → `0.8917`.
   One provenance line added below the table: the row pools two on-disk
   runs because no single 7-app run exercised this exact 6-pass set.
 - **Source trees (both S=3, status=completed, strict-BR pass set
@@ -10203,7 +10203,7 @@ validity gate, framework change, or AWS/Paper-B.
   clean-source image rebuild still blocked); AWS still blocked (no
   `~/.aws`, no `AWS_*` env, no key file); no step dir past
   `step-0066`; KVM operational; nothing running.
-- **Disposition:** scoped doc edit committed to `docs/evaluation.md`
+- **Disposition:** scoped doc edit committed to `rejit/docs/evaluation.md`
   only, plus this forward-only log entry. This broke the "fixed point"
   framing by surfacing a local analysis cell, not by inventing a run or
   gate. The two external blockers (AWS credentials; Paper-B
@@ -10255,7 +10255,7 @@ validity gate, framework change, or AWS/Paper-B.
 - **Why this step:** 0067 closed the `br` bytecode-rewriting group at the
   current tree. The KOP-class named groups (`kop`, `kop-5`, `kop-6`)
   were noted out of scope in 0067, but that over-read
-  `docs/evaluation.md` §1: KOP is a KOperation-*paper* deliverable,
+  `rejit/docs/evaluation.md` §1: KOP is a KOperation-*paper* deliverable,
   while AGENTS.md's "Current pass list" explicitly includes the kop-class
   as a measured pass in this framework. The KOP groups are therefore
   in-scope framework pass space, and re-deriving the §6.2.1 KOP rows

@@ -16,6 +16,6 @@
 - Run command: see `run-command.sh`.
 - Result path: `corpus/results/x86_kvm_corpus_20260625_090323_284447`
 - Follow-up: restore katran source with
-  `patch -p1 -R < docs/source-opt/katran/20260625-015559-icmp-protocol-refresh/source.diff`
+  `patch -p1 -R < docs/shared/source-opt/katran/20260625-015559-icmp-protocol-refresh/source.diff`
   after recording the result. Completed; katran nested repo has no remaining
   source diff.

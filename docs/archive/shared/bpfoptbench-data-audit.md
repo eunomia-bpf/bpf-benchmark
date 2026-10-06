@@ -155,7 +155,7 @@ correct (0.9019 - 0.8587 = 0.0432 ~ 0.04), but the implication is unclear.
 **Analysis documents**:
 - `docs/tmp/corpus-performance-analysis-20260428.md` - main corpus analysis
 - `docs/tmp/pass_signal_audit_20260508.md` - noise floor measurements
-- `docs/research/bpfoptbench-session-data-analysis.md` - meta-analysis
+- `docs/shared/research/bpfoptbench-session-data-analysis.md` - meta-analysis
 
 The numbers come from a specific April 2026 corpus run analyzed offline.
 

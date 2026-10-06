@@ -15,7 +15,7 @@ The design below makes section 5.6 concrete and keeps section 4.4's three-layer 
 ├── CLAUDE.md
 ├── Makefile
 ├── README.md
-├── REVIEW.md
+├── docs/REVIEW.md
 ├── build-arm64/
 ├── config/
 ├── corpus/

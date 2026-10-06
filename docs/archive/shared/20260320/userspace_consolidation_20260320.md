@@ -55,7 +55,7 @@
   - no `Makefile`, `corpus/driver.py`, active code, or workflow caller
   - only documentation/historical references remained
 - Note:
-  - `docs/micro-bench-status.md` and `docs/benchmark-framework-design.md` still mention the removed BCF analysis path. I left those historical/non-canonical docs untouched; `docs/micro-bench-status.md` is also already dirty in this worktree.
+  - `docs/shared/micro-bench-status.md` and `docs/benchmark-framework-design.md` still mention the removed BCF analysis path. I left those historical/non-canonical docs untouched; `docs/shared/micro-bench-status.md` is also already dirty in this worktree.
 
 ### `scripts/` and `docker/`
 

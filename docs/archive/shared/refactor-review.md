@@ -19,7 +19,7 @@
 | 文件 | + | - | 状态 |
 | --- | ---: | ---: | --- |
 | `Makefile` | 31 | 3 | 修改 |
-| `docs/remote_machine_aws_skills.md` | 2 | 2 | 修改 |
+| `docs/shared/remote_machine_aws_skills.md` | 2 | 2 | 修改 |
 | `e2e/cases/scx/case.py` | 1 | 0 | 修改 |
 | `runner/containers/runner-build.Dockerfile` | 22 | 1 | 修改 |
 | `runner/containers/runner-runtime.Dockerfile` | 3 | 0 | 修改 |
@@ -65,7 +65,7 @@
 - 扩展 `check` 目标的 `py_compile` 覆盖范围，纳入 app runners、bpf stats、case/input helpers、suite commands、workspace layout、suite common 等更多 Python 文件。
 - ARM64 本地和 AWS kernel image 构建前新增清理步骤: 创建容器内 HOME/构建目录，删除 0 字节 `*.o`，并移除可能污染重建的 `vmlinux.a`、`vmlinux.o`、`drivers/of/built-in.a`。
 
-### `docs/remote_machine_aws_skills.md`
+### `docs/shared/remote_machine_aws_skills.md`
 
 - 文档将“root 级 rsync”表述改为“root 级同步”。
 - 远端落盘建议从 `sudo install` / `sudo rsync` 改为 `sudo install` / `sudo tar`，与代码中 rsync -> tar 的远端同步改造一致。

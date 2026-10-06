@@ -70,7 +70,7 @@ This is a strong foundation for a systems-measurement paper. The repo is already
 
 ### 1.3 What the docs already acknowledge
 
-`docs/paper.md` and `docs/micro-bench-status.md` already identify the most important measurement caveats:
+`docs/paper.md` and `docs/shared/micro-bench-status.md` already identify the most important measurement caveats:
 
 - `BPF_PROG_TEST_RUN` uses `ktime_get_ns()` on the kernel side, with roughly 100 ns granularity on this platform.
 - llvmbpf uses `rdtsc`, so sub-100 ns kernels become asymmetric.
@@ -741,7 +741,7 @@ In short:
   - `micro/runner/src/perf_counters.cpp`
   - `micro/run_micro.py`
   - `docs/paper.md`
-  - `docs/micro-bench-status.md`
+  - `docs/shared/micro-bench-status.md`
 
 - Upstream / public sources:
   - Linux `BPF_PROG_TEST_RUN`, `BPF_ENABLE_STATS`, and `bpf_prog_info` UAPI:

@@ -94,4 +94,4 @@ On 2026-09-08, the rebuilt Workspace passed a default-driver `docker run` and a
 `KVM_CREATE_VM` probe. Project build and KVM-suite results should still be
 recorded per invocation; infrastructure readiness alone is not a benchmark
 result. The current research priorities and retained experiment evidence are in
-[`docs/tmp/20260906-bpf-development-todo.md`](../docs/tmp/20260906-bpf-development-todo.md).
+[`docs/tmp/20260906-bpf-development-todo.md`](../docs/archive/shared/20260906-bpf-development-todo.md).

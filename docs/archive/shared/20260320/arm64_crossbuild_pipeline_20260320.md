@@ -22,7 +22,7 @@ AWS profile：`codex-ec2`
 - `runner/docker/arm64-crossbuild.Dockerfile`
 - `runner/scripts/aws_arm64.sh`
 - `Makefile`
-- `docs/remote_machine_aws_skills.md`
+- `docs/shared/remote_machine_aws_skills.md`
 
 说明：
 

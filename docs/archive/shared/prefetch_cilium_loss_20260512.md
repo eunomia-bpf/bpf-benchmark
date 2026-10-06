@@ -4,7 +4,7 @@
 
 Source rows:
 
-- `docs/evaluation.md:313`: doc baseline says `cilium/agent` `prefetch` = `430 / 430`.
+- `rejit/docs/evaluation.md:313`: doc baseline says `cilium/agent` `prefetch` = `430 / 430`.
 - `corpus/results/x86_kvm_corpus_20260512_185702_727232/details/apps/cilium__agent.json`: current prefetch-only run.
 - `corpus/results/x86_kvm_corpus_20260512_190655_194595/details/apps/cilium__agent.json`: current kop-6 run.
 

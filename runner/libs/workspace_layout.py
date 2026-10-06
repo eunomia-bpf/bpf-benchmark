@@ -48,13 +48,13 @@ def micro_program_root(workspace: Path, target_arch: str) -> Path:
 
 
 def stage2_program_root(workspace: Path, target_arch: str) -> Path:
-    """native-sim/test/-built Stage 2 (maps + helpers) program artifacts.
+    """kprog/test/-built Stage 2 (maps + helpers) program artifacts.
     Mirrors `micro_program_root` but under a separate sub-tree so the
     Stage 1 pure-compute build doesn't have to care about helper extern
     relocations."""
     if inside_runtime_image():
         return image_artifact_root(target_arch, "stage2-programs")
-    return runtime_workspace(workspace) / "native-sim" / "test" / f"build-{_vendor_arch(target_arch)}"
+    return runtime_workspace(workspace) / "kprog" / "test" / f"build-{_vendor_arch(target_arch)}"
 
 def sim_proof_root(workspace: Path, target_arch: str) -> Path:
     return stage2_program_root(workspace, target_arch) / f"{_vendor_arch(target_arch)}_sim_proofs"

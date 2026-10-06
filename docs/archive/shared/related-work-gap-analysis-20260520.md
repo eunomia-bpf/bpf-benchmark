@@ -1,7 +1,7 @@
 # 三篇论文相关工作 / 参考文献缺口分析
 
 日期: 2026-05-20
-范围: `docs/rejit-speculative-optimization-ebpf_idea.md` (idea #1) /
+范围: `rejit/docs/design.md` (idea #1) /
 `docs/kop_idea.md` (idea #2) / `docs/nativebpf_idea.md` (idea #3)
 方法: web 检索 eBPF 优化/验证/JIT/native-code 文献 + 对比三篇现有引用
 

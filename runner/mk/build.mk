@@ -4,7 +4,7 @@ RUN_TARGET_ARCH ?= x86_64
 IMAGE_BUILD_JOBS ?= $(JOBS)
 
 MICRO_PROGRAM_DIR := $(ROOT_DIR)/micro/programs
-STAGE2_PROGRAM_DIR := $(ROOT_DIR)/native-sim/test
+STAGE2_PROGRAM_DIR := $(ROOT_DIR)/kprog/test
 MICRO_PROGRAM_BUILD_X86 := $(MICRO_PROGRAM_DIR)/build-x86
 MICRO_PROGRAM_BUILD_ARM64 := $(MICRO_PROGRAM_DIR)/build-arm64
 STAGE2_PROGRAM_BUILD_X86 := $(STAGE2_PROGRAM_DIR)/build-x86
@@ -44,8 +44,8 @@ ARM64_SYS_INCLUDE_FLAGS = -I/usr/aarch64-linux-gnu/include -I$(AARCH64_SYSROOT_D
 CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
 
 ARM64_RUST_TARGET := aarch64-unknown-linux-gnu
-NATIVE_LINK_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
-ARM64_SIM_PROOF_DIR := $(ROOT_DIR)/native-sim/arm64
+NATIVE_LINK_DIR := $(ROOT_DIR)/kprog/x86/native_lab/native_link
+ARM64_SIM_PROOF_DIR := $(ROOT_DIR)/kprog/arm64
 MICRO_PROOF_CONFIG := $(if $(strip $(SUITE)),$(if $(filter /%,$(SUITE)),$(SUITE),$(ROOT_DIR)/$(SUITE)),$(ROOT_DIR)/micro/config/micro_pure_jit.yaml)
 BPFOPT_LLVM_BUILD_X86 := $(ROOT_DIR)/bpfopt/llvm/build-kop
 BPFOPT_LLVM_BUILD_ARM64 := $(ROOT_DIR)/bpfopt/llvm/build-kop-arm64
@@ -303,7 +303,7 @@ host-native-bpf-arm64: host-native-link host-rust-arm64 host-source-apps-arm64 h
 		native-artifacts
 
 host-x86-sim-proofs: host-micro-programs-x86
-	$(MAKE) -C "$(ROOT_DIR)/native-sim/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
+	$(MAKE) -C "$(ROOT_DIR)/kprog/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
 
 host-arm64-sim-proofs: host-micro-programs-arm64
 	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" micro-proofs-build
@@ -407,7 +407,7 @@ arm64-runner-runtime-image-tar: host-kernel-arm64 host-kop-arm64 host-rust-arm64
 		--build-arg BPFOPT_HOST_BIN="$(ARM64_BPFOPT_HOST_BIN)" \
 		--build-arg KOPPROBER_HOST_BIN="$(ARM64_KOPPROBER_HOST_BIN)" \
 		--build-arg BPFPROF_HOST_BIN="$(ARM64_BPFPROF_HOST_BIN)" \
-		--build-arg NATIVE_LINK_HOST_BIN="native-sim/x86/native_lab/native_link/target/$(ARM64_RUST_TARGET)/release/native-link" \
+		--build-arg NATIVE_LINK_HOST_BIN="kprog/x86/native_lab/native_link/target/$(ARM64_RUST_TARGET)/release/native-link" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR)"

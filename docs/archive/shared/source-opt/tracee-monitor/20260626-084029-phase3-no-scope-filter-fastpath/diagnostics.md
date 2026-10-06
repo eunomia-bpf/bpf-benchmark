@@ -1,7 +1,7 @@
 # Diagnostics
 
 Current base: tracee phase2 best,
-`docs/source-opt/tracee-monitor/20260625-210832-phase2-cap-capable-fentry-return0/source.diff`.
+`docs/shared/source-opt/tracee-monitor/20260625-210832-phase2-cap-capable-fentry-return0/source.diff`.
 
 Candidate change:
 

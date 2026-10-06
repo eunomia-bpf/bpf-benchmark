@@ -40,7 +40,7 @@ Verification after cleanup:
 - Added root-only `.gitignore` coverage for `/build-arm64/` and `/live-xlated-test.*/`
 - Removed the obsolete `.gitignore` exception for `micro/dump_all_jit.sh`
 - Updated `e2e/README.md` to describe the new `e2e/cases/tracee/manual.py` location
-- Updated `docs/micro-bench-status.md` so it no longer points at the deleted `micro/dump_all_jit.sh`
+- Updated `docs/shared/micro-bench-status.md` so it no longer points at the deleted `micro/dump_all_jit.sh`
 
 ## Notes
 

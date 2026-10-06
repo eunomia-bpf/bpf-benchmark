@@ -10,7 +10,7 @@ Current run inspected:
 | ---: | ---: | ---: | ---: |
 | 286 | 1972 | 1170 | 802 |
 
-The documented baseline is `docs/evaluation.md:305-310`, where `tetragon` has `cond_select` `1 331 / 1 753` applied/matched. Current matched grew by `1972 - 1753 = 219`; current applied dropped by `1331 - 1170 = 161`.
+The documented baseline is `rejit/docs/evaluation.md:305-310`, where `tetragon` has `cond_select` `1 331 / 1 753` applied/matched. Current matched grew by `1972 - 1753 = 219`; current applied dropped by `1331 - 1170 = 161`.
 
 Current skip-reason totals:
 

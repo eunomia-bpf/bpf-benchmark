@@ -16,6 +16,6 @@
 - Run command: see `run-command.sh`.
 - Result path: `corpus/results/x86_kvm_corpus_20260625_084248_406394`
 - Follow-up: restore katran source with
-  `patch -p1 -R < docs/source-opt/katran/20260625-013540-udp-parse-first/source.diff`
+  `patch -p1 -R < docs/shared/source-opt/katran/20260625-013540-udp-parse-first/source.diff`
   after recording the result. Completed; katran nested repo has no remaining
   source diff.

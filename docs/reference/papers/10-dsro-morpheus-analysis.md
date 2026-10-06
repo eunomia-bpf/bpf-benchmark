@@ -114,6 +114,6 @@ speculation 而非单纯 better codegen。
 
 ## 5. 引用落点
 
-- `docs/rejit-speculative-optimization-ebpf_idea.md` §1.8 两张比较表已加入 Morpheus 行,
+- `rejit/docs/design.md` §1.8 两张比较表已加入 Morpheus 行,
   并更正了"verifier 当 oracle 是区别"的错误表述。
 - 相关工作全集见 `docs/archive/shared/related-work-gap-analysis-20260520.md`。
