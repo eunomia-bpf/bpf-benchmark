@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <errno.h>
+#include <linux/bpf.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -18,44 +19,6 @@ typedef uint64_t u64;
 #define __always_inline inline __attribute__((always_inline))
 #endif
 
-#define BPF_REG_0 0
-#define BPF_REG_1 1
-#define BPF_REG_2 2
-#define BPF_REG_3 3
-#define BPF_REG_4 4
-#define BPF_REG_5 5
-#define BPF_REG_6 6
-#define BPF_REG_7 7
-#define BPF_REG_8 8
-#define BPF_REG_9 9
-#define BPF_REG_10 10
-
-#define BPF_DW 8
-#define BPF_AND 1
-#define BPF_LSH 2
-#define BPF_RSH 3
-#define BPF_NEG 4
-#define BPF_OR 5
-
-enum test_bpf_code {
-	TEST_BPF_LDX_MEM = 1,
-	TEST_BPF_STX_MEM = 2,
-	TEST_BPF_MOV64_REG = 3,
-	TEST_BPF_MOV32_REG = 4,
-	TEST_BPF_ALU64_IMM = 5,
-	TEST_BPF_ALU32_IMM = 6,
-	TEST_BPF_ALU64_REG = 7,
-	TEST_BPF_ALU32_REG = 8,
-};
-
-struct bpf_insn {
-	u8 code;
-	u8 dst_reg;
-	u8 src_reg;
-	s16 off;
-	s32 imm;
-};
-
 struct bpf_prog_aux {
 	bool priv_stack_ptr;
 };
@@ -64,22 +27,22 @@ struct bpf_prog {
 	const struct bpf_prog_aux *aux;
 };
 
+#define INSN(CODE, DST, SRC, OFF, IMM) \
+	((struct bpf_insn){ .code = (CODE), .dst_reg = (DST), \
+		.src_reg = (SRC), .off = (OFF), .imm = (IMM) })
 #define BPF_LDX_MEM(SIZE, DST, SRC, OFF) \
-	((struct bpf_insn){ TEST_BPF_LDX_MEM, (DST), (SRC), (OFF), (SIZE) })
+	INSN(BPF_LDX | BPF_MEM | (SIZE), DST, SRC, OFF, 0)
 #define BPF_STX_MEM(SIZE, DST, SRC, OFF) \
-	((struct bpf_insn){ TEST_BPF_STX_MEM, (DST), (SRC), (OFF), (SIZE) })
-#define BPF_MOV64_REG(DST, SRC) \
-	((struct bpf_insn){ TEST_BPF_MOV64_REG, (DST), (SRC), 0, 0 })
-#define BPF_MOV32_REG(DST, SRC) \
-	((struct bpf_insn){ TEST_BPF_MOV32_REG, (DST), (SRC), 0, 0 })
-#define BPF_ALU64_IMM(OP, DST, IMM) \
-	((struct bpf_insn){ TEST_BPF_ALU64_IMM, (DST), (OP), 0, (IMM) })
-#define BPF_ALU32_IMM(OP, DST, IMM) \
-	((struct bpf_insn){ TEST_BPF_ALU32_IMM, (DST), (OP), 0, (IMM) })
-#define BPF_ALU64_REG(OP, DST, SRC) \
-	((struct bpf_insn){ TEST_BPF_ALU64_REG, (DST), (SRC), (OP), 0 })
-#define BPF_ALU32_REG(OP, DST, SRC) \
-	((struct bpf_insn){ TEST_BPF_ALU32_REG, (DST), (SRC), (OP), 0 })
+	INSN(BPF_STX | BPF_MEM | (SIZE), DST, SRC, OFF, 0)
+#define BPF_MOV64_REG(DST, SRC) INSN(BPF_ALU64 | BPF_MOV | BPF_X, DST, SRC, 0, 0)
+#define BPF_MOV32_REG(DST, SRC) INSN(BPF_ALU | BPF_MOV | BPF_X, DST, SRC, 0, 0)
+#define BPF_ALU64_IMM(OP, DST, IMM) INSN(BPF_ALU64 | (OP), DST, 0, 0, IMM)
+#define BPF_ALU32_IMM(OP, DST, IMM) INSN(BPF_ALU | (OP), DST, 0, 0, IMM)
+#define BPF_ALU64_REG(OP, DST, SRC) INSN(BPF_ALU64 | (OP) | BPF_X, DST, SRC, 0, 0)
+#define BPF_ALU32_REG(OP, DST, SRC) INSN(BPF_ALU | (OP) | BPF_X, DST, SRC, 0, 0)
+#define BPF_JMP_IMM(OP, DST, IMM, OFF) INSN(BPF_JMP | (OP), DST, 0, OFF, IMM)
+#define BPF_JMP32_IMM(OP, DST, IMM, OFF) INSN(BPF_JMP32 | (OP), DST, 0, OFF, IMM)
+#define BPF_JMP_A(OFF) INSN(BPF_JMP | BPF_JA, 0, 0, OFF, 0)
 
 #define KOP_X86_REG_R9 11
 #define KOP_X86_REG_R10 12
@@ -222,33 +185,6 @@ static void require_bytes(const char *name, const u8 *actual,
 	}
 }
 
-static int count_alu_imm(const struct bpf_insn *insns, int count, u8 code,
-			 u8 op, s32 imm)
-{
-	int matches = 0;
-	int i;
-
-	for (i = 0; i < count; i++) {
-		if (insns[i].code == code && insns[i].src_reg == op &&
-		    insns[i].imm == imm)
-			matches++;
-	}
-	return matches;
-}
-
-static bool has_mov(const struct bpf_insn *insns, int count, u8 code,
-		    u8 dst_reg, u8 src_reg)
-{
-	int i;
-
-	for (i = 0; i < count; i++) {
-		if (insns[i].code == code && insns[i].dst_reg == dst_reg &&
-		    insns[i].src_reg == src_reg)
-			return true;
-	}
-	return false;
-}
-
 static void test_emit_rol_imm_widths(void)
 {
 	const u8 expected_rolq[] = { 0x48, 0xc1, 0xc0, 13 };
@@ -331,42 +267,105 @@ static void test_emit_rorxl_keeps_distinct_src(void)
 	require_bytes("rorxl bytes", image, expected, sizeof(expected));
 }
 
+/* Execute the real instruction ABI against an independent rotate oracle.
+ * This catches wrong signed-branch widths, missed wrap bits, CL aliasing, and
+ * writes to other registers without depending on a scratch-register layout.
+ */
+static void execute_rotate(const struct bpf_insn *insns, int count, u64 regs[16])
+{
+	for (int pc = 0, steps = 0; pc < count; pc++, steps++) {
+		const struct bpf_insn *insn = &insns[pc];
+		u8 cls = BPF_CLASS(insn->code), op = BPF_OP(insn->code);
+		u64 value = regs[insn->dst_reg];
+		u64 rhs = BPF_SRC(insn->code) == BPF_X ?
+			regs[insn->src_reg] : (u64)(int64_t)insn->imm;
+
+		require_true(steps < count, "rotate expansion did not terminate");
+		if (cls == BPF_ALU || cls == BPF_ALU64) {
+			if (cls == BPF_ALU)
+				value = (u32)value;
+			switch (op) {
+			case BPF_MOV: value = rhs; break;
+			case BPF_LSH:
+				require_true(rhs < (cls == BPF_ALU ? 32U : 64U),
+					     "rotate expansion has an out-of-range shift");
+				value <<= rhs;
+				break;
+			case BPF_OR: value |= rhs; break;
+			default: require_true(false, "unsupported rotate ALU opcode");
+			}
+			regs[insn->dst_reg] = cls == BPF_ALU ? (u32)value : value;
+		} else if (cls == BPF_JMP || cls == BPF_JMP32) {
+			bool taken = false;
+
+			switch (op) {
+			case BPF_JA: taken = true; break;
+			case BPF_JSET: taken = (value & rhs) != 0; break;
+			case BPF_JSLT:
+				taken = cls == BPF_JMP32 ? (s32)value < (s32)rhs :
+					(int64_t)value < (int64_t)rhs;
+				break;
+			default: require_true(false, "unsupported rotate jump opcode");
+			}
+			if (taken) {
+				require_true(insn->off >= 0 && pc + insn->off < count,
+					     "rotate expansion jumps outside its bytecode");
+				pc += insn->off;
+			}
+		} else {
+			require_true(false, "unsupported rotate instruction class");
+		}
+	}
+}
+
 static void test_instantiate_rol_cl_widths(void)
 {
-	struct bpf_insn insns[64];
-	u64 payload = rotate_rr_payload(X86_ROTATE_FORM_RR, BPF_REG_0,
-					BPF_REG_4);
-	int count;
+	const u64 values[] = { 0, 1, 0x80000000ULL, 1ULL << 63,
+			      UINT64_MAX, 0x0123456789abcdefULL };
+	const u8 destinations[] = { BPF_REG_0, BPF_REG_4, BPF_REG_5 };
+	const struct bpf_kop *descs[] = { &bpf_x86_roll_desc, &bpf_x86_rolq_desc };
 
-	memset(insns, 0, sizeof(insns));
-	count = instantiate_rolq(payload, insns);
-	require_true(count > 0, "instantiate rolq cl failed");
-	require_int("rolq cl and-mask count",
-		    count_alu_imm(insns, count, TEST_BPF_ALU64_IMM, BPF_AND,
-				  63),
-		    2);
-	require_int("rolq cl wrong-width and-mask count",
-		    count_alu_imm(insns, count, TEST_BPF_ALU32_IMM, BPF_AND,
-				  31),
-		    0);
-	require_true(has_mov(insns, count, TEST_BPF_MOV64_REG,
-			     KOP_X86_SCRATCH1, BPF_REG_4),
-		     "rolq cl did not read count as 64-bit");
+	for (size_t w = 0; w < 2; w++) {
+		const struct bpf_kop *desc = descs[w];
+		unsigned width = w ? 64 : 32;
+		u64 mask = w ? UINT64_MAX : UINT32_MAX;
+		struct bpf_insn *insns = calloc(desc->max_insn_cnt + 1, sizeof(*insns));
 
-	memset(insns, 0, sizeof(insns));
-	count = instantiate_roll(payload, insns);
-	require_true(count > 0, "instantiate roll cl failed");
-	require_int("roll cl and-mask count",
-		    count_alu_imm(insns, count, TEST_BPF_ALU32_IMM, BPF_AND,
-				  31),
-		    2);
-	require_int("roll cl wrong-width and-mask count",
-		    count_alu_imm(insns, count, TEST_BPF_ALU64_IMM, BPF_AND,
-				  63),
-		    0);
-	require_true(has_mov(insns, count, TEST_BPF_MOV32_REG,
-			     KOP_X86_SCRATCH1, BPF_REG_4),
-		     "roll cl did not read count as 32-bit");
+		require_true(insns != NULL, "cannot allocate rotate bytecode");
+		for (size_t d = 0; d < sizeof(destinations); d++) {
+			u8 dst = destinations[d];
+			int count = desc->instantiate_insn(
+				rotate_rr_payload(X86_ROTATE_FORM_RR, dst, BPF_REG_4), insns);
+
+			require_true(count > 0, "rotate payload was rejected");
+			require_true(count <= desc->max_insn_cnt,
+				     "rotate expansion exceeds its registered capacity");
+			require_true(insns[desc->max_insn_cnt].code == 0,
+				     "rotate expansion overwrote its capacity guard");
+			for (size_t v = 0; v < sizeof(values) / sizeof(values[0]); v++) {
+				for (unsigned cl = 0; cl < 256; cl++) {
+					u64 regs[16], before[16];
+					unsigned shift = cl & (width - 1);
+					u64 value, want;
+
+					for (unsigned r = 0; r < 16; r++)
+						regs[r] = 0xfedcba9876543200ULL + r;
+					regs[dst] = values[v];
+					regs[BPF_REG_4] = (regs[BPF_REG_4] & ~0xffULL) | cl;
+					memcpy(before, regs, sizeof(regs));
+					value = regs[dst] & mask;
+					want = shift ? ((value << shift) |
+						(value >> (width - shift))) & mask : value;
+					execute_rotate(insns, count, regs);
+					require_true(regs[dst] == want, "rotate result differs from oracle");
+					for (unsigned r = 0; r < 16; r++)
+						require_true(r == dst || regs[r] == before[r],
+							     "rotate changed another register");
+				}
+			}
+		}
+		free(insns);
+	}
 }
 
 int main(void)
