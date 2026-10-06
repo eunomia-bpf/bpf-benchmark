@@ -44,6 +44,9 @@ inductive MInsn where
       (scale : Nat) (off : BitVec 64)
   | inc (bits : Nat) (dst : GPReg)
   | shd (bits : Nat) (left : Bool) (dst src : GPReg) (count : Nat)
+  /-- Self-contained XOR EDX; TEST src; JZ zero; DIV64 src; JMP done;
+      zero: MOV RDX,RAX; XOR EAX. The emitter keeps src distinct from RDX. -/
+  | guardedDiv64 (src : GPReg)
   | popcnt (dst src : GPReg)
   | movImm8 (dst : GPReg) (imm : BitVec 8)
   | movImm32Z (dst : GPReg) (imm : BitVec 32)
@@ -127,6 +130,12 @@ def MInsn.step (i : MInsn) (s : State) : State :=
     s.set dst (BitVec.setWidth 64 (if n = 0 then d
       else if left then (d <<< n) ||| (v >>> (bits - n))
       else (d >>> n) ||| (v <<< (bits - n))))
+  | .guardedDiv64 src =>
+    let cleared := s.set .rdx 0
+    let n := cleared.regs .rax
+    let v := cleared.regs src
+    (cleared.set .rax (if v = 0 then 0 else BitVec.udiv n v)).set .rdx
+      (if v = 0 then n else BitVec.umod n v)
   | .popcnt dst src => s.set dst (BitVec.ofNat 64
       ((List.range 64).filter (fun i => (s.regs src).getLsbD i)).length)
   | .movImm8 dst imm => s.set dst (writeWidth 8 (s.regs dst) (BitVec.setWidth 64 imm))
@@ -167,6 +176,7 @@ def MInsn.step (i : MInsn) (s : State) : State :=
 
 def MInsn.writes : MInsn → List GPReg
   | .core i => [i.dstReg]
+  | .guardedDiv64 _ => [.rax, .rdx]
   | .cmp .. | .store .. | .prefetch .. | .storeImm .. => []
   | .cmov _ _ d _ | .load _ d _ _ _ | .rorx32 d _ _ | .rolW d _
   | .bswap32 d | .not _ d | .imul d _ | .shift _ _ d _ _ | .bzhi _ d _ _
@@ -174,7 +184,8 @@ def MInsn.writes : MInsn → List GPReg
   | .aluMem _ _ d _ _ _ _ | .aluNarrow _ _ d _ | .inc _ d
   | .aluImmNarrow _ _ d _ | .aluMemNarrow _ _ d _ _ | .aluMemIndexNarrow _ _ d _ _ _ _
   | .shd _ _ d _ _ | .popcnt d _ => [d]
-  | .movImm8 d _ | .movImm32Z d _ | .mov32 d _ | .movzx _ d _ | .movswl d _ | .loadIndex _ d _ _ _ _ _
+  | .movImm8 d _ | .movImm32Z d _ | .mov32 d _ | .movzx _ d _ | .movswl d _
+  | .loadIndex _ d _ _ _ _ _
   | .loadIndexSx32 d _ _ _ _ | .rolCL _ d
   | .shiftCLWidth _ _ d | .shiftImmWidth _ _ d _ => [d]
 

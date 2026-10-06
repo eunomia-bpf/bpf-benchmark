@@ -478,54 +478,68 @@ static int instantiate_incq(u64 payload, struct bpf_insn *insn_buf)
 	return instantiate_inc(payload, insn_buf, 64);
 }
 
+/* DIVL's payload register is a read-only divisor, including R10. */
+static int decode_divl_payload(u64 payload, u8 *src_reg)
+{
+	u8 form;
+
+	payload = kop_payload_decode(payload);
+	form = payload & 0xf;
+	if (form != KOP_X86_ALU_FORM_IMM && form != KOP_X86_ALU_FORM_ARCH_IMM)
+		return -EINVAL;
+	*src_reg = kop_payload_reg(payload, 4);
+	if (payload >> 8 || !kop_x86_operand_valid(*src_reg))
+		return -EINVAL;
+	return 0;
+}
+
+static int divl_temps(u8 src_reg, u8 *num, u8 *divisor)
+{
+	u8 reg;
+	int found = 0;
+
+	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
+		if (reg == BPF_REG_0 || reg == BPF_REG_3 || reg == src_reg)
+			continue;
+		if (!found++)
+			*num = reg;
+		else {
+			*divisor = reg;
+			return 0;
+		}
+	}
+	return -EINVAL;
+}
+
 static int instantiate_divl(u64 payload, struct bpf_insn *insn_buf)
 {
-	struct kop_x86_alu_payload decoded;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2);
-	u8 src_reg;
-	bool arch_reg;
+	u8 src_reg, num, divisor;
 	int cnt = 0;
 	int err;
 
-	err = decode_x86_alu_payload(payload, &decoded);
+	err = decode_divl_payload(payload, &src_reg);
 	if (err)
 		return err;
-	if ((decoded.form != KOP_X86_ALU_FORM_IMM &&
-	     decoded.form != KOP_X86_ALU_FORM_ARCH_IMM) ||
-	    decoded.imm != 0)
-		return -EINVAL;
-	src_reg = decoded.dst_reg;
-	arch_reg = x86_alu_uses_arch_reg(decoded.form);
+	err = divl_temps(src_reg, &num, &divisor);
+	if (err)
+		return err;
 
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kop_x86_read32_arch(insn_buf, &cnt, KOP_X86_SCRATCH0, BPF_REG_3);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, KOP_X86_SCRATCH0, 32);
-	kop_x86_read32_arch(insn_buf, &cnt, KOP_X86_SCRATCH2, BPF_REG_0);
-	insn_buf[cnt++] = BPF_MOV32_REG(KOP_X86_SCRATCH2,
-					KOP_X86_SCRATCH2);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, KOP_X86_SCRATCH0,
-					KOP_X86_SCRATCH2);
-	if (arch_reg)
-		kop_x86_read32_arch(insn_buf, &cnt, KOP_X86_SCRATCH1,
-				      src_reg);
-	else
-		kop_x86_read32(insn_buf, &cnt, KOP_X86_SCRATCH1,
-				 src_reg);
-	insn_buf[cnt++] = BPF_MOV32_REG(KOP_X86_SCRATCH1,
-					KOP_X86_SCRATCH1);
-	insn_buf[cnt++] = BPF_MOV64_REG(KOP_X86_SCRATCH2,
-					KOP_X86_SCRATCH0);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_MOD, KOP_X86_SCRATCH2,
-					KOP_X86_SCRATCH1);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_DIV, KOP_X86_SCRATCH0,
-					KOP_X86_SCRATCH1);
-	kop_x86_write32_arch(insn_buf, &cnt, BPF_REG_0,
-			       KOP_X86_SCRATCH0, scratch_mask);
-	kop_x86_write32_arch(insn_buf, &cnt, BPF_REG_3,
-			       KOP_X86_SCRATCH2, scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, num, KOP_X86_PROOF_LHS_OFF);
+	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, divisor, KOP_X86_PROOF_RHS_OFF);
+	/* Capture divisor before writing either implicit input, even src=R0/R3. */
+	insn_buf[cnt++] = BPF_MOV32_REG(divisor, src_reg);
+	insn_buf[cnt++] = BPF_MOV32_REG(num, BPF_REG_3);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, num, 32);
+	insn_buf[cnt++] = BPF_MOV32_REG(BPF_REG_0, BPF_REG_0);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, num, BPF_REG_0);
+	insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_0, num);
+	insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_3, num);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_MOD, BPF_REG_3, divisor);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_DIV, BPF_REG_0, divisor);
+	insn_buf[cnt++] = BPF_MOV32_REG(BPF_REG_0, BPF_REG_0);
+	insn_buf[cnt++] = BPF_MOV32_REG(BPF_REG_3, BPF_REG_3);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, divisor, BPF_REG_10, KOP_X86_PROOF_RHS_OFF);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, num, BPF_REG_10, KOP_X86_PROOF_LHS_OFF);
 	return cnt;
 }
 
@@ -1058,34 +1072,76 @@ static int emit_incq_x86(u8 *image, u32 *off, bool emit,
 	return emit_inc_x86(image, off, emit, payload, prog, true);
 }
 
+static void emit_divl_rr(u8 *buf, u32 *len, bool wide, u8 opcode,
+			 u8 dst, u8 src)
+{
+	kop_emit_rex_rr(buf, len, wide, src, dst);
+	kop_emit_u8(buf, len, opcode);
+	kop_emit_u8(buf, len, 0xc0 | (kop_x86_code(src) << 3) | kop_x86_code(dst));
+}
+
+static void emit_divl_slot(u8 *buf, u32 *len, u8 reg, u8 frame, s16 offset, bool load)
+{
+	kop_emit_rex(buf, len, true, kop_x86_ext(reg), false, kop_x86_ext(frame));
+	kop_emit_u8(buf, len, load ? 0x8b : 0x89);
+	kop_emit_modrm_mem(buf, len, reg, frame, offset);
+}
+
 static int emit_divl_x86(u8 *image, u32 *off, bool emit,
 			 u64 payload, const struct bpf_prog *prog,
 			 const u8 *final_ip)
 {
-	struct kop_x86_alu_payload decoded;
-	u8 buf[4];
-	u8 src_reg;
-	bool arch_reg;
-	u32 len = 0;
+	u8 buf[96];
+	u8 src_reg, num, divisor;
+	u8 frame = kop_x86_reg_for_prog(prog, BPF_REG_10);
+	u32 len = 0, zero_jump, done_jump;
 	int err;
 
-	err = decode_x86_alu_payload(payload, &decoded);
+	err = decode_divl_payload(payload, &src_reg);
 	if (err)
 		return err;
-	if ((decoded.form != KOP_X86_ALU_FORM_IMM &&
-	     decoded.form != KOP_X86_ALU_FORM_ARCH_IMM) ||
-	    decoded.imm != 0)
-		return -EINVAL;
+	err = divl_temps(src_reg, &num, &divisor);
+	if (err)
+		return err;
+	src_reg = kop_x86_reg_for_prog(prog, src_reg);
+	num = kop_x86_reg_for_prog(prog, num);
+	divisor = kop_x86_reg_for_prog(prog, divisor);
 
-	arch_reg = x86_alu_uses_arch_reg(decoded.form);
-	src_reg = arch_reg ? decoded.dst_reg :
-			     kop_x86_reg_for_prog(prog, decoded.dst_reg);
-	if (!kop_x86_valid(src_reg))
-		return -EINVAL;
+	emit_divl_slot(buf, &len, num, frame, KOP_X86_PROOF_LHS_OFF, false);
+	emit_divl_slot(buf, &len, divisor, frame, KOP_X86_PROOF_RHS_OFF, false);
+	emit_divl_rr(buf, &len, false, 0x89, divisor, src_reg);
+	emit_divl_rr(buf, &len, false, 0x89, num, BPF_REG_3);
+	kop_emit_rex_rr(buf, &len, true, 0, num);
+	kop_emit_u8(buf, &len, 0xc1);
+	kop_emit_u8(buf, &len, 0xe0 | kop_x86_code(num));
+	kop_emit_u8(buf, &len, 32);
+	emit_divl_rr(buf, &len, false, 0x89, BPF_REG_0, BPF_REG_0);
+	emit_divl_rr(buf, &len, true, 0x09, num, BPF_REG_0);
+	emit_divl_rr(buf, &len, true, 0x89, BPF_REG_0, num);
 
-	kop_emit_rex_rr(buf, &len, false, 0, src_reg);
+	/* The guard is self-contained. DIV64 with high half zero cannot overflow;
+	 * MOV32 below supplies BPF's truncated quotient and remainder semantics.
+	 */
+	emit_divl_rr(buf, &len, false, 0x31, BPF_REG_3, BPF_REG_3);
+	emit_divl_rr(buf, &len, true, 0x85, divisor, divisor);
+	kop_emit_u8(buf, &len, 0x74); /* JZ zero */
+	zero_jump = len;
+	kop_emit_u8(buf, &len, 0);
+	kop_emit_rex_rr(buf, &len, true, 0, divisor);
 	kop_emit_u8(buf, &len, 0xf7);
-	kop_emit_u8(buf, &len, 0xf0 | kop_x86_code(src_reg));
+	kop_emit_u8(buf, &len, 0xf0 | kop_x86_code(divisor));
+	kop_emit_u8(buf, &len, 0xeb); /* JMP done */
+	done_jump = len;
+	kop_emit_u8(buf, &len, 0);
+	buf[zero_jump] = len - zero_jump - 1;
+	emit_divl_rr(buf, &len, true, 0x89, BPF_REG_3, BPF_REG_0);
+	emit_divl_rr(buf, &len, false, 0x31, BPF_REG_0, BPF_REG_0);
+	buf[done_jump] = len - done_jump - 1;
+
+	emit_divl_rr(buf, &len, false, 0x89, BPF_REG_0, BPF_REG_0);
+	emit_divl_rr(buf, &len, false, 0x89, BPF_REG_3, BPF_REG_3);
+	emit_divl_slot(buf, &len, divisor, frame, KOP_X86_PROOF_RHS_OFF, true);
+	emit_divl_slot(buf, &len, num, frame, KOP_X86_PROOF_LHS_OFF, true);
 	return kop_emit_finish(image, off, emit, buf, len);
 }
 
@@ -1131,8 +1187,8 @@ const struct bpf_kop bpf_x86_incl_desc = {
 
 const struct bpf_kop bpf_x86_divl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 12 + KOP_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
+	.max_insn_cnt = 15,
+	.max_emit_bytes = 96,
 	.instantiate_insn = instantiate_divl,
 	.emit_x86 = emit_divl_x86,
 };
