@@ -1,7 +1,8 @@
-# ReverseSim Prototypes
+# kprog native simulator and loader
 
-This directory holds proof-of-concept simulators for the ReverseSim research
-direction.
+This directory holds the kprog native loader/linker, proof-producing
+simulators, and formal contracts. Start with the current
+[design](../docs/kprog/design.md) and [evaluation](../docs/kprog/evaluation.md).
 
 The goal is deliberately narrow: use a real eBPF program as a verifier-facing simulator
 for a native-like instruction stream, then execute it through
@@ -24,6 +25,10 @@ Current layout:
 - `formal/`: a Lean 4 model and machine-checked refinement theorem for the
   shared register-transfer/tag-policy fragment. Its scope is intentionally
   smaller than either C simulator implementation.
+- `libnativeloader/`: shared native loader and linker integration used by the
+  benchmark paths.
+- `test/`: workload-derived native and BPF test programs.
 
-This is not part of the benchmark framework and does not write benchmark result
-payloads.
+Build and smoke targets, plus the raw result locations, are listed in the
+[kprog entry point](../docs/kprog/README.md). The framework stores raw benchmark
+results under `micro/results/` and `corpus/results/`.

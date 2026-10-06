@@ -153,7 +153,7 @@ The first BPFOptBench paper should focus on A1-A3 over L3/L4, with L0-L2/L1 desc
 - Success criterion: show at least three concrete difficulty modes: noise floor, pass interaction, and applied-count mismatch.
 - Failure interpretation: if historical results are too stale for the current codebase, rerun a minimal six-app floor and static-policy subset.
 - Figure/table target: Fig. 2 static policy and noise-floor motivation.
-- Reproducibility files: `docs/tmp/pass_signal_audit_20260508.md`, `docs/tmp/corpus-performance-analysis-20260428.md`, `docs/tmp/2026-03-11/corpus-tuned-policy-comparison.md`, `docs/tmp/active/policy-iteration-rounds.md`.
+- Reproducibility files: `docs/archive/shared/pass_signal_audit_20260508.md`, `docs/archive/shared/corpus-performance-analysis-20260428.md`, `docs/archive/shared/2026-03-11/corpus-tuned-policy-comparison.md`, `docs/archive/shared/active/policy-iteration-rounds.md`.
 
 ### B3. Oracle Composition And Failure Taxonomy
 
@@ -307,7 +307,7 @@ All benchmark execution must use `make <target>` entrypoints. Analysis scripts m
 ## Tracker Handoff
 
 - Tracker destination if persisted: `docs/research/bpfoptbench-experiment-tracker.md`.
-- Result path convention: `corpus/results/<platform_arch>_corpus_<timestamp>/` plus `docs/tmp/bpfoptbench/<run-id>/` for analysis outputs.
+- Historical result path convention: `corpus/results/<platform_arch>_corpus_<timestamp>/` plus `docs/tmp/bpfoptbench/<run-id>/` for analysis outputs; moved reports are indexed in `docs/MOVED.md`.
 - Required tracker columns: Run ID, Claim, Block, Purpose, Command/config, Commit, Machine, App subset, Pass/action space, Agent/model, Attempt budget, Oracle, Decision gate, Result path, Status.
 - Next rows to add: R001-R006 after the task schema is frozen.
 

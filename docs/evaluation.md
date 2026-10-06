@@ -21,7 +21,7 @@ selects a deterministic app/run interval at Git artifact snapshot `5b130b6ec`,
 checks the completed two-start/load-time lifecycle and exact pass list, parses
 each raw workload leaf, and maps every app JSON to its introducing commit. The
 full 60-run output and exact commands are retained in
-[`raw-results.md`](tmp/build-and-evaluate/step-0004-20260924T163615+0000/experiment-001/raw-results.md).
+[`raw-results.md`](archive/rejit/build-and-evaluate/step-0004-20260924T163615+0000/experiment-001/raw-results.md).
 
 Four ten-run, 180-second pktgen batches have positive policy/baseline
 workload-throughput geomeans whose fixed-seed 95% run-level percentile
@@ -58,9 +58,9 @@ is not a repeated estimate and is not a paper result.  The shim now preserves
 `input.step.N.bin` and `output.next.N.bin` when `KEEP_WORKDIRS=1`.  A new
 Make-backed run is required before using that mechanism evidence.  Exact audit
 commands and the independent review are in
-[`step-0005`](tmp/build-and-evaluate/step-0005-20260924T170452+0000/step-report.md)
+[`step-0005`](archive/rejit/build-and-evaluate/step-0005-20260924T170452+0000/step-report.md)
 and the retention fix is recorded in
-[`step-0006`](tmp/build-and-evaluate/step-0006-20260924T172311+0000/step-report.md).
+[`step-0006`](archive/rejit/build-and-evaluate/step-0006-20260924T172311+0000/step-report.md).
 
 The same retained workdirs do support a narrower, valid input-provenance
 result.  A fail-fast join of all 3,787 optimizer-reported applied entries to
@@ -71,7 +71,7 @@ metadata rather than mutable-map metadata.  This separate finding does not
 repair the missing before images or prove rewriting, exact value offsets,
 cross-start stability, execution, or throughput causality.  The plan, formal
 output, and independent recomputation are retained in
-[`step-0007`](tmp/build-and-evaluate/step-0007-20260925T015337+0000/step-report.md).
+[`step-0007`](archive/rejit/build-and-evaluate/step-0007-20260925T015337+0000/step-report.md).
 
 ## 1. System Under Test
 
@@ -376,7 +376,7 @@ Findings:
 - The earlier `wide_mem` isolated 7-app run separately triggered a
   kernel panic on tetragon (post-swap refresh handling in
   `kernel/bpf/syscall.c:3937`); see
-  `docs/tmp/q5_widemem_kernel_panic_20260507.md`. Not reproduced in
+  `docs/archive/shared/q5_widemem_kernel_panic_20260507.md`. Not reproduced in
   the current 5-pass / 6-pass conditions.
 
 #### 6.1.1 Bytecode-pass apply rate (per app × condition)
@@ -439,7 +439,7 @@ Every cell that *should* be 1.0 (the noise-floor rows) is the empirical
 phase-variance reference; everything below the noise rows is what a
 pass coverage run produces.
 
-![Per-program geomean by app × condition](tmp/eval_per_program_geomean.png)
+![Per-program geomean by app × condition](archive/shared/eval_per_program_geomean.png)
 
 | Condition | bcc | bpftrace | cilium | katran | otel | tetragon | tracee | suite | retained |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -496,7 +496,7 @@ Per-app throughput recorded in `baseline.workloads[]` /
 samples (same `SAMPLES=3` runs as §6.2.1). Values >1.0 = app went
 faster after ReJIT.
 
-![App-side workload throughput by app × condition](tmp/eval_app_workload.png)
+![App-side workload throughput by app × condition](archive/shared/eval_app_workload.png)
 
 Per-app throughput metric:
 
@@ -544,7 +544,7 @@ means ReJIT shrunk total program size; `> 1.0` means ReJIT added code
 replace inlined sequences with kfunc calls that are slightly larger
 in raw bytecode but lower at the machine-code level).
 
-![Binary size (bytes_jited) ratio by app × condition](tmp/eval_size_jited.png)
+![Binary size (bytes_jited) ratio by app × condition](archive/shared/eval_size_jited.png)
 
 | Condition | bcc | bpftrace | cilium | katran | otel | tetragon | tracee |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

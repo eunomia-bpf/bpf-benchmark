@@ -457,7 +457,7 @@ fn resolve_helper_target(
 
 /// A side-band relocation record. The on-disk layout must stay in sync
 /// with `struct native_lab_reloc_record` in
-/// module/x86/bpf_x86_native_lab.c (offset:u32, kind:u32, target:u64 —
+/// kinsn/module/x86/bpf_x86_native_lab.c (offset:u32, kind:u32, target:u64 —
 /// 16 bytes, little-endian). We serialize byte-by-byte below rather than
 /// transmuting from a `#[repr(C, packed)]` struct, so plain alignment is
 /// fine.

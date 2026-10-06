@@ -4,7 +4,7 @@ Last updated: 2026-06-07
 
 This is the current paper-facing status page for microbenchmark data. The
 previous long evaluation note is archived at
-`docs/tmp/micro-bench-status-20260520-archive.md`.
+`docs/archive/shared/micro-bench-status-20260520-archive.md`.
 
 All ratios, speedups, and win/loss counts below are post-hoc analysis from raw
 `result.json` files. The benchmark framework still records raw measurements
@@ -464,29 +464,29 @@ letting these one-sample outliers dominate per-case ratios.
 ## Appendix F: Figure Generation
 
 The plotting script for Figures 1, 2a, 2b, 3a, 3b, and 4 is
-`docs/tmp/plot_micro_characterization_20260606.py`. It is an analysis-side
+`docs/archive/shared/plot_micro_characterization_20260606.py`. It is an analysis-side
 script that reads the raw `result.json` artifacts listed in Appendix A and
 writes the PNG files under `docs/figures`. It also writes the detailed
-post-hoc table at `docs/tmp/micro_characterization_20260606_summary.md`.
+post-hoc table at `docs/archive/shared/micro_characterization_20260606_summary.md`.
 
 ```sh
-python3 docs/tmp/plot_micro_characterization_20260606.py
+python3 docs/archive/shared/plot_micro_characterization_20260606.py
 ```
 
 The plotting script for Figures 5-6 is
-`docs/tmp/plot_kop_micro_20260527.py`.
+`docs/archive/shared/plot_kop_micro_20260527.py`.
 
 ```sh
-python3 docs/tmp/plot_kop_micro_20260527.py
+python3 docs/archive/shared/plot_kop_micro_20260527.py
 ```
 
 The plotting script for Figure 7 is
-`docs/tmp/plot_arm64_kop_micro_20260606.py`. It also writes the detailed
-post-hoc table at `docs/tmp/arm64_kop_micro_20260606_summary.md`.
+`docs/archive/shared/plot_arm64_kop_micro_20260606.py`. It also writes the detailed
+post-hoc table at `docs/archive/kinsn/arm64_kop_micro_20260606_summary.md`.
 
 ```sh
-python3 docs/tmp/plot_arm64_kop_micro_20260606.py
+python3 docs/archive/shared/plot_arm64_kop_micro_20260606.py
 ```
 
 The older zero-apply arm64 kop script is
-`docs/tmp/plot_arm64_kop_micro_20260605.py`.
+`docs/archive/shared/plot_arm64_kop_micro_20260605.py`.

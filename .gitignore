@@ -56,20 +56,20 @@ daemon/target/
 bpfperf/target/
 
 # Kernel module build artifacts
-module/x86/*.ko
-module/x86/*.mod
-module/x86/*.mod.c
-module/x86/modules.order
-module/x86/Module.symvers
-module/x86/.*.cmd
-module/arm64/*.ko
-module/arm64/*.mod
-module/arm64/*.mod.c
-module/arm64/*.mod.o
-module/arm64/*.o
-module/arm64/modules.order
-module/arm64/Module.symvers
-module/arm64/.*.cmd
+kinsn/module/x86/*.ko
+kinsn/module/x86/*.mod
+kinsn/module/x86/*.mod.c
+kinsn/module/x86/modules.order
+kinsn/module/x86/Module.symvers
+kinsn/module/x86/.*.cmd
+kinsn/module/arm64/*.ko
+kinsn/module/arm64/*.mod
+kinsn/module/arm64/*.mod.c
+kinsn/module/arm64/*.mod.o
+kinsn/module/arm64/*.o
+kinsn/module/arm64/modules.order
+kinsn/module/arm64/Module.symvers
+kinsn/module/arm64/.*.cmd
 
 # Test build artifacts and binary data
 tests/hold_bpf_prog

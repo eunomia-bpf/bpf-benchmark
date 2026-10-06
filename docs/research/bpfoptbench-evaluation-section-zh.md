@@ -135,7 +135,7 @@ BPFOptBench 的任务不应绑定到某一个 optimizer implementation。任务�
 
 ### No-op Floor Shows Measurement Perturbation
 
-`docs/tmp/pass_signal_audit_20260508.md` 记录了两个关键 floor：
+`docs/archive/shared/pass_signal_audit_20260508.md` 记录了两个关键 floor：
 
 | Run | Retained Programs | Method B Ratio | W/L/T |
 |---|---:|---:|---|
@@ -159,7 +159,7 @@ paper-grade 结论。combined kop run 也出现 OTEL 低 ratio，但 single-pass
 
 ### Corpus-Level Result Is Near-Flat But Informative
 
-`docs/tmp/corpus-performance-analysis-20260428.md` 记录了一个更干净的 full-corpus run：
+`docs/archive/shared/corpus-performance-analysis-20260428.md` 记录了一个更干净的 full-corpus run：
 
 | Metric | Value |
 |---|---:|
@@ -178,7 +178,7 @@ event mix 或 phase effect 偏离 1.0；前者说明 applied subset 的确存在
 
 ### Policy Helps But Does Not Solve The Corpus
 
-`docs/tmp/2026-03-11/corpus-tuned-policy-comparison.md` 显示，human-tuned policy 相比 blind
+`docs/archive/shared/2026-03-11/corpus-tuned-policy-comparison.md` 显示，human-tuned policy 相比 blind
 all-apply 有改进：
 
 | Run | Measured Pairs | Applied Programs | Exec Geomean | Wins | Regressions |

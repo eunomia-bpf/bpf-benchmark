@@ -54,7 +54,7 @@ Added for artifact evaluation:
   embedded constants.
 - `docs/artifacts/render_claim_table.py` derives all six RQ3 throughput/cost
   points from the retained app JSON. Applied-site counts remain declared from
-  `docs/tmp/kop_ablation_20260605_summary.md`, which is now shipped.
+  `docs/archive/kinsn/kop_ablation_20260605_summary.md`, which is now shipped.
 - Formal-proof evidence refresh: the retained `Semantic proofs` receipt and log
   were regenerated at commit `68a77fe0e` (`make -C native-sim/formal check`,
   exit 0: 52 generator `--check` runs, 80 Lean module checks, 30 host
@@ -229,7 +229,7 @@ Added for artifact evaluation:
   required before a fresh KVM smoke can report PASS.
 
 Optimizer fixes verified during artifact preparation (both with measured
-evidence recorded in `docs/tmp/20260906-bpf-development-todo.md`):
+evidence recorded in `docs/archive/shared/20260906-bpf-development-todo.md`):
 
 - `bpfopt`: probe `bpf_x86_movw` so 2-byte memcpy stores lower, instead of
   failing the whole `kop` step with `target.json has no kop entry`.

@@ -58,12 +58,12 @@ The artifact contains four components. Each maps to a part of the paper.
 | Component | Path | Paper relation |
 |---|---|---|
 | `bpfopt` bytecode optimizer + stock-kernel userspace shim | `bpfopt/` (`shim/`, `llvm/`, `kopprober/`) | \S\ref{sec:implementation}; the load-time lowering/restore stage |
-| KOperation native-operation kernel modules | `module/x86/`, `module/arm64/` | \S\ref{sec:koperation}; the seven hardware-idiom descriptor families |
+| KOperation native-operation kernel modules | `kinsn/module/x86/`, `kinsn/module/arm64/` | \S\ref{sec:koperation}; the seven hardware-idiom descriptor families |
 | Lean 4 semantic proofs + host cross-checks | `native-sim/formal/`, `native-sim/x86/`, `native-sim/arm64/` | abstract + \S\ref{sec:implementation}; "each native emit computes the same result as its proof sequence" |
 | Make-backed benchmark harness (micro + production corpus) | `Makefile`, `runner/`, `micro/`, `corpus/` | \S\ref{sec:evaluation} (RQ1–RQ4) |
 
 Supporting material: `docs/implementation.md` (current proof/coverage boundary),
-`docs/tmp/20260906-bpf-development-todo.md` (chronological engineering log with
+`docs/archive/shared/20260906-bpf-development-todo.md` (chronological engineering log with
 measured results and known defects), `docs/paper/` (LaTeX, figures, tables,
 plotting scripts).
 
@@ -499,7 +499,7 @@ for the unavailable `aws` platform here), retaining
 `details/loadtime-reports/katran.jsonl` from which the renderer derives
 21 (conservative) and 64 (coverage-max) applied sites. The June and historical
 RQ2 site counts remain declared from
-`docs/tmp/kop_ablation_20260605_summary.md` because their runs retained no
+`docs/archive/kinsn/kop_ablation_20260605_summary.md` because their runs retained no
 per-pass report:
 
 ```bash
@@ -603,7 +603,7 @@ the reverse (no-bulk+no-prefetch fastest at 1.138190×, coverage-max slowest at
 row derives both orderings from retained raw JSON and reports the divergence;
 the fresh ladder is shipped as separate evidence and does not replace the June
 values. The Katran and the historical RQ2 counts (21/62, 4086) remain
-**declared** from `docs/tmp/kop_ablation_20260605_summary.md`, since no
+**declared** from `docs/archive/kinsn/kop_ablation_20260605_summary.md`, since no
 `details/loadtime-reports/` tree survives for those runs and the figures
 annotate them as declared.
 
@@ -698,7 +698,7 @@ assuming a command or retained directory succeeded.
    the widest width (`1df5b1369`) and giving the generic (non-`kop`) roundtrip
    passes the same 4096-byte LLVM stack budget that `kop` already used
    (`42cceb67e`), so the remapper can squeeze the layout back into the 512-byte
-   BPF frame. Quantified in `docs/tmp/20260906-bpf-development-todo.md`.
+   BPF frame. Quantified in `docs/archive/shared/20260906-bpf-development-todo.md`.
 2. **`tracee/monitor` app-level errors are fixed for the default policy.** The
    shim returns `errno=EINVAL` for an application's own `BPF_PROG_LOAD` when an
    optimizer step fails (deliberate fail-fast policy), and some applications
@@ -728,7 +728,7 @@ assuming a command or retained directory succeeded.
    0.995157×/0.997839× (both 1.00×). The renderer reports both and gates the
    row on the paper-matched open+load value.
 6. **Katran's per-app applied-site count differs from the corpus-wide family
-   sum.** `docs/tmp/kop_ablation_20260605_summary.md` records 21 Katran sites in
+   sum.** `docs/archive/kinsn/kop_ablation_20260605_summary.md` records 21 Katran sites in
    its per-app table (line 55) but 24 in its corpus-wide family tally (rotate 20
    + extract 4). The paper quotes the per-app 21; the two are different
    aggregations of the same run and the discrepancy is unresolved because the
@@ -737,7 +737,7 @@ assuming a command or retained directory succeeded.
    counts are derived.** No `details/loadtime-reports/` tree survives for the
    June ladder, so its annotated counts (4697/4086/4136/3512), the June Katran
    counts (21/62) and the RQ2 4086 count are **declared** from
-   `docs/tmp/kop_ablation_20260605_summary.md`. Five fresh Cilium reruns retain
+   `docs/archive/kinsn/kop_ablation_20260605_summary.md`. Five fresh Cilium reruns retain
    their report streams: the four RQ3 policy arms
    (`corpus/results/x86_kvm_corpus_20260924_{064817_392000,074900_275227,085901_647044,095500_223221}`)
    derive 4017/3512/3517/2988, and a rerun of the RQ2 run's own `kop` policy
@@ -758,7 +758,7 @@ assuming a command or retained directory succeeded.
    (`RQ3 Cilium June-vs-fresh ladder ordering (diverges)`); the June rows are
    kept and the fresh runs are shipped as a separate evidence set.
 9. **RQ4's producers are retained analysis scripts, not Make targets.**
-   `docs/tmp/native_eval_20260529.py` and `docs/tmp/native_eval_20260614.py`
+   `docs/archive/kprog/native_eval_20260529.py` and `docs/archive/kprog/native_eval_20260614.py`
    derive the native-in-kernel metrics; they are shipped as cited files and are
    not reachable from a single `make` command.
 
@@ -781,7 +781,7 @@ corpus/                       # production app corpus, workloads, results
 runner/                       # Make-backed suites, executors, images, libs
 docs/paper/                   # current paper source and plots; see metadata caveat above
 docs/implementation.md        # current proof/coverage boundary (read this)
-docs/tmp/20260906-*.md        # chronological engineering log with measurements
+docs/archive/shared/20260906-*.md  # chronological engineering log with measurements
 docs/artifacts/               # AEC renderer, packager, and compact receipts
 docs/paper/scripts/           # raw-deriving plot scripts (RQ1, RQ3, Section 3)
 ```

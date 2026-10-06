@@ -27,7 +27,7 @@ Current policy:
 8. Runtime containers use the image workspace directly. They must not
    bind-mount the host repository over that path.
 9. KOperation modules are inside the runner image. Runtime containers must not
-   bind-mount host `module/` over the image workspace.
+   bind-mount host `kinsn/module/` over the image workspace.
 10. Remote runners load and run this image directly; they do not mirror suite
    source trees or require a directory-sync tool for result collection.
 

@@ -1,6 +1,6 @@
 # map_inline overrides for katran/balancer_ingress.
 #
-# Phased Route A rollout — see docs/tmp/katran_optimization_upper_bound.md
+# Phased Route A rollout — see docs/archive/shared/katran_optimization_upper_bound.md
 # §17 for the full plan. Each phase is gated on (a) actually inlining and
 # (b) being semantically safe (BPF kernel data path does not write the map).
 #

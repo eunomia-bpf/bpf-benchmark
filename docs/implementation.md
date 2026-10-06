@@ -2,7 +2,7 @@
 
 This file is the current handoff pointer for the duty chain. The authoritative,
 continuously updated research log is
-[`docs/tmp/20260906-bpf-development-todo.md`](tmp/20260906-bpf-development-todo.md),
+[`docs/archive/shared/20260906-bpf-development-todo.md`](archive/shared/20260906-bpf-development-todo.md),
 which supersedes stale execution boundaries without deleting them.
 
 ## Active line: kprog / native-sim semantic-refinement proof
@@ -349,7 +349,7 @@ increment is committed and pushed immediately). Current state:
   2026-09-30: both policies now resolve the host-prepared `.bin` artifact
   path from the injected `BPFREJIT_REPO_ROOT` (same fix as `map_inline`);
   verified by executing the fixed pass command on the host against a
-  captured katran input blob (`docs/tmp/20260906-bpf-development-todo.md`,
+  captured katran input blob (`docs/archive/shared/20260906-bpf-development-todo.md`,
   step 0065).
 - Run one corpus invocation at a time; runs share
   `.cache/container-images/*.image.tar` and the framework kernel build. Under

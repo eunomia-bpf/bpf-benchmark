@@ -19,8 +19,8 @@
 > - **⚠️ 禁止 sudo**：VM 内已是 root（vng），主机不跑 BPF。
 > - **⚠️ VM 测试每个 target 一个 agent**：`make test` / `make micro` / `make corpus` 串行跑，平台用 `PLATFORM` / `ARCH` 选择。
 > - **⚠️ Unit test 质量标准见 `CLAUDE.md` 的 "Unit Test Quality"**：非必要不加 unit test。新增测试必须能说明失败时定位哪一类 bug。合理测试覆盖逻辑分支、状态变化、计算/转换、边界、错误路径、外部 ABI/layout/序列化约定或 bug 回归。ABI/layout 测试不能只验 `size_of`，必须验字段 offset 或编码格式。禁止 trivial getter/setter、std/upstream lib 行为、自身重言、mock 测 mock、可读性测试、纯 const alias 和重复覆盖率测试。慢测试或真实系统依赖测试应放到集成/端到端层级，不要伪装成 unit test。
-> - **当前架构约束见 §4，Benchmark 设计约束见 §5.35。** `docs/tmp/bpfopt_design_v3.md` 是已淘汰的 daemon/ReJIT 设计，不再是规范。
-> **当前数据状态（2026-07-10）**：stock-kernel shim 的 `branch_flip` 六应用结果尚不可复现为稳定收益。2026-07-01 完整运行的 per-program geomean 为 **1.054x speedup**，但 2026-07-04 的六应用拼接复跑为 **0.899x**，Tracee 与 Tetragon 明显回退；详见 `docs/tmp/20260710/speculative-optimization-branch-flip-rerun.md`。因此论文当前不能声称稳定加速。
+> - **当前架构约束见 §4，Benchmark 设计约束见 §5.35。** `docs/archive/rejit/bpfopt_design_v3.md` 是已淘汰的 daemon/ReJIT 设计，不再是规范。
+> **当前数据状态（2026-07-10）**：stock-kernel shim 的 `branch_flip` 六应用结果尚不可复现为稳定收益。2026-07-01 完整运行的 per-program geomean 为 **1.054x speedup**，但 2026-07-04 的六应用拼接复跑为 **0.899x**，Tracee 与 Tetragon 明显回退；详见 `docs/archive/rejit/20260710/speculative-optimization-branch-flip-rerun.md`。因此论文当前不能声称稳定加速。
 > **历史数据（非当前 speculative 论文证据）**：v1 native-rewrite、2026-04 v2 daemon/ReJIT、20-app、bpftrace/SCX 和 kop 数据均属于旧架构或其他论文线，只保留作实验沿革，不得用于当前摘要或贡献结论。
 
 ---
@@ -36,17 +36,17 @@ eBPF is widely adopted in production for observability, networking, and customiz
 | Topic | File | Purpose |
 | --- | --- | --- |
 | **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf_idea.md` | paper plan, architecture, methodology, task tracking |
-| Sister idea hubs (separate paper lines) | `docs/kop_idea.md`, `docs/nativebpf_idea.md` | idea #2 / #3 framing |
+| Sister idea hubs (separate paper lines) | `docs/kinsn/design.md`, `docs/kprog/design.md` | idea #2 / #3 framing |
 | Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history |
 | Shim implementation | `bpfopt/shim/README.md` | LD_PRELOAD shim, load-time plan, per-pid `execute_plan`, reload/reattach |
-| Userspace-only design notes | `docs/tmp/userspace_speculative_opt_design.md`, `docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`, `docs/tmp/poc_c_v2_shim_only_design.md`, `docs/tmp/poc_e_vendor_replace_x_sys_design.md` | per-attach-type swap recipes, static-Go fallback |
+| Userspace-only design notes | `docs/archive/rejit/userspace_speculative_opt_design.md`, `docs/archive/shared/poc_a_katran_pidfd_swap.md`, `docs/archive/shared/poc_b_bcc_perf_event_swap.md`, `docs/archive/rejit/poc_c_v2_shim_only_design.md`, `docs/archive/shared/poc_e_vendor_replace_x_sys_design.md` | per-attach-type swap recipes, static-Go fallback |
 | Benchmark runtime | `runner/containers/README.md`, `corpus/driver.py` | current container/runtime and measured lifecycle |
-| Historical story / pitch | `docs/tmp/bpfrejit-story.md` | superseded kernel-daemon narrative; history only |
-| eBPF research plan | `docs/tmp/ebpf-bench-research-plan.md` | research methodology + 项目目标 |
-| GHCR image cache | `docs/tmp/ghcr-image-cache.md` | base image strategy |
-| Docker build cache | `docs/tmp/docker-build-cache-gc.md` | local docker cache 生命周期 |
+| Historical story / pitch | `docs/archive/rejit/bpfrejit-story.md` | superseded kernel-daemon narrative; history only |
+| eBPF research plan | `docs/archive/shared/ebpf-bench-research-plan.md` | research methodology + 项目目标 |
+| GHCR image cache | `docs/archive/shared/ghcr-image-cache.md` | base image strategy |
+| Docker build cache | `docs/archive/shared/docker-build-cache-gc.md` | local docker cache 生命周期 |
 | Paper writeup | `docs/speculative-optimization/` (submodule) | speculative-optimization paper LaTeX source |
-| Ad-hoc reports | `docs/tmp/` | 临时调研/调试报告(按日期组织) |
+| Ad-hoc reports | `docs/archive/rejit/` | 历史调研/调试报告(按日期组织) |
 
 ---
 
@@ -150,7 +150,7 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 > - bpfopt CLI:对单个 pass 的 bytecode 重写完整知识;不知任何 app/runtime 状态
 > - Runner:对 pass 顺序 / yaml / profile 完整知识;不知任何拦截细节
 
-**static Go 二进制 fallback**:tetragon / cilium-agent / otelcol-profiler 静态 Go binary 不能 LD_PRELOAD,通过 `golang.org/x/sys/unix` 的 vendor-replace fork(详 `docs/tmp/poc_e_vendor_replace_x_sys_design.md`)在编译时注入同一份 shim handler ABI。Static Go 不在 idea #1 的主线评估,作为 fallback 列出。
+**static Go 二进制 fallback**:tetragon / cilium-agent / otelcol-profiler 静态 Go binary 不能 LD_PRELOAD,通过 `golang.org/x/sys/unix` 的 vendor-replace fork(详 `docs/archive/shared/poc_e_vendor_replace_x_sys_design.md`)在编译时注入同一份 shim handler ABI。Static Go 不在 idea #1 的主线评估,作为 fallback 列出。
 
 ### 1.8 类比定位
 
@@ -242,7 +242,7 @@ bpfopt 的 Insight 3(吃 verifier 已算出来的 tnum/range 当 ground truth、
 
 ### 3.1 性能优化变换
 
-> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kop 框架的 pass)。所有依赖 kop 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `docs/kop_idea.md`,**不在本论文范围**。
+> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kop 框架的 pass)。所有依赖 kop 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `docs/kinsn/design.md`,**不在本论文范围**。
 
 #### Speculative 分类(本论文 framing)
 
@@ -274,12 +274,12 @@ C 类是本论文跟所有 prior eBPF 优化(K2/Merlin/EPSO)的关键差异:**�
 | **Frozen map inlining** | A | ❌ 不做 | BPF_MAP_FREEZE 后只读 map → 常量 MOV | **真实 workload 无显式 freeze,hot-path lookup ≈ 0** |
 | **Subprog inline** | A/C | ⏸ 不在主线 | bytecode 层 budgeted inline。**REJIT 元数据 blocker** 在 stock-kernel + LD_PRELOAD shim 路径下不再适用(shim 在 PROG_LOAD 拦截层重发整 prog,无 func_info/line_info UAPI 增量),PGO selective inline 留作后续实验 | **834 调用点 / 67 对象(11.8%)**。调研:`subprog_inline_research_20260326.md` |
 | **Spill/fill 消除** | A | ❌ 不做 | 冗余 spill/fill 消除 | 内核已有 KF_FASTCALL,增量收益低 |
-| **除法强度削减** | A | ⏸ 后续 | 常量除数 → shift+multiply。支持 app 命中几乎全是 64-bit `/1e9`,纯 bytecode 需要 64x64→128 multiply-high emulation,先等 per-site profile 数据 | DIV/MOD 共 `1269` sites,Cilium `/1e9` 占 `553`。调研:`docs/tmp/division_reduction_research_20260430.md` |
-| **寄存器重分配** | A | 📝 待实现 | BPF bytecode 层面 R1-R5→R6-R9 live-range 重分配,删除跨 helper caller-saved spill/fill | **62,406 matched pairs,59,297 跨 helper(95.0%),Tetragon+Tracee 占 91.7%**。调研:`docs/tmp/register_realloc_research_20260430.md` |
-| **Stack-slot coalescing** | A/C | ⏸ verifier-state 版作 future work | 静态版调研:**0 coalescable pairs**(安全 slot 都是长生命周期 save slot)。verifier-state-driven 版可窄化 helper memory range,但静态版不进 first wave | 实测:`docs/tmp/stack_coalesce_census_20260506.md` |
-| **PHI-style merge** | A/B | ⏸ second wave | 不同 path 后 reg 一致的合并简化。imm-only 安全且 site 数可观;copy-reg / alu-op 需要 verifier-state interference 分析 | **121,556 CFG merge points → 1,316 all-assign-same-imm sites + 61 copy-same-reg + 85 same-alu-op + 46 strict diamond**。实测:`docs/tmp/phi_merge_census_20260506.md` |
-| **Loop-invariant code motion (LICM)** | A/B | ⏸ second wave | open-coded 循环里把不变量提到循环外。仅 stack-reload 候选;safety 需 verifier stack-state / helper-memory bounds | **934 open-coded loops → 118 unique stack-load LICM sites**。实测:`docs/tmp/licm_census_20260506.md` |
-| **Strength reduction (mul/mod by const)** | A | ❌ 不做 | LLVM 已在源码层 reduce,BPF bytecode 直接是 LSH/AND 形态 | 实测:`docs/tmp/strength_reduction_census_20260506.md`(0 sites) |
+| **除法强度削减** | A | ⏸ 后续 | 常量除数 → shift+multiply。支持 app 命中几乎全是 64-bit `/1e9`,纯 bytecode 需要 64x64→128 multiply-high emulation,先等 per-site profile 数据 | DIV/MOD 共 `1269` sites,Cilium `/1e9` 占 `553`。调研:`docs/archive/shared/division_reduction_research_20260430.md` |
+| **寄存器重分配** | A | 📝 待实现 | BPF bytecode 层面 R1-R5→R6-R9 live-range 重分配,删除跨 helper caller-saved spill/fill | **62,406 matched pairs,59,297 跨 helper(95.0%),Tetragon+Tracee 占 91.7%**。调研:`docs/archive/shared/register_realloc_research_20260430.md` |
+| **Stack-slot coalescing** | A/C | ⏸ verifier-state 版作 future work | 静态版调研:**0 coalescable pairs**(安全 slot 都是长生命周期 save slot)。verifier-state-driven 版可窄化 helper memory range,但静态版不进 first wave | 实测:`docs/archive/shared/stack_coalesce_census_20260506.md` |
+| **PHI-style merge** | A/B | ⏸ second wave | 不同 path 后 reg 一致的合并简化。imm-only 安全且 site 数可观;copy-reg / alu-op 需要 verifier-state interference 分析 | **121,556 CFG merge points → 1,316 all-assign-same-imm sites + 61 copy-same-reg + 85 same-alu-op + 46 strict diamond**。实测:`docs/archive/shared/phi_merge_census_20260506.md` |
+| **Loop-invariant code motion (LICM)** | A/B | ⏸ second wave | open-coded 循环里把不变量提到循环外。仅 stack-reload 候选;safety 需 verifier stack-state / helper-memory bounds | **934 open-coded loops → 118 unique stack-load LICM sites**。实测:`docs/archive/shared/licm_census_20260506.md` |
+| **Strength reduction (mul/mod by const)** | A | ❌ 不做 | LLVM 已在源码层 reduce,BPF bytecode 直接是 LSH/AND 形态 | 实测:`docs/archive/shared/strength_reduction_census_20260506.md`(0 sites) |
 | **Local instruction scheduling** | A | ❌ 不做 | 同 BB 内 pure ALU 指令调度。risk 高,收益 low-medium | 不在第一波 |
 | **Helper inline beyond map_inline** | A | ❌ 不做 | `bpf_jiffies64` / `bpf_get_smp_processor_id` / current_task helpers 等已被 kernel inline | 新候选需窄 whitelist + 每调用 stability proof |
 
@@ -620,7 +620,7 @@ bpfopt/llvm/                # bpfopt CLI(C++/LLVM,纯 bytecode rewriter)
 runner/config/passes/       # 每个 pass 的 yaml 命令模板
 ```
 
-详细设计文档见 `docs/tmp/20260320/benchmark-framework-design_20260320.md`。
+详细设计文档见 `docs/archive/shared/20260320/benchmark-framework-design_20260320.md`。
 
 ---
 
@@ -657,10 +657,10 @@ CI:        GitHub Actions ARM64 + x86(manual trigger)
 
 ## 7. 任务追踪
 
-任务追踪已迁移到 git history。每个任务的详细记录在 commit messages 和 `docs/tmp/` 报告中。
+任务追踪已迁移到 git history。每个任务的详细记录在 commit messages 和 `docs/archive/` 报告中。
 
 - **历史记录（v1 #1 - #303 / v2 #304 - #673）**：归档在 git history;原 archive 文件已随 rename 一起淘汰
 - **当前任务**：用 `git log --oneline` 查看
-- **2026-05-05 changed flag deletion follow-up**：`docs/tmp/changed-flag-deletion-20260505.md`
-- **调研报告**：`docs/tmp/` 按日期组织
+- **2026-05-05 changed flag deletion follow-up**：`docs/archive/shared/changed-flag-deletion-20260505.md`
+- **调研报告**：`docs/archive/` 按项目和日期组织
 - **2026-09-17 RQ3 → RQ1 → RQ2 新实验（未完成）**：已核对当前生产实现和实验入口；`make negative-test` 前置运行在 `host-native-bpf-x86` 的 Tetragon 构建中退出 2（生成头文件缺少 `mm_struct.user_ns`），尚未进入 VM。无新的语义或性能测量。完整命令、版本、原始日志、独立计划审阅和待授权的最小实验扩展/构建修复范围见 `docs/tmp/20260917-speculative-rqs/results.md`；保留已有生成头文件 WIP，历史数据仅作定位线索。

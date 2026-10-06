@@ -82,12 +82,12 @@ test: all
 # Boot virtme-ng with the bench framework's kop-aware kernel + insmod
 # the bpf_x86_native_lab .ko, then run the perf-compare runner.
 # Requires the regular bench build to have produced the kernel under vendor/build
-# and the kop modules under module/x86/build. Host's Ubuntu
+# and the kop modules under kinsn/module/x86/build. Host's Ubuntu
 # kernel doesn't ship the kop / BPF_PROG_REJIT framework, so the
 # native_lab leg fails outside the framework VM -- this is the canonical
 # way to exercise it standalone.
 KIMG := $(REPO_ROOT)/vendor/build/x86/linux/arch/x86/boot/bzImage
-KOP_KO_DIR := $(REPO_ROOT)/module/x86/build
+KOP_KO_DIR := $(REPO_ROOT)/kinsn/module/x86/build
 NATIVE_LINK_HOST := $(REPO_ROOT)/native-sim/x86/native_lab/native_link/target/release/native-link
 
 VM_SCRIPT := $(OUTPUT_DIR)/run-in-vm.sh

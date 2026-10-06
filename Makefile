@@ -216,7 +216,7 @@ check:
 
 lint:
 	find "$(ROOT_DIR)" \
-		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/llvm-backend" -o -path "$(ROOT_DIR)/docs/tmp" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
+		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/llvm-backend" -o -path "$(ROOT_DIR)/docs/archive" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
 		-type f -name '*.py' -exec "$(PYTHON)" -m py_compile {} +
 
 selftest: selftest-$(RUN_KEY)
@@ -390,12 +390,12 @@ clean-build:
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"
 	rm -rf "$(ROOT_DIR)"/vendor/build
-	rm -rf "$(ROOT_DIR)"/module/x86/build "$(ROOT_DIR)"/module/arm64/build
+	rm -rf "$(ROOT_DIR)"/kinsn/module/x86/build "$(ROOT_DIR)"/kinsn/module/arm64/build
 	rm -rf "$(ROOT_DIR)"/native-sim/test/build-x86 "$(ROOT_DIR)"/native-sim/test/build-arm64
 
 clean-results:
-	@# results retention is manual; see docs/tmp/p89_disk_audit.md
-	@echo "Result cleanup is manual; see docs/tmp/p89_disk_audit.md"
+	@# results retention is manual; see docs/archive/shared/p89_disk_audit.md
+	@echo "Result cleanup is manual; see docs/archive/shared/p89_disk_audit.md"
 
 clean-vm-tmp:
 	-find "$(ROOT_DIR)/docs/tmp" -path '*/vm-tmp/*.img' -type f -delete
@@ -405,4 +405,4 @@ clean-docker-cache:
 	@echo "Docker build cache is not pruned automatically."
 	@echo "After confirming no image build is active, run:"
 	@echo "  docker buildx prune --keep-storage $(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
-	@echo "See docs/tmp/docker-build-cache-gc.md"
+	@echo "See docs/archive/shared/docker-build-cache-gc.md"
