@@ -548,6 +548,10 @@ static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf,
 		return err;
 	if (byte_lane && size != BPF_B)
 		return -EINVAL;
+	if (!byte_lane) {
+		insn_buf[0] = BPF_STX_MEM(size, base_reg, src_reg, offset);
+		return 1;
+	}
 	if (!arch_base && src_reg != BPF_REG_10 &&
 	    !kop_x86_reg_uses_stack_slot(src_reg) && src_reg >= BPF_REG_10)
 		return -EINVAL;
@@ -594,11 +598,9 @@ static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf,
 static int instantiate_mov_imm_store(u64 payload, struct bpf_insn *insn_buf,
 				     u8 size, bool arch_base)
 {
-	u8 base_reg, addr_reg;
-	u32 scratch_mask = 0;
+	u8 base_reg;
 	s16 offset;
 	s32 imm;
-	int cnt = 0;
 	int err;
 
 	err = decode_store_imm(payload,
@@ -612,22 +614,8 @@ static int instantiate_mov_imm_store(u64 payload, struct bpf_insn *insn_buf,
 	if (size == BPF_H && (imm < -32768 || imm > 0xffff))
 		return -EINVAL;
 
-	addr_reg = base_reg;
-	if ((arch_base && kop_x86_arch_reg_uses_stack_slot(base_reg)) ||
-	    (!arch_base && kop_x86_reg_uses_stack_slot(base_reg))) {
-		addr_reg = KOP_X86_SCRATCH0;
-		scratch_mask = KOP_X86_SCRATCH_MASK(addr_reg);
-		kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-		if (arch_base)
-			kop_x86_read64_arch(insn_buf, &cnt, addr_reg,
-					      base_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, addr_reg, base_reg);
-	}
-	insn_buf[cnt++] = BPF_ST_MEM(size, addr_reg, offset, imm);
-	if (scratch_mask)
-		kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	insn_buf[0] = BPF_ST_MEM(size, base_reg, offset, imm);
+	return 1;
 }
 
 static int instantiate_movb(u64 payload, struct bpf_insn *insn_buf)
@@ -1424,7 +1412,7 @@ const struct bpf_kop bpf_x86_movb_desc = {
 
 const struct bpf_kop bpf_x86_movw_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movw,
 	.emit_x86 = emit_movw_x86,
