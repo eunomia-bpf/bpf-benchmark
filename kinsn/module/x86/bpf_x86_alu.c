@@ -332,44 +332,28 @@ static int instantiate_x86_alu_sib(const struct kop_x86_alu_payload *alu,
 	return cnt;
 }
 
-static int instantiate_x86_shift_cl(const struct kop_x86_alu_payload *alu,
-				    struct bpf_insn *insn_buf, u8 op,
-				    u8 width)
+static int instantiate_x86_shift(const struct kop_x86_alu_payload *alu,
+				  struct bpf_insn *insn_buf, u8 op, u8 width)
 {
-	u8 dst_eval_reg = KOP_X86_SCRATCH0;
-	u8 count_reg = KOP_X86_SCRATCH1;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
-	bool arch_reg = x86_alu_uses_arch_reg(alu->form);
-	int cnt = 0;
 	int err;
 
-	if (alu->src_reg != BPF_REG_4)
-		return -EINVAL;
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg) {
-		kop_x86_read64_arch(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
-		kop_x86_read64_arch(insn_buf, &cnt, count_reg, alu->src_reg);
+	if (alu->form == KOP_X86_ALU_FORM_RR ||
+	    alu->form == KOP_X86_ALU_FORM_ARCH_RR) {
+		if (alu->src_reg != BPF_REG_4)
+			return -EINVAL;
+		err = emit_bpf_alu_reg(&insn_buf[0], op, width, alu->dst_reg,
+				       alu->src_reg);
+	} else if (alu->form == KOP_X86_ALU_FORM_IMM ||
+		   alu->form == KOP_X86_ALU_FORM_ARCH_IMM) {
+		if (alu->imm < 0 || alu->imm >= width)
+			return -EINVAL;
+		err = emit_bpf_alu_imm(&insn_buf[0], op, width, alu->dst_reg,
+				       alu->imm);
 	} else {
-		kop_x86_read64(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
-		kop_x86_read64(insn_buf, &cnt, count_reg, alu->src_reg);
+		/* Memory-source shifts have never had a native emitter. */
+		return -EINVAL;
 	}
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, count_reg, width - 1);
-	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width, dst_eval_reg,
-			       count_reg);
-	if (err)
-		return err;
-	if (width == 32)
-		insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, alu->dst_reg,
-				       dst_eval_reg, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return err ? err : 1;
 }
 
 static int instantiate_x86_xorw_mem(const struct kop_x86_alu_payload *alu,
@@ -442,6 +426,9 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 	if (err)
 		return err;
 
+	if (x86_alu_is_shift(op))
+		return instantiate_x86_shift(alu, insn_buf, op, width);
+
 	if (alu->form == KOP_X86_ALU_FORM_MEM ||
 	    alu->form == KOP_X86_ALU_FORM_ARCH_MEM)
 		return instantiate_x86_alu_mem(alu, insn_buf, op, width);
@@ -458,9 +445,6 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 
 	if (alu->form == KOP_X86_ALU_FORM_IMM ||
 	    alu->form == KOP_X86_ALU_FORM_ARCH_IMM) {
-		if (x86_alu_is_shift(op) &&
-		    (alu->imm < 0 || alu->imm >= width))
-			return -EINVAL;
 		dst_eval_reg = alu->dst_reg;
 		if (dst_stacked) {
 			dst_eval_reg = KOP_X86_SCRATCH0;
@@ -493,8 +477,6 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 		return cnt;
 	}
 
-	if (x86_alu_is_shift(op))
-		return instantiate_x86_shift_cl(alu, insn_buf, op, width);
 	if (op == BPF_XOR && alu->dst_reg == alu->src_reg) {
 		if (dst_stacked) {
 			scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
