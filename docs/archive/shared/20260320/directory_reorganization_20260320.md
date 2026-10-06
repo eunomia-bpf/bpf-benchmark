@@ -56,10 +56,10 @@ Updated references in:
 - `.github/workflows/x86-benchmark.yml`
 - `CLAUDE.md`
 - `README.md`
-- `REVIEW.md`
+- `docs/REVIEW.md`
 - `corpus/README.md`
 - `docs/kernel-jit-optimization-plan.md`
-- `docs/micro-bench-status.md`
+- `docs/shared/micro-bench-status.md`
 - `micro/README.md`
 - `micro/benchmark_catalog.py`
 - `runner/libs/catalog.py`

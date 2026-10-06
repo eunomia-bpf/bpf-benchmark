@@ -406,7 +406,7 @@ Examples with multiple guard-skipped diamonds:
 220_tail_ipv4_to_endpoint:           5 / 9, three external-join skips plus one temp-reg skip
 ```
 
-The doc baseline records cilium `cond_select` at `208 / 218` and tetragon at `1 331 / 1 753` (`docs/evaluation.md:305-309`). The static cilium testbin scan is not the same as the full kop-5 corpus pipeline, but it demonstrates that the current pass-level guard has corpus-scale impact: most cilium cond_select skips in these snapshots are the mirrored external-join predicate, not real lowering failures.
+The doc baseline records cilium `cond_select` at `208 / 218` and tetragon at `1 331 / 1 753` (`rejit/docs/evaluation.md:305-309`). The static cilium testbin scan is not the same as the full kop-5 corpus pipeline, but it demonstrates that the current pass-level guard has corpus-scale impact: most cilium cond_select skips in these snapshots are the mirrored external-join predicate, not real lowering failures.
 
 For the PC 39 site in `164_cil_from_host`, the live-in verification is:
 

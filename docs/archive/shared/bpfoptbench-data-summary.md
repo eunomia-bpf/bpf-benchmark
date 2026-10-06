@@ -247,7 +247,7 @@ CV drops from 29.6% (no filter) to 17.7% with min_runs >= 100 filter. Without fi
 
 - Corpus results: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/` (2,124 sessions)
 - Micro results: `/home/yunwei37/workspace/bpf-benchmark/micro/results/` (852 sessions)
-- Source-opt records: `/home/yunwei37/workspace/bpf-benchmark/docs/source-opt/` (6 apps)
+- Source-opt records: `/home/yunwei37/workspace/bpf-benchmark/docs/shared/source-opt/` (6 apps)
 - Evaluation sessions: `/home/yunwei37/workspace/bpf-benchmark/docs/ebpf27-bpfoptbench/docs/evaluation-sessions.md`
 - Pass variance analysis: `/home/yunwei37/workspace/bpf-benchmark/docs/ebpf27-bpfoptbench/docs/micro-pass-variance-analysis.md`
 

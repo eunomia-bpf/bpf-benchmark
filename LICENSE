@@ -27,7 +27,7 @@ SCOPE AND THIRD-PARTY MATERIAL
 The MIT license above applies to the original material of this repository:
 the benchmark harness (`runner/`, `corpus/`, `micro/`, `tests/`), the `bpfopt`
 optimizer and shim (`bpfopt/`), the KOperation kernel modules (`module/`), the
-formalization and simulator code (`native-sim/`), and this repository's
+formalization and simulator code (`kprog/`), and this repository's
 documentation.
 
 Third-party and vendored material is covered by its own licenses, which are

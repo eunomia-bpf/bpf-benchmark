@@ -1,7 +1,7 @@
 # Diagnostics
 
 Current base: bcc/set phase3 attempt 4,
-`docs/source-opt/bcc-set/20260626-075220-phase3-syscount-key-width-cleanup/source.diff`.
+`docs/shared/source-opt/bcc-set/20260626-075220-phase3-syscount-key-width-cleanup/source.diff`.
 
 Candidate change:
 

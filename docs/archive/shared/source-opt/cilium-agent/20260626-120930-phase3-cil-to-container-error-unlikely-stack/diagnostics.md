@@ -2,12 +2,12 @@
 
 Current base before this attempt:
 
-- `docs/source-opt/cilium-agent/20260626-105321-phase3-reserved-identity-cold/source.diff`
+- `docs/shared/source-opt/cilium-agent/20260626-105321-phase3-reserved-identity-cold/source.diff`
 - Mean `1672664` pktgen_total_pps, `+12.40%` vs clean baseline.
 
 Candidate stacked patch:
 
-- Reused `docs/source-opt/cilium-agent/20260625-084516-cil-to-container-error-unlikely/source.diff`.
+- Reused `docs/shared/source-opt/cilium-agent/20260625-084516-cil-to-container-error-unlikely/source.diff`.
 - That first-round attempt alone measured mean `1510065`, `+1.48%` vs clean baseline.
 - The candidate marks `cil_to_container()` invalid ethertype and failed L3 header pull branches as `unlikely()`.
 

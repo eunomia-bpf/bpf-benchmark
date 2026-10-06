@@ -9,7 +9,7 @@ with `SKIP_REJIT=all` so there is no shim, no kop module preload, and no
 
 Start checks:
 
-- Worktree: `M docs/source-opt/README.md`
+- Worktree: `M docs/shared/source-opt/README.md`
 - Disk: `/dev/nvme0n1p2 915G 683G 187G 79% /`
 - Residual benchmark process: none found.
 

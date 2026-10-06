@@ -59,10 +59,10 @@ The artifact contains four components. Each maps to a part of the paper.
 |---|---|---|
 | `bpfopt` bytecode optimizer + stock-kernel userspace shim | `bpfopt/` (`shim/`, `llvm/`, `kopprober/`) | \S\ref{sec:implementation}; the load-time lowering/restore stage |
 | KOperation native-operation kernel modules | `kinsn/module/x86/`, `kinsn/module/arm64/` | \S\ref{sec:koperation}; the seven hardware-idiom descriptor families |
-| Lean 4 semantic proofs + host cross-checks | `native-sim/formal/`, `native-sim/x86/`, `native-sim/arm64/` | abstract + \S\ref{sec:implementation}; "each native emit computes the same result as its proof sequence" |
+| Lean 4 semantic proofs + host cross-checks | `kprog/formal/`, `kprog/x86/`, `kprog/arm64/` | abstract + \S\ref{sec:implementation}; "each native emit computes the same result as its proof sequence" |
 | Make-backed benchmark harness (micro + production corpus) | `Makefile`, `runner/`, `micro/`, `corpus/` | \S\ref{sec:evaluation} (RQ1–RQ4) |
 
-Supporting material: `docs/implementation.md` (current proof/coverage boundary),
+Supporting material: `docs/shared/implementation.md` (current proof/coverage boundary),
 `docs/archive/shared/20260906-bpf-development-todo.md` (chronological engineering log with
 measured results and known defects), `docs/paper/` (LaTeX, figures, tables,
 plotting scripts).
@@ -96,7 +96,7 @@ The artifact was developed and validated on:
 | qemu-system-aarch64 | 8.2.2 |
 | virtme-ng (`vng`) | 1.41 |
 | docker | 29.8.0 |
-| Lean (`lean-toolchain`) | `leanprover/lean4:v4.19.0` (pinned in `native-sim/formal/lean-toolchain`) |
+| Lean (`lean-toolchain`) | `leanprover/lean4:v4.19.0` (pinned in `kprog/formal/lean-toolchain`) |
 
 Rust and Go are required by the full build and are pinned by the tracked
 `.devcontainer/Dockerfile`; the versions above were verified in the preparation
@@ -232,10 +232,10 @@ semantic checks, beyond a passing fixture or kernel verifier result.
 make lint
 
 # 2. Lean 4 semantic proofs + generated-contract drift checks + C host cross-checks.
-make -C native-sim/formal check
+make -C kprog/formal check
 
 # 3. x86 simulator proof artifacts (negative artifact + workload-derived artifacts).
-make -C native-sim/x86 micro-proofs-build
+make -C kprog/x86 micro-proofs-build
 ```
 
 ### Why `make check` is not in the fast path
@@ -245,7 +245,7 @@ the Make-backed **KVM test suite** target. It requires the runtime image and a
 KVM-capable host, so it belongs to the full-validation stage in
 [Step 2](#7-step-2--kvm--full-validation-then-the-single-app-smoke-path) and later, not here.
 
-### What `make -C native-sim/formal check` does
+### What `make -C kprog/formal check` does
 
 It is the paper's **soundness check for the "native emit == proof sequence"
 claim**. In order it:
@@ -273,13 +273,13 @@ non-zero exit is a real failure — see
 [Troubleshooting](#8-idempotence-and-failure-recovery).
 
 **No `sorry`/`admit`.** The proof suite is required to be complete; a `sorry`
-would be a defect, not a warning. (Check: `grep -rn "sorry" native-sim/formal/KProgFormal/`.)
+would be a defect, not a warning. (Check: `grep -rn "sorry" kprog/formal/KProgFormal/`.)
 
 **Resource note.** The Lean step is the slowest part of the fast path; budget
 tens of minutes on a first run and much less on re-runs (the `.lake` build
 directory is cached).
 
-**Validation evidence (2026-09-29).** A full `make -C native-sim/formal check`
+**Validation evidence (2026-09-29).** A full `make -C kprog/formal check`
 completed with **exit status 0** at commit `cc1c64c7f`: 59
 `generate_*_spec.py --check` generators, 107 `lake env lean` refinement-module
 checks, and 49 compiled-and-run C host cross-checks reporting 4,303,967 oracle
@@ -289,7 +289,7 @@ x86 `CMOV`/`CMOV_MEM` handler composition.)
 receipt is `docs/artifacts/evidence/formal-check.json`, its console log is
 `docs/artifacts/evidence/formal-check.log`, and the claim table's
 `Semantic proofs` row derives those four counts from the log and cross-checks
-them against both the receipt and the `native-sim/formal/Makefile` at the
+them against both the receipt and the `kprog/formal/Makefile` at the
 current commit, so a receipt left behind by an older proof tree reports
 PARTIAL rather than passing. Performance experiments were **not** rerun as part
 of this documentation validation; the paper's performance numbers are not
@@ -482,7 +482,7 @@ metric rows.
 | RQ3 policy | site-count vs profitability | four-arm Cilium ladder + two-arm Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points and all six fresh site counts (Cilium 4017/3512/3517/2988; Katran 21/64) derive from retained raw JSON; the June per-pass site reports are missing, so the June site counts are declared and the fresh ladder's ordering diverges from June's |
 | RQ4 native bound | 2.358×, 488.7→262.3 ns/run | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; the paper's 113/22/89 loader counts stay declared, and a fresh native-post run derives 179 loads / 135 replacements / 0 pass-through / 33 feature-probe skips / 11 pre-init loads plus 89 manifest objects across 6 native objects |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
-| Proofs | "emit computes the same result as its proof sequence" | `make -C native-sim/formal check` | stdout | **Yes** |
+| Proofs | "emit computes the same result as its proof sequence" | `make -C kprog/formal check` | stdout | **Yes** |
 The RQ3 policy-arm commands below select the pass names and 3-sample,
 30-second workload settings recorded in the retained Cilium/Katran run
 metadata. The Cilium ladder starts from the coverage-max arm and disables
@@ -499,7 +499,7 @@ for the unavailable `aws` platform here), retaining
 `details/loadtime-reports/katran.jsonl` from which the renderer derives
 21 (conservative) and 64 (coverage-max) applied sites. The June and historical
 RQ2 site counts remain declared from
-`docs/archive/kinsn/kop_ablation_20260605_summary.md` because their runs retained no
+`kinsn/docs/archive/kop_ablation_20260605_summary.md` because their runs retained no
 per-pass report:
 
 ```bash
@@ -603,7 +603,7 @@ the reverse (no-bulk+no-prefetch fastest at 1.138190×, coverage-max slowest at
 row derives both orderings from retained raw JSON and reports the divergence;
 the fresh ladder is shipped as separate evidence and does not replace the June
 values. The Katran and the historical RQ2 counts (21/62, 4086) remain
-**declared** from `docs/archive/kinsn/kop_ablation_20260605_summary.md`, since no
+**declared** from `kinsn/docs/archive/kop_ablation_20260605_summary.md`, since no
 `details/loadtime-reports/` tree survives for those runs and the figures
 annotate them as declared.
 
@@ -728,7 +728,7 @@ assuming a command or retained directory succeeded.
    0.995157×/0.997839× (both 1.00×). The renderer reports both and gates the
    row on the paper-matched open+load value.
 6. **Katran's per-app applied-site count differs from the corpus-wide family
-   sum.** `docs/archive/kinsn/kop_ablation_20260605_summary.md` records 21 Katran sites in
+   sum.** `kinsn/docs/archive/kop_ablation_20260605_summary.md` records 21 Katran sites in
    its per-app table (line 55) but 24 in its corpus-wide family tally (rotate 20
    + extract 4). The paper quotes the per-app 21; the two are different
    aggregations of the same run and the discrepancy is unresolved because the
@@ -737,7 +737,7 @@ assuming a command or retained directory succeeded.
    counts are derived.** No `details/loadtime-reports/` tree survives for the
    June ladder, so its annotated counts (4697/4086/4136/3512), the June Katran
    counts (21/62) and the RQ2 4086 count are **declared** from
-   `docs/archive/kinsn/kop_ablation_20260605_summary.md`. Five fresh Cilium reruns retain
+   `kinsn/docs/archive/kop_ablation_20260605_summary.md`. Five fresh Cilium reruns retain
    their report streams: the four RQ3 policy arms
    (`corpus/results/x86_kvm_corpus_20260924_{064817_392000,074900_275227,085901_647044,095500_223221}`)
    derive 4017/3512/3517/2988, and a rerun of the RQ2 run's own `kop` policy
@@ -758,7 +758,7 @@ assuming a command or retained directory succeeded.
    (`RQ3 Cilium June-vs-fresh ladder ordering (diverges)`); the June rows are
    kept and the fresh runs are shipped as a separate evidence set.
 9. **RQ4's producers are retained analysis scripts, not Make targets.**
-   `docs/archive/kprog/native_eval_20260529.py` and `docs/archive/kprog/native_eval_20260614.py`
+   `kprog/docs/archive/native_eval_20260529.py` and `kprog/docs/archive/native_eval_20260614.py`
    derive the native-in-kernel metrics; they are shipped as cited files and are
    not reachable from a single `make` command.
 
@@ -773,14 +773,14 @@ bpfopt/
   llvm/                       # the optimizer CLI (one named pass per invocation)
   kopprober/                  # probes loaded KOperation BTF and writes target.json
 module/{x86,arm64}/           # KOperation native-operation kernel modules
-native-sim/
+kprog/
   formal/                     # Lean 4 proofs, JSON specs, generators, host checks
   x86/, arm64/                # architecture simulators with proven contracts
 micro/                        # microbenchmark programs + configs + results
 corpus/                       # production app corpus, workloads, results
 runner/                       # Make-backed suites, executors, images, libs
 docs/paper/                   # current paper source and plots; see metadata caveat above
-docs/implementation.md        # current proof/coverage boundary (read this)
+docs/shared/implementation.md        # current proof/coverage boundary (read this)
 docs/archive/shared/20260906-*.md  # chronological engineering log with measurements
 docs/artifacts/               # AEC renderer, packager, and compact receipts
 docs/paper/scripts/           # raw-deriving plot scripts (RQ1, RQ3, Section 3)
@@ -1249,14 +1249,14 @@ workload.
 
 > BPF-Ext reproduces on Ubuntu 24.04 x86-64. A fast path requiring no VM runs the
 > Lean 4 proof suite, the generated-contract drift checks, and the independent C
-> host cross-checks (`make -C native-sim/formal check`; `make -C native-sim/x86
+> host cross-checks (`make -C kprog/formal check`; `make -C kprog/x86
 > micro-proofs-build`). End-to-end measurement uses an in-repo Linux
 > `7.0.0-rc2+` kernel inside KVM via virtme-ng, driven only through `make`
 > targets; the smallest end-to-end experiment is
 > `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 make corpus`.
 > Dependencies are clang/LLVM 18, gcc 13, cmake, Python 3 + PyYAML, Rust
 > (rustup), Go, Docker, virtme-ng, and the Lean 4 toolchain pinned by
-> `native-sim/formal/lean-toolchain` (`leanprover/lean4:v4.19.0`). One-time kernel
+> `kprog/formal/lean-toolchain` (`leanprover/lean4:v4.19.0`). One-time kernel
 > and image builds dominate runtime (hours) and disk (~25–40 GB); the guest
 > measurement itself is ~2 minutes. Full paper-scale runs (both architectures)
 > additionally require AWS `t4g.small` for the ARM64 column.

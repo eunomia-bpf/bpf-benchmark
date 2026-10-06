@@ -7,10 +7,10 @@ the original `result.json` records; the reorganization does not alter them.
 
 | Question | Current interpretation |
 | --- | --- |
-| kprog native execution | [kprog evaluation](../kprog/evaluation.md) |
-| kinsn inline kfuncs | [kinsn evaluation](../kinsn/evaluation.md) |
-| Speculative ReJIT | [ReJIT evaluation](../evaluation.md) |
-| Cross-runtime micro characterization | [micro benchmark status](../micro-bench-status.md) |
+| kprog native execution | [kprog evaluation](../../kprog/docs/evaluation.md) |
+| kinsn inline kfuncs | [kinsn evaluation](../../kinsn/docs/evaluation.md) |
+| Speculative ReJIT | [ReJIT evaluation](../../rejit/docs/evaluation.md) |
+| Cross-runtime micro characterization | [micro benchmark status](micro-bench-status.md) |
 | Corpus workload selection | [workload tuning log](../workload.md) |
 
 Run `make micro` or `make corpus` from the repository root to create new

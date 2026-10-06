@@ -83,9 +83,9 @@ branch behavior, and architecture-sensitive lowering under
 
 | Project | Code | Current design | Current results | Build and run |
 | --- | --- | --- | --- | --- |
-| **kprog**: native whole-program execution | [`native-sim/`](native-sim/README.md) (loader, linker, simulator, Lean) | [design](docs/kprog/design.md) | [evaluation](docs/kprog/evaluation.md) | [project guide](docs/kprog/README.md) |
-| **kinsn**: verified inline kfuncs | [`kinsn/module/`](kinsn/module/), [`bpfopt/llvm/`](bpfopt/llvm/README.md) | [design](docs/kinsn/design.md) | [evaluation](docs/kinsn/evaluation.md) | [project guide](docs/kinsn/README.md) |
-| **Speculative ReJIT** | [`bpfopt/`](bpfopt/), [`runner/`](runner/) | [design](docs/rejit-speculative-optimization-ebpf_idea.md) | [evaluation](docs/evaluation.md) | [project guide](docs/rejit/README.md) |
+| **kprog**: native whole-program execution | [`kprog/`](kprog/README.md) (loader, linker, simulator, Lean) | [design](kprog/docs/design.md) | [evaluation](kprog/docs/evaluation.md) | [project guide](kprog/docs/README.md) |
+| **kinsn**: verified inline kfuncs | [`kinsn/module/`](kinsn/module/), [`bpfopt/llvm/`](bpfopt/llvm/README.md) | [design](kinsn/docs/design.md) | [evaluation](kinsn/docs/evaluation.md) | [project guide](kinsn/docs/README.md) |
+| **Speculative ReJIT** | [`bpfopt/`](bpfopt/), [`runner/`](runner/) | [design](rejit/docs/design.md) | [evaluation](rejit/docs/evaluation.md) | [project guide](rejit/README.md) |
 | **Shared framework** | [`corpus/`](corpus/), [`micro/`](micro/), [`bpfperf/`](bpfperf/), [`analysis/`](analysis/) | [design](docs/shared/design.md) | [results guide](docs/shared/evaluation.md) | [Make targets](#running-benchmarks) |
 
 Historical plans and dated reports are grouped in the [archive](docs/archive/README.md).
@@ -100,13 +100,17 @@ bpf-benchmark/
 ├── corpus/                   # Production app corpus, workloads, results
 ├── micro/                    # Microbenchmark programs, configs, results
 ├── bpfopt/                   # Bytecode optimizer, loader, target probing tools
-├── kinsn/module/             # Inline-kfunc modules for x86 and arm64
-├── native-sim/               # kprog simulator, native loader/linker, Lean proofs
+├── kinsn/                    # Inline-kfunc modules, Lean proofs, and docs
+├── kprog/                   # kprog simulator, native loader/linker, Lean proofs
+├── rejit/                    # ReJIT docs; code in bpfopt/ and runner/
 ├── analysis/                 # Post-hoc analysis utilities
 ├── tests/                    # Selftests and negative tests
 ├── docs/                     # Design notes, reports, and paper material
 └── vendor/                   # Vendored kernel, libbpf, llvmbpf, app deps
 ```
+
+`native-sim` is a temporary symlink to `kprog` for agents and running scripts
+that still use the former path. New commands and references use `kprog/`.
 
 The current designs and historical notes are linked in the project table above.
 Runtime image layering and host/runtime boundaries are documented in

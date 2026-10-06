@@ -11,7 +11,7 @@ After fixes: **clean** — no untracked files.
 
 ### 2. Root directory
 
-Root directory is clean: CLAUDE.md, config, corpus, docs, e2e, legacy, Makefile, micro, README.md, reference, REVIEW.md, scanner, tests, tmp, vendor. No loose scripts or temp files.
+Root directory is clean: CLAUDE.md, config, corpus, docs, e2e, legacy, Makefile, micro, README.md, reference, docs/REVIEW.md, scanner, tests, tmp, vendor. No loose scripts or temp files.
 
 `tmp/` directory exists but is now properly gitignored (56 previously-tracked scratch files removed from git).
 

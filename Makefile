@@ -216,7 +216,7 @@ check:
 
 lint:
 	find "$(ROOT_DIR)" \
-		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/llvm-backend" -o -path "$(ROOT_DIR)/docs/archive" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
+		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/llvm-backend" -o -path "$(ROOT_DIR)/docs/archive" -o -path "$(ROOT_DIR)/kprog/docs/archive" -o -path "$(ROOT_DIR)/kinsn/docs/archive" -o -path "$(ROOT_DIR)/rejit/docs/archive" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
 		-type f -name '*.py' -exec "$(PYTHON)" -m py_compile {} +
 
 selftest: selftest-$(RUN_KEY)
@@ -391,7 +391,7 @@ clean-build:
 		"$(ARTIFACT_ROOT)/aws-x86/state"
 	rm -rf "$(ROOT_DIR)"/vendor/build
 	rm -rf "$(ROOT_DIR)"/kinsn/module/x86/build "$(ROOT_DIR)"/kinsn/module/arm64/build
-	rm -rf "$(ROOT_DIR)"/native-sim/test/build-x86 "$(ROOT_DIR)"/native-sim/test/build-arm64
+	rm -rf "$(ROOT_DIR)"/kprog/test/build-x86 "$(ROOT_DIR)"/kprog/test/build-arm64
 
 clean-results:
 	@# results retention is manual; see docs/archive/shared/p89_disk_audit.md

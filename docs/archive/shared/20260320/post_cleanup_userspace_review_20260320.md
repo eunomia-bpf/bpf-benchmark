@@ -258,7 +258,7 @@ Source-only search:
 
 ```bash
 rg -n "_driver_impl_|run_rigorous|run_micro.py|run_rigorous.py|run_rigorous_framework_vm.py|run_e2e_tracee" \
-  micro corpus e2e runner Makefile .github/workflows README.md REVIEW.md docs \
+  micro corpus e2e runner Makefile .github/workflows README.md docs/REVIEW.md docs \
   --glob '!**/results/**' --glob '!docs/tmp/**'
 ```
 

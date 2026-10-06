@@ -17,4 +17,4 @@
 - Run command: see `run-command.sh`.
 - Result path: `corpus/results/x86_kvm_corpus_20260625_092311_749645`
 - Follow-up: completed; katran source restored with
-  `patch -p1 -R < docs/source-opt/katran/20260625-021633-calc-offset-fastpath/source.diff`.
+  `patch -p1 -R < docs/shared/source-opt/katran/20260625-021633-calc-offset-fastpath/source.diff`.

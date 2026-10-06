@@ -1,7 +1,7 @@
 # Diagnostics
 
 Current base: bcc/set phase3 attempt 2,
-`docs/source-opt/bcc-set/20260626-070554-phase3-syscount-default-filter-fastpath/source.diff`.
+`docs/shared/source-opt/bcc-set/20260626-070554-phase3-syscount-default-filter-fastpath/source.diff`.
 
 Candidate change:
 

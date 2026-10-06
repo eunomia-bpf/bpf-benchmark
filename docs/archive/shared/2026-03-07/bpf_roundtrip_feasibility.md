@@ -296,14 +296,14 @@ Total estimates:
 
 The repo's current authoritative result is:
 
-- `llvmbpf/kernel` exec-time geomean = **0.849x** (`docs/micro-bench-status.md:491-493`)
-- `llvmbpf/kernel` native code-size geomean = **0.496x** (`docs/micro-bench-status.md:491-493`)
+- `llvmbpf/kernel` exec-time geomean = **0.849x** (`docs/shared/micro-bench-status.md:491-493`)
+- `llvmbpf/kernel` native code-size geomean = **0.496x** (`docs/shared/micro-bench-status.md:491-493`)
 
 But that number is **not** a direct upper bound on what BPF-bytecode optimization can recover before kernel JIT.
 
 Why not:
 
-- Part of `llvmbpf`'s advantage is from **host-native** instruction selection and register allocation. The benchmark summary explicitly calls out x86-specific wins such as `cmov` and BMI instructions (`docs/micro-bench-status.md:493`).
+- Part of `llvmbpf`'s advantage is from **host-native** instruction selection and register allocation. The benchmark summary explicitly calls out x86-specific wins such as `cmov` and BMI instructions (`docs/shared/micro-bench-status.md:493`).
 - Those wins do **not** survive lowering back into BPF bytecode, because BPF ISA cannot encode x86-specific `cmov`/BMI patterns directly.
 
 What is likely to survive:

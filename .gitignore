@@ -92,9 +92,9 @@ tests/kernel/build/
 tests/kernel/build-arm64/
 tests/negative/build-arm64/
 tests/integration/
-native-sim/test/build-x86/
-native-sim/test/build-arm64/
-native-sim/test/build-*/
+kprog/test/build-x86/
+kprog/test/build-arm64/
+kprog/test/build-*/
 
 # BPF build artifacts
 *.bpf.o
@@ -322,3 +322,6 @@ docs/tmp/*/llvmbpf_bulk_roundtrip/guest_verify_helper/target/
 /vendor/bpf/targets/
 /docs/artifacts/dist/
 /docs/tmp/build-and-evaluate/
+
+# Simulator compilation caches
+/kprog/**/build-*/

@@ -1,6 +1,6 @@
 # eBPF Grant 提案事实核查报告（overview.tex / main.tex / biblio.bib）
 
-- 核查对象：`docs/research/eBPF-Grant---eBPF-runtime-optimization/{overview.tex,main.tex,biblio.bib}`
+- 核查对象：`docs/shared/research/eBPF-Grant---eBPF-runtime-optimization/{overview.tex,main.tex,biblio.bib}`
 - 核查时间：2026-07-13
 - 方法：逐条对照三篇 source-of-truth 论文（Kops `docs/paper/`、BpfReJIT `docs/speculative-optimization/`、NativeBPF `docs/kprog-simulator-in-ebpf/`）、bpf-bench 论文（`docs/ebpf27-bpfoptbench/main.tex`）、仓库现状（`corpus/config/macro_apps.yaml`、`bpfopt/`、`micro/`、CLAUDE.md）、以及 GitHub/WebSearch 外部核实。
 

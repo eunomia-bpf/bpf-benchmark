@@ -1,7 +1,7 @@
 # Diagnostics
 
 Current base: bcc/set phase2 best,
-`docs/source-opt/bcc-set/20260625-203413-phase2-raw-syscount-tcpconnect-fexit/source.diff`.
+`docs/shared/source-opt/bcc-set/20260625-203413-phase2-raw-syscount-tcpconnect-fexit/source.diff`.
 
 Candidate change: keep the phase2 stacked base and add `__builtin_expect(..., 0)`
 to default-cold `tcpconnect` branches inside `exit_tcp_connect()`: pid filter,

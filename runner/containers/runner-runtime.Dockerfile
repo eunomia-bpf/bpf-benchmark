@@ -151,7 +151,7 @@ ARG RUN_TARGET_ARCH=x86_64
 ARG BPFOPT_HOST_BIN=bpfopt/llvm/build-kop/bpfopt
 ARG KOPPROBER_HOST_BIN=bpfopt/target/release/kopprober
 ARG BPFPROF_HOST_BIN=bpfperf/target/release/bpfprof
-ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
+ARG NATIVE_LINK_HOST_BIN=kprog/x86/native_lab/native_link/target/release/native-link
 
 COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
 COPY --link --from=runner-runtime-artifacts /artifacts/tetragon /artifacts/tetragon

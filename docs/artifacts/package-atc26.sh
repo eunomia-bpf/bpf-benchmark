@@ -29,9 +29,9 @@ git -C "$ROOT_DIR" archive --format=tar "$COMMIT" -- . \
     ':(exclude)tests/results' \
     ':(exclude)docs/tmp' \
     ':(exclude)tmp-*' \
-    ':(exclude)docs/source-opt' \
+    ':(exclude)docs/shared/source-opt' \
     ':(exclude)docs/reference' \
-    ':(exclude)docs/research' \
+    ':(exclude)docs/shared/research' \
     ':(exclude)docs/ebpf27-bpfoptbench' \
     ':(exclude)docs/kprog-simulator-in-ebpf' \
     ':(exclude)docs/speculative-optimization' \
@@ -481,7 +481,7 @@ required=(
     docs/paper/scripts/plot_evaluation_koperation.py
     docs/paper/scripts/plot_rq3_policy_probes.py
     docs/paper/scripts/plot_app_case_studies.py
-    native-sim/formal/lean-toolchain vendor/llvmbpf/CMakeLists.txt
+    kprog/formal/lean-toolchain vendor/llvmbpf/CMakeLists.txt
     vendor/libbpf/src/libbpf.c vendor/linux-framework/Makefile
     llvm-backend/llvm/llvm/CMakeLists.txt vendor/repos/katran/CMakeLists.txt
     vendor/repos/tracee/Makefile vendor/repos/tetragon/Makefile

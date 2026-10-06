@@ -2,7 +2,7 @@
 
 日期：2026-07-13
 输入材料：
-- `docs/research/eBPF-Grant---eBPF-runtime-optimization/`（现版 main.tex = 2025 "Extending eBPF for LLM Serving Observability" 提案，$50K/12 个月，PI Andi Quinn + Yusheng Zheng；`old/` 为 PI 更早的 bug-reproduction NSF 素材）
+- `docs/shared/research/eBPF-Grant---eBPF-runtime-optimization/`（现版 main.tex = 2025 "Extending eBPF for LLM Serving Observability" 提案，$50K/12 个月，PI Andi Quinn + Yusheng Zheng；`old/` 为 PI 更早的 bug-reproduction NSF 素材）
 - 仓库四条论文线：
   1. **KOperation**（`docs/paper/`）："Safely Extending the eBPF Compilation Pipeline with Native Operations" — dual-form operation（proof sequence + native emit），Lean 4 证明，7 个硬件习语操作，micro +24% / production +12%，x86-64 + ARM64
   2. **BpfReJIT / Speculative Optimization**（`docs/speculative-optimization/`）："Transparent Speculative Optimization for Deployed eBPF Programs" — shim 拦截 + bpfopt 纯字节码 CLI + stock verifier/JIT，load-time 与 live-swap 两条路径

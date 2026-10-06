@@ -54,113 +54,113 @@ Added for artifact evaluation:
   embedded constants.
 - `docs/artifacts/render_claim_table.py` derives all six RQ3 throughput/cost
   points from the retained app JSON. Applied-site counts remain declared from
-  `docs/archive/kinsn/kop_ablation_20260605_summary.md`, which is now shipped.
+  `kinsn/docs/archive/kop_ablation_20260605_summary.md`, which is now shipped.
 - Formal-proof evidence refresh: the retained `Semantic proofs` receipt and log
-  were regenerated at commit `68a77fe0e` (`make -C native-sim/formal check`,
+  were regenerated at commit `68a77fe0e` (`make -C kprog/formal check`,
   exit 0: 52 generator `--check` runs, 80 Lean module checks, 30 host
   cross-checks over 1,517,532 oracle cases), replacing the 2026-09-22 record
   that predated five proof commits. `docs/artifacts/render_claim_table.py` now
   derives those counts from the retained log and requires them to agree with
-  both the receipt and the `native-sim/formal/Makefile` at the current commit,
+  both the receipt and the `kprog/formal/Makefile` at the current commit,
   so a stale receipt reports PARTIAL instead of passing on a hard-coded count.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `735539c2c` (`make -C native-sim/formal
+  and log were regenerated at commit `735539c2c` (`make -C kprog/formal
   check`, exit 0: 52 generator `--check` runs, 84 Lean module checks, 34 host
   cross-checks over 1,605,212 oracle cases). This replaces the `68a77fe0e`
   receipt, which predated the x86 memory source/store/unary handler proof
   commits and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `5b20bc853` (`make -C native-sim/formal
+  and log were regenerated at commit `5b20bc853` (`make -C kprog/formal
   check`, exit 0: 52 generator `--check` runs, 85 Lean module checks, 35 host
   cross-checks over 1,626,236 oracle cases). This replaces the `735539c2c`
   receipt, which predated the x86 memory-source shift/rotate handler proof
   commit and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `40ca51e79` (`make -C native-sim/formal
+  and log were regenerated at commit `40ca51e79` (`make -C kprog/formal
   check`, exit 0: 52 generator `--check` runs, 86 Lean module checks, 36 host
   cross-checks over 1,646,748 oracle cases). This replaces the `5b20bc853`
   receipt, which predated the x86 memory-source bit-test/zero-high-bits handler
   proof commit and had therefore drifted to PARTIAL against the current
   Makefile enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `5c5f9515a` (`make -C native-sim/formal
+  and log were regenerated at commit `5c5f9515a` (`make -C kprog/formal
   check`, exit 0: 52 generator `--check` runs, 87 Lean module checks, 37 host
   cross-checks over 1,689,884 oracle cases). This replaces the `40ca51e79`
   receipt, which predated the x86 memory-source multiply handler proof commit
   and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `947efed1a` (`make -C native-sim/formal
+  and log were regenerated at commit `947efed1a` (`make -C kprog/formal
   check`, exit 0: 52 generator `--check` runs, 88 Lean module checks, 38 host
   cross-checks over 1,730,668 oracle cases). This replaces the `5c5f9515a`
   receipt, which predated the x86 memory-source compare/test handler proof
   commit and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `4eb558734` (`make -C native-sim/formal
+  and log were regenerated at commit `4eb558734` (`make -C kprog/formal
   check`, exit 0: 52 generator `--check` runs, 89 Lean module checks, 39 host
   cross-checks over 1,771,964 oracle cases). This replaces the `947efed1a`
   receipt, which predated the x86 two-destination `MULX` handler proof commit
   and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `12475532c` (`make -C native-sim/formal
+  and log were regenerated at commit `12475532c` (`make -C kprog/formal
   check`, exit 0: 52 generator `--check` runs, 90 Lean module checks, 40 host
   cross-checks over 1,813,260 oracle cases). This replaces the `4eb558734`
   receipt, which predated the x86 register-source `IMUL reg, imm` handler proof
   commit and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `98426b872` (`make -C native-sim/formal
+  and log were regenerated at commit `98426b872` (`make -C kprog/formal
   check`, exit 0: 53 generator `--check` runs, 93 Lean module checks, 41 host
   cross-checks over 1,874,700 oracle cases). This replaces the `12475532c`
   receipt, which predated the x86 effective-address offset and `LEA` handler
   proof commit and had therefore drifted to PARTIAL against the current
   Makefile enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `650e28d1e` (`make -C native-sim/formal
+  and log were regenerated at commit `650e28d1e` (`make -C kprog/formal
   check`, exit 0: 53 generator `--check` runs, 94 Lean module checks, 42 host
   cross-checks over 1,975,148 oracle cases). This replaces the `98426b872`
   receipt, which predated the x86 register-writing `MOV` handler proof commit
   and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `29495e78a` (`make -C native-sim/formal
+  and log were regenerated at commit `29495e78a` (`make -C kprog/formal
   check`, exit 0: 53 generator `--check` runs, 95 Lean module checks, 43 host
   cross-checks over 2,037,557 oracle cases). This replaces the `650e28d1e`
   receipt, which predated the x86 width-converting `MOVZX`/`MOVSX` register
   handler proof commit and had therefore drifted to PARTIAL against the current
   Makefile enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `9806ed750` (`make -C native-sim/formal
+  and log were regenerated at commit `9806ed750` (`make -C kprog/formal
   check`, exit 0: 54 generator `--check` runs, 97 Lean module checks, 44 host
   cross-checks over 2,041,207 oracle cases). This replaces the `29495e78a`
   receipt, which predated the shared x86 memory read-dispatch proof commit and
   had therefore drifted to PARTIAL against the current Makefile enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `aebeabf6f` (`make -C native-sim/formal
+  and log were regenerated at commit `aebeabf6f` (`make -C kprog/formal
   check`, exit 0: 55 generator `--check` runs, 99 Lean module checks, 45 host
   cross-checks over 2,127,668 oracle cases). This replaces the `9806ed750`
   receipt, which predated the shared x86 `MOV_LOAD` handler composition proof
   commit and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `4c1cb3705` (`make -C native-sim/formal
+  and log were regenerated at commit `4c1cb3705` (`make -C kprog/formal
   check`, exit 0: 56 generator `--check` runs, 101 Lean module checks, 46 host
   cross-checks over 2,175,681 oracle cases). This replaces the `aebeabf6f`
   receipt, which predated the shared x86 `MOV_STORE` handler composition proof
   commit and had therefore drifted to PARTIAL against the current Makefile
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `cfe42a8da` (`make -C native-sim/formal
+  and log were regenerated at commit `cfe42a8da` (`make -C kprog/formal
   check`, exit 0: 57 generator `--check` runs, 103 Lean module checks, 47 host
   cross-checks over 2,766,407 oracle cases). This replaces the `4c1cb3705`
   receipt, which predated the x86 `SETCC` handler composition proof commit and
   had therefore drifted to PARTIAL against the current Makefile enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs` receipt
-  and log were regenerated at commit `a84158bea` (`make -C native-sim/formal
+  and log were regenerated at commit `a84158bea` (`make -C kprog/formal
   check`, exit 0: 58 generator `--check` runs, 105 Lean module checks, 48 host
   cross-checks over 3,819,598 oracle cases). This replaces the `cfe42a8da`
   receipt, which predated the x86 `SETCC_MEM` handler composition proof commit
@@ -168,7 +168,7 @@ Added for artifact evaluation:
   enumeration.
 - Formal-proof evidence refresh again: the retained `Semantic proofs`
   receipt and log were regenerated at commit `cc1c64c7f` (`make
-  -C native-sim/formal check`, exit 0: 59 generator `--check` runs, 107
+  -C kprog/formal check`, exit 0: 59 generator `--check` runs, 107
   Lean module checks, 49 host cross-checks over 4,303,967 oracle
   cases). This replaces the `a84158bea` receipt, which predated the
   x86 `CMOV`/`CMOV_MEM` handler composition proof commit and had
@@ -253,6 +253,6 @@ paper's Xeon/AWS numbers were re-measured):
   exact documented command exited 0 in 5,946 seconds; suite `completed`, app
   `ok`, and ReJIT `ok`. The retained receipt binds commit, log and JSON files
   by SHA256.
-- `make -C native-sim/formal check`: exit 0 (generated-contract drift checks,
+- `make -C kprog/formal check`: exit 0 (generated-contract drift checks,
   Lean modules, 25 C host cross-checks).
-- `make -C native-sim/x86 micro-proofs-build`: 30/30 OK.
+- `make -C kprog/x86 micro-proofs-build`: 30/30 OK.

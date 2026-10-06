@@ -1,6 +1,6 @@
 # Source optimization attempt records
 
-The [experiment summary and results](../../../source-opt/README.md) remains the
+The [experiment summary and results](../../../shared/source-opt/README.md) remains the
 entry point. These directories preserve source patches, commands, correctness
 notes, and paths to the original corpus results for each application.
 

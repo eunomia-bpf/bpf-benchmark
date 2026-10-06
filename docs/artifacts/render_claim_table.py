@@ -72,7 +72,7 @@ SMOKE_COMMAND = (
 )
 FORMAL_RECEIPT = "docs/artifacts/evidence/formal-check.json"
 FORMAL_LOG = "docs/artifacts/evidence/formal-check.log"
-FORMAL_MAKEFILE = "native-sim/formal/Makefile"
+FORMAL_MAKEFILE = "kprog/formal/Makefile"
 # The formal check prints one `<label> host cross-check: OK (<N> cases)` line
 # per cross-check program; the totals are the oracle-case counts they report.
 FORMAL_CASES = re.compile(r"host cross-check: OK \((\d+) cases\)")
@@ -2200,7 +2200,7 @@ def corpus_evidence(
     ]
 
 def formal_log_counts(path: Path) -> dict[str, int] | None:
-    """Count the check classes a retained `make -C native-sim/formal check` log ran.
+    """Count the check classes a retained `make -C kprog/formal check` log ran.
 
     Each generator is invoked as `python3 generate_*_spec.py --check`, each
     refinement module as `lake env lean KProgFormal/<Module>.lean`, and each C
@@ -2231,7 +2231,7 @@ def formal_log_counts(path: Path) -> dict[str, int] | None:
 def formal_makefile_counts(path: Path) -> dict[str, int] | None:
     """Count the check commands the formal Makefile at this commit enumerates.
 
-    The Makefile is the authority on what `make -C native-sim/formal check`
+    The Makefile is the authority on what `make -C kprog/formal check`
     must run, so disagreement between it and a retained log means the log
     predates the current proof tree.
     """
@@ -2293,7 +2293,7 @@ def formal_evidence(root: Path) -> tuple[str, str]:
         and checks.get("host_cross_check_cases") == log_counts["host_cross_check_cases"]
     )
     base_ok = (
-        data.get("command") == "make -C native-sim/formal check"
+        data.get("command") == "make -C kprog/formal check"
         and data.get("exit_code") == 0
         and checks.get("generated_contract_drift") is True
         and checks.get("lean_modules") is True
@@ -2604,7 +2604,7 @@ def self_test() -> int:
             "\t./build/test_one_host\n"
         )
         good_formal = {
-            "command": "make -C native-sim/formal check",
+            "command": "make -C kprog/formal check",
             "exit_code": 0,
             "commit": "a" * 40,
             "checks": {
@@ -2672,7 +2672,7 @@ def self_test() -> int:
 
         # Non-zero exit -> PARTIAL.
         write_log(synthetic_log)
-        write_formal({"command": "make -C native-sim/formal check", "exit_code": 1,
+        write_formal({"command": "make -C kprog/formal check", "exit_code": 1,
                       "commit": "a" * 40, "checks": good_formal["checks"],
                       "log": {"path": FORMAL_LOG,
                               "sha256": file_sha256(log_path)}})

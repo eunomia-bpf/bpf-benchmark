@@ -1,7 +1,7 @@
 # Diagnostics
 
 Current base: bcc/set phase3 attempt 1,
-`docs/source-opt/bcc-set/20260626-064041-phase3-tcpconnect-default-fastpath/source.diff`.
+`docs/shared/source-opt/bcc-set/20260626-064041-phase3-tcpconnect-default-fastpath/source.diff`.
 
 Candidate change: keep the phase3 attempt 1 stacked base and tune
 `syscount.bpf.c` for the default runner configuration (`syscount -L -i 1`).

@@ -31,7 +31,7 @@
 - [x] Five source-only attempts recorded.
 - [x] Every accepted attempt has `source.diff`, command, result path, and correctness notes.
 - [x] App source restored after every attempt.
-- [x] Root `docs/source-opt/README.md` performance table updated through attempt 5.
+- [x] Root `docs/shared/source-opt/README.md` performance table updated through attempt 5.
 
 ## Phase2 Gates
 
@@ -46,7 +46,7 @@
 - [x] Phase2 attempt 5 recorded with `source.diff`, command, result path, diagnostics, and correctness notes.
 - [x] App source restored after phase2 attempt 5.
 - [x] Five phase2 attempts recorded.
-- [x] Root `docs/source-opt/README.md` performance table updated through phase2 attempt 5.
+- [x] Root `docs/shared/source-opt/README.md` performance table updated through phase2 attempt 5.
 
 ## Phase3 Gates
 
@@ -61,4 +61,4 @@
 - [x] Phase3 attempt 5 recorded.
 - [x] App source restored after phase3 attempt 5.
 - [x] Five phase3 attempts recorded.
-- [x] Root `docs/source-opt/README.md` performance table updated through phase3 attempt 5.
+- [x] Root `docs/shared/source-opt/README.md` performance table updated through phase3 attempt 5.

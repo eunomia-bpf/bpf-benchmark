@@ -257,8 +257,8 @@ struct BbProgram {
 - [ ] Phase 1 完成总结报告
 
 ### Phase 2 准备（本月底）
-- [ ] **调研 1**：LLVM BPF backend 现状 (`docs/research/llvm-bpf-backend.md`)
-- [ ] **调研 2**：eBPF 优化论文综述 (`docs/research/ebpf-optimization-papers.md`)
+- [ ] **调研 1**：LLVM BPF backend 现状 (`llvm-backend/docs/llvm-bpf-backend.md`)
+- [ ] **调研 2**：eBPF 优化论文综述 (`docs/shared/research/ebpf-optimization-papers.md`)
 - [ ] 选 pattern DSL 设计（自己写 proc-macro vs 借用 egg / Bril / etc.）
 - [ ] 评估 LLVM BPF backend 上游贡献机会
 

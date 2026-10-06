@@ -4,7 +4,7 @@
 
 Read first: `CLAUDE.md:70-74` fail-fast/no-fallback rule and the paper-performance guidance in `CLAUDE.md:33-62`. I did not run benchmarks.
 
-Doc baseline: `docs/evaluation.md:310-311` says cilium had:
+Doc baseline: `rejit/docs/evaluation.md:310-311` says cilium had:
 
 | pass | cilium doc baseline |
 |---|---:|

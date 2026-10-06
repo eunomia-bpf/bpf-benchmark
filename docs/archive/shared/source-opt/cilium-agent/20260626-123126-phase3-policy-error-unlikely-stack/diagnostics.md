@@ -2,12 +2,12 @@
 
 Current base before this attempt:
 
-- `docs/source-opt/cilium-agent/20260626-120930-phase3-cil-to-container-error-unlikely-stack/source.diff`
+- `docs/shared/source-opt/cilium-agent/20260626-120930-phase3-cil-to-container-error-unlikely-stack/source.diff`
 - Mean `1686212` pktgen_total_pps, `+13.31%` vs clean baseline.
 
 Candidate stacked patch:
 
-- Reused `docs/source-opt/cilium-agent/20260625-082528-cil-lxc-policy-error-unlikely/source.diff`.
+- Reused `docs/shared/source-opt/cilium-agent/20260625-082528-cil-lxc-policy-error-unlikely/source.diff`.
 - That first-round attempt alone measured mean `1509617`, `+1.45%` vs clean baseline.
 - The candidate marks `cil_lxc_policy()` invalid ethertype and failed L3 header pull branches as `unlikely()`.
 

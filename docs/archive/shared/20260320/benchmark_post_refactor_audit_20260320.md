@@ -62,7 +62,7 @@ Fixed active references in:
 
 - `corpus/README.md`
   - Removed the stale checked-in `corpus/tmp/` description.
-- `docs/micro-bench-status.md`
+- `docs/shared/micro-bench-status.md`
   - Replaced removed `micro/archive/...` references with surviving archived reports.
   - Updated `micro/runner/...` references to `runner/...`.
 - `docs/kernel-jit-optimization-plan.md`
