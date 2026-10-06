@@ -44,12 +44,42 @@ static __always_inline int decode_bmi2_shift_payload(u64 payload, u8 *dst_reg,
 	return 0;
 }
 
+/* Only the dst == count != src case needs a dispatch: a MOV to dst would
+ * otherwise destroy the count. Test its low width bits before writing dst.
+ * Every leaf is MOV + immediate shift; there are no spills or hidden state.
+ * The native BMI2 instruction still performs the whole operation at once.
+ */
+static void instantiate_shift_dispatch(struct bpf_insn *insn_buf, int *cnt,
+				       u8 dst_reg, u8 src_reg, bool is64,
+				       bool left, u8 depth, u8 shift)
+{
+	int test, jump, high;
+
+	if (!depth) {
+		insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, src_reg);
+		insn_buf[(*cnt)++] = is64 ?
+			BPF_ALU64_IMM(left ? BPF_LSH : BPF_RSH, dst_reg, shift) :
+			BPF_ALU32_IMM(left ? BPF_LSH : BPF_RSH, dst_reg, shift);
+		return;
+	}
+
+	depth--;
+	test = (*cnt)++;
+	instantiate_shift_dispatch(insn_buf, cnt, dst_reg, src_reg, is64,
+				   left, depth, shift);
+	jump = (*cnt)++;
+	high = *cnt;
+	instantiate_shift_dispatch(insn_buf, cnt, dst_reg, src_reg, is64,
+				   left, depth, shift + (1U << depth));
+	insn_buf[test] = BPF_JMP_IMM(BPF_JSET, dst_reg, 1U << depth,
+				   high - test - 1);
+	insn_buf[jump] = BPF_JMP_A(*cnt - jump - 1);
+}
+
 static int instantiate_bmi2_shift(u64 payload, struct bpf_insn *insn_buf,
 				  bool is64, bool left)
 {
 	u8 dst_reg, src_reg, cnt_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
 	int cnt = 0;
 	int err;
 
@@ -57,19 +87,15 @@ static int instantiate_bmi2_shift(u64 payload, struct bpf_insn *insn_buf,
 	if (err)
 		return err;
 
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH0, src_reg, is64,
-		       false);
-	kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH1, cnt_reg, is64,
-		       false);
+	if (dst_reg == cnt_reg && dst_reg != src_reg) {
+		instantiate_shift_dispatch(insn_buf, &cnt, dst_reg, src_reg,
+					   is64, left, is64 ? 6 : 5, 0);
+		return cnt;
+	}
+	insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, src_reg);
 	insn_buf[cnt++] = is64 ?
-		BPF_ALU64_REG(left ? BPF_LSH : BPF_RSH, KOP_X86_SCRATCH0,
-			      KOP_X86_SCRATCH1) :
-		BPF_ALU32_REG(left ? BPF_LSH : BPF_RSH, KOP_X86_SCRATCH0,
-			      KOP_X86_SCRATCH1);
-	kop_x86_write(insn_buf, &cnt, dst_reg, KOP_X86_SCRATCH0,
-			scratch_mask, is64, false);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+		BPF_ALU64_REG(left ? BPF_LSH : BPF_RSH, dst_reg, cnt_reg) :
+		BPF_ALU32_REG(left ? BPF_LSH : BPF_RSH, dst_reg, cnt_reg);
 	return cnt;
 }
 
@@ -296,7 +322,7 @@ static int emit_bzhiq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kop bpf_x86_shlxl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 126,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_shlxl,
 	.emit_x86 = emit_shlxl_x86,
@@ -304,7 +330,7 @@ const struct bpf_kop bpf_x86_shlxl_desc = {
 
 const struct bpf_kop bpf_x86_shlxq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 254,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_shlxq,
 	.emit_x86 = emit_shlxq_x86,
@@ -312,7 +338,7 @@ const struct bpf_kop bpf_x86_shlxq_desc = {
 
 const struct bpf_kop bpf_x86_shrxl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 126,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_shrxl,
 	.emit_x86 = emit_shrxl_x86,
@@ -320,7 +346,7 @@ const struct bpf_kop bpf_x86_shrxl_desc = {
 
 const struct bpf_kop bpf_x86_shrxq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 254,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_shrxq,
 	.emit_x86 = emit_shrxq_x86,
