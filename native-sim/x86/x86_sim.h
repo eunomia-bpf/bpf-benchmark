@@ -211,6 +211,11 @@ static __always_inline __u64 x86_apply_width(__u64 value, __u8 width)
 	return KPROG_X86_APPLY_WIDTH(value, width);
 }
 
+static __always_inline __u8 x86_width_effective(__u8 code)
+{
+	return KPROG_X86_WIDTH_EFFECTIVE(code);
+}
+
 static __always_inline __u64 x86_sign_extend(__u64 value, __u8 width)
 {
 	return kprog_x86_sign_extend_value(value, width);

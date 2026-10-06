@@ -29,4 +29,32 @@ theorem x86_sign_mask_observes (v:X86Word) (w:X86Width) :
       x86SignSpec v w := by
   cases w <;> simp [x86NarrowSpec, x86WidthSignMaskSpec, x86SignSpec,
     x86WidthMaskSpec, x86WidthBitsSpec] <;> bv_decide
+/-- The decoded width code that means "absent", stated independently of the
+generated contract: the code the simulator leaves in an unused width field. -/
+def x86AbsentCodeSpec : Nat := 0
+/-- The code an absent width field resolves to, stated independently: the
+64-bit width's code. -/
+def x86DefaultCodeSpec : Nat := 8
+/-- The width code a body operates at: the decoded code itself, or the 64-bit
+default when the decoded code is absent. This is the resolution the simulator
+restated inline; it now shares this one kernel. -/
+def x86EffectiveCodeSpec (c : Nat) : Nat :=
+  if c = x86AbsentCodeSpec then x86DefaultCodeSpec else c
+theorem x86_effective_refines (c : Nat) :
+    GeneratedX86Width.effective c = x86EffectiveCodeSpec c := by rfl
+theorem x86_effective_absent_is_default :
+    x86EffectiveCodeSpec x86AbsentCodeSpec = x86DefaultCodeSpec := by rfl
+/-- The absent code names no width, so the fallback only fires on a genuinely
+unused field and every real code is used as decoded. -/
+theorem x86_absent_code_names_no_width (w : X86Width) :
+    x86WidthCodeSpec w != x86AbsentCodeSpec := by cases w <;> decide
+/-- The absent field's fallback code is exactly the 64-bit width's code, pinned
+against the generated `x86_width.h` decode so the default cannot drift. -/
+theorem x86_default_code_is_w64 :
+    x86WidthCodeSpec .w64 = x86DefaultCodeSpec := by rfl
+/-- A decoded width code is its own effective code: the resolution is the
+identity on every real width, and only rewrites the absent code. -/
+theorem x86_effective_identity_on_width (w : X86Width) :
+    x86EffectiveCodeSpec (x86WidthCodeSpec w) = x86WidthCodeSpec w := by
+  cases w <;> rfl
 end KProgFormal

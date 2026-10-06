@@ -126,8 +126,11 @@ union x86_sim_stack_mem {
 #define X86_SIM_HELPER_bpf_prog_load_map 20ULL
 #define X86_SIM_HELPER_bpf_get_current_task 21ULL
 
+/* The width a body operates at when its decoded width field is absent (the
+ * code 0): the same resolution the Lean `effective` def and the C contract
+ * state. Bodies restated this fallback inline; they now share one kernel. */
 #define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                    \
-	((WIDTH) ? (WIDTH) : X86_WIDTH_64)
+	x86_width_effective(WIDTH)
 
 #define X86_SIM_L_FOR_EACH_GPR(X)                                           \
 	X(X86_RAX, rax)                                                     \
@@ -300,8 +303,8 @@ struct x86_sim_state {
 	({                                                                 \
 		__u8 __x86_rd_reg = (REG);                                  \
 		__u8 __x86_rd_raw_width = (WIDTH);                         \
-		__u8 __x86_rd_width = __x86_rd_raw_width ?                 \
-			__x86_rd_raw_width : X86_WIDTH_64;                   \
+		__u8 __x86_rd_width =                                       \
+			X86_SIM_L_EFFECTIVE_WIDTH(__x86_rd_raw_width);             \
 		__u8 __x86_rd_shift = (SRC_SHIFT);                          \
 		__u64 __x86_rd_value =                                    \
 			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg);  \
@@ -375,8 +378,8 @@ struct x86_sim_state {
 #define X86_SIM_L_WRITE_REG_WIDTH_SHIFT(REG, VALUE, WIDTH, DST_SHIFT)       \
 	do {                                                               \
 		__u8 __x86_wr_raw_width = (WIDTH);                         \
-		__u8 __x86_wr_width = __x86_wr_raw_width ?                 \
-			__x86_wr_raw_width : X86_WIDTH_64;                   \
+		__u8 __x86_wr_width =                                       \
+			X86_SIM_L_EFFECTIVE_WIDTH(__x86_wr_raw_width);             \
 		__u8 __x86_wr_shift = (DST_SHIFT);                          \
 		__u64 __x86_wr_next = (VALUE);                            \
 		if (__x86_wr_width == X86_WIDTH_8) {                      \
@@ -436,14 +439,14 @@ struct x86_sim_state {
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \
 		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
-		if (((WIDTH) ? (WIDTH) : X86_WIDTH_64) == X86_WIDTH_64 && \
+		if ((X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) == X86_WIDTH_64 && \
 		    KPROG_X86_STACK_WORD_ALIGNED(__x86_stw_index)) {      \
 			__x86_stack_mem.q                               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_stw_index)] = (VALUE);     \
 		} else {                                                  \
 			__u8 __x86_stw_width =                            \
-				(WIDTH) ? (WIDTH) : X86_WIDTH_64;         \
+				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
 			__u64 __x86_stw_narrowed = (VALUE) &              \
 				x86_width_mask(__x86_stw_width);          \
 			__x86_stack_mem.b[__x86_stw_index] =              \
@@ -481,14 +484,14 @@ struct x86_sim_state {
 	({                                                                 \
 		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		__u64 __x86_str_value;                                   \
-		if (((WIDTH) ? (WIDTH) : X86_WIDTH_64) == X86_WIDTH_64 && \
+		if ((X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) == X86_WIDTH_64 && \
 		    KPROG_X86_STACK_WORD_ALIGNED(__x86_str_index)) {      \
 			__x86_str_value = __x86_stack_mem.q               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_str_index)];               \
 		} else {                                                  \
 			__u8 __x86_str_width =                            \
-				(WIDTH) ? (WIDTH) : X86_WIDTH_64;         \
+				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
 			__x86_str_value =                                 \
 				__x86_stack_mem.b[__x86_str_index];       \
 			if (__x86_str_width >= X86_WIDTH_16)              \
@@ -536,7 +539,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_SET_LOGIC_FLAGS(RESULT, WIDTH)                            \
 	do {                                                               \
-		__u8 __x86_fl_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;   \
+		__u8 __x86_fl_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);   \
 		__u64 __x86_fl_value = x86_apply_width((RESULT),          \
 						      __x86_fl_width);    \
 		__u32 __x86_fl_bits = x86_width_bits(__x86_fl_width);     \
@@ -547,7 +550,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_SET_SUB_FLAGS(LHS, RHS, RESULT, WIDTH)                    \
 	do {                                                               \
-		__u8 __x86_sub_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
+		__u8 __x86_sub_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);  \
 		__u64 __x86_sub_mask = x86_width_mask(__x86_sub_width);   \
 		__u64 __x86_sub_a = (LHS) & __x86_sub_mask;               \
 		__u64 __x86_sub_b = (RHS) & __x86_sub_mask;               \
@@ -560,7 +563,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_SET_ADD_FLAGS(LHS, RHS, RESULT, WIDTH)                    \
 	do {                                                               \
-		__u8 __x86_add_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
+		__u8 __x86_add_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);  \
 		__u64 __x86_add_mask = x86_width_mask(__x86_add_width);   \
 		__u64 __x86_add_a = (LHS) & __x86_add_mask;               \
 		__u64 __x86_add_b = (RHS) & __x86_add_mask;               \
@@ -573,7 +576,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_SET_ADC_FLAGS(LHS, RHS, CARRY, RESULT, WIDTH)             \
 	do {                                                               \
-		__u8 __x86_adc_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
+		__u8 __x86_adc_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);  \
 		__u64 __x86_adc_mask = x86_width_mask(__x86_adc_width);   \
 		__u64 __x86_adc_a = (LHS) & __x86_adc_mask;               \
 		__u64 __x86_adc_b = (RHS) & __x86_adc_mask;               \
@@ -586,7 +589,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_SET_SBB_FLAGS(LHS, RHS, BORROW, RESULT, WIDTH)            \
 	do {                                                               \
-		__u8 __x86_sbb_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
+		__u8 __x86_sbb_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);  \
 		__u64 __x86_sbb_mask = x86_width_mask(__x86_sbb_width);   \
 		__u64 __x86_sbb_a = (LHS) & __x86_sbb_mask;               \
 		__u64 __x86_sbb_b = (RHS) & __x86_sbb_mask;               \
@@ -599,7 +602,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_SET_IMUL_FLAGS(LHS, RHS, WIDTH)                           \
 	do {                                                               \
-		__u8 __x86_imul_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64; \
+		__u8 __x86_imul_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH); \
 		__u64 __x86_imul_a_abs = x86_signed_abs_width((LHS),      \
 							   __x86_imul_width);\
 		__u64 __x86_imul_b_abs = x86_signed_abs_width((RHS),      \
@@ -616,8 +619,8 @@ struct x86_sim_state {
 #define X86_SIM_L_SET_SHIFT_FLAGS(LHS, RHS, RESULT, ALU, WIDTH)             \
 	do {                                                               \
 		__u8 __x86_sh_raw_width = (WIDTH);                         \
-		__u8 __x86_sh_width = __x86_sh_raw_width ?                  \
-			__x86_sh_raw_width : X86_WIDTH_64;                    \
+		__u8 __x86_sh_width =                                       \
+			X86_SIM_L_EFFECTIVE_WIDTH(__x86_sh_raw_width);             \
 		__u32 __x86_sh_bits = x86_width_bits(__x86_sh_width);     \
 		__u64 __x86_sh_mask = x86_width_mask(__x86_sh_width);     \
 		__u64 __x86_sh_a = (LHS) & __x86_sh_mask;                 \
@@ -688,7 +691,8 @@ struct x86_sim_state {
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 	({                                                                 \
 		void *__x86_l_base_ptr = (void *)0;                      \
-		__u8 __x86_l_mem_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);\
+		__u8 __x86_l_read_mem_width =                            \
+			X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);                \
 		__s64 __x86_l_disp = (STORE_DISP) ?                      \
 			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp);\
@@ -699,11 +703,11 @@ struct x86_sim_state {
 		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
 				     __x86_l_disp;                       \
 		switch (X86_SIM_L_MEM_READ_SRC(BASE_REG,                 \
-					       __x86_l_mem_width)) {     \
+					       __x86_l_read_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
-				__x86_l_mem_width);                       \
+				__x86_l_read_mem_width);                  \
 			break;                                           \
 		case KPROG_X86_MEM_SRC_ABI_PTR_LOAD:                     \
 			__x86_l_value =                                  \
@@ -713,7 +717,7 @@ struct x86_sim_state {
 		default:                                                 \
 			__x86_l_value = X86_SIM_L_LOAD_ADDR(             \
 				(void *)(long)__x86_l_addr,              \
-				__x86_l_mem_width);                      \
+				__x86_l_read_mem_width);                  \
 			break;                                           \
 		}                                                         \
 		__x86_l_value;                                            \
@@ -927,7 +931,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_LEA(DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__s64 __x86_l_off = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
 		X86_SIM_L_BARRIER_VAR(__x86_l_off);                     \
 		void *__x86_l_src_ptr = KPROG_X86_REG_ABSENT(SRC) ? (void *)0 :\
@@ -966,7 +970,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_ALU_IMM(DST, FLAGS, ALU, IMM)                        \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u32 __x86_l_aux = (ALU);                               \
 		__u8 __x86_l_alu =                                      \
 			KPROG_X86_REG_LANE_AUX_PAYLOAD(__x86_l_aux);       \
@@ -1011,7 +1015,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_ALU_REG(DST, SRC, FLAGS, ALU)                        \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u32 __x86_l_aux = (ALU);                               \
 		__u8 __x86_l_alu =                                      \
 			KPROG_X86_REG_LANE_AUX_PAYLOAD(__x86_l_aux);       \
@@ -1058,7 +1062,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_ALU_MEM(DST, SRC, FLAGS, AUX, IMM)                   \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
 		__u64 __x86_l_rhs = X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),\
@@ -1088,7 +1092,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_ALU_MEM_UNARY(DST, FLAGS, AUX, IMM)                  \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
 			(IMM), __x86_l_width, 0);                         \
@@ -1116,7 +1120,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_ALU_MEM_IMM(DST, FLAGS, AUX, IMM)                    \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
 			(IMM), __x86_l_width, 1);                         \
@@ -1161,7 +1165,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_ALU_MEM_REG(DST, SRC, FLAGS, AUX, IMM)               \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
 			(IMM), __x86_l_width, 0);                         \
@@ -1295,7 +1299,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_IMUL_IMM(DST, SRC, FLAGS, IMM)                       \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(SRC);             \
 		__u64 __x86_l_rhs = x86_sign_extend((IMM), __x86_l_width);\
 		__u64 __x86_l_result = __x86_l_lhs * __x86_l_rhs;        \
@@ -1307,7 +1311,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_IMUL_MEM_IMM(DST, SRC, FLAGS, AUX, IMM)              \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX);     \
 		if (!__x86_l_mem_width)                                  \
 			__x86_l_mem_width = __x86_l_width;                \
@@ -1327,7 +1331,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_MULX(DST, SRC, AUX, FLAGS)                           \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(X86_RDX);         \
 		__u64 __x86_l_rhs = X86_SIM_L_READ_REG(SRC);             \
 		__u64 __x86_l_low;                                       \
@@ -1490,7 +1494,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_CMP_MEM(OP, DST, SRC, FLAGS, AUX, IMM)               \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
 			(IMM), __x86_l_width, (OP) != X86_OP_CMP_MEM_REG);\
 		__u64 __x86_l_rhs = ((OP) == X86_OP_CMP_MEM_REG ||        \
@@ -1509,7 +1513,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_CMP_REG_MEM(DST, SRC, FLAGS, AUX, IMM)               \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
 		__u64 __x86_l_rhs = X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),\
 			(IMM), __x86_l_width, 0);                         \
@@ -1520,7 +1524,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_MOV_IMM_AUX(DST, FLAGS, AUX, IMM)                    \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), (IMM), __x86_l_width,\
 			KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));              \
 	} while (0)
@@ -1530,7 +1534,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)                    \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		if (__x86_l_width == X86_WIDTH_64 && (SRC) == X86_RSP) {  \
 			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
 				X86_SIM_L_STACK_PTR(                       \
@@ -1555,7 +1559,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC_MOVX_REG(OP, DST, SRC, FLAGS, AUX)                   \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_src_width = (AUX) ? (AUX) : __x86_l_width;   \
 		__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);            \
 		__x86_l_value = (OP) == X86_OP_MOVSX_REG ?                \
@@ -1760,7 +1764,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_EXEC(OP, DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
-		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		if ((OP) == X86_OP_NOP) {                                  \
 			(void)0;                                           \
 		} else if ((OP) == X86_OP_MOV_LOAD_MAP_PTR ||             \
