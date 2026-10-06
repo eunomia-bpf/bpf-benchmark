@@ -648,10 +648,7 @@ static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 static int instantiate_inc(u64 payload, struct bpf_insn *insn_buf, u8 width)
 {
 	struct kop_x86_alu_payload decoded;
-	u8 dst_reg, value_reg, high_reg;
-	u32 scratch_mask;
-	bool arch_reg;
-	int cnt = 0;
+	u8 dst_reg;
 	int err;
 
 	err = decode_x86_alu_payload(payload, &decoded);
@@ -661,53 +658,20 @@ static int instantiate_inc(u64 payload, struct bpf_insn *insn_buf, u8 width)
 	     decoded.form != KOP_X86_ALU_FORM_ARCH_IMM) ||
 	    decoded.imm != 0)
 		return -EINVAL;
-	if (width != 32 && width != 64)
+	if (width != 8 && width != 32 && width != 64)
 		return -EINVAL;
 
 	dst_reg = decoded.dst_reg;
-	arch_reg = x86_alu_uses_arch_reg(decoded.form);
-	if (!arch_reg && !kop_x86_reg_uses_stack_slot(dst_reg) &&
-	    !kop_x86_is_scratch(dst_reg)) {
-		if (width == 32)
-			insn_buf[0] = BPF_ALU32_IMM(BPF_ADD, dst_reg, 1);
-		else
-			insn_buf[0] = BPF_ALU64_IMM(BPF_ADD, dst_reg, 1);
-		return 1;
-	}
-
-	value_reg = kop_x86_scratch_avoid(dst_reg, 0, 0);
-	scratch_mask = KOP_X86_SCRATCH_MASK(value_reg);
-	high_reg = kop_x86_scratch_avoid(dst_reg, value_reg, 0);
+	insn_buf[0] = width == 32 ?
+		BPF_ALU32_IMM(BPF_ADD, dst_reg, 1) :
+		BPF_ALU64_IMM(BPF_ADD, dst_reg, 1);
 	if (width == 8) {
-		if (high_reg == value_reg)
-			return -EINVAL;
-		scratch_mask |= KOP_X86_SCRATCH_MASK(high_reg);
+		/* Undo the carry into bits 63:8 only when the low byte wraps. */
+		insn_buf[1] = BPF_JMP_IMM(BPF_JSET, dst_reg, 0xff, 1);
+		insn_buf[2] = BPF_ALU64_IMM(BPF_ADD, dst_reg, -256);
+		return 3;
 	}
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read64_arch(insn_buf, &cnt, value_reg, dst_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, value_reg, dst_reg);
-	if (width == 8) {
-		insn_buf[cnt++] = BPF_MOV64_REG(high_reg, value_reg);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, -256);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, value_reg, 0xff);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, value_reg, 1);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, value_reg, 0xff);
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, value_reg, high_reg);
-	} else if (width == 32) {
-		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_ADD, value_reg, 1);
-	} else {
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, value_reg, 1);
-	}
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, dst_reg, value_reg,
-				       scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, dst_reg, value_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return 1;
 }
 
 static int instantiate_incb(u64 payload, struct bpf_insn *insn_buf)
@@ -1523,7 +1487,7 @@ const struct bpf_kop bpf_x86_andb_desc = {
 
 const struct bpf_kop bpf_x86_incb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 12 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 3,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incb,
 	.emit_x86 = emit_incb_x86,
@@ -1531,7 +1495,7 @@ const struct bpf_kop bpf_x86_incb_desc = {
 
 const struct bpf_kop bpf_x86_incq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incq,
 	.emit_x86 = emit_incq_x86,
@@ -1539,7 +1503,7 @@ const struct bpf_kop bpf_x86_incq_desc = {
 
 const struct bpf_kop bpf_x86_incl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incl,
 	.emit_x86 = emit_incl_x86,
