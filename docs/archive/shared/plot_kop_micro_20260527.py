@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 FIG = ROOT / "docs" / "figures"
 
 BEST_RAW_KOP = ROOT / "micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json"

@@ -16,9 +16,9 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 FIG = ROOT / "docs" / "figures"
-SUMMARY = ROOT / "docs" / "tmp" / "arm64_kop_micro_20260605_summary.md"
+SUMMARY = ROOT / "kinsn" / "docs" / "archive" / "arm64_kop_micro_20260605_summary.md"
 
 PURE = ROOT / "micro/results/aws_arm64_micro_20260605_195615_598255/details/result.json"
 STAGE2 = ROOT / "micro/results/aws_arm64_micro_20260605_201826_257732/details/result.json"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Post-hoc arm64 AWS kop follow-up for 2026-06-05.
 
-This script intentionally lives under docs/tmp. It analyzes raw benchmark
+This script intentionally lives under docs/archive/shared. It analyzes raw benchmark
 artifacts after collection and does not participate in the benchmark framework.
 """
 
@@ -20,12 +20,12 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "docs" / "tmp"))
+ROOT = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "docs" / "archive" / "shared"))
 import kop_eval_20260604 as kop_eval
 
 FIG_OUT = ROOT / "docs" / "figures" / "eval-kop-arm64-aws-20260605.png"
-SUMMARY_OUT = ROOT / "docs" / "tmp" / "kop_arm64_eval_20260605_summary.md"
+SUMMARY_OUT = ROOT / "kinsn" / "docs" / "archive" / "kop_arm64_eval_20260605_summary.md"
 
 APP_ORDER = [
     "bcc/set",

@@ -2,7 +2,7 @@
 """Post-hoc kop ablation plots for 2026-06-05.
 
 This script analyzes already-collected corpus artifacts only. It intentionally
-lives under docs/tmp and is not part of the benchmark framework.
+lives under docs/archive/shared and is not part of the benchmark framework.
 """
 
 from __future__ import annotations
@@ -21,13 +21,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "docs" / "tmp"))
+ROOT = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "docs" / "archive" / "shared"))
 import kop_eval_20260604 as kop_eval
 
 RESULTS = ROOT / "corpus" / "results"
 FIG_OUT = ROOT / "docs" / "figures" / "eval-kop-ablation-20260605.png"
-SUMMARY_OUT = ROOT / "docs" / "tmp" / "kop_ablation_20260605_summary.md"
+SUMMARY_OUT = ROOT / "kinsn" / "docs" / "archive" / "kop_ablation_20260605_summary.md"
 
 APP_ORDER = [
     "bcc/set",
