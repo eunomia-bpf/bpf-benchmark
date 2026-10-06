@@ -140,8 +140,15 @@ static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
 	    false_reg == 0xff || cond_reg == 0xff)
 		return -EINVAL;
 
+	/* Establish our own predicate; preceding koperations have no flags contract. */
+	err = kop_arm64_emit_one(image, idx, emit, a64_tst(cond_reg, cond_reg));
+	if (err < 0)
+		return err;
 	insn = a64_csel(dst_reg, true_reg, false_reg, COND_NE);
-	return kop_arm64_emit_one(image, idx, emit, insn);
+	err = kop_arm64_emit_one(image, idx, emit, insn);
+	if (err < 0)
+		return err;
+	return 2;
 }
 
 const struct bpf_kop bpf_arm64_tst_desc = {
@@ -155,7 +162,7 @@ const struct bpf_kop bpf_arm64_tst_desc = {
 const struct bpf_kop bpf_arm64_csel_ne_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 4,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_csel_ne,
 	.emit_arm64 = emit_csel_ne_arm64,
 };

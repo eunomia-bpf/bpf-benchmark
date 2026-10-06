@@ -53,23 +53,6 @@ static __always_inline int decode_rotate_payload(u64 payload, u8 shift_mask,
 	return 0;
 }
 
-static __always_inline int decode_rotate64_payload(u64 payload,
-						   u8 *dst_reg,
-						   u8 *src_reg,
-						   u8 *shift)
-{
-	struct rotate_payload rot;
-	int err;
-
-	err = decode_rotate_payload(payload, 63, &rot);
-	if (err)
-		return err;
-	*dst_reg = rot.dst_reg;
-	*src_reg = rot.src_reg;
-	*shift = rot.shift;
-	return 0;
-}
-
 static __always_inline int decode_rotate32_payload(u64 payload,
 						   u8 *dst_reg,
 						   u8 *src_reg,
@@ -119,213 +102,104 @@ static __always_inline struct bpf_insn rotate_alu_imm(u8 width, u8 op, u8 dst,
 			     BPF_ALU32_IMM(op, dst, imm);
 }
 
-static __always_inline struct bpf_insn rotate_alu_reg(u8 width, u8 op, u8 dst,
-						      u8 src)
+/* Keep the shifted-out bit in control flow, not a scratch register. */
+static int instantiate_rotate_leaf(u8 width, u8 dst_reg, u8 src_reg,
+				   u8 shift, struct bpf_insn *insn_buf)
 {
-	return width == 64 ? BPF_ALU64_REG(op, dst, src) :
-			     BPF_ALU32_REG(op, dst, src);
+	int cnt = 0;
+	int i;
+
+	insn_buf[cnt++] = rotate_mov(width, dst_reg, src_reg);
+	for (i = 0; i < shift; i++) {
+		insn_buf[cnt++] = width == 64 ?
+			BPF_JMP_IMM(BPF_JSLT, dst_reg, 0, 2) :
+			BPF_JMP32_IMM(BPF_JSLT, dst_reg, 0, 2);
+		insn_buf[cnt++] = rotate_alu_imm(width, BPF_LSH, dst_reg, 1);
+		insn_buf[cnt++] = BPF_JMP_A(2);
+		insn_buf[cnt++] = rotate_alu_imm(width, BPF_LSH, dst_reg, 1);
+		insn_buf[cnt++] = rotate_alu_imm(width, BPF_OR, dst_reg, 1);
+	}
+	return cnt;
 }
 
 static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, u8 width)
 {
 	struct rotate_payload rot;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
-	bool arch_reg;
-	int cnt = 0;
 	int err;
 
 	err = decode_rotate_payload(payload, width - 1, &rot);
 	if (err)
 		return err;
-
-	arch_reg = rotate_payload_form(payload) == X86_ROTATE_FORM_ARCH_IMM;
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read64_arch(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				      rot.src_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				 rot.src_reg);
-	if (rot.shift) {
-		insn_buf[cnt++] = rotate_mov(width, KOP_X86_SCRATCH1,
-					     KOP_X86_SCRATCH0);
-		insn_buf[cnt++] = rotate_alu_imm(width, BPF_LSH,
-						 KOP_X86_SCRATCH0,
-						 rot.shift);
-		insn_buf[cnt++] = rotate_alu_imm(width, BPF_RSH,
-						 KOP_X86_SCRATCH1,
-						 width - rot.shift);
-		insn_buf[cnt++] = rotate_alu_reg(width, BPF_OR,
-						 KOP_X86_SCRATCH0,
-						 KOP_X86_SCRATCH1);
-	}
-	if (width == 32) {
-		if (arch_reg)
-			kop_x86_write32_arch(insn_buf, &cnt, rot.dst_reg,
-					       KOP_X86_SCRATCH0,
-					       scratch_mask);
-		else
-			kop_x86_write32(insn_buf, &cnt, rot.dst_reg,
-					  KOP_X86_SCRATCH0, scratch_mask);
-	} else {
-		if (arch_reg)
-			kop_x86_write64_arch(insn_buf, &cnt, rot.dst_reg,
-					       KOP_X86_SCRATCH0,
-					       scratch_mask);
-		else
-			kop_x86_write64(insn_buf, &cnt, rot.dst_reg,
-					  KOP_X86_SCRATCH0, scratch_mask);
-	}
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
-}
-
-static int instantiate_rotate_bpf(u64 payload, struct bpf_insn *insn_buf,
-				  u8 width)
-{
-	struct rotate_payload rot;
-	u8 scratch;
-	u32 scratch_mask;
-	int cnt = 0;
-	int err;
-
-	if (rotate_payload_form(payload) != X86_ROTATE_FORM_IMM)
-		return -EINVAL;
-
-	err = decode_rotate_payload(payload, width - 1, &rot);
-	if (err)
-		return err;
-	if (rot.shift == 0)
-		return -EINVAL;
-	if (!kop_x86_reg_is_bpf_writable(rot.dst_reg) ||
-	    !kop_x86_reg_is_bpf_writable(rot.src_reg))
-		return -EINVAL;
-
-	scratch = kop_x86_scratch_avoid(rot.dst_reg, rot.src_reg, 0);
-	scratch_mask = KOP_X86_SCRATCH_MASK(scratch);
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (rot.dst_reg != rot.src_reg)
-		insn_buf[cnt++] = rotate_mov(width, rot.dst_reg, rot.src_reg);
-	insn_buf[cnt++] = rotate_mov(width, scratch, rot.dst_reg);
-	insn_buf[cnt++] = rotate_alu_imm(width, BPF_LSH, rot.dst_reg,
-					 rot.shift);
-	insn_buf[cnt++] = rotate_alu_imm(width, BPF_RSH, scratch,
-					 width - rot.shift);
-	insn_buf[cnt++] = rotate_alu_reg(width, BPF_OR, rot.dst_reg,
-					 scratch);
-	if (width == 32)
-		kop_x86_write32(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
-				  scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
-}
-
-static int instantiate_rotate64(u64 payload, struct bpf_insn *insn_buf)
-{
-	int err = instantiate_rotate_bpf(payload, insn_buf, 64);
-
-	if (err != -EINVAL)
-		return err;
-	return instantiate_rotate(payload, insn_buf, 64);
+	return instantiate_rotate_leaf(width, rot.dst_reg, rot.src_reg,
+				       rot.shift, insn_buf);
 }
 
 static int instantiate_rotate32(u64 payload, struct bpf_insn *insn_buf)
 {
-	int err = instantiate_rotate_bpf(payload, insn_buf, 32);
-
-	if (err != -EINVAL)
-		return err;
 	return instantiate_rotate(payload, insn_buf, 32);
 }
 
-static int instantiate_rol_cl(u64 payload, struct bpf_insn *insn_buf,
-			      u8 width);
-
-static int instantiate_rolq(u64 payload, struct bpf_insn *insn_buf)
+/* Every CL bit is tested before the selected leaf writes dst, including
+ * dst=CL. Both child paths rejoin at the end of the node.
+ */
+static int instantiate_rotate_tree(u8 width, u8 dst_reg, u8 depth, u8 base,
+				   struct bpf_insn *insn_buf)
 {
+	int cnt = 0;
+	int branch;
+	int join;
+
+	if (!depth)
+		return instantiate_rotate_leaf(width, dst_reg, dst_reg, base, insn_buf);
+
+	branch = cnt++;
+	cnt += instantiate_rotate_tree(width, dst_reg, depth - 1, base, insn_buf + cnt);
+	join = cnt++;
+	insn_buf[branch] = BPF_JMP_IMM(BPF_JSET, BPF_REG_4,
+				      1U << (depth - 1), cnt - branch - 1);
+	cnt += instantiate_rotate_tree(width, dst_reg, depth - 1,
+				       base + (1U << (depth - 1)), insn_buf + cnt);
+	insn_buf[join] = BPF_JMP_A(cnt - join - 1);
+	return cnt;
+}
+
+static int instantiate_rol(u64 payload, struct bpf_insn *insn_buf, u8 width)
+{
+	struct rotate_payload rot;
+	u8 dst_reg, cnt_reg;
+	int err;
+
 	switch (rotate_payload_form(payload)) {
 	case X86_ROTATE_FORM_IMM:
 	case X86_ROTATE_FORM_ARCH_IMM:
-		return instantiate_rotate64(payload, insn_buf);
+		err = decode_rotate_payload(payload, width - 1, &rot);
+		if (err)
+			return err;
+		/* These are exactly the forms emit_rol_imm_x86 accepts. */
+		if (rot.dst_reg != rot.src_reg || !rot.shift)
+			return -EINVAL;
+		return instantiate_rotate_leaf(width, rot.dst_reg, rot.src_reg,
+					       rot.shift, insn_buf);
 	case X86_ROTATE_FORM_RR:
 	case X86_ROTATE_FORM_ARCH_RR:
-		return instantiate_rol_cl(payload, insn_buf, 64);
+		err = decode_rotate_cl_payload(payload, &dst_reg, &cnt_reg);
+		if (err)
+			return err;
+		return instantiate_rotate_tree(width, dst_reg, width == 64 ? 6 : 5,
+					       0, insn_buf);
 	default:
 		return -EINVAL;
 	}
+}
+
+static int instantiate_rolq(u64 payload, struct bpf_insn *insn_buf)
+{
+	return instantiate_rol(payload, insn_buf, 64);
 }
 
 static int instantiate_roll(u64 payload, struct bpf_insn *insn_buf)
 {
-	switch (rotate_payload_form(payload)) {
-	case X86_ROTATE_FORM_IMM:
-	case X86_ROTATE_FORM_ARCH_IMM:
-		return instantiate_rotate32(payload, insn_buf);
-	case X86_ROTATE_FORM_RR:
-	case X86_ROTATE_FORM_ARCH_RR:
-		return instantiate_rol_cl(payload, insn_buf, 32);
-	default:
-		return -EINVAL;
-	}
-}
-
-static int instantiate_rol_cl(u64 payload, struct bpf_insn *insn_buf,
-			      u8 width)
-{
-	u8 dst_reg, cnt_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2);
-	bool arch_reg;
-	bool width64;
-	u8 shift_mask;
-	int cnt = 0;
-	int err;
-
-	if (width != 32 && width != 64)
-		return -EINVAL;
-
-	err = decode_rotate_cl_payload(payload, &dst_reg, &cnt_reg);
-	if (err)
-		return err;
-
-	width64 = width == 64;
-	shift_mask = width - 1;
-	arch_reg = rotate_payload_form(payload) == X86_ROTATE_FORM_ARCH_RR;
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH0, dst_reg,
-		       width64, arch_reg);
-	if (arch_reg)
-		kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH1,
-			       cnt_reg, width64, true);
-	else
-		insn_buf[cnt++] = rotate_mov(width, KOP_X86_SCRATCH1,
-					     cnt_reg);
-	insn_buf[cnt++] = rotate_alu_imm(width, BPF_AND,
-					 KOP_X86_SCRATCH1, shift_mask);
-	insn_buf[cnt++] = rotate_mov(width, KOP_X86_SCRATCH2,
-				     KOP_X86_SCRATCH0);
-	insn_buf[cnt++] = rotate_alu_reg(width, BPF_LSH,
-					 KOP_X86_SCRATCH0,
-					 KOP_X86_SCRATCH1);
-	insn_buf[cnt++] = rotate_alu_imm(width, BPF_NEG,
-					 KOP_X86_SCRATCH1, 0);
-	insn_buf[cnt++] = rotate_alu_imm(width, BPF_AND,
-					 KOP_X86_SCRATCH1, shift_mask);
-	insn_buf[cnt++] = rotate_alu_reg(width, BPF_RSH,
-					 KOP_X86_SCRATCH2,
-					 KOP_X86_SCRATCH1);
-	insn_buf[cnt++] = rotate_alu_reg(width, BPF_OR,
-					 KOP_X86_SCRATCH0,
-					 KOP_X86_SCRATCH2);
-	kop_x86_write(insn_buf, &cnt, dst_reg, KOP_X86_SCRATCH0,
-			scratch_mask, width64, arch_reg);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return instantiate_rol(payload, insn_buf, 32);
 }
 
 static void emit_rol_imm(u8 *buf, u32 *len, bool is64, u8 dst_reg, u8 imm8)
@@ -471,7 +345,7 @@ static int emit_roll_x86(u8 *image, u32 *off, bool emit,
 
 const struct bpf_kop bpf_x86_rolq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 15 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 10270,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_rolq,
 	.emit_x86 = emit_rolq_x86,
@@ -479,7 +353,7 @@ const struct bpf_kop bpf_x86_rolq_desc = {
 
 const struct bpf_kop bpf_x86_roll_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 15 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 2574,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_roll,
 	.emit_x86 = emit_roll_x86,
@@ -487,7 +361,7 @@ const struct bpf_kop bpf_x86_roll_desc = {
 
 const struct bpf_kop bpf_x86_rorxl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 156,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_rotate32,
 	.emit_x86 = emit_rotate32_x86,

@@ -103,7 +103,18 @@ static int emit_rev_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 	}
 
-	return kop_arm64_emit_one(image, idx, emit, insn);
+	err = kop_arm64_emit_one(image, idx, emit, insn);
+	if (err < 0)
+		return err;
+	if (bits == 16) {
+		/* UXTH Wd,Wd: BPF_BSWAP(16) clears every bit above bit 15. */
+		err = kop_arm64_emit_one(image, idx, emit,
+					0x53003C00U | ((u32)dst_reg << 5) | dst_reg);
+		if (err < 0)
+			return err;
+		return 2;
+	}
+	return err;
 }
 
 static int emit_rev16_w_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -136,7 +147,7 @@ static int emit_rev_x_arm64(u32 *image, int *idx, bool emit, u64 payload,
 const struct bpf_kop bpf_arm64_rev16_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_rev16_w,
 	.emit_arm64 = emit_rev16_w_arm64,
 };

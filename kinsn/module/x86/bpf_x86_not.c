@@ -44,41 +44,16 @@ static int instantiate_not_narrow(u64 payload, struct bpf_insn *insn_buf,
 				  u32 mask)
 {
 	u8 dst_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
 	bool arch_reg;
-	int cnt = 0;
 	int err;
 
 	err = decode_not_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read64_arch(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				      dst_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				 dst_reg);
-	insn_buf[cnt++] = BPF_MOV64_REG(KOP_X86_SCRATCH1,
-					KOP_X86_SCRATCH0);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KOP_X86_SCRATCH1,
-					~mask);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_XOR, KOP_X86_SCRATCH0,
-					mask);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KOP_X86_SCRATCH0,
-					mask);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, KOP_X86_SCRATCH0,
-					KOP_X86_SCRATCH1);
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, dst_reg,
-				       KOP_X86_SCRATCH0, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, dst_reg,
-				  KOP_X86_SCRATCH0, scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	/* Flipping only the low mask preserves the rest of the register. */
+	insn_buf[0] = BPF_ALU64_IMM(BPF_XOR, dst_reg, mask);
+	return 1;
 }
 
 static int instantiate_notb_r(u64 payload, struct bpf_insn *insn_buf)
@@ -94,69 +69,29 @@ static int instantiate_notw_r(u64 payload, struct bpf_insn *insn_buf)
 static int instantiate_notl_r(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
 	bool arch_reg;
-	int cnt = 0;
 	int err;
 
 	err = decode_not_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
-	if (!arch_reg && !kop_x86_reg_uses_stack_slot(dst_reg)) {
-		insn_buf[0] = BPF_ALU32_IMM(BPF_XOR, dst_reg, -1);
-		return 1;
-	}
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read32_arch(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				      dst_reg);
-	else
-		kop_x86_read32(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				 dst_reg);
-	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_XOR, KOP_X86_SCRATCH0, -1);
-	if (arch_reg)
-		kop_x86_write32_arch(insn_buf, &cnt, dst_reg,
-				       KOP_X86_SCRATCH0, scratch_mask);
-	else
-		kop_x86_write32(insn_buf, &cnt, dst_reg,
-				  KOP_X86_SCRATCH0, scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	insn_buf[0] = BPF_ALU32_IMM(BPF_XOR, dst_reg, -1);
+	return 1;
 }
 
 static int instantiate_notq_r(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
 	bool arch_reg;
-	int cnt = 0;
 	int err;
 
 	err = decode_not_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
-	if (!arch_reg && !kop_x86_reg_uses_stack_slot(dst_reg)) {
-		insn_buf[0] = BPF_ALU64_IMM(BPF_XOR, dst_reg, -1);
-		return 1;
-	}
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read64_arch(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				      dst_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0,
-				 dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_XOR, KOP_X86_SCRATCH0, -1);
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, dst_reg,
-				       KOP_X86_SCRATCH0, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, dst_reg,
-				  KOP_X86_SCRATCH0, scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	insn_buf[0] = BPF_ALU64_IMM(BPF_XOR, dst_reg, -1);
+	return 1;
 }
 
 static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -221,7 +156,7 @@ static int emit_notq_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kop bpf_x86_notb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 11 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_notb_r,
 	.emit_x86 = emit_notb_r_x86,
@@ -229,7 +164,7 @@ const struct bpf_kop bpf_x86_notb_desc = {
 
 const struct bpf_kop bpf_x86_notl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 3,
 	.instantiate_insn = instantiate_notl_r,
 	.emit_x86 = emit_notl_r_x86,
@@ -237,7 +172,7 @@ const struct bpf_kop bpf_x86_notl_desc = {
 
 const struct bpf_kop bpf_x86_notq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 3,
 	.instantiate_insn = instantiate_notq_r,
 	.emit_x86 = emit_notq_r_x86,
@@ -245,7 +180,7 @@ const struct bpf_kop bpf_x86_notq_desc = {
 
 const struct bpf_kop bpf_x86_notw_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 11 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_notw_r,
 	.emit_x86 = emit_notw_r_x86,

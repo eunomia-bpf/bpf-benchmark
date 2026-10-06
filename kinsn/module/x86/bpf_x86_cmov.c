@@ -135,7 +135,19 @@ static int emit_cmp_cmov_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	kop_emit_u8(buf, &len, 0xC0 |
 		(kop_x86_reg_code(right_reg) << 3) |
 		kop_x86_reg_code(left_reg));
-	kop_emit_rex_rr(buf, &len, !value32, dst_reg, src_reg);
+	if (value32) {
+		/* MOV r32 zero-extends without changing the CMP flags. R11 is
+		 * JIT scratch, never a payload operand. CMOV64 preserves dst
+		 * exactly when the predicate is false.
+		 */
+		kop_emit_rex_rr(buf, &len, false, src_reg, KOP_X86_REG_R11);
+		kop_emit_u8(buf, &len, 0x89);
+		kop_emit_u8(buf, &len, 0xC0 |
+			(kop_x86_reg_code(src_reg) << 3) |
+			kop_x86_reg_code(KOP_X86_REG_R11));
+		src_reg = KOP_X86_REG_R11;
+	}
+	kop_emit_rex_rr(buf, &len, true, dst_reg, src_reg);
 	kop_emit_u8(buf, &len, 0x0F);
 	kop_emit_u8(buf, &len, cc);
 	kop_emit_u8(buf, &len, 0xC0 |

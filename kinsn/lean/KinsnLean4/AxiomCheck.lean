@@ -10,6 +10,30 @@ import KinsnLean4.Kinsn.Bswap
 import KinsnLean4.Kinsn.LoadImm
 import KinsnLean4.Kinsn.Insert
 import KinsnLean4.Kinsn.Catalog
+import KinsnLean4.Kinsn.ModuleCsel
+import KinsnLean4.Kinsn.ModuleCset
+import KinsnLean4.Kinsn.ModuleCmov
+import KinsnLean4.Kinsn.ModuleByteorder
+import KinsnLean4.Kinsn.ModuleNot
+import KinsnLean4.Kinsn.ModuleImul
+import KinsnLean4.Kinsn.ModuleBextr
+import KinsnLean4.Kinsn.ModuleLowBit
+import KinsnLean4.Kinsn.ModuleX86Rotate
+import KinsnLean4.Kinsn.ModuleMovWide
+import KinsnLean4.Kinsn.ModuleMovStore
+import KinsnLean4.Kinsn.ModuleMovsxd
+import KinsnLean4.Kinsn.ModuleMovzx
+import KinsnLean4.Kinsn.ModuleMovswl
+import KinsnLean4.Kinsn.ModuleNarrowLogic
+import KinsnLean4.Kinsn.ModuleAluShift
+import KinsnLean4.Kinsn.ModuleMovbe16
+import KinsnLean4.Kinsn.ModuleMovbeWide
+import KinsnLean4.Kinsn.ModuleBzhi
+import KinsnLean4.Kinsn.ModuleBmiShift
+import KinsnLean4.Kinsn.ModuleInc
+import KinsnLean4.Kinsn.ModuleRev16
+import KinsnLean4.Kinsn.ModuleCatalog
+import KinsnLean4.Kinsn.Counterexamples
 
 open Lean Elab Command
 

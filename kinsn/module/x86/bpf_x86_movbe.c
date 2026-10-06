@@ -56,62 +56,43 @@ static __always_inline int decode_movbe_payload(u64 payload,
 	return 0;
 }
 
-static bool movbe16_direct_scratch(u8 dst_reg, u8 base_reg, u8 *high_reg,
-				   u8 *value_reg)
+/* The load replaces dst, so dst itself can hold the effective address.
+ * Preserve base/index reads for every alias without a spill or temporary.
+ */
+static int instantiate_movbe_wide(u8 dst_reg, u8 base_reg, u8 index_reg,
+				   u8 scale_log2, s16 offset, bool indexed,
+				   struct bpf_insn *insn_buf, u8 size)
 {
-	u8 reg;
-
-	*high_reg = 0;
-	*value_reg = 0;
-	for (reg = KOP_X86_SCRATCH0; reg <= KOP_X86_SCRATCH2; reg++) {
-		if (reg == dst_reg || reg == base_reg)
-			continue;
-		if (!*high_reg) {
-			*high_reg = reg;
-			continue;
-		}
-		*value_reg = reg;
-		return true;
-	}
-	return false;
-}
-
-static int instantiate_movbe16_direct(u8 dst_reg, u8 base_reg, s16 offset,
-				      struct bpf_insn *insn_buf)
-{
-	u8 high_reg, value_reg;
-	u32 scratch_mask;
 	int cnt = 0;
+	int i;
 
-	if (!movbe16_direct_scratch(dst_reg, base_reg, &high_reg, &value_reg))
-		return -EINVAL;
-
-	scratch_mask = KOP_X86_SCRATCH_MASK(high_reg) |
-		       KOP_X86_SCRATCH_MASK(value_reg);
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	insn_buf[cnt++] = BPF_MOV64_REG(high_reg, dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, high_reg, 16);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, high_reg, 16);
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_H, value_reg, base_reg, offset);
-	insn_buf[cnt++] = BPF_BSWAP(value_reg, 16);
-	insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, high_reg);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, value_reg);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	if (indexed) {
+		if (dst_reg == base_reg && dst_reg == index_reg) {
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MUL, dst_reg,
+						 1 + (1U << scale_log2));
+		} else if (dst_reg == base_reg) {
+			for (i = 0; i < (1U << scale_log2); i++)
+				insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg,
+							      index_reg);
+		} else {
+			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, index_reg);
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MUL, dst_reg,
+						 1U << scale_log2);
+			insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg, base_reg);
+		}
+		base_reg = dst_reg;
+	}
+	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
+	insn_buf[cnt++] = BPF_BSWAP(dst_reg, kop_bpf_size_bits(size));
 	return cnt;
 }
 
 static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
-				 u8 size)
+				    u8 size)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2, addr_reg, value_reg, high_reg;
-	bool need_tmp = size == BPF_H;
+	u8 dst_reg, base_reg, index_reg, scale_log2;
 	bool indexed;
-	u32 scratch_mask;
-	u8 bytes = kop_bpf_size_bits(size) / 8;
 	s16 offset;
-	int add_count;
-	int i;
-	int cnt = 0;
 	int err;
 
 	err = decode_movbe_payload(payload, &dst_reg, &base_reg,
@@ -119,56 +100,8 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 				       &indexed);
 	if (err)
 		return err;
-
-	if (!indexed && (size == BPF_W || size == BPF_DW)) {
-		insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
-		insn_buf[cnt++] = BPF_BSWAP(dst_reg, size == BPF_W ? 32 : 64);
-		return cnt;
-	}
-	if (!indexed && size == BPF_H) {
-		err = instantiate_movbe16_direct(dst_reg, base_reg, offset,
-						 insn_buf);
-		if (err != -EINVAL)
-			return err;
-	}
-
-	addr_reg = kop_x86_scratch_avoid(dst_reg, base_reg, index_reg);
-	value_reg = kop_x86_scratch_avoid4(dst_reg, base_reg, index_reg,
-					     addr_reg);
-	scratch_mask = KOP_X86_SCRATCH_MASK(addr_reg) |
-		       KOP_X86_SCRATCH_MASK(value_reg);
-	if (need_tmp) {
-		high_reg = kop_x86_scratch_avoid4(dst_reg, base_reg,
-						     addr_reg, value_reg);
-		scratch_mask |= KOP_X86_SCRATCH_MASK(high_reg);
-	}
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (need_tmp) {
-		insn_buf[cnt++] = BPF_MOV64_REG(high_reg, dst_reg);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, high_reg, 16);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, high_reg, 16);
-	}
-
-	insn_buf[cnt++] = BPF_MOV64_REG(addr_reg, base_reg);
-	if (indexed) {
-		add_count = 1 << scale_log2;
-		while (add_count--)
-			insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg,
-							index_reg);
-	}
-	insn_buf[cnt++] = BPF_MOV64_IMM(dst_reg, 0);
-	for (i = 0; i < bytes; i++) {
-		insn_buf[cnt++] = BPF_LDX_MEM(BPF_B, value_reg, addr_reg,
-					      offset + i);
-		if (i != bytes - 1)
-			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, value_reg,
-							(bytes - 1 - i) * 8);
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, value_reg);
-	}
-	if (need_tmp)
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, high_reg);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return instantiate_movbe_wide(dst_reg, base_reg, index_reg,
+				     scale_log2, offset, indexed, insn_buf, size);
 }
 
 static int instantiate_movbe16_indexed(u64 payload, struct bpf_insn *insn_buf)
@@ -226,6 +159,16 @@ static int emit_movbe_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	else
 		kop_emit_modrm_mem(buf, &len, dst_reg, base_reg, offset);
 
+	if (size == BPF_H) {
+		/* MOVBE16 preserves the upper bits; BPF's endian load does not. */
+		kop_emit_rex(buf, &len, false, kop_x86_ext(dst_reg),
+			       false, kop_x86_ext(dst_reg));
+		kop_emit_u8(buf, &len, 0x0f);
+		kop_emit_u8(buf, &len, 0xb7);
+		kop_emit_u8(buf, &len, 0xc0 | (kop_x86_code(dst_reg) << 3) |
+			    kop_x86_code(dst_reg));
+	}
+
 	return kop_emit_finish(image, off, emit, buf, len);
 }
 
@@ -252,7 +195,7 @@ static int emit_movbe64_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kop bpf_x86_movbe16_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 19 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 10,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe16_indexed,
 	.emit_x86 = emit_movbe16_indexed_x86,
@@ -260,7 +203,7 @@ const struct bpf_kop bpf_x86_movbe16_desc = {
 
 const struct bpf_kop bpf_x86_movbe32_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 18 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 10,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe32_indexed,
 	.emit_x86 = emit_movbe32_indexed_x86,
@@ -268,7 +211,7 @@ const struct bpf_kop bpf_x86_movbe32_desc = {
 
 const struct bpf_kop bpf_x86_movbe64_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 30 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 10,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe64_indexed,
 	.emit_x86 = emit_movbe64_indexed_x86,

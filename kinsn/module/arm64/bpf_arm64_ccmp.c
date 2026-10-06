@@ -239,7 +239,7 @@ static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
 			   const struct bpf_prog *prog, const u32 *final_ip)
 {
 	struct ccmp_payload decoded;
-	u8 dst_reg, continue_cond, poison_nzcv;
+	u8 dst_reg, reg, continue_cond, poison_nzcv, i;
 	u32 insn;
 	int err;
 
@@ -255,9 +255,25 @@ static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 
 	ccmp_mode_fields(decoded.mode, &continue_cond, &poison_nzcv);
-	(void)poison_nzcv;
+	/* Recompute the complete payload predicate, independent of incoming NZCV. */
+	for (i = 0; i < decoded.count; i++) {
+		reg = kop_arm64_reg(decoded.regs[i]);
+		if (reg == 0xff)
+			return -EINVAL;
+		if (!i)
+			insn = a64_cmp_imm(decoded.width32 ? 0 : 1, reg);
+		else
+			insn = a64_ccmp_imm(decoded.width32 ? 0 : 1, reg,
+					    poison_nzcv, continue_cond);
+		err = kop_arm64_emit_one(image, idx, emit, insn);
+		if (err < 0)
+			return err;
+	}
 	insn = a64_cset_x(dst_reg, continue_cond);
-	return kop_arm64_emit_one(image, idx, emit, insn);
+	err = kop_arm64_emit_one(image, idx, emit, insn);
+	if (err < 0)
+		return err;
+	return decoded.count + 1;
 }
 
 static int emit_cmp_x_arm64(u32 *image, int *idx, bool emit,
@@ -331,7 +347,7 @@ const struct bpf_kop bpf_arm64_ccmp_w_desc = {
 const struct bpf_kop bpf_arm64_cset_x_cond_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = KOP_CCMP_MAX_TERMS + 2,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = (KOP_CCMP_MAX_TERMS + 1) * 4,
 	.instantiate_insn = instantiate_cset,
 	.emit_arm64 = emit_cset_arm64,
 };

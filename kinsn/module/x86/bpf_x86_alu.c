@@ -332,44 +332,28 @@ static int instantiate_x86_alu_sib(const struct kop_x86_alu_payload *alu,
 	return cnt;
 }
 
-static int instantiate_x86_shift_cl(const struct kop_x86_alu_payload *alu,
-				    struct bpf_insn *insn_buf, u8 op,
-				    u8 width)
+static int instantiate_x86_shift(const struct kop_x86_alu_payload *alu,
+				  struct bpf_insn *insn_buf, u8 op, u8 width)
 {
-	u8 dst_eval_reg = KOP_X86_SCRATCH0;
-	u8 count_reg = KOP_X86_SCRATCH1;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
-	bool arch_reg = x86_alu_uses_arch_reg(alu->form);
-	int cnt = 0;
 	int err;
 
-	if (alu->src_reg != BPF_REG_4)
-		return -EINVAL;
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg) {
-		kop_x86_read64_arch(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
-		kop_x86_read64_arch(insn_buf, &cnt, count_reg, alu->src_reg);
+	if (alu->form == KOP_X86_ALU_FORM_RR ||
+	    alu->form == KOP_X86_ALU_FORM_ARCH_RR) {
+		if (alu->src_reg != BPF_REG_4)
+			return -EINVAL;
+		err = emit_bpf_alu_reg(&insn_buf[0], op, width, alu->dst_reg,
+				       alu->src_reg);
+	} else if (alu->form == KOP_X86_ALU_FORM_IMM ||
+		   alu->form == KOP_X86_ALU_FORM_ARCH_IMM) {
+		if (alu->imm < 0 || alu->imm >= width)
+			return -EINVAL;
+		err = emit_bpf_alu_imm(&insn_buf[0], op, width, alu->dst_reg,
+				       alu->imm);
 	} else {
-		kop_x86_read64(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
-		kop_x86_read64(insn_buf, &cnt, count_reg, alu->src_reg);
+		/* Memory-source shifts have never had a native emitter. */
+		return -EINVAL;
 	}
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, count_reg, width - 1);
-	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width, dst_eval_reg,
-			       count_reg);
-	if (err)
-		return err;
-	if (width == 32)
-		insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, alu->dst_reg,
-				       dst_eval_reg, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return err ? err : 1;
 }
 
 static int instantiate_x86_xorw_mem(const struct kop_x86_alu_payload *alu,
@@ -442,6 +426,9 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 	if (err)
 		return err;
 
+	if (x86_alu_is_shift(op))
+		return instantiate_x86_shift(alu, insn_buf, op, width);
+
 	if (alu->form == KOP_X86_ALU_FORM_MEM ||
 	    alu->form == KOP_X86_ALU_FORM_ARCH_MEM)
 		return instantiate_x86_alu_mem(alu, insn_buf, op, width);
@@ -458,9 +445,6 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 
 	if (alu->form == KOP_X86_ALU_FORM_IMM ||
 	    alu->form == KOP_X86_ALU_FORM_ARCH_IMM) {
-		if (x86_alu_is_shift(op) &&
-		    (alu->imm < 0 || alu->imm >= width))
-			return -EINVAL;
 		dst_eval_reg = alu->dst_reg;
 		if (dst_stacked) {
 			dst_eval_reg = KOP_X86_SCRATCH0;
@@ -493,8 +477,6 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 		return cnt;
 	}
 
-	if (x86_alu_is_shift(op))
-		return instantiate_x86_shift_cl(alu, insn_buf, op, width);
 	if (op == BPF_XOR && alu->dst_reg == alu->src_reg) {
 		if (dst_stacked) {
 			scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
@@ -565,6 +547,40 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 	return cnt;
 }
 
+/* Register logic on a narrow destination can be expressed by independent
+ * source-bit tests. This preserves every other register and all upper bits,
+ * including self operands, without any scratch slot contract.
+ */
+static int instantiate_x86_logic_narrow(const struct kop_x86_alu_payload *alu,
+				        struct bpf_insn *insn_buf, u8 op, u8 width)
+{
+	u32 low_mask = (1U << width) - 1;
+	u32 mask;
+	int bit;
+	int cnt = 0;
+
+	if (alu->form == KOP_X86_ALU_FORM_IMM ||
+	    alu->form == KOP_X86_ALU_FORM_ARCH_IMM) {
+		if (alu->imm < 0 || alu->imm > low_mask)
+			return -EINVAL;
+		insn_buf[cnt++] = BPF_ALU64_IMM(op, alu->dst_reg,
+				 op == BPF_AND ? alu->imm | ~low_mask : alu->imm);
+		return cnt;
+	}
+
+	for (bit = 0; bit < width; bit++) {
+		mask = 1U << bit;
+		insn_buf[cnt++] = BPF_JMP_IMM(BPF_JSET, alu->src_reg, mask, 1);
+		if (op == BPF_AND) {
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, alu->dst_reg, ~mask);
+		} else {
+			insn_buf[cnt++] = BPF_JMP_A(1);
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_OR, alu->dst_reg, mask);
+		}
+	}
+	return cnt;
+}
+
 static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 				      u8 op, u8 width)
 {
@@ -592,6 +608,9 @@ static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 	    alu->form != KOP_X86_ALU_FORM_IMM &&
 	    alu->form != KOP_X86_ALU_FORM_ARCH_IMM)
 		return -EINVAL;
+
+	if (op == BPF_AND || op == BPF_OR)
+		return instantiate_x86_logic_narrow(alu, insn_buf, op, width);
 
 	low_mask = width == 8 ? 0xff : 0xffff;
 	preserve_mask = width == 8 ? -256 : -65536;
@@ -648,10 +667,7 @@ static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 static int instantiate_inc(u64 payload, struct bpf_insn *insn_buf, u8 width)
 {
 	struct kop_x86_alu_payload decoded;
-	u8 dst_reg, value_reg, high_reg;
-	u32 scratch_mask;
-	bool arch_reg;
-	int cnt = 0;
+	u8 dst_reg;
 	int err;
 
 	err = decode_x86_alu_payload(payload, &decoded);
@@ -661,53 +677,20 @@ static int instantiate_inc(u64 payload, struct bpf_insn *insn_buf, u8 width)
 	     decoded.form != KOP_X86_ALU_FORM_ARCH_IMM) ||
 	    decoded.imm != 0)
 		return -EINVAL;
-	if (width != 32 && width != 64)
+	if (width != 8 && width != 32 && width != 64)
 		return -EINVAL;
 
 	dst_reg = decoded.dst_reg;
-	arch_reg = x86_alu_uses_arch_reg(decoded.form);
-	if (!arch_reg && !kop_x86_reg_uses_stack_slot(dst_reg) &&
-	    !kop_x86_is_scratch(dst_reg)) {
-		if (width == 32)
-			insn_buf[0] = BPF_ALU32_IMM(BPF_ADD, dst_reg, 1);
-		else
-			insn_buf[0] = BPF_ALU64_IMM(BPF_ADD, dst_reg, 1);
-		return 1;
-	}
-
-	value_reg = kop_x86_scratch_avoid(dst_reg, 0, 0);
-	scratch_mask = KOP_X86_SCRATCH_MASK(value_reg);
-	high_reg = kop_x86_scratch_avoid(dst_reg, value_reg, 0);
+	insn_buf[0] = width == 32 ?
+		BPF_ALU32_IMM(BPF_ADD, dst_reg, 1) :
+		BPF_ALU64_IMM(BPF_ADD, dst_reg, 1);
 	if (width == 8) {
-		if (high_reg == value_reg)
-			return -EINVAL;
-		scratch_mask |= KOP_X86_SCRATCH_MASK(high_reg);
+		/* Undo the carry into bits 63:8 only when the low byte wraps. */
+		insn_buf[1] = BPF_JMP_IMM(BPF_JSET, dst_reg, 0xff, 1);
+		insn_buf[2] = BPF_ALU64_IMM(BPF_ADD, dst_reg, -256);
+		return 3;
 	}
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (arch_reg)
-		kop_x86_read64_arch(insn_buf, &cnt, value_reg, dst_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, value_reg, dst_reg);
-	if (width == 8) {
-		insn_buf[cnt++] = BPF_MOV64_REG(high_reg, value_reg);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, -256);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, value_reg, 0xff);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, value_reg, 1);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, value_reg, 0xff);
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, value_reg, high_reg);
-	} else if (width == 32) {
-		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_ADD, value_reg, 1);
-	} else {
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, value_reg, 1);
-	}
-	if (arch_reg)
-		kop_x86_write64_arch(insn_buf, &cnt, dst_reg, value_reg,
-				       scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, dst_reg, value_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return 1;
 }
 
 static int instantiate_incb(u64 payload, struct bpf_insn *insn_buf)
@@ -1515,7 +1498,7 @@ const struct bpf_kop bpf_x86_addb_desc = {
 
 const struct bpf_kop bpf_x86_andb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 16,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_andb,
 	.emit_x86 = emit_andb_x86,
@@ -1523,7 +1506,7 @@ const struct bpf_kop bpf_x86_andb_desc = {
 
 const struct bpf_kop bpf_x86_incb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 12 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 3,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incb,
 	.emit_x86 = emit_incb_x86,
@@ -1531,7 +1514,7 @@ const struct bpf_kop bpf_x86_incb_desc = {
 
 const struct bpf_kop bpf_x86_incq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incq,
 	.emit_x86 = emit_incq_x86,
@@ -1539,7 +1522,7 @@ const struct bpf_kop bpf_x86_incq_desc = {
 
 const struct bpf_kop bpf_x86_incl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incl,
 	.emit_x86 = emit_incl_x86,
@@ -1571,7 +1554,7 @@ const struct bpf_kop bpf_x86_xorw_desc = {
 
 const struct bpf_kop bpf_x86_orw_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 48,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_orw,
 	.emit_x86 = emit_orw_x86,
@@ -1579,7 +1562,7 @@ const struct bpf_kop bpf_x86_orw_desc = {
 
 const struct bpf_kop bpf_x86_orb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 24,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_orb,
 	.emit_x86 = emit_orb_x86,
