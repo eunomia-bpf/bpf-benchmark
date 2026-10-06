@@ -517,46 +517,16 @@ static int instantiate_movzx_rr(u64 payload, struct bpf_insn *insn_buf, u32 mask
 static int instantiate_movswl_rr(u64 payload, struct bpf_insn *insn_buf)
 {
 	struct mov_rr_payload rr;
-	u8 value_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-	bool src_stacked, dst_stacked;
-	int cnt = 0;
 	int err;
 
 	err = decode_rr_any(payload, &rr);
 	if (err)
 		return err;
 
-	src_stacked = rr.src_arch ? kop_x86_arch_reg_uses_stack_slot(rr.src_reg) :
-				     kop_x86_reg_uses_stack_slot(rr.src_reg);
-	dst_stacked = rr.dst_arch ? kop_x86_arch_reg_uses_stack_slot(rr.dst_reg) :
-				     kop_x86_reg_uses_stack_slot(rr.dst_reg);
-	if (!dst_stacked && !src_stacked) {
-		insn_buf[0] = BPF_MOV32_REG(rr.dst_reg, rr.src_reg);
-		insn_buf[1] = BPF_ALU32_IMM(BPF_LSH, rr.dst_reg, 16);
-		insn_buf[2] = BPF_ALU32_IMM(BPF_ARSH, rr.dst_reg, 16);
-		return 3;
-	}
-
-	value_reg = dst_stacked ? KOP_X86_SCRATCH0 : rr.dst_reg;
-	if (dst_stacked)
-		kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (rr.src_arch)
-		kop_x86_read32_arch(insn_buf, &cnt, value_reg, rr.src_reg);
-	else
-		kop_x86_read32(insn_buf, &cnt, value_reg, rr.src_reg);
-	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_LSH, value_reg, 16);
-	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_ARSH, value_reg, 16);
-	if (dst_stacked) {
-		if (rr.dst_arch)
-			kop_x86_write32_arch(insn_buf, &cnt, rr.dst_reg,
-					       value_reg, scratch_mask);
-		else
-			kop_x86_write32(insn_buf, &cnt, rr.dst_reg,
-					  value_reg, scratch_mask);
-		kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	}
-	return cnt;
+	insn_buf[0] = BPF_MOV32_REG(rr.dst_reg, rr.src_reg);
+	insn_buf[1] = BPF_ALU32_IMM(BPF_LSH, rr.dst_reg, 16);
+	insn_buf[2] = BPF_ALU32_IMM(BPF_ARSH, rr.dst_reg, 16);
+	return 3;
 }
 
 static int instantiate_mov_mem(u64 payload, struct bpf_insn *insn_buf, u8 size,
@@ -1680,7 +1650,7 @@ const struct bpf_kop bpf_x86_movzwl_desc = {
 
 const struct bpf_kop bpf_x86_movswl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 6 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 3,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_movswl_rr,
 	.emit_x86 = emit_movswl_x86,
