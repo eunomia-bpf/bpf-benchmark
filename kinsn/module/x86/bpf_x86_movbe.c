@@ -100,6 +100,37 @@ static int instantiate_movbe16_direct(u8 dst_reg, u8 base_reg, s16 offset,
 	return cnt;
 }
 
+/* The load replaces dst, so dst itself can hold the effective address.
+ * Preserve base/index reads for every alias without a spill or temporary.
+ */
+static int instantiate_movbe_wide(u8 dst_reg, u8 base_reg, u8 index_reg,
+				   u8 scale_log2, s16 offset, bool indexed,
+				   struct bpf_insn *insn_buf, u8 size)
+{
+	int cnt = 0;
+	int i;
+
+	if (indexed) {
+		if (dst_reg == base_reg && dst_reg == index_reg) {
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MUL, dst_reg,
+						 1 + (1U << scale_log2));
+		} else if (dst_reg == base_reg) {
+			for (i = 0; i < (1U << scale_log2); i++)
+				insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg,
+							      index_reg);
+		} else {
+			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, index_reg);
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MUL, dst_reg,
+						 1U << scale_log2);
+			insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg, base_reg);
+		}
+		base_reg = dst_reg;
+	}
+	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
+	insn_buf[cnt++] = BPF_BSWAP(dst_reg, size == BPF_W ? 32 : 64);
+	return cnt;
+}
+
 static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 				 u8 size)
 {
@@ -120,11 +151,10 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 	if (err)
 		return err;
 
-	if (!indexed && (size == BPF_W || size == BPF_DW)) {
-		insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
-		insn_buf[cnt++] = BPF_BSWAP(dst_reg, size == BPF_W ? 32 : 64);
-		return cnt;
-	}
+	if (size == BPF_W || size == BPF_DW)
+		return instantiate_movbe_wide(dst_reg, base_reg, index_reg,
+					     scale_log2, offset, indexed,
+					     insn_buf, size);
 	if (!indexed && size == BPF_H) {
 		err = instantiate_movbe16_direct(dst_reg, base_reg, offset,
 						 insn_buf);
@@ -260,7 +290,7 @@ const struct bpf_kop bpf_x86_movbe16_desc = {
 
 const struct bpf_kop bpf_x86_movbe32_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 18 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 10,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe32_indexed,
 	.emit_x86 = emit_movbe32_indexed_x86,
@@ -268,7 +298,7 @@ const struct bpf_kop bpf_x86_movbe32_desc = {
 
 const struct bpf_kop bpf_x86_movbe64_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 30 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 10,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe64_indexed,
 	.emit_x86 = emit_movbe64_indexed_x86,
