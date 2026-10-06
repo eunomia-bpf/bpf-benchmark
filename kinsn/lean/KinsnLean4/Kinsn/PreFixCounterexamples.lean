@@ -37,13 +37,13 @@ theorem lift_x86_related (s : BPF.State) : observeBpf s = observeX86 Catalog.x86
 theorem lift_arm_related (s : BPF.State) : observeBpf s = observeArm Catalog.armMap (liftArm s) := by
   unfold observeBpf observeArm liftArm; congr 1; funext r; cases r <;> rfl
 
-/-- include/kop_x86_emit.h:kop_x86_scratch_off. -/
+/-- include/kinsn_x86_emit.h:kinsn_x86_scratch_off. -/
 def slot (r : BPF.Reg) : BitVec 64 :=
   match r with | .r6 => -40 | .r7 => -32 | _ => -24
-/-- include/kop_x86_emit.h:kop_x86_save_scratch, increasing register order. -/
+/-- include/kinsn_x86_emit.h:kinsn_x86_save_scratch, increasing register order. -/
 def save (rs : List BPF.Reg) : List BPF.MInsn :=
   rs.map (fun r => .store 8 .r10 (.reg r) (slot r))
-/-- include/kop_x86_emit.h:kop_x86_restore_scratch, decreasing register order. -/
+/-- include/kinsn_x86_emit.h:kinsn_x86_restore_scratch, decreasing register order. -/
 def restore (rs : List BPF.Reg) : List BPF.MInsn :=
   rs.reverse.map (fun r => .load 8 r .r10 (slot r))
 

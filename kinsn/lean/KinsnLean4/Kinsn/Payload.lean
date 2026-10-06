@@ -2,25 +2,25 @@ import KinsnLean4.Kinsn.Catalog
 
 namespace Kinsn.Payload
 
-/-- include/kop_common.h:kop_payload_wire_escaped. -/
+/-- include/kinsn_common.h:kinsn_payload_wire_escaped. -/
 def escaped (p : BitVec 64) : Bool :=
   (p &&& 15) == 10 && decide (11 ≤ ((p >>> 4) &&& 15).toNat) &&
     decide (((p >>> 4) &&& 15).toNat ≤ 15)
 
-/-- include/kop_common.h:kop_payload_decode; remove the escape nibble only
+/-- include/kinsn_common.h:kinsn_payload_decode; remove the escape nibble only
     when both marker and original-low-nibble satisfy the C predicate. -/
 def decode (p : BitVec 64) : BitVec 64 :=
   if escaped p then ((p >>> 8) <<< 4) ||| ((p >>> 4) &&& 15) else p
 
-/-- include/kop_common.h:kop_payload_reg; the helper itself decodes. -/
+/-- include/kinsn_common.h:kinsn_payload_reg; the helper itself decodes. -/
 def regField (p : BitVec 64) (shift : Nat) : Nat :=
   ((decode p >>> shift) &&& 15).toNat
 
-/-- include/kop_common.h:kop_payload_u8; the helper itself decodes. -/
+/-- include/kinsn_common.h:kinsn_payload_u8; the helper itself decodes. -/
 def byteField (p : BitVec 64) (shift : Nat) : BitVec 8 :=
   BitVec.setWidth 8 (decode p >>> shift)
 
-/-- include/kop_common.h:kop_payload_s16, followed by BPF/native effective
+/-- include/kinsn_common.h:kinsn_payload_s16, followed by BPF/native effective
     address sign extension. Keeping the intermediate 16-bit field is essential. -/
 def offset (p : BitVec 64) (shift : Nat) : BitVec 64 :=
   BitVec.signExtend 64 (BitVec.setWidth 16 (decode p >>> shift))
@@ -30,11 +30,11 @@ def displacement (p : BitVec 64) : BitVec 32 :=
   BitVec.setWidth 32 (decode p >>> 20)
 
 /-- Validated BPF operand, without a default register for invalid nibbles.
-    include/kop_x86_emit.h:kop_x86_operand_valid and ARM decoders' ≤R10 checks. -/
+    include/kinsn_x86_emit.h:kinsn_x86_operand_valid and ARM decoders' ≤R10 checks. -/
 def reg (n : Nat) (h : n ≤ 10) : BPF.Reg :=
   #[.r0,.r1,.r2,.r3,.r4,.r5,.r6,.r7,.r8,.r9,.r10][n]'(by change n < 11; omega)
 
-/-- include/kop_common.h:kop_arm64_reg; physical numbers, not BPF indices. -/
+/-- include/kinsn_common.h:kinsn_arm64_reg; physical numbers, not BPF indices. -/
 def armNumber : BPF.Reg → Nat
   | .r0 => 7 | .r1 => 0 | .r2 => 1 | .r3 => 2 | .r4 => 3 | .r5 => 4
   | .r6 => 19 | .r7 => 20 | .r8 => 21 | .r9 => 22 | .r10 => 25
@@ -50,7 +50,7 @@ def armGPNumber : ARM64.GPReg → Nat
 theorem arm_register_encoding (r : BPF.Reg) :
     armGPNumber (Catalog.armReg r) = armNumber r := by cases r <;> rfl
 
-/-- include/kop_common.h:kop_x86_reg_code/kop_x86_reg_ext, combined
+/-- include/kinsn_common.h:kinsn_x86_reg_code/kinsn_x86_reg_ext, combined
     three-bit ModRM field and extension bit. Standard non-private-stack map. -/
 def x86Number : BPF.Reg → Nat
   | .r0 => 0 | .r1 => 7 | .r2 => 6 | .r3 => 2 | .r4 => 1 | .r5 => 8

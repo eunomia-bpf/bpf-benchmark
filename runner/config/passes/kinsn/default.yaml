@@ -1,8 +1,8 @@
-# Default per-pass step config for kop.
+# Default per-pass step config for kinsn.
 # Read by runner/libs/rejit_plan.py at execute_plan build time.
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
-koperation:
+kinsn:
   - name: bpf_arm64_ccmp_w
   - name: bpf_arm64_ccmp_x
   - name: bpf_arm64_cmp_w
@@ -68,9 +68,9 @@ koperation:
 command: |
   case "${RUN_TARGET_ARCH:-}" in
     arm64|aarch64)
-      bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode bulk_memory=disable,endian_fusion=disable,prefetch=disable
+      bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode bulk_memory=disable,endian_fusion=disable,prefetch=disable
       ;;
     *)
-      bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable
+      bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable
       ;;
   esac

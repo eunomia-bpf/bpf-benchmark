@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-//! kopprober — probe loaded kop BTF modules and emit target.json
+//! kinsnprober — probe loaded kinsn BTF modules and emit target.json
 //! consumed by `bpfopt --target`. Stock-kernel LD_PRELOAD shim execs this once
 //! at startup so subsequent `bpfopt --pass <name>` invocations see every
-//! registered kop kfunc.
+//! registered kinsn kfunc.
 //!
 //! Pure CLI: reads no inputs, writes one JSON file. Uses libbpf-sys (BTF) and
 //! the bpf(2) syscall directly; does not depend on bpfopt internals.
@@ -21,22 +21,22 @@ use std::path::PathBuf;
 use std::ptr::NonNull;
 
 #[derive(Parser)]
-#[command(name = "kopprober", about = "Emit a bpfopt target.json from loaded kop BTF modules")]
+#[command(name = "kinsnprober", about = "Emit a bpfopt target.json from loaded kinsn BTF modules")]
 struct Cli {
     /// Output file (target.json compatible with `bpfopt --target`).
     #[arg(long, value_name = "FILE")]
     out: PathBuf,
-    /// KOperation function names to probe. Defaults to the union of names declared
+    /// Kinsn function names to probe. Defaults to the union of names declared
     /// across `runner/config/passes/*/default.yaml` — currently a fixed list
     /// generated from those yamls.
     #[arg(long, value_name = "NAME")]
     name: Vec<String>,
 }
 
-/// Default kop name list — union of every `koperation:` entry across the runner
+/// Default kinsn name list — union of every `kinsn:` entry across the runner
 /// pass configs. Keep in sync with `runner/config/passes/*/default.yaml`. The
-/// shim invokes kopprober with no `--name` flags and gets this set.
-const DEFAULT_KOP_NAMES: &[&str] = &[
+/// shim invokes kinsnprober with no `--name` flags and gets this set.
+const DEFAULT_KINSN_NAMES: &[&str] = &[
     "bpf_arm64_ccmp_w", "bpf_arm64_ccmp_x", "bpf_arm64_cmp_w",
     "bpf_arm64_cmp_x", "bpf_arm64_csel_ne", "bpf_arm64_cset_x_cond",
     "bpf_arm64_extr_w", "bpf_arm64_extr_x", "bpf_arm64_ldr_w",
@@ -63,11 +63,11 @@ const DEFAULT_KOP_NAMES: &[&str] = &[
 #[derive(Serialize)]
 struct TargetJson {
     arch: String,
-    koperation: BTreeMap<String, TargetKopJson>,
+    kinsn: BTreeMap<String, TargetKinsnJson>,
 }
 
 #[derive(Serialize)]
-struct TargetKopJson {
+struct TargetKinsnJson {
     btf_func_id: i32,
     btf_id: u32,
     call_offset: u32,
@@ -145,13 +145,13 @@ fn detect_arch() -> String {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     let names: Vec<String> = if cli.name.is_empty() {
-        DEFAULT_KOP_NAMES.iter().map(|s| s.to_string()).collect()
+        DEFAULT_KINSN_NAMES.iter().map(|s| s.to_string()).collect()
     } else {
         cli.name
     };
 
     let vmlinux = KernelBtf::load_vmlinux().context("load vmlinux BTF")?;
-    let mut found: BTreeMap<String, TargetKopJson> = BTreeMap::new();
+    let mut found: BTreeMap<String, TargetKinsnJson> = BTreeMap::new();
     let mut module_slot: BTreeMap<u32, u32> = BTreeMap::new();
     let mut next_slot: u32 = 1;
     let mut start_id: u32 = 0;
@@ -180,7 +180,7 @@ fn main() -> Result<()> {
             } else {
                 0
             };
-            found.insert(name.clone(), TargetKopJson {
+            found.insert(name.clone(), TargetKinsnJson {
                 btf_func_id: func_id,
                 btf_id,
                 call_offset,
@@ -193,7 +193,7 @@ fn main() -> Result<()> {
         bail!("no kernel BTF objects visible — is BPF enabled?");
     }
 
-    let out = TargetJson { arch: detect_arch(), koperation: found };
+    let out = TargetJson { arch: detect_arch(), kinsn: found };
     let json = serde_json::to_string_pretty(&out)?;
     std::fs::write(&cli.out, json).with_context(|| format!("write {}", cli.out.display()))?;
     Ok(())

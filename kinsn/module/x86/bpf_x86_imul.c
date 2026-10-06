@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT x86 koperation: IMUL.
+ * BpfReJIT x86 kinsn: IMUL.
  */
 
-#include "kop_x86_emit.h"
+#include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_x86_imulq(void) {}
@@ -20,18 +20,18 @@ static __always_inline int decode_imul_rr_payload(u64 payload, u8 *dst_reg,
 						  u8 *src_reg,
 						  bool *arch_reg)
 {
-	payload = kop_payload_decode(payload);
+	payload = kinsn_payload_decode(payload);
 	*arch_reg = (payload & 0xf) == X86_FORM_ARCH_RR;
 	if ((payload & 0xf) != X86_FORM_RR &&
 	    (payload & 0xf) != X86_FORM_ARCH_RR)
 		return -EINVAL;
-	*dst_reg = kop_payload_reg(payload, 4);
-	*src_reg = kop_payload_reg(payload, 8);
+	*dst_reg = kinsn_payload_reg(payload, 4);
+	*src_reg = kinsn_payload_reg(payload, 8);
 
 	if (payload >> 12)
 		return -EINVAL;
-	if (!kop_x86_operand_valid(*dst_reg) ||
-	    !kop_x86_operand_valid(*src_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg) ||
+	    !kinsn_x86_operand_valid(*src_reg))
 		return -EINVAL;
 
 	return 0;
@@ -66,23 +66,23 @@ static int emit_imulq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return err;
 
 	if (!arch_reg) {
-		dst_reg = kop_x86_reg_for_prog(prog, dst_reg);
-		src_reg = kop_x86_reg_for_prog(prog, src_reg);
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
+		src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
 	}
-	if (!kop_x86_valid(dst_reg) || !kop_x86_valid(src_reg))
+	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(src_reg))
 		return -EINVAL;
 
-	kop_emit_rex_rr(buf, &len, true, dst_reg, src_reg);
-	kop_emit_u8(buf, &len, 0x0f);
-	kop_emit_u8(buf, &len, 0xaf);
-	kop_emit_u8(buf, &len, 0xc0 |
-		      (kop_x86_code(dst_reg) << 3) |
-		      kop_x86_code(src_reg));
+	kinsn_emit_rex_rr(buf, &len, true, dst_reg, src_reg);
+	kinsn_emit_u8(buf, &len, 0x0f);
+	kinsn_emit_u8(buf, &len, 0xaf);
+	kinsn_emit_u8(buf, &len, 0xc0 |
+		      (kinsn_x86_code(dst_reg) << 3) |
+		      kinsn_x86_code(src_reg));
 
-	return kop_emit_finish(image, off, emit, buf, len);
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
-const struct bpf_kop bpf_x86_imulq_desc = {
+const struct bpf_kinsn bpf_x86_imulq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -90,9 +90,9 @@ const struct bpf_kop bpf_x86_imulq_desc = {
 	.emit_x86 = emit_imulq_rr_x86,
 };
 
-static const struct bpf_kop * const bpf_x86_imul_kop_descs[] = {
+static const struct bpf_kinsn * const bpf_x86_imul_kinsn_descs[] = {
 	&bpf_x86_imulq_desc,
 };
 
-DEFINE_KOP_V2_MODULE(bpf_x86_imul, "BpfReJIT x86 koperation: IMUL",
-		       bpf_x86_imul_kfunc_ids, bpf_x86_imul_kop_descs);
+DEFINE_KINSN_V2_MODULE(bpf_x86_imul, "BpfReJIT x86 kinsn: IMUL",
+		       bpf_x86_imul_kfunc_ids, bpf_x86_imul_kinsn_descs);

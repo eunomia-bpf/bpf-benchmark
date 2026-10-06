@@ -1,10 +1,10 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * kop_common.h - shared helpers for first-class v2 kop modules
+ * kinsn_common.h - shared helpers for first-class v2 kinsn modules
  */
 
-#ifndef _KOP_COMMON_H
-#define _KOP_COMMON_H
+#ifndef _KINSN_COMMON_H
+#define _KINSN_COMMON_H
 
 #include <linux/bpf.h>
 #include <linux/btf.h>
@@ -14,7 +14,7 @@
 #include <linux/module.h>
 #include <linux/string.h>
 
-static __always_inline bool kop_payload_wire_escaped(u64 payload)
+static __always_inline bool kinsn_payload_wire_escaped(u64 payload)
 {
 	u8 marker = payload & 0xf;
 	u8 original_low = (payload >> 4) & 0xf;
@@ -22,32 +22,32 @@ static __always_inline bool kop_payload_wire_escaped(u64 payload)
 	return marker == BPF_REG_10 && original_low >= 11 && original_low <= 15;
 }
 
-static __always_inline u64 kop_payload_decode(u64 payload)
+static __always_inline u64 kinsn_payload_decode(u64 payload)
 {
-	if (!kop_payload_wire_escaped(payload))
+	if (!kinsn_payload_wire_escaped(payload))
 		return payload;
 	return ((payload >> 8) << 4) | ((payload >> 4) & 0xf);
 }
 
-static __always_inline u8 kop_payload_reg(u64 payload, u8 shift)
+static __always_inline u8 kinsn_payload_reg(u64 payload, u8 shift)
 {
-	payload = kop_payload_decode(payload);
+	payload = kinsn_payload_decode(payload);
 	return (payload >> shift) & 0xf;
 }
 
-static __always_inline u8 kop_payload_u8(u64 payload, u8 shift)
+static __always_inline u8 kinsn_payload_u8(u64 payload, u8 shift)
 {
-	payload = kop_payload_decode(payload);
+	payload = kinsn_payload_decode(payload);
 	return (payload >> shift) & 0xff;
 }
 
-static __always_inline s16 kop_payload_s16(u64 payload, u8 shift)
+static __always_inline s16 kinsn_payload_s16(u64 payload, u8 shift)
 {
-	payload = kop_payload_decode(payload);
+	payload = kinsn_payload_decode(payload);
 	return (s16)((payload >> shift) & 0xffff);
 }
 
-static __always_inline u8 kop_bpf_size_bits(u8 size)
+static __always_inline u8 kinsn_bpf_size_bits(u8 size)
 {
 	switch (size) {
 	case BPF_H:
@@ -62,13 +62,13 @@ static __always_inline u8 kop_bpf_size_bits(u8 size)
 }
 
 #ifdef CONFIG_X86_64
-#define KOP_X86_REG_R9	11
-#define KOP_X86_REG_R10	12
-#define KOP_X86_REG_R11	13
-#define KOP_X86_REG_R12	14
-#define KOP_X86_REG_RSP	15
+#define KINSN_X86_REG_R9	11
+#define KINSN_X86_REG_R10	12
+#define KINSN_X86_REG_R11	13
+#define KINSN_X86_REG_R12	14
+#define KINSN_X86_REG_RSP	15
 
-static __always_inline u8 kop_x86_reg_code(u8 bpf_reg)
+static __always_inline u8 kinsn_x86_reg_code(u8 bpf_reg)
 {
 	switch (bpf_reg) {
 	case BPF_REG_0:
@@ -89,45 +89,45 @@ static __always_inline u8 kop_x86_reg_code(u8 bpf_reg)
 	case BPF_REG_1:
 	case BPF_REG_9:
 		return 7;
-	case KOP_X86_REG_R9:
+	case KINSN_X86_REG_R9:
 		return 1;
-	case KOP_X86_REG_R10:
+	case KINSN_X86_REG_R10:
 		return 2;
-	case KOP_X86_REG_R11:
+	case KINSN_X86_REG_R11:
 		return 3;
-	case KOP_X86_REG_R12:
-	case KOP_X86_REG_RSP:
+	case KINSN_X86_REG_R12:
+	case KINSN_X86_REG_RSP:
 		return 4;
 	default:
 		return 0xff;
 	}
 }
 
-static __always_inline bool kop_x86_reg_ext(u8 bpf_reg)
+static __always_inline bool kinsn_x86_reg_ext(u8 bpf_reg)
 {
 	switch (bpf_reg) {
 	case BPF_REG_5:
 	case BPF_REG_7:
 	case BPF_REG_8:
 	case BPF_REG_9:
-	case KOP_X86_REG_R9:
-	case KOP_X86_REG_R10:
-	case KOP_X86_REG_R11:
-	case KOP_X86_REG_R12:
+	case KINSN_X86_REG_R9:
+	case KINSN_X86_REG_R10:
+	case KINSN_X86_REG_R11:
+	case KINSN_X86_REG_R12:
 		return true;
 	default:
 		return false;
 	}
 }
 
-static __always_inline bool kop_x86_reg_valid(u8 bpf_reg)
+static __always_inline bool kinsn_x86_reg_valid(u8 bpf_reg)
 {
-	return kop_x86_reg_code(bpf_reg) != 0xff;
+	return kinsn_x86_reg_code(bpf_reg) != 0xff;
 }
 #endif
 
 #ifdef CONFIG_ARM64
-static __always_inline u8 kop_arm64_reg(u8 bpf_reg)
+static __always_inline u8 kinsn_arm64_reg(u8 bpf_reg)
 {
 	switch (bpf_reg) {
 	case BPF_REG_0:
@@ -157,7 +157,7 @@ static __always_inline u8 kop_arm64_reg(u8 bpf_reg)
 	}
 }
 
-static __always_inline int kop_arm64_emit_one(u32 *image, int *idx,
+static __always_inline int kinsn_arm64_emit_one(u32 *image, int *idx,
 						bool emit, u32 insn)
 {
 	if (!idx)
@@ -170,23 +170,23 @@ static __always_inline int kop_arm64_emit_one(u32 *image, int *idx,
 	return 1;
 }
 
-static __always_inline bool kop_arm64_scaled_uoff_ok(s16 offset, u8 shift)
+static __always_inline bool kinsn_arm64_scaled_uoff_ok(s16 offset, u8 shift)
 {
 	return offset >= 0 && offset <= (0x0fff << shift) &&
 	       !(offset & ((1 << shift) - 1));
 }
 
-static __always_inline bool kop_arm64_unscaled_soff_ok(s16 offset)
+static __always_inline bool kinsn_arm64_unscaled_soff_ok(s16 offset)
 {
 	return offset >= -256 && offset <= 255;
 }
 #endif
 
-#define DEFINE_KOP_V2_MODULE(prefix, desc, kfunc_ids, kop_desc_array)	\
+#define DEFINE_KINSN_V2_MODULE(prefix, desc, kfunc_ids, kinsn_desc_array)	\
 static const struct btf_kfunc_id_set prefix##_kfunc_set = {		\
 	.owner = THIS_MODULE,						\
 	.set = &(kfunc_ids),						\
-	.kop_descs = (kop_desc_array),				\
+	.kinsn_descs = (kinsn_desc_array),				\
 };									\
 									\
 static int __init prefix##_init(void)					\
@@ -201,4 +201,4 @@ MODULE_DESCRIPTION(desc);						\
 MODULE_LICENSE("GPL");							\
 MODULE_AUTHOR("BpfReJIT")
 
-#endif /* _KOP_COMMON_H */
+#endif /* _KINSN_COMMON_H */

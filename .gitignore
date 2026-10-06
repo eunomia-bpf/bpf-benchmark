@@ -102,9 +102,9 @@ kprog/test/build-*/
 !bpfopt/testobject/
 !bpfopt/testobject/*.o
 !bpfopt/testobject/*.bpf.o
-bpfopt/llvm/build-kop/bpfopt
-bpfopt/llvm/build-kop-arm64/bpfopt
-bpfopt/llvm/build-kop-arm64/cmake_install.cmake
+bpfopt/llvm/build-kinsn/bpfopt
+bpfopt/llvm/build-kinsn-arm64/bpfopt
+bpfopt/llvm/build-kinsn-arm64/cmake_install.cmake
 bpfopt/testccode/*.s
 # Makefile incremental rebuild stamp files
 .build.stamp
@@ -259,13 +259,13 @@ micro/results/**/*.h
 micro/results/**/*.o
 micro/results/**/*.so
 !micro/results/**/*.json
-micro/results/llvm_kop_programs_*/*.bpf.d
-micro/results/llvm_kop_programs_*/*.bpf.ll
-micro/results/llvm_kop_programs_*/*.bpf.o
-micro/results/llvm_kop_programs_*/*.h
-micro/results/llvm_kop_programs_*/*.native.d
-micro/results/llvm_kop_programs_*/*.so
-micro/results/llvm_kop_programs_*/*.o
+micro/results/llvm_kinsn_programs_*/*.bpf.d
+micro/results/llvm_kinsn_programs_*/*.bpf.ll
+micro/results/llvm_kinsn_programs_*/*.bpf.o
+micro/results/llvm_kinsn_programs_*/*.h
+micro/results/llvm_kinsn_programs_*/*.native.d
+micro/results/llvm_kinsn_programs_*/*.so
+micro/results/llvm_kinsn_programs_*/*.o
 micro/results/llvm_nokop_programs_*/*.bpf.d
 micro/results/llvm_nokop_programs_*/*.bpf.ll
 micro/results/llvm_nokop_programs_*/*.h
@@ -315,8 +315,8 @@ docs/tmp/*/llvmbpf_bulk_roundtrip/guest_logs/
 docs/tmp/*/llvmbpf_bulk_roundtrip/guest_verify_helper/target/
 
 # Generated build trees, shim test executables, and target-kernel headers
-/bpfopt/llvm/build-kop/
-/bpfopt/llvm/build-kop-arm64/
+/bpfopt/llvm/build-kinsn/
+/bpfopt/llvm/build-kinsn-arm64/
 /bpfopt/shim/selftest
 /bpfopt/shim/selftest_full
 /vendor/bpf/targets/

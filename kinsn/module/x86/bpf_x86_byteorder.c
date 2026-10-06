@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT x86 koperation: byte-order instructions.
+ * BpfReJIT x86 kinsn: byte-order instructions.
  */
 
-#include "kop_x86_emit.h"
+#include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_x86_rolw(void) {}
@@ -23,16 +23,16 @@ BTF_KFUNCS_END(bpf_x86_byteorder_kfunc_ids)
 static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg,
 					      bool *arch_reg)
 {
-	payload = kop_payload_decode(payload);
+	payload = kinsn_payload_decode(payload);
 	*arch_reg = (payload & 0xf) == X86_FORM_ARCH_IMM;
 	if ((payload & 0xf) != X86_FORM_IMM &&
 	    (payload & 0xf) != X86_FORM_ARCH_IMM)
 		return -EINVAL;
-	*dst_reg = kop_payload_reg(payload, 4);
+	*dst_reg = kinsn_payload_reg(payload, 4);
 
 	if (payload >> 8)
 		return -EINVAL;
-	if (!kop_x86_operand_valid(*dst_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 
 	return 0;
@@ -41,17 +41,17 @@ static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg,
 static __always_inline int decode_reg_imm_payload(u64 payload, u8 *dst_reg,
 						  u8 *imm, bool *arch_reg)
 {
-	payload = kop_payload_decode(payload);
+	payload = kinsn_payload_decode(payload);
 	*arch_reg = (payload & 0xf) == X86_FORM_ARCH_IMM;
 	if ((payload & 0xf) != X86_FORM_IMM &&
 	    (payload & 0xf) != X86_FORM_ARCH_IMM)
 		return -EINVAL;
-	*dst_reg = kop_payload_reg(payload, 4);
-	*imm = kop_payload_u8(payload, 8);
+	*dst_reg = kinsn_payload_reg(payload, 4);
+	*imm = kinsn_payload_u8(payload, 8);
 
 	if (payload >> 16)
 		return -EINVAL;
-	if (!kop_x86_operand_valid(*dst_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 
 	return 0;
@@ -114,21 +114,21 @@ static int emit_rolw_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (imm != 8)
 		return -EINVAL;
 	if (!arch_reg)
-		dst_reg = kop_x86_reg_for_prog(prog, dst_reg);
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 
-	kop_emit_u8(buf, &len, 0x66);
-	kop_emit_rex(buf, &len, false, false, false, kop_x86_ext(dst_reg));
-	kop_emit_u8(buf, &len, 0xc1);
-	kop_emit_u8(buf, &len, 0xc0 | kop_x86_code(dst_reg));
-	kop_emit_u8(buf, &len, imm);
+	kinsn_emit_u8(buf, &len, 0x66);
+	kinsn_emit_rex(buf, &len, false, false, false, kinsn_x86_ext(dst_reg));
+	kinsn_emit_u8(buf, &len, 0xc1);
+	kinsn_emit_u8(buf, &len, 0xc0 | kinsn_x86_code(dst_reg));
+	kinsn_emit_u8(buf, &len, imm);
 	/* BPF_BSWAP16 zero-extends; ROLW alone preserves bits 63:16. */
-	kop_emit_rex_rr(buf, &len, false, dst_reg, dst_reg);
-	kop_emit_u8(buf, &len, 0x0f);
-	kop_emit_u8(buf, &len, 0xb7);
-	kop_emit_u8(buf, &len, 0xc0 | (kop_x86_code(dst_reg) << 3) |
-		      kop_x86_code(dst_reg));
+	kinsn_emit_rex_rr(buf, &len, false, dst_reg, dst_reg);
+	kinsn_emit_u8(buf, &len, 0x0f);
+	kinsn_emit_u8(buf, &len, 0xb7);
+	kinsn_emit_u8(buf, &len, 0xc0 | (kinsn_x86_code(dst_reg) << 3) |
+		      kinsn_x86_code(dst_reg));
 
-	return kop_emit_finish(image, off, emit, buf, len);
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_bswap_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -144,13 +144,13 @@ static int emit_bswap_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (err)
 		return err;
 	if (!arch_reg)
-		dst_reg = kop_x86_reg_for_prog(prog, dst_reg);
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 
-	kop_emit_rex(buf, &len, is64, false, false, kop_x86_ext(dst_reg));
-	kop_emit_u8(buf, &len, 0x0f);
-	kop_emit_u8(buf, &len, 0xc8 + kop_x86_code(dst_reg));
+	kinsn_emit_rex(buf, &len, is64, false, false, kinsn_x86_ext(dst_reg));
+	kinsn_emit_u8(buf, &len, 0x0f);
+	kinsn_emit_u8(buf, &len, 0xc8 + kinsn_x86_code(dst_reg));
 
-	return kop_emit_finish(image, off, emit, buf, len);
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_bswapl_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -167,7 +167,7 @@ static int emit_bswapq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return emit_bswap_x86(image, off, emit, payload, prog, true);
 }
 
-const struct bpf_kop bpf_x86_rolw_desc = {
+const struct bpf_kinsn bpf_x86_rolw_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 12,
@@ -175,7 +175,7 @@ const struct bpf_kop bpf_x86_rolw_desc = {
 	.emit_x86 = emit_rolw_imm_x86,
 };
 
-const struct bpf_kop bpf_x86_bswapl_desc = {
+const struct bpf_kinsn bpf_x86_bswapl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -183,7 +183,7 @@ const struct bpf_kop bpf_x86_bswapl_desc = {
 	.emit_x86 = emit_bswapl_x86,
 };
 
-const struct bpf_kop bpf_x86_bswapq_desc = {
+const struct bpf_kinsn bpf_x86_bswapq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -191,13 +191,13 @@ const struct bpf_kop bpf_x86_bswapq_desc = {
 	.emit_x86 = emit_bswapq_x86,
 };
 
-static const struct bpf_kop * const bpf_x86_byteorder_kop_descs[] = {
+static const struct bpf_kinsn * const bpf_x86_byteorder_kinsn_descs[] = {
 	&bpf_x86_bswapl_desc,
 	&bpf_x86_bswapq_desc,
 	&bpf_x86_rolw_desc,
 };
 
-DEFINE_KOP_V2_MODULE(bpf_x86_byteorder,
-		       "BpfReJIT x86 koperation: ROL/BSWAP",
+DEFINE_KINSN_V2_MODULE(bpf_x86_byteorder,
+		       "BpfReJIT x86 kinsn: ROL/BSWAP",
 		       bpf_x86_byteorder_kfunc_ids,
-		       bpf_x86_byteorder_kop_descs);
+		       bpf_x86_byteorder_kinsn_descs);

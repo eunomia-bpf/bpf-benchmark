@@ -116,8 +116,8 @@ constexpr uint8_t BPF_PSEUDO_MAP_IDX = 5;
 constexpr uint8_t BPF_PSEUDO_MAP_IDX_VALUE = 6;
 constexpr uint8_t BPF_PSEUDO_CALL = 1;
 constexpr uint8_t BPF_PSEUDO_FUNC = 4;
-constexpr uint8_t BPF_PSEUDO_KOP_SIDECAR = 3;
-constexpr uint8_t BPF_PSEUDO_KOP_CALL = 4;
+constexpr uint8_t BPF_PSEUDO_KINSN_SIDECAR = 3;
+constexpr uint8_t BPF_PSEUDO_KINSN_CALL = 4;
 constexpr size_t INSN_SIZE = 8;
 
 constexpr int32_t BPF_FUNC_map_update_elem = 2;
@@ -143,28 +143,28 @@ struct Cli {
 	std::vector<std::string> pass_args;
 };
 
-struct KopTarget {
+struct KinsnTarget {
 	int32_t btf_func_id = 0;
 	int16_t call_offset = 0;
 };
 
-using KopTargetMap = std::map<std::string, KopTarget>;
+using KinsnTargetMap = std::map<std::string, KinsnTarget>;
 
-enum class KopTargetArch {
+enum class KinsnTargetArch {
 	Unknown,
 	X86,
 	Arm64,
 };
 
-struct BytecodeKopPolicy {
+struct BytecodeKinsnPolicy {
 	std::optional<bool> all_enabled;
 	std::map<std::string, bool> family_enabled;
 };
 
-struct KopPassOptions {
+struct KinsnPassOptions {
 	std::vector<std::string> llvm_args;
 	std::vector<std::string> effective_llvm_args;
-	BytecodeKopPolicy bytecode_policy;
+	BytecodeKinsnPolicy bytecode_policy;
 };
 
 struct BranchFlipOptions {
@@ -199,15 +199,15 @@ struct BranchFlipIrSite {
 	size_t fallthrough_pc = 0;
 };
 
-bool bytecode_kop_family_enabled(std::string_view pass, std::string_view family,
-				   const BytecodeKopPolicy &policy);
-bool target_has_kop(const KopTargetMap &targets, std::string_view name);
-bool target_is_x86_kop_set(const KopTargetMap &targets);
-bool target_is_arm64_kop_set(const KopTargetMap &targets);
-bool kop_target_arch_is_x86(KopTargetArch arch,
-			      const KopTargetMap &targets);
-bool kop_target_arch_is_arm64(KopTargetArch arch,
-				const KopTargetMap &targets);
+bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view family,
+				   const BytecodeKinsnPolicy &policy);
+bool target_has_kinsn(const KinsnTargetMap &targets, std::string_view name);
+bool target_is_x86_kinsn_set(const KinsnTargetMap &targets);
+bool target_is_arm64_kinsn_set(const KinsnTargetMap &targets);
+bool kinsn_target_arch_is_x86(KinsnTargetArch arch,
+			      const KinsnTargetMap &targets);
+bool kinsn_target_arch_is_arm64(KinsnTargetArch arch,
+				const KinsnTargetMap &targets);
 
 std::string llvm_error_string(llvm::Error err)
 {
@@ -300,31 +300,31 @@ void shift_target_call_offsets(const std::filesystem::path &input,
 	if (!root) {
 		throw std::runtime_error("target.json root is not an object");
 	}
-	auto *koperation = root->getObject("koperation");
-	if (koperation) {
+	auto *kinsn = root->getObject("kinsn");
+	if (kinsn) {
 		const uint32_t base = module_fd_array_base(map_count);
-		for (auto &entry : *koperation) {
+		for (auto &entry : *kinsn) {
 			auto *obj = entry.getSecond().getAsObject();
 			if (!obj) {
 				throw std::runtime_error(
-					"target kop is not an object");
+					"target kinsn is not an object");
 			}
 			auto call_offset = obj->getInteger("call_offset");
 			if (!call_offset) {
 				throw std::runtime_error(
-					"target kop has no call_offset");
+					"target kinsn has no call_offset");
 			}
 			if (*call_offset == 0) {
 				continue;
 			}
 			if (*call_offset < 0) {
 				throw std::runtime_error(
-					"target kop has negative call_offset");
+					"target kinsn has negative call_offset");
 			}
 			auto btf_id = obj->getInteger("btf_id");
 			if (!btf_id || *btf_id == 0) {
 				throw std::runtime_error(
-					"target kop has call_offset but no BTF object id");
+					"target kinsn has call_offset but no BTF object id");
 			}
 			const int64_t shifted =
 				static_cast<int64_t>(base) + *call_offset - 1;
@@ -373,40 +373,40 @@ read_fd_to_id_map(const std::filesystem::path &path)
 	return out;
 }
 
-KopTargetMap read_kop_targets(const std::filesystem::path &path)
+KinsnTargetMap read_kinsn_targets(const std::filesystem::path &path)
 {
 	auto value = expected_or_throw(llvm::json::parse(read_text(path)));
 	auto *root = value.getAsObject();
 	if (!root) {
 		throw std::runtime_error("--target JSON root is not an object");
 	}
-	auto *koperation = root->getObject("koperation");
-	if (!koperation) {
-		throw std::runtime_error("--target JSON has no koperation object");
+	auto *kinsn = root->getObject("kinsn");
+	if (!kinsn) {
+		throw std::runtime_error("--target JSON has no kinsn object");
 	}
-	KopTargetMap out;
-	for (const auto &entry : *koperation) {
+	KinsnTargetMap out;
+	for (const auto &entry : *kinsn) {
 		auto *obj = entry.getSecond().getAsObject();
 		if (!obj) {
-			throw std::runtime_error("target kop is not an object: " +
+			throw std::runtime_error("target kinsn is not an object: " +
 						 entry.getFirst().str());
 		}
 		auto func_id = obj->getInteger("btf_func_id");
 		if (!func_id || *func_id <= 0 ||
 		    *func_id > std::numeric_limits<int32_t>::max()) {
 			throw std::runtime_error(
-				"target kop has invalid btf_func_id: " +
+				"target kinsn has invalid btf_func_id: " +
 				entry.getFirst().str());
 		}
 		auto call_offset = obj->getInteger("call_offset");
 		if (!call_offset || *call_offset < 0 ||
 		    *call_offset > std::numeric_limits<int16_t>::max()) {
 			throw std::runtime_error(
-				"target kop has invalid call_offset: " +
+				"target kinsn has invalid call_offset: " +
 				entry.getFirst().str());
 		}
 		out.emplace(entry.getFirst().str(),
-			    KopTarget{
+			    KinsnTarget{
 				    static_cast<int32_t>(*func_id),
 				    static_cast<int16_t>(*call_offset),
 			    });
@@ -414,7 +414,7 @@ KopTargetMap read_kop_targets(const std::filesystem::path &path)
 	return out;
 }
 
-KopTargetArch parse_kop_target_arch(std::string_view arch)
+KinsnTargetArch parse_kinsn_target_arch(std::string_view arch)
 {
 	std::string value;
 	value.reserve(arch.size());
@@ -425,18 +425,18 @@ KopTargetArch parse_kop_target_arch(std::string_view arch)
 		}
 	}
 	if (value.empty()) {
-		return KopTargetArch::Unknown;
+		return KinsnTargetArch::Unknown;
 	}
 	if (value == "x86" || value == "x86_64" || value == "amd64") {
-		return KopTargetArch::X86;
+		return KinsnTargetArch::X86;
 	}
 	if (value == "arm64" || value == "aarch64") {
-		return KopTargetArch::Arm64;
+		return KinsnTargetArch::Arm64;
 	}
 	throw std::runtime_error("unsupported target.json arch: " + value);
 }
 
-KopTargetArch read_kop_target_arch(const std::filesystem::path &path)
+KinsnTargetArch read_kinsn_target_arch(const std::filesystem::path &path)
 {
 	auto value = expected_or_throw(llvm::json::parse(read_text(path)));
 	auto *root = value.getAsObject();
@@ -445,40 +445,40 @@ KopTargetArch read_kop_target_arch(const std::filesystem::path &path)
 	}
 	const auto arch = root->getString("arch");
 	if (!arch) {
-		return KopTargetArch::Unknown;
+		return KinsnTargetArch::Unknown;
 	}
-	return parse_kop_target_arch(arch->str());
+	return parse_kinsn_target_arch(arch->str());
 }
 
-bool kop_target_arch_is_x86(KopTargetArch arch,
-			      const KopTargetMap &targets)
+bool kinsn_target_arch_is_x86(KinsnTargetArch arch,
+			      const KinsnTargetMap &targets)
 {
-	if (arch == KopTargetArch::X86) {
+	if (arch == KinsnTargetArch::X86) {
 		return true;
 	}
-	if (arch == KopTargetArch::Arm64) {
+	if (arch == KinsnTargetArch::Arm64) {
 		return false;
 	}
-	return target_is_x86_kop_set(targets);
+	return target_is_x86_kinsn_set(targets);
 }
 
-bool kop_target_arch_is_arm64(KopTargetArch arch,
-				const KopTargetMap &targets)
+bool kinsn_target_arch_is_arm64(KinsnTargetArch arch,
+				const KinsnTargetMap &targets)
 {
-	if (arch == KopTargetArch::Arm64) {
+	if (arch == KinsnTargetArch::Arm64) {
 		return true;
 	}
-	if (arch == KopTargetArch::X86) {
+	if (arch == KinsnTargetArch::X86) {
 		return false;
 	}
-	return target_is_arm64_kop_set(targets) &&
-	       !target_is_x86_kop_set(targets);
+	return target_is_arm64_kinsn_set(targets) &&
+	       !target_is_x86_kinsn_set(targets);
 }
 
-bool is_kop_pass(std::string_view pass)
+bool is_kinsn_pass(std::string_view pass)
 {
 	static constexpr std::string_view passes[] = {
-		"kop", "rotate", "cond_select", "extract", "endian_fusion",
+		"kinsn", "rotate", "cond_select", "extract", "endian_fusion",
 		"bulk_memory", "lea", "prefetch", "ccmp",
 	};
 	return std::find(std::begin(passes), std::end(passes), pass) !=
@@ -550,7 +550,7 @@ BranchFlipOptions parse_branch_flip_pass_args(const std::vector<std::string> &ar
 	return options;
 }
 
-void validate_kop_mode_arg(std::string_view value)
+void validate_kinsn_mode_arg(std::string_view value)
 {
 	size_t start = 0;
 	while (start <= value.size()) {
@@ -559,12 +559,12 @@ void validate_kop_mode_arg(std::string_view value)
 								 comma;
 		const std::string spec = trim_copy(value.substr(start, end - start));
 		if (spec.empty()) {
-			throw std::runtime_error("empty --kop-mode entry");
+			throw std::runtime_error("empty --kinsn-mode entry");
 		}
 		const size_t eq = spec.find('=');
 		if (eq == std::string::npos || eq == 0 || eq + 1 >= spec.size() ||
 		    spec.find('=', eq + 1) != std::string::npos) {
-			throw std::runtime_error("invalid --kop-mode entry: " +
+			throw std::runtime_error("invalid --kinsn-mode entry: " +
 						 spec);
 		}
 		const std::string family = trim_copy(
@@ -572,7 +572,7 @@ void validate_kop_mode_arg(std::string_view value)
 		const std::string mode = trim_copy(
 			std::string_view(spec).substr(eq + 1));
 		if (mode != "disable" && mode != "force") {
-			throw std::runtime_error("invalid --kop-mode value: " +
+			throw std::runtime_error("invalid --kinsn-mode value: " +
 						 mode);
 		}
 		if (comma == std::string_view::npos) {
@@ -582,7 +582,7 @@ void validate_kop_mode_arg(std::string_view value)
 	}
 }
 
-bool is_bytecode_kop_family(std::string_view family)
+bool is_bytecode_kinsn_family(std::string_view family)
 {
 	static constexpr std::string_view families[] = {
 		"all", "rotate", "cond_select", "extract", "endian_fusion",
@@ -592,7 +592,7 @@ bool is_bytecode_kop_family(std::string_view family)
 	       std::end(families);
 }
 
-void apply_bytecode_kop_mode_arg(BytecodeKopPolicy &policy,
+void apply_bytecode_kinsn_mode_arg(BytecodeKinsnPolicy &policy,
 				   std::string_view value)
 {
 	size_t start = 0;
@@ -602,25 +602,25 @@ void apply_bytecode_kop_mode_arg(BytecodeKopPolicy &policy,
 								 comma;
 		const std::string spec = trim_copy(value.substr(start, end - start));
 		if (spec.empty()) {
-			throw std::runtime_error("empty --bytecode-kop-mode entry");
+			throw std::runtime_error("empty --bytecode-kinsn-mode entry");
 		}
 		const size_t eq = spec.find('=');
 		if (eq == std::string::npos || eq == 0 || eq + 1 >= spec.size() ||
 		    spec.find('=', eq + 1) != std::string::npos) {
 			throw std::runtime_error(
-				"invalid --bytecode-kop-mode entry: " + spec);
+				"invalid --bytecode-kinsn-mode entry: " + spec);
 		}
 		const std::string family = trim_copy(
 			std::string_view(spec).substr(0, eq));
 		const std::string mode = trim_copy(
 			std::string_view(spec).substr(eq + 1));
-		if (!is_bytecode_kop_family(family)) {
+		if (!is_bytecode_kinsn_family(family)) {
 			throw std::runtime_error(
-				"invalid --bytecode-kop-mode family: " + family);
+				"invalid --bytecode-kinsn-mode family: " + family);
 		}
 		if (mode != "disable" && mode != "force") {
 			throw std::runtime_error(
-				"invalid --bytecode-kop-mode value: " + mode);
+				"invalid --bytecode-kinsn-mode value: " + mode);
 		}
 		const bool enabled = mode == "force";
 		if (family == "all") {
@@ -635,48 +635,48 @@ void apply_bytecode_kop_mode_arg(BytecodeKopPolicy &policy,
 	}
 }
 
-KopPassOptions parse_kop_pass_args(std::string_view pass,
+KinsnPassOptions parse_kinsn_pass_args(std::string_view pass,
 				       const std::vector<std::string> &args)
 {
-	KopPassOptions options;
+	KinsnPassOptions options;
 	for (size_t i = 0; i < args.size(); i++) {
 		const auto &arg = args[i];
-		if (arg == "--kop-mode" || arg.starts_with("--kop-mode=")) {
+		if (arg == "--kinsn-mode" || arg.starts_with("--kinsn-mode=")) {
 			const std::string value =
-				pass_arg_value(args, i, "--kop-mode");
-			validate_kop_mode_arg(value);
-			options.llvm_args.push_back("-bpf-kop-mode=" + value);
-		} else if (arg == "--bytecode-kop-mode" ||
-			   arg.starts_with("--bytecode-kop-mode=")) {
+				pass_arg_value(args, i, "--kinsn-mode");
+			validate_kinsn_mode_arg(value);
+			options.llvm_args.push_back("-bpf-kinsn-mode=" + value);
+		} else if (arg == "--bytecode-kinsn-mode" ||
+			   arg.starts_with("--bytecode-kinsn-mode=")) {
 			const std::string value =
-				pass_arg_value(args, i, "--bytecode-kop-mode");
-			apply_bytecode_kop_mode_arg(options.bytecode_policy,
+				pass_arg_value(args, i, "--bytecode-kinsn-mode");
+			apply_bytecode_kinsn_mode_arg(options.bytecode_policy,
 						      value);
 		} else if (arg == "--llvm-arg" ||
 			   arg.starts_with("--llvm-arg=")) {
 			std::string value = pass_arg_value(args, i, "--llvm-arg");
-			if (value.starts_with("-bpf-kop-mode=")) {
-				validate_kop_mode_arg(
+			if (value.starts_with("-bpf-kinsn-mode=")) {
+				validate_kinsn_mode_arg(
 					std::string_view(value).substr(
 						std::string_view(
-							"-bpf-kop-mode=")
+							"-bpf-kinsn-mode=")
 							.size()));
 			} else {
 				throw std::runtime_error(
-					"kop --llvm-arg only accepts BPF kop policy options");
+					"kinsn --llvm-arg only accepts BPF kinsn policy options");
 			}
 			options.llvm_args.push_back(std::move(value));
 		} else {
-			throw std::runtime_error("kop pass " + std::string(pass) +
+			throw std::runtime_error("kinsn pass " + std::string(pass) +
 						 " unknown pass-local arg: " + arg);
 		}
 	}
 	return options;
 }
 
-std::optional<std::string> default_kop_mode_for_pass(std::string_view pass)
+std::optional<std::string> default_kinsn_mode_for_pass(std::string_view pass)
 {
-	if (pass == "kop") {
+	if (pass == "kinsn") {
 		return "all=force,movbe-load=disable";
 	}
 	if (pass == "rotate") {
@@ -704,34 +704,34 @@ std::optional<std::string> default_kop_mode_for_pass(std::string_view pass)
 }
 
 std::vector<std::string>
-configure_llvm_kop_select(std::string_view pass,
+configure_llvm_kinsn_select(std::string_view pass,
 			    const std::vector<std::string> &llvm_args,
-			    const KopTargetMap &kop_targets,
-			    KopTargetArch target_arch)
+			    const KinsnTargetMap &kinsn_targets,
+			    KinsnTargetArch target_arch)
 {
-	bool has_kop_mode = false;
+	bool has_kinsn_mode = false;
 	for (const auto &arg : llvm_args) {
-		if (arg.starts_with("-bpf-kop-mode=")) {
-			has_kop_mode = true;
+		if (arg.starts_with("-bpf-kinsn-mode=")) {
+			has_kinsn_mode = true;
 			break;
 		}
 	}
 
-	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kop-select",
+	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select",
 				       "-bpf-stack-size=4096" };
 	const bool arm64_target =
-		kop_target_arch_is_arm64(target_arch, kop_targets);
+		kinsn_target_arch_is_arm64(target_arch, kinsn_targets);
 	if (arm64_target) {
-		if (has_kop_mode) {
+		if (has_kinsn_mode) {
 			throw std::runtime_error(
-				"explicit LLVM kop mode is unsupported for arm64 targets");
+				"explicit LLVM kinsn mode is unsupported for arm64 targets");
 		}
-		args.push_back("-bpf-kop-mode=all=disable");
-	} else if (!has_kop_mode) {
-		if (const auto mode = default_kop_mode_for_pass(pass)) {
-			args.push_back("-bpf-kop-mode=" + *mode);
+		args.push_back("-bpf-kinsn-mode=all=disable");
+	} else if (!has_kinsn_mode) {
+		if (const auto mode = default_kinsn_mode_for_pass(pass)) {
+			args.push_back("-bpf-kinsn-mode=" + *mode);
 		} else {
-			throw std::runtime_error("no default kop mode for pass " +
+			throw std::runtime_error("no default kinsn mode for pass " +
 						 std::string(pass));
 		}
 	}
@@ -744,16 +744,16 @@ configure_llvm_kop_select(std::string_view pass,
 		argv.push_back(arg.c_str());
 	}
 	llvm::cl::ParseCommandLineOptions(static_cast<int>(argv.size()),
-					  argv.data(), "bpfopt LLVM kop\n");
+					  argv.data(), "bpfopt LLVM kinsn\n");
 	return args;
 }
 
-// Generic (non-kop) passes run the same bpf->LLVM->bpf relift as kop passes,
-// but only the kop path parsed -bpf-stack-size.  At the 512-byte default LLVM
+// Generic (non-kinsn) passes run the same bpf->LLVM->bpf relift as kinsn passes,
+// but only the kinsn path parsed -bpf-stack-size.  At the 512-byte default LLVM
 // hard-errors ("Looks like the BPF stack limit is exceeded") when a program
 // whose frame is already near the BPF limit is relifted again, and it cannot
 // pack spills beyond -512.  Let LLVM address the frame with the same 4096-byte
-// budget the kop path uses; remap_out_of_range_stack_spills then squeezes every
+// budget the kinsn path uses; remap_out_of_range_stack_spills then squeezes every
 // out-of-range slot back into the free 512-byte BPF frame.
 void configure_llvm_generic_roundtrip()
 {
@@ -768,13 +768,13 @@ void configure_llvm_generic_roundtrip()
 }
 
 void apply_target_bytecode_policy_defaults(std::string_view pass,
-					   const KopTargetMap &kop_targets,
-					   KopTargetArch target_arch,
-					   KopPassOptions &options)
+					   const KinsnTargetMap &kinsn_targets,
+					   KinsnTargetArch target_arch,
+					   KinsnPassOptions &options)
 {
 	const bool arm64_target =
-		kop_target_arch_is_arm64(target_arch, kop_targets);
-	if (!arm64_target || pass != "kop" ||
+		kinsn_target_arch_is_arm64(target_arch, kinsn_targets);
+	if (!arm64_target || pass != "kinsn" ||
 	    options.bytecode_policy.all_enabled) {
 		return;
 	}
@@ -790,7 +790,7 @@ void apply_target_bytecode_policy_defaults(std::string_view pass,
 	}
 }
 
-int64_t count_kop_calls(const std::vector<uint8_t> &bytes)
+int64_t count_kinsn_calls(const std::vector<uint8_t> &bytes)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
 		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
@@ -800,33 +800,33 @@ int64_t count_kop_calls(const std::vector<uint8_t> &bytes)
 	for (size_t pc = 0; pc < insn_count; pc++) {
 		const uint8_t opcode = bytes[pc * INSN_SIZE];
 		if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
-		    src_reg(bytes, pc) == BPF_PSEUDO_KOP_CALL) {
+		    src_reg(bytes, pc) == BPF_PSEUDO_KINSN_CALL) {
 			count++;
 		}
 	}
 	return count;
 }
 
-using KopCallKey = std::pair<int16_t, int32_t>;
+using KinsnCallKey = std::pair<int16_t, int32_t>;
 
-std::map<KopCallKey, std::string>
-kop_target_name_by_call_key(const KopTargetMap &targets)
+std::map<KinsnCallKey, std::string>
+kinsn_target_name_by_call_key(const KinsnTargetMap &targets)
 {
-	std::map<KopCallKey, std::string> names;
+	std::map<KinsnCallKey, std::string> names;
 	for (const auto &[name, target] : targets) {
 		const auto [_, inserted] = names.emplace(
-			KopCallKey{ target.call_offset, target.btf_func_id },
+			KinsnCallKey{ target.call_offset, target.btf_func_id },
 			name);
 		if (!inserted) {
 			throw std::runtime_error(
-				"target.json has duplicate kop relocation tuple for " +
+				"target.json has duplicate kinsn relocation tuple for " +
 				name);
 		}
 	}
 	return names;
 }
 
-std::string kop_family_for_name(std::string_view name)
+std::string kinsn_family_for_name(std::string_view name)
 {
 	if (name.starts_with("bpf_x86_lea")) {
 		return "lea";
@@ -885,34 +885,34 @@ std::string kop_family_for_name(std::string_view name)
 }
 
 std::map<std::string, int64_t>
-count_kop_calls_by_name(const std::vector<uint8_t> &bytes,
-			  const KopTargetMap &targets)
+count_kinsn_calls_by_name(const std::vector<uint8_t> &bytes,
+			  const KinsnTargetMap &targets)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
 		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
 	}
-	const auto names = kop_target_name_by_call_key(targets);
+	const auto names = kinsn_target_name_by_call_key(targets);
 	std::map<std::string, int64_t> counts;
 	const size_t insn_count = bytes.size() / INSN_SIZE;
 	for (size_t pc = 0; pc < insn_count; pc++) {
 		const uint8_t opcode = bytes[pc * INSN_SIZE];
 		if ((opcode != BPF_CALL && opcode != BPF_CALLX) ||
-		    src_reg(bytes, pc) != BPF_PSEUDO_KOP_CALL) {
+		    src_reg(bytes, pc) != BPF_PSEUDO_KINSN_CALL) {
 			continue;
 		}
-		const KopCallKey key{ read_off(bytes, pc),
+		const KinsnCallKey key{ read_off(bytes, pc),
 					read_imm(bytes, pc) };
 		const auto it = names.find(key);
 		if (it == names.end()) {
 			throw std::runtime_error(
-				"output bytecode references a kop relocation tuple missing from target.json");
+				"output bytecode references a kinsn relocation tuple missing from target.json");
 		}
 		counts[it->second]++;
 	}
 	return counts;
 }
 
-uint64_t read_kop_sidecar_payload(const std::vector<uint8_t> &bytes,
+uint64_t read_kinsn_sidecar_payload(const std::vector<uint8_t> &bytes,
 				    size_t pc)
 {
 	return static_cast<uint64_t>(dst_reg(bytes, pc) & 0xf) |
@@ -924,16 +924,16 @@ uint64_t read_kop_sidecar_payload(const std::vector<uint8_t> &bytes,
 		<< 20);
 }
 
-bool kop_payload_wire_escaped(uint64_t payload)
+bool kinsn_payload_wire_escaped(uint64_t payload)
 {
 	const uint8_t marker = payload & 0xf;
 	const uint8_t original_low = (payload >> 4) & 0xf;
 	return marker == 10 && original_low >= 11 && original_low <= 15;
 }
 
-uint64_t decode_kop_payload(uint64_t payload)
+uint64_t decode_kinsn_payload(uint64_t payload)
 {
-	if (!kop_payload_wire_escaped(payload)) {
+	if (!kinsn_payload_wire_escaped(payload)) {
 		return payload;
 	}
 	return ((payload >> 8) << 4) | ((payload >> 4) & 0xf);
@@ -947,9 +947,9 @@ std::string bpf_reg_name(uint8_t reg)
 	return "x" + std::to_string(reg);
 }
 
-std::string kop_payload_shape(std::string_view name, uint64_t payload)
+std::string kinsn_payload_shape(std::string_view name, uint64_t payload)
 {
-	const uint64_t decoded = decode_kop_payload(payload);
+	const uint64_t decoded = decode_kinsn_payload(payload);
 	if (name.starts_with("bpf_x86_lea")) {
 		if ((decoded & 0xf) != 1 || decoded >> 52) {
 			std::ostringstream os;
@@ -980,36 +980,36 @@ std::string kop_payload_shape(std::string_view name, uint64_t payload)
 }
 
 std::map<std::string, int64_t>
-count_kop_payload_shapes(const std::vector<uint8_t> &bytes,
-			   const KopTargetMap &targets)
+count_kinsn_payload_shapes(const std::vector<uint8_t> &bytes,
+			   const KinsnTargetMap &targets)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
 		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
 	}
-	const auto names = kop_target_name_by_call_key(targets);
+	const auto names = kinsn_target_name_by_call_key(targets);
 	std::map<std::string, int64_t> counts;
 	const size_t insn_count = bytes.size() / INSN_SIZE;
 	for (size_t pc = 0; pc < insn_count; pc++) {
 		const uint8_t opcode = bytes[pc * INSN_SIZE];
 		if ((opcode != BPF_CALL && opcode != BPF_CALLX) ||
-		    src_reg(bytes, pc) != BPF_PSEUDO_KOP_CALL) {
+		    src_reg(bytes, pc) != BPF_PSEUDO_KINSN_CALL) {
 			continue;
 		}
 		if (pc == 0 || bytes[(pc - 1) * INSN_SIZE] != BPF_MOV64_K ||
-		    src_reg(bytes, pc - 1) != BPF_PSEUDO_KOP_SIDECAR) {
+		    src_reg(bytes, pc - 1) != BPF_PSEUDO_KINSN_SIDECAR) {
 			throw std::runtime_error(
-				"output bytecode has kop call without preceding sidecar");
+				"output bytecode has kinsn call without preceding sidecar");
 		}
-		const KopCallKey key{ read_off(bytes, pc),
+		const KinsnCallKey key{ read_off(bytes, pc),
 					read_imm(bytes, pc) };
 		const auto it = names.find(key);
 		if (it == names.end()) {
 			throw std::runtime_error(
-				"output bytecode references a kop relocation tuple missing from target.json");
+				"output bytecode references a kinsn relocation tuple missing from target.json");
 		}
-		counts[kop_payload_shape(
+		counts[kinsn_payload_shape(
 			it->second,
-			read_kop_sidecar_payload(bytes, pc - 1))]++;
+			read_kinsn_sidecar_payload(bytes, pc - 1))]++;
 	}
 	return counts;
 }
@@ -1039,7 +1039,7 @@ counter_delta(std::map<std::string, int64_t> after,
 	for (const auto &[name, count] : before) {
 		after[name] -= count;
 		if (after[name] < 0) {
-			throw std::runtime_error("kop report counter decreased for " +
+			throw std::runtime_error("kinsn report counter decreased for " +
 						 name);
 		}
 		if (after[name] == 0) {
@@ -1050,18 +1050,18 @@ counter_delta(std::map<std::string, int64_t> after,
 }
 
 std::map<std::string, int64_t>
-kop_call_family_counts(const std::map<std::string, int64_t> &by_name)
+kinsn_call_family_counts(const std::map<std::string, int64_t> &by_name)
 {
 	std::map<std::string, int64_t> by_family;
 	for (const auto &[name, count] : by_name) {
-		by_family[kop_family_for_name(name)] += count;
+		by_family[kinsn_family_for_name(name)] += count;
 	}
 	return by_family;
 }
 
 llvm::json::Object
-bytecode_kop_family_policy_json(std::string_view pass,
-				  const BytecodeKopPolicy &policy)
+bytecode_kinsn_family_policy_json(std::string_view pass,
+				  const BytecodeKinsnPolicy &policy)
 {
 	static constexpr std::string_view families[] = {
 		"rotate", "cond_select", "extract", "endian_fusion",
@@ -1071,19 +1071,19 @@ bytecode_kop_family_policy_json(std::string_view pass,
 	llvm::json::Object out;
 	for (const auto family : families) {
 		out[std::string(family)] =
-			bytecode_kop_family_enabled(pass, family, policy);
+			bytecode_kinsn_family_enabled(pass, family, policy);
 	}
 	return out;
 }
 
-llvm::json::Object kop_policy_json(const Cli &cli,
-				     const KopPassOptions &options)
+llvm::json::Object kinsn_policy_json(const Cli &cli,
+				     const KinsnPassOptions &options)
 {
 	llvm::json::Object policy{
 		{ "pass_args", string_array_json(cli.pass_args) },
 		{ "llvm_args", string_array_json(options.effective_llvm_args) },
 		{ "bytecode_families",
-		  bytecode_kop_family_policy_json(*cli.pass,
+		  bytecode_kinsn_family_policy_json(*cli.pass,
 						    options.bytecode_policy) },
 	};
 	if (options.bytecode_policy.all_enabled) {
@@ -1246,13 +1246,13 @@ bool valid_bpf_stack_range(int off, int width)
 	return off >= -512 && off + width <= 0;
 }
 
-constexpr int X86_KOP_STACK_OFF = -40;
-constexpr int X86_KOP_STACK_BYTES = 40;
+constexpr int X86_KINSN_STACK_OFF = -40;
+constexpr int X86_KINSN_STACK_BYTES = 40;
 
-bool overlaps_x86_kop_stack_contract(int off, int width)
+bool overlaps_x86_kinsn_stack_contract(int off, int width)
 {
-	return byte_ranges_overlap(off, width, X86_KOP_STACK_OFF,
-				   X86_KOP_STACK_BYTES);
+	return byte_ranges_overlap(off, width, X86_KINSN_STACK_OFF,
+				   X86_KINSN_STACK_BYTES);
 }
 
 struct StackAccess {
@@ -1262,16 +1262,16 @@ struct StackAccess {
 	bool write = false;
 };
 
-bool is_kop_sidecar(const std::vector<uint8_t> &bytes, size_t pc)
+bool is_kinsn_sidecar(const std::vector<uint8_t> &bytes, size_t pc)
 {
 	return bytes[pc * INSN_SIZE] == BPF_MOV64_K &&
-	       src_reg(bytes, pc) == BPF_PSEUDO_KOP_SIDECAR;
+	       src_reg(bytes, pc) == BPF_PSEUDO_KINSN_SIDECAR;
 }
 
-bool is_kop_call(const std::vector<uint8_t> &bytes, size_t pc)
+bool is_kinsn_call(const std::vector<uint8_t> &bytes, size_t pc)
 {
 	return bytes[pc * INSN_SIZE] == BPF_CALL &&
-	       src_reg(bytes, pc) == BPF_PSEUDO_KOP_CALL;
+	       src_reg(bytes, pc) == BPF_PSEUDO_KINSN_CALL;
 }
 
 bool candidate_access_overlaps(const StackAccess &access, int off, int width)
@@ -1328,7 +1328,7 @@ bool candidate_is_free_for_range(const std::vector<StackAccess> &accesses,
 }
 
 int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
-					bool reserve_x86_kop_stack)
+					bool reserve_x86_kinsn_stack)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
 		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
@@ -1382,8 +1382,8 @@ int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
 			if (!valid_bpf_stack_range(candidate, width)) {
 				continue;
 			}
-			if (reserve_x86_kop_stack &&
-			    overlaps_x86_kop_stack_contract(candidate, width)) {
+			if (reserve_x86_kinsn_stack &&
+			    overlaps_x86_kinsn_stack_contract(candidate, width)) {
 				continue;
 			}
 			if (!candidate_is_free_for_range(
@@ -2706,7 +2706,7 @@ struct Low16LoadSource {
 
 std::optional<Low16LoadSource>
 low16_load_source_at(const std::vector<uint8_t> &bytes, size_t pc,
-		     const std::map<KopCallKey, std::string> &kop_names)
+		     const std::map<KinsnCallKey, std::string> &kinsn_names)
 {
 	const size_t insn_count = bytes.size() / INSN_SIZE;
 	if (pc >= insn_count) {
@@ -2718,18 +2718,18 @@ low16_load_source_at(const std::vector<uint8_t> &bytes, size_t pc,
 					src_reg(bytes, pc), read_off(bytes, pc) };
 	}
 
-	if (pc + 1 >= insn_count || !is_kop_sidecar(bytes, pc) ||
-	    !is_kop_call(bytes, pc + 1)) {
+	if (pc + 1 >= insn_count || !is_kinsn_sidecar(bytes, pc) ||
+	    !is_kinsn_call(bytes, pc + 1)) {
 		return std::nullopt;
 	}
-	const KopCallKey key{ read_off(bytes, pc + 1),
+	const KinsnCallKey key{ read_off(bytes, pc + 1),
 				read_imm(bytes, pc + 1) };
-	const auto name = kop_names.find(key);
-	if (name == kop_names.end() || name->second != "bpf_x86_movzwl") {
+	const auto name = kinsn_names.find(key);
+	if (name == kinsn_names.end() || name->second != "bpf_x86_movzwl") {
 		return std::nullopt;
 	}
 	const uint64_t payload =
-		decode_kop_payload(read_kop_sidecar_payload(bytes, pc));
+		decode_kinsn_payload(read_kinsn_sidecar_payload(bytes, pc));
 	constexpr uint8_t x86_form_mem = 4;
 	if ((payload & 0xf) != x86_form_mem || payload >> 28) {
 		return std::nullopt;
@@ -2743,12 +2743,12 @@ low16_load_source_at(const std::vector<uint8_t> &bytes, size_t pc,
 }
 
 int64_t preserve_low16_bound_after_composite_u32_check(
-	std::vector<uint8_t> &bytes, const KopTargetMap &kop_targets)
+	std::vector<uint8_t> &bytes, const KinsnTargetMap &kinsn_targets)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
 		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
 	}
-	const auto kop_names = kop_target_name_by_call_key(kop_targets);
+	const auto kinsn_names = kinsn_target_name_by_call_key(kinsn_targets);
 	int64_t changed = 0;
 	size_t pc = 0;
 	while (true) {
@@ -2756,7 +2756,7 @@ int64_t preserve_low16_bound_after_composite_u32_check(
 		if (pc >= insn_count) {
 			break;
 		}
-		const auto low_load = low16_load_source_at(bytes, pc, kop_names);
+		const auto low_load = low16_load_source_at(bytes, pc, kinsn_names);
 		if (!low_load) {
 			pc++;
 			continue;
@@ -2856,8 +2856,8 @@ int64_t preserve_shifted_offset_bound_after_guard(std::vector<uint8_t> &bytes)
 		    bytes[(pc + 1) * INSN_SIZE] != BPF_RSH64_K ||
 		    bytes[(pc + 2) * INSN_SIZE] != BPF_LD_IMM64 ||
 		    bytes[(pc + 4) * INSN_SIZE] != BPF_AND64_X ||
-		    !is_kop_sidecar(bytes, pc + 5) ||
-		    !is_kop_call(bytes, pc + 6)) {
+		    !is_kinsn_sidecar(bytes, pc + 5) ||
+		    !is_kinsn_call(bytes, pc + 6)) {
 			pc++;
 			continue;
 		}
@@ -2951,24 +2951,24 @@ int64_t preserve_shifted_offset_bound_after_guard(std::vector<uint8_t> &bytes)
 	return changed;
 }
 
-#include "bpf_kop_bytecode.hpp"
+#include "bpf_kinsn_bytecode.hpp"
 
 std::optional<uint8_t>
 rolw_imm8_dst_at(const std::vector<uint8_t> &bytes, size_t pc,
-		 const std::map<KopCallKey, std::string> &kop_names)
+		 const std::map<KinsnCallKey, std::string> &kinsn_names)
 {
-	if (pc + 1 >= bytes.size() / INSN_SIZE || !is_kop_sidecar(bytes, pc) ||
-	    !is_kop_call(bytes, pc + 1)) {
+	if (pc + 1 >= bytes.size() / INSN_SIZE || !is_kinsn_sidecar(bytes, pc) ||
+	    !is_kinsn_call(bytes, pc + 1)) {
 		return std::nullopt;
 	}
-	const KopCallKey key{ read_off(bytes, pc + 1),
+	const KinsnCallKey key{ read_off(bytes, pc + 1),
 				read_imm(bytes, pc + 1) };
-	const auto name = kop_names.find(key);
-	if (name == kop_names.end() || name->second != "bpf_x86_rolw") {
+	const auto name = kinsn_names.find(key);
+	if (name == kinsn_names.end() || name->second != "bpf_x86_rolw") {
 		return std::nullopt;
 	}
 	const uint64_t payload =
-		decode_kop_payload(read_kop_sidecar_payload(bytes, pc));
+		decode_kinsn_payload(read_kinsn_sidecar_payload(bytes, pc));
 	if ((payload & 0xf) != X86_FORM_IMM || ((payload >> 8) & 0xff) != 8 ||
 	    payload >> 16) {
 		return std::nullopt;
@@ -2977,12 +2977,12 @@ rolw_imm8_dst_at(const std::vector<uint8_t> &bytes, size_t pc,
 }
 
 int64_t apply_movbe16_after_low16_load(std::vector<uint8_t> &bytes,
-				       const KopTargetMap &kop_targets)
+				       const KinsnTargetMap &kinsn_targets)
 {
-	if (!target_has_kop(kop_targets, "bpf_x86_movbe16")) {
+	if (!target_has_kinsn(kinsn_targets, "bpf_x86_movbe16")) {
 		return 0;
 	}
-	const auto kop_names = kop_target_name_by_call_key(kop_targets);
+	const auto kinsn_names = kinsn_target_name_by_call_key(kinsn_targets);
 	int64_t changed = 0;
 	size_t pc = 0;
 	while (true) {
@@ -2990,13 +2990,13 @@ int64_t apply_movbe16_after_low16_load(std::vector<uint8_t> &bytes,
 		if (pc >= insn_count) {
 			break;
 		}
-		const auto low_load = low16_load_source_at(bytes, pc, kop_names);
+		const auto low_load = low16_load_source_at(bytes, pc, kinsn_names);
 		if (!low_load) {
 			pc++;
 			continue;
 		}
 		const size_t rolw_pc = pc + low_load->len;
-		const auto rolw_dst = rolw_imm8_dst_at(bytes, rolw_pc, kop_names);
+		const auto rolw_dst = rolw_imm8_dst_at(bytes, rolw_pc, kinsn_names);
 		const size_t old_len = low_load->len + 2;
 		if (!rolw_dst || *rolw_dst != low_load->dst ||
 		    !range_is_replaceable(bytes, pc, old_len)) {
@@ -3009,7 +3009,7 @@ int64_t apply_movbe16_after_low16_load(std::vector<uint8_t> &bytes,
 						    0, 0);
 		replacement.insert(replacement.end(), zero_dst.begin(),
 				   zero_dst.end());
-		append_kop_pair(replacement, kop_targets, "bpf_x86_movbe16",
+		append_kinsn_pair(replacement, kinsn_targets, "bpf_x86_movbe16",
 				  pack_x86_mem_payload(low_load->dst,
 						       low_load->base,
 						       low_load->off));
@@ -3152,8 +3152,8 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 		  const std::vector<InlineRecord> &inlined = {},
 		  const PassReportCounts *report_counts = nullptr,
 		  const std::vector<std::string> &diagnostics = {},
-		  const KopTargetMap *kop_targets = nullptr,
-		  const KopPassOptions *kop_options = nullptr)
+		  const KinsnTargetMap *kinsn_targets = nullptr,
+		  const KinsnPassOptions *kinsn_options = nullptr)
 {
 	if (!cli.report) {
 		return;
@@ -3225,31 +3225,31 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 			  static_cast<int64_t>(input.size() / INSN_SIZE) },
 		{ "inlined_map_entries", std::move(inlined_entries) },
 	};
-	if (kop_targets) {
-		if (kop_options) {
-			report["kop_policy"] = kop_policy_json(cli, *kop_options);
+	if (kinsn_targets) {
+		if (kinsn_options) {
+			report["kinsn_policy"] = kinsn_policy_json(cli, *kinsn_options);
 		}
 		auto by_name = counter_delta(
-			count_kop_calls_by_name(output, *kop_targets),
-			count_kop_calls_by_name(input, *kop_targets));
+			count_kinsn_calls_by_name(output, *kinsn_targets),
+			count_kinsn_calls_by_name(input, *kinsn_targets));
 		int64_t counted_sites = 0;
 		for (const auto &[_, count] : by_name) {
 			counted_sites += count;
 		}
 		if (counted_sites != reported_sites) {
 			throw std::runtime_error(
-				"kop report count mismatch: new output calls=" +
+				"kinsn report count mismatch: new output calls=" +
 				std::to_string(counted_sites) +
 				" sites_applied=" +
 				std::to_string(reported_sites));
 		}
 		auto payload_shapes = counter_delta(
-			count_kop_payload_shapes(output, *kop_targets),
-			count_kop_payload_shapes(input, *kop_targets));
-		report["kop_calls_by_name"] = counter_json(by_name);
-		report["kop_calls_by_family"] =
-			counter_json(kop_call_family_counts(by_name));
-		report["kop_payload_shapes"] = counter_json(payload_shapes);
+			count_kinsn_payload_shapes(output, *kinsn_targets),
+			count_kinsn_payload_shapes(input, *kinsn_targets));
+		report["kinsn_calls_by_name"] = counter_json(by_name);
+		report["kinsn_calls_by_family"] =
+			counter_json(kinsn_call_family_counts(by_name));
+		report["kinsn_payload_shapes"] = counter_json(payload_shapes);
 	}
 	std::string json;
 	llvm::raw_string_ostream os(json);
@@ -3275,7 +3275,7 @@ void run_pass(Cli &cli)
 		throw std::runtime_error(
 			"--fd-to-id requires --canonicalize-map-refs");
 	}
-	const bool kop_pass = is_kop_pass(*cli.pass);
+	const bool kinsn_pass = is_kinsn_pass(*cli.pass);
 	const bool branch_flip_pass = *cli.pass == "branch_flip";
 	const bool tail_call_icache_pass = *cli.pass == "tail_call_icache";
 	const bool hot_region_version_pass = *cli.pass == "hot_region_version";
@@ -3284,27 +3284,27 @@ void run_pass(Cli &cli)
 	const bool specialization_profile_pass = tail_call_icache_pass ||
 		hot_region_version_pass || loop_trip_spec_pass ||
 		context_specialize_pass;
-	KopTargetMap kop_targets;
-	KopTargetArch kop_target_arch = KopTargetArch::Unknown;
-	KopPassOptions kop_options;
+	KinsnTargetMap kinsn_targets;
+	KinsnTargetArch kinsn_target_arch = KinsnTargetArch::Unknown;
+	KinsnPassOptions kinsn_options;
 	BranchFlipOptions branch_flip_options;
 	SpecializationProfileOptions specialization_options;
-	if (kop_pass) {
+	if (kinsn_pass) {
 		if (!cli.target) {
 			throw std::runtime_error("--pass " + *cli.pass +
 						 " requires --target");
 		}
-		kop_target_arch = read_kop_target_arch(*cli.target);
-		kop_targets = read_kop_targets(*cli.target);
-		kop_options = parse_kop_pass_args(*cli.pass, cli.pass_args);
-		apply_target_bytecode_policy_defaults(*cli.pass, kop_targets,
-						      kop_target_arch,
-						      kop_options);
-		kop_options.effective_llvm_args =
-			configure_llvm_kop_select(*cli.pass,
-						    kop_options.llvm_args,
-						    kop_targets,
-						    kop_target_arch);
+		kinsn_target_arch = read_kinsn_target_arch(*cli.target);
+		kinsn_targets = read_kinsn_targets(*cli.target);
+		kinsn_options = parse_kinsn_pass_args(*cli.pass, cli.pass_args);
+		apply_target_bytecode_policy_defaults(*cli.pass, kinsn_targets,
+						      kinsn_target_arch,
+						      kinsn_options);
+		kinsn_options.effective_llvm_args =
+			configure_llvm_kinsn_select(*cli.pass,
+						    kinsn_options.llvm_args,
+						    kinsn_targets,
+						    kinsn_target_arch);
 	} else if (branch_flip_pass) {
 		branch_flip_options = parse_branch_flip_pass_args(cli.pass_args);
 	} else if (specialization_profile_pass) {
@@ -3315,8 +3315,8 @@ void run_pass(Cli &cli)
 					 " does not accept pass-local args");
 	}
 	const auto input = read_all(cli.input);
-	const int64_t input_kop_calls =
-		kop_pass ? count_kop_calls(input) : 0;
+	const int64_t input_kinsn_calls =
+		kinsn_pass ? count_kinsn_calls(input) : 0;
 	std::vector<InlineRecord> inlined;
 	std::vector<uint8_t> output;
 	std::optional<int64_t> sites_applied;
@@ -3342,39 +3342,39 @@ void run_pass(Cli &cli)
 		output = run_map_inline_roundtrip(input, cli, inlined);
 
 	} else {
-		if (!kop_pass) {
+		if (!kinsn_pass) {
 			configure_llvm_generic_roundtrip();
 		}
-		if (kop_pass && count_kop_calls(input) > 0) {
+		if (kinsn_pass && count_kinsn_calls(input) > 0) {
 			output = input;
 		} else {
 			output = run_llvm_roundtrip(
-				input, kop_pass ? &kop_targets : nullptr);
+				input, kinsn_pass ? &kinsn_targets : nullptr);
 		}
-		if (kop_pass) {
-			if (input_kop_calls == 0) {
+		if (kinsn_pass) {
+			if (input_kinsn_calls == 0) {
 				eliminate_entry_ctx_null_branches(output);
 				propagate_masked_range_to_fallthrough_source(output);
 				propagate_masked_range_to_fallthrough_copies(output);
 				retarget_masked_range_branches(output);
 				preserve_low16_bound_after_composite_u32_check(output,
-									       kop_targets);
+									       kinsn_targets);
 				preserve_shifted_offset_bound_after_guard(output);
-				apply_movbe16_after_low16_load(output, kop_targets);
+				apply_movbe16_after_low16_load(output, kinsn_targets);
 				compact_unreachable_insns(output);
 				remap_out_of_range_stack_spills(output, true);
 			}
-			apply_bytecode_kop_recovery(
-				output, *cli.pass, kop_options.bytecode_policy,
-				kop_targets, kop_target_arch, diagnostics);
-			const int64_t output_kop_calls = count_kop_calls(output);
-			if (output_kop_calls < input_kop_calls) {
+			apply_bytecode_kinsn_recovery(
+				output, *cli.pass, kinsn_options.bytecode_policy,
+				kinsn_targets, kinsn_target_arch, diagnostics);
+			const int64_t output_kinsn_calls = count_kinsn_calls(output);
+			if (output_kinsn_calls < input_kinsn_calls) {
 				throw std::runtime_error(
-					"kop pass removed existing kop calls");
+					"kinsn pass removed existing kinsn calls");
 			}
-			sites_applied = output_kop_calls - input_kop_calls;
+			sites_applied = output_kinsn_calls - input_kinsn_calls;
 			pass_report_counts.sites_applied = sites_applied;
-			if (output_kop_calls == 0) {
+			if (output_kinsn_calls == 0) {
 				output = input;
 			}
 		} else {
@@ -3388,8 +3388,8 @@ void run_pass(Cli &cli)
 			? &pass_report_counts
 			: nullptr;
 	write_report(cli, input, output, inlined, report_counts, diagnostics,
-		     kop_pass ? &kop_targets : nullptr,
-		     kop_pass ? &kop_options : nullptr);
+		     kinsn_pass ? &kinsn_targets : nullptr,
+		     kinsn_pass ? &kinsn_options : nullptr);
 }
 
 std::string next_value(int &i, int argc, char **argv, std::string_view opt)

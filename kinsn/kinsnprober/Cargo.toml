@@ -1,11 +1,12 @@
 [package]
-name = "kopprober"
+workspace = "../../bpfopt"
+name = "kinsnprober"
 version = "0.1.0"
 edition = "2021"
-description = "Probe loaded kop BTF modules and emit a bpfopt target.json"
+description = "Probe loaded kinsn BTF modules and emit a bpfopt target.json"
 
 [[bin]]
-name = "kopprober"
+name = "kinsnprober"
 path = "src/main.rs"
 
 [dependencies]

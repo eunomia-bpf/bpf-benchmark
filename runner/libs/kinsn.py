@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from . import ROOT_DIR, run_command
-from .workspace_layout import RUNTIME_KOP_MODULE_DIR, inside_runtime_image, kop_module_dir
+from .workspace_layout import RUNTIME_KINSN_MODULE_DIR, inside_runtime_image, kinsn_module_dir
 
 
-_KOP_MODULE_ARCH_DIRS = {
+_KINSN_MODULE_ARCH_DIRS = {
     "x86_64": "x86",
     "aarch64": "arm64",
 }
@@ -24,32 +24,32 @@ def relpath(path: Path | None) -> str | None:
         return str(path.resolve())
 
 
-def expected_kop_modules() -> list[str]:
-    module_dir = resolve_kop_module_dir()
+def expected_kinsn_modules() -> list[str]:
+    module_dir = resolve_kinsn_module_dir()
     if not module_dir.is_dir():
-        raise RuntimeError(f"kop module directory is missing: {module_dir}")
+        raise RuntimeError(f"kinsn module directory is missing: {module_dir}")
     modules = sorted(
         path.stem
         for path in module_dir.glob("bpf_*.ko")
         if path.is_file()
     )
     if not modules:
-        raise RuntimeError(f"no kop modules found under {module_dir}")
+        raise RuntimeError(f"no kinsn modules found under {module_dir}")
     return modules
 
 
-def resolve_kop_module_dir(module_dir: Path | None = None) -> Path:
+def resolve_kinsn_module_dir(module_dir: Path | None = None) -> Path:
     if module_dir is not None:
         resolved = Path(module_dir).resolve()
         if not resolved.is_dir():
-            raise RuntimeError(f"kop module directory is missing: {resolved}")
+            raise RuntimeError(f"kinsn module directory is missing: {resolved}")
         return resolved
-    if inside_runtime_image() or RUNTIME_KOP_MODULE_DIR.is_dir():
-        return RUNTIME_KOP_MODULE_DIR
-    arch_dir = _KOP_MODULE_ARCH_DIRS.get(platform.machine())
+    if inside_runtime_image() or RUNTIME_KINSN_MODULE_DIR.is_dir():
+        return RUNTIME_KINSN_MODULE_DIR
+    arch_dir = _KINSN_MODULE_ARCH_DIRS.get(platform.machine())
     if arch_dir is None:
-        raise RuntimeError(f"unsupported architecture for kop modules: {platform.machine()}")
-    return kop_module_dir(ROOT_DIR, arch_dir)
+        raise RuntimeError(f"unsupported architecture for kinsn modules: {platform.machine()}")
+    return kinsn_module_dir(ROOT_DIR, arch_dir)
 
 
 def _loaded_bpf_modules_from_lsmod() -> tuple[list[str], str] | None:
@@ -70,7 +70,7 @@ def _loaded_bpf_modules_from_sysfs() -> tuple[list[str], str]:
     return entries, "\n".join(entries)
 
 
-def capture_kop_module_snapshot(expected_modules: Sequence[str]) -> dict[str, object]:
+def capture_kinsn_module_snapshot(expected_modules: Sequence[str]) -> dict[str, object]:
     snapshot = _loaded_bpf_modules_from_lsmod()
     source = "lsmod"
     if snapshot is None:
@@ -99,14 +99,14 @@ def _module_is_resident(module_name: str) -> bool:
     return (Path("/sys/module") / module_name).is_dir()
 
 
-def load_kop_modules(
+def load_kinsn_modules(
     expected_modules: Sequence[str],
     *,
     module_dir: Path | None = None,
     before_snapshot: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    snapshot_before = dict(before_snapshot) if before_snapshot is not None else capture_kop_module_snapshot(expected_modules)
-    resolved_module_dir = resolve_kop_module_dir(module_dir)
+    snapshot_before = dict(before_snapshot) if before_snapshot is not None else capture_kinsn_module_snapshot(expected_modules)
+    resolved_module_dir = resolve_kinsn_module_dir(module_dir)
     loaded = 0
     total = 0
     for ko_path in sorted(resolved_module_dir.glob("bpf_*.ko")):
@@ -122,9 +122,9 @@ def load_kop_modules(
         if _module_is_resident(module_name):
             loaded += 1
     if total == 0:
-        raise RuntimeError(f"no kop modules found in {resolved_module_dir}")
+        raise RuntimeError(f"no kinsn modules found in {resolved_module_dir}")
 
-    after_snapshot = capture_kop_module_snapshot(expected_modules)
+    after_snapshot = capture_kinsn_module_snapshot(expected_modules)
 
     expected = list(after_snapshot.get("expected_modules") or [])
     before_loaded = {
@@ -143,13 +143,13 @@ def load_kop_modules(
     failed_modules = [name for name in expected if name not in after_loaded]
     if failed_modules:
         raise RuntimeError(
-            "kop module loader did not load all expected modules: "
+            "kinsn module loader did not load all expected modules: "
             + ", ".join(failed_modules)
         )
 
     return {
         "invoked_at": datetime.now(timezone.utc).isoformat(),
-        "loader": "runner.libs.kop.load_kop_modules",
+        "loader": "runner.libs.kinsn.load_kinsn_modules",
         "module_dir": relpath(resolved_module_dir),
         "status": "ok",
         "loaded_count": loaded,
@@ -162,10 +162,10 @@ def load_kop_modules(
     }
 
 
-def prepare_kop_modules() -> dict[str, object]:
-    expected_modules = expected_kop_modules()
-    before_snapshot = capture_kop_module_snapshot(expected_modules)
-    module_load = load_kop_modules(
+def prepare_kinsn_modules() -> dict[str, object]:
+    expected_modules = expected_kinsn_modules()
+    before_snapshot = capture_kinsn_module_snapshot(expected_modules)
+    module_load = load_kinsn_modules(
         expected_modules,
         before_snapshot=before_snapshot,
     )

@@ -7,12 +7,13 @@
 [submodule "vendor/linux-framework"]
 	path = vendor/linux-framework
 	url = https://github.com/eunomia-bpf/linux.git
+	branch = kinsn-only
 [submodule "docs/paper"]
 	path = docs/paper
 	url = https://github.com/yunwei37/eurosys27-koperation
 [submodule "llvm-backend/llvm"]
 	path = llvm-backend/llvm
-	url = https://github.com/eunomia-bpf/bpf-kop-llvm.git
+	url = https://github.com/eunomia-bpf/bpf-kinsn-llvm.git
 	branch = main
 [submodule "vendor/repos/katran"]
 	path = vendor/repos/katran

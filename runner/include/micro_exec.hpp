@@ -22,7 +22,7 @@ struct map_spec {
     bool internal = false;
 };
 
-struct kop_call_relocation {
+struct kinsn_call_relocation {
     uint64_t insn_index = 0;
     std::string name;
 };
@@ -30,7 +30,7 @@ struct kop_call_relocation {
 struct program_image {
     std::vector<uint8_t> code;
     std::vector<map_spec> maps;
-    std::vector<kop_call_relocation> kop_calls;
+    std::vector<kinsn_call_relocation> kinsn_calls;
     std::string program_name;
     std::string license;
     uint32_t prog_type = 0;

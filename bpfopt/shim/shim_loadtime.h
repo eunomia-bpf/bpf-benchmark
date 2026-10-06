@@ -605,7 +605,7 @@ static int loadtime_plan_is_single_branch_flip(const char *steps,
 }
 
 static int loadtime_step_needs_target(const char *name) {
-    return strcmp(name, "kop") == 0 ||
+    return strcmp(name, "kinsn") == 0 ||
            strcmp(name, "rotate") == 0 ||
            strcmp(name, "cond_select") == 0 ||
            strcmp(name, "extract") == 0 ||
@@ -765,7 +765,7 @@ static int loadtime_ensure_shared_target(const char *dir, char *shared,
     if (stat(shared, &st) == 0)
         return 0;
 
-    char *const argv[] = {"kopprober", "--out", shared, NULL};
+    char *const argv[] = {"kinsnprober", "--out", shared, NULL};
     posix_spawn_file_actions_t fa;
     int fa_inited = (posix_spawn_file_actions_init(&fa) == 0);
     if (fa_inited) {
@@ -776,31 +776,31 @@ static int loadtime_ensure_shared_target(const char *dir, char *shared,
     }
     char **clean_env = snapshot_env_without_ld_preload();
     pid_t pid;
-    int rc = posix_spawnp(&pid, "kopprober", fa_inited ? &fa : NULL,
+    int rc = posix_spawnp(&pid, "kinsnprober", fa_inited ? &fa : NULL,
                           NULL, argv, clean_env ? clean_env : environ);
     if (fa_inited)
         posix_spawn_file_actions_destroy(&fa);
     free(clean_env);
     if (rc != 0) {
-        snprintf(err, err_sz, "failed to spawn kopprober rc=%d", rc);
+        snprintf(err, err_sz, "failed to spawn kinsnprober rc=%d", rc);
         return -1;
     }
     int status = 0;
     if (waitpid(pid, &status, 0) < 0) {
-        snprintf(err, err_sz, "failed to wait for kopprober errno=%d", errno);
+        snprintf(err, err_sz, "failed to wait for kinsnprober errno=%d", errno);
         return -1;
     }
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        snprintf(err, err_sz, "kopprober failed exit=%d",
+        snprintf(err, err_sz, "kinsnprober failed exit=%d",
                  WIFEXITED(status) ? WEXITSTATUS(status) : -1);
         return -1;
     }
     if (stat(shared, &st) != 0) {
-        snprintf(err, err_sz, "kopprober did not write target.json at %s",
+        snprintf(err, err_sz, "kinsnprober did not write target.json at %s",
                  shared);
         return -1;
     }
-    log_line("kopprober wrote target=%s", shared);
+    log_line("kinsnprober wrote target=%s", shared);
     return 0;
 }
 
@@ -914,7 +914,7 @@ static int loadtime_bytecode_needs_fd_array(const struct bpf_insn *insns,
         }
         if ((insn->code == (BPF_JMP | BPF_CALL) ||
              insn->code == (BPF_JMP32 | BPF_CALL)) &&
-            insn->src_reg == BPF_PSEUDO_KOP_CALL &&
+            insn->src_reg == BPF_PSEUDO_KINSN_CALL &&
             insn->off != 0)
             return 1;
     }

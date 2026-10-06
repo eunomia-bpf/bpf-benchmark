@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Bytecode-level kop recovery for patterns that do not survive cleanly as
+// Bytecode-level kinsn recovery for patterns that do not survive cleanly as
 // LLVM MachineInstr trees. Included inside main.cpp's anonymous namespace.
 
 constexpr uint8_t BPF_LDX_MEM_MODE = 0x60;
@@ -46,29 +46,29 @@ constexpr uint8_t X86_ROTATE_PROOF_SCRATCH0 = 6;
 constexpr uint8_t X86_ROTATE_PROOF_SCRATCH1 = 7;
 constexpr uint8_t X86_ROTATE_PROOF_SCRATCH2 = 8;
 
-bool target_has_kop(const KopTargetMap &targets, std::string_view name)
+bool target_has_kinsn(const KinsnTargetMap &targets, std::string_view name)
 {
 	return targets.find(std::string(name)) != targets.end();
 }
 
-bool target_is_x86_kop_set(const KopTargetMap &targets)
+bool target_is_x86_kinsn_set(const KinsnTargetMap &targets)
 {
-	return target_has_kop(targets, "bpf_x86_movq") ||
-	       target_has_kop(targets, "bpf_x86_rorxl") ||
-	       target_has_kop(targets, "bpf_x86_movbe32");
+	return target_has_kinsn(targets, "bpf_x86_movq") ||
+	       target_has_kinsn(targets, "bpf_x86_rorxl") ||
+	       target_has_kinsn(targets, "bpf_x86_movbe32");
 }
 
-bool target_is_arm64_kop_set(const KopTargetMap &targets)
+bool target_is_arm64_kinsn_set(const KinsnTargetMap &targets)
 {
-	return target_has_kop(targets, "bpf_arm64_extr_x") ||
-	       target_has_kop(targets, "bpf_arm64_rev_x") ||
-	       target_has_kop(targets, "bpf_arm64_ubfm_x");
+	return target_has_kinsn(targets, "bpf_arm64_extr_x") ||
+	       target_has_kinsn(targets, "bpf_arm64_rev_x") ||
+	       target_has_kinsn(targets, "bpf_arm64_ubfm_x");
 }
 
 uint64_t pack_u4(uint64_t value, unsigned shift)
 {
 	if (value > 0xf) {
-		throw std::runtime_error("kop payload nibble overflow");
+		throw std::runtime_error("kinsn payload nibble overflow");
 	}
 	return value << shift;
 }
@@ -76,7 +76,7 @@ uint64_t pack_u4(uint64_t value, unsigned shift)
 uint64_t pack_u8(uint64_t value, unsigned shift)
 {
 	if (value > 0xff) {
-		throw std::runtime_error("kop payload byte overflow");
+		throw std::runtime_error("kinsn payload byte overflow");
 	}
 	return value << shift;
 }
@@ -84,7 +84,7 @@ uint64_t pack_u8(uint64_t value, unsigned shift)
 uint64_t pack_u16(uint64_t value, unsigned shift)
 {
 	if (value > 0xffff) {
-		throw std::runtime_error("kop payload u16 overflow");
+		throw std::runtime_error("kinsn payload u16 overflow");
 	}
 	return value << shift;
 }
@@ -92,7 +92,7 @@ uint64_t pack_u16(uint64_t value, unsigned shift)
 uint64_t pack_u32(uint64_t value, unsigned shift)
 {
 	if (value > 0xffffffffULL) {
-		throw std::runtime_error("kop payload u32 overflow");
+		throw std::runtime_error("kinsn payload u32 overflow");
 	}
 	return value << shift;
 }
@@ -221,24 +221,24 @@ uint64_t pack_arm64_cset_payload(uint8_t dst, uint8_t count, uint8_t mode,
 	return payload;
 }
 
-void append_kop_pair(std::vector<uint8_t> &out, const KopTargetMap &targets,
+void append_kinsn_pair(std::vector<uint8_t> &out, const KinsnTargetMap &targets,
 		       std::string_view name, uint64_t payload)
 {
 	if (payload >> 52) {
-		throw std::runtime_error("kop payload exceeds sidecar capacity");
+		throw std::runtime_error("kinsn payload exceeds sidecar capacity");
 	}
 	const auto target = targets.find(std::string(name));
 	if (target == targets.end()) {
-		throw std::runtime_error("target.json has no kop entry for " +
+		throw std::runtime_error("target.json has no kinsn entry for " +
 					 std::string(name));
 	}
 
 	const auto sidecar = make_bpf_insn(
 		BPF_MOV64_K, static_cast<uint8_t>(payload & 0xf),
-		BPF_PSEUDO_KOP_SIDECAR,
+		BPF_PSEUDO_KINSN_SIDECAR,
 		static_cast<int16_t>((payload >> 4) & 0xffff),
 		static_cast<int32_t>((payload >> 20) & 0xffffffffULL));
-	const auto call = make_bpf_insn(BPF_CALL, 0, BPF_PSEUDO_KOP_CALL,
+	const auto call = make_bpf_insn(BPF_CALL, 0, BPF_PSEUDO_KINSN_CALL,
 				       target->second.call_offset,
 				       target->second.btf_func_id);
 	out.insert(out.end(), sidecar.begin(), sidecar.end());
@@ -930,25 +930,25 @@ uint8_t rotate_proof_scratch(const RotateSite &site)
 	return X86_ROTATE_PROOF_SCRATCH0;
 }
 
-std::vector<uint8_t> emit_rotate_replacement(const KopTargetMap &targets,
+std::vector<uint8_t> emit_rotate_replacement(const KinsnTargetMap &targets,
 					    const RotateSite &site,
-					    KopTargetArch target_arch)
+					    KinsnTargetArch target_arch)
 {
 	std::vector<uint8_t> out;
-	if (kop_target_arch_is_arm64(target_arch, targets)) {
+	if (kinsn_target_arch_is_arm64(target_arch, targets)) {
 		const char *name = site.width == RotateWidth::W64 ?
 					   "bpf_arm64_extr_x" :
 					   "bpf_arm64_extr_w";
-		if (!target_has_kop(targets, name)) {
+		if (!target_has_kinsn(targets, name)) {
 			return out;
 		}
-		append_kop_pair(out, targets, name,
+		append_kinsn_pair(out, targets, name,
 				  pack_arm64_rotate_payload(
 					  site.dst, site.val, site.tmp,
 					  static_cast<uint8_t>(site.shift)));
 		return out;
 	}
-	if (!kop_target_arch_is_x86(target_arch, targets)) {
+	if (!kinsn_target_arch_is_x86(target_arch, targets)) {
 		return out;
 	}
 	if (site.preinit_proof_scratch) {
@@ -959,28 +959,28 @@ std::vector<uint8_t> emit_rotate_replacement(const KopTargetMap &targets,
 	}
 	if (site.width == RotateWidth::W64) {
 		if (site.dst != site.val) {
-			append_kop_pair(out, targets, "bpf_x86_movq",
+			append_kinsn_pair(out, targets, "bpf_x86_movq",
 					  pack_x86_mov_rr_payload(site.dst,
 								  site.val));
 		}
-		append_kop_pair(out, targets, "bpf_x86_rolq",
+		append_kinsn_pair(out, targets, "bpf_x86_rolq",
 				  pack_x86_rotate_payload(
 					  site.dst, site.dst,
 					  static_cast<uint8_t>(site.shift)));
 	} else {
-		if (target_has_kop(targets, "bpf_x86_roll")) {
+		if (target_has_kinsn(targets, "bpf_x86_roll")) {
 			if (site.dst != site.val) {
 				const auto mov = make_bpf_insn(
 					BPF_MOV32_X, site.dst, site.val, 0, 0);
 				out.insert(out.end(), mov.begin(), mov.end());
 			}
-			append_kop_pair(out, targets, "bpf_x86_roll",
+			append_kinsn_pair(out, targets, "bpf_x86_roll",
 					  pack_x86_rotate_payload(
 						  site.dst, site.dst,
 						  static_cast<uint8_t>(
 							  site.shift)));
 		} else {
-			append_kop_pair(out, targets, "bpf_x86_rorxl",
+			append_kinsn_pair(out, targets, "bpf_x86_rorxl",
 					  pack_x86_rotate_payload(
 						  site.dst, site.val,
 						  static_cast<uint8_t>(
@@ -1036,9 +1036,9 @@ bool reg_written_between(const std::vector<uint8_t> &bytes, size_t start,
 	return false;
 }
 
-int64_t apply_rotate_bytecode_kops(std::vector<uint8_t> &bytes,
-				     const KopTargetMap &targets,
-				     KopTargetArch target_arch)
+int64_t apply_rotate_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				     const KinsnTargetMap &targets,
+				     KinsnTargetArch target_arch)
 {
 	std::vector<RotateSite> sites;
 	const auto subprog_entries = subprog_entry_pcs(bytes);
@@ -1186,11 +1186,11 @@ std::optional<ShdSite> match_shd_site(const std::vector<uint8_t> &bytes,
 			tmp, static_cast<uint8_t>(dst_shift) };
 }
 
-int64_t apply_shd_bytecode_kops(std::vector<uint8_t> &bytes,
-				  const KopTargetMap &targets,
-				  KopTargetArch target_arch)
+int64_t apply_shd_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				  const KinsnTargetMap &targets,
+				  KinsnTargetArch target_arch)
 {
-	if (!kop_target_arch_is_x86(target_arch, targets)) {
+	if (!kinsn_target_arch_is_x86(target_arch, targets)) {
 		return 0;
 	}
 	int64_t applied = 0;
@@ -1203,7 +1203,7 @@ int64_t apply_shd_bytecode_kops(std::vector<uint8_t> &bytes,
 				break;
 			}
 		}
-		if (!site || !target_has_kop(targets, site->name) ||
+		if (!site || !target_has_kinsn(targets, site->name) ||
 		    !range_is_replaceable(bytes, site->start, site->old_len) ||
 		    reg_read_before_write_on_any_path_after(
 			    bytes, site->start + site->old_len, site->tmp)) {
@@ -1211,7 +1211,7 @@ int64_t apply_shd_bytecode_kops(std::vector<uint8_t> &bytes,
 			continue;
 		}
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, site->name,
+		append_kinsn_pair(replacement, targets, site->name,
 				  pack_x86_shd_payload(site->dst, site->src,
 						       site->shift));
 		replace_insn_range(bytes, site->start, site->old_len,
@@ -1257,14 +1257,14 @@ std::optional<uint64_t> extract_and_mask_value(const std::vector<uint8_t> &bytes
 	return const_reg_value_before(bytes, pc, src_reg(bytes, pc));
 }
 
-int64_t apply_extract_bytecode_kops(std::vector<uint8_t> &bytes,
-				      const KopTargetMap &targets,
-				      KopTargetArch target_arch)
+int64_t apply_extract_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				      const KinsnTargetMap &targets,
+				      KinsnTargetArch target_arch)
 {
 	int64_t applied = 0;
 	size_t pc = 0;
-	if (kop_target_arch_is_x86(target_arch, targets)) {
-		applied += apply_shd_bytecode_kops(bytes, targets,
+	if (kinsn_target_arch_is_x86(target_arch, targets)) {
+		applied += apply_shd_bytecode_kinsn(bytes, targets,
 						     target_arch);
 	}
 	while (pc + 1 < bytes.size() / INSN_SIZE) {
@@ -1303,18 +1303,18 @@ int64_t apply_extract_bytecode_kops(std::vector<uint8_t> &bytes,
 		}
 		std::vector<uint8_t> replacement;
 		const uint8_t dst = dst_reg(bytes, pc);
-		if (kop_target_arch_is_arm64(target_arch, targets)) {
-			if (!target_has_kop(targets, "bpf_arm64_ubfm_x")) {
+		if (kinsn_target_arch_is_arm64(target_arch, targets)) {
+			if (!target_has_kinsn(targets, "bpf_arm64_ubfm_x")) {
 				pc++;
 				continue;
 			}
-			append_kop_pair(replacement, targets, "bpf_arm64_ubfm_x",
+			append_kinsn_pair(replacement, targets, "bpf_arm64_ubfm_x",
 					  pack_arm64_extract_payload(
 						  dst, extract->first,
 						  extract->second));
 		} else {
-			if (!kop_target_arch_is_x86(target_arch, targets) ||
-			    !target_has_kop(targets, "bpf_x86_bextrq")) {
+			if (!kinsn_target_arch_is_x86(target_arch, targets) ||
+			    !target_has_kinsn(targets, "bpf_x86_bextrq")) {
 				pc++;
 				continue;
 			}
@@ -1332,7 +1332,7 @@ int64_t apply_extract_bytecode_kops(std::vector<uint8_t> &bytes,
 					      static_cast<int32_t>(ctl));
 			replacement.insert(replacement.end(), ctl_mov.begin(),
 					   ctl_mov.end());
-			append_kop_pair(replacement, targets, "bpf_x86_bextrq",
+			append_kinsn_pair(replacement, targets, "bpf_x86_bextrq",
 					  pack_x86_bextr_payload(dst, dst,
 								 *ctl_reg));
 		}
@@ -1412,17 +1412,17 @@ std::optional<Bmi1Site> match_bmi1_site(const std::vector<uint8_t> &bytes,
 	return std::nullopt;
 }
 
-int64_t apply_bmi1_bytecode_kops(std::vector<uint8_t> &bytes,
-				   const KopTargetMap &targets)
+int64_t apply_bmi1_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				   const KinsnTargetMap &targets)
 {
-	if (!target_is_x86_kop_set(targets)) {
+	if (!target_is_x86_kinsn_set(targets)) {
 		return 0;
 	}
 	int64_t applied = 0;
 	size_t pc = 0;
 	while (pc < bytes.size() / INSN_SIZE) {
 		const auto site = match_bmi1_site(bytes, pc);
-		if (!site || !target_has_kop(targets, site->name) ||
+		if (!site || !target_has_kinsn(targets, site->name) ||
 		    !range_is_replaceable(bytes, site->start, site->old_len)) {
 			pc++;
 			continue;
@@ -1435,7 +1435,7 @@ int64_t apply_bmi1_bytecode_kops(std::vector<uint8_t> &bytes,
 			continue;
 		}
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, site->name,
+		append_kinsn_pair(replacement, targets, site->name,
 				  pack_x86_bmi1_payload(site->dst, site->src));
 		replace_insn_range(bytes, site->start, site->old_len, replacement);
 		applied++;
@@ -1460,15 +1460,15 @@ const char *bmi2_shift_name(uint8_t opcode)
 	}
 }
 
-int64_t apply_bmi2_shift_bytecode_kops(std::vector<uint8_t> &bytes,
-					 const KopTargetMap &targets)
+int64_t apply_bmi2_shift_bytecode_kinsn(std::vector<uint8_t> &bytes,
+					 const KinsnTargetMap &targets)
 {
 	int64_t applied = 0;
 	size_t pc = 0;
 	while (pc < bytes.size() / INSN_SIZE) {
 		const uint8_t opcode = bytes[pc * INSN_SIZE];
 		const char *name = bmi2_shift_name(opcode);
-		if (!name || !target_has_kop(targets, name) ||
+		if (!name || !target_has_kinsn(targets, name) ||
 		    !range_is_replaceable(bytes, pc, 1)) {
 			pc++;
 			continue;
@@ -1480,7 +1480,7 @@ int64_t apply_bmi2_shift_bytecode_kops(std::vector<uint8_t> &bytes,
 			continue;
 		}
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, name,
+		append_kinsn_pair(replacement, targets, name,
 				  pack_x86_bmi2_shift_payload(dst, dst, cnt));
 		replace_insn_range(bytes, pc, 1, replacement);
 		applied++;
@@ -1557,15 +1557,15 @@ bool reg_is_bzhi_count_bounded_before(const std::vector<uint8_t> &bytes,
 	return false;
 }
 
-int64_t apply_bzhi_bytecode_kops(std::vector<uint8_t> &bytes,
-				   const KopTargetMap &targets)
+int64_t apply_bzhi_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				   const KinsnTargetMap &targets)
 {
 	int64_t applied = 0;
 	size_t pc = 0;
 	while (pc + 1 < bytes.size() / INSN_SIZE) {
 		const uint8_t opcode = bytes[pc * INSN_SIZE];
 		const char *name = bzhi_name_for_opcode(opcode);
-		if (!name || !target_has_kop(targets, name) ||
+		if (!name || !target_has_kinsn(targets, name) ||
 		    !range_is_replaceable(bytes, pc, 2)) {
 			pc++;
 			continue;
@@ -1584,7 +1584,7 @@ int64_t apply_bzhi_bytecode_kops(std::vector<uint8_t> &bytes,
 			continue;
 		}
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, name,
+		append_kinsn_pair(replacement, targets, name,
 				  pack_x86_bzhi_payload(mask, mask, cnt));
 		replace_insn_range(bytes, pc, 2, replacement);
 		applied++;
@@ -1707,10 +1707,10 @@ std::optional<PopcntSite> match_popcnt_swar_site(const std::vector<uint8_t> &byt
 			   interlude_len, dst, src };
 }
 
-int64_t apply_popcnt_bytecode_kops(std::vector<uint8_t> &bytes,
-				     const KopTargetMap &targets)
+int64_t apply_popcnt_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				     const KinsnTargetMap &targets)
 {
-	if (!target_has_kop(targets, "bpf_x86_popcntq")) {
+	if (!target_has_kinsn(targets, "bpf_x86_popcntq")) {
 		return 0;
 	}
 	int64_t applied = 0;
@@ -1730,7 +1730,7 @@ int64_t apply_popcnt_bytecode_kops(std::vector<uint8_t> &bytes,
 		}
 
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, "bpf_x86_popcntq",
+		append_kinsn_pair(replacement, targets, "bpf_x86_popcntq",
 				  pack_x86_popcnt_payload(site->dst, site->src));
 		if (site->interlude_len) {
 			replacement.insert(
@@ -2074,30 +2074,30 @@ match_arm64_byte_load_fusion_site(const std::vector<uint8_t> &bytes, size_t pc)
 }
 
 std::vector<uint8_t>
-emit_arm64_byte_load_fusion(const KopTargetMap &targets,
+emit_arm64_byte_load_fusion(const KinsnTargetMap &targets,
 			    const Arm64ByteLoadFusionSite &site)
 {
 	std::vector<uint8_t> replacement;
 	const auto load_name = arm64_load_target_for_width(site.width);
-	if (!target_has_kop(targets, load_name)) {
+	if (!target_has_kinsn(targets, load_name)) {
 		return replacement;
 	}
-	append_kop_pair(replacement, targets, load_name,
+	append_kinsn_pair(replacement, targets, load_name,
 			  pack_arm64_mem_payload(site.dst, site.base, site.off));
 	if (!site.big_endian) {
 		return replacement;
 	}
 	const auto rev_name = arm64_rev_target_for_size(site.width);
-	if (!target_has_kop(targets, rev_name)) {
+	if (!target_has_kinsn(targets, rev_name)) {
 		replacement.clear();
 		return replacement;
 	}
-	append_kop_pair(replacement, targets, rev_name, pack_u4(site.dst, 0));
+	append_kinsn_pair(replacement, targets, rev_name, pack_u4(site.dst, 0));
 	return replacement;
 }
 
-int64_t apply_arm64_byte_load_fusion_kops(std::vector<uint8_t> &bytes,
-					    const KopTargetMap &targets,
+int64_t apply_arm64_byte_load_fusion_kinsn(std::vector<uint8_t> &bytes,
+					    const KinsnTargetMap &targets,
 					    bool big_endian)
 {
 	int64_t applied = 0;
@@ -2134,10 +2134,10 @@ int64_t apply_arm64_byte_load_fusion_kops(std::vector<uint8_t> &bytes,
 	return applied;
 }
 
-int64_t apply_arm64_endian_bytecode_kops(std::vector<uint8_t> &bytes,
-					   const KopTargetMap &targets)
+int64_t apply_arm64_endian_bytecode_kinsn(std::vector<uint8_t> &bytes,
+					   const KinsnTargetMap &targets)
 {
-	int64_t applied = apply_arm64_byte_load_fusion_kops(bytes, targets,
+	int64_t applied = apply_arm64_byte_load_fusion_kinsn(bytes, targets,
 							      true);
 	size_t pc = 0;
 	while (pc < bytes.size() / INSN_SIZE) {
@@ -2147,12 +2147,12 @@ int64_t apply_arm64_endian_bytecode_kops(std::vector<uint8_t> &bytes,
 			continue;
 		}
 		const auto name = arm64_rev_target_for_size(*endian_bytes);
-		if (!target_has_kop(targets, name)) {
+		if (!target_has_kinsn(targets, name)) {
 			pc++;
 			continue;
 		}
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, name,
+		append_kinsn_pair(replacement, targets, name,
 				  pack_u4(dst_reg(bytes, pc), 0));
 		replace_insn_range(bytes, pc, 1, replacement);
 		applied++;
@@ -2161,14 +2161,14 @@ int64_t apply_arm64_endian_bytecode_kops(std::vector<uint8_t> &bytes,
 	return applied;
 }
 
-int64_t apply_endian_bytecode_kops(std::vector<uint8_t> &bytes,
-				     const KopTargetMap &targets,
-				     KopTargetArch target_arch)
+int64_t apply_endian_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				     const KinsnTargetMap &targets,
+				     KinsnTargetArch target_arch)
 {
-	if (kop_target_arch_is_arm64(target_arch, targets)) {
-		return apply_arm64_endian_bytecode_kops(bytes, targets);
+	if (kinsn_target_arch_is_arm64(target_arch, targets)) {
+		return apply_arm64_endian_bytecode_kinsn(bytes, targets);
 	}
-	if (!kop_target_arch_is_x86(target_arch, targets)) {
+	if (!kinsn_target_arch_is_x86(target_arch, targets)) {
 		return 0;
 	}
 	int64_t applied = 0;
@@ -2190,10 +2190,10 @@ int64_t apply_endian_bytecode_kops(std::vector<uint8_t> &bytes,
 					   bytes.begin() +
 						   site->start * INSN_SIZE,
 					   bytes.begin() + endian_pc * INSN_SIZE);
-			append_kop_pair(replacement, targets, "bpf_x86_rolw",
+			append_kinsn_pair(replacement, targets, "bpf_x86_rolw",
 					  pack_x86_reg_imm_payload(site->dst, 8));
 		} else {
-			append_kop_pair(replacement, targets,
+			append_kinsn_pair(replacement, targets,
 					  movbe_target_for_size(site->bytes),
 					  pack_x86_mem_payload(site->dst,
 							       site->base,
@@ -2246,13 +2246,13 @@ match_arm64_csel_ne_site(const std::vector<uint8_t> &bytes, size_t pc)
 			       src_reg(bytes, pc + 1), dst_reg(bytes, pc) };
 }
 
-int64_t apply_cond_select_bytecode_kops(std::vector<uint8_t> &bytes,
-					  const KopTargetMap &targets,
-					  KopTargetArch target_arch)
+int64_t apply_cond_select_bytecode_kinsn(std::vector<uint8_t> &bytes,
+					  const KinsnTargetMap &targets,
+					  KinsnTargetArch target_arch)
 {
-	if (!kop_target_arch_is_arm64(target_arch, targets) ||
-	    !target_has_kop(targets, "bpf_arm64_tst") ||
-	    !target_has_kop(targets, "bpf_arm64_csel_ne")) {
+	if (!kinsn_target_arch_is_arm64(target_arch, targets) ||
+	    !target_has_kinsn(targets, "bpf_arm64_tst") ||
+	    !target_has_kinsn(targets, "bpf_arm64_csel_ne")) {
 		return 0;
 	}
 	int64_t applied = 0;
@@ -2264,9 +2264,9 @@ int64_t apply_cond_select_bytecode_kops(std::vector<uint8_t> &bytes,
 			continue;
 		}
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, "bpf_arm64_tst",
+		append_kinsn_pair(replacement, targets, "bpf_arm64_tst",
 				  pack_u4(site->cond_reg, 0));
-		append_kop_pair(replacement, targets, "bpf_arm64_csel_ne",
+		append_kinsn_pair(replacement, targets, "bpf_arm64_csel_ne",
 				  pack_arm64_csel_payload(
 					  site->dst, site->true_reg,
 					  site->false_reg, site->cond_reg));
@@ -2362,16 +2362,16 @@ std::optional<CcmpSite> match_arm64_ccmp_site(const std::vector<uint8_t> &bytes,
 	return CcmpSite{ pc, regs.size() + 2, *width32, dst, *mode, regs };
 }
 
-int64_t apply_ccmp_bytecode_kops(std::vector<uint8_t> &bytes,
-				   const KopTargetMap &targets,
-				   KopTargetArch target_arch)
+int64_t apply_ccmp_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				   const KinsnTargetMap &targets,
+				   KinsnTargetArch target_arch)
 {
-	if (!kop_target_arch_is_arm64(target_arch, targets) ||
-	    !target_has_kop(targets, "bpf_arm64_cmp_x") ||
-	    !target_has_kop(targets, "bpf_arm64_cmp_w") ||
-	    !target_has_kop(targets, "bpf_arm64_ccmp_x") ||
-	    !target_has_kop(targets, "bpf_arm64_ccmp_w") ||
-	    !target_has_kop(targets, "bpf_arm64_cset_x_cond")) {
+	if (!kinsn_target_arch_is_arm64(target_arch, targets) ||
+	    !target_has_kinsn(targets, "bpf_arm64_cmp_x") ||
+	    !target_has_kinsn(targets, "bpf_arm64_cmp_w") ||
+	    !target_has_kinsn(targets, "bpf_arm64_ccmp_x") ||
+	    !target_has_kinsn(targets, "bpf_arm64_ccmp_w") ||
+	    !target_has_kinsn(targets, "bpf_arm64_cset_x_cond")) {
 		return 0;
 	}
 
@@ -2389,14 +2389,14 @@ int64_t apply_ccmp_bytecode_kops(std::vector<uint8_t> &bytes,
 		const char *ccmp_name = site->width32 ? "bpf_arm64_ccmp_w" :
 						      "bpf_arm64_ccmp_x";
 		std::vector<uint8_t> replacement;
-		append_kop_pair(replacement, targets, cmp_name,
+		append_kinsn_pair(replacement, targets, cmp_name,
 				  pack_u4(site->regs[0], 0));
 		for (size_t i = 1; i < site->regs.size(); i++) {
-			append_kop_pair(replacement, targets, ccmp_name,
+			append_kinsn_pair(replacement, targets, ccmp_name,
 					  pack_arm64_ccmp_payload(site->regs[i],
 								  site->mode));
 		}
-		append_kop_pair(replacement, targets, "bpf_arm64_cset_x_cond",
+		append_kinsn_pair(replacement, targets, "bpf_arm64_cset_x_cond",
 				  pack_arm64_cset_payload(
 					  site->dst,
 					  static_cast<uint8_t>(site->regs.size()),
@@ -2495,7 +2495,7 @@ std::string_view mov_store_target_for_width(int width)
 	}
 }
 
-std::vector<uint8_t> emit_memcpy_lane_kops(const KopTargetMap &targets,
+std::vector<uint8_t> emit_memcpy_lane_kinsn(const KinsnTargetMap &targets,
 					     const MemcpyLane &first,
 					     size_t lanes)
 {
@@ -2508,10 +2508,10 @@ std::vector<uint8_t> emit_memcpy_lane_kops(const KopTargetMap &targets,
 		    !checked_i16_offset(first.dst_off, delta, dst_off)) {
 			throw std::runtime_error("bulk_memory lane offset exceeds i16");
 		}
-		append_kop_pair(out, targets, mov_load_target_for_width(first.width),
+		append_kinsn_pair(out, targets, mov_load_target_for_width(first.width),
 				  pack_x86_mem_payload(first.tmp, first.src_base,
 						       src_off));
-		append_kop_pair(out, targets,
+		append_kinsn_pair(out, targets,
 				  mov_store_target_for_width(first.width),
 				  pack_x86_store_reg_payload(first.tmp,
 							     first.dst_base,
@@ -2520,15 +2520,15 @@ std::vector<uint8_t> emit_memcpy_lane_kops(const KopTargetMap &targets,
 	return out;
 }
 
-std::vector<uint8_t> emit_memcpy_lanes_kops(const KopTargetMap &targets,
+std::vector<uint8_t> emit_memcpy_lanes_kinsn(const KinsnTargetMap &targets,
 					      const std::vector<MemcpyLane> &lanes)
 {
 	std::vector<uint8_t> out;
 	for (const auto &lane : lanes) {
-		append_kop_pair(out, targets, mov_load_target_for_width(lane.width),
+		append_kinsn_pair(out, targets, mov_load_target_for_width(lane.width),
 				  pack_x86_mem_payload(lane.tmp, lane.src_base,
 						       lane.src_off));
-		append_kop_pair(out, targets,
+		append_kinsn_pair(out, targets,
 				  mov_store_target_for_width(lane.width),
 				  pack_x86_store_reg_payload(lane.tmp,
 							     lane.dst_base,
@@ -2643,12 +2643,12 @@ std::optional<MemsetLane> memset_lane_at(const std::vector<uint8_t> &bytes,
 			   *fill, static_cast<uint32_t>(read_imm(bytes, pc)) };
 }
 
-std::vector<uint8_t> emit_memset_lane_kops(const KopTargetMap &targets,
+std::vector<uint8_t> emit_memset_lane_kinsn(const KinsnTargetMap &targets,
 					     const std::vector<MemsetLane> &lanes)
 {
 	std::vector<uint8_t> out;
 	for (const auto &lane : lanes) {
-		append_kop_pair(out, targets,
+		append_kinsn_pair(out, targets,
 				  mov_store_target_for_width(lane.width),
 				  pack_x86_store_imm_payload(
 					  lane.base, lane.off, lane.imm));
@@ -2661,15 +2661,15 @@ bool arm64_ldstp_soff_ok(int16_t off)
 	return off >= -512 && off <= 504 && (off % 8) == 0;
 }
 
-int64_t apply_arm64_pair_memory_bytecode_kops(std::vector<uint8_t> &bytes,
-						const KopTargetMap &targets,
-						KopTargetArch target_arch)
+int64_t apply_arm64_pair_memory_bytecode_kinsn(std::vector<uint8_t> &bytes,
+						const KinsnTargetMap &targets,
+						KinsnTargetArch target_arch)
 {
-	if (!kop_target_arch_is_arm64(target_arch, targets)) {
+	if (!kinsn_target_arch_is_arm64(target_arch, targets)) {
 		return 0;
 	}
 
-	int64_t applied = apply_arm64_byte_load_fusion_kops(bytes, targets,
+	int64_t applied = apply_arm64_byte_load_fusion_kinsn(bytes, targets,
 							      false);
 	size_t pc = 0;
 	while (pc + 1 < bytes.size() / INSN_SIZE) {
@@ -2680,12 +2680,12 @@ int64_t apply_arm64_pair_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 		    dst_reg(bytes, pc) != dst_reg(bytes, pc + 1) &&
 		    src_reg(bytes, pc) != dst_reg(bytes, pc) &&
 		    src_reg(bytes, pc) != dst_reg(bytes, pc + 1) &&
-		    target_has_kop(targets, "bpf_arm64_ldp_x") &&
+		    target_has_kinsn(targets, "bpf_arm64_ldp_x") &&
 		    range_is_replaceable(bytes, pc, 2)) {
 			const int16_t off0 = read_off(bytes, pc);
 			const int16_t off1 = read_off(bytes, pc + 1);
 			if (off1 == off0 + 8 && arm64_ldstp_soff_ok(off0)) {
-				append_kop_pair(
+				append_kinsn_pair(
 					replacement, targets, "bpf_arm64_ldp_x",
 					pack_arm64_pair_payload(
 						dst_reg(bytes, pc),
@@ -2693,7 +2693,7 @@ int64_t apply_arm64_pair_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 						src_reg(bytes, pc), off0));
 			} else if (off0 == off1 + 8 &&
 				   arm64_ldstp_soff_ok(off1)) {
-				append_kop_pair(
+				append_kinsn_pair(
 					replacement, targets, "bpf_arm64_ldp_x",
 					pack_arm64_pair_payload(
 						dst_reg(bytes, pc + 1),
@@ -2703,12 +2703,12 @@ int64_t apply_arm64_pair_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 		} else if (bytes[pc * INSN_SIZE] == BPF_STXDW &&
 			   bytes[(pc + 1) * INSN_SIZE] == BPF_STXDW &&
 			   dst_reg(bytes, pc) == dst_reg(bytes, pc + 1) &&
-			   target_has_kop(targets, "bpf_arm64_stp_x") &&
+			   target_has_kinsn(targets, "bpf_arm64_stp_x") &&
 			   range_is_replaceable(bytes, pc, 2)) {
 			const int16_t off0 = read_off(bytes, pc);
 			const int16_t off1 = read_off(bytes, pc + 1);
 			if (off1 == off0 + 8 && arm64_ldstp_soff_ok(off0)) {
-				append_kop_pair(
+				append_kinsn_pair(
 					replacement, targets, "bpf_arm64_stp_x",
 					pack_arm64_pair_payload(
 						src_reg(bytes, pc),
@@ -2716,7 +2716,7 @@ int64_t apply_arm64_pair_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 						dst_reg(bytes, pc), off0));
 			} else if (off0 == off1 + 8 &&
 				   arm64_ldstp_soff_ok(off1)) {
-				append_kop_pair(
+				append_kinsn_pair(
 					replacement, targets, "bpf_arm64_stp_x",
 					pack_arm64_pair_payload(
 						src_reg(bytes, pc + 1),
@@ -2735,15 +2735,15 @@ int64_t apply_arm64_pair_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 	return applied;
 }
 
-int64_t apply_bulk_memory_bytecode_kops(std::vector<uint8_t> &bytes,
-					  const KopTargetMap &targets,
-					  KopTargetArch target_arch)
+int64_t apply_bulk_memory_bytecode_kinsn(std::vector<uint8_t> &bytes,
+					  const KinsnTargetMap &targets,
+					  KinsnTargetArch target_arch)
 {
-	if (kop_target_arch_is_arm64(target_arch, targets)) {
-		return apply_arm64_pair_memory_bytecode_kops(
+	if (kinsn_target_arch_is_arm64(target_arch, targets)) {
+		return apply_arm64_pair_memory_bytecode_kinsn(
 			bytes, targets, target_arch);
 	}
-	if (!kop_target_arch_is_x86(target_arch, targets)) {
+	if (!kinsn_target_arch_is_x86(target_arch, targets)) {
 		return 0;
 	}
 	constexpr size_t MinBulkBytes = 16;
@@ -2783,7 +2783,7 @@ int64_t apply_bulk_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 			    memcpy_temps_dead_after(bytes, pc + old_len,
 						    lanes)) {
 				const auto replacement =
-					emit_memcpy_lane_kops(targets, *first,
+					emit_memcpy_lane_kinsn(targets, *first,
 								pairs);
 				replace_insn_range(bytes, pc, old_len,
 						    replacement);
@@ -2817,7 +2817,7 @@ int64_t apply_bulk_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 			    memcpy_temps_dead_after(bytes, pc + unordered_old_len,
 						    lanes)) {
 				const auto replacement =
-					emit_memcpy_lanes_kops(targets, lanes);
+					emit_memcpy_lanes_kinsn(targets, lanes);
 				replace_insn_range(bytes, pc, unordered_old_len,
 						    replacement);
 				applied++;
@@ -2845,7 +2845,7 @@ int64_t apply_bulk_memory_bytecode_kops(std::vector<uint8_t> &bytes,
 			if (total_bytes >= MinBulkBytes &&
 			    range_is_replaceable(bytes, pc, lanes.size())) {
 				const auto replacement =
-					emit_memset_lane_kops(targets, lanes);
+					emit_memset_lane_kinsn(targets, lanes);
 				replace_insn_range(bytes, pc, lanes.size(),
 						    replacement);
 				applied++;
@@ -2874,29 +2874,29 @@ std::optional<uint8_t> memory_base_reg(const std::vector<uint8_t> &bytes,
 bool previous_is_same_prefetch(const std::vector<uint8_t> &bytes, size_t pc,
 			       uint8_t ptr_reg)
 {
-	if (pc < 2 || !is_kop_sidecar(bytes, pc - 2) ||
-	    !is_kop_call(bytes, pc - 1)) {
+	if (pc < 2 || !is_kinsn_sidecar(bytes, pc - 2) ||
+	    !is_kinsn_call(bytes, pc - 1)) {
 		return false;
 	}
-	return (read_kop_sidecar_payload(bytes, pc - 2) & 0xf) == ptr_reg;
+	return (read_kinsn_sidecar_payload(bytes, pc - 2) & 0xf) == ptr_reg;
 }
 
 std::optional<std::string_view>
-prefetch_target_name(const KopTargetMap &targets, KopTargetArch target_arch)
+prefetch_target_name(const KinsnTargetMap &targets, KinsnTargetArch target_arch)
 {
-	if (kop_target_arch_is_arm64(target_arch, targets) &&
-	    target_has_kop(targets, "bpf_arm64_prfm_pldl1keep")) {
+	if (kinsn_target_arch_is_arm64(target_arch, targets) &&
+	    target_has_kinsn(targets, "bpf_arm64_prfm_pldl1keep")) {
 		return "bpf_arm64_prfm_pldl1keep";
 	}
-	if (kop_target_arch_is_x86(target_arch, targets) &&
-	    target_has_kop(targets, "bpf_x86_prefetcht0")) {
+	if (kinsn_target_arch_is_x86(target_arch, targets) &&
+	    target_has_kinsn(targets, "bpf_x86_prefetcht0")) {
 		return "bpf_x86_prefetcht0";
 	}
 	return std::nullopt;
 }
 
 bool scan_prefetch_alias_path(std::vector<uint8_t> &bytes,
-			      const KopTargetMap &targets,
+			      const KinsnTargetMap &targets,
 			      std::string_view target_name, size_t start,
 			      size_t scan_end, std::array<uint8_t, 11> alias,
 			      size_t &next_pc, int64_t &applied)
@@ -2907,7 +2907,7 @@ bool scan_prefetch_alias_path(std::vector<uint8_t> &bytes,
 			if (*base < alias.size() && alias[*base]) {
 				if (!previous_is_same_prefetch(bytes, scan, *base)) {
 					std::vector<uint8_t> replacement;
-					append_kop_pair(replacement, targets,
+					append_kinsn_pair(replacement, targets,
 							  target_name,
 							  pack_u4(*base, 0));
 					replace_insn_range(bytes, scan, 0,
@@ -2941,9 +2941,9 @@ bool scan_prefetch_alias_path(std::vector<uint8_t> &bytes,
 	return false;
 }
 
-int64_t apply_prefetch_bytecode_kops(std::vector<uint8_t> &bytes,
-				       const KopTargetMap &targets,
-				       KopTargetArch target_arch)
+int64_t apply_prefetch_bytecode_kinsn(std::vector<uint8_t> &bytes,
+				       const KinsnTargetMap &targets,
+				       KinsnTargetArch target_arch)
 {
 	const auto target_name = prefetch_target_name(targets, target_arch);
 	if (!target_name) {
@@ -2991,10 +2991,10 @@ int64_t apply_prefetch_bytecode_kops(std::vector<uint8_t> &bytes,
 	return applied;
 }
 
-bool bytecode_kop_family_enabled(std::string_view pass, std::string_view family,
-				   const BytecodeKopPolicy &policy)
+bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view family,
+				   const BytecodeKinsnPolicy &policy)
 {
-	bool enabled = pass == "kop" || pass == family;
+	bool enabled = pass == "kinsn" || pass == family;
 	if (policy.all_enabled) {
 		enabled = *policy.all_enabled;
 	}
@@ -3005,76 +3005,76 @@ bool bytecode_kop_family_enabled(std::string_view pass, std::string_view family,
 	return enabled;
 }
 
-int64_t apply_bytecode_kop_recovery(std::vector<uint8_t> &bytes,
+int64_t apply_bytecode_kinsn_recovery(std::vector<uint8_t> &bytes,
 				      std::string_view pass,
-				      const BytecodeKopPolicy &policy,
-				      const KopTargetMap &targets,
-				      KopTargetArch target_arch,
+				      const BytecodeKinsnPolicy &policy,
+				      const KinsnTargetMap &targets,
+				      KinsnTargetArch target_arch,
 				      std::vector<std::string> &diagnostics)
 {
-	const bool is_x86 = kop_target_arch_is_x86(target_arch, targets);
-	const bool is_arm64 = kop_target_arch_is_arm64(target_arch, targets);
+	const bool is_x86 = kinsn_target_arch_is_x86(target_arch, targets);
+	const bool is_arm64 = kinsn_target_arch_is_arm64(target_arch, targets);
 	if (!is_x86 && !is_arm64) {
 		return 0;
 	}
-	const int64_t before = count_kop_calls(bytes);
+	const int64_t before = count_kinsn_calls(bytes);
 	if (is_arm64) {
-		if (bytecode_kop_family_enabled(pass, "ccmp", policy)) {
-			apply_ccmp_bytecode_kops(bytes, targets, target_arch);
+		if (bytecode_kinsn_family_enabled(pass, "ccmp", policy)) {
+			apply_ccmp_bytecode_kinsn(bytes, targets, target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "cond_select", policy)) {
-			apply_cond_select_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "cond_select", policy)) {
+			apply_cond_select_bytecode_kinsn(bytes, targets,
 							 target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "rotate", policy)) {
-			apply_rotate_bytecode_kops(bytes, targets, target_arch);
+		if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
+			apply_rotate_bytecode_kinsn(bytes, targets, target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "extract", policy)) {
-			apply_extract_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "extract", policy)) {
+			apply_extract_bytecode_kinsn(bytes, targets,
 						      target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "endian_fusion", policy)) {
-			apply_endian_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "endian_fusion", policy)) {
+			apply_endian_bytecode_kinsn(bytes, targets,
 						     target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "bulk_memory", policy)) {
-			apply_bulk_memory_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "bulk_memory", policy)) {
+			apply_bulk_memory_bytecode_kinsn(bytes, targets,
 							 target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "prefetch", policy)) {
-			apply_prefetch_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "prefetch", policy)) {
+			apply_prefetch_bytecode_kinsn(bytes, targets,
 						       target_arch);
 		}
 	} else {
-		if (bytecode_kop_family_enabled(pass, "bitops", policy)) {
-			apply_popcnt_bytecode_kops(bytes, targets);
-			apply_bzhi_bytecode_kops(bytes, targets);
-			apply_bmi2_shift_bytecode_kops(bytes, targets);
-			apply_bmi1_bytecode_kops(bytes, targets);
+		if (bytecode_kinsn_family_enabled(pass, "bitops", policy)) {
+			apply_popcnt_bytecode_kinsn(bytes, targets);
+			apply_bzhi_bytecode_kinsn(bytes, targets);
+			apply_bmi2_shift_bytecode_kinsn(bytes, targets);
+			apply_bmi1_bytecode_kinsn(bytes, targets);
 		}
-		if (bytecode_kop_family_enabled(pass, "rotate", policy)) {
-			apply_rotate_bytecode_kops(bytes, targets, target_arch);
+		if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
+			apply_rotate_bytecode_kinsn(bytes, targets, target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "extract", policy)) {
-			apply_extract_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "extract", policy)) {
+			apply_extract_bytecode_kinsn(bytes, targets,
 						      target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "endian_fusion", policy)) {
-			apply_endian_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "endian_fusion", policy)) {
+			apply_endian_bytecode_kinsn(bytes, targets,
 						     target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "bulk_memory", policy)) {
-			apply_bulk_memory_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "bulk_memory", policy)) {
+			apply_bulk_memory_bytecode_kinsn(bytes, targets,
 							 target_arch);
 		}
-		if (bytecode_kop_family_enabled(pass, "prefetch", policy)) {
-			apply_prefetch_bytecode_kops(bytes, targets,
+		if (bytecode_kinsn_family_enabled(pass, "prefetch", policy)) {
+			apply_prefetch_bytecode_kinsn(bytes, targets,
 						       target_arch);
 		}
 	}
-	const int64_t after = count_kop_calls(bytes);
+	const int64_t after = count_kinsn_calls(bytes);
 	if (after > before) {
-		diagnostics.push_back("bytecode_kop_recovery_applied=" +
+		diagnostics.push_back("bytecode_kinsn_recovery_applied=" +
 				      std::to_string(after - before));
 	}
 	return after - before;

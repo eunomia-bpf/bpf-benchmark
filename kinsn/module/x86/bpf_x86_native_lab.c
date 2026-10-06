@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT x86 native-code lab kop.
+ * BpfReJIT x86 native-code lab kinsn.
  *
  * Test-only escape hatch: lets userspace upload an x86-64 byte sequence and a
  * verifier proof, then have a BPF program splat the native bytes inline at JIT
- * time via a kop. A non-zero generation in the sidecar payload binds both
+ * time via a kinsn. A non-zero generation in the sidecar payload binds both
  * callbacks to the same immutable upload snapshot. Generation zero retains
  * the explicitly unbound lower-bound mode used by trusted-native experiments.
  *
  * Use cases:
  *  - Establish a hand-tuned "pure native" performance lower bound to compare
- *    against the production kop passes.
+ *    against the production kinsn passes.
  *  - Bring up new optimization ideas at the x86 level without going through
- *    bpfopt+kop+REJIT first.
+ *    bpfopt+kinsn+REJIT first.
  *
  * Safety: generation-zero calls disable verifier guarantees. Bound calls make
  * the verifier analyze the uploaded proof but still trust the proof generator
@@ -46,11 +46,11 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 
-#include "kop_x86_emit.h"
+#include "kinsn_x86_emit.h"
 
 #define NATIVE_LAB_MAX_BLOBS	512
 /*
- * BPF_MAX_INSN_SIZE in arch/x86/net/bpf_jit_comp.c bounds a single kop
+ * BPF_MAX_INSN_SIZE in arch/x86/net/bpf_jit_comp.c bounds a single kinsn
  * emit at 128 bytes. Userspace uploads longer programs as multiple
  * back-to-back sidecar/call pairs.
  */
@@ -104,7 +104,7 @@ static struct dentry *debugfs_root;
 __bpf_kfunc_start_defs();
 /*
  * The BPF stub. Verifier sees an empty void kfunc taking one u64; the JIT
- * never actually calls it because the kop descriptor below provides
+ * never actually calls it because the kinsn descriptor below provides
  * emit_x86. The argument exists so BPF code can stage a value into rdi
  * before the call, which the blob can then consume.
  */
@@ -121,7 +121,7 @@ BTF_KFUNCS_END(bpf_x86_native_lab_kfunc_ids)
 static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask,
 				     u32 *generation)
 {
-	payload = kop_payload_decode(payload);
+	payload = kinsn_payload_decode(payload);
 
 	if (payload & 0xf)
 		return -EINVAL;
@@ -351,7 +351,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return snapshot_len;
 }
 
-const struct bpf_kop bpf_x86_native_lab_desc = {
+const struct bpf_kinsn bpf_x86_native_lab_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = NATIVE_LAB_MAX_PROOF_INSNS,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
@@ -359,7 +359,7 @@ const struct bpf_kop bpf_x86_native_lab_desc = {
 	.emit_x86 = emit_native_lab_x86,
 };
 
-static const struct bpf_kop * const bpf_x86_native_lab_kop_descs[] = {
+static const struct bpf_kinsn * const bpf_x86_native_lab_kinsn_descs[] = {
 	&bpf_x86_native_lab_desc,
 };
 
@@ -793,7 +793,7 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 static const struct btf_kfunc_id_set bpf_x86_native_lab_kfunc_set = {
 	.owner = THIS_MODULE,
 	.set = &bpf_x86_native_lab_kfunc_ids,
-	.kop_descs = bpf_x86_native_lab_kop_descs,
+	.kinsn_descs = bpf_x86_native_lab_kinsn_descs,
 };
 
 static int __init bpf_x86_native_lab_init(void)
@@ -822,7 +822,7 @@ static void __exit bpf_x86_native_lab_exit(void)
 module_init(bpf_x86_native_lab_init);
 module_exit(bpf_x86_native_lab_exit);
 
-MODULE_DESCRIPTION("BpfReJIT x86 native-code lab kop (test only; optional bound proof)");
+MODULE_DESCRIPTION("BpfReJIT x86 native-code lab kinsn (test only; optional bound proof)");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("BpfReJIT");
 MODULE_IMPORT_NS("BPF_INTERNAL");

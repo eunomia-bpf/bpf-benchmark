@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "kopprober",
+    "../kinsn/kinsnprober",
     "loader",
 ]
 resolver = "2"

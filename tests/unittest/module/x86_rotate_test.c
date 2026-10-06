@@ -44,13 +44,13 @@ struct bpf_prog {
 #define BPF_JMP32_IMM(OP, DST, IMM, OFF) INSN(BPF_JMP32 | (OP), DST, 0, OFF, IMM)
 #define BPF_JMP_A(OFF) INSN(BPF_JMP | BPF_JA, 0, 0, OFF, 0)
 
-#define KOP_X86_REG_R9 11
-#define KOP_X86_REG_R10 12
-#define KOP_X86_REG_R11 13
-#define KOP_X86_REG_R12 14
-#define KOP_X86_REG_RSP 15
+#define KINSN_X86_REG_R9 11
+#define KINSN_X86_REG_R10 12
+#define KINSN_X86_REG_R11 13
+#define KINSN_X86_REG_R12 14
+#define KINSN_X86_REG_RSP 15
 
-static __always_inline bool kop_payload_wire_escaped(u64 payload)
+static __always_inline bool kinsn_payload_wire_escaped(u64 payload)
 {
 	u8 marker = payload & 0xf;
 	u8 original_low = (payload >> 4) & 0xf;
@@ -58,14 +58,14 @@ static __always_inline bool kop_payload_wire_escaped(u64 payload)
 	return marker == BPF_REG_10 && original_low >= 11 && original_low <= 15;
 }
 
-static __always_inline u64 kop_payload_decode(u64 payload)
+static __always_inline u64 kinsn_payload_decode(u64 payload)
 {
-	if (!kop_payload_wire_escaped(payload))
+	if (!kinsn_payload_wire_escaped(payload))
 		return payload;
 	return ((payload >> 8) << 4) | ((payload >> 4) & 0xf);
 }
 
-static __always_inline u8 kop_x86_reg_code(u8 bpf_reg)
+static __always_inline u8 kinsn_x86_reg_code(u8 bpf_reg)
 {
 	switch (bpf_reg) {
 	case BPF_REG_0:
@@ -86,43 +86,43 @@ static __always_inline u8 kop_x86_reg_code(u8 bpf_reg)
 	case BPF_REG_1:
 	case BPF_REG_9:
 		return 7;
-	case KOP_X86_REG_R9:
+	case KINSN_X86_REG_R9:
 		return 1;
-	case KOP_X86_REG_R10:
+	case KINSN_X86_REG_R10:
 		return 2;
-	case KOP_X86_REG_R11:
+	case KINSN_X86_REG_R11:
 		return 3;
-	case KOP_X86_REG_R12:
-	case KOP_X86_REG_RSP:
+	case KINSN_X86_REG_R12:
+	case KINSN_X86_REG_RSP:
 		return 4;
 	default:
 		return 0xff;
 	}
 }
 
-static __always_inline bool kop_x86_reg_ext(u8 bpf_reg)
+static __always_inline bool kinsn_x86_reg_ext(u8 bpf_reg)
 {
 	switch (bpf_reg) {
 	case BPF_REG_5:
 	case BPF_REG_7:
 	case BPF_REG_8:
 	case BPF_REG_9:
-	case KOP_X86_REG_R9:
-	case KOP_X86_REG_R10:
-	case KOP_X86_REG_R11:
-	case KOP_X86_REG_R12:
+	case KINSN_X86_REG_R9:
+	case KINSN_X86_REG_R10:
+	case KINSN_X86_REG_R11:
+	case KINSN_X86_REG_R12:
 		return true;
 	default:
 		return false;
 	}
 }
 
-static __always_inline bool kop_x86_reg_valid(u8 bpf_reg)
+static __always_inline bool kinsn_x86_reg_valid(u8 bpf_reg)
 {
-	return kop_x86_reg_code(bpf_reg) != 0xff;
+	return kinsn_x86_reg_code(bpf_reg) != 0xff;
 }
 
-#define _KOP_COMMON_H
+#define _KINSN_COMMON_H
 #define __bpf_kfunc_start_defs()
 #define __bpf_kfunc
 #define __bpf_kfunc_end_defs()
@@ -130,9 +130,9 @@ static __always_inline bool kop_x86_reg_valid(u8 bpf_reg)
 #define BTF_ID_FLAGS(KIND, NAME)
 #define BTF_KFUNCS_END(NAME)
 #define THIS_MODULE NULL
-#define DEFINE_KOP_V2_MODULE(PREFIX, DESC, KFUNC_IDS, KOP_DESC_ARRAY)
+#define DEFINE_KINSN_V2_MODULE(PREFIX, DESC, KFUNC_IDS, KINSN_DESC_ARRAY)
 
-struct bpf_kop {
+struct bpf_kinsn {
 	void *owner;
 	int max_insn_cnt;
 	int max_emit_bytes;
@@ -323,10 +323,10 @@ static void test_instantiate_rol_cl_widths(void)
 	const u64 values[] = { 0, 1, 0x80000000ULL, 1ULL << 63,
 			      UINT64_MAX, 0x0123456789abcdefULL };
 	const u8 destinations[] = { BPF_REG_0, BPF_REG_4, BPF_REG_5 };
-	const struct bpf_kop *descs[] = { &bpf_x86_roll_desc, &bpf_x86_rolq_desc };
+	const struct bpf_kinsn *descs[] = { &bpf_x86_roll_desc, &bpf_x86_rolq_desc };
 
 	for (size_t w = 0; w < 2; w++) {
-		const struct bpf_kop *desc = descs[w];
+		const struct bpf_kinsn *desc = descs[w];
 		unsigned width = w ? 64 : 32;
 		u64 mask = w ? UINT64_MAX : UINT32_MAX;
 		struct bpf_insn *insns = calloc(desc->max_insn_cnt + 1, sizeof(*insns));

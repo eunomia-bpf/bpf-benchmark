@@ -520,11 +520,11 @@ constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
     "htab_lru_percpu_map_lookup_elem";
 constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 
-#ifndef BPF_PSEUDO_KOP_SIDECAR
-#define BPF_PSEUDO_KOP_SIDECAR 3
+#ifndef BPF_PSEUDO_KINSN_SIDECAR
+#define BPF_PSEUDO_KINSN_SIDECAR 3
 #endif
-#ifndef BPF_PSEUDO_KOP_CALL
-#define BPF_PSEUDO_KOP_CALL 4
+#ifndef BPF_PSEUDO_KINSN_CALL
+#define BPF_PSEUDO_KINSN_CALL 4
 #endif
 #ifndef K_BPF_ARRAY_VALUE_OFFSET
 #error "kernel_offsets.h must define K_BPF_ARRAY_VALUE_OFFSET"
@@ -888,7 +888,7 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
     size_t offset = 0;
     while (offset < blob_size) {
         size_t end = std::min(offset + kNativeLabTarget.chunk_bytes, blob_size);
-        /* A helper-call reloc slot must fit inside one kop emit chunk. */
+        /* A helper-call reloc slot must fit inside one kinsn emit chunk. */
         for (const NativeLabReloc &reloc : relocs) {
             const size_t reloc_start = reloc.global_offset;
             const size_t reloc_end = reloc_start + native_lab_reloc_slot_bytes(reloc.kind);
@@ -1012,8 +1012,8 @@ std::vector<bpf_insn> bound_proof_sequence(const std::vector<bpf_insn> &program)
         bpf_insn &insn = proof[i];
         const uint8_t cls = BPF_CLASS(insn.code);
         if (insn.code == (BPF_ALU64 | BPF_MOV | BPF_K) &&
-            insn.src_reg == BPF_PSEUDO_KOP_SIDECAR) {
-            fail("native_kernel bound proof contains a kop sidecar at instruction " +
+            insn.src_reg == BPF_PSEUDO_KINSN_SIDECAR) {
+            fail("native_kernel bound proof contains a kinsn sidecar at instruction " +
                  std::to_string(i));
         }
         if ((cls == BPF_JMP || cls == BPF_JMP32) &&
@@ -1088,8 +1088,8 @@ std::vector<uint32_t> upload_bound_proofs(
     std::vector<uint32_t> generations;
     generations.reserve(chunks.size());
     for (uint32_t i = 0; i < chunks.size(); i++) {
-        /* Put the real proof on the final KOP. Every redirected proof EXIT
-         * then reaches the stub's real EXIT without traversing another KOP;
+        /* Put the real proof on the final KINSN. Every redirected proof EXIT
+         * then reaches the stub's real EXIT without traversing another KINSN;
          * doing the inverse multiplies verifier states for loop-heavy CFGs. */
         upload_proof_chunk(i + 1 == chunks.size() ? proof : continuation, i);
         generations.push_back(read_blob_generation(i));
@@ -1509,7 +1509,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         bpf_insn sidecar = {
             .code = BPF_ALU64 | BPF_MOV | BPF_K,
             .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KOP_SIDECAR,
+            .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
             .off = static_cast<int16_t>(callee_saved_mask | (i << 4)),
             .imm = static_cast<int32_t>(generation),
         };
@@ -1517,7 +1517,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         bpf_insn call = {
             .code = BPF_JMP | BPF_CALL,
             .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KOP_CALL,
+            .src_reg = BPF_PSEUDO_KINSN_CALL,
             .off = 1, // fd_array slot for module BTF
             .imm = kfunc_btf_id,
         };
@@ -1557,7 +1557,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     }
 
     // fd_array[0] is the verifier pre-scan slot; fd_array[1] is what `off=1`
-    // in the kop call resolves to. Retained map fds follow and are bound via
+    // in the kinsn call resolves to. Retained map fds follow and are bound via
     // fd_array_cnt, so map retention has no runtime BPF instruction cost.
     std::vector<int> fd_array;
     fd_array.reserve(2 + map_ref_fds.size());

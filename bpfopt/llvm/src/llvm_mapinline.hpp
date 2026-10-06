@@ -5,7 +5,7 @@
 std::vector<uint8_t>
 extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 		       const std::vector<uint8_t> &input,
-		       const KopTargetMap *kop_targets)
+		       const KinsnTargetMap *kinsn_targets)
 {
 	auto buffer = llvm::MemoryBuffer::getMemBuffer(
 		llvm::StringRef(
@@ -35,7 +35,7 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 	const size_t generated_insns = text.size() / INSN_SIZE;
 	const auto call_src_by_imm = external_call_src_regs(input);
 	apply_text_relocations(*object, text, subprog_start, generated_insns,
-			       call_src_by_imm, kop_targets);
+			       call_src_by_imm, kinsn_targets);
 	if (subprog_start) {
 		text.insert(text.end(), input.begin() + *subprog_start * INSN_SIZE,
 			    input.end());
@@ -198,7 +198,7 @@ llvm::orc::ThreadSafeModule generate_llvm_module(const std::vector<uint8_t> &inp
 }
 
 std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
-					const KopTargetMap *kop_targets)
+					const KinsnTargetMap *kinsn_targets)
 {
 	auto module = generate_llvm_module(input);
 	return module.withModuleDo([&](llvm::Module &module) {
@@ -206,7 +206,7 @@ std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
 			llvm::CodeGenOptLevel::Aggressive);
 		promote_register_allocas(module, *machine);
 		return extract_relocated_text(emit_bpf_object(module), input,
-					      kop_targets);
+					      kinsn_targets);
 	});
 }
 
