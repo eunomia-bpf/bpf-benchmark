@@ -109,8 +109,9 @@ def cmovBpf (c : X86.CC) (cmp32 value32 : Bool) (l r dst src : BPF.Reg) :
     (if cmp32 then .w32 else .w64) l (.reg r) 1,
    .core (if value32 then BPF.mov32 dst (.reg src) else BPF.mov64 dst (.reg src))]
 
-/-- x86/bpf_x86_cmov.c:emit_cmp_cmov_rr_x86, CMP then CMOVcc with the
-    two independent REX.W fields decoded from cmp32/value32. -/
+/-- Pre-fix x86/bpf_x86_cmov.c:emit_cmp_cmov_rr_x86 at 69f9a30f6,
+    CMP then CMOVcc. The current value32 lowering is ModuleCmov.native;
+    this pair remains current for value64 and records the old counterexamples. -/
 def cmovX86 (m : X86RegMap) (c : X86.CC) (cmp32 value32 : Bool)
     (l r dst src : BPF.Reg) : List X86.MInsn :=
   [.cmp cmp32 (m.map l) (m.map r), .cmov c value32 (m.map dst) (m.map src)]
