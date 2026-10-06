@@ -16,6 +16,7 @@ import KinsnLean4.Kinsn.ModuleCmov
 import KinsnLean4.Kinsn.ModuleByteorder
 import KinsnLean4.Kinsn.ModuleNot
 import KinsnLean4.Kinsn.ModuleImul
+import KinsnLean4.Kinsn.ModuleMovzx
 import KinsnLean4.Kinsn.ModuleMovswl
 import KinsnLean4.Kinsn.ModuleNarrowLogic
 import KinsnLean4.Kinsn.ModuleAluShift
