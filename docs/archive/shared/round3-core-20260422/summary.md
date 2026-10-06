@@ -170,7 +170,7 @@ Rename:
 Grep verification:
 - pattern: `attach_pending_result_metadata|reset_pending_result_metadata|_append_pending_kinsn_metadata|lifecycle_runs|lifecycle_index|abort_phase|daemon_kinsn_discovery|captured_at`
 - result: no output
-- retained grep: `\bkop_modules\b|daemon_binary`
+- retained grep: `\bkinsn_modules\b|daemon_binary`
 - remaining hits are only the static keepers:
   - `runner/libs/rejit.py:834`
   - `runner/libs/case_common.py:153,398`

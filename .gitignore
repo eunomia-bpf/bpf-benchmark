@@ -127,17 +127,17 @@ micro/results/*/*.bpf.d
 micro/results/*/*.bpf.o
 
 # Track summary files inside details/, ignore large per-program detail payloads.
-**/results/*/details/*
-!**/results/*/details/result.json
-!**/results/*/details/*.md
-!**/results/*/details/*/*.md
-!**/results/*/details/progress.json
-!**/results/*/details/apps/
-!**/results/*/details/apps/*.json
-!**/results/*/details/loadtime-reports/
-!**/results/*/details/loadtime-reports/*.jsonl
-**/results/*/details/failures/
-**/results/*/details/workdirs/
+**/results/**/details/*
+!**/results/**/details/result.json
+!**/results/**/details/*.md
+!**/results/**/details/*/*.md
+!**/results/**/details/progress.json
+!**/results/**/details/apps/
+!**/results/**/details/apps/*.json
+!**/results/**/details/loadtime-reports/
+!**/results/**/details/loadtime-reports/*.jsonl
+**/results/**/details/failures/
+**/results/**/details/workdirs/
 
 # Native proof test results (keep JSON, ignore everything else)
 tests/results/77216644/**
@@ -222,9 +222,9 @@ docs/tmp/*.sh
 !e2e/results/*/result.md
 
 # Corpus run guest-inputs snapshots (build artifacts copied into VM, ~600MB+)
-corpus/results/*/guest-inputs/
+corpus/results/**/guest-inputs/
 
-runner/corpus/results/*/guest-inputs/
+runner/corpus/results/**/guest-inputs/
 
 # Preserved failure workdirs (raw bytecode + verifier logs from REJIT failures)
 corpus/results/failures/
@@ -244,10 +244,10 @@ e2e/cases/tetragon/bin/
 # Micro benchmark result artifacts are tracked for review.
 !micro/results/
 !micro/results/**
-micro/results/*/details/jit_dumps/
-micro/results/*/details/jit_dumps/**
-micro/results/*/details/code_compare/
-micro/results/*/details/code_compare/**
+micro/results/**/details/jit_dumps/
+micro/results/**/details/jit_dumps/**
+micro/results/**/details/code_compare/
+micro/results/**/details/code_compare/**
 micro/results/**/*.bpf.d
 micro/results/**/*.bpf.ll
 micro/results/**/*.bpf.o
@@ -266,13 +266,13 @@ micro/results/llvm_kinsn_programs_*/*.h
 micro/results/llvm_kinsn_programs_*/*.native.d
 micro/results/llvm_kinsn_programs_*/*.so
 micro/results/llvm_kinsn_programs_*/*.o
-micro/results/llvm_nokop_programs_*/*.bpf.d
-micro/results/llvm_nokop_programs_*/*.bpf.ll
-micro/results/llvm_nokop_programs_*/*.h
-micro/results/llvm_nokop_programs_*/*.bpf.o
-micro/results/llvm_nokop_programs_*/*.native.d
-micro/results/llvm_nokop_programs_*/*.so
-micro/results/llvm_nokop_programs_*/*.o
+micro/results/llvm_nokinsn_programs_*/*.bpf.d
+micro/results/llvm_nokinsn_programs_*/*.bpf.ll
+micro/results/llvm_nokinsn_programs_*/*.h
+micro/results/llvm_nokinsn_programs_*/*.bpf.o
+micro/results/llvm_nokinsn_programs_*/*.native.d
+micro/results/llvm_nokinsn_programs_*/*.so
+micro/results/llvm_nokinsn_programs_*/*.o
 # micro/programs/*.md
 e2e/cases/katran/bin/
 
