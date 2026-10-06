@@ -17,4 +17,6 @@ import KinsnLean4.Kinsn.Bswap
 import KinsnLean4.Kinsn.LoadImm
 import KinsnLean4.Kinsn.Insert
 import KinsnLean4.Kinsn.Catalog
+import KinsnLean4.Kinsn.ModuleCatalog
+import KinsnLean4.Kinsn.Counterexamples
 import KinsnLean4.AxiomCheck
