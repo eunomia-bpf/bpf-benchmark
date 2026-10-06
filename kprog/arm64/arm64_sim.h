@@ -109,7 +109,7 @@
 
 #include "../formal/generated/arm64_width.h"
 
-static __always_inline __u8 arm64_width_effective(__u8 code)
+static inline __attribute__((always_inline)) __u8 arm64_width_effective(__u8 code)
 {
 	return KPROG_ARM64_WIDTH_EFFECTIVE(code);
 }
