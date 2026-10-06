@@ -16,6 +16,7 @@ import KinsnLean4.Kinsn.ModuleCmov
 import KinsnLean4.Kinsn.ModuleByteorder
 import KinsnLean4.Kinsn.ModuleNot
 import KinsnLean4.Kinsn.ModuleImul
+import KinsnLean4.Kinsn.ModuleBextr
 import KinsnLean4.Kinsn.ModuleLowBit
 import KinsnLean4.Kinsn.ModuleX86Rotate
 import KinsnLean4.Kinsn.ModuleMovWide
