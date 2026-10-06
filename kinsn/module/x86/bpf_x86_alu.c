@@ -108,7 +108,7 @@ static __always_inline int decode_x86_alu_payload(u64 payload,
 		alu->src_reg = (payload >> 8) & 0xf;
 		if (payload >> 12)
 			return -EINVAL;
-		if (!kop_x86_operand_valid(alu->dst_reg) ||
+		if (!kop_x86_reg_is_bpf_writable(alu->dst_reg) ||
 		    !kop_x86_operand_valid(alu->src_reg))
 			return -EINVAL;
 		return 0;
@@ -121,7 +121,7 @@ static __always_inline int decode_x86_alu_payload(u64 payload,
 		alu->imm = (s32)((u32)(payload >> 8));
 		if (payload >> 40)
 			return -EINVAL;
-		if (!kop_x86_operand_valid(alu->dst_reg))
+		if (!kop_x86_reg_is_bpf_writable(alu->dst_reg))
 			return -EINVAL;
 		return 0;
 	}
@@ -133,8 +133,8 @@ static __always_inline int decode_x86_alu_payload(u64 payload,
 		alu->offset = kop_payload_s16(payload, 12);
 		if (payload >> 28)
 			return -EINVAL;
-		if (!kop_x86_reg_valid(alu->dst_reg) ||
-		    !kop_x86_reg_valid(alu->base_reg))
+		if (!kop_x86_reg_is_bpf_writable(alu->dst_reg) ||
+		    !kop_x86_operand_valid(alu->base_reg))
 			return -EINVAL;
 		return 0;
 	}
@@ -150,9 +150,9 @@ static __always_inline int decode_x86_alu_payload(u64 payload,
 			return -EINVAL;
 		if (payload & (0x3ULL << 18))
 			return -EINVAL;
-		if (!kop_x86_reg_valid(alu->dst_reg) ||
-		    !kop_x86_reg_valid(alu->base_reg) ||
-		    !kop_x86_reg_valid(alu->index_reg))
+		if (!kop_x86_reg_is_bpf_writable(alu->dst_reg) ||
+		    !kop_x86_operand_valid(alu->base_reg) ||
+		    !kop_x86_operand_valid(alu->index_reg))
 			return -EINVAL;
 		return 0;
 	}
@@ -205,130 +205,52 @@ static __always_inline int emit_bpf_alu_imm(struct bpf_insn *insn, u8 op,
 	return 0;
 }
 
-static int instantiate_x86_alu_mem(const struct kop_x86_alu_payload *alu,
-				   struct bpf_insn *insn_buf, u8 op,
-				   u8 width)
+/* A live temporary is chosen from the BPF register file, excluding every
+ * operand. Its save/restore is emitted natively as well as in the proof.
+ */
+static int x86_alu_mem_temp(const struct kop_x86_alu_payload *alu)
 {
-	u8 addr_reg, dst_eval_reg, value_reg;
-	u8 load_size = width == 64 ? BPF_DW : BPF_W;
-	u32 scratch_mask = 0;
-	int cnt = 0;
-	int err;
+	bool indexed = alu->form == KOP_X86_ALU_FORM_SIB ||
+		       alu->form == KOP_X86_ALU_FORM_ARCH_SIB;
+	u8 reg;
 
-	if (width != 8 && width != 32 && width != 64)
-		return -EINVAL;
-
-	addr_reg = alu->base_reg;
-	dst_eval_reg = alu->dst_reg;
-	value_reg = kop_x86_scratch_avoid(alu->dst_reg, alu->base_reg, 0);
-	scratch_mask |= KOP_X86_SCRATCH_MASK(value_reg);
-	if (kop_x86_reg_uses_stack_slot(alu->base_reg)) {
-		if (x86_alu_uses_arch_base(alu->form))
-			return -EINVAL;
-		addr_reg = kop_x86_scratch_avoid(alu->dst_reg, value_reg, 0);
-		scratch_mask |= KOP_X86_SCRATCH_MASK(addr_reg);
+	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
+		if (reg != alu->dst_reg && reg != alu->base_reg &&
+		    (!indexed || reg != alu->index_reg))
+			return reg;
 	}
-	if (x86_alu_uses_arch_base(alu->form)) {
-		addr_reg = kop_x86_scratch_avoid(alu->dst_reg, value_reg, 0);
-		scratch_mask |= KOP_X86_SCRATCH_MASK(addr_reg);
-	}
-	if ((x86_alu_uses_arch_base(alu->form) &&
-	     kop_x86_arch_reg_uses_stack_slot(alu->dst_reg)) ||
-	    (!x86_alu_uses_arch_base(alu->form) &&
-	     kop_x86_reg_uses_stack_slot(alu->dst_reg))) {
-		dst_eval_reg = kop_x86_scratch_avoid(addr_reg, value_reg, 0);
-		scratch_mask |= KOP_X86_SCRATCH_MASK(dst_eval_reg);
-	}
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (addr_reg != alu->base_reg) {
-		if (x86_alu_uses_arch_base(alu->form))
-			kop_x86_read64_arch(insn_buf, &cnt, addr_reg,
-					      alu->base_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, addr_reg,
-					 alu->base_reg);
-	}
-	if (dst_eval_reg != alu->dst_reg) {
-		if (x86_alu_uses_arch_base(alu->form))
-			kop_x86_read64_arch(insn_buf, &cnt, dst_eval_reg,
-					      alu->dst_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, dst_eval_reg,
-					 alu->dst_reg);
-	}
-	insn_buf[cnt++] = BPF_LDX_MEM(load_size, value_reg, addr_reg,
-				      alu->offset);
-	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width, dst_eval_reg,
-			       value_reg);
-	if (err)
-		return err;
-	if (dst_eval_reg != alu->dst_reg) {
-		if (width == 32)
-			insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
-		if (x86_alu_uses_arch_base(alu->form))
-			kop_x86_write64_arch(insn_buf, &cnt, alu->dst_reg,
-					       dst_eval_reg, scratch_mask);
-		else
-			kop_x86_write64(insn_buf, &cnt, alu->dst_reg,
-					  dst_eval_reg, scratch_mask);
-	}
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return -EINVAL;
 }
 
-static int instantiate_x86_alu_sib(const struct kop_x86_alu_payload *alu,
-				   struct bpf_insn *insn_buf, u8 op,
-				   u8 width)
+static int instantiate_x86_alu_mem(const struct kop_x86_alu_payload *alu,
+				  struct bpf_insn *insn_buf, u8 op, u8 width)
 {
-	u8 addr_reg = KOP_X86_SCRATCH0;
-	u8 value_reg = KOP_X86_SCRATCH1;
-	u8 dst_eval_reg = KOP_X86_SCRATCH2;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2);
-	u8 load_size = width == 64 ? BPF_DW : BPF_W;
+	bool indexed = alu->form == KOP_X86_ALU_FORM_SIB ||
+		       alu->form == KOP_X86_ALU_FORM_ARCH_SIB;
+	int temp;
 	int cnt = 0;
+	int i;
 	int err;
 
-	if (width != 8 && width != 32 && width != 64)
+	if (width != 32 && width != 64)
 		return -EINVAL;
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (x86_alu_uses_arch_sib(alu->form)) {
-		kop_x86_read64_arch(insn_buf, &cnt, addr_reg,
-				      alu->base_reg);
-		kop_x86_read64_arch(insn_buf, &cnt, value_reg,
-				      alu->index_reg);
-	} else {
-		kop_x86_read64(insn_buf, &cnt, addr_reg, alu->base_reg);
-		kop_x86_read64(insn_buf, &cnt, value_reg, alu->index_reg);
+	temp = x86_alu_mem_temp(alu);
+	if (temp < 0)
+		return temp;
+	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp,
+				    KOP_X86_PROOF_RHS_OFF);
+	insn_buf[cnt++] = BPF_MOV64_REG(temp, alu->base_reg);
+	if (indexed) {
+		for (i = 0; i < (1U << alu->scale_log2); i++)
+			insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, temp, alu->index_reg);
 	}
-	if (alu->scale_log2)
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, value_reg,
-						alu->scale_log2);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg, value_reg);
-	insn_buf[cnt++] = BPF_LDX_MEM(load_size, value_reg, addr_reg,
-				      alu->offset);
-	if (x86_alu_uses_arch_sib(alu->form))
-		kop_x86_read64_arch(insn_buf, &cnt, dst_eval_reg,
-				      alu->dst_reg);
-	else
-		kop_x86_read64(insn_buf, &cnt, dst_eval_reg,
-				 alu->dst_reg);
-	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width, dst_eval_reg,
-			       value_reg);
+	insn_buf[cnt++] = BPF_LDX_MEM(width == 64 ? BPF_DW : BPF_W,
+				    temp, temp, alu->offset);
+	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width, alu->dst_reg, temp);
 	if (err)
 		return err;
-	if (width == 32)
-		insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
-	if (x86_alu_uses_arch_sib(alu->form))
-		kop_x86_write64_arch(insn_buf, &cnt, alu->dst_reg,
-				       dst_eval_reg, scratch_mask);
-	else
-		kop_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
-				  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10,
+				    KOP_X86_PROOF_RHS_OFF);
 	return cnt;
 }
 
@@ -414,137 +336,25 @@ static int instantiate_x86_xorw_mem(const struct kop_x86_alu_payload *alu,
 static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 			       u8 op, u8 width)
 {
-	struct kop_x86_alu_payload decoded;
-	const struct kop_x86_alu_payload *alu = &decoded;
-	u8 dst_eval_reg, src_eval_reg;
-	bool arch_reg, dst_stacked, src_stacked;
-	u32 scratch_mask;
-	int cnt = 0;
+	struct kop_x86_alu_payload alu;
 	int err;
 
-	err = decode_x86_alu_payload(payload, &decoded);
+	err = decode_x86_alu_payload(payload, &alu);
 	if (err)
 		return err;
-
 	if (x86_alu_is_shift(op))
-		return instantiate_x86_shift(alu, insn_buf, op, width);
-
-	if (alu->form == KOP_X86_ALU_FORM_MEM ||
-	    alu->form == KOP_X86_ALU_FORM_ARCH_MEM)
-		return instantiate_x86_alu_mem(alu, insn_buf, op, width);
-
-	if (alu->form == KOP_X86_ALU_FORM_SIB ||
-	    alu->form == KOP_X86_ALU_FORM_ARCH_SIB)
-		return instantiate_x86_alu_sib(alu, insn_buf, op, width);
-
-	arch_reg = x86_alu_uses_arch_reg(alu->form);
-	dst_stacked = arch_reg ? kop_x86_arch_reg_uses_stack_slot(alu->dst_reg) :
-				  kop_x86_reg_uses_stack_slot(alu->dst_reg);
-	src_stacked = arch_reg ? kop_x86_arch_reg_uses_stack_slot(alu->src_reg) :
-				  kop_x86_reg_uses_stack_slot(alu->src_reg);
-
-	if (alu->form == KOP_X86_ALU_FORM_IMM ||
-	    alu->form == KOP_X86_ALU_FORM_ARCH_IMM) {
-		dst_eval_reg = alu->dst_reg;
-		if (dst_stacked) {
-			dst_eval_reg = KOP_X86_SCRATCH0;
-			scratch_mask = KOP_X86_SCRATCH_MASK(dst_eval_reg);
-			kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-			if (arch_reg)
-				kop_x86_read64_arch(insn_buf, &cnt,
-						      dst_eval_reg,
-						      alu->dst_reg);
-			else
-				kop_x86_read64(insn_buf, &cnt, dst_eval_reg,
-						  alu->dst_reg);
-		}
-		err = emit_bpf_alu_imm(&insn_buf[cnt++], op, width,
-				       dst_eval_reg, alu->imm);
-		if (err)
-			return err;
-		if (dst_stacked) {
-			if (arch_reg)
-				kop_x86_write64_arch(insn_buf, &cnt,
-						       alu->dst_reg,
-						       dst_eval_reg,
-						       scratch_mask);
-			else
-				kop_x86_write64(insn_buf, &cnt,
-						  alu->dst_reg, dst_eval_reg,
-						  scratch_mask);
-			kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-		}
-		return cnt;
-	}
-
-	if (op == BPF_XOR && alu->dst_reg == alu->src_reg) {
-		if (dst_stacked) {
-			scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-			kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-			insn_buf[cnt++] = BPF_MOV64_IMM(KOP_X86_SCRATCH0, 0);
-			if (arch_reg)
-				kop_x86_write64_arch(insn_buf, &cnt,
-						       alu->dst_reg,
-						       KOP_X86_SCRATCH0,
-						       scratch_mask);
-			else
-				kop_x86_write64(insn_buf, &cnt,
-						  alu->dst_reg,
-						  KOP_X86_SCRATCH0,
-						  scratch_mask);
-			kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-			return cnt;
-		}
-		if (width == 32)
-			insn_buf[0] = BPF_MOV32_IMM(alu->dst_reg, 0);
-		else
-			insn_buf[0] = BPF_MOV64_IMM(alu->dst_reg, 0);
-		return 1;
-	}
-
-	dst_eval_reg = alu->dst_reg;
-	src_eval_reg = alu->src_reg;
-	if (dst_stacked || src_stacked) {
-		dst_eval_reg = KOP_X86_SCRATCH0;
-		src_eval_reg = alu->src_reg == alu->dst_reg ?
-			       dst_eval_reg : KOP_X86_SCRATCH1;
-		scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0);
-		if (src_eval_reg == KOP_X86_SCRATCH1)
-			scratch_mask |= KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
-		kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-		if (arch_reg)
-			kop_x86_read64_arch(insn_buf, &cnt, dst_eval_reg,
-					      alu->dst_reg);
-		else
-			kop_x86_read64(insn_buf, &cnt, dst_eval_reg,
-					 alu->dst_reg);
-		if (src_eval_reg != dst_eval_reg) {
-			if (arch_reg)
-				kop_x86_read64_arch(insn_buf, &cnt,
-						      src_eval_reg,
-						      alu->src_reg);
-			else
-				kop_x86_read64(insn_buf, &cnt,
-						  src_eval_reg,
-						  alu->src_reg);
-		}
-	}
-	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width,
-			       dst_eval_reg, src_eval_reg);
-	if (err)
-		return err;
-	if (dst_stacked || src_stacked) {
-		if (width == 32)
-			insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
-		if (arch_reg)
-			kop_x86_write64_arch(insn_buf, &cnt, alu->dst_reg,
-					       dst_eval_reg, scratch_mask);
-		else
-			kop_x86_write64(insn_buf, &cnt, alu->dst_reg,
-					  dst_eval_reg, scratch_mask);
-		kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	}
-	return cnt;
+		return instantiate_x86_shift(&alu, insn_buf, op, width);
+	if (alu.form == KOP_X86_ALU_FORM_MEM ||
+	    alu.form == KOP_X86_ALU_FORM_ARCH_MEM ||
+	    alu.form == KOP_X86_ALU_FORM_SIB ||
+	    alu.form == KOP_X86_ALU_FORM_ARCH_SIB)
+		return instantiate_x86_alu_mem(&alu, insn_buf, op, width);
+	if (alu.form == KOP_X86_ALU_FORM_RR ||
+	    alu.form == KOP_X86_ALU_FORM_ARCH_RR)
+		err = emit_bpf_alu_reg(&insn_buf[0], op, width, alu.dst_reg, alu.src_reg);
+	else
+		err = emit_bpf_alu_imm(&insn_buf[0], op, width, alu.dst_reg, alu.imm);
+	return err ? err : 1;
 }
 
 /* Register logic on a narrow destination can be expressed by independent
@@ -944,16 +754,25 @@ static __always_inline void emit_rex8_mem(u8 *buf, u32 *len, u8 reg_field,
 		kop_emit_u8(buf, len, rex);
 }
 
+static void emit_alu_temp_slot(u8 *buf, u32 *len, u8 temp, u8 frame, bool load)
+{
+	kop_emit_rex(buf, len, true, kop_x86_ext(temp), false, kop_x86_ext(frame));
+	kop_emit_u8(buf, len, load ? 0x8b : 0x89);
+	kop_emit_modrm_mem(buf, len, temp, frame, KOP_X86_PROOF_RHS_OFF);
+}
+
 static int emit_alu_mem_x86(u8 *image, u32 *off, bool emit,
 			    const struct kop_x86_alu_payload *alu,
 			    const struct bpf_prog *prog, u8 width,
 			    u8 opcode, bool is16, bool is8)
 {
-	u8 buf[16];
+	u8 buf[32];
 	u8 dst_reg, base_reg;
 	u32 len = 0;
+	int temp = -1;
+	u8 frame = kop_x86_reg_for_prog(prog, BPF_REG_10);
 
-	if (x86_alu_uses_arch_base(alu->form)) {
+	if (x86_alu_uses_arch_base(alu->form) && (is16 || is8)) {
 		dst_reg = alu->dst_reg;
 		base_reg = alu->base_reg;
 	} else {
@@ -963,6 +782,13 @@ static int emit_alu_mem_x86(u8 *image, u32 *off, bool emit,
 	if (!kop_x86_valid(dst_reg) || !kop_x86_valid(base_reg))
 		return -EINVAL;
 
+	if (!is16 && !is8) {
+		temp = x86_alu_mem_temp(alu);
+		if (temp < 0)
+			return temp;
+		emit_alu_temp_slot(buf, &len, kop_x86_reg_for_prog(prog, temp),
+				   frame, false);
+	}
 	if (is16)
 		kop_emit_u8(buf, &len, 0x66);
 	if (is8)
@@ -974,6 +800,9 @@ static int emit_alu_mem_x86(u8 *image, u32 *off, bool emit,
 	kop_emit_u8(buf, &len, opcode);
 	kop_emit_modrm_mem(buf, &len, dst_reg, base_reg, alu->offset);
 
+	if (temp >= 0)
+		emit_alu_temp_slot(buf, &len, kop_x86_reg_for_prog(prog, temp),
+				   frame, true);
 	return kop_emit_finish(image, off, emit, buf, len);
 }
 
@@ -981,28 +810,34 @@ static int emit_alu_sib_x86(u8 *image, u32 *off, bool emit,
 			    const struct kop_x86_alu_payload *alu,
 			    const struct bpf_prog *prog, u8 width, u8 opcode)
 {
-	u8 buf[16];
+	u8 buf[32];
 	u8 dst_reg, base_reg, index_reg;
 	u32 len = 0;
+	int temp = -1;
+	u8 frame = kop_x86_reg_for_prog(prog, BPF_REG_10);
 
-	if (x86_alu_uses_arch_sib(alu->form)) {
-		dst_reg = alu->dst_reg;
-		base_reg = alu->base_reg;
-		index_reg = alu->index_reg;
-	} else {
-		dst_reg = kop_x86_reg_for_prog(prog, alu->dst_reg);
-		base_reg = kop_x86_reg_for_prog(prog, alu->base_reg);
-		index_reg = kop_x86_reg_for_prog(prog, alu->index_reg);
-	}
+	dst_reg = kop_x86_reg_for_prog(prog, alu->dst_reg);
+	base_reg = kop_x86_reg_for_prog(prog, alu->base_reg);
+	index_reg = kop_x86_reg_for_prog(prog, alu->index_reg);
 	if (!kop_x86_valid(dst_reg) || !kop_x86_valid(base_reg) ||
 	    !kop_x86_valid(index_reg))
 		return -EINVAL;
 
+	if (width == 32 || width == 64) {
+		temp = x86_alu_mem_temp(alu);
+		if (temp < 0)
+			return temp;
+		emit_alu_temp_slot(buf, &len, kop_x86_reg_for_prog(prog, temp),
+				   frame, false);
+	}
 	kop_emit_rex(buf, &len, width == 64, kop_x86_ext(dst_reg),
 		       kop_x86_ext(index_reg), kop_x86_ext(base_reg));
 	kop_emit_u8(buf, &len, opcode);
 	kop_emit_sib_mem(buf, &len, dst_reg, base_reg, index_reg,
 			   alu->scale_log2, alu->offset);
+	if (temp >= 0)
+		emit_alu_temp_slot(buf, &len, kop_x86_reg_for_prog(prog, temp),
+				   frame, true);
 	return kop_emit_finish(image, off, emit, buf, len);
 }
 
@@ -1014,7 +849,6 @@ static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
 	const struct kop_x86_alu_payload *alu = &decoded;
 	u8 buf[8];
 	u8 dst_reg, src_reg;
-	bool arch_reg;
 	u32 len = 0;
 	int err;
 
@@ -1038,9 +872,7 @@ static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
 					rr_opcode | 0x02);
 	}
 
-	arch_reg = x86_alu_uses_arch_reg(alu->form);
-	dst_reg = arch_reg ? alu->dst_reg :
-			     kop_x86_reg_for_prog(prog, alu->dst_reg);
+	dst_reg = kop_x86_reg_for_prog(prog, alu->dst_reg);
 	if (!kop_x86_valid(dst_reg))
 		return -EINVAL;
 
@@ -1055,8 +887,7 @@ static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
 				      kop_x86_code(dst_reg));
 			return kop_emit_finish(image, off, emit, buf, len);
 		}
-		src_reg = arch_reg ? alu->src_reg :
-				     kop_x86_reg_for_prog(prog, alu->src_reg);
+		src_reg = kop_x86_reg_for_prog(prog, alu->src_reg);
 		if (!kop_x86_valid(src_reg))
 			return -EINVAL;
 		kop_emit_rex_rr(buf, &len, width == 64, src_reg, dst_reg);
@@ -1596,7 +1427,7 @@ const struct bpf_kop bpf_x86_shrb_desc = {
 const struct bpf_kop bpf_x86_##name##_desc = {			\
 	.owner = THIS_MODULE,						\
 	.max_insn_cnt = 24 + KOP_X86_SAVE_RESTORE_INSN_CNT,		\
-	.max_emit_bytes = 16,						\
+	.max_emit_bytes = 32,						\
 	.instantiate_insn = instantiate_##name,				\
 	.emit_x86 = emit_##name##_x86,					\
 }
