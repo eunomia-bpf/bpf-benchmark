@@ -40,4 +40,32 @@ theorem arm64_sign_mask_observes (v : Arm64Word) (w : Arm64Width) :
       arm64SignSpec v w := by
   cases w <;> simp [arm64NarrowSpec, arm64WidthSignMaskSpec, arm64SignSpec,
     arm64WidthMaskSpec, arm64WidthBitsSpec] <;> bv_decide
+/-- The decoded width code that means "absent", stated independently of the
+generated contract: the code the simulator leaves in an unused width field. -/
+def arm64AbsentCodeSpec : Nat := 0
+/-- The code an absent width field resolves to, stated independently: the
+64-bit width's code. -/
+def arm64DefaultCodeSpec : Nat := 8
+/-- The width code a body operates at: the decoded code itself, or the 64-bit
+default when the decoded code is absent. This is the resolution the simulator
+restated inline; it now shares this one kernel. -/
+def arm64EffectiveCodeSpec (c : Nat) : Nat :=
+  if c = arm64AbsentCodeSpec then arm64DefaultCodeSpec else c
+theorem arm64_effective_refines (c : Nat) :
+    GeneratedArm64Width.effective c = arm64EffectiveCodeSpec c := by rfl
+theorem arm64_effective_absent_is_default :
+    arm64EffectiveCodeSpec arm64AbsentCodeSpec = arm64DefaultCodeSpec := by rfl
+/-- The absent code names no width, so the fallback only fires on a genuinely
+unused field and every real code is used as decoded. -/
+theorem arm64_absent_code_names_no_width (w : Arm64Width) :
+    arm64WidthCodeSpec w != arm64AbsentCodeSpec := by cases w <;> decide
+/-- The absent field's fallback code is exactly the 64-bit width's code, pinned
+against the generated `arm64_width.h` decode so the default cannot drift. -/
+theorem arm64_default_code_is_w64 :
+    arm64WidthCodeSpec .w64 = arm64DefaultCodeSpec := by rfl
+/-- A decoded width code is its own effective code: the resolution is the
+identity on every real width, and only rewrites the absent code. -/
+theorem arm64_effective_identity_on_width (w : Arm64Width) :
+    arm64EffectiveCodeSpec (arm64WidthCodeSpec w) = arm64WidthCodeSpec w := by
+  cases w <;> rfl
 end KProgFormal

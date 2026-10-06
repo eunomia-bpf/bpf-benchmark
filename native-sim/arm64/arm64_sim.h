@@ -106,7 +106,13 @@
 #define ARM64_WIDTH_16 2U
 #define ARM64_WIDTH_32 4U
 #define ARM64_WIDTH_64 8U
+
 #include "../formal/generated/arm64_width.h"
+
+static __always_inline __u8 arm64_width_effective(__u8 code)
+{
+	return KPROG_ARM64_WIDTH_EFFECTIVE(code);
+}
 
 #define ARM64_X0 0U
 #define ARM64_X1 1U

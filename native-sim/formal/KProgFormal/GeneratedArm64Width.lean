@@ -30,4 +30,14 @@ def bits : Width -> Nat
 def narrow (value : BitVec 64) (width : Width) := BitVec.and value (mask width)
 def zero (value : BitVec 64) (width : Width) : Bool := narrow value width == 0
 def sign (value : BitVec 64) (width : Width) : Bool := (narrow value width).getLsbD (bits width - 1)
+/-- The decoded width code that means "absent": a body that leaves its width
+field empty falls back to the default code. -/
+def absentCode : Nat := 0
+/-- The decoded width code an absent width field resolves to: the 64-bit width. -/
+def defaultCode : Nat := 8
+/-- Resolve a decoded width code to the code a body operates at. The absent code
+(0) falls back to 8 (the 64-bit width); every other code is used as
+decoded, exactly as the simulator's inline fallback did. -/
+def effective (code : Nat) : Nat :=
+  if code = absentCode then defaultCode else code
 end KProgFormal.GeneratedArm64Width
