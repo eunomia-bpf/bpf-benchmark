@@ -111,54 +111,54 @@ static int instantiate_bextrq(u64 payload, struct bpf_insn *insn_buf)
 	return cnt;
 }
 
-static int instantiate_blsiq(u64 payload, struct bpf_insn *insn_buf)
+/* Shift past zero low bits. The first set bit and its position live in
+ * control flow, so neither operands nor other registers need spill slots.
+ */
+static int instantiate_bls_scan(bool isolate, u8 dst_reg, u8 remaining,
+				u8 shift, struct bpf_insn *insn_buf)
+{
+	int cnt = 0;
+	int branch;
+	int join;
+
+	if (!remaining) {
+		insn_buf[cnt++] = BPF_MOV64_IMM(dst_reg, 0);
+		return cnt;
+	}
+	branch = cnt++;
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, dst_reg, 1);
+	cnt += instantiate_bls_scan(isolate, dst_reg, remaining - 1,
+				    shift + 1, insn_buf + cnt);
+	join = cnt++;
+	insn_buf[branch] = BPF_JMP_IMM(BPF_JSET, dst_reg, 1, cnt - branch - 1);
+	insn_buf[cnt++] = isolate ? BPF_MOV64_IMM(dst_reg, 1) :
+		BPF_ALU64_IMM(BPF_ADD, dst_reg, -1);
+	if (shift)
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, shift);
+	insn_buf[join] = BPF_JMP_A(cnt - join - 1);
+	return cnt;
+}
+
+static int instantiate_bls(u64 payload, struct bpf_insn *insn_buf, bool isolate)
 {
 	u8 dst_reg, src_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
-	int cnt = 0;
 	int err;
 
 	err = decode_bmi1_payload(payload, &dst_reg, &src_reg);
 	if (err)
 		return err;
+	insn_buf[0] = BPF_MOV64_REG(dst_reg, src_reg);
+	return 1 + instantiate_bls_scan(isolate, dst_reg, 64, 0, insn_buf + 1);
+}
 
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0, src_reg);
-	insn_buf[cnt++] = BPF_MOV64_IMM(KOP_X86_SCRATCH1, 0);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_SUB, KOP_X86_SCRATCH1,
-					KOP_X86_SCRATCH0);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_AND, KOP_X86_SCRATCH0,
-					KOP_X86_SCRATCH1);
-	kop_x86_write64(insn_buf, &cnt, dst_reg, KOP_X86_SCRATCH0,
-			  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+static int instantiate_blsiq(u64 payload, struct bpf_insn *insn_buf)
+{
+	return instantiate_bls(payload, insn_buf, true);
 }
 
 static int instantiate_blsrq(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 dst_reg, src_reg;
-	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
-			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
-	int cnt = 0;
-	int err;
-
-	err = decode_bmi1_payload(payload, &dst_reg, &src_reg);
-	if (err)
-		return err;
-
-	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0, src_reg);
-	insn_buf[cnt++] = BPF_MOV64_REG(KOP_X86_SCRATCH1,
-					KOP_X86_SCRATCH0);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, KOP_X86_SCRATCH1, -1);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_AND, KOP_X86_SCRATCH0,
-					KOP_X86_SCRATCH1);
-	kop_x86_write64(insn_buf, &cnt, dst_reg, KOP_X86_SCRATCH0,
-			  scratch_mask);
-	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
+	return instantiate_bls(payload, insn_buf, false);
 }
 
 static __always_inline u8 kop_x86_reg_no(u8 reg)
@@ -280,7 +280,7 @@ const struct bpf_kop bpf_x86_bextrq_desc = {
 
 const struct bpf_kop bpf_x86_blsiq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 8 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 321,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_blsiq,
 	.emit_x86 = emit_blsiq_x86,
@@ -288,7 +288,7 @@ const struct bpf_kop bpf_x86_blsiq_desc = {
 
 const struct bpf_kop bpf_x86_blsrq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 8 + KOP_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 321,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_blsrq,
 	.emit_x86 = emit_blsrq_x86,
