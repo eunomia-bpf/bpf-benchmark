@@ -417,7 +417,7 @@ theorem x86_cmov_condition_sources_differ :
       x86CmovMemConditionCodeSpec 0x05000000 = 5 ∧
       x86CmovConditionByteSpec 0x05000000 = 0 ∧
       x86CmovMemConditionCodeSpec 0x00000005 = 0 := by
-  decide
+  native_decide
 
 /-- The whole-word comparison is not the low-byte equality: with the zero flag
 clear, `0x00000105` fails every `KPROG_X86_EVAL_CC` arm (its value is neither
@@ -430,7 +430,7 @@ theorem x86_cmov_whole_word_not_low_byte_equality :
       x86CmovConditionSpec .cmov 0x00000105 ⟨false, false, false, false⟩ =
         false ∧
       (x86CmovByteConditionTable 0x05 = some .ne) := by
-  decide
+  native_decide
 
 /-- The memory form's access width falls back twice: an addressing mode with no
 width reads at the resolved write width, while a present memory-width byte wins
@@ -440,7 +440,7 @@ theorem x86_cmov_mem_width_two_level_fallback :
       x86CmovMemWidthSpec Code.absent Code.absent = Code.b64 ∧
       x86CmovMemWidthSpec Code.b8 Code.b64 = Code.b8 ∧
       x86CmovMemWidthSpec Code.b64 Code.b8 = Code.b64 := by
-  decide
+  native_decide
 
 /-- The memory form's displacement is the artifact's high half, while the memory
 `SETCC`'s is the whole artifact: the same field yields different addresses, and
@@ -448,7 +448,7 @@ the CMOV slice agrees with the immediate store's. -/
 theorem x86_cmov_mem_disp_differs_from_setcc_mem :
     x86CmovMemDispSpec 0xdeadbeef00000008 = 0xffffffffdeadbeef ∧
       x86SetccMemDispSpec 0xdeadbeef00000008 = 0xdeadbeef00000008 := by
-  decide
+  native_decide
 
 /-- The writeback selector is exactly the 64-bit test: no width below 64 bits
 can select the pointer-preserving arm. -/
@@ -457,7 +457,7 @@ theorem x86_cmov_writeback_only_w64 :
       x86CmovWriteBackSpec .w32 = WriteBack.scalarize ∧
       x86CmovWriteBackSpec .w16 = WriteBack.scalarize ∧
       x86CmovWriteBackSpec .w8 = WriteBack.scalarize := by
-  decide
+  native_decide
 
 /-- An unsupported parity code evaluates to the C default false for both
 opcodes, at every flag combination: the word table rejects the register form's
@@ -466,7 +466,7 @@ theorem x86_cmov_unsupported_example :
     GeneratedX86Cmov.evalRawOp true true true true .cmov 10 = false ∧
       GeneratedX86Cmov.evalRawOp true true true true .cmovMem 0x0a000000 =
         false := by
-  decide
+  native_decide
 
 /-- Canonical example: a set zero flag with an `e` condition on the register
 form takes the 64-bit pointer arm, so the destination receives the source's
@@ -481,7 +481,7 @@ theorem x86_cmov_pointer_arm_example :
         value := 0x1122334455667788,
         before := { bits := 0xdeadbeefdeadbeef, tag := .scalar },
         dst := { bits := 0x1122334455667788, tag := .packet } } := by
-  decide
+  native_decide
 
 /-- Canonical example: the same condition at a 32-bit width reads the source at
 the full 64 bits and scalarizes it, so the upper half is zeroed and the packet
@@ -496,7 +496,7 @@ theorem x86_cmov_narrow_arm_example :
         value := 0x1122334455667788,
         before := { bits := 0xdeadbeefdeadbeef, tag := .mapValue },
         dst := { bits := 0x55667788, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a false condition leaves the destination untouched, at
 both widths — the condition test encloses the writeback, so neither arm runs. -/
@@ -510,6 +510,6 @@ theorem x86_cmov_false_condition_example :
         value := 0x1122334455667788,
         before := { bits := 0xdeadbeefdeadbeef, tag := .stack },
         dst := { bits := 0xdeadbeefdeadbeef, tag := .stack } } := by
-  decide
+  native_decide
 
 end KProgFormal

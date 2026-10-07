@@ -72,11 +72,11 @@ theorem arm64_orn_w32_bound (lhs rhs : BitVec 64) :
 the second source only. -/
 theorem arm64_orn_example :
     arm64OrnSpec .orn_reg 0xf0 0x0f .w64 = 0xfffffffffffffff0 := by
-  decide
+  native_decide
 
 /-- Canonical example: a word-width ORN truncates to 32 bits. -/
 theorem arm64_orn_w32_example :
     arm64OrnSpec .orn_reg 0 0x1_0000_0000 .w32 = 0xffffffff := by
-  decide
+  native_decide
 
 end KProgFormal

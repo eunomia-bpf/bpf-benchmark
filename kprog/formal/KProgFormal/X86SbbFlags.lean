@@ -31,10 +31,10 @@ theorem x86_sbb_branch_refines (a b r sign : BitVec 64) (borrow : Bool)
 not a signed overflow even though `b + borrow` wraps into the sign bit. -/
 theorem x86_sbb_no_false_overflow_at_positive_boundary :
     (generatedX86SbbFlags 0 0x7f 0x80 0x80 true).of = false := by
-  decide
+  native_decide
 
 /-- The dual boundary really does overflow: `-1 - 127 - 1 = -129`. -/
 theorem x86_sbb_detects_negative_boundary_overflow :
     (generatedX86SbbFlags 0xff 0x7f 0x7f 0x80 true).of = true := by
-  decide
+  native_decide
 end KProgFormal

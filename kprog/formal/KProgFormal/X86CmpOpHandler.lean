@@ -249,7 +249,7 @@ theorem x86_cmpop_equal_w64 :
       { cf := false, zf := true, sf := false, of := false } ∧
       (x86CmpOpStepSpec .cmpReg .b64 0x1122334455667788 0x1122334455667788 0
         .low .low ⟨0xdead, .packet⟩).dst = ⟨0xdead, .packet⟩ := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 /-- A 32-bit `TEST` whose width-narrowed conjunction is nonzero clears carry
 and overflow and takes its zero/sign from the conjunction: an operand pair whose
@@ -259,7 +259,7 @@ theorem x86_cmpop_test_zero_w16 :
     (x86CmpOpStepSpec .testImm .b16 0x000000000000ff00 0 0x00000000000000ff
       .low .low ⟨0, .scalar⟩).flags =
       { cf := false, zf := true, sf := false, of := false } := by
-  decide
+  native_decide
 
 /-- A narrow `_IMM` form decodes the immediate at the resolved width: a 64-bit
 immediate with bit 31 set sign-extends only under the 64-bit width, so the same
@@ -269,6 +269,6 @@ theorem x86_cmpop_imm64_sign_extends :
       ⟨0, .scalar⟩).rhs = 0xffffffff80000000 ∧
       (x86CmpOpStepSpec .cmpImm .b32 0 0 0x0000000080000000 .low .low
         ⟨0, .scalar⟩).rhs = 0x80000000 := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 end KProgFormal

@@ -63,43 +63,43 @@ theorem arm64_stack_arena_lane0_agrees (value : BitVec 64) :
   bv_decide
 
 /-- Canonical example: the enabled 160-byte arena needs exactly 20 word slots. -/
-theorem arm64_stack_arena_words_160 : words 160 = 20 := by decide
+theorem arm64_stack_arena_words_160 : words 160 = 20 := by native_decide
 
 /-- Canonical example: the disabled 1-byte arena still needs a word slot. -/
-theorem arm64_stack_arena_words_1 : words 1 = 1 := by decide
+theorem arm64_stack_arena_words_1 : words 1 = 1 := by native_decide
 
 /-- Canonical example: a non-multiple capacity rounds up. -/
-theorem arm64_stack_arena_words_161 : words 161 = 21 := by decide
+theorem arm64_stack_arena_words_161 : words 161 = 21 := by native_decide
 
 /-- Canonical example: the frame-base byte index, 0, is word-aligned and slot 0. -/
 theorem arm64_stack_arena_index_zero :
     arm64StackArenaWordAlignedSpec 0 = true ∧
       arm64StackArenaWordIndexSpec 0 = 0 := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 /-- Canonical example: byte index 96 is word-aligned and lands at slot 12. -/
 theorem arm64_stack_arena_index_96 :
     arm64StackArenaWordAlignedSpec 96 = true ∧
       arm64StackArenaWordIndexSpec 96 = 12 := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 /-- Canonical example: byte index 1 is not word-aligned and rounds to slot 0. -/
 theorem arm64_stack_arena_index_1 :
     arm64StackArenaWordAlignedSpec 1 = false ∧
       arm64StackArenaWordIndexSpec 1 = 0 := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 /-- Canonical example: the top of the enabled arena, byte 159, is not aligned
 and indexes the last word slot, 19. -/
 theorem arm64_stack_arena_index_159 :
     arm64StackArenaWordAlignedSpec 159 = false ∧
       arm64StackArenaWordIndexSpec 159 = 19 := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 /-- Canonical example: a word-aligned store's slot ties back to its byte. -/
 theorem arm64_stack_arena_roundtrip_example :
     arm64StackArenaWordAlignedSpec 160 = true ∧
       arm64StackArenaWordIndexSpec 160 * 8 = 160 := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 end KProgFormal

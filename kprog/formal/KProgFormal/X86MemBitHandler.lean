@@ -117,7 +117,7 @@ theorem x86_mem_bt_w8_example :
       3 .w8 =
       { dst := { bits := 0x1122334455667788, tag := .scalar },
         flags := { cf := true, zf := true, sf := false, of := true } } := by
-  decide
+  native_decide
 
 /-- A 32-bit `BZHI` with count 4 keeps the low nibble of the loaded word and
 zero-extends into the 64-bit destination, clearing CF/ZF/SF/OF. -/
@@ -129,7 +129,7 @@ theorem x86_mem_bzhi_w32_example :
       4 .w32 =
       { dst := { bits := 0x000000000000000f, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  decide
+  native_decide
 
 /-- An 8-bit `BZHI` whose masked count reaches the width keeps the whole loaded
 byte, merges it into the low destination byte, and reports CF. -/
@@ -141,6 +141,6 @@ theorem x86_mem_bzhi_count_reaches_width_example :
       0xff .w8 =
       { dst := { bits := 0x11223344556677ab, tag := .scalar },
         flags := { cf := true, zf := false, sf := false, of := false } } := by
-  decide
+  native_decide
 
 end KProgFormal

@@ -65,7 +65,7 @@ theorem x86_mem_adc_w16_carry_example :
       (fun i => if i = 0 then 0xff else if i = 1 then 0xff else 0) .w16 =
       { dst := { bits := 0x1122334455660000, tag := .scalar },
         flags := { cf := true, zf := true, sf := false, of := false } } := by
-  decide
+  native_decide
 
 /-- A 32-bit subtract of the loaded value one from zero demonstrates both
 borrow/sign flags and architectural zero-extension of the destination. -/
@@ -76,6 +76,6 @@ theorem x86_mem_sub_w32_borrow_example :
       (fun i => if i = 0 then 1 else 0) .w32 =
       { dst := { bits := 0xffffffff, tag := .scalar },
         flags := { cf := true, zf := false, sf := true, of := false } } := by
-  decide
+  native_decide
 
 end KProgFormal

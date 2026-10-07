@@ -164,7 +164,7 @@ theorem x86_lea_rodata_example :
       { bits := 0, tag := .scalar, isNone := true, isRsp := false }
       0x0000000000004000 true .w64 false 0 0 0 =
       { dst := { bits := 0x0000000000004000, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a 64-bit indexed LEA sums the source pointer, the
 sign-extended displacement, and the scaled index, carrying the source
@@ -176,7 +176,7 @@ theorem x86_lea_indexed_example :
         isRsp := false }
       0x0000000000000010 false .w64 true 3 4 0 =
       { dst := { bits := 0x0000000000001030, tag := .packet } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a 64-bit stack-pointer LEA resolves through the abstract
 frame base and tags the destination as stack provenance. -/
@@ -187,7 +187,7 @@ theorem x86_lea_stack_example :
         isRsp := true }
       0x0000000000000020 false .w64 false 0 0 0x0000000000007000 =
       { dst := { bits := 0x0000000000007020, tag := .stack } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a 32-bit LEA zero-extends the low half of the summed
 pointer and scalarizes provenance, discarding the incoming destination upper
@@ -199,6 +199,6 @@ theorem x86_lea_w32_example :
         isRsp := false }
       0x0000000000000010 false .w32 false 0 0 0 =
       { dst := { bits := 0x0000000000001010, tag := .scalar } } := by
-  decide
+  native_decide
 
 end KProgFormal

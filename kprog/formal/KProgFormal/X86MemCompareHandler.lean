@@ -173,7 +173,7 @@ theorem x86_mem_compare_equal_w32 :
       old 0x12345678 .w32 =
       { dst := { bits := 0xdeadbeefcafef00d, tag := .packet },
         flags := { cf := false, zf := true, sf := false, of := false } } := by
-  decide
+  native_decide
 
 /-- An 8-bit compare of one against two borrows: carry and sign are set, zero
 and overflow are clear. -/
@@ -184,7 +184,7 @@ theorem x86_mem_compare_borrow_w8 :
         flags := { cf := false, zf := true, sf := false, of := false } }
       old 0x02 .w8).flags =
       { cf := true, zf := false, sf := true, of := false } := by
-  decide
+  native_decide
 
 /-- A 16-bit test whose width-local conjunction is zero sets zero and clears
 carry, sign, and overflow. -/
@@ -195,7 +195,7 @@ theorem x86_mem_compare_test_zero_w16 :
         flags := { cf := true, zf := false, sf := true, of := true } }
       old 0x00ff .w16).flags =
       { cf := false, zf := true, sf := false, of := false } := by
-  decide
+  native_decide
 
 /-- The register/memory compare takes the register as its left-hand side: three
 compared against a loaded five borrows and leaves the destination intact. -/
@@ -207,6 +207,6 @@ theorem x86_cmp_reg_mem_borrow_w64 :
       old .w64 =
       { dst := { bits := 0x0000000000000003, tag := .abi },
         flags := { cf := true, zf := false, sf := true, of := false } } := by
-  decide
+  native_decide
 
 end KProgFormal

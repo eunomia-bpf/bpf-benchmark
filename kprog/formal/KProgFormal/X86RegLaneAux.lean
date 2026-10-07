@@ -65,7 +65,7 @@ theorem x86_reg_lane_aux_fields_non_interfering
 source lane `0` packs to `0x0802`, pinning the byte order against a concrete
 value. -/
 theorem x86_reg_lane_aux_example : pack 2 8 0 = 0x0802 := by
-  decide
+  native_decide
 
 /-- Typed-lane roundtrip: for the two valid byte lanes, packing their concrete
 byte shifts and decoding them back recovers the shifts. -/

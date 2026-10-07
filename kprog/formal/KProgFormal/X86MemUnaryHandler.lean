@@ -112,6 +112,6 @@ theorem x86_mem_unary_neg_w8_min_example :
         { cf := false, zf := true, sf := false, of := false }
         old .w8).flags =
         { cf := true, zf := false, sf := true, of := true } := by
-  decide
+  native_decide
 
 end KProgFormal

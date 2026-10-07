@@ -44,17 +44,17 @@ theorem x86_mem_offset_scale_is_power_of_two (disp index : BitVec 64) :
 scaled index in the 64-bit wrap-around domain. -/
 theorem x86_mem_offset_indexed_example :
     valueSpec true 2 (-8) 5 = 12 := by
-  decide
+  native_decide
 
 /-- Canonical example: an indexed access whose scaled index wraps past 2^64. -/
 theorem x86_mem_offset_indexed_wrap_example :
     valueSpec true 3 0 0xf000000000000000 = 0x8000000000000000 := by
-  decide
+  native_decide
 
 /-- Canonical example: a displacement-only access with a negative displacement
 is the sign-extended displacement, unaffected by the (unused) index. -/
 theorem x86_mem_offset_plain_example :
     valueSpec false 3 0xfffffffffffffff8 123 = 0xfffffffffffffff8 := by
-  decide
+  native_decide
 
 end KProgFormal

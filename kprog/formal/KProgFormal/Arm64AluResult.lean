@@ -127,26 +127,26 @@ theorem arm64_sub_borrow_example :
     (arm64SubStepSpec 1 2 .w64).flags.c = false ∧
     (arm64SubStepSpec 1 2 .w64).flags.n = true ∧
     (arm64SubStepSpec 1 2 .w64).flags.v = false := by
-  decide
+  native_decide
 
 /-- AArch64 canonical example: BIC clears exactly the selected bits. -/
 theorem arm64_bic_example :
     arm64AluResultSpec .bic 0xff 0x0f = 0xf0 := by
-  decide
+  native_decide
 
 /-- AArch64 canonical example: EOR of an operand with itself is zero, which
 also sets Z through the logic flag transition. -/
 theorem arm64_eor_self_example :
     (arm64LogicStepSpec .eor 0x123456789abcdef0 0x123456789abcdef0 .w64).value = 0 ∧
     (arm64LogicStepSpec .eor 0x123456789abcdef0 0x123456789abcdef0 .w64).flags.z = true := by
-  decide
+  native_decide
 
 /-- AArch64 canonical example: ORR sets every selected bit and clears C/V. -/
 theorem arm64_orr_example :
     (arm64LogicStepSpec .orr 0xf0 0x0f .w64).value = 0xff ∧
     (arm64LogicStepSpec .orr 0xf0 0x0f .w64).flags.c = false ∧
     (arm64LogicStepSpec .orr 0xf0 0x0f .w64).flags.v = false := by
-  decide
+  native_decide
 
 /-- AArch64 canonical example: 64-bit `0xffffffffffffffff + 1` wraps to zero
 and carries out. -/
@@ -154,6 +154,6 @@ theorem arm64_add_wrap_example :
     (arm64AddStepSpec 0xffffffffffffffff 1 .w64).value = 0 ∧
     (arm64AddStepSpec 0xffffffffffffffff 1 .w64).flags.c = true ∧
     (arm64AddStepSpec 0xffffffffffffffff 1 .w64).flags.z = true := by
-  decide
+  native_decide
 
 end KProgFormal

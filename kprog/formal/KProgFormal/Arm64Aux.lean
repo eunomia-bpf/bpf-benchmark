@@ -100,7 +100,7 @@ pack to the little-endian word `0x04030201`, pinning the byte order against a
 concrete value. -/
 theorem arm64_aux_example :
     pack 1 2 3 4 = 0x04030201 := by
-  decide
+  native_decide
 /-- The lane-0 interpretation is shared: the ALU opcode, the memory index
 register, the bitfield kind and the shift kind all decode bits 0-7, and the
 `ARM64_REG_NONE` "no index" sentinel is a lane-0 byte. Naming the four aliases
@@ -153,6 +153,6 @@ modifier lane and `0x22` in the shift-amount lane, so per-opcode reuse never
 aliases the two. -/
 theorem arm64_aux_lane1_lane2_disjoint :
     b1 (pack 0 0x11 0x22 0) = 0x11 ∧ b2 (pack 0 0x11 0x22 0) = 0x22 := by
-  decide
+  native_decide
 
 end KProgFormal

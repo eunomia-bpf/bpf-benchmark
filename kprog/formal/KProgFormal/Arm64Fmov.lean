@@ -72,12 +72,12 @@ theorem arm64_fmov_roundtrip_example :
     narrow (GeneratedArm64Fmov.value .x_from_d
       (GeneratedArm64Fmov.value .d_from_x 0 0xdeadbeefcafef00d) 0) .w64 =
       0xdeadbeefcafef00d := by
-  decide
+  native_decide
 
 /-- Canonical example: a 32-bit W_FROM_S write narrows v0 to the low word. -/
 theorem arm64_fmov_w_from_s_example :
     narrow (GeneratedArm64Fmov.value .w_from_s 0x123456789abcdef0 0) .w32 =
       0x9abcdef0 := by
-  decide
+  native_decide
 
 end KProgFormal

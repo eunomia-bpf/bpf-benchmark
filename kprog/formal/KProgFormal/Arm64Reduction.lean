@@ -69,21 +69,21 @@ theorem arm64_reduction_uaddlv_bound (value : BitVec 64) :
 /-- Canonical example: CNT of a byte with one bit set in each lane. -/
 theorem arm64_reduction_cnt_example :
     arm64ReductionSpec .cnt 0x8040201008040201 = 0x0101010101010101 := by
-  decide
+  native_decide
 
 /-- Canonical example: CNT of all-ones bytes fills each lane with 8. -/
 theorem arm64_reduction_cnt_full_example :
     arm64ReductionSpec .cnt 0xffffffffffffffff = 0x0808080808080808 := by
-  decide
+  native_decide
 
 /-- Canonical example: UADDLV of eight 0xff bytes is 8*255. -/
 theorem arm64_reduction_uaddlv_example :
     arm64ReductionSpec .uaddlv 0xffffffffffffffff = 2040 := by
-  decide
+  native_decide
 
 /-- Canonical example: UADDLV of the low byte only. -/
 theorem arm64_reduction_uaddlv_low_example :
     arm64ReductionSpec .uaddlv 0xff = 255 := by
-  decide
+  native_decide
 
 end KProgFormal
