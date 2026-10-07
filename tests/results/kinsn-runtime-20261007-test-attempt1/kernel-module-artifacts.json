@@ -1,0 +1,75 @@
+{
+  "kernel_release": "7.0.0-rc2+",
+  "kernel_artifacts": {
+    "/var/tmp/kinsn-runtime-test-20261007/linux/arch/x86/boot/bzImage": {
+      "sha256": "c885c7715d72631d832dcd9358327a53fe1108b6290aa6bb982b9111529adaa7",
+      "size": 15233536
+    },
+    "/var/tmp/kinsn-runtime-test-20261007/linux/.config": {
+      "sha256": "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163",
+      "size": 164006
+    }
+  },
+  "modules": {
+    "kinsn/module/x86/build/bpf_x86_alu.ko": {
+      "sha256": "03d9cfe3adcf4a2e4e2d0eaec01c5609beea148071055a229e7195464c525af0",
+      "size": 940544
+    },
+    "kinsn/module/x86/build/bpf_x86_bmi1.ko": {
+      "sha256": "1d4c3d50077414c6a95babda8ba00e83131f358a48f9d1caad640b8c20368927",
+      "size": 643000
+    },
+    "kinsn/module/x86/build/bpf_x86_bmi2_shift.ko": {
+      "sha256": "22b33417ca35385a7b8273f9b934f5fa87f5a0689a973f223ea7cbd8fbe059b1",
+      "size": 664800
+    },
+    "kinsn/module/x86/build/bpf_x86_byteorder.ko": {
+      "sha256": "76ec10685318be23fa73780cb43b54f9d40407248c8c86f9239198ccaae7abd3",
+      "size": 621264
+    },
+    "kinsn/module/x86/build/bpf_x86_cmov.ko": {
+      "sha256": "a8e26262d09a33d28981d346f4ff54a91a1dcfb59cd021d2fd0c4941cf1c617e",
+      "size": 620416
+    },
+    "kinsn/module/x86/build/bpf_x86_imul.ko": {
+      "sha256": "e6ab71c69c37b870ba67c93e37ea7c4c8de28cac4cb76213484206bc537a42f7",
+      "size": 595736
+    },
+    "kinsn/module/x86/build/bpf_x86_lea.ko": {
+      "sha256": "e2443c8bcf5ae59fcd5f38356469855e079a5f819eb4fd419ccdc2498fa78249",
+      "size": 638864
+    },
+    "kinsn/module/x86/build/bpf_x86_mov.ko": {
+      "sha256": "4ac572c0d74445993125ed16e7421ec6a88ce60c55e9a9b7e45a9786152ad230",
+      "size": 888808
+    },
+    "kinsn/module/x86/build/bpf_x86_movbe.ko": {
+      "sha256": "d2b2a86d4a7698e0b864ebdbc72b0de00cc8bcb90d4930b7e1e3523ef342e9df",
+      "size": 633904
+    },
+    "kinsn/module/x86/build/bpf_x86_native_lab.ko": {
+      "sha256": "ebdbf286a029a45fd90fa41329b6958c113b81b46e4c2540cc8a04c164d221e8",
+      "size": 693880
+    },
+    "kinsn/module/x86/build/bpf_x86_not.ko": {
+      "sha256": "1c8844c8befcfd8a69c9a34c8286956b4219b8b36bb5a1599b6087a92c50b635",
+      "size": 615368
+    },
+    "kinsn/module/x86/build/bpf_x86_popcnt.ko": {
+      "sha256": "043260e9a7ef4d8a4db3adce92326db1c223cd51088c8ee9c8302c4209d606bb",
+      "size": 611600
+    },
+    "kinsn/module/x86/build/bpf_x86_prefetch.ko": {
+      "sha256": "3fc623fb553f8d200bc043d9716d2cf3278176faee0175ed0e1a5e197da078be",
+      "size": 592688
+    },
+    "kinsn/module/x86/build/bpf_x86_rotate.ko": {
+      "sha256": "cbe593442fd3281673348020bc9dd99d594a34b54ab8e0a6a691e6e264b20982",
+      "size": 641600
+    },
+    "kinsn/module/x86/build/bpf_x86_shd.ko": {
+      "sha256": "f6d7904206a2b813f2b5479038e9ef42544eac5372e7b28d2d2a570d7376dc42",
+      "size": 625016
+    }
+  }
+}
