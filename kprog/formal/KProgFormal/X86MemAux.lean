@@ -99,7 +99,7 @@ theorem x86_mem_aux_index_none_is_0xff : indexNone = 0xff := rfl
 byte order against a concrete value. -/
 theorem x86_mem_aux_example :
     pack 1 2 3 4 = 0x04030201 := by
-  decide
+  native_decide
 
 /-- Canonical example: the memory-width field carries a register source byte
 lane (`8`) in bits 16-23 while the source-shift byte lives in bits 24-31, so a
@@ -107,6 +107,6 @@ store AUX of `X86_MEM_AUX(dst, scale) | X86_REG_AUX_SRC_SHIFT(8)` decodes back
 to lane 8 and shift byte 8. -/
 theorem x86_mem_aux_src_lane_example :
     memWidth (pack 0 0 8 8) = 8 ∧ op (pack 0 0 8 8) = 8 := by
-  decide
+  native_decide
 
 end KProgFormal

@@ -82,7 +82,7 @@ theorem x86_imul_reg_imm_w16_overflow_example :
       0x0000000000007fff 2 .w16 =
       { dst := { bits := 0x000000000000fffe, tag := .scalar },
         flags := { cf := true, zf := false, sf := false, of := true } } := by
-  decide
+  native_decide
 
 /-- A 64-bit `IMUL` of the low immediate `0x7fffffff` sign-extends bit 31, so the
 product with one is the sign-extended `0xffffffff80000001` and no overflow is
@@ -94,7 +94,7 @@ theorem x86_imul_reg_imm_w64_sign_extends_example :
       1 0x0000000080000001 .w64 =
       { dst := { bits := 0xffffffff80000001, tag := .scalar },
         flags := { cf := false, zf := true, sf := true, of := false } } := by
-  decide
+  native_decide
 
 /-- An 8-bit `IMUL` whose operands have opposite signs gets one extra bit of
 headroom: the source `0xff...81` narrows to `-127` and the immediate `2` gives
@@ -107,7 +107,7 @@ theorem x86_imul_reg_imm_w8_mixed_sign_overflow_example :
       0xffffffffffffff81 2 .w8 =
       { dst := { bits := 0x1122334455660002, tag := .scalar },
         flags := { cf := true, zf := true, sf := true, of := true } } := by
-  decide
+  native_decide
 
 /-- An in-range 8-bit `IMUL` with an all-zero flag word stays entirely clear and
 merges the product into the destination's low byte. -/
@@ -118,6 +118,6 @@ theorem x86_imul_reg_imm_w8_in_range_example :
       0x10 2 .w8 =
       { dst := { bits := 0x1122334455660020, tag := .scalar },
         flags := { cf := false, zf := false, sf := false, of := false } } := by
-  decide
+  native_decide
 
 end KProgFormal

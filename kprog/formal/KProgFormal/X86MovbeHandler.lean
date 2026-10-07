@@ -427,7 +427,7 @@ plausible bug this contract's displacement form rules out. -/
 theorem x86_movbe_disp_differs_from_imm_store :
     x86MovbeDispSpec 0x8000001000000008 = 0x8000001000000008 ∧
       x86StoreDispSpec true 0x8000001000000008 = 0xffffffff80000010 := by
-  decide
+  native_decide
 
 /-- Canonical example: a 16-bit `MOVBE_LOAD` reverses the two little-endian
 bytes it reads and writes the zero-extended lane, scalarizing the destination. -/
@@ -438,7 +438,7 @@ theorem x86_movbe_load_w16_example :
       (fun i => if i = 0 then 0x34 else if i = 1 then 0x12 else 0xa5)
       (fun _ => 0xa5) 0 =
       { dst := { bits := 0x3412, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a stack-based `MOVBE_LOAD` reverses the bytes read from
 the stack frame, not process memory, and still scalarizes. -/
@@ -451,7 +451,7 @@ theorem x86_movbe_load_stack_example :
         if i = 2 then 0x33 else if i = 3 then 0x44 else 0xa5)
       0 =
       { dst := { bits := 0x11223344, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: an ABI-tagged 64-bit base takes the shared ABI arm, so
 the loaded pointer is byte-reversed and written with a scalar tag — the one
@@ -463,7 +463,7 @@ theorem x86_movbe_load_abi_example :
       false true .w64
       (fun _ => 0xa5) (fun _ => 0xa5) 0x1122334455667788 =
       { dst := { bits := 0x8877665544332211, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a `MOVBE_LOAD` at width 8 does not sign-extend — the
 loaded `0x80` stays `0x80`, whereas the shared `MOVSX` load of the same byte
@@ -474,7 +474,7 @@ theorem x86_movbe_load_w8_no_sign_extension :
       false false .w8
       (fun i => if i = 0 then 0x80 else 0xa5) (fun _ => 0xa5) 0 =
       { dst := { bits := 0x80, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a `MOVBE_STORE` reverses its 64-bit source register and
 writes the whole word little-endian to the addressed memory, at the whole-field
@@ -493,7 +493,7 @@ theorem x86_movbe_store_w64_example :
       (generatedX86MovbeStoreStep .movbeStore false .w64
         old (fun _ => 0x5a) 0x0000000000000010 0x0123456789abcdef
         0x4000 false 0 0).addr = 0x4010 := by
-  decide
+  native_decide
 
 /-- Canonical example: a stack-pointer destination takes the stack arm and
 writes the stack frame, at the same reversed value and width the memory arm
@@ -514,6 +514,6 @@ theorem x86_movbe_store_stack_arm_example :
       (generatedX86MovbeStoreStep .movbeStore true .w16
         (fun _ => 0x11) (fun i => 0xa5 + (i : X86MemByte)) 0x0000000000000020
         0x1234567890ab1234 0x20 false 0 0).bytes 2 = 0xa7 := by
-  decide
+  native_decide
 
 end KProgFormal

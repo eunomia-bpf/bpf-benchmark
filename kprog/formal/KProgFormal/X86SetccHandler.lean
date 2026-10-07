@@ -140,17 +140,17 @@ theorem x86_setcc_cond_matched_refines (flags : X86Flags)
 /-- Accepted matched codes hold on the architectural condition they name. -/
 theorem x86_setcc_cond_matched_accepted :
     x86MatchedCondSpec ⟨true, false, true, false⟩ 12 = true := by
-  decide
+  native_decide
 
 /-- The no-match sentinel is rejected, like the C default arm. -/
 theorem x86_setcc_cond_matched_sentinel_rejected :
     x86MatchedCondSpec ⟨true, true, true, true⟩ 0xffff = false := by
-  decide
+  native_decide
 
 /-- A parity code the subset drops is rejected too. -/
 theorem x86_setcc_cond_matched_parity_rejected :
     x86MatchedCondSpec ⟨true, true, true, true⟩ 10 = false := by
-  decide
+  native_decide
 
 /-- The lane table is an equality test, not a truthiness test: any destination
 shift other than exactly 8 selects the low byte. -/

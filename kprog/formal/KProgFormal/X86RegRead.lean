@@ -35,6 +35,6 @@ theorem x86_reg_read_high8 (value : BitVec 64) :
 
 theorem x86_reg_read_high8_counterexample :
     GeneratedX86RegRead.readAt 0x112233445566aa88 .w8 .high = 0xaa := by
-  decide
+  native_decide
 
 end KProgFormal

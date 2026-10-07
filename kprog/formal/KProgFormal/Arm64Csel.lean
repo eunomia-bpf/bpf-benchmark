@@ -95,43 +95,43 @@ theorem arm64_csel_cond_refines (op : Csel) (n z c v : Bool)
 /-- Canonical example: CSEL on a taken condition picks the first source. -/
 theorem arm64_csel_taken_example :
     arm64CselValueSpec .csel true 0x11 0x22 = 0x11 := by
-  decide
+  native_decide
 
 /-- Canonical example: CSEL on an untaken condition picks the second source. -/
 theorem arm64_csel_untaken_example :
     arm64CselValueSpec .csel false 0x11 0x22 = 0x22 := by
-  decide
+  native_decide
 
 /-- Canonical example: CINC on a taken condition increments the source. -/
 theorem arm64_cinc_example :
     arm64CselValueSpec .cinc true 0x41 0x0 = 0x42 := by
-  decide
+  native_decide
 
 /-- Canonical example: CSET yields one on a taken condition. -/
 theorem arm64_cset_example :
     arm64CselValueSpec .cset true 0x0 0x0 = 0x1 := by
-  decide
+  native_decide
 
 /-- Canonical example: CSETM yields all ones on a taken condition. -/
 theorem arm64_csetm_example :
     arm64CselValueSpec .csetm true 0x0 0x0 = 0xffffffffffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: CINV complements the source on a taken condition. -/
 theorem arm64_cinv_example :
     arm64CselValueSpec .cinv true 0x0 0x0 = 0xffffffffffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: CSINV complements the second source on an untaken
 condition. -/
 theorem arm64_csinv_example :
     arm64CselValueSpec .csinv false 0x0 0x0 = 0xffffffffffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: CSNEG negates the second source on an untaken
 condition. -/
 theorem arm64_csneg_example :
     arm64CselValueSpec .csneg false 0x0 0x2 = 0xfffffffffffffffe := by
-  decide
+  native_decide
 
 end KProgFormal

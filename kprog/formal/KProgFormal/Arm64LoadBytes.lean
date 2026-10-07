@@ -55,16 +55,16 @@ theorem arm64_load_bytes_upper_cleared (value : BitVec 64) :
 /-- Canonical example: a halfword load takes the low two bytes little-endian. -/
 theorem arm64_load_bytes_w16_example :
     arm64LoadBytesSpec .w16 0x0123456789abcdef = 0xcdef := by
-  decide
+  native_decide
 
 /-- Canonical example: a word load drops the high word. -/
 theorem arm64_load_bytes_w32_example :
     arm64LoadBytesSpec .w32 0x0123456789abcdef = 0x89abcdef := by
-  decide
+  native_decide
 
 /-- Canonical example: a doubleword load keeps all eight bytes. -/
 theorem arm64_load_bytes_w64_example :
     arm64LoadBytesSpec .w64 0x0123456789abcdef = 0x0123456789abcdef := by
-  decide
+  native_decide
 
 end KProgFormal

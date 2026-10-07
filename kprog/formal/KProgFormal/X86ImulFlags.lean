@@ -68,10 +68,10 @@ theorem x86_imul_flags_apply_refines (lhs rhs : BitVec 64) (width : X86Width)
 
 theorem x86_imul_w16_boundary_overflow :
     x86ImulOverflowSpec 0x7fff 2 .w16 = true := by
-  decide
+  native_decide
 
 theorem x86_imul_w8_min_boundary_no_overflow :
     x86ImulOverflowSpec 0x80 1 .w8 = false := by
-  decide
+  native_decide
 
 end KProgFormal

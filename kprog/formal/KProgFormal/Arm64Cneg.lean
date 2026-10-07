@@ -68,22 +68,22 @@ theorem arm64_cneg_w32_bound (taken : Bool) (src : BitVec 64) :
 /-- Canonical example: CNEG of one on a taken condition is the all-ones word. -/
 theorem arm64_cneg_taken_one_example :
     arm64CnegSpec .cneg true 1 .w64 = 0xffffffffffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: CNEG of one on an untaken condition is one. -/
 theorem arm64_cneg_untaken_one_example :
     arm64CnegSpec .cneg false 1 .w64 = 1 := by
-  decide
+  native_decide
 
 /-- Canonical example: a word-width taken CNEG truncates to 32 bits. -/
 theorem arm64_cneg_taken_w32_example :
     arm64CnegSpec .cneg true 1 .w32 = 0xffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: a word-width untaken CNEG keeps only the low 32 bits of
 the source. -/
 theorem arm64_cneg_untaken_w32_example :
     arm64CnegSpec .cneg false 0x1_0000_0001 .w32 = 1 := by
-  decide
+  native_decide
 
 end KProgFormal

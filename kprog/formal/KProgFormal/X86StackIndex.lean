@@ -44,6 +44,6 @@ theorem x86_stack_index_mod_2_32 (capacity off off' : BitVec 64)
 qword below the frame base) maps to byte index 8, and `-8` maps to 56. -/
 theorem x86_stack_index_example :
     index 64 (-56) = 8 ∧ index 64 (-8) = 56 ∧ index 64 0 = 64 := by
-  refine ⟨?_, ?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_, ?_⟩ <;> native_decide
 
 end KProgFormal
