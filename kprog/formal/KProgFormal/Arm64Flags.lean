@@ -97,32 +97,32 @@ clears N and V. -/
 theorem arm64_add_carry_w64_example :
     let f := GeneratedArm64Flags.applyAdd 0xffffffffffffffff 1 .w64
     f.c = true ∧ f.z = true ∧ f.n = false ∧ f.v = false := by
-  decide
+  native_decide
 
 /-- AArch64 canonical example: 64-bit `0 + 0` subtract sets C (no borrow), Z,
 and clears N and V. -/
 theorem arm64_sub_zero_w64_example :
     let f := GeneratedArm64Flags.applySub 0 0 .w64
     f.c = true ∧ f.z = true ∧ f.n = false ∧ f.v = false := by
-  decide
+  native_decide
 
 /-- AArch64 canonical example: 32-bit `0x7fffffff + 1` sets V and N (result
 sign flips), clears Z, and does not carry out. -/
 theorem arm64_add_overflow_w32_example :
     let f := GeneratedArm64Flags.applyAdd 0x7fffffff 1 .w32
     f.v = true ∧ f.n = true ∧ f.z = false ∧ f.c = false := by
-  decide
+  native_decide
 
 /-- AArch64 canonical example: 64-bit `1 - 2` borrows, so C is clear. -/
 theorem arm64_sub_borrow_w64_example :
     let f := GeneratedArm64Flags.applySub 1 2 .w64
     f.c = false ∧ f.n = true ∧ f.z = false ∧ f.v = false := by
-  decide
+  native_decide
 
 /-- Logical flags clear C and V and observe the width-narrowed value. -/
 theorem arm64_logic_clears_carry_overflow :
     let f := GeneratedArm64Flags.applyLogic 0x80000000 .w32
     f.c = false ∧ f.v = false ∧ f.n = true ∧ f.z = false := by
-  decide
+  native_decide
 
 end KProgFormal

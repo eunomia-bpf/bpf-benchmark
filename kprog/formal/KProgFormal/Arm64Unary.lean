@@ -75,27 +75,27 @@ theorem arm64_unary_mvn_w8_bound (src : BitVec 64) :
 /-- Canonical example: MVN of zero is the all-ones word. -/
 theorem arm64_unary_mvn_zero_example :
     arm64UnarySpec .mvn 0 .w64 = 0xffffffffffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: NEG of one is the all-ones word. -/
 theorem arm64_unary_neg_one_example :
     arm64UnarySpec .neg 1 .w64 = 0xffffffffffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: NEG of zero is zero. -/
 theorem arm64_unary_neg_zero_example :
     arm64UnarySpec .neg 0 .w64 = 0 := by
-  decide
+  native_decide
 
 /-- Canonical example: a word-width NEG truncates to 32 bits rather than
 producing the full 64-bit negation. -/
 theorem arm64_unary_neg_w32_example :
     arm64UnarySpec .neg 1 .w32 = 0xffffffff := by
-  decide
+  native_decide
 
 /-- Canonical example: a byte-width MVN keeps only the low byte. -/
 theorem arm64_unary_mvn_w8_example :
     arm64UnarySpec .mvn 0 .w8 = 0xff := by
-  decide
+  native_decide
 
 end KProgFormal

@@ -86,7 +86,7 @@ theorem arm64_ccmp_true_path_uses_sub_flags_and_preserves_regs :
       .eq 1 2 .w64 0x6 =
       { regs := { dst := { bits := 0xfeed, tag := .packet }, sp := 0x80 },
         flags := { n := true, z := false, c := false, v := false } } := by
-  decide
+  native_decide
 
 theorem arm64_ccmp_false_path_uses_fallback_and_preserves_regs :
     generatedArm64CcmpHandler
@@ -95,7 +95,7 @@ theorem arm64_ccmp_false_path_uses_fallback_and_preserves_regs :
       .eq 1 2 .w64 0x6 =
       { regs := { dst := { bits := 0xfeed, tag := .mapValue }, sp := 0x80 },
         flags := { n := false, z := true, c := true, v := false } } := by
-  decide
+  native_decide
 
 theorem arm64_ccmp_w32_true_path_sets_sub_overflow :
     (generatedArm64CcmpHandler
@@ -103,11 +103,11 @@ theorem arm64_ccmp_w32_true_path_sets_sub_overflow :
         flags := { n := false, z := false, c := true, v := false } }
       .cs 0x80000000 1 .w32 0).flags =
       { n := false, z := false, c := true, v := true } := by
-  decide
+  native_decide
 
 theorem arm64_ccmp_fallback_ignores_high_nibble :
     GeneratedArm64CcmpHandler.fallbackFlags 0xf5 =
       { n := false, z := true, c := false, v := true } := by
-  decide
+  native_decide
 
 end KProgFormal

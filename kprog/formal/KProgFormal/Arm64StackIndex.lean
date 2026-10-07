@@ -66,12 +66,12 @@ at byte 160. -/
 theorem arm64_stack_index_example :
     index 96 (-96) = 0 ∧ index 96 0 = 96 ∧ index 96 8 = 104 ∧
       index 96 64 = 160 := by
-  refine ⟨?_, ?_, ?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> native_decide
 
 /-- Concrete arena: bias 96. A negative offset below the frame base wraps, as
 the 32-bit index of the biased arena byte. -/
 theorem arm64_stack_index_wrap_example :
     index 96 (-97) = 0xffffffff ∧ index 96 (-100) = 0xfffffffc := by
-  refine ⟨?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 end KProgFormal

@@ -21,11 +21,11 @@ theorem x86_immediate_value_refines (raw : BitVec 64) (width : X86Width) :
 theorem x86_immediate_64_sign_extends_bit31 :
     GeneratedX86Immediate.value 0x0000000080000001 .w64 =
       0xffffffff80000001 := by
-  decide
+  native_decide
 
 theorem x86_immediate_narrow_width_does_not_sign_extend :
     GeneratedX86Immediate.value 0x0000000080000001 .w32 =
       0x0000000080000001 := by
-  decide
+  native_decide
 
 end KProgFormal

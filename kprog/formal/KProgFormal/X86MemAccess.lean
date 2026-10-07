@@ -81,12 +81,12 @@ theorem x86_mem_load_w32_example :
       (fun i => match i with
         | 0 => 0x78 | 1 => 0x56 | 2 => 0x34 | 3 => 0x12 | _ => 0)
       .w32 = 0x12345678 := by
-  decide
+  native_decide
 
 /-- Concrete store: a 16-bit masked value decomposes into its two low bytes. -/
 theorem x86_mem_store_w16_example :
     x86MemStoreByteSpec 0xaabb .w16 0 = 0xbb ∧
       x86MemStoreByteSpec 0xaabb .w16 1 = 0xaa := by
-  decide
+  native_decide
 
 end KProgFormal

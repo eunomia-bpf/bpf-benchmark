@@ -34,16 +34,16 @@ theorem arm64_mem_offset_prepost_ignores_immediate (imm imm' index : BitVec 64) 
 /-- Canonical example: an offset access with an index adds both. -/
 theorem arm64_mem_offset_indexed_example :
     valueSpec false true 16 (-8) = 8 := by
-  decide
+  native_decide
 
 /-- Canonical example: an offset access with no index is the immediate alone. -/
 theorem arm64_mem_offset_plain_example :
     valueSpec false false 0xfffffffffffffff8 123 = 0xfffffffffffffff8 := by
-  decide
+  native_decide
 
 /-- Canonical example: a pre/post-indexed access carries no immediate. -/
 theorem arm64_mem_offset_prepost_example :
     valueSpec true false 64 0 = 0 ∧ valueSpec true true 64 32 = 32 := by
-  decide
+  native_decide
 
 end KProgFormal

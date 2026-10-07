@@ -293,7 +293,7 @@ theorem x86_mov_load_ordinary_w16_example :
       (fun i => if i = 0 then 0x34 else if i = 1 then 0x12 else 0xa5)
       (fun _ => 0xa5) .xdp 0x10 0x4000 =
       { dst := { bits := 0x1234, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: `_MOVSX_LOAD` sign-extends the loaded 8-bit lane before a
 32-bit write, so `0x80` becomes `0xffffff80` and the destination's upper half is
@@ -305,7 +305,7 @@ theorem x86_mov_load_movsx_w8_example :
       (fun i => if i = 0 then 0x80 else 0xa5)
       (fun _ => 0xa5) .xdp 0x20 0x4000 =
       { dst := { bits := 0xffffff80, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: the ABI pointer arm writes the loaded pointer with its
 packet provenance, from the `_MOV_LOAD` opcode at both 64-bit widths off an
@@ -317,7 +317,7 @@ theorem x86_mov_load_abi_arm_example :
       (fun _ => 0xa5) (fun _ => 0xa5) .xdp 0
       0x1122334455667788 =
       { dst := { bits := 0x1122334455667788, tag := .packet } } := by
-  decide
+  native_decide
 
 /-- Canonical example: a stack-based `_MOVSX_LOAD` still takes the stack arm, so
 the loaded `0x80` is *not* sign-extended and the destination receives the
@@ -329,7 +329,7 @@ theorem x86_mov_load_stack_movsx_example :
       (fun _ => 0xa5)
       (fun i => if i = 0 then 0x80 else 0xa5) .xdp 0x30 0x7ff0 =
       { dst := { bits := 0x80, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: an ABI-tagged base reached by a narrow write falls
 through to the ordinary scalar load and is scalarized — the ABI arm needs both
@@ -343,7 +343,7 @@ theorem x86_mov_load_abi_narrow_write_example :
         | 4 => 0x55 | 5 => 0x66 | 6 => 0x77 | _ => 0x88)
       (fun _ => 0xa5) .xdp 0 0x40000 =
       { dst := { bits := 0x44332211, tag := .scalar } } := by
-  decide
+  native_decide
 
 /-- Canonical example: `_MOV_LOAD_SCALAR` below the ABI gates behaves exactly
 like `_MOV_LOAD`, since neither opcode sign-extends and the arm agrees. -/
@@ -355,6 +355,6 @@ theorem x86_mov_load_movscalar_example :
         if i = 2 then 0x33 else if i = 3 then 0x44 else 0xa5)
       (fun _ => 0xa5) .skb 0x40 0x50000 =
       { dst := { bits := 0x44332211, tag := .scalar } } := by
-  decide
+  native_decide
 
 end KProgFormal

@@ -127,6 +127,6 @@ theorem x86_stack_arena_example :
     words 128 = 16 ∧ words 64 = 8 ∧ words 1 = 1 ∧
       wordIndex 0 = 0 ∧ wordIndex 56 = 7 ∧
       wordAligned 56 = true ∧ wordAligned 60 = false := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> decide
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
 
 end KProgFormal

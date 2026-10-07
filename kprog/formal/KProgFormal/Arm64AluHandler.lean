@@ -149,27 +149,27 @@ theorem arm64_tagged_add_uses_pointer_path :
       { dst := { bits := 0x55, tag := .scalar }, sp := 0x80 }
       .gpr { bits := 0x1000, tag := .packet } 0x20 .w64 .add =
       { dst := { bits := 0x1020, tag := .packet }, sp := 0x80 } := by
-  decide
+  native_decide
 
 theorem arm64_tagged_sub_scalarizes :
     generatedArm64AluHandler
       { dst := { bits := 0x55, tag := .packet }, sp := 0x80 }
       .gpr { bits := 0x1000, tag := .packet } 0x20 .w64 .sub =
       { dst := { bits := 0xfe0, tag := .scalar }, sp := 0x80 } := by
-  decide
+  native_decide
 
 theorem arm64_sp_add_is_scalar_write :
     generatedArm64AluHandler
       { dst := { bits := 0x55, tag := .packet }, sp := 0x80 }
       .sp { bits := 0x1000, tag := .stack } 0x20 .w64 .add =
       { dst := { bits := 0x55, tag := .packet }, sp := 0x1020 } := by
-  decide
+  native_decide
 
 theorem arm64_w32_add_zero_extends_and_scalarizes :
     generatedArm64AluHandler
       { dst := { bits := 0, tag := .packet }, sp := 0 }
       .gpr { bits := 0xffffffff, tag := .packet } 1 .w32 .add =
       { dst := { bits := 0, tag := .scalar }, sp := 0 } := by
-  decide
+  native_decide
 
 end KProgFormal
