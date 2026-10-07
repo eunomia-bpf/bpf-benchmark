@@ -8577,12 +8577,97 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C kprog/arm64 micro-proofs-build` rc=0 (30 `ok` rows).
 - Full gate `make -C kprog/formal check` rc=0 (123 `cross-check: OK`).
 
+## Step 0107 — x86-64 `CMP`/`TEST` eight-opcode left-source/displacement-kind machine-checked contract
+
+- Scope: extend the x86 `cmpop` contract from the four register forms
+  (`CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG`) to all eight `CMP`/`TEST` opcodes by
+  adding the four memory forms (`CMP_MEM_IMM` `0x1d`, `TEST_MEM_IMM` `0x1e`,
+  `CMP_MEM_REG` `0x1f`, `TEST_MEM_REG` `0x3b`) plus two new per-opcode facts and
+  their routed selectors, and route the `X86_SIM_L_EXEC_CMP_MEM` body through the
+  shared `X86_SIM_L_EXEC_CMP_STEP`. This closes the remaining half of the
+  explicitly-named x86 open item "register/immediate/RHS objdump→AUX selection":
+  Step 0086 routed the register half's `rhs`/`flags` selection, and the memory
+  half's `lhs` (register vs addressed memory) and displacement kind were the gap.
+- Shared spec `kprog/formal/x86_cmpop_spec.json` (regenerated) gained an `lhs`
+  column (`register`|`memory`) and a `disp` column (`simm`|`store`) on every
+  opcode row plus an updated `selector` string;
+  `generate_x86_cmpop_spec.py` validates both columns against their tables and
+  emits the `KPROG_X86_CMPOP_LHS_REGISTER`/`_LHS_MEMORY` and
+  `KPROG_X86_CMPOP_DISP_SIMM`/`_DISP_STORE` constants, the per-opcode
+  `_<NAME>_LHS_SOURCE`/`_<NAME>_DISP_KIND` defines, the routed selectors
+  `KPROG_X86_CMPOP_LHS_SOURCE(OP_IS_MEM)` and
+  `KPROG_X86_CMPOP_DISP_KIND(OP_IS_CMP_MEM_REG)`, and the Lean `LhsSource` /
+  `DispKind` inductives with their `lhsSource`/`dispKind` tables.
+  `generate_x86_cmpop_spec.py --check` rc=0.
+- Refinement `KProgFormal/X86CmpOpHandler.lean` (extended) against independent
+  specs: `x86_cmpop_lhs_source_refines` and `x86_cmpop_disp_kind_refines`
+  (generated tables equal the independent per-opcode statements, `rfl`),
+  `x86_cmpop_lhs_refines` (the composed left-hand-side read dispatch), and
+  `x86_cmpop_lhs_disp_independent`: `TEST_MEM_REG` reads a *register* right-hand
+  side yet takes the *store* displacement, so `disp` is not a function of `rhs`;
+  `CMP_MEM_REG` and `CMP_MEM_IMM` both load the left-hand side from memory yet
+  differ in displacement kind, so `disp` is not a function of `lhs` either. The
+  memory body reads `SRC` whole at 64 bits (letting the flag production narrow
+  it) where the register forms use the width/lane read; `x86_cmpop_lhs_arms`
+  pins that the final flags are identical. `x86_cmpop_step_refines` composes the
+  whole eight-opcode body over the five generated tables.
+- `KProgFormal/X86MemCompareHandler.lean` (extended) pins the shared contract's
+  memory rows to independent restatements: `x86_mem_compare_lhs_source_refines`
+  (every memory form reads its left-hand side from memory) and
+  `x86_mem_compare_disp_kind` (the register-RHS memory forms `cmpReg`/`testReg`
+  split `simm`/`store` despite sharing a right-hand-side source). Lean modules
+  elaborate rc=0.
+- Routing: `x86_sim_local_bpf.h` gained the unified `X86_SIM_L_EXEC_CMP_STEP` and
+  its `X86_SIM_L_EXEC_CMP_MEM` instantiation now routes the left-hand-side source
+  through `KPROG_X86_CMPOP_LHS_SOURCE`, the right-hand-side source through
+  `KPROG_X86_CMPOP_RHS_SOURCE`, the flag kind through
+  `KPROG_X86_CMPOP_FLAG_KIND`, the memory displacement kind through
+  `KPROG_X86_CMPOP_DISP_KIND`, and the width through
+  `KPROG_X86_CMPOP_WRITE_WIDTH`; the four register-form wrappers were
+  re-fronted onto the same step with their public signatures unchanged, and the
+  old `X86_SIM_L_EXEC_CMP_REG_STEP` was deleted.
+- Two host oracles, both zero-warning under `-Wall -Wextra` and clean under
+  ASan+UBSan. `test_x86_cmpop_host.c` (extended) grew the four memory opcode
+  defines, the `lhs`/`disp` selector pins, the per-opcode `lhs`/`disp` tables
+  for all eight opcodes, and an independence pin (register-RHS `TEST_MEM_REG` is
+  memory-lhs yet store-disp): `x86 cmpop handler host cross-check: OK (2913
+  cases)`. `test_x86_cmp_mem_route_host.c` (new) includes the simulator header
+  and drives the four memory bodies — directly and through the `X86_SIM_L_EXEC`
+  dispatcher arm — over the modeled heap, stack, and ABI pointer-load arms, every
+  FLAGS width, identity and scaled-index addressing, and both displacement
+  forms, comparing the whole register file with its tags, the heap, the stack,
+  and all four flags against an independent model: `x86 cmp mem route host
+  cross-check: OK (2244 cases)`. `test_x86_cmpop_route_host.c` (extended) grew
+  the `lhs`/`disp` selector pins and the eight-row `rhs`/flag-kind/`lhs`/`disp`
+  tables: `x86 cmpop route host cross-check: OK (47529 cases)`. All three wired
+  into `formal/Makefile` together with the new oracle (gate `cross-check: OK`
+  count rose from 123 to 124).
+- Mutation harness `/tmp/mut_x86_cmpop_lhs_disp.py`: 25 mutations, all as
+  expected. The generator `--check` catches the spec-`lhs`/spec-`disp`/
+  spec-operation/spec-selector/spec-code, generator-selector-inversion/
+  register-code-drift/Lean-arm defects and the hand-edited generated-Lean/header
+  defects; the hand module catches the independent-`lhs`-spec,
+  independent-`disp`-spec, and weakened-independence defects; the memory-handler
+  module catches the memory-`lhs`-spec and memory-disp-theorem defects; the route
+  oracles catch the inverted-`lhs`-selector, inverted-`disp`-kind,
+  dropped-write-width, wrong-displacement-opcode, and dropped-register-RHS
+  behavioural defects; and a defect consistent across generator *and* both
+  regenerated artifacts (`--check` blind) is caught only by the refinement
+  theorem over a rebuilt olean. The inline-`lhs`-restatement equivalence
+  SURVIVES, as it must. Post-restore sources byte-identical.
+- Because `x86_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C kprog/x86 micro-proofs-build` rc=0.
+- Full gate `make -C kprog/formal check` rc=0 (124 `cross-check: OK`).
+
 ## Next after 0076
 
 
 Remaining x86 open work is *compositional/handwritten*:
-register/immediate/RHS objdump→AUX selection; compiler/native bytes;
-specialization preservation. The index-register decode into the AUX index byte
+compiler/native bytes; specialization preservation. The
+register/immediate/RHS objdump→AUX selection is no longer wholly open: the
+register forms' RHS/flag selection (Step 0086) and the memory forms'
+left-source/displacement-kind selection (Step 0107) are now machine-checked
+contracts, leaving the register decode inside the composed body. The index-register decode into the AUX index byte
 is no longer wholly open: the sentinel *presence* decision over that byte is
 now a machine-checked contract for both x86 (Step 0101) and AArch64 (Step 0102),
 leaving the register-value read inside the composed body. "Multi-step

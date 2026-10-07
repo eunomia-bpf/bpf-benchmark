@@ -3,15 +3,20 @@ import Std
 import KProgFormal.GeneratedX86Store
 namespace KProgFormal.GeneratedX86CmpOp
 open GeneratedX86Store (Code)
-/-- The four CMP/TEST opcodes this contract spans: the `CMP` forms produce the
+/-- The eight CMP/TEST opcodes this contract spans: the `CMP` forms produce the
 zero-borrow subtraction flags, the `TEST` forms the logical flags; the `_IMM`
 forms take the right-hand side from the decoded immediate, the `_REG` forms from
-a register. -/
+a register; the register forms read the left-hand side from the destination
+register, the memory forms load it from memory. -/
 inductive Op where
   | cmpImm
   | cmpReg
   | testImm
   | testReg
+  | cmpMemImm
+  | testMemImm
+  | cmpMemReg
+  | testMemReg
 deriving DecidableEq, Repr
 /-- Where the right-hand side of the comparison comes from. -/
 inductive RhsSource where
@@ -23,18 +28,56 @@ inductive FlagKind where
   | sub
   | logic
 deriving DecidableEq, Repr
+/-- Where the left-hand side of the comparison comes from. -/
+inductive LhsSource where
+  | register
+  | memory
+deriving DecidableEq, Repr
+/-- How a memory form takes the displacement out of the raw immediate. -/
+inductive DispKind where
+  | simm
+  | store
+deriving DecidableEq, Repr
 /-- The right-hand-side source each opcode uses. -/
 def rhsSource : Op -> RhsSource
   | .cmpImm => .immediate
   | .cmpReg => .register
   | .testImm => .immediate
   | .testReg => .register
+  | .cmpMemImm => .immediate
+  | .testMemImm => .immediate
+  | .cmpMemReg => .register
+  | .testMemReg => .register
 /-- The flag kind each opcode uses. -/
 def flagKind : Op -> FlagKind
   | .cmpImm => .sub
   | .cmpReg => .sub
   | .testImm => .logic
   | .testReg => .logic
+  | .cmpMemImm => .sub
+  | .testMemImm => .logic
+  | .cmpMemReg => .sub
+  | .testMemReg => .logic
+/-- The left-hand-side source each opcode uses. -/
+def lhsSource : Op -> LhsSource
+  | .cmpImm => .register
+  | .cmpReg => .register
+  | .testImm => .register
+  | .testReg => .register
+  | .cmpMemImm => .memory
+  | .testMemImm => .memory
+  | .cmpMemReg => .memory
+  | .testMemReg => .memory
+/-- The displacement kind each opcode uses. -/
+def dispKind : Op -> DispKind
+  | .cmpImm => .simm
+  | .cmpReg => .simm
+  | .testImm => .simm
+  | .testReg => .simm
+  | .cmpMemImm => .store
+  | .testMemImm => .store
+  | .cmpMemReg => .simm
+  | .testMemReg => .store
 /-- The width a body falls back to when its opcode carries the "absent" FLAGS
 code 0. -/
 def writeWidthDefault : GeneratedX86Store.Code := .b64

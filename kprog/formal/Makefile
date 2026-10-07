@@ -327,6 +327,8 @@ check:
 	./build/test_x86_cmpop_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_cmpop_route_host.c -o build/test_x86_cmpop_route_host
 	./build/test_x86_cmpop_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_cmp_mem_route_host.c -o build/test_x86_cmp_mem_route_host
+	./build/test_x86_cmp_mem_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_cmov_route_host.c -o build/test_x86_cmov_route_host
 	./build/test_x86_cmov_route_host
 	lake env lean KProgFormal/GeneratedArm64Width.lean

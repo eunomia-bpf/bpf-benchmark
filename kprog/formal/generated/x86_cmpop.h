@@ -2,24 +2,32 @@
 #ifndef KPROG_FORMAL_GENERATED_X86_CMPOP_H
 #define KPROG_FORMAL_GENERATED_X86_CMPOP_H
 /*
- * x86-64 `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` handler-
- * composition contract. All four bodies resolve one width
- * `FLAGS ? FLAGS : 64` and read the destination register lane through
- * the width/lane register read. The right-hand side is a per-opcode
- * fact: the decoded immediate for the `_IMM` forms, the width/lane
- * register read of `SRC` for the `_REG` forms. The flag kind is a
+ * x86-64 `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` /
+ * `CMP_MEM_IMM` / `TEST_MEM_IMM` / `CMP_MEM_REG` / `TEST_MEM_REG`
+ * handler-composition contract. All eight bodies resolve one width
+ * `FLAGS ? FLAGS : 64`. The left-hand side is a per-opcode fact: the
+ * width/lane register read of the destination for the register forms, the
+ * value loaded from the addressed memory for the memory forms. The
+ * right-hand side is a per-opcode fact: the decoded immediate for the
+ * `_IMM` forms, the register for the `_REG` forms. The flag kind is a
  * per-opcode fact: the `CMP` forms produce the zero-borrow subtraction
- * flags, the `TEST` forms the logical flags of the conjunction. No
- * register is written.
- * The contract selects the opcodes, the right-hand-side source, and the
- * flag kind; the reads, the subtraction/logical flag production, and the
- * register preservation stay in the one C step the four bodies route
- * through.
+ * flags, the `TEST` forms the logical flags of the conjunction. The
+ * displacement kind is a per-opcode fact: `CMP_MEM_REG` takes the whole
+ * immediate as a signed displacement, every other memory form takes the
+ * high 32 bits as a store displacement. No register is written.
+ * The contract selects the opcodes, the right-hand-side source, the flag
+ * kind, the left-hand-side source, and the displacement kind; the reads,
+ * the subtraction/logical flag production, and the register preservation
+ * stay in the one C step the eight bodies route through.
  */
 _Static_assert(X86_OP_CMP_IMM == 0x0cU, "x86 cmpop cmpImm opcode drift");
 _Static_assert(X86_OP_CMP_REG == 0x0dU, "x86 cmpop cmpReg opcode drift");
 _Static_assert(X86_OP_TEST_IMM == 0x0eU, "x86 cmpop testImm opcode drift");
 _Static_assert(X86_OP_TEST_REG == 0x0fU, "x86 cmpop testReg opcode drift");
+_Static_assert(X86_OP_CMP_MEM_IMM == 0x1dU, "x86 cmpop cmpMemImm opcode drift");
+_Static_assert(X86_OP_TEST_MEM_IMM == 0x1eU, "x86 cmpop testMemImm opcode drift");
+_Static_assert(X86_OP_CMP_MEM_REG == 0x1fU, "x86 cmpop cmpMemReg opcode drift");
+_Static_assert(X86_OP_TEST_MEM_REG == 0x3bU, "x86 cmpop testMemReg opcode drift");
 /* The FLAGS width codes, including the 0 "absent" code. */
 #define X86_WIDTH_8 1U
 #define X86_WIDTH_16 2U
@@ -29,28 +37,65 @@ _Static_assert(X86_WIDTH_64 == 8U, "x86 width code drift");
 /* The width a body falls back to when its FLAGS code is absent. */
 #define KPROG_X86_CMPOP_WRITE_WIDTH_DEFAULT X86_WIDTH_64
 /*
- * The right-hand-side source and the flag kind of each opcode. Both are
- * per-opcode table entries: only the `_IMM` forms decode an immediate,
- * and only the `CMP` forms produce subtraction flags.
+ * The right-hand-side source, the flag kind, the left-hand-side source,
+ * and the displacement kind of each opcode. All four are per-opcode table
+ * entries: only the `_IMM` forms decode an immediate, only the `CMP` forms
+ * produce subtraction flags, only the memory forms load the left-hand side
+ * from memory, and only `CMP_MEM_REG` takes the immediate as a signed
+ * displacement rather than the high 32 bits as a store displacement.
  */
 #define KPROG_X86_CMPOP_RHS_IMMEDIATE 0U
 #define KPROG_X86_CMPOP_RHS_REGISTER 1U
 #define KPROG_X86_CMPOP_FLAGS_SUB 0U
 #define KPROG_X86_CMPOP_FLAGS_LOGIC 1U
+#define KPROG_X86_CMPOP_LHS_REGISTER 0U
+#define KPROG_X86_CMPOP_LHS_MEMORY 1U
+#define KPROG_X86_CMPOP_DISP_SIMM 0U
+#define KPROG_X86_CMPOP_DISP_STORE 1U
 #define KPROG_X86_CMPOP_OP_CMP_IMM_RHS_SOURCE KPROG_X86_CMPOP_RHS_IMMEDIATE
 #define KPROG_X86_CMPOP_OP_CMP_IMM_FLAG_KIND KPROG_X86_CMPOP_FLAGS_SUB
+#define KPROG_X86_CMPOP_OP_CMP_IMM_LHS_SOURCE KPROG_X86_CMPOP_LHS_REGISTER
+#define KPROG_X86_CMPOP_OP_CMP_IMM_DISP_KIND KPROG_X86_CMPOP_DISP_SIMM
 #define KPROG_X86_CMPOP_OP_CMP_REG_RHS_SOURCE KPROG_X86_CMPOP_RHS_REGISTER
 #define KPROG_X86_CMPOP_OP_CMP_REG_FLAG_KIND KPROG_X86_CMPOP_FLAGS_SUB
+#define KPROG_X86_CMPOP_OP_CMP_REG_LHS_SOURCE KPROG_X86_CMPOP_LHS_REGISTER
+#define KPROG_X86_CMPOP_OP_CMP_REG_DISP_KIND KPROG_X86_CMPOP_DISP_SIMM
 #define KPROG_X86_CMPOP_OP_TEST_IMM_RHS_SOURCE KPROG_X86_CMPOP_RHS_IMMEDIATE
 #define KPROG_X86_CMPOP_OP_TEST_IMM_FLAG_KIND KPROG_X86_CMPOP_FLAGS_LOGIC
+#define KPROG_X86_CMPOP_OP_TEST_IMM_LHS_SOURCE KPROG_X86_CMPOP_LHS_REGISTER
+#define KPROG_X86_CMPOP_OP_TEST_IMM_DISP_KIND KPROG_X86_CMPOP_DISP_SIMM
 #define KPROG_X86_CMPOP_OP_TEST_REG_RHS_SOURCE KPROG_X86_CMPOP_RHS_REGISTER
 #define KPROG_X86_CMPOP_OP_TEST_REG_FLAG_KIND KPROG_X86_CMPOP_FLAGS_LOGIC
+#define KPROG_X86_CMPOP_OP_TEST_REG_LHS_SOURCE KPROG_X86_CMPOP_LHS_REGISTER
+#define KPROG_X86_CMPOP_OP_TEST_REG_DISP_KIND KPROG_X86_CMPOP_DISP_SIMM
+#define KPROG_X86_CMPOP_OP_CMP_MEM_IMM_RHS_SOURCE KPROG_X86_CMPOP_RHS_IMMEDIATE
+#define KPROG_X86_CMPOP_OP_CMP_MEM_IMM_FLAG_KIND KPROG_X86_CMPOP_FLAGS_SUB
+#define KPROG_X86_CMPOP_OP_CMP_MEM_IMM_LHS_SOURCE KPROG_X86_CMPOP_LHS_MEMORY
+#define KPROG_X86_CMPOP_OP_CMP_MEM_IMM_DISP_KIND KPROG_X86_CMPOP_DISP_STORE
+#define KPROG_X86_CMPOP_OP_TEST_MEM_IMM_RHS_SOURCE KPROG_X86_CMPOP_RHS_IMMEDIATE
+#define KPROG_X86_CMPOP_OP_TEST_MEM_IMM_FLAG_KIND KPROG_X86_CMPOP_FLAGS_LOGIC
+#define KPROG_X86_CMPOP_OP_TEST_MEM_IMM_LHS_SOURCE KPROG_X86_CMPOP_LHS_MEMORY
+#define KPROG_X86_CMPOP_OP_TEST_MEM_IMM_DISP_KIND KPROG_X86_CMPOP_DISP_STORE
+#define KPROG_X86_CMPOP_OP_CMP_MEM_REG_RHS_SOURCE KPROG_X86_CMPOP_RHS_REGISTER
+#define KPROG_X86_CMPOP_OP_CMP_MEM_REG_FLAG_KIND KPROG_X86_CMPOP_FLAGS_SUB
+#define KPROG_X86_CMPOP_OP_CMP_MEM_REG_LHS_SOURCE KPROG_X86_CMPOP_LHS_MEMORY
+#define KPROG_X86_CMPOP_OP_CMP_MEM_REG_DISP_KIND KPROG_X86_CMPOP_DISP_SIMM
+#define KPROG_X86_CMPOP_OP_TEST_MEM_REG_RHS_SOURCE KPROG_X86_CMPOP_RHS_REGISTER
+#define KPROG_X86_CMPOP_OP_TEST_MEM_REG_FLAG_KIND KPROG_X86_CMPOP_FLAGS_LOGIC
+#define KPROG_X86_CMPOP_OP_TEST_MEM_REG_LHS_SOURCE KPROG_X86_CMPOP_LHS_MEMORY
+#define KPROG_X86_CMPOP_OP_TEST_MEM_REG_DISP_KIND KPROG_X86_CMPOP_DISP_STORE
 #define KPROG_X86_CMPOP_RHS_SOURCE(OP_IS_REG) \
 	((OP_IS_REG) ? KPROG_X86_CMPOP_RHS_REGISTER : \
 		  KPROG_X86_CMPOP_RHS_IMMEDIATE)
 #define KPROG_X86_CMPOP_FLAG_KIND(OP_IS_TEST) \
 	((OP_IS_TEST) ? KPROG_X86_CMPOP_FLAGS_LOGIC : \
 		  KPROG_X86_CMPOP_FLAGS_SUB)
+#define KPROG_X86_CMPOP_LHS_SOURCE(OP_IS_MEM) \
+	((OP_IS_MEM) ? KPROG_X86_CMPOP_LHS_MEMORY : \
+		  KPROG_X86_CMPOP_LHS_REGISTER)
+#define KPROG_X86_CMPOP_DISP_KIND(OP_IS_CMP_MEM_REG) \
+	((OP_IS_CMP_MEM_REG) ? KPROG_X86_CMPOP_DISP_SIMM : \
+		  KPROG_X86_CMPOP_DISP_STORE)
 /*
  * FLAGS is the opcode's width code, with 0 the "absent" code; the resolved
  * width is the code itself, or the 64-bit default when it is absent. Both

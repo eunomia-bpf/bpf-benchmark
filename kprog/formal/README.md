@@ -481,8 +481,11 @@ The memory-source compare theorem covers the four `CMP/TEST [mem], rhs` forms
 and `CMP reg, [mem]`. It composes the byte load with the generated zero-borrow
 subtraction flags for the compare forms and the generated logical flags for the
 test forms, proving equality of every modeled flag and that no register is
-written against an independently stated load/flags specification. Its
-independent 40,784-case oracle checks the actual generated macros against a
+written against an independently stated load/flags specification. It also pins
+the shared `KPROG_X86_CMPOP_*` left-source (memory) and displacement-kind
+(store, except the whole-immediate `CMP_MEM_REG`) facts to independent
+restatements (`x86_mem_compare_lhs_source_refines`, `x86_mem_compare_disp_kind`).
+Its independent 40,784-case oracle checks the actual generated macros against a
 byte-loop model. Effective-address derivation and RHS source selection remain
 outside the theorem.
 The two-destination `MULX` theorem covers `X86_SIM_L_EXEC_MULX`. It composes
@@ -1235,50 +1238,75 @@ memory form it complements the tested bit of the loaded byte against the
 pointer value the base register holds, so a body that reads the base register
 instead of memory reports the opposite `CF` at every index source.
 
-The `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` theorem covers the
-`X86_SIM_L_EXEC_CMP_IMM_OP` and `X86_SIM_L_EXEC_CMP_REG_OP` arms for
-`X86_OP_CMP_IMM` (`0x0c`), `X86_OP_CMP_REG` (`0x0d`), `X86_OP_TEST_IMM`
-(`0x0e`) and `X86_OP_TEST_REG` (`0x0f`), the four opcodes that compare or test
-without writing a register. All four resolve *one* width `FLAGS ? FLAGS : 64`
-and read their destination lane through the width/lane register read
-(`x86_cmpop_write_width_refines`). Two per-opcode facts separate them, both
-table entries (`x86_cmpop_rhs_source_refines`, `x86_cmpop_flag_kind_refines`):
-the right-hand side is the decoded immediate for the `_IMM` forms
-(`x86ImmediateValueSpec`) and the width/lane register read of `SRC` for the
-`_REG` forms, and the flag kind is the zero-borrow subtraction flags for the
-`CMP` opcodes and the logical flags of the width-narrowed conjunction for the
-`TEST` opcodes. The tables are provably independent
-(`x86_cmpop_tables_independent`): `CMP_IMM`/`TEST_IMM` share a source but differ
-in flag kind, and `CMP_IMM`/`CMP_REG` share flags but differ in source, so no
-row is a function of another. All four write no register
-(`x86_cmpop_preserves_dst`, `x86_cmpop_flag_production`). `x86_cmpop_step_refines`
-composes the whole body over the generated source/flag-kind/width tables and the
-shared register read, immediate decode, subtraction/logical flag production, and
-register pass-through; its independent 2904-case oracle exercises the generated
-tables, the full composition over a deterministic register model at both AUX
-lanes, and pins the immediate/register source split, the CMP/TEST flag-kind
-split, the destination-lane and `SRC`-lane reads, the immediate sign-extension
-at the resolved width, the absent-width default, and register-preserving
-write-free memory. The register decode that selects the opcode remains outside
-the theorem.
+The `CMP_IMM` / `CMP_REG` / `TEST_IMM` / `TEST_REG` / `CMP_MEM_IMM` /
+`TEST_MEM_IMM` / `CMP_MEM_REG` / `TEST_MEM_REG` theorem covers all eight
+compare/test opcodes: the register forms `X86_OP_CMP_IMM` (`0x0c`),
+`X86_OP_CMP_REG` (`0x0d`), `X86_OP_TEST_IMM` (`0x0e`), `X86_OP_TEST_REG`
+(`0x0f`) and the memory forms `X86_OP_CMP_MEM_IMM` (`0x1d`),
+`X86_OP_TEST_MEM_IMM` (`0x1e`), `X86_OP_CMP_MEM_REG` (`0x1f`),
+`X86_OP_TEST_MEM_REG` (`0x3b`) — the opcodes that compare or test without
+writing a register. All eight resolve *one* width `FLAGS ? FLAGS : 64` and read
+their register-operand lanes through the width/lane register read
+(`x86_cmpop_write_width_refines`). Four per-opcode facts separate them, each a
+table entry (`x86_cmpop_rhs_source_refines`, `x86_cmpop_flag_kind_refines`,
+`x86_cmpop_lhs_source_refines`, `x86_cmpop_disp_kind_refines`): the left-hand
+side is the destination register for the register forms and the addressed
+memory operand for the memory forms (`x86_cmpop_lhs_refines`); the right-hand
+side is the decoded immediate for the `_IMM` forms (`x86ImmediateValueSpec`) and
+the register read of `SRC` for the `_REG` forms; the flag kind is the
+zero-borrow subtraction flags for the `CMP` opcodes and the logical flags of the
+width-narrowed conjunction for the `TEST` opcodes; and the memory-form
+displacement is the whole immediate as a signed displacement for `CMP_MEM_REG`
+alone and the high 32 bits as a store displacement for the other memory forms
+(the register forms' displacement is unused and reads as the signed-immediate
+form). The facts are provably independent (`x86_cmpop_tables_independent`,
+`x86_cmpop_lhs_disp_independent`): `CMP_IMM`/`TEST_IMM` share a left/right source
+but differ in flag kind, `CMP_IMM`/`CMP_REG` share flags but differ in source,
+and `TEST_MEM_REG` is memory-left/register-right yet store-displacement, so no
+row is a function of another. The memory right-hand side is read whole at 64
+bits (letting the flag production narrow it), which the register forms' lane
+read does not do (`x86_cmpop_lhs_arms`); the final flags are identical. All
+eight write no register (`x86_cmpop_preserves_dst`,
+`x86_cmpop_flag_production`, `x86_cmpop_mem_reg_borrow_w64`). `x86_cmpop_step_refines`
+composes the whole body over the generated source/flag-kind/left-source/disp-kind/width
+tables and the shared register/memory read, immediate decode,
+subtraction/logical flag production, and register pass-through; its independent
+oracle exercises the generated tables, the full composition over a deterministic
+register model at both AUX lanes, and pins the register/memory left-hand-side
+split, the immediate/register right-hand-side split, the `CMP`/`TEST` flag-kind
+split, the displacement-kind split, the destination-lane and `SRC`-lane reads,
+the immediate sign-extension at the resolved width, the absent-width default,
+and register-preserving write-free memory. The register decode that selects the
+opcode remains outside the theorem.
 
-The four bodies named in that paragraph now share one
-`X86_SIM_L_EXEC_CMP_REG_STEP` composition that routes the right-hand-side
-source through the machine-checked `KPROG_X86_CMPOP_RHS_SOURCE` selector, the
-flag kind through `KPROG_X86_CMPOP_FLAG_KIND`, and the one resolved width
-through `KPROG_X86_CMPOP_WRITE_WIDTH`, so the four bodies and the Lean
-refinement share one compare/test step rather than four restated sequences and
-the per-opcode selector is compile-time at each wrapper. The independent
-`test_x86_cmpop_route_host.c` oracle includes the simulator header, drives all
-four real bodies — directly and through the `X86_SIM_L_EXEC` dispatcher arms
-that route to them — over both register/immediate source forms, every FLAGS
-code, both AUX lanes, and three destination / source registers, and compares
-the whole register file with its tags and all four flags against an
-independent model. Its planted registers carry the immediate-incompatible high
-word `0xa5a5…` and bits above bit 32, so a body that resolves the wrong
-right-hand side, produces the wrong flag kind (`CMP` clears `OF` and computes
-`CF` from the borrow, `TEST` clears both), or narrows to 32 bits instead of the
-resolved width is numerically distinguishable at every opcode, width, and lane.
+The eight bodies named in that paragraph now share one
+`X86_SIM_L_EXEC_CMP_STEP` composition that routes the left-hand-side source
+through the machine-checked `KPROG_X86_CMPOP_LHS_SOURCE` selector, the
+right-hand-side source through `KPROG_X86_CMPOP_RHS_SOURCE`, the flag kind
+through `KPROG_X86_CMPOP_FLAG_KIND`, the memory displacement kind through
+`KPROG_X86_CMPOP_DISP_KIND`, and the one resolved width through
+`KPROG_X86_CMPOP_WRITE_WIDTH`, so the eight bodies and the Lean refinement share
+one compare/test step rather than restated sequences and the per-opcode selector
+is compile-time at each wrapper. The independent `test_x86_cmpop_route_host.c`
+oracle includes the simulator header and drives the four register bodies —
+directly and through the `X86_SIM_L_EXEC` dispatcher arms that route to them —
+over both register/immediate source forms, every FLAGS code, both AUX lanes, and
+three destination / source registers, comparing the whole register file with its
+tags and all four flags against an independent model; its planted registers
+carry the immediate-incompatible high word `0xa5a5…` and bits above bit 32, so a
+body that resolves the wrong right-hand side, produces the wrong flag kind
+(`CMP` clears `OF` and computes `CF` from the borrow, `TEST` clears both), or
+narrows to 32 bits instead of the resolved width is numerically distinguishable
+at every opcode, width, and lane. The independent `test_x86_cmp_mem_route_host.c`
+oracle drives all four *memory* bodies — directly and through the
+`X86_SIM_L_EXEC` dispatcher arm — over the modeled heap, stack, and ABI
+pointer-load arms, every FLAGS width, the identity and scaled-index addressing,
+and both displacement forms, comparing the whole register file with its tags,
+the heap, the stack, and all four flags against an independent model. Its
+displacement pair (`imm = 8` with the store form reading the heap at offset 0
+and the whole-immediate form at offset 8, whose bytes differ) makes a body that
+routes the wrong displacement kind numerically distinguishable, and its planted
+ABI pointer value makes a body that misclassifies the load arm observable.
 
 The AArch64 `.D0` / `.Q0` vector memory-transfer theorem covers the four bodies
 `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`, `STORE_D0_MEM`, and `STORE_Q0_MEM` for
@@ -2021,8 +2049,9 @@ simulator's routing of all three bodies through the `KPROG_X86_BT_*`
 contract), the
 `BZHI`/`BZHI_MEM` single-width value/count-source composition (and the
 simulator's routing of both bodies through the `KPROG_X86_BZHI_*` contract), the
-`CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG` register/immediate source/flag-kind
-composition (and the simulator's routing of all four bodies through the
+`CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG`/`CMP_MEM_IMM`/`TEST_MEM_IMM`/
+`CMP_MEM_REG`/`TEST_MEM_REG` left/right-source, flag-kind and displacement-kind
+composition (and the simulator's routing of all eight bodies through the
 `KPROG_X86_CMPOP_*` contract), the
 `CMOV`/`CMOV_MEM` whole-word/source-shift condition, two-level access-width,
 high-half displacement, and source-provenance writeback composition (and the

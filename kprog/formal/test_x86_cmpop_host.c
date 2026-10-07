@@ -55,6 +55,10 @@ typedef signed long long __s64;
 #define X86_OP_CMP_REG 0x0dU
 #define X86_OP_TEST_IMM 0x0eU
 #define X86_OP_TEST_REG 0x0fU
+#define X86_OP_CMP_MEM_IMM 0x1dU
+#define X86_OP_TEST_MEM_IMM 0x1eU
+#define X86_OP_CMP_MEM_REG 0x1fU
+#define X86_OP_TEST_MEM_REG 0x3bU
 
 #define X86_SIM_TAG_SCALAR 0U
 
@@ -292,6 +296,82 @@ static unsigned part1(void)
 
 		if (got != want) {
 			fprintf(stderr, "cmpop flag kind select drift\n");
+			return 0;
+		}
+		cases++;
+	}
+
+	if (KPROG_X86_CMPOP_LHS_REGISTER == KPROG_X86_CMPOP_LHS_MEMORY) {
+		fprintf(stderr, "cmpop lhs source codes collide\n");
+		return 0;
+	}
+	cases++;
+
+	if (KPROG_X86_CMPOP_DISP_SIMM == KPROG_X86_CMPOP_DISP_STORE) {
+		fprintf(stderr, "cmpop disp kind codes collide\n");
+		return 0;
+	}
+	cases++;
+
+	/* The per-opcode left-hand-side source: the register forms read their
+	 * left operand from the destination register, all four memory forms
+	 * load it from the addressed bytes. */
+	if (KPROG_X86_CMPOP_OP_CMP_IMM_LHS_SOURCE != KPROG_X86_CMPOP_LHS_REGISTER ||
+	    KPROG_X86_CMPOP_OP_CMP_REG_LHS_SOURCE != KPROG_X86_CMPOP_LHS_REGISTER ||
+	    KPROG_X86_CMPOP_OP_TEST_IMM_LHS_SOURCE !=
+		    KPROG_X86_CMPOP_LHS_REGISTER ||
+	    KPROG_X86_CMPOP_OP_TEST_REG_LHS_SOURCE !=
+		    KPROG_X86_CMPOP_LHS_REGISTER ||
+	    KPROG_X86_CMPOP_OP_CMP_MEM_IMM_LHS_SOURCE !=
+		    KPROG_X86_CMPOP_LHS_MEMORY ||
+	    KPROG_X86_CMPOP_OP_TEST_MEM_IMM_LHS_SOURCE !=
+		    KPROG_X86_CMPOP_LHS_MEMORY ||
+	    KPROG_X86_CMPOP_OP_CMP_MEM_REG_LHS_SOURCE !=
+		    KPROG_X86_CMPOP_LHS_MEMORY ||
+	    KPROG_X86_CMPOP_OP_TEST_MEM_REG_LHS_SOURCE !=
+		    KPROG_X86_CMPOP_LHS_MEMORY) {
+		fprintf(stderr, "cmpop lhs source table drift\n");
+		return 0;
+	}
+	cases++;
+
+	/* The per-opcode displacement kind: only the register-RHS memory opcode
+	 * takes the whole immediate as a signed displacement, the other memory
+	 * forms take the high 32 bits as a store displacement, and the register
+	 * forms do not address memory at all (their displacement is unused, and
+	 * reads as the signed immediate form). */
+	if (KPROG_X86_CMPOP_OP_CMP_MEM_IMM_DISP_KIND != KPROG_X86_CMPOP_DISP_STORE ||
+	    KPROG_X86_CMPOP_OP_TEST_MEM_IMM_DISP_KIND != KPROG_X86_CMPOP_DISP_STORE ||
+	    KPROG_X86_CMPOP_OP_TEST_MEM_REG_DISP_KIND != KPROG_X86_CMPOP_DISP_STORE ||
+	    KPROG_X86_CMPOP_OP_CMP_MEM_REG_DISP_KIND != KPROG_X86_CMPOP_DISP_SIMM ||
+	    KPROG_X86_CMPOP_OP_CMP_IMM_DISP_KIND != KPROG_X86_CMPOP_DISP_SIMM ||
+	    KPROG_X86_CMPOP_OP_CMP_REG_DISP_KIND != KPROG_X86_CMPOP_DISP_SIMM ||
+	    KPROG_X86_CMPOP_OP_TEST_IMM_DISP_KIND != KPROG_X86_CMPOP_DISP_SIMM ||
+	    KPROG_X86_CMPOP_OP_TEST_REG_DISP_KIND != KPROG_X86_CMPOP_DISP_SIMM) {
+		fprintf(stderr, "cmpop disp kind table drift\n");
+		return 0;
+	}
+	cases++;
+
+	for (ci = 0; ci < 2U; ci++) {
+		unsigned got = KPROG_X86_CMPOP_LHS_SOURCE(ci != 0U);
+		unsigned want = ci != 0U ? KPROG_X86_CMPOP_LHS_MEMORY
+					 : KPROG_X86_CMPOP_LHS_REGISTER;
+
+		if (got != want) {
+			fprintf(stderr, "cmpop lhs source select drift\n");
+			return 0;
+		}
+		cases++;
+	}
+
+	for (ci = 0; ci < 2U; ci++) {
+		unsigned got = KPROG_X86_CMPOP_DISP_KIND(ci != 0U);
+		unsigned want = ci != 0U ? KPROG_X86_CMPOP_DISP_SIMM
+					 : KPROG_X86_CMPOP_DISP_STORE;
+
+		if (got != want) {
+			fprintf(stderr, "cmpop disp kind select drift\n");
 			return 0;
 		}
 		cases++;
@@ -712,6 +792,48 @@ static unsigned part3(void)
 		if (memcmp(oracle_regs, pristine_regs, sizeof(oracle_regs)))
 			return 0;
 		if (memcmp(oracle_mem, pristine_mem, ORACLE_MEM_BYTES))
+			return 0;
+		cases++;
+	}
+
+	/* Pin 10: the two new facts are independent of each other and of the
+	 * register-form facts — the left-hand-side source keys only on whether
+	 * the opcode addresses memory, and the displacement kind keys only on
+	 * whether the opcode is exactly the register-RHS memory form, so a
+	 * register form is not a memory form and vice versa, and the
+	 * register-RHS `TEST` memory form (`TEST_MEM_REG`) is memory-lhs yet
+	 * store-displacement — proving the displacement is not a function of
+	 * the right-hand-side source. */
+	{
+		unsigned is_cmp_mem_reg = 1U;
+		unsigned not_cmp_mem_reg = 0U;
+
+		if (KPROG_X86_CMPOP_LHS_SOURCE(is_cmp_mem_reg) !=
+			    KPROG_X86_CMPOP_LHS_MEMORY)
+			return 0;
+		if (KPROG_X86_CMPOP_LHS_SOURCE(not_cmp_mem_reg) !=
+			    KPROG_X86_CMPOP_LHS_REGISTER)
+			return 0;
+		/* The displacement kind keys on "is exactly the register-RHS
+		 * memory opcode": that opcode takes the whole immediate, every
+		 * other opcode takes the store displacement (and the register
+		 * forms' displacement is unused). */
+		if (KPROG_X86_CMPOP_DISP_KIND(is_cmp_mem_reg) !=
+			    KPROG_X86_CMPOP_DISP_SIMM)
+			return 0;
+		if (KPROG_X86_CMPOP_DISP_KIND(not_cmp_mem_reg) !=
+			    KPROG_X86_CMPOP_DISP_STORE)
+			return 0;
+		/* Memory left-hand side, register right-hand side, yet the store
+		 * displacement form: the kinds are independent. */
+		if (KPROG_X86_CMPOP_OP_TEST_MEM_REG_LHS_SOURCE !=
+			    KPROG_X86_CMPOP_LHS_MEMORY)
+			return 0;
+		if (KPROG_X86_CMPOP_OP_TEST_MEM_REG_RHS_SOURCE !=
+			    KPROG_X86_CMPOP_RHS_REGISTER)
+			return 0;
+		if (KPROG_X86_CMPOP_OP_TEST_MEM_REG_DISP_KIND !=
+			    KPROG_X86_CMPOP_DISP_STORE)
 			return 0;
 		cases++;
 	}

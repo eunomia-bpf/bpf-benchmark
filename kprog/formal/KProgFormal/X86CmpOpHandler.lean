@@ -2,6 +2,7 @@ import KProgFormal.GeneratedX86CmpOp
 import KProgFormal.X86AluWriteback
 import KProgFormal.X86Immediate
 import KProgFormal.X86LogicFlags
+import KProgFormal.X86MemAccess
 import KProgFormal.X86RegRead
 import KProgFormal.X86SubResult
 import KProgFormal.X86Width
@@ -9,20 +10,28 @@ import Std.Tactic.BVDecide
 
 namespace KProgFormal
 
-open GeneratedX86CmpOp (Op RhsSource FlagKind rhsSource flagKind resolveWidth
-  writeWidthDefault)
+open GeneratedX86CmpOp (Op RhsSource FlagKind LhsSource DispKind rhsSource
+  flagKind lhsSource dispKind resolveWidth writeWidthDefault)
 open GeneratedX86Store (Code)
 
-/-- The four `CMP`/`TEST` opcodes this contract spans: `X86_OP_CMP_IMM`
+/-- The eight `CMP`/`TEST` opcodes this contract spans: `X86_OP_CMP_IMM`
 (`0x0c`), `X86_OP_CMP_REG` (`0x0d`), `X86_OP_TEST_IMM` (`0x0e`) and
-`X86_OP_TEST_REG` (`0x0f`). The `_IMM` forms take the right-hand side from the
-decoded immediate, the `_REG` forms from a register; the `CMP` forms produce the
-zero-borrow subtraction flags, the `TEST` forms the logical flags. -/
+`X86_OP_TEST_REG` (`0x0f`) are the register forms, `X86_OP_CMP_MEM_IMM`
+(`0x1d`), `X86_OP_TEST_MEM_IMM` (`0x1e`), `X86_OP_CMP_MEM_REG` (`0x1f`) and
+`X86_OP_TEST_MEM_REG` (`0x3b`) the memory forms. The `_IMM` forms take the
+right-hand side from the decoded immediate, the `_REG` forms from a register;
+the `CMP` forms produce the zero-borrow subtraction flags, the `TEST` forms the
+logical flags; the register forms read the left-hand side from the destination
+register, the memory forms load it from memory. -/
 inductive X86CmpOp
   | cmpImm
   | cmpReg
   | testImm
   | testReg
+  | cmpMemImm
+  | testMemImm
+  | cmpMemReg
+  | testMemReg
   deriving DecidableEq, Repr
 
 /-- Bridge to the generated opcode table. -/
@@ -31,6 +40,10 @@ def x86CmpOpToOp : X86CmpOp -> GeneratedX86CmpOp.Op
   | .cmpReg => .cmpReg
   | .testImm => .testImm
   | .testReg => .testReg
+  | .cmpMemImm => .cmpMemImm
+  | .testMemImm => .testMemImm
+  | .cmpMemReg => .cmpMemReg
+  | .testMemReg => .testMemReg
 
 /-- Independent statement of where each opcode reads its right-hand side. -/
 def x86CmpOpRhsSourceSpec : X86CmpOp -> RhsSource
@@ -38,6 +51,10 @@ def x86CmpOpRhsSourceSpec : X86CmpOp -> RhsSource
   | .cmpReg => .register
   | .testImm => .immediate
   | .testReg => .register
+  | .cmpMemImm => .immediate
+  | .testMemImm => .immediate
+  | .cmpMemReg => .register
+  | .testMemReg => .register
 
 /-- Independent statement of which flag production each opcode uses. -/
 def x86CmpOpFlagKindSpec : X86CmpOp -> FlagKind
@@ -45,6 +62,35 @@ def x86CmpOpFlagKindSpec : X86CmpOp -> FlagKind
   | .cmpReg => .sub
   | .testImm => .logic
   | .testReg => .logic
+  | .cmpMemImm => .sub
+  | .testMemImm => .logic
+  | .cmpMemReg => .sub
+  | .testMemReg => .logic
+
+/-- Independent statement of where each opcode reads its left-hand side. -/
+def x86CmpOpLhsSourceSpec : X86CmpOp -> LhsSource
+  | .cmpImm => .register
+  | .cmpReg => .register
+  | .testImm => .register
+  | .testReg => .register
+  | .cmpMemImm => .memory
+  | .testMemImm => .memory
+  | .cmpMemReg => .memory
+  | .testMemReg => .memory
+
+/-- Independent statement of how each opcode takes its displacement out of the
+raw immediate: `CMP_MEM_REG` the whole immediate as a signed displacement, every
+other memory form the high 32 bits as a store displacement. The register forms
+carry no displacement and name the signed-immediate kind. -/
+def x86CmpOpDispKindSpec : X86CmpOp -> DispKind
+  | .cmpImm => .simm
+  | .cmpReg => .simm
+  | .testImm => .simm
+  | .testReg => .simm
+  | .cmpMemImm => .store
+  | .testMemImm => .store
+  | .cmpMemReg => .simm
+  | .testMemReg => .store
 
 /-- The generated right-hand-side-source table agrees with the independent
 statement. -/
@@ -57,6 +103,18 @@ theorem x86_cmpop_flag_kind_refines (op : X86CmpOp) :
     flagKind (x86CmpOpToOp op) = x86CmpOpFlagKindSpec op := by
   cases op <;> rfl
 
+/-- The generated left-hand-side-source table agrees with the independent
+statement. -/
+theorem x86_cmpop_lhs_source_refines (op : X86CmpOp) :
+    lhsSource (x86CmpOpToOp op) = x86CmpOpLhsSourceSpec op := by
+  cases op <;> rfl
+
+/-- The generated displacement-kind table agrees with the independent
+statement. -/
+theorem x86_cmpop_disp_kind_refines (op : X86CmpOp) :
+    dispKind (x86CmpOpToOp op) = x86CmpOpDispKindSpec op := by
+  cases op <;> rfl
+
 /-- The right-hand-side source and the flag kind are *independent* per-opcode
 facts: `CMP_IMM` and `TEST_IMM` share the immediate source but differ in flag
 kind, and `CMP_IMM`/`CMP_REG` share the subtraction flags but differ in source
@@ -67,6 +125,21 @@ theorem x86_cmpop_tables_independent :
       x86CmpOpRhsSourceSpec .cmpImm ≠ x86CmpOpRhsSourceSpec .cmpReg ∧
       x86CmpOpFlagKindSpec .cmpImm ≠ x86CmpOpFlagKindSpec .testImm := by
   refine ⟨rfl, rfl, ?_, ?_⟩
+  · intro h; cases h
+  · intro h; cases h
+
+/-- The displacement kind is independent of both the right-hand-side source and
+the left-hand-side source: `TEST_MEM_REG` reads a register right-hand side yet
+takes the store displacement, so `disp` is not a function of `rhs`; and
+`CMP_MEM_REG` and `CMP_MEM_IMM` both load the left-hand side from memory yet
+differ in displacement kind, so `disp` is not a function of `lhs` either. The
+displacement kind is therefore a fact carried per opcode. -/
+theorem x86_cmpop_lhs_disp_independent :
+    x86CmpOpRhsSourceSpec .testMemReg = x86CmpOpRhsSourceSpec .cmpMemReg ∧
+      x86CmpOpDispKindSpec .testMemReg ≠ x86CmpOpDispKindSpec .cmpMemReg ∧
+      x86CmpOpLhsSourceSpec .cmpMemReg = x86CmpOpLhsSourceSpec .cmpMemImm ∧
+      x86CmpOpDispKindSpec .cmpMemReg ≠ x86CmpOpDispKindSpec .cmpMemImm := by
+  refine ⟨rfl, ?_, rfl, ?_⟩
   · intro h; cases h
   · intro h; cases h
 
@@ -104,19 +177,27 @@ theorem x86_cmpop_write_width_default_refines :
   rfl
 
 /-- Independent statement of the right-hand side: the decoded immediate for the
-`_IMM` forms, the width/lane register read of `SRC` for the `_REG` forms. -/
+`_IMM` forms; for the `_REG` forms, the width/lane register read of `SRC` on the
+register forms and the full 64-bit register read on the memory forms (the
+memory body reads `SRC` whole and lets the flag production narrow it). -/
 def x86CmpOpRhsSpec (op : X86CmpOp) (srcBits rawImm : BitVec 64)
     (width : X86Width) (srcLane : X86ByteLane) : BitVec 64 :=
   match x86CmpOpRhsSourceSpec op with
   | .immediate => x86ImmediateValueSpec rawImm width
-  | .register => x86RegReadAtSpec srcBits width srcLane
+  | .register =>
+      match x86CmpOpLhsSourceSpec op with
+      | .memory => srcBits
+      | .register => x86RegReadAtSpec srcBits width srcLane
 
 /-- The right-hand side the generated body builds, restated. -/
 def generatedX86CmpOpRhs (op : X86CmpOp) (srcBits rawImm : BitVec 64)
     (width : X86Width) (srcLane : X86ByteLane) : BitVec 64 :=
   match rhsSource (x86CmpOpToOp op) with
   | .immediate => GeneratedX86Immediate.value rawImm width
-  | .register => GeneratedX86RegRead.readAt srcBits width srcLane
+  | .register =>
+      match lhsSource (x86CmpOpToOp op) with
+      | .memory => srcBits
+      | .register => GeneratedX86RegRead.readAt srcBits width srcLane
 
 /-- The generated right-hand side equals the independent statement, for every
 opcode, source register bits, raw immediate, width, and source lane. -/
@@ -125,16 +206,47 @@ theorem x86_cmpop_rhs_refines (op : X86CmpOp) (srcBits rawImm : BitVec 64)
     generatedX86CmpOpRhs op srcBits rawImm width srcLane =
       x86CmpOpRhsSpec op srcBits rawImm width srcLane := by
   cases op <;>
-    simp only [generatedX86CmpOpRhs, x86CmpOpRhsSpec, rhsSource, x86CmpOpToOp,
-      x86CmpOpRhsSourceSpec, x86_immediate_value_refines,
-      x86_reg_read_at_refines]
+    simp only [generatedX86CmpOpRhs, x86CmpOpRhsSpec, rhsSource, lhsSource,
+      x86CmpOpToOp, x86CmpOpRhsSourceSpec, x86CmpOpLhsSourceSpec,
+      x86_immediate_value_refines, x86_reg_read_at_refines]
 
-/-- The effect of one `CMP`/`TEST` body. `rhsSource` records where the
-right-hand side came from, `flagKind` which flags the body produced, `width` the
-narrowing width, `lhs`/`rhs` the resolved operands, and `dst` the (unchanged)
-destination register. -/
+/-- Independent statement of the left-hand side: the width/lane register read of
+the destination on the register forms, the addressed memory load on the memory
+forms. -/
+def x86CmpOpLhsSpec (op : X86CmpOp) (dstBits : BitVec 64)
+    (byte : Nat -> X86MemByte) (width : X86Width)
+    (dstLane : X86ByteLane) : BitVec 64 :=
+  match x86CmpOpLhsSourceSpec op with
+  | .register => x86RegReadAtSpec dstBits width dstLane
+  | .memory => x86MemLoadSpec byte width
+
+/-- The left-hand side the generated body builds, restated. -/
+def generatedX86CmpOpLhs (op : X86CmpOp) (dstBits : BitVec 64)
+    (byte : Nat -> X86MemByte) (width : X86Width)
+    (dstLane : X86ByteLane) : BitVec 64 :=
+  match lhsSource (x86CmpOpToOp op) with
+  | .register => GeneratedX86RegRead.readAt dstBits width dstLane
+  | .memory => GeneratedX86MemAccess.load byte width
+
+/-- The generated left-hand side equals the independent statement, for every
+opcode, destination bits, memory byte source, width, and destination lane. -/
+theorem x86_cmpop_lhs_refines (op : X86CmpOp) (dstBits : BitVec 64)
+    (byte : Nat -> X86MemByte) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86CmpOpLhs op dstBits byte width dstLane =
+      x86CmpOpLhsSpec op dstBits byte width dstLane := by
+  cases op <;>
+    simp only [generatedX86CmpOpLhs, x86CmpOpLhsSpec, lhsSource, x86CmpOpToOp,
+      x86CmpOpLhsSourceSpec, x86_reg_read_at_refines, x86_mem_load_refines]
+
+/-- The effect of one `CMP`/`TEST` body. `lhsSource`/`rhsSource` record where
+the operands came from, `dispKind` how the memory forms take their displacement,
+`flagKind` which flags the body produced, `width` the narrowing width,
+`lhs`/`rhs` the resolved operands, and `dst` the (unchanged) destination
+register. -/
 structure X86CmpOpEffect where
+  lhsSource : LhsSource
   rhsSource : RhsSource
+  dispKind : DispKind
   flagKind : FlagKind
   width : X86Width
   lhs : BitVec 64
@@ -143,17 +255,18 @@ structure X86CmpOpEffect where
   flags : X86Flags
   deriving DecidableEq, Repr
 
-/-- The composed handler transition used by all four bodies: the generated
-tables select the right-hand-side source, the flag kind, and the `FLAGS`-resolved
-width; the left-hand side is the width/lane register read of the destination,
-the right-hand side the decoded immediate or the width/lane register read of
-`SRC`; the flags are the zero-borrow subtraction flags or the logical flags of
-the width-narrowed conjunction. No register is written. -/
+/-- The composed handler transition used by all eight bodies: the generated
+tables select the left-hand-side source, the right-hand-side source, the
+displacement kind, the flag kind, and the `FLAGS`-resolved width; the left-hand
+side is the width/lane register read of the destination or the addressed memory
+load, the right-hand side the decoded immediate or the register; the flags are
+the zero-borrow subtraction flags or the logical flags of the width-narrowed
+conjunction. No register is written. -/
 def generatedX86CmpOpStep (op : X86CmpOp) (flagsCode : Code)
-    (dstBits srcBits rawImm : BitVec 64)
+    (dstBits srcBits rawImm : BitVec 64) (byte : Nat -> X86MemByte)
     (dstLane srcLane : X86ByteLane) (dstOld : X86RegValue) : X86CmpOpEffect :=
   let w := generatedX86CmpOpWriteWidth flagsCode
-  let lhs := GeneratedX86RegRead.readAt dstBits w dstLane
+  let lhs := generatedX86CmpOpLhs op dstBits byte w dstLane
   let rhs := generatedX86CmpOpRhs op srcBits rawImm w srcLane
   let flags := match flagKind (x86CmpOpToOp op) with
     | .sub =>
@@ -166,17 +279,19 @@ def generatedX86CmpOpStep (op : X86CmpOp) (flagsCode : Code)
         generatedX86LogicFlags
           (GeneratedX86Width.zero (BitVec.and lhs rhs) w)
           (GeneratedX86Width.sign (BitVec.and lhs rhs) w)
-  { rhsSource := rhsSource (x86CmpOpToOp op),
-    flagKind := flagKind (x86CmpOpToOp op), width := w, lhs := lhs, rhs := rhs,
-    dst := dstOld, flags := flags }
+  { lhsSource := lhsSource (x86CmpOpToOp op),
+    rhsSource := rhsSource (x86CmpOpToOp op),
+    dispKind := dispKind (x86CmpOpToOp op), flagKind := flagKind (x86CmpOpToOp op),
+    width := w, lhs := lhs, rhs := rhs, dst := dstOld, flags := flags }
 
-/-- Independent statement of the same handler, reading the right-hand side, the
-flag kind, the width, and the flags from the independent statements. -/
+/-- Independent statement of the same handler, reading the operand sources, the
+displacement kind, the flag kind, the width, and the flags from the independent
+statements. -/
 def x86CmpOpStepSpec (op : X86CmpOp) (flagsCode : Code)
-    (dstBits srcBits rawImm : BitVec 64)
+    (dstBits srcBits rawImm : BitVec 64) (byte : Nat -> X86MemByte)
     (dstLane srcLane : X86ByteLane) (dstOld : X86RegValue) : X86CmpOpEffect :=
   let w := x86CmpOpWriteWidthSpec flagsCode
-  let lhs := x86RegReadAtSpec dstBits w dstLane
+  let lhs := x86CmpOpLhsSpec op dstBits byte w dstLane
   let rhs := x86CmpOpRhsSpec op srcBits rawImm w srcLane
   let flags := match x86CmpOpFlagKindSpec op with
     | .sub =>
@@ -186,25 +301,29 @@ def x86CmpOpStepSpec (op : X86CmpOp) (flagsCode : Code)
     | .logic =>
         x86LogicFlagsSpec (x86ZeroSpec (BitVec.and lhs rhs) w)
           (x86SignSpec (BitVec.and lhs rhs) w)
-  { rhsSource := x86CmpOpRhsSourceSpec op, flagKind := x86CmpOpFlagKindSpec op,
+  { lhsSource := x86CmpOpLhsSourceSpec op, rhsSource := x86CmpOpRhsSourceSpec op,
+    dispKind := x86CmpOpDispKindSpec op, flagKind := x86CmpOpFlagKindSpec op,
     width := w, lhs := lhs, rhs := rhs, dst := dstOld, flags := flags }
 
 /-- The `CMP`/`TEST` handler composition refines the independent
-rhs/flag-kind/width/flag-production statement for every opcode, `FLAGS` code,
-register bits, raw immediate, lanes, and destination register. -/
+operand-source/displacement/flag-kind/width/flag-production statement for every
+opcode, `FLAGS` code, register bits, raw immediate, memory byte source, lanes,
+and destination register. -/
 theorem x86_cmpop_step_refines (op : X86CmpOp) (flagsCode : Code)
-    (dstBits srcBits rawImm : BitVec 64)
+    (dstBits srcBits rawImm : BitVec 64) (byte : Nat -> X86MemByte)
     (dstLane srcLane : X86ByteLane) (dstOld : X86RegValue) :
-    generatedX86CmpOpStep op flagsCode dstBits srcBits rawImm
+    generatedX86CmpOpStep op flagsCode dstBits srcBits rawImm byte
         dstLane srcLane dstOld =
-      x86CmpOpStepSpec op flagsCode dstBits srcBits rawImm
+      x86CmpOpStepSpec op flagsCode dstBits srcBits rawImm byte
         dstLane srcLane dstOld := by
   cases op <;> cases flagsCode <;>
     simp only [generatedX86CmpOpStep, x86CmpOpStepSpec, x86CmpOpToOp,
-      rhsSource, flagKind, x86CmpOpRhsSourceSpec, x86CmpOpFlagKindSpec,
+      rhsSource, flagKind, lhsSource, dispKind, x86CmpOpRhsSourceSpec,
+      x86CmpOpFlagKindSpec, x86CmpOpLhsSourceSpec, x86CmpOpDispKindSpec,
       resolveWidth, generatedX86CmpOpWriteWidth, x86CmpOpWriteWidthSpec,
-      x86CmpOpCodeWidthSpec, generatedX86CmpOpRhs, x86CmpOpRhsSpec,
-      x86_reg_read_at_refines, x86_immediate_value_refines] <;>
+      x86CmpOpCodeWidthSpec, generatedX86CmpOpLhs, x86CmpOpLhsSpec,
+      generatedX86CmpOpRhs, x86CmpOpRhsSpec, x86_reg_read_at_refines,
+      x86_immediate_value_refines, x86_mem_load_refines] <;>
     first
       | rw [x86_sub_step_refines]
       | rw [x86_zero_refines, x86_sign_refines, x86_logic_flags_refine]
@@ -212,31 +331,42 @@ theorem x86_cmpop_step_refines (op : X86CmpOp) (flagsCode : Code)
 /-- Every `CMP`/`TEST` body writes no register: the destination passes through
 unchanged. -/
 theorem x86_cmpop_preserves_dst (op : X86CmpOp) (flagsCode : Code)
-    (dstBits srcBits rawImm : BitVec 64)
+    (dstBits srcBits rawImm : BitVec 64) (byte : Nat -> X86MemByte)
     (dstLane srcLane : X86ByteLane) (dstOld : X86RegValue) :
-    (x86CmpOpStepSpec op flagsCode dstBits srcBits rawImm dstLane srcLane
+    (x86CmpOpStepSpec op flagsCode dstBits srcBits rawImm byte dstLane srcLane
       dstOld).dst = dstOld := by
   cases op <;> rfl
+
+/-- The memory forms load their left-hand side from memory and the register
+forms from the destination register, so the two arms are distinguishable: the
+memory left-hand side is the addressed load of the byte source, the register
+left-hand side the width/lane destination read. -/
+theorem x86_cmpop_lhs_arms (w : X86Width) (dstBits : BitVec 64)
+    (byte : Nat -> X86MemByte) (dstLane : X86ByteLane) :
+    x86CmpOpLhsSpec .cmpMemImm dstBits byte w dstLane = x86MemLoadSpec byte w ∧
+      x86CmpOpLhsSpec .cmpImm dstBits byte w dstLane =
+        x86RegReadAtSpec dstBits w dstLane := by
+  exact ⟨rfl, rfl⟩
 
 /-- The `CMP` opcodes produce subtraction flags and the `TEST` opcodes logical
 flags; the two flag kinds are distinct, and the right-hand-side source is again
 independent of the flag kind (`CMP_IMM`/`TEST_IMM` share a source but differ in
 kind). -/
 theorem x86_cmpop_flag_production (flagsCode : Code)
-    (dstBits srcBits rawImm : BitVec 64)
+    (dstBits srcBits rawImm : BitVec 64) (byte : Nat -> X86MemByte)
     (dstLane srcLane : X86ByteLane) (dstOld : X86RegValue) :
-    (x86CmpOpStepSpec .cmpImm flagsCode dstBits srcBits rawImm dstLane srcLane
-        dstOld).flagKind =
-      (x86CmpOpStepSpec .cmpReg flagsCode dstBits srcBits rawImm dstLane srcLane
-        dstOld).flagKind ∧
-      (x86CmpOpStepSpec .testImm flagsCode dstBits srcBits rawImm dstLane srcLane
-        dstOld).flagKind =
-      (x86CmpOpStepSpec .testReg flagsCode dstBits srcBits rawImm dstLane srcLane
-        dstOld).flagKind ∧
-      (x86CmpOpStepSpec .cmpImm flagsCode dstBits srcBits rawImm dstLane srcLane
-        dstOld).flagKind ≠
-      (x86CmpOpStepSpec .testImm flagsCode dstBits srcBits rawImm dstLane srcLane
-        dstOld).flagKind := by
+    (x86CmpOpStepSpec .cmpImm flagsCode dstBits srcBits rawImm byte dstLane
+        srcLane dstOld).flagKind =
+      (x86CmpOpStepSpec .cmpReg flagsCode dstBits srcBits rawImm byte dstLane
+        srcLane dstOld).flagKind ∧
+      (x86CmpOpStepSpec .testImm flagsCode dstBits srcBits rawImm byte dstLane
+        srcLane dstOld).flagKind =
+      (x86CmpOpStepSpec .testReg flagsCode dstBits srcBits rawImm byte dstLane
+        srcLane dstOld).flagKind ∧
+      (x86CmpOpStepSpec .cmpImm flagsCode dstBits srcBits rawImm byte dstLane
+        srcLane dstOld).flagKind ≠
+      (x86CmpOpStepSpec .testImm flagsCode dstBits srcBits rawImm byte dstLane
+        srcLane dstOld).flagKind := by
   refine ⟨rfl, rfl, ?_⟩
   intro h
   cases h
@@ -245,10 +375,11 @@ theorem x86_cmpop_flag_production (flagsCode : Code)
 overflow, and leaves the packet-tagged destination untouched. -/
 theorem x86_cmpop_equal_w64 :
     (x86CmpOpStepSpec .cmpReg .b64 0x1122334455667788 0x1122334455667788 0
-      .low .low ⟨0xdead, .packet⟩).flags =
+      (fun _ => 0) .low .low ⟨0xdead, .packet⟩).flags =
       { cf := false, zf := true, sf := false, of := false } ∧
       (x86CmpOpStepSpec .cmpReg .b64 0x1122334455667788 0x1122334455667788 0
-        .low .low ⟨0xdead, .packet⟩).dst = ⟨0xdead, .packet⟩ := by
+        (fun _ => 0) .low .low ⟨0xdead, .packet⟩).dst =
+        ⟨0xdead, .packet⟩ := by
   refine ⟨?_, ?_⟩ <;> decide
 
 /-- A 32-bit `TEST` whose width-narrowed conjunction is nonzero clears carry
@@ -257,7 +388,7 @@ shared low byte is nonzero but whose width-local conjunction is zero sets
 zero. -/
 theorem x86_cmpop_test_zero_w16 :
     (x86CmpOpStepSpec .testImm .b16 0x000000000000ff00 0 0x00000000000000ff
-      .low .low ⟨0, .scalar⟩).flags =
+      (fun _ => 0) .low .low ⟨0, .scalar⟩).flags =
       { cf := false, zf := true, sf := false, of := false } := by
   decide
 
@@ -265,10 +396,20 @@ theorem x86_cmpop_test_zero_w16 :
 immediate with bit 31 set sign-extends only under the 64-bit width, so the same
 compare carries at 64 bits. -/
 theorem x86_cmpop_imm64_sign_extends :
-    (x86CmpOpStepSpec .cmpImm .b64 0 0 0x0000000080000000 .low .low
-      ⟨0, .scalar⟩).rhs = 0xffffffff80000000 ∧
-      (x86CmpOpStepSpec .cmpImm .b32 0 0 0x0000000080000000 .low .low
-        ⟨0, .scalar⟩).rhs = 0x80000000 := by
+    (x86CmpOpStepSpec .cmpImm .b64 0 0 0x0000000080000000 (fun _ => 0) .low
+      .low ⟨0, .scalar⟩).rhs = 0xffffffff80000000 ∧
+      (x86CmpOpStepSpec .cmpImm .b32 0 0 0x0000000080000000 (fun _ => 0) .low
+        .low ⟨0, .scalar⟩).rhs = 0x80000000 := by
   refine ⟨?_, ?_⟩ <;> decide
+
+/-- The memory form takes its left-hand side from the addressed bytes: comparing
+a loaded `5` against a register `7` under a 64-bit `CMP` borrows, and the loaded
+value — not the destination register — is the left-hand side. -/
+theorem x86_cmpop_mem_reg_borrow_w64 :
+    let byte : Nat -> X86MemByte := fun i => if i = 0 then 0x05 else 0
+    (x86CmpOpStepSpec .cmpMemReg .b64 0xffffffffffffffff 0x0000000000000007 0
+      byte .low .low ⟨0, .scalar⟩).flags =
+      { cf := true, zf := false, sf := true, of := false } := by
+  decide
 
 end KProgFormal
