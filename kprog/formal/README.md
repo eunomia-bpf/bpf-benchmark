@@ -1831,6 +1831,34 @@ same independent module (`X86Width.lean`); the arm64 side previously restated
 only the mask and narrowing inline in `Arm64AluResult.lean`, which now imports
 `Arm64Width` instead.
 
+The AArch64 decoded width a body operates at — the arm64 analogue of the x86
+effective-width resolution — is now the same generated contract rather than an
+inline fallback. `generate_arm64_width_spec.py` emits
+`KPROG_ARM64_WIDTH_ABSENT_CODE`, `KPROG_ARM64_WIDTH_EFFECTIVE_DEFAULT` and
+`KPROG_ARM64_WIDTH_EFFECTIVE` alongside the width tables, and the generated Lean
+`effective` resolves a decoded code to the code a body operates at.
+`Arm64Width.lean` proves that resolution equal to an independent
+`if c = 0 then 8 else c` (`arm64_effective_refines`), that the absent code names
+no width (`arm64_absent_code_names_no_width`), that the fallback code is exactly
+the 64-bit width's code (`arm64_default_code_is_w64`, pinned to the generated
+decode so it cannot drift), and that the resolution is the identity on every real
+width (`arm64_effective_identity_on_width`). The AArch64 dispatcher resolves the
+width exactly once, at the `ARM64_SIM_L_EXEC` prologue, and every arm below it
+operates at that effective width; that one site now routes through
+`ARM64_SIM_L_EFFECTIVE_WIDTH`, whose kernel is the generated
+`KPROG_ARM64_WIDTH_EFFECTIVE`. A generated-header oracle sweeps the full decoded
+code domain (0..255) plus the width codes and the absent code's neighbours
+against the independent model and the pinned width table (1,280 cases); a
+sim-header route oracle drives fifteen width-reading dispatcher arms —
+move/move-immediate/MOVK, ALU immediate/register, LSL/ROR shift, MVN, NEG,
+compare-immediate, both CCMP forms, CSEL and the ADDS/SUBS writeback pair — at
+each of the four widths and at the absent code, and checks that a raw code and
+its effective code produce identical whole modeled state: all 31 general
+registers with tags, the stack pointer, NZCV, LR, the SIMD quarters, and the
+whole stack arena with its slot tags (337 cases). Because the resolution is
+total on the width codes, driving the absent code must reproduce the 64-bit
+behavior exactly; the oracle's regression tripwire is that raw-0 equals raw-8.
+
 The AArch64 condition-code contract is now a standalone module rather than a
 fragment of the branch-PC module. `GeneratedArm64Cond` (from
 `arm64_cond_spec.json`) defines the fifteen `Cond` constructors, their
@@ -2015,7 +2043,9 @@ the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
 compositions, and
-AArch64 width, generic ALU handler writeback/path
+AArch64 width, the AArch64 effective-width resolution (and the simulator's
+routing of its dispatcher's single width-resolution site through it), generic
+ALU handler writeback/path
 `.D0`/`.Q0` vector memory-transfer (and the simulator's routing of all four
 bodies through the `KPROG_ARM64_DQ_MEM_*` contract), `LDP`/`STP` pair-move
 (and the simulator's routing of both bodies through the `KPROG_ARM64_PAIR_MEM_*`

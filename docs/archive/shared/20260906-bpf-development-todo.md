@@ -8516,6 +8516,67 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Full gate `make -C kprog/formal check` rc=0 (121 `cross-check: OK`).
 
 
+## Step 0106 — AArch64 effective-width resolution bridged through a machine-checked contract
+
+- Scope: the AArch64 mirror of Step 0105 — the *effective-width resolution*, the
+  decoded width code of 0 (an unused width field) meaning the 64-bit default.
+  Unlike x86, the AArch64 simulator restated the fallback only once: the
+  `ARM64_SIM_L_EXEC` prologue resolves the width a single time
+  (`__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);`) and every arm
+  below operates at that effective width, so exactly one line routes through the
+  contract. The per-opcode `ARM64_WIDTH_*` literals (stack/pair/`ldrsx`, the
+  `STLXR` hardcoded 32-bit width, the index-register width) are separate
+  decisions and stay out of scope, as in the x86 step.
+- Shared spec `kprog/formal/arm64_width_spec.json` gained an `effective` block
+  (`absent_code` 0, `default_name` `w64`); `generate_arm64_width_spec.py`
+  validates it (absent code 0, not colliding with a width code, default a 64-bit
+  width) and emits `KPROG_ARM64_WIDTH_ABSENT_CODE`,
+  `KPROG_ARM64_WIDTH_EFFECTIVE_DEFAULT`, `KPROG_ARM64_WIDTH_EFFECTIVE` and the
+  Lean `absentCode`/`defaultCode`/`effective` definitions.
+  `generate_arm64_width_spec.py --check` rc=0.
+- Refinement `KProgFormal/Arm64Width.lean` against an independent spec
+  (extended): `arm64_effective_refines` (generated `effective` equals the
+  independent `if c = 0 then 8 else c`, `rfl`), `arm64_effective_absent_is_default`,
+  `arm64_absent_code_names_no_width` (no width's code is the absent code),
+  `arm64_default_code_is_w64` (the fallback code pinned against the generated
+  decode so it cannot drift), and `arm64_effective_identity_on_width` (the
+  resolution is the identity on every real width). Lean modules elaborate rc=0.
+- Routing: `arm64_sim.h` gained
+  `arm64_width_effective` (kernel = generated `KPROG_ARM64_WIDTH_EFFECTIVE`);
+  `arm64_sim_local_bpf.h` gained `ARM64_SIM_L_EFFECTIVE_WIDTH` and its single
+  exec-prologue width-resolution site now routes through it.
+- Two host oracles. `test_arm64_width_effective_host.c` includes only the
+  generated header, pins the absent code, the default macro, and the width
+  codes, and sweeps the full decoded-code domain (0..255) plus the width codes
+  and the absent code's neighbours against an independent `code ? code : 64-bit
+  code` model and the pinned width table: `arm64 width effective host
+  cross-check: OK (1280 cases)`. `test_arm64_width_effective_route_host.c`
+  includes the simulator header and drives fifteen width-reading dispatcher arms
+  (move/move-immediate/MOVK, ALU immediate/register, LSL/ROR shift, MVN, NEG,
+  compare-immediate, both CCMP forms, CSEL, and the ADDS/SUBS writeback pair) at
+  each of the four widths and at the absent code, checking that a raw code and
+  its effective code produce identical whole modeled state — all 31 general
+  registers with tags, the stack pointer, NZCV, LR, the SIMD quarters, and the
+  whole stack arena with its slot tags: `arm64 width effective route host
+  cross-check: OK (337 cases)`. Because the resolution is total on the width
+  codes, raw-0 must reproduce raw-8 exactly; that is the regression tripwire.
+  Both zero-warning under `-Wall -Wextra` and clean under ASan+UBSan. Both wired
+  into `formal/Makefile` together with the `GeneratedArm64Width` elaboration row
+  (gate `cross-check: OK` count rose from 121 to 123).
+- Mutation harness `/tmp/mut_arm64_width_effective.py`: 17 mutations, all as
+  expected. The generator `--check` catches the spec-op / spec-absent /
+  spec-collision / spec-default / spec-width-code / generator-inversion /
+  generator-default / generated-Lean and generated-C header defects; the hand
+  module catches the independent-spec and refinement defects; the route oracle
+  catches the pinned-width and dropped-default behavioural defects; and a defect
+  consistent across generator *and* both regenerated artifacts (`--check` blind)
+  is caught only by the refinement theorem over a rebuilt olean. The
+  inline-restatement equivalence SURVIVES, as it must. Post-restore sources
+  byte-identical.
+- Because `arm64_sim_local_bpf.h` changed, the sim was rebuilt:
+  `make -C kprog/arm64 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (123 `cross-check: OK`).
+
 ## Next after 0076
 
 
