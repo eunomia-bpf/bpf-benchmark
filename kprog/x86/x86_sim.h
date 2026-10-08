@@ -80,6 +80,7 @@
 #define X86_OP_ADD_REG64 X86_OP_ADD_REG
 #define X86_OP_XOR_REG32 X86_OP_XOR_REG
 
+#include "../formal/generated/x86_opcode.h"
 #include "../formal/generated/x86_alu_decode.h"
 
 #define X86_CC_O 0U

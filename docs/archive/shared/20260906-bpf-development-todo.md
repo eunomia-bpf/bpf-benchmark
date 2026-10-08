@@ -8783,6 +8783,81 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - No sim-header C change: the trace contract consumes the existing
   `KPROG_*_BRANCH_BACKWARD` macros, so no arch-sim rebuild is required.
 
+## Step 0110 — x86 opcode-token (objdump-mnemonic → `X86_OP_*`) machine-checked contract
+
+- Scope: the artifact encoder `kprog/x86/micro-prog/generate_micro_sim_proofs.py`
+  hardcoded the `"X86_OP_*"` token it emits for each decoded operation as a
+  string literal in 72 `enc(...)` call sites, and the simulator
+  `kprog/x86/x86_sim.h` defines those numeric codes independently. Nothing tied
+  the two, so a renumbered or renamed token in the simulator would have left the
+  encoder emitting a stale name the simulator no longer dispatched. This step
+  makes the token set and its codes a shared, generated, machine-checked
+  contract. Coverage rises from 31/72 tokens implicitly exercised to 72/72 pinned.
+- Shared spec `kprog/formal/x86_opcode_spec.json` (`schema_version` 1,
+  `operation` `x86Opcode`): 72 canonical rows `{name, define, code}` (row order =
+  `x86_sim.h` definition order, `name` lowerCamelCase, `code` a hex string
+  `"0x00"`..`"0xff"`) plus 5 `{name, define, target}` alias rows.
+  `generate_x86_opcode_spec.py` carries an independent module-level `EXPECTED`
+  and `ALIAS_EXPECTED` enumeration, re-reads `kprog/x86/x86_sim.h` on every run
+  (`OPCODE_DEFINE` / `ALIAS_DEFINE` regexes), and fails on: a renumbered code, a
+  renamed `define`, an added or dropped canonical token (whole-namespace set
+  equality both directions), a duplicate code, an alias whose target drifts, or a
+  `canonical_name` derivation mismatch. It emits `generated/x86_opcode.h`, the
+  Lean `KProgFormal.GeneratedX86Opcode`, and the encoder table
+  `kprog/x86/micro-prog/generated_x86_opcode.py`. `--check` rc=0.
+- Generated C: 72 `_Static_assert(X86_OP_X == 0x..U, "x86 opcode <name> drift");`
+  plus 5 alias identity asserts
+  (`_Static_assert(X86_OP_MOV_IMM64 == X86_OP_MOV_IMM, ...)`) and
+  `#define KPROG_X86_OPCODE_COUNT 72U`. Included from `x86_sim.h:83`, immediately
+  before the existing `generated/x86_alu_decode.h` include, so the defines are in
+  scope and a renumbered token fails the simulator build itself.
+- Aliases are modeled as *identity* asserts, not literals: an alias asserts
+  sameness with its target. Only `X86_OP_MOV_IMM64` has a real caller
+  (`kprog/x86/x86_sim_hardcoded.bpf.c:8`); the other four are unused but stay
+  defined and pinned.
+- Generated Lean: `inductive Op` (72 constructors), `deriving DecidableEq, Repr`,
+  `def code : Op -> Nat`, `def define : Op -> String` (the second projection is
+  named `define` because the generated name column is the `X86_OP_*` token, not a
+  camelCase mnemonic). Hand refinement `KProgFormal/X86Opcode.lean`:
+  `def x86OpcodeSpec : List (String × Nat)` (72 independent token/code pairs),
+  `def allOpcodes : List GeneratedX86Opcode.Op` (72 constructors), and
+  `theorem x86_opcode_refines` proving the generated token/code projection equal
+  to the independent list via `native_decide`; `x86_opcode_codes_distinct` pins a
+  5-conjunct sample of pairwise code distinctness (per the arm64 precedent, not
+  all 2556 pairs). Module elaborates rc=0.
+- Encoder wiring: `enc()` now resolves its opcode argument through the generated
+  `X86_OPCODE`/`X86_OPCODE_NAME` tables, accepts either the `X86_OP_*` token or
+  the camelCase name, and `raise SystemExit(f"unknown x86 opcode: {op}")` on an
+  unknown name — the emitted C token is still the `X86_OP_*` name, so the 68
+  literal call sites are unchanged. A module-scope loop validates every
+  `DIRECT_STEP_MACROS` key against `X86_OPCODE_NAME`; the table is a deliberate
+  superset and exactly four keys are dead (`MOV_LOAD_SCALAR`, `ADD_IMM`,
+  `ADD_REG`, `XOR_REG`), documented at the loop rather than deleted.
+- Host oracle `test_x86_opcode_host.c`: an independent `OPCODE_OPS[]` (72 token
+  rows) plus a run-time re-read of `../x86/x86_sim.h` that confirms the header
+  defines exactly those tokens (`UNCOVERED canonical ...` otherwise), no two
+  canonical tokens share a code, and each width-suffixed alias resolves to its
+  target — `x86 opcode host cross-check: OK (2778 cases)`, zero warnings.
+- Gate `make -C kprog/formal check` rc=0, **129** `cross-check: OK` (was 128 for
+  Step 0109). `generate_x86_opcode_spec.py --check`, the Lean pair, and the oracle
+  are wired into `kprog/formal/Makefile`.
+- Mutation harness `/tmp/mut_x86_opcode.py`, 7 mutations against a cloned tree,
+  each caught after three unmutated controls pass: generated-header renumber
+  (oracle), spec code change (generator), spec dropped row (generator),
+  simulator-header token addition (generator), simulator-header renumber
+  (generator), generated-Lean code change (Lean refinement, olean rebuilt first),
+  encoder-table remap (generator). 7/7 caught, 0 missed.
+- Simulator rebuild: the `x86_sim.h:83` include means `make -C kprog/x86
+  micro-proofs-build` was re-run — all 30 workload-derived artifacts `ok`.
+- arm64 is out of scope for this step and recorded here as such:
+  `kprog/arm64/arm64_sim.h` has 71 `#define ARM64_OP_*` rows and no whole-table
+  generated opcode header (`GeneratedArm64Decode` covers only the ALU/shift/mod/
+  bitfield sub-tables).
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` records the contract
+  (O1 operation numbers, O4 token binding, x86 covered list, and the
+  mnemonic-parsing limitation) in the paper repo commit `c3acacf`; the outer
+  gitlink bump follows.
+
 ## Next after 0076
 
 
@@ -8791,7 +8866,11 @@ compiler/native bytes; specialization preservation. The
 register/immediate/RHS objdump→AUX selection is no longer wholly open: the
 register forms' RHS/flag selection (Step 0086) and the memory forms'
 left-source/displacement-kind selection (Step 0107) are now machine-checked
-contracts, leaving the register decode inside the composed body. The index-register decode into the AUX index byte
+contracts, leaving the register decode inside the composed body. The encoder's
+operation *token* is likewise no longer wholly open: the objdump-mnemonic →
+`X86_OP_*` token set and its codes are now a shared generated contract binding
+the simulator, the Lean model, and the artifact encoder (Step 0110), leaving the
+textual mnemonic that selects a token inside the parser. The index-register decode into the AUX index byte
 is no longer wholly open: the sentinel *presence* decision over that byte is
 now a machine-checked contract for both x86 (Step 0101) and AArch64 (Step 0102),
 leaving the register-value read inside the composed body. "Multi-step

@@ -377,6 +377,18 @@ independent operation mapping. The C immediate, register, and memory ALU paths
 consume the generated predicates for those two special branches. This binds
 typed AUX payload extraction to handler class, but not native-byte or textual
 mnemonic parsing to that typed operation.
+The x86 opcode-number contract is generated from `x86_opcode_spec.json` into
+the C `_Static_assert` table `generated/x86_opcode.h`, the Lean
+`KProgFormal.GeneratedX86Opcode` family, and the artifact encoder's
+`generated_x86_opcode.py`. It pins all 72 canonical `X86_OP_*` tokens to their
+codes and the five width-suffixed aliases as identities with their target
+tokens. The generator re-reads `kprog/x86/x86_sim.h` on every `--check` and
+fails on a renumbered, renamed, added, or dropped token, so the simulator, the
+Lean model, and the encoder cannot silently disagree about what a token means.
+Lean proves the generated token/code projection equal to an independent
+enumeration. The artifact encoder resolves every opcode it emits through the
+generated table and exits on an unknown name. Textual mnemonic parsing and
+native bytes remain outside this contract.
 The x86 little-endian memory access contract is generated from
 `x86_mem_access_spec.json` into the C macros `KPROG_X86_MEM_LOAD` /
 `KPROG_X86_MEM_STORE` and Lean. The central `X86_SIM_L_LOAD_ADDR` /
@@ -2204,10 +2216,11 @@ verify the C compiler or native instruction bytes.
 
 This is still a deliberately bounded proof. It does not establish full
 equivalence between the simulator and native instruction bytes, cover complete
-instruction decoding/dispatch, multi-step control-flow traces, helpers, or the
-full workload-derived instruction subsets, or prove the paper's complete
-O1--O4 obligations. The proved branch predicates and the AArch64 and x86
-emitted-shape bridges are local control-flow refinements (one conditional edge
-at a time), not a whole-program trace theorem.
+instruction decoding/dispatch, helpers, or the full workload-derived instruction
+subsets, or prove the paper's complete O1--O4 obligations. The proved branch
+predicates and the AArch64 and x86 emitted-shape bridges are local control-flow
+refinements (one conditional edge at a time); the whole-program control-flow
+trace contract chains those edges over arbitrary-length paths, but the emitted
+shapes are still not tied to concrete native instruction bytes.
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.

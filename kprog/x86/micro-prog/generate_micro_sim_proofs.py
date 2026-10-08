@@ -13,6 +13,7 @@ from pathlib import Path
 import yaml
 
 from generated_x86_alu_decode import ALU_AUX
+from generated_x86_opcode import X86_OPCODE, X86_OPCODE_NAME
 from generated_x86_reg_lane_aux import c_reg_lane_aux
 
 
@@ -451,7 +452,15 @@ def has_direct_branch_target(operand: str) -> bool:
 
 def enc(op: str, dst: str = "X86_REG_NONE", src: str = "X86_REG_NONE",
         flags: str = "X86_WIDTH_64", aux: str = "0", imm: str = "0") -> EncodedInsn:
-    return EncodedInsn(op, dst, src, flags, aux, imm)
+    # Every opcode an artifact step carries is resolved through the generated
+    # x86 opcode contract, so a token the simulator does not define, or a
+    # canonical name the contract does not know, fails generation here instead
+    # of emitting a step the simulator cannot dispatch.
+    name = X86_OPCODE_NAME.get(op, op)
+    define = X86_OPCODE.get(name)
+    if define is None:
+        raise SystemExit(f"unknown x86 opcode: {op}")
+    return EncodedInsn(define, dst, src, flags, aux, imm)
 
 
 def is_helper_symbol(symbol: str | None) -> bool:
@@ -999,6 +1008,17 @@ DIRECT_STEP_MACROS = {
     "X86_OP_PUSH": "X86_SIM_L_EXEC_PUSH({src})",
     "X86_OP_POP": "X86_SIM_L_EXEC_POP({dst}, {flags})",
 }
+
+# Every macro-table key must be an opcode the generated contract defines: a
+# typo'd key would otherwise silently miss the table lookup and fall back to the
+# generic `X86_SIM_RUN_OP` step. The table is deliberately a superset of the
+# opcodes the encoder emits: `MOV_LOAD_SCALAR`, `ADD_IMM`, `ADD_REG`, and
+# `XOR_REG` are reachable only through the alias spellings, which the encoder
+# never produces (`alu`/`xor reg, reg` lower through `ALU_IMM`/`ALU_REG`).
+for _macro_key in DIRECT_STEP_MACROS:
+    if _macro_key not in X86_OPCODE_NAME:
+        raise SystemExit(f"unknown x86 opcode in DIRECT_STEP_MACROS: {_macro_key}")
+del _macro_key
 
 
 def direct_step_statement(encoded: EncodedInsn) -> str | None:
