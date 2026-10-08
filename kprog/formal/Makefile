@@ -36,6 +36,7 @@ check:
 	python3 generate_arm64_mem_index_spec.py --check
 	python3 generate_arm64_reg_presence_spec.py --check
 	python3 generate_arm64_reg_dispatch_spec.py --check
+	python3 generate_control_flow_trace_spec.py --check
 	python3 generate_arm64_fmov_spec.py --check
 	python3 generate_arm64_fmov_dest_spec.py --check
 	python3 generate_arm64_load_bytes_spec.py --check
@@ -401,6 +402,12 @@ check:
 	lake env lean KProgFormal/Arm64BranchEmit.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_branch_emit_host.c -o build/test_arm64_branch_emit_host
 	./build/test_arm64_branch_emit_host
+	lake env lean KProgFormal/GeneratedControlFlowTrace.lean
+	lake env lean KProgFormal/ControlFlowTrace.lean
+	$(CC) -Wall -Wextra -O2 -I. test_control_flow_trace_host.c -o build/test_control_flow_trace_host
+	./build/test_control_flow_trace_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_control_flow_trace_route_host.c -o build/test_control_flow_trace_route_host
+	./build/test_control_flow_trace_route_host
 	lake env lean KProgFormal/GeneratedArm64Movk.lean
 	lake env lean KProgFormal/Arm64Movk.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_movk_host.c -o build/test_arm64_movk_host

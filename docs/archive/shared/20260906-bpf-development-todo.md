@@ -8731,6 +8731,58 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   rebuilt: `make -C kprog/arm64 micro-proofs-build` rc=0 (30 `ok` rows).
 - Full gate `make -C kprog/formal check` rc=0 (126 `cross-check: OK`).
 
+## Step 0109 — whole-program control-flow trace machine-checked contract
+
+- Scope: lift the per-conditional-edge emission facts (Step 0100 x86, Step 0108
+  arm64 bridge already proved the emitted `goto`/label shape selects exactly the
+  architectural `branchPc`) to an *arbitrary-length* path. The omitted piece was
+  the whole-program trace theorem: chaining the per-edge next-PC facts through a
+  multi-edge walk. This step is ISA-agnostic — the per-edge theorem
+  `nextPc (shape) taken fallthrough target = branchPc taken fallthrough target`
+  is literally identical in `X86BranchEmit.lean` and `Arm64BranchEmit.lean`, and
+  both C macros route through the mirrored `KPROG_{X86,ARM64}_BRANCH_BACKWARD`.
+- Shared spec `kprog/formal/control_flow_trace_spec.json`
+  (`schema_version` 1, `operation` `controlFlowTrace`, `composer` `sequential`,
+  `fallthrough_step` 1). `generate_control_flow_trace_spec.py` hard-pins the
+  `EXPECTED` dict to that spec and emits the Lean
+  `GeneratedControlFlowTrace.fallthroughStep`/`emittedStep`/`walk`/`walkPolicy`
+  and the C macros `KPROG_CONTROL_FLOW_SEQUENTIAL_STEP` and
+  `KPROG_CONTROL_FLOW_EDGE_NEXT`. `--check` rc=0.
+- Trace representation: `List (Bool × Nat)` (already-evaluated predicate value,
+  edge target). No per-instruction program type or small-step relation — a new
+  `step` type would be a needless abstraction; matches an independent `List`-fold
+  model.
+- Generated side: `emittedStep` (= `GeneratedX86BranchEmit.nextPc` with the
+  fall-through resume `pc + fallthroughStep`), folded by `walk` (fixed shape)
+  and `walkPolicy` (recomputes the direction shape at every edge from the running
+  program counter and edge target — exactly as the simulator calls its direction
+  macro per conditional transfer). Hand side: `ControlFlowTrace.archWalk`, the
+  independent architectural walk stated over the shared `branchPc` next-PC model
+  (`archEdge`) with no reference to any emitted shape or direction policy.
+- Refinement `KProgFormal/ControlFlowTrace.lean`:
+  `control_flow_trace_step_refines` (one edge, both shapes), the whole-program
+  lifts `control_flow_trace_walk_refines` and
+  `control_flow_trace_walk_policy_refines` (emitted walk equals `archWalk` for
+  every direction shape and every per-edge policy), and the supporting lemmas
+  `control_flow_trace_walk_shape_irrelevant`,
+  `control_flow_trace_walk_append`,
+  `control_flow_trace_walk_all_fallthrough`. The per-edge direction computation
+  is therefore a machine-checked whole-program no-op. Uses no new axioms. Module
+  elaborates rc=0.
+- Two host oracles: `test_control_flow_trace_host.c` (generated-header only)
+  folds `KPROG_CONTROL_FLOW_EDGE_NEXT` over random traces while cross-checking
+  the direction macro and both emitted shapes against an independent
+  `taken ? target : pc + 1` walk — `control flow trace host cross-check: OK
+  (845 cases)`, clean under ASan+UBSan; `test_control_flow_trace_route_host.c`
+  (combined x86+arm64 translation unit) folds the real `X86_SIM_X86_JCC` and
+  `ARM64_SIM_A64_JCC` macros — each routed through its own generated direction
+  macro — over random traces for both ISAs against the same independent walk —
+  `control flow trace route host cross-check: OK (3108 cases)`. Both wired into
+  `formal/Makefile` together with the generator `--check` and the Lean pair (gate
+  `cross-check: OK` count rises by two).
+- No sim-header C change: the trace contract consumes the existing
+  `KPROG_*_BRANCH_BACKWARD` macros, so no arch-sim rebuild is required.
+
 ## Next after 0076
 
 
@@ -8745,8 +8797,10 @@ now a machine-checked contract for both x86 (Step 0101) and AArch64 (Step 0102),
 leaving the register-value read inside the composed body. "Multi-step
 control-flow traces" is likewise no
 longer wholly open: the per-conditional-edge predicate *and* its emitted
-`goto`/label shape are now bridged for both x86 (Step 0100) and AArch64; what
-remains is a whole-program trace theorem chaining those edges.
+`goto`/label shape are now bridged for both x86 (Step 0100) and AArch64, and the
+whole-program trace theorem chaining those edges is now proved ISA-agnostically
+(Step 0109): the emitted walk (fixed shape and per-edge directional policy)
+equals the architectural `branchPc` walk for arbitrary-length paths.
 
 The AArch64 *write-register destination-presence* decision is likewise no longer
 open: the `XZR`/sentinel presence test the three writeback bodies shared is now

@@ -1500,6 +1500,34 @@ four write widths and several values, observing which of the sim's own 31 GPR
 cells each write changes and comparing it against the generated cell selector
 (6,401 cases).
 
+The whole-program control-flow trace contract lifts the per-edge
+conditional-transfer emission facts to an arbitrary-length path. A trace is a
+list of conditional edges, each edge an already-evaluated predicate value and a
+candidate target; the generated
+`GeneratedControlFlowTrace.emittedStep`/`walk`/`walkPolicy` fold the per-edge
+`nextPc` next-PC selection over the path, threading the program counter and --
+in `walkPolicy` -- recomputing the direction shape at every edge from the running
+program counter and the edge target, exactly as the simulator calls
+`KPROG_X86_BRANCH_BACKWARD` / `KPROG_ARM64_BRANCH_BACKWARD` at each conditional
+transfer. The hand-written `ControlFlowTrace.archWalk` is the independent
+architectural walk, stated directly over the shared `branchPc` model with no
+reference to any emitted shape or direction policy, and
+`control_flow_trace_walk_refines` / `control_flow_trace_walk_policy_refines`
+prove the emitted walks equal it for every direction shape and every per-edge
+policy -- the whole-program lift of `x86_branch_emit_refines` /
+`arm64_branch_emit_refines`, so the per-edge direction computation is a
+machine-checked whole-program no-op. Supporting lemmas fix the walk's induction
+behaviour (`control_flow_trace_walk_append`), that the direction shape is
+irrelevant to a whole trace (`control_flow_trace_walk_shape_irrelevant`) and
+that an all-fall-through trace advances by exactly its length
+(`control_flow_trace_walk_all_fallthrough`). A generated-header oracle folds the
+edge macro `KPROG_CONTROL_FLOW_EDGE_NEXT` over random traces against an
+independent `taken ? target : pc + 1` walk while cross-checking the direction
+macro and both emitted goto/fall-through shapes (845 cases), and a route oracle
+folds the real `X86_SIM_X86_JCC` and `ARM64_SIM_A64_JCC` macros -- each routed
+through its own generated direction macro -- over random traces for both ISAs
+against the same independent walk (3,108 cases).
+
 The AArch64 vector-register-file half-mapping theorem covers the four
 vector memory-transfer bodies `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`,
 `STORE_D0_MEM` and `STORE_Q0_MEM`, which move a SIMD register's low 64-bit half
@@ -2093,6 +2121,10 @@ the x86 conditional-branch emitted-shape contract (and the simulator's routing
 of `X86_SIM_X86_JCC_IMPL`'s backward-edge choice through
 `KPROG_X86_BRANCH_BACKWARD`, proved equal to the architectural `branchPc` for
 both shapes),
+the whole-program control-flow trace contract (and the simulator's per-edge
+routing of both `X86_SIM_X86_JCC_IMPL` and `ARM64_SIM_A64_JCC_IMPL` through the
+generated direction macros, proved equal to the architectural `branchPc` walk
+for every direction shape and every per-edge direction policy),
 the x86 little-endian memory
 memory-source bit-test/zero-high-bits composition, the memory-source
 multiply, the register-source multiply, two-destination `MULX`, and compare
