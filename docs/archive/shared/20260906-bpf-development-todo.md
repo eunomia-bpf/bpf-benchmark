@@ -8659,6 +8659,78 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C kprog/x86 micro-proofs-build` rc=0.
 - Full gate `make -C kprog/formal check` rc=0 (124 `cross-check: OK`).
 
+## Step 0108 — AArch64 register-number → dispatch-cell machine-checked contract
+
+- Scope: the AArch64 register-number decode into the dispatch cell the three
+  writeback bodies (`ARM64_SIM_L_WRITE_REG_WIDTH`/`_PTR`/`_PTR_TAG`) and the two
+  read bodies (`ARM64_SIM_L_READ_REG`/`_READ_REG_PTR`) select. This is the last
+  openly uncontracted AArch64 decode: Step 0103 lifted the *destination-presence*
+  decision (`XZR`/sentinel) out of the bodies but explicitly left the GPR
+  dispatch `switch` inside the composed body; Step 0108 pins that dispatch — the
+  binding from a decoded register number to the cell the hand-written
+  `ARM64_SIM_L_FOR_EACH_GPR` order names — to a generated contract.
+- Shared spec `kprog/formal/arm64_reg_dispatch_spec.json`
+  (`schema_version` 1, `operation` `arm64RegDispatch`, `reg_bits` 8,
+  `gpr_count` 31, and 31 cells `x0`..`x30` numbered `0`..`30`).
+  `generate_arm64_reg_dispatch_spec.py` hard-pins the `EXPECTED` dict to that
+  spec, validates the cell names/numbers/count, and emits the C macros
+  `KPROG_ARM64_GPR_COUNT 31U` and `KPROG_ARM64_GPR_CELL(REG)` (the cell index
+  equals the register number), the 31 per-number
+  `_Static_assert(ARM64_X<n> == <n>U, "arm64 gpr dispatch number drift")`
+  checks, and the count `_Static_assert`, plus the Lean `gprCount`/`regBits`/
+  `cellNumbers`/`cellNames`/`cellOf`/`numberOfName`/`nameOfNumber` tables.
+  `generate_arm64_reg_dispatch_spec.py --check` rc=0.
+- Refinement `KProgFormal/Arm64RegDispatch.lean` against independent
+  `List.finRange 31` constructions: `arm64_reg_dispatch_numbers_refine` and
+  `arm64_reg_dispatch_names_refine` (the generated cell tables equal the
+  independent constructions, so the cell index equals the register number and
+  cell `i` names `x{i}`), the length/nodup facts
+  (`arm64_reg_dispatch_numbers_length`, `_names_length`, `_numbers_nodup`),
+  `arm64_reg_dispatch_cellof_refines` (the selector equals an independent
+  literal-bound-`31` statement), `arm64_reg_dispatch_bits_is_8`,
+  `arm64_reg_dispatch_cell_x0`/`_cell_x30`/`_zero_is_none`/`_sp_is_none`/
+  `_sentinel_is_none`, `arm64_reg_dispatch_full_range`,
+  `arm64_reg_dispatch_name_number_roundtrip`, and the cross-contract pins
+  `arm64_reg_dispatch_count_is_xzr` (the dispatch count ends exactly where the
+  presence `XZR` number begins), `_xzr_is_none`, `_none_is_none`,
+  `_cell_implies_writable`, `_writable_not_dispatch_none` (the dispatch `none`
+  case is a subset of the presence `discard` case — directionally stated, not as
+  an `isSome = writable` iff, because the presence contract is coarser: it calls
+  bytes `32..254` writable while the dispatch calls them `none`),
+  `_sentinel_is_index_sentinel`, and `_case_dispatch`. Module elaborates rc=0.
+- Routing: `arm64_sim_local_bpf.h` now includes the generated
+  `formal/generated/arm64_reg_dispatch.h` after the `ARM64_X0..ARM64_X30`
+  register-presence include, and adds three
+  `_Static_assert(KPROG_ARM64_GPR_CELL(ARM64_X0/X15/X30) == 0/15/30U, ...)`
+  checks binding the cell selector to the hand-written X-macro order, so the
+  generated per-number drift checks and the cell selector both pin the dispatch
+  order. (The `SP` branch remains a separate architectural case.)
+- Two host oracles: `test_arm64_reg_dispatch_host.c` (generated-header only)
+  drives the count and cell macros over all 256 register numbers against an
+  independent number-is-cell binding — `arm64 reg dispatch host cross-check: OK
+  (257 cases)`; `test_arm64_reg_dispatch_route_host.c` (sim header) drives the
+  real `READ_REG`/`READ_REG_PTR`/`WRITE_REG_WIDTH` bodies over all 256 register
+  numbers, all four widths and six values, and observes which of the simulator's
+  own 31 GPR cells each write changes — `arm64 reg dispatch route host
+  cross-check: OK (6401 cases)`. Both wired into `formal/Makefile` together with
+  the generator `--check` and the Lean pair (gate `cross-check: OK` count rises
+  by two).
+- Mutation harness `/tmp/mut_arm64_reg_dispatch.py`: 15 mutations, all as
+  expected. The generator `--check` catches spec cell-number/`EXPECTED`-count,
+  hand-edited generated-header assert, and generated-Lean bound defects; the
+  `lean_chain` detector (rebuild the generated olean, then elaborate the hand
+  module) catches generated-Lean name-order, hand-spec-bound and
+  hand-case-dispatch defects; the route oracle catches a hand-edited
+  cell-selector assert, a dropped generated include, and an X-macro GPR case
+  swap; the host oracle catches a count-macro and a cell-macro defect; a defect
+  consistent across generator *and* both regenerated artifacts (`--check` blind)
+  is caught only by the refinement theorem over a rebuilt olean. Three genuine
+  equivalences SURVIVE: a local comment reword, a hand-module comment, and a
+  reversed drift-assert emission order. Post-restore sources byte-identical.
+- Because `arm64_sim_local_bpf.h` and a generated `*.h` changed, the sim was
+  rebuilt: `make -C kprog/arm64 micro-proofs-build` rc=0 (30 `ok` rows).
+- Full gate `make -C kprog/formal check` rc=0 (126 `cross-check: OK`).
+
 ## Next after 0076
 
 
@@ -8680,7 +8752,11 @@ The AArch64 *write-register destination-presence* decision is likewise no longer
 open: the `XZR`/sentinel presence test the three writeback bodies shared is now
 a machine-checked contract (Step 0103), leaving the GPR dispatch `switch`, the
 width handling and the value computation inside the composed body, and the `SP`
-branch as a separate architectural case.
+branch as a separate architectural case. The GPR dispatch `switch` itself is now
+no longer wholly open either: the register-number → dispatch-cell binding the
+writeback and read bodies select is a machine-checked contract (Step 0108),
+leaving the width handling and the value computation inside the composed body
+and the `SP` branch as a separate architectural case.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

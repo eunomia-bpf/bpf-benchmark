@@ -1470,6 +1470,36 @@ forms, comparing the whole register file with tags and the stack pointer against
 an independent model that writes only when the number is neither `31` nor `0xff`
 (6,913 cases).
 
+The AArch64 register-number -> dispatch-cell binding -- the last openly
+uncontracted AArch64 decode -- is itself a generated contract:
+`generate_arm64_reg_dispatch_spec.py` emits `KPROG_ARM64_GPR_COUNT` and
+`KPROG_ARM64_GPR_CELL`, and `Arm64RegDispatch.lean` proves the generated
+`cellNumbers` / `cellNames` tables equal an independent `List.finRange 31`
+construction (so the dispatch cell index equals the register number and cell
+`i` names `x{i}`), that the table holds exactly `gprCount` distinct entries,
+that `cellOf` maps exactly the general-purpose register numbers `0..30` and
+none of the zero register (`31`), the stack pointer (`32`) or the sentinel
+(`0xff`), and -- pinning the constants the presence contract fixes -- that the
+dispatch count begins exactly where the write-presence decoder starts
+discarding (`arm64_reg_dispatch_count_is_xzr`), that the zero register and the
+sentinel name no cell, and that the dispatch `none` case is a subset of the
+presence `discard` case
+(`arm64_reg_dispatch_cell_implies_writable`,
+`arm64_reg_dispatch_writable_not_dispatch_none`); a further theorem fixes the
+dispatch sentinel as the memory-index sentinel, so the three arm64 decoders
+cannot disagree about "no register". The hand-written
+`ARM64_SIM_L_FOR_EACH_GPR` order is bound to the generated table both by the
+generated header's per-number `_Static_assert(ARM64_X<n> == <n>U, ...)` drift
+checks and by the three cell-selector asserts the sim header adds, so the
+X-macro dispatch order can no longer drift from the generated cell table. A
+generated-header oracle drives the count and cell macros over all 256 register
+numbers against an independent number-is-cell binding (257 cases), and a
+sim-header route oracle drives the real `ARM64_SIM_L_READ_REG` /
+`READ_REG_PTR` / `WRITE_REG_WIDTH` bodies over all 256 register numbers, all
+four write widths and several values, observing which of the sim's own 31 GPR
+cells each write changes and comparing it against the generated cell selector
+(6,401 cases).
+
 The AArch64 vector-register-file half-mapping theorem covers the four
 vector memory-transfer bodies `ARM64_SIM_L_LOAD_D0_MEM`, `LOAD_Q0_MEM`,
 `STORE_D0_MEM` and `STORE_Q0_MEM`, which move a SIMD register's low 64-bit half
@@ -2075,7 +2105,8 @@ bodies through the `KPROG_ARM64_DQ_MEM_*` contract), `LDP`/`STP` pair-move
 (and the simulator's routing of both bodies through the `KPROG_ARM64_PAIR_MEM_*`
 contract), pre/post-indexed
 address-writeback, load/store index-register presence, write-register
-destination presence, vector-register-file half mapping, MVN/NEG unary-value, and
+destination presence, register-number dispatch-cell binding,
+vector-register-file half mapping, MVN/NEG unary-value, and
 CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
 provenance-path routing, sign-extending-load width selection, and plain-load

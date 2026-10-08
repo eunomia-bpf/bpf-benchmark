@@ -33,6 +33,7 @@
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_mem_index.h"
 #include "../formal/generated/arm64_reg_presence.h"
+#include "../formal/generated/arm64_reg_dispatch.h"
 #include "../formal/generated/arm64_fmov.h"
 #include "../formal/generated/arm64_fmov_dest.h"
 #include "../formal/generated/arm64_load_bytes.h"
@@ -85,6 +86,20 @@
 	X(ARM64_X28, x28)                                                   \
 	X(ARM64_X29, x29)                                                   \
 	X(ARM64_X30, x30)
+
+/*
+ * The dispatch cell index a decoded register number names equals the hand-written
+ * `ARM64_SIM_L_FOR_EACH_GPR` order: cell `n` is `ARM64_X<n>`. The generated
+ * `arm64_reg_dispatch.h` already pins each `ARM64_X<n>` to its number; these
+ * asserts bind the cell selector itself to the same order, so the two cannot
+ * drift apart.
+ */
+_Static_assert(KPROG_ARM64_GPR_CELL(ARM64_X0) == 0U,
+	       "arm64 gpr dispatch cell drift");
+_Static_assert(KPROG_ARM64_GPR_CELL(ARM64_X15) == 15U,
+	       "arm64 gpr dispatch cell drift");
+_Static_assert(KPROG_ARM64_GPR_CELL(ARM64_X30) == 30U,
+	       "arm64 gpr dispatch cell drift");
 
 union arm64_sim_gpr {
 	void *ptr;

@@ -185,3 +185,5 @@ import KProgFormal.GeneratedArm64StackArena
 import KProgFormal.Arm64StackArena
 import KProgFormal.GeneratedArm64StackIndex
 import KProgFormal.Arm64StackIndex
+import KProgFormal.GeneratedArm64RegDispatch
+import KProgFormal.Arm64RegDispatch
