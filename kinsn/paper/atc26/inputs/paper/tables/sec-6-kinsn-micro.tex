@@ -1,0 +1,14 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{\lang microbenchmark evaluation artifacts. The x86 row is a local LLVM-\lang candidate against a stock-kernel baseline and is not a matched compiler-control comparison. The ARM64 row is a matched \texttt{kernel}/\texttt{kernel\_rejit} ReJIT comparison.}
+\label{tab:eval-kinsn-micro}
+\begin{tabular}{@{}lllccc@{}}
+\toprule
+Platform & Comparison & Cases & Mism. & Geomean & Sites \\
+\midrule
+x86-64 KVM & LLVM-\lang candidate / stock kernel & 29 & 0 & 1.216$\times$ & n/a \\
+ARM64 AWS & \texttt{kernel} / \texttt{kernel\_rejit} & 29 & 0 & 1.208$\times$ & 308/308 \\
+\bottomrule
+\end{tabular}
+\end{table*}

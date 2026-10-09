@@ -1,0 +1,7 @@
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/sec-3-jit-dump-fig.pdf}
+  \caption{Compiling a 64-bit rotate with a variable shift. Direct compilation to x86-64 emits a single \texttt{ROL}. Through eBPF the rotate becomes eight bytecode instructions, which the per-opcode kernel JIT translates separately into 15 machine instructions (Linux 6.1, x86-64).}
+  \label{fig:jit-dump}
+\end{figure}
+

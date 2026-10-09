@@ -1,0 +1,36 @@
+\section{Implementation}
+\label{sec:implementation}
+
+We implement \tool in the Linux eBPF pipeline on x86-64 and ARM64. The implementation has three parts: common kernel integration code, a userspace pattern recognizer, and loadable kernel modules that package operation implementations. The common code connects the existing verifier and JIT; each operation module provides both an expansion function and a native-code emitter.
+
+\subsection{Kernel Integration}
+\label{subsec:kernel}
+
+\tool uses operation descriptors to associate \kinsns with their kernel implementations. A \kinsn occupies two adjacent eBPF instruction slots: the sidecar carries operands, and the following call identifies the operation. In the kernel, a \texttt{struct bpf\_kop} descriptor records the operation's expansion function and architecture-specific native-code generation functions. Kernel modules register these descriptors through the BTF/kfunc registration mechanism~\cite{kfuncs}. During program loading, the kernel uses the identifier in the call to find the corresponding implementation.
+
+To restore each \kinsn after verification, the common kernel code saves its two instruction slots along with the position and length of its expansion. The kernel checks the length and instruction forms of the sequence returned by the expansion function before substituting it into the program. After verification succeeds, the kernel restores \kinsns from the saved information and adjusts branch offsets affected by changes in instruction count. The modified x86-64 and ARM64 JITs process the restored \kinsns by invoking the native-code generation functions in their descriptors and incorporating the generated machine code into their existing length calculation and code layout.
+
+Table~\ref{tab:kernel-loc} summarizes the changes to the common kernel code shared across operations. Adding a recognition rule that uses existing \kinsns requires changes only to the userspace pattern recognizer. Section~\ref{subsec:operations} describes the module implementation and work involved in adding an operation.
+
+\input{tables/sec-5-kernel-loc}
+
+\subsection{Userspace Pattern Recognizer}
+\label{subsec:llvm}
+
+The pattern recognizer supports matching within the compiler and on compiled bytecode. In our modified LLVM BPF backend, it matches code patterns using data dependencies in the internal \texttt{MachineInstr} representation and generates extension pseudo-instructions, which the output stage encodes as \kinsns. The bytecode recognizer directly matches compiled eBPF instructions and can also process programs produced without the modified backend. The two can run in sequence: the backend first rewrites matched code, after which the bytecode recognizer looks for additional matches in the output.
+
+Recognition rules check both the computation and the conditions for rewriting it to preserve program behavior. For example, the LLVM backend's rotation rule checks that the left and right shifts use the same input, that their amounts sum to the operation's bit width, and that their results are combined by bitwise OR. It also checks that the OR is the only use of each shift result, to avoid removing intermediate values needed by other computations. After a match, the recognizer rewrites the computation as a rotation pseudo-instruction and records the source, destination, and rotation amount for the output stage to encode as a \kinsn.
+
+\subsection{Implemented Optimizations}
+\label{subsec:descriptors}
+\label{subsec:operations}
+\label{sec:lang}
+\label{subsec:adding}
+
+To reduce computation and memory-access overhead in eBPF programs, we implement seven categories of local optimizations using \kinsns, as summarized in Table~\ref{tab:descriptors}. Rotation, bit extraction, and address calculation combine basic operations, while conditional selection replaces branch-based assignments with native conditional selection. Big-endian loads and bulk memory access provide native implementations for combinations of loads and byte-order conversion or consecutive memory accesses. Prefetching adds cache hints to reduce memory stalls and expands to an eBPF no-op.
+
+\input{tables/sec-5-operations}
+
+New optimization rules can reuse existing \kinsn implementations. For an unsigned 64-bit value $x$, for example, both $(x \gg 8)\mathbin{\&}\mathtt{0xff}$ and $(x\mathbin{\&}\mathtt{0xff00}) \gg 8$ extract bits 8 through 15. The bytecode recognizer matches each pattern and, on ARM64, rewrites it as the same bit-extraction \kinsn with starting bit 8 and width 8. Adding such a matching rule requires changes only to the userspace recognizer, provided the existing \kinsn implements the required computation and its usage conditions are satisfied.
+
+When the required native operation has no corresponding \kinsn, the developer must add an extended-instruction implementation. This requires parameter checks, an eBPF expansion, native-code generation, and registration, as well as establishing semantic correspondence between the two implementations (\S\ref{sec:formal-verification}). The pattern recognizer also needs a rewriting rule that uses the new \kinsn. For ARM64 bit extraction, for example, the kernel module uses the register, starting bit, and bit width parameters to generate an expansion with a right shift and a mask, and the corresponding \texttt{UBFM} instruction. The module's parameter checks, sequence generation, and registration total 78 lines of code.

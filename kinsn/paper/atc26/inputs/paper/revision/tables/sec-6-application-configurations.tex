@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Applied optimizations in each \tool application configuration. The last column lists categories of \kinsns actually generated, using the names in Section~\ref{subsec:operations}.}
+\label{tab:eval-application-configurations}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ll>{\raggedright\arraybackslash}p{0.48\textwidth}@{}}
+\toprule
+\textbf{Application} & \textbf{Configuration} & \textbf{Applied optimizations} \\
+\midrule
+Cilium & All optimizations & Address calculation, conditional select,\newline bulk memory access, prefetch \\
+ & Without bulk memory access & Address calculation, conditional select, prefetch \\
+\addlinespace
+Katran & Register optimizations & Rotation, bit extraction \\
+ & Register and memory optimizations & Rotation, bit extraction, big-endian load,\newline bulk memory access, prefetch \\
+\bottomrule
+\end{tabular*}
+\end{table*}

@@ -1,0 +1,7 @@
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/sec-3-slowdown-o2-grouped.pdf}
+\caption{eBPF JIT execution time relative to user-space native. The left and right bars for each benchmark correspond to x86-64 and ARM64. Each bar is the ratio of mean per-call execution times on the same architecture; values above 1 indicate slower eBPF JIT execution, and the dashed line denotes equal time. Error bars show 95\% confidence intervals obtained by resampling instances. Each geometric mean in the legend summarizes the 27 benchmark ratios for that architecture.}
+\Description{Grouped bars compare eBPF JIT with user-space native across 27 benchmarks. Blue bars represent x86-64 and green bars represent ARM64, with geometric mean execution-time ratios of 1.71 and 2.05, respectively.}
+\label{fig:char-pure-percase}
+\end{figure*}

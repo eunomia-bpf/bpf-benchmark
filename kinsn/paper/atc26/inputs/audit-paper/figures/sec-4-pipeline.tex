@@ -1,0 +1,6 @@
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/sec-4-pipeline-fig.pdf}
+\caption{The original eBPF pipeline (orange) and the \tool pipeline (green). The original pipeline verifies and JIT-compiles the bytecode unchanged, producing under-optimized native code. With \tool, the compile-time recognizer rewrites supported operations into extended instructions, and the \lang modules supply each operation's proof sequence to the verifier and its native emit to the JIT, producing optimized native code.}
+\label{fig:pipeline}
+\end{figure*}

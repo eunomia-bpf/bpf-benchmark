@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Execution-time ratios on x86-64 and ARM64. Each entry is the geometric mean of 27 benchmark ratios, computed from mean per-call times using the numerator and denominator in the first column. A ratio above 1 means the numerator path is slower.}
+\label{tab:char-micro-summary}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Execution-time ratio} & \textbf{x86-64} & \textbf{ARM64} \\
+\midrule
+Kernel native / user-space native & 1.055 & 1.154 \\
+\addlinespace
+eBPF JIT / kernel native & 1.622 & 1.773 \\
+\addlinespace
+LLVM-BPF / user-space native & 1.068 & 1.054 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,15 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Native instruction sequences for two computations in the compiled programs. The operand \texttt{b} is a zero-extended byte. Bit extraction starts with the operand ready; the big-endian read includes the memory loads.}
+\label{tab:isa-gap}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Computation} & \textbf{Architecture} & \textbf{eBPF JIT} & \textbf{Direct native} \\
+\midrule
+\texttt{(b >{}> 1) \& 0x1f} & ARM64 & \texttt{LSR; AND} & \texttt{UBFX} \\
+Big-endian 16-bit read & x86-64 & \texttt{MOVZX} $\times$ 2\texttt{; SHL; OR; AND} & \texttt{MOVBE; MOVZX} \\
+Big-endian 16-bit read & ARM64 & \texttt{LDRB} $\times$ 2\texttt{; LSL; ORR; AND} & \texttt{LDRH; REV16} \\
+\bottomrule
+\end{tabular}
+\end{table*}

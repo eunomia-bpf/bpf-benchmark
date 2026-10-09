@@ -1,0 +1,15 @@
+\section{The eBPF Compilation Pipeline}
+\label{sec:background}
+
+The eBPF compilation pipeline translates source programs into code for execution in the kernel and checks program safety before execution, as shown in Figure~\ref{fig:ebpf}. A user-space compiler first produces eBPF bytecode, which the kernel verifies at load time. When just-in-time (JIT) compilation is used, the eBPF JIT then generates machine code for the target architecture. Once loaded, the program can be attached to a kernel hook, such as XDP or a tracepoint, and executed in response to the corresponding events~\cite{linuxndlibbpf}.
+
+\input{figures/sec-2-ebpf-pipeline}
+
+\noindent\textbf{Source compilation.}
+Clang optimizes source programs in user space and compiles them into eBPF bytecode. Its front end first translates C source into LLVM intermediate representation (IR), which LLVM optimizes before the eBPF back end performs instruction selection and register allocation~\cite{llvmndcodegenerator}. This stage targets the eBPF instruction set; the JIT then generates machine code for the target CPU.
+
+\noindent\textbf{Verification.}
+The kernel checks an eBPF program's safety through static analysis at load time. The verifier analyzes changes to register and stack states along the program's control flow. For example, it uses a pointer's offset range and the access size to determine whether a memory access could exceed the bounds of the referenced region~\cite{verifier}. The loading process also performs necessary bytecode transformations before passing the accepted program to the JIT compiler.
+
+\noindent\textbf{JIT compilation.}
+The eBPF JIT translates bytecode into machine code for the target architecture. The x86-64 and ARM64 implementations map eBPF registers to fixed native registers and select native instructions and encodings based on the target architecture and instruction operands~\cite{linux_bpf_jit,linuxndarm64jit}. For example, on x86-64, a register can be set to zero either by a \texttt{MOV} instruction that writes an immediate zero or by an \texttt{XOR} instruction with the same register as both operands, since the bitwise exclusive OR of a value with itself is zero. The eBPF JIT selects the latter for its shorter encoding~\cite{linux_bpf_jit}. Despite these local optimizations, programs compiled through the eBPF pipeline can still run more slowly than programs compiled directly to native code from the same source. Section~\ref{sec:characterization} quantifies this difference and investigates its sources.

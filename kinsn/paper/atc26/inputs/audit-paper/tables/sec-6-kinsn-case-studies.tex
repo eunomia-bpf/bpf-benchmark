@@ -1,0 +1,15 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Production case studies for Cilium and Katran. Workload speedup reports post-ReJIT throughput normalized to baseline. BPF cost reports post-ReJIT per-program cost normalized to baseline, so lower is better.}
+\label{tab:eval-kinsn-case-studies}
+\begin{tabular}{@{}llllcccl@{}}
+\toprule
+Case & Platform & Policy & Sites & Workload & BPF cost & Retained / W-L-T & Dominant applied families \\
+\midrule
+Cilium & x86-64 KVM & Full & 4697 & 1.114$\times$ & 0.776$\times$ & 2 / 2-0-0 & lea, endian, prefetch, bulk, select \\
+Katran & x86-64 KVM & No bulk & 77 & 1.032$\times$ & 0.932$\times$ & 1 / 1-0-0 & lea, rotate, endian, prefetch, extract \\
+Katran & ARM64 AWS & Conservative & 21 & 1.073$\times$ & 0.941$\times$ & 1 / 1-0-0 & rotate, extract \\
+\bottomrule
+\end{tabular}
+\end{table*}

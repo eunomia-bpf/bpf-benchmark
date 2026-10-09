@@ -1,0 +1,32 @@
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+%%%
+% message<\tool recap: dual-form operations under the existing verifier, measured wins, modules>
+% we presented \tool, extending the pipeline with operations the kernel JIT emits directly
+% each operation carries a verifier-checked proof sequence and a native emit the CPU runs
+% only the native emit joins the trusted computing base
+% with \tool we built \lang, seven hardware-idiom operations
+% Lean 4 proofs show each \lang emit computes the same result as its proof sequence
+% \lang speeds up eBPF programs up to 24%/22%, recovering up to 42% of the gap
+% a new operation ships as a kernel module, the settled safety argument stays untouched
+
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+\section{Conclusion}
+\label{sec:conclusion}
+% 结论
+
+We presented \tool, a mechanism that extends the eBPF compilation pipeline with new operations the kernel JIT emits directly.
+% 我们提出了 \tool，一种通过内核 JIT 直接发射的新操作扩展 eBPF 编译管线的机制。
+Each operation has a proof sequence that the existing verifier checks on every load and a native emit that the CPU runs.
+% 每个操作有一个现有验证器在每次加载时检查的证明序列和一个 CPU 运行的本地发射。
+Beyond the generic enforcement core, the native emit is the only per-operation addition to the trusted base.
+% 除了通用执行核心外，本地发射是每个操作对可信基的唯一增加。
+With \tool, we built \lang, a set of seven hardware-idiom operations.
+% 借助 \tool，我们构建了 \lang，一组七个硬件习语操作。
+Lean 4 proofs show that each \lang native emit computes the same result as its proof sequence.
+% Lean 4 证明表明每个 \lang 本地发射与其证明序列计算相同的结果。
+\lang speeds up eBPF microbenchmarks by up to 24\% on x86-64 and 22\% on ARM64 over the unmodified pipeline, recovering up to 42\% of the gap to native code, and improves production application throughput by up to 12\%.
+% \lang 使 eBPF 微基准测试在 x86-64 上提速达 24\%，在 ARM64 上达 22\%，恢复了与原生代码差距的 42\%，并使生产应用吞吐量提高达 12\%。
+A new operation now ships as a kernel module, and the existing verifier analysis stays untouched.
+% 新操作现在作为内核模块发布，现有验证器分析保持不变。

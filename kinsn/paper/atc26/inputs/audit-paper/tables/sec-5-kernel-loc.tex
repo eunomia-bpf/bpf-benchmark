@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\small
+\caption{The kernel core is a 929-line addition, measured as lines added on the \tool kernel branch over mainline Linux. The total excludes 11 lines of disassembler support and tools-side header sync.}
+\label{tab:kernel-loc}
+\begin{tabular}{@{}lc@{}}
+\toprule
+Component & Lines of code \\
+\midrule
+Verifier (lowering, restore, validation) & 487 \\
+BTF and registration & 139 \\
+JIT dispatch (ARM64) & 121 \\
+JIT dispatch (x86-64) & 97 \\
+Headers & 85 \\
+\midrule
+Total kernel core & 929 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\caption{The seven \lang operations, each with the canonical proof sequence and the native emit per architecture. Exact proof sequences vary by descriptor and architecture (\S\ref{sec:mechanism}). A dash marks an architecture with no native emit, where the operation falls back to its proof sequence. Each native-emit cell lists the instructions emitted for one operation instance. Table~\ref{tab:isa-gap} counts the instructions along each compilation path for the idioms the two tables share, and the native compiler's instruction choice there can differ from the native emit here.}
+\label{tab:descriptors}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & & \multicolumn{2}{c}{Native emit} \\
+\cmidrule(lr){3-4}
+Operation & Proof sequence & x86-64 & ARM64 \\
+\midrule
+Rotate & two shifts + or & \texttt{ROL} & \texttt{ROR} \\
+Conditional select & branch + move & \texttt{CMP+CMOV} & \texttt{TST+CSEL} \\
+Bit extract & shift + and & \texttt{BEXTR} & \texttt{UBFX} \\
+Byte swap & load + byte swap & \texttt{MOVBE} & \texttt{LDR+REV} \\
+Prefetch & no-op (\texttt{JA +0}) & \texttt{PREFETCHT0} & \texttt{PRFM} \\
+Bulk copy & loads + stores & \texttt{MOV} & \texttt{LDP+STP} \\
+LEA & shift + adds & \texttt{LEA} & -- \\
+\bottomrule
+\end{tabular}
+\end{table}

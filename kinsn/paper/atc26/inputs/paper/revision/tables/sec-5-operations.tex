@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Operation semantics and native implementations for seven optimization categories. Here $w$ is the bit width, $m$ a bit-field mask, $s$ a shift amount, and $p$ an address. Semicolons separate consecutive instructions, slashes separate alternatives, and a dash denotes no implementation.}
+\label{tab:descriptors}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llll@{}}
+\toprule
+\textbf{Optimization} & \textbf{Operation semantics} & \textbf{x86-64 native instructions} & \textbf{ARM64 native instructions} \\
+\midrule
+Rotation & $(x\ll n)\lor(x\gg(w-n))$ & \texttt{ROL} & \texttt{EXTR} (\texttt{ROR}) \\
+Conditional select & Select one of two values & \texttt{CMP; CMOVcc} & \texttt{TST; CSEL} \\
+Bit extraction & $(x\gg s)\mathbin{\&}m$ & \texttt{BEXTR} & \texttt{UBFM} (\texttt{UBFX}) \\
+Big-endian load & Read memory in big-endian order & \texttt{MOVBE} & \texttt{LDR; REV} \\
+Prefetch & Cache prefetch hint for address $p$ & \texttt{PREFETCHT0} & \texttt{PRFM PLDL1KEEP} \\
+Bulk memory access & Read or write consecutive memory & \texttt{MOV} / \texttt{MOVZX} & \texttt{LDP} / \texttt{STP} \\
+Address calculation & $b+(i\ll s)+off$ & \texttt{LEA} & --- \\
+\bottomrule
+\end{tabular*}
+\end{table*}

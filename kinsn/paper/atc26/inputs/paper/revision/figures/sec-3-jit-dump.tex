@@ -1,0 +1,30 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  x=1cm,y=1cm,
+  font=\sffamily\fontsize{8}{9.5}\selectfont,
+  code/.style={draw=black,line width=0.5pt,fill=black!2,
+    text width=3.1cm,inner xsep=2mm,inner ysep=2mm,
+    anchor=north west,align=left,
+    font=\ttfamily\fontsize{8}{9.5}\selectfont},
+  heading/.style={anchor=south west,text depth=1.5pt,font=\sffamily\bfseries\fontsize{8}{9.5}\selectfont},
+  flow/.style={-{Stealth[length=1.5mm]},line width=0.6pt},
+  stage/.style={align=center,font=\sffamily\fontsize{7.5}{9}\selectfont}
+]
+\path[use as bounding box] (0,-0.08) rectangle (8.5,4.72);
+\node[heading] at (0,4.21) {C (simplified)};
+\node[heading] at (5,4.21) {x86-64 native};
+\node[code,minimum height=1.35cm] (source) at (0,4.15) {y = (x <{}< 16)\\\hspace*{1em}| (x >{}> 48);};
+\node[code,minimum height=1.35cm] (native) at (5,4.15) {rorx r15, rbx, 0x30};
+\node[heading,align=left] at (0,1.76) {eBPF\\bytecode};
+\node[heading] at (5,1.76) {x86-64 native};
+\node[code,minimum height=1.75cm] (bytecode) at (0,1.70) {r1 = r7\\r1 >{}>= 48\\r7 <{}<= 16\\r7 |= r1};
+\node[code,minimum height=1.75cm] (jit) at (5,1.70) {mov rdi, r13\\shr rdi, 0x30\\shl r13, 0x10\\or r13, rdi};
+\draw[flow] (source.east) -- node[above,stage] {Clang\\(native)} (native.west);
+\draw[flow] (source.south) -- node[right,stage] {Clang (BPF)} (bytecode.north);
+\draw[flow] (bytecode.east) -- node[above,stage] {eBPF JIT} (jit.west);
+\end{tikzpicture}
+\caption{Two compilation paths for a 64-bit left rotation by 16 bits in the SipHash-style benchmark on x86-64. In the simplified C expression, \texttt{x} and \texttt{y} are 64-bit unsigned integers. The code panels show only the rotation, omitting input preparation and adjacent computation. Assembly uses Intel syntax; right rotation by \texttt{0x30} (48) bits equals left rotation by 16 bits.}
+\Description{A two-by-two diagram compares direct native compilation with compilation through eBPF. Simplified C for the constant-16 rotation produces one RORX instruction through direct compilation, or a register copy, two shifts, and an OR through eBPF and its JIT.}
+\label{fig:jit-dump}
+\end{figure}

@@ -1,0 +1,4 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented \tool, which uses extended instructions to support more efficient native implementations while reusing the existing eBPF verifier. The framework keeps pattern recognition in userspace, uses eBPF implementations for safety analysis of the complete program, and executes semantically equivalent native implementations. New optimizations reuse the framework's kernel support without adding each pattern-recognition and transformation rule to the JIT. We implemented seven categories of local optimizations on x86-64 and ARM64. Relative to the stock Linux eBPF JIT, microbenchmarks achieve geometric mean speedups of 1.24$\times$ and 1.22$\times$, respectively. Throughput also improves for Cilium and Katran.

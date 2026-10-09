@@ -1,0 +1,18 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\tool provides a mechanism for extending local optimizations. Two research questions remain: how to build a \kinsn set useful across a broad range of programs, and how to select effective optimization combinations for a given program.
+
+\subsection{Selecting \kinsn Operations}
+\label{subsec:selecting-kinsn-operations}
+
+An open question in constructing a \kinsn set is how to derive reusable operations from optimization opportunities in individual programs. Future work could examine this question from two perspectives: application needs and architectural capabilities. The former concerns computation and memory-access needs shared by a class of programs; the latter concerns native capabilities worth exposing through extended instructions. For example, profiling and comparing compilation results across programs could help identify candidate operations. The research question is whether these candidates can benefit a broader range of programs beyond those used to identify them.
+
+The size of an extension set also involves a tradeoff between performance gains and maintenance costs. Adding operations enables new optimizations, but also requires reviewing kernel implementations, proving semantic equivalence, and maintaining support across architectures (Sections~\ref{sec:mechanism} and~\ref{sec:implementation}). When multiple programs and recognition rules can reuse a \kinsn, this effort supports more optimizations. Future selection methods could therefore evaluate measured gains, reuse, and maintenance costs together to determine which extensions are worth supporting over time.
+
+\subsection{Selecting Optimizations for a Workload}
+\label{subsec:selecting-workload-optimizations}
+
+Selecting combinations of existing extensions must account for the difference between local optimization effects and whole-program performance. The number of rule matches does not capture how often each site executes or the combined performance effect of multiple rewrites. Even with a fixed extension set, research is needed on selecting rule combinations for a target program and processor, including whether selection should apply to entire rule categories or individual rewrite sites.
+
+A challenge for automatic selection is adapting choices to different workloads while reducing manual experimentation. One direction is to combine program profiles and target-processor information in a userspace cost model that estimates the benefits of candidate rewrites, then test the selected combinations through measurement. Further questions include which inputs measurements should cover and how much workload change warrants selecting a new combination. By keeping pattern recognition in userspace, \tool allows these selection methods to develop while reusing existing \kinsn implementations.

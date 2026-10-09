@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Computational microbenchmarks used in Figure~\ref{fig:char-pure-percase}. The \texttt{cksum} and \texttt{tc\_cksum} programs perform the same computation with different eBPF program types.}
+\label{tab:microbenchmarks}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ll@{\hspace{1.2em}}ll@{\hspace{1.2em}}ll@{}}
+\toprule
+\textbf{Benchmark} & \textbf{Computation} & \textbf{Benchmark} & \textbf{Computation} & \textbf{Benchmark} & \textbf{Computation} \\
+\midrule
+\texttt{bitmap} & Bit counting, mixing & \texttt{katran} & Hash-based selection & \texttt{sock\_lb} & Service selection \\
+\texttt{bin\_search} & Sorted-rule binary search & \texttt{policy} & Nested conditions & \texttt{tcpconn} & Connection filtering \\
+\texttt{runqlat} & Logarithmic buckets & \texttt{siphash} & SipHash-style mixing & \texttt{tetragon} & Process-event filtering \\
+\texttt{trace\_sw} & Switch dispatch & \texttt{bounds} & Bounds checks, reads & \texttt{otel} & Frame-record scan \\
+\texttt{cksum} & Checksum & \texttt{field} & Field reads, mixing & \texttt{ct\_nat} & Address rewriting \\
+\texttt{memcmp} & Bytewise comparison & \texttt{bitfield} & Bit-field extraction & \texttt{toeplitz} & Toeplitz-style hashing \\
+\texttt{vlan} & Packet-header parsing & \texttt{str\_search} & Substring search & \texttt{fnv} & FNV-1a hashing \\
+\texttt{call\_fanout} & Local-call dispatch & \texttt{syscall} & Syscall name lookup & \texttt{tc\_cksum} & Checksum (TC) \\
+\texttt{5tuple} & Jenkins-style hashing & \texttt{http} & HTTP prefix detection & \texttt{cgroup} & Hash mixing \\
+\bottomrule
+\end{tabular*}
+\end{table*}

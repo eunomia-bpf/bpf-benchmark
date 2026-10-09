@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Katran CPU costs from independent sampling. Entries give the median across three instances, with the minimum and maximum in parentheses. Estimated CPU time is divided by the increase in the virtual-IP packet counter over the same sending window. Application + callees includes kernel functions attributed to Katran through its call stacks.}
+\label{tab:eval-katran-profile}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc@{}}
+\toprule
+\textbf{Configuration} & \textbf{Application code (ns/packet)} & \textbf{Application + callees (ns/packet)} \\
+\midrule
+eBPF JIT & 116.3 (114.8--118.3) & 260.4 (259.8--265.4) \\
+Register optimizations & 121.5 (119.9--126.6) & 261.0 (260.6--268.5) \\
+Register and memory optimizations & 121.3 (110.8--123.2) & 260.6 (259.3--269.9) \\
+\bottomrule
+\end{tabular*}
+\end{table*}

@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\caption{Application-level \lang{} policy probes. Rows are paired by
+application: Cilium compares the full policy with a single-family ablation,
+while Katran compares a conservative policy with a coverage-max policy.
+Workload ratios report end-to-end datapath throughput; higher is better.}
+\label{tab:app_case_studies}
+\small
+\begin{tabular}{lcc}
+\toprule
+Configuration & Sites & Throughput $\uparrow$ \\
+\midrule
+Cilium (Full \lang{}) &
+4086 &
+1.074$\times$ \\
+
+Cilium (No Bulk) &
+3512 &
+1.114$\times$ \\
+
+Katran (Conservative) &
+21 &
+1.073$\times$ \\
+
+Katran (Coverage-Max) &
+62 &
+0.995$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}

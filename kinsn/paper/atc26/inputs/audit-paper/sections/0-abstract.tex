@@ -1,0 +1,51 @@
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+%%%
+% message<eBPF's simple per-instruction kernel JIT loses up to 2x on hardware idioms>
+% eBPF safely extends OS kernels in domains such as networking, observability, security
+% the safety comes from a verifying pipeline ending in a kernel JIT kept simple
+% the simple JIT translates one instruction at a time
+% C code through the pipeline runs up to twice as slow as natively compiled code
+% the clearest losses come from hardware idioms
+% a CPU executes an idiom directly, yet the idiom reaches the JIT as several instructions
+
+%%%
+% message<dual-form operations under the existing verifier let \lang recover the loss>
+% we present \tool, extending the pipeline with new operations
+% each operation carries two forms, a proof sequence and a native emit
+% the existing verifier checks each proof sequence on every load
+% only the native emit joins the trusted computing base
+% with \tool we build \lang, seven hardware-idiom operations
+% Lean 4 proofs discharge that trust, each emit computes the same result as its sequence
+% a new operation ships as a kernel module
+% on x86-64 and ARM64, \lang speeds up eBPF programs by up to 24% over the unmodified pipeline
+
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+eBPF safely extends OS kernels in domains such as networking, observability, and security.
+% eBPF 在网络、可观测性和安全等领域安全地扩展操作系统内核。
+The safety comes from an in-kernel compilation pipeline where a verifier checks every program, and a kernel just-in-time compiler (JIT) translates the verified bytecode to native code.
+% 其安全性来自内核编译管线，验证器检查每个程序，内核 JIT 将经过验证的字节码翻译为本地代码。
+The kernel keeps the JIT simple to stay trustworthy, translating one bytecode instruction at a time in a single pass.
+% 内核保持 JIT 简单以维持可信，单遍逐条翻译字节码指令。
+This single-pass design misses optimization opportunities, so eBPF runs up to twice as slow as natively compiled code in our characterization.
+% 这种单遍设计错过了优化机会，因此在我们的特征分析中，eBPF 代码运行速度比原生编译慢达两倍。
+Adding optimizations to the kernel JIT directly requires upstream acceptance and a long release cycle, enlarges the trusted computing base (TCB), and grows the per-architecture kernel code.
+% 直接向内核 JIT 添加优化需要上游接受和漫长的发布周期，会扩展可信计算基（TCB），并增加每架构的内核代码。
+
+To address this, we present \tool, an extension interface that lets userspace compilers and kernel modules introduce new operations without modifying the kernel core, while keeping a minimal trusted computing base (TCB).
+% 为了解决这个问题，我们提出 \tool，一种扩展接口，让用户空间编译器和内核模块能够引入新操作而无需修改内核核心，同时保持最小可信计算基（TCB）。
+Each operation has two forms, a \emph{proof sequence} of vanilla eBPF instructions that the existing verifier checks and a \emph{native emit} of machine instructions that the JIT compiles.
+% 每个操作有两种形式，现有验证器检查的原生 eBPF 指令\emph{证明序列}，和 JIT 编译的机器指令\emph{本地发射}。
+Because the verifier checks the proof sequence, the native emit is the only per-operation addition to the TCB.
+% 由于验证器检查证明序列，本地发射是每个操作对 TCB 的唯一增加。
+Hardware idioms are the lowest-hanging fruit for this interface. With \tool, we build \lang, seven operations such as rotate and conditional select that CPUs usually execute as a single instruction.
+% 硬件习语是这个接口最容易获取的收益。借助 \tool，我们构建了 \lang，包括旋转和条件选择等 CPU 通常作为单条指令执行的七个操作。
+Lean 4 proofs show that each native emit computes the same result as its proof sequence.
+% Lean 4 证明表明每个本地发射与其证明序列计算相同的结果。
+On x86-64 and ARM64, \lang speeds up eBPF microbenchmarks by 24\% and 22\% in geometric mean and production applications by up to 12\%.
+% 在 x86-64 和 ARM64 上，\lang 使 eBPF 微基准测试的几何平均提速分别为 24\% 和 22\%，生产应用提速达 12\%。
+The same interface also supports whole-program native replacement, reaching 2.358$\times$ on Cilium at the cost of a larger TCB.
+% 同样的接口还支持整个程序的本地替换，以更大的 TCB 为代价在 Cilium 上达到 2.358 倍加速。
+\end{abstract}

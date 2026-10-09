@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Generate the RQ3 application-level policy-probe figure from retained raw JSON.
+
+Both series are derived from the corpus run directories named below, using the
+same definitions as docs/artifacts/render_claim_table.py:
+
+  workload throughput ratio = mean(post_rejit pps) / mean(baseline pps)
+  BPF cost ratio           = (sum run_time_ns_delta / sum run_cnt_delta)_post
+                             divided by the same quantity for baseline, over
+                             records with run_cnt_delta >= 100
+
+The site annotations are NOT derivable from these runs' app JSON (their original
+per-pass loadtime reports were not retained); they are declared here and sourced
+from docs/tmp/kop_ablation_20260605_summary.md. Every other plotted value is
+computed from the raw run directories. The four fresh reruns
+corpus/results/x86_kvm_corpus_20260924_* do retain their report streams and
+yield derived counts 4017/3512/3517/2988 (see render_claim_table.py
+CILIUM_SITE_ARMS); those are a different host/toolchain generation and are not
+plotted here.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import statistics
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import FuncFormatter
+
+PAPER = Path(__file__).resolve().parents[1]
+REPO = PAPER.parents[1]
+FIG = PAPER / "figures"
+CORPUS = REPO / "corpus/results"
+
+# (label, run directory, per-app JSON, declared applied sites)
+CILIUM_LADDER = [
+    ("Cilium\nCoverage-Max", "x86_kvm_corpus_20260605_145112_835705", "cilium__agent.json", 4697),
+    ("Cilium\nNo Prefetch", "x86_kvm_corpus_20260605_141420_746952", "cilium__agent.json", 4086),
+    ("Cilium\nNo Bulk", "x86_kvm_corpus_20260605_164411_317423", "cilium__agent.json", 4136),
+    ("Cilium\nNo Bulk/Pref", "x86_kvm_corpus_20260605_160715_129437", "cilium__agent.json", 3512),
+]
+KATRAN_PROBES = [
+    ("Katran\nConservative", "aws_arm64_corpus_20260605_080836_924256", "katran.json", 21),
+    ("Katran\nCoverage-Max", "aws_arm64_corpus_20260605_094729_221231", "katran.json", 62),
+]
+
+PPS = re.compile(r"\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)")
+
+
+def workload_pps(workload: dict) -> float:
+    components = sum(workload_pps(c) for c in workload.get("components") or [])
+    text = "\n" + (workload.get("stdout") or "") + "\n" + (workload.get("stderr") or "")
+    return components + sum(float(m.group(1)) for m in PPS.finditer(text))
+
+
+def phase_pps(app: dict, phase: str) -> list[float]:
+    return [workload_pps(w) for w in (app.get(phase) or {}).get("workloads") or []]
+
+
+def bpf_ns_per_run(app: dict, phase: str) -> float | None:
+    records = [
+        r for r in ((app.get(phase) or {}).get("bpf") or {}).values()
+        if r.get("run_cnt_delta", 0) >= 100
+    ]
+    runs = sum(r.get("run_cnt_delta", 0) for r in records)
+    elapsed = sum(r.get("run_time_ns_delta", 0) for r in records)
+    return elapsed / runs if runs else None
+
+
+def measure(entry: tuple) -> tuple[str, int, float, float]:
+    label, run, app_file, sites = entry
+    path = CORPUS / run
+    if not path.is_dir():
+        raise SystemExit(f"missing corpus run: {path}")
+    app = json.loads((path / "details/apps" / app_file).read_text())
+    if app.get("status") != "ok":
+        raise SystemExit(f"{run}: app status {app.get('status')!r}")
+    baseline, post = phase_pps(app, "baseline"), phase_pps(app, "post_rejit")
+    if len(baseline) != len(post) or not baseline:
+        raise SystemExit(f"{run}: {len(baseline)} baseline vs {len(post)} post samples")
+    workload = statistics.mean(post) / statistics.mean(baseline)
+    cost_b, cost_p = bpf_ns_per_run(app, "baseline"), bpf_ns_per_run(app, "post_rejit")
+    if not cost_b or not cost_p:
+        raise SystemExit(f"{run}: missing BPF cost (stats disabled?)")
+    return label, sites, workload, cost_p / cost_b
+
+
+def main() -> None:
+    FIG.mkdir(parents=True, exist_ok=True)
+    rows = [measure(e) for e in CILIUM_LADDER + KATRAN_PROBES]
+
+    labels = [f"{r[0]}\n({r[1]} sites)" for r in rows]
+    workloads = [r[2] for r in rows]
+    costs = [r[3] for r in rows]
+    for label, _, workload, cost in rows:
+        print(f"{label.replace(chr(10), ' '):32s} workload={workload:.6f}x cost={cost:.6f}x")
+
+    x = np.arange(len(rows))
+    width = 0.38
+    fig, ax = plt.subplots(figsize=(9, 4.2))
+    bars_w = ax.bar(x - width / 2, workloads, width, label="Workload throughput",
+                    color="#4C78A8", edgecolor="#333333", linewidth=0.6)
+    bars_c = ax.bar(x + width / 2, costs, width, label="BPF cost",
+                    color="#F58518", edgecolor="#333333", linewidth=0.6)
+
+    ax.axhline(1.0, color="#333333", linestyle="--", linewidth=1.0)
+    for bars, values in ((bars_w, workloads), (bars_c, costs)):
+        for bar, value in zip(bars, values):
+            ax.text(bar.get_x() + bar.get_width() / 2, value + 0.012,
+                    f"{value:.3f}x", ha="center", va="bottom", fontsize=9)
+
+    ax.set_ylabel("Ratio to stock eBPF", fontsize=13)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=9.5)
+    ax.set_ylim(0.8, max(workloads + costs) * 1.16)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.2f}x"))
+    ax.tick_params(axis="y", labelsize=11)
+    ax.grid(axis="y", color="#eeeeee", linewidth=0.8)
+    ax.legend(fontsize=11, loc="upper left", framealpha=0.95)
+
+    fig.tight_layout()
+    out = FIG / "sec-6-rq3-cilium-katran.pdf"
+    fig.savefig(out, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+if __name__ == "__main__":
+    main()

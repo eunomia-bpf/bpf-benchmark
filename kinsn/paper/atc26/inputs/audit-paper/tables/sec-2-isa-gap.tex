@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Hardware idioms and their instruction counts along each path, measured on x86-64 from real JIT dumps and compiler output. The second column names the native instruction on x86-64 / ARM64. Byte swap assumes a \texttt{MOVBE}-capable x86-64. The bulk-copy row is a 64-byte copy between non-overlapping regions.}
+\label{tab:isa-gap}
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}llccc@{}}
+\toprule
+ & & \multicolumn{3}{c}{\# Instructions} \\
+\cmidrule(lr){3-5}
+Operation & Native instruction & Native & eBPF & Kernel JIT \\
+\midrule
+Rotate & \texttt{ROL}/\texttt{ROR} & 1 & 8 & 15 \\
+Wide load & \texttt{MOV}/\texttt{LDR} & 1 & 22 & 22 \\
+Conditional select & \texttt{CMP+CMOV}/\texttt{CMP+CSEL} & 2 & 3 & 4 \\
+Byte swap & \texttt{MOVBE}/\texttt{REV} & 1 & 2 & 2 \\
+Bulk copy (64\,B) & \texttt{MOVUPS}/\texttt{LDP+STP} & 4 & 16 & 16 \\
+\bottomrule
+\end{tabular}}
+\end{table}

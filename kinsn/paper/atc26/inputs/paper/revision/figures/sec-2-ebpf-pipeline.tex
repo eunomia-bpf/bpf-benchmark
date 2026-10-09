@@ -1,0 +1,79 @@
+\begin{figure}[t]
+  \centering
+  \fontencoding{T1}\selectfont
+  \renewcommand{\sfdefault}{lmss}
+  \renewcommand{\ttdefault}{lmtt}
+\definecolor{ink}{gray}{0}
+\definecolor{compilefill}{HTML}{EEE7F2}
+\definecolor{kernelfill}{HTML}{E5EDF8}
+\definecolor{hookfill}{HTML}{FFF0CA}
+
+\newcommand{\programartifact}[3]{\coordinate (#1) at (#2,#3);
+  \coordinate (#1-south) at ($(#1)+(0,-0.35)$);
+  \draw[draw=ink,fill=white,line width=0.55pt]
+    ($(#1)+(-0.25,-0.35)$) -- ($(#1)+(0.25,-0.35)$)
+    -- ($(#1)+(0.25,0.18)$) -- ($(#1)+(0.08,0.35)$)
+    -- ($(#1)+(-0.25,0.35)$) -- cycle;
+  \draw[draw=ink,line width=0.55pt]
+    ($(#1)+(0.08,0.35)$) -- ($(#1)+(0.08,0.18)$)
+    -- ($(#1)+(0.25,0.18)$);
+  \node[font=\ttfamily\bfseries\fontsize{6.5}{6.5}\selectfont,
+    text=ink,inner sep=0pt] at ($(#1)+(0,-0.06)$) {</>};
+}
+
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[
+  x=1cm,y=1cm,
+  font=\sffamily\fontsize{8.5}{10}\selectfont,
+  text=ink,
+  component/.style={rectangle,draw=ink,line width=0.55pt,
+    minimum width=1.50cm,minimum height=1.00cm,
+    text width=1.18cm,inner xsep=1.6mm,inner ysep=1.5mm,
+    outer sep=0pt,align=center},
+  artifactlabel/.style={align=center,inner sep=0pt,outer sep=0pt,
+    font=\sffamily\fontsize{8}{9}\selectfont,fill=white},
+  flow/.style={-{Stealth[length=1.4mm,width=1.0mm]},
+    draw=ink,line width=0.6pt},
+  edgeword/.style={font=\sffamily\fontsize{8}{9}\selectfont,
+    inner sep=0pt,outer sep=0pt,fill=white}
+]
+  \path[use as bounding box] (0,0) rectangle (8.5,4.95);
+
+  \node[anchor=base west,font=\sffamily\bfseries\fontsize{8.5}{10}\selectfont]
+    at (0.03,4.63) {User space};
+  \node[anchor=base west,font=\sffamily\bfseries\fontsize{8.5}{10}\selectfont]
+    at (2.12,4.63) {Kernel};
+  \draw[draw=ink,line width=0.55pt,dash pattern=on 2pt off 2pt]
+    (1.95,1.40) -- (1.95,4.89);
+
+  \node[component,fill=compilefill] (compiler) at (0.80,2.00)
+    {Clang};
+  \node[component,fill=kernelfill] (verifier) at (3.10,2.00)
+    {eBPF\\verifier};
+  \node[component,fill=kernelfill] (jit) at (5.40,2.00)
+    {eBPF\\JIT};
+  \node[component,rounded corners=5mm,fill=hookfill] (hook) at (7.70,2.00)
+    {Hook\\point};
+
+  \programartifact{source}{0.80}{3.55}
+  \node[artifactlabel,anchor=south] at (0.80,4.10) {Source code};
+  \node[artifactlabel,anchor=south] at (7.70,3.40) {Event};
+
+  \draw[flow] (source-south) -- (compiler.north);
+  \draw[flow] (7.70,3.20) --
+    node[edgeword,left=2mm] {Trigger} (hook.north);
+
+  \draw[flow] (compiler.east) -- (verifier.west);
+  \draw[flow] (verifier.east) -- (jit.west);
+  \draw[flow] (jit.east) -- (hook.west);
+
+  \programartifact{bytecode}{1.95}{0.85}
+  \programartifact{verified}{4.25}{0.85}
+  \programartifact{native}{6.55}{0.85}
+  \node[artifactlabel,anchor=north] at (1.95,0.30) {eBPF bytecode};
+  \node[artifactlabel,anchor=north] at (4.25,0.30) {Verified bytecode};
+  \node[artifactlabel,anchor=north] at (6.55,0.30) {Native code};
+\end{tikzpicture}}
+  \caption{The eBPF compilation and execution pipeline. Bytecode is verified and compiled into native code at load time. Once the program is attached to a hook, the corresponding events trigger its execution.}
+  \Description{A user-space Clang compiler produces eBPF bytecode. In the kernel, the eBPF verifier checks the bytecode and the eBPF JIT compiles it to native code. After the program is attached to a hook, events trigger its execution.}
+  \label{fig:ebpf}
+\end{figure}

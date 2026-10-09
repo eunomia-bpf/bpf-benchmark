@@ -1,0 +1,19 @@
+\newcommand{\zj} [1]{\textcolor{blue}{{}#1}}
+\newcommand{\note} [1]{\textcolor{red}{#1}}
+
+\newcommand{\tool}{\textsc{BPF-Ext}\xspace}
+\newcommand{\kinsn}{\textsc{Kinsn}\xspace}
+\newcommand{\kinsns}{\textsc{Kinsn}s\xspace}
+\newcommand{\lang}{\kinsn}
+
+\newcommand{\citehere}[1][?]{  \textcolor{red}{[#1]}}
+
+\newtcolorbox[auto counter]{finding}[1][]{
+  enhanced, breakable, sharp corners,
+  fontupper=\normalfont\normalsize,
+  colback=black!4, colframe=black!75, boxrule=0.5pt,
+  left=2.2mm, right=2.2mm, top=1.4mm, bottom=1.4mm,
+  before skip=2.4mm, after skip=2.4mm,
+  #1,
+}
+\newcommand{\finlabel}{\textbf{Finding~\thetcbcounter:}\ }

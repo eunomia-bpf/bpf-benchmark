@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Rewriting and first-load costs in milliseconds, using the same LLVM pipeline with and without \kinsn rewriting. Entries summarize per-program means across 27 programs. Ranges give the minimum and maximum across programs. Increments are computed per program as the cost with rewriting minus the cost without it, before summarization.}
+\label{tab:eval-preparation-cost}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{\textbf{x86-64}} & \multicolumn{2}{c}{\textbf{ARM64}} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+\textbf{Measurement} & \textbf{Median} & \textbf{Range} & \textbf{Median} & \textbf{Range} \\
+\midrule
+Without \kinsn rewriting & 24.0 & 15.4--109.8 & 24.2 & 13.9--145.7 \\
+With \kinsn rewriting & 35.6 & 24.4--138.9 & 34.2 & 23.8--155.7 \\
+Per-program increment & 9.2 & 3.6--46.2 & 10.0 & 2.6--15.7 \\
+\bottomrule
+\end{tabular*}
+\end{table*}

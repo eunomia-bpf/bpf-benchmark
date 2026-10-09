@@ -1,0 +1,17 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Cilium throughput ratios, using mean rates of packets accepted by the sending interfaces. Each ratio divides whole-program native throughput by the reference throughput. Brackets give 95\% confidence intervals.}
+\label{tab:eval-native-comparison}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Reference} & \textbf{Native / reference} \\
+\midrule
+eBPF JIT & 1.005 [0.939, 1.098] \\
+All optimizations & 1.036 [0.931, 1.141] \\
+Without bulk memory access & 1.005 [0.952, 1.065] \\
+\bottomrule
+\end{tabular}
+\end{table}

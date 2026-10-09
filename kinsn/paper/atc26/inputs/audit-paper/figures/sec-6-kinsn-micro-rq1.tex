@@ -1,0 +1,28 @@
+\begin{figure*}[t]
+\centering
+
+\begin{subfigure}[t]{\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf}
+\caption{x86-64 KVM \lang{}-enabled run.}
+\label{fig:eval-kinsn-micro-x86}
+\end{subfigure}
+
+\vspace{0.6em}
+
+\begin{subfigure}[t]{\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf}
+\caption{ARM64 AWS \lang{}-enabled run.}
+\label{fig:eval-kinsn-micro-arm64}
+\end{subfigure}
+
+\caption{Microbenchmark execution-time speedup over the stock kernel eBPF JIT.
+Each benchmark is measured with three samples and
+\texttt{INNER\_REPEAT=100000}; bars report speedup computed from median
+\texttt{exec\_ns}, and higher is better. Panel~(a) reports the x86-64 KVM
+\lang{}-enabled run. Panel~(b) reports the ARM64 AWS \lang{}-enabled run over
+the 27 benchmarks with applied \lang{} sites. Red lines mark the geomean
+speedup reported in each panel.}
+\label{fig:eval-kinsn-micro}
+\end{figure*}

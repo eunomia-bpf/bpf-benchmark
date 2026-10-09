@@ -1,0 +1,224 @@
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+%%%
+% message<implementation is a small kernel core, a compile-time recognizer, and operation modules>
+% we implement \tool in three parts
+% the kernel core is a one-time change to the verifier and JIT
+% the recognizer rewrites idioms in userspace before load
+% each operation ships as one or more loadable kernel modules
+
+%%% Section 6.1 Kernel Core
+
+%%%
+% message<the kernel core is a small one-time change>
+% the kernel core adds 929 lines to the Linux kernel
+% the table breaks the total down by component
+
+%%%
+% message<instruction encoding: a call plus a sidecar marked via src_reg>
+% each extended instruction is a pair of instructions, a call and a sidecar
+% both reuse existing eBPF opcodes, a reserved src_reg value marks the pair
+% the call identifies the descriptor
+% the sidecar carries a packed 52-bit payload with the operands
+% the low four payload bits must form a valid eBPF register number
+% the recognizer re-encodes payloads whose low bits exceed the largest register
+% the kernel reverses the re-encoding when reading the sidecar
+
+%%%
+% message<verifier: a lowering stage and a restore stage around the existing analysis>
+% the verifier gains a lowering stage and a restore stage around its analysis
+% the lowering stage walks backward and substitutes each extended instruction's proof sequence
+% the stage records each original pair for restoration
+% the verifier then runs unchanged on the lowered program
+% the restore stage reinstates the extended instructions after success
+% with proof-sequence validation and bookkeeping the verifier changes total 487 lines
+
+%%%
+% message<JIT: per-architecture dispatch, fallback resolved before the JIT>
+% the x86-64 and ARM64 JITs each gain a dispatch case for extended instructions
+% the JIT looks up the descriptor and decodes the sidecar payload
+% the JIT then calls the descriptor's native emit for the running architecture
+% with no native emit the kernel rewrites the site to its proof sequence in load-time fixups
+% dispatch is 97 lines on x86-64 and 121 on ARM64
+
+%%%
+% message<module registration reuses BTF and kfunc machinery>
+% a loaded module registers its descriptors for lookup by the verifier and JIT
+% registration reuses BTF, the kernel's type metadata, and kfuncs, kernel functions eBPF may call
+% each module exports a stub kfunc as its BTF anchor
+% the module lists its descriptors in a parallel array
+% the kernel caches the descriptors per program
+% BTF and registration are 139 lines
+% the new descriptor type and helpers add 85 lines of headers
+
+%%% Section 6.2 Compile-Time Recognizer
+
+%%%
+% message<the recognizer is an optional pre-load rewriter with two paths>
+% the recognizer rewrites idioms into extended instructions before load, through two paths
+% a program built without the recognizer, or unmatched, produces the same vanilla eBPF bytecode
+
+%%%
+% message<the selector path matches idioms during LLVM instruction selection>
+% the first path is a selector in the LLVM eBPF backend
+% the selector matches idioms during instruction selection and emits the call and sidecar
+% counted over the backend's \tool commits, the selector adds 2,126 lines, half a new selection module
+
+%%%
+% message<the bytecode-recovery path re-matches idioms on compiled bytecode>
+% the second path is a bytecode-recovery pass on already-compiled bytecode
+% the pass covers bytecode the selector never sees or cannot match
+% the implementation is a standalone userspace tool of 6,967 lines
+% the pass checks that each rewrite preserves the program's semantics
+% even a wrong rewrite leaves the program safe, the verifier re-checks the lowered program
+% at worst a wrong rewrite changes the program's result
+
+%%% Section 6.3 Operation Modules
+
+%%%
+% message<a module packages an operation's two forms outside the kernel core>
+% each operation is packaged as one or more kernel modules, separate from the core
+% a module supplies the proof-sequence routine, the native emits, and the BTF registration
+
+%%%
+% message<modules are organized by native instruction; tree counts and scope>
+% each module covers one native instruction on one architecture
+% a single-architecture operation contributes modules on one side, so the counts differ
+% the tree is 14 x86-64 and 11 ARM64 modules, 9,765 lines, including helpers and test-only modules
+
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+\section{Implementation}
+\label{sec:implementation}
+% 实现
+
+We implement \tool in three parts.
+% 我们分三部分实现 \tool。
+The kernel core is a one-time change to the verifier and the JIT (\S\ref{subsec:kernel}).
+% 内核核心是对验证器和 JIT 的一次性更改。
+A compile-time recognizer rewrites idioms in userspace before load (\S\ref{subsec:llvm}).
+% 编译时识别器在加载前在用户空间重写习语。
+Each operation ships as one or more loadable kernel modules (\S\ref{subsec:descriptors}).
+% 每个操作作为一个或多个可加载内核模块发布。
+
+\subsection{Kernel Core}
+\label{subsec:kernel}
+% 内核核心
+
+The kernel core adds 929 lines to the Linux kernel.
+% 内核核心向 Linux 内核添加了 929 行。
+Table~\ref{tab:kernel-loc} breaks the total down by component.
+% 表按组件分解总数。
+
+\input{tables/sec-5-kernel-loc}
+
+\noindent\textbf{Instruction encoding.}
+% \noindent\textbf{指令编码。}
+Each extended instruction is a pair of instructions, a call and a sidecar, shown in Table~\ref{tab:encoding}.
+% 每条扩展指令是一对指令：一个调用和一个伴随，如表所示。
+Both reuse existing eBPF opcodes, and a reserved \texttt{src\_reg} value marks the pair for \tool.
+% 两者都重用现有的 eBPF 操作码，保留的 src\_reg 值标记该对用于 \tool。
+The call identifies the descriptor to use.
+% 调用标识要使用的描述符。
+The sidecar carries a packed 52-bit payload with the operands.
+% 伴随携带包含操作数的 52 位压缩载荷。
+The low four bits of the payload must form a valid eBPF register number.
+% 载荷的低四位必须形成有效的 eBPF 寄存器编号。
+The recognizer therefore re-encodes a payload whose low four bits exceed the largest register number.
+% 因此识别器重新编码低四位超过最大寄存器编号的载荷。
+The kernel reverses the re-encoding when reading the sidecar.
+% 内核在读取伴随时逆转重新编码。
+
+\input{tables/sec-5-encoding}
+
+\noindent\textbf{Verifier lowering and restore.}
+% \noindent\textbf{验证器降低和恢复。}
+The verifier gains a lowering stage and a restore stage around its existing analysis.
+% 验证器在其现有分析周围获得降低阶段和恢复阶段。
+The lowering stage traverses the program backward and replaces each extended instruction with the proof sequence from its descriptor.
+% 降低阶段向后遍历程序，用描述符中的证明序列替换每条扩展指令。
+The stage records each original pair for restoration.
+% 该阶段记录每个原始对以供恢复。
+The verifier then runs unchanged on the lowered program.
+% 然后验证器在降低后的程序上不变地运行。
+The restore stage reinstates the extended instructions after verification succeeds.
+% 验证成功后恢复阶段恢复扩展指令。
+With proof-sequence validation and the supporting bookkeeping, the changes to the verifier total 487 lines, the largest single component.
+% 加上证明序列验证和支持簿记，验证器的更改共 487 行，是最大的单一组件。
+
+\noindent\textbf{JIT dispatch.}
+% \noindent\textbf{JIT 分派。}
+The x86-64 and ARM64 JIT backends each gain a dispatch case for extended instructions.
+% x86-64 和 ARM64 JIT 后端各获得扩展指令的分派情况。
+On reaching an extended instruction, the JIT looks up the descriptor and decodes the sidecar payload.
+% 到达扩展指令时，JIT 查找描述符并解码伴随载荷。
+The JIT then calls the descriptor's native emit for the running architecture.
+% 然后 JIT 调用描述符对应运行架构的本地发射。
+When a descriptor has no native emit for the architecture, the kernel rewrites the site back to its proof sequence during load-time fixups, before the JIT runs.
+% 当描述符没有该架构的本地发射时，内核在 JIT 运行前的加载时修复期间将站点重写回其证明序列。
+The dispatch logic is 97 lines on x86-64 and 121 lines on ARM64.
+% 分派逻辑在 x86-64 上 97 行，在 ARM64 上 121 行。
+
+\noindent\textbf{Module registration.}
+% \noindent\textbf{模块注册。}
+A loaded module registers its descriptors for lookup by the verifier and the JIT.
+% 加载的模块注册其描述符以供验证器和 JIT 查找。
+Registration reuses two existing kernel facilities, BTF, the kernel's type metadata for eBPF objects, and kfuncs, kernel functions that eBPF programs may call.
+% 注册重用两个现有内核设施：BTF（内核对 eBPF 对象的类型元数据）和 kfunc（eBPF 程序可以调用的内核函数）。
+Each module exports a stub kfunc as its BTF anchor.
+% 每个模块导出一个存根 kfunc 作为其 BTF 锚点。
+The module lists its \texttt{struct bpf\_kinsn} descriptors in a parallel array.
+% 模块在并行数组中列出其 struct bpf\_kinsn 描述符。
+The kernel caches the descriptors per program.
+% 内核为每个程序缓存描述符。
+The BTF and registration changes are 139 lines.
+% BTF 和注册更改为 139 行。
+The new \texttt{struct bpf\_kinsn} type and helpers add 85 lines of headers.
+% 新的 struct bpf\_kinsn 类型和辅助函数添加 85 行头文件。
+
+\subsection{Compile-Time Recognizer}
+\label{subsec:llvm}
+% 编译时识别器
+
+The recognizer rewrites a program's idioms into extended instructions before load, through two paths.
+% 识别器通过两条路径在加载前将程序的习语重写为扩展指令。
+A program built without the recognizer, or one whose idioms the recognizer does not match, produces the same vanilla eBPF bytecode and runs through the unchanged pipeline.
+% 没有使用识别器构建的程序，或识别器不匹配其习语的程序，产生相同的原生 eBPF 字节码并通过不变的管线运行。
+
+\noindent\textbf{Selector.}
+% \noindent\textbf{选择器。}
+The first path is a selector in the LLVM eBPF backend.
+% 第一条路径是 LLVM eBPF 后端中的选择器。
+The selector matches idioms during instruction selection and emits the call and sidecar in place of the decomposed bytecode.
+% 选择器在指令选择期间匹配习语，并发射调用和伴随替代分解的字节码。
+Counted over the backend's \tool commits, the selector adds 2{,}126 lines, half in a new selection module.
+% 计算后端的 \tool 提交，选择器添加 2126 行，一半在新的选择模块中。
+
+\noindent\textbf{Bytecode recovery.}
+% \noindent\textbf{字节码恢复。}
+The second path is a bytecode-recovery pass that re-matches idioms on already-compiled bytecode.
+% 第二条路径是字节码恢复遍，在已编译的字节码上重新匹配习语。
+The pass covers bytecode the selector never sees or cannot match, such as programs compiled by a separate toolchain.
+% 该遍覆盖选择器从未见过或无法匹配的字节码，如由单独工具链编译的程序。
+The implementation is a standalone userspace tool of 6{,}967 lines.
+% 实现是一个 6967 行的独立用户空间工具。
+The pass checks that each rewrite preserves the program's semantics, for example that a temporary register the idiom overwrites is dead afterward.
+% 该遍检查每次重写保持程序的语义，例如习语覆盖的临时寄存器之后是死的。
+Even a wrong rewrite leaves the program safe, because the verifier re-checks every lowered program (\S\ref{subsec:safety}).% At worst, a wrong rewrite changes the program's result.
+% 即使错误的重写也使程序保持安全，因为验证器重新检查每个降低的程序。
+
+\subsection{Operation Modules}
+\label{subsec:descriptors}
+% 操作模块
+
+Each operation is packaged as one or more kernel modules, separate from the kernel core.
+% 每个操作打包为一个或多个内核模块，与内核核心分开。
+A module supplies an operation's proof-sequence routine, its native emits, and the BTF registration that exposes both.
+% 模块提供操作的证明序列例程、其本地发射和暴露两者的 BTF 注册。
+
+Each module covers one native instruction on one architecture.
+% 每个模块覆盖一个架构上的一条本地指令。
+An operation that targets a single architecture contributes modules on that architecture only, which is why the per-architecture counts differ.
+% 针对单一架构的操作只在该架构上贡献模块，这就是每架构计数不同的原因。
+The module tree holds 14 modules on x86-64 and 11 on ARM64, 9{,}765 lines in all, including shared helper headers, test-only modules, and operations beyond \lang's seven (Table~\ref{tab:descriptors}).
+% 模块树在 x86-64 上有 14 个模块，在 ARM64 上有 11 个，共 9765 行，包括共享辅助头文件、仅测试模块和超出 \lang 七个的操作。

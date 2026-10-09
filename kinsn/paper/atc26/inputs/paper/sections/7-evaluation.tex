@@ -1,0 +1,121 @@
+\section{Evaluation}
+\label{sec:eval}
+% 评估
+
+This section evaluates \lang, the hardware-idiom instantiation of \tool.
+% 本节评估 \lang，\tool 的硬件习语实例。
+\tool provides the extension interface, while \lang provides the concrete operations used in our experiments.
+% \tool 提供扩展机制，而 \lang 提供我们实验中使用的具体描述符族。
+\lang complements bytecode optimizers~\cite{xu2021synthesizing,mao2024merlin,zhu2025epso}, which cannot emit native instructions that the eBPF instruction set lacks.
+% \lang 与字节码优化器互补，后者无法发射 eBPF 指令集缺少的本地指令。
+We use two workload classes.
+% 我们使用两类工作负载。
+First, we reuse the 27 microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects.
+% 首先，我们重用来自特征分析的 27 个纯字节码微基准测试来隔离指令选择效果。
+Second, we use production datapath applications to test whether those effects matter in real BPF loading and execution paths.
+% 其次，我们使用生产数据路径应用来测试这些效果在真实 BPF 加载和执行路径中是否重要。
+We answer four questions:
+% 我们回答四个问题：
+
+\begin{itemize}
+\item \textbf{RQ1:} How effectively does \lang improve generated native-code efficiency across architectures?
+% RQ1：\lang 在各架构上改善生成的本地代码效率的效果如何？
+\item \textbf{RQ2:} How does \lang perform on production applications?
+% RQ2：\lang 在生产应用上的表现如何？
+\item \textbf{RQ3:} How sensitive is \lang to its operation-selection policy?
+% RQ3：\lang 对族选择策略的敏感度如何？
+\item \textbf{RQ4:} How does \tool compare with a native-in-kernel upper bound?
+% RQ4：\tool 与内核内原生上界相比如何？
+\end{itemize}
+
+\paragraph{Evaluation environment.}
+% \paragraph{评估环境。}
+
+We use two evaluation platforms.
+% 我们使用两个评估平台。
+The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\,GHz host, using Linux 7.0.0-rc2+.
+% x86-64 实验在 Intel Xeon Silver 4210R @ 2.40 GHz 主机上的 KVM 虚拟机中运行，配置 8 个 vCPU 和 64 GB RAM，使用 Linux 7.0.0-rc2+。
+The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.
+% ARM64 实验在 AWS t4g.small 实例（2 个 vCPU，2 GiB RAM，AWS Graviton2）上运行，使用启用 \lang 的 Linux 7.0.0-rc2+ 构建。
+These platforms cover both the microbenchmark suite and the production-application experiments.
+% 这些平台涵盖微基准测试套件和生产应用实验。
+For matched application comparisons, the original and \lang runs use the same kernel image and differ only in the loaded program form or \lang policy.
+% 对于匹配的应用比较，原版和 \lang 运行使用相同的内核镜像，仅在加载的程序形式或 \lang 策略上不同。
+
+\paragraph{Measurement conventions.}
+% \paragraph{测量约定。}
+Unless otherwise stated, each experiment uses three measured runs and reports the median.
+% 除非另有说明，每个实验使用三次测量运行并报告中位数。
+Execution-time and throughput ratios are normalized to the original kernel JIT, so values above 1$\times$ indicate faster execution or higher throughput.
+% 执行时间和吞吐量比率归一化到原版内核 eBPF JIT，因此高于 1 倍的值表示更快的执行或更高的吞吐量。
+BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost.
+% BPF 成本比率报告后/基线成本，因此低于 1 倍的值表示更低的 BPF 运行时成本。
+For BPF-counter results, we report post/baseline ns/run for retained counter rows.
+% 对于 BPF 计数器结果，我们报告保留计数器行的后/基线 ns/run。
+For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index.
+% 对于每个保留行，我们计算 run\_time\_ns\_delta/run\_cnt\_delta，丢弃任一阶段运行次数少于 100 的行，并按程序名称、程序类型和出现索引配对行。
+
+\subsection{RQ1: x86-64 and ARM64 Microbenchmark Signal}
+\label{subsec:micro_benchmark}
+
+\input{figures/sec-6-kinsn-micro-rq1}
+
+\lang reduces generated native-code size on both evaluated architectures. Relative to the original kernel JIT, generated kernel JIT code shrinks to 0.772$\times$ on x86-64 KVM and 0.879$\times$ on ARM64 AWS, corresponding to geomean reductions of 22.8\% and 12.1\%, respectively.
+
+Figure~\ref{fig:eval-kinsn-micro} reports the corresponding execution-time results. On x86-64 KVM, the \lang-enabled run achieves a 1.242$\times$ geomean speedup over the original kernel JIT, reducing execution time by 19.47\%. On ARM64 AWS, the \lang-enabled run applies all matched \lang sites, with 308/308 sites in the median sample and 924/924 site instances across all samples. Over the 27 \lang-bearing benchmarks, it achieves a 1.222$\times$ geomean speedup over the original kernel JIT, reducing
+execution time by 18.17\%. Both architectures produce zero correctness mismatches. On the microbenchmarks, the 1.242$\times$ speedup recovers 42\% of the characterization's 1.57$\times$ eBPF-native gap on x86-64 $((1.242{-}1)/(1.57{-}1))$.
+
+
+The per-benchmark distributions suggest different sources of benefit across architectures. On x86-64, speedups are more closely associated with native code-size reduction, which is consistent with \lang replacing the original JIT's conservative instruction sequences and reducing dynamic instruction overhead. On ARM64, code-size reduction alone is less explanatory: the largest gains appear when the selector reaches target-specific idioms such as rotate/extract operations and packet-field load fusion. For example, \texttt{siphash\_rotate64\_\allowbreak mixer} reaches a 1.902$\times$ speedup on ARM64 with dominant extract-style sites, while networking-oriented microbenchmarks such as Cilium socket load balancing, BCC TCP tuple filtering, and Cilium CT/NAT tuple rewriting achieve speedups of 1.691$\times$, 1.624$\times$, and 1.482$\times$, respectively. These results suggest that \lang is not merely a code-size optimization. Rather, its effectiveness depends on the architecture, the original JIT baseline, the selected operation, and whether the selected sites lie on performance-critical execution paths.
+
+The regressions also reveal the current limits of the selector. \texttt{bpftrace\_comm\_key\_fnv\_hash} regresses to 0.862$\times$ on ARM64, while \texttt{bitmap\_popcount\_scan} regresses to 0.966$\times$ despite having applied \lang sites. These cases indicate that \lang is not uniformly beneficial and motivate per-operation gating or lightweight cost-model guidance, rather than blindly applying every matched \lang site.
+
+\noindent\textbf{Load-time overhead.}
+The \lang lowering and restore stages add two linear passes over the program during verification. Across all 62 microbenchmarks on x86-64 KVM, the kernel-side load time (\texttt{object\_load\_ns}, covering verification and JIT) shows a 0.99$\times$ geomean ratio relative to the original kernel, i.e., no measurable overhead. For programs with \lang sites, the end-to-end compile time (including the userspace recognizer) increases by 1.4--2.4$\times$, but remains sub-millisecond in absolute terms.
+
+
+
+\subsection{RQ2: Real Packet-Processing Applications}
+\label{subsec:corpus_application}
+
+Microbenchmarks isolate individual instruction patterns, but packet-processing applications combine those patterns with maps, helper calls, tail calls, and application-specific datapath structure. We therefore evaluate \lang on two real eBPF packet-processing applications: Cilium and Katran. Cilium represents a large tail-call-heavy Kubernetes datapath, while Katran represents a compact high-rate XDP load balancer with a hot directly attached program. We measure end-to-end datapath throughput with BPF runtime statistics disabled to avoid measurement overhead.
+
+\textbf{Cilium on x86-64.}
+On x86-64 KVM, the default full-\lang policy improves Cilium's end-to-end datapath throughput by 1.074$\times$ over the original kernel JIT. This run applies 4086 \lang sites with zero load-time skips or report errors. The applied sites span several operations: LEA contributes 2346 sites, conditional select 385, endian fusion 766, extract 2, and bulk memory 587. This confirms that \lang reaches real bytecode patterns in Cilium's production datapath.
+
+\textbf{Katran on ARM64.}
+On ARM64 AWS, the conservative \lang policy applies 21 sites and improves Katran's end-to-end workload throughput by 1.073$\times$ over the original kernel JIT. Because Katran's datapath is dominated by a single hot XDP program, the throughput signal is clean: the program that receives \lang sites is the program on the critical path.
+
+Together, these two case studies show that \lang improves real packet-processing workloads on both architectures. The results raise a follow-up question: once \lang reaches real application bytecode, should it enable every matched operation, or should it select operations by workload-specific profitability?
+
+
+\input{figures/sec-6-kinsn-micro-rq3}
+
+
+\subsection{RQ3: Sensitivity to Operation-Selection Policy}
+\label{subsec:policy_sensitivity}
+
+
+Which \lang operations to enable is a policy decision above \tool, and it is a performance decision: each matched site trades the dynamic work saved by a shorter native idiom against the cost and placement of the replacement in a particular datapath. A simple policy would maximize coverage, i.e., enable every implemented operation and apply as many matched sites as possible. Figure~\ref{fig:app_policy_probes} illustrates this policy effect by comparing two paired policy perturbations on Cilium and Katran.
+
+
+
+For Cilium, we start from the full x86-64 \lang policy used in RQ2. As shown in Figure~\ref{fig:app_policy_probes}, this policy applies 4086 sites and improves workload throughput to 1.074$\times$, while the BPF-cost ratio remains near neutral at 1.009$\times$. We then disable only the \texttt{bulk\_memory} operation while keeping the other \lang operations enabled. This reduces the number of applied sites from 4086 to 3512, but increases workload throughput further to 1.114$\times$. At the same time, the BPF-cost ratio rises to 1.062$\times$, so this result should not be read as saying that \texttt{bulk\_memory} is universally harmful. Rather, it shows that an additional operation can increase syntactic coverage without improving the measured datapath: the saved instructions may not outweigh the replacement overhead, or they may not lie on the part of the datapath that dominates throughput.
+
+Katran shows the same policy lesson more directly. Figure~\ref{fig:app_policy_probes} shows that the conservative ARM64 policy used in RQ2 applies 21 sites and improves Katran to 1.073$\times$ workload throughput, while reducing BPF cost to 0.941$\times$. To test whether simply increasing coverage is beneficial, we then force a coverage-max policy that enables every implemented ARM64 operation and applies 62 sites. The result is worse despite the larger number of applied sites: workload throughput falls to 0.995$\times$, and BPF cost rises to 1.006$\times$. Because Katran is dominated by a single hot XDP path, this result gives a particularly clear counterexample to coverage maximization: adding more matched sites does not translate into either higher throughput or lower BPF cost.
+
+Taken together, the figure rejects raw site count as the right objective for \lang policy. The useful objective is profitability: an operation should be enabled when its replacements save enough dynamic work on the target workload to justify their cost, rather than simply because they increase the number of matched sites.
+
+
+\subsection{RQ4: Native-in-Kernel Upper Bound}
+\label{subsec:native_upper_bound}
+
+The three RQs above evaluate \lang as an instantiation of \tool. We now place \tool in a broader design space by using \tool itself to load whole-program native replacements. In this experiment, each Cilium BPF program is compiled from the same C source along two paths: the proof sequence is the normal eBPF bytecode that the verifier checks, while the native emit is the same source compiled with LLVM \texttt{-O2} directly to native code. The verifier still checks the eBPF proof sequence on every load, but the equivalence between the two compilations is trusted rather than proved, so the application's native code becomes part of the TCB. The 2.358$\times$ upper bound is not comparable to the characterization's 1.57$\times$ microbenchmark gap, which measures microbenchmarks in isolation rather than Cilium's full datapath.
+
+We use Cilium for this upper-bound study because it is the same kind of datapath workload evaluated above. The native-in-kernel experiment uses the same x86-64 KVM application setup as the Cilium \lang runs. It is not a claim about Cilium control-plane throughput: it measures steady-state datapath throughput after endpoint setup, with runtime reload and regeneration controllers disabled and the Cilium agent paused during measured workload samples.
+
+Relaxing the trust boundary exposes a much higher performance ceiling. Cilium throughput improves by 2.358$\times$ over original eBPF, and retained BPF cost drops from 488.7~ns/run to 262.3~ns/run, a 1.86$\times$ BPF-counter speedup.
+
+The performance gain comes with a larger trusted surface. The Cilium native run logs 113 native replacements and 22 manifest no-match pass-throughs. The native sidecar data also records 89 Cilium manifest objects across 8 native files. These numbers are not a full TCB LOC audit, but they show the scale of the code surface that the native path must trust or validate.
+
+This places original eBPF, \tool instantiated as \lang, and native-in-kernel execution at three points in the same design space. Original eBPF is the most conservative point: it keeps the existing verifier/JIT trust boundary but pays the cost of a small virtual instruction set. Native-in-kernel execution is the performance ceiling under an assumed-safe model, but it trusts whole native replacements and the loader path. \lang occupies the middle ground: its 1.074$\times$ Cilium throughput gain recovers 5.4\% of the 2.358$\times$ native upper bound's gap $((1.074{-}1)/(2.358{-}1))$, compared with 42\% on the microbenchmarks, because real datapaths spend most of their time in helpers, maps, and tail calls that \lang does not target. \lang does not reach the native upper bound, but it provides controllable speedups through a small set of kernel-defined operations rather than trusting whole native replacement objects.

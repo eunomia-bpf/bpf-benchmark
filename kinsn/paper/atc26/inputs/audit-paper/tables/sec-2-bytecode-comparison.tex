@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Comparison of bytecode systems by verification requirements and optimization scope.}
+\label{tab:bytecode-comparison}
+\begin{tabular}{@{}lll@{}}
+\toprule
+System & Per-opcode verification & Optimization scope \\
+\midrule
+LLVM & None & Full \\
+JVM & Type rules & Full \\
+Wasm & Type + structural rules & Cross-instruction \\
+eBPF & Abstract transfer function & Per-instruction \\
+\bottomrule
+\end{tabular}
+\end{table}

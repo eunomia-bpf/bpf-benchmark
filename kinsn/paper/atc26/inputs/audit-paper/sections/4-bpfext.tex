@@ -1,0 +1,450 @@
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+%%% Section 4 \tool: Extending the eBPF Compilation Pipeline
+
+%%%
+% message<\tool adds dual-form operations; constraints map to the subsections>
+% \tool extends the pipeline with operations the verifier checks and the JIT emits
+% each operation carries two forms, a proof sequence and a native emit
+% the figure contrasts the pipeline with and without \tool
+% a recognizer rewrites a pattern into extended instructions, each a pair of call and sidecar
+% each call selects a descriptor from a kernel module, the descriptor supplies its two forms
+% the same program verifies as vanilla eBPF and runs as native
+% \tool meets the three constraints, each cashed by one subsection
+% section 5 then presents \lang, the operations built with the mechanism
+
+%%% Section 4.1 The Compilation Pipeline
+
+%%%
+% message<recognition turns idiom patterns into extended instructions without new opcodes>
+% the recognizer matches the patterns of supported operations in userspace before load
+% for \lang's rotate the pattern is the shift-and-or sequence
+% the call and the sidecar reuse existing eBPF opcodes
+% \tool therefore adds no new opcode
+
+%%%
+% message<the verifier checks an extended instruction by lowering it>
+% the verifier checks an extended instruction by lowering it to vanilla eBPF
+% the proof sequence is a vanilla eBPF fragment with the extended instruction's semantics
+% a lowering stage substitutes the proof sequence before the main analysis
+% the verifier analyzes the lowered program with its existing transfer functions
+% after the analysis succeeds, a restore stage reinstates the extended instructions
+
+%%%
+% message<the JIT emits per-architecture native code; verification stays architecture-independent>
+% the JIT dispatches each extended instruction to the descriptor's native emit
+% for \lang's rotate, a single ROL on x86-64 or ROR on ARM64
+% the exact proof sequence, like the native emit, can differ across architectures
+% every proof-sequence variant stays vanilla eBPF
+% verification therefore stays architecture-independent
+% with no native emit the extended instruction falls back to the proof sequence
+% the interpreter has no dispatch for extended instructions
+% a kernel without a JIT therefore rejects programs that carry extended instructions
+
+%%% Section 4.2 Adding an Operation
+
+%%%
+% message<a new operation is descriptors in a module plus a recognizer pattern>
+% a new operation needs only descriptors in a kernel module and a pattern in the recognizer
+% a descriptor is a small structure with two author-supplied parts, routine and emits
+% a family of descriptors implements an operation, one per variant
+% a kernel module registers its descriptors with the kernel core
+% \tool's one-time core change stays the same for every operation
+
+%%%
+% message<an operation's size is open>
+% the mechanism leaves an operation's size open
+% a proof sequence may span a few instructions or an entire rule-conforming region
+
+%%% Section 4.3 Safety and the Trusted Base
+
+%%%
+% message<the verification side adds nothing to the trusted base>
+% the verification side adds nothing to the trusted computing base
+% everything the recognizer and the module contribute reaches the verifier in the lowered program
+% the verifier re-checks the lowered program on every load, same analysis as vanilla eBPF
+% a faulty rewrite or proof sequence fails verification like any unsafe program
+
+%%%
+% message<the verdict carries over to the restored program>
+% the verdict on the lowered program carries over to the restored program
+% restore collapses each proof region back into its extended instruction, changes nothing else
+% for the collapse to preserve the verdict, a region must stay single-entry, single-exit, jump-clean
+% control enters a region only at its top and leaves only past its end, like one instruction
+% at load time the kernel rejects calls, exits, or nesting inside a proof sequence
+% the jump rules remain the operation author's responsibility
+
+%%%
+% message<the native emit is the sole evidence-owing addition>
+% the native emit is the one component \tool adds to the trusted computing base
+% the verifier never sees the native emit that the CPU runs
+% every operation must supply evidence that its emit computes the same result as its proof sequence
+% for \lang, the Lean 4 proofs supply the evidence
+
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+\section{\tool: Extending the eBPF Compilation Pipeline}
+\label{sec:mechanism}
+% \tool：扩展 eBPF 编译管线
+
+\tool extends the eBPF compilation pipeline with new operations that the existing verifier checks and the kernel JIT emits directly.
+% \tool 通过现有验证器检查且内核 JIT 直接发射的新操作来扩展 eBPF 编译管线。
+Each operation has two forms: a \emph{proof sequence} of vanilla eBPF that the verifier checks and a \emph{native emit} that the CPU runs.
+% 每个操作有两种形式：验证器检查的原生 eBPF \emph{证明序列}和 CPU 运行的\emph{本地发射}。
+Figure~\ref{fig:pipeline} contrasts the pipeline with and without \tool.
+% 图对比了有无 \tool 的管线。
+A compile-time recognizer rewrites an operation's pattern into one or more \emph{extended instructions}, each a pair of a call and a sidecar that carries the operands.
+% 编译时识别器将操作的模式重写为一条或多条\emph{扩展指令}，每条是一个调用和携带操作数的伴随对。
+Each call selects a \emph{descriptor} from a kernel module, and the descriptor supplies both forms for its instruction.
+% 每个调用从内核模块选择一个\emph{描述符}，描述符为其指令提供两种形式。
+The same program therefore verifies as vanilla eBPF and runs as native code.
+% 因此同一程序作为原生 eBPF 验证，作为本地代码运行。
+\tool meets the three constraints of \S\ref{subsec:char-challenges}: the safety guarantee stays intact up to one explicit obligation (\S\ref{subsec:safety}), the kernel core changes once (\S\ref{subsec:adding}), and verification stays architecture-independent (\S\ref{subsec:pipeline}).
+% \tool 满足三个约束：安全保证保持完整（有一个明确义务），内核核心只更改一次，验证保持架构无关。
+With \tool, we build \lang, a set of seven operations for hardware idioms (\S\ref{sec:lang}), and use its rotate as the running example.
+% 借助 \tool，我们构建了 \lang，一组七个硬件习语操作，并以其旋转操作作为贯穿全节的例子。
+
+\begin{figure*}[t]
+\centering
+\begingroup
+\fontencoding{T1}\selectfont
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\ttdefault}{lmtt}
+\definecolor{evoink}{HTML}{17365D}
+\definecolor{evogreen}{HTML}{EDF2F8}
+\definecolor{evoedge}{HTML}{506C8B}
+\definecolor{evoblue}{HTML}{E5EDF8}
+\definecolor{evopurple}{HTML}{EEE7F2}
+\definecolor{evobaseline}{HTML}{B56A00}
+\begin{tikzpicture}[
+x=1cm,y=1cm,font=\sffamily\fontsize{8.5}{10}\selectfont,
+code/.style={anchor=west,font=\ttfamily\fontsize{8}{10}\selectfont,inner sep=0pt},
+slot/.style={anchor=west,font=\sffamily\fontsize{7.5}{9}\selectfont,inner sep=0pt,text=evoink},
+component/.style={draw,line width=.55pt,fill=evoblue,minimum width=2.20cm,minimum height=1.20cm,text width=1.94cm,align=center,inner xsep=1.3mm,inner ysep=.8mm,outer sep=0pt},
+stepdot/.style={circle,fill=evoink,draw=evoink,minimum size=2.2mm,inner sep=0pt,outer sep=0pt},
+flow/.style={-{Stealth[length=1.4mm,width=1mm]},line width=.75pt,shorten <=.45mm,shorten >=.45mm},
+originalflow/.style={flow,draw=evobaseline,dash pattern=on 5pt off 3pt},
+extendedflow/.style={flow,draw=evoink,line width=.85pt},
+callarrow/.style={flow,draw=evoink,line width=.55pt,line cap=round,dash pattern=on .5pt off 2.2pt},
+resultarrow/.style={flow,draw=evoink,line width=.55pt},
+edgelabel/.style={font=\sffamily\fontsize{8}{9}\selectfont,text=evoink,align=center,inner sep=0pt},
+regionlabel/.style={font=\sffamily\bfseries\fontsize{8.5}{10}\selectfont,inner sep=0pt},
+productnumber/.style={circle,draw=black!75,fill=white,line width=.5pt,minimum size=3.5mm,inner sep=0pt,outer sep=0pt,font=\sffamily\fontsize{7.5}{8}\selectfont},
+panelheading/.style={anchor=west,align=left,inner sep=0pt,font=\sffamily\fontsize{8}{10}\selectfont}
+]
+\path[use as bounding box] (0,0) rectangle (17.5,10.90);
+\draw[draw=evoedge,fill=evogreen,line width=.55pt] (3.10,5.15) rectangle (12.30,8.30);
+\node[regionlabel] at (7.70,5.475) {BPF-Ext};
+\draw[draw=evoedge,fill=white,line width=.5pt] (6.45,5.80) rectangle (11.95,7.95);
+\node[regionlabel] at (9.20,6.10) {Kernel modules};
+\draw[black!55,line width=.55pt,dash pattern=on 2pt off 2pt] (6.10,4.95) -- (6.10,10.85);
+\node[regionlabel,anchor=base east] at (5.88,10.60) {User space};
+\node[regionlabel,anchor=base west] at (6.32,10.60) {Kernel};
+\node[component,fill=evopurple] (clang) at (2.25,9.375) {Clang};
+\node[component] (verifier) at (10.50,9.375) {eBPF verifier};
+\node[component,draw=evoedge,line width=.8pt] (jit) at (14.90,9.375) {eBPF JIT};
+\node[component,draw=evoedge,fill=white] (recognizer) at (4.55,7.00) {Compile-time\\recognizer};
+\node[component,fill=white] (expansion) at (7.90,7.00) {Proof\\sequence};
+\node[component,fill=white] (emitter) at (10.50,7.00) {Native\\emit};
+\foreach \name/\x/\y in {source/.50/9.375,originalnative/17.25/9.75} {
+\coordinate (\name) at (\x,\y);
+\draw[fill=white,line width=.55pt] ($(\name)+(-.25,-.35)$) -- ($(\name)+(.25,-.35)$) -- ($(\name)+(.25,.18)$) -- ($(\name)+(.08,.35)$) -- ($(\name)+(-.25,.35)$) -- cycle;
+\draw[line width=.55pt] ($(\name)+(.08,.35)$) -- ($(\name)+(.08,.18)$) -- ($(\name)+(.25,.18)$);
+\node[font=\ttfamily\bfseries\fontsize{6.5}{6.5}\selectfont,inner sep=0pt] at ($(\name)+(0,-.06)$) {</>};
+}
+\node[font=\sffamily\fontsize{8}{9}\selectfont,inner sep=0pt,anchor=north,text width=1.0cm,align=center] at (.50,8.78) {Source\\code};
+\node[font=\sffamily\fontsize{8}{9}\selectfont,inner sep=0pt,anchor=south east,text=evobaseline] at (17.50,10.30) {Native code};
+\foreach \x/\n in {3.95/1,5.15/2,8.65/3,13.05/4,17.30/5} {
+\node[productnumber] (p\n) at (\x,9.00) {\n};
+}
+\node[stepdot] (expandstep) at (7.90,9.00) {};
+\node[stepdot] (restorestep) at (12.30,9.00) {};
+\draw[flow] (.75,9.375) -- (clang.west);
+\draw[originalflow] (3.35,9.75) -- (9.40,9.75);
+\draw[originalflow] (11.60,9.75) -- (13.80,9.75);
+\draw[originalflow] (16.00,9.75) -- (17.00,9.75);
+\draw[extendedflow] (3.35,9.00) -- (p1.west);
+\draw[extendedflow] (p1.south) -- (3.95,7.60);
+\draw[extendedflow] (5.15,7.60) -- (p2.south);
+\draw[extendedflow] (p2.east) -- (expandstep.west);
+\draw[extendedflow] (expandstep.east) -- (p3.west);
+\draw[extendedflow] (p3.east) -- (9.40,9.00);
+\draw[extendedflow] (11.60,9.00) -- (restorestep.west);
+\draw[extendedflow] (restorestep.east) -- (p4.west);
+\draw[extendedflow] (p4.east) -- (13.80,9.00);
+\draw[extendedflow] (16.00,9.00) -- (p5.west);
+\node[edgelabel,anchor=south] at (7.90,9.20) {Lower};
+\node[edgelabel,anchor=south] at (12.30,9.20) {Restore};
+\draw[callarrow] (7.70,9.00) -- (7.70,7.60);
+\draw[resultarrow] (8.10,7.60) -- (8.10,9.00);
+\draw[callarrow] (14.70,8.775) -- (14.70,7.20) -- (11.60,7.20);
+\draw[resultarrow] (11.60,6.80) -- (15.10,6.80) -- (15.10,8.775);
+\draw[originalflow] (.05,6.90) -- (.65,6.90);
+\draw[extendedflow] (.05,6.35) -- (.65,6.35);
+\node[font=\sffamily\fontsize{8}{9}\selectfont,anchor=west,inner sep=0pt] at (.82,6.90) {Original eBPF};
+\node[font=\sffamily\fontsize{8}{9}\selectfont,anchor=west,inner sep=0pt] at (.82,6.35) {BPF-Ext};
+\begin{scope}[yshift=0cm]
+\foreach \x/\n/\stage/\representation in {0/1/Input/eBPF bytecode,3.59/2/Rewritten/eBPF + ext.\ insns,7.18/3/Lowered/eBPF bytecode,10.77/4/Restored/eBPF + ext.\ insns,14.36/5/x86-64/Native code} {
+\draw[draw=black!40,fill=white,line width=.55pt] (\x,.05) rectangle (\x+3.14,4.75);
+\node[productnumber] at (\x+.40,4.33) {\n};
+\node[panelheading] at (\x+.77,4.33) {\textbf{\stage}\\\representation};
+\draw[black!15,line width=.45pt] (\x+.20,3.88) -- (\x+2.94,3.88);
+}
+\foreach \x in {0,3.59,7.18,10.77} {
+  \node[code,text=black!50] at (\x+.22,3.63) {\ldots};
+  \node[code,text=black!50] at (\x+.22,3.30) {r6 = 0};
+}
+\draw[draw=black!35,fill=black!3,line width=.5pt] (.18,1.62) rectangle (2.96,3.00);
+\node[code] at (.32,2.79) {r1 = r7};
+\node[code] at (.32,2.46) {r7 <{}<= 16};
+\node[code] at (.32,2.13) {r1 >{}>= 48};
+\node[code] at (.32,1.80) {r7 |= r1};
+\node[code,text=black!50] at (.22,1.29) {r0 = r7};
+\node[code,text=black!50] at (.22,.96) {\ldots};
+\foreach \x in {3.59,10.77} {
+  \draw[draw=evoedge,fill=evogreen,line width=.6pt] (\x+.18,1.42) rectangle (\x+2.96,3.00);
+  \draw[evoedge,line width=.5pt] (\x+.18,2.18) -- (\x+2.96,2.18);
+  \node[slot] at (\x+.32,2.79) {Sidecar};
+  \node[code,text=evoink] at (\x+.32,2.46) {IMM, r7, r7, 16};
+  \node[slot] at (\x+.32,1.98) {Call};
+  \node[code,text=evoink] at (\x+.32,1.65) {call d\_rot};
+  \node[code,text=black!50] at (\x+.22,1.09) {r0 = r7};
+  \node[code,text=black!50] at (\x+.22,.76) {\ldots};
+}
+\draw[draw=evoedge,fill=evogreen,line width=.6pt] (7.36,.94) rectangle (10.14,3.00);
+\node[code,text=evoink] at (7.50,2.79) {[fp-40] = r6};
+\node[code,text=evoink] at (7.50,2.46) {r6 = r7};
+\node[code,text=evoink] at (7.50,2.13) {r7 <{}<= 16};
+\node[code,text=evoink] at (7.50,1.80) {r6 >{}>= 48};
+\node[code,text=evoink] at (7.50,1.47) {r7 |= r6};
+\node[code,text=evoink] at (7.50,1.14) {r6 = [fp-40]};
+\node[code,text=black!50] at (7.40,.63) {r0 = r7};
+\node[code,text=black!50] at (7.40,.30) {\ldots};
+\node[code,text=black!50] at (14.58,3.63) {\ldots};
+\node[code,text=black!50] at (14.58,3.30) {xor ebx, ebx};
+\draw[draw=evoedge,fill=evogreen,line width=.6pt] (14.54,2.40) rectangle (17.32,3.00);
+\node[code,text=evoink] at (14.68,2.70) {rol r13, 16};
+\node[code,text=black!50] at (14.58,2.07) {mov rax, r13};
+\node[code,text=black!50] at (14.58,1.74) {\ldots};
+\end{scope}
+\end{tikzpicture}
+\endgroup
+\caption{Original eBPF and BPF-Ext compilation paths for a 64-bit left rotation by 16. Circled numbers link the BPF-Ext path to the code panels. Module callbacks use dotted arrows for calls and thin solid arrows for returned instruction sequences. One extended instruction occupies two eBPF slots: an operand sidecar followed by a call identifying the operation. The proof sequence adds a store and a load to preserve the temporary register \texttt{r6}. \texttt{fp} denotes the eBPF frame pointer; gray code provides context.}
+\Description{Orange long-dashed arrows show the original eBPF compilation path, and dark blue solid arrows show the BPF-Ext path. Both pass through the same Clang, eBPF verifier, and eBPF JIT components. Circled program representations one through five lie on the solid path and match the code panels below. Representation one enters the compile-time recognizer, which returns rewritten representation two. The kernel lowers the program to representation three, verifies it, restores representation four, and generates native representation five. The dashed path bypasses these additional steps and produces separate native code. The proof sequence and native emit are adjacent within the kernel modules box. The JIT calls the native emit through an orthogonal connection.}
+\label{fig:pipeline}
+\end{figure*}
+
+\subsection{The Compilation Pipeline}
+\label{subsec:pipeline}
+% 编译管线
+
+\noindent\textbf{Recognition.}
+% \noindent\textbf{识别。}
+The recognizer matches the patterns of supported operations in userspace, before the program loads (\S\ref{subsec:llvm}).
+% 识别器在程序加载前在用户空间匹配支持的操作模式。
+For \lang's rotate, the pattern is the shift-and-or sequence of Figure~\ref{fig:jit-dump}.
+% 对于 \lang 的旋转，模式是图中的移位与或序列。
+The call and the sidecar reuse existing eBPF opcodes.
+% 调用和伴随重用现有的 eBPF 操作码。
+\tool therefore adds no new opcode.
+% 因此 \tool 不添加新操作码。
+
+\noindent\textbf{Verification.}
+% \noindent\textbf{验证。}
+The verifier checks an extended instruction by lowering it to vanilla eBPF.
+% 验证器通过将扩展指令降低为原生 eBPF 来检查它。
+The proof sequence is a fragment of vanilla eBPF with the same semantics as the extended instruction.
+% 证明序列是具有与扩展指令相同语义的原生 eBPF 片段。
+A lowering stage substitutes the proof sequence for the extended instruction before the main analysis.
+% 降低阶段在主分析前用证明序列替换扩展指令。
+The verifier then analyzes the lowered program with its existing transfer functions.
+% 然后验证器用其现有的传递函数分析降低后的程序。
+After the analysis succeeds, a restore stage reinstates the extended instructions for the JIT.
+% 分析成功后，恢复阶段为 JIT 恢复扩展指令。
+
+\noindent\textbf{Execution.}
+% \noindent\textbf{执行。}
+The JIT dispatches each extended instruction to the descriptor's native emit for the running architecture.
+% JIT 将每条扩展指令分派到描述符对应运行架构的本地发射。
+For \lang's rotate, the native emit is a single \texttt{ROL} on x86-64 or a single \texttt{ROR} on ARM64.
+% 对于 \lang 的旋转，本地发射是 x86-64 上的单条 ROL 或 ARM64 上的单条 ROR。
+The exact proof sequence, like the native emit, can differ across architectures.
+% 确切的证明序列，像本地发射一样，可以在架构间不同。
+Every proof-sequence variant stays vanilla eBPF.
+% 每个证明序列变体都保持原生 eBPF。
+Verification therefore stays architecture-independent.
+% 因此验证保持架构无关。
+When a descriptor provides no native emit for the architecture, the extended instruction falls back to its proof sequence, which the JIT compiles as vanilla eBPF.
+% 当描述符不为该架构提供本地发射时，扩展指令回退到其证明序列，JIT 将其编译为原生 eBPF。
+The interpreter has no dispatch for extended instructions.
+% 解释器没有扩展指令的分派。
+A kernel without a JIT therefore rejects programs that carry extended instructions.
+% 因此没有 JIT 的内核会拒绝携带扩展指令的程序。
+
+\subsection{Adding an Operation}
+\label{subsec:adding}
+% 添加操作
+
+A new operation needs only descriptors in a kernel module and a pattern in the recognizer.
+% 新操作只需要内核模块中的描述符和识别器中的模式。
+A descriptor is a small kernel structure with two author-supplied parts, the proof-sequence routine and the per-architecture native emits.
+% 描述符是一个小的内核结构，有两个作者提供的部分：证明序列例程和每架构本地发射。
+A family of descriptors implements an operation, one descriptor per variant, such as width, condition, or architecture.
+% 一系列描述符实现一个操作，每个变体一个描述符，如宽度、条件或架构。
+A kernel module registers its descriptors with the kernel core.
+% 内核模块向内核核心注册其描述符。
+\tool's one-time change to the kernel core stays the same for every operation (\S\ref{sec:implementation}).
+% \tool 对内核核心的一次性更改对每个操作保持相同。
+
+The mechanism leaves an operation's size open.
+% 该机制对操作的大小开放。
+A proof sequence may span a few instructions or an entire region within the rules of \S\ref{subsec:safety}.
+% 证明序列可以跨越几条指令或在规则内的整个区域。
+
+\subsection{Safety and the Trusted Base}
+\label{subsec:safety}
+% 安全性与可信基
+
+\tool does not add operation-specific abstract semantics to the verifier.
+% \tool 不向验证器添加操作特定的抽象语义。
+Everything the recognizer and the module contribute reaches the verifier inside the lowered program.
+% 识别器和模块贡献的一切都在降低后的程序内到达验证器。
+The verifier re-checks the lowered program on every load, with the same analysis as for vanilla eBPF.
+% 验证器在每次加载时重新检查降低后的程序，使用与原生 eBPF 相同的分析。
+A faulty rewrite or proof sequence that violates safety therefore fails verification like any unsafe program.
+% 因此违反安全的错误重写或证明序列会像任何不安全程序一样验证失败。
+
+The verifier's verdict on the lowered program carries over to the restored program.
+% 验证器对降低后程序的裁决传递到恢复后的程序。
+The restore stage collapses each \emph{proof region}, the span its proof sequence occupies, back into its extended instruction and changes nothing else.
+% 恢复阶段将每个\emph{证明区域}（其证明序列占据的范围）折叠回其扩展指令，其他不变。
+For the collapse to preserve the verdict, a region must stay single-entry and single-exit, free of nested extended instructions, calls, exits, and backward jumps.
+% 为使折叠保持裁决，区域必须保持单入口单出口，没有嵌套扩展指令、调用、退出和向后跳转。
+Control then enters a region only at its top and leaves only past its end, like a single instruction.
+% 然后控制只从区域顶部进入，只从末尾之后离开，像单条指令。
+The kernel validates proof-region well-formedness at load time, including single entry, single exit, no nested extended instructions, and no calls or exits inside a region.
+% 内核在加载时验证证明区域的良构性，包括单入口、单出口、无嵌套扩展指令、区域内无调用或退出。
+The kernel also validates that no jump enters or leaves a region except at its boundary.
+% 内核还验证除边界外没有跳转进入或离开区域。
+
+The trusted enforcement path therefore consists of the existing eBPF verifier and JIT plus a small, generic \tool patch that validates proof regions, lowers extended instructions before verification, restores them after verification, and dispatches their native emits (\S\ref{sec:implementation}).
+% 因此可信执行路径包括现有的 eBPF 验证器和 JIT，加上一个小的通用 \tool 补丁，用于验证证明区域、在验证前降低扩展指令、在验证后恢复它们、并分派它们的本地发射。
+The per-operation native emit is the one component whose correctness \tool cannot check at load time.
+% 每操作本地发射是 \tool 无法在加载时检查其正确性的唯一组件。
+Every operation must therefore supply evidence that its native emit has the same eBPF-visible effect as its proof sequence.
+% 因此每个操作必须提供证据，证明其本地发射具有与其证明序列相同的 eBPF 可见效果。
+For \lang, the Lean 4 proofs of \S\ref{sec:formal-verification} supply the evidence.
+% 对于 \lang，Lean 4 证明提供了证据。
+The userspace recognizer is outside the safety boundary: an incorrect rewrite produces a program the verifier re-checks and rejects or accepts on its own merits.
+% 用户空间识别器在安全边界之外：不正确的重写产生的程序由验证器重新检查并根据其本身优劣拒绝或接受。
+
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+%%% Section 5 \lang: Hardware-Idiom Operations
+
+%%%
+% message<\lang is the seven-operation instance of \tool for hardware idioms>
+% with \tool we build \lang, seven operations for hardware idioms
+% each operation targets an idiom with no single-instruction eBPF form
+% the rotate, for example, covers its 64-bit and 32-bit variants through descriptors
+% the section closes with the Lean 4 proofs that supply the owed evidence
+
+%%%
+% message<the seven operations are a deliberate design point, with payoffs>
+% the seven operations are a deliberate choice within the space \tool leaves open
+% the idioms of the characterized kind are few
+% a handful of modules therefore covers the kernel JIT's clearest losses
+% each proof sequence stays a small fragment of the program
+% the equivalence evidence each operation owes covers only that fragment
+% the compiler spells six of the seven out as fixed patterns the recognizer matches in place
+% the prefetch alone has no eBPF form of any length
+% the recognizer instead inserts the prefetch at selected sites, with a no-op proof sequence
+
+%%%
+% message<the table lists the operations; native emits differ in shape and availability>
+% the table lists the seven operations with proof sequence and native emit per architecture
+% the native emits differ across architectures, in shape and in availability
+% a conditional select is one extended instruction on x86-64, two on ARM64 (TST, CSEL)
+% the load-fused byte swap splits the same way on ARM64, into LDR and REV
+% one operation, the address computation LEA, exists on x86-64 alone
+
+%%%
+% message<we prove in Lean 4 that each native emit equals its proof sequence>
+% the dual lowering imposes a proof obligation
+% every safety property on the eBPF expansion must transfer to the native sequence
+% we prove in Lean 4 the two compute the same function on the destination register
+% both sides are pure computations, so functional equivalence
+% each ISA gets a small-step semantics, a program is the fold of transitions
+% the native instruction's semantics is ported from an existing formalization
+% the cross-ISA proof is factored through a hardware-independent specification
+% per-lang bitvector spec, ISA-local lemmas refine the spec on the destination register
+
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+\subsection{\lang: Hardware-Idiom Operations}
+\label{sec:lang}
+% \lang：硬件习语操作
+
+Each \lang operation targets an idiom for which the eBPF instruction set has no single-instruction form.
+% 每个操作针对 eBPF 指令集没有单指令形式的习语。
+The rotate, for example, covers its 64-bit and 32-bit variants through separate descriptors.
+% 例如旋转通过单独的描述符覆盖其 64 位和 32 位变体。
+\S\ref{sec:formal-verification} gives the Lean 4 proofs that supply the evidence \S\ref{subsec:safety} requires.
+% \S\ref{sec:formal-verification} 给出提供所需证据的 Lean 4 证明。
+
+The seven operations are a deliberate choice within the space that \S\ref{subsec:adding} leaves open.
+% 这七个操作是在所留空间内的刻意选择。
+The idioms of the kind \S\ref{subsec:char-idiom} characterizes are few.
+% 所特征化的这类习语很少。
+A handful of modules therefore covers the kernel JIT’s clearest losses.
+% 因此少数模块就覆盖了内核 JIT 最明显的损失。
+Each proof sequence stays a small fragment of the program.
+% 每个证明序列都是程序的一小片段。
+The equivalence evidence each operation owes covers only that fragment.
+% 每个操作所需的等价证据只覆盖该片段。
+The compiler emits six of the seven idioms as fixed bytecode patterns, which the recognizer matches in place.
+% 编译器将七个习语中的六个发射为固定的字节码模式，识别器就地匹配。
+The prefetch alone has no eBPF form of any length.
+% 只有预取没有任何长度的 eBPF 形式。
+The recognizer instead inserts the prefetch at sites it selects, with a no-op proof sequence.
+% 识别器在其选择的位置插入预取，使用空操作证明序列。
+
+Table~\ref{tab:descriptors} lists the seven operations, each with its proof sequence and its native emit on x86-64 and ARM64.
+% 表列出了七个操作，每个都有其证明序列及其在 x86-64 和 ARM64 上的本地发射。
+The native emits differ across architectures, in shape and in availability.
+% 本地发射在架构间的形状和可用性上有所不同。
+A conditional select compiles to one extended instruction on x86-64, emitting the \texttt{CMP+CMOV} pair, and to two extended instructions on ARM64, one emitting \texttt{TST} and one emitting \texttt{CSEL}.
+% 条件选择在 x86-64 上编译为一条扩展指令，发射 CMP+CMOV 对，在 ARM64 上编译为两条扩展指令，一条发射 TST，一条发射 CSEL。
+The byte swap, fused with its load, splits the same way on ARM64, into an \texttt{LDR} and a \texttt{REV}.
+% 与加载融合的字节交换在 ARM64 上以相同方式分割，成为 LDR 和 REV。
+One operation, the address computation \texttt{LEA}, exists on x86-64 alone.
+% 一个操作，地址计算 LEA，仅存在于 x86-64。
+
+\input{tables/sec-3-descriptors}
+
+\subsection{Formal Verification}
+\label{sec:formal-verification}
+% 形式化验证
+The dual lowering of a \lang: one path expands to vanilla eBPF for the verifier, the other emits native code in the JIT, imposes a proof obligation.
+% \lang 的双重降低：一条路径为验证器扩展为原生 eBPF，另一条在 JIT 中发射本地代码，这施加了证明义务。
+The native sequence that the CPU actually executes must produce the same eBPF-observable architectural state as the eBPF expansion.
+% CPU 实际执行的本地序列必须产生与 eBPF 扩展相同的 eBPF 可观察架构状态。
+We therefore prove, in Lean 4, that for each supported \lang operation, the eBPF expansion and the corresponding native sequence produce the same eBPF-observable architectural state.
+% 因此我们在 Lean 4 中证明，对于每个支持的 \lang 操作，eBPF 扩展和相应的本地序列产生相同的 eBPF 可观察架构状态。
+For register-only operations such as rotate, conditional select, and bit extract, the refinement reduces to equality on the destination register.
+% 对于仅寄存器操作如旋转、条件选择和位提取，精化归结为目标寄存器上的相等。
+For memory-touching operations such as byte swap (fused with its load) and bulk copy, the proof obligation is equality on the projected architectural state over live registers and the accessed memory, leaving all other eBPF-visible memory unchanged.
+% 对于涉及内存的操作如字节交换（与加载融合）和批量复制，证明义务是活寄存器和访问内存上投影架构状态的相等，其他 eBPF 可见内存保持不变。
+Prefetch is modeled as an architectural no-op; microarchitectural effects such as cache state are outside the semantic model.
+% 预取被建模为架构空操作；缓存状态等微架构效果在语义模型之外。
+We give each ISA a small-step register-transfer semantics; a program denotes the fold of its per-instruction transitions.
+% 我们给每个 ISA 一个小步寄存器传递语义；程序表示其逐指令转换的折叠。
+The native instruction’s semantics is ported from the existing formalization~\cite{lnsym}.
+% 本地指令的语义从现有形式化移植。
+The cross-ISA proof is factored through an intermediate hardware-independent specification.
+% 跨 ISA 证明通过中间的硬件无关规范分解。
+The refinement is stated for verifier-accepted proof sequences and verifier-safe initial states.
+% 精化针对验证器接受的证明序列和验证器安全的初始状态陈述。
+For each \lang operation, we define a specification over the relevant architectural state and discharge ISA-local correctness lemmas stating that the eBPF expansion and the native sequence each refine the specification.
+% 对于每个 \lang 操作，我们定义相关架构状态上的规范，并卸载声明 eBPF 扩展和本地序列各自精化规范的 ISA 局部正确性引理。
+% This keeps the per-ISA obligations local, and we therefore accept a new \lang by supplying its specification and refinement proofs.

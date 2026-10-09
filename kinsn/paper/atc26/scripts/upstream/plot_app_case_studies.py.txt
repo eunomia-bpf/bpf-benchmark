@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Generate application case-study throughput figure for the paper."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import FuncFormatter
+
+PAPER = Path(__file__).resolve().parents[1]
+FIG = PAPER / "figures"
+
+CONFIGS = [
+    ("Cilium\nFull", 4086, 1.074),
+    ("Cilium\nNo Bulk", 3512, 1.114),
+    ("Katran\nConservative", 21, 1.073),
+    ("Katran\nCoverage-Max", 62, 0.995),
+]
+
+
+def main() -> None:
+    FIG.mkdir(parents=True, exist_ok=True)
+
+    labels = [c[0] for c in CONFIGS]
+    sites = [c[1] for c in CONFIGS]
+    throughputs = [c[2] for c in CONFIGS]
+
+    fig, ax = plt.subplots(figsize=(7, 3.8))
+
+    colors = ["#4C78A8" if v >= 1.0 else "#B279A2" for v in throughputs]
+    x = np.arange(len(labels))
+    bars = ax.bar(x, throughputs, width=0.55, color=colors, edgecolor="#333333", linewidth=0.6)
+
+    ax.axhline(1.0, color="#333333", linestyle="--", linewidth=1.0)
+
+    for bar, value, site in zip(bars, throughputs, sites):
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            value + 0.008,
+            f"{value:.3f}x\n({site} sites)",
+            ha="center",
+            va="bottom",
+            fontsize=12,
+        )
+
+    ax.set_ylabel("Throughput over stock eBPF JIT", fontsize=13)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=12)
+    ax.set_ylim(0.95, max(throughputs) * 1.12)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.2f}x"))
+    ax.tick_params(axis="y", labelsize=11)
+    ax.grid(axis="y", color="#eeeeee", linewidth=0.8)
+
+    fig.tight_layout()
+    out = FIG / "sec-6-app-case-studies.pdf"
+    fig.savefig(out, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+if __name__ == "__main__":
+    main()

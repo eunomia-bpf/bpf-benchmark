@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Code changes for common kernel integration relative to the upstream baseline. Blank and comment-only lines are excluded, and modified lines are not counted as additions or deletions. Counts exclude the userspace pattern recognizer and operation modules.}
+\label{tab:kernel-loc}
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrr@{}}
+\toprule
+\textbf{Kernel code} & \textbf{Added} & \textbf{Modified} & \textbf{Deleted} \\
+\midrule
+Verifier & 389 & 26 & 41 \\
+BTF & 107 & 11 & 5 \\
+x86-64 JIT & 80 & 3 & 0 \\
+ARM64 JIT & 96 & 15 & 0 \\
+Headers & 65 & 1 & 0 \\
+\midrule
+\textbf{Total} & \textbf{737} & \textbf{56} & \textbf{46} \\
+\bottomrule
+\end{tabular*}
+\end{table}

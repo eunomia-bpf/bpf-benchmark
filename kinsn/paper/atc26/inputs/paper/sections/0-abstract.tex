@@ -1,0 +1,50 @@
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+%%%
+% message<eBPF's simple per-instruction kernel JIT loses up to 2x on hardware idioms>
+% eBPF safely extends OS kernels in domains such as networking, observability, security
+% the safety comes from a verifying pipeline ending in a kernel JIT kept simple
+% the simple JIT translates one instruction at a time
+% C code through the pipeline runs up to twice as slow as natively compiled code
+% the clearest losses come from hardware idioms
+% a CPU executes an idiom directly, yet the idiom reaches the JIT as several instructions
+
+%%%
+% message<dual-form operations under the existing verifier let \lang recover the loss>
+% we present \tool, extending the pipeline with new operations
+% each operation carries two forms, a proof sequence and a native emit
+% the existing verifier checks each proof sequence on every load
+% only the native emit joins the trusted computing base
+% with \tool we build \lang, seven hardware-idiom operations
+% Lean 4 proofs discharge that trust, each emit computes the same result as its sequence
+% a new operation ships as a kernel module
+% on x86-64 and ARM64, \lang speeds up eBPF programs by up to 24% over the unmodified pipeline
+
+%%%%%%%%%%%%Outline%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+eBPF safely extends OS kernels in production by verifying bytecode before execution, and many of its uses are performance critical.
+% eBPF 通过在执行前验证字节码，在生产中安全地扩展操作系统内核，其许多用途对性能要求很高。
+However, its design favors safety over speed: the instruction set is designed to be verifiable, and the kernel just-in-time compiler (JIT) stays simple to remain trustworthy, translating one opcode at a time.
+% 然而其设计偏重安全而非速度：指令集为可验证而设计，内核即时编译器（JIT）保持简单以维持可信，一次只翻译一个操作码。
+As a result, eBPF runs up to twice as slow as native code, and the clearest losses come from hardware idioms, operations that CPUs execute as a single instruction but eBPF lacks.
+% 因此，eBPF 运行速度比本地代码慢达两倍，最明显的损失来自硬件习语，即 CPU 以单条指令执行、但 eBPF 缺少的操作。
+Current approaches like optimizing the bytecode cannot emit these instructions, adding them to eBPF requires changing the verifier, every JIT, and the compiler, and optimizing in the JIT enlarges the trusted computing base (TCB). 
+%
+\note{[zhengjie: it is weird to say every JIT. is the compiler in TCB? this sentence is too complex to understand] Bytecode optimization is limited by the existing JIT. Overcoming this limit by extending the eBPF instruction set typically requires compiler and kernel changes, while adding JIT optimizations enlarges the trusted computing base (TCB).}
+% 优化字节码无法发射这些指令，把它们加入 eBPF 需要修改验证器、每个 JIT 和编译器，而在 JIT 中优化会扩大可信计算基（TCB）。
+We present \tool, an extension interface that lets kernel modules introduce new operations without further kernel patches or verifier changes.
+% 我们提出 \tool，一种扩展接口，让内核模块能够引入新操作，而无需再打内核补丁或修改验证器。
+Our key insight is that a new operation can be verified through an equivalent vanilla eBPF form, while the CPU runs its native implementation.
+%
+\note{[zhengjie: this maybe hard to understand to new audience. new operation is not clearly defined] We present \tool, an interface that lets kernel modules introduce extended eBPF instructions without further kernel patches or verifier changes. Extended eBPF instructions support efficient native implementations while retaining the existing verifier’s safety checks through semantically equivalent standard eBPF instructions.}
+% 我们的核心洞见是：新操作可以通过一个等价的原生 eBPF 形式来验证，而 CPU 运行它的本地实现。
+Since the verifier checks only the eBPF form \note{is this causal?}, the native implementation is the only per-operation addition to the TCB, so we prove in Lean 4 that it matches its eBPF form.
+% 由于验证器只检查 eBPF 形式，本地实现是每个操作对 TCB 的唯一增加，因此我们在 Lean 4 中证明它与其 eBPF 形式一致。
+Using \tool, we build \lang, seven hardware-idiom operations such as rotate and conditional select.
+% 借助 \tool，我们构建了 \lang，包括旋转和条件选择等七个硬件习语操作。
+On x86-64 and ARM64, \lang speeds up microbenchmarks by 24\% and 22\% and production applications by up to 12\%.
+% 在 x86-64 和 ARM64 上，\lang 使微基准测试的几何平均提速分别为 24\% 和 22\%，生产应用提速达 12\%。
+The same interface also supports whole-program native replacement, reaching 2.358$\times$ on Cilium at the cost of a larger TCB.
+% 同样的接口还支持整个程序的本地替换，以更大的 TCB 为代价在 Cilium 上达到 2.358 倍加速。
+\end{abstract}

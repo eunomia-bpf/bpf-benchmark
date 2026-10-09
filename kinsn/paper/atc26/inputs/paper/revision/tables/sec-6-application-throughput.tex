@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Application throughput in millions of packets accepted by the sending interfaces per second (Mpps). Relative rates divide each configuration's mean by the application's eBPF JIT mean. Brackets give 95\% confidence intervals.}
+\label{tab:eval-application-throughput}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrc@{}}
+\toprule
+\textbf{Application} & \textbf{Configuration} & \textbf{Mean (Mpps)} & \textbf{Relative rate [95\% CI]} \\
+\midrule
+Cilium & eBPF JIT & 0.575 & 1.000 \\
+ & All optimizations & 0.557 & 0.970 [0.871, 1.093] \\
+ & Without bulk memory access & 0.575 & 1.000 [0.932, 1.075] \\
+\addlinespace
+Katran & eBPF JIT & 1.722 & 1.000 \\
+ & Register optimizations & 1.710 & 0.993 [0.988, 0.998] \\
+ & Register and memory optimizations & 1.721 & 0.999 [0.993, 1.005] \\
+\bottomrule
+\end{tabular*}
+\end{table*}

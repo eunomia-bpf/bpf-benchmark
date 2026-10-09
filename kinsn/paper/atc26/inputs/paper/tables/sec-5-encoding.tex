@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Extended-instruction encoding. A reserved \texttt{src\_reg} value marks the pair for \tool, a \texttt{BPF\_CALL} for the call and a \texttt{MOV64\_K} for the sidecar. The notation [h:l] gives a field's position within the 52-bit sidecar payload.}
+\label{tab:encoding}
+\begin{tabular}{@{}llcp{0.50\columnwidth}@{}}
+\toprule
+Insn & Field & Bits & Meaning \tabularnewline
+\midrule
+Call & \texttt{imm} & 32 & \raggedright BTF ID of the operation's stub kfunc \tabularnewline
+ & \texttt{off} & 16 & \raggedright Index into \texttt{fd\_array} for the module's BTF file descriptor \tabularnewline
+\midrule
+Sidecar & \texttt{dst\_reg} & [3:0] & \raggedright Destination register or per-operation form tag \tabularnewline
+ & \texttt{off} & [19:4] & \raggedright Offset or auxiliary field per operation \tabularnewline
+ & \texttt{imm} & [51:20] & \raggedright Immediate value or configuration per operation \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}

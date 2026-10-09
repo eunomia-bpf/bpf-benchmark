@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\%.}
+\label{tab:char-micro-summary}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Platform & Path & Speedup & \# Cases Faster \\
+\midrule
+x86-64 & In-kernel native   & 1.55$\times$ & 24/27 \\
+       & Userspace native   & 1.57$\times$ & 25/27 \\
+       & Userspace LLVM-BPF & 1.53$\times$ & 25/27 \\
+\midrule
+ARM64  & In-kernel native   & 1.88$\times$ & 27/27 \\
+       & Userspace native   & 1.98$\times$ & 27/27 \\
+       & Userspace LLVM-BPF & 1.92$\times$ & 27/27 \\
+\bottomrule
+\end{tabular}
+\end{table}

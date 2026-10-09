@@ -1,0 +1,48 @@
+\section{\tool Design}
+\label{sec:mechanism}
+
+This section describes how \tool uses more efficient native implementations for eBPF programs while preserving their safety guarantees. We introduce extended instructions and their optimization mechanism (\S\ref{subsec:pipeline}), explain the additional kernel safety responsibilities and trusted code (\S\ref{subsec:safety}), and describe how to prove that the verification and execution implementations have the same semantics (\S\ref{sec:formal-verification}).
+
+\subsection{Optimizing eBPF Programs with \kinsns}
+\label{subsec:pipeline}
+
+\tool places pattern recognition in userspace and provides the corresponding native implementations in the kernel. The userspace pattern recognizer rewrites matched code as extended instructions that specify operations and their parameters while preserving program behavior. We call these extended instructions \kinsns. The kernel generates code for the operation specified by each \kinsn, so the JIT need not rediscover the original code pattern.
+
+\input{figures/sec-4-extension-flow}
+
+The kernel must verify programs containing \kinsns while retaining the selected native implementations for execution. The existing verifier analyzes eBPF instructions~\cite{verifier}, so during program loading, the common kernel code calls expansion functions provided by kernel modules to generate eBPF instruction sequences from each \kinsn's operands. After these sequences replace the \kinsns, the existing verifier analyzes the entire program. Once verification succeeds, the common kernel code restores the \kinsns so that code generation still uses their specified operations. The eBPF JIT then calls the modules' native-code generation functions and incorporates the resulting native sequences into the program's machine code. The remaining eBPF instructions are translated as before to form the complete executable program.
+
+The rotation example in Figure~\ref{fig:extension-flow} illustrates the roles of the verification representation and execution code. The input program uses shifts and bitwise OR to rotate a 64-bit value left by 16 bits. In the rewritten \kinsn, the operation identifier selects rotation, and the operands specify \texttt{r7} as both source and destination and 16 as the rotation amount. The eBPF expansion used for verification still describes this computation through shifts and bitwise OR. The final program instead executes \texttt{rol r13, 16} to perform the rotation, where \texttt{r13} corresponds to eBPF register \texttt{r7}. The expansion's operations are not individually compiled into native code for this rotation.
+
+\subsection{Preserving eBPF Safety}
+\label{subsec:safety}
+
+\tool must ensure that programs using \kinsns satisfy eBPF safety constraints during native execution. The framework describes each \kinsn's behavior through its eBPF expansion, and the existing verifier~\cite{verifier} checks the complete program containing these expansions. The native implementation must have the same semantics as the verified eBPF expansion; Section~\ref{sec:formal-verification} presents the proof method.
+
+\tool's kernel code is responsible for checking the conditions for using \kinsns and correctly performing expansion and restoration. Each \kinsn's implementer determines these conditions from the operation definition, eBPF expansion, and native implementation. Kernel modules must check operand constraints, and conditions involving the program context must also be checked in the kernel. When expansion and restoration change instruction counts and positions, the common kernel code must adjust branch targets accordingly to preserve program control flow.
+
+These responsibilities define \tool's additional trusted computing base (TCB): the common kernel support and the parameter-handling, expansion, and native-code generation functions in kernel modules. This code both constructs the final program and executes in the kernel. Implementation errors can cause native execution to violate the verified safety conditions or corrupt kernel memory during program loading and code generation. Verifying the generated eBPF program therefore cannot replace a review of this kernel code.
+
+\subsection{Proving Semantic Equivalence}
+\label{sec:formal-verification}
+
+We must show that a native implementation can replace the eBPF expansion used for verification without changing subsequent program behavior. An operation specification defines the expected result and permitted state changes. We use Lean~4~\cite{moura2021lean} to prove separately that both implementations satisfy these requirements. For a rotation's register computation, we must prove equal results and preservation of the other register values needed by subsequent code.
+
+The result proofs use a shared rotation function. For a 64-bit value $x$, rotation to the left by $n$ bits is defined as
+\[
+\operatorname{rotl}_{64}(x,n)=(x\ll n)\mathbin{\lor}(x\gg(64-n)),
+\]
+for $1\leq n<64$. The operations are defined over 64-bit bitvectors, and the right shift is logical. We model in Lean the eBPF sequence of shifts and bitwise OR, the x86-64 \texttt{ROL} sequence, and the ARM64 \texttt{EXTR} sequence with identical source operands and a shift amount of $64-n$. We use LNSym~\cite{lnsym} as a reference for ARM64 instruction semantics. For the same source value $x$ and rotation amount $n$, and with the expansion's temporary register distinct from the source and destination, two result lemmas establish
+\[
+\begin{aligned}
+\operatorname{out}_{\mathrm{eBPF}}(x,n)&=\operatorname{rotl}_{64}(x,n),\\
+\operatorname{out}_{\mathrm{native}}(x,n)&=\operatorname{rotl}_{64}(x,n).
+\end{aligned}
+\]
+Here, $\operatorname{out}$ denotes the destination register value after the sequence executes. Both results equal the function's value, so the destination register values agree.
+
+The equivalence proof must also establish that rotation preserves other register values needed by subsequent code. We map each eBPF register to a distinct readable and writable native register and assume that corresponding registers have equal initial values. Register-preservation lemmas show that the eBPF expansion changes only the destination and temporary registers; among the mapped native registers, the native sequence changes only the destination. These lemmas establish that all corresponding register values except the temporary register remain equal after execution.
+
+Differences in temporary register values must not affect subsequent program behavior. The operation implementation must save and restore the original value, or the kernel must establish that the temporary register will not be read before it is overwritten. This condition is required to use the register correspondence above for program replacement and must be enforced by the kernel mechanisms described in Section~\ref{subsec:safety}.
+
+The shared operation specification supports proof reuse across architectures. Supporting a new architecture requires a model of its native instructions and proofs that its sequence satisfies the same specification and the corresponding register-preservation requirements. If the eBPF expansion remains unchanged, its existing lemmas can be combined with these new lemmas to establish semantic correspondence.
