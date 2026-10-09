@@ -61,5 +61,5 @@ def generate(rows, output):
             file = c['file'].removeprefix('paper/')
             lines.append(f"- `{file}:{c['line']}` — {c['claim']} ({c['value']}; {c['scope']}).")
         lines += ['']
-    (output / 'provenance.md').write_text('\n'.join(lines) + '\n')
+    (output / 'provenance.md').write_text('\n'.join(lines).rstrip() + '\n')
     return result

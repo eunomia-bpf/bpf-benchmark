@@ -276,7 +276,7 @@ def illustrations():
 def reports(rows, vals):
     fields = list(dict.fromkeys(k for r in rows for k in r))
     with (OUT / 'numbers.csv').open('w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+        writer = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     (OUT / 'metrics.json').write_text(json.dumps(vals, indent=2)+'\n')

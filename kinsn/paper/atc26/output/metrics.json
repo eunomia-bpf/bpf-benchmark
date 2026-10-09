@@ -1,0 +1,49 @@
+{
+  "characterization": {
+    "x86 native_kernel": 1.5450415226942318,
+    "x86 native": 1.5748079751098394,
+    "x86 llvmbpf": 1.5349458292469476,
+    "arm native_kernel": 1.8751772543779623,
+    "arm native": 1.97774368424816,
+    "arm llvmbpf": 1.9213275834397197
+  },
+  "micro_speedup": {
+    "x86": 1.241735835760905,
+    "arm64": 1.2220421614232169
+  },
+  "code_size": {
+    "x86": 0.7718068807314803,
+    "arm": 0.8791161563071921
+  },
+  "Cilium_full": 1.0742623599543757,
+  "Cilium_tuned_mean": 1.113902567363188,
+  "Cilium_tuned_median": 1.1189352022274368,
+  "Katran_selected": 1.072759988762753,
+  "Katran_full": 0.9947431641667075,
+  "native": 2.3579740430209055,
+  "Cilium_full_paired_cost": [
+    1.009033918136711,
+    2
+  ],
+  "Cilium_no_bulk_paired_cost": [
+    1.0618644053761546,
+    2
+  ],
+  "load_time": {
+    "population": 62,
+    "object_load_ns": [
+      0.995157451293951,
+      0.9978385188193412
+    ],
+    "compile_ns": [
+      0.9942695779060561,
+      0.9903002181317831
+    ]
+  },
+  "code_size_27_case_alternative": {
+    "x86": 0.7596618735091323,
+    "arm64": 0.8707661543422783
+  },
+  "Katran_selected_median": 1.065063078455156,
+  "Katran_full_median": 0.9843569275313135
+}

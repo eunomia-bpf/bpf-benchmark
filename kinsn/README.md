@@ -12,6 +12,7 @@ The prototype backs the paper *BPF-Ext: Safely Extending the eBPF Compilation Pi
 
 - [Kernel modules](module/) for x86 and arm64 and [Lean proofs](lean/README.md).
 - [Target prober](kinsnprober/) and [LLVM/bytecode selector](../bpfopt/llvm/README.md), with policies in [runner/config/passes/](../runner/config/passes/).
+- [ATC'26 paper data, plots, and provenance](paper/atc26/README.md): `make -C kinsn/paper/atc26` regenerates the local paper bundle and its discrepancy report.
 - [Evaluation](docs/evaluation.md), [project notes](docs/README.md), and indexed raw [corpus](../corpus/results/README.md), [micro](../micro/results/README.md), and [test](../tests/results/README.md) results.
 - [Archived paper-prototype design](docs/archive/paper-prototype-design.md) and [historical notes](docs/archive/).
 

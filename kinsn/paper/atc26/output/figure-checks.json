@@ -1,0 +1,4482 @@
+[
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bitmap_popcount_scan",
+    "regenerated": 2.3832976445396143,
+    "pdf_value": 2.383310135196495,
+    "absolute_difference": 1.2490656880803641e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel sorted_rule_binary_search",
+    "regenerated": 1.9130434782608696,
+    "pdf_value": 1.9130495373985,
+    "absolute_difference": 6.05913763029875e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.1642512077294687,
+    "pdf_value": 1.164257658669259,
+    "absolute_difference": 6.450939790347832e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel trace_event_type_switch_dispatch",
+    "regenerated": 0.996415770609319,
+    "pdf_value": 0.9964257544439615,
+    "absolute_difference": 9.983834642568468e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_checksum_fold",
+    "regenerated": 1.3300641267446247,
+    "pdf_value": 1.3300722673841812,
+    "absolute_difference": 8.140639556453166e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel payload_prefix_memcmp_scan",
+    "regenerated": 1.851063829787234,
+    "pdf_value": 1.8510753864246063,
+    "absolute_difference": 1.1556637372400758e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_vlan_tcpopt_parser",
+    "regenerated": 1.0909090909090908,
+    "pdf_value": 1.090915944687722,
+    "absolute_difference": 6.85377863107739e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bpf_local_call_fanout_dispatch",
+    "regenerated": 1.7971014492753623,
+    "pdf_value": 1.7971144449667278,
+    "absolute_difference": 1.299569136548051e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel flow_5tuple_rss_hash",
+    "regenerated": 1.6,
+    "pdf_value": 1.6000123368015358,
+    "absolute_difference": 1.2336801535672848e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel katran_lb_consistent_hash_select",
+    "regenerated": 1.5714285714285714,
+    "pdf_value": 1.5714412182819977,
+    "absolute_difference": 1.2646853426279137e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cilium_policy_guard_tree_filter",
+    "regenerated": 2.027027027027027,
+    "pdf_value": 2.0270438681812757,
+    "absolute_difference": 1.684115424849253e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel siphash_rotate64_mixer",
+    "regenerated": 1.9285714285714286,
+    "pdf_value": 1.928582484369101,
+    "absolute_difference": 1.1055797672465673e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_record_bounds_window",
+    "regenerated": 1.873015873015873,
+    "pdf_value": 1.8730348931581584,
+    "absolute_difference": 1.90201422853864e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel flow_record_field_scan",
+    "regenerated": 1.5510204081632653,
+    "pdf_value": 1.5510306655190396,
+    "absolute_difference": 1.0257355774312416e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packed_header_bitfield_decode",
+    "regenerated": 1.162303664921466,
+    "pdf_value": 1.1623128989827278,
+    "absolute_difference": 9.234061261853554e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bpftrace_string_search_prefix_scan",
+    "regenerated": 1.6936936936936937,
+    "pdf_value": 1.69370463298301,
+    "absolute_difference": 1.0939289316391765e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tracee_syscall_name_table_lookup",
+    "regenerated": 1.1818181818181819,
+    "pdf_value": 1.1818261778932513,
+    "absolute_difference": 7.99607506940525e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tracee_http_method_prefix_detect",
+    "regenerated": 1.0555555555555556,
+    "pdf_value": 1.0555624410646431,
+    "absolute_difference": 6.885509087561914e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cilium_socket_lb_service_select",
+    "regenerated": 2.1637426900584797,
+    "pdf_value": 2.163760759718515,
+    "absolute_difference": 1.806966003536914e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.6935483870967742,
+    "pdf_value": 1.6935584190388833,
+    "absolute_difference": 1.0031942109023362e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tetragon_process_event_arg_filter",
+    "regenerated": 1.9142857142857144,
+    "pdf_value": 1.914303778887963,
+    "absolute_difference": 1.8064602248735184e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel otel_stack_frame_unwind_scan",
+    "regenerated": 2.6666666666666665,
+    "pdf_value": 2.6666796126929695,
+    "absolute_difference": 1.2946026302973479e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.9342105263157894,
+    "pdf_value": 1.934234567146755,
+    "absolute_difference": 2.4040830965521565e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_toeplitz_rss_hash",
+    "regenerated": 1.0176211453744493,
+    "pdf_value": 1.017626205194136,
+    "absolute_difference": 5.059819686792366e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.013953488372093,
+    "pdf_value": 1.0139560067372644,
+    "absolute_difference": 2.5183651712890054e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tc_packet_checksum_fold",
+    "regenerated": 1.3346957311534968,
+    "pdf_value": 1.3347065640351394,
+    "absolute_difference": 1.0832881642608427e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cgroup_skb_hash_chain",
+    "regenerated": 1.4158415841584158,
+    "pdf_value": 1.415856445321982,
+    "absolute_difference": 1.486116356619327e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bitmap_popcount_scan",
+    "regenerated": 2.388412017167382,
+    "pdf_value": 2.38843904620532,
+    "absolute_difference": 2.7029037938053335e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native sorted_rule_binary_search",
+    "regenerated": 1.3233082706766917,
+    "pdf_value": 1.3233155839505066,
+    "absolute_difference": 7.313273814979482e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.1779081133919844,
+    "pdf_value": 1.1779138125914195,
+    "absolute_difference": 5.699199435049707e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native trace_event_type_switch_dispatch",
+    "regenerated": 1.0,
+    "pdf_value": 1.0000074249268502,
+    "absolute_difference": 7.42492685024132e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_checksum_fold",
+    "regenerated": 1.3358084558266403,
+    "pdf_value": 1.3358180184697912,
+    "absolute_difference": 9.562643150884398e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native payload_prefix_memcmp_scan",
+    "regenerated": 1.9772727272727273,
+    "pdf_value": 1.9772808661348515,
+    "absolute_difference": 8.138862124251744e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_vlan_tcpopt_parser",
+    "regenerated": 1.5,
+    "pdf_value": 1.5000077105009597,
+    "absolute_difference": 7.710500959712263e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bpf_local_call_fanout_dispatch",
+    "regenerated": 1.8507462686567164,
+    "pdf_value": 1.850760112607583,
+    "absolute_difference": 1.3843950866565535e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native flow_5tuple_rss_hash",
+    "regenerated": 1.7777777777777777,
+    "pdf_value": 1.77779364300609,
+    "absolute_difference": 1.5865228312428314e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native katran_lb_consistent_hash_select",
+    "regenerated": 1.8333333333333333,
+    "pdf_value": 1.8333480879956638,
+    "absolute_difference": 1.4754662330584978e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cilium_policy_guard_tree_filter",
+    "regenerated": 2.142857142857143,
+    "pdf_value": 2.1428738693407063,
+    "absolute_difference": 1.6726483563545003e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native siphash_rotate64_mixer",
+    "regenerated": 2.076923076923077,
+    "pdf_value": 2.0769393766145647,
+    "absolute_difference": 1.629969148764232e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_record_bounds_window",
+    "regenerated": 1.903225806451613,
+    "pdf_value": 1.9032417801776156,
+    "absolute_difference": 1.5973726002593835e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native flow_record_field_scan",
+    "regenerated": 1.6521739130434783,
+    "pdf_value": 1.652187868926053,
+    "absolute_difference": 1.3955882574689937e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packed_header_bitfield_decode",
+    "regenerated": 1.162303664921466,
+    "pdf_value": 1.1623128989827278,
+    "absolute_difference": 9.234061261853554e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bpftrace_string_search_prefix_scan",
+    "regenerated": 1.7570093457943925,
+    "pdf_value": 1.757024409161446,
+    "absolute_difference": 1.5063367053480547e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tracee_syscall_name_table_lookup",
+    "regenerated": 1.2061855670103092,
+    "pdf_value": 1.2061919320744845,
+    "absolute_difference": 6.365064175284374e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tracee_http_method_prefix_detect",
+    "regenerated": 1.1875,
+    "pdf_value": 1.1875056757854288,
+    "absolute_difference": 5.675785428760349e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cilium_socket_lb_service_select",
+    "regenerated": 2.1893491124260356,
+    "pdf_value": 2.189363049794415,
+    "absolute_difference": 1.393736837940196e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.7796610169491525,
+    "pdf_value": 1.779672720647408,
+    "absolute_difference": 1.1703698255427497e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tetragon_process_event_arg_filter",
+    "regenerated": 1.9705882352941178,
+    "pdf_value": 1.9705995742661173,
+    "absolute_difference": 1.1338971999563796e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native otel_stack_frame_unwind_scan",
+    "regenerated": 2.8,
+    "pdf_value": 2.800026729736661,
+    "absolute_difference": 2.672973666095757e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.0416666666666665,
+    "pdf_value": 2.0416801124476613,
+    "absolute_difference": 1.3445780994825185e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_toeplitz_rss_hash",
+    "regenerated": 1.1666666666666667,
+    "pdf_value": 1.1666776136742023,
+    "absolute_difference": 1.0947007535566655e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bpftrace_comm_key_fnv_hash",
+    "regenerated": 0.5907859078590786,
+    "pdf_value": 0.590791719950036,
+    "absolute_difference": 5.812090957402205e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tc_packet_checksum_fold",
+    "regenerated": 1.3350999394306482,
+    "pdf_value": 1.3351086523814881,
+    "absolute_difference": 8.712950839928624e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cgroup_skb_hash_chain",
+    "regenerated": 1.4371859296482412,
+    "pdf_value": 1.437195113941214,
+    "absolute_difference": 9.184292972808095e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bitmap_popcount_scan",
+    "regenerated": 2.3832976445396143,
+    "pdf_value": 2.383310135196495,
+    "absolute_difference": 1.2490656880803641e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf sorted_rule_binary_search",
+    "regenerated": 2.209205020920502,
+    "pdf_value": 2.209220731081144,
+    "absolute_difference": 1.5710160641724258e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.238437821171634,
+    "pdf_value": 1.2384475277563756,
+    "absolute_difference": 9.706584741531188e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf trace_event_type_switch_dispatch",
+    "regenerated": 1.1209677419354838,
+    "pdf_value": 1.12097833120771,
+    "absolute_difference": 1.0589272226191326e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_checksum_fold",
+    "regenerated": 1.3252649778245509,
+    "pdf_value": 1.3252757646389572,
+    "absolute_difference": 1.0786814406360534e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf payload_prefix_memcmp_scan",
+    "regenerated": 1.1153846153846154,
+    "pdf_value": 1.1153936439199272,
+    "absolute_difference": 9.02853531181691e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_vlan_tcpopt_parser",
+    "regenerated": 1.2,
+    "pdf_value": 1.2000081103047133,
+    "absolute_difference": 8.110304713371264e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bpf_local_call_fanout_dispatch",
+    "regenerated": 1.8507462686567164,
+    "pdf_value": 1.850760112607583,
+    "absolute_difference": 1.3843950866565535e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf flow_5tuple_rss_hash",
+    "regenerated": 1.3333333333333333,
+    "pdf_value": 1.3333478024215542,
+    "absolute_difference": 1.446908822089199e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf katran_lb_consistent_hash_select",
+    "regenerated": 1.8333333333333333,
+    "pdf_value": 1.8333480879956638,
+    "absolute_difference": 1.4754662330584978e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cilium_policy_guard_tree_filter",
+    "regenerated": 1.744186046511628,
+    "pdf_value": 1.7442009893429453,
+    "absolute_difference": 1.4942831317421579e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf siphash_rotate64_mixer",
+    "regenerated": 1.9285714285714286,
+    "pdf_value": 1.928582484369101,
+    "absolute_difference": 1.1055797672465673e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_record_bounds_window",
+    "regenerated": 1.903225806451613,
+    "pdf_value": 1.9032417801776156,
+    "absolute_difference": 1.5973726002593835e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf flow_record_field_scan",
+    "regenerated": 1.6170212765957446,
+    "pdf_value": 1.6170325537350523,
+    "absolute_difference": 1.127713930770824e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packed_header_bitfield_decode",
+    "regenerated": 1.088235294117647,
+    "pdf_value": 1.0882418287252142,
+    "absolute_difference": 6.534607567276751e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bpftrace_string_search_prefix_scan",
+    "regenerated": 1.898989898989899,
+    "pdf_value": 1.8990129987623219,
+    "absolute_difference": 2.309977242287431e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tracee_syscall_name_table_lookup",
+    "regenerated": 1.3,
+    "pdf_value": 1.300009880864193,
+    "absolute_difference": 9.880864192846062e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tracee_http_method_prefix_detect",
+    "regenerated": 1.2666666666666666,
+    "pdf_value": 1.2666742438997087,
+    "absolute_difference": 7.577233042121989e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cilium_socket_lb_service_select",
+    "regenerated": 2.102272727272727,
+    "pdf_value": 2.1022994998455045,
+    "absolute_difference": 2.6772572777389314e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.4583333333333333,
+    "pdf_value": 1.4583458747963143,
+    "absolute_difference": 1.2541462981019436e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tetragon_process_event_arg_filter",
+    "regenerated": 1.8962264150943395,
+    "pdf_value": 1.896242929898981,
+    "absolute_difference": 1.6514804641376557e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf otel_stack_frame_unwind_scan",
+    "regenerated": 1.4545454545454546,
+    "pdf_value": 1.4545574486580588,
+    "absolute_difference": 1.1994112604218898e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.9864864864864864,
+    "pdf_value": 1.9865071944685437,
+    "absolute_difference": 2.070798205733304e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_toeplitz_rss_hash",
+    "regenerated": 2.381443298969072,
+    "pdf_value": 2.3814573303732627,
+    "absolute_difference": 1.4031404190539831e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bpftrace_comm_key_fnv_hash",
+    "regenerated": 0.9864253393665159,
+    "pdf_value": 0.986431231755384,
+    "absolute_difference": 5.892388868167231e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tc_packet_checksum_fold",
+    "regenerated": 1.3248685199098422,
+    "pdf_value": 1.3248811012194586,
+    "absolute_difference": 1.2581309616344072e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cgroup_skb_hash_chain",
+    "regenerated": 0.9794520547945206,
+    "pdf_value": 0.9794586542948347,
+    "absolute_difference": 6.5995003141194886e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bitmap_popcount_scan",
+    "regenerated": 1.2169076751946608,
+    "pdf_value": 1.2169104502333126,
+    "absolute_difference": 2.7750386517588765e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel sorted_rule_binary_search",
+    "regenerated": 2.6204188481675392,
+    "pdf_value": 2.6204184205566374,
+    "absolute_difference": 4.2761090179865846e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.8867120954003407,
+    "pdf_value": 1.8867237430534534,
+    "absolute_difference": 1.1647653112678569e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel trace_event_type_switch_dispatch",
+    "regenerated": 1.0833333333333333,
+    "pdf_value": 1.083336855391891,
+    "absolute_difference": 3.522058557692276e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_checksum_fold",
+    "regenerated": 1.5248968257029352,
+    "pdf_value": 1.5248990501864788,
+    "absolute_difference": 2.224483543589173e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel payload_prefix_memcmp_scan",
+    "regenerated": 1.6647398843930636,
+    "pdf_value": 1.664746097654309,
+    "absolute_difference": 6.2132612452803215e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_vlan_tcpopt_parser",
+    "regenerated": 1.5714285714285714,
+    "pdf_value": 1.571431345559636,
+    "absolute_difference": 2.7741310646423045e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bpf_local_call_fanout_dispatch",
+    "regenerated": 2.6641791044776117,
+    "pdf_value": 2.6641932296515445,
+    "absolute_difference": 1.4125173932733048e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel flow_5tuple_rss_hash",
+    "regenerated": 1.8571428571428572,
+    "pdf_value": 1.8571464471948231,
+    "absolute_difference": 3.5900519659293195e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel katran_lb_consistent_hash_select",
+    "regenerated": 1.6585365853658536,
+    "pdf_value": 1.6585377555158294,
+    "absolute_difference": 1.1701499758043354e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cilium_policy_guard_tree_filter",
+    "regenerated": 1.7552447552447552,
+    "pdf_value": 1.7552508181646838,
+    "absolute_difference": 6.062919928551125e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel siphash_rotate64_mixer",
+    "regenerated": 3.0576923076923075,
+    "pdf_value": 3.0577010286314805,
+    "absolute_difference": 8.720939173034736e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_record_bounds_window",
+    "regenerated": 2.1325301204819276,
+    "pdf_value": 2.132529542456036,
+    "absolute_difference": 5.780258915955017e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel flow_record_field_scan",
+    "regenerated": 1.5354330708661417,
+    "pdf_value": 1.5354343840490727,
+    "absolute_difference": 1.3131829310619736e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packed_header_bitfield_decode",
+    "regenerated": 1.7817047817047817,
+    "pdf_value": 1.7817085220490385,
+    "absolute_difference": 3.740344256764061e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bpftrace_string_search_prefix_scan",
+    "regenerated": 1.7231182795698925,
+    "pdf_value": 1.723120505805685,
+    "absolute_difference": 2.2262357926017273e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tracee_syscall_name_table_lookup",
+    "regenerated": 1.4886363636363635,
+    "pdf_value": 1.4886382198564143,
+    "absolute_difference": 1.8562200507776794e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tracee_http_method_prefix_detect",
+    "regenerated": 1.2765957446808511,
+    "pdf_value": 1.2766007756144089,
+    "absolute_difference": 5.030933557748085e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cilium_socket_lb_service_select",
+    "regenerated": 3.530085959885387,
+    "pdf_value": 3.5300924683157517,
+    "absolute_difference": 6.508430364871032e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 2.289308176100629,
+    "pdf_value": 2.2893076013638933,
+    "absolute_difference": 5.747367355368738e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tetragon_process_event_arg_filter",
+    "regenerated": 2.10989010989011,
+    "pdf_value": 2.109903076756127,
+    "absolute_difference": 1.296686601692798e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel otel_stack_frame_unwind_scan",
+    "regenerated": 3.9904761904761905,
+    "pdf_value": 3.9904875861714464,
+    "absolute_difference": 1.1395695255878024e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.4029126213592233,
+    "pdf_value": 2.4029094107500844,
+    "absolute_difference": 3.210609138992737e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_toeplitz_rss_hash",
+    "regenerated": 1.2939698492462313,
+    "pdf_value": 1.2939704261310092,
+    "absolute_difference": 5.768847779474839e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.2232558139534884,
+    "pdf_value": 1.2232547247939596,
+    "absolute_difference": 1.0891595287887412e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tc_packet_checksum_fold",
+    "regenerated": 1.517928134556575,
+    "pdf_value": 1.517932227978091,
+    "absolute_difference": 4.093421515971585e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cgroup_skb_hash_chain",
+    "regenerated": 2.741424802110818,
+    "pdf_value": 2.7414314026740993,
+    "absolute_difference": 6.600563281278227e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bitmap_popcount_scan",
+    "regenerated": 1.379182156133829,
+    "pdf_value": 1.3791840627802179,
+    "absolute_difference": 1.9066463887718044e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native sorted_rule_binary_search",
+    "regenerated": 2.6966759002770084,
+    "pdf_value": 2.696683363128045,
+    "absolute_difference": 7.462851036699192e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.9118279569892473,
+    "pdf_value": 1.911839257055064,
+    "absolute_difference": 1.1300065816621796e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native trace_event_type_switch_dispatch",
+    "regenerated": 1.0506706408345752,
+    "pdf_value": 1.0506719516583185,
+    "absolute_difference": 1.3108237433279157e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_checksum_fold",
+    "regenerated": 1.515928694652099,
+    "pdf_value": 1.515929794901963,
+    "absolute_difference": 1.100249864105507e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native payload_prefix_memcmp_scan",
+    "regenerated": 1.7,
+    "pdf_value": 1.7000051403016785,
+    "absolute_difference": 5.140301678530079e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_vlan_tcpopt_parser",
+    "regenerated": 2.263157894736842,
+    "pdf_value": 2.263162884737302,
+    "absolute_difference": 4.9900004599479075e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bpf_local_call_fanout_dispatch",
+    "regenerated": 2.182926829268293,
+    "pdf_value": 2.182930200414651,
+    "absolute_difference": 3.371146358066568e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native flow_5tuple_rss_hash",
+    "regenerated": 2.888888888888889,
+    "pdf_value": 2.888907800122225,
+    "absolute_difference": 1.8911233336194044e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native katran_lb_consistent_hash_select",
+    "regenerated": 2.5185185185185186,
+    "pdf_value": 2.5185319298405937,
+    "absolute_difference": 1.3411322075107535e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cilium_policy_guard_tree_filter",
+    "regenerated": 1.984,
+    "pdf_value": 1.9840056657547391,
+    "absolute_difference": 5.665754739148099e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native siphash_rotate64_mixer",
+    "regenerated": 3.533333333333333,
+    "pdf_value": 3.5333491350014565,
+    "absolute_difference": 1.5801668123316404e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_record_bounds_window",
+    "regenerated": 2.3533333333333335,
+    "pdf_value": 2.3533323433493063,
+    "absolute_difference": 9.899840271998528e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native flow_record_field_scan",
+    "regenerated": 1.8073394495412844,
+    "pdf_value": 1.8073392085077704,
+    "absolute_difference": 2.410335140368147e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packed_header_bitfield_decode",
+    "regenerated": 1.673828125,
+    "pdf_value": 1.6738318664435394,
+    "absolute_difference": 3.741443539428957e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bpftrace_string_search_prefix_scan",
+    "regenerated": 1.7459016393442623,
+    "pdf_value": 1.7459080342915236,
+    "absolute_difference": 6.394947261290085e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tracee_syscall_name_table_lookup",
+    "regenerated": 1.3665480427046264,
+    "pdf_value": 1.3665514858327574,
+    "absolute_difference": 3.443128131053186e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tracee_http_method_prefix_detect",
+    "regenerated": 1.4047619047619047,
+    "pdf_value": 1.4047644885114257,
+    "absolute_difference": 2.583749521001266e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cilium_socket_lb_service_select",
+    "regenerated": 3.3147058823529414,
+    "pdf_value": 3.314717254850446,
+    "absolute_difference": 1.1372497504602563e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 2.329608938547486,
+    "pdf_value": 2.3296201317059517,
+    "absolute_difference": 1.1193158465871988e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tetragon_process_event_arg_filter",
+    "regenerated": 2.2971887550200805,
+    "pdf_value": 2.297205389320738,
+    "absolute_difference": 1.6634300657347723e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native otel_stack_frame_unwind_scan",
+    "regenerated": 3.822429906542056,
+    "pdf_value": 3.8224436994180038,
+    "absolute_difference": 1.3792875947604699e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.50253807106599,
+    "pdf_value": 2.5025495896325824,
+    "absolute_difference": 1.1518566592538804e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_toeplitz_rss_hash",
+    "regenerated": 1.2952127659574468,
+    "pdf_value": 1.2952143791372288,
+    "absolute_difference": 1.613179781978502e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.2350194552529183,
+    "pdf_value": 1.2350168773238448,
+    "absolute_difference": 2.5779290735439275e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tc_packet_checksum_fold",
+    "regenerated": 1.205507440839229,
+    "pdf_value": 1.2055126879779767,
+    "absolute_difference": 5.247138747721536e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cgroup_skb_hash_chain",
+    "regenerated": 2.619565217391304,
+    "pdf_value": 2.61957655337061,
+    "absolute_difference": 1.1335979305915345e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bitmap_popcount_scan",
+    "regenerated": 1.36313533374158,
+    "pdf_value": 1.3631360409396471,
+    "absolute_difference": 7.071980672179734e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf sorted_rule_binary_search",
+    "regenerated": 2.9322289156626504,
+    "pdf_value": 2.9322336895372016,
+    "absolute_difference": 4.77387455122269e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.819484240687679,
+    "pdf_value": 1.819488597097443,
+    "absolute_difference": 4.356409764039171e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf trace_event_type_switch_dispatch",
+    "regenerated": 1.376953125,
+    "pdf_value": 1.376953171851708,
+    "absolute_difference": 4.685170806872918e-08,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_checksum_fold",
+    "regenerated": 1.5114670132252885,
+    "pdf_value": 1.5114691553342052,
+    "absolute_difference": 2.142108916691754e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf payload_prefix_memcmp_scan",
+    "regenerated": 1.5372340425531914,
+    "pdf_value": 1.5372403433721522,
+    "absolute_difference": 6.300818960802701e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_vlan_tcpopt_parser",
+    "regenerated": 1.9545454545454546,
+    "pdf_value": 1.9545483102686094,
+    "absolute_difference": 2.8557231548376194e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bpf_local_call_fanout_dispatch",
+    "regenerated": 2.958677685950413,
+    "pdf_value": 2.958677685950413,
+    "absolute_difference": 0.0,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf flow_5tuple_rss_hash",
+    "regenerated": 1.8571428571428572,
+    "pdf_value": 1.8571464471948231,
+    "absolute_difference": 3.5900519659293195e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf katran_lb_consistent_hash_select",
+    "regenerated": 1.8888888888888888,
+    "pdf_value": 1.888894092651082,
+    "absolute_difference": 5.203762193151107e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cilium_policy_guard_tree_filter",
+    "regenerated": 1.6423841059602649,
+    "pdf_value": 1.6423880699309485,
+    "absolute_difference": 3.9639706836958055e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf siphash_rotate64_mixer",
+    "regenerated": 3.3125,
+    "pdf_value": 3.312509209707174,
+    "absolute_difference": 9.209707174218096e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_record_bounds_window",
+    "regenerated": 2.152439024390244,
+    "pdf_value": 2.1524430711589098,
+    "absolute_difference": 4.0467686659440005e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf flow_record_field_scan",
+    "regenerated": 1.6554621848739495,
+    "pdf_value": 1.6554684242690776,
+    "absolute_difference": 6.239395128115888e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packed_header_bitfield_decode",
+    "regenerated": 1.7633744855967077,
+    "pdf_value": 1.763380490841696,
+    "absolute_difference": 6.005244988172009e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bpftrace_string_search_prefix_scan",
+    "regenerated": 2.0157728706624605,
+    "pdf_value": 2.015765305248248,
+    "absolute_difference": 7.565414212429289e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tracee_syscall_name_table_lookup",
+    "regenerated": 1.465648854961832,
+    "pdf_value": 1.4656542176175273,
+    "absolute_difference": 5.362655695284602e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tracee_http_method_prefix_detect",
+    "regenerated": 1.3111111111111111,
+    "pdf_value": 1.3111150456630132,
+    "absolute_difference": 3.934551902062822e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cilium_socket_lb_service_select",
+    "regenerated": 2.6897374701670644,
+    "pdf_value": 2.689739386704895,
+    "absolute_difference": 1.9165378306595926e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 2.7434210526315788,
+    "pdf_value": 2.743433835750227,
+    "absolute_difference": 1.2783118648052039e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tetragon_process_event_arg_filter",
+    "regenerated": 2.183206106870229,
+    "pdf_value": 2.18321063242845,
+    "absolute_difference": 4.525558221057935e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf otel_stack_frame_unwind_scan",
+    "regenerated": 2.1871657754010694,
+    "pdf_value": 2.1871789453243244,
+    "absolute_difference": 1.3169923255063054e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.4166666666666665,
+    "pdf_value": 2.4166837058148234,
+    "absolute_difference": 1.703914815687213e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_toeplitz_rss_hash",
+    "regenerated": 1.830827067669173,
+    "pdf_value": 1.8308292448896835,
+    "absolute_difference": 2.1772205105463627e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.1896551724137931,
+    "pdf_value": 1.189655428444145,
+    "absolute_difference": 2.560303518084339e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tc_packet_checksum_fold",
+    "regenerated": 1.5120486536107711,
+    "pdf_value": 1.5120482959899935,
+    "absolute_difference": 3.5762077765788547e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cgroup_skb_hash_chain",
+    "regenerated": 2.5913978494623655,
+    "pdf_value": 2.591409984750438,
+    "absolute_difference": 1.2135288072645523e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bitmap_popcount_scan",
+    "regenerated": 2.2668024439918533,
+    "pdf_value": 2.266801894726866,
+    "absolute_difference": 5.492649872707034e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "siphash_rotate64_mixer",
+    "regenerated": 1.7419354838709677,
+    "pdf_value": 1.7419391134423934,
+    "absolute_difference": 3.629571425634026e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_record_bounds_window",
+    "regenerated": 1.6388888888888888,
+    "pdf_value": 1.6388962285840425,
+    "absolute_difference": 7.3396951536519595e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bpftrace_string_search_prefix_scan",
+    "regenerated": 1.6375838926174497,
+    "pdf_value": 1.6375801535336392,
+    "absolute_difference": 3.739083810572197e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tracee_syscall_name_table_lookup",
+    "regenerated": 1.5272727272727273,
+    "pdf_value": 1.5272782830846428,
+    "absolute_difference": 5.5558119154142105e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bpf_local_call_fanout_dispatch",
+    "regenerated": 1.4880952380952381,
+    "pdf_value": 1.4880955561357978,
+    "absolute_difference": 3.180405596658886e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "katran_lb_consistent_hash_select",
+    "regenerated": 1.4666666666666666,
+    "pdf_value": 1.4666639496252725,
+    "absolute_difference": 2.717041394095787e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "flow_5tuple_rss_hash",
+    "regenerated": 1.4545454545454546,
+    "pdf_value": 1.454548805051045,
+    "absolute_difference": 3.3505055903049197e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tetragon_process_event_arg_filter",
+    "regenerated": 1.4532374100719425,
+    "pdf_value": 1.4532327300006416,
+    "absolute_difference": 4.680071300944277e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_vlan_tcpopt_parser",
+    "regenerated": 1.3636363636363635,
+    "pdf_value": 1.3636468051590767,
+    "absolute_difference": 1.0441522713122708e-05,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_checksum_fold",
+    "regenerated": 1.332905369685069,
+    "pdf_value": 1.3329116069083313,
+    "absolute_difference": 6.2372232623175705e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tc_packet_checksum_fold",
+    "regenerated": 1.331923890063425,
+    "pdf_value": 1.331927426914349,
+    "absolute_difference": 3.5368509241351376e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "flow_record_field_scan",
+    "regenerated": 1.2115384615384615,
+    "pdf_value": 1.211542732853535,
+    "absolute_difference": 4.2713150736339855e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.205179282868526,
+    "pdf_value": 1.2051821259496889,
+    "absolute_difference": 2.8430811629398534e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_toeplitz_rss_hash",
+    "regenerated": 1.1928251121076232,
+    "pdf_value": 1.1928267377153492,
+    "absolute_difference": 1.6256077259857449e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cilium_socket_lb_service_select",
+    "regenerated": 1.1450617283950617,
+    "pdf_value": 1.1450625150274165,
+    "absolute_difference": 7.86632354810024e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.1170212765957446,
+    "pdf_value": 1.1170226478400398,
+    "absolute_difference": 1.3712442952229509e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "otel_stack_frame_unwind_scan",
+    "regenerated": 1.0761904761904761,
+    "pdf_value": 1.0761913657754576,
+    "absolute_difference": 8.895849814560819e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.072992700729927,
+    "pdf_value": 1.0729964371007192,
+    "absolute_difference": 3.7363707923177003e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tracee_http_method_prefix_detect",
+    "regenerated": 1.0588235294117647,
+    "pdf_value": 1.0588249861986647,
+    "absolute_difference": 1.4567869000003952e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cilium_policy_guard_tree_filter",
+    "regenerated": 1.056338028169014,
+    "pdf_value": 1.0563381133111562,
+    "absolute_difference": 8.514214222543615e-08,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "trace_event_type_switch_dispatch",
+    "regenerated": 1.0179856115107915,
+    "pdf_value": 1.0179886340568398,
+    "absolute_difference": 3.0225460483368494e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.0046189376443417,
+    "pdf_value": 1.0046198153828874,
+    "absolute_difference": 8.777385456237852e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "sorted_rule_binary_search",
+    "regenerated": 1.0019011406844107,
+    "pdf_value": 1.0019042040105481,
+    "absolute_difference": 3.063326137420219e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cgroup_skb_hash_chain",
+    "regenerated": 0.9761092150170648,
+    "pdf_value": 0.9761109660505678,
+    "absolute_difference": 1.7510335029724544e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packed_header_bitfield_decode",
+    "regenerated": 0.8345864661654135,
+    "pdf_value": 0.8345910699949514,
+    "absolute_difference": 4.603829537819237e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "payload_prefix_memcmp_scan",
+    "regenerated": 0.7964601769911505,
+    "pdf_value": 0.7964613590888057,
+    "absolute_difference": 1.182097655205716e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bitmap_popcount_scan",
+    "regenerated": 0.9664607237422771,
+    "pdf_value": 0.9664608540311111,
+    "absolute_difference": 1.3028883405485914e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "siphash_rotate64_mixer",
+    "regenerated": 1.9019607843137254,
+    "pdf_value": 1.901966936466277,
+    "absolute_difference": 6.152152551619494e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_record_bounds_window",
+    "regenerated": 1.2724014336917562,
+    "pdf_value": 1.2724060851067065,
+    "absolute_difference": 4.651414950318511e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bpftrace_string_search_prefix_scan",
+    "regenerated": 1.558252427184466,
+    "pdf_value": 1.5582560650311508,
+    "absolute_difference": 3.637846684778623e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tracee_syscall_name_table_lookup",
+    "regenerated": 1.1746031746031746,
+    "pdf_value": 1.1746052701112901,
+    "absolute_difference": 2.0955081154738764e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bpf_local_call_fanout_dispatch",
+    "regenerated": 1.1821192052980132,
+    "pdf_value": 1.182123804656164,
+    "absolute_difference": 4.59935815078083e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "katran_lb_consistent_hash_select",
+    "regenerated": 1.1333333333333333,
+    "pdf_value": 1.1333358163711624,
+    "absolute_difference": 2.483037829126289e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "flow_5tuple_rss_hash",
+    "regenerated": 1.1063829787234043,
+    "pdf_value": 1.1063834807523292,
+    "absolute_difference": 5.020289248758303e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tetragon_process_event_arg_filter",
+    "regenerated": 1.3419203747072599,
+    "pdf_value": 1.34192132917145,
+    "absolute_difference": 9.544641901282347e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_vlan_tcpopt_parser",
+    "regenerated": 1.048780487804878,
+    "pdf_value": 1.0487799931631958,
+    "absolute_difference": 4.946416822804167e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_checksum_fold",
+    "regenerated": 1.1981891957364341,
+    "pdf_value": 1.1981928294677568,
+    "absolute_difference": 3.6337313227274848e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tc_packet_checksum_fold",
+    "regenerated": 1.1978430306325902,
+    "pdf_value": 1.1978441641558408,
+    "absolute_difference": 1.1335232505960136e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "flow_record_field_scan",
+    "regenerated": 1.0960451977401129,
+    "pdf_value": 1.096045983260555,
+    "absolute_difference": 7.855204420259554e-07,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.1602080624187256,
+    "pdf_value": 1.1602091757867932,
+    "absolute_difference": 1.1133680675179392e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_toeplitz_rss_hash",
+    "regenerated": 1.162621359223301,
+    "pdf_value": 1.1626242875810213,
+    "absolute_difference": 2.92835772031097e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cilium_socket_lb_service_select",
+    "regenerated": 1.6906906906906907,
+    "pdf_value": 1.6906923326976886,
+    "absolute_difference": 1.6420069979261598e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.6238095238095238,
+    "pdf_value": 1.6238164538436743,
+    "absolute_difference": 6.930034150531839e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "otel_stack_frame_unwind_scan",
+    "regenerated": 1.2088235294117646,
+    "pdf_value": 1.208826926478225,
+    "absolute_difference": 3.397066460353315e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.4820359281437125,
+    "pdf_value": 1.4820383738546257,
+    "absolute_difference": 2.445710913123733e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tracee_http_method_prefix_detect",
+    "regenerated": 1.0350877192982457,
+    "pdf_value": 1.0350917596229579,
+    "absolute_difference": 4.0403247121290065e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cilium_policy_guard_tree_filter",
+    "regenerated": 1.2266009852216748,
+    "pdf_value": 1.226603397302758,
+    "absolute_difference": 2.412081083091877e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "trace_event_type_switch_dispatch",
+    "regenerated": 1.0170278637770898,
+    "pdf_value": 1.0170301944550124,
+    "absolute_difference": 2.330677922657287e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bpftrace_comm_key_fnv_hash",
+    "regenerated": 0.8615803814713896,
+    "pdf_value": 0.8615827962139003,
+    "absolute_difference": 2.4147425107257092e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "sorted_rule_binary_search",
+    "regenerated": 1.0025813113061435,
+    "pdf_value": 1.002583984367002,
+    "absolute_difference": 2.6730608584379922e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cgroup_skb_hash_chain",
+    "regenerated": 1.6164154103852597,
+    "pdf_value": 1.6164168711110314,
+    "absolute_difference": 1.4607257716736655e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packed_header_bitfield_decode",
+    "regenerated": 1.1335978835978835,
+    "pdf_value": 1.1336004354026334,
+    "absolute_difference": 2.551804749950648e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "payload_prefix_memcmp_scan",
+    "regenerated": 1.1788617886178863,
+    "pdf_value": 1.1788635499861841,
+    "absolute_difference": 1.761368297881205e-06,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Cilium Full",
+    "regenerated": 1.074,
+    "pdf_value": 1.0739999909263793,
+    "absolute_difference": 9.073620743649258e-09,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Cilium No Bulk",
+    "regenerated": 1.114,
+    "pdf_value": 1.1140000068630502,
+    "absolute_difference": 6.8630501282029854e-09,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Katran Full",
+    "regenerated": 0.995,
+    "pdf_value": 0.9949999980079162,
+    "absolute_difference": 1.9920838312259548e-09,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Katran Conservative",
+    "regenerated": 1.073,
+    "pdf_value": 1.0729999905279626,
+    "absolute_difference": 9.472037376667686e-09,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Cilium Full",
+    "regenerated": 1.009,
+    "pdf_value": 1.008999990733597,
+    "absolute_difference": 9.266402978269639e-09,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Cilium No Bulk",
+    "regenerated": 1.062,
+    "pdf_value": 1.061999986145378,
+    "absolute_difference": 1.3854622116227233e-08,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Katran Full",
+    "regenerated": 1.006,
+    "pdf_value": 1.0059999895383467,
+    "absolute_difference": 1.0461653321414133e-08,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Katran Conservative",
+    "regenerated": 0.941,
+    "pdf_value": 0.9409999893455643,
+    "absolute_difference": 1.0654435667056816e-08,
+    "tolerance": 0.0001,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bitmap_popcount_scan",
+    "regenerated": 2.3832976445396143,
+    "pdf_value": 2.3832985631279313,
+    "absolute_difference": 9.185883169671172e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel sorted_rule_binary_search",
+    "regenerated": 1.9130434782608696,
+    "pdf_value": 1.9130438958281089,
+    "absolute_difference": 4.175672392303653e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.1642512077294687,
+    "pdf_value": 1.1642516046761036,
+    "absolute_difference": 3.969466348952011e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel trace_event_type_switch_dispatch",
+    "regenerated": 0.996415770609319,
+    "pdf_value": 0.9964160899792446,
+    "absolute_difference": 3.1936992561654165e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_checksum_fold",
+    "regenerated": 1.3300641267446247,
+    "pdf_value": 1.330064400467397,
+    "absolute_difference": 2.7372277222603714e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel payload_prefix_memcmp_scan",
+    "regenerated": 1.851063829787234,
+    "pdf_value": 1.851064715266699,
+    "absolute_difference": 8.854794650847708e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_vlan_tcpopt_parser",
+    "regenerated": 1.0909090909090908,
+    "pdf_value": 1.090909236424947,
+    "absolute_difference": 1.45515856253553e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bpf_local_call_fanout_dispatch",
+    "regenerated": 1.7971014492753623,
+    "pdf_value": 1.7971022457462078,
+    "absolute_difference": 7.964708454988312e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel flow_5tuple_rss_hash",
+    "regenerated": 1.6,
+    "pdf_value": 1.600000533558139,
+    "absolute_difference": 5.335581390042421e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel katran_lb_consistent_hash_select",
+    "regenerated": 1.5714285714285714,
+    "pdf_value": 1.5714290287641193,
+    "absolute_difference": 4.573355478765251e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cilium_policy_guard_tree_filter",
+    "regenerated": 2.027027027027027,
+    "pdf_value": 2.0270279210974222,
+    "absolute_difference": 8.940703950521822e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel siphash_rotate64_mixer",
+    "regenerated": 1.9285714285714286,
+    "pdf_value": 1.928572038352159,
+    "absolute_difference": 6.097807303540037e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_record_bounds_window",
+    "regenerated": 1.873015873015873,
+    "pdf_value": 1.8730163642281281,
+    "absolute_difference": 4.912122550937426e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel flow_record_field_scan",
+    "regenerated": 1.5510204081632653,
+    "pdf_value": 1.5510209634992878,
+    "absolute_difference": 5.553360225007964e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packed_header_bitfield_decode",
+    "regenerated": 1.162303664921466,
+    "pdf_value": 1.1623041174681599,
+    "absolute_difference": 4.5254669389649393e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bpftrace_string_search_prefix_scan",
+    "regenerated": 1.6936936936936937,
+    "pdf_value": 1.693694409911376,
+    "absolute_difference": 7.162176822728128e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tracee_syscall_name_table_lookup",
+    "regenerated": 1.1818181818181819,
+    "pdf_value": 1.1818184728498942,
+    "absolute_difference": 2.910317122850614e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tracee_http_method_prefix_detect",
+    "regenerated": 1.0555555555555556,
+    "pdf_value": 1.0555556741240308,
+    "absolute_difference": 1.1856847526026115e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cilium_socket_lb_service_select",
+    "regenerated": 2.1637426900584797,
+    "pdf_value": 2.1637436573276205,
+    "absolute_difference": 9.672691407835998e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.6935483870967742,
+    "pdf_value": 1.6935487485393845,
+    "absolute_difference": 3.6144261028603353e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tetragon_process_event_arg_filter",
+    "regenerated": 1.9142857142857144,
+    "pdf_value": 1.9142865527342188,
+    "absolute_difference": 8.384485044032886e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel otel_stack_frame_unwind_scan",
+    "regenerated": 2.6666666666666665,
+    "pdf_value": 2.666668089488371,
+    "absolute_difference": 1.4228217044554015e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.9342105263157894,
+    "pdf_value": 1.934211214324969,
+    "absolute_difference": 6.880091796279686e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel packet_toeplitz_rss_hash",
+    "regenerated": 1.0176211453744493,
+    "pdf_value": 1.0176212911039852,
+    "absolute_difference": 1.457295359941213e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.013953488372093,
+    "pdf_value": 1.0139536124553812,
+    "absolute_difference": 1.2408328808888314e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel tc_packet_checksum_fold",
+    "regenerated": 1.3346957311534968,
+    "pdf_value": 1.3346962186734677,
+    "absolute_difference": 4.875199708376243e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native_kernel cgroup_skb_hash_chain",
+    "regenerated": 1.4158415841584158,
+    "pdf_value": 1.4158418747098778,
+    "absolute_difference": 2.905514620010763e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bitmap_popcount_scan",
+    "regenerated": 2.388412017167382,
+    "pdf_value": 2.3884132514499443,
+    "absolute_difference": 1.2342825623790077e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native sorted_rule_binary_search",
+    "regenerated": 1.3233082706766917,
+    "pdf_value": 1.3233084873093197,
+    "absolute_difference": 2.1663262805837746e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.1779081133919844,
+    "pdf_value": 1.1779085588061102,
+    "absolute_difference": 4.4541412580478834e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native trace_event_type_switch_dispatch",
+    "regenerated": 1.0,
+    "pdf_value": 1.0,
+    "absolute_difference": 0.0,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_checksum_fold",
+    "regenerated": 1.3358084558266403,
+    "pdf_value": 1.335808687393622,
+    "absolute_difference": 2.3156698158999234e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native payload_prefix_memcmp_scan",
+    "regenerated": 1.9772727272727273,
+    "pdf_value": 1.9772736246205067,
+    "absolute_difference": 8.9734777941608e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_vlan_tcpopt_parser",
+    "regenerated": 1.5,
+    "pdf_value": 1.5000005335581392,
+    "absolute_difference": 5.335581392262867e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bpf_local_call_fanout_dispatch",
+    "regenerated": 1.8507462686567164,
+    "pdf_value": 1.8507467146157581,
+    "absolute_difference": 4.459590416949766e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native flow_5tuple_rss_hash",
+    "regenerated": 1.7777777777777777,
+    "pdf_value": 1.7777783706201546,
+    "absolute_difference": 5.928423769674396e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native katran_lb_consistent_hash_select",
+    "regenerated": 1.8333333333333333,
+    "pdf_value": 1.8333340447441855,
+    "absolute_difference": 7.114108522277007e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cilium_policy_guard_tree_filter",
+    "regenerated": 2.142857142857143,
+    "pdf_value": 2.1428580575282385,
+    "absolute_difference": 9.146710957530502e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native siphash_rotate64_mixer",
+    "regenerated": 2.076923076923077,
+    "pdf_value": 2.076924144039355,
+    "absolute_difference": 1.0671162780084842e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_record_bounds_window",
+    "regenerated": 1.903225806451613,
+    "pdf_value": 1.9032264260675165,
+    "absolute_difference": 6.196159034743687e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native flow_record_field_scan",
+    "regenerated": 1.6521739130434783,
+    "pdf_value": 1.6521745161961574,
+    "absolute_difference": 6.031526791350217e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packed_header_bitfield_decode",
+    "regenerated": 1.162303664921466,
+    "pdf_value": 1.1623041174681599,
+    "absolute_difference": 4.5254669389649393e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bpftrace_string_search_prefix_scan",
+    "regenerated": 1.7570093457943925,
+    "pdf_value": 1.7570101536113882,
+    "absolute_difference": 8.078169957403958e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tracee_syscall_name_table_lookup",
+    "regenerated": 1.2061855670103092,
+    "pdf_value": 1.2061860730654517,
+    "absolute_difference": 5.060551424573845e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tracee_http_method_prefix_detect",
+    "regenerated": 1.1875,
+    "pdf_value": 1.187500333473837,
+    "absolute_difference": 3.334738369886736e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cilium_socket_lb_service_select",
+    "regenerated": 2.1893491124260356,
+    "pdf_value": 2.189350179542314,
+    "absolute_difference": 1.0671162784525734e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.7796610169491525,
+    "pdf_value": 1.7796618308513987,
+    "absolute_difference": 8.139022462660961e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tetragon_process_event_arg_filter",
+    "regenerated": 1.9705882352941178,
+    "pdf_value": 1.9705886746949381,
+    "absolute_difference": 4.39400820395619e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native otel_stack_frame_unwind_scan",
+    "regenerated": 2.8,
+    "pdf_value": 2.8000010671162783,
+    "absolute_difference": 1.0671162784525734e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.0416666666666665,
+    "pdf_value": 2.041667689319767,
+    "absolute_difference": 1.0226531004242645e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native packet_toeplitz_rss_hash",
+    "regenerated": 1.1666666666666667,
+    "pdf_value": 1.1666670223720927,
+    "absolute_difference": 3.5570542600282806e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native bpftrace_comm_key_fnv_hash",
+    "regenerated": 0.5907859078590786,
+    "pdf_value": 0.5907859844948005,
+    "absolute_difference": 7.66357218795477e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native tc_packet_checksum_fold",
+    "regenerated": 1.3350999394306482,
+    "pdf_value": 1.3351001221848138,
+    "absolute_difference": 1.8275416557855806e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 native cgroup_skb_hash_chain",
+    "regenerated": 1.4371859296482412,
+    "pdf_value": 1.4371863345089397,
+    "absolute_difference": 4.0486069852185835e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bitmap_popcount_scan",
+    "regenerated": 2.3832976445396143,
+    "pdf_value": 2.3832985631279313,
+    "absolute_difference": 9.185883169671172e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf sorted_rule_binary_search",
+    "regenerated": 2.209205020920502,
+    "pdf_value": 2.2092060121331123,
+    "absolute_difference": 9.912126102129548e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.238437821171634,
+    "pdf_value": 1.2384380619034152,
+    "absolute_difference": 2.407317811758958e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf trace_event_type_switch_dispatch",
+    "regenerated": 1.1209677419354838,
+    "pdf_value": 1.1209683013109524,
+    "absolute_difference": 5.593754686117336e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_checksum_fold",
+    "regenerated": 1.3252649778245509,
+    "pdf_value": 1.3252655785637681,
+    "absolute_difference": 6.007392172602266e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf payload_prefix_memcmp_scan",
+    "regenerated": 1.1153846153846154,
+    "pdf_value": 1.1153851489427546,
+    "absolute_difference": 5.335581392262867e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_vlan_tcpopt_parser",
+    "regenerated": 1.2,
+    "pdf_value": 1.2000005335581392,
+    "absolute_difference": 5.335581392262867e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bpf_local_call_fanout_dispatch",
+    "regenerated": 1.8507462686567164,
+    "pdf_value": 1.8507467146157581,
+    "absolute_difference": 4.459590416949766e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf flow_5tuple_rss_hash",
+    "regenerated": 1.3333333333333333,
+    "pdf_value": 1.3333335111860465,
+    "absolute_difference": 1.7785271322345864e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf katran_lb_consistent_hash_select",
+    "regenerated": 1.8333333333333333,
+    "pdf_value": 1.8333340447441855,
+    "absolute_difference": 7.114108522277007e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cilium_policy_guard_tree_filter",
+    "regenerated": 1.744186046511628,
+    "pdf_value": 1.7441866172947535,
+    "absolute_difference": 5.707831256529516e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf siphash_rotate64_mixer",
+    "regenerated": 1.9285714285714286,
+    "pdf_value": 1.928572038352159,
+    "absolute_difference": 6.097807303540037e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_record_bounds_window",
+    "regenerated": 1.903225806451613,
+    "pdf_value": 1.9032264260675165,
+    "absolute_difference": 6.196159034743687e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf flow_record_field_scan",
+    "regenerated": 1.6170212765957446,
+    "pdf_value": 1.6170215717555663,
+    "absolute_difference": 2.951598216949236e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packed_header_bitfield_decode",
+    "regenerated": 1.088235294117647,
+    "pdf_value": 1.088235576589603,
+    "absolute_difference": 2.8247195604791386e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bpftrace_string_search_prefix_scan",
+    "regenerated": 1.898989898989899,
+    "pdf_value": 1.8989905080007043,
+    "absolute_difference": 6.090108053413701e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tracee_syscall_name_table_lookup",
+    "regenerated": 1.3,
+    "pdf_value": 1.3000005335581393,
+    "absolute_difference": 5.335581392262867e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tracee_http_method_prefix_detect",
+    "regenerated": 1.2666666666666666,
+    "pdf_value": 1.2666670223720928,
+    "absolute_difference": 3.5570542622487267e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cilium_socket_lb_service_select",
+    "regenerated": 2.102272727272727,
+    "pdf_value": 2.102273491230972,
+    "absolute_difference": 7.639582451091087e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.4583333333333333,
+    "pdf_value": 1.4583339113546507,
+    "absolute_difference": 5.780213174766402e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tetragon_process_event_arg_filter",
+    "regenerated": 1.8962264150943395,
+    "pdf_value": 1.896227210397981,
+    "absolute_difference": 7.953036413876902e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf otel_stack_frame_unwind_scan",
+    "regenerated": 1.4545454545454546,
+    "pdf_value": 1.454545648566596,
+    "absolute_difference": 1.9402114137534454e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.9864864864864864,
+    "pdf_value": 1.986487106567567,
+    "absolute_difference": 6.200810807044377e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf packet_toeplitz_rss_hash",
+    "regenerated": 2.381443298969072,
+    "pdf_value": 2.381443915036202,
+    "absolute_difference": 6.16067129755038e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf bpftrace_comm_key_fnv_hash",
+    "regenerated": 0.9864253393665159,
+    "pdf_value": 0.9864257473815634,
+    "absolute_difference": 4.08015047526078e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf tc_packet_checksum_fold",
+    "regenerated": 1.3248685199098422,
+    "pdf_value": 1.3248691448663703,
+    "absolute_difference": 6.249565280835867e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "x86 llvmbpf cgroup_skb_hash_chain",
+    "regenerated": 0.9794520547945206,
+    "pdf_value": 0.9794521425027078,
+    "absolute_difference": 8.770818726855367e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bitmap_popcount_scan",
+    "regenerated": 1.2169076751946608,
+    "pdf_value": 1.216908457430064,
+    "absolute_difference": 7.82235403118392e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel sorted_rule_binary_search",
+    "regenerated": 2.6204188481675392,
+    "pdf_value": 2.6204198035438933,
+    "absolute_difference": 9.553763540282034e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.8867120954003407,
+    "pdf_value": 1.8867128016604329,
+    "absolute_difference": 7.062600921869944e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel trace_event_type_switch_dispatch",
+    "regenerated": 1.0833333333333333,
+    "pdf_value": 1.0833332444069768,
+    "absolute_difference": 8.892635650070702e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_checksum_fold",
+    "regenerated": 1.5248968257029352,
+    "pdf_value": 1.524897423447746,
+    "absolute_difference": 5.977448107596928e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel payload_prefix_memcmp_scan",
+    "regenerated": 1.6647398843930636,
+    "pdf_value": 1.6647408774897157,
+    "absolute_difference": 9.930966520244056e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_vlan_tcpopt_parser",
+    "regenerated": 1.5714285714285714,
+    "pdf_value": 1.5714290287641193,
+    "absolute_difference": 4.573355478765251e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bpf_local_call_fanout_dispatch",
+    "regenerated": 2.6641791044776117,
+    "pdf_value": 2.6641801078854557,
+    "absolute_difference": 1.0034078439247196e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel flow_5tuple_rss_hash",
+    "regenerated": 1.8571428571428572,
+    "pdf_value": 1.8571430095880397,
+    "absolute_difference": 1.5244518247747862e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel katran_lb_consistent_hash_select",
+    "regenerated": 1.6585365853658536,
+    "pdf_value": 1.6585366634475325,
+    "absolute_difference": 7.808167890033246e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cilium_policy_guard_tree_filter",
+    "regenerated": 1.7552447552447552,
+    "pdf_value": 1.7552451432870382,
+    "absolute_difference": 3.880422829727337e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel siphash_rotate64_mixer",
+    "regenerated": 3.0576923076923075,
+    "pdf_value": 3.0576936415876554,
+    "absolute_difference": 1.3338953479546944e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_record_bounds_window",
+    "regenerated": 2.1325301204819276,
+    "pdf_value": 2.1325305061866064,
+    "absolute_difference": 3.8570467886245297e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel flow_record_field_scan",
+    "regenerated": 1.5354330708661417,
+    "pdf_value": 1.5354330624636514,
+    "absolute_difference": 8.402490259129536e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packed_header_bitfield_decode",
+    "regenerated": 1.7817047817047817,
+    "pdf_value": 1.7817053585243916,
+    "absolute_difference": 5.768196098543399e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bpftrace_string_search_prefix_scan",
+    "regenerated": 1.7231182795698925,
+    "pdf_value": 1.7231185406117777,
+    "absolute_difference": 2.610418852189156e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tracee_syscall_name_table_lookup",
+    "regenerated": 1.4886363636363635,
+    "pdf_value": 1.4886368123102534,
+    "absolute_difference": 4.486738898190623e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tracee_http_method_prefix_detect",
+    "regenerated": 1.2765957446808511,
+    "pdf_value": 1.2765965393419094,
+    "absolute_difference": 7.946610582898472e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cilium_socket_lb_service_select",
+    "regenerated": 3.530085959885387,
+    "pdf_value": 3.5300873434673807,
+    "absolute_difference": 1.3835819938634586e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 2.289308176100629,
+    "pdf_value": 2.2893090955655984,
+    "absolute_difference": 9.194649694954649e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tetragon_process_event_arg_filter",
+    "regenerated": 2.10989010989011,
+    "pdf_value": 2.1098905672256576,
+    "absolute_difference": 4.573355476544805e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel otel_stack_frame_unwind_scan",
+    "regenerated": 3.9904761904761905,
+    "pdf_value": 3.9904775878903647,
+    "absolute_difference": 1.3974141741535107e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.4029126213592233,
+    "pdf_value": 2.402913227439828,
+    "absolute_difference": 6.060806048147072e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel packet_toeplitz_rss_hash",
+    "regenerated": 1.2939698492462313,
+    "pdf_value": 1.293970259469323,
+    "absolute_difference": 4.102230917180094e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.2232558139534884,
+    "pdf_value": 1.2232556650535427,
+    "absolute_difference": 1.4889994570665976e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel tc_packet_checksum_fold",
+    "regenerated": 1.517928134556575,
+    "pdf_value": 1.517929154150282,
+    "absolute_difference": 1.0195937070189842e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native_kernel cgroup_skb_hash_chain",
+    "regenerated": 2.741424802110818,
+    "pdf_value": 2.7414259874827263,
+    "absolute_difference": 1.185371908185573e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bitmap_popcount_scan",
+    "regenerated": 1.379182156133829,
+    "pdf_value": 1.3791826956424307,
+    "absolute_difference": 5.395086015713701e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native sorted_rule_binary_search",
+    "regenerated": 2.6966759002770084,
+    "pdf_value": 2.696676466351156,
+    "absolute_difference": 5.660741475566056e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.9118279569892473,
+    "pdf_value": 1.9118284503870964,
+    "absolute_difference": 4.933978490218038e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native trace_event_type_switch_dispatch",
+    "regenerated": 1.0506706408345752,
+    "pdf_value": 1.050670949359997,
+    "absolute_difference": 3.0852542187709275e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_checksum_fold",
+    "regenerated": 1.515928694652099,
+    "pdf_value": 1.5159293782447005,
+    "absolute_difference": 6.835926016357519e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native payload_prefix_memcmp_scan",
+    "regenerated": 1.7,
+    "pdf_value": 1.7000005335581392,
+    "absolute_difference": 5.335581392262867e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_vlan_tcpopt_parser",
+    "regenerated": 2.263157894736842,
+    "pdf_value": 2.2631583440489593,
+    "absolute_difference": 4.4931211728993503e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bpf_local_call_fanout_dispatch",
+    "regenerated": 2.182926829268293,
+    "pdf_value": 2.182927206663074,
+    "absolute_difference": 3.7739478120357717e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native flow_5tuple_rss_hash",
+    "regenerated": 2.888888888888889,
+    "pdf_value": 2.8888897188682163,
+    "absolute_difference": 8.299793274879619e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native katran_lb_consistent_hash_select",
+    "regenerated": 2.5185185185185186,
+    "pdf_value": 2.518519269452196,
+    "absolute_difference": 7.509336774624842e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cilium_policy_guard_tree_filter",
+    "regenerated": 1.984,
+    "pdf_value": 1.9840007256390693,
+    "absolute_difference": 7.256390692766956e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native siphash_rotate64_mixer",
+    "regenerated": 3.533333333333333,
+    "pdf_value": 3.5333345783023247,
+    "absolute_difference": 1.2449689914539874e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_record_bounds_window",
+    "regenerated": 2.3533333333333335,
+    "pdf_value": 2.3533339380325575,
+    "absolute_difference": 6.04699224027172e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native flow_record_field_scan",
+    "regenerated": 1.8073394495412844,
+    "pdf_value": 1.807339625762321,
+    "absolute_difference": 1.7622103665182465e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packed_header_bitfield_decode",
+    "regenerated": 1.673828125,
+    "pdf_value": 1.6738284397159335,
+    "absolute_difference": 3.147159335359362e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bpftrace_string_search_prefix_scan",
+    "regenerated": 1.7459016393442623,
+    "pdf_value": 1.7459014731540223,
+    "absolute_difference": 1.6619024001407467e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tracee_syscall_name_table_lookup",
+    "regenerated": 1.3665480427046264,
+    "pdf_value": 1.3665480389070594,
+    "absolute_difference": 3.797566927588036e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tracee_http_method_prefix_detect",
+    "regenerated": 1.4047619047619047,
+    "pdf_value": 1.4047625399501658,
+    "absolute_difference": 6.351882610999837e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cilium_socket_lb_service_select",
+    "regenerated": 3.3147058823529414,
+    "pdf_value": 3.314706996547879,
+    "absolute_difference": 1.1141949376458626e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 2.329608938547486,
+    "pdf_value": 2.3296098089328305,
+    "absolute_difference": 8.703853446867527e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tetragon_process_event_arg_filter",
+    "regenerated": 2.2971887550200805,
+    "pdf_value": 2.2971897492810305,
+    "absolute_difference": 9.942609500157573e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native otel_stack_frame_unwind_scan",
+    "regenerated": 3.822429906542056,
+    "pdf_value": 3.8224313177285363,
+    "absolute_difference": 1.4111864801158447e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.50253807106599,
+    "pdf_value": 2.502539203184275,
+    "absolute_difference": 1.132118284896677e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native packet_toeplitz_rss_hash",
+    "regenerated": 1.2952127659574468,
+    "pdf_value": 1.295213449933572,
+    "absolute_difference": 6.839761250709842e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.2350194552529183,
+    "pdf_value": 1.2350195549058003,
+    "absolute_difference": 9.965288194635491e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native tc_packet_checksum_fold",
+    "regenerated": 1.205507440839229,
+    "pdf_value": 1.2055073871124367,
+    "absolute_difference": 5.372679234838529e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm native cgroup_skb_hash_chain",
+    "regenerated": 2.619565217391304,
+    "pdf_value": 2.619566110521233,
+    "absolute_difference": 8.931299286807359e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bitmap_popcount_scan",
+    "regenerated": 1.36313533374158,
+    "pdf_value": 1.3631354010489753,
+    "absolute_difference": 6.730739543492348e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf sorted_rule_binary_search",
+    "regenerated": 2.9322289156626504,
+    "pdf_value": 2.932229579396119,
+    "absolute_difference": 6.637334686310226e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.819484240687679,
+    "pdf_value": 1.819484476125941,
+    "absolute_difference": 2.3543826199734497e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf trace_event_type_switch_dispatch",
+    "regenerated": 1.376953125,
+    "pdf_value": 1.3769534897370093,
+    "absolute_difference": 3.647370092618729e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_checksum_fold",
+    "regenerated": 1.5114670132252885,
+    "pdf_value": 1.5114677650850226,
+    "absolute_difference": 7.518597340272493e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf payload_prefix_memcmp_scan",
+    "regenerated": 1.5372340425531914,
+    "pdf_value": 1.5372343547414644,
+    "absolute_difference": 3.1218827301060514e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_vlan_tcpopt_parser",
+    "regenerated": 1.9545454545454546,
+    "pdf_value": 1.9545461821247352,
+    "absolute_difference": 7.275792806016312e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bpf_local_call_fanout_dispatch",
+    "regenerated": 2.958677685950413,
+    "pdf_value": 2.95867858991255,
+    "absolute_difference": 9.039621367001871e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf flow_5tuple_rss_hash",
+    "regenerated": 1.8571428571428572,
+    "pdf_value": 1.8571430095880397,
+    "absolute_difference": 1.5244518247747862e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf katran_lb_consistent_hash_select",
+    "regenerated": 1.8888888888888888,
+    "pdf_value": 1.8888897188682165,
+    "absolute_difference": 8.299793277100065e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cilium_policy_guard_tree_filter",
+    "regenerated": 1.6423841059602649,
+    "pdf_value": 1.6423847914588012,
+    "absolute_difference": 6.854985363791144e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf siphash_rotate64_mixer",
+    "regenerated": 3.3125,
+    "pdf_value": 3.3125012672005805,
+    "absolute_difference": 1.2672005804681419e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_record_bounds_window",
+    "regenerated": 2.152439024390244,
+    "pdf_value": 2.152439694591321,
+    "absolute_difference": 6.702010773018685e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf flow_record_field_scan",
+    "regenerated": 1.6554621848739495,
+    "pdf_value": 1.6554623014496774,
+    "absolute_difference": 1.1657572795975568e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packed_header_bitfield_decode",
+    "regenerated": 1.7633744855967077,
+    "pdf_value": 1.7633744350953202,
+    "absolute_difference": 5.050138751627742e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bpftrace_string_search_prefix_scan",
+    "regenerated": 2.0157728706624605,
+    "pdf_value": 2.015773579268065,
+    "absolute_difference": 7.086056044158795e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tracee_syscall_name_table_lookup",
+    "regenerated": 1.465648854961832,
+    "pdf_value": 1.4656489934425705,
+    "absolute_difference": 1.384807384319231e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tracee_http_method_prefix_detect",
+    "regenerated": 1.3111111111111111,
+    "pdf_value": 1.3111113482480619,
+    "absolute_difference": 2.371369507425669e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cilium_socket_lb_service_select",
+    "regenerated": 2.6897374701670644,
+    "pdf_value": 2.689738076309485,
+    "absolute_difference": 6.061424207004507e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 2.7434210526315788,
+    "pdf_value": 2.7434220284813335,
+    "absolute_difference": 9.75849754780711e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tetragon_process_event_arg_filter",
+    "regenerated": 2.183206106870229,
+    "pdf_value": 2.1832067911279953,
+    "absolute_difference": 6.842577664478711e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf otel_stack_frame_unwind_scan",
+    "regenerated": 2.1871657754010694,
+    "pdf_value": 2.1871663260787213,
+    "absolute_difference": 5.506776519226264e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cilium_ct_nat_tuple_rewrite",
+    "regenerated": 2.4166666666666665,
+    "pdf_value": 2.4166672891511625,
+    "absolute_difference": 6.224844959490383e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf packet_toeplitz_rss_hash",
+    "regenerated": 1.830827067669173,
+    "pdf_value": 1.8308279221645387,
+    "absolute_difference": 8.544953657985133e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.1896551724137931,
+    "pdf_value": 1.1896553747979148,
+    "absolute_difference": 2.0238412168360753e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf tc_packet_checksum_fold",
+    "regenerated": 1.5120486536107711,
+    "pdf_value": 1.5120493434567097,
+    "absolute_difference": 6.898459385951128e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-3-4config-percase.pdf",
+    "point": "arm llvmbpf cgroup_skb_hash_chain",
+    "regenerated": 2.5913978494623655,
+    "pdf_value": 2.591399042796698,
+    "absolute_difference": 1.1933343326830936e-06,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bitmap_popcount_scan",
+    "regenerated": 2.2668024439918533,
+    "pdf_value": 2.2668023585606916,
+    "absolute_difference": 8.54311617004555e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "siphash_rotate64_mixer",
+    "regenerated": 1.7419354838709677,
+    "pdf_value": 1.741935302180028,
+    "absolute_difference": 1.8169093984887752e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_record_bounds_window",
+    "regenerated": 1.6388888888888888,
+    "pdf_value": 1.6388887118464746,
+    "absolute_difference": 1.770424142844007e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bpftrace_string_search_prefix_scan",
+    "regenerated": 1.6375838926174497,
+    "pdf_value": 1.6375837692652822,
+    "absolute_difference": 1.2335216759140621e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tracee_syscall_name_table_lookup",
+    "regenerated": 1.5272727272727273,
+    "pdf_value": 1.5272726922385413,
+    "absolute_difference": 3.503418599670738e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bpf_local_call_fanout_dispatch",
+    "regenerated": 1.4880952380952381,
+    "pdf_value": 1.4880950669346316,
+    "absolute_difference": 1.7116060657684784e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "katran_lb_consistent_hash_select",
+    "regenerated": 1.4666666666666666,
+    "pdf_value": 1.4666665283265474,
+    "absolute_difference": 1.383401191379363e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "flow_5tuple_rss_hash",
+    "regenerated": 1.4545454545454546,
+    "pdf_value": 1.4545454141213938,
+    "absolute_difference": 4.042406076543159e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tetragon_process_event_arg_filter",
+    "regenerated": 1.4532374100719425,
+    "pdf_value": 1.45323735888752,
+    "absolute_difference": 5.1184422478200986e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_vlan_tcpopt_parser",
+    "regenerated": 1.3636363636363635,
+    "pdf_value": 1.3636362423641812,
+    "absolute_difference": 1.2127218229629477e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_checksum_fold",
+    "regenerated": 1.332905369685069,
+    "pdf_value": 1.3329053188860793,
+    "absolute_difference": 5.0798989681410944e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tc_packet_checksum_fold",
+    "regenerated": 1.331923890063425,
+    "pdf_value": 1.3319237957406165,
+    "absolute_difference": 9.432280845267371e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "flow_record_field_scan",
+    "regenerated": 1.2115384615384615,
+    "pdf_value": 1.211538395978927,
+    "absolute_difference": 6.555953446785168e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.205179282868526,
+    "pdf_value": 1.205179246551292,
+    "absolute_difference": 3.6317233886862255e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packet_toeplitz_rss_hash",
+    "regenerated": 1.1928251121076232,
+    "pdf_value": 1.192825128059719,
+    "absolute_difference": 1.5952095866467175e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cilium_socket_lb_service_select",
+    "regenerated": 1.1450617283950617,
+    "pdf_value": 1.1450616208886861,
+    "absolute_difference": 1.075063755795469e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.1170212765957446,
+    "pdf_value": 1.117021215099567,
+    "absolute_difference": 6.149617748363312e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "otel_stack_frame_unwind_scan",
+    "regenerated": 1.0761904761904761,
+    "pdf_value": 1.0761904747788422,
+    "absolute_difference": 1.4116339208669615e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.072992700729927,
+    "pdf_value": 1.0729925947028285,
+    "absolute_difference": 1.0602709843432478e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "tracee_http_method_prefix_detect",
+    "regenerated": 1.0588235294117647,
+    "pdf_value": 1.0588235032550195,
+    "absolute_difference": 2.6156745214223065e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cilium_policy_guard_tree_filter",
+    "regenerated": 1.056338028169014,
+    "pdf_value": 1.0563379759783253,
+    "absolute_difference": 5.219068865969234e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "trace_event_type_switch_dispatch",
+    "regenerated": 1.0179856115107915,
+    "pdf_value": 1.0179856482995948,
+    "absolute_difference": 3.678880333701784e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "bpftrace_comm_key_fnv_hash",
+    "regenerated": 1.0046189376443417,
+    "pdf_value": 1.0046188801357472,
+    "absolute_difference": 5.750859455311286e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "sorted_rule_binary_search",
+    "regenerated": 1.0019011406844107,
+    "pdf_value": 1.001901089680415,
+    "absolute_difference": 5.1003995693577053e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "cgroup_skb_hash_chain",
+    "regenerated": 0.9761092150170648,
+    "pdf_value": 0.9761092048995524,
+    "absolute_difference": 1.011751238344516e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "packed_header_bitfield_decode",
+    "regenerated": 0.8345864661654135,
+    "pdf_value": 0.8345865218878031,
+    "absolute_difference": 5.572238959139497e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+    "point": "payload_prefix_memcmp_scan",
+    "regenerated": 0.7964601769911505,
+    "pdf_value": 0.7964602320823483,
+    "absolute_difference": 5.5091197825873905e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bitmap_popcount_scan",
+    "regenerated": 0.9664607237422771,
+    "pdf_value": 0.9664607226956995,
+    "absolute_difference": 1.0465776023593776e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "siphash_rotate64_mixer",
+    "regenerated": 1.9019607843137254,
+    "pdf_value": 1.9019606302795593,
+    "absolute_difference": 1.5403416608883447e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_record_bounds_window",
+    "regenerated": 1.2724014336917562,
+    "pdf_value": 1.2724014278478957,
+    "absolute_difference": 5.843860506615783e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bpftrace_string_search_prefix_scan",
+    "regenerated": 1.558252427184466,
+    "pdf_value": 1.5582523314880243,
+    "absolute_difference": 9.56964416598538e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tracee_syscall_name_table_lookup",
+    "regenerated": 1.1746031746031746,
+    "pdf_value": 1.1746030663779112,
+    "absolute_difference": 1.082252634176939e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bpf_local_call_fanout_dispatch",
+    "regenerated": 1.1821192052980132,
+    "pdf_value": 1.1821190850520487,
+    "absolute_difference": 1.2024596451887248e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "katran_lb_consistent_hash_select",
+    "regenerated": 1.1333333333333333,
+    "pdf_value": 1.133333293807585,
+    "absolute_difference": 3.952574822996269e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "flow_5tuple_rss_hash",
+    "regenerated": 1.1063829787234043,
+    "pdf_value": 1.1063829093431012,
+    "absolute_difference": 6.938030305825293e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tetragon_process_event_arg_filter",
+    "regenerated": 1.3419203747072599,
+    "pdf_value": 1.3419203021585357,
+    "absolute_difference": 7.254872413930968e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_vlan_tcpopt_parser",
+    "regenerated": 1.048780487804878,
+    "pdf_value": 1.0487804552684388,
+    "absolute_difference": 3.2536439320551835e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_checksum_fold",
+    "regenerated": 1.1981891957364341,
+    "pdf_value": 1.1981891179587165,
+    "absolute_difference": 7.777771759975849e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tc_packet_checksum_fold",
+    "regenerated": 1.1978430306325902,
+    "pdf_value": 1.1978430206248813,
+    "absolute_difference": 1.0007708883819078e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "flow_record_field_scan",
+    "regenerated": 1.0960451977401129,
+    "pdf_value": 1.096045196902703,
+    "absolute_difference": 8.374099191854611e-10,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bcc_runqlat_log2_histogram_bucket",
+    "regenerated": 1.1602080624187256,
+    "pdf_value": 1.1602079370568268,
+    "absolute_difference": 1.253618988616978e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packet_toeplitz_rss_hash",
+    "regenerated": 1.162621359223301,
+    "pdf_value": 1.162621280435629,
+    "absolute_difference": 7.878767194213765e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cilium_socket_lb_service_select",
+    "regenerated": 1.6906906906906907,
+    "pdf_value": 1.6906905153174379,
+    "absolute_difference": 1.753732528086971e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bcc_tcpconnect_ipv4_tuple_filter",
+    "regenerated": 1.6238095238095238,
+    "pdf_value": 1.623809391821757,
+    "absolute_difference": 1.319877667160796e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "otel_stack_frame_unwind_scan",
+    "regenerated": 1.2088235294117646,
+    "pdf_value": 1.2088234217331635,
+    "absolute_difference": 1.0767860114668792e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cilium_ct_nat_tuple_rewrite",
+    "regenerated": 1.4820359281437125,
+    "pdf_value": 1.4820357697152826,
+    "absolute_difference": 1.5842842993052386e-07,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "tracee_http_method_prefix_detect",
+    "regenerated": 1.0350877192982457,
+    "pdf_value": 1.0350877479024057,
+    "absolute_difference": 2.8604159929557227e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cilium_policy_guard_tree_filter",
+    "regenerated": 1.2266009852216748,
+    "pdf_value": 1.2266009669677886,
+    "absolute_difference": 1.8253886180374934e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "trace_event_type_switch_dispatch",
+    "regenerated": 1.0170278637770898,
+    "pdf_value": 1.0170278406031312,
+    "absolute_difference": 2.3173958529909555e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "bpftrace_comm_key_fnv_hash",
+    "regenerated": 0.8615803814713896,
+    "pdf_value": 0.8615803352682669,
+    "absolute_difference": 4.620312266112592e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "sorted_rule_binary_search",
+    "regenerated": 1.0025813113061435,
+    "pdf_value": 1.0025812784020294,
+    "absolute_difference": 3.2904114100063e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "cgroup_skb_hash_chain",
+    "regenerated": 1.6164154103852597,
+    "pdf_value": 1.6164153594884103,
+    "absolute_difference": 5.089684940173811e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "packed_header_bitfield_decode",
+    "regenerated": 1.1335978835978835,
+    "pdf_value": 1.1335978692854847,
+    "absolute_difference": 1.431239882165869e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+    "point": "payload_prefix_memcmp_scan",
+    "regenerated": 1.1788617886178863,
+    "pdf_value": 1.17886176813198,
+    "absolute_difference": 2.0485906304656964e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Cilium Full",
+    "regenerated": 1.074,
+    "pdf_value": 1.073999996279678,
+    "absolute_difference": 3.7203220504267165e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Cilium No Bulk",
+    "regenerated": 1.114,
+    "pdf_value": 1.1139999942686931,
+    "absolute_difference": 5.731306984557705e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Katran Full",
+    "regenerated": 0.995,
+    "pdf_value": 0.9949999876827175,
+    "absolute_difference": 1.2317282527263274e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Katran Conservative",
+    "regenerated": 1.073,
+    "pdf_value": 1.072999983761297,
+    "absolute_difference": 1.623870304889863e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Cilium Full",
+    "regenerated": 1.009,
+    "pdf_value": 1.0089999869788728,
+    "absolute_difference": 1.3021127065471205e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Cilium No Bulk",
+    "regenerated": 1.062,
+    "pdf_value": 1.0619999968829734,
+    "absolute_difference": 3.1170266368008015e-09,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Katran Full",
+    "regenerated": 1.006,
+    "pdf_value": 1.0059999871296965,
+    "absolute_difference": 1.2870303489620483e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Katran Conservative",
+    "regenerated": 0.941,
+    "pdf_value": 0.9409999903975471,
+    "absolute_difference": 9.602452832879749e-09,
+    "tolerance": 2e-06,
+    "match": true
+  }
+]

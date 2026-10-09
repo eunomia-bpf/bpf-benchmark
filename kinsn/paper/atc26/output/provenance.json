@@ -1,0 +1,3843 @@
+[
+  {
+    "original_path": "corpus/results/aws_arm64_corpus_20260605_080836_924256",
+    "bundle_path": "data/corpus/aws_arm64_corpus_20260605_080836_924256",
+    "introduced_commit": "72e02c43b590f6fa814ca9f9fb37c90a115ffeb3",
+    "introduced_commit_date": "2026-04-30T16:07:02-07:00",
+    "files": 9,
+    "bytes": 374294,
+    "collection_date": "2026-06-05T08:08:36.924256+00:00",
+    "platform": "aws_arm64_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "error",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": true,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.",
+      "Recorded bpf_stats=true differs from RQ2 stats-disabled wording. Suite status=error includes other apps; retain Katran measurements."
+    ],
+    "claims": [
+      {
+        "claim": "Katran conservative throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 87,
+        "kind": "empirical",
+        "value": "1.073",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran conservative applied sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 87,
+        "kind": "declared count",
+        "value": "21",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran conservative throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "empirical",
+        "value": "1.073",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran conservative BPF cost",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "empirical",
+        "value": "0.941",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran repeated conservative site count",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "declared count",
+        "value": "21",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran Conservative throughput bar",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "empirical",
+        "value": "1.074/1.114/1.073/0.995",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 AWS instance/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 38,
+        "kind": "empirical",
+        "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-rq3-cilium-katran.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-6-rq3-cilium-katran.pdf",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran conservative throughput under stated median convention",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "empirical",
+        "value": "1.073",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/aws_arm64_corpus_20260605_094729_221231",
+    "bundle_path": "data/corpus/aws_arm64_corpus_20260605_094729_221231",
+    "introduced_commit": "72e02c43b590f6fa814ca9f9fb37c90a115ffeb3",
+    "introduced_commit_date": "2026-04-30T16:07:02-07:00",
+    "files": 9,
+    "bytes": 338242,
+    "collection_date": "2026-06-05T09:47:29.221231+00:00",
+    "platform": "aws_arm64_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "error",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": true,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.",
+      "Recorded bpf_stats=true differs from RQ2 stats-disabled wording. Suite status=error includes other apps; retain Katran measurements."
+    ],
+    "claims": [
+      {
+        "claim": "Katran coverage-max throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "empirical",
+        "value": "0.995",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran coverage-max BPF cost",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "empirical",
+        "value": "1.006",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran coverage-max sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "declared count",
+        "value": "62",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran Full throughput bar",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "empirical",
+        "value": "1.074/1.114/1.073/0.995",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 AWS instance/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 38,
+        "kind": "empirical",
+        "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-rq3-cilium-katran.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-6-rq3-cilium-katran.pdf",
+        "scope": "body"
+      },
+      {
+        "claim": "Katran coverage-max throughput under stated median convention",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 105,
+        "kind": "empirical",
+        "value": "0.995",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/x86_kvm_corpus_20260529_033517_489159",
+    "bundle_path": "data/corpus/x86_kvm_corpus_20260529_033517_489159",
+    "introduced_commit": "72e02c43b590f6fa814ca9f9fb37c90a115ffeb3",
+    "introduced_commit_date": "2026-04-30T16:07:02-07:00",
+    "files": 4,
+    "bytes": 54243,
+    "collection_date": "2026-05-29T03:35:17.489159+00:00",
+    "platform": "x86_kvm_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": true,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs."
+    ],
+    "claims": [
+      {
+        "claim": "Cilium baseline BPF ns/run",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 117,
+        "kind": "empirical",
+        "value": "488.7",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium native BPF ns/run",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 117,
+        "kind": "empirical",
+        "value": "262.3",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium BPF-counter speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 117,
+        "kind": "empirical",
+        "value": "1.86",
+        "scope": "body"
+      },
+      {
+        "claim": "native replacements",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "113",
+        "scope": "body"
+      },
+      {
+        "claim": "manifest no-match pass-throughs",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "22",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium manifest objects",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "89",
+        "scope": "body"
+      },
+      {
+        "claim": "native files",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "8",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/x86_kvm_corpus_20260529_040554_604387",
+    "bundle_path": "data/corpus/x86_kvm_corpus_20260529_040554_604387",
+    "introduced_commit": "72e02c43b590f6fa814ca9f9fb37c90a115ffeb3",
+    "introduced_commit_date": "2026-04-30T16:07:02-07:00",
+    "files": 4,
+    "bytes": 56750,
+    "collection_date": "2026-05-29T04:05:54.604387+00:00",
+    "platform": "x86_kvm_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": false,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs."
+    ],
+    "claims": [
+      {
+        "claim": "Cilium native throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 117,
+        "kind": "empirical",
+        "value": "2.358",
+        "scope": "body"
+      },
+      {
+        "claim": "native upper-bound repetition",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 113,
+        "kind": "empirical",
+        "value": "2.358",
+        "scope": "body"
+      },
+      {
+        "claim": "native replacements",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "113",
+        "scope": "body"
+      },
+      {
+        "claim": "manifest no-match pass-throughs",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "22",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium manifest objects",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "89",
+        "scope": "body"
+      },
+      {
+        "claim": "native files",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 119,
+        "kind": "declared count",
+        "value": "8",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium fraction of native gap recovered (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 121,
+        "kind": "empirical",
+        "value": "5.4",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium native headline speedup",
+        "file": "paper/sections/0-abstract.tex",
+        "line": 48,
+        "kind": "empirical",
+        "value": "2.358",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium native headline speedup",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 149,
+        "kind": "empirical",
+        "value": "2.358",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/x86_kvm_corpus_20260604_070210_639497",
+    "bundle_path": "data/corpus/x86_kvm_corpus_20260604_070210_639497",
+    "introduced_commit": "e9956b814b38636b2b4d7a57c2dbc1c5e6908850",
+    "introduced_commit_date": "2026-06-04T01:10:32-07:00",
+    "files": 4,
+    "bytes": 55986,
+    "collection_date": "2026-06-04T07:02:10.639497+00:00",
+    "platform": "x86_kvm_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": true,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs."
+    ],
+    "claims": [
+      {
+        "claim": "Cilium full applied sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "4086",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium load-time skips",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "0",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium report errors",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "0",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium LEA sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "2346",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium conditional select sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "385",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium endian fusion sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "766",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium extract sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "2",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium bulk memory sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "declared count",
+        "value": "587",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium full paired BPF cost",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 103,
+        "kind": "empirical",
+        "value": "1.009",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium repeated full site count",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 103,
+        "kind": "declared count",
+        "value": "4086",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-rq3-cilium-katran.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-6-rq3-cilium-katran.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/x86_kvm_corpus_20260604_100557_313063",
+    "bundle_path": "data/corpus/x86_kvm_corpus_20260604_100557_313063",
+    "introduced_commit": "e9956b814b38636b2b4d7a57c2dbc1c5e6908850",
+    "introduced_commit_date": "2026-06-04T01:10:32-07:00",
+    "files": 4,
+    "bytes": 57910,
+    "collection_date": "2026-06-04T10:05:57.313063+00:00",
+    "platform": "x86_kvm_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": false,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs."
+    ],
+    "claims": [
+      {
+        "claim": "Cilium full throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 84,
+        "kind": "empirical",
+        "value": "1.074",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium full policy throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 103,
+        "kind": "empirical",
+        "value": "1.074",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium fraction of native gap recovered (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 121,
+        "kind": "empirical",
+        "value": "5.4",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium Full throughput bar",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "empirical",
+        "value": "1.074/1.114/1.073/0.995",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-rq3-cilium-katran.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-6-rq3-cilium-katran.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/x86_kvm_corpus_20260604_232313_992341",
+    "bundle_path": "data/corpus/x86_kvm_corpus_20260604_232313_992341",
+    "introduced_commit": "e9956b814b38636b2b4d7a57c2dbc1c5e6908850",
+    "introduced_commit_date": "2026-06-04T01:10:32-07:00",
+    "files": 6,
+    "bytes": 199210,
+    "collection_date": "2026-06-04T23:23:13.992341+00:00",
+    "platform": "x86_kvm_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": true,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs."
+    ],
+    "claims": [
+      {
+        "claim": "Cilium no-bulk paired BPF cost",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 103,
+        "kind": "empirical",
+        "value": "1.062",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium no-bulk site count",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 103,
+        "kind": "declared count",
+        "value": "3512",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-rq3-cilium-katran.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-6-rq3-cilium-katran.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/x86_kvm_corpus_20260605_004607_636479",
+    "bundle_path": "data/corpus/x86_kvm_corpus_20260605_004607_636479",
+    "introduced_commit": "e9956b814b38636b2b4d7a57c2dbc1c5e6908850",
+    "introduced_commit_date": "2026-06-04T01:10:32-07:00",
+    "files": 6,
+    "bytes": 208332,
+    "collection_date": "2026-06-05T00:46:07.636479+00:00",
+    "platform": "x86_kvm_corpus",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": false,
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs."
+    ],
+    "claims": [
+      {
+        "claim": "Cilium no-bulk throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 103,
+        "kind": "empirical",
+        "value": "1.114",
+        "scope": "body"
+      },
+      {
+        "claim": "production throughput increase up to (%)",
+        "file": "paper/sections/0-abstract.tex",
+        "line": 46,
+        "kind": "empirical",
+        "value": "12",
+        "scope": "body"
+      },
+      {
+        "claim": "production throughput increase up to (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 147,
+        "kind": "empirical",
+        "value": "12",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium No Bulk throughput bar",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "empirical",
+        "value": "1.074/1.114/1.073/0.995",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-rq3-cilium-katran.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-6-rq3-cilium-katran.pdf",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium tuned throughput under stated median convention",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 103,
+        "kind": "empirical",
+        "value": "1.114",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/aws_arm64_micro_20260520_052452_727433",
+    "bundle_path": "data/micro/aws_arm64_micro_20260520_052452_727433",
+    "introduced_commit": "1b788815cb908bee11b2b1d5e688da215f9dd79b",
+    "introduced_commit_date": "2026-05-14T17:21:33-07:00",
+    "files": 3,
+    "bytes": 240259,
+    "collection_date": "2026-05-20T05:24:52.727433+00:00",
+    "platform": "aws_arm64_micro",
+    "recorded_cpu": "aarch64",
+    "recorded_environment": "bare-metal",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 1,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded aarch64 does not identify Graviton generation or instance type; body declares t4g.small/Graviton2."
+    ],
+    "claims": [
+      {
+        "claim": "ARM64 eBPF/native gap",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 113,
+        "kind": "empirical",
+        "value": "1.98",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 userspace native speedup",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 192,
+        "kind": "empirical",
+        "value": "1.98",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 LLVM-BPF speedup",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 214,
+        "kind": "empirical",
+        "value": "1.92",
+        "scope": "body"
+      },
+      {
+        "claim": "arm optimizing backend recovered gap (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 216,
+        "kind": "empirical",
+        "value": "94",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bytecode residual gap (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 220,
+        "kind": "empirical",
+        "value": "6",
+        "scope": "body"
+      },
+      {
+        "claim": "arm in-kernel native execution overhead (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 200,
+        "kind": "empirical",
+        "value": "5",
+        "scope": "body"
+      },
+      {
+        "claim": "27 pure-bytecode computation benchmarks",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 143,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "in-kernel native overhead range",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 194,
+        "kind": "empirical",
+        "value": "2--5%",
+        "scope": "body"
+      },
+      {
+        "claim": "optimizing backend recovered gap range",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 224,
+        "kind": "empirical",
+        "value": "93--94%",
+        "scope": "body"
+      },
+      {
+        "claim": "arm native speedup",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 15,
+        "kind": "empirical",
+        "value": "1.98",
+        "scope": "body"
+      },
+      {
+        "claim": "arm native faster cases (>2%)",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 15,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "arm llvmbpf speedup",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 16,
+        "kind": "empirical",
+        "value": "1.92",
+        "scope": "body"
+      },
+      {
+        "claim": "arm llvmbpf faster cases (>2%)",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 16,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_runqlat_log2_histogram_bucket native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_tcpconnect_ipv4_tuple_filter native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bitmap_popcount_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpf_local_call_fanout_dispatch native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_comm_key_fnv_hash native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_string_search_prefix_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cgroup_skb_hash_chain native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_ct_nat_tuple_rewrite native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_policy_guard_tree_filter native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_socket_lb_service_select native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_5tuple_rss_hash native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_record_field_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm katran_lb_consistent_hash_select native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm otel_stack_frame_unwind_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packed_header_bitfield_decode native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_checksum_fold native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_record_bounds_window native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_toeplitz_rss_hash native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_vlan_tcpopt_parser native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm payload_prefix_memcmp_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm siphash_rotate64_mixer native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm sorted_rule_binary_search native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tc_packet_checksum_fold native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tetragon_process_event_arg_filter native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm trace_event_type_switch_dispatch native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_http_method_prefix_detect native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_syscall_name_table_lookup native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_runqlat_log2_histogram_bucket llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_tcpconnect_ipv4_tuple_filter llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bitmap_popcount_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpf_local_call_fanout_dispatch llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_comm_key_fnv_hash llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_string_search_prefix_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cgroup_skb_hash_chain llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_ct_nat_tuple_rewrite llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_policy_guard_tree_filter llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_socket_lb_service_select llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_5tuple_rss_hash llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_record_field_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm katran_lb_consistent_hash_select llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm otel_stack_frame_unwind_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packed_header_bitfield_decode llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_checksum_fold llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_record_bounds_window llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_toeplitz_rss_hash llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_vlan_tcpopt_parser llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm payload_prefix_memcmp_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm siphash_rotate64_mixer llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm sorted_rule_binary_search llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tc_packet_checksum_fold llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tetragon_process_event_arg_filter llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm trace_event_type_switch_dispatch llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_http_method_prefix_detect llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_syscall_name_table_lookup llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\caption{Per-case speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, on x86-64 (top) and ARM64 (bottom). Each bar is one non-baseline path. The ARM64 paths come from separate runs, each over its own baseline.}",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 4,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: The examples include a consistent-hash load-balancer lookup from \\texttt{katran} and a SipHash-like 64-bit-rotation mixer.",
+        "file": "audit-paper/sections/3-characterization.tex",
+        "line": "145",
+        "kind": "definition/setup",
+        "value": "64",
+        "scope": "removed from current body; audit snapshot only"
+      },
+      {
+        "claim": "numerical claim: Figure~\\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation.",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 238,
+        "kind": "definition/setup",
+        "value": "64",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 AWS instance/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 38,
+        "kind": "empirical",
+        "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\\%.}",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 4,
+        "kind": "empirical",
+        "value": "27; 2",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-3-4config-percase.pdf",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-3-4config-percase.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/aws_arm64_micro_20260523_091516_610343",
+    "bundle_path": "data/micro/aws_arm64_micro_20260523_091516_610343",
+    "introduced_commit": "5cfa2a789bcba751b77bd6810284d9fa0cbb2bc6",
+    "introduced_commit_date": "2026-05-19T20:37:00-07:00",
+    "files": 3,
+    "bytes": 490771,
+    "collection_date": "2026-05-23T09:15:16.610343+00:00",
+    "platform": "aws_arm64_micro",
+    "recorded_cpu": "aarch64",
+    "recorded_environment": "bare-metal",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded aarch64 does not identify Graviton generation or instance type; body declares t4g.small/Graviton2."
+    ],
+    "claims": [
+      {
+        "claim": "ARM64 kernel native speedup",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 192,
+        "kind": "empirical",
+        "value": "1.88",
+        "scope": "body"
+      },
+      {
+        "claim": "arm optimizing backend recovered gap (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 216,
+        "kind": "empirical",
+        "value": "94",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bytecode residual gap (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 220,
+        "kind": "empirical",
+        "value": "6",
+        "scope": "body"
+      },
+      {
+        "claim": "arm in-kernel native execution overhead (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 200,
+        "kind": "empirical",
+        "value": "5",
+        "scope": "body"
+      },
+      {
+        "claim": "arm kernel native code size ratio",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 255,
+        "kind": "empirical",
+        "value": "0.49",
+        "scope": "body"
+      },
+      {
+        "claim": "27 pure-bytecode computation benchmarks",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 143,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "in-kernel native overhead range",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 194,
+        "kind": "empirical",
+        "value": "2--5%",
+        "scope": "body"
+      },
+      {
+        "claim": "arm native_kernel speedup",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 14,
+        "kind": "empirical",
+        "value": "1.88",
+        "scope": "body"
+      },
+      {
+        "claim": "arm native_kernel faster cases (>2%)",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 14,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_runqlat_log2_histogram_bucket native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_tcpconnect_ipv4_tuple_filter native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bitmap_popcount_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpf_local_call_fanout_dispatch native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_comm_key_fnv_hash native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_string_search_prefix_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cgroup_skb_hash_chain native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_ct_nat_tuple_rewrite native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_policy_guard_tree_filter native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_socket_lb_service_select native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_5tuple_rss_hash native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_record_field_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm katran_lb_consistent_hash_select native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm otel_stack_frame_unwind_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packed_header_bitfield_decode native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_checksum_fold native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_record_bounds_window native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_toeplitz_rss_hash native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_vlan_tcpopt_parser native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm payload_prefix_memcmp_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm siphash_rotate64_mixer native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm sorted_rule_binary_search native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tc_packet_checksum_fold native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tetragon_process_event_arg_filter native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm trace_event_type_switch_dispatch native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_http_method_prefix_detect native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_syscall_name_table_lookup native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\caption{Per-case speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, on x86-64 (top) and ARM64 (bottom). Each bar is one non-baseline path. The ARM64 paths come from separate runs, each over its own baseline.}",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 4,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: The examples include a consistent-hash load-balancer lookup from \\texttt{katran} and a SipHash-like 64-bit-rotation mixer.",
+        "file": "audit-paper/sections/3-characterization.tex",
+        "line": "145",
+        "kind": "definition/setup",
+        "value": "64",
+        "scope": "removed from current body; audit snapshot only"
+      },
+      {
+        "claim": "numerical claim: Figure~\\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation.",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 238,
+        "kind": "definition/setup",
+        "value": "64",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 AWS instance/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 38,
+        "kind": "empirical",
+        "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\\%.}",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 4,
+        "kind": "empirical",
+        "value": "27; 2",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-3-4config-percase.pdf",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-3-4config-percase.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/aws_arm64_micro_20260606_001225_821028",
+    "bundle_path": "data/micro/aws_arm64_micro_20260606_001225_821028",
+    "introduced_commit": "439f4ca0dced8f1984461d78e49879349251b7d3",
+    "introduced_commit_date": "2026-06-05T14:46:50-07:00",
+    "files": 3,
+    "bytes": 2412439,
+    "collection_date": "2026-06-06T00:12:25.821028+00:00",
+    "platform": "aws_arm64_micro",
+    "recorded_cpu": "aarch64",
+    "recorded_environment": "bare-metal",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded aarch64 does not identify Graviton generation or instance type; body declares t4g.small/Graviton2."
+    ],
+    "claims": [
+      {
+        "claim": "ARM64 native code size ratio",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 63,
+        "kind": "empirical",
+        "value": "0.879",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 native code reduction (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 63,
+        "kind": "empirical",
+        "value": "12.1",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 execution speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 65,
+        "kind": "empirical",
+        "value": "1.222",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 time reduction (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 66,
+        "kind": "empirical",
+        "value": "18.17",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 median matched/applied sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 65,
+        "kind": "empirical",
+        "value": "308/308",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 summed sample matched/applied sites",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 65,
+        "kind": "empirical",
+        "value": "924/924",
+        "scope": "body"
+      },
+      {
+        "claim": "zero correctness mismatches on both architectures",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 66,
+        "kind": "empirical",
+        "value": "0",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 SipHash speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 69,
+        "kind": "empirical",
+        "value": "1.902",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 Cilium socket LB speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 69,
+        "kind": "empirical",
+        "value": "1.691",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 BCC TCP tuple speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 69,
+        "kind": "empirical",
+        "value": "1.624",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 Cilium CT/NAT speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 69,
+        "kind": "empirical",
+        "value": "1.482",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 FNV regression speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 71,
+        "kind": "empirical",
+        "value": "0.862",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 bitmap regression speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 71,
+        "kind": "empirical",
+        "value": "0.966",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 headline speed increase (%)",
+        "file": "paper/sections/0-abstract.tex",
+        "line": 46,
+        "kind": "empirical",
+        "value": "22",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 headline speed increase (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "22",
+        "scope": "body"
+      },
+      {
+        "claim": "native code reduction range",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "12--23%",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_runqlat_log2_histogram_bucket plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bcc_tcpconnect_ipv4_tuple_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bitmap_popcount_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpf_local_call_fanout_dispatch plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_comm_key_fnv_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm bpftrace_string_search_prefix_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cgroup_skb_hash_chain plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_ct_nat_tuple_rewrite plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_policy_guard_tree_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm cilium_socket_lb_service_select plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_5tuple_rss_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm flow_record_field_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm katran_lb_consistent_hash_select plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm otel_stack_frame_unwind_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packed_header_bitfield_decode plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_checksum_fold plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_record_bounds_window plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_toeplitz_rss_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm packet_vlan_tcpopt_parser plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm payload_prefix_memcmp_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm siphash_rotate64_mixer plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm sorted_rule_binary_search plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tc_packet_checksum_fold plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tetragon_process_event_arg_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm trace_event_type_switch_dispatch plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_http_method_prefix_detect plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "arm tracee_syscall_name_table_lookup plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 15,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 figure population",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 25,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\texttt{INNER\\_REPEAT=100000}; bars report speedup computed from median",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 22,
+        "kind": "empirical",
+        "value": "100000",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \\S\\ref{sec:characterization} to isolate instruction-selection effects.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 13,
+        "kind": "definition/setup",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "ARM64 AWS instance/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 38,
+        "kind": "empirical",
+        "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\\times$ indicate faster execution or higher throughput.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 49,
+        "kind": "definition/setup",
+        "value": "1",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\\times$ indicate lower BPF runtime cost.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 51,
+        "kind": "definition/setup",
+        "value": "1",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: For each retained row, we compute \\texttt{run\\_time\\_ns\\_delta}/\\texttt{run\\_cnt\\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 55,
+        "kind": "definition/setup",
+        "value": "100",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure artifact",
+        "value": "sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/x86_kvm_micro_20260429_035938_203074",
+    "bundle_path": "data/micro/x86_kvm_micro_20260429_035938_203074",
+    "introduced_commit": "55b4b05ecb528fc079187e0fe62240ef98953776",
+    "introduced_commit_date": "2026-05-14T11:26:48-07:00",
+    "files": 3,
+    "bytes": 1393123,
+    "collection_date": "2026-04-29T03:59:38.203074+00:00",
+    "platform": "x86_kvm_micro",
+    "recorded_cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "recorded_environment": "vm",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+    ],
+    "claims": [
+      {
+        "claim": "62-case kernel-side object_load_ns ratio",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "empirical",
+        "value": "0.99",
+        "scope": "body"
+      },
+      {
+        "claim": "historical load-time campaign protocol",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "empirical",
+        "value": "62 cases",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/x86_kvm_micro_20260514_031744_210343",
+    "bundle_path": "data/micro/x86_kvm_micro_20260514_031744_210343",
+    "introduced_commit": "55b4b05ecb528fc079187e0fe62240ef98953776",
+    "introduced_commit_date": "2026-05-14T11:26:48-07:00",
+    "files": 5,
+    "bytes": 853882,
+    "collection_date": "2026-05-14T03:17:44.210343+00:00",
+    "platform": "x86_kvm_micro",
+    "recorded_cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "recorded_environment": "vm",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 1,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+    ],
+    "claims": [
+      {
+        "claim": "62-case kernel-side object_load_ns ratio",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "empirical",
+        "value": "0.99",
+        "scope": "body"
+      },
+      {
+        "claim": "1.4--2.4x end-to-end compile time, remains sub-millisecond",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "missing raw",
+        "value": "1.4--2.4; <1 ms",
+        "scope": "body"
+      },
+      {
+        "claim": "historical load-time campaign protocol",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "empirical",
+        "value": "62 cases",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/x86_kvm_micro_20260514_181806_133778",
+    "bundle_path": "data/micro/x86_kvm_micro_20260514_181806_133778",
+    "introduced_commit": "55b4b05ecb528fc079187e0fe62240ef98953776",
+    "introduced_commit_date": "2026-05-14T11:26:48-07:00",
+    "files": 5,
+    "bytes": 6520582,
+    "collection_date": "2026-05-14T18:18:06.133778+00:00",
+    "platform": "x86_kvm_micro",
+    "recorded_cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "recorded_environment": "vm",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 1,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+    ],
+    "claims": [
+      {
+        "claim": "62-case kernel-side object_load_ns ratio",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "empirical",
+        "value": "0.99",
+        "scope": "body"
+      },
+      {
+        "claim": "1.4--2.4x end-to-end compile time, remains sub-millisecond",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "missing raw",
+        "value": "1.4--2.4; <1 ms",
+        "scope": "body"
+      },
+      {
+        "claim": "historical load-time campaign protocol",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "empirical",
+        "value": "62 cases",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/x86_kvm_micro_20260519_114214_364050",
+    "bundle_path": "data/micro/x86_kvm_micro_20260519_114214_364050",
+    "introduced_commit": "c739b9a5ad56e3ab2f550d5c928ceb0ef265959e",
+    "introduced_commit_date": "2026-05-19T04:55:28-07:00",
+    "files": 3,
+    "bytes": 256531,
+    "collection_date": "2026-05-19T11:42:14.364050+00:00",
+    "platform": "x86_kvm_micro",
+    "recorded_cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "recorded_environment": "vm",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+    ],
+    "claims": [
+      {
+        "claim": "x86 native code size ratio",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 63,
+        "kind": "empirical",
+        "value": "0.772",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 native code reduction (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 63,
+        "kind": "empirical",
+        "value": "22.8",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 execution speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 65,
+        "kind": "empirical",
+        "value": "1.242",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 time reduction (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 65,
+        "kind": "empirical",
+        "value": "19.47",
+        "scope": "body"
+      },
+      {
+        "claim": "zero correctness mismatches on both architectures",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 66,
+        "kind": "empirical",
+        "value": "0",
+        "scope": "body"
+      },
+      {
+        "claim": "1.4--2.4x end-to-end compile time, remains sub-millisecond",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "missing raw",
+        "value": "1.4--2.4; <1 ms",
+        "scope": "body"
+      },
+      {
+        "claim": "micro fraction of characterization gap recovered (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 66,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 headline speed increase (%)",
+        "file": "paper/sections/0-abstract.tex",
+        "line": 46,
+        "kind": "empirical",
+        "value": "24",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 headline speed increase (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "24",
+        "scope": "body"
+      },
+      {
+        "claim": "headline recovered micro gap (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "contribution recovered micro gap (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 159,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "native code reduction range",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "12--23%",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_runqlat_log2_histogram_bucket plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_tcpconnect_ipv4_tuple_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bitmap_popcount_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpf_local_call_fanout_dispatch plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_comm_key_fnv_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_string_search_prefix_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cgroup_skb_hash_chain plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_ct_nat_tuple_rewrite plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_policy_guard_tree_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_socket_lb_service_select plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_5tuple_rss_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_record_field_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 katran_lb_consistent_hash_select plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 otel_stack_frame_unwind_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packed_header_bitfield_decode plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_checksum_fold plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_record_bounds_window plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_toeplitz_rss_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_vlan_tcpopt_parser plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 payload_prefix_memcmp_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 siphash_rotate64_mixer plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 sorted_rule_binary_search plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tc_packet_checksum_fold plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tetragon_process_event_arg_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 trace_event_type_switch_dispatch plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_http_method_prefix_detect plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_syscall_name_table_lookup plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\texttt{INNER\\_REPEAT=100000}; bars report speedup computed from median",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 22,
+        "kind": "empirical",
+        "value": "100000",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \\S\\ref{sec:characterization} to isolate instruction-selection effects.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 13,
+        "kind": "definition/setup",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 hardware and VM/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 36,
+        "kind": "empirical",
+        "value": "The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\\,GHz host, using Linux 7.0.0-rc2+.",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\\times$ indicate faster execution or higher throughput.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 49,
+        "kind": "definition/setup",
+        "value": "1",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\\times$ indicate lower BPF runtime cost.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 51,
+        "kind": "definition/setup",
+        "value": "1",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: For each retained row, we compute \\texttt{run\\_time\\_ns\\_delta}/\\texttt{run\\_cnt\\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 55,
+        "kind": "definition/setup",
+        "value": "100",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure artifact",
+        "value": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/x86_kvm_micro_20260526_210351_224315",
+    "bundle_path": "data/micro/x86_kvm_micro_20260526_210351_224315",
+    "introduced_commit": "5cfa2a789bcba751b77bd6810284d9fa0cbb2bc6",
+    "introduced_commit_date": "2026-05-19T20:37:00-07:00",
+    "files": 3,
+    "bytes": 855951,
+    "collection_date": "2026-05-26T21:03:51.224315+00:00",
+    "platform": "x86_kvm_micro",
+    "recorded_cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "recorded_environment": "vm",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+    ],
+    "claims": [
+      {
+        "claim": "x86 native code size ratio",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 63,
+        "kind": "empirical",
+        "value": "0.772",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 native code reduction (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 63,
+        "kind": "empirical",
+        "value": "22.8",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 execution speedup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 65,
+        "kind": "empirical",
+        "value": "1.242",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 time reduction (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 65,
+        "kind": "empirical",
+        "value": "19.47",
+        "scope": "body"
+      },
+      {
+        "claim": "zero correctness mismatches on both architectures",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 66,
+        "kind": "empirical",
+        "value": "0",
+        "scope": "body"
+      },
+      {
+        "claim": "1.4--2.4x end-to-end compile time, remains sub-millisecond",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 74,
+        "kind": "missing raw",
+        "value": "1.4--2.4; <1 ms",
+        "scope": "body"
+      },
+      {
+        "claim": "micro fraction of characterization gap recovered (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 66,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 headline speed increase (%)",
+        "file": "paper/sections/0-abstract.tex",
+        "line": 46,
+        "kind": "empirical",
+        "value": "24",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 headline speed increase (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "24",
+        "scope": "body"
+      },
+      {
+        "claim": "headline recovered micro gap (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "contribution recovered micro gap (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 159,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "native code reduction range",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "12--23%",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_runqlat_log2_histogram_bucket plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_tcpconnect_ipv4_tuple_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bitmap_popcount_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpf_local_call_fanout_dispatch plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_comm_key_fnv_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_string_search_prefix_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cgroup_skb_hash_chain plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_ct_nat_tuple_rewrite plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_policy_guard_tree_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_socket_lb_service_select plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_5tuple_rss_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_record_field_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 katran_lb_consistent_hash_select plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 otel_stack_frame_unwind_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packed_header_bitfield_decode plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_checksum_fold plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_record_bounds_window plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_toeplitz_rss_hash plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_vlan_tcpopt_parser plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 payload_prefix_memcmp_scan plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 siphash_rotate64_mixer plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 sorted_rule_binary_search plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tc_packet_checksum_fold plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tetragon_process_event_arg_filter plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 trace_event_type_switch_dispatch plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_http_method_prefix_detect plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_syscall_name_table_lookup plotted kinsn speedup",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\texttt{INNER\\_REPEAT=100000}; bars report speedup computed from median",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 22,
+        "kind": "empirical",
+        "value": "100000",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \\S\\ref{sec:characterization} to isolate instruction-selection effects.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 13,
+        "kind": "definition/setup",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 hardware and VM/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 36,
+        "kind": "empirical",
+        "value": "The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\\,GHz host, using Linux 7.0.0-rc2+.",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\\times$ indicate faster execution or higher throughput.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 49,
+        "kind": "definition/setup",
+        "value": "1",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\\times$ indicate lower BPF runtime cost.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 51,
+        "kind": "definition/setup",
+        "value": "1",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: For each retained row, we compute \\texttt{run\\_time\\_ns\\_delta}/\\texttt{run\\_cnt\\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index.",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 55,
+        "kind": "definition/setup",
+        "value": "100",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+        "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
+        "line": 6,
+        "kind": "figure artifact",
+        "value": "sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "micro/results/x86_kvm_micro_20260526_210952_650695",
+    "bundle_path": "data/micro/x86_kvm_micro_20260526_210952_650695",
+    "introduced_commit": "5cfa2a789bcba751b77bd6810284d9fa0cbb2bc6",
+    "introduced_commit_date": "2026-05-19T20:37:00-07:00",
+    "files": 3,
+    "bytes": 855575,
+    "collection_date": "2026-05-26T21:09:52.650695+00:00",
+    "platform": "x86_kvm_micro",
+    "recorded_cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "recorded_environment": "vm",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "7.0.0-rc2+",
+    "recorded_status": "completed",
+    "recorded_samples": 3,
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+    ],
+    "claims": [
+      {
+        "claim": "x86 eBPF/native gap",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 113,
+        "kind": "empirical",
+        "value": "1.57",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 kernel native speedup",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 192,
+        "kind": "empirical",
+        "value": "1.55",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 userspace native speedup",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 192,
+        "kind": "empirical",
+        "value": "1.57",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 LLVM-BPF speedup",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 214,
+        "kind": "empirical",
+        "value": "1.53",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 optimizing backend recovered gap (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 216,
+        "kind": "empirical",
+        "value": "93",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bytecode residual gap (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 220,
+        "kind": "empirical",
+        "value": "7",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 in-kernel native execution overhead (%)",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 200,
+        "kind": "empirical",
+        "value": "2",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 kernel native code size ratio",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 255,
+        "kind": "empirical",
+        "value": "0.54",
+        "scope": "body"
+      },
+      {
+        "claim": "27 pure-bytecode computation benchmarks",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 143,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "in-kernel native overhead range",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 194,
+        "kind": "empirical",
+        "value": "2--5%",
+        "scope": "body"
+      },
+      {
+        "claim": "optimizing backend recovered gap range",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 224,
+        "kind": "empirical",
+        "value": "93--94%",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 native_kernel speedup",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 10,
+        "kind": "empirical",
+        "value": "1.55",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 native_kernel faster cases (>2%)",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 10,
+        "kind": "empirical",
+        "value": "24",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 native speedup",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 11,
+        "kind": "empirical",
+        "value": "1.57",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 native faster cases (>2%)",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 11,
+        "kind": "empirical",
+        "value": "25",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 llvmbpf speedup",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 12,
+        "kind": "empirical",
+        "value": "1.53",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 llvmbpf faster cases (>2%)",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 12,
+        "kind": "empirical",
+        "value": "25",
+        "scope": "body"
+      },
+      {
+        "claim": "micro fraction of characterization gap recovered (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 66,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "headline recovered micro gap (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 145,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "contribution recovered micro gap (%)",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 159,
+        "kind": "empirical",
+        "value": "42",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_runqlat_log2_histogram_bucket native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_tcpconnect_ipv4_tuple_filter native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bitmap_popcount_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpf_local_call_fanout_dispatch native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_comm_key_fnv_hash native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_string_search_prefix_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cgroup_skb_hash_chain native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_ct_nat_tuple_rewrite native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_policy_guard_tree_filter native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_socket_lb_service_select native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_5tuple_rss_hash native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_record_field_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 katran_lb_consistent_hash_select native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 otel_stack_frame_unwind_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packed_header_bitfield_decode native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_checksum_fold native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_record_bounds_window native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_toeplitz_rss_hash native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_vlan_tcpopt_parser native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 payload_prefix_memcmp_scan native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 siphash_rotate64_mixer native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 sorted_rule_binary_search native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tc_packet_checksum_fold native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tetragon_process_event_arg_filter native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 trace_event_type_switch_dispatch native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_http_method_prefix_detect native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_syscall_name_table_lookup native_kernel plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_runqlat_log2_histogram_bucket native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_tcpconnect_ipv4_tuple_filter native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bitmap_popcount_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpf_local_call_fanout_dispatch native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_comm_key_fnv_hash native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_string_search_prefix_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cgroup_skb_hash_chain native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_ct_nat_tuple_rewrite native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_policy_guard_tree_filter native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_socket_lb_service_select native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_5tuple_rss_hash native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_record_field_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 katran_lb_consistent_hash_select native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 otel_stack_frame_unwind_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packed_header_bitfield_decode native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_checksum_fold native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_record_bounds_window native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_toeplitz_rss_hash native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_vlan_tcpopt_parser native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 payload_prefix_memcmp_scan native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 siphash_rotate64_mixer native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 sorted_rule_binary_search native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tc_packet_checksum_fold native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tetragon_process_event_arg_filter native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 trace_event_type_switch_dispatch native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_http_method_prefix_detect native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_syscall_name_table_lookup native plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_runqlat_log2_histogram_bucket llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bcc_tcpconnect_ipv4_tuple_filter llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bitmap_popcount_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpf_local_call_fanout_dispatch llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_comm_key_fnv_hash llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 bpftrace_string_search_prefix_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cgroup_skb_hash_chain llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_ct_nat_tuple_rewrite llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_policy_guard_tree_filter llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 cilium_socket_lb_service_select llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_5tuple_rss_hash llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 flow_record_field_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 katran_lb_consistent_hash_select llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 otel_stack_frame_unwind_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packed_header_bitfield_decode llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_checksum_fold llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_record_bounds_window llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_toeplitz_rss_hash llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 packet_vlan_tcpopt_parser llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 payload_prefix_memcmp_scan llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 siphash_rotate64_mixer llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 sorted_rule_binary_search llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tc_packet_checksum_fold llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tetragon_process_event_arg_filter llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 trace_event_type_switch_dispatch llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_http_method_prefix_detect llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 tracee_syscall_name_table_lookup llvmbpf plotted speedup",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "bar (value derived below)",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\caption{Per-case speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, on x86-64 (top) and ARM64 (bottom). Each bar is one non-baseline path. The ARM64 paths come from separate runs, each over its own baseline.}",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 4,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      },
+      {
+        "claim": "numerical claim: The examples include a consistent-hash load-balancer lookup from \\texttt{katran} and a SipHash-like 64-bit-rotation mixer.",
+        "file": "audit-paper/sections/3-characterization.tex",
+        "line": "145",
+        "kind": "definition/setup",
+        "value": "64",
+        "scope": "removed from current body; audit snapshot only"
+      },
+      {
+        "claim": "numerical claim: Figure~\\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation.",
+        "file": "paper/sections/3-characterization.tex",
+        "line": 238,
+        "kind": "definition/setup",
+        "value": "64",
+        "scope": "body"
+      },
+      {
+        "claim": "x86 hardware and VM/kernel setup",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 36,
+        "kind": "empirical",
+        "value": "The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\\,GHz host, using Linux 7.0.0-rc2+.",
+        "scope": "body"
+      },
+      {
+        "claim": "measurement/population convention: \\caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\\%.}",
+        "file": "paper/tables/sec-3-micro-summary.tex",
+        "line": 4,
+        "kind": "empirical",
+        "value": "27; 2",
+        "scope": "body"
+      },
+      {
+        "claim": "figure file sec-3-4config-percase.pdf",
+        "file": "paper/figures/sec-3-pure-bytecode-percase.tex",
+        "line": 3,
+        "kind": "figure artifact",
+        "value": "sec-3-4config-percase.pdf",
+        "scope": "body"
+      },
+      {
+        "claim": "27 named computation programs and descriptions",
+        "file": "paper/revision/tables/sec-3-microbenchmarks.tex",
+        "line": 4,
+        "kind": "empirical",
+        "value": "27",
+        "scope": "body"
+      }
+    ]
+  }
+]

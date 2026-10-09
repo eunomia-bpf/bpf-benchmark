@@ -16,7 +16,7 @@ make -C kinsn/paper/atc26
 
 From this directory, the command is `make`. It uses local inputs only and
 runs no VM, application, benchmark, or data collector. Dependencies are Python
-3.10+, the packages pinned in `requirements.txt`, and `pdflatex` with TikZ,
+3.11+, the packages pinned in `requirements.txt`, and `pdflatex` with TikZ,
 standalone, and Latin Modern. Install them once, for example:
 
 ```sh

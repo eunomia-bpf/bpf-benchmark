@@ -1,0 +1,14 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{Authoritative pure-bytecode microbenchmark artifacts used for the eBPF-hardware gap characterization. Artifact suffixes identify the result directories under \texttt{micro/results}. Correctness mismatches count expected-result or retval mismatches across all recorded samples.}
+\label{tab:char-micro-artifacts}
+\begin{tabular}{@{}llllr@{}}
+\toprule
+Platform & Suite & Artifact suffix & Runtimes & Mismatches \\
+\midrule
+x86-64 KVM & Pure bytecode 29 & \texttt{210952\_650695} & kernel, LLVM-BPF, native, kernel native & 0 \\
+ARM64 AWS & Pure bytecode 29 & \texttt{063319\_954947} & kernel, LLVM-BPF, native, kernel native & 0 \\
+\bottomrule
+\end{tabular}
+\end{table*}

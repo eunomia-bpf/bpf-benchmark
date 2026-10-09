@@ -8,6 +8,12 @@ only; all ratios, tables, figures, and interpretation below are post-hoc
 analysis. Detailed commands, artifact paths, debugging history, and caveats
 are preserved in the appendices.
 
+The [ATC'26 reproduction bundle](../paper/atc26/README.md) copies the paper's
+17 raw result directories and pins its sources. Run
+`make -C kinsn/paper/atc26` from the repository root to regenerate the PDFs,
+LaTeX tables, numbers comparison, and per-directory provenance, including
+reported discrepancies and claims without retained raw evidence.
+
 ## Paper Framing
 
 Kinsn ReJIT replaces selected BPF bytecode patterns with calls to in-kernel

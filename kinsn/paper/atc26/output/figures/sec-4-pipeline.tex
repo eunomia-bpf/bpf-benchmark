@@ -1,0 +1,132 @@
+\documentclass[tikz,border=2pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{xspace}
+\usetikzlibrary{arrows.meta,calc}
+\newcommand{\tool}{\textsc{BPF-Ext}\xspace}
+\newcommand{\lang}{\textsc{Kinsn}\xspace}
+\begin{document}
+\begingroup
+\fontencoding{T1}\selectfont
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\ttdefault}{lmtt}
+\definecolor{evoink}{HTML}{17365D}
+\definecolor{evogreen}{HTML}{EDF2F8}
+\definecolor{evoedge}{HTML}{506C8B}
+\definecolor{evoblue}{HTML}{E5EDF8}
+\definecolor{evopurple}{HTML}{EEE7F2}
+\definecolor{evobaseline}{HTML}{B56A00}
+\begin{tikzpicture}[
+x=1cm,y=1cm,font=\sffamily\fontsize{8.5}{10}\selectfont,
+code/.style={anchor=west,font=\ttfamily\fontsize{8}{10}\selectfont,inner sep=0pt},
+slot/.style={anchor=west,font=\sffamily\fontsize{7.5}{9}\selectfont,inner sep=0pt,text=evoink},
+component/.style={draw,line width=.55pt,fill=evoblue,minimum width=2.20cm,minimum height=1.20cm,text width=1.94cm,align=center,inner xsep=1.3mm,inner ysep=.8mm,outer sep=0pt},
+stepdot/.style={circle,fill=evoink,draw=evoink,minimum size=2.2mm,inner sep=0pt,outer sep=0pt},
+flow/.style={-{Stealth[length=1.4mm,width=1mm]},line width=.75pt,shorten <=.45mm,shorten >=.45mm},
+originalflow/.style={flow,draw=evobaseline,dash pattern=on 5pt off 3pt},
+extendedflow/.style={flow,draw=evoink,line width=.85pt},
+callarrow/.style={flow,draw=evoink,line width=.55pt,line cap=round,dash pattern=on .5pt off 2.2pt},
+resultarrow/.style={flow,draw=evoink,line width=.55pt},
+edgelabel/.style={font=\sffamily\fontsize{8}{9}\selectfont,text=evoink,align=center,inner sep=0pt},
+regionlabel/.style={font=\sffamily\bfseries\fontsize{8.5}{10}\selectfont,inner sep=0pt},
+productnumber/.style={circle,draw=black!75,fill=white,line width=.5pt,minimum size=3.5mm,inner sep=0pt,outer sep=0pt,font=\sffamily\fontsize{7.5}{8}\selectfont},
+panelheading/.style={anchor=west,align=left,inner sep=0pt,font=\sffamily\fontsize{8}{10}\selectfont}
+]
+\path[use as bounding box] (0,0) rectangle (17.5,10.90);
+\draw[draw=evoedge,fill=evogreen,line width=.55pt] (3.10,5.15) rectangle (12.30,8.30);
+\node[regionlabel] at (7.70,5.475) {BPF-Ext};
+\draw[draw=evoedge,fill=white,line width=.5pt] (6.45,5.80) rectangle (11.95,7.95);
+\node[regionlabel] at (9.20,6.10) {Kernel modules};
+\draw[black!55,line width=.55pt,dash pattern=on 2pt off 2pt] (6.10,4.95) -- (6.10,10.85);
+\node[regionlabel,anchor=base east] at (5.88,10.60) {User space};
+\node[regionlabel,anchor=base west] at (6.32,10.60) {Kernel};
+\node[component,fill=evopurple] (clang) at (2.25,9.375) {Clang};
+\node[component] (verifier) at (10.50,9.375) {eBPF verifier};
+\node[component,draw=evoedge,line width=.8pt] (jit) at (14.90,9.375) {eBPF JIT};
+\node[component,draw=evoedge,fill=white] (recognizer) at (4.55,7.00) {Compile-time\\recognizer};
+\node[component,fill=white] (expansion) at (7.90,7.00) {Proof\\sequence};
+\node[component,fill=white] (emitter) at (10.50,7.00) {Native\\emit};
+\foreach \name/\x/\y in {source/.50/9.375,originalnative/17.25/9.75} {
+\coordinate (\name) at (\x,\y);
+\draw[fill=white,line width=.55pt] ($(\name)+(-.25,-.35)$) -- ($(\name)+(.25,-.35)$) -- ($(\name)+(.25,.18)$) -- ($(\name)+(.08,.35)$) -- ($(\name)+(-.25,.35)$) -- cycle;
+\draw[line width=.55pt] ($(\name)+(.08,.35)$) -- ($(\name)+(.08,.18)$) -- ($(\name)+(.25,.18)$);
+\node[font=\ttfamily\bfseries\fontsize{6.5}{6.5}\selectfont,inner sep=0pt] at ($(\name)+(0,-.06)$) {</>};
+}
+\node[font=\sffamily\fontsize{8}{9}\selectfont,inner sep=0pt,anchor=north,text width=1.0cm,align=center] at (.50,8.78) {Source\\code};
+\node[font=\sffamily\fontsize{8}{9}\selectfont,inner sep=0pt,anchor=south east,text=evobaseline] at (17.50,10.30) {Native code};
+\foreach \x/\n in {3.95/1,5.15/2,8.65/3,13.05/4,17.30/5} {
+\node[productnumber] (p\n) at (\x,9.00) {\n};
+}
+\node[stepdot] (expandstep) at (7.90,9.00) {};
+\node[stepdot] (restorestep) at (12.30,9.00) {};
+\draw[flow] (.75,9.375) -- (clang.west);
+\draw[originalflow] (3.35,9.75) -- (9.40,9.75);
+\draw[originalflow] (11.60,9.75) -- (13.80,9.75);
+\draw[originalflow] (16.00,9.75) -- (17.00,9.75);
+\draw[extendedflow] (3.35,9.00) -- (p1.west);
+\draw[extendedflow] (p1.south) -- (3.95,7.60);
+\draw[extendedflow] (5.15,7.60) -- (p2.south);
+\draw[extendedflow] (p2.east) -- (expandstep.west);
+\draw[extendedflow] (expandstep.east) -- (p3.west);
+\draw[extendedflow] (p3.east) -- (9.40,9.00);
+\draw[extendedflow] (11.60,9.00) -- (restorestep.west);
+\draw[extendedflow] (restorestep.east) -- (p4.west);
+\draw[extendedflow] (p4.east) -- (13.80,9.00);
+\draw[extendedflow] (16.00,9.00) -- (p5.west);
+\node[edgelabel,anchor=south] at (7.90,9.20) {Lower};
+\node[edgelabel,anchor=south] at (12.30,9.20) {Restore};
+\draw[callarrow] (7.70,9.00) -- (7.70,7.60);
+\draw[resultarrow] (8.10,7.60) -- (8.10,9.00);
+\draw[callarrow] (14.70,8.775) -- (14.70,7.20) -- (11.60,7.20);
+\draw[resultarrow] (11.60,6.80) -- (15.10,6.80) -- (15.10,8.775);
+\draw[originalflow] (.05,6.90) -- (.65,6.90);
+\draw[extendedflow] (.05,6.35) -- (.65,6.35);
+\node[font=\sffamily\fontsize{8}{9}\selectfont,anchor=west,inner sep=0pt] at (.82,6.90) {Original eBPF};
+\node[font=\sffamily\fontsize{8}{9}\selectfont,anchor=west,inner sep=0pt] at (.82,6.35) {BPF-Ext};
+\begin{scope}[yshift=0cm]
+\foreach \x/\n/\stage/\representation in {0/1/Input/eBPF bytecode,3.59/2/Rewritten/eBPF + ext.\ insns,7.18/3/Lowered/eBPF bytecode,10.77/4/Restored/eBPF + ext.\ insns,14.36/5/x86-64/Native code} {
+\draw[draw=black!40,fill=white,line width=.55pt] (\x,.05) rectangle (\x+3.14,4.75);
+\node[productnumber] at (\x+.40,4.33) {\n};
+\node[panelheading] at (\x+.77,4.33) {\textbf{\stage}\\\representation};
+\draw[black!15,line width=.45pt] (\x+.20,3.88) -- (\x+2.94,3.88);
+}
+\foreach \x in {0,3.59,7.18,10.77} {
+  \node[code,text=black!50] at (\x+.22,3.63) {\ldots};
+  \node[code,text=black!50] at (\x+.22,3.30) {r6 = 0};
+}
+\draw[draw=black!35,fill=black!3,line width=.5pt] (.18,1.62) rectangle (2.96,3.00);
+\node[code] at (.32,2.79) {r1 = r7};
+\node[code] at (.32,2.46) {r7 <{}<= 16};
+\node[code] at (.32,2.13) {r1 >{}>= 48};
+\node[code] at (.32,1.80) {r7 |= r1};
+\node[code,text=black!50] at (.22,1.29) {r0 = r7};
+\node[code,text=black!50] at (.22,.96) {\ldots};
+\foreach \x in {3.59,10.77} {
+  \draw[draw=evoedge,fill=evogreen,line width=.6pt] (\x+.18,1.42) rectangle (\x+2.96,3.00);
+  \draw[evoedge,line width=.5pt] (\x+.18,2.18) -- (\x+2.96,2.18);
+  \node[slot] at (\x+.32,2.79) {Sidecar};
+  \node[code,text=evoink] at (\x+.32,2.46) {IMM, r7, r7, 16};
+  \node[slot] at (\x+.32,1.98) {Call};
+  \node[code,text=evoink] at (\x+.32,1.65) {call d\_rot};
+  \node[code,text=black!50] at (\x+.22,1.09) {r0 = r7};
+  \node[code,text=black!50] at (\x+.22,.76) {\ldots};
+}
+\draw[draw=evoedge,fill=evogreen,line width=.6pt] (7.36,.94) rectangle (10.14,3.00);
+\node[code,text=evoink] at (7.50,2.79) {[fp-40] = r6};
+\node[code,text=evoink] at (7.50,2.46) {r6 = r7};
+\node[code,text=evoink] at (7.50,2.13) {r7 <{}<= 16};
+\node[code,text=evoink] at (7.50,1.80) {r6 >{}>= 48};
+\node[code,text=evoink] at (7.50,1.47) {r7 |= r6};
+\node[code,text=evoink] at (7.50,1.14) {r6 = [fp-40]};
+\node[code,text=black!50] at (7.40,.63) {r0 = r7};
+\node[code,text=black!50] at (7.40,.30) {\ldots};
+\node[code,text=black!50] at (14.58,3.63) {\ldots};
+\node[code,text=black!50] at (14.58,3.30) {xor ebx, ebx};
+\draw[draw=evoedge,fill=evogreen,line width=.6pt] (14.54,2.40) rectangle (17.32,3.00);
+\node[code,text=evoink] at (14.68,2.70) {rol r13, 16};
+\node[code,text=black!50] at (14.58,2.07) {mov rax, r13};
+\node[code,text=black!50] at (14.58,1.74) {\ldots};
+\end{scope}
+\end{tikzpicture}
+\endgroup
+\end{document}
