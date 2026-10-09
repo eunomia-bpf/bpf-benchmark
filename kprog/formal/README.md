@@ -688,6 +688,39 @@ over five flag codes (including 0), two source registers, and explicit
 dividend/high/divisor tables against an independent quotient/remainder model,
 comparing the whole register file with its tags and requiring the flags to stay
 put (48,515 cases).
+The x86-64 `SHLD`/`SHRD` immediate arm's choice of body and flag family on the
+opcode is likewise a generated contract: `generate_x86_doubleshift_arm_spec.py`
+emits `KPROG_X86_DOUBLESHIFT_ARM_COUNT` (2), the two arm defines, and two
+opcode-keyed selectors — `KPROG_X86_DOUBLESHIFT_ARM(OP)` for the body and
+`KPROG_X86_DOUBLESHIFT_ARM_FLAGS(OP)` for the `X86_ALU_*` flag family, both
+keyed on the same opcode so the body and the family cannot diverge — and
+`X86DoubleShiftArmHandler.lean` proves the generated `armOf` equal to an
+independent selector from the opcode literals (the left double-shift body at
+`X86_OP_SHLD_IMM`, the right at every other opcode — the total/default arm),
+that `armOfFlags` equals an independent family selector built from the ALU
+contract's own `x86AluCodeSpec .shl`/`.shr` codes and that `resultOfArm` equals
+an independent double-shift-function selector over the same opcode literals,
+that the arm-name and arm-code tables equal an independent literal order, that
+the tables hold exactly `armCount` entries and the codes are duplicate-free,
+that `armOfCode` inverts `codeOfArm` on the two arms and names no code beyond
+them, that the opcode the arm keys on is 8 bits and the two independent opcode
+literals are the codes the opcode contract names for
+`X86_OP_SHLD_IMM`/`X86_OP_SHRD_IMM`, and — the
+semantic split — that the two bodies compute the two double shifts `x86_shld` /
+`x86_shrd` with the SHL and SHR flag families, and that the count-zero step gate
+is the architectural `SHLD`/`SHRD` no-op: at a hardware-masked count of zero the
+shift-flag contract leaves the flags untouched and both bodies leave the
+destination window unchanged, so neither the body nor the family is observable.
+The generated header is included in the sim header, and the routed arm selects
+both its body and its flag family through the generated selectors instead of a
+hand-written `if ((OP) == X86_OP_SHLD_IMM)` test, behind the count-zero step
+gate. A generated-header oracle drives both selectors over the whole byte
+opcode domain against an independent opcode-keyed model (517 cases), and a
+sim-header route oracle drives the real `SHLD`/`SHRD` arm over both opcodes,
+five flag codes (including 0), eleven immediates (including count-zero and
+count-one), and several destination/source pairs against an independent
+bit-by-bit double-shift model and an independent shift-flag model, comparing the
+whole register file with its tags and all four flags (326,703 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2211,6 +2244,9 @@ x86 `XCHG` resolved-width arm selection (and the simulator's routing of the
 x86 `DIV` resolved-width quotient/remainder case selection (and the simulator's
 routing of the `X86_OP_DIV` arm bodies through the generated width-keyed
 selector),
+x86 `SHLD`/`SHRD` immediate opcode-keyed body and flag-family selection (and the
+simulator's routing of the arm body and its shift-flag family through the
+generated opcode-keyed selectors behind the count-zero step gate),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,

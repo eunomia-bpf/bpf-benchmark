@@ -9319,6 +9319,122 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   paragraph after the x86 XCHG arm-selection paragraph (paper commit pushed to
   `main`).
 
+## Step 0116 — x86 SHLD/SHRD immediate-arm opcode-keyed body + flag-family selection machine-checked contract
+
+- Scope: the x86 simulator's `X86_OP_SHLD_IMM || X86_OP_SHRD_IMM` arm
+  (`kprog/x86/x86_sim_local_bpf.h`, the `X86_SIM_L_EXEC` chain) selects between
+  two bodies and their shift-flag families on the *opcode*, not on any operand
+  field: at the `X86_OP_SHLD_IMM` opcode (`27`) it computes the left double
+  shift `x86_shld` and reports the `X86_ALU_SHL` flag family to the shift-flag
+  contract, while at every other opcode it computes the right double shift
+  `x86_shrd` and reports the `X86_ALU_SHR` family. Both bodies sit behind a
+  count-zero *step gate*: `x86_shift_count((IMM), __x86_l_width) != 0` guards
+  the whole result-flag-write sequence, so at a hardware-masked count of zero
+  no result function and no flag family is consulted --- the architectural
+  `SHLD`/`SHRD` count-zero no-op. The `SHLD`/`SHRD` *values* were already proved
+  (`GeneratedX86DoubleShift.lean`/`X86DoubleShift.lean`); this closes the open
+  arm-level selection and the count-zero gate the composed arm body restated by
+  hand. x86-only; the AArch64 double-shift analogue is not an opcode-keyed
+  two-body split, so there is no mirror.
+- Shared spec `kprog/formal/x86_doubleshift_arm_spec.json` (`schema_version` 1,
+  `operation` `x86DoubleShiftArmSelector`): `selector` `opcode_then_arm`,
+  `opcode_bits` 8, and two `{arm, arm_define, opcode, opcode_define, result,
+  flag_family_code, flag_family_define, effect}` rows in selection order
+  (`shld`/`KPROG_X86_DOUBLESHIFT_ARM_SHLD`/27/`X86_OP_SHLD_IMM`/`shld`/5/
+  `X86_ALU_SHL`/`shift_left_fill_src_high`,
+  `shrd`/`KPROG_X86_DOUBLESHIFT_ARM_SHRD`/28/`X86_OP_SHRD_IMM`/`shrd`/6/
+  `X86_ALU_SHR`/`shift_right_fill_src_low`). `generate_x86_doubleshift_arm_spec.py`
+  carries an independent module-level `_ARMS` enumeration plus a `COLUMNS`
+  cross-check, validates the spec (distinct opcodes, distinct flag families,
+  the results naming the double-shift functions), re-derives the live
+  `SHLD`/`SHRD` arm text from the header (`arm_region()` slices between the
+  `SHLD_IMM ||` arm opener and the `PUSH` arm, `flat()` flattens
+  `\`-continuations, whitespace collapse makes the substring checks exact), and
+  `check_against_header()` requires the routed arm to go through
+  `KPROG_X86_DOUBLESHIFT_ARM((OP))` for its body, `KPROG_X86_DOUBLESHIFT_ARM_FLAGS((OP))`
+  for its flag family, and `KPROG_X86_DOUBLESHIFT_ARM_SHLD`, `x86_shld(`,
+  `x86_shrd(`, and the count-zero `x86_shift_count((IMM), __x86_l_width) != 0`
+  gate, and rejects any literal `X86_ALU_SHL`/`X86_ALU_SHR` left in the region
+  (forcing the family through the generated selector). It emits
+  `generated/x86_doubleshift_arm.h` (`KPROG_X86_DOUBLESHIFT_ARM_COUNT 2U`, the
+  two arm defines, two opcode-keyed ternary selectors, and drift
+  `_Static_assert`s pinning `X86_OP_SHLD_IMM == 27U`, `X86_OP_SHRD_IMM == 28U`,
+  `X86_ALU_SHL == 5U`, `X86_ALU_SHR == 6U`, the arm count, the arm-code and
+  flag-family distinctness, each opcode's body and family, and the totality of
+  the absent opcode `0` to the default arm) and the Lean
+  `KProgFormal.GeneratedX86DoubleShiftArm`. `--check` rc=0.
+- Hand refinement `KProgFormal/X86DoubleShiftArmHandler.lean`: the independent
+  specs `x86DoubleShiftArmSpec`, `x86DoubleShiftResultSpec`, and
+  `x86DoubleShiftFlagsSpec` are built from the literal opcode
+  `x86DoubleShiftShldOpcodeSpec := 27` (and `x86DoubleShiftShrdOpcodeSpec := 28`)
+  and the ALU contract's own `x86AluCodeSpec .shl`/`.shr` rather than the
+  generated tables, and `x86DoubleShiftArmNamesSpec` is the literal constructor
+  order. It proves `x86_doubleshift_arm_refines`, `_flags_refines`,
+  `_result_refines`,
+  `_names_refine`, `_codes_length`, `_names_length`, `_codes_nodup`,
+  `_opcodes_nodup`, `_opcode_spec_bound` (via `x86OpcodeSpec.lookup`),
+  `_arm_over_opcodes`, `_arm_of_code_roundtrip`, `_arm_of_code_beyond_is_none`,
+  `_opcode_bits_is_8`, `_arm_count_is_2`, `_arm_opcodes`, `_arm_results`,
+  `_arm_flags`, `_opcode_result_family`, `_arm_effects`, `_arm_shld_iff`,
+  `_arm_shrd_iff`, `_case_dispatch`, `_ladder_total`, and --- the semantic split
+  --- `_count_zero_flags_noop` (the shift-flag contract leaves the flags
+  untouched at count zero), `_count_zero_value_noop` (both bodies leave the
+  destination window unchanged at count zero, reusing the double-shift
+  contract's zero-count identity), and `_arm_is_doubleshift` (the two bodies are
+  the proved `GeneratedX86DoubleShift.shld`/`.shrd`). Module elaborates rc=0, no
+  `sorry`/`admit`.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_doubleshift_arm.h"` after the DIV include,
+  and the `X86_OP_SHLD_IMM || X86_OP_SHRD_IMM` arm now reads
+  `KPROG_X86_DOUBLESHIFT_ARM((OP))` for its body and
+  `KPROG_X86_DOUBLESHIFT_ARM_FLAGS((OP))` for its flag family instead of a
+  hand-written `if ((OP) == X86_OP_SHLD_IMM)` test, behind the count-zero step
+  gate; both bodies are kept byte-behaviour-identical.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_doubleshift_arm_host.c` includes the generated header (compiling
+    its drift asserts) and drives both selectors over the whole byte opcode
+    domain against an independent opcode-keyed model
+    --- `x86 doubleshift arm host cross-check: OK (517 cases)`. Zero warnings
+    from its own file.
+  - `test_x86_doubleshift_arm_route_host.c` includes the simulator header and
+    drives the real `X86_SIM_L_EXEC` `SHLD`/`SHRD` arm over both opcodes, five
+    flag codes (including 0), eleven immediates (including the count-zero and
+    count-one cases and the width boundary), and several destination/source
+    register pairs, comparing the whole 16-cell register file (value and tag)
+    and all four flags against an independent bit-by-bit double-shift model and
+    an independent shift-flag model
+    --- `x86 doubleshift arm route host cross-check: OK (326703 cases)`. Zero
+    warnings from its own file.
+- Gate `make -C kprog/formal check` rc=0, **141** `cross-check: OK`. Baseline
+  was **139** for Step 0115; Step 0116 adds the two `SHLD`/`SHRD`-arm oracles
+  and the Lean pair, wired into `kprog/formal/Makefile`, with the two new Lean
+  modules imported in `KProgFormal.lean`.
+- Mutation harness `kprog/formal/build/mut_x86_doubleshift_arm.py`, 48 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  seventeen spec/generator defects (arm-name swap, opcode drift, opcode swap,
+  arm-define drift, result drift, flag-family drift, flag-define drift, effect
+  drift, generator arm-define drift, generator opcode swap, generator opcode-bits
+  drift, and generator selector/flags/shld-arm/step-gate/arm-opener/arm-closer
+  text drift → generator), seven generated-C defects (count macro, arm-code
+  drift, selector-opcode drift, reversed flag family, opcode assert, flag
+  assert, total assert → host/generator), six generated-Lean defects (opcode
+  drift, code-table drift, name-table drift, flag-table drift, result drift,
+  `armOf` shape drift → refinement), six hand-refinement defects (spec arm swap,
+  opcode-def drift, result-spec swap, flags-spec reversal, flag-claim drift,
+  opcode-claim drift → refinement), six routed-wiring defects (dropped include,
+  unrouted body selector, unrouted flag family, inverted step gate, inverted arm
+  test, dropped `x86_shld` call → route oracle), and three generator+artifact
+  pair defects regenerated so `--check` stays green and only the rebuilt-olean
+  refinement catches them (an `armOf` swap, an arm-code drift, and a flag-table
+  drift). Three semantically equivalent mutations (an added include-side
+  comment, an added hand-module comment, and a resolved-but-equal generator root
+  path) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the double-shift
+  contract paragraph after the x86 `DIV` arm-selection paragraph (paper commit
+  pushed to `main`).
+
 ## Next after 0076
 
 
@@ -9349,11 +9465,18 @@ equals the architectural `branchPc` walk for arbitrary-length paths.
 The x86 `XCHG` arm's choice of body on its resolved width is likewise no longer
 wholly open: the pointer-cell/subreword split is now a machine-checked
 full-width selector (Step 0114), leaving the register reads, the writes, and
-the value computation inside the composed arm body. Still-open x86 arm
-selection includes the `DIV` four-way width ladder with its `RDX==0` advice
-gate, the `SHLD`/`SHRD` immediate shift-flag shape, the `POPCNT` flag block,
-the `MOVX` source-width fallback (a duplicated inline width test), and the
-`MOV_REG` three-way arm.
+the value computation inside the composed arm body. The x86 `DIV` arm's
+four-way resolved-width quotient/remainder ladder (with its `RDX==0`
+architectural overflow gate) is likewise no longer wholly open: the case choice
+is now a machine-checked width-keyed selector (Step 0115), leaving the register
+reads, the writes, and the quotient/remainder computation inside the composed
+arm bodies. The x86 `SHLD`/`SHRD` immediate arm's opcode-keyed body and
+shift-flag-family choice (behind its count-zero step gate) is likewise no
+longer wholly open: the case choice is now a machine-checked opcode-keyed
+selector (Step 0116), leaving the register reads, the writes, and the
+double-shift value computation inside the composed arm bodies. Still-open x86
+arm selection includes the `POPCNT` flag block, the `MOVX` source-width
+fallback (a duplicated inline width test), and the `MOV_REG` three-way arm.
 
 The AArch64 *write-register destination-presence* decision is likewise no longer
 open: the `XZR`/sentinel presence test the three writeback bodies shared is now

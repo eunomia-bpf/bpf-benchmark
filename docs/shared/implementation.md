@@ -216,6 +216,15 @@ increment is committed and pushed immediately). Current state:
   quotient/remainder computation in the composed arm bodies; the AArch64
   simulator's `DIV`-analogue is not a width-keyed four-body split, so there is
   no mirror.
+  The `SHLD`/`SHRD` immediate arm's choice of body and flag family on the opcode
+  is likewise no longer open for x86-64 (Step 0116): the arm now routes both its
+  body and its shift-flag family through generated machine-checked opcode-keyed
+  selectors (the left double shift and the SHL family at `X86_OP_SHLD_IMM`, the
+  right double shift and the SHR family elsewhere), behind the count-zero step
+  gate, so the case choice is a proved table rather than a restated opcode test,
+  leaving the register reads, writes, and the double-shift value computation in
+  the composed arm bodies; the AArch64 simulator's double-shift analogue is not
+  an opcode-keyed two-body split, so there is no mirror.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
