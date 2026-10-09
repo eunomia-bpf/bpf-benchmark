@@ -26,6 +26,7 @@
 #include "../formal/generated/x86_mem_index.h"
 #include "../formal/generated/x86_reg_presence.h"
 #include "../formal/generated/x86_reg_dispatch.h"
+#include "../formal/generated/x86_xchg.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -1987,7 +1988,8 @@ struct x86_sim_state {
 			} else if ((OP) == X86_OP_ANDN_MEM) {                     \
 				X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
 			} else if ((OP) == X86_OP_XCHG) {                         \
-				if (__x86_l_width == X86_WIDTH_64) {              \
+				if (KPROG_X86_XCHG_ARM(__x86_l_width) ==                \
+				    KPROG_X86_XCHG_ARM_POINTER_SWAP) {              \
 					void *__x86_l_dst_ptr =                    \
 					X86_SIM_L_READ_REG_PTR(DST);       \
 				void *__x86_l_src_ptr =                    \

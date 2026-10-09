@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "operation": "x86XchgSelector",
+  "selector": "full_width_code_then_arm",
+  "width_code_bits": 8,
+  "opcode_define": "X86_OP_XCHG",
+  "opcode": 25,
+  "full_width_define": "KPROG_X86_XCHG_FULL_WIDTH",
+  "full_width_code": 8,
+  "arms": [
+    {
+      "arm": "pointerSwap",
+      "arm_define": "KPROG_X86_XCHG_ARM_POINTER_SWAP",
+      "is_full_width": 1,
+      "effect": "pointer_swap",
+      "width_class": "full"
+    },
+    {
+      "arm": "subwordSwap",
+      "arm_define": "KPROG_X86_XCHG_ARM_SUBWORD_SWAP",
+      "is_full_width": 0,
+      "effect": "width_value_swap",
+      "width_class": "narrow"
+    }
+  ]
+}

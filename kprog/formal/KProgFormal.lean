@@ -16,6 +16,8 @@ import KProgFormal.GeneratedX86RegDispatch
 import KProgFormal.X86RegDispatch
 import KProgFormal.GeneratedX86HelperDispatch
 import KProgFormal.X86HelperDispatch
+import KProgFormal.GeneratedX86Xchg
+import KProgFormal.X86XchgHandler
 import KProgFormal.X86MemAux
 import KProgFormal.GeneratedArm64MemIndex
 import KProgFormal.Arm64MemIndex
