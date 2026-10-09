@@ -1,0 +1,278 @@
+run,benchmark,runtime,sample,program_id,status,error
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,0,83,error,prog_id 83 not tracked by shim pid=2770
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,0,85,error,prog_id 85 not tracked by shim pid=2770
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,0,86,error,prog_id 86 not tracked by shim pid=2770
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,1,92,error,prog_id 92 not tracked by shim pid=2783
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,1,94,error,prog_id 94 not tracked by shim pid=2783
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,1,95,error,prog_id 95 not tracked by shim pid=2783
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,2,113,error,prog_id 113 not tracked by shim pid=2797
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,2,115,error,prog_id 115 not tracked by shim pid=2797
+micro/results/aws_arm64_micro_20260606_001225_821028,simple,kernel_rejit,2,116,error,prog_id 116 not tracked by shim pid=2797
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,0,128,error,prog_id 128 not tracked by shim pid=2810
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,0,130,error,prog_id 130 not tracked by shim pid=2810
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,0,131,error,prog_id 131 not tracked by shim pid=2810
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,1,137,error,prog_id 137 not tracked by shim pid=2822
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,1,139,error,prog_id 139 not tracked by shim pid=2822
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,1,140,error,prog_id 140 not tracked by shim pid=2822
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,2,158,error,prog_id 158 not tracked by shim pid=2836
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,2,160,error,prog_id 160 not tracked by shim pid=2836
+micro/results/aws_arm64_micro_20260606_001225_821028,simple_packet,kernel_rejit,2,161,error,prog_id 161 not tracked by shim pid=2836
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,0,173,error,prog_id 173 not tracked by shim pid=2889
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,0,175,error,prog_id 175 not tracked by shim pid=2889
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,0,176,error,prog_id 176 not tracked by shim pid=2889
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,1,182,error,prog_id 182 not tracked by shim pid=2901
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,1,184,error,prog_id 184 not tracked by shim pid=2901
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,1,185,error,prog_id 185 not tracked by shim pid=2901
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,2,203,error,prog_id 203 not tracked by shim pid=2915
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,2,205,error,prog_id 205 not tracked by shim pid=2915
+micro/results/aws_arm64_micro_20260606_001225_821028,bitmap_popcount_scan,kernel_rejit,2,206,error,prog_id 206 not tracked by shim pid=2915
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,0,218,error,prog_id 218 not tracked by shim pid=3016
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,0,220,error,prog_id 220 not tracked by shim pid=3016
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,0,221,error,prog_id 221 not tracked by shim pid=3016
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,1,227,error,prog_id 227 not tracked by shim pid=3028
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,1,229,error,prog_id 229 not tracked by shim pid=3028
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,1,230,error,prog_id 230 not tracked by shim pid=3028
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,2,248,error,prog_id 248 not tracked by shim pid=3042
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,2,250,error,prog_id 250 not tracked by shim pid=3042
+micro/results/aws_arm64_micro_20260606_001225_821028,sorted_rule_binary_search,kernel_rejit,2,251,error,prog_id 251 not tracked by shim pid=3042
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,0,263,error,prog_id 263 not tracked by shim pid=3095
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,0,265,error,prog_id 265 not tracked by shim pid=3095
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,0,266,error,prog_id 266 not tracked by shim pid=3095
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,1,272,error,prog_id 272 not tracked by shim pid=3107
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,1,274,error,prog_id 274 not tracked by shim pid=3107
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,1,275,error,prog_id 275 not tracked by shim pid=3107
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,2,293,error,prog_id 293 not tracked by shim pid=3161
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,2,295,error,prog_id 295 not tracked by shim pid=3161
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_runqlat_log2_histogram_bucket,kernel_rejit,2,296,error,prog_id 296 not tracked by shim pid=3161
+micro/results/aws_arm64_micro_20260606_001225_821028,trace_event_type_switch_dispatch,kernel_rejit,0,308,error,prog_id 308 not tracked by shim pid=3174
+micro/results/aws_arm64_micro_20260606_001225_821028,trace_event_type_switch_dispatch,kernel_rejit,0,310,error,prog_id 310 not tracked by shim pid=3174
+micro/results/aws_arm64_micro_20260606_001225_821028,trace_event_type_switch_dispatch,kernel_rejit,0,311,error,prog_id 311 not tracked by shim pid=3174
+micro/results/aws_arm64_micro_20260606_001225_821028,trace_event_type_switch_dispatch,kernel_rejit,1,319,error,prog_id 319 not tracked by shim pid=3186
+micro/results/aws_arm64_micro_20260606_001225_821028,trace_event_type_switch_dispatch,kernel_rejit,1,320,error,prog_id 320 not tracked by shim pid=3186
+micro/results/aws_arm64_micro_20260606_001225_821028,trace_event_type_switch_dispatch,kernel_rejit,2,339,error,prog_id 339 not tracked by shim pid=3203
+micro/results/aws_arm64_micro_20260606_001225_821028,trace_event_type_switch_dispatch,kernel_rejit,2,341,error,prog_id 341 not tracked by shim pid=3203
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,0,355,error,prog_id 355 not tracked by shim pid=3347
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,0,357,error,prog_id 357 not tracked by shim pid=3347
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,0,358,error,prog_id 358 not tracked by shim pid=3347
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,1,364,error,prog_id 364 not tracked by shim pid=3439
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,1,366,error,prog_id 366 not tracked by shim pid=3439
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,1,367,error,prog_id 367 not tracked by shim pid=3439
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,2,385,error,prog_id 385 not tracked by shim pid=3662
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,2,387,error,prog_id 387 not tracked by shim pid=3662
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_checksum_fold,kernel_rejit,2,388,error,prog_id 388 not tracked by shim pid=3662
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,0,400,error,prog_id 400 not tracked by shim pid=3803
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,0,402,error,prog_id 402 not tracked by shim pid=3803
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,0,403,error,prog_id 403 not tracked by shim pid=3803
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,1,409,error,prog_id 409 not tracked by shim pid=3815
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,1,411,error,prog_id 411 not tracked by shim pid=3815
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,1,412,error,prog_id 412 not tracked by shim pid=3815
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,2,430,error,prog_id 430 not tracked by shim pid=3829
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,2,432,error,prog_id 432 not tracked by shim pid=3829
+micro/results/aws_arm64_micro_20260606_001225_821028,payload_prefix_memcmp_scan,kernel_rejit,2,433,error,prog_id 433 not tracked by shim pid=3829
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,0,445,error,prog_id 445 not tracked by shim pid=3842
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,0,447,error,prog_id 447 not tracked by shim pid=3842
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,0,448,error,prog_id 448 not tracked by shim pid=3842
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,1,454,error,prog_id 454 not tracked by shim pid=3854
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,1,456,error,prog_id 456 not tracked by shim pid=3854
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,1,457,error,prog_id 457 not tracked by shim pid=3854
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,2,475,error,prog_id 475 not tracked by shim pid=3868
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,2,477,error,prog_id 477 not tracked by shim pid=3868
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_vlan_tcpopt_parser,kernel_rejit,2,478,error,prog_id 478 not tracked by shim pid=3868
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,0,490,error,prog_id 490 not tracked by shim pid=3921
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,0,492,error,prog_id 492 not tracked by shim pid=3921
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,0,493,error,prog_id 493 not tracked by shim pid=3921
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,1,499,error,prog_id 499 not tracked by shim pid=3933
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,1,501,error,prog_id 501 not tracked by shim pid=3933
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,1,502,error,prog_id 502 not tracked by shim pid=3933
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,2,520,error,prog_id 520 not tracked by shim pid=3947
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,2,522,error,prog_id 522 not tracked by shim pid=3947
+micro/results/aws_arm64_micro_20260606_001225_821028,bpf_local_call_fanout_dispatch,kernel_rejit,2,523,error,prog_id 523 not tracked by shim pid=3947
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,0,535,error,prog_id 535 not tracked by shim pid=3960
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,0,537,error,prog_id 537 not tracked by shim pid=3960
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,0,538,error,prog_id 538 not tracked by shim pid=3960
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,1,544,error,prog_id 544 not tracked by shim pid=3972
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,1,546,error,prog_id 546 not tracked by shim pid=3972
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,1,547,error,prog_id 547 not tracked by shim pid=3972
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,2,565,error,prog_id 565 not tracked by shim pid=4026
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,2,567,error,prog_id 567 not tracked by shim pid=4026
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_5tuple_rss_hash,kernel_rejit,2,568,error,prog_id 568 not tracked by shim pid=4026
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,0,580,error,prog_id 580 not tracked by shim pid=4039
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,0,582,error,prog_id 582 not tracked by shim pid=4039
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,0,583,error,prog_id 583 not tracked by shim pid=4039
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,1,589,error,prog_id 589 not tracked by shim pid=4051
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,1,591,error,prog_id 591 not tracked by shim pid=4051
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,1,592,error,prog_id 592 not tracked by shim pid=4051
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,2,610,error,prog_id 610 not tracked by shim pid=4065
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,2,612,error,prog_id 612 not tracked by shim pid=4065
+micro/results/aws_arm64_micro_20260606_001225_821028,katran_lb_consistent_hash_select,kernel_rejit,2,613,error,prog_id 613 not tracked by shim pid=4065
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,0,625,error,prog_id 625 not tracked by shim pid=4078
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,0,627,error,prog_id 627 not tracked by shim pid=4078
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,1,635,error,prog_id 635 not tracked by shim pid=4093
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,1,637,error,prog_id 637 not tracked by shim pid=4093
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,1,638,error,prog_id 638 not tracked by shim pid=4093
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,2,656,error,prog_id 656 not tracked by shim pid=4147
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,2,658,error,prog_id 658 not tracked by shim pid=4147
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_policy_guard_tree_filter,kernel_rejit,2,659,error,prog_id 659 not tracked by shim pid=4147
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,0,671,error,prog_id 671 not tracked by shim pid=4160
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,0,673,error,prog_id 673 not tracked by shim pid=4160
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,0,674,error,prog_id 674 not tracked by shim pid=4160
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,1,680,error,prog_id 680 not tracked by shim pid=4172
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,1,682,error,prog_id 682 not tracked by shim pid=4172
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,1,683,error,prog_id 683 not tracked by shim pid=4172
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,2,701,error,prog_id 701 not tracked by shim pid=4188
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,2,703,error,prog_id 703 not tracked by shim pid=4188
+micro/results/aws_arm64_micro_20260606_001225_821028,siphash_rotate64_mixer,kernel_rejit,2,704,error,prog_id 704 not tracked by shim pid=4188
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,0,716,error,prog_id 716 not tracked by shim pid=4201
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,0,718,error,prog_id 718 not tracked by shim pid=4201
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,0,719,error,prog_id 719 not tracked by shim pid=4201
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,1,725,error,prog_id 725 not tracked by shim pid=4303
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,1,727,error,prog_id 727 not tracked by shim pid=4303
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,1,728,error,prog_id 728 not tracked by shim pid=4303
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,2,746,error,prog_id 746 not tracked by shim pid=4317
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,2,748,error,prog_id 748 not tracked by shim pid=4317
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_record_bounds_window,kernel_rejit,2,749,error,prog_id 749 not tracked by shim pid=4317
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_record_field_scan,kernel_rejit,0,761,error,prog_id 761 not tracked by shim pid=4330
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_record_field_scan,kernel_rejit,0,763,error,prog_id 763 not tracked by shim pid=4330
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_record_field_scan,kernel_rejit,0,764,error,prog_id 764 not tracked by shim pid=4330
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_record_field_scan,kernel_rejit,1,772,error,prog_id 772 not tracked by shim pid=4343
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_record_field_scan,kernel_rejit,1,773,error,prog_id 773 not tracked by shim pid=4343
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_record_field_scan,kernel_rejit,2,792,error,prog_id 792 not tracked by shim pid=4360
+micro/results/aws_arm64_micro_20260606_001225_821028,flow_record_field_scan,kernel_rejit,2,794,error,prog_id 794 not tracked by shim pid=4360
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,0,808,error,prog_id 808 not tracked by shim pid=4418
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,0,810,error,prog_id 810 not tracked by shim pid=4418
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,0,811,error,prog_id 811 not tracked by shim pid=4418
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,1,817,error,prog_id 817 not tracked by shim pid=4430
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,1,819,error,prog_id 819 not tracked by shim pid=4430
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,1,820,error,prog_id 820 not tracked by shim pid=4430
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,2,838,error,prog_id 838 not tracked by shim pid=4444
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,2,840,error,prog_id 840 not tracked by shim pid=4444
+micro/results/aws_arm64_micro_20260606_001225_821028,packed_header_bitfield_decode,kernel_rejit,2,841,error,prog_id 841 not tracked by shim pid=4444
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,0,853,error,prog_id 853 not tracked by shim pid=4458
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,0,855,error,prog_id 855 not tracked by shim pid=4458
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,0,856,error,prog_id 856 not tracked by shim pid=4458
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,1,862,error,prog_id 862 not tracked by shim pid=4470
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,1,864,error,prog_id 864 not tracked by shim pid=4470
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,2,884,error,prog_id 884 not tracked by shim pid=4527
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,2,886,error,prog_id 886 not tracked by shim pid=4527
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_string_search_prefix_scan,kernel_rejit,2,887,error,prog_id 887 not tracked by shim pid=4527
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,0,899,error,prog_id 899 not tracked by shim pid=4540
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,0,901,error,prog_id 901 not tracked by shim pid=4540
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,0,902,error,prog_id 902 not tracked by shim pid=4540
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,1,908,error,prog_id 908 not tracked by shim pid=4552
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,1,910,error,prog_id 910 not tracked by shim pid=4552
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,1,911,error,prog_id 911 not tracked by shim pid=4552
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,2,929,error,prog_id 929 not tracked by shim pid=4566
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,2,931,error,prog_id 931 not tracked by shim pid=4566
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_syscall_name_table_lookup,kernel_rejit,2,932,error,prog_id 932 not tracked by shim pid=4566
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,0,944,error,prog_id 944 not tracked by shim pid=4583
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,0,946,error,prog_id 946 not tracked by shim pid=4583
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,0,947,error,prog_id 947 not tracked by shim pid=4583
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,1,953,error,prog_id 953 not tracked by shim pid=4631
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,1,955,error,prog_id 955 not tracked by shim pid=4631
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,1,956,error,prog_id 956 not tracked by shim pid=4631
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,2,974,error,prog_id 974 not tracked by shim pid=4645
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,2,976,error,prog_id 976 not tracked by shim pid=4645
+micro/results/aws_arm64_micro_20260606_001225_821028,tracee_http_method_prefix_detect,kernel_rejit,2,977,error,prog_id 977 not tracked by shim pid=4645
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,0,989,error,prog_id 989 not tracked by shim pid=4658
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,0,991,error,prog_id 991 not tracked by shim pid=4658
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,0,992,error,prog_id 992 not tracked by shim pid=4658
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,1,1000,error,prog_id 1000 not tracked by shim pid=4670
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,1,1001,error,prog_id 1001 not tracked by shim pid=4670
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,1,998,error,prog_id 998 not tracked by shim pid=4670
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,2,1021,error,prog_id 1021 not tracked by shim pid=4772
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_socket_lb_service_select,kernel_rejit,2,1022,error,prog_id 1022 not tracked by shim pid=4772
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,0,1035,error,prog_id 1035 not tracked by shim pid=4788
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,0,1037,error,prog_id 1037 not tracked by shim pid=4788
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,0,1038,error,prog_id 1038 not tracked by shim pid=4788
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,1,1044,error,prog_id 1044 not tracked by shim pid=4800
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,1,1046,error,prog_id 1046 not tracked by shim pid=4800
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,1,1047,error,prog_id 1047 not tracked by shim pid=4800
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,2,1065,error,prog_id 1065 not tracked by shim pid=4814
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,2,1067,error,prog_id 1067 not tracked by shim pid=4814
+micro/results/aws_arm64_micro_20260606_001225_821028,bcc_tcpconnect_ipv4_tuple_filter,kernel_rejit,2,1068,error,prog_id 1068 not tracked by shim pid=4814
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,0,1080,error,prog_id 1080 not tracked by shim pid=4827
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,0,1082,error,prog_id 1082 not tracked by shim pid=4827
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,0,1083,error,prog_id 1083 not tracked by shim pid=4827
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,1,1089,error,prog_id 1089 not tracked by shim pid=4879
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,1,1091,error,prog_id 1091 not tracked by shim pid=4879
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,1,1092,error,prog_id 1092 not tracked by shim pid=4879
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,2,1110,error,prog_id 1110 not tracked by shim pid=4893
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,2,1112,error,prog_id 1112 not tracked by shim pid=4893
+micro/results/aws_arm64_micro_20260606_001225_821028,tetragon_process_event_arg_filter,kernel_rejit,2,1113,error,prog_id 1113 not tracked by shim pid=4893
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,0,1125,error,prog_id 1125 not tracked by shim pid=4906
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,0,1127,error,prog_id 1127 not tracked by shim pid=4906
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,0,1128,error,prog_id 1128 not tracked by shim pid=4906
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,1,1134,error,prog_id 1134 not tracked by shim pid=4918
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,1,1136,error,prog_id 1136 not tracked by shim pid=4918
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,1,1137,error,prog_id 1137 not tracked by shim pid=4918
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,2,1155,error,prog_id 1155 not tracked by shim pid=4932
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,2,1157,error,prog_id 1157 not tracked by shim pid=4932
+micro/results/aws_arm64_micro_20260606_001225_821028,otel_stack_frame_unwind_scan,kernel_rejit,2,1158,error,prog_id 1158 not tracked by shim pid=4932
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,0,1170,error,prog_id 1170 not tracked by shim pid=4985
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,0,1172,error,prog_id 1172 not tracked by shim pid=4985
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,0,1173,error,prog_id 1173 not tracked by shim pid=4985
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,1,1179,error,prog_id 1179 not tracked by shim pid=4997
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,1,1181,error,prog_id 1181 not tracked by shim pid=4997
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,1,1182,error,prog_id 1182 not tracked by shim pid=4997
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,2,1200,error,prog_id 1200 not tracked by shim pid=5011
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,2,1202,error,prog_id 1202 not tracked by shim pid=5011
+micro/results/aws_arm64_micro_20260606_001225_821028,cilium_ct_nat_tuple_rewrite,kernel_rejit,2,1203,error,prog_id 1203 not tracked by shim pid=5011
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,0,1215,error,prog_id 1215 not tracked by shim pid=5024
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,0,1217,error,prog_id 1217 not tracked by shim pid=5024
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,0,1218,error,prog_id 1218 not tracked by shim pid=5024
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,1,1224,error,prog_id 1224 not tracked by shim pid=5036
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,1,1226,error,prog_id 1226 not tracked by shim pid=5036
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,1,1227,error,prog_id 1227 not tracked by shim pid=5036
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,2,1245,error,prog_id 1245 not tracked by shim pid=5090
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,2,1247,error,prog_id 1247 not tracked by shim pid=5090
+micro/results/aws_arm64_micro_20260606_001225_821028,packet_toeplitz_rss_hash,kernel_rejit,2,1248,error,prog_id 1248 not tracked by shim pid=5090
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,0,1260,error,prog_id 1260 not tracked by shim pid=5103
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,0,1262,error,prog_id 1262 not tracked by shim pid=5103
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,0,1263,error,prog_id 1263 not tracked by shim pid=5103
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,1,1269,error,prog_id 1269 not tracked by shim pid=5115
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,1,1271,error,prog_id 1271 not tracked by shim pid=5115
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,1,1272,error,prog_id 1272 not tracked by shim pid=5115
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,2,1290,error,prog_id 1290 not tracked by shim pid=5217
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,2,1292,error,prog_id 1292 not tracked by shim pid=5217
+micro/results/aws_arm64_micro_20260606_001225_821028,bpftrace_comm_key_fnv_hash,kernel_rejit,2,1293,error,prog_id 1293 not tracked by shim pid=5217
+micro/results/aws_arm64_micro_20260606_001225_821028,tc_packet_checksum_fold,kernel_rejit,0,1304,error,prog_id 1304 not tracked by shim pid=5270
+micro/results/aws_arm64_micro_20260606_001225_821028,tc_packet_checksum_fold,kernel_rejit,0,1306,error,prog_id 1306 not tracked by shim pid=5270
+micro/results/aws_arm64_micro_20260606_001225_821028,tc_packet_checksum_fold,kernel_rejit,1,1312,error,prog_id 1312 not tracked by shim pid=5363
+micro/results/aws_arm64_micro_20260606_001225_821028,tc_packet_checksum_fold,kernel_rejit,1,1314,error,prog_id 1314 not tracked by shim pid=5363
+micro/results/aws_arm64_micro_20260606_001225_821028,tc_packet_checksum_fold,kernel_rejit,2,1330,error,prog_id 1330 not tracked by shim pid=5585
+micro/results/aws_arm64_micro_20260606_001225_821028,tc_packet_checksum_fold,kernel_rejit,2,1332,error,prog_id 1332 not tracked by shim pid=5585
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,0,1344,error,prog_id 1344 not tracked by shim pid=5690
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,0,1346,error,prog_id 1346 not tracked by shim pid=5690
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,0,1347,error,prog_id 1347 not tracked by shim pid=5690
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,1,1353,error,prog_id 1353 not tracked by shim pid=5738
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,1,1355,error,prog_id 1355 not tracked by shim pid=5738
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,1,1356,error,prog_id 1356 not tracked by shim pid=5738
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,2,1374,error,prog_id 1374 not tracked by shim pid=5752
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,2,1376,error,prog_id 1376 not tracked by shim pid=5752
+micro/results/aws_arm64_micro_20260606_001225_821028,cgroup_skb_hash_chain,kernel_rejit,2,1377,error,prog_id 1377 not tracked by shim pid=5752
+micro/results/x86_kvm_micro_20260514_181806_133778,bitcount,kernel_rejit,0,45,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,log2_fold,kernel_rejit,0,57,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,binary_search,kernel_rejit,0,93,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,switch_dispatch,kernel_rejit,0,117,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,branch_dense,kernel_rejit,0,129,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,cmov_select,kernel_rejit,0,141,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,cmov_dense,kernel_rejit,0,153,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,checksum,kernel_rejit,0,165,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,bounds_check_heavy,kernel_rejit,0,249,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,mixed_alu_mem,kernel_rejit,0,285,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,fixed_loop_small,kernel_rejit,0,357,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,fixed_loop_large,kernel_rejit,0,369,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,code_clone_2,kernel_rejit,0,405,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,code_clone_8,kernel_rejit,0,417,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,large_mixed_500,kernel_rejit,0,429,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,large_mixed_1000,kernel_rejit,0,441,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,memcmp_prefix_64,kernel_rejit,0,465,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,packet_rss_hash,kernel_rejit,0,501,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,katran_like,kernel_rejit,0,513,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,imm64_storm,kernel_rejit,0,525,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,branch_fanout_32,kernel_rejit,0,549,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,rotate64_hash,kernel_rejit,0,585,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,cond_select_dense,kernel_rejit,0,657,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,rotate_dense,kernel_rejit,0,669,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,tc_bitcount,kernel_rejit,0,728,error,
+micro/results/x86_kvm_micro_20260514_181806_133778,tc_checksum,kernel_rejit,0,738,error,

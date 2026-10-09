@@ -1,0 +1,25 @@
+{
+  "command": [
+    "make",
+    "corpus"
+  ],
+  "environment": {
+    "PLATFORM": "aws",
+    "ARCH": "x86",
+    "SAMPLES": "1",
+    "WARMUPS": "0",
+    "WORKLOAD_DURATION": "180",
+    "BPFREJIT_CORPUS_APPS": "cilium/agent",
+    "BPFREJIT_SHIM_NATIVE_LOADER": "post",
+    "BPFREJIT_CORPUS_BPF_STATS": "1",
+    "CPU": "0",
+    "AWS_X86_BENCH_INSTANCE_TYPE": "t3.small",
+    "AWS_X86_REGION": "us-east-1",
+    "AWS_X86_NAME_TAG": "cilium-rerun-20261009",
+    "JOBS": "2",
+    "IMAGE_BUILD_JOBS": "2",
+    "RUN_TOKEN": "cilium-rerun-20261009-preflight"
+  },
+  "purpose": "native preflight; CPU env alone is not corpus pinning",
+  "started_at": "2026-10-09T13:47:17.397316+00:00"
+}

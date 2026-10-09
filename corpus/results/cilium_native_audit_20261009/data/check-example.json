@@ -1,0 +1,576 @@
+{
+  "command": [
+    "python3",
+    "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-rerun-20261009/check-code-identity.py",
+    "--reference",
+    "micro/results/x86_kvm_micro_20260519_114214_364050",
+    "--candidate",
+    "micro/results/x86_kvm_micro_20260526_210351_224315",
+    "--reference-runtime",
+    "kernel",
+    "--candidate-runtime",
+    "kernel",
+    "--commit",
+    "16e4d39d76eddb03f68312e09928163a67f4def6"
+  ],
+  "exit_code": 1,
+  "purpose": "detect real historical baseline/candidate size differences, not a new replay or native identity proof",
+  "output": {
+    "candidate_commit_asserted": "16e4d39d76eddb03f68312e09928163a67f4def6",
+    "size_signatures_equal": false,
+    "mismatches": [
+      {
+        "program": "bcc_runqlat_log2_histogram_bucket",
+        "reference": [
+          [
+            542,
+            1168,
+            542,
+            1168
+          ]
+        ],
+        "candidate": [
+          [
+            716,
+            1368,
+            716,
+            1368
+          ]
+        ]
+      },
+      {
+        "program": "bcc_tcpconnect_ipv4_tuple_filter",
+        "reference": [
+          [
+            804,
+            1520,
+            804,
+            1520
+          ]
+        ],
+        "candidate": [
+          [
+            1003,
+            1808,
+            1003,
+            1808
+          ]
+        ]
+      },
+      {
+        "program": "bitmap_popcount_scan",
+        "reference": [
+          [
+            337,
+            624,
+            337,
+            624
+          ]
+        ],
+        "candidate": [
+          [
+            504,
+            928,
+            504,
+            928
+          ]
+        ]
+      },
+      {
+        "program": "bpf_local_call_fanout_dispatch",
+        "reference": [
+          [
+            1089,
+            2360,
+            1089,
+            2360
+          ]
+        ],
+        "candidate": [
+          [
+            2173,
+            4240,
+            2173,
+            4240
+          ]
+        ]
+      },
+      {
+        "program": "bpftrace_comm_key_fnv_hash",
+        "reference": [
+          [
+            901,
+            1736,
+            901,
+            1736
+          ]
+        ],
+        "candidate": [
+          [
+            994,
+            1872,
+            994,
+            1872
+          ]
+        ]
+      },
+      {
+        "program": "bpftrace_string_search_prefix_scan",
+        "reference": [
+          [
+            712,
+            1312,
+            712,
+            1312
+          ]
+        ],
+        "candidate": [
+          [
+            931,
+            1624,
+            931,
+            1624
+          ]
+        ]
+      },
+      {
+        "program": "cgroup_skb_hash_chain",
+        "reference": [
+          [
+            434,
+            800,
+            434,
+            800
+          ]
+        ],
+        "candidate": [
+          [
+            516,
+            936,
+            516,
+            936
+          ]
+        ]
+      },
+      {
+        "program": "cilium_ct_nat_tuple_rewrite",
+        "reference": [
+          [
+            764,
+            1560,
+            764,
+            1560
+          ]
+        ],
+        "candidate": [
+          [
+            958,
+            1808,
+            958,
+            1808
+          ]
+        ]
+      },
+      {
+        "program": "cilium_policy_guard_tree_filter",
+        "reference": [
+          [
+            576,
+            1072,
+            576,
+            1072
+          ]
+        ],
+        "candidate": [
+          [
+            659,
+            1176,
+            659,
+            1176
+          ]
+        ]
+      },
+      {
+        "program": "cilium_socket_lb_service_select",
+        "reference": [
+          [
+            853,
+            1728,
+            853,
+            1728
+          ]
+        ],
+        "candidate": [
+          [
+            1081,
+            2000,
+            1081,
+            2000
+          ]
+        ]
+      },
+      {
+        "program": "flow_5tuple_rss_hash",
+        "reference": [
+          [
+            589,
+            1296,
+            589,
+            1296
+          ]
+        ],
+        "candidate": [
+          [
+            1009,
+            2088,
+            1009,
+            2088
+          ]
+        ]
+      },
+      {
+        "program": "flow_record_field_scan",
+        "reference": [
+          [
+            385,
+            728,
+            385,
+            728
+          ]
+        ],
+        "candidate": [
+          [
+            410,
+            744,
+            410,
+            744
+          ]
+        ]
+      },
+      {
+        "program": "katran_lb_consistent_hash_select",
+        "reference": [
+          [
+            2697,
+            5448,
+            2697,
+            5448
+          ]
+        ],
+        "candidate": [
+          [
+            3463,
+            6832,
+            3463,
+            6832
+          ]
+        ]
+      },
+      {
+        "program": "otel_stack_frame_unwind_scan",
+        "reference": [
+          [
+            881,
+            1696,
+            881,
+            1696
+          ]
+        ],
+        "candidate": [
+          [
+            1065,
+            1944,
+            1065,
+            1944
+          ]
+        ]
+      },
+      {
+        "program": "packed_header_bitfield_decode",
+        "reference": [
+          [
+            1006,
+            2032,
+            1006,
+            2032
+          ]
+        ],
+        "candidate": [
+          [
+            1012,
+            1976,
+            1012,
+            1976
+          ]
+        ]
+      },
+      {
+        "program": "packet_checksum_fold",
+        "reference": [
+          [
+            270,
+            536,
+            270,
+            536
+          ]
+        ],
+        "candidate": [
+          [
+            424,
+            784,
+            424,
+            784
+          ]
+        ]
+      },
+      {
+        "program": "packet_record_bounds_window",
+        "reference": [
+          [
+            401,
+            752,
+            401,
+            752
+          ]
+        ],
+        "candidate": [
+          [
+            716,
+            1304,
+            716,
+            1304
+          ]
+        ]
+      },
+      {
+        "program": "packet_toeplitz_rss_hash",
+        "reference": [
+          [
+            916,
+            1568,
+            916,
+            1568
+          ]
+        ],
+        "candidate": [
+          [
+            1086,
+            1808,
+            1086,
+            1808
+          ]
+        ]
+      },
+      {
+        "program": "packet_vlan_tcpopt_parser",
+        "reference": [
+          [
+            866,
+            1576,
+            866,
+            1576
+          ]
+        ],
+        "candidate": [
+          [
+            1110,
+            1856,
+            1110,
+            1856
+          ]
+        ]
+      },
+      {
+        "program": "payload_prefix_memcmp_scan",
+        "reference": [
+          [
+            531,
+            1104,
+            531,
+            1104
+          ]
+        ],
+        "candidate": [
+          [
+            612,
+            1168,
+            612,
+            1168
+          ]
+        ]
+      },
+      {
+        "program": "simple",
+        "reference": [
+          [
+            101,
+            192,
+            101,
+            192
+          ]
+        ],
+        "candidate": [
+          [
+            107,
+            192,
+            107,
+            192
+          ]
+        ]
+      },
+      {
+        "program": "simple_packet",
+        "reference": [
+          [
+            92,
+            168,
+            92,
+            168
+          ]
+        ],
+        "candidate": [
+          [
+            95,
+            168,
+            95,
+            168
+          ]
+        ]
+      },
+      {
+        "program": "siphash_rotate64_mixer",
+        "reference": [
+          [
+            1565,
+            4640,
+            1565,
+            4640
+          ]
+        ],
+        "candidate": [
+          [
+            3520,
+            7936,
+            3520,
+            7936
+          ]
+        ]
+      },
+      {
+        "program": "sorted_rule_binary_search",
+        "reference": [
+          [
+            643,
+            1280,
+            643,
+            1280
+          ]
+        ],
+        "candidate": [
+          [
+            786,
+            1440,
+            786,
+            1440
+          ]
+        ]
+      },
+      {
+        "program": "tc_packet_checksum_fold",
+        "reference": [
+          [
+            205,
+            416,
+            205,
+            416
+          ]
+        ],
+        "candidate": [
+          [
+            361,
+            672,
+            361,
+            672
+          ]
+        ]
+      },
+      {
+        "program": "tetragon_process_event_arg_filter",
+        "reference": [
+          [
+            1099,
+            2000,
+            1099,
+            2000
+          ]
+        ],
+        "candidate": [
+          [
+            1254,
+            2248,
+            1254,
+            2248
+          ]
+        ]
+      },
+      {
+        "program": "trace_event_type_switch_dispatch",
+        "reference": [
+          [
+            1457,
+            1912,
+            1457,
+            1912
+          ]
+        ],
+        "candidate": [
+          [
+            1621,
+            2072,
+            1621,
+            2072
+          ]
+        ]
+      },
+      {
+        "program": "tracee_http_method_prefix_detect",
+        "reference": [
+          [
+            802,
+            1208,
+            802,
+            1208
+          ]
+        ],
+        "candidate": [
+          [
+            906,
+            1344,
+            906,
+            1344
+          ]
+        ]
+      },
+      {
+        "program": "tracee_syscall_name_table_lookup",
+        "reference": [
+          [
+            906,
+            1408,
+            906,
+            1408
+          ]
+        ],
+        "candidate": [
+          [
+            1017,
+            1536,
+            1017,
+            1536
+          ]
+        ]
+      }
+    ],
+    "byte_identity": "not established: historical JIT bytes required"
+  }
+}

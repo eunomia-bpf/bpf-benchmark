@@ -1,0 +1,6 @@
+{
+  "app": "cilium/agent",
+  "runner": "cilium",
+  "status": "error",
+  "error": "AWS credential preflight failed: codex-ec2 profile is absent and default SSH key does not exist. Native preflight stopped during local build before AWS executor; no controlled measurement phases ran."
+}

@@ -1,0 +1,437 @@
+06f80a8955abc5bc083022594b33f9e0aff6ddf9 2026-06-05T19:26:05-07:00 2026-06-05T19:26:05-07:00 Refactor code structure for improved readability and maintainability
+cc070f4d68302acfde4c5e8ed4ad13eceb1d5be4 2026-06-05T14:59:36-07:00 2026-06-05T14:59:36-07:00 Add benchmark results and metadata for siphash_rotate64_mixer
+439f4ca0dced8f1984461d78e49879349251b7d3 2026-06-05T14:46:50-07:00 2026-06-05T14:46:50-07:00 Add kinsn ablation configurations for various bytecode modes
+d0105616526926659284d6c8ea7dd3f978a3da85 2026-06-05T13:37:34-07:00 2026-06-05T13:37:34-07:00 Add arm64 AWS kinsn follow-up evaluation script and summary
+dd3e7097b4eeb1ab6d268371c9a4b6dfd50929ca 2026-06-05T07:04:48-07:00 2026-06-05T07:04:48-07:00 Add kinsn selector follow-up results and update configurations
+fbbd216a28a4b8c3bd6a28952a3f9ffa1a20e8e1 2026-06-04T20:32:20-07:00 2026-06-04T20:32:20-07:00 Add evaluation results and configuration for kinsn ReJIT on x86 KVM corpus
+e0d759464921464c9b38069780d234d0a6404c4e 2026-06-04T19:10:26-07:00 2026-06-04T19:10:26-07:00 Add progress and result metadata for x86 KVM corpus runs
+9af5cf074873121875b4992ed355b350d2aed39b 2026-06-03T22:37:15-07:00 2026-06-03T22:37:15-07:00 Add new metadata and result files for x86 KVM corpus runs
+73bf769aa1123b09a1b558413bf00df229347ca7 2026-06-03T18:35:55-07:00 2026-06-03T18:35:55-07:00 Refactor code structure for improved readability and maintainability
+b2e441528067b1c4f9a435a6401fb4dea18370e9 2026-06-03T14:06:08-07:00 2026-06-03T14:06:08-07:00 Refactor code structure for improved readability and maintainability
+bf542dd096d1d8a1c95fc2b55edb22b8de6f99e5 2026-06-03T13:52:33-07:00 2026-06-03T13:52:33-07:00 Add all-force kinsn evaluation summary and update configurations
+b73147c9cc9092a780774346bcfd6af32f7e478b 2026-06-03T09:46:01-07:00 2026-06-03T09:46:01-07:00 Add corpus results and metadata for x86 KVM corpus run
+b62155f5ac12a09618798f13e491842cfb0c390b 2026-06-02T16:35:06-07:00 2026-06-02T16:35:06-07:00 Add post-hoc LEA all-force corpus evaluation script and summary report
+6c02e6c00748db86b7a2568b97206acf5a008a11 2026-06-02T10:53:16-07:00 2026-06-02T10:53:16-07:00 feat: update LEA and related configurations for enhanced instruction support
+1dd24ba8fa3c2d06ddafc52b0d58e8873f5608de 2026-06-01T20:02:55-07:00 2026-06-01T20:02:55-07:00 Add results and metadata for x86 KVM corpus run
+2394ff89cb7ea3469e54b5f6ac0673a32cc929a5 2026-06-01T20:02:10-07:00 2026-06-01T20:02:10-07:00 Refactor native linking and helper resolution in native-sim
+c4b7d3b3490393d382c520d6940bacc0331fad46 2026-05-31T11:37:16-07:00 2026-05-31T11:37:16-07:00 Add results and metadata for x86 KVM corpus runs
+5e365dfe08713cd1e492e79d522beadc15da0d6a 2026-05-31T00:49:55-07:00 2026-05-31T00:49:55-07:00 cleanup: remove unused diagnostic environment variables and related code
+bd6fae74be72581c42c48f71a73bca8422e0e3a0 2026-05-30T12:14:11-07:00 2026-05-30T12:14:11-07:00 feat: enhance runner and tracee functionality
+f28ffb371676fa174aad286188197efc60ebce7b 2026-05-29T18:11:32-07:00 2026-05-29T18:11:32-07:00 bpf: Refactor register access and improve ARM64 compatibility
+7b1f965d8d6737c86056744c2488a494abe9d7ee 2026-05-29T08:45:04-07:00 2026-05-29T08:45:04-07:00 Add kernel log retrieval and filtering, enhance manifest resolution
+9f3855f6fa1c43027cfe0788615b6efb247f2a4d 2026-05-28T19:22:18-07:00 2026-05-28T19:22:18-07:00 Add native link plan and enhance map rule handling
+4a68e9424cbecb5fb1ed7898052224845bd980c6 2026-05-27T22:32:26-07:00 2026-05-27T22:32:26-07:00 Refactor native-link process to utilize structured link plans
+22129888b4e62838f70792b2295050d1c8b1f0a9 2026-05-27T21:10:22-07:00 2026-05-27T21:10:22-07:00 Refactor native linking and helper resolution in native-sim
+9aded2da6aca29d657a72ed72d6742b79316e4ba 2026-05-27T15:59:39-07:00 2026-05-27T15:59:39-07:00 Refactor native loader: Extract manifest handling into separate header
+0dc16c222d77c37813987270098d4cd6463e0924 2026-05-27T14:30:54-07:00 2026-05-27T14:30:54-07:00 Add BPF map rules for Cilium and Tracee/Tetragon applications
+295530740049b82906fe00ee465b42a845623091 2026-05-26T17:44:24-07:00 2026-05-26T17:44:24-07:00 Add corpus results and metadata for x86 KVM benchmarks
+dcebb471f74fb102c255ce357d841805df2f4191 2026-05-26T15:04:07-07:00 2026-05-26T15:04:07-07:00 Add userspace BPF runtime support and enhance native program handling
+16e4d39d76eddb03f68312e09928163a67f4def6 2026-05-25T21:02:15-07:00 2026-05-25T21:02:15-07:00 Refactor native loader and cleanup dead code
+865ec231b060201b2ea85f489dc2d79508db3d5f 2026-05-25T20:25:23-07:00 2026-05-25T20:25:23-07:00 Add result and progress JSON files for x86 KVM corpus run
+3ae4917a7493a655c3173da97c65695326ee73ea 2026-05-25T15:44:30-07:00 2026-05-25T15:44:30-07:00 ini
+d9297ac4f0f7569a3cbe05c2359cafec3b93f309 2026-05-25T15:17:59-07:00 2026-05-25T15:17:59-07:00 Enhance native loader with key offset support and post-processing for lookup calls
+71aa16eea93a307ebd57b6e98b500db75b29154f 2026-05-25T12:52:36-07:00 2026-05-25T12:52:36-07:00 Add metadata and results for x86 KVM corpus and micro benchmarks
+19adfd8280d40088713d3cc6c130b69fb0801eb1 2026-05-25T11:55:12-07:00 2026-05-25T11:55:12-07:00 Add results and metadata for x86 KVM corpus run
+ad68a93b62b9d9bd992820a3f8f7c32036f55e90 2026-05-25T00:24:59-07:00 2026-05-25T00:24:59-07:00 Refactor native loader integration across app runners
+69bf72a8cfbe5e08b60158ae2efb098d7fd17433 2026-05-24T23:45:17-07:00 2026-05-24T23:45:17-07:00 Remove arm64 native kernel smoke test from selftest and test modes
+ae7a43ebbf9cc8328873cda197655777cfafc5bc 2026-05-24T23:15:56-07:00 2026-05-24T23:15:56-07:00 Refactor code structure for improved readability and maintainability
+27b188554e20d80e591ddf36cbd529e5db3b8c03 2026-05-24T14:53:10-07:00 2026-05-24T14:53:10-07:00 Refactor BPF optimization commands and update Dockerfile
+ef5d4b3317a203ac87cd0e8e53ed51c413e2d8ed 2026-05-24T12:43:41-07:00 2026-05-24T12:43:41-07:00 Refactor BPF code to replace inline assembly with C operations for value masking
+d340a708ecc41142954e90aa1756235923fdebd8 2026-05-23T14:22:36-07:00 2026-05-23T14:22:36-07:00 Refactor WorkloadResult to support optional fields and improve composite handling
+7a25ad141ee913b68c04e60aab36f68185ee72c1 2026-05-23T13:48:54-07:00 2026-05-23T13:48:54-07:00 Refactor BPF simulation operations and update helper calls
+f04689b46f2fd6539556ae7d1ec2cf220eae4ece 2026-05-23T13:25:36-07:00 2026-05-23T13:25:36-07:00 Enhance x86 native simulation and BPF program performance
+14867b6a71cba8abb4ba94ebcab608de0f9fa5fc 2026-05-23T01:17:38-07:00 2026-05-23T01:17:38-07:00 Refactor BPF optimization commands and update Dockerfile
+6141dd1b58a670aedc464c456bb42de271c59548 2026-05-23T00:53:00-07:00 2026-05-23T00:53:00-07:00 Refactor Dockerfile and workload.py for improved module handling and workload configuration
+24702010d393388e51e0e67214bd523512f5b63c 2026-05-23T00:17:39-07:00 2026-05-23T00:17:39-07:00 Enhance Dockerfile and workload.py for improved artifact management and workload configuration
+361e40c93a4b988a07946caa7617b356feb07b35 2026-05-22T23:33:45-07:00 2026-05-22T23:33:45-07:00 feat: Update Cilium agent workload and enhance pktgen functionality
+148b85bf277933db4113fca4d76046b7f786dd9b 2026-05-22T20:15:38-07:00 2026-05-22T20:15:38-07:00 Add benchmark results and update workload profiling scripts
+9f9d57e4f2b83830437fcc10e4c8c321008a7419 2026-05-22T19:24:30-07:00 2026-05-22T19:24:30-07:00 Improve native compilation flags for better optimization and compatibility
+ddce02e7972a01ef648e84c734072a8bd2d6ee49 2026-05-22T17:23:33-07:00 2026-05-22T17:23:33-07:00 Refactor BPF programs and update inline hints
+50bf5e008dfc639271582691e3207089b47083cf 2026-05-22T15:37:50-07:00 2026-05-22T15:37:50-07:00 Refactor remote suite execution to remove unused trace logging and simplify status handling
+bc7a04c7805dbe49674dbe7670b41f692f680d3d 2026-05-22T14:20:15-07:00 2026-05-22T14:20:15-07:00 Add new micro program results and enhance AWS executor logging
+e7dab1d8e84d154a638c01cd7e10dd7112c71bce 2026-05-22T00:35:45-07:00 2026-05-22T00:35:45-07:00 Update CMakeLists.txt and build.mk for LLVM configuration
+950d0657d349483d8e3ddaedce4f56692fcb1dbc 2026-05-21T23:35:39-07:00 2026-05-21T23:35:39-07:00 Add support for performance counters in micro benchmark suite
+95f874ce71f4313867b6055fdeceed3e4bf45bfa 2026-05-21T23:25:04-07:00 2026-05-21T23:25:04-07:00 Refactor micro_exec: Remove performance counter functionality
+a6ce47a0cf2f8c6dfad28fad8389f39e1ba27b5c 2026-05-21T22:44:14-07:00 2026-05-21T22:44:14-07:00 build: update ARM64 LLVM directory to use in-repo kinsn LLVM
+da4d689571354e57f01194dd264afe6b186e3104 2026-05-21T22:31:34-07:00 2026-05-21T22:31:34-07:00 Add new results files, enhance Cilium and Katran runners, and improve AWS executor diagnostics
+8575ef9eeb7a2d78fb4f4509094a3222261b8ee0 2026-05-21T22:22:44-07:00 2026-05-21T22:22:44-07:00 Update compilation times for various BPF programs in native-sim
+b2357b721990c6dd9a8317713f66955422fdfecb 2026-05-21T20:23:20-07:00 2026-05-21T20:23:20-07:00 refactor: restructure BPF helper management and enhance JIT target decoding
+5c8f7a99359bb09f97d49b15dd5cdb640dc8451f 2026-05-21T16:29:06-07:00 2026-05-21T16:29:06-07:00 Add new result files and update build process for native linking
+b4250770a9a073a44bbba0d0bbb2edda2fcdd0d4 2026-05-21T16:17:13-07:00 2026-05-21T16:17:13-07:00 Add snapshot_app_maps function and enhance native lab runner with BTF caching
+e3f41fbf5f1d260a68f741c3671cc889b08e3738 2026-05-21T15:23:31-07:00 2026-05-21T15:23:31-07:00 Update LLVM directory path in build configuration and enhance LLVM component selection for better target support
+b4541b40973bdcb83886d05006f3999fba92b738 2026-05-21T13:08:35-07:00 2026-05-21T13:08:35-07:00 Refactor code structure for improved readability and maintainability
+258c6b7f379d427e0b135d8135387908010437ca 2026-05-21T12:22:51-07:00 2026-05-21T12:22:51-07:00 Refactor timeout handling and improve error management across various modules
+b4e6a00190924083826b7103c68894a2130834cf 2026-05-21T04:08:54-07:00 2026-05-21T04:08:54-07:00 Refactor code structure for improved readability and maintainability
+fd12585e46683ba3203e03048154ea3bdf63cf03 2026-05-20T23:59:41-07:00 2026-05-20T23:59:41-07:00 Add remaining generated artifacts
+0bfaf9bff494baa56233d3ae7a342a1dc0911547 2026-05-20T23:58:53-07:00 2026-05-20T23:58:53-07:00 Merge remote-tracking branch 'origin/main'
+331738f0c3d14e06d42398a1c70280d05bf7ac18 2026-05-20T23:58:02-07:00 2026-05-20T23:58:02-07:00 Update vendor repos and benchmark artifacts
+19aceeff48d291d0d1d3d70b485f89ad48b5926b 2026-05-20T23:06:20-07:00 2026-05-20T23:06:20-07:00 Add support for enhanced BPF map lookup site specifications and metadata
+4e345e014551c3ce1cb07830e491407df687805a 2026-05-20T22:17:28-07:00 2026-05-20T22:17:28-07:00 Implement relocation handling for multiple chunks in native lab runner
+cc4f18d1ab668c891de35c97dbea8a83a00bab10 2026-05-20T21:59:01-07:00 2026-05-20T21:59:01-07:00 Add deepflow submodule and implement shim client enhancements
+27d2799688d0dba4a39936da47cdc320bbc0562f 2026-05-20T21:47:30-07:00 2026-05-20T21:47:30-07:00 Remove bpftrace scripts and associated runner code
+41020e5e993c078e771968d20359e00a10afb6e9 2026-05-20T21:26:37-07:00 2026-05-20T21:26:37-07:00 Add ARM64 kernel image handling and improve BPF map pointer extraction
+962fab1d0ef864f9a5a832c7184d805430777b95 2026-05-20T21:15:33-07:00 2026-05-20T21:15:33-07:00 Add vmlinux_flavors.h and vmlinux_missing.h for kernel compatibility
+e7454cf5eb84ae11990051a298402f8e08a9015d 2026-05-20T20:44:43-07:00 2026-05-20T20:44:43-07:00 Merge pull request #7 from orbisai0security/fix-v001-bounds-check-before-memcpy
+fb4b36269151182d2faffde0eb688f872d4efe98 2026-05-20T18:07:36-07:00 2026-05-20T18:07:36-07:00 Enhance ARM64 support and improve REJIT handling
+bad02ea2a3dd017a93c6eaa6200713abc9d7dc0a 2026-05-20T17:39:25-07:00 2026-05-20T17:39:25-07:00 Refactor native lab runner to native kernel runner
+bc32a08b258c07553a24207175a4b1e7e2974673 2026-05-20T17:09:04-07:00 2026-05-20T17:09:04-07:00 Add new results and metadata for x86 KVM corpus runs
+df08fc6a6977f3e211ef6ec3aef165acc04a8975 2026-05-20T15:47:45-07:00 2026-05-20T15:47:45-07:00 Update native lab smoke tests and results for ARM64 and x86
+86556847fb328571a80101457a825bf22570d933 2026-05-20T15:24:51-07:00 2026-05-20T15:24:51-07:00 Add progress and metadata JSON files for x86 and ARM64 benchmarks; update Makefiles to support additional arguments for micro-proofs-run
+6262c1aab8b88864313b45be4ec74ba5f35be8cd 2026-05-20T15:20:18-07:00 2026-05-20T15:20:18-07:00 Add micro-proofs-run target and refactor Makefiles for ARM64 and x86
+e2ee107f955372272000d0fa38d2b0191e17dae7 2026-05-20T15:17:51-07:00 2026-05-20T15:17:51-07:00 Add support for wait signal functionality in micro_exec
+f424434a1e621281ae03c0b94ba9d4242b96f185 2026-05-20T15:04:09-07:00 2026-05-20T15:04:09-07:00 Refactor Dockerfile and build.mk to remove unnecessary target copies and update build commands
+3d9e01c401d6405c580fe2eb1f3943cc45cc0758 2026-05-20T13:16:59-07:00 2026-05-20T13:16:59-07:00 Add ARM64 native lab smoke test and related infrastructure
+881769eab470ea408c6c10056b56dec59fea4e54 2026-05-20T01:23:04-07:00 2026-05-20T01:23:04-07:00 Remove daemon-related artifacts and references throughout the codebase
+8282f5cd59cf5ac7cb745b641af61f00ce5873e5 2026-05-20T00:56:08-07:00 2026-05-20T00:56:08-07:00 Refactor environment variable handling and remove deprecated target files
+9be2bafcdeaa4f1696e8be27988f4b69cb113873 2026-05-20T00:34:00-07:00 2026-05-20T00:34:00-07:00 Refactor documentation and results to standardize terminology for native kernel
+52b991a4e769d6cad068d7776b04034899fe289c 2026-05-20T00:19:45-07:00 2026-05-20T00:19:45-07:00 feat: Add new runtime figures and update configuration for micro benchmarks
+f0509606926bbc0f6b145bb3bf45f4c2f2da977a 2026-05-19T23:59:26-07:00 2026-05-19T23:59:26-07:00 Add metadata and results for x86 KVM corpus runs
+cabdcde4f5fc8d46fd98548b7651356bd10336f4 2026-05-19T23:55:35-07:00 2026-05-19T23:55:35-07:00 chore: clean up code structure and remove unused code blocks
+2478e2d73e22cb6533d9109db0b8f01f70b22252 2026-05-19T23:30:51-07:00 2026-05-19T23:30:51-07:00 feat: Enhance BCC and libbpf integration in the runner
+88aa0683fddb8360b907fedc24c53a93892ad64c 2026-05-19T23:20:14-07:00 2026-05-19T23:20:14-07:00 Fix native_lab result handling and add new full native lab runtime results
+08aba8625570a8c4b48abfc345304c5c9c4aade7 2026-05-19T22:02:39-07:00 2026-05-19T22:02:39-07:00 Fix native_lab result handling and add new runtime results documentation
+819b9614cf584d01412e19065c224a91ea37b9c8 2026-05-19T21:35:21-07:00 2026-05-19T21:35:21-07:00 Enhance BPF execution plan with mutex protection for kernel program ID and update Dockerfile to streamline test artifact copying
+a224c1d640776d32f1456f220cc510067621fc5f 2026-05-19T20:55:51-07:00 2026-05-19T20:55:51-07:00 Add BPF state management in shim_state.h and update rejit.py error handling
+5cfa2a789bcba751b77bd6810284d9fa0cbb2bc6 2026-05-19T20:37:00-07:00 2026-05-19T20:37:00-07:00 Add benchmark results and metadata for x86 KVM micro test
+5e50cd7d3b7cb11be72e999f432dd4eca5a5aede 2026-05-19T19:31:26-07:00 2026-05-19T19:31:26-07:00 bpf: refactor rotate instruction handling and add unit tests
+b92b797eafa34bc35704adb769ae9ee07f02ea60 2026-05-19T18:45:51-07:00 2026-05-19T18:45:51-07:00 Refactor BPF barrier handling and improve ARM64 instruction emission
+36d905946da98835ed563fd500dde7d68b430992 2026-05-19T18:19:31-07:00 2026-05-19T18:19:31-07:00 Refactor build paths and update kernel image references
+8f7bb430d6dd2ebf2e5f69e5ba99fbc935be0c35 2026-05-19T17:19:11-07:00 2026-05-19T17:19:11-07:00 Add metadata file, update LLVM submodule, and enhance BPF programs
+1271a48f4257e02caf766bfd0d4a3ead9ef9b609 2026-05-19T17:05:20-07:00 2026-05-19T17:05:20-07:00 Update .dockerignore and documentation for new build paths and known failures
+c7e9627e814f24808a92c65211981fa0cca8df1d 2026-05-19T16:56:07-07:00 2026-05-19T16:56:07-07:00 Add benchmark results for memory-local and control-flow categories
+0d5d179528bdfc470f2d65bb059ef9d7fbdf7f49 2026-05-19T16:53:16-07:00 2026-05-19T16:53:16-07:00 Refactor Makefiles and Dockerfile for improved build configuration and clarity
+5be24f27f1b03d4c87198f08440689b2132557d8 2026-05-19T15:22:25-07:00 2026-05-19T15:22:25-07:00 Update documentation to preserve history and increase inner repeat count for micro benchmarks
+1735fece630e7b15773396738b8b2fbbf909c391 2026-05-19T15:13:53-07:00 2026-05-19T15:13:53-07:00 Increase inner repeat count for micro benchmarks and update Dockerfile for artifact paths
+25a3755fcc5606320caffcc10e25fed719c32ec3 2026-05-19T15:01:52-07:00 2026-05-19T15:01:52-07:00 Add new benchmarks and update Dockerfile for runtime environment
+feae9dfe55651f6f2cb80d2122fab47198ea5ae1 2026-05-19T14:41:08-07:00 2026-05-19T14:41:08-07:00 Refactor Makefile and BPF programs for improved functionality and performance
+22667be0d27f6c98f563bcd1a134e7d87047b191 2026-05-19T14:22:50-07:00 2026-05-19T14:22:50-07:00 Add support for cgroup skb input and result channel in micro simulation
+9ed2013079d3c537870c4d3b8f94b2e4b5bb054f 2026-05-19T10:59:05-07:00 2026-05-19T10:59:05-07:00 Add new BPF object file and update README and simulator spec to document ABI mismatches
+2c2277b95ffa559be9974602438ea65201e7e080 2026-05-19T10:25:13-07:00 2026-05-19T10:25:13-07:00 Add MOVBE and POPCNT instruction implementations for BPF
+72eaefa8e003ade5b3ded7769ae977f74e11b833 2026-05-19T09:24:33-07:00 2026-05-19T09:24:33-07:00 Add new BPF object and metadata files for x86 KVM corpus results; enhance x86 simulator with union for general-purpose registers
+0d740a9c4ccde49861c07c583dfaed4de0800443 2026-05-19T09:02:32-07:00 2026-05-19T09:02:32-07:00 Add support for persistent shim work directories and update Makefile for dynamic linking
+be12ab6ba4687e31c887af594058a2ab9a06ca07 2026-05-19T08:45:40-07:00 2026-05-19T08:45:40-07:00 Inject LD_PRELOAD shim and BPFREJIT_SHIM_SOCK_DIR into BCCRunner environment to ensure libbpf calls are routed through the bpfrejit shim, preventing ENOENT errors on reload requests due to missing per-pid shim sockets.
+4277d35af2eb42c124c9fe81b83b9e9265b637fe 2026-05-19T06:10:53-07:00 2026-05-19T06:10:53-07:00 Add benchmark result files for void register ABI tests
+86e6b03965e4a49cf21ea93a5f853a62e299cecd 2026-05-19T06:09:19-07:00 2026-05-19T06:09:19-07:00 bpf: enhance mov instruction handling and improve memory access in x86 simulation
+fef7f5f299a5717a10f34a4fc9bafac997b80536 2026-05-19T05:42:44-07:00 2026-05-19T05:42:44-07:00 Implement XDP and SKB entry macros in x86 simulator
+7c7c431daaa60a94db2451355b0709b7737cde66 2026-05-19T05:18:17-07:00 2026-05-19T05:18:17-07:00 Remove unreachable code from BPF programs and update build scripts
+83d891de35cf785d2a8a3e1146b5d8d8bed605ff 2026-05-19T05:12:01-07:00 2026-05-19T05:12:01-07:00 Refactor x86 simulator to remove ghost pointer metadata
+c739b9a5ad56e3ab2f550d5c928ceb0ef265959e 2026-05-19T04:55:28-07:00 2026-05-19T04:55:28-07:00 Add benchmark metadata for micro BPF tests and update simulator documentation
+0ba581f9ebb1481dc7b7d396001fb038eb832eb8 2026-05-19T04:42:32-07:00 2026-05-19T04:42:32-07:00 Refactor code structure for improved readability and maintainability
+6063cc3014441b3919c695d19c4e293fb8347cb2 2026-05-19T04:34:48-07:00 2026-05-19T04:34:48-07:00 Refactor Dockerfile and build scripts for improved artifact management
+c145d1c1e6e6421952ad6fd994126e0865a8795f 2026-05-19T04:02:58-07:00 2026-05-19T04:02:58-07:00 Refactor Dockerfile and build scripts to streamline artifact management and remove unused dependencies
+cf99d5c07eacd819050bcf98adbb8d548d6f37e4 2026-05-19T02:42:41-07:00 2026-05-19T02:42:41-07:00 Refactor BPF micro-program generation and enhance program kind detection
+cf67b765479e2c5c1bc71f077c34b31e8667c233 2026-05-19T02:18:44-07:00 2026-05-19T02:18:44-07:00 Update benchmark results and add new README files for native linking
+1e457f23849936af6286ec047e9656a3b419fef9 2026-05-19T02:03:47-07:00 2026-05-19T02:03:47-07:00 Update correctness-first results and enhance micro simulation batch processing
+f2b52e78aef1032d7e9f6d060b0e6413d5d0a0a9 2026-05-19T01:51:09-07:00 2026-05-19T01:51:09-07:00 Add x86 simulator enhancements: implement non-faulting DIV semantics, update stack handling, and refine README and TODO documentation
+62f9114e7a47fb312d488e30ed375f18d3978645 2026-05-19T01:43:44-07:00 2026-05-19T01:43:44-07:00 ihiini
+4a772edb107c311cbd91a7649727e875bc79f1f7 2026-05-19T00:06:17-07:00 2026-05-19T00:06:17-07:00 Add progress and metadata JSON files for x86 KVM corpus results; update README and TODO for simulator improvements
+1ecaa2970cac54df09e0cf9b1c0cedae92c1468a 2026-05-18T23:54:27-07:00 2026-05-18T23:54:27-07:00 Refactor Katran integration and update build processes
+b82b56c7b604f7fa273571d5aaa428d1cb54bfbb 2026-05-18T23:49:05-07:00 2026-05-18T23:49:05-07:00 Refactor x86 simulator stack operations and remove Katran artifacts Dockerfile
+3a9e72569555a6a036125b02354e8e2e31a64891 2026-05-18T23:32:30-07:00 2026-05-18T23:32:30-07:00 Refactor x86 simulator and add correctness-first compile check
+68809708354b590e04012e3eee7fbb007dc7aa9a 2026-05-18T21:59:27-07:00 2026-05-18T21:59:27-07:00 Refactor kernel artifact extraction and build processes
+190dc585f6901e85eb2c36360c0539adc7e23806 2026-05-18T21:29:41-07:00 2026-05-18T21:29:41-07:00 Fix build rule for Katran artifacts to use clang and update file checks
+a492dc8e110cf18fdde955a5cc8eb7a07b5363db 2026-05-18T21:22:32-07:00 2026-05-18T21:22:32-07:00 Refactor native simulation and update paths
+a848912b37fec71e99b3ac2d139198aa2fea26ae 2026-05-18T21:12:38-07:00 2026-05-18T21:12:38-07:00 Refactor runner components and update dependencies
+06c95aec000771c44575c285b5abacfc9dd41ac8 2026-05-18T20:10:47-07:00 2026-05-18T20:10:47-07:00 feat: Add BEXTR kinsn support for x86 architecture
+24e144a5f3f6dc9f325a48241744ed385db3aff8 2026-05-18T18:59:51-07:00 2026-05-18T18:59:51-07:00 feat: Add vendor submodules for BPF projects and update build configurations
+acc0b0d8d416ef6f6aa39fb68ba16abbd93f3814 2026-05-18T17:12:57-07:00 2026-05-18T17:12:57-07:00 refactor: Remove sparse clone fallback for Katran in Dockerfile; enforce presence of source in build context
+6b8c94d82780e579d3538630ff9cdc214c967e63 2026-05-18T17:03:48-07:00 2026-05-18T17:03:48-07:00 refactor: Remove unused Calico images and related code from Dockerfile; clean up BPF helper functions and DaemonSession class
+e93d4f43b41d1b40dfff456080af48891e5e1c57 2026-05-18T16:38:09-07:00 2026-05-18T16:38:09-07:00 feat: Add kinsnprober for probing loaded kinsn BTF modules
+0b89b59b966f3703f4711f5ff6498ceea442496a 2026-05-18T14:28:11-07:00 2026-05-18T14:28:11-07:00 Implement BPF Rejit Shim and Refactor Daemon Integration
+a00582084cc3c5f3534cecfac665c8c2fc9871e0 2026-05-18T13:13:05-07:00 2026-05-18T13:13:05-07:00 Refactor kernel runner and driver: remove signal control handling and streamline command execution
+14525fa3d02c0a807bc83dde47f2f4a015965d9a 2026-05-18T12:55:42-07:00 2026-05-18T12:55:42-07:00 Enhance BPF programs with deterministic identity helpers and update YAML benchmarks
+fe63acd5d59560b5abc8cc40fe4fda1ada20167d 2026-05-18T12:24:26-07:00 2026-05-18T12:24:26-07:00 Refactor and enhance native lab support in micro suite
+5584a00844bdd0b1e25fa47b05869c412c0856db 2026-05-18T12:09:20-07:00 2026-05-18T12:09:20-07:00 Add LLVM kinsn backend path documentation and usage instructions
+c43a7e4365df43d537992933d816a89df30465f4 2026-05-18T00:21:52-07:00 2026-05-18T00:21:52-07:00 Add per-call-site routing for bpf_map_lookup_elem in native lab
+88ba8ca07a60c399707e4b15b61e3e840821aa74 2026-05-18T06:51:36Z 2026-05-18T06:51:36Z fix: V-001 security vulnerability
+7011eb21190a84a415ae7ce793fb33634c8dbf63 2026-05-17T23:16:11-07:00 2026-05-17T23:16:11-07:00 Enhance prog_data structure and memory management for BPF programs
+ceb6f2d9fd80bce9aa15a66920ffded53154a253 2026-05-17T22:56:00-07:00 2026-05-17T22:56:00-07:00 Add Stage 2 tests for various BPF map types and enhance native linking
+81e9387c44e6322013c5aae1571d4e6cbae998cd 2026-05-17T22:02:43-07:00 2026-05-17T22:02:43-07:00 Add micro_handcraft.h and integrate handcraft program support
+8dc353a666b75346154d0f5daf912d6a4a672ab2 2026-05-17T21:49:35-07:00 2026-05-17T21:49:35-07:00 Add Stage 2 inline hash lookup support for BPF maps
+eaf1b8c782b6014419d14908ab185a3b2efdb935 2026-05-17T21:17:26-07:00 2026-05-17T21:17:26-07:00 bpf: Enhance native lab with side-band relocations and ELF support
+81ddd4584af906a2a0f262c33196fae6de75a819 2026-05-17T20:57:50-07:00 2026-05-17T20:57:50-07:00 x86: Enhance handling of architecture-specific registers and LEA instructions
+90858297858ec8908c5f5fac019eb27f6e64b023 2026-05-17T19:43:32-07:00 2026-05-17T19:43:32-07:00 x86: Enhance BPF register handling and improve native lab runner
+c6d1ff509dd2171010eb124ac86291acf4767a7c 2026-05-17T18:45:51-07:00 2026-05-17T18:45:51-07:00 x86: Add support for the INCB instruction and enhance related functionality
+5f64297253be089f17d1b76ee06739109b239611 2026-05-17T18:29:26-07:00 2026-05-17T18:29:26-07:00 Add BPF x86 native-code lab for testing arbitrary byte sequences
+68ccd248ed3c836e1a7fd24b71d69d947774f313 2026-05-17T17:39:28-07:00 2026-05-17T17:39:28-07:00 Remove unused binary file from native_lab tests
+920fcc28a8c18a4942fb0937067704a380b3a573 2026-05-17T16:58:17-07:00 2026-05-17T16:58:17-07:00 bpf: Add x86 native-code lab kinsn for testing arbitrary byte blobs
+43a37edbeb901a91745faac43679aa2436e3bf24 2026-05-17T16:50:30-07:00 2026-05-17T16:50:30-07:00 Refactor eBPF VM: Enhance loop handling and add new features
+4f357e30012d9555e1c91d48eb97454c28e54db2 2026-05-17T16:09:49-07:00 2026-05-17T16:09:49-07:00 Add BPF_REJIT shim for intercepting BPF-related syscalls
+2d9a9a9d44df3ce7e8bd9d926f02ef85b5b4555e 2026-05-17T15:57:48-07:00 2026-05-17T15:57:48-07:00 Remove x86 branch instructions and related files
+4ab080738dabe53211ffb0a77e4501c37fc86cbe 2026-05-17T12:06:30-07:00 2026-05-17T12:06:30-07:00 Refactor eBPF VM return handling and improve micro program execution
+8a118e20567e289ecb04c81c3c4eb95afe72fb5d 2026-05-17T11:58:48-07:00 2026-05-17T11:58:48-07:00 Remove obsolete BpfReJIT test files
+5b01a36b0ccc88c9e0e5099c76d6a102f5d20f80 2026-05-17T11:41:32-07:00 2026-05-17T11:41:32-07:00 Update linux-framework submodule to latest commit
+fd0a42607fa86bd1725a9c14bb48ef17e6483c8d 2026-05-17T11:21:13-07:00 2026-05-17T11:21:13-07:00 Update linux-framework submodule to latest commit c23719ab
+d207cb44e132c2ca1cc689b1f2eb28ce000dd0ef 2026-05-17T11:17:21-07:00 2026-05-17T11:17:21-07:00 Add benchmark results and metadata for packet Toeplitz RSS hash
+01ed207aedce2e2151e8df58a55a4fcadef08ba7 2026-05-17T00:25:13-07:00 2026-05-17T00:25:13-07:00 Add benchmark results and error handling for flow_5tuple_rss_hash
+0298bb3a092d7d5327eaa010e11114bce647d098 2026-05-16T21:51:42-07:00 2026-05-16T21:51:42-07:00 Add benchmark results and error handling for flow_5tuple_rss_hash
+3a32d7981a24f8792d2df723d668439e08aad668 2026-05-16T20:41:57-07:00 2026-05-16T20:41:57-07:00 x86/bpf: Optimize immediate value handling in ALU and CMOV instructions
+8c1baa22fc7861c5b4409f4551fc7f12bd4d2c48 2026-05-16T19:29:52-07:00 2026-05-16T19:29:52-07:00 Add support for branch proofing in x86 BPF instructions
+0424622278d33d3be3f1e3dc94a1bbe59bc58f45 2026-05-16T18:30:03-07:00 2026-05-16T18:30:03-07:00 Add benchmark results and metadata for x86 KVM micro-benchmarks
+a3ce662299b44f363bd01d2874d5db222a6c3048 2026-05-16T17:52:33-07:00 2026-05-16T17:52:33-07:00 Add x86 branch instructions support to BPF
+c72430f675065e72bac8b1d1d961cca280f5516b 2026-05-16T17:39:21-07:00 2026-05-16T17:39:21-07:00 Add new contract JSON files and enhance x86 instruction set support
+dc31bdf990a4f8e2cbe3e53084dfbf7631fe5d87 2026-05-16T16:30:25-07:00 2026-05-16T16:30:25-07:00 bpf: Refactor and rename various BPF kfuncs and instructions for ARM64 and x86 architectures
+01f5ca0f82bcc1be083642664e33721a48a68cea 2026-05-16T11:25:37-07:00 2026-05-16T11:25:37-07:00 Refactor code structure for improved readability and maintainability
+e6be1326f76a27edda821cf786e07ab1cc0d28f7 2026-05-16T11:03:22-07:00 2026-05-16T11:03:22-07:00 Refactor code structure and remove redundant code blocks for improved readability and maintainability
+8f7cf87a9ff783b92f5701df36da2c2b6d993e8a 2026-05-16T01:34:15-07:00 2026-05-16T01:34:15-07:00 Refactor BPF x86 function names and update related descriptors
+10649778adaa6a432c3d39b6d52ec87f7d1e83f4 2026-05-16T00:42:57-07:00 2026-05-16T00:42:57-07:00 Refactor conditional move instruction handling in BPF
+d69e9fae2c627684c23b3436975211ef97ac1e3b 2026-05-16T00:03:56-07:00 2026-05-16T00:03:56-07:00 Refactor code structure and remove redundant code blocks for improved readability and maintainability
+633eba503390add3a510f8411cc271d76e3d0271 2026-05-15T22:00:36-07:00 2026-05-15T22:00:36-07:00 x86: Refactor instruction emission and payload handling
+aeec0cac886018a82792a2608e655b7eb5092881 2026-05-15T17:40:36-07:00 2026-05-15T17:40:36-07:00 Add new BPF instructions and enhance unit tests for x86 architecture
+677acc3eb5c0e497eace0645c35e6de862b54d03 2026-05-15T13:34:18-07:00 2026-05-15T13:34:18-07:00 Add new BPF object file for tracee tracing functionality
+5b4366664df7cdba24225da9692f361a4cf162a5 2026-05-15T10:31:48-07:00 2026-05-15T10:31:48-07:00 Add new x86 instructions and corresponding tests for ALU operations
+b2287033dfcc79fa71cfa577e7bc30cea91da21b 2026-05-15T01:27:50-07:00 2026-05-15T01:27:50-07:00 bpf: Add new rotate instructions for x86 architecture
+36e624b3c0a5c8e83378589441ae32f44d7bb43a 2026-05-14T23:58:12-07:00 2026-05-14T23:58:12-07:00 Refactor code structure for improved readability and maintainability
+627780a5f2483ba8facc0b7d022593c97c167acf 2026-05-14T22:45:56-07:00 2026-05-14T22:45:56-07:00 Add benchmark results and metadata for x86 KVM micro tests
+162cd4c700e0013fd18074943a856cb2d35401d0 2026-05-14T22:36:05-07:00 2026-05-14T22:36:05-07:00 Add benchmark results and metadata for x86 KVM micro tests
+04ee94932d9cff8e83037ed11e990490a609d697 2026-05-14T22:25:09-07:00 2026-05-14T22:25:09-07:00 Add new benchmarks and update handcraft instruction set for x86
+e155a7bd544776b18a90e655b27c7ece10034fa8 2026-05-14T21:43:46-07:00 2026-05-14T21:43:46-07:00 Add new benchmarks and enhance error handling in micro BPF runner
+8e2e75f88621cc5a2e570a3ee8ea6bb32cb037bb 2026-05-14T21:19:41-07:00 2026-05-14T21:19:41-07:00 Add micro benchmark results and update Dockerfile and executor for new programs
+735fc989d050a3d651c8853f914c4ccd492aaff9 2026-05-14T20:17:46-07:00 2026-05-14T20:17:46-07:00 Add support for handcraft micro programs and related metadata
+361875ca9a5ac8762bb26758f2822a27591b340d 2026-05-14T19:38:45-07:00 2026-05-14T19:38:45-07:00 Refactor code structure for improved readability and maintainability
+d6e578d23fc85f34671edcc64c5c83c02149a7c5 2026-05-14T18:38:40-07:00 2026-05-14T18:38:40-07:00 bpf: add MOV register-to-register instructions for arm64 and x86 architectures
+d1d3f03838627d85a703d69229cd9fe9cb932cb3 2026-05-14T18:05:06-07:00 2026-05-14T18:05:06-07:00 Add x86 kinsns for byte-order, conditional moves, memory loads, and stores
+05fa0c7ea3e942a4e08b5c83db5303408b6d4946 2026-05-14T17:26:43-07:00 2026-05-14T17:26:43-07:00 bpf: Add new kinsns for ARM64 and x86 architectures
+1b788815cb908bee11b2b1d5e688da215f9dd79b 2026-05-14T17:21:33-07:00 2026-05-14T17:21:33-07:00 Refactor KVM run configuration and update BPF function registrations
+b3de7a33b03a30b7f383eaa5258a826076b20d45 2026-05-14T16:27:22-07:00 2026-05-14T16:27:22-07:00 bpf: Add x86 kinsns for MOV SIB, MOVBE SIB, and POPCNT
+4f24bd29b0b86067fd9644e3a5d1cc6702d33175 2026-05-14T15:57:37-07:00 2026-05-14T15:57:37-07:00 Add support for custom bpfopt executable in bpfopt-loader
+6da64ddeab462004b28b0d3172003bf62bac29ee 2026-05-14T15:12:12-07:00 2026-05-14T15:12:12-07:00 Add LLVM support and enhance verifier state handling
+2a12b8fbf4971362786f14ee031599c0bdc7e04b 2026-05-14T14:44:40-07:00 2026-05-14T14:44:40-07:00 Refactor code structure and remove redundant sections for improved readability and maintainability
+d910d1cdfc1758df41528bddfbfe83a73d65ec1c 2026-05-14T13:55:43-07:00 2026-05-14T13:55:43-07:00 Enhance native runner to retrieve native symbol size
+305284066fc108c37b648af944695dc02c2888bd 2026-05-14T13:33:24-07:00 2026-05-14T13:33:24-07:00 Add native execution support and refactor related components
+59b8e1445acfd19f41adb3b4236898ff6f598a8d 2026-05-14T13:02:47-07:00 2026-05-14T13:02:47-07:00 fix: update katran workload definitions and add new input generator functions
+5f82950df5f1f3c2c49bcdaaa658600444502541 2026-05-14T12:53:09-07:00 2026-05-14T12:53:09-07:00 Refactor input generator specifications and remove unused builders
+9accaf525377598aea692604fa3e06cfc674339e 2026-05-14T12:14:36-07:00 2026-05-14T12:14:36-07:00 Refactor and enhance input generator functions and specifications
+f3d221af69ace4aef1fcc2d9d05877c88d408e37 2026-05-14T11:50:27-07:00 2026-05-14T11:50:27-07:00 Remove benchmark set argument from micro suite parser and driver
+477b22b1d4a26aa0ae5a4438d7f18a596a0b6e21 2026-05-14T11:41:48-07:00 2026-05-14T11:41:48-07:00 Add support for katranc binary and enhance Katran integration
+fed5531cd05c3414ae59527f552dbc6e68e9a65f 2026-05-14T01:37:10-07:00 2026-05-14T01:37:10-07:00 Add corpus results and documentation for bpfopt verifier-state proof design
+7e4a3838136c7de4052243cd57c265b01aae9409 2026-05-14T01:27:03-07:00 2026-05-14T01:27:03-07:00 feat: Enhance Katran configuration for UDP support and add pktgen workload
+5b8ffb3fae4f5a780ad0a6cc1e74d0fe3c4c0ba1 2026-05-14T00:41:40-07:00 2026-05-14T00:41:40-07:00 Add results and metadata for x86 KVM corpus run on 2026-05-14
+653f15b280c30ca480564d5ff4829d89c2355057 2026-05-14T00:01:19-07:00 2026-05-14T00:01:19-07:00 Implement Katran map inline optimization with const propagation and dead code elimination
+2ec1dda46f99884e0d14c1da06b6a64397fabef9 2026-05-13T22:12:47-07:00 2026-05-13T22:12:47-07:00 Add documentation for Katran JIT capture and map_inline runtime key improvements
+3dc1a304c1da81ef6690f3e0c9fa59dc34420788 2026-05-13T21:46:57-07:00 2026-05-13T21:46:57-07:00 feat: Add new JSON result files and metadata for AWS ARM64 and x86 KVM corpus runs
+b80cbb894e6c6739b26deb5b637b2dca6a417a8a 2026-05-13T21:19:29-07:00 2026-05-13T21:19:29-07:00 Add result and progress JSON files for x86 KVM corpus run
+6273b6497908491b1f6224d747ac2ae37c2016d2 2026-05-13T20:13:55-07:00 2026-05-13T20:13:55-07:00 Add analysis and results for Katran optimizations and corpus run details
+9cdab0d259efabb06f7dd53da09f70538e519902 2026-05-13T19:36:17-07:00 2026-05-13T19:36:17-07:00 feat: Enhance bpfopt-loader with Katran support and BPF_PROG_TEST_RUN options
+9c44f268d2aaf6d441b6998bbed535d9e45d9d83 2026-05-13T19:20:12-07:00 2026-05-13T19:20:12-07:00 feat: Enhance KVM support and Katran integration
+b26b53765e57f77f3c0ff5bf581c0b303a90e43f 2026-05-13T17:41:25-07:00 2026-05-13T17:41:25-07:00 feat: Add Katran optimization and Tetragon kprobe documentation
+bb809fb866cfd1e75285c6608cbc45c25ba5ce69 2026-05-13T16:23:45-07:00 2026-05-13T16:23:45-07:00 Add support for 64-bit rotate operations in BPF
+0a952ac422f2263cffa9fd68bce7c3213da91223 2026-05-13T15:46:02-07:00 2026-05-13T15:46:02-07:00 Enhance noop pass configuration with live JIT dump options and enable LLVM feature in Dockerfile
+412ff283d4175282a8f09187b626811faf9deae3 2026-05-13T14:22:18-07:00 2026-05-13T14:22:18-07:00 Add evidence documents and enhance micro execution for kernel ReJIT
+686a8dd109bf0c6423b2b8a6830a0bb6f0867430 2026-05-13T13:54:44-07:00 2026-05-13T13:54:44-07:00 Add signal control options to kernel runner for enhanced execution management
+f80039d33a00bda0ba1b07ae3e3013ce7b6b09be 2026-05-13T12:57:21-07:00 2026-05-13T12:57:21-07:00 Add katran_like packet generator and update map_inline audit comments
+72083df54ed122c7375db946b48a06a79c6e2214 2026-05-13T12:29:18-07:00 2026-05-13T12:29:18-07:00 Add results and metadata for x86 KVM corpus run on 2026-05-13
+338f7df28d13a5c8c1814d5c23f1ff794fa10abc 2026-05-13T11:59:11-07:00 2026-05-13T11:59:11-07:00 Add new BPF optimization passes and update evaluation documentation
+7433ee38aaf6107fb76060ef51f947a36074ab37 2026-05-13T02:18:06-07:00 2026-05-13T02:18:06-07:00 Add bulk memory verifier states audit and fix logging issues
+332213011ccb979901bedfd30644dd22c697e600 2026-05-13T02:16:01-07:00 2026-05-13T02:16:01-07:00 Enhance ProgramCFG API documentation and remove unused memcpy alias skip reason
+309f3adbb29233dcd113e8774748e33d9db99256 2026-05-13T00:02:00-07:00 2026-05-13T00:02:00-07:00 Add result and progress metadata for x86 KVM corpus runs
+e3507fdb7a0dcf32b77a9f06811b6c30d38b9e4f 2026-05-12T23:17:05-07:00 2026-05-12T23:17:05-07:00 Add results and metadata for x86 KVM corpus run on 2026-05-13
+ebb21e7a104216cda9934927c5699b237f659bde 2026-05-12T22:39:27-07:00 2026-05-12T22:39:27-07:00 Enhance rotate pass and tests: improve tmp_reg handling and add new test for tetragon masked high32 shape
+e00a570cb1f888462945e3c45e4365a449c1e4bc 2026-05-12T22:21:47-07:00 2026-05-12T22:21:47-07:00 Add results and metadata for katran application benchmark
+a3b833bf8657db2052dbba346b9d2b2ad36edf5c 2026-05-12T22:00:14-07:00 2026-05-12T22:00:14-07:00 Add progress and metadata files for x86 KVM corpus runs
+e64a8d07e66eea767b2f7e7498ac8b40f9a9a8da 2026-05-12T21:47:39-07:00 2026-05-12T21:47:39-07:00 Refactor BPF optimization passes and update configurations
+472994cdd34ffae73f59069f89451163e4bf6969 2026-05-12T21:28:12-07:00 2026-05-12T21:28:12-07:00 Add progress and metadata JSON files for x86 KVM corpus results
+6c6b181be6ba4dd690a9f51d12e30a3f1d4a685d 2026-05-12T21:18:34-07:00 2026-05-12T21:18:34-07:00 Add result, progress, and metadata files for x86 KVM corpus run
+5753482c584aed820fd00a7449940187052ccf88 2026-05-12T20:50:07-07:00 2026-05-12T20:50:07-07:00 Refactor BPF optimization passes to improve code clarity and consistency
+059d23349dc0c74842b85fdfcd59948f11259f63 2026-05-12T20:43:02-07:00 2026-05-12T20:43:02-07:00 Add results and metadata for x86 KVM corpus run
+c86b8e9dcdd644ec43e74006b2856b215e527c31 2026-05-12T20:24:17-07:00 2026-05-12T20:24:17-07:00 Update corpus results and metadata for x86 KVM benchmarks
+2499c2da227e34912cea88f018ccb244a1e02533 2026-05-12T20:19:06-07:00 2026-05-12T20:19:06-07:00 Add progress and metadata JSON files for x86 KVM corpus run
+3ec55eeb9fadaa7b09f4809c1c3e89f71ad3a4f5 2026-05-12T20:07:53-07:00 2026-05-12T20:07:53-07:00 Add results and documentation for x86 KVM corpus run
+bcdd7851d0ec3cf212ed7a4715066e78cb75157f 2026-05-12T19:37:29-07:00 2026-05-12T19:37:29-07:00 Add results and metadata for x86 KVM corpus run on 2026-05-13
+603ed212b4b56349db8d477b8b9ced8fe990e9ec 2026-05-12T18:33:29-07:00 2026-05-12T18:33:29-07:00 Add results and metadata for x86 KVM corpus run on 2026-05-13
+37e8c7b0e44aeb10ad8ffbb4fb5b60bf1682ed6f 2026-05-12T17:59:29-07:00 2026-05-12T17:59:29-07:00 Refactor passes to use ProgramCFG instead of BBProgram
+1fc232a40b8432ee0fbc9ed5c09526fbc037bf5e 2026-05-12T17:56:51-07:00 2026-05-12T17:56:51-07:00 Add error reporting and result details for x86 KVM corpus run
+b8a9d834f13374e43dc6d2ff909ae10b40b66b3b 2026-05-12T17:53:19-07:00 2026-05-12T17:53:19-07:00 Add result and progress JSON files for x86 KVM corpus run
+4e5fad8c5fdce8ac323c06cc7004f4307c5752b9 2026-05-12T15:56:41-07:00 2026-05-12T15:56:41-07:00 Add progress and result metadata for x86 KVM corpus runs
+4236d2d0a5293c7997b9b8dc404494e1bda12058 2026-05-12T15:46:21-07:00 2026-05-12T15:46:21-07:00 Refactor BPF optimization and analysis code
+e2034ce85522e53ad28e3573202d116eb89e498b 2026-05-12T15:27:59-07:00 2026-05-12T15:27:59-07:00 Add progress and result metadata for x86 KVM corpus runs
+924ddb295deefd4c6ca0e3aeedce9eb70377954b 2026-05-12T14:44:38-07:00 2026-05-12T14:44:38-07:00 Add detailed reports for Cilium and Tetragon cond_select losses
+31771cd78d0b190d837c2b71a0aadba6bca2b042 2026-05-12T14:20:58-07:00 2026-05-12T14:20:58-07:00 fix: resolve map_inline issues in otel and katran benchmarks
+3512a79e922aa190dd4a27d6dc24a2c1e9c156fe 2026-05-12T14:18:40-07:00 2026-05-12T14:18:40-07:00 Add progress and metadata files for x86 KVM corpus runs
+18ff261a0677c7234aadc5baa04c66524bf72bbd 2026-05-12T13:25:37-07:00 2026-05-12T13:25:37-07:00 Fix BR daemon target.json preparation and cond_select diamond handling
+1fda6be28e309fa19bfc7a3f3274e8ed12f9bfb3 2026-05-12T13:20:47-07:00 2026-05-12T13:20:47-07:00 Add results and metadata for x86 KVM corpus runs
+fb8758dc5864ad68c5487db91f2776b792a7e3bd 2026-05-12T12:31:38-07:00 2026-05-12T12:31:38-07:00 Add results and metadata for x86 KVM corpus runs
+a8c5b966f1d2d63ac85bff4e76d6072d4d2de047 2026-05-12T11:09:22-07:00 2026-05-12T11:09:22-07:00 Refactor mutation methods in BBProgram to use a transactional rollback pattern for improved safety and clarity
+3969eb16d489993499061b7502c2b79ab0810c1d 2026-05-12T10:45:36-07:00 2026-05-12T10:45:36-07:00 Add results and metadata for x86 KVM corpus runs; cleanup review notes
+9a61ab1a9efd68d719a18f4d8ae1d15be562989a 2026-05-12T10:01:37-07:00 2026-05-12T10:01:37-07:00 Refactor code to remove MakeReplacement enum and update related functions for improved clarity and consistency
+14d9c19d5bcd2a33161588b43a910b289b016cda 2026-05-12T09:08:01-07:00 2026-05-12T09:08:01-07:00 Refactor const propagation tests to remove unused cases and improve clarity
+0dec9e22ec9b402fac5137340159442ea49ecfd7 2026-05-12T08:54:07-07:00 2026-05-12T08:54:07-07:00 Refactor map_info handling to replace MapInfoResult with MapInfoBySite for improved clarity and efficiency
+b7e1b3a89c5b655230caa3186fd7d2c60be0cfdb 2026-05-12T08:38:51-07:00 2026-05-12T08:38:51-07:00 Refactor KinsnDescriptor to replace canonical_name with name and remove unused proof_len functions across multiple passes
+b42632e04cf1ad24dba7fc75f1c03c5fe260f2ee 2026-05-12T08:30:36-07:00 2026-05-12T08:30:36-07:00 Refactor BPF optimization passes for improved clarity and performance
+44be6efbfb2bfaabc49b01261528e9ed189252e2 2026-05-11T22:44:16-07:00 2026-05-11T22:44:16-07:00 Implement V4c fix cleanup and V5 architectural refactor documentation
+08b51e1b5d22142146574cae4198768e457fe76c 2026-05-11T21:06:03-07:00 2026-05-11T21:06:03-07:00 Refactor passes to remove MakeReplacement usage and improve site skipping
+01e1a7bbb29492132f1e5a8342edc24390e976a1 2026-05-11T20:14:34-07:00 2026-05-11T20:14:34-07:00 Refactor BPF optimization passes to improve code structure and maintainability
+496c82a0b62876b2b87c59a0cf547936c72b40d3 2026-05-11T18:38:22-07:00 2026-05-11T18:38:22-07:00 feat: Add P3 Quality Cleanup, Redundancy Audit, and Wrapper Purge Reports
+c6338744dd98f6cbe6221d5d89d20a05edefad4c 2026-05-11T18:25:31-07:00 2026-05-11T18:25:31-07:00 Add Phase 3 Review Documents for map_inline Simplification and BBProgram Migration
+d13f616f6129ea5a5be26c874de1fe21598cba57 2026-05-11T17:14:24-07:00 2026-05-11T17:14:24-07:00 feat: Add Phase 3 BBProgram Migration Design Review documentation
+965a259e6e794f78fd24136078d2d3e8ed9f7268 2026-05-11T15:28:19-07:00 2026-05-11T15:28:19-07:00 Refactor BPF optimization passes to adhere to new API contract
+ab62bef9f961c996b0904f107b01827655cbb422 2026-05-11T14:29:04-07:00 2026-05-11T14:29:04-07:00 Refactor BPF passes to use InsnSite for site management
+ee5c4f13403e775fef5273bccdb76d7fcdbf32c6 2026-05-11T11:44:29-07:00 2026-05-11T11:44:29-07:00 docs: Add Phase 3 reports for remaining pass cleanup and fresh-eyes reviews
+40f46113b5b1bb04b13b1b96b23234f0671ce372 2026-05-11T02:36:00-07:00 2026-05-11T02:36:00-07:00 Add Phase 3 BBProgram Migration Wave-4 and Wave-5 Review Reports
+57cac8a019e19e3d10ce5ffd953df85e30267d7c 2026-05-10T22:36:26-07:00 2026-05-10T22:36:26-07:00 Add Phase 3 TDD test migration and test-loss review documentation
+cd2a9117b73d5d2896208f1022e134dcdc496c81 2026-05-10T11:21:41-07:00 2026-05-10T11:21:41-07:00 Fix const propagation and DCE target configuration issues
+bfa802c9e707e37daa58eb75278d5cdf365af039 2026-05-10T10:52:14-07:00 2026-05-10T10:52:14-07:00 fix: Address P1-G review issues and enhance DCE handling
+d5ed40590f335200a6b96d597ccffe9e0d0bbb62 2026-05-10T01:51:42-07:00 2026-05-10T01:51:42-07:00 testbin: add 542-prog reproducer corpus for bpfopt
+69eaad0f1afc3879dd452aedf5110f8b8ff6ffdc 2026-05-10T00:38:30-07:00 2026-05-10T00:38:30-07:00 Implement P1-G Megafix: Refactor analysis and rewrite infrastructure
+86ac8991ee2319235ad59c5a102ca22ea5f2be87 2026-05-10T00:08:00-07:00 2026-05-10T00:08:00-07:00 feat(rewrite): Implement shared rewrite-plan machinery for bytecode replacement
+00558edcb893188ab635ff1a39bac518c5597996 2026-05-09T22:36:47-07:00 2026-05-09T22:36:47-07:00 feat(bpfopt): Implement atomic setter for KinsnRegistry and fix panic regression
+70173af1aafce574b83168771f0207437dccb9cf 2026-05-09T21:34:26-07:00 2026-05-09T21:34:26-07:00 Add progress and metadata JSON files for x86 KVM corpus run
+2c9e9b952dc83be1cfe25a57eb17418f53839261 2026-05-09T20:56:22-07:00 2026-05-09T20:56:22-07:00 feat: Add corpus results and metadata for x86 KVM corpus run
+699b42a062f2b0ccaaa05ff7f66951da9c8b40e2 2026-05-09T20:01:13-07:00 2026-05-09T20:01:13-07:00 Refactor BPF instruction creation to use BpfInsn methods
+7db9c5c5dab88337d0ddab64c33ac408a3f8d735 2026-05-09T11:42:33-07:00 2026-05-09T11:42:33-07:00 feat: Add initial implementation of RewriteBuilder and perform dead code cleanup
+7f746d15987e98a9f137c558d6cbc6fe35df5882 2026-05-09T00:17:32-07:00 2026-05-09T00:17:32-07:00 Remove bpfprof and kernel-sys, refactor bpfopt and daemon
+6a5ca5369846cd6da46a6dd5957f0c07d5e8fb0e 2026-05-08T23:14:02-07:00 2026-05-08T23:14:02-07:00 Add results and metadata for x86 KVM corpus run
+cc780ce51f201e5e0cb521c02f833a9e5d838273 2026-05-08T22:12:00-07:00 2026-05-08T22:12:00-07:00 Add progress and result metadata for x86 KVM corpus runs
+2fdbc3e6a6f585931e480753b407661d19a13167 2026-05-08T21:44:14-07:00 2026-05-08T21:44:14-07:00 feat: Conduct architecture audit for bpfopt pass and implement improvements
+3323f649bc240fcc256df5a60e85bb12b92aea5d 2026-05-08T21:09:04-07:00 2026-05-08T21:09:04-07:00 Add corpus results and optimize katran configuration
+d8a47f62c33966c9e4b59f41ce959086adae5978 2026-05-08T20:48:25-07:00 2026-05-08T20:48:25-07:00 Add corpus results and fix const_prop EACCES issue
+3cbf020614a09aff586760ecf33bd95af9aeda68 2026-05-08T19:42:57-07:00 2026-05-08T19:42:57-07:00 Implement const_prop Path C verifier post-state guard fix and optimize katran map inlining
+de58ebe07034306c83bd5c24841d4730527f2d6c 2026-05-08T15:55:24-07:00 2026-05-08T15:55:24-07:00 Add corpus results and update daemon command configurations
+a2f1a8f7069a9b33908dcb767b7a225fc6d3f252 2026-05-08T15:03:31-07:00 2026-05-08T15:03:31-07:00 Implement Route A inline hint support and update runner configurations
+a218f6318cf227f69cf7fe5fcabe3c355b80580d 2026-05-08T14:17:40-07:00 2026-05-08T14:17:40-07:00 Add results and metadata for x86 KVM corpus run on 2026-05-08
+15c35c45970622487d4d3a448698f181abc29851 2026-05-08T12:41:21-07:00 2026-05-08T12:41:21-07:00 Add new result files and investigate Cilium ReJIT timeout issues
+608d5e1bad19f0c2b27085c929f0290098e16c0a 2026-05-08T00:08:23-07:00 2026-05-08T00:08:23-07:00 Add results and metadata for x86 KVM corpus runs
+7469582303e885ec31dd18353673f1b326e6b26e 2026-05-07T22:00:32-07:00 2026-05-07T22:00:32-07:00 Add results and metadata for x86 KVM corpus runs
+64a2f624bec229468effb96a5befec3c74dd70b6 2026-05-07T21:57:05-07:00 2026-05-07T21:57:05-07:00 Add results and metadata for x86 KVM corpus run on 2026-05-08
+3674f8d4ba830b17b65c39fff878c51b65f02544 2026-05-07T15:44:28-07:00 2026-05-07T15:44:28-07:00 Refactor AWS and KVM executor to remove config file dependencies
+0e126a8e6c4392db6e1d0e69b66ce2a3b57270fd 2026-05-07T13:18:06-07:00 2026-05-07T13:18:06-07:00 Add detailed reports for bpfopt unit test cleanup and Run 3 + Run 4 paper-grade analysis
+402b6e8a5fbd74f0f5e957f90fcb36ad292a3103 2026-05-07T11:55:49-07:00 2026-05-07T11:55:49-07:00 Refactor bpfopt CLI to support pass-local arguments and improve command assembly
+8fbd015c6e68eac66592a4a22377d707c4041670 2026-05-07T00:37:17-07:00 2026-05-07T00:37:17-07:00 Add error handling and metadata for corpus runs; implement agent pause/resume in CiliumRunner
+db1564b4b5590a8d9a673d423678eb07cd54dac3 2026-05-07T00:08:29-07:00 2026-05-07T00:08:29-07:00 Refactor workload duration handling and remove rate limiting in policies
+8d679044b4a0e5cba4399f2cc7b842ec332cbca5 2026-05-06T23:29:54-07:00 2026-05-06T23:29:54-07:00 Add support for mixed workload profiling with multiple languages
+1366b6622e42e6e91829c237066f869552d063e2 2026-05-06T23:08:31-07:00 2026-05-06T23:08:31-07:00 Add results and metadata for multiple x86 KVM corpus runs
+e24ee163fc420ed431b08e6934c198a33563be25 2026-05-06T21:31:27-07:00 2026-05-06T21:31:27-07:00 Refactor workload handling and improve XDP program management
+54a79b8830396fd8902215b61cf3d05e578255ae 2026-05-06T20:09:54-07:00 2026-05-06T20:09:54-07:00 refactor: unify timeout handling and improve workdir retention in benchmarks
+cb71b387e271b057c9f6372888b9fa9c9b3b3f08 2026-05-06T19:41:12-07:00 2026-05-06T19:41:12-07:00 refactor: remove redundant branch cleanup from const propagation
+79e15e80f0158455782838c102b63c955b083e62 2026-05-06T19:39:57-07:00 2026-05-06T19:39:57-07:00 Refactor ReJIT response handling and add metadata and progress files for x86 KVM corpus runs
+c374ecfc161c1c4b31f269366f341a60b7f8978b 2026-05-06T19:15:01-07:00 2026-05-06T19:15:01-07:00 Add PHI-style merge simplification and strength reduction census reports
+1e8d13f5487a4eb276d6ef93aa5336a5c22f1bbc 2026-05-06T18:16:51-07:00 2026-05-06T18:16:51-07:00 Add error handling and logging improvements for ReJIT process
+fd9a36b7c4a4650fca9fa4c506791eed6e4e3dab 2026-05-06T18:13:21-07:00 2026-05-06T18:13:21-07:00 ....
+d199736bdf0b77fc23ebb9529beef3525e7c8c48 2026-05-06T17:41:31-07:00 2026-05-06T17:41:31-07:00 Add metadata and progress files for x86 KVM corpus runs; update commands and documentation
+d239075559211b88ccd3e45a4dff3b256b12250a 2026-05-06T15:32:48-07:00 2026-05-06T15:32:48-07:00 Add metadata and progress files for x86 KVM corpus runs; refactor BCC and BPFtrace runners
+b141208cd76db559d265d3c253dbe20b09047ff0 2026-05-06T14:54:54-07:00 2026-05-06T14:54:54-07:00 feat(cilium): enhance CiliumRunner with endpoint management and API integration
+0c0db2f34c442fc366734a1a776f358faf1f1122 2026-05-06T14:16:03-07:00 2026-05-06T14:16:03-07:00 Add major BPF program trigger analysis and tail-call guard relaxation analysis reports
+b3985dc121db23e18395241aee8a825be47a60cd 2026-05-06T13:34:08-07:00 2026-05-06T13:34:08-07:00 fix: enhance timeout settings and add rotate capture functionality
+f435a01274530f453412ace301c28a23491183a2 2026-05-06T11:25:00-07:00 2026-05-06T11:25:00-07:00 Refactor BPF-related runners and introduce bpftrace_set functionality
+7889467bb6bf55cd4e23f0afc6011cfa04c89070 2026-05-06T11:13:28-07:00 2026-05-06T11:13:28-07:00 Fix bcc set per-child readiness
+d6c4f9e6fb3ce9e50b1de0560a0f2f9d7b44bd4a 2026-05-06T11:12:12-07:00 2026-05-06T11:12:12-07:00 bpfopt: allow cond_select with select kinsn
+f37aed21269aaed0733214bad10a07d664cf2b58 2026-05-06T01:07:02-07:00 2026-05-06T01:07:02-07:00 Add value-stability map_inline emitter (no per-site limits)
+511c41d679dc71cc696c17fef9fd41518bb04ded 2026-05-06T00:23:24-07:00 2026-05-06T00:23:24-07:00 Restore map name through MapInfo → map-values.json → bpfopt MapMetadata
+c75bf9d5980cdfafb50c56c376206dfe1f2c615e 2026-05-06T00:23:05-07:00 2026-05-06T00:23:05-07:00 Add bcc/set merged runner for parallel 8-tool corpus
+92a71a3e9f4d84ff7f286f6218f7b16e97d8f44b 2026-05-06T00:11:46-07:00 2026-05-06T00:11:46-07:00 Fix rotate split-copy matcher
+c5c5b38c6c7b109b5b9cf8db46f3f5560b9f0778 2026-05-05T23:43:28-07:00 2026-05-05T23:43:28-07:00 Stop truncating verifier log entirely - emit raw log in errors
+6c5d40baa6be2408f39bb00442073b571bf23e82 2026-05-05T23:42:34-07:00 2026-05-05T23:42:34-07:00 Inline verifier_log_tail at the 2 call sites + delete the helper
+3cafae342487d0ae2b04356f4a89bd6b756e8391 2026-05-05T23:40:31-07:00 2026-05-05T23:40:31-07:00 Replace verifier_log_summary with verifier_log_tail (4KB → 64KB, head-truncate)
+1ee75bc96386eeb4c2da8c77c7ec1e4ad6d2cde8 2026-05-05T23:20:06-07:00 2026-05-05T23:21:02-07:00 Soften daemon inner-map snapshot fail-fast for runtime-grown maps
+88c290ca3533aef143f37480efad439b477928ee 2026-05-05T23:19:11-07:00 2026-05-05T23:19:11-07:00 Fix map_inline Issue 1+2 unlock failure: preserve full verifier states
+2b126921b47f397d65dd55188034c7df4574f426 2026-05-05T23:18:02-07:00 2026-05-05T23:18:02-07:00 rotate32 kinsn: x86 + ARM64 module + bpfopt pass extension
+c3e2744ffaea67d54ebf9570ec7244ab80b4ff68 2026-05-05T22:46:32-07:00 2026-05-05T22:46:32-07:00 Fix corpus driver exit policy NameError on per-app success path
+1da6c2dc5ee446fb58c8ba0cc3a6e5f34311d041 2026-05-05T22:44:50-07:00 2026-05-05T22:44:50-07:00 Refactor BPF execution plan steps to use structured StepSpec
+58de347be60deb5a4fc560357363aefecdee50e0 2026-05-05T22:42:44-07:00 2026-05-05T22:42:44-07:00 Map_inline Issue 2: map-in-map chain inline (HASH_OF_MAPS + ARRAY_OF_MAPS)
+98bfbca2c0e9d8583950d9860a39b37fe9d807f3 2026-05-05T22:23:15-07:00 2026-05-05T22:23:15-07:00 Map_inline Issue 1: verifier-state stack snapshot key extraction unlock
+fe4ce2c71dca0735da614750908c7146d4fce025 2026-05-05T22:12:21-07:00 2026-05-05T22:12:21-07:00 Add 10min timeout to bpfopt step commands in runner adapter
+83e4b48c5deac0248a3701f17dee6ed3e10f1935 2026-05-05T21:53:07-07:00 2026-05-05T21:53:07-07:00 Add runner-side adapter that translates legacy apply_rejit to execute_plan
+56549b8a901b39850e65564e65e805819c076122 2026-05-05T19:55:01-07:00 2026-05-05T19:55:01-07:00 Move pass metadata into bpfopt list-passes --json (-LoC)
+4af33cb69786d2c6fc756e222db58eaeb27c0ee4 2026-05-05T19:24:22-07:00 2026-05-05T19:24:22-07:00 Add metadata and progress files for x86 KVM corpus runs; update BPF feature detection and documentation
+e7efdeedf7f8febd0294a4f64c8ab85d85faf74f 2026-05-05T19:16:39-07:00 2026-05-05T19:16:39-07:00 Allow layout-safe kinsn replacements after tail-call prefix
+e59bf141d6e9598ea0103280bcb43d4d503f5dd0 2026-05-05T18:52:27-07:00 2026-05-05T18:52:27-07:00 Limit verbose ReJIT logs to stateful passes
+9c6298b5ea28c8eb92265614ef2168743dcc75bc 2026-05-05T16:45:52-07:00 2026-05-05T16:45:52-07:00 Refactor Dockerfile and build scripts for ARM64 support; add progress and metadata JSON files
+a6753982fcc9800bc468be78f8959d602e0bd67c 2026-05-05T14:58:53-07:00 2026-05-05T14:58:53-07:00 Add metadata file for x86 KVM corpus and refactor DaemonSession handling
+745c93da6163864c5cd9483449956f90baea8290 2026-05-05T14:55:47-07:00 2026-05-05T14:55:47-07:00 Add option to persist failure artifacts and update result metadata structure
+cc3bcaee6ff38cbf2304f97da3963b598d17b45e 2026-05-05T14:16:24-07:00 2026-05-05T14:16:24-07:00 Implement workdir_tar_b64 serialization and failure artifacts handling in daemon
+30af8df0e52c7599075c8d43f17573ce9a1082d8 2026-05-05T12:14:36-07:00 2026-05-05T12:14:36-07:00 Update Dockerfile and build.mk to streamline kernel image handling and reduce build context size
+e1148a2548f25942563c1f1af0ccc66543032ab5 2026-05-05T11:58:01-07:00 2026-05-05T11:58:01-07:00 Refactor Dockerfile and build.mk for host kernel image handling and artifact paths
+bb530b172588857f866bc1f2e70ac26f1ae40dc6 2026-05-05T11:56:58-07:00 2026-05-05T11:56:58-07:00 Refactor build system for host kernel and kinsn artifacts
+346836bddf554624a77f1bcd996249fe96c1e773 2026-05-05T11:25:19-07:00 2026-05-05T11:25:19-07:00 host kernel + kinsn build via Makefile (+307 LoC)
+af7fab65887689adb6c9f33b5f73542e330032b0 2026-05-05T11:13:58-07:00 2026-05-05T11:13:58-07:00 docs: SAMPLES cap is 3 (paper-grade by min_runs filter, not by SAMPLES)
+45c7a647867945e615f81f9efc5bc5e1c9fdf339 2026-05-05T10:40:19-07:00 2026-05-05T10:40:19-07:00 Net -201 LoC: complete bpfopt opaque pass-through, sweep dead helpers
+c510c6465355f234dc2e1ec01a36be652e23f1d4 2026-05-05T10:28:45-07:00 2026-05-05T10:28:45-07:00 Net -308 LoC: opaque bpfopt summary, fixes 8b0dfaa7 socket regression
+8b0dfaa7a689c1e9ed64193eeda2ad49a1e2b5ae 2026-05-05T10:01:47-07:00 2026-05-05T10:01:47-07:00 Refactor optimization reporting and metadata handling
+3c66ff9adaeb3da63239cb5098a744a9de5d9cee 2026-05-05T09:13:34-07:00 2026-05-05T09:13:34-07:00 Prune design-review violations (-846 LoC)
+35ed1536fe00b11cf0507668a83a86df08256b1f 2026-05-05T08:15:30-07:00 2026-05-05T08:15:30-07:00 Drop bpfopt unchanged-vs-bytecode sanity check
+b592a8bb8b0c0872d5055e5f2d9d5c7249c3500f 2026-05-05T08:11:15-07:00 2026-05-05T08:11:15-07:00 Fix rotate no-op ReJIT blocker
+fe458eb98d310b3636557f985c056b164e9747bc 2026-05-05T07:42:45-07:00 2026-05-05T07:42:45-07:00 Move ARM64 daemon/bpfopt build into Docker stage
+7f6e4944658aae09d205a625c85328a773c00ca7 2026-05-05T07:42:34-07:00 2026-05-05T07:42:34-07:00 Restore inlined_map_entries reporting + bootstrap verifier states
+2ce464f80fbfb0b17f9de99e3f9948a5756cab5b 2026-05-05T02:12:01-07:00 2026-05-05T02:12:01-07:00 Delete post-invalidation dead code
+8b75920ede35f3f3e21554fb2ee296737aa0d902 2026-05-05T01:56:03-07:00 2026-05-05T01:56:03-07:00 Delete invalidation tracker — paper bench doesn't need it (-1033 +98 lines)
+380f90673646301d3aa1f38daf3b490102357201 2026-05-05T01:41:07-07:00 2026-05-05T01:41:07-07:00 Add corpus benchmark results and update Dockerfile for daemon and BPFOPT builds
+94d720a9e7eafc2770f60900cf62719028790662 2026-05-05T00:59:16-07:00 2026-05-05T00:59:16-07:00 Add metadata.json for x86 KVM corpus and update build.mk for kernel fork image sources
+c338e664bb11b6e16f50a365231b78412b7b8167 2026-05-05T00:16:18-07:00 2026-05-05T00:16:18-07:00 Add metadata file for x86 KVM corpus run and update rejit.py for noop pass
+a2f119c6f3c98734a5d336fbe583ec7195aaccbc 2026-05-05T00:16:01-07:00 2026-05-05T00:16:01-07:00 Add benchmark results and metadata for x86 KVM corpus runs
+9306757b4582bdcbf8e33dda232dde8f78833071 2026-05-05T00:01:01-07:00 2026-05-05T00:01:01-07:00 Refactor driver.py and remove unused functions; delete summarize_rq.py and reporting.py
+bdfcaa6298c5861f640236be3e478dfe55cd82a7 2026-05-04T23:07:52-07:00 2026-05-04T23:07:52-07:00 feat: Enhance runtime support by adding additional language interpreters and updating workload definitions
+be7132e6494852823b1c8d04ab267f01f89567ab 2026-05-04T22:31:18-07:00 2026-05-04T22:31:18-07:00 feat: Add metadata and analysis for low-trigger App Paper-Grade improvements
+9dedda7db7247cd4510ef4a30f80c9cc699ca884 2026-05-04T20:21:36-07:00 2026-05-04T20:21:36-07:00 Add metadata file for x86 KVM corpus and refactor workload runners
+539852d243693286728839ee2020a4b59b540438 2026-05-04T19:58:10-07:00 2026-05-04T19:58:10-07:00 Add new workload and update existing runners for enhanced network testing
+4972401e34c5f90ff73433a2dbcdcf8998d42c8e 2026-05-04T19:34:29-07:00 2026-05-04T19:34:29-07:00 Add new tracing policies and refactor existing code
+f591080bbc76e1a9af49073a86a7b8a299511a42 2026-05-04T19:27:26-07:00 2026-05-04T19:27:26-07:00 Remove e2e benchmark results and related scripts
+3616feb738edfa912040685c0ec2c026faf5c60e 2026-05-04T18:54:53-07:00 2026-05-04T18:54:53-07:00 Refactor end-to-end benchmark cases: remove Cilium, Katran, and OpenTelemetry cases; update driver and common case logic for simplified app execution
+d88b7c6ed7f6130c389717771c5fbe6f64a3edaa 2026-05-04T18:34:40-07:00 2026-05-04T18:34:40-07:00 Remove CalicoRunner and related references from the application
+918ff617952917d2b5c709d7eee4b965440ad0e8 2026-05-04T17:14:26-07:00 2026-05-04T17:14:26-07:00 daemon+bpfopt: 删除 frozen 字段+try_reapply/[trace]/RejitSummary 死代码
+0a5d7c5dfaf054fc6bf351a607e6becd0153b7cf 2026-05-04T12:31:52-07:00 2026-05-04T12:31:52-07:00 cleanup: calico stop() delete nft calico table
+b847da55f5bd4d380be60f827db007778b1b953d 2026-05-04T12:31:09-07:00 2026-05-04T12:31:09-07:00 cleanup: katran teardown timeout 10s -> 20s
+4a480dfacce43b0e365f24cecf3412fd99cabcfe 2026-05-04T12:31:02-07:00 2026-05-04T12:31:02-07:00 cleanup: corpus driver wait_for_suite_quiescence() on normal app stop path
+ac9a73667ce45fcf4e22221237a759300a96ab44 2026-05-04T12:30:57-07:00 2026-05-04T12:30:57-07:00 cleanup: cilium stop() umount bpffs before rmtree
+c488dfac0c4f18929d5d00fe570b2751f0dd79e4 2026-05-04T09:39:57-07:00 2026-05-04T09:39:57-07:00 calico: fix HEP allow policy selector to use all() instead of label match
+56148a3d61e78b991bd6ea7e8dd9323cb02f6218 2026-05-04T09:22:57-07:00 2026-05-04T09:22:57-07:00 workload: parallelize stress-ng class + retarget tracee/tcpconnect/tcplife
+aba8a06fc98bb978c8d838ef3bc1d05a308ed8f3 2026-05-04T09:14:40-07:00 2026-05-04T09:14:40-07:00 calico/cilium: fix wrk timeout from default-deny HEP + stale TC programs
+fb320d2ff24a5e3e5e890f5fe38068bd2b095b32 2026-05-04T07:58:00-07:00 2026-05-04T07:58:00-07:00 calico: use apply instead of patch for Node BGP IPv4
+750ad801c7bf24afcaee1a617b422788cf3dc32b 2026-05-04T07:53:46-07:00 2026-05-04T07:53:46-07:00 workload: delete hand-written Python loop workloads, use industry-standard tools
+08b7abdb4bda76e25dca90a3060246d18683d588 2026-05-04T07:46:38-07:00 2026-05-04T07:46:38-07:00 calico: patch node BGP IPv4 so Felix learns hostIP before TC attach
+78aa95d1032b10cddc3ce5480b76d2f99757909b 2026-05-04T07:27:07-07:00 2026-05-04T07:27:07-07:00 runner-runtime: install calicoctl for HostEndpoint registration
+2012866a9ded674f6cdaa0ae68ed09693b641e03 2026-05-04T06:51:59-07:00 2026-05-04T06:51:59-07:00 workload+calico: route wrk traffic through bpfbench0 + register Calico HostEndpoint
+6ee5b243daaf1d85a29af696ddd90bbb988b4eaf 2026-05-04T00:06:07-07:00 2026-05-04T00:06:07-07:00 katran: switch from BPF_PROG_TEST_RUN to network workload
+d5d932926921aa8e5d7c28f2771d48b6a916a7e9 2026-05-03T21:10:39-07:00 2026-05-03T21:10:39-07:00 vendor/linux-framework: drop global REJIT swap mutex commits
+7a89bb2f7474e52d794e33be6cb454f184daed6e 2026-05-03T21:09:31-07:00 2026-05-03T21:09:31-07:00 corpus: don't mark app as error when only some progs fail REJIT
+9a97a71e0f9dc88fcf4fb087fe6c7d614285d99d 2026-05-03T20:07:09-07:00 2026-05-03T20:07:09-07:00 vendor/linux-framework: convert poke desc BUG_ON to error return
+dc124f66f08399135432865437efabec5f79442f 2026-05-03T19:32:10-07:00 2026-05-03T19:32:10-07:00 Merge B1: wide_mem skip merge across BTF struct member boundaries
+ae54236589d6c641b20da38200beceb20e8c797d 2026-05-03T19:31:49-07:00 2026-05-03T19:31:49-07:00 wide_mem: skip merging across BTF field boundaries to fix cilium prog 141 EACCES
+3d0e04f597bece451aef142bc8f85848d92dd2a3 2026-05-03T19:19:15-07:00 2026-05-03T19:19:15-07:00 kvm_executor: mount docker disk with discard so deletes free tmpfs
+a560ff2be37cfc73cfb84c9681b2f0cc256cb883 2026-05-03T18:08:51-07:00 2026-05-03T18:08:51-07:00 bjbjbj
+d1f2768a0a0b369cc27bb66f169d42f0dea6b248 2026-05-03T12:57:10-07:00 2026-05-03T12:57:10-07:00 vm.py: --verbose to vng for kernel console capture
+b3d37be25f48d2e205a3002a01a8d23db7eb9bbb 2026-05-03T12:49:35-07:00 2026-05-03T12:49:35-07:00 vm.py: --append loglevel=7 panic=30 oops=panic for KVM crash diagnostics
+042ce234252ec3fc125411af5c6fdc6c4b3f24cf 2026-05-03T12:49:06-07:00 2026-05-03T12:49:06-07:00 vm.py: preserve pty log on KVM failure for crash diagnostics
+d4c4d34a7f732be950ab662adac143a88ab105a6 2026-05-03T12:00:51-07:00 2026-05-03T12:00:51-07:00 daemon stderr/stdout: caller passes path directly, no log_dir abstraction
+8208e34c08ac8f174eaf69b80b15ff458285caa6 2026-05-03T11:57:57-07:00 2026-05-03T11:57:57-07:00 Write daemon stderr/stdout to bind-mounted result dir for crash diagnostics
+f4880fe394a0656422d39d76feec480337da7ca8 2026-05-03T11:40:57-07:00 2026-05-03T11:40:57-07:00 Revert REJIT mutex + chunk-64; keep bounded verifier log
+7e9f2d89d7ae2a3cbbdf797d340ee08798e7b37b 2026-05-03T11:30:15-07:00 2026-05-03T11:30:15-07:00 Implement various enhancements and fixes for BPF ReJIT processing
+2093d7a84838d8e59745840ddcc92502db971d09 2026-05-03T07:35:23-07:00 2026-05-03T07:35:23-07:00 Fix corpus ReJIT failure artifact scope
+ef4736cefdb48e6ffd5065883f886c0b7b6e65d8 2026-05-03T07:23:12-07:00 2026-05-03T07:23:23-07:00 Return ReJIT failure artifacts over daemon socket
+e46b041065c30977f680767b3abf8d4f85a1486e 2026-05-03T00:34:27-07:00 2026-05-03T00:34:27-07:00 Revert "diag: add BPFREJIT_VM_CONSOLE_LOG env var to capture KVM kernel console"
+6c8310b4c47a646ebd86b5747df10447b5059208 2026-05-03T00:22:50-07:00 2026-05-03T00:22:50-07:00 runner: delete daemon socket request timeout (-21 lines net)
+bcddadf5de3faedf2d2fc4b55f5dd34134445d0e 2026-05-03T00:20:16-07:00 2026-05-03T00:20:16-07:00 diag: add BPFREJIT_VM_CONSOLE_LOG env var to capture KVM kernel console
+e32f8fbe5f7f178f28ba670737833567e6fb79a0 2026-05-02T23:59:06-07:00 2026-05-02T23:59:06-07:00 runner: delete Python-wraps-Make sandwich; deps via Makefile (-89 lines net)
+382a9db050fc08f359ab130c2935f69667498bd3 2026-05-02T23:47:26-07:00 2026-05-02T23:47:26-07:00 build.mk: move daemon binary rule outside BPFREJIT_IMAGE_BUILD gate
+7ff4a156f6c84c184d8cb55a2c2793852915208c 2026-05-02T23:33:01-07:00 2026-05-02T23:33:01-07:00 build.mk: --no-cache-filter daemon + bpfopt stages so source edits land in image
+2a95a30e681e80bf1b95d52422de73e315eb8aea 2026-05-02T23:07:26-07:00 2026-05-02T23:07:26-07:00 Add metadata and progress tracking for x86 KVM corpus runs
+729512c0ec7813c3ae7a6216bf4a2026f6da6fb6 2026-05-02T22:49:28-07:00 2026-05-02T22:50:40-07:00 daemon: delete profile-start/profile-stop/status; bpfprof stays as standalone CLI
+fa1a70ecb09f2233d938e68dc8f5f1cde2d75e67 2026-05-02T22:41:01-07:00 2026-05-02T22:42:21-07:00 daemon: merge optimize-batch into optimize; parallel by default
+adfa97683d41329e4e4c535c900d28c02da113a6 2026-05-02T21:16:02-07:00 2026-05-02T21:16:02-07:00 kernel: 1-line REJIT func_info propagation fix (drop EXT-only)
+3099402a84135525f5d0e93608a0cab9341774bd 2026-05-02T20:16:30-07:00 2026-05-02T20:16:30-07:00 fix: move KVM docker disk to VM-local /var/tmp to prevent EROFS; add BPFREJIT_CORPUS_APPS filter
+8219d82a56cba92a9c493e8b5cf1fb8eaacfa8bd 2026-05-02T20:03:16-07:00 2026-05-02T20:03:16-07:00 Refactor and enhance BPF optimization passes and corpus results
+43cf9bc466bd4d434132c8832278b14d131b69d7 2026-05-02T19:15:07-07:00 2026-05-02T19:15:07-07:00 fail-fast：map_inline min_removed_pc 的 unwrap_or(0) 为不可达代码
+326e34e5f41e5cecc8ce9981fabb58ad1096ccd4 2026-05-02T19:14:14-07:00 2026-05-02T19:14:14-07:00 fail-fast：const_prop::decode_ldimm64 删除 unwrap_or(0) fallback
+2e512674de84d88abe79bf42e83da8e9d00b01a0 2026-05-02T19:11:45-07:00 2026-05-02T19:11:45-07:00 死代码删除：BpfInsn::new_raw 改为私有
+573a6bae280fd46f6e6754c9d0e415a6e0b7533f 2026-05-02T19:10:18-07:00 2026-05-02T19:10:18-07:00 死代码删除：BpfInsn::set_code / set_off / set_imm 无调用方
+64643fb701c9e23381d4cf0d17aa17136a8c5d00 2026-05-02T19:07:38-07:00 2026-05-02T19:07:38-07:00 重复删除：pass_tests.rs 中 exit_insn 移到 passes::test_helpers
+37a67a77597bcdf9941ebec73c2ebb08c2d2a8c0 2026-05-02T19:03:17-07:00 2026-05-02T19:03:17-07:00 重复删除：map_inline.rs 的 BPF_MAP_TYPE_* 常量改用 kernel_sys 直引
+e2e477dd2181860293d89a1ca3e8ca499a15bcdb 2026-05-02T19:01:13-07:00 2026-05-02T19:01:13-07:00 重复删除：测试辅助函数抽到 passes/test_helpers.rs
+0fbe4a258ae02d7de14000d2ced0adc59f0eff16 2026-05-02T18:57:50-07:00 2026-05-02T18:57:50-07:00 重复删除：emit_ldimm64 移到 utils.rs，消除 const_prop / map_inline 两份副本
+c6fb7c79f53e8add5ed8d5b158a0b0e06e412c78 2026-05-02T18:56:21-07:00 2026-05-02T18:56:21-07:00 重复删除：prefetch.rs / map_inline.rs 的本地 insn_width 副本
+d4fa3697e21120253ce0e0fe6aba67c44e5649f8 2026-05-02T18:32:23-07:00 2026-05-02T18:32:23-07:00 Canonicalize pseudo map refs to IDX
+e1730c421a36951125c77e7f26c2bcab3f99e917 2026-05-02T17:35:34-07:00 2026-05-02T17:35:34-07:00 revert kernel changes; remove prog_flags from daemon
+e4993908871ecc2376eb5d3ff473e4d2f9f2add1 2026-05-02T17:31:54-07:00 2026-05-02T17:31:54-07:00 Revert "fix: preserve func_info for wide_mem callback REJIT"
+fd6995206deeb3eec816bb22c1be5e77ff29b26e 2026-05-02T17:19:45-07:00 2026-05-02T17:19:45-07:00 fix: preserve func_info for wide_mem callback REJIT
+79b54e3bafb99e61da69f79defd316fef9c96956 2026-05-02T15:57:37-07:00 2026-05-02T15:57:37-07:00 refactor: remove all non-essential daemon CLI args, hardcode socket/failure-root
+d507a22bcf96f9609923a69b070a0aecb8d2daa1 2026-05-02T15:47:24-07:00 2026-05-02T15:47:24-07:00 refactor: reduce BPFREJIT_* env vars — delete 3, convert 1 to CLI arg
+9fba6d2c943f0710cb9efc70a9cc04bbe6ee0e17 2026-05-02T15:05:27-07:00 2026-05-02T15:05:27-07:00 fix: remove VM timeout for corpus/e2e/micro, keep 3600s for test
+07c78af944628a37e760460e57f67a6fea9f79f6 2026-05-02T12:10:45-07:00 2026-05-02T12:10:45-07:00 删除 daemon 默认 pass 列表并启用 arm64 ccmp
+ad3e401aceb6b7acb65d59ef9509dbda608d4846 2026-05-02T11:31:34-07:00 2026-05-02T11:31:34-07:00 fix(bpfopt): delete LD_IMM64 atomically in DCE
+758e90d1c9ff3f803f732c7224c702e2d9d330b6 2026-05-02T11:29:15-07:00 2026-05-02T11:29:15-07:00 fix: protect wide_mem across pseudo_func subprog targets
+4522507e2bccc142aab8b71849ae4d7577547941 2026-05-02T00:27:08-07:00 2026-05-02T00:27:08-07:00 fix: correct fd_array indexing for module BTF fds (cff84bff off-by-one)
+298211a0e6b7d3f5a81ead45c3fefd9e203e4f71 2026-05-01T19:32:47-07:00 2026-05-01T19:32:47-07:00 Refactor daemon to per-pass ReJIT
+0186227d0ce8ee0102480d73397ffd7f0adbb590 2026-05-01T14:21:31-07:00 2026-05-01T14:21:31-07:00 Restore default const-prop side inputs
+522e810e0bc489a969976e3f52df323ec7177ae8 2026-05-01T13:17:44-07:00 2026-05-01T13:17:44-07:00 Implement v2-style daemon rollback
+fca13a396742b54673118e2b5dad6f547e1a069e 2026-05-01T10:19:01-07:00 2026-05-01T10:19:01-07:00 Refactor BPF optimization and verification process
+9bbd56f8b0c1cfa2faa676dd8b6c094709e143cb 2026-05-01T09:10:35-07:00 2026-05-01T09:10:35-07:00 Pivot daemon to in-process kernel libraries
+dc92a15cd733b4a9f4432ffc9a8a9cca7fed6374 2026-05-01T07:39:20-07:00 2026-05-01T07:39:20-07:00 Fix round6 verifier timeout and network workload

@@ -1,0 +1,64 @@
+{
+  "run_type": "cilium_native_audit",
+  "suite": "corpus",
+  "status": "error",
+  "started_at": "2026-10-09T13:47:17.397316+00:00",
+  "completed_at": "2026-10-09T13:54:30.665864+00:00",
+  "generated_at": "2026-10-09T13:54:30.665864+00:00",
+  "details_dir": "details",
+  "error": "AWS credential preflight failed: codex-ec2 profile is absent and default SSH key does not exist. Native preflight stopped during local build before AWS executor; no controlled measurement phases ran.",
+  "provenance": {
+    "analysis_source_commit": "4b6999ff2c1d1c99cd68990ad6a34c413c0af269",
+    "kernel_source_commit_for_planned_run": "24cd6e63ce912a4e220ca1cae3137ab29706551b",
+    "paper_inventory_snapshot": "aadeb1948468b9bbea4befda283aff25130d9a0b",
+    "paper_commit": "d6c50f83dca5298b0f5f7f639f66f6ed5d4e53fa",
+    "original_measured_source_commits": "unknown; candidates in data/commit-pins.json"
+  },
+  "aws": {
+    "region": "us-east-1",
+    "planned_instance_type": "t3.small",
+    "architecture": "x86_64",
+    "started_instances": [],
+    "terminated_instances": [],
+    "observed_AWS_kernel": null,
+    "intended_source_commit": "4b6999ff2c1d1c99cd68990ad6a34c413c0af269",
+    "intended_kernel_commit": "24cd6e63ce912a4e220ca1cae3137ab29706551b",
+    "intended_kernel_release": "7.0.0-rc2+",
+    "AWS_executor_reached": false,
+    "run_state_present": false
+  },
+  "command": {
+    "command": [
+      "make",
+      "corpus"
+    ],
+    "environment": {
+      "PLATFORM": "aws",
+      "ARCH": "x86",
+      "SAMPLES": "1",
+      "WARMUPS": "0",
+      "WORKLOAD_DURATION": "180",
+      "BPFREJIT_CORPUS_APPS": "cilium/agent",
+      "BPFREJIT_SHIM_NATIVE_LOADER": "post",
+      "BPFREJIT_CORPUS_BPF_STATS": "1",
+      "CPU": "0",
+      "AWS_X86_BENCH_INSTANCE_TYPE": "t3.small",
+      "AWS_X86_REGION": "us-east-1",
+      "AWS_X86_NAME_TAG": "cilium-rerun-20261009",
+      "JOBS": "2",
+      "IMAGE_BUILD_JOBS": "2",
+      "RUN_TOKEN": "cilium-rerun-20261009-preflight"
+    },
+    "purpose": "native preflight; CPU env alone is not corpus pinning",
+    "started_at": "2026-10-09T13:47:17.397316+00:00"
+  },
+  "requested_protocol": {
+    "native_restart_pairs": 5,
+    "noop_restart_pairs": 5,
+    "sample_seconds": 180,
+    "cpu_pinned": true,
+    "verdict_drop_snapshots": true
+  },
+  "completed_native_restart_pairs": 0,
+  "completed_noop_restart_pairs": 0
+}
