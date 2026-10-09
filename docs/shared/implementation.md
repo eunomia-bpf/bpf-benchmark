@@ -207,6 +207,15 @@ increment is committed and pushed immediately). Current state:
   the width-masked value swap are selected by a proved table rather than a
   restated width test, leaving the register reads, writes, and the value
   computation in the composed arm body.
+  The `DIV` arm's choice of quotient/remainder body on its resolved operand
+  width is likewise no longer open for x86-64 (Step 0115): the arm now routes
+  its four bodies through a generated machine-checked width-keyed selector, so
+  the byte/word/dword/qword cases (and the qword case's architectural
+  high-half overflow gate) are selected by a proved table rather than a
+  restated width ladder, leaving the register reads, writes, and the
+  quotient/remainder computation in the composed arm bodies; the AArch64
+  simulator's `DIV`-analogue is not a width-keyed four-body split, so there is
+  no mirror.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

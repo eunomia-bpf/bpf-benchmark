@@ -663,6 +663,31 @@ route oracle drives the real `XCHG` body over every operand pair and every
 resolved width against an independent model that exchanges whole 64-bit cells
 and low-lane windows below, comparing the whole register file with its tags and
 requiring no third cell to move and the flags to stay put (62,725 cases).
+The x86-64 `DIV` arm's choice of quotient/remainder body on the resolved operand
+width is likewise a generated contract: `generate_x86_div_spec.py` emits
+`KPROG_X86_DIV_ARM_COUNT` (4), the four arm defines, and the nested-ternary
+`KPROG_X86_DIV_ARM(WIDTH)` selector, and `X86DivHandler.lean` proves the
+generated `armOf` equal to an independent selector built from the width
+contract's own `x86WidthCodeSpec` literals (the byte case at `w8`, word at
+`w16`, dword at `w32`, qword at every other code — the total/default arm), that
+the arm-name and arm-code tables equal an independent literal order, that the
+tables hold exactly `armCount` entries and the codes are duplicate-free, that
+`armOfCode` inverts `codeOfArm` on the four arms and names no code beyond them,
+that the resolved width code is 8 bits and the opcode is `X86_OP_DIV`, and — the
+semantic split — that each arm's width code, write count, high-half dividend
+register, and high-half gate match the architectural `DIV` split: the byte case
+makes exactly one 16-bit partial-register write of the packed quotient/remainder
+with no high-half dividend, the three wider cases write both quotient and
+remainder registers, and only the qword case gates its split on the high-half
+dividend being zero. The generated header is included in the sim header, and the
+routed arm selects its body through `KPROG_X86_DIV_ARM(__x86_l_width)` instead
+of restating the width ladder. A generated-header oracle drives the width
+selector over the whole resolved-width-code domain against an independent
+arm ladder (260 cases), and a sim-header route oracle drives the real `DIV` body
+over five flag codes (including 0), two source registers, and explicit
+dividend/high/divisor tables against an independent quotient/remainder model,
+comparing the whole register file with its tags and requiring the flags to stay
+put (48,515 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2183,6 +2208,9 @@ x86 helper-id dispatch-body binding (and the simulator's binding of its
 table),
 x86 `XCHG` resolved-width arm selection (and the simulator's routing of the
 `X86_OP_XCHG` arm body through the generated full-width selector),
+x86 `DIV` resolved-width quotient/remainder case selection (and the simulator's
+routing of the `X86_OP_DIV` arm bodies through the generated width-keyed
+selector),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,

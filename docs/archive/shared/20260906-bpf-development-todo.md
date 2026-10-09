@@ -9216,6 +9216,109 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   paragraph after the x86 helper-id dispatch paragraph (paper commit pushed to
   `main`).
 
+## Step 0115 — x86 DIV resolved-width quotient/remainder case-ladder machine-checked contract
+
+- Scope: the x86 simulator's `X86_OP_DIV` arm
+  (`kprog/x86/x86_sim_local_bpf.h`, the `X86_SIM_L_EXEC` chain) selects between
+  four quotient/remainder bodies on the *resolved* operand width
+  `__x86_l_width`: at the byte code it divides a single register and packs the
+  quotient (8 bits) and remainder (8 bits) into one 16-bit partial-register
+  write to `RAX` (`RDX` untouched, no high-half dividend); at the word code it
+  divides `RDX:AX` and writes the 16-bit quotient to `RAX` and the 16-bit
+  remainder to `RDX`; at the dword code it divides `RDX:EAX` and writes the
+  32-bit quotient/remainder to the same pair; at every other code (the
+  *default* arm) it divides `RDX:RAX` and writes the 64-bit quotient/remainder
+  to the pair, gating the split on the high-half dividend `__x86_l_rdx == 0`
+  (the architectural `DIV` overflow gate: when the gate fails, `q =
+  0xffffffffffffffff`, `rem = rdx`, and `RDX` is preserved). The final `else`
+  is the total/default arm and the only high-half-gated one; the ladder is
+  closed over the four `X86_WIDTH_*` codes, so the selector is total and no
+  width code is unsupported. x86-only.
+- Shared spec `kprog/formal/x86_div_spec.json` (`schema_version` 1, `operation`
+  `x86DivCaseSelector`): `selector` `resolved_width_code_then_case`,
+  `width_code_bits` 8, `opcode_define` `X86_OP_DIV`, `opcode` 26, and four
+  `{arm, arm_define, width_code, write_count, dividend_high, high_gate, effect,
+  width_class}` rows in selection order
+  (`b8`/`KPROG_X86_DIV_ARM_B8`/1/1/`none`/0/`byte_quotient_packed`/`narrow`,
+  `b16`/`KPROG_X86_DIV_ARM_B16`/2/2/`rdx`/0/`word_quotient_remainder`/`narrow`,
+  `b32`/`KPROG_X86_DIV_ARM_B32`/4/2/`rdx`/0/`dword_quotient_remainder`/`narrow`,
+  `b64`/`KPROG_X86_DIV_ARM_B64`/8/2/`rdx`/1/`qword_quotient_remainder`/`full`).
+  `generate_x86_div_spec.py` carries an independent module-level `_ARMS`
+  enumeration plus a `COLUMNS` cross-check, validates the spec (exactly one
+  single-write byte arm, wider arms with two writes, exactly one high-gated arm
+  and it is the last/default), re-derives the live `X86_OP_DIV` arm text from
+  the header (`arm_region()` slices between the `DIV` arm opener and the
+  `SHLD_IMM` arm, `flat()` flattens `\`-continuations, whitespace collapse makes
+  the selector substring check exact), and `check_against_header()` requires the
+  routed arm to go through `KPROG_X86_DIV_ARM(__x86_l_width)` with the three
+  non-default arm defines, a `} else {` default branch, the width write
+  primitive, and a `X86_SIM_L_READ_REG(X86_RDX)` high-half read. It emits
+  `generated/x86_div.h` (`X86_WIDTH_{8,16,32,64}` re-declares,
+  `KPROG_X86_DIV_ARM_COUNT 4U`, the four arm defines, a nested-ternary
+  `KPROG_X86_DIV_ARM(WIDTH)` selector, and drift `_Static_assert`s pinning
+  `X86_OP_DIV == 26U`, the arm count, arm-code distinctness, each real width
+  code to its own arm, and the totality of the absent code `0` to the default
+  arm) and the Lean `KProgFormal.GeneratedX86Div`. `--check` rc=0.
+- Hand refinement `KProgFormal/X86DivHandler.lean`: the independent spec
+  `x86DivArmSpec` selects on the width contract's own literal
+  `x86WidthCodeSpec .w8/.w16/.w32` rather than the generated `widthCodeOfArm`,
+  and `x86DivArmNamesSpec` is the literal constructor order. It proves
+  `x86_div_arm_refines`, `x86_div_names_refine`, the two `_length`s,
+  `_codes_nodup`, `_arm_over_widths`, `_arm_of_code_roundtrip`,
+  `_arm_of_code_beyond_is_none`, `_opcode_is_0x1a`, `_width_code_bits_is_8`,
+  `_arm_count_is_4`, `_arm_width_codes`, `_write_counts`, `_dividend_high`,
+  `_only_qword_gated`, `_gated_only_default`, `_nondefault_not_gated`,
+  `_ladder_total`, `_case_dispatch`, `_width_classes`, and `_effects`; and,
+  pinning the register effect, `_byte_is_single_write`,
+  `_byte_preserves_upper`, `_byte_scalarizes`, `_wide_writes_both`,
+  `_wide_scalarizes`, and `_write_count_matches_effect`. Module elaborates
+  rc=0, no `sorry`/`admit`.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_div.h"` after the XCHG include, and the
+  `X86_OP_DIV` arm now selects its body through
+  `KPROG_X86_DIV_ARM(__x86_l_width)` instead of a restated width ladder; all
+  four bodies are kept byte-identical.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_div_host.c` includes the generated header (compiling its drift
+    asserts) and drives `KPROG_X86_DIV_ARM` over the whole resolved-width-code
+    domain against an independent arm ladder (8→byte, 16→word, 32→dword, else
+    qword)
+    — `x86 div host cross-check: OK (260 cases)`. Zero warnings from its own
+    file.
+  - `test_x86_div_route_host.c` includes the simulator header and drives the
+    real `X86_SIM_L_EXEC` `X86_OP_DIV` arm over five flag codes (including 0),
+    two source registers, and explicit dividend/high/divisor tables chosen so
+    no divisor low lane is zero, comparing the whole 16-cell register file
+    (value and tag) against an independent model and requiring the flags to
+    stay put
+    — `x86 div route host cross-check: OK (48515 cases)`. Zero warnings from
+    its own file.
+- Gate `make -C kprog/formal check` rc=0, **139** `cross-check: OK`. Baseline
+  was **137** for Step 0114; Step 0115 adds the two DIV oracles and the Lean
+  pair, wired into `kprog/formal/Makefile`, with the two new Lean modules
+  imported in `KProgFormal.lean`.
+- Mutation harness `/tmp/mut_x86_div.py`, 31 mutations against a cloned tree,
+  each caught after the four unmutated controls (`gen`, `lean_chain`, `host`,
+  `route`) pass, restoring every watched file byte-for-byte between mutations
+  and re-checking the baseline green at the end: ten spec/generator defects
+  (arm-name swap, opcode drift, arm-define drift, high-gate drift, width-bits
+  drift, write-count drift, generator arm-define drift, generator opcode drift,
+  generator selector-text drift, generator arm-opener-text drift → generator),
+  four generated-C defects (count macro, opcode assert, total assert, arm-code
+  drift → host/generator), four generated-Lean defects (opcode drift, code-table
+  drift, name-table drift, `armOf` shape drift → refinement), four
+  hand-refinement defects (spec selector swap, width-code claim drift, gate
+  claim drift, second-branch swap → refinement), four routed-wiring defects
+  (inverted selector guard, dropped include, byte-pack drift, qword-gate drop →
+  route oracle), and two generator+artifact pair defects regenerated so
+  `--check` stays green and only the rebuilt-olean refinement catches them.
+  Three semantically equivalent mutations (an added include-side comment, an
+  added hand-module comment, and a resolved-but-equal generator root path)
+  SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the contract
+  paragraph after the x86 XCHG arm-selection paragraph (paper commit pushed to
+  `main`).
+
 ## Next after 0076
 
 
