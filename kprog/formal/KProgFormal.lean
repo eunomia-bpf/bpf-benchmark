@@ -12,6 +12,8 @@ import KProgFormal.GeneratedX86MemIndex
 import KProgFormal.X86MemIndex
 import KProgFormal.GeneratedX86RegPresence
 import KProgFormal.X86RegPresence
+import KProgFormal.GeneratedX86RegDispatch
+import KProgFormal.X86RegDispatch
 import KProgFormal.X86MemAux
 import KProgFormal.GeneratedArm64MemIndex
 import KProgFormal.Arm64MemIndex

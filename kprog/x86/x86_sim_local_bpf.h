@@ -25,6 +25,7 @@
 #include "../formal/generated/x86_branch_emit.h"
 #include "../formal/generated/x86_mem_index.h"
 #include "../formal/generated/x86_reg_presence.h"
+#include "../formal/generated/x86_reg_dispatch.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -149,6 +150,23 @@ union x86_sim_stack_mem {
 	X(X86_R13, r13)                                                     \
 	X(X86_R14, r14)                                                     \
 	X(X86_R15, r15)
+
+/*
+ * The dispatch cell index a decoded register number names equals the hand-written
+ * `X86_SIM_L_FOR_EACH_GPR` order: cell `n` is register number `X86_R<n>`, in
+ * `rax rcx rdx rbx rsp rbp rsi rdi r8 .. r15` order. The generated
+ * `x86_reg_dispatch.h` already pins each `X86_R<n>` to its number and
+ * `KProgFormal/X86RegDispatch.lean` proves the same order, but the read path
+ * resolves registers through the independent `X86_SIM_L_REG_VALUE` ternary
+ * chain; these asserts bind the cell selector itself to the dispatched order,
+ * so the two hand-written orders cannot drift apart from the generated table.
+ */
+_Static_assert(KPROG_X86_GPR_CELL(X86_RAX) == 0U,
+	       "x86 gpr dispatch cell drift");
+_Static_assert(KPROG_X86_GPR_CELL(X86_R8) == 8U,
+	       "x86 gpr dispatch cell drift");
+_Static_assert(KPROG_X86_GPR_CELL(X86_R15) == 15U,
+	       "x86 gpr dispatch cell drift");
 
 #define X86_SIM_L_DECLARE_REG(REG, NAME)                                    \
 	union x86_sim_gpr __x86_##NAME = { .ptr = (void *)0 };              \

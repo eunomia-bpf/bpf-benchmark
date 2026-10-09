@@ -100,6 +100,7 @@ check:
 	python3 generate_x86_mem_aux_spec.py --check
 	python3 generate_x86_mem_index_spec.py --check
 	python3 generate_x86_reg_presence_spec.py --check
+	python3 generate_x86_reg_dispatch_spec.py --check
 	python3 generate_x86_opcode_spec.py --check
 	python3 generate_x86_specialization_spec.py --check
 	lake build
@@ -232,6 +233,12 @@ check:
 	./build/test_x86_mem_index_route_host
 	lake env lean KProgFormal/GeneratedX86RegPresence.lean
 	lake env lean KProgFormal/X86RegPresence.lean
+	lake env lean KProgFormal/GeneratedX86RegDispatch.lean
+	lake env lean KProgFormal/X86RegDispatch.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_dispatch_host.c -o build/test_x86_reg_dispatch_host
+	./build/test_x86_reg_dispatch_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_reg_dispatch_route_host.c -o build/test_x86_reg_dispatch_route_host
+	./build/test_x86_reg_dispatch_route_host
 	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_presence_host.c -o build/test_x86_reg_presence_host
 	./build/test_x86_reg_presence_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_reg_presence_route_host.c -o build/test_x86_reg_presence_route_host

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "operation": "x86RegDispatch",
+  "reg_bits": 8,
+  "gpr_count": 16,
+  "sentinel": 255,
+  "cells": [
+    {"name": "rax", "define": "X86_RAX", "number": 0},
+    {"name": "rcx", "define": "X86_RCX", "number": 1},
+    {"name": "rdx", "define": "X86_RDX", "number": 2},
+    {"name": "rbx", "define": "X86_RBX", "number": 3},
+    {"name": "rsp", "define": "X86_RSP", "number": 4},
+    {"name": "rbp", "define": "X86_RBP", "number": 5},
+    {"name": "rsi", "define": "X86_RSI", "number": 6},
+    {"name": "rdi", "define": "X86_RDI", "number": 7},
+    {"name": "r8", "define": "X86_R8", "number": 8},
+    {"name": "r9", "define": "X86_R9", "number": 9},
+    {"name": "r10", "define": "X86_R10", "number": 10},
+    {"name": "r11", "define": "X86_R11", "number": 11},
+    {"name": "r12", "define": "X86_R12", "number": 12},
+    {"name": "r13", "define": "X86_R13", "number": 13},
+    {"name": "r14", "define": "X86_R14", "number": 14},
+    {"name": "r15", "define": "X86_R15", "number": 15}
+  ]
+}
