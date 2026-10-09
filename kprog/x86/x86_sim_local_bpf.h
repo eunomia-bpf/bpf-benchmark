@@ -127,6 +127,11 @@ union x86_sim_stack_mem {
 #define X86_SIM_HELPER_bpf_prog_load_map 20ULL
 #define X86_SIM_HELPER_bpf_get_current_task 21ULL
 
+/* The helper-id -> helper-body dispatch contract. Included here, after the
+ * `X86_SIM_HELPER_bpf_*` id defines above, so its `_Static_assert`s see the id
+ * values and pin them to the generated ladder table. */
+#include "../formal/generated/x86_helper_dispatch.h"
+
 /* The width a body operates at when its decoded width field is absent (the
  * code 0): the same resolution the Lean `effective` def and the C contract
  * state. Bodies restated this fallback inline; they now share one kernel. */
