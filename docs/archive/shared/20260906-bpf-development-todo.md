@@ -9120,6 +9120,102 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   paragraph after the x86 register-number dispatch paragraph (paper commit
   `afa3120`, pushed to `main`).
 
+## Step 0114 — x86 XCHG resolved-width arm-selection machine-checked contract
+
+- Scope: the x86 simulator's `X86_OP_XCHG` arm
+  (`kprog/x86/x86_sim_local_bpf.h`, the `X86_SIM_L_EXEC` chain) selects between
+  two bodies on the *resolved* operand width `__x86_l_width`: at the full 64-bit
+  width it swaps the two register cells as raw pointer cells (tag-preserving
+  `X86_SIM_L_READ_REG_PTR`, scalarizing `X86_SIM_L_WRITE_REG_PTR`), at every
+  narrower width it reads both cells as 64-bit values and writes each back
+  through the partial-register writeback (`X86_SIM_L_WRITE_REG_WIDTH`). Both
+  arms scalarize both tags; on *value* bits the two arms are bit-identical at
+  64 bits and diverge only below it, so the selector distinguishes an
+  implementation, not a value. The effective-width resolution
+  (`X86_SIM_L_EFFECTIVE_WIDTH`, Step 0014) and the write primitives were pinned
+  earlier; this step makes the arm *choice* a shared, generated,
+  machine-checked contract. x86-only; the AArch64 simulator's `XCHG`-analogue
+  is not a width-keyed two-body split.
+- Shared spec `kprog/formal/x86_xchg_spec.json` (`schema_version` 1, `operation`
+  `x86XchgSelector`): `selector` `full_width_code_then_arm`, `width_code_bits`
+  8, `opcode_define` `X86_OP_XCHG`, `opcode` 25, `full_width_define`
+  `KPROG_X86_XCHG_FULL_WIDTH`, `full_width_code` 8, and two `{arm, arm_define,
+  is_full_width, effect, width_class}` rows in selection order
+  (`pointerSwap`/`KPROG_X86_XCHG_ARM_POINTER_SWAP`/1/`pointer_swap`/`full`,
+  `subwordSwap`/`KPROG_X86_XCHG_ARM_SUBWORD_SWAP`/0/`width_value_swap`/
+  `narrow`). `generate_x86_xchg_spec.py` carries an independent module-level
+  `_ARMS` enumeration **and** re-derives the live `X86_OP_XCHG` arm text from
+  the header (`arm_region()` slices between the `XCHG` arm opener and the `DIV`
+  arm, `flat()` flattens `\`-continuations, and a whitespace collapse makes the
+  selector substring check exact), then `check_against_header()` requires the
+  routed arm to go through `KPROG_X86_XCHG_ARM(__x86_l_width) ==
+  KPROG_X86_XCHG_ARM_POINTER_SWAP` and to read/write the pointer cells and use
+  the width write. It emits `generated/x86_xchg.h` (`X86_WIDTH_{8,16,32,64}`
+  re-declares, `KPROG_X86_XCHG_FULL_WIDTH 8U`, `KPROG_X86_XCHG_ARM_COUNT 2U`,
+  the two arm defines, a `KPROG_X86_XCHG_ARM(WIDTH)` selector, and drift
+  `_Static_assert`s pinning `X86_OP_XCHG == 25U`, the width codes, the arm
+  count, and arm distinctness) and the Lean `KProgFormal.GeneratedX86Xchg`.
+  `--check` rc=0.
+- Hand refinement `KProgFormal/X86XchgHandler.lean`: the independent spec
+  `x86XchgArmSpec` selects on the width contract's own literal
+  `x86WidthCodeSpec .w64` rather than the generated `fullWidthCode`, and
+  `x86XchgArmNamesSpec` is the literal constructor order. It proves
+  `x86_xchg_arm_refines`, `x86_xchg_names_refine`, the two `_length`s,
+  `_codes_nodup`, `_arm_of_code_roundtrip`, `_arm_of_code_beyond_is_none`,
+  `_opcode_is_0x19`, `_width_code_bits_is_8`, `_full_width_is_w64`,
+  `_arm_count_is_2`, `_width_classes`, `_effects`, `_pointer_swaps`,
+  `_pointer_scalarizes`, `_subword_scalarizes`, `_pointer_involution`,
+  `_is_full_width_only_w64`, and `_case_dispatch`; and, pinning the semantic
+  split, `_full_arms_agree_bits` (the two arms are bit-identical at `w64`),
+  `_subword_exchanges_window`, `_subword8_preserves_upper`,
+  `_subword16_preserves_upper`, `_subword32_zero_extends`,
+  `_subword_is_reg_write`. Module elaborates rc=0, no `sorry`/`admit`.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_xchg.h"` after the register-dispatch
+  include, and the `X86_OP_XCHG` arm now selects its body through
+  `KPROG_X86_XCHG_ARM(__x86_l_width)` instead of a restated width test; both
+  bodies are kept byte-identical.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_xchg_host.c` includes the generated header (compiling its drift
+    asserts) and drives `KPROG_X86_XCHG_ARM_COUNT` / `_FULL_WIDTH` / the
+    arm-code distinctness and the selector over the whole resolved-width-code
+    domain against an independent full-width-code binding
+    — `x86 xchg host cross-check: OK (260 cases)`. Zero warnings from its own
+    file.
+  - `test_x86_xchg_route_host.c` includes the simulator header, plants a
+    deterministic non-scalar register pattern in all 16 GPR cells, and drives
+    the real `X86_SIM_L_EXEC` `XCHG` arm over every operand pair and every
+    resolved width code (including the absent code 0), comparing the whole
+    register file (value and tag) against an independent model that exchanges
+    whole 64-bit cells at the full width and low-lane windows below, requiring
+    no third cell to move and the flags to stay put
+    — `x86 xchg route host cross-check: OK (62725 cases)`. Zero warnings from
+    its own file.
+- Gate `make -C kprog/formal check` rc=0, **137** `cross-check: OK`. Baseline
+  was **135** for Step 0113; Step 0114 adds the two XCHG oracles and the Lean
+  pair, wired into `kprog/formal/Makefile`, with the two new Lean modules
+  imported in `KProgFormal.lean`.
+- Mutation harness `/tmp/mut_x86_xchg.py`, 27 mutations against a cloned tree,
+  each caught after the four unmutated controls (`gen`, `lean_chain`, `host`,
+  `route`) pass, restoring every watched file byte-for-byte between mutations
+  and re-checking the baseline green at the end: eight spec/generator defects
+  (arm-name swap, full-width drift, opcode drift, arm-define drift,
+  is-full-width-flag drift, armed-flag drift, generator full-width drift,
+  selector-text drift → generator), four generated-C defects (full-width macro,
+  count macro, selector shape, opcode assert → host/generator), five
+  generated-Lean defects (full-width drift, `armOf` shape drift, code-table
+  drift, name-table drift, opcode drift → refinement), four hand-refinement
+  defects (spec selector swap, full-width claim drift, agree-bits claim drift,
+  zero-extend claim drift → refinement), two routed-wiring defects (inverted
+  selector guard, dropped include → route oracle), and two generator+artifact
+  pair defects regenerated so `--check` stays green and only the rebuilt-olean
+  refinement catches them. Three semantically equivalent mutations (an added
+  include-side comment, an added hand-module comment, and a resolved-but-equal
+  generator root path) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the contract
+  paragraph after the x86 helper-id dispatch paragraph (paper commit pushed to
+  `main`).
+
 ## Next after 0076
 
 
@@ -9147,6 +9243,14 @@ longer wholly open: the per-conditional-edge predicate *and* its emitted
 whole-program trace theorem chaining those edges is now proved ISA-agnostically
 (Step 0109): the emitted walk (fixed shape and per-edge directional policy)
 equals the architectural `branchPc` walk for arbitrary-length paths.
+The x86 `XCHG` arm's choice of body on its resolved width is likewise no longer
+wholly open: the pointer-cell/subreword split is now a machine-checked
+full-width selector (Step 0114), leaving the register reads, the writes, and
+the value computation inside the composed arm body. Still-open x86 arm
+selection includes the `DIV` four-way width ladder with its `RDX==0` advice
+gate, the `SHLD`/`SHRD` immediate shift-flag shape, the `POPCNT` flag block,
+the `MOVX` source-width fallback (a duplicated inline width test), and the
+`MOV_REG` three-way arm.
 
 The AArch64 *write-register destination-presence* decision is likewise no longer
 open: the `XZR`/sentinel presence test the three writeback bodies shared is now

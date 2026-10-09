@@ -640,6 +640,29 @@ every armed id, the zero id, the unarmed named ids and beyond, and all 256
 register numbers, serving the four host-calling helpers with fixed-return stubs
 and comparing the whole changed register state against an independent id-to-body
 model (2,882 cases).
+The x86-64 `XCHG` arm's choice of body on the resolved operand width is itself
+a generated contract: `generate_x86_xchg_spec.py` emits
+`KPROG_X86_XCHG_FULL_WIDTH` (8), `KPROG_X86_XCHG_ARM_COUNT` (2), the two arm
+defines, and the `KPROG_X86_XCHG_ARM(WIDTH)` selector, and `X86XchgHandler.lean`
+proves the generated `armOf` equal to an independent selector (the pointer-swap
+arm at the width contract's own `x86WidthCodeSpec .w64`, the subword-swap arm at
+every other code), that the arm-name and arm-code tables equal an independent
+literal order, that the tables hold exactly `armCount` entries and the codes are
+duplicate-free, that `armOfCode` inverts `codeOfArm` on the two arms and names
+no arm beyond them, that the resolved width code is 8 bits and the full-width
+code is exactly the 64-bit width's code, and---the semantic split---that the two
+arms are *bit-identical at 64 bits* (so the selector distinguishes an
+implementation, not a value) while the subword arm exchanges each cell's
+low-lane window, preserves the upper bytes at 8 and 16 bits, and zero-extends at
+32. The generated header is included in the sim header, and the routed arm
+selects its body through `KPROG_X86_XCHG_ARM(__x86_l_width)` instead of
+restating the width test. A generated-header oracle drives the count and
+full-width macros and the selector over the whole resolved-width-code domain
+against an independent full-width-code binding (260 cases), and a sim-header
+route oracle drives the real `XCHG` body over every operand pair and every
+resolved width against an independent model that exchanges whole 64-bit cells
+and low-lane windows below, comparing the whole register file with its tags and
+requiring no third cell to move and the flags to stay put (62,725 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2158,6 +2181,8 @@ selector),
 x86 helper-id dispatch-body binding (and the simulator's binding of its
 `X86_SIM_BPF_CALL_ID` call ladder and its id defines to the generated helper
 table),
+x86 `XCHG` resolved-width arm selection (and the simulator's routing of the
+`X86_OP_XCHG` arm body through the generated full-width selector),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,

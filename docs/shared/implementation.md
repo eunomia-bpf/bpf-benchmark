@@ -201,6 +201,12 @@ increment is committed and pushed immediately). Current state:
   chain's `X86_OP_CALL_REG` arm), leaving the per-helper value computation in
   the composed body; the AArch64 simulator has no helper ladder, so there is no
   mirror.
+  The `XCHG` arm's choice of body on its resolved operand width is likewise no
+  longer open for x86-64 (Step 0114): the arm now routes its body through a
+  generated machine-checked full-width selector, so the pointer-cell swap and
+  the width-masked value swap are selected by a proved table rather than a
+  restated width test, leaving the register reads, writes, and the value
+  computation in the composed arm body.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
