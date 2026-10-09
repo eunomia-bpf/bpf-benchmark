@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "operation": "x86MovxShapeSelector",
+  "selector": "opcode_then_arm",
+  "opcode_bits": 8,
+  "arms": [
+    {
+      "arm": "sign_extend",
+      "arm_define": "KPROG_X86_MOVX_SHAPE_SIGN_EXTEND",
+      "opcode": 33,
+      "opcode_define": "X86_OP_MOVSX_REG",
+      "result": "sign_extend",
+      "effect": "sign_extend_source_lane"
+    },
+    {
+      "arm": "zero_extend",
+      "arm_define": "KPROG_X86_MOVX_SHAPE_ZERO_EXTEND",
+      "opcode": 32,
+      "opcode_define": "X86_OP_MOVZX_REG",
+      "result": "zero_extend",
+      "effect": "zero_extend_source_lane"
+    }
+  ]
+}

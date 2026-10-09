@@ -30,6 +30,7 @@
 #include "../formal/generated/x86_div.h"
 #include "../formal/generated/x86_doubleshift_arm.h"
 #include "../formal/generated/x86_popcnt_flags.h"
+#include "../formal/generated/x86_movx_shape.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -1639,10 +1640,16 @@ struct x86_sim_state {
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_src_width = (AUX) ? (AUX) : __x86_l_width;   \
+		__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));          \
 		__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);            \
-		__x86_l_value = (OP) == X86_OP_MOVSX_REG ?                \
-			x86_sign_extend(__x86_l_value, __x86_l_src_width) :\
-			x86_apply_width(__x86_l_value, __x86_l_src_width); \
+		if (__x86_l_shape ==                                      \
+		    KPROG_X86_MOVX_SHAPE_SIGN_EXTEND) {                   \
+			__x86_l_value = x86_sign_extend(__x86_l_value,    \
+				__x86_l_src_width);                       \
+		} else {                                                  \
+			__x86_l_value = x86_apply_width(__x86_l_value,    \
+				__x86_l_src_width);                       \
+		}                                                         \
 		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,           \
 					  __x86_l_width);                    \
 	} while (0)
@@ -1865,10 +1872,16 @@ struct x86_sim_state {
 		} else if ((OP) == X86_OP_MOVZX_REG ||                    \
 			   (OP) == X86_OP_MOVSX_REG) {                    \
 			__u8 __x86_l_src_width = (AUX) ? (AUX) : __x86_l_width;\
+			__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));   \
 			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);     \
-			__x86_l_value = (OP) == X86_OP_MOVSX_REG ?         \
-				x86_sign_extend(__x86_l_value, __x86_l_src_width) :\
-				x86_apply_width(__x86_l_value, __x86_l_src_width);\
+			if (__x86_l_shape ==                               \
+			    KPROG_X86_MOVX_SHAPE_SIGN_EXTEND) {            \
+				__x86_l_value = x86_sign_extend(           \
+					__x86_l_value, __x86_l_src_width); \
+			} else {                                           \
+				__x86_l_value = x86_apply_width(           \
+					__x86_l_value, __x86_l_src_width); \
+			}                                                  \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_width);        \
 			} else if ((OP) == X86_OP_MOV_LOAD ||                     \

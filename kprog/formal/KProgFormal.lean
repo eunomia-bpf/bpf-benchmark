@@ -24,6 +24,8 @@ import KProgFormal.GeneratedX86DoubleShiftArm
 import KProgFormal.X86DoubleShiftArmHandler
 import KProgFormal.GeneratedX86PopcntFlags
 import KProgFormal.X86PopcntFlags
+import KProgFormal.GeneratedX86MovxShape
+import KProgFormal.X86MovxShape
 import KProgFormal.X86MemAux
 import KProgFormal.GeneratedArm64MemIndex
 import KProgFormal.Arm64MemIndex

@@ -106,6 +106,7 @@ check:
 	python3 generate_x86_div_spec.py --check
 	python3 generate_x86_doubleshift_arm_spec.py --check
 	python3 generate_x86_popcnt_flags_spec.py --check
+	python3 generate_x86_movx_shape_spec.py --check
 	python3 generate_x86_opcode_spec.py --check
 	python3 generate_x86_specialization_spec.py --check
 	lake build
@@ -273,6 +274,12 @@ check:
 	./build/test_x86_popcnt_flags_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_popcnt_flags_route_host.c -o build/test_x86_popcnt_flags_route_host
 	./build/test_x86_popcnt_flags_route_host
+	lake env lean KProgFormal/GeneratedX86MovxShape.lean
+	lake env lean KProgFormal/X86MovxShape.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_movx_shape_host.c -o build/test_x86_movx_shape_host
+	./build/test_x86_movx_shape_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_movx_shape_route_host.c -o build/test_x86_movx_shape_route_host
+	./build/test_x86_movx_shape_route_host
 	./build/test_x86_reg_dispatch_route_host
 	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_presence_host.c -o build/test_x86_reg_presence_host
 	./build/test_x86_reg_presence_host
