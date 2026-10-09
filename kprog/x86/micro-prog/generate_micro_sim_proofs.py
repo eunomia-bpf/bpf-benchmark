@@ -15,6 +15,8 @@ import yaml
 from generated_x86_alu_decode import ALU_AUX
 from generated_x86_opcode import X86_OPCODE, X86_OPCODE_NAME
 from generated_x86_reg_lane_aux import c_reg_lane_aux
+from generated_x86_specialization import (X86_SPECIALIZATION_AUX_CALL,
+                                         X86_SPECIALIZATION_DIRECT_CALL)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -955,59 +957,17 @@ def c_comment(text: str) -> str:
     return text.replace("*/", "* /")
 
 
-DIRECT_STEP_MACROS = {
-    "X86_OP_MOV_LOAD_MAP_PTR": "X86_SIM_L_WRITE_REG_MAP_PTR({dst}, (void *)(long)({imm}))",
-    "X86_OP_MOV_LOAD_HELPER_ID": "X86_SIM_L_WRITE_REG_HELPER_ID({dst}, {imm})",
-    "X86_OP_CALL_HELPER": "X86_SIM_BPF_CALL_ID({imm})",
-    "X86_OP_CALL_MEMCPY": "X86_SIM_L_EXEC_CALL_MEMCPY({imm})",
-    "X86_OP_CALL_MEMSET": "X86_SIM_L_EXEC_CALL_MEMSET({imm})",
-    "X86_OP_CALL_MEMCPY_REG": "X86_SIM_L_EXEC_CALL_MEMCPY_REG({imm})",
-    "X86_OP_CALL_MEMSET_REG": "X86_SIM_L_EXEC_CALL_MEMSET_REG({imm})",
-    "X86_OP_CALL_REG": "X86_SIM_BPF_CALL_REG({src})",
-    "X86_OP_MOV_IMM": "X86_SIM_L_EXEC_MOV_IMM({dst}, {flags}, {imm})",
-    "X86_OP_MOV_REG": "X86_SIM_L_EXEC_MOV_REG({dst}, {src}, {flags})",
-    "X86_OP_MOVZX_REG": "X86_SIM_L_EXEC_MOVX_REG({op}, {dst}, {src}, {flags}, {aux})",
-    "X86_OP_MOVSX_REG": "X86_SIM_L_EXEC_MOVX_REG({op}, {dst}, {src}, {flags}, {aux})",
-    "X86_OP_MOV_LOAD": "X86_SIM_L_EXEC_MOV_LOAD({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_MOV_LOAD_SCALAR": "X86_SIM_L_EXEC_MOV_LOAD({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_MOVSX_LOAD": "X86_SIM_L_EXEC_MOV_LOAD({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_MOV_STORE_IMM": "X86_SIM_L_EXEC_STORE({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_MOV_STORE_REG": "X86_SIM_L_EXEC_STORE({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_LEA": "X86_SIM_L_EXEC_LEA({dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_ALU_IMM": "X86_SIM_L_EXEC_ALU_IMM({dst}, {flags}, {aux}, {imm})",
-    "X86_OP_ADD_IMM": "X86_SIM_L_EXEC_ALU_IMM({dst}, {flags}, {aux}, {imm})",
-    "X86_OP_ALU_REG": "X86_SIM_L_EXEC_ALU_REG({dst}, {src}, {flags}, {aux})",
-    "X86_OP_ADD_REG": "X86_SIM_L_EXEC_ALU_REG({dst}, {src}, {flags}, {aux})",
-    "X86_OP_XOR_REG": "X86_SIM_L_EXEC_ALU_REG({dst}, {src}, {flags}, {aux})",
-    "X86_OP_ALU_MEM": "X86_SIM_L_EXEC_ALU_MEM({dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_ALU_MEM_UNARY": "X86_SIM_L_EXEC_ALU_MEM_UNARY({dst}, {flags}, {aux}, {imm})",
-    "X86_OP_ALU_MEM_IMM": "X86_SIM_L_EXEC_ALU_MEM_IMM({dst}, {flags}, {aux}, {imm})",
-    "X86_OP_ALU_MEM_REG": "X86_SIM_L_EXEC_ALU_MEM_REG({dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_CMP_IMM": "X86_SIM_L_EXEC_CMP_IMM_OP({op}, {dst}, {flags}, {imm})",
-    "X86_OP_TEST_IMM": "X86_SIM_L_EXEC_CMP_IMM_OP({op}, {dst}, {flags}, {imm})",
-    "X86_OP_CMP_REG": "X86_SIM_L_EXEC_CMP_REG_OP({op}, {dst}, {src}, {flags})",
-    "X86_OP_TEST_REG": "X86_SIM_L_EXEC_CMP_REG_OP({op}, {dst}, {src}, {flags})",
-    "X86_OP_CMP_MEM_IMM": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_TEST_MEM_IMM": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_CMP_MEM_REG": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_TEST_MEM_REG": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_CMP_REG_MEM": "X86_SIM_L_EXEC_CMP_REG_MEM({dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_CMOV": "X86_SIM_L_EXEC_CMOV({dst}, {src}, {flags}, {aux})",
-    "X86_OP_CMOV_MEM": "X86_SIM_L_EXEC_CMOV_MEM({dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_SETCC": "X86_SIM_L_EXEC_SETCC({dst}, {aux})",
-    "X86_OP_SETCC_MEM": "X86_SIM_L_EXEC_SETCC_MEM({dst}, {aux}, {imm})",
-    "X86_OP_BT": "X86_SIM_L_EXEC_BT({dst}, {src}, {flags})",
-    "X86_OP_BT_IMM": "X86_SIM_L_EXEC_BT_IMM({dst}, {flags}, {imm})",
-    "X86_OP_BT_MEM_IMM": "X86_SIM_L_EXEC_BT_MEM_IMM({dst}, {flags}, {aux}, {imm})",
-    "X86_OP_IMUL_IMM": "X86_SIM_L_EXEC_IMUL_IMM({dst}, {src}, {flags}, {imm})",
-    "X86_OP_IMUL_MEM_IMM": "X86_SIM_L_EXEC_IMUL_MEM_IMM({dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_MULX": "X86_SIM_L_EXEC_MULX({dst}, {src}, {aux}, {flags})",
-    "X86_OP_REP_MOVS": "X86_SIM_L_EXEC_REP_MOVS({flags}, {imm})",
-    "X86_OP_ANDN": "X86_SIM_L_EXEC_ANDN({dst}, {src}, {aux}, {flags})",
-    "X86_OP_ANDN_MEM": "X86_SIM_L_EXEC_ANDN_MEM({dst}, {src}, {flags}, {aux}, {imm})",
-    "X86_OP_PUSH": "X86_SIM_L_EXEC_PUSH({src})",
-    "X86_OP_POP": "X86_SIM_L_EXEC_POP({dst}, {flags})",
-}
+# The specialized step for each token the encoder can lower directly, and the
+# aux-gated override for the six lane-shift-sensitive tokens. Both come from the
+# machine-checked specialization contract in
+# `kprog/formal/x86_specialization_spec.json` (the `directMacro` and
+# aux-gated rows): `X86_SPECIALIZATION_DIRECT_CALL` is the call the encoder
+# emits at aux 0, `X86_SPECIALIZATION_AUX_CALL` the one it emits for nonzero
+# aux. `kprog/formal/KProgFormal/X86Specialization.lean` proves each of these
+# calls names the same body the simulator's own `X86_SIM_L_EXEC` chain runs, so
+# lowering a token here cannot insert a step the chain does not perform (O2).
+DIRECT_STEP_MACROS = dict(X86_SPECIALIZATION_DIRECT_CALL)
+AUX_STEP_MACROS = dict(X86_SPECIALIZATION_AUX_CALL)
 
 # Every macro-table key must be an opcode the generated contract defines: a
 # typo'd key would otherwise silently miss the table lookup and fall back to the
@@ -1019,29 +979,24 @@ for _macro_key in DIRECT_STEP_MACROS:
     if _macro_key not in X86_OPCODE_NAME:
         raise SystemExit(f"unknown x86 opcode in DIRECT_STEP_MACROS: {_macro_key}")
 del _macro_key
+for _aux_key in AUX_STEP_MACROS:
+    if _aux_key not in X86_OPCODE_NAME:
+        raise SystemExit(f"unknown x86 opcode in AUX_STEP_MACROS: {_aux_key}")
+del _aux_key
 
 
 def direct_step_statement(encoded: EncodedInsn) -> str | None:
-    if encoded.op == "X86_OP_MOV_IMM" and encoded.aux != "0":
-        return (
-            f"X86_SIM_L_EXEC_MOV_IMM_AUX({encoded.dst}, {encoded.flags}, "
-            f"{encoded.aux}, {encoded.imm})"
-        )
-    if encoded.op == "X86_OP_MOV_REG" and encoded.aux != "0":
-        return (
-            f"X86_SIM_L_EXEC_MOV_REG_AUX({encoded.dst}, {encoded.src}, "
-            f"{encoded.flags}, {encoded.aux})"
-        )
-    if encoded.op in {"X86_OP_CMP_IMM", "X86_OP_TEST_IMM"} and encoded.aux != "0":
-        return (
-            f"X86_SIM_L_EXEC_CMP_IMM_OP_AUX({encoded.op}, {encoded.dst}, "
-            f"{encoded.flags}, {encoded.aux}, {encoded.imm})"
-        )
-    if encoded.op in {"X86_OP_CMP_REG", "X86_OP_TEST_REG"} and encoded.aux != "0":
-        return (
-            f"X86_SIM_L_EXEC_CMP_REG_OP_AUX({encoded.op}, {encoded.dst}, "
-            f"{encoded.src}, {encoded.flags}, {encoded.aux})"
-        )
+    if encoded.aux != "0":
+        template = AUX_STEP_MACROS.get(encoded.op)
+        if template is not None:
+            return template.format(
+                op=encoded.op,
+                dst=encoded.dst,
+                src=encoded.src,
+                flags=encoded.flags,
+                aux=encoded.aux,
+                imm=encoded.imm,
+            )
     template = DIRECT_STEP_MACROS.get(encoded.op)
     if template is None:
         return None

@@ -8858,11 +8858,99 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   mnemonic-parsing limitation) in the paper repo commit `c3acacf`; the outer
   gitlink bump follows.
 
+
+## Step 0111 — x86 specialization-preservation machine-checked contract
+
+- Scope: the artifact encoder `kprog/x86/micro-prog/generate_micro_sim_proofs.py`
+  chooses, per decoded operation, either a *specialized* body (a
+  `X86_SIM_L_EXEC_*`/`X86_SIM_BPF_CALL_*` macro named in its
+  `DIRECT_STEP_MACROS` table, plus six AUX-gated overrides) or the generic
+  `X86_SIM_L_EXEC` chain. The simulator's own dispatch chain
+  (`X86_SIM_L_EXEC` in `kprog/x86/x86_sim_local_bpf.h`) independently selects a
+  handler for the same token. Nothing tied the two selections, so a token the
+  encoder specialized to one body could be dispatched by the simulator to a
+  *different* body — a silently inserted or omitted step. This step makes the
+  per-token dispatch selection a shared, generated, machine-checked contract,
+  and proves at run time that the two selections run the same handler body.
+- Shared spec `kprog/formal/x86_specialization_spec.json` (`schema_version` 1,
+  `operation` `x86Specialization`): 72 canonical rows
+  `{token, dispatch, chain_macro, direct_call, aux_call}` in canonical token
+  order, plus an `aux_gated` list. `dispatch` is one of `directMacro`,
+  `branchHandler`, `genericRunOp` (49 / 4 / 19). `chain_macro` records the
+  `X86_SIM_L_EXEC` arm macro name (empty when the arm is inline or absent),
+  `direct_call`/`aux_call` are the emitted call templates.
+  `generate_x86_specialization_spec.py` carries an independent module-level
+  `EXPECTED` enumeration, re-reads `kprog/x86/x86_sim_local_bpf.h` on every run
+  (the `X86_SIM_L_EXEC` arm guards and the `X86_SIM_L_EXEC_*` macro
+  definitions), and fails on a class change, an added or dropped row (whole
+  set equality both directions), a drifted chain/direct/aux target, or a
+  `chain_macro` that no longer names an `X86_SIM_L_EXEC_*` macro. It emits
+  `generated/x86_specialization.h`, the Lean
+  `KProgFormal.GeneratedX86Specialization`, and the encoder tables
+  `kprog/x86/micro-prog/generated_x86_specialization.py`. `--check` rc=0.
+- Dead-macro defect found and fixed: the spec rows for
+  `X86_OP_MOV_LOAD_MAP_PTR` and `X86_OP_MOV_LOAD_HELPER_ID` had been pinned to
+  `dispatch=directMacro` with the `direct_call` macros
+  `X86_SIM_L_WRITE_REG_MAP_PTR`/`X86_SIM_L_WRITE_REG_HELPER_ID`, but those two
+  macros were deleted from `x86_sim_local_bpf.h` at the source root (commit
+  `6719bdb3d`, "step 0042"); the tokens are actually handled by the in-chain
+  arms at `x86_sim_local_bpf.h:1784-1795`. Both rows are now
+  `genericRunOp` with empty `chain_macro`/`direct_call`/`aux_call`. The fix was
+  propagated to all four places that carried the stale row: the generator's
+  `EXPECTED`, `x86_specialization_spec.json`, `X86Specialization.lean`, and the
+  encoder's `DIRECT_STEP_MACROS`. Tables now hold 72 dispatch / 49 direct / 6
+  aux, with 49 `DIRECT_STEP_MACROS` keys; the encoder refactor was verified
+  output-identical across 6912 combinations (0 mismatches).
+- Generated C: `generated/x86_specialization.h` defines
+  `KPROG_X86_SPEC_{DIRECT_MACRO,BRANCH_HANDLER,GENERIC_RUN_OP}`,
+  `KPROG_X86_SPEC_COUNT 72U`, and a `kprog_x86_spec_dispatch(__u8 op)` switch
+  with one case per canonical token in canonical order.
+- Generated Lean: `inductive Dispatch`, `inductive Op` (72 constructors),
+  `def dispatch : Op -> Dispatch`. Hand refinement
+  `KProgFormal/X86Specialization.lean`: an independent
+  `List (String × Dispatch)` enumeration and `theorem x86_specialization_refines`
+  proving the generated projection equal via `native_decide`. Module elaborates
+  rc=0.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_specialization_chain_host.c` re-parses the live `X86_SIM_L_EXEC`
+    body text at run time (arms split at brace depth 0 on the `(OP) ==
+    X86_OP_*` guards) and confirms every arm guard names a canonical token, no
+    token is selected by two arms, each arm's called handler matches an
+    independent per-token table, the table is exactly the canonical token list
+    from `x86_sim.h` in order, and `KPROG_X86_SPEC_COUNT` equals the table size
+    — `x86 specialization chain host cross-check: OK (192 cases)`.
+  - `test_x86_specialization_host.c` is the run-time no-insertion oracle: for
+    every `directMacro` token it plants identical machine state twice, runs
+    `X86_SIM_RUN_OP` (chain side) and then restates by hand the specialized
+    body the encoder emits (the `aux_call` macro when the token is aux-gated
+    and AUX is non-zero, else `direct_call`), snapshots the whole state
+    (16 GPRs with width/tag, 64-byte stack image, cf/zf/sf/of, XMM0) after each
+    run, and compares element-wise; it also asserts the generated dispatch
+    class of every row and the 49-direct count
+    — `x86 specialization host cross-check: OK (483 cases)`. Both compile with
+    zero warnings from their own file.
+- The encoder restates the macro selection by hand in the runtime oracle, so a
+  spec/table selection error is caught independently of the generator: a wrong
+  choice of `direct_call`/`aux_call`, or a chain arm that dispatches to a
+  different macro, produces a state mismatch.
+- Gate `make -C kprog/formal check` rc=0, **132** `cross-check: OK` (was 129
+  for Step 0110; Step 0111 adds the two specialization oracles and the Lean
+  pair). `generate_x86_specialization_spec.py --check`, the Lean pair, and both
+  oracles are wired into `kprog/formal/Makefile`.
+- Mutation harness `/tmp/mut_x86_specialization.py`, 8 mutations against a
+  cloned tree, each caught after four unmutated controls pass: spec class flip
+  (generator), spec dropped row (generator), spec retargeted macro (generator),
+  generated-header RET class change (runtime oracle), encoder-table remap
+  (generator), generated-Lean class change (Lean refinement, olean rebuilt
+  first), and chain-header arm retarget (both the chain and the runtime oracle).
+- arm64 is out of scope for this step: `kprog/arm64/` has no equivalent
+  per-token specialization-preservation table.
+
 ## Next after 0076
 
 
 Remaining x86 open work is *compositional/handwritten*:
-compiler/native bytes; specialization preservation. The
+compiler/native bytes. The
 register/immediate/RHS objdump→AUX selection is no longer wholly open: the
 register forms' RHS/flag selection (Step 0086) and the memory forms'
 left-source/displacement-kind selection (Step 0107) are now machine-checked
@@ -8873,7 +8961,11 @@ the simulator, the Lean model, and the artifact encoder (Step 0110), leaving the
 textual mnemonic that selects a token inside the parser. The index-register decode into the AUX index byte
 is no longer wholly open: the sentinel *presence* decision over that byte is
 now a machine-checked contract for both x86 (Step 0101) and AArch64 (Step 0102),
-leaving the register-value read inside the composed body. "Multi-step
+leaving the register-value read inside the composed body. Specialization
+*preservation* is likewise no longer wholly open: the per-token selection of the
+specialized handler body the artifact encoder emits is now a shared generated
+contract, and the runtime oracle proves the simulator chain and the encoder run
+the same body for every `directMacro` token (Step 0111). "Multi-step
 control-flow traces" is likewise no
 longer wholly open: the per-conditional-edge predicate *and* its emitted
 `goto`/label shape are now bridged for both x86 (Step 0100) and AArch64, and the

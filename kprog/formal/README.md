@@ -389,6 +389,22 @@ Lean proves the generated token/code projection equal to an independent
 enumeration. The artifact encoder resolves every opcode it emits through the
 generated table and exits on an unknown name. Textual mnemonic parsing and
 native bytes remain outside this contract.
+The x86 specialization-preservation contract is generated from
+`x86_specialization_spec.json` into the C dispatch header
+`generated/x86_specialization.h`, the Lean
+`KProgFormal.GeneratedX86Specialization` family, and the artifact encoder's
+`generated_x86_specialization.py`. It pins, per canonical `X86_OP_*` token,
+whether the artifact encoder emits a specialized `X86_SIM_L_EXEC_*`/
+`X86_SIM_BPF_CALL_*` body (`directMacro`, with the six AUX-gated overrides),
+the control-transfer path (`branchHandler`), or the generic `X86_SIM_L_EXEC`
+chain (`genericRunOp`), and names the chain arm macro for each token. The
+generator re-reads `kprog/x86/x86_sim_local_bpf.h` on every `--check` and fails
+on a class change, a dropped or added row, or a drifted chain/direct/aux
+target, so the simulator's dispatch chain, the Lean model, and the encoder
+cannot silently disagree about which handler a token runs. Two host oracles
+check the live chain text and prove at run time that the chain and the
+hand-restated encoder body leave identical machine state. Textual mnemonic
+parsing and native bytes remain outside this contract.
 The x86 little-endian memory access contract is generated from
 `x86_mem_access_spec.json` into the C macros `KPROG_X86_MEM_LOAD` /
 `KPROG_X86_MEM_STORE` and Lean. The central `X86_SIM_L_LOAD_ADDR` /

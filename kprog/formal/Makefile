@@ -101,6 +101,7 @@ check:
 	python3 generate_x86_mem_index_spec.py --check
 	python3 generate_x86_reg_presence_spec.py --check
 	python3 generate_x86_opcode_spec.py --check
+	python3 generate_x86_specialization_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -132,6 +133,12 @@ check:
 	lake env lean KProgFormal/X86Opcode.lean
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_opcode_host.c -o build/test_x86_opcode_host
 	./build/test_x86_opcode_host
+	lake env lean KProgFormal/GeneratedX86Specialization.lean
+	lake env lean KProgFormal/X86Specialization.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_specialization_chain_host.c -o build/test_x86_specialization_chain_host
+	./build/test_x86_specialization_chain_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_specialization_host.c -o build/test_x86_specialization_host
+	./build/test_x86_specialization_host
 	lake env lean KProgFormal/X86IncDec.lean
 	lake env lean KProgFormal/X86Not.lean
 	lake env lean KProgFormal/X86ShiftCount.lean
