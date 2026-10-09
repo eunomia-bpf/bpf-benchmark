@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "operation": "x86DivCaseSelector",
+  "selector": "resolved_width_code_then_case",
+  "width_code_bits": 8,
+  "opcode_define": "X86_OP_DIV",
+  "opcode": 26,
+  "arms": [
+    {
+      "arm": "b8",
+      "arm_define": "KPROG_X86_DIV_ARM_B8",
+      "width_code": 1,
+      "write_count": 1,
+      "dividend_high": "none",
+      "high_gate": 0,
+      "effect": "byte_quotient_packed",
+      "width_class": "narrow"
+    },
+    {
+      "arm": "b16",
+      "arm_define": "KPROG_X86_DIV_ARM_B16",
+      "width_code": 2,
+      "write_count": 2,
+      "dividend_high": "rdx",
+      "high_gate": 0,
+      "effect": "word_quotient_remainder",
+      "width_class": "narrow"
+    },
+    {
+      "arm": "b32",
+      "arm_define": "KPROG_X86_DIV_ARM_B32",
+      "width_code": 4,
+      "write_count": 2,
+      "dividend_high": "rdx",
+      "high_gate": 0,
+      "effect": "dword_quotient_remainder",
+      "width_class": "narrow"
+    },
+    {
+      "arm": "b64",
+      "arm_define": "KPROG_X86_DIV_ARM_B64",
+      "width_code": 8,
+      "write_count": 2,
+      "dividend_high": "rdx",
+      "high_gate": 1,
+      "effect": "qword_quotient_remainder",
+      "width_class": "full"
+    }
+  ]
+}

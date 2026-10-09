@@ -27,6 +27,7 @@
 #include "../formal/generated/x86_reg_presence.h"
 #include "../formal/generated/x86_reg_dispatch.h"
 #include "../formal/generated/x86_xchg.h"
+#include "../formal/generated/x86_div.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -2012,16 +2013,19 @@ struct x86_sim_state {
 			__u64 __x86_l_divisor = X86_SIM_L_READ_REG(SRC);  \
 			__u64 __x86_l_rax = X86_SIM_L_READ_REG(X86_RAX);  \
 			__u64 __x86_l_rdx = X86_SIM_L_READ_REG(X86_RDX);  \
-			if (__x86_l_width == X86_WIDTH_8) {                \
+			if (KPROG_X86_DIV_ARM(__x86_l_width) ==            \
+			    KPROG_X86_DIV_ARM_B8) {                        \
 				__u32 __x86_l_dividend = (__u16)__x86_l_rax;\
 				__u8 __x86_l_q = __x86_l_dividend / (__u8)__x86_l_divisor;\
 				__u8 __x86_l_rem = __x86_l_dividend % (__u8)__x86_l_divisor;\
 				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, ((__u16)__x86_l_rem << 8) | __x86_l_q, X86_WIDTH_16);\
-			} else if (__x86_l_width == X86_WIDTH_16) {        \
+			} else if (KPROG_X86_DIV_ARM(__x86_l_width) ==     \
+				   KPROG_X86_DIV_ARM_B16) {                \
 				__u32 __x86_l_dividend = ((__u32)(__u16)__x86_l_rdx << 16) | (__u16)__x86_l_rax;\
 				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_dividend / (__u16)__x86_l_divisor, X86_WIDTH_16);\
 				X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_dividend % (__u16)__x86_l_divisor, X86_WIDTH_16);\
-			} else if (__x86_l_width == X86_WIDTH_32) {        \
+			} else if (KPROG_X86_DIV_ARM(__x86_l_width) ==     \
+				   KPROG_X86_DIV_ARM_B32) {                \
 				__u64 __x86_l_dividend = ((__u64)(__u32)__x86_l_rdx << 32) | (__u32)__x86_l_rax;\
 				__u64 __x86_l_div = (__u32)__x86_l_divisor;\
 				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_dividend / __x86_l_div, X86_WIDTH_32);\
