@@ -189,6 +189,11 @@ increment is committed and pushed immediately). Current state:
   helpers (`x86_bswap`, `x86_popcount64`, `x86_sign_extend`,
   `x86_signed_abs_width`, `x86_shld`/`x86_shrd`, `x86_ror`, the BT/BZHI
   predicates) now delegate to generated contracts with proven refinements.
+  The register-number -> dispatch-cell binding inside the composed bodies is no
+  longer open: for AArch64 (Step 0108) and x86-64 (Step 0112) the decoded
+  register number is bound, by a generated machine-checked contract, to the
+  state cell the writeback and read bodies select, leaving the width handling
+  and the value computation in the composed body.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

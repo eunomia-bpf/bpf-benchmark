@@ -8946,6 +8946,84 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - arm64 is out of scope for this step: `kprog/arm64/` has no equivalent
   per-token specialization-preservation table.
 
+## Step 0112 — x86 register-number → dispatch-cell machine-checked contract
+
+- Scope: the x86 simulator binds a decoded register number (`0..15`) to a state
+  cell in the hand-written `X86_SIM_L_FOR_EACH_GPR` X-macro order
+  (`kprog/x86/x86_sim_local_bpf.h:135-152`), used by the write/tag dispatch, and
+  again in the *independent* `X86_SIM_L_REG_VALUE` ternary chain (`:252-268`)
+  used by the read path. Steps 0104 (operand-register presence) and 0101
+  (memory-index presence) pinned the sentinel *presence* decision but left both
+  dispatch orders inside the composed bodies, exactly as Step 0103 did for
+  AArch64 before Step 0108 closed it. This step makes the register-number →
+  dispatch-cell binding a shared, generated, machine-checked contract binding
+  the two hand-written orders and the numeric defines `X86_RAX..X86_R15`
+  (`kprog/x86/x86_sim.h:118-134`), the x86 mirror of Step 0108.
+- Shared spec `kprog/formal/x86_reg_dispatch_spec.json` (`schema_version` 1,
+  `operation` `x86RegDispatch`): `reg_bits` 8, `gpr_count` 16, `sentinel` 255,
+  and 16 `{name, define, number}` cells in `X86_SIM_L_FOR_EACH_GPR` order
+  (`rax X86_RAX 0` … `r15 X86_R15 15`). `generate_x86_reg_dispatch_spec.py`
+  carries an independent module-level `_GPR_CELLS` enumeration and fails on a
+  cell-order/name/define drift, a number that is not `range(gpr_count)`, or a
+  `len(cells) != gpr_count`. It emits `generated/x86_reg_dispatch.h`
+  (`KPROG_X86_GPR_COUNT 16U`, `KPROG_X86_GPR_CELL(REG) ((__u8)((REG)))`,
+  per-number `_Static_assert(X86_R<n> == <n>U, ...)`, a count assert) and the
+  Lean `KProgFormal.GeneratedX86RegDispatch`. `--check` rc=0.
+- Hand refinement `KProgFormal/X86RegDispatch.lean`: independent spec from
+  `List.finRange 16`, proving `x86_reg_dispatch_numbers_refine`,
+  `_names_refine`, `_numbers_length`/`_names_length`/`_numbers_nodup`,
+  `_cellof_refines`, `_bits_is_8`, `_cell_rax`/`_cell_r15`,
+  `_first_non_gpr_is_none` (`0x10`), `_sentinel_is_none` (`0xff`),
+  `_full_range`, `_name_number_roundtrip`, `_count_is_16`, `_none_is_none`,
+  `_cell_implies_present`, `_absent_not_dispatch_some`,
+  `_sentinel_is_index_sentinel`, `_sentinel_is_index_none`, `_case_dispatch`.
+  Module elaborates rc=0.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: line 28 adds
+  `#include "../formal/generated/x86_reg_dispatch.h"` (right after the
+  reg-presence include); three `_Static_assert(KPROG_X86_GPR_CELL(X86_RAX /
+  X86_R8 / X86_R15) == 0 / 8 / 15U, ...)` bind the X-macro order to the
+  generated cell selector, with a comment noting the two independent
+  hand-written orders (the write/tag X-macro dispatch and the `X86_SIM_L_REG_VALUE`
+  read ternary chain).
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_reg_dispatch_host.c` drives `KPROG_X86_GPR_COUNT`==16 + the
+    `KPROG_X86_GPR_CELL` selector over all 256 register numbers against an
+    independent `number <= 15 ? number : -1` model
+    — `x86 reg dispatch host cross-check: OK (258 cases)`.
+  - `test_x86_reg_dispatch_route_host.c` includes the simulator header,
+    snapshots all 16 GPR `.ptr`+`_tag` cells via `X86_SIM_L_FOR_EACH_GPR`,
+    drives the real `X86_SIM_L_WRITE_REG_WIDTH` (all 256 register numbers × 4
+    widths × 6 values) and `X86_SIM_L_READ_REG` (all 256 numbers), and asserts
+    the single cell each write changes equals the generated cell selector
+    — `x86 reg dispatch route host cross-check: OK (6401 cases)`. Zero warnings
+    from its own file (the residual `-Wunused-but-set-variable` warnings all
+    trace to the simulator header's `X86_SIM_L_DECLARE_STATE`, identical to the
+    existing presence route oracle).
+- Gate `make -C kprog/formal check` rc=0, **133** `cross-check: OK`. Baseline
+  was **131** for Step 0111 (the retained `/tmp/gate_0111.log` is authoritative;
+  the "132" recorded above for Step 0111 is off by one and wrong). Step 0112
+  adds the two register-dispatch oracles and the Lean pair;
+  `generate_x86_reg_dispatch_spec.py --check`, the Lean pair, and both oracles
+  are wired into `kprog/formal/Makefile`, and the two new Lean modules are
+  imported in `KProgFormal.lean`.
+- Mutation harness `/tmp/mut_x86_reg_dispatch.py`, 20 mutations against a cloned
+  tree, each caught after the four unmutated controls (`gen`, `lean_chain`,
+  `host`, `route`) pass, restoring every watched file byte-for-byte between
+  mutations and re-checking the baseline green at the end: four spec defects
+  (cell-number drift, expected-count drift, sentinel drift, cell-define swap →
+  generator), three generated-C defects (count macro, cell macro, per-number
+  assert → generator/host oracle), three generated-Lean defects (name-order swap,
+  numbers-tail drop, `cellOf` bound drift → refinement), three hand-refinement
+  defects (spec bound drift, names swap, case-dispatch drift → refinement), three
+  routed-wiring defects (cell-selector assert, dropped include, X-macro case
+  swap → route oracle), and one generator+artifact-pair defect regenerated so
+  `--check` stays green and only the rebuilt-olean refinement catches it. Three
+  semantically equivalent mutations (a reworded simulator-header comment, an
+  added hand-module comment, and a reversed per-number drift-assert emission
+  order) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` records the contract
+  (paper commit `3bb6f87`, pushed to `main`; outer gitlink bump `4652dc8bb`).
+
 ## Next after 0076
 
 
@@ -8954,7 +9032,8 @@ compiler/native bytes. The
 register/immediate/RHS objdump→AUX selection is no longer wholly open: the
 register forms' RHS/flag selection (Step 0086) and the memory forms'
 left-source/displacement-kind selection (Step 0107) are now machine-checked
-contracts, leaving the register decode inside the composed body. The encoder's
+contracts, leaving the register *number*→*cell* binding (now itself closed for
+x86, Step 0112) and the value computation inside the composed body. The encoder's
 operation *token* is likewise no longer wholly open: the objdump-mnemonic →
 `X86_OP_*` token set and its codes are now a shared generated contract binding
 the simulator, the Lean model, and the artifact encoder (Step 0110), leaving the
@@ -8981,7 +9060,13 @@ branch as a separate architectural case. The GPR dispatch `switch` itself is now
 no longer wholly open either: the register-number → dispatch-cell binding the
 writeback and read bodies select is a machine-checked contract (Step 0108),
 leaving the width handling and the value computation inside the composed body
-and the `SP` branch as a separate architectural case.
+and the `SP` branch as a separate architectural case. The x86 mirror is now
+closed too: the register-number → dispatch-cell binding the x86 write/tag
+X-macro dispatch and the independent `X86_SIM_L_REG_VALUE` read ternary chain
+select is a machine-checked contract (Step 0112), binding both hand-written
+orders and the `X86_RAX..X86_R15` numeric defines, so neither order can drift
+from the generated cell selector; the width handling and the value computation
+stay inside the composed body.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

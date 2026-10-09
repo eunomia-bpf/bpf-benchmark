@@ -588,6 +588,33 @@ complementarity and arm gaps, and pins the sentinel against the simulator's own
 oracle drives the real bodies over the present/absent/non-GPR/stack cases, every
 width, and both pointer forms, comparing the whole register file with tags and
 the modeled heap and stack against an independent model (891 cases).
+The x86-64 register-number -> dispatch-cell binding -- the last openly
+uncontracted x86 decode -- is itself a generated contract:
+`generate_x86_reg_dispatch_spec.py` emits `KPROG_X86_GPR_COUNT` (16) and
+`KPROG_X86_GPR_CELL`, and `X86RegDispatch.lean` proves the generated
+`cellNumbers` / `cellNames` tables equal an independent `List.finRange 16`
+construction (so the dispatch cell index equals the register number and cell
+`i` names the corresponding general-purpose register, in the
+`rax rcx rdx rbx rsp rbp rsi rdi r8..r15` order), that the table holds exactly
+16 distinct entries, that `cellOf` maps exactly the numbers `0..15` and none of
+the sentinel (`0xff`) or any byte above `15`, and -- pinning the constants the
+presence contract fixes -- that the dispatch `none` case is a subset of the
+presence `absent` case (`x86_reg_dispatch_cell_implies_present`), that a present
+register is not a `dispatch none` (`x86_reg_dispatch_absent_not_dispatch_some`),
+and that the dispatch sentinel is both the operand-presence and the memory-index
+sentinel, so the x86 register-number, operand-presence and memory-index decoders
+cannot disagree about "no register". The generated header's per-number
+`_Static_assert(X86_R<n> == <n>U, ...)` drift checks and the three cell-selector
+asserts the sim header adds bind the hand-written `X86_SIM_L_FOR_EACH_GPR`
+X-macro order to the generated table, and `X86_SIM_L_REG_VALUE`'s independent
+read-path ternary chain is bound by an equality theorem, so neither hand-written
+order can drift from the generated cell table. A generated-header oracle drives
+the count and cell macros over all 256 register numbers against an independent
+`number <= 15 ? number : -1` binding (258 cases), and a sim-header route oracle
+drives the real register read and width-narrowed writeback bodies over all 256
+register numbers, all four widths and several values, observing which of the
+simulator's own 16 cells each write changes and comparing it against the
+generated cell selector (6,401 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2099,7 +2126,10 @@ x86 effective-width resolution (and the simulator's routing of its
 register/stack/flag/ALU/move/compare bodies through it), x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
 x86 operand-register presence (and the simulator's routing of its memory-read,
-MULX, MOVBE, LEA and ALU-memory bodies through it),
+MULX, MOVBE, LEA and ALU-memory bodies through it), x86 register-number
+dispatch-cell binding (and the simulator's binding of its write/tag X-macro
+dispatch and its `X86_SIM_L_REG_VALUE` read ternary chain to the generated cell
+selector),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,
