@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "operation": "x86PopcntFlags",
+  "opcode": 24,
+  "opcode_define": "X86_OP_POPCNT",
+  "zero_source": "narrowed_source_is_zero",
+  "flags": {
+    "cf": {"op": "const", "value": false},
+    "zf": {"op": "input", "name": "zero"},
+    "sf": {"op": "const", "value": false},
+    "of": {"op": "const", "value": false}
+  }
+}

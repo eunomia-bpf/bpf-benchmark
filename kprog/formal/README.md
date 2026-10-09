@@ -721,6 +721,32 @@ five flag codes (including 0), eleven immediates (including count-zero and
 count-one), and several destination/source pairs against an independent
 bit-by-bit double-shift model and an independent shift-flag model, comparing the
 whole register file with its tags and all four flags (326,703 cases).
+The x86-64 `POPCNT` arm's arithmetic flag block is likewise a generated
+contract: `generate_x86_popcnt_flags_spec.py` emits
+`KPROG_X86_SET_POPCNT_FLAGS(C_CF, C_ZF, C_SF, C_OF, ZERO)`, which clears `CF`,
+`SF`, and `OF` and sets `ZF` from its single `ZERO` input, and
+`X86PopcntFlags.lean` proves the generated transition equal to an independent
+statement built from the width contract's own narrowing — `ZF` is
+`x86ZeroSpec` of the width-narrowed source, which is exactly the narrowed
+source being zero — that the generated opcode equals the independent literal
+and is the code the opcode contract names for `X86_OP_POPCNT`, and that the
+generated selector names the narrowed-source zero predicate; it further proves
+the three clears independent of the source, a zero source setting `ZF` and a
+nonzero source clearing it at every width, `SF` cleared even for a source whose
+sign bit is set (the semantic split from the logical shape, which would derive
+`SF` from the result's sign), and — the narrowing observable — that a source
+whose low byte is zero but whose upper bytes are set still clears `ZF` at the
+8-bit width. The generated header is included in the sim header, and the routed
+arm sets its flags through the `X86_SIM_L_SET_POPCNT_FLAGS` wrapper instead of
+restating the clear/set sequence, feeding it the width-narrowed source so the
+`ZF` input matches the proven narrowing. A generated-header oracle drives the
+macro against an independent literal model from a planted all-set pre-state
+(4 cases), and a sim-header route oracle drives the real `POPCNT` arm over five
+flag codes (including 0), twelve source values (spanning zero, all-ones,
+single-bit, and values whose low byte is zero but whose upper bytes are set),
+and three destination/source pairs against an independent bit-by-bit
+population-count model and an independent flag model, comparing the whole
+register file with its tags and all four flags (5,940 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2247,6 +2273,9 @@ selector),
 x86 `SHLD`/`SHRD` immediate opcode-keyed body and flag-family selection (and the
 simulator's routing of the arm body and its shift-flag family through the
 generated opcode-keyed selectors behind the count-zero step gate),
+x86 `POPCNT` flag-block transition (and the simulator's routing of the arm's
+arithmetic flags through the generated clear-`CF`/`SF`/`OF`, set-`ZF`-from-
+narrowed-source contract),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,

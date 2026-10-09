@@ -29,6 +29,7 @@
 #include "../formal/generated/x86_xchg.h"
 #include "../formal/generated/x86_div.h"
 #include "../formal/generated/x86_doubleshift_arm.h"
+#include "../formal/generated/x86_popcnt_flags.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -572,6 +573,14 @@ struct x86_sim_state {
 		KPROG_X86_SET_LOGIC_FLAGS(__x86_cf, __x86_zf, __x86_sf,  \
 			__x86_of, __x86_fl_value == 0,                     \
 			(__x86_fl_value >> (__x86_fl_bits - 1)) & 1);       \
+	} while (0)
+
+#define X86_SIM_L_SET_POPCNT_FLAGS(SRC, WIDTH)                              \
+	do {                                                               \
+		__u8 __x86_pc_width = X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);   \
+		KPROG_X86_SET_POPCNT_FLAGS(                               \
+			__x86_cf, __x86_zf, __x86_sf, __x86_of,           \
+			x86_apply_width((SRC), __x86_pc_width) == 0);     \
 	} while (0)
 
 #define X86_SIM_L_SET_SUB_FLAGS(LHS, RHS, RESULT, WIDTH)                    \
@@ -1933,8 +1942,8 @@ struct x86_sim_state {
 				__u64 __x86_l_result =                            \
 					x86_popcount64(x86_apply_width(__x86_l_src,\
 								       __x86_l_width));\
-				__x86_cf = 0; __x86_of = 0; __x86_sf = 0;          \
-				__x86_zf = x86_apply_width(__x86_l_src, __x86_l_width) == 0;\
+				X86_SIM_L_SET_POPCNT_FLAGS(__x86_l_src,           \
+							  __x86_l_width);        \
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 							  __x86_l_width);        \
 			} else if ((OP) == X86_OP_SHIFTX) {                       \
