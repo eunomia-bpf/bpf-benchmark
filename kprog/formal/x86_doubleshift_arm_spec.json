@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "operation": "x86DoubleShiftArmSelector",
+  "selector": "opcode_then_arm",
+  "opcode_bits": 8,
+  "arms": [
+    {
+      "arm": "shld",
+      "arm_define": "KPROG_X86_DOUBLESHIFT_ARM_SHLD",
+      "opcode": 27,
+      "opcode_define": "X86_OP_SHLD_IMM",
+      "result": "shld",
+      "flag_family_code": 5,
+      "flag_family_define": "X86_ALU_SHL",
+      "effect": "shift_left_fill_src_high"
+    },
+    {
+      "arm": "shrd",
+      "arm_define": "KPROG_X86_DOUBLESHIFT_ARM_SHRD",
+      "opcode": 28,
+      "opcode_define": "X86_OP_SHRD_IMM",
+      "result": "shrd",
+      "flag_family_code": 6,
+      "flag_family_define": "X86_ALU_SHR",
+      "effect": "shift_right_fill_src_low"
+    }
+  ]
+}

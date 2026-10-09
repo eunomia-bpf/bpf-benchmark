@@ -28,6 +28,7 @@
 #include "../formal/generated/x86_reg_dispatch.h"
 #include "../formal/generated/x86_xchg.h"
 #include "../formal/generated/x86_div.h"
+#include "../formal/generated/x86_doubleshift_arm.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -2045,13 +2046,17 @@ struct x86_sim_state {
 			__u64 __x86_l_dst = X86_SIM_L_READ_REG(DST);     \
 			__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);     \
 			__u64 __x86_l_result;                            \
+			__u8 __x86_l_arm =                               \
+				KPROG_X86_DOUBLESHIFT_ARM((OP));         \
+			__u32 __x86_l_alu =                              \
+				KPROG_X86_DOUBLESHIFT_ARM_FLAGS((OP));   \
 			if (x86_shift_count((IMM), __x86_l_width) != 0) { \
-				if ((OP) == X86_OP_SHLD_IMM) {             \
+				if (__x86_l_arm == KPROG_X86_DOUBLESHIFT_ARM_SHLD) {\
 					__x86_l_result = x86_shld(__x86_l_dst, __x86_l_src, (IMM), __x86_l_width);\
-					X86_SIM_L_SET_SHIFT_FLAGS(__x86_l_dst, (IMM), __x86_l_result, X86_ALU_SHL, __x86_l_width);\
+					X86_SIM_L_SET_SHIFT_FLAGS(__x86_l_dst, (IMM), __x86_l_result, __x86_l_alu, __x86_l_width);\
 				} else {                                    \
 					__x86_l_result = x86_shrd(__x86_l_dst, __x86_l_src, (IMM), __x86_l_width);\
-					X86_SIM_L_SET_SHIFT_FLAGS(__x86_l_dst, (IMM), __x86_l_result, X86_ALU_SHR, __x86_l_width);\
+					X86_SIM_L_SET_SHIFT_FLAGS(__x86_l_dst, (IMM), __x86_l_result, __x86_l_alu, __x86_l_width);\
 				}                                           \
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,\
 							  __x86_l_width);    \
