@@ -747,6 +747,30 @@ single-bit, and values whose low byte is zero but whose upper bytes are set),
 and three destination/source pairs against an independent bit-by-bit
 population-count model and an independent flag model, comparing the whole
 register file with its tags and all four flags (5,940 cases).
+The x86-64 `MOVZX`/`MOVSX` register arm's choice of which extension function
+widens the raw source register is likewise a generated contract:
+`generate_x86_movx_shape_spec.py` emits `KPROG_X86_MOVX_SHAPE(OP)`, which names
+the sign extension at `X86_OP_MOVSX_REG` and the zero extension at every other
+opcode (so the default is the zero extension), and `X86MovxShape.lean` proves
+the generated selector equal to an independent opcode-literal statement that
+names the sign extension exactly at `X86_OP_MOVSX_REG`, that the generated
+opcodes are the literals the opcode contract already names for
+`X86_OP_MOVZX_REG`/`X86_OP_MOVSX_REG`, that the arm result names agree with the
+generated table, that the two opcodes are distinct, that an arm code beyond the
+two named arms is unrecognised, and — connecting this selection contract to
+the value composition — that the selected arm's per-opcode extension picks the
+`X86MovxRegHandler` extension (`sign_extend` at `MOVSX`, `zero_extend` at
+`MOVZX`). Both the standalone `X86_SIM_L_EXEC_MOVX_REG` body and the inline
+`X86_OP_MOVZX_REG || X86_OP_MOVSX_REG` arm compute the selector and branch the
+widened value through the selected function, leaving the source-width fallback
+(`(AUX) ? (AUX) : __x86_l_width`, the separate width contract) and the
+partial-register writeback in the composed arm bodies. A generated-header
+oracle cross-checks the compiled selector against an independent literal model
+(260 cases), and a sim-header route oracle drives the real `MOVX` arm over both
+opcodes, five flag codes (including 0), several AUX source widths (including
+the absent-code fallback), high-bit source values, and register pairs against
+an independent sign/zero-extension model, comparing the whole register file
+with its tags (118,802 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2276,6 +2300,9 @@ generated opcode-keyed selectors behind the count-zero step gate),
 x86 `POPCNT` flag-block transition (and the simulator's routing of the arm's
 arithmetic flags through the generated clear-`CF`/`SF`/`OF`, set-`ZF`-from-
 narrowed-source contract),
+x86 `MOVZX`/`MOVSX` register opcode-keyed extension-shape selection (and the
+simulator's routing of both the standalone `MOVX` body and its inline arm
+through the generated opcode-keyed selector),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,

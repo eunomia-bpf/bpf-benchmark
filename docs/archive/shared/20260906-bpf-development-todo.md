@@ -9533,8 +9533,106 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   population-count flag contract paragraph after the x86 double-shift
   arm-selection paragraph (paper commit pushed to `main`).
 
-## Next after 0076
+## Step 0118 — x86 MOVX opcode-keyed extension-shape contract
 
+- Scope: the x86 simulator's register-source `X86_OP_MOVZX_REG`/`X86_OP_MOVSX_REG`
+  arm (`kprog/x86/x86_sim_local_bpf.h`, both the standalone
+  `X86_SIM_L_EXEC_MOVX_REG` body and the inline `X86_OP_MOVZX_REG ||
+  X86_OP_MOVSX_REG` arm) chose *which extension function* widens the raw
+  source register by a hand-written `SIGN_EXTEND ? sign : zero` branch. The
+  `MOVX` *value* composition was already proved
+  (`X86MovxRegHandler.lean`); this closes the open arm-level choice of which
+  function performs the widening, under one opcode-keyed selector. The
+  source-width fallback (`(AUX) ? (AUX) : __x86_l_width`) and the
+  destination writeback stay in the composed bodies (the width fallback is a
+  separate width contract, Step 0105). x86-only; the AArch64 simulator has no
+  opcode-keyed MOVX extension split, so there is no mirror.
+- Shared spec `kprog/formal/x86_movx_shape_spec.json` (`schema_version` 1,
+  `operation` `x86MovxShapeSelector`): a `selector` `opcode_then_arm` and two
+  ordered arms `(arm, arm_define, opcode, opcode_define, result, effect)`
+  `("sign_extend", "KPROG_X86_MOVX_SHAPE_SIGN_EXTEND", 33, "X86_OP_MOVSX_REG",
+  "sign_extend", "sign_extend_source_lane")` and `("zero_extend",
+  "KPROG_X86_MOVX_SHAPE_ZERO_EXTEND", 32, "X86_OP_MOVZX_REG", "zero_extend",
+  "zero_extend_source_lane")`. `generate_x86_movx_shape_spec.py` carries an
+  independent module-level `_ARMS` construction, validates the spec, re-derives
+  both live regions from the header (`arm_region()` slices the inline
+  `MOVZX || MOVSX` arm opener to the `MOV_LOAD` arm; `macro_region()` slices
+  the standalone `#define` body to the next `#define`; `flat()` flattens
+  `\`-continuations and whitespace is collapsed so the substring checks are
+  exact), and `check_against_header()` calls `check_region()` on BOTH regions
+  (exactly-one-arm only on the inline region), requiring the generated selector
+  `KPROG_X86_MOVX_SHAPE((OP))`, the sign arm
+  `KPROG_X86_MOVX_SHAPE_SIGN_EXTEND`, the `x86_sign_extend(` and
+  `x86_apply_width(` calls in each, and rejecting a hand `X86_OP_MOVSX_REG ?`
+  selection. It emits `generated/x86_movx_shape.h` (the
+  `KPROG_X86_MOVX_SHAPE(OP)` selector naming the sign extension at
+  `X86_OP_MOVSX_REG` and the zero extension elsewhere, `_COUNT`/`_SIGN_EXTEND`/
+  `_ZERO_EXTEND` codes, and opcode/selection/total drift asserts) and the Lean
+  `KProgFormal.GeneratedX86MovxShape`. `--check` rc=0.
+- Hand refinement `KProgFormal/X86MovxShape.lean`: the independent specs
+  `x86MovxShapeSignOpcodeSpec := 33`, `x86MovxShapeZeroOpcodeSpec := 32`, and
+  `x86MovxShapeSpec`/`x86MovxShapeResultSpec` (the literal opcode-keyed
+  branch). It proves `x86_movx_shape_refines` (the generated selector equals
+  the independent statement), `_result_refines`, `_names_refine`,
+  `_codes_length`, `_names_length`, `_codes_nodup`, `_opcodes_nodup`,
+  `_opcode_spec_bound` (via `x86OpcodeSpec.lookup`), `_arm_over_opcodes`,
+  `_arm_of_code_roundtrip`, `_arm_of_code_beyond_is_none` (an arm code beyond
+  the two named arms is unrecognised), `_opcode_bits_is_8`, `_arm_count_is_2`,
+  `_opcode_result`, `_arm_effects`, `_sign_iff`, `_zero_iff`, `_case_dispatch`,
+  `_ladder_total`, and --- connecting the selection to the value composition ---
+  `_is_movx`/`_matches_handler` (the arm the selector names at each MOVX opcode
+  extends by exactly the `X86MovxRegHandler` extension function it names there).
+  Module elaborates rc=0, no `sorry`/`admit`.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_movx_shape.h"`, and both the standalone
+  `X86_SIM_L_EXEC_MOVX_REG` body and the inline `MOVZX || MOVSX` arm now
+  compute `__x86_l_shape = KPROG_X86_MOVX_SHAPE((OP))` and branch the widened
+  value through `x86_sign_extend(...)` when the shape is the sign extension and
+  `x86_apply_width(...)` otherwise, keeping the source-width fallback and the
+  partial-register writeback byte-behaviour-identical and the loader ABI
+  (the macro signature) unchanged.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_movx_shape_host.c` includes the generated header (compiling its
+    drift asserts) and drives the compiled selector against an independent
+    literal model --- `x86 movx shape host cross-check: OK (260 cases)`.
+  - `test_x86_movx_shape_route_host.c` includes the simulator header and drives
+    the real `X86_SIM_L_EXEC` `MOVZX`/`MOVSX` arm over both opcodes, five flag
+    codes (including 0), several AUX source widths (including the absent-code
+    fallback), high-bit source values, and register pairs, comparing the whole
+    16-cell register file (value and tag) and requiring the flags to stay put
+    against an independent sign/zero-extension model
+    --- `x86 movx shape route host cross-check: OK (118802 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **145** `cross-check: OK`. Baseline
+  was **143** for Step 0117; Step 0118 adds the two `MOVX`-shape oracles and the
+  Lean pair, wired into `kprog/formal/Makefile`, with the two new Lean modules
+  imported in `KProgFormal.lean`.
+- Mutation harness `kprog/formal/build/mut_x86_movx_shape.py`, 47 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  seven spec defects (arm-name swap, opcode drift, opcode swap, arm-define
+  drift, opcode-define drift, result drift, effect drift → generator), fifteen
+  generator defects (arm-define/opcode-swap/opcode-bits/selector/sign-arm/
+  sign-call/zero-call/arm-opener/arm-closer/macro-opener text drift and a
+  hand-selection-marker injection → generator), seven generated-C defects (the
+  count/sign-code drifts → host, and the selector/result/opcode-assert/
+  select-assert/total-assert drifts → generator), five generated-Lean defects
+  (opcode/codes/names/result drifts → refinement and the armOf-shape drift →
+  generator), eight hand-refinement defects (spec-arm swap, opcode-def drift,
+  zero-def drift, result-spec swap, and the opcodes/results/handler claim
+  drifts → refinement), six routed-body defects (dropped include, unrouted
+  selector, drifted sign test, dropped sign call, dropped zero call, swapped
+  source-width fallback → route oracle), and two generator+artifact pair
+  defects regenerated so `--check` stays green and only the rebuilt-olean
+  refinement catches them (an armOf-value swap and a codes-value drift). Three
+  semantically equivalent mutations (an added include-side comment, an added
+  hand-module comment, and a resolved-but-equal generator root path) SURVIVE as
+  required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the
+  move-with-extension contract paragraph after the x86 population-count flag
+  paragraph (paper commit pushed to `main`).
+
+## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
 compiler/native bytes. The
@@ -9572,9 +9670,17 @@ arm bodies. The x86 `SHLD`/`SHRD` immediate arm's opcode-keyed body and
 shift-flag-family choice (behind its count-zero step gate) is likewise no
 longer wholly open: the case choice is now a machine-checked opcode-keyed
 selector (Step 0116), leaving the register reads, the writes, and the
-double-shift value computation inside the composed arm bodies. Still-open x86
-arm selection includes the `POPCNT` flag block, the `MOVX` source-width
-fallback (a duplicated inline width test), and the `MOV_REG` three-way arm.
+double-shift value computation inside the composed arm bodies. The x86
+`POPCNT` arm's arithmetic flag block is likewise no longer open: its
+clear-`CF`/`SF`/`OF`, set-`ZF`-from-narrowed-source transition is now a
+machine-checked contract (Step 0117), leaving the register read, the population
+count, and the destination writeback inside the composed arm body. The x86
+register-source `MOVZX`/`MOVSX` arm's choice of which extension function widens
+the source is likewise no longer open: the opcode-keyed extension-shape
+selection is now a machine-checked contract (Step 0118), leaving the
+source-width fallback, the register read, and the destination writeback inside
+the composed arm bodies. Still-open x86 arm selection includes the `MOV_REG`
+three-way arm.
 
 The AArch64 *write-register destination-presence* decision is likewise no longer
 open: the `XZR`/sentinel presence test the three writeback bodies shared is now

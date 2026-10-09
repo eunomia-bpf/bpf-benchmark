@@ -234,6 +234,16 @@ increment is committed and pushed immediately). Current state:
   Unlike the logical shape, `SF` is cleared rather than derived from the
   result's sign, so a logic-flag reuse would be wrong; the AArch64 simulator has
   no flags-setting population-count instruction, so there is no mirror.
+  The `MOVZX`/`MOVSX` register arm's choice of *which* extension function
+  widens the raw source register is likewise no longer open for x86-64
+  (Step 0118): the arm now routes both its standalone `X86_SIM_L_EXEC_MOVX_REG`
+  body and its inline opcode arm through a generated machine-checked
+  opcode-keyed selector, which names the sign extension at `X86_OP_MOVSX_REG`
+  and the zero extension at every other opcode, so the extension choice is a
+  proved table rather than a restated `SIGN_EXTEND ? sign : zero` branch,
+  leaving the source-width fallback, the register read, and the destination
+  writeback in the composed arm bodies; the AArch64 simulator has no
+  opcode-keyed MOVX extension split, so there is no mirror.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
