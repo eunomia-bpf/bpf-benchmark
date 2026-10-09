@@ -1,0 +1,74 @@
+{
+  "033517_489159/baseline": {
+    "programs": 53,
+    "run_cnt": 842066910,
+    "run_time_ns": 411497744478,
+    "ns_per_run": 488.675828002789,
+    "pps_samples": [
+      1555071,
+      1571949,
+      1552378
+    ],
+    "median_pps": 1555071,
+    "min_pps": 1552378,
+    "max_pps": 1571949,
+    "packets": 842065781
+  },
+  "033517_489159/post_rejit": {
+    "programs": 53,
+    "run_cnt": 1895968339,
+    "run_time_ns": 497308860864,
+    "ns_per_run": 262.2980830609746,
+    "pps_samples": [
+      3502101,
+      3505649,
+      3528644
+    ],
+    "median_pps": 3505649,
+    "min_pps": 3502101,
+    "max_pps": 3528644,
+    "packets": 1895968326
+  },
+  "040554_604387/baseline": {
+    "programs": 62,
+    "run_cnt": 0,
+    "run_time_ns": 0,
+    "ns_per_run": null,
+    "pps_samples": [
+      1662810,
+      1589441,
+      1639482
+    ],
+    "median_pps": 1639482,
+    "min_pps": 1589441,
+    "max_pps": 1662810,
+    "packets": 880107441
+  },
+  "040554_604387/post_rejit": {
+    "programs": 56,
+    "run_cnt": 0,
+    "run_time_ns": 0,
+    "ns_per_run": null,
+    "pps_samples": [
+      3865856,
+      3907168,
+      3862601
+    ],
+    "median_pps": 3865856,
+    "min_pps": 3862601,
+    "max_pps": 3907168,
+    "packets": 2094200472
+  },
+  "stats_on_cost_ratio": 1.8630552777970169,
+  "stats_off_throughput_ratio": 2.3579740430209055,
+  "paper_code_size_ratios": {
+    "x86": {
+      "cases": 29,
+      "ratio": 0.7718068807314803
+    },
+    "arm64": {
+      "cases": 29,
+      "ratio": 0.8791161563071921
+    }
+  }
+}
