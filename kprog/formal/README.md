@@ -615,6 +615,31 @@ drives the real register read and width-narrowed writeback bodies over all 256
 register numbers, all four widths and several values, observing which of the
 simulator's own 16 cells each write changes and comparing it against the
 generated cell selector (6,401 cases).
+The x86-64 helper-id -> helper-body binding the call ladder
+(`X86_SIM_BPF_CALL_ID`) and its routed register form
+(`X86_SIM_BPF_CALL_REG`, the chain's `X86_OP_CALL_REG` arm) select is itself a
+generated contract: `generate_x86_helper_dispatch_spec.py` emits
+`KPROG_X86_HELPER_COUNT` (7), `KPROG_X86_HELPER_SLOT_NONE` (0xff) and
+`KPROG_X86_HELPER_SLOT`, and `X86HelperDispatch.lean` proves the generated
+`helperIds` / `helperNames` / `helperBodies` tables equal an independent literal
+construction (the armed ids from `List.range 7`, the bodies from the
+`"X86_SIM_BPF_CALL_" ++` prefix), that the id table is strictly increasing and
+duplicate-free, that the tables hold exactly 7 entries, that `slotOf` maps
+exactly the armed ids `1..7` (slot `i` for id `i+1`) and names the zero id, the
+first unarmed named id `8`, the last named id `21`, and an id beyond the named
+space as no slot, that the id and slot tables invert each other over the armed
+range, and that the default arm body is the RAX zero-write the hand-written
+ladder's `else` runs. The generated header is included in the sim header just
+after the `X86_SIM_HELPER_bpf_*` id defines, so its per-id `_Static_assert`s
+bind all 21 hand-written id values (and the ladder-arm order) to the generated
+table. A generated-header oracle drives the count and slot macros over ids
+`0..4096` and the named ids against an independent `id in 1..7 ? id - 1 : -1`
+model (4,100 cases), and a sim-header route oracle drives the real
+`X86_SIM_BPF_CALL_ID` ladder and the routed `X86_SIM_BPF_CALL_REG` body over
+every armed id, the zero id, the unarmed named ids and beyond, and all 256
+register numbers, serving the four host-calling helpers with fixed-return stubs
+and comparing the whole changed register state against an independent id-to-body
+model (2,882 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2130,6 +2155,9 @@ MULX, MOVBE, LEA and ALU-memory bodies through it), x86 register-number
 dispatch-cell binding (and the simulator's binding of its write/tag X-macro
 dispatch and its `X86_SIM_L_REG_VALUE` read ternary chain to the generated cell
 selector),
+x86 helper-id dispatch-body binding (and the simulator's binding of its
+`X86_SIM_BPF_CALL_ID` call ladder and its id defines to the generated helper
+table),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,

@@ -9024,6 +9024,102 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` records the contract
   (paper commit `3bb6f87`, pushed to `main`; outer gitlink bump `4652dc8bb`).
 
+## Step 0113 — x86 helper-id → helper-body machine-checked contract
+
+- Scope: the x86 simulator binds a decoded 64-bit BPF helper id to a helper
+  body in the hand-written `X86_SIM_BPF_CALL_ID` `if/else-if` ladder
+  (`kprog/x86/x86_sim_local_bpf.h`, the seven `X86_SIM_BPF_CALL_bpf_*` arms
+  `bpf_map_lookup_elem .. bpf_ktime_get_ns` plus a default zero-write arm), and
+  `X86_SIM_BPF_CALL_REG(REG)` reads the id out of a register and calls the same
+  ladder; the chain's `X86_OP_CALL_REG` arm is exactly
+  `X86_SIM_BPF_CALL_REG((SRC))`. The `X86_SIM_HELPER_bpf_*` id defines
+  (`:108-128`) name 21 helpers, of which only ids `1..7` have bodies; the
+  register-presence (0104), memory-index (0101), and register-number (0112)
+  steps pinned those sentinels but left the helper-id → body binding inside the
+  composed ladder. This step makes it a shared, generated, machine-checked
+  contract binding the hand-written id defines and ladder arms to the generated
+  table; x86-only, since the AArch64 simulator has no helper-call ladder.
+- Shared spec `kprog/formal/x86_helper_dispatch_spec.json` (`schema_version` 1,
+  `operation` `x86HelperDispatch`): `id_bits` 64, `helper_count` 7, a
+  `default_body`, and 7 `{name, define, id, body}` rows in
+  `X86_SIM_BPF_CALL_ID` order (`bpf_map_lookup_elem … bpf_ktime_get_ns`, ids
+  `1..7`). `generate_x86_helper_dispatch_spec.py` carries an independent
+  module-level `_ARMED` enumeration **and** re-derives the live ladder from the
+  header via `HELPER_DEFINE`/`LADDER_ARM`/`LADDER_DEFAULT` regexes
+  (`ladder_region()` slices between the `X86_SIM_BPF_CALL_ID(ID)` and
+  `X86_SIM_BPF_CALL_REG(REG)` defines and `flat()` collapses `\`-continuations),
+  then `check_against_header()` requires exact arm-for-arm agreement on name,
+  body, and id, the same default body, and that no unarmed named helper has a
+  body macro. It emits `generated/x86_helper_dispatch.h` (`KPROG_X86_HELPER_COUNT
+  7U`, `KPROG_X86_HELPER_SLOT_NONE 0xffU`, a nested-ternary
+  `KPROG_X86_HELPER_SLOT(ID)` selector over the seven ids, per-id id-define
+  `_Static_assert`s, and slot-drift asserts for each armed id plus the zero id)
+  and the Lean `KProgFormal.GeneratedX86HelperDispatch`. `--check` rc=0.
+- Hand refinement `KProgFormal/X86HelperDispatch.lean`: the independent spec
+  builds the armed ids from `(List.range 7).map (fun i => i + 1)`, the names
+  from the literal helper order, and the bodies from the `"X86_SIM_BPF_CALL_" ++`
+  prefix, and the selector `x86HelperDispatchSlotOfSpec` from the
+  `(ids.zip (List.range 7)).lookup id.toNat` lookup. It proves `_ids_refine`,
+  `_names_refine`, `_bodies_refine`, the three `_length`s, `_ids_strict_mono`,
+  `_ids_nodup`, `_slotof_refines` (by rewriting the ids refinement, not
+  `native_decide`/`omega`), `_bits_is_64`, `_slot_lookup` (id 1 → slot 0),
+  `_slot_ktime` (id 7 → slot 6), `_first_unarmed_is_none` (id 8),
+  `_last_named_is_none` (id 21), `_zero_is_none`, `_full_range`, the
+  `_name_slot_roundtrip`, `_count_is_7`, `_default_is_rax_zero`,
+  `_ids_nonzero`, `_armed_is_strict_subset`, the `_id_slot_roundtrip` (slot →
+  id → slot over the armed range), and `_case_dispatch`. Module elaborates rc=0.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_helper_dispatch.h"` at line 133, placed
+  just after the `X86_SIM_HELPER_bpf_*` id defines so the header's
+  `_Static_assert`s see them and pin the 21 id values to the generated ladder
+  table; the generated selector then binds the ladder arms to the same table.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_helper_dispatch_host.c` hand-defines the 21 `X86_SIM_HELPER_bpf_*`
+    ids, includes the generated header (compiling its drift asserts), and drives
+    `KPROG_X86_HELPER_COUNT`==7 + the `KPROG_X86_HELPER_SLOT` / `_SLOT_NONE`
+    macros over ids `0..4096` and the named ids against an independent
+    `id in 1..7 ? id - 1 : -1` model
+    — `x86 helper dispatch host cross-check: OK (4100 cases)`. Zero warnings
+    from its own file.
+  - `test_x86_helper_dispatch_route_host.c` defines `__BPF_HELPERS__` (so
+    `bpf_helpers.h`'s guarded fake helper-pointer consts are skipped) and
+    provides callable fixed-return stubs for the four host-calling helpers
+    (`bpf_map_lookup_elem` → a distinct pointer, `bpf_map_update_elem`,
+    `bpf_map_delete_elem`, `bpf_ktime_get_ns`), includes the simulator header,
+    seeds all 16 GPR cells with a non-scalar tag, then drives the real
+    `X86_SIM_BPF_CALL_ID` over every armed id, the zero id, the named-but-unarmed
+    ids `8`/`21`, and out to `64`, and the routed `X86_SIM_BPF_CALL_REG` for all
+    256 register numbers against every armed id plus the default id, comparing
+    the whole changed register file (value and tag) against an independent
+    id-to-body model and requiring exactly RAX to change
+    — `x86 helper dispatch route host cross-check: OK (2882 cases)`. Zero
+    warnings from its own file.
+- Gate `make -C kprog/formal check` rc=0, **135** `cross-check: OK`. Baseline
+  was **133** for Step 0112; Step 0113 adds the two helper-dispatch oracles and
+  the Lean pair; the generator `--check`, the Lean pair, and both oracles are
+  wired into `kprog/formal/Makefile`, and the two new Lean modules are imported
+  in `KProgFormal.lean`.
+- Mutation harness `/tmp/mut_x86_helper_dispatch.py`, 26 mutations against a
+  cloned tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file byte-for-byte
+  between mutations and re-checking the baseline green at the end: seven
+  spec/generator defects (id drift, id swap, name swap, body drift, count drift,
+  default-body drift, armed-enumeration id drift → generator), three
+  generated-C defects (count macro, slot-arm shift, per-id assert → host
+  oracle/generator), five generated-Lean defects (id-table drop, name-order
+  swap, `slotOf` shape drift, default-body drift, `idOfSlot` tail drift →
+  refinement), four hand-refinement defects (spec id-range drift, spec lookup
+  drift, names tail swap, case-dispatch drift → refinement), three routed-wiring
+  defects (ladder body-id drift, dropped include, default-arm register drift →
+  route oracle), and one generator+artifact-pair defect regenerated so `--check`
+  stays green and only the rebuilt-olean refinement catches it. Three
+  semantically equivalent mutations (a reworded simulator-header comment, an
+  added hand-module comment, and a reversed drift-assert emission order) SURVIVE
+  as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the contract
+  paragraph after the x86 register-number dispatch paragraph (paper commit
+  `afa3120`, pushed to `main`).
+
 ## Next after 0076
 
 
@@ -9067,6 +9163,16 @@ select is a machine-checked contract (Step 0112), binding both hand-written
 orders and the `X86_RAX..X86_R15` numeric defines, so neither order can drift
 from the generated cell selector; the width handling and the value computation
 stay inside the composed body.
+
+The x86 helper-id → helper-body binding the call ladder (`X86_SIM_BPF_CALL_ID`)
+and its routed register form (`X86_SIM_BPF_CALL_REG`, the chain's
+`X86_OP_CALL_REG` arm) select is likewise no longer wholly open: the seven armed
+helper ids `1..7`, their ladder order, and the default zero-write arm are now a
+machine-checked contract binding the 21 hand-written `X86_SIM_HELPER_bpf_*` id
+defines and the ladder arms to a generated table (Step 0113), leaving the
+per-helper value computation, the four host-calling helper stubs, and the
+register-number decode (Step 0112) as the composed-body and separate-contract
+parts.
 
 ### KVM selftest smoke at `5aa795837`, 2026-09-29
 

@@ -194,6 +194,13 @@ increment is committed and pushed immediately). Current state:
   register number is bound, by a generated machine-checked contract, to the
   state cell the writeback and read bodies select, leaving the width handling
   and the value computation in the composed body.
+  The helper-id -> helper-body binding inside the composed call ladder is
+  likewise no longer open for x86-64 (Step 0113): the decoded 64-bit helper id
+  is bound, by a generated machine-checked contract, to the helper body
+  `X86_SIM_BPF_CALL_ID` runs (and, through it, `X86_SIM_BPF_CALL_REG` and the
+  chain's `X86_OP_CALL_REG` arm), leaving the per-helper value computation in
+  the composed body; the AArch64 simulator has no helper ladder, so there is no
+  mirror.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
