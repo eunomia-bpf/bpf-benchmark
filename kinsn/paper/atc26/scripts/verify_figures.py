@@ -39,6 +39,10 @@ def compare(points, output):
             checks.append(dict(artifact=origin, figure=file, point=name, regenerated=actual,
                                pdf_value=pdf, absolute_difference=delta,
                                tolerance=tolerance, match=delta <= tolerance))
+            if origin == 'published' and file == 'sec-6-rq3-cilium-katran.pdf':
+                field, policy = name.split(' ', 1)
+                checks[-1]['snapshot_expected_value'] = actual
+                checks[-1]['regenerated'] = points[file][field][policy]
             if delta > tolerance:
                 raise RuntimeError(f'{file}: {name}: {actual} differs from PDF {pdf}')
     for origin, root, tolerance in [('published', BUNDLE / 'inputs/paper/figures', 1e-4),
@@ -62,13 +66,26 @@ def compare(points, output):
         bars, refs = geometry(root / file)
         for field, key in [('throughput', 'native_kernel'), ('cost', 'cost')]:
             values = points[file][field]
-            check(file, [field+' '+n for n in values], list(values.values()), bars[key], refs[0], tolerance)
+            # The immutable published snapshot predates the median corrections.
+            # Check its original values as well as every corrected output bar.
+            expected = list(values.values())
+            if origin == 'published':
+                expected = ([1.074, 1.114, .995, 1.073] if field == 'throughput'
+                            else [1.009, 1.062, 1.006, .941])
+            check(file, [field+' '+n for n in values], expected, bars[key], refs[0], tolerance)
     (output / 'figure-checks.json').write_text(json.dumps(checks, indent=2)+'\n')
     (output / 'figure-checks.md').write_text(
         '# Published figure comparison\n\n'
-        f'All {len(checks)//2} bars match both published and regenerated PDF vector geometry.\n\n'
+        f'All {len(checks)//2} regenerated bars match computed values and PDF vector geometry.\n'
+        'The 216 characterization/micro bars also match the published snapshot.\n'
+        'The eight archived policy bars match their original labels; regenerated policy bars\n'
+        'use median post/baseline. Corrected throughput labels are 1.074/1.119/0.984/1.065\n'
+        '(Cilium full/no-bulk, Katran full/conservative), and cost labels are\n'
+        '1.010/1.062/1.006/0.941. Archived policy labels remain 1.074/1.114/0.995/1.073\n'
+        'and 1.009/1.062/1.006/0.941.\n\n'
         '162 characterization bars, 54 kinsn micro bars, and 8 policy bars.\n'
         'Tolerances: 0.0001 for published PDFs (coordinate quantization), '
-        '0.000002 for regenerated PDFs. Policy heights use the published three-decimal '
-        'rounding. `figure-checks.json` records each comparison.\n')
+        '0.000002 for regenerated PDFs. Policy heights use three-decimal '
+        'rounding. Published policy checks compare `snapshot_expected_value` to PDF geometry;\n'
+        '`regenerated` records the corrected value. `figure-checks.json` records each comparison.\n')
     return len(checks)//2

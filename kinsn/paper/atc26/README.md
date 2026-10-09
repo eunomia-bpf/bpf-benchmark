@@ -7,6 +7,9 @@ associated with arXiv 2606.24213 v1. It pins the current
 `22810b78eb2b24b1ad5cecfd9e07329f5af9ac10`; the supplied October 7 inventory
 used `d6c50f83dca5298b0f5f7f639f66f6ed5d4e53fa`. Wording edits between those
 snapshots are mapped to current file/line references in the generated report.
+The report expectations and regenerated application policy artifacts also apply
+the authors' October 9 median and Core Ultra 9 285K host corrections. Pinned
+paper/audit snapshots and historical inventory text retain their original values.
 
 From the bpf-benchmark root, regenerate and verify everything with:
 
@@ -43,6 +46,8 @@ preserved as text under `scripts/upstream/`; `metrics.py` adapts the audit's
 calculations to `data/`. The final 27-case and combined policy generators
 were not retained upstream, so `plots.py` reconstructs those final populations
 and verifies every bar against the published PDF geometry.
+The archived policy PDF is checked against its original labels; the regenerated
+policy PDF is checked against the corrected median ratios.
 
 The command writes:
 
@@ -96,16 +101,16 @@ this map into individual claims and exact file/line locations.
 | `data/micro/x86_kvm_micro_20260429_035938_203074` | The historical 62-program load-time population, not the 27-case runtime population |
 | `data/micro/x86_kvm_micro_20260514_031744_210343` | §6 load-time comparison, first campaign |
 | `data/micro/x86_kvm_micro_20260514_181806_133778` | §6 load-time comparison, second campaign |
-| `data/corpus/x86_kvm_corpus_20260604_070210_639497` | §6 RQ2/RQ3 full Cilium counters; 1.009 paired BPF-cost ratio |
+| `data/corpus/x86_kvm_corpus_20260604_070210_639497` | §6 RQ2/RQ3 full Cilium counters; 1.010 median paired BPF-cost ratio |
 | `data/corpus/x86_kvm_corpus_20260604_100557_313063` | §6 RQ2/RQ3 full Cilium throughput; 1.074262x; policy figure/table |
 | `data/corpus/x86_kvm_corpus_20260604_232313_992341` | §6 RQ3 tuned no-bulk Cilium counters; 1.062 paired BPF-cost ratio |
-| `data/corpus/x86_kvm_corpus_20260605_004607_636479` | §6 RQ3 tuned no-bulk Cilium throughput; 1.113903x mean / 1.118935x median |
-| `data/corpus/aws_arm64_corpus_20260605_080836_924256` | §6 RQ2/RQ3 conservative Katran; 1.072760x throughput / 0.941 BPF-cost ratio |
-| `data/corpus/aws_arm64_corpus_20260605_094729_221231` | §6 RQ3 coverage-max Katran; 0.994743x throughput / 1.006 BPF-cost ratio |
-| `data/corpus/x86_kvm_corpus_20260529_033517_489159` | §6 RQ4 Cilium native counters; 488.676 → 262.298 ns/run |
+| `data/corpus/x86_kvm_corpus_20260605_004607_636479` | §6 RQ3 tuned no-bulk Cilium throughput; 1.118935x median |
+| `data/corpus/aws_arm64_corpus_20260605_080836_924256` | §6 RQ2/RQ3 conservative Katran; 1.065063x median throughput / 0.941 BPF-cost ratio |
+| `data/corpus/aws_arm64_corpus_20260605_094729_221231` | §6 RQ3 coverage-max Katran; 0.984357x median throughput / 1.006 BPF-cost ratio |
+| `data/corpus/x86_kvm_corpus_20260529_033517_489159` | §6 RQ4 Cilium native counters; median 488.676 → 262.303 ns/run |
 | `data/corpus/x86_kvm_corpus_20260529_040554_604387` | §6 RQ4 Cilium native throughput; 2.357974x and native-gap calculation |
 
-The report explains the 0.99 load-time field mismatch, tuned mean/median
-mismatch, 5.4% rounding, Core Ultra/Xeon mismatch, sampling and BPF-stat
+The report explains the 0.99 load-time field mismatch, corrected application
+mean/median values, 5.4% rounding, corrected Core Ultra host, sampling and BPF-stat
 conventions, missing report streams, and October revision evidence gaps.
 Analysis stays here, outside the measurement framework.

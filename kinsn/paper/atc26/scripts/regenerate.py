@@ -98,6 +98,14 @@ def all_claims():
             elif key in computed:
                 row.update(computed[key])
                 row['verification'] = 'recomputed from data/'
+            elif row['claim'] == 'x86 hardware and VM/kernel setup':
+                cpus = [m.js(m.REPO / m.resolve(p) / 'metadata.json')['provenance']['cpu_model']
+                        for p in row['current_data_paths'].split('; ')]
+                row.update(claimed_value='Core Ultra 9 285K', recomputed_value='; '.join(dict.fromkeys(cpus)),
+                           recomputable='yes', verification='checked against retained metadata',
+                           match='matches CPU model' if all('Ultra 9 285K' in cpu for cpu in cpus) else 'MISMATCH',
+                           method='author-corrected host CPU expectation checked against all three x86 micro metadata files',
+                           notes='CPU model matches the 2026-10-09 author correction; VM sizing is not established by these runs. Pinned source text retains the earlier host description.')
             else:
                 row['recomputed_value'] = ''
                 row['recomputable'] = 'no'
@@ -142,32 +150,33 @@ def all_claims():
                                      'Preserved source values; instruction definitions/layout/version numerals are not benchmark measurements. '
                                      'Implementation LOC counts require the historical patch/base revisions, which are not recorded here.',
                                      verification='source reproduction only', audit_source_line='', audit_source_text=''))
-    # Quantify convention differences, without altering the paper or its plots.
-    for label, run, name, printed in [('Cilium tuned', m.CN, 'cilium__agent.json', 1.114),
-                                      ('Katran conservative', m.KC, 'katran.json', 1.073),
-                                      ('Katran coverage-max', m.KM, 'katran.json', .995)]:
+    # Expectations follow the author corrections; archived source text is retained.
+    for label, run, name, printed in [('Cilium tuned', m.CN, 'cilium__agent.json', 1.119),
+                                      ('Katran conservative', m.KC, 'katran.json', 1.065),
+                                      ('Katran coverage-max', m.KM, 'katran.json', .984)]:
         m.scalar('sections/7-evaluation.tex', 'reduces the number' if label == 'Cilium tuned' else
                  'conservative ARM64 policy' if label == 'Katran conservative' else 'throughput falls',
                  label+' throughput under stated median convention', printed,
                  m.throughput(run, name), [run], digits=3,
                  method='median post summed pktgen pps / median baseline summed pktgen pps',
-                 notes='Body/plot uses a ratio of means for this policy; default stated convention is median.')
+                 notes='Expectation updated to the 2026-10-09 author correction; archived text retains the former ratio of means.')
         rows.append(locate(dict(m.ROWS[-1], verification='recomputed from data/')))
-    policy = {label: dict(throughput=m.throughput(run, name, agg), cost=m.paired_cost(counter, name)[0])
-              for label, run, counter, name, agg in [
-                  ('Cilium Full', m.CF, m.CFC, 'cilium__agent.json', m.statistics.median),
-                  ('Cilium No Bulk', m.CN, m.CNC, 'cilium__agent.json', m.statistics.mean),
-                  ('Katran Conservative', m.KC, m.KC, 'katran.json', m.statistics.mean),
-                  ('Katran Full', m.KM, m.KM, 'katran.json', m.statistics.mean)]}
+    policy = {label: dict(throughput=m.throughput(run, name), cost=m.paired_cost(counter, name)[0])
+              for label, run, counter, name in [
+                  ('Cilium Full', m.CF, m.CFC, 'cilium__agent.json'),
+                  ('Cilium No Bulk', m.CN, m.CNC, 'cilium__agent.json'),
+                  ('Katran Conservative', m.KC, m.KC, 'katran.json'),
+                  ('Katran Full', m.KM, m.KM, 'katran.json')]}
     vals = dict(characterization={a+' '+rt: m.gm(v) for (a, rt), v in chars.items()},
                 micro_speedup=dict(x86=m.gm(x86), arm64=m.gm(arm)), code_size=sizes,
-                Cilium_full=m.throughput(m.CF), Cilium_tuned_mean=m.throughput(m.CN, agg=m.statistics.mean),
+                Cilium_full=m.throughput(m.CF),
                 Cilium_tuned_median=m.throughput(m.CN),
-                Katran_selected=m.throughput(m.KC, 'katran.json', m.statistics.mean),
-                Katran_full=m.throughput(m.KM, 'katran.json', m.statistics.mean),
+                Katran_selected=m.throughput(m.KC, 'katran.json'),
+                Katran_full=m.throughput(m.KM, 'katran.json'),
                 native=m.throughput(m.NT),
                 Cilium_full_paired_cost=m.paired_cost(m.CFC),
-                Cilium_no_bulk_paired_cost=m.paired_cost(m.CNC))
+                Cilium_no_bulk_paired_cost=m.paired_cost(m.CNC),
+                application_policy=policy, native_cost=m.cost(m.NC))
     population = [b['name'] for b in m.data(m.LP)['benchmarks']]
     vals['load_time'] = {'population': len(population)}
     for field in ['object_load_ns', 'compile_ns']:
@@ -180,8 +189,6 @@ def all_claims():
     for label, path, baseline, runtime in [('x86', m.EX, m.BX, 'kernel'), ('arm64', m.EA, m.EA, 'kernel_rejit')]:
         a, b = m.med(path, runtime, 'size'), m.med(baseline, 'kernel', 'size')
         vals['code_size_27_case_alternative'][label] = m.gm(a[n]/b[n] for n in a if n not in ('simple', 'simple_packet'))
-    vals['Katran_selected_median'] = m.throughput(m.KC, 'katran.json')
-    vals['Katran_full_median'] = m.throughput(m.KM, 'katran.json')
     expected = m.js(BUNDLE / 'inputs/inventory/recomputed-metrics.json')
     def compare(actual, expected, name):
         if isinstance(expected, dict):
@@ -229,17 +236,23 @@ def tables(chars, policy):
                            ('Katran Conservative', '1.073'), ('Katran Full', '0.995')]:
         text = text.replace(original+'$\\times$', f"{policy[name]['throughput']:.3f}"+'$\\times$')
     path.write_text(text)
-    # Source-table verification: same printed values; computed replacements above
-    # would expose any discrepancy instead of overwriting inputs/paper/.
+    # Verify unchanged tables against the snapshot and the policy table against
+    # the corrected expectations, without overwriting the archived source.
     checks = []
     for path in sorted(target.glob('*.tex')):
+        expected = (PAPER / 'tables' / path.name).read_text()
+        if path.name == 'sec-6-RQ2-RQ3.tex':
+            for old, new in [('1.114', '1.119'), ('1.073', '1.065'), ('0.995', '0.984')]:
+                expected = expected.replace(old+'$\\times$', new+'$\\times$')
         match = path.read_bytes() == (PAPER / 'tables' / path.name).read_bytes()
+        correct = path.read_text() == expected
         checks.append(dict(table=path.name, matches_paper_source=match,
+                           matches_corrected_expectations=correct,
                            method='computed numeric cells' if path.name in
                            ['sec-3-micro-summary.tex', 'sec-6-kinsn-micro.tex', 'sec-6-RQ2-RQ3.tex'] else
                            'authored source reproduction; empirical counts not independently established'))
-        if not match:
-            raise RuntimeError(f'Table output differs from pinned paper: {path.name}')
+        if not correct:
+            raise RuntimeError(f'Table output differs from expected values: {path.name}')
     (OUT / 'table-checks.json').write_text(json.dumps(checks, indent=2)+'\n')
 
 
@@ -285,23 +298,37 @@ def reports(rows, vals):
              'Every archived claim and numerical line in the pinned body/revision has a row',
              'in `numbers.csv`. Empty regenerated cells mean missing evidence or source-only',
              'declarations, never a successful measurement. Table/figure prose is retained',
-             'as source, and its unsupported numbers remain explicitly unsupported.', '',
+             'as source, and its unsupported numbers remain explicitly unsupported.',
+             'Application policy and host CPU expectations include the 2026-10-09 author',
+             'corrections. Pinned paper/audit snapshots and archived inventory text retain',
+             'their original values; `claimed_value` reports the corrected expectation.', '',
              '## Regenerated headline values', '',
              '| Quantity | Regenerated |', '| --- | --- |']
-    for key in ['micro_speedup', 'code_size', 'Cilium_full', 'Cilium_tuned_mean',
+    for key in ['micro_speedup', 'code_size', 'Cilium_full',
                 'Cilium_tuned_median', 'Katran_selected', 'Katran_full', 'native']:
         lines.append(f'| {key} | {json.dumps(vals[key])} |')
     lines += ['', 'All metrics in `inputs/inventory/recomputed-metrics.json` match fresh',
-              'recomputation within 1e-12. All 224 published data bars match PDF geometry;',
+              'recomputation within 1e-12. All 224 regenerated data bars match PDF geometry;',
               'see `figure-checks.md` and `figure-checks.json`.', '',
+              '## Application policy figure (median post / median baseline)', '',
+              '| Configuration | Throughput | BPF cost |', '| --- | --- | --- |']
+    for name, policy in vals['application_policy'].items():
+        lines.append(f"| {name} | {policy['throughput']:.3f} | {policy['cost']:.3f} |")
+    lines += ['',
+              'BPF costs use paired name/type/occurrence ns/run rows with >=100 runs in',
+              'both phases: two rows for each Cilium policy, one for each Katran policy.',
+              'These counters aggregate each phase; they are not independent run samples.', '',
               '## Differences and evidence gaps', '',
               f"- Load time: printed 0.99; bare `object_load_ns` gives {' / '.join(f'{v:.9f}' for v in vals['load_time']['object_load_ns'])} (both round to 1.00). "
               f"Open-plus-load `compile_ns` gives {' / '.join(f'{v:.9f}' for v in vals['load_time']['compile_ns'])} (both round to 0.99). "
               'These May14 runs use one sample and INNER_REPEAT=10, with the Apr29 62-name population.',
-              f"- Tuned Cilium: printed 1.114 is the ratio of means ({vals['Cilium_tuned_mean']:.9f}); the stated median convention gives {vals['Cilium_tuned_median']:.9f}, or 1.119. Katran policies also use means; the default median gives {vals['Katran_selected_median']:.9f} / {vals['Katran_full_median']:.9f} instead of printed 1.073 / 0.995.",
+              f"- Corrected throughput means: tuned Cilium 1.114 -> {vals['Cilium_tuned_median']:.9f} (1.119); Katran conservative 1.073 -> {vals['Katran_selected']:.9f} (1.065); Katran all-operations 0.995 -> {vals['Katran_full']:.9f} (0.984). RQ2 repeats the conservative Katran value and uses the same correction. The abstract/introduction up-to-12% claim still rounds to 12% from the median increase (11.893520%).",
+              '- Other non-median aggregations: policy BPF costs previously used a geometric mean of paired per-program ratios. '
+              f"The median convention gives full/no-bulk Cilium {vals['Cilium_full_paired_cost'][0]:.9f}/{vals['Cilium_no_bulk_paired_cost'][0]:.9f}; full Cilium changes its printed cost from 1.009 to 1.010, no-bulk still rounds to 1.062. Single-row Katran costs remain 0.941/1.006. "
+              f"Native Cilium costs previously used count-weighted phase means; medians are {vals['native_cost']['baseline']:.9f} -> {vals['native_cost']['post_rejit']:.9f} ns/run, retaining printed 488.7 -> 262.3 and 1.86x. Characterization, micro execution/code size, load time, full Cilium and native throughput already use sample medians; their cross-benchmark geometric means are stated explicitly. The separate October revision explicitly uses mean per-call times and lacks raw data; its values are unchanged.",
               '- Native-gap recovery: printed 5.4%; raw ratios give '
               f"{(vals['Cilium_full']-1)/(vals['native']-1)*100:.7f}%. Rounded inputs 1.074 and 2.358 give 5.449189%, which rounds to 5.4% (raw inputs round to 5.5%).",
-              '- Hardware: x86 micro metadata says Core Ultra 9 285K; paper says Xeon Silver 4210R. '
+              '- Hardware: corrected Core Ultra 9 285K host expectation matches all three x86 micro metadata files. '
               'The claimed 8-vCPU/64-GB VM sizing is not established by the raw runs. ARM metadata says aarch64, '
               'without independently establishing t4g.small/Graviton2. Corpus metadata does not record CPU/source/kernel commits.',
               f"- Code-size population: the printed evaluation ratios 0.772/0.879 use all 29 raw cases, including the two controls. Using the 27-case runtime population gives {vals['code_size_27_case_alternative']['x86']:.9f}/{vals['code_size_27_case_alternative']['arm64']:.9f}. The characterization now says code size across all 27, but its printed 0.54/0.49 are unchanged by that distinction at two decimal places.",
@@ -351,7 +378,7 @@ def main():
     reports(rows, vals)
     print(f'Regenerated 7 figure PDFs, {len(list((OUT / "tables").glob("*.tex")))} table sources, '
           f'{len(rows)} claim/number rows, and provenance for {len(prov)} data directories.')
-    print(f'PASS: {count} published PDF bars and inventory metric recomputations match.')
+    print(f'PASS: {count} regenerated PDF bars, archived figure values, and inventory recomputations match.')
     print('See output/numbers.md for differences and missing raw evidence.')
 
 

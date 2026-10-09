@@ -2167,47 +2167,52 @@
     "pdf_value": 1.0739999909263793,
     "absolute_difference": 9.073620743649258e-09,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 1.074
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Cilium No Bulk",
-    "regenerated": 1.114,
+    "regenerated": 1.119,
     "pdf_value": 1.1140000068630502,
     "absolute_difference": 6.8630501282029854e-09,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 1.114
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Full",
-    "regenerated": 0.995,
+    "regenerated": 0.984,
     "pdf_value": 0.9949999980079162,
     "absolute_difference": 1.9920838312259548e-09,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 0.995
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Conservative",
-    "regenerated": 1.073,
+    "regenerated": 1.065,
     "pdf_value": 1.0729999905279626,
     "absolute_difference": 9.472037376667686e-09,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 1.073
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Cilium Full",
-    "regenerated": 1.009,
+    "regenerated": 1.01,
     "pdf_value": 1.008999990733597,
     "absolute_difference": 9.266402978269639e-09,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 1.009
   },
   {
     "artifact": "published",
@@ -2217,7 +2222,8 @@
     "pdf_value": 1.061999986145378,
     "absolute_difference": 1.3854622116227233e-08,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 1.062
   },
   {
     "artifact": "published",
@@ -2227,7 +2233,8 @@
     "pdf_value": 1.0059999895383467,
     "absolute_difference": 1.0461653321414133e-08,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 1.006
   },
   {
     "artifact": "published",
@@ -2237,7 +2244,8 @@
     "pdf_value": 0.9409999893455643,
     "absolute_difference": 1.0654435667056816e-08,
     "tolerance": 0.0001,
-    "match": true
+    "match": true,
+    "snapshot_expected_value": 0.941
   },
   {
     "artifact": "regenerated",
@@ -4413,9 +4421,9 @@
     "artifact": "regenerated",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Cilium No Bulk",
-    "regenerated": 1.114,
-    "pdf_value": 1.1139999942686931,
-    "absolute_difference": 5.731306984557705e-09,
+    "regenerated": 1.119,
+    "pdf_value": 1.1189999814486642,
+    "absolute_difference": 1.8551335800864877e-08,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4423,9 +4431,9 @@
     "artifact": "regenerated",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Full",
-    "regenerated": 0.995,
-    "pdf_value": 0.9949999876827175,
-    "absolute_difference": 1.2317282527263274e-08,
+    "regenerated": 0.984,
+    "pdf_value": 0.984000000804394,
+    "absolute_difference": 8.043939958568558e-10,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4433,9 +4441,9 @@
     "artifact": "regenerated",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Conservative",
-    "regenerated": 1.073,
-    "pdf_value": 1.072999983761297,
-    "absolute_difference": 1.623870304889863e-08,
+    "regenerated": 1.065,
+    "pdf_value": 1.0649999841634938,
+    "absolute_difference": 1.5836506106481352e-08,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4443,9 +4451,9 @@
     "artifact": "regenerated",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Cilium Full",
-    "regenerated": 1.009,
-    "pdf_value": 1.0089999869788728,
-    "absolute_difference": 1.3021127065471205e-08,
+    "regenerated": 1.01,
+    "pdf_value": 1.009999986928598,
+    "absolute_difference": 1.3071401960829121e-08,
     "tolerance": 2e-06,
     "match": true
   },

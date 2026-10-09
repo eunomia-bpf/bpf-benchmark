@@ -27,7 +27,7 @@ def generate(rows, output):
         cpu = prov.get('cpu_model', 'unknown')
         notes = []
         if '285K' in cpu:
-            notes.append('Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement.')
+            notes.append('Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.')
         if cpu == 'aarch64':
             notes.append('Recorded aarch64 does not identify Graviton generation or instance type; body declares t4g.small/Graviton2.')
         if not prov:

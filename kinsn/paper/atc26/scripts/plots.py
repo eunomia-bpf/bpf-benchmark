@@ -77,7 +77,7 @@ def draw(chars, x86, arm64, policy, figures):
         fig.savefig(figures / filename)
         plt.close(fig)
         points[filename] = dict(zip(names, ys))
-    # The published four-point policy figure plots three-decimal rounded inputs.
+    # Policy inputs use median post/baseline, rounded to three decimals for plotting.
     # Declared site labels remain annotations, never treated as measured counts.
     names = ['Cilium Full', 'Cilium No Bulk', 'Katran Full', 'Katran Conservative']
     labels = ['Cilium\nFull\n4086 sites', 'Cilium\nNo Bulk\n3512 sites',

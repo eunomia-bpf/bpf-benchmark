@@ -22,15 +22,15 @@ Corpus metadata has no CPU model, source commit, or kernel commit; do not infer 
 
 Recorded bpf_stats=true differs from RQ2 stats-disabled wording. Suite status=error includes other apps; retain Katran measurements.
 
-- `sections/7-evaluation.tex:87` — Katran conservative throughput (1.073; body).
+- `sections/7-evaluation.tex:87` — Katran conservative throughput (1.065; body).
 - `sections/7-evaluation.tex:87` — Katran conservative applied sites (21; body).
-- `sections/7-evaluation.tex:105` — Katran conservative throughput (1.073; body).
+- `sections/7-evaluation.tex:105` — Katran conservative throughput (1.065; body).
 - `sections/7-evaluation.tex:105` — Katran conservative BPF cost (0.941; body).
 - `sections/7-evaluation.tex:105` — Katran repeated conservative site count (21; body).
-- `figures/sec-6-kinsn-micro-rq3.tex:3` — Katran Conservative throughput bar (1.074/1.114/1.073/0.995; body).
+- `figures/sec-6-kinsn-micro-rq3.tex:3` — Katran Conservative throughput bar (1.074/1.119/1.065/0.984; body).
 - `sections/7-evaluation.tex:38` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
-- `sections/7-evaluation.tex:105` — Katran conservative throughput under stated median convention (1.073; body).
+- `sections/7-evaluation.tex:105` — Katran conservative throughput under stated median convention (1.065; body).
 
 ## data/corpus/aws_arm64_corpus_20260605_094729_221231
 
@@ -48,13 +48,13 @@ Corpus metadata has no CPU model, source commit, or kernel commit; do not infer 
 
 Recorded bpf_stats=true differs from RQ2 stats-disabled wording. Suite status=error includes other apps; retain Katran measurements.
 
-- `sections/7-evaluation.tex:105` — Katran coverage-max throughput (0.995; body).
+- `sections/7-evaluation.tex:105` — Katran coverage-max throughput (0.984; body).
 - `sections/7-evaluation.tex:105` — Katran coverage-max BPF cost (1.006; body).
 - `sections/7-evaluation.tex:105` — Katran coverage-max sites (62; body).
-- `figures/sec-6-kinsn-micro-rq3.tex:3` — Katran Full throughput bar (1.074/1.114/1.073/0.995; body).
+- `figures/sec-6-kinsn-micro-rq3.tex:3` — Katran Full throughput bar (1.074/1.119/1.065/0.984; body).
 - `sections/7-evaluation.tex:38` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
-- `sections/7-evaluation.tex:105` — Katran coverage-max throughput under stated median convention (0.995; body).
+- `sections/7-evaluation.tex:105` — Katran coverage-max throughput under stated median convention (0.984; body).
 
 ## data/corpus/x86_kvm_corpus_20260529_033517_489159
 
@@ -124,7 +124,7 @@ Corpus metadata has no CPU model, source commit, or kernel commit; do not infer 
 - `sections/7-evaluation.tex:84` — Cilium endian fusion sites (766; body).
 - `sections/7-evaluation.tex:84` — Cilium extract sites (2; body).
 - `sections/7-evaluation.tex:84` — Cilium bulk memory sites (587; body).
-- `sections/7-evaluation.tex:103` — Cilium full paired BPF cost (1.009; body).
+- `sections/7-evaluation.tex:103` — Cilium full paired BPF cost (1.01; body).
 - `sections/7-evaluation.tex:103` — Cilium repeated full site count (4086; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
 
@@ -145,7 +145,7 @@ Corpus metadata has no CPU model, source commit, or kernel commit; do not infer 
 - `sections/7-evaluation.tex:84` — Cilium full throughput (1.074; body).
 - `sections/7-evaluation.tex:103` — Cilium full policy throughput (1.074; body).
 - `sections/7-evaluation.tex:121` — Cilium fraction of native gap recovered (%) (5.4; body).
-- `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium Full throughput bar (1.074/1.114/1.073/0.995; body).
+- `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium Full throughput bar (1.074/1.119/1.065/0.984; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
 
 ## data/corpus/x86_kvm_corpus_20260604_232313_992341
@@ -180,12 +180,12 @@ Status: completed; samples: 3; BPF stats: False; files: 6; bytes: 208332.
 
 Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.
 
-- `sections/7-evaluation.tex:103` — Cilium no-bulk throughput (1.114; body).
+- `sections/7-evaluation.tex:103` — Cilium no-bulk throughput (1.119; body).
 - `sections/0-abstract.tex:46` — production throughput increase up to (%) (12; body).
 - `sections/1-introduction.tex:147` — production throughput increase up to (%) (12; body).
-- `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium No Bulk throughput bar (1.074/1.114/1.073/0.995; body).
+- `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium No Bulk throughput bar (1.074/1.119/1.065/0.984; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
-- `sections/7-evaluation.tex:103` — Cilium tuned throughput under stated median convention (1.114; body).
+- `sections/7-evaluation.tex:103` — Cilium tuned throughput under stated median convention (1.119; body).
 
 ## data/micro/aws_arm64_micro_20260520_052452_727433
 
@@ -410,7 +410,7 @@ Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `7.
 
 Status: completed; samples: 3; BPF stats: unknown; files: 3; bytes: 1393123.
 
-Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement.
+Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.
 
 - `sections/7-evaluation.tex:74` — 62-case kernel-side object_load_ns ratio (0.99; body).
 - `sections/7-evaluation.tex:74` — historical load-time campaign protocol (62 cases; body).
@@ -427,7 +427,7 @@ Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `7.
 
 Status: completed; samples: 1; BPF stats: unknown; files: 5; bytes: 853882.
 
-Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement.
+Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.
 
 - `sections/7-evaluation.tex:74` — 62-case kernel-side object_load_ns ratio (0.99; body).
 - `sections/7-evaluation.tex:74` — 1.4--2.4x end-to-end compile time, remains sub-millisecond (1.4--2.4; <1 ms; body).
@@ -445,7 +445,7 @@ Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `7.
 
 Status: completed; samples: 1; BPF stats: unknown; files: 5; bytes: 6520582.
 
-Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement.
+Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.
 
 - `sections/7-evaluation.tex:74` — 62-case kernel-side object_load_ns ratio (0.99; body).
 - `sections/7-evaluation.tex:74` — 1.4--2.4x end-to-end compile time, remains sub-millisecond (1.4--2.4; <1 ms; body).
@@ -463,7 +463,7 @@ Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `7.
 
 Status: completed; samples: 3; BPF stats: unknown; files: 3; bytes: 256531.
 
-Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement.
+Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.
 
 - `sections/7-evaluation.tex:63` — x86 native code size ratio (0.772; body).
 - `sections/7-evaluation.tex:63` — x86 native code reduction (%) (22.8; body).
@@ -506,7 +506,7 @@ Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 tracee_syscall_name_table_lookup plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:22` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
 - `sections/7-evaluation.tex:13` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
-- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\,GHz host, using Linux 7.0.0-rc2+.; body).
+- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
 - `sections/7-evaluation.tex:49` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
 - `sections/7-evaluation.tex:51` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
 - `sections/7-evaluation.tex:55` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
@@ -524,7 +524,7 @@ Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `7.
 
 Status: completed; samples: 3; BPF stats: unknown; files: 3; bytes: 855951.
 
-Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement.
+Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.
 
 - `sections/7-evaluation.tex:63` — x86 native code size ratio (0.772; body).
 - `sections/7-evaluation.tex:63` — x86 native code reduction (%) (22.8; body).
@@ -567,7 +567,7 @@ Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 tracee_syscall_name_table_lookup plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:22` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
 - `sections/7-evaluation.tex:13` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
-- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\,GHz host, using Linux 7.0.0-rc2+.; body).
+- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
 - `sections/7-evaluation.tex:49` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
 - `sections/7-evaluation.tex:51` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
 - `sections/7-evaluation.tex:55` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
@@ -585,7 +585,7 @@ Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `7.
 
 Status: completed; samples: 3; BPF stats: unknown; files: 3; bytes: 855575.
 
-Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement.
+Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.
 
 - `sections/3-characterization.tex:113` — x86 eBPF/native gap (1.57; body).
 - `sections/3-characterization.tex:192` — x86 kernel native speedup (1.55; body).
@@ -691,7 +691,7 @@ Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing
 - `figures/sec-3-pure-bytecode-percase.tex:4` — measurement/population convention: \caption{Per-case speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, on x86-64 (top) and ARM64 (bottom). Each bar is one non-baseline path. The ARM64 paths come from separate runs, each over its own baseline.} (27; body).
 - `audit-paper/sections/3-characterization.tex:145` — numerical claim: The examples include a consistent-hash load-balancer lookup from \texttt{katran} and a SipHash-like 64-bit-rotation mixer. (64; removed from current body; audit snapshot only).
 - `sections/3-characterization.tex:238` — numerical claim: Figure~\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation. (64; body).
-- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\,GHz host, using Linux 7.0.0-rc2+.; body).
+- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
 - `tables/sec-3-micro-summary.tex:4` — measurement/population convention: \caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\%.} (27; 2; body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — figure file sec-3-4config-percase.pdf (sec-3-4config-percase.pdf; body).
 - `revision/tables/sec-3-microbenchmarks.tex:4` — 27 named computation programs and descriptions (27; body).

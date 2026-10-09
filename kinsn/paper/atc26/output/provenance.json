@@ -26,7 +26,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 87,
         "kind": "empirical",
-        "value": "1.073",
+        "value": "1.065",
         "scope": "body"
       },
       {
@@ -42,7 +42,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 105,
         "kind": "empirical",
-        "value": "1.073",
+        "value": "1.065",
         "scope": "body"
       },
       {
@@ -66,7 +66,7 @@
         "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
         "line": 3,
         "kind": "empirical",
-        "value": "1.074/1.114/1.073/0.995",
+        "value": "1.074/1.119/1.065/0.984",
         "scope": "body"
       },
       {
@@ -90,7 +90,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 105,
         "kind": "empirical",
-        "value": "1.073",
+        "value": "1.065",
         "scope": "body"
       }
     ]
@@ -122,7 +122,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 105,
         "kind": "empirical",
-        "value": "0.995",
+        "value": "0.984",
         "scope": "body"
       },
       {
@@ -146,7 +146,7 @@
         "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
         "line": 3,
         "kind": "empirical",
-        "value": "1.074/1.114/1.073/0.995",
+        "value": "1.074/1.119/1.065/0.984",
         "scope": "body"
       },
       {
@@ -170,7 +170,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 105,
         "kind": "empirical",
-        "value": "0.995",
+        "value": "0.984",
         "scope": "body"
       }
     ]
@@ -439,7 +439,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 103,
         "kind": "empirical",
-        "value": "1.009",
+        "value": "1.01",
         "scope": "body"
       },
       {
@@ -510,7 +510,7 @@
         "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
         "line": 3,
         "kind": "empirical",
-        "value": "1.074/1.114/1.073/0.995",
+        "value": "1.074/1.119/1.065/0.984",
         "scope": "body"
       },
       {
@@ -596,7 +596,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 103,
         "kind": "empirical",
-        "value": "1.114",
+        "value": "1.119",
         "scope": "body"
       },
       {
@@ -620,7 +620,7 @@
         "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
         "line": 3,
         "kind": "empirical",
-        "value": "1.074/1.114/1.073/0.995",
+        "value": "1.074/1.119/1.065/0.984",
         "scope": "body"
       },
       {
@@ -636,7 +636,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 103,
         "kind": "empirical",
-        "value": "1.114",
+        "value": "1.119",
         "scope": "body"
       }
     ]
@@ -2056,7 +2056,7 @@
     "recorded_samples": 3,
     "recorded_bpf_stats": "unknown",
     "notes": [
-      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+      "Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement."
     ],
     "claims": [
       {
@@ -2095,7 +2095,7 @@
     "recorded_samples": 1,
     "recorded_bpf_stats": "unknown",
     "notes": [
-      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+      "Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement."
     ],
     "claims": [
       {
@@ -2142,7 +2142,7 @@
     "recorded_samples": 1,
     "recorded_bpf_stats": "unknown",
     "notes": [
-      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+      "Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement."
     ],
     "claims": [
       {
@@ -2189,7 +2189,7 @@
     "recorded_samples": 3,
     "recorded_bpf_stats": "unknown",
     "notes": [
-      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+      "Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement."
     ],
     "claims": [
       {
@@ -2525,7 +2525,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 36,
         "kind": "empirical",
-        "value": "The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\\,GHz host, using Linux 7.0.0-rc2+.",
+        "value": "Core Ultra 9 285K",
         "scope": "body"
       },
       {
@@ -2580,7 +2580,7 @@
     "recorded_samples": 3,
     "recorded_bpf_stats": "unknown",
     "notes": [
-      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+      "Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement."
     ],
     "claims": [
       {
@@ -2916,7 +2916,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 36,
         "kind": "empirical",
-        "value": "The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\\,GHz host, using Linux 7.0.0-rc2+.",
+        "value": "Core Ultra 9 285K",
         "scope": "body"
       },
       {
@@ -2971,7 +2971,7 @@
     "recorded_samples": 3,
     "recorded_bpf_stats": "unknown",
     "notes": [
-      "Recorded Core Ultra 9 285K differs from paper Xeon Silver 4210R; paper VM sizing is not bound to this measurement."
+      "Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement."
     ],
     "claims": [
       {
@@ -3811,7 +3811,7 @@
         "file": "paper/sections/7-evaluation.tex",
         "line": 36,
         "kind": "empirical",
-        "value": "The x86-64 experiments run in a KVM virtual machine with 8 vCPUs and 64\\,GB RAM on an Intel Xeon Silver 4210R @ 2.40\\,GHz host, using Linux 7.0.0-rc2+.",
+        "value": "Core Ultra 9 285K",
         "scope": "body"
       },
       {

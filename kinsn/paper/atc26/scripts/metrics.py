@@ -64,14 +64,14 @@ def app(path,name='cilium__agent.json'):return js(REPO/resolve(path)/'details/ap
 def pps(w):
     text='\n'+(w.get('stdout') or '')+'\n'+(w.get('stderr') or '')
     return sum(pps(c) for c in w.get('components',[]))+sum(float(m[1]) for m in re.finditer(r'\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)',text))
-def throughput(path,name='cilium__agent.json',agg=statistics.median):
+def throughput(path,name='cilium__agent.json'):
     x=app(path,name);b=[pps(w) for w in x['baseline']['workloads']];p=[pps(w) for w in x['post_rejit']['workloads']]
-    return agg(p)/agg(b)
+    return statistics.median(p)/statistics.median(b)
 def cost(path,name='cilium__agent.json'):
     x=app(path,name);vals={}
     for phase in ('baseline','post_rejit'):
         rs=[r for r in x[phase]['bpf'].values() if r.get('run_cnt_delta',0)>=100]
-        vals[phase]=sum(r['run_time_ns_delta'] for r in rs)/sum(r['run_cnt_delta'] for r in rs)
+        vals[phase]=statistics.median(r['run_time_ns_delta']/r['run_cnt_delta'] for r in rs)
     return vals
 def paired_cost(path,name='cilium__agent.json'):
     x=app(path,name); phases=[]
@@ -80,12 +80,13 @@ def paired_cost(path,name='cilium__agent.json'):
         for r in x[phase]['bpf'].values():
             key=(r.get('name'),r.get('type'));key=(*key,occur[key]);occur[key[:2]]+=1;records[key]=r
         phases.append(records)
-    ratios=[]
+    baseline=[];post=[]
     for k in phases[0].keys()&phases[1].keys():
         b,p=phases[0][k],phases[1][k]
         if min(b.get('run_cnt_delta',0),p.get('run_cnt_delta',0))>=100:
-            ratios.append((p['run_time_ns_delta']/p['run_cnt_delta'])/(b['run_time_ns_delta']/b['run_cnt_delta']))
-    return gm(ratios),len(ratios)
+            baseline.append(b['run_time_ns_delta']/b['run_cnt_delta'])
+            post.append(p['run_time_ns_delta']/p['run_cnt_delta'])
+    return statistics.median(post)/statistics.median(baseline),len(baseline)
 
 def source_line(file,needle):
     matches=[(i,l) for i,l in enumerate((PAPER/file).read_text().splitlines(),1) if needle in l and not l.lstrip().startswith('%')]
@@ -194,24 +195,24 @@ def main_claims():
     add(ef,'kernel-side load time','62-case kernel-side object_load_ns ratio','0.99',LX+[LP],'bpf-benchmark/docs/artifacts/render_claim_table.py','; '.join(f'{v:.9f}' for v in loadvalues),'MISMATCH','geomean of per-case median kernel_rejit/kernel phases_ns.object_load_ns','Bare object_load_ns rounds to 1.00 in both runs. Open+load compile_ns gives '+', '.join(f'{v:.9f}' for v in openvalues)+', rounding to 0.99. These are 1-sample INNER_REPEAT=10 May14 runs, not the 3-sample June performance protocol.')
     add(ef,'end-to-end compile time','1.4--2.4x end-to-end compile time, remains sub-millisecond','1.4--2.4; <1 ms',LX+[EX,BX],EVAL_SCRIPT,'','not substantiated; timing-field ambiguity','inspect compile_ns and phase fields','Retained compile_ns includes libbpf open+load. May19 candidate has multi-ms values. No retained recognizer-inclusive sub-ms timing campaign or exact generating script found.',kind='missing raw')
     scalar(ef,'On x86-64 KVM, the default','Cilium full throughput',1.074,throughput(CF),[CF],APP_SCRIPT,method='median summed pktgen post pps / median summed baseline pps (3+3 samples; stats off)')
-    scalar(ef,'On ARM64 AWS, the conservative','Katran conservative throughput',1.073,throughput(KC,'katran.json',statistics.mean),[KC],APP_SCRIPT,method='mean summed pktgen post/baseline pps, 3+3 samples; raw bpf_stats=true unlike RQ2 stats-disabled wording')
+    scalar(ef,'On ARM64 AWS, the conservative','Katran conservative throughput',1.065,throughput(KC,'katran.json'),[KC],APP_SCRIPT,method='median summed pktgen post pps / median baseline pps, 3+3 samples; raw bpf_stats=true unlike RQ2 stats-disabled wording')
     for needle,label,val,paths in [('This run applies','Cilium full applied sites',4086,[CFC]),('This run applies','Cilium load-time skips',0,[CFC]),('This run applies','Cilium report errors',0,[CFC]),('LEA contributes','Cilium LEA sites',2346,[CFC]),('LEA contributes','Cilium conditional select sites',385,[CFC]),('LEA contributes','Cilium endian fusion sites',766,[CFC]),('LEA contributes','Cilium extract sites',2,[CFC]),('LEA contributes','Cilium bulk memory sites',587,[CFC]),('applies 21 sites','Katran conservative applied sites',21,[KC])]:
         add(ef,needle,label,val,paths,APP_SCRIPT,match='unverifiable original count',notes='Original per-pass report_path is recorded but corresponding JSONL absent. Later Sept KVM/QEMU reports measure a different generation; not a substitute.',kind='declared count')
     for needle,label,val,actual,paths in [
         ('this policy applies','Cilium full policy throughput',1.074,throughput(CF),[CF]),
-        ('this policy applies','Cilium full paired BPF cost',1.009,paired_cost(CFC)[0],[CFC]),
-        ('reduces the number','Cilium no-bulk throughput',1.114,throughput(CN,agg=statistics.mean),[CN]),
+        ('this policy applies','Cilium full paired BPF cost',1.010,paired_cost(CFC)[0],[CFC]),
+        ('reduces the number','Cilium no-bulk throughput',1.119,throughput(CN),[CN]),
         ('At the same time','Cilium no-bulk paired BPF cost',1.062,paired_cost(CNC)[0],[CNC]),
-        ('conservative ARM64 policy','Katran conservative throughput',1.073,throughput(KC,'katran.json',statistics.mean),[KC]),
+        ('conservative ARM64 policy','Katran conservative throughput',1.065,throughput(KC,'katran.json'),[KC]),
         ('reducing BPF cost','Katran conservative BPF cost',.941,paired_cost(KC,'katran.json')[0],[KC]),
-        ('throughput falls','Katran coverage-max throughput',.995,throughput(KM,'katran.json',statistics.mean),[KM]),
+        ('throughput falls','Katran coverage-max throughput',.984,throughput(KM,'katran.json'),[KM]),
         ('BPF cost rises','Katran coverage-max BPF cost',1.006,paired_cost(KM,'katran.json')[0],[KM])]:
-        scalar(ef,needle,label,val,actual,paths,APP_SCRIPT,method='Cilium full throughput: stats-off median; tuned: stats-off mean (median gives 1.118935, violating paper default median convention); cost: geomean of name/type/occurrence paired ns/run rows >=100. Katran throughput: mean; one paired hot-XDP cost row.',notes='This paper figure uses the June4/tuned June5 pair, not the separate four-arm June5 ablation ladder.')
+        scalar(ef,needle,label,val,actual,paths,APP_SCRIPT,method='throughput: median post summed pktgen pps / median baseline pps; cost: median post ns/run / median baseline ns/run over name/type/occurrence paired rows >=100 (two Cilium rows, one Katran row). Counters are phase aggregates, not three independent cost samples.',notes='This paper figure uses the June4/tuned June5 pair, not the separate four-arm June5 ablation ladder.')
     for needle,label,val,p in [('this policy applies','Cilium repeated full site count',4086,CFC),('reduces the number','Cilium no-bulk site count',3512,CNC),('conservative ARM64 policy','Katran repeated conservative site count',21,KC),('coverage-max policy','Katran coverage-max sites',62,KM)]:
         add(ef,needle,label,val,[p],APP_SCRIPT,match='unverifiable original count',notes='No original per-pass report retained.',kind='declared count')
     cv=cost(NC);nspeed=cv['baseline']/cv['post_rejit']
     for needle,label,val,actual,p in [('throughput improves by','Cilium native throughput',2.358,throughput(NT),NT),('cost drops from','Cilium baseline BPF ns/run',488.7,cv['baseline'],NC),('cost drops from','Cilium native BPF ns/run',262.3,cv['post_rejit'],NC),('BPF-counter speedup','Cilium BPF-counter speedup',1.86,nspeed,NC),('The 2.358','native upper-bound repetition',2.358,throughput(NT),NT)]:
-        scalar(ef,needle,label,val,actual,[p],NATIVE_SCRIPT,digits=1 if val in (488.7,262.3) else 2 if val==1.86 else 3,method='throughput: stats-off median summed pps; cost: phase sum(run_time_ns_delta)/sum(run_cnt_delta), retain each phase row >=100')
+        scalar(ef,needle,label,val,actual,[p],NATIVE_SCRIPT,digits=1 if val in (488.7,262.3) else 2 if val==1.86 else 3,method='throughput: stats-off median summed pps; cost: median of retained phase rows run_time_ns_delta/run_cnt_delta, each row >=100')
     for label,v in [('native replacements',113),('manifest no-match pass-throughs',22),('Cilium manifest objects',89),('native files',8)]:
         add(ef,'The Cilium native run logs' if v in (113,22) else 'native sidecar data',label,v,[NC,NT],NATIVE_SCRIPT,match='unverifiable original loader count',notes='Original loader stream/sidecar absent. Sept24 evidence has 135 replacements, 0 pass-throughs, 89 objects across 6 files; different generation.',kind='declared count')
     scalar(ef,'gain recovers 5.4','Cilium fraction of native gap recovered (%)',5.4,(throughput(CF)-1)/(throughput(NT)-1)*100,[CF,NT],NATIVE_SCRIPT,digits=1,method='(kinsn throughput-1)/(native throughput-1)*100')
@@ -219,7 +220,7 @@ def main_claims():
     for f,needle in [('sections/0-abstract.tex','speeds up eBPF microbenchmarks'),('sections/1-introduction.tex','speeds up eBPF microbenchmarks')]:
         scalar(f,needle,'x86 headline speed increase (%)',24,(gm(er.values())-1)*100,[EX,BX],EVAL_SCRIPT,digits=0)
         scalar(f,needle,'ARM64 headline speed increase (%)',22,(gm(ar.values())-1)*100,[EA],EVAL_SCRIPT,digits=0)
-        add(f,needle,'production throughput increase up to (%)',12,[CN],APP_SCRIPT,f'{(throughput(CN,agg=statistics.mean)-1)*100:.9f}% mean; {(throughput(CN)-1)*100:.9f}% median','approximate bound; aggregation-dependent','tuned Cilium mean pps ratio matches body 1.114; median-phase ratio rounds to a 12% increase','Mean-based increase is 11.390%, below loose 12% bound; paper default median gives 11.894%.')
+        scalar(f,needle,'production throughput increase up to (%)',12,(throughput(CN)-1)*100,[CN],APP_SCRIPT,digits=0,method='(median post summed pktgen pps / median baseline pps - 1)*100')
         scalar(f,'reaching 2.358','Cilium native headline speedup',2.358,throughput(NT),[NT],NATIVE_SCRIPT)
     scalar('sections/1-introduction.tex','recovering 42','headline recovered micro gap (%)',42,(gm(er.values())-1)/(gm(chars['x86','native'])-1)*100,[EX,BX,X],EVAL_SCRIPT,digits=0)
     scalar('sections/1-introduction.tex','An implementation','contribution recovered micro gap (%)',42,(gm(er.values())-1)/(gm(chars['x86','native'])-1)*100,[EX,BX,X],EVAL_SCRIPT,digits=0)
@@ -233,8 +234,8 @@ def main_claims():
     for arch,values,paths in [('x86',er,[EX,BX]),('arm',ar,[EA])]:
         for name,val in sorted(values.items()):
             add('figures/sec-6-kinsn-micro-rq1.tex','sec-6-'+('x86' if arch=='x86' else 'arm64'),arch+' '+name+' plotted kinsn speedup','bar (value derived below)',paths,EVAL_SCRIPT,f'{val:.9f}','recomputed; figure geomeans 1.24/1.22 match','27-case sample medians; x86 separate candidate/baseline; ARM matched kernel/kernel_rejit',kind='figure bar')
-    for label,run,n,agg in [('Cilium Full',CF,'cilium__agent.json',statistics.median),('Cilium No Bulk',CN,'cilium__agent.json',statistics.mean),('Katran Conservative',KC,'katran.json',statistics.mean),('Katran Full',KM,'katran.json',statistics.mean)]:
-        add('figures/sec-6-kinsn-micro-rq3.tex','includegraphics',label+' throughput bar','1.074/1.114/1.073/0.995',[run],APP_SCRIPT,f'{throughput(run,n,agg):.9f}','matches plotted labels','as body RQ3; active PDF has exactly four configurations')
+    for label,run,n in [('Cilium Full',CF,'cilium__agent.json'),('Cilium No Bulk',CN,'cilium__agent.json'),('Katran Conservative',KC,'katran.json'),('Katran Full',KM,'katran.json')]:
+        add('figures/sec-6-kinsn-micro-rq3.tex','includegraphics',label+' throughput bar','1.074/1.119/1.065/0.984',[run],APP_SCRIPT,f'{throughput(run,n):.9f}','matches regenerated labels','median post summed pktgen pps / median baseline pps; four configurations')
     add(ef,'kernel-side load time','historical load-time campaign protocol','62 cases',[*LX,LP],EVAL_SCRIPT,'62','matches population; different sampling protocol','intersect both May14 runs with Apr29 62-name list; exclude katran_like','Retained historical samples=1, INNER_REPEAT=10; performance figure protocol is samples=3, INNER_REPEAT=100000.')
     add('figures/sec-6-kinsn-micro-rq1.tex','the 27 benchmarks','ARM64 figure population','27',[EA],EVAL_SCRIPT,len(ar),'matches','cases with applied kinsn sites; exclude baseline-only simple/simple_packet')
     return chars,er,ar,sizes
