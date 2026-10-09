@@ -225,6 +225,15 @@ increment is committed and pushed immediately). Current state:
   leaving the register reads, writes, and the double-shift value computation in
   the composed arm bodies; the AArch64 simulator's double-shift analogue is not
   an opcode-keyed two-body split, so there is no mirror.
+  The `POPCNT` arm's arithmetic flag block is likewise no longer open for
+  x86-64 (Step 0117): the arm now routes its flag block through a generated
+  machine-checked transition that clears `CF`/`SF`/`OF` and sets `ZF` from the
+  width-narrowed source being zero, so the flag consequence is a proved
+  contract rather than a restated clear/set sequence, leaving the register read,
+  the population count, and the destination writeback in the composed arm body.
+  Unlike the logical shape, `SF` is cleared rather than derived from the
+  result's sign, so a logic-flag reuse would be wrong; the AArch64 simulator has
+  no flags-setting population-count instruction, so there is no mirror.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

@@ -9435,6 +9435,104 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   contract paragraph after the x86 `DIV` arm-selection paragraph (paper commit
   pushed to `main`).
 
+## Step 0117 — x86 POPCNT flag-block machine-checked contract
+
+- Scope: the x86 simulator's `X86_OP_POPCNT` arm
+  (`kprog/x86/x86_sim_local_bpf.h`, the `X86_SIM_L_EXEC` chain) writes its
+  arithmetic flag block by hand: `CF`, `SF`, and `OF` are cleared and `ZF` is
+  set from the width-narrowed source operand being zero. It is *not* the
+  logical shape: `SF` is cleared rather than derived from the result's sign,
+  so reusing `KPROG_X86_SET_LOGIC_FLAGS` would set `SF` wrongly for a source
+  whose sign bit is set (the popcount of a nonzero source is positive). The
+  `POPCNT` *value* was already proved
+  (`GeneratedX86Popcount.lean`/`X86Popcount.lean`); this closes the open
+  arm-level flag block the composed arm body restated by hand. x86-only; the
+  AArch64 simulator has no flags-setting population-count instruction, so there
+  is no mirror.
+- Shared spec `kprog/formal/x86_popcnt_flags_spec.json` (`schema_version` 1,
+  `operation` `x86PopcntFlags`): `opcode` 24, `opcode_define` `X86_OP_POPCNT`,
+  `zero_source` `narrowed_source_is_zero`, and a four-entry `flags` table in
+  canonical order (`cf` const false, `zf` input `zero`, `sf` const false, `of`
+  const false). `generate_x86_popcnt_flags_spec.py` carries an independent
+  module-level `FLAGS`/`EXPECTED` construction, validates the spec (exact key
+  set, canonical flag order, each flag expression one of the two accepted
+  shapes, exactly the `zero` input at `ZF`), re-derives the live `POPCNT` arm
+  text from the header (`arm_region()` slices between the `POPCNT` arm opener
+  and the `SHIFTX` arm, `flat()` flattens `\`-continuations, whitespace collapse
+  makes the substring checks exact), and `check_against_header()` requires the
+  routed arm to name the opcode, compute `x86_popcount64(`, and route its flag
+  block through `X86_SIM_L_SET_POPCNT_FLAGS(__x86_l_src, __x86_l_width)`, rejects
+  any hand `__x86_cf =` left in the region, and asserts the region is exactly
+  one arm. It emits `generated/x86_popcnt_flags.h` (the
+  `KPROG_X86_SET_POPCNT_FLAGS(C_CF, C_ZF, C_SF, C_OF, ZERO)` macro clearing
+  `CF`/`SF`/`OF` and setting `ZF` to `ZERO`, plus a drift
+  `_Static_assert(X86_OP_POPCNT == 24U)`) and the Lean
+  `KProgFormal.GeneratedX86PopcntFlags`. `--check` rc=0.
+- Hand refinement `KProgFormal/X86PopcntFlags.lean`: the independent specs
+  `x86PopcntOpcodeSpec := 24`, `x86PopcntOpcodeBitsSpec := 8`,
+  `x86PopcntZeroSpec src width := x86ZeroSpec src width` (built from the width
+  contract's own narrowing, not the generated structure), and
+  `x86PopcntFlagsSpec` (the literal `X86Flags` record). It proves
+  `x86_popcnt_flags_refines` (the generated transition equals the independent
+  statement, consuming the independent spec so no definition is dead),
+  `_opcode_refines`, `_opcode_bits_refines`, `_opcode_spec_bound` (via
+  `x86OpcodeSpec.lookup`), `_zero_source_refines`, `_zf_is_narrowed_source_zero`,
+  `_cleared_flags` (the three clears independent of the source),
+  `_zero_source_sets_zf`, `_nonzero_source_clears_zf`, `_sf_not_result_sign`
+  (the semantic split from the logical shape), `_w64_zf_is_source_zero`, and ---
+  the narrowing observable --- `_w8_narrowed_zero` (a source whose low byte is
+  zero but whose upper bytes are set still clears `ZF` at the 8-bit width).
+  Module elaborates rc=0, no `sorry`/`admit`.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_popcnt_flags.h"` after the doubleshift-arm
+  include, a new `X86_SIM_L_SET_POPCNT_FLAGS(SRC, WIDTH)` wrapper that resolves
+  the effective width and feeds `x86_apply_width((SRC), __x86_pc_width) == 0`
+  as the `ZERO` input so the `ZF` input matches the proven narrowing, and the
+  `X86_OP_POPCNT` arm now calls that wrapper instead of restating the
+  clear/set sequence; the register read, the population count, and the
+  destination writeback are kept byte-behaviour-identical.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_popcnt_flags_host.c` includes the generated header (compiling its
+    drift assert) and drives `KPROG_X86_SET_POPCNT_FLAGS` from a planted
+    all-set pre-state against an independent literal flag model
+    --- `x86 popcnt flags host cross-check: OK (4 cases)`.
+  - `test_x86_popcnt_flags_route_host.c` includes the simulator header and
+    drives the real `X86_SIM_L_EXEC` `POPCNT` arm over five flag codes
+    (including 0), twelve source values (zero, all-ones, single-bit, byte/word
+    boundaries, and values whose low byte is zero but whose upper bytes are
+    set), and three destination/source register pairs, comparing the whole
+    16-cell register file (value and tag) and all four flags against an
+    independent bit-by-bit population-count model and an independent flag model
+    --- `x86 popcnt flags route host cross-check: OK (5940 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **143** `cross-check: OK`. Baseline
+  was **141** for Step 0116; Step 0117 adds the two `POPCNT`-flags oracles and
+  the Lean pair, wired into `kprog/formal/Makefile`, with the two new Lean
+  modules imported in `KProgFormal.lean`.
+- Mutation harness `kprog/formal/build/mut_x86_popcnt_flags.py`, 46 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  eight spec defects (opcode drift, opcode-define drift, zero-source drift, the
+  three const-value drifts, `zf` input swap, `zf` const drift → generator),
+  twelve generator defects (opcode/opcode-define/zero-source drift, the three
+  flag-value drifts, `zf` input drift, and arm-opener/arm-hand-flags/arm-closer/
+  arm-flag-set/zero-check text drift → generator), five generated-C defects (the
+  four flag-set drifts → host and the opcode-assert drift → generator), seven
+  generated-Lean defects (opcode drift, opcode-bits drift, zero-source drift,
+  and the four `eval` flag-field drifts → refinement/generator), six
+  hand-refinement defects (opcode-def drift, opcode-bits-def drift, zero-spec
+  drift, flags-`sf` drift, `zf`-claim drift, cleared-claim drift → refinement),
+  three routed-wiring defects (dropped include, unrouted flag block, restored
+  hand flags → route oracle/generator), and two generator+artifact pair defects
+  regenerated so `--check` stays green and only the rebuilt-olean refinement
+  catches them (a constant-expression swap and an assignment-form drift). Three
+  semantically equivalent mutations (an added include-side comment, an added
+  hand-module comment, and a resolved-but-equal generator root path) SURVIVE as
+  required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the
+  population-count flag contract paragraph after the x86 double-shift
+  arm-selection paragraph (paper commit pushed to `main`).
+
 ## Next after 0076
 
 
