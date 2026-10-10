@@ -37,6 +37,23 @@ class WorkloadContractTests(unittest.TestCase):
     def test_bpftool_hex_bytes_are_decoded_for_per_cpu_counters(self) -> None:
         self.assertEqual(app_outcomes._little_endian(["0x62", "0x6b", "0x0c", "0x00"]), 813922)
 
+    def test_cilium_verdict_keys_decode_bpftool_hex_bytes(self) -> None:
+        record = {
+            "key": ["0x8b", "0x02", "0x00", "0x00"],
+            "values": [{"value": ["0x03", *("0x00" for _ in range(15))]}],
+        }
+        with (
+            mock.patch.object(app_outcomes, "_map_ids", return_value=[42]),
+            mock.patch.object(app_outcomes, "_map_dump", return_value=[record]),
+            mock.patch.object(app_outcomes, "_link_stats", return_value={}),
+        ):
+            snapshot = app_outcomes.cilium_outcome_snapshot()
+
+        self.assertEqual(
+            snapshot["verdicts"],
+            {"reason=139,direction=2": {"count": 3, "bytes": 0}},
+        )
+
     def test_outcome_snapshot_waits_for_async_receiver_drain(self) -> None:
         snapshots = iter(({"packets": 1}, {"packets": 4}))
         with mock.patch.object(app_outcomes.time, "sleep") as sleep:

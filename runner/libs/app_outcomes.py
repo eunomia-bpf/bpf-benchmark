@@ -131,8 +131,8 @@ def cilium_outcome_snapshot() -> dict[str, object]:
             key = record.get("key")
             if not isinstance(key, list) or len(key) < 2:
                 continue
-            reason = int(key[0])
-            direction = int(key[1]) & 0x3
+            reason = _little_endian(key[:1])
+            direction = _little_endian(key[1:2]) & 0x3
             count, byte_count = _per_cpu_words(record.get("values", record.get("value")), 2)
             aggregate = verdicts.setdefault(
                 f"reason={reason},direction={direction}", {"count": 0, "bytes": 0}
