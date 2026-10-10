@@ -841,6 +841,28 @@ cases), and a sim-header route oracle drives the real read helper over every
 resolved index and every width against an independent model of both bodies and
 the selected arm, plus the real write/read round-trip, comparing each read
 against the body the independent selector names (167,478 cases).
+The AArch64 memory store's little-endian width ladder is likewise a generated
+contract: `generate_arm64_store_bytes_spec.py` emits
+`KPROG_ARM64_STORE_BYTES(ADDR, WIDTH, VALUE)` (from
+`arm64_store_bytes_spec.json`), which resolves the width through
+`KPROG_ARM64_APPLY_WIDTH`, writes each in-range byte of the value exactly once
+through a `volatile __u8 *` pointer, leaves every byte above the width
+untouched, and writes no NZCV, and `Arm64StoreBytes.lean` proves the generated
+`image` (the masked truncation `value &&& 0xff`/`0xffff`/`0xffffffff`/`value`)
+equal to an independent lane-by-lane write-then-read statement, that the byte
+counts are 1/2/4/8 and the width codes 1/2/4/8, that a narrow store leaves the
+covered word's higher bytes zero, and — connecting this contract to the load
+contract — that the store `image` equals `arm64LoadBytesSpec` at every width
+(`arm64_store_bytes_load_agree`). `ARM64_SIM_L_STORE_ADDR` (and so the
+`ARM64_SIM_L_MEM_WRITE` caller) routes through the generated macro, leaving the
+address arithmetic and the destination selection in the composed bodies. A
+generated-header oracle pre-fills a heap buffer with a sentinel and checks the
+whole image (covered bytes written, higher bytes untouched) against an
+independent byte-pointer oracle over six boundary patterns and 20000 fixed-seed
+values across all four widths (20,024 cases); a sim-header route oracle drives
+the real write over those inputs against an independent width-masked scatter
+model of the whole heap, plus a store/read-back round trip through the routed
+load at every width (16,486,328 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new

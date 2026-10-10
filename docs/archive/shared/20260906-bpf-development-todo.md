@@ -9978,6 +9978,101 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
   stack body-selection contract paragraph (paper commit pushed to `main`).
 
+## Step 0122 — AArch64 general-memory typed-store width contract
+
+- Scope: the AArch64 simulator's memory store helper
+  `ARM64_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)`
+  (`kprog/arm64/arm64_sim_local_bpf.h`) wrote the width's low bytes to memory
+  through a hand-written width-gated byte ladder with no independent statement
+  — the last hand-written value computation in the AArch64 memory *store*
+  path, the exact write-side mirror of the byte-ladder load contract
+  (`Arm64LoadBytes.lean`) that closed the read path. The store image — what a
+  later load of the covered word observes — was therefore unproved.
+- Contract shape: the store width is one of the four `ARM64_WIDTH_*` codes, so
+  the ladder has a closed byte-count set (1, 2, 4, 8) and no unsupported arm;
+  the macro masks the raw value to the width, writes each in-range byte exactly
+  once through a `volatile __u8 *` pointer, and writes no NZCV.
+- Shared spec `kprog/formal/arm64_store_bytes_spec.json`
+  (`schema_version` 1, `operation` `arm64StoreBytes`): the four ordered widths
+  `(name, bytes, width_code)` `("w8", 1, 1)`, `("w16", 2, 2)`, `("w32", 4, 4)`,
+  `("w64", 8, 8)`.
+  `generate_arm64_store_bytes_spec.py` carries the same four rows in an
+  `EXPECTED` literal, validates the spec against it (operation, order, byte
+  counts, width codes), and emits `generated/arm64_store_bytes.h` (the
+  `KPROG_ARM64_STORE_BYTES(ADDR, WIDTH, VALUE)` `do { } while (0)` macro: it
+  resolves the width through `KPROG_ARM64_APPLY_WIDTH`, writes byte 0
+  unconditionally, then the `>= ARM64_WIDTH_16`, `>= ARM64_WIDTH_32`, and
+  `== ARM64_WIDTH_64` gated byte groups, preceded by four
+  `_Static_assert(ARM64_WIDTH_<n> == <code>U, "arm64 store-bytes width code
+  drift")`) and the Lean `KProgFormal.GeneratedArm64StoreBytes` (a
+  self-contained namespace with `StoreWidth`, `widthCode`, `byteCount`, and
+  `image` = the *masked truncation* `value &&& 0xff`/`0xffff`/`0xffffffff`/`value`).
+  It has a `--check` mode and a `make check` line (right after the load-bytes
+  `--check`).
+- Hand refinement `kprog/formal/KProgFormal/Arm64StoreBytes.lean`: the
+  independent spec `arm64StoreBytesSpec` is the *lane-by-lane assembly* of the
+  write-then-read image (each written byte in its own lane, every higher lane
+  zero) — structurally the opposite of the generated masked `image`, so the
+  refinement is not a restatement. It proves `arm64_store_bytes_refines` (the
+  generated masked image equals the independent lane assembly across all four
+  widths), `arm64_store_bytes_width_dispatch` (byte counts 1/2/4/8 and width
+  codes 1/2/4/8), `arm64_store_bytes_upper_cleared` (a narrow store leaves the
+  covered word's higher bytes zero), `arm64_store_bytes_load_agree` (the store
+  `image` equals `arm64LoadBytesSpec` at all four widths, so the two ladders
+  are a matched pair), and three `native_decide` examples. No `sorry`/`admit`.
+  Both new Lean modules are imported in `KProgFormal.lean`.
+- Routing in `kprog/arm64/arm64_sim_local_bpf.h`: a new
+  `#include "../formal/generated/arm64_store_bytes.h"`, and
+  `ARM64_SIM_L_STORE_ADDR` now delegates to
+  `KPROG_ARM64_STORE_BYTES((ADDR), (WIDTH), (VALUE))`, keeping the
+  `ARM64_SIM_L_MEM_WRITE` caller, the address arithmetic, and the helper
+  signature unchanged.
+- Two host oracles, both wired into `kprog/formal/Makefile` immediately after
+  the load-bytes block:
+  - `test_arm64_store_bytes_host.c` includes the generated header (compiling
+    its drift asserts) and compares `KPROG_ARM64_STORE_BYTES` against an
+    independent oracle that writes the in-range bytes one at a time through a
+    byte pointer; the buffer is pre-filled with a per-iteration sentinel so the
+    oracle checks both the covered bytes and that every byte above the store
+    width is untouched. It sweeps six boundary patterns over all four widths,
+    then a fixed-seed 20000-iteration LCG sweep on a heap buffer (seed
+    `0x9a2f5c81e4b70d36`) --- `arm64 store bytes host cross-check: OK (20024
+    cases)`.
+  - `test_arm64_store_bytes_route_host.c` includes the simulator header
+    (`ARM64_SIM_ENABLE_STACK`) and drives the real `ARM64_SIM_L_MEM_WRITE`
+    through the routed store helper (base X2 planted as an
+    `ARM64_SIM_TAG_SCALAR` pointer to `heap + BASE_OFF`), comparing the whole
+    heap image against an independent byte-pointer scatter model of the
+    width-masked value, plus a real store-then-read round trip through the
+    routed `ARM64_SIM_L_MEM_READ` at every width --- `arm64 store bytes route
+    host cross-check: OK (16486328 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **153** `cross-check: OK`. Baseline
+  was **151** for Step 0121; Step 0122 adds the store-bytes host and route
+  oracles and the Lean pair. `make -C kprog/arm64 micro-proofs-build` rebuilt
+  all 30 workload-derived artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_store_bytes.py`, 40 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end: six spec defects (operation/schema/name/byte-count/width-code drifts and
+  an order swap → generator), ten generator defects (operation/Lean-path/
+  C-header-path/width-row/mask/macro-name/gate16/gate32/apply/shift drifts →
+  generator), six generated-C defects (width-code assert and gate-16/gate-32/
+  byte-2-shift/byte-0-index drifts → host, macro-name drift → route), five
+  generated-Lean defects (w16/w32/w64 image drifts and byte-count/width-code
+  drifts → generator), four hand-refinement defects (w16-spec, upper-cleared,
+  example, and load-agreement drifts → refinement), three routed-body defects
+  (dropped include, unrouted macro — count 1 here, since only the store helper
+  routes — and an argument-order swap → route), and two generator+artifact pair
+  defects regenerated so `--check` stays green and only the rebuilt-olean
+  refinement / host catches them (a mask drift and a gate-16 value drift). Four
+  semantically equivalent mutations (an added include-side comment, an added
+  hand-module comment, a resolved-but-equal generator root path, and an added
+  generated-Lean import comment) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  store-bytes contract paragraph and folds "store byte-ladder" into the
+  covered-slices list (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
@@ -10054,6 +10149,15 @@ select is a machine-checked contract (Step 0112), binding both hand-written
 orders and the `X86_RAX..X86_R15` numeric defines, so neither order can drift
 from the generated cell selector; the width handling and the value computation
 stay inside the composed body.
+
+The AArch64 memory store's little-endian *byte ladder* is likewise no longer
+open: the width-keyed write the `ARM64_SIM_L_STORE_ADDR` helper performed is now
+a machine-checked shared contract (Step 0122), so the store image — the width's
+low bytes of the value, every higher byte untouched — is a proved table rather
+than a hand-written lane sequence, the write-side mirror of the byte-ladder load
+contract (`arm64_load_bytes_spec.json` / `Arm64LoadBytes.lean`), with the two
+ladders proved a matched pair (`arm64_store_bytes_load_agree`); the address
+arithmetic and the destination selection stay inside the composed bodies.
 
 The x86 helper-id → helper-body binding the call ladder (`X86_SIM_BPF_CALL_ID`)
 and its routed register form (`X86_SIM_BPF_CALL_REG`, the chain's
