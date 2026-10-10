@@ -164,6 +164,7 @@ class MarkerAndCommandTest(unittest.TestCase):
             control = next(item for item in command if item.startswith("--control="))
             self.assertNotIn("corpus/results", control)
             self.assertIn("cycles:k", command)
+            self.assertIn("37000000", command)
             self.assertIn("any_call,any_ret,k,save_type", command)
 
     def test_symbol_snapshot_follows_workload_and_sampling_stop(self) -> None:

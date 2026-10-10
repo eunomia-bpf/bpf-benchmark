@@ -66,5 +66,7 @@ Set `CILIUM_PROFILE_OUTPUT_DIR` to choose a new directory below
 mount. The command fails instead of overwriting an existing directory. Each arm retains the exact
 Make command, complete log, raw host counters, raw `perf.data`, guest kallsyms
 and module snapshots, BPF inventory, `perf report`, `perf script`, and JSON and
-Markdown analyses. `SUMMARY.md` compares the arms. The temporary staged perf
+Markdown analyses. The full textual `perf script` is gzip-compressed; raw
+`perf.data` remains directly available for re-analysis. `SUMMARY.md` compares
+the arms. The temporary staged perf
 runtime is removed after collection and is never part of the result.

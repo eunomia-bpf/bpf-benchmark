@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import collections
 import csv
+import gzip
 import json
 import math
 import re
@@ -262,7 +263,8 @@ def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
             text=True,
         ).stdout
     (arm_dir / "perf-report.txt").write_text(report, encoding="utf-8")
-    (arm_dir / "perf-script.txt").write_text(script, encoding="utf-8")
+    with gzip.open(arm_dir / "perf-script.txt.gz", "wt", encoding="utf-8") as output:
+        output.write(script)
     return report, script
 
 

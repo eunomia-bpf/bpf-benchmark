@@ -20,7 +20,10 @@ _SYMBOL_SETTINGS = {
     Path("/proc/sys/kernel/kptr_restrict"): "0",
     Path("/proc/sys/net/core/bpf_jit_kallsyms"): "1",
 }
-_SAMPLE_PERIOD_CYCLES = 7_400_000
+# About 100 Hz per busy 3.7-GHz vCPU. LBR records are substantially larger
+# than frame-pointer-only samples, so this keeps each auditable perf.data below
+# repository blob limits while retaining tens of thousands of 60-second samples.
+_SAMPLE_PERIOD_CYCLES = 37_000_000
 
 
 def _required_env(name: str) -> str:
