@@ -15,7 +15,7 @@ namespace Kinsn.ModuleCatalog
 validated operands; byte offsets retain their signed 16-bit encoding.
 Each certificate includes spec correctness, write bounds and full-memory
 refinement through ArmStateEquiv.arm_refines or X86StateEquiv.x86_refines.
-Rotation exposes exactly its explicit BPF temporary. -/
+Rotation writes only its destination; the legacy temporary field is ignored. -/
 
 /-- arm64/bpf_arm64_ldr.c:instantiate_ldrb_mem/emit_ldrb_mem_arm64. -/
 def bpf_arm64_ldrb (dst base : BPF.Reg) (off : BitVec 16) : ArmStateEquiv Catalog.armMap :=
@@ -82,24 +82,20 @@ def bpf_arm64_ubfm_x (dst : BPF.Reg) (start width : Nat)
   ModuleRegister.extractCert Catalog.armMap dst start width hw hw32 hbound
 
 /-- arm64/bpf_arm64_extr.c:instantiate_rotate32/emit_rotate32_arm64. -/
-theorem bpf_arm64_extr_w_refines (dst src tmp : BPF.Reg) (n : Nat) (hn : n < 32)
-    (hts : tmp ≠ src) (htd : tmp ≠ dst) (b : BPF.State) (a : ARM64.State)
+theorem bpf_arm64_extr_w_refines (dst src : BPF.Reg) (n : Nat) (hn : n < 32) (b : BPF.State) (a : ARM64.State)
     (hi : observeBpf b = observeArm Catalog.armMap a) :
-    observeBpf (BPF.mexec (ModuleRotate.bpf .w32 dst src tmp n) b) =
+    observeBpf (BPF.mexec (ModuleArmRotate.bpf .w32 dst src n) b) =
       observeArm Catalog.armMap (ARM64.mexec
-        (ModuleArmRotate.native .w32 (Catalog.armReg dst) (Catalog.armReg src)
-          (Catalog.armReg tmp) n) a) :=
-  (ModuleArmRotate.cert Catalog.armMap .w32 dst src tmp n hn hts htd).arm_refines b a hi
+        (ModuleArmRotate.native .w32 (Catalog.armReg dst) (Catalog.armReg src) n) a) :=
+  (ModuleArmRotate.cert Catalog.armMap .w32 dst src n hn).arm_refines b a hi
 
 /-- arm64/bpf_arm64_extr.c:instantiate_rotate64/emit_rotate64_arm64. -/
-theorem bpf_arm64_extr_x_refines (dst src tmp : BPF.Reg) (n : Nat) (hn : n < 64)
-    (hts : tmp ≠ src) (htd : tmp ≠ dst) (b : BPF.State) (a : ARM64.State)
+theorem bpf_arm64_extr_x_refines (dst src : BPF.Reg) (n : Nat) (hn : n < 64) (b : BPF.State) (a : ARM64.State)
     (hi : observeBpf b = observeArm Catalog.armMap a) :
-    observeBpf (BPF.mexec (ModuleRotate.bpf .w64 dst src tmp n) b) =
+    observeBpf (BPF.mexec (ModuleArmRotate.bpf .w64 dst src n) b) =
       observeArm Catalog.armMap (ARM64.mexec
-        (ModuleArmRotate.native .w64 (Catalog.armReg dst) (Catalog.armReg src)
-          (Catalog.armReg tmp) n) a) :=
-  (ModuleArmRotate.cert Catalog.armMap .w64 dst src tmp n hn hts htd).arm_refines b a hi
+        (ModuleArmRotate.native .w64 (Catalog.armReg dst) (Catalog.armReg src) n) a) :=
+  (ModuleArmRotate.cert Catalog.armMap .w64 dst src n hn).arm_refines b a hi
 
 /-- arm64/bpf_arm64_prfm.c:instantiate_prfm_pldl1keep/emit_prfm_pldl1keep_arm64. -/
 def bpf_arm64_prfm_pldl1keep (base : BPF.Reg) : ArmStateEquiv Catalog.armMap :=
@@ -177,20 +173,15 @@ theorem arm_load_payload_refines (bytes : Nat) (p : BitVec 64)
     the shift byte is masked to five/six bits before instantiation. -/
 theorem arm_rotate_payload_refines (w : BPF.Width) (p : BitVec 64)
     (hd : Payload.regField p 0 ≤ 10) (hs : Payload.regField p 4 ≤ 10)
-    (ht : Payload.regField p 16 ≤ 10)
-    (hds : Payload.reg (Payload.regField p 16) ht ≠ Payload.reg (Payload.regField p 0) hd)
-    (hss : Payload.reg (Payload.regField p 16) ht ≠ Payload.reg (Payload.regField p 4) hs)
     (b : BPF.State) (a : ARM64.State) (hi : observeBpf b = observeArm Catalog.armMap a) :
     let dst := Payload.reg (Payload.regField p 0) hd
     let src := Payload.reg (Payload.regField p 4) hs
-    let tmp := Payload.reg (Payload.regField p 16) ht
     let n := (Payload.byteField p 8).toNat % (if w = .w64 then 64 else 32)
-    observeBpf (BPF.mexec (ModuleRotate.bpf w dst src tmp n) b) =
+    observeBpf (BPF.mexec (ModuleArmRotate.bpf w dst src n) b) =
       observeArm Catalog.armMap (ARM64.mexec
-        (ModuleArmRotate.native w (Catalog.armReg dst) (Catalog.armReg src)
-          (Catalog.armReg tmp) n) a) := by
+        (ModuleArmRotate.native w (Catalog.armReg dst) (Catalog.armReg src) n) a) := by
   dsimp only
-  apply (ModuleArmRotate.cert Catalog.armMap w _ _ _ _ ?_ hss hds).arm_refines b a hi
+  apply (ModuleArmRotate.cert Catalog.armMap w _ _ _ ?_).arm_refines b a hi
   exact Nat.mod_lt _ (by cases w <;> decide)
 
 end Kinsn.ModuleCatalog

@@ -133,9 +133,11 @@ benchmarks, kernel rebuilds, kernel-core edits, or bpfopt edits were performed.
 `ModuleCatalog.arm_jit_sound` / `x86_jit_sound` use the Linux register maps.
 Parenthesized names in the table identify the certificate supplied to these
 theorems. The corrected certificates observe every mapped register, including
-explicit payload temporaries. `ModuleArmRotate.cert` and the strengthened
-`ModuleCatalog.bpf_arm64_extr_w_refines` / `_x_refines` include the ARM rotate
-temporary. The original abstract EXTR-leaf proofs are retained in `ModuleRotate`.
+explicit payload temporaries. `ModuleArmRotate.cert` and
+`ModuleCatalog.bpf_arm64_extr_w_refines` / `_x_refines` preserve the legacy ARM
+rotate temporary: only the destination is an output. The October 10 proof uses
+`1 + 5*n` instructions (W maximum 156, X maximum 316), and native code is the
+single June EXTR instruction. The original abstract EXTR-leaf proofs are retained in `ModuleRotate`.
 
 The byte-memory semantics cover successful ordinary single-threaded accesses,
 with wrapping 64-bit addresses. They do not model MMIO, concurrent interference,
@@ -197,8 +199,8 @@ The table follows the requested category order.
 
 | Operation | C expansion (`file:function`) | C emit (`file:function`) | Lean theorem / certificate | Status | Bug fixed |
 |---|---|---|---|---|---|
-| `bpf_arm64_extr_w` | `arm64/bpf_arm64_extr.c:instantiate_rotate32` | `arm64/bpf_arm64_extr.c:emit_rotate32_arm64` | `ModuleCatalog.bpf_arm64_extr_w_refines` | proved | native omitted decoded temporary update |
-| `bpf_arm64_extr_x` | `arm64/bpf_arm64_extr.c:instantiate_rotate64` | `arm64/bpf_arm64_extr.c:emit_rotate64_arm64` | `ModuleCatalog.bpf_arm64_extr_x_refines` | proved | native omitted decoded temporary update |
+| `bpf_arm64_extr_w` | `arm64/bpf_arm64_extr.c:instantiate_rotate32` | `arm64/bpf_arm64_extr.c:emit_rotate32_arm64` | `ModuleCatalog.bpf_arm64_extr_w_refines` | proved | scratch-free destination-only rotation; June EXTR restored |
+| `bpf_arm64_extr_x` | `arm64/bpf_arm64_extr.c:instantiate_rotate64` | `arm64/bpf_arm64_extr.c:emit_rotate64_arm64` | `ModuleCatalog.bpf_arm64_extr_x_refines` | proved | scratch-free destination-only rotation; June EXTR restored |
 | `bpf_x86_roll` | `x86/bpf_x86_rotate.c:instantiate_roll` | `x86/bpf_x86_rotate.c:emit_roll_x86` | `ModuleX86Rotate.bpf_x86_roll` | proved | scratch restore overwrote destination |
 | `bpf_x86_rolq` | `x86/bpf_x86_rotate.c:instantiate_rolq` | `x86/bpf_x86_rotate.c:emit_rolq_x86` | `ModuleX86Rotate.bpf_x86_rolq` | proved | scratch restore overwrote destination |
 | `bpf_x86_rorxl` | `x86/bpf_x86_rotate.c:instantiate_rotate32` | `x86/bpf_x86_rotate.c:emit_rotate32_x86` | `ModuleX86Rotate.bpf_x86_rorxl` | proved | ARCH read unsaved slots / left destination stale |
