@@ -13,6 +13,45 @@ struct NativeDataSymbolLayout {
     uint32_t size;
 };
 
+enum class NativeDataSymbolOffsetKind {
+    NativeOffset,
+    SourceOffset,
+    Absent,
+    SectionMismatch,
+    SizeMismatch,
+    OutOfBounds,
+};
+
+struct NativeDataSymbolOffsetResolution {
+    NativeDataSymbolOffsetKind kind;
+    uint64_t offset;
+};
+
+inline NativeDataSymbolOffsetResolution resolve_source_data_symbol_offset(
+    const NativeDataSymbolLayout &layout,
+    uint64_t native_size,
+    uint64_t native_offset,
+    uint64_t map_value_size)
+{
+    if (!layout.is_datasec) {
+        return {NativeDataSymbolOffsetKind::NativeOffset, native_offset};
+    }
+    if (!layout.section_matches) {
+        return {NativeDataSymbolOffsetKind::SectionMismatch, 0};
+    }
+    if (!layout.found) {
+        return {NativeDataSymbolOffsetKind::Absent, 0};
+    }
+    if (layout.size != native_size) {
+        return {NativeDataSymbolOffsetKind::SizeMismatch, 0};
+    }
+    if (layout.offset > map_value_size ||
+        layout.size > map_value_size - layout.offset) {
+        return {NativeDataSymbolOffsetKind::OutOfBounds, 0};
+    }
+    return {NativeDataSymbolOffsetKind::SourceOffset, layout.offset};
+}
+
 inline NativeDataSymbolLayout find_source_data_symbol_layout(
     const btf *btf_obj,
     uint32_t value_type_id,

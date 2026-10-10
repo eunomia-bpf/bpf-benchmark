@@ -3197,11 +3197,12 @@ bool native_data_section_supported(const std::string &section_name)
            section_name.rfind(".rodata", 0) == 0;
 }
 
-uint64_t source_data_symbol_offset(const MapMeta &map,
-                                   const std::string &section_name,
-                                   const std::string &symbol_name,
-                                   uint64_t native_size,
-                                   uint64_t native_offset)
+std::optional<uint64_t> source_data_symbol_offset(
+    const MapMeta &map,
+    const std::string &section_name,
+    const std::string &symbol_name,
+    uint64_t native_size,
+    uint64_t native_offset)
 {
     if (map.btf_id == 0 || map.btf_value_type_id == 0) {
         return native_offset;
@@ -3217,30 +3218,27 @@ uint64_t source_data_symbol_offset(const MapMeta &map,
 
     const NativeDataSymbolLayout layout = find_source_data_symbol_layout(
         btf_obj, map.btf_value_type_id, section_name, symbol_name);
-    if (!layout.is_datasec) {
-        btf__free(btf_obj);
-        return native_offset;
-    }
-    if (!layout.section_matches) {
-        btf__free(btf_obj);
+    btf__free(btf_obj);
+    const NativeDataSymbolOffsetResolution resolution =
+        resolve_source_data_symbol_offset(
+            layout, native_size, native_offset, map.value_size);
+    if (resolution.kind == NativeDataSymbolOffsetKind::SectionMismatch) {
         fail("native data section " + section_name +
              " does not match the source BTF datasec for map " + map.name);
     }
-    btf__free(btf_obj);
-    if (!layout.found) {
-        fail("native data symbol " + symbol_name +
-             " is absent from source BTF datasec " + section_name);
+    if (resolution.kind == NativeDataSymbolOffsetKind::Absent) {
+        return std::nullopt;
     }
-    if (layout.size != native_size) {
+    if (resolution.kind == NativeDataSymbolOffsetKind::SizeMismatch) {
         fail("native data symbol " + symbol_name + " size " +
              std::to_string(native_size) + " differs from source BTF size " +
              std::to_string(layout.size));
     }
-    if (static_cast<uint64_t>(layout.offset) + layout.size > map.value_size) {
+    if (resolution.kind == NativeDataSymbolOffsetKind::OutOfBounds) {
         fail("source BTF data symbol " + symbol_name + " exceeds map " +
              map.name + " value_size");
     }
-    return layout.offset;
+    return resolution.offset;
 }
 
 std::string bpf_obj_name_truncation(const std::string &name)
@@ -3678,9 +3676,12 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (!map) {
                 continue;
             }
-            const uint64_t off = source_data_symbol_offset(
+            const std::optional<uint64_t> off = source_data_symbol_offset(
                 *map, section, name, sym.st_size, native_off);
-            if (off + sym.st_size > map->value_size) {
+            if (!off) {
+                continue;
+            }
+            if (*off + sym.st_size > map->value_size) {
                 elf_end(elf);
                 close(fd);
                 fail("native data symbol " + std::string(name) +
@@ -3698,7 +3699,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (load.map_addrs.count(symbol_name)) {
                 continue;
             }
-            load.map_addrs[symbol_name] = map->value_addr + off;
+            load.map_addrs[symbol_name] = map->value_addr + *off;
             load.map_addr_ids[symbol_name] = map->kernel_id;
         }
     }
