@@ -28,9 +28,6 @@ class AppRunner:
     def stop(self) -> None:
         raise NotImplementedError
 
-    def prepare_bpf_evidence_capture(self) -> None:
-        """Quiesce application-side BPF graph updates before evidence capture."""
-
     @property
     def pid(self) -> int | None:
         raise NotImplementedError

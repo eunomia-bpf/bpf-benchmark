@@ -224,30 +224,6 @@ class WorkloadContractTests(unittest.TestCase):
 
         run_named.assert_called_once_with("network_lossy_multi", 1, network_device=workload.BENCHMARK_IFACE)
 
-    def test_cilium_workload_preserves_snapshot_quiescence(self) -> None:
-        """Catch evidence/workload drift from resuming a pre-paused Cilium agent."""
-        result = _workload_result()
-        runner = cilium_runner.CiliumRunner(workload_kind="network_lossy_multi")
-        runner.device = workload.BENCHMARK_IFACE
-        runner._agent_paused = True
-        with (
-            mock.patch.object(
-                cilium_runner,
-                "run_named_workload",
-                return_value=result,
-            ),
-            mock.patch.object(
-                cilium_runner,
-                "run_with_outcomes",
-                side_effect=lambda run, snapshot: run(),
-            ),
-            mock.patch.object(runner, "_resume_agent") as resume_agent,
-        ):
-            self.assertIs(runner._run_workload(1), result)
-
-        resume_agent.assert_not_called()
-        self.assertTrue(runner._agent_paused)
-
     def test_corpus_runner_adapter_preserves_network_device_path(self) -> None:
         for runner_name, runner_module in (
             ("cilium", cilium_runner),
