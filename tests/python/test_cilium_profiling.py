@@ -188,6 +188,7 @@ ffffffff81003000 htab_map_lookup_elem
         self.assertEqual(len(callgraphs[0]), 3)
         self.assertEqual(report.classify_symbol("bpf_prog_deadbeef_cil_from_host"), "bpf_code")
         self.assertEqual(report.classify_symbol("htab_map_lookup_elem"), "maps")
+        self.assertEqual(report.classify_symbol("lookup_nulls_elem_raw"), "maps")
         self.assertEqual(report.classify_symbol("bpf_redirect"), "helpers")
         self.assertIn("pv_native_safe_halt", report.IDLE_SYMBOLS)
         report.validate_callgraph_samples(counts, callgraphs)
@@ -256,6 +257,40 @@ ffffffff81003000 htab_map_lookup_elem
             report._require_native_size_coverage(
                 [{"id": 11}, {"id": 12}], [{"native_id": 11}]
             )
+
+    def test_packet_metrics_preserve_outcome_verdicts(self) -> None:
+        workloads = [
+            {
+                "components": [
+                    {"stdout": "pkts-sofar: 100\n", "returncode": 0},
+                    {"stdout": "pkts-sofar: 101\n", "returncode": 0},
+                ],
+                "config": {
+                    "outcomes": {
+                        "delta": {
+                            "receivers": {
+                                "left": {
+                                    "rx_packets": 202,
+                                    "rx_errors": 0,
+                                    "rx_dropped": 0,
+                                }
+                            },
+                            "verdicts": {
+                                "reason=0,direction=1": {"count": 201, "bytes": 12864},
+                                "reason=3,direction=1": {"count": 1, "bytes": 64},
+                            },
+                        }
+                    }
+                },
+            }
+        ]
+        metrics = report._packet_metrics(workloads)
+        self.assertEqual(metrics["packets_sent"], 201)
+        self.assertEqual(metrics["packets_received"], 202)
+        self.assertEqual(
+            report._verdict_count(metrics, "reason=0,direction=1"), 201
+        )
+        self.assertEqual(report._other_verdict_count(metrics), 1)
 
 
 if __name__ == "__main__":

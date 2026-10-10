@@ -9,6 +9,7 @@ import csv
 import json
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Mapping, Sequence
 
@@ -102,6 +103,7 @@ def classify_symbol(symbol: str) -> str:
         "map_update",
         "map_delete",
         "lookup_elem",
+        "lookup_nulls_elem",
         "update_elem",
         "delete_elem",
         "htab_",
@@ -143,35 +145,41 @@ def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
     for path in (data, kallsyms, vmlinux):
         if not path.is_file():
             raise RuntimeError(f"required profiling artifact is missing: {path}")
-    common = [
-        "-i",
-        str(data),
-        "--kallsyms",
-        str(kallsyms),
-        "--vmlinux",
-        str(vmlinux),
-    ]
-    report = subprocess.run(
-        [
-            str(perf),
-            "report",
-            "--stdio",
-            "--percent-limit",
-            "0",
-            "--sort",
-            "symbol",
-            *common,
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout
-    script = subprocess.run(
-        [str(perf), "script", "-F", "ip,sym", *common],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout
+    # The profile is kernel-only.  Hiding guest user DSOs avoids host perf
+    # trying to synthesize PLT symbols from unrelated guest paths; current
+    # perf versions can crash there after otherwise decoding all samples.
+    with tempfile.TemporaryDirectory(prefix="cilium-profile-symfs-") as symfs:
+        common = [
+            "--symfs",
+            symfs,
+            "-i",
+            str(data),
+            "--kallsyms",
+            str(kallsyms),
+            "--vmlinux",
+            str(vmlinux),
+        ]
+        report = subprocess.run(
+            [
+                str(perf),
+                "report",
+                "--stdio",
+                "--percent-limit",
+                "0",
+                "--sort",
+                "symbol",
+                *common,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        script = subprocess.run(
+            [str(perf), "script", "-F", "ip,sym", *common],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
     (arm_dir / "perf-report.txt").write_text(report, encoding="utf-8")
     (arm_dir / "perf-script.txt").write_text(script, encoding="utf-8")
     return report, script
@@ -274,7 +282,7 @@ def _require_native_size_coverage(
         )
 
 
-def _packet_metrics(workloads: object) -> dict[str, int]:
+def _packet_metrics(workloads: object) -> dict[str, object]:
     if not isinstance(workloads, list) or len(workloads) != 1:
         raise RuntimeError("profile requires exactly one Cilium workload sample")
     workload = workloads[0]
@@ -297,6 +305,7 @@ def _packet_metrics(workloads: object) -> dict[str, int]:
     outcomes = workload.get("config", {})
     delta = outcomes.get("outcomes", {}).get("delta", {}) if isinstance(outcomes, Mapping) else {}
     receivers = delta.get("receivers", {}) if isinstance(delta, Mapping) else {}
+    verdicts = delta.get("verdicts", {}) if isinstance(delta, Mapping) else {}
     received = 0
     rx_errors = 0
     rx_dropped = 0
@@ -307,13 +316,43 @@ def _packet_metrics(workloads: object) -> dict[str, int]:
             received += int(record.get("rx_packets", 0) or 0)
             rx_errors += int(record.get("rx_errors", 0) or 0)
             rx_dropped += int(record.get("rx_dropped", 0) or 0)
+    outcome_verdicts: dict[str, dict[str, int]] = {}
+    if isinstance(verdicts, Mapping):
+        for name, record in verdicts.items():
+            if not isinstance(record, Mapping):
+                continue
+            outcome_verdicts[str(name)] = {
+                "count": int(record.get("count", 0) or 0),
+                "bytes": int(record.get("bytes", 0) or 0),
+            }
     return {
         "packets_sent": sent,
         "packets_received": received,
         "component_errors": errors,
         "rx_errors": rx_errors,
         "rx_dropped": rx_dropped,
+        "verdicts": outcome_verdicts,
     }
+
+
+def _verdict_count(packet_metrics: Mapping[str, object], name: str) -> int:
+    verdicts = packet_metrics.get("verdicts", {})
+    if not isinstance(verdicts, Mapping):
+        return 0
+    record = verdicts.get(name, {})
+    return int(record.get("count", 0) or 0) if isinstance(record, Mapping) else 0
+
+
+def _other_verdict_count(packet_metrics: Mapping[str, object]) -> int:
+    verdicts = packet_metrics.get("verdicts", {})
+    if not isinstance(verdicts, Mapping):
+        return 0
+    return sum(
+        int(record.get("count", 0) or 0)
+        for name, record in verdicts.items()
+        if name not in {"reason=0,direction=1", "reason=0,direction=2"}
+        and isinstance(record, Mapping)
+    )
 
 
 def _program_rows(
@@ -391,7 +430,7 @@ def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> d
     for symbol, count in analyzed_symbols.items():
         category_counts[classify_symbol(symbol)] += count
     packet_metrics = _packet_metrics(phase.get("workloads"))
-    packets = packet_metrics["packets_sent"]
+    packets = int(packet_metrics["packets_sent"])
     if packets <= 0:
         raise RuntimeError(f"Cilium {arm} workload sent no packets")
     counters = parse_perf_stat(arm_dir / "host-perf-stat.csv")
@@ -474,7 +513,9 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         f"| cycles/packet | {float(host['cycles_per_packet']):.3f} |",
         f"| instructions/packet | {float(host['instructions_per_packet']):.3f} |",
         f"| IPC | {float(host['ipc']):.3f} |",
+        f"| branches/packet | {float(host['branches_per_packet']):.3f} |",
         f"| branch misses/packet | {float(host['branch_misses_per_packet']):.6f} |",
+        f"| branch miss rate | {float(host['branch_miss_rate']):.6%} |",
         f"| cache misses/packet | {float(host['cache_misses_per_packet']):.6f} |",
         f"| BPF runs/packet | {float(bpf['runs_per_packet']):.3f} |",
         f"| active BPF programs | {bpf['active_programs']} / {bpf['total_programs']} |",
@@ -552,8 +593,8 @@ def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
         "",
         "These profiling runs are separate from timing runs and reuse the unchanged Cilium corpus setup.",
         "",
-        "| Arm | Packets | BPF runs/packet | cycles/packet | instructions/packet | IPC | branch misses/packet | cache misses/packet |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Arm | Packets | BPF runs/packet | cycles/packet | instructions/packet | IPC | branches/packet | branch misses/packet | branch miss rate | cache misses/packet |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for arm in ("jit", "kprog"):
         if arm not in results:
@@ -566,8 +607,29 @@ def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
         lines.append(
             f"| {arm} | {packets['packets_sent']} | {float(bpf['runs_per_packet']):.3f} | "
             f"{float(host['cycles_per_packet']):.3f} | {float(host['instructions_per_packet']):.3f} | "
-            f"{float(host['ipc']):.3f} | {float(host['branch_misses_per_packet']):.6f} | "
+            f"{float(host['ipc']):.3f} | {float(host['branches_per_packet']):.3f} | "
+            f"{float(host['branch_misses_per_packet']):.6f} | "
+            f"{float(host['branch_miss_rate']):.6%} | "
             f"{float(host['cache_misses_per_packet']):.6f} |"
+        )
+    lines += [
+        "",
+        "## Outcome counters",
+        "",
+        "| Arm | Sent | Received | Component errors | RX errors | RX drops | Allow dir. 1 | Allow dir. 2 | Other verdicts |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for arm in ("jit", "kprog"):
+        if arm not in results:
+            continue
+        packets = results[arm]["packets"]
+        assert isinstance(packets, Mapping)
+        lines.append(
+            f"| {arm} | {packets['packets_sent']} | {packets['packets_received']} | "
+            f"{packets['component_errors']} | {packets['rx_errors']} | {packets['rx_dropped']} | "
+            f"{_verdict_count(packets, 'reason=0,direction=1')} | "
+            f"{_verdict_count(packets, 'reason=0,direction=2')} | "
+            f"{_other_verdict_count(packets)} |"
         )
     lines += [
         "",
