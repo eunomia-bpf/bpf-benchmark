@@ -158,12 +158,16 @@ def _running_guests() -> list[int]:
         if not entry.name.isdigit():
             continue
         try:
-            command = (entry / "cmdline").read_bytes().replace(b"\0", b" ")
+            executable = (entry / "exe").resolve(strict=True)
         except (FileNotFoundError, PermissionError, ProcessLookupError):
             continue
-        if b"qemu-system-" in command:
+        if _is_qemu_executable(executable):
             pids.append(int(entry.name))
     return sorted(pids)
+
+
+def _is_qemu_executable(executable: Path) -> bool:
+    return executable.name.startswith("qemu-system-")
 
 
 def _preflight_runtime_artifacts() -> None:

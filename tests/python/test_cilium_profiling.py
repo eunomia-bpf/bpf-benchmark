@@ -70,6 +70,12 @@ class MarkerAndCommandTest(unittest.TestCase):
         self.assertEqual(host._parse_arms("all"), ["jit", "kprog"])
         with self.assertRaisesRegex(RuntimeError, "unknown=.*kinsn"):
             host._parse_arms("kinsn")
+
+    def test_guest_scan_matches_executable_not_package_argument(self) -> None:
+        self.assertTrue(
+            host._is_qemu_executable(Path("/usr/local/bin/qemu-system-x86_64"))
+        )
+        self.assertFalse(host._is_qemu_executable(Path("/usr/bin/apt-get")))
         self.assertIsNone(
             host._progress_marker(
                 '{"event":"measurement_start","app":"cilium/agent",'
