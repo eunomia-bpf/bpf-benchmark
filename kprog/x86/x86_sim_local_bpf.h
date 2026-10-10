@@ -31,6 +31,7 @@
 #include "../formal/generated/x86_doubleshift_arm.h"
 #include "../formal/generated/x86_popcnt_flags.h"
 #include "../formal/generated/x86_movx_shape.h"
+#include "../formal/generated/x86_mov_reg_arm.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -1614,16 +1615,19 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)                    \
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
-		if (__x86_l_width == X86_WIDTH_64 && (SRC) == X86_RSP) {  \
+		if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==         \
+		    KPROG_X86_MOV_REG_ARM_STACK_PTR) {                     \
 			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
 				X86_SIM_L_STACK_PTR(                       \
 					(__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)),\
 				X86_SIM_TAG_STACK);                        \
-		} else if (__x86_l_width == X86_WIDTH_64) {              \
+		} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==  \
+			   KPROG_X86_MOV_REG_ARM_POINTER) {               \
 			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
 				X86_SIM_L_READ_REG_PTR(SRC),              \
 				X86_SIM_L_REG_TAG(SRC));                  \
-		} else {                                                  \
+		} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==  \
+			   KPROG_X86_MOV_REG_ARM_NARROW) {                \
 			__u64 __x86_l_value = X86_SIM_L_READ_REG_WIDTH_SHIFT(\
 				(SRC), __x86_l_width,                         \
 				KPROG_X86_REG_LANE_AUX_SRC_SHIFT(AUX));       \
@@ -1850,17 +1854,21 @@ struct x86_sim_state {
 				__x86_l_width,                                \
 				KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));        \
 		} else if ((OP) == X86_OP_MOV_REG) {                       \
-			if (__x86_l_width == X86_WIDTH_64 &&              \
-			    (SRC) == X86_RSP) {                           \
+			if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==\
+			    KPROG_X86_MOV_REG_ARM_STACK_PTR) {            \
 				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
 					X86_SIM_L_STACK_PTR(               \
 						(__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)),\
 					X86_SIM_TAG_STACK);                \
-			} else if (__x86_l_width == X86_WIDTH_64)           \
+			} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width,   \
+				   (SRC)) ==                              \
+				   KPROG_X86_MOV_REG_ARM_POINTER) {       \
 				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
 					X86_SIM_L_READ_REG_PTR(SRC),       \
 					X86_SIM_L_REG_TAG(SRC));           \
-			else {                                            \
+			} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width,   \
+				   (SRC)) ==                              \
+				   KPROG_X86_MOV_REG_ARM_NARROW) {        \
 				__u64 __x86_l_value =                    \
 					X86_SIM_L_READ_REG_WIDTH_SHIFT(   \
 						(SRC), __x86_l_width,        \

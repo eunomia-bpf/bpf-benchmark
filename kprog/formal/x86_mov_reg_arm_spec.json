@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "operation": "x86MovRegArmSelector",
+  "selector": "width64_and_rsp_then_arm",
+  "opcode_define": "X86_OP_MOV_REG",
+  "opcode": 2,
+  "full_width_define": "KPROG_X86_MOV_REG_FULL_WIDTH",
+  "full_width_code": 8,
+  "rsp_define": "X86_RSP",
+  "rsp_code": 4,
+  "arms": [
+    {
+      "arm": "stackPtr",
+      "arm_define": "KPROG_X86_MOV_REG_ARM_STACK_PTR",
+      "effect": "stack_base_pointer_write",
+      "width_class": "full"
+    },
+    {
+      "arm": "pointer",
+      "arm_define": "KPROG_X86_MOV_REG_ARM_POINTER",
+      "effect": "provenance_pointer_write",
+      "width_class": "full"
+    },
+    {
+      "arm": "narrow",
+      "arm_define": "KPROG_X86_MOV_REG_ARM_NARROW",
+      "effect": "width_scalarizing_write",
+      "width_class": "narrow"
+    }
+  ]
+}
