@@ -615,6 +615,7 @@ DEFAULT_WRK_THREADS = 4
 DEFAULT_WRK_CONNECTIONS = 10
 DEFAULT_PKTGEN_PKT_SIZE = 64
 DEFAULT_PKTGEN_CLONE_SKB = 0
+DEFAULT_PKTGEN_SRC_PORT = 10000
 PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
 # A veth has one TX queue.  Multiple pktgen workers therefore race on queue 0,
 # producing NETDEV_TX_BUSY errors and, on AWS, no traffic at the XDP hook.
@@ -779,7 +780,10 @@ class KatranRunner(AppRunner):
             self._pktgen_write(thread_path, "rem_device_all")
             self._pktgen_write(thread_path, f"add_device {alias}")
         pktgen_commands = (
-            "flag !SHARED",
+            # This is the packet shape used by the zero-loss paper workload.
+            # FLOW_RND/!SHARED looks successful in pktgen but does not traverse
+            # the veth peer's XDP hook on the kernels used by the AWS runner.
+            "flag SHARED",
             f"clone_skb {DEFAULT_PKTGEN_CLONE_SKB}",
             "burst 1",
             "count 0",
@@ -794,10 +798,10 @@ class KatranRunner(AppRunner):
             f"dst_mac {LB_MAC}",
             f"udp_dst_min {VIP_PORT}",
             f"udp_dst_max {VIP_PORT}",
-            "udp_src_min 1",
-            "udp_src_max 65535",
-            "flows 65535",
-            "flowlen 1",
+            f"udp_src_min {DEFAULT_PKTGEN_SRC_PORT}",
+            f"udp_src_max {DEFAULT_PKTGEN_SRC_PORT}",
+            "flows 0",
+            "flowlen 0",
             "clear_counters",
         )
         for alias in aliases:
@@ -828,7 +832,7 @@ class KatranRunner(AppRunner):
                 stdout=tail_text(self._pktgen_read(f"/proc/net/pktgen/{alias}"), max_lines=200000, max_chars=8388608),
                 stderr="",
                 config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": alias,
-                        "thread_id": int(thread_id), "shared_skb": False,
+                        "thread_id": int(thread_id), "shared_skb": True,
                         "xmit_mode": "start_xmit", "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
                         "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
                         "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT,
@@ -844,7 +848,7 @@ class KatranRunner(AppRunner):
             stdout="",
             stderr=tail_text(stderr or "", max_lines=200000, max_chars=8388608),
             config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": ROUTER_LB_IFACE,
-                    "shared_skb": False, "xmit_mode": "start_xmit",
+                    "shared_skb": True, "xmit_mode": "start_xmit",
                     "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
                     "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
                     "threads": list(pktgen_thread_ids),

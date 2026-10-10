@@ -35,6 +35,7 @@ def _workload_result() -> workload.WorkloadResult:
 class WorkloadContractTests(unittest.TestCase):
     def test_katran_pktgen_uses_one_dedicated_veth_queue_worker(self) -> None:
         self.assertEqual(katran_runner.KATRAN_PKTGEN_THREAD_IDS, (7,))
+        self.assertEqual(katran_runner.DEFAULT_PKTGEN_SRC_PORT, 10000)
         completed = subprocess.CompletedProcess(
             args=[], returncode=0, stdout="kpktgend_0\nkpktgend_7\n", stderr=""
         )
