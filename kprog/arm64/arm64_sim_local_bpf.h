@@ -37,6 +37,7 @@
 #include "../formal/generated/arm64_fmov.h"
 #include "../formal/generated/arm64_fmov_dest.h"
 #include "../formal/generated/arm64_load_bytes.h"
+#include "../formal/generated/arm64_store_bytes.h"
 #include "../formal/generated/arm64_byte_lane.h"
 #include "../formal/generated/arm64_mem_dispatch.h"
 #include "../formal/generated/arm64_stack_tag.h"
@@ -641,20 +642,17 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 
 #define ARM64_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void **)(ADDR))
 
+/*
+ * Little-endian byte-ladder store. The byte lanes and the width-driven ladder
+ * are the generated AArch64 store-bytes contract in
+ * formal/generated/arm64_store_bytes.h, which KProgFormal/Arm64StoreBytes.lean
+ * proves equal to an independent lane-by-lane write-then-read statement over
+ * all four ARM64_WIDTH_* codes (and agrees with the load contract). ADDR is the
+ * byte destination address, WIDTH the store width, VALUE the raw source value
+ * (masked to the width by the macro); the macro writes no NZCV.
+ */
 #define ARM64_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                          \
-	do {                                                               \
-		__u8 *__a64_sta_addr = (__u8 *)(ADDR);                   \
-		__u8 __a64_sta_width = (WIDTH);                           \
-		__u64 __a64_sta_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_sta_width);\
-		if (__a64_sta_width == ARM64_WIDTH_8)                     \
-			*(__u8 *)__a64_sta_addr = __a64_sta_value;        \
-		else if (__a64_sta_width == ARM64_WIDTH_16)               \
-			*(__u16 *)__a64_sta_addr = __a64_sta_value;       \
-		else if (__a64_sta_width == ARM64_WIDTH_32)               \
-			*(__u32 *)__a64_sta_addr = __a64_sta_value;       \
-		else                                                      \
-			*(__u64 *)__a64_sta_addr = __a64_sta_value;       \
-	} while (0)
+	KPROG_ARM64_STORE_BYTES((ADDR), (WIDTH), (VALUE))
 
 #define ARM64_SIM_L_MEM_BASE_OFF(AUX, INDEX, IMM)                           \
 	({                                                                 \
