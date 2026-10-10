@@ -62,6 +62,31 @@ def capture_bpf_evidence(
     (output_dir / "program-inventory.json").write_text(
         json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    all_maps = _json_payload([bpftool, "-j", "map", "show"])
+    map_inventory = [
+        dict(record)
+        for record in (all_maps if isinstance(all_maps, list) else [])
+        if isinstance(record, Mapping) and int(record.get("id", 0) or 0) > 0
+    ]
+    (output_dir / "map-inventory.json").write_text(
+        json.dumps(map_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    program_array_dumps: dict[str, object] = {}
+    for record in map_inventory:
+        if str(record.get("type") or "") != "prog_array":
+            continue
+        map_id = int(record["id"])
+        map_name = _safe_name(str(record.get("name") or "map"))
+        filename = f"map-{map_id}-{map_name}.prog-array.json"
+        payload = _json_payload([bpftool, "-j", "map", "dump", "id", str(map_id)])
+        (output_dir / filename).write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        program_array_dumps[str(map_id)] = {
+            "name": str(record.get("name") or ""),
+            "path": filename,
+        }
 
     captures: dict[str, object] = {}
     for label, command in {
@@ -119,6 +144,7 @@ def capture_bpf_evidence(
         "program_ids": selected_ids,
         "captures": captures,
         "program_dumps": dumps,
+        "program_array_dumps": program_array_dumps,
     }
     (output_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
