@@ -136,6 +136,7 @@ class MarkerAndCommandTest(unittest.TestCase):
         )
         self.assertIn("BPFREJIT_CORPUS_APPS=cilium/agent", command)
         self.assertIn("BPFREJIT_CORPUS_BPF_STATS=1", command)
+        self.assertIn("CILIUM_PROFILE_PERF_ROOT=/results/profile/.perf-tools", command)
         self.assertIn("CILIUM_PROFILE_CODE_ROOT=/results/profile/.profile-code", command)
         with tempfile.TemporaryDirectory() as raw:
             script = Path(raw) / "run.sh"
@@ -149,23 +150,24 @@ class MarkerAndCommandTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "must be below"):
             host._resolve_profile_root("/tmp/profile-test")
 
-    def test_perf_operational_files_stay_on_guest_local_storage(self) -> None:
+    def test_record_uses_guest_local_storage_software_clock_and_frame_pointers(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
-            perf_root = Path(raw) / "perf"
-            (perf_root / "lib64").mkdir(parents=True)
+            perf_root = Path(raw)
+            (perf_root / "lib64").mkdir()
             (perf_root / "lib64" / "ld-linux-x86-64.so.2").touch()
-            (perf_root / "lib" / "x86_64-linux-gnu").mkdir(parents=True)
-            (perf_root / "lib" / "x86_64-linux-gnu" / "libc.so.6").touch()
-            (perf_root / "usr" / "lib" / "linux-tools").mkdir(parents=True)
-            (perf_root / "usr" / "lib" / "linux-tools" / "perf").touch()
+            (perf_root / "usr/lib/linux-tools").mkdir(parents=True)
+            (perf_root / "usr/lib/linux-tools/perf").touch()
+            (perf_root / "usr/lib/libperf-test.so").touch()
             command = guest._perf_command(perf_root, Path("/var/tmp/work"))
-            output_index = command.index("-o") + 1
-            self.assertEqual(command[output_index], "/var/tmp/work/guest.perf.data")
-            control = next(item for item in command if item.startswith("--control="))
-            self.assertNotIn("corpus/results", control)
-            self.assertIn("cycles:k", command)
-            self.assertIn("37000000", command)
-            self.assertIn("any_call,any_ret,k,save_type", command)
+        self.assertIn("cpu-clock:k", command)
+        self.assertIn("1000000", command)
+        self.assertEqual(command[command.index("--call-graph") + 1], "fp")
+        self.assertNotIn("-j", command)
+        self.assertEqual(
+            command[command.index("-o") + 1], "/var/tmp/work/guest.perf.data"
+        )
+        control = next(item for item in command if item.startswith("--control="))
+        self.assertNotIn("corpus/results", control)
 
     def test_symbol_snapshot_follows_workload_and_sampling_stop(self) -> None:
         events: list[str] = []
@@ -187,6 +189,7 @@ class MarkerAndCommandTest(unittest.TestCase):
             )
         self.assertEqual(result, {"ok": True})
         self.assertEqual(events, ["measure", "marker", "disable", "snapshot"])
+        collector.disable.assert_called_once_with()
 
     def test_perf_data_is_published_only_after_driver_returns(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -245,6 +248,28 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P
         self.assertIn("pv_native_safe_halt", report.IDLE_SYMBOLS)
         report.validate_callgraph_samples(counts, callgraphs, histories)
 
+    def test_post_workload_module_snapshot_resolves_pktgen_samples(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            kallsyms = root / "kallsyms"
+            modules = root / "modules"
+            kallsyms.write_text(
+                "ffffffffc0100000 t pktgen_xmit [pktgen]\n"
+                "ffffffffc0100100 t mod_cur_headers [pktgen]\n",
+                encoding="utf-8",
+            )
+            modules.write_text(
+                "pktgen 8192 0 - Live 0xffffffffc0100000\n", encoding="utf-8"
+            )
+            script = (
+                "ffffffffc0100120 [unknown]\n"
+                "        ffffffff81000000 net_rx_action\n\n"
+                "ffffffff81000000 [unknown]\n"
+            )
+            resolved = report.symbolize_module_ips(script, kallsyms, modules)
+            self.assertIn("ffffffffc0100120 mod_cur_headers", resolved)
+            self.assertIn("ffffffff81000000 [unknown]", resolved)
+
     def test_completed_lbr_call_does_not_reclassify_rest_sample(self) -> None:
         active = report.reconstruct_active_lbr(
             "net_rx_action",
@@ -256,7 +281,7 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P
         self.assertEqual(active, ["net_rx_action"])
         self.assertEqual(report.classify_context(active), "rest")
 
-    def test_native_validation_requires_active_lbr_crossing(self) -> None:
+    def test_native_validation_requires_live_native_frame(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "crossing a live native"):
             report.validate_callgraph_samples(
                 {"bpf_prog_stub": 1},
@@ -266,8 +291,8 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P
             )
         report.validate_callgraph_samples(
             {"_raw_spin_lock": 1},
-            [["_raw_spin_lock", "bpf_common_lru_pop_free"]],
-            [["_raw_spin_lock", "bpf_prog_e984be621a492c42_cil_to_host", "bpf_dispatcher"]],
+            [["_raw_spin_lock", "bpf_common_lru_pop_free", "bpf_prog_e984be621a492c42_cil_to_host"]],
+            [[]],
             frozenset({"bpf_prog_e984be621a492c42_cil_to_host"}),
         )
 
@@ -279,12 +304,6 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P
                 {"bpf_prog_deadbeef_cil_from_host": 5},
                 [["bpf_prog_deadbeef_cil_from_host"]],
                 [["bpf_prog_deadbeef_cil_from_host", "net_rx_action"]],
-            )
-        with self.assertRaisesRegex(RuntimeError, "no reconstructed active LBR"):
-            report.validate_callgraph_samples(
-                {"bpf_prog_deadbeef_cil_from_host": 5},
-                [["bpf_prog_deadbeef_cil_from_host", "do_softirq"]],
-                [[]],
             )
         with self.assertRaisesRegex(RuntimeError, "no BPF-code context"):
             report.validate_callgraph_samples(
@@ -343,19 +362,36 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P
     def test_live_native_sizes_exclude_lifecycle_replacements(self) -> None:
         self.assertEqual(
             report._live_native_sizes(
-                [{"id": 12}],
+                frozenset({12}),
                 [
                     {"native_id": 11, "native_blob_bytes": 100},
                     {"native_id": 12, "native_blob_bytes": 80},
+                    {"native_id": 13, "native_blob_bytes": 60},
                 ],
             ),
             [{"native_id": 12, "native_blob_bytes": 80}],
         )
 
+    def test_live_program_rows_exclude_stale_measured_ids(self) -> None:
+        self.assertEqual(
+            report._select_live_program_rows(
+                [
+                    {"id": 11, "name": "stale"},
+                    {"id": 12, "name": "reachable"},
+                ],
+                [12],
+            ),
+            [{"id": 12, "name": "reachable"}],
+        )
+
+    def test_live_program_rows_require_every_reachable_id(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "live program IDs: \\[13\\]"):
+            report._select_live_program_rows([{"id": 12}], [12, 13])
+
     def test_native_size_coverage_rejects_unpaired_program(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "program IDs: \\[12\\]"):
             report._live_native_sizes(
-                [{"id": 11}, {"id": 12}], [{"native_id": 11}]
+                frozenset({11, 12}), [{"native_id": 11}]
             )
 
     def test_packet_metrics_preserve_outcome_verdicts(self) -> None:

@@ -20,17 +20,7 @@ _SYMBOL_SETTINGS = {
     Path("/proc/sys/kernel/kptr_restrict"): "0",
     Path("/proc/sys/net/core/bpf_jit_kallsyms"): "1",
 }
-# About 100 Hz per busy 3.7-GHz vCPU. LBR records are substantially larger
-# than frame-pointer-only samples, so this keeps each auditable perf.data below
-# repository blob limits while retaining tens of thousands of 60-second samples.
-_SAMPLE_PERIOD_CYCLES = 37_000_000
-
-
-def _required_env(name: str) -> str:
-    value = os.environ.get(name, "").strip()
-    if not value:
-        raise RuntimeError(f"{name} is required")
-    return value
+_SAMPLE_PERIOD_NS = 1_000_000
 
 
 def _perf_command(perf_root: Path, work_dir: Path) -> list[str]:
@@ -55,19 +45,24 @@ def _perf_command(perf_root: Path, work_dir: Path) -> list[str]:
         "record",
         "-a",
         "-e",
-        "cycles:k",
+        "cpu-clock:k",
         "-c",
-        str(_SAMPLE_PERIOD_CYCLES),
+        str(_SAMPLE_PERIOD_NS),
         "--call-graph",
         "fp",
-        "-j",
-        "any_call,any_ret,k,save_type",
         "--sample-cpu",
         "--delay=-1",
         f"--control=fifo:{control},{ack}",
         "-o",
         str(work_dir / "guest.perf.data"),
     ]
+
+
+def _required_env(name: str) -> str:
+    value = os.environ.get(name, "").strip()
+    if not value:
+        raise RuntimeError(f"{name} is required")
+    return value
 
 
 def _enable_symbolization() -> None:
@@ -123,6 +118,16 @@ def _configure_arm(arm: str) -> str:
     return "post_rejit"
 
 
+def _print_profile_marker(event: str, phase: str) -> None:
+    print(
+        json.dumps(
+            {"event": event, "app": "cilium/agent", "phase": phase},
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+
 def _publish_perf_data(local_data: Path, result_data: Path) -> None:
     if not local_data.is_file():
         raise RuntimeError("perf record completed without guest-local perf data")
@@ -160,16 +165,6 @@ def _run_driver_then_publish(local_data: Path, result_data: Path) -> int:
     # returns. Publishing only here keeps the large 9p copy outside that gate.
     _publish_perf_data(local_data, result_data)
     return result
-
-
-def _print_profile_marker(event: str, phase: str) -> None:
-    print(
-        json.dumps(
-            {"event": event, "app": "cilium/agent", "phase": phase},
-            sort_keys=True,
-        ),
-        flush=True,
-    )
 
 
 def _measure_stop_and_capture(
@@ -214,7 +209,6 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
         measurement_index += 1
         if phase != selected_phase:
             return original_measure(**kwargs)
-
         command = _perf_command(local_perf_root, work_dir)
         collector = PerfCollector(
             command=command,
@@ -222,33 +216,35 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
             ack_fifo=work_dir / "guest-perf.ack.fifo",
             stderr_path=output_dir / "guest-perf.stderr.log",
         )
-        metadata = {
-            "arm": arm,
-            "phase": phase,
-            "perf_command": command,
-            "sample_event": "cycles:k",
-            "sample_period_cycles": _SAMPLE_PERIOD_CYCLES,
-            "call_graph": "frame-pointer with LBR call/return branch stack",
-            "perf_data": str(output_dir / "guest.perf.data"),
-        }
         (output_dir / "guest-profile.json").write_text(
-            json.dumps(metadata, indent=2, sort_keys=True) + "\n",
+            json.dumps(
+                {
+                    "arm": arm,
+                    "phase": phase,
+                    "perf_command": command,
+                    "sample_event": "cpu-clock:k",
+                    "sample_period_ns": _SAMPLE_PERIOD_NS,
+                    "call_graph": "frame-pointer",
+                    "perf_data": str(result_data),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
             encoding="utf-8",
         )
+        collector.start()
+        collector.enable()
+        _print_profile_marker("profile_measurement_start", phase)
         try:
-            collector.start()
-            collector.enable()
-            _print_profile_marker("profile_measurement_start", phase)
             result = _measure_stop_and_capture(
                 original_measure, kwargs, collector, output_dir, phase
             )
             collector.finish()
-            if not local_data.is_file():
-                raise RuntimeError("perf record completed without guest-local perf data")
+            return result
         except BaseException:
             collector.abort()
             raise
-        return result
 
     driver._measure_app_phase_with_stats = profiled_measure
     try:

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import bisect
 import collections
 import csv
 import gzip
@@ -203,8 +204,6 @@ def validate_callgraph_samples(
         raise RuntimeError("perf record contains no resolved leaf symbols")
     if not any(len(callgraph) >= 2 for callgraph in callgraphs):
         raise RuntimeError("perf record contains no callchain with at least two frames")
-    if not any(len(history) >= 2 for history in branch_histories):
-        raise RuntimeError("perf record contains no reconstructed active LBR ancestry")
     if not any(
         classify_symbol(symbol, native_symbols) == "bpf_code"
         for symbols in (*callgraphs, *branch_histories)
@@ -212,19 +211,64 @@ def validate_callgraph_samples(
     ):
         raise RuntimeError("perf record contains no BPF-code context")
     if native_symbols and not any(
-        len(history) >= 2 and any(symbol in native_symbols for symbol in history)
-        for history in branch_histories
+        any(symbol in native_symbols for symbol in callgraph)
+        for callgraph in callgraphs
     ):
         raise RuntimeError(
-            "perf record contains no active LBR path crossing a live native BPF frame"
+            "perf record contains no callchain crossing a live native BPF frame"
         )
+
+
+def symbolize_module_ips(script: str, kallsyms: Path, modules: Path) -> str:
+    """Resolve perf's module `[unknown]` frames from post-workload snapshots."""
+    ranges: list[tuple[int, int, str]] = []
+    for line in modules.read_text(encoding="utf-8").splitlines():
+        fields = line.split()
+        if len(fields) < 6:
+            raise RuntimeError(f"malformed /proc/modules snapshot line: {line}")
+        start = int(fields[5], 16)
+        ranges.append((start, start + int(fields[1]), fields[0]))
+    symbols: dict[str, list[tuple[int, str]]] = collections.defaultdict(list)
+    for line in kallsyms.read_text(encoding="utf-8").splitlines():
+        fields = line.split()
+        if len(fields) >= 4 and fields[3].startswith("[") and fields[3].endswith("]"):
+            symbols[fields[3][1:-1]].append((int(fields[0], 16), fields[2]))
+    addresses = {
+        module: [address for address, _ in records]
+        for module, records in symbols.items()
+    }
+    unknown = re.compile(r"^(\s*)((?:0x)?[0-9a-fA-F]+)\s+\[unknown\](.*)$")
+    output: list[str] = []
+    for line in script.splitlines(keepends=True):
+        match = unknown.match(line.rstrip("\n"))
+        if match is None:
+            output.append(line)
+            continue
+        ip = int(match.group(2), 16)
+        resolved: str | None = None
+        for start, end, module in ranges:
+            if not start <= ip < end or module not in symbols:
+                continue
+            index = bisect.bisect_right(addresses[module], ip) - 1
+            if index >= 0:
+                resolved = symbols[module][index][1]
+            break
+        if resolved is None:
+            output.append(line)
+        else:
+            newline = "\n" if line.endswith("\n") else ""
+            output.append(
+                f"{match.group(1)}{match.group(2)} {resolved}{match.group(3)}{newline}"
+            )
+    return "".join(output)
 
 
 def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
     data = arm_dir / "guest.perf.data"
     kallsyms = arm_dir / "guest.kallsyms"
+    modules = arm_dir / "guest.modules"
     vmlinux = ROOT / "vendor" / "build" / "x86" / "linux" / "vmlinux"
-    for path in (data, kallsyms, vmlinux):
+    for path in (data, kallsyms, modules, vmlinux):
         if not path.is_file():
             raise RuntimeError(f"required profiling artifact is missing: {path}")
     # The profile is kernel-only.  Hiding guest user DSOs avoids host perf
@@ -263,6 +307,7 @@ def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
             capture_output=True,
             text=True,
         ).stdout
+    script = symbolize_module_ips(script, kallsyms, modules)
     (arm_dir / "perf-report.txt").write_text(report, encoding="utf-8")
     with gzip.open(arm_dir / "perf-script.txt.gz", "wt", encoding="utf-8") as output:
         output.write(script)
@@ -356,23 +401,46 @@ def _native_sizes(shim_log: Path) -> list[dict[str, object]]:
 
 
 def _live_native_sizes(
-    programs: Sequence[Mapping[str, object]], sizes: Sequence[Mapping[str, object]]
+    live_program_ids: frozenset[int], sizes: Sequence[Mapping[str, object]]
 ) -> list[dict[str, object]]:
-    program_ids = {int(row["id"]) for row in programs}
+    if not live_program_ids:
+        raise RuntimeError("live-program ID set is empty")
     by_native_id: dict[int, dict[str, object]] = {}
     for raw in sizes:
         native_id = int(raw["native_id"])
-        if native_id not in program_ids:
+        if native_id not in live_program_ids:
             continue
         if native_id in by_native_id:
             raise RuntimeError(f"duplicate native image size for live program ID {native_id}")
         by_native_id[native_id] = dict(raw)
-    missing = sorted(program_ids - set(by_native_id))
+    missing = sorted(live_program_ids - set(by_native_id))
     if missing:
         raise RuntimeError(
             f"native image sizes are missing for post-replacement program IDs: {missing}"
         )
-    return [by_native_id[program_id] for program_id in sorted(program_ids)]
+    return [by_native_id[program_id] for program_id in sorted(live_program_ids)]
+
+
+def _select_live_program_rows(
+    programs: Sequence[Mapping[str, object]], live_program_ids: Sequence[object]
+) -> list[dict[str, object]]:
+    live_ids = {int(program_id) for program_id in live_program_ids}
+    if not live_ids:
+        raise RuntimeError("live Cilium program graph is empty")
+    by_id: dict[int, dict[str, object]] = {}
+    for raw in programs:
+        program_id = int(raw["id"])
+        if program_id not in live_ids:
+            continue
+        if program_id in by_id:
+            raise RuntimeError(f"duplicate measured live program ID {program_id}")
+        by_id[program_id] = dict(raw)
+    missing = sorted(live_ids - set(by_id))
+    if missing:
+        raise RuntimeError(
+            f"BPF counters are missing reachable live program IDs: {missing}"
+        )
+    return [by_id[program_id] for program_id in sorted(live_ids)]
 
 
 def _packet_metrics(workloads: object) -> dict[str, object]:
@@ -502,14 +570,22 @@ def analyze_run(
         / "cilium_agent"
         / phase_name
     )
-    rows = _program_rows(phase, evidence, arm_dir / "guest-bpf-net.json")
+    measured_rows = _program_rows(phase, evidence, arm_dir / "guest-bpf-net.json")
+    live_graph = _json(evidence / "live-program-graph.json")
+    if not isinstance(live_graph, Mapping):
+        raise RuntimeError(f"Cilium live program graph is malformed: {evidence}")
+    raw_live_program_ids = live_graph.get("live_program_ids")
+    if not isinstance(raw_live_program_ids, list):
+        raise RuntimeError(f"Cilium live program graph lacks live_program_ids: {evidence}")
+    live_program_ids = frozenset(int(program_id) for program_id in raw_live_program_ids)
+    rows = _select_live_program_rows(measured_rows, raw_live_program_ids)
     live_native_sizes: list[dict[str, object]] = []
     native_symbols: frozenset[str] = frozenset()
     if arm == "kprog":
         all_native_sizes = _native_sizes(
             corpus_run / "details" / "shim-logs" / "cilium__agent.post_rejit.log"
         )
-        live_native_sizes = _live_native_sizes(rows, all_native_sizes)
+        live_native_sizes = _live_native_sizes(live_program_ids, all_native_sizes)
         native_symbols = frozenset(
             str(record["native_ksym"]) for record in live_native_sizes
         )
@@ -553,15 +629,15 @@ def analyze_run(
     guest_profile = _json(arm_dir / "guest-profile.json")
     if not isinstance(guest_profile, Mapping):
         raise RuntimeError(f"guest profile metadata is malformed: {arm_dir}")
-    sample_period_cycles = int(guest_profile.get("sample_period_cycles", 0) or 0)
-    if sample_period_cycles <= 0:
-        raise RuntimeError(f"guest profile has no positive cycle period: {arm_dir}")
+    sample_period_ns = int(guest_profile.get("sample_period_ns", 0) or 0)
+    if sample_period_ns <= 0:
+        raise RuntimeError(f"guest profile has no positive time period: {arm_dir}")
     categories = {
         category: {
             "samples": int(category_counts.get(category, 0)),
             "sample_fraction": category_counts.get(category, 0) / analyzed_samples,
-            "estimated_guest_cycles_per_packet": category_counts.get(category, 0)
-            * sample_period_cycles
+            "estimated_guest_ns_per_packet": category_counts.get(category, 0)
+            * sample_period_ns
             / packets,
         }
         for category in ("bpf_code", "helpers", "maps", "rest")
@@ -593,7 +669,7 @@ def analyze_run(
             "callgraphs": len(callgraphs),
             "active_lbr_samples": active_lbr_samples,
             "active_lbr_coverage": active_lbr_samples / analyzed_samples,
-            "sample_period_cycles": sample_period_cycles,
+            "sample_period_ns": sample_period_ns,
             "categories": categories,
             "top_symbols": [
                 {"symbol": symbol, "samples": count, "category": category}
@@ -643,17 +719,17 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         f"| analyzed call-graph samples | {callgraph['analyzed_samples']} / {callgraph['samples']} raw |",
         f"| excluded idle samples | {callgraph['excluded_idle_samples']} |",
         f"| unresolved samples | {callgraph['unresolved_samples']} |",
-        f"| active-LBR coverage | {callgraph['active_lbr_samples']} / "
+        f"| samples with LBR context | {callgraph['active_lbr_samples']} / "
         f"{callgraph['analyzed_samples']} ({float(callgraph['active_lbr_coverage']):.3%}) |",
         "",
         "## Resolved non-idle context-attributed cost per packet",
         "",
         "Each resolved, non-idle sample is assigned to the first datapath class in its "
-        "frame-pointer plus LBR context. This places spin-lock frames reached through "
+        "frame-pointer context. This places spin-lock frames reached through "
         "`htab_lru_map_update_elem` or `bpf_common_lru_pop_free` under maps. Values are "
-        "fixed-period sampled guest cycles, not wall-clock nanoseconds.",
+        "fixed-period sampled guest CPU nanoseconds.",
         "",
-        "| Category | Samples | Fraction | Estimated guest cycles/packet |",
+        "| Category | Samples | Fraction | Estimated guest ns/packet |",
         "| --- | ---: | ---: | ---: |",
     ]
     categories = callgraph["categories"]
@@ -663,7 +739,7 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         assert isinstance(record, Mapping)
         lines.append(
             f"| {name} | {record['samples']} | {float(record['sample_fraction']):.3%} | "
-            f"{float(record['estimated_guest_cycles_per_packet']):.3f} |"
+            f"{float(record['estimated_guest_ns_per_packet']):.3f} |"
         )
     lines += [
         "",
@@ -700,8 +776,8 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
             "",
             "## Live-program JIT versus whole-program native image size",
             "",
-            "Only native IDs in the measured post-replacement BPF counter set are included; "
-            "earlier lifecycle replacements are excluded.",
+            "Only native IDs reachable from the measured XDP/TCX roots are included; "
+            "stale measured IDs and earlier lifecycle replacements are excluded.",
             "",
             "| Original ID | Native ID | Symbol | JIT bytes | Native blob bytes | Native stub image bytes |",
             "| ---: | ---: | --- | ---: | ---: | ---: |",
@@ -812,6 +888,28 @@ def _combined_markdown(results: Sequence[Mapping[str, object]]) -> str:
             )
     lines += [
         "",
+        "## Hot endpoint-root BPF cost",
+        "",
+        "| Order | Arm | Attach point | Runs | ns/run |",
+        "| --- | --- | --- | ---: | ---: |",
+    ]
+    for result in results:
+        bpf = result["bpf"]
+        assert isinstance(bpf, Mapping)
+        programs = bpf["programs"]
+        assert isinstance(programs, list)
+        for row in programs:
+            assert isinstance(row, Mapping)
+            attach_points = row["attach_points"]
+            assert isinstance(attach_points, list)
+            for attach in attach_points:
+                if str(attach).startswith("tc:lxcbench"):
+                    lines.append(
+                        f"| {result['order']} | {result['arm']} | `{attach}` | "
+                        f"{row['run_count']} | {float(row['ns_per_run']):.3f} |"
+                    )
+    lines += [
+        "",
         "## Outcome counters",
         "",
         "| Order | Arm | Sent | Received | Component errors | RX errors | RX drops | Allow dir. 1 | Allow dir. 2 | Other verdicts |",
@@ -831,10 +929,10 @@ def _combined_markdown(results: Sequence[Mapping[str, object]]) -> str:
         "",
         "## Resolved non-idle context-attributed split",
         "",
-        "Frame-pointer and LBR context assigns LRU map spin-lock samples to maps. "
-        "The units are estimated guest sampled cycles per packet.",
+        "Frame-pointer context assigns LRU map spin-lock samples to maps. "
+        "The units are estimated guest sampled nanoseconds per packet.",
         "",
-        "| Order | Arm | BPF code cycles/packet | Helpers cycles/packet | Maps cycles/packet | Rest cycles/packet |",
+        "| Order | Arm | BPF code ns/packet | Helpers ns/packet | Maps ns/packet | Rest ns/packet |",
         "| --- | --- | ---: | ---: | ---: | ---: |",
     ]
     for result in results:
@@ -846,13 +944,69 @@ def _combined_markdown(results: Sequence[Mapping[str, object]]) -> str:
         for category in ("bpf_code", "helpers", "maps", "rest"):
             record = categories[category]
             assert isinstance(record, Mapping)
-            values.append(float(record["estimated_guest_cycles_per_packet"]))
+            values.append(float(record["estimated_guest_ns_per_packet"]))
         lines.append(
             f"| {result['order']} | {result['arm']} | {values[0]:.3f} | {values[1]:.3f} | {values[2]:.3f} | {values[3]:.3f} |"
         )
+    if pairs:
+        lines += [
+            "",
+            "### Within-order sampled savings attribution",
+            "",
+            "Positive values are JIT minus native sampled ns/packet. The share is "
+            "relative to the sum of positive category savings in that order.",
+            "",
+            "| Order | BPF code | Helpers | Maps | Rest | Total |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        for order, jit, native in pairs:
+            jit_callgraph, native_callgraph = jit["callgraph"], native["callgraph"]
+            assert isinstance(jit_callgraph, Mapping) and isinstance(native_callgraph, Mapping)
+            jit_categories = jit_callgraph["categories"]
+            native_categories = native_callgraph["categories"]
+            assert isinstance(jit_categories, Mapping) and isinstance(native_categories, Mapping)
+            savings = []
+            for category in ("bpf_code", "helpers", "maps", "rest"):
+                jit_record, native_record = jit_categories[category], native_categories[category]
+                assert isinstance(jit_record, Mapping) and isinstance(native_record, Mapping)
+                savings.append(
+                    float(jit_record["estimated_guest_ns_per_packet"])
+                    - float(native_record["estimated_guest_ns_per_packet"])
+                )
+            positive_total = sum(max(value, 0.0) for value in savings)
+            cells = [
+                f"{value:.3f} ({max(value, 0.0) / positive_total:.1%})"
+                for value in savings
+            ]
+            lines.append(
+                f"| {order} | " + " | ".join(cells) + f" | {sum(savings):.3f} |"
+            )
+    native_results = [result for result in results if result["arm"] == "kprog"]
+    if native_results:
+        lines += [
+            "",
+            "## Measured live-program image sizes",
+            "",
+            "Only programs reachable from the final measured XDP/TCX roots are included; "
+            "stale measured IDs and earlier lifecycle replacements are excluded.",
+            "",
+            "| Order | Live programs | Original JIT bytes | Native blob bytes | Native stub bytes | Blob growth | Stub growth |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        for result in native_results:
+            sizes = result["live_native_image_sizes"]
+            assert isinstance(sizes, list)
+            jit_bytes = sum(int(row["jit_image_bytes"]) for row in sizes)
+            blob_bytes = sum(int(row["native_blob_bytes"]) for row in sizes)
+            stub_bytes = sum(int(row["native_stub_image_bytes"]) for row in sizes)
+            lines.append(
+                f"| {result['order']} | {len(sizes)} | {jit_bytes} | {blob_bytes} | "
+                f"{stub_bytes} | {blob_bytes / jit_bytes - 1:.3%} | "
+                f"{stub_bytes / jit_bytes - 1:.3%} |"
+            )
     lines += [
         "",
-        "| Order | Arm | Unresolved leaf samples | Estimated unresolved sampled cycles/packet | Unresolved share of non-idle samples |",
+        "| Order | Arm | Unresolved leaf samples | Estimated unresolved sampled ns/packet | Unresolved share of non-idle samples |",
         "| --- | --- | ---: | ---: | ---: |",
     ]
     for result in results:
@@ -863,10 +1017,19 @@ def _combined_markdown(results: Sequence[Mapping[str, object]]) -> str:
         non_idle = unresolved + int(callgraph["analyzed_samples"])
         lines.append(
             f"| {result['order']} | {result['arm']} | {unresolved} | "
-            f"{unresolved * int(callgraph['sample_period_cycles']) / int(packets['packets_sent']):.3f} | "
+            f"{unresolved * int(callgraph['sample_period_ns']) / int(packets['packets_sent']):.3f} | "
             f"{unresolved / non_idle:.3%} |"
         )
     lines += [
+        "",
+        "## Callgraph capability boundary",
+        "",
+        "This hybrid host's KVM intentionally exposes no guest architectural PMU; "
+        "software events reject LBR sampling, guest Intel PT is absent, and a host "
+        "LBR probe records only VM-exit host branches. The retained callgraphs therefore "
+        "use arm-neutral guest `cpu-clock` sampling and frame pointers. They resolve "
+        "native frames and their helper/map callees, but cannot unwind callers above "
+        "native code compiled with omitted frame pointers. No synthetic ancestry is used.",
         "",
         "Raw counters, perf data, symbol snapshots, full call graphs, and per-program tables are in each arm directory.",
     ]

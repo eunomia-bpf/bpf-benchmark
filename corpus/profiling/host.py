@@ -287,7 +287,7 @@ def _run_arm(
     output_dir = root / run_id
     output_dir.mkdir(parents=True, exist_ok=False)
     pmu = _resolve_pmu(cpus)
-    stat_command, control, ack = _stat_command(perf, pmu, cpus, output_dir)
+    stat_command, stat_control, stat_ack = _stat_command(perf, pmu, cpus, output_dir)
     guest_script = code_root / f"run-{run_id.replace('/', '-')}.sh"
     guest_make_command = _guest_make_command(
         arm=arm,
@@ -328,10 +328,10 @@ def _run_arm(
     metadata_path.write_text(
         json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    collector = PerfCollector(
+    stat_collector = PerfCollector(
         command=stat_command,
-        control_fifo=control,
-        ack_fifo=ack,
+        control_fifo=stat_control,
+        ack_fifo=stat_ack,
         stderr_path=output_dir / "host-perf.stderr.log",
         use_sudo_for_signals=True,
     )
@@ -340,7 +340,7 @@ def _run_arm(
     make_process: subprocess.Popen[str] | None = None
     marker_count = 0
     try:
-        collector.start()
+        stat_collector.start()
         make_process = subprocess.Popen(
             make_command,
             cwd=ROOT,
@@ -358,10 +358,10 @@ def _run_arm(
             make_log.flush()
             event = _progress_marker(line, phase)
             if event == "measurement_start":
-                collector.enable()
+                stat_collector.enable()
                 marker_count += 1
             elif event == "measurement_done":
-                collector.disable()
+                stat_collector.disable()
                 marker_count += 1
         returncode = make_process.wait()
         if returncode != 0:
@@ -370,7 +370,7 @@ def _run_arm(
             raise RuntimeError(
                 f"Cilium {arm} emitted {marker_count} selected-phase markers, expected 2"
             )
-        collector.finish()
+        stat_collector.finish()
         new_runs = _corpus_runs() - before
         if len(new_runs) != 1:
             raise RuntimeError(
@@ -392,7 +392,7 @@ def _run_arm(
             json.dumps(metadata, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-        collector.abort()
+        stat_collector.abort()
         raise
     finally:
         if make_process is not None and make_process.poll() is None:
