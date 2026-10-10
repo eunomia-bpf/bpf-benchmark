@@ -1,0 +1,86 @@
+[
+  {
+    "flow_dissector": [],
+    "netfilter": [],
+    "tc": [
+      {
+        "devname": "bpfbench0",
+        "ifindex": 3,
+        "kind": "tcx/ingress",
+        "link_flags": [],
+        "link_id": 8,
+        "name": "cil_from_netdev",
+        "prog_flags": [],
+        "prog_id": 142
+      },
+      {
+        "devname": "bpfbench0",
+        "ifindex": 3,
+        "kind": "tcx/egress",
+        "link_flags": [],
+        "link_id": 9,
+        "name": "cil_to_netdev",
+        "prog_flags": [],
+        "prog_id": 135
+      },
+      {
+        "devname": "cilium_net",
+        "ifindex": 4,
+        "kind": "tcx/ingress",
+        "link_flags": [],
+        "link_id": 7,
+        "name": "cil_to_host",
+        "prog_flags": [],
+        "prog_id": 134
+      },
+      {
+        "devname": "cilium_host",
+        "ifindex": 5,
+        "kind": "tcx/ingress",
+        "link_flags": [],
+        "link_id": 5,
+        "name": "cil_to_host",
+        "prog_flags": [],
+        "prog_id": 122
+      },
+      {
+        "devname": "cilium_host",
+        "ifindex": 5,
+        "kind": "tcx/egress",
+        "link_flags": [],
+        "link_id": 6,
+        "name": "cil_from_host",
+        "prog_flags": [],
+        "prog_id": 112
+      },
+      {
+        "devname": "lxcbench0",
+        "ifindex": 7,
+        "kind": "tcx/ingress",
+        "link_flags": [],
+        "link_id": 10,
+        "name": "cil_from_container",
+        "prog_flags": [],
+        "prog_id": 150
+      },
+      {
+        "devname": "lxcbench1",
+        "ifindex": 9,
+        "kind": "tcx/ingress",
+        "link_flags": [],
+        "link_id": 11,
+        "name": "cil_from_container",
+        "prog_flags": [],
+        "prog_id": 168
+      }
+    ],
+    "xdp": [
+      {
+        "devname": "bpfbench0",
+        "id": 111,
+        "ifindex": 3,
+        "mode": "driver"
+      }
+    ]
+  }
+]
