@@ -55,9 +55,6 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 	}
 }
 
-#define KINSN_X86_PROOF_LHS_OFF		-16
-#define KINSN_X86_PROOF_RHS_OFF		-8
-
 #define KINSN_X86_SAVE_RESTORE_INSN_CNT	6
 
 static __always_inline bool kinsn_x86_reg_is_bpf_writable(u8 reg)

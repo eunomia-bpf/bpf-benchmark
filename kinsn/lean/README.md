@@ -201,8 +201,8 @@ The table follows the requested category order.
 |---|---|---|---|---|---|
 | `bpf_arm64_extr_w` | `arm64/bpf_arm64_extr.c:instantiate_rotate32` | `arm64/bpf_arm64_extr.c:emit_rotate32_arm64` | `ModuleCatalog.bpf_arm64_extr_w_refines` | proved | scratch-free destination-only rotation; June EXTR restored |
 | `bpf_arm64_extr_x` | `arm64/bpf_arm64_extr.c:instantiate_rotate64` | `arm64/bpf_arm64_extr.c:emit_rotate64_arm64` | `ModuleCatalog.bpf_arm64_extr_x_refines` | proved | scratch-free destination-only rotation; June EXTR restored |
-| `bpf_x86_roll` | `x86/bpf_x86_rotate.c:instantiate_roll` | `x86/bpf_x86_rotate.c:emit_roll_x86` | `ModuleX86Rotate.bpf_x86_roll` | proved | scratch restore overwrote destination |
-| `bpf_x86_rolq` | `x86/bpf_x86_rotate.c:instantiate_rolq` | `x86/bpf_x86_rotate.c:emit_rolq_x86` | `ModuleX86Rotate.bpf_x86_rolq` | proved | scratch restore overwrote destination |
+| `bpf_x86_roll` | `x86/bpf_x86_rotate.c:instantiate_roll` | `x86/bpf_x86_rotate.c:emit_roll_x86` | `ModuleX86Rotate.bpf_x86_roll` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_rolq` | `x86/bpf_x86_rotate.c:instantiate_rolq` | `x86/bpf_x86_rotate.c:emit_rolq_x86` | `ModuleX86Rotate.bpf_x86_rolq` | proved | destination-only register operation; no memory or borrowed registers |
 | `bpf_x86_rorxl` | `x86/bpf_x86_rotate.c:instantiate_rotate32` | `x86/bpf_x86_rotate.c:emit_rotate32_x86` | `ModuleX86Rotate.bpf_x86_rorxl` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_arm64_csel_ne` | `arm64/bpf_arm64_csel.c:instantiate_csel_ne` | `arm64/bpf_arm64_csel.c:emit_csel_ne_arm64` | `ModuleCsel.bpf_arm64_csel_ne_refines` | proved | standalone flags/register predicates disagree |
 | `bpf_arm64_tst` | `arm64/bpf_arm64_csel.c:instantiate_tst` | `arm64/bpf_arm64_csel.c:emit_tst_arm64` | `ModuleCatalog.arm_jit_sound (bpf_arm64_tst)` | proved | — |
@@ -229,12 +229,12 @@ The table follows the requested category order.
 | `bpf_arm64_str_x` | `arm64/bpf_arm64_str.c:instantiate_str_x` | `arm64/bpf_arm64_str.c:emit_str_x_arm64` | `ModuleCatalog.arm_jit_sound (bpf_arm64_str_x)` | proved | — |
 | `bpf_arm64_strb` | `arm64/bpf_arm64_str.c:instantiate_strb` | `arm64/bpf_arm64_str.c:emit_strb_arm64` | `ModuleCatalog.arm_jit_sound (bpf_arm64_strb)` | proved | — |
 | `bpf_arm64_strh` | `arm64/bpf_arm64_str.c:instantiate_strh` | `arm64/bpf_arm64_str.c:emit_strh_arm64` | `ModuleCatalog.arm_jit_sound (bpf_arm64_strh)` | proved | — |
-| `bpf_x86_movb` | `x86/bpf_x86_mov.c:instantiate_movb` | `x86/bpf_x86_mov.c:emit_movb_x86` | `ModuleMovb.bpf_x86_movb` | proved | ARCH store read an unsaved address slot |
+| `bpf_x86_movb` | `x86/bpf_x86_mov.c:instantiate_movb` | `x86/bpf_x86_mov.c:emit_movb_x86` | `ModuleMovb.bpf_x86_movb` | proved | high-byte dispatch; one byte write, no BPF register outputs |
 | `bpf_x86_movl` | `x86/bpf_x86_mov.c:instantiate_movl` | `x86/bpf_x86_mov.c:emit_movl_x86` | `ModuleMovWide.bpf_x86_movl` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_movq` | `x86/bpf_x86_mov.c:instantiate_movq` | `x86/bpf_x86_mov.c:emit_movq_x86` | `ModuleMovWide.bpf_x86_movq` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_movswl` | `x86/bpf_x86_mov.c:instantiate_movswl_rr` | `x86/bpf_x86_mov.c:emit_movswl_x86` | `ModuleMovswl.bpf_x86_movswl` | proved | ARCH read unsaved slots / left destination stale |
-| `bpf_x86_movsxd` | `x86/bpf_x86_mov.c:instantiate_movsxd` | `x86/bpf_x86_mov.c:emit_movsxd_x86` | `ModuleMovsxd.bpf_x86_movsxd` | proved | scratch restore overwrote destination |
-| `bpf_x86_movw` | `x86/bpf_x86_mov.c:instantiate_movw` | `x86/bpf_x86_mov.c:emit_movw_x86` | `ModuleMovStore.bpf_x86_movw` | proved | ARCH store read an unsaved address slot |
+| `bpf_x86_movsxd` | `x86/bpf_x86_mov.c:instantiate_movsxd` | `x86/bpf_x86_mov.c:emit_movsxd_x86` | `ModuleMovsxd.bpf_x86_movsxd` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_movw` | `x86/bpf_x86_mov.c:instantiate_movw` | `x86/bpf_x86_mov.c:emit_movw_x86` | `ModuleMovStore.bpf_x86_movw` | proved | explicit halfword store; no borrowed registers or memory |
 | `bpf_x86_movzbl` | `x86/bpf_x86_mov.c:instantiate_movzbl` | `x86/bpf_x86_mov.c:emit_movzbl_x86` | `ModuleMovzx.bpf_x86_movzbl` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_movzwl` | `x86/bpf_x86_mov.c:instantiate_movzwl` | `x86/bpf_x86_mov.c:emit_movzwl_x86` | `ModuleMovzx.bpf_x86_movzwl` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_leal` | `x86/bpf_x86_lea.c:instantiate_lea32` | `x86/bpf_x86_lea.c:emit_lea32_x86` | `ModuleCatalog.x86_jit_sound (bpf_x86_leal)` | proved | — |
@@ -245,50 +245,50 @@ The table follows the requested category order.
 | `bpf_arm64_cmp_x` | `arm64/bpf_arm64_ccmp.c:instantiate_cmp` | `arm64/bpf_arm64_ccmp.c:emit_cmp_x_arm64` | `ModuleCatalog.arm_jit_sound (bpf_arm64_cmp_x)` | proved | — |
 | `bpf_arm64_cset_x_cond` | `arm64/bpf_arm64_ccmp.c:instantiate_cset` | `arm64/bpf_arm64_ccmp.c:emit_cset_arm64` | `ModuleCset.bpf_arm64_cset_x_cond_refines` | proved | standalone flags/register predicates disagree |
 | `bpf_arm64_mov_x` | `arm64/bpf_arm64_mov.c:instantiate_mov_x` | `arm64/bpf_arm64_mov.c:emit_mov_x_arm64` | `ModuleCatalog.arm_jit_sound (bpf_arm64_mov_x)` | proved | — |
-| `bpf_x86_addb` | `x86/bpf_x86_alu.c:instantiate_addb` | `x86/bpf_x86_alu.c:emit_addb_x86` | `ModuleByteAlu.bpf_x86_addb` | proved | scratch restore overwrote destination |
+| `bpf_x86_addb` | `x86/bpf_x86_alu.c:instantiate_addb` | `x86/bpf_x86_alu.c:emit_addb_x86` | `ModuleByteAlu.bpf_x86_addb` | proved | destination-only; source-byte dispatch and carry correction |
 | `bpf_x86_addl` | `x86/bpf_x86_alu.c:instantiate_addl` | `x86/bpf_x86_alu.c:emit_addl_x86` | `ModuleAluWide.bpf_x86_addl` | proved | memory forms: declared loaded-operand output; no stack accesses |
 | `bpf_x86_addq` | `x86/bpf_x86_alu.c:instantiate_addq` | `x86/bpf_x86_alu.c:emit_addq_x86` | `ModuleAluWide.bpf_x86_addq` | proved | memory forms: declared loaded-operand output; no stack accesses |
-| `bpf_x86_andb` | `x86/bpf_x86_alu.c:instantiate_andb` | `x86/bpf_x86_alu.c:emit_andb_x86` | `ModuleNarrowLogic.bpf_x86_andb` | proved | scratch restore overwrote destination |
+| `bpf_x86_andb` | `x86/bpf_x86_alu.c:instantiate_andb` | `x86/bpf_x86_alu.c:emit_andb_x86` | `ModuleNarrowLogic.bpf_x86_andb` | proved | destination-only register operation; no memory or borrowed registers |
 | `bpf_x86_andl` | `x86/bpf_x86_alu.c:instantiate_andl` | `x86/bpf_x86_alu.c:emit_andl_x86` | `ModuleAluWide.bpf_x86_andl` | proved | memory forms: declared loaded-operand output; no stack accesses |
 | `bpf_x86_andq` | `x86/bpf_x86_alu.c:instantiate_andq` | `x86/bpf_x86_alu.c:emit_andq_x86` | `ModuleAluWide.bpf_x86_andq` | proved | memory forms: declared loaded-operand output; no stack accesses |
-| `bpf_x86_blsiq` | `x86/bpf_x86_bmi1.c:instantiate_blsiq` | `x86/bpf_x86_bmi1.c:emit_blsiq_x86` | `ModuleLowBit.bpf_x86_blsiq` | proved | scratch restore overwrote destination |
-| `bpf_x86_blsrq` | `x86/bpf_x86_bmi1.c:instantiate_blsrq` | `x86/bpf_x86_bmi1.c:emit_blsrq_x86` | `ModuleLowBit.bpf_x86_blsrq` | proved | scratch restore overwrote destination |
+| `bpf_x86_blsiq` | `x86/bpf_x86_bmi1.c:instantiate_blsiq` | `x86/bpf_x86_bmi1.c:emit_blsiq_x86` | `ModuleLowBit.bpf_x86_blsiq` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_blsrq` | `x86/bpf_x86_bmi1.c:instantiate_blsrq` | `x86/bpf_x86_bmi1.c:emit_blsrq_x86` | `ModuleLowBit.bpf_x86_blsrq` | proved | destination-only register operation; no memory or borrowed registers |
 | `bpf_x86_bswapl` | `x86/bpf_x86_byteorder.c:instantiate_bswapl` | `x86/bpf_x86_byteorder.c:emit_bswapl_x86` | `ModuleByteorder.bpf_x86_bswapl` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_bswapq` | `x86/bpf_x86_byteorder.c:instantiate_bswapq` | `x86/bpf_x86_byteorder.c:emit_bswapq_x86` | `ModuleByteorder.bpf_x86_bswapq` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_bzhil` | `x86/bpf_x86_bmi2_shift.c:instantiate_bzhil` | `x86/bpf_x86_bmi2_shift.c:emit_bzhil_x86` | `ModuleBzhi.bpf_x86_bzhil` | proved | count=256 not masked to low byte |
 | `bpf_x86_bzhiq` | `x86/bpf_x86_bmi2_shift.c:instantiate_bzhiq` | `x86/bpf_x86_bmi2_shift.c:emit_bzhiq_x86` | `ModuleBzhi.bpf_x86_bzhiq` | proved | count=256 not masked to low byte |
-| `bpf_x86_divl` | `x86/bpf_x86_alu.c:instantiate_divl` | `x86/bpf_x86_alu.c:emit_divl_x86` | `ModuleDivl.bpf_x86_divl` | proved | zero/overflow #DE; scratch/ARCH aliases |
+| `bpf_x86_divl` | `x86/bpf_x86_alu.c:instantiate_divl` | `x86/bpf_x86_alu.c:emit_divl_x86` | `ModuleDivl.bpf_x86_divl` | proved | declared divisor output; no stack; fault guard retained |
 | `bpf_x86_imulq` | `x86/bpf_x86_imul.c:instantiate_imulq_rr` | `x86/bpf_x86_imul.c:emit_imulq_rr_x86` | `ModuleImul.bpf_x86_imulq_refines` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_incb` | `x86/bpf_x86_alu.c:instantiate_incb` | `x86/bpf_x86_alu.c:emit_incb_x86` | `ModuleInc.bpf_x86_incb` | proved | expansion rejects every byte width |
 | `bpf_x86_incl` | `x86/bpf_x86_alu.c:instantiate_incl` | `x86/bpf_x86_alu.c:emit_incl_x86` | `ModuleInc.bpf_x86_incl` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_incq` | `x86/bpf_x86_alu.c:instantiate_incq` | `x86/bpf_x86_alu.c:emit_incq_x86` | `ModuleInc.bpf_x86_incq` | proved | ARCH read unsaved slots / left destination stale |
-| `bpf_x86_notb` | `x86/bpf_x86_not.c:instantiate_notb_r` | `x86/bpf_x86_not.c:emit_notb_r_x86` | `ModuleNot.bpf_x86_notb` | proved | scratch restore overwrote destination |
+| `bpf_x86_notb` | `x86/bpf_x86_not.c:instantiate_notb_r` | `x86/bpf_x86_not.c:emit_notb_r_x86` | `ModuleNot.bpf_x86_notb` | proved | destination-only register operation; no memory or borrowed registers |
 | `bpf_x86_notl` | `x86/bpf_x86_not.c:instantiate_notl_r` | `x86/bpf_x86_not.c:emit_notl_r_x86` | `ModuleNot.bpf_x86_notl` | proved | ARCH read unsaved slots / left destination stale |
 | `bpf_x86_notq` | `x86/bpf_x86_not.c:instantiate_notq_r` | `x86/bpf_x86_not.c:emit_notq_r_x86` | `ModuleNot.bpf_x86_notq` | proved | ARCH read unsaved slots / left destination stale |
-| `bpf_x86_notw` | `x86/bpf_x86_not.c:instantiate_notw_r` | `x86/bpf_x86_not.c:emit_notw_r_x86` | `ModuleNot.bpf_x86_notw` | proved | scratch restore overwrote destination |
-| `bpf_x86_orb` | `x86/bpf_x86_alu.c:instantiate_orb` | `x86/bpf_x86_alu.c:emit_orb_x86` | `ModuleNarrowLogic.bpf_x86_orb` | proved | scratch restore overwrote destination |
+| `bpf_x86_notw` | `x86/bpf_x86_not.c:instantiate_notw_r` | `x86/bpf_x86_not.c:emit_notw_r_x86` | `ModuleNot.bpf_x86_notw` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_orb` | `x86/bpf_x86_alu.c:instantiate_orb` | `x86/bpf_x86_alu.c:emit_orb_x86` | `ModuleNarrowLogic.bpf_x86_orb` | proved | destination-only register operation; no memory or borrowed registers |
 | `bpf_x86_orl` | `x86/bpf_x86_alu.c:instantiate_orl` | `x86/bpf_x86_alu.c:emit_orl_x86` | `ModuleAluWide.bpf_x86_orl` | proved | memory forms: declared loaded-operand output; no stack accesses |
 | `bpf_x86_orq` | `x86/bpf_x86_alu.c:instantiate_orq` | `x86/bpf_x86_alu.c:emit_orq_x86` | `ModuleAluWide.bpf_x86_orq` | proved | memory forms: declared loaded-operand output; no stack accesses |
-| `bpf_x86_orw` | `x86/bpf_x86_alu.c:instantiate_orw` | `x86/bpf_x86_alu.c:emit_orw_x86` | `ModuleNarrowLogic.bpf_x86_orw` | proved | scratch restore overwrote destination |
-| `bpf_x86_popcntq` | `x86/bpf_x86_popcnt.c:instantiate_popcntq` | `x86/bpf_x86_popcnt.c:emit_popcntq_x86` | `ModulePopcnt.bpf_x86_popcntq` | proved | scratch restore overwrote destination |
+| `bpf_x86_orw` | `x86/bpf_x86_alu.c:instantiate_orw` | `x86/bpf_x86_alu.c:emit_orw_x86` | `ModuleNarrowLogic.bpf_x86_orw` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_popcntq` | `x86/bpf_x86_popcnt.c:instantiate_popcntq` | `x86/bpf_x86_popcnt.c:emit_popcntq_x86` | `ModulePopcnt.bpf_x86_popcntq` | proved | destination-only population count; no memory or borrowed registers |
 | `bpf_x86_rolw` | `x86/bpf_x86_byteorder.c:instantiate_rolw_imm` | `x86/bpf_x86_byteorder.c:emit_rolw_imm_x86` | `ModuleByteorder.bpf_x86_rolw` | proved | 16-bit swap upper bits disagreed |
-| `bpf_x86_sarl` | `x86/bpf_x86_alu.c:instantiate_sarl` | `x86/bpf_x86_alu.c:emit_sarl_x86` | `ModuleAluShift.bpf_x86_sarl` | proved | scratch restore overwrote destination |
-| `bpf_x86_sarq` | `x86/bpf_x86_alu.c:instantiate_sarq` | `x86/bpf_x86_alu.c:emit_sarq_x86` | `ModuleAluShift.bpf_x86_sarq` | proved | scratch restore overwrote destination |
+| `bpf_x86_sarl` | `x86/bpf_x86_alu.c:instantiate_sarl` | `x86/bpf_x86_alu.c:emit_sarl_x86` | `ModuleAluShift.bpf_x86_sarl` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_sarq` | `x86/bpf_x86_alu.c:instantiate_sarq` | `x86/bpf_x86_alu.c:emit_sarq_x86` | `ModuleAluShift.bpf_x86_sarq` | proved | destination-only register operation; no memory or borrowed registers |
 | `bpf_x86_shlb` | `x86/bpf_x86_alu.c:instantiate_shlb` | `x86/bpf_x86_alu.c:emit_shlb_x86` | `ModuleByteAlu.bpf_x86_shlb` | proved | destination-only byte dispatch; June SHL/SHR restored |
 | `bpf_x86_shldl` | `x86/bpf_x86_shd.c:instantiate_shldl_imm` | `x86/bpf_x86_shd.c:emit_shldl_imm_x86` | `ModuleShd.bpf_x86_shldl` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
 | `bpf_x86_shldq` | `x86/bpf_x86_shd.c:instantiate_shldq_imm` | `x86/bpf_x86_shd.c:emit_shldq_imm_x86` | `ModuleShd.bpf_x86_shldq` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
-| `bpf_x86_shll` | `x86/bpf_x86_alu.c:instantiate_shll` | `x86/bpf_x86_alu.c:emit_shll_x86` | `ModuleAluShift.bpf_x86_shll` | proved | scratch restore overwrote destination |
-| `bpf_x86_shlq` | `x86/bpf_x86_alu.c:instantiate_shlq` | `x86/bpf_x86_alu.c:emit_shlq_x86` | `ModuleAluShift.bpf_x86_shlq` | proved | scratch restore overwrote destination |
-| `bpf_x86_shlxl` | `x86/bpf_x86_bmi2_shift.c:instantiate_shlxl` | `x86/bpf_x86_bmi2_shift.c:emit_shlxl_x86` | `ModuleBmiShift.bpf_x86_shlxl` | proved | scratch restore overwrote destination |
-| `bpf_x86_shlxq` | `x86/bpf_x86_bmi2_shift.c:instantiate_shlxq` | `x86/bpf_x86_bmi2_shift.c:emit_shlxq_x86` | `ModuleBmiShift.bpf_x86_shlxq` | proved | scratch restore overwrote destination |
+| `bpf_x86_shll` | `x86/bpf_x86_alu.c:instantiate_shll` | `x86/bpf_x86_alu.c:emit_shll_x86` | `ModuleAluShift.bpf_x86_shll` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_shlq` | `x86/bpf_x86_alu.c:instantiate_shlq` | `x86/bpf_x86_alu.c:emit_shlq_x86` | `ModuleAluShift.bpf_x86_shlq` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_shlxl` | `x86/bpf_x86_bmi2_shift.c:instantiate_shlxl` | `x86/bpf_x86_bmi2_shift.c:emit_shlxl_x86` | `ModuleBmiShift.bpf_x86_shlxl` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_shlxq` | `x86/bpf_x86_bmi2_shift.c:instantiate_shlxq` | `x86/bpf_x86_bmi2_shift.c:emit_shlxq_x86` | `ModuleBmiShift.bpf_x86_shlxq` | proved | destination-only register operation; no memory or borrowed registers |
 | `bpf_x86_shrb` | `x86/bpf_x86_alu.c:instantiate_shrb` | `x86/bpf_x86_alu.c:emit_shrb_x86` | `ModuleByteAlu.bpf_x86_shrb` | proved | destination-only byte dispatch; June SHL/SHR restored |
 | `bpf_x86_shrdl` | `x86/bpf_x86_shd.c:instantiate_shrdl_imm` | `x86/bpf_x86_shd.c:emit_shrdl_imm_x86` | `ModuleShd.bpf_x86_shrdl` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
 | `bpf_x86_shrdq` | `x86/bpf_x86_shd.c:instantiate_shrdq_imm` | `x86/bpf_x86_shd.c:emit_shrdq_imm_x86` | `ModuleShd.bpf_x86_shrdq` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
-| `bpf_x86_shrl` | `x86/bpf_x86_alu.c:instantiate_shrl` | `x86/bpf_x86_alu.c:emit_shrl_x86` | `ModuleAluShift.bpf_x86_shrl` | proved | scratch restore overwrote destination |
-| `bpf_x86_shrq` | `x86/bpf_x86_alu.c:instantiate_shrq` | `x86/bpf_x86_alu.c:emit_shrq_x86` | `ModuleAluShift.bpf_x86_shrq` | proved | scratch restore overwrote destination |
-| `bpf_x86_shrxl` | `x86/bpf_x86_bmi2_shift.c:instantiate_shrxl` | `x86/bpf_x86_bmi2_shift.c:emit_shrxl_x86` | `ModuleBmiShift.bpf_x86_shrxl` | proved | scratch restore overwrote destination |
-| `bpf_x86_shrxq` | `x86/bpf_x86_bmi2_shift.c:instantiate_shrxq` | `x86/bpf_x86_bmi2_shift.c:emit_shrxq_x86` | `ModuleBmiShift.bpf_x86_shrxq` | proved | scratch restore overwrote destination |
-| `bpf_x86_subb` | `x86/bpf_x86_alu.c:instantiate_subb` | `x86/bpf_x86_alu.c:emit_subb_x86` | `ModuleByteAlu.bpf_x86_subb` | proved | scratch restore overwrote destination |
+| `bpf_x86_shrl` | `x86/bpf_x86_alu.c:instantiate_shrl` | `x86/bpf_x86_alu.c:emit_shrl_x86` | `ModuleAluShift.bpf_x86_shrl` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_shrq` | `x86/bpf_x86_alu.c:instantiate_shrq` | `x86/bpf_x86_alu.c:emit_shrq_x86` | `ModuleAluShift.bpf_x86_shrq` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_shrxl` | `x86/bpf_x86_bmi2_shift.c:instantiate_shrxl` | `x86/bpf_x86_bmi2_shift.c:emit_shrxl_x86` | `ModuleBmiShift.bpf_x86_shrxl` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_shrxq` | `x86/bpf_x86_bmi2_shift.c:instantiate_shrxq` | `x86/bpf_x86_bmi2_shift.c:emit_shrxq_x86` | `ModuleBmiShift.bpf_x86_shrxq` | proved | destination-only register operation; no memory or borrowed registers |
+| `bpf_x86_subb` | `x86/bpf_x86_alu.c:instantiate_subb` | `x86/bpf_x86_alu.c:emit_subb_x86` | `ModuleByteAlu.bpf_x86_subb` | proved | destination-only; source-byte dispatch and borrow correction |
 | `bpf_x86_subl` | `x86/bpf_x86_alu.c:instantiate_subl` | `x86/bpf_x86_alu.c:emit_subl_x86` | `ModuleAluWide.bpf_x86_subl` | proved | memory forms: declared loaded-operand output; no stack accesses |
 | `bpf_x86_subq` | `x86/bpf_x86_alu.c:instantiate_subq` | `x86/bpf_x86_alu.c:emit_subq_x86` | `ModuleAluWide.bpf_x86_subq` | proved | memory forms: declared loaded-operand output; no stack accesses |
 | `bpf_x86_xorb` | `x86/bpf_x86_alu.c:instantiate_xorb` | `x86/bpf_x86_alu.c:emit_xorb_x86` | `ModuleNarrowXor.bpf_x86_xorb` | proved | memory forms: declared loaded-operand output; no stack accesses |

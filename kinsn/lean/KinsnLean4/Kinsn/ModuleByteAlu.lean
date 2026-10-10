@@ -3,98 +3,14 @@ import KinsnLean4.Kinsn.ModuleControlDispatch
 import KinsnLean4.Kinsn.ModuleAluShift
 import KinsnLean4.Kinsn.ModuleNarrowLogic
 import KinsnLean4.Kinsn.ModuleRotateOne
+import KinsnLean4.Kinsn.ModuleByteArithmetic
 
 namespace Kinsn.ModuleByteAlu
 open ModuleMovStore (Source)
 open ModuleAluShift (Count)
 
-def slot : BitVec 64 := -8
-
 theorem high_immediate : BitVec.signExtend 64 (-256 : BitVec 32) = ~~~(255#64) := by
   decide +kernel
-
-/-- x86/bpf_x86_alu.c:instantiate_x86_alu_narrow: save one chosen temporary
-    and preserve the destination's upper lane in it. -/
-def prologue (d t : BPF.Reg) : List BPF.MInsn :=
-  [.store 8 .r10 (.reg t) slot, .core (.alu .mov .w64 t (.reg d)),
-    .core (.alu .and .w64 t (.imm (BitVec.signExtend 64 (-256 : BitVec 32))))]
-
-def prepared (d t : BPF.Reg) (s : BPF.State) : BPF.State :=
-  (s.write (s.regs .r10 + slot) 8 (s.regs t)).set t (s.regs d &&& ~~~255)
-
-theorem prologue_exec (d t : BPF.Reg) (s : BPF.State) (tail : List BPF.MInsn) :
-    BPF.mexec (prologue d t ++ tail) s = BPF.mexec tail (prepared d t s) := by
-  simp [prologue, prepared, BPF.mexec, BPF.MInsn.step, BPF.Insn.step,
-    BPF.AluOp.eval, BPF.Src.eval, high_immediate, Machine.State.set,
-    Machine.State.write]
-  rw [BPF.RegFile.set_set_same]
-  rfl
-
-def suffix (t : BPF.Reg) : List BPF.MInsn := [.load 8 t .r10 slot]
-
-/-- The actual restore value is observed, without assuming spill memory private. -/
-def finish (d t : BPF.Reg) (v : BitVec 64) (s : Outcome) : Outcome :=
-  let saved := ModuleMemory.storeSpec 8 t .r10 slot s
-  let a := saved.regs .r10 + slot
-  let restored := Machine.loadLE saved.mem a 8
-  { regs := (saved.regs.set d v).set t restored
-    mem := saved.mem
-    trace := saved.trace ++ [.read a 8 restored] }
-
-/-- x86/bpf_x86_alu.c:instantiate_x86_alu_narrow's ADD/SUB body. The low
-    mask is applied after the full operation, so src=dst remains correct. -/
-def arithmeticBody (kind : ModuleWideAlu.Kind) (d t : BPF.Reg) (src : Source) :
-    List BPF.MInsn :=
-  [.core (.alu kind.bpf .w64 d src.bpf), .core (.alu .and .w64 d (.imm 255)),
-    .core (.alu .or .w64 d (.reg t))]
-
-def arithmeticBpf (kind : ModuleWideAlu.Kind) (d t : BPF.Reg) (src : Source) :
-    List BPF.MInsn := prologue d t ++ arithmeticBody kind d t src ++ suffix t
-
-def arithmeticNative (m : X86RegMap) (kind : ModuleWideAlu.Kind) (d t : BPF.Reg)
-    (src : Source) : List X86.MInsn :=
-  [.store 8 (m.map t) (m.map .r10) slot] ++
-    (match src with
-    | .reg r => [.aluNarrow kind.native 8 (m.map d) (m.map r)]
-    | .imm v => [.aluImmNarrow kind.native 8 (m.map d) (BitVec.signExtend 64 v)]) ++
-    [.load 8 (m.map t) (m.map .r10) slot]
-
-def arithmeticSpec (kind : ModuleWideAlu.Kind) (d t : BPF.Reg) (src : Source)
-    (s : Outcome) : Outcome :=
-  finish d t (X86.writeWidth 8 (s.regs d) (kind.native.eval (s.regs d) (src.word s.regs))) s
-
-def sourceTempValid (src : Source) (t : BPF.Reg) : Prop :=
-  match src with | .reg r => t ≠ r | .imm _ => True
-
-theorem arithmetic_bpf_correct (kind : ModuleWideAlu.Kind) (d t : BPF.Reg)
-    (src : Source) (ht : t ≠ d) (hf : t ≠ .r10) (hd : d ≠ .r10)
-    (hr : sourceTempValid src t) (s : BPF.State) :
-    observeBpf (BPF.mexec (arithmeticBpf kind d t src) s) =
-      arithmeticSpec kind d t src (observeBpf s) := by
-  simp only [arithmeticBpf, List.append_assoc, prologue_exec]
-  cases src <;> cases kind <;>
-    simp [arithmeticBody, suffix, prepared, arithmeticSpec, finish,
-      ModuleMemory.storeSpec, BPF.mexec, BPF.MInsn.step, BPF.Insn.step,
-      BPF.AluOp.eval, BPF.Src.eval, Source.bpf, Source.word, sourceTempValid,
-      ModuleWideAlu.Kind.bpf, ModuleWideAlu.Kind.native, X86.AluOp.eval, observeBpf, Machine.State.read, Machine.State.write,
-      Machine.State.set, BPF.RegFile.set, ht, Ne.symm ht, hf, Ne.symm hf,
-      hd, Ne.symm hd, X86.writeWidth, Bits.lowMask, BitVec.or_comm] at hr ⊢
-  all_goals funext q
-  all_goals by_cases hqt : q = t <;> by_cases hqd : q = d
-  all_goals simp_all [BPF.RegFile.set, BitVec.or_comm, Ne.symm]
-
-theorem arithmetic_native_correct (m : X86RegMap) (kind : ModuleWideAlu.Kind)
-    (d t : BPF.Reg) (src : Source) (hd : d ≠ .r10) (s : X86.State) :
-    observeX86 m (X86.mexec (arithmeticNative m kind d t src) s) =
-      arithmeticSpec kind d t src (observeX86 m s) := by
-  cases src <;>
-    simp [arithmeticNative, arithmeticSpec, finish, ModuleMemory.storeSpec,
-      X86.mexec_cons, X86.mexec_nil, X86.MInsn.step, Source.word, observeX86,
-      Machine.State.read, Machine.State.write, Machine.State.set,
-      m.inj.eq_iff, Ne.symm hd]
-  all_goals funext q
-  all_goals by_cases hqt : q = t <;> by_cases hqd : q = d
-  all_goals simp_all [BPF.RegFile.set]
 
 theorem masked_byte (v : BitVec 8) :
     BitVec.setWidth 64 v &&& (255#64) = BitVec.setWidth 64 v := by
@@ -226,22 +142,6 @@ theorem shift_leaf_writes (left : Bool) (d r : BPF.Reg) (n : Nat)
     · exact ModuleControlDispatch.writes_tree d (inputLeaf left d n) 8 0 d
         (fun v r h => input_writes left d r n v h) r (by simpa [shiftLeaf, hz, hn] using h)
 
-def arithmeticCert (m : X86RegMap) (kind : ModuleWideAlu.Kind) (d t : BPF.Reg)
-    (src : Source) (ht : t ≠ d) (hf : t ≠ .r10) (hd : d ≠ .r10)
-    (hr : sourceTempValid src t) : X86StateEquiv m where
-  spec := arithmeticSpec kind d t src
-  bpf := arithmeticBpf kind d t src
-  native := arithmeticNative m kind d t src
-  writeSet := [d, t]
-  bpfCorrect := arithmetic_bpf_correct kind d t src ht hf hd hr
-  nativeCorrect := arithmetic_native_correct m kind d t src hd
-  bpfWrites := by
-    simp [arithmeticBpf, prologue, arithmeticBody, suffix, BPF.mwrites,
-      BPF.MInsn.writes, BPF.Insn.dstReg, or_comm, or_left_comm]
-  nativeWrites := by
-    cases src <;> simp [arithmeticNative, X86.mwrites, X86.MInsn.writes,
-      m.inj.eq_iff, or_comm]
-
 def shiftCert (m : X86RegMap) (hc : m.map .r4 = .rcx) (left : Bool)
     (d : BPF.Reg) (count : Count) (hv : count.Valid false) : X86StateEquiv m where
   spec := shiftSpec left d count
@@ -259,14 +159,15 @@ def shiftCert (m : X86RegMap) (hc : m.map .r4 = .rcx) (left : Bool)
   nativeWrites := by
     cases count <;> simp [shiftNative, X86.mwrites, X86.MInsn.writes, m.inj.eq_iff]
 
-/-- x86/bpf_x86_alu.c:instantiate_addb/emit_addb_x86: ordinary and ARCH tags. -/
-def bpf_x86_addb (m : X86RegMap) (d t : BPF.Reg) (src : Source)
-    (ht : t ≠ d) (hf : t ≠ .r10) (hd : d ≠ .r10) (hr : sourceTempValid src t) :
-    X86StateEquiv m := arithmeticCert m .add d t src ht hf hd hr
-/-- x86/bpf_x86_alu.c:instantiate_subb/emit_subb_x86: ordinary and ARCH tags. -/
-def bpf_x86_subb (m : X86RegMap) (d t : BPF.Reg) (src : Source)
-    (ht : t ≠ d) (hf : t ≠ .r10) (hd : d ≠ .r10) (hr : sourceTempValid src t) :
-    X86StateEquiv m := arithmeticCert m .sub d t src ht hf hd hr
+/-- Destination-only byte arithmetic, including src=dst and ARCH tags. -/
+def bpf_x86_addb (m : X86RegMap) (d : BPF.Reg) (src : Source)
+    (hv : ModuleByteArithmetic.sourceValid src) : X86StateEquiv m :=
+  ModuleByteArithmetic.certificate m .add (by simp) d src hv
+
+def bpf_x86_subb (m : X86RegMap) (d : BPF.Reg) (src : Source)
+    (hv : ModuleByteArithmetic.sourceValid src) : X86StateEquiv m :=
+  ModuleByteArithmetic.certificate m .sub (by simp) d src hv
+
 /-- x86/bpf_x86_alu.c:instantiate_shlb/emit_shlb_x86: immediate and CL tags. -/
 def bpf_x86_shlb (m : X86RegMap) (hc : m.map .r4 = .rcx) (d : BPF.Reg) (c : Count)
     (hv : c.Valid false) : X86StateEquiv m := shiftCert m hc true d c hv

@@ -323,21 +323,59 @@ static int instantiate_x86_logic_narrow(const struct kinsn_x86_alu_payload *alu,
 	return cnt;
 }
 
-static int x86_alu_narrow_temp(const struct kinsn_x86_alu_payload *alu)
+/* A byte add/subtract by a power of two only carries/borrows above that
+ * bit when bits 7:bit are zero. Correct the carry in dst itself. */
+static int instantiate_byte_arithmetic_leaf(u8 dst, struct bpf_insn *buf,
+                                            u8 op, u8 value)
 {
-	bool reg_src = alu->form == KINSN_X86_ALU_FORM_RR ||
-		       alu->form == KINSN_X86_ALU_FORM_ARCH_RR;
-	u8 reg;
+	int bit, cnt = 0;
 
-	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
-		if (reg != alu->dst_reg && (!reg_src || reg != alu->src_reg))
-			return reg;
+	if (!value) {
+		buf[0] = BPF_JMP_A(0);
+		return 1;
 	}
-	return -EINVAL;
+	if (op == BPF_XOR) {
+		buf[0] = BPF_ALU64_IMM(BPF_XOR, dst, value);
+		return 1;
+	}
+	for (bit = 7; bit >= 0; bit--) {
+		if (!(value & (1U << bit)))
+			continue;
+		if (op == BPF_ADD) {
+			buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst, 1U << bit);
+			buf[cnt++] = BPF_JMP_IMM(BPF_JSET, dst,
+						  256 - (1U << bit), 1);
+			buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst, -256);
+		} else {
+			buf[cnt++] = BPF_JMP_IMM(BPF_JSET, dst,
+						  256 - (1U << bit), 1);
+			buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst, 256);
+			buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst, -(1U << bit));
+		}
+	}
+	return cnt;
 }
 
-/* Decode the original byte entirely in control flow before writing dst.
- * Each leaf replaces only that byte; all other registers and memory survive. */
+/* Read every source-byte bit before the first destination write. This also
+ * implements src=dst without a borrowed register. */
+static int instantiate_byte_arithmetic_tree(u8 dst, u8 src,
+                                            struct bpf_insn *buf, u8 op,
+                                            u8 depth, u8 value)
+{
+	int cnt = 0, branch, join;
+
+	if (!depth)
+		return instantiate_byte_arithmetic_leaf(dst, buf, op, value);
+	branch = cnt++;
+	cnt += instantiate_byte_arithmetic_tree(dst, src, buf + cnt, op, depth - 1, value);
+	join = cnt++;
+	buf[branch] = BPF_JMP_IMM(BPF_JSET, src, 1U << (depth - 1), cnt - branch - 1);
+	cnt += instantiate_byte_arithmetic_tree(dst, src, buf + cnt, op,
+					       depth - 1, value + (1U << (depth - 1)));
+	buf[join] = BPF_JMP_A(cnt - join - 1);
+	return cnt;
+}
+
 static int instantiate_narrow_byte_tree(u8 dst, struct bpf_insn *insn_buf,
 				       u8 op, u8 depth, u8 value, u8 count)
 {
@@ -407,8 +445,6 @@ static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 {
 	struct kinsn_x86_alu_payload alu;
 	bool reg_src;
-	int temp;
-	int cnt = 0;
 	int err;
 
 	err = decode_x86_alu_payload(payload, &alu);
@@ -435,22 +471,10 @@ static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 			return instantiate_narrow_shift_tree(&alu, insn_buf, op, 5, 0);
 		return instantiate_narrow_shift_leaf(&alu, insn_buf, op, alu.imm);
 	}
-	temp = x86_alu_narrow_temp(&alu);
-	if (temp < 0)
-		return temp;
-	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp, KINSN_X86_PROOF_RHS_OFF);
-	insn_buf[cnt++] = BPF_MOV64_REG(temp, alu.dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, temp, -(1U << width));
 	if (reg_src)
-		err = emit_bpf_alu_reg(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.src_reg);
-	else
-		err = emit_bpf_alu_imm(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.imm);
-	if (err)
-		return err;
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, alu.dst_reg, (1U << width) - 1);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, alu.dst_reg, temp);
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10, KINSN_X86_PROOF_RHS_OFF);
-	return cnt;
+		return instantiate_byte_arithmetic_tree(alu.dst_reg, alu.src_reg,
+						insn_buf, op, 8, 0);
+	return instantiate_byte_arithmetic_leaf(alu.dst_reg, insn_buf, op, alu.imm);
 }
 
 static int instantiate_inc(u64 payload, struct bpf_insn *insn_buf, u8 width)
@@ -512,53 +536,40 @@ static int decode_divl_payload(u64 payload, u8 *src_reg)
 	return 0;
 }
 
-static int divl_temps(u8 src_reg, u8 *num, u8 *divisor)
+/* DIVL declares R0 (quotient), R3 (remainder), and this divisor output.
+ * Capture its low 32 bits before changing either implicit input. */
+static int divl_data_output(u8 src_reg)
 {
 	u8 reg;
-	int found = 0;
 
 	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
-		if (reg == BPF_REG_0 || reg == BPF_REG_3 || reg == src_reg)
-			continue;
-		if (!found++)
-			*num = reg;
-		else {
-			*divisor = reg;
-			return 0;
-		}
+		if (reg != BPF_REG_0 && reg != BPF_REG_3 && reg != src_reg)
+			return reg;
 	}
 	return -EINVAL;
 }
 
 static int instantiate_divl(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 src_reg, num, divisor;
-	int cnt = 0;
-	int err;
+	u8 src_reg;
+	int divisor, cnt = 0, err;
 
 	err = decode_divl_payload(payload, &src_reg);
 	if (err)
 		return err;
-	err = divl_temps(src_reg, &num, &divisor);
-	if (err)
-		return err;
-
-	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, num, KINSN_X86_PROOF_LHS_OFF);
-	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, divisor, KINSN_X86_PROOF_RHS_OFF);
-	/* Capture divisor before writing either implicit input, even src=R0/R3. */
+	divisor = divl_data_output(src_reg);
+	if (divisor < 0)
+		return divisor;
 	insn_buf[cnt++] = BPF_MOV32_REG(divisor, src_reg);
-	insn_buf[cnt++] = BPF_MOV32_REG(num, BPF_REG_3);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, num, 32);
+	insn_buf[cnt++] = BPF_MOV32_REG(BPF_REG_3, BPF_REG_3);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, BPF_REG_3, 32);
 	insn_buf[cnt++] = BPF_MOV32_REG(BPF_REG_0, BPF_REG_0);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, num, BPF_REG_0);
-	insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_0, num);
-	insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_3, num);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, BPF_REG_0, BPF_REG_3);
+	insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_3, BPF_REG_0);
 	insn_buf[cnt++] = BPF_ALU64_REG(BPF_MOD, BPF_REG_3, divisor);
 	insn_buf[cnt++] = BPF_ALU64_REG(BPF_DIV, BPF_REG_0, divisor);
 	insn_buf[cnt++] = BPF_MOV32_REG(BPF_REG_0, BPF_REG_0);
 	insn_buf[cnt++] = BPF_MOV32_REG(BPF_REG_3, BPF_REG_3);
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, divisor, BPF_REG_10, KINSN_X86_PROOF_RHS_OFF);
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, num, BPF_REG_10, KINSN_X86_PROOF_LHS_OFF);
 	return cnt;
 }
 
@@ -597,13 +608,6 @@ static int instantiate_xorw(u64 payload, struct bpf_insn *insn_buf)
 	    decoded.form != KINSN_X86_ALU_FORM_ARCH_MEM)
 		return -EINVAL;
 	return instantiate_x86_alu_mem(&decoded, insn_buf, BPF_XOR, 16);
-}
-
-static void emit_alu_temp_slot(u8 *buf, u32 *len, u8 temp, u8 frame, bool load)
-{
-	kinsn_emit_rex(buf, len, true, kinsn_x86_ext(temp), false, kinsn_x86_ext(frame));
-	kinsn_emit_u8(buf, len, load ? 0x8b : 0x89);
-	kinsn_emit_modrm_mem(buf, len, temp, frame, KINSN_X86_PROOF_RHS_OFF);
 }
 
 /* One operand read into the declared data output, followed by register ALU.
@@ -749,8 +753,6 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 	const struct kinsn_x86_alu_payload *alu = &decoded;
 	u8 buf[24];
 	u8 dst_reg, src_reg;
-	int temp = -1;
-	u8 frame = kinsn_x86_reg_for_prog(prog, BPF_REG_10);
 	u32 len = 0;
 	int err;
 
@@ -768,13 +770,6 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 	dst_reg = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
 	if (!kinsn_x86_valid(dst_reg))
 		return -EINVAL;
-
-	if (op != BPF_AND && op != BPF_OR && !x86_alu_is_shift(op)) {
-		temp = x86_alu_narrow_temp(alu);
-		if (temp < 0)
-			return temp;
-		emit_alu_temp_slot(buf, &len, kinsn_x86_reg_for_prog(prog, temp), frame, false);
-	}
 
 	if (width == 16)
 		kinsn_emit_u8(buf, &len, 0x66);
@@ -846,8 +841,6 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 	}
 
 finish:
-	if (temp >= 0)
-		emit_alu_temp_slot(buf, &len, kinsn_x86_reg_for_prog(prog, temp), frame, true);
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
@@ -1037,44 +1030,32 @@ static void emit_divl_rr(u8 *buf, u32 *len, bool wide, u8 opcode,
 	kinsn_emit_u8(buf, len, 0xc0 | (kinsn_x86_code(src) << 3) | kinsn_x86_code(dst));
 }
 
-static void emit_divl_slot(u8 *buf, u32 *len, u8 reg, u8 frame, s16 offset, bool load)
-{
-	kinsn_emit_rex(buf, len, true, kinsn_x86_ext(reg), false, kinsn_x86_ext(frame));
-	kinsn_emit_u8(buf, len, load ? 0x8b : 0x89);
-	kinsn_emit_modrm_mem(buf, len, reg, frame, offset);
-}
-
 static int emit_divl_x86(u8 *image, u32 *off, bool emit,
 			 u64 payload, const struct bpf_prog *prog,
 			 const u8 *final_ip)
 {
 	u8 buf[96];
-	u8 src_reg, num, divisor;
-	u8 frame = kinsn_x86_reg_for_prog(prog, BPF_REG_10);
+	u8 src_reg, divisor;
+	int data;
 	u32 len = 0, zero_jump, done_jump;
 	int err;
 
 	err = decode_divl_payload(payload, &src_reg);
 	if (err)
 		return err;
-	err = divl_temps(src_reg, &num, &divisor);
-	if (err)
-		return err;
+	data = divl_data_output(src_reg);
+	if (data < 0)
+		return data;
+	divisor = kinsn_x86_reg_for_prog(prog, data);
 	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
-	num = kinsn_x86_reg_for_prog(prog, num);
-	divisor = kinsn_x86_reg_for_prog(prog, divisor);
-
-	emit_divl_slot(buf, &len, num, frame, KINSN_X86_PROOF_LHS_OFF, false);
-	emit_divl_slot(buf, &len, divisor, frame, KINSN_X86_PROOF_RHS_OFF, false);
 	emit_divl_rr(buf, &len, false, 0x89, divisor, src_reg);
-	emit_divl_rr(buf, &len, false, 0x89, num, BPF_REG_3);
-	kinsn_emit_rex_rr(buf, &len, true, 0, num);
+	emit_divl_rr(buf, &len, false, 0x89, BPF_REG_3, BPF_REG_3);
+	kinsn_emit_rex_rr(buf, &len, true, 0, BPF_REG_3);
 	kinsn_emit_u8(buf, &len, 0xc1);
-	kinsn_emit_u8(buf, &len, 0xe0 | kinsn_x86_code(num));
+	kinsn_emit_u8(buf, &len, 0xe0 | kinsn_x86_code(BPF_REG_3));
 	kinsn_emit_u8(buf, &len, 32);
 	emit_divl_rr(buf, &len, false, 0x89, BPF_REG_0, BPF_REG_0);
-	emit_divl_rr(buf, &len, true, 0x09, num, BPF_REG_0);
-	emit_divl_rr(buf, &len, true, 0x89, BPF_REG_0, num);
+	emit_divl_rr(buf, &len, true, 0x09, BPF_REG_0, BPF_REG_3);
 
 	/* The guard is self-contained. DIV64 with high half zero cannot overflow;
 	 * MOV32 below supplies BPF's truncated quotient and remainder semantics.
@@ -1097,14 +1078,12 @@ static int emit_divl_x86(u8 *image, u32 *off, bool emit,
 
 	emit_divl_rr(buf, &len, false, 0x89, BPF_REG_0, BPF_REG_0);
 	emit_divl_rr(buf, &len, false, 0x89, BPF_REG_3, BPF_REG_3);
-	emit_divl_slot(buf, &len, divisor, frame, KINSN_X86_PROOF_RHS_OFF, true);
-	emit_divl_slot(buf, &len, num, frame, KINSN_X86_PROOF_LHS_OFF, true);
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 const struct bpf_kinsn bpf_x86_addb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 3583,
 	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_addb,
 	.emit_x86 = emit_addb_x86,
@@ -1144,7 +1123,7 @@ const struct bpf_kinsn bpf_x86_incl_desc = {
 
 const struct bpf_kinsn bpf_x86_divl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 15,
+	.max_insn_cnt = 10,
 	.max_emit_bytes = 96,
 	.instantiate_insn = instantiate_divl,
 	.emit_x86 = emit_divl_x86,
@@ -1152,7 +1131,7 @@ const struct bpf_kinsn bpf_x86_divl_desc = {
 
 const struct bpf_kinsn bpf_x86_xorb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 24 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 766,
 	.max_emit_bytes = 32,
 	.instantiate_insn = instantiate_xorb,
 	.emit_x86 = emit_xorb_x86,
@@ -1184,7 +1163,7 @@ const struct bpf_kinsn bpf_x86_orb_desc = {
 
 const struct bpf_kinsn bpf_x86_subb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 16 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 3583,
 	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_subb,
 	.emit_x86 = emit_subb_x86,

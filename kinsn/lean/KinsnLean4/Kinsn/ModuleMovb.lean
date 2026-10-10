@@ -1,9 +1,8 @@
 import KinsnLean4.Kinsn.ModuleByteAlu
 import KinsnLean4.Kinsn.ModuleNarrowLogic
+import KinsnLean4.Kinsn.ModuleShiftedDispatch
 
 namespace Kinsn.ModuleMovb
-
-def slot : BitVec 64 := -8
 
 /-- x86/bpf_x86_mov.c:instantiate_movb_imm: clear the live low byte and OR
     the positive decoded imm8. No scratch registers or unsaved ARCH slots. -/
@@ -43,114 +42,105 @@ def immediateCert (m : X86RegMap) (d : BPF.Reg) (v : BitVec 8) : X86StateEquiv m
   bpfWrites := by simp [immediateBpf, BPF.mwrites, BPF.MInsn.writes, BPF.Insn.dstReg]
   nativeWrites := by simp [immediateNative, X86.mwrites, X86.MInsn.writes, m.inj.eq_iff]
 
-/-- x86/bpf_x86_mov.c:instantiate_store_reg's high-byte lane: five instructions,
-    including matching spill memory before and after the byte store. -/
-def highBpf (r b t : BPF.Reg) (off : BitVec 64) : List BPF.MInsn :=
-  [.store 8 .r10 (.reg t) slot, .core (.alu .mov .w64 t (.reg r)),
-    .core (.alu .rsh .w64 t (BPF.immN 8)), .store 1 b (.reg t) off, .load 8 t .r10 slot]
+/-- Source bits 15:8 are dispatched before the sole observable byte write. -/
+def highLeaf (b : BPF.Reg) (off : BitVec 64) (n : Nat) : List BPF.MInsn :=
+  [.store 1 b (.imm (BitVec.ofNat 64 n)) off]
 
-/-- x86/bpf_x86_mov.c:emit_store_reg_x86/emit_mov_store_slot: save; MOV64;
-    SHR64 8; low-byte MOV store; restore. Unlike AH/CH/DH/BH, this sequence
-    also encodes extended base/source registers and private-stack R10. -/
-def highNative (m : X86RegMap) (r b t : BPF.Reg) (off : BitVec 64) : List X86.MInsn :=
-  [.store 8 (m.map t) (m.map .r10) slot, .core (.movRR (m.map t) (m.map r)),
-    .core (.shiftI .shr (m.map t) 8), .store 1 (m.map t) (m.map b) off,
-    .load 8 (m.map t) (m.map .r10) slot]
+def highBpf (r b : BPF.Reg) (off : BitVec 64) : List BPF.MInsn :=
+  ModuleShiftedDispatch.tree r 8 (highLeaf b off) 8 0
 
-def highSpec (r b t : BPF.Reg) (off : BitVec 64) (s : Outcome) : Outcome :=
-  let saved := ModuleMemory.storeSpec 8 t .r10 slot s
-  let a := saved.regs b + off
-  let v := saved.regs r >>> 8
-  let mem := Machine.storeLE saved.mem a 1 v
-  let aSlot := saved.regs .r10 + slot
-  let restored := Machine.loadLE mem aSlot 8
-  { regs := saved.regs.set t restored
-    mem := mem
-    trace := (saved.trace ++ [.write a 1 (BitVec.setWidth 64 (BitVec.setWidth 8 v))]) ++
-      [.read aSlot 8 restored] }
+def directHigh (r b : X86.GPReg) : Bool :=
+  [.rax, .rcx, .rdx, .rbx].contains r &&
+    [.rax, .rcx, .rdx, .rbx, .rsp, .rbp, .rsi, .rdi].contains b
 
-theorem high_bpf_correct (r b t : BPF.Reg) (off : BitVec 64)
-    (hb : t ≠ b) (hf : t ≠ .r10) (s : BPF.State) :
-    observeBpf (BPF.mexec (highBpf r b t off) s) = highSpec r b t off (observeBpf s) := by
-  simp [highBpf, highSpec, ModuleMemory.storeSpec, BPF.mexec, BPF.MInsn.step,
-    BPF.Insn.step, BPF.AluOp.eval, BPF.Src.eval, BPF.immN, observeBpf,
-    Machine.State.read, Machine.State.write, Machine.State.set, BPF.RegFile.set,
-    Ne.symm hb, Ne.symm hf, List.append_assoc]
-  funext q
-  by_cases hqt : q = t <;> simp_all [BPF.RegFile.set]
+/-- June's AH/CH/DH/BH store when encodable; otherwise use the unmapped
+    JIT AX register R11, whose value no BPF register can observe. -/
+def highNative (m : X86RegMap) (r b : BPF.Reg) (off : BitVec 64) : List X86.MInsn :=
+  if directHigh (m.map r) (m.map b) then [.storeHigh8 (m.map r) (m.map b) off]
+  else [.core (.movRR .r11 (m.map r)), .core (.shiftI .shr .r11 8),
+    .store 1 .r11 (m.map b) off]
 
-theorem native_extract (r t : X86.GPReg) (s : X86.State) (tail : List X86.MInsn) :
-    X86.mexec ([.core (.movRR t r), .core (.shiftI .shr t 8)] ++ tail) s =
-      X86.mexec tail (s.set t (s.regs r >>> 8)) := by
-  simp [X86.mexec_cons, X86.MInsn.step, X86.Insn.step, X86.ShiftOp.eval,
-    X86.RegFile.set, Machine.State.set]
-  apply congrArg (X86.mexec tail)
-  congr 1
-  funext q
-  by_cases hq : q = t <;> simp [X86.RegFile.set, hq]
+def highSpec (r b : BPF.Reg) (off : BitVec 64) (s : Outcome) : Outcome :=
+  let a := s.regs b + off
+  let v := s.regs r >>> 8
+  { s with
+    mem := Machine.storeLE s.mem a 1 v
+    trace := s.trace ++ [.write a 1 (BitVec.setWidth 64 (BitVec.setWidth 8 v))] }
 
-/-- Keeping the saved input state abstract avoids expanding an eight-byte
-    spill twice inside the native core-register substitutions. -/
-theorem native_store_restore (m : X86RegMap) (b t : BPF.Reg) (off v : BitVec 64)
-    (hb : t ≠ b) (hf : t ≠ .r10) (s : X86.State) :
-    observeX86 m (X86.mexec
-      [.store 1 (m.map t) (m.map b) off, .load 8 (m.map t) (m.map .r10) slot]
-      (s.set (m.map t) v)) =
-    { regs := (observeX86 m s).regs.set t (Machine.loadLE
-        (Machine.storeLE s.mem (s.regs (m.map b) + off) 1 v)
-        (s.regs (m.map .r10) + slot) 8)
-      mem := Machine.storeLE s.mem (s.regs (m.map b) + off) 1 v
-      trace := (s.trace ++ [.write (s.regs (m.map b) + off) 1
-        (BitVec.setWidth 64 (BitVec.setWidth 8 v))]) ++
-        [.read (s.regs (m.map .r10) + slot) 8 (Machine.loadLE
-          (Machine.storeLE s.mem (s.regs (m.map b) + off) 1 v)
-          (s.regs (m.map .r10) + slot) 8)] } := by
-  simp [X86.mexec_cons, X86.mexec_nil, X86.MInsn.step, observeX86,
-    Machine.State.read, Machine.State.write, Machine.State.set,
-    m.inj.eq_iff, Ne.symm hb, Ne.symm hf]
-  funext q
-  by_cases hqt : q = t <;> simp_all [BPF.RegFile.set]
+theorem high_leaf_exec (b : BPF.Reg) (off : BitVec 64) (n : Nat)
+    (s : BPF.State) (tail : List BPF.MInsn) :
+    BPF.mexec (highLeaf b off n ++ tail) s =
+      BPF.mexec tail (s.write (s.regs b + off) 1 (BitVec.ofNat 64 n)) := by
+  simp [highLeaf, BPF.mexec, BPF.MInsn.step, BPF.Src.eval]
 
-theorem high_native_correct (m : X86RegMap) (r b t : BPF.Reg) (off : BitVec 64)
-    (hb : t ≠ b) (hf : t ≠ .r10) (s : X86.State) :
-    observeX86 m (X86.mexec (highNative m r b t off) s) =
-      highSpec r b t off (observeX86 m s) := by
-  change observeX86 m (X86.mexec
-    (.store 8 (m.map t) (m.map .r10) slot ::
-      ([.core (.movRR (m.map t) (m.map r)), .core (.shiftI .shr (m.map t) 8)] ++
-        [.store 1 (m.map t) (m.map b) off, .load 8 (m.map t) (m.map .r10) slot])) s) = _
-  rw [X86.mexec_cons, native_extract, native_store_restore m b t off _ hb hf]
-  rfl
+theorem high_bpf_correct (r b : BPF.Reg) (off : BitVec 64) (s : BPF.State) :
+    observeBpf (BPF.mexec (highBpf r b off) s) = highSpec r b off (observeBpf s) := by
+  rw [highBpf, ← List.append_nil (ModuleShiftedDispatch.tree r 8 (highLeaf b off) 8 0),
+    ModuleShiftedDispatch.exec_tree r 8 (highLeaf b off)
+      (fun n s => s.write (s.regs b + off) 1 (BitVec.ofNat 64 n)) (high_leaf_exec b off)
+      8 0 (by decide) s [], ModuleDispatch.selected_eq _ _ _ (by decide : 8 ≤ 64)]
+  have he : BitVec.ofNat 8 ((s.regs r).toNat >>> 8 % 256) =
+      BitVec.setWidth 8 (s.regs r >>> 8) := by
+    apply BitVec.eq_of_toNat_eq
+    simp [BitVec.toNat_setWidth, BitVec.toNat_ofNat, BitVec.toNat_ushiftRight]
+  simp [BPF.mexec, Machine.State.write, Machine.storeLE, highSpec, observeBpf, he]
 
-def highCert (m : X86RegMap) (r b t : BPF.Reg) (off : BitVec 64)
-    (hb : t ≠ b) (hf : t ≠ .r10) : X86StateEquiv m where
-  spec := highSpec r b t off
-  bpf := highBpf r b t off
-  native := highNative m r b t off
-  writeSet := [t]
-  bpfCorrect := high_bpf_correct r b t off hb hf
-  nativeCorrect := high_native_correct m r b t off hb hf
-  bpfWrites := by simp [highBpf, BPF.mwrites, BPF.MInsn.writes, BPF.Insn.dstReg]
+theorem high_native_correct (m : X86RegMap) (r b : BPF.Reg) (off : BitVec 64)
+    (hs : ∀ q, m.map q ≠ .r11) (s : X86.State) :
+    observeX86 m (X86.mexec (highNative m r b off) s) =
+      highSpec r b off (observeX86 m s) := by
+  simp only [highNative]
+  split_ifs
+  · rfl
+  · simp [X86.mexec_cons, X86.mexec_nil, X86.MInsn.step, X86.Insn.step,
+      X86.ShiftOp.eval, highSpec, observeX86, Machine.State.set, Machine.State.write,
+      X86.RegFile.set, hs]
+
+theorem high_tree_writes (r b : BPF.Reg) (off : BitVec 64) (depth base : Nat) :
+    BPF.mwrites (ModuleShiftedDispatch.tree r 8 (highLeaf b off) depth base) = [] := by
+  induction depth generalizing base with
+  | zero => simp [ModuleShiftedDispatch.tree, highLeaf, BPF.mwrites, BPF.MInsn.writes]
+  | succ k ih =>
+    simp only [ModuleShiftedDispatch.tree, BPF.mwrites, List.flatMap_append,
+      List.flatMap_cons, List.flatMap_nil, BPF.MInsn.writes, List.nil_append, List.append_nil]
+    change BPF.mwrites (ModuleShiftedDispatch.tree r 8 (highLeaf b off) k base) ++
+      BPF.mwrites (ModuleShiftedDispatch.tree r 8 (highLeaf b off) k (base+2^k)) = []
+    rw [ih, ih]
+    rfl
+
+def highCert (m : X86RegMap) (r b : BPF.Reg) (off : BitVec 64)
+    (hs : ∀ q, m.map q ≠ .r11) : X86StateEquiv m where
+  spec := highSpec r b off
+  bpf := highBpf r b off
+  native := highNative m r b off
+  writeSet := []
+  bpfCorrect := high_bpf_correct r b off
+  nativeCorrect := high_native_correct m r b off hs
+  bpfWrites := by simp [highBpf, high_tree_writes]
   nativeWrites := by
-    simp [highNative, X86.mwrites, X86.MInsn.writes, X86.Insn.dstReg, m.inj.eq_iff]
+    intro r hr
+    simp only [highNative] at hr
+    split_ifs at hr
+    · simpa [X86.mwrites, X86.MInsn.writes] using hr
+    · simpa [X86.mwrites, X86.MInsn.writes, X86.Insn.dstReg, hs] using hr
 
 inductive Operand where
   | imm (d : BPF.Reg) (v : BitVec 8)
   | store (b : BPF.Reg) (off : BitVec 16) (src : ModuleMovStore.Source)
-  | high (r b t : BPF.Reg) (off : BitVec 16)
+  | high (r b : BPF.Reg) (off : BitVec 16)
 
-def Operand.Valid : Operand → Prop
+def Operand.Valid (m : X86RegMap) : Operand → Prop
   | .imm d _ => d ≠ .r10
   | .store _ _ _ => True
-  | .high _ b t _ => t ≠ b ∧ t ≠ .r10
+  | .high _ _ _ => ∀ q, m.map q ≠ .r11
 
 /-- x86/bpf_x86_mov.c:instantiate_movb/emit_movb_x86: every IMM, STORE,
     STORE_IMM and ARCH counterpart, including both byte lanes. The store
     certificate covers all imm32 values, stronger than the decoder's imm8 range. -/
-def bpf_x86_movb (m : X86RegMap) (operand : Operand) (h : operand.Valid) : X86StateEquiv m :=
+def bpf_x86_movb (m : X86RegMap) (operand : Operand) (h : operand.Valid m) : X86StateEquiv m :=
   match operand with
   | .imm d v => immediateCert m d v
   | .store b off src => ModuleMovStore.cert m 1 b (BitVec.signExtend 64 off) src
-  | .high r b t off => highCert m r b t (BitVec.signExtend 64 off) h.1 h.2
+  | .high r b off => highCert m r b (BitVec.signExtend 64 off) h
 
 end Kinsn.ModuleMovb

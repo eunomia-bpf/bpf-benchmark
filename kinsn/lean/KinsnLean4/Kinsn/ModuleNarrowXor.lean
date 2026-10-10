@@ -75,19 +75,19 @@ def memoryCert (m : X86RegMap) (n : Nat) (hn : n = 1 ∨ n = 2) (indexed : Bool)
     cases indexed <;> simp [memoryNative, X86.mwrites, X86.MInsn.writes, m.inj.eq_iff]
 
 inductive ByteOperand where
-  | scalar (t : BPF.Reg) (src : ModuleMovStore.Source)
+  | scalar (src : ModuleMovStore.Source)
   | indexed (b i t : BPF.Reg) (scale : Nat) (off : BitVec 16)
 
 def ByteOperand.Valid (d : BPF.Reg) : ByteOperand → Prop
-  | .scalar t src => d ≠ .r10 ∧ t ≠ d ∧ t ≠ .r10 ∧ ModuleByteAlu.sourceTempValid src t
+  | .scalar src => d ≠ .r10 ∧ ModuleByteArithmetic.sourceValid src
   | .indexed _ i t scale _ => d ≠ .r10 ∧ scale ≤ 3 ∧ t ≠ d ∧ t ≠ i ∧ t ≠ .r10
 
 /-- x86/bpf_x86_alu.c:instantiate_xorb/emit_xorb_x86: all scalar and indexed
-    tags, including ARCH. The scalar cert is stronger than the imm8 range. -/
+    tags, including ARCH. The scalar certificate uses exactly the accepted imm8 range. -/
 def bpf_x86_xorb (m : X86RegMap) (d : BPF.Reg) (operand : ByteOperand)
     (h : operand.Valid d) : X86StateEquiv m :=
   match operand with
-  | .scalar t src => ModuleByteAlu.arithmeticCert m .xor d t src h.2.1 h.2.2.1 h.1 h.2.2.2
+  | .scalar src => ModuleByteArithmetic.certificate m .xor (by simp) d src h.2
   | .indexed b i t scale off => memoryCert m 1 (by simp) true d b i t scale
       (BitVec.signExtend 64 off) h.2.1 h.2.2.1 h.2.2.2.1 h.2.2.2.2 h.1
 

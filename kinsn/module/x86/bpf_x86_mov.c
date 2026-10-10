@@ -353,15 +353,24 @@ static int instantiate_mov_sib(u64 payload, struct bpf_insn *insn_buf, u8 size)
 	return cnt;
 }
 
-static int mov_store_temp(u8 src_reg, u8 base_reg)
+/* Capture bits 15:8 before the sole byte store; no register is written. */
+static int instantiate_high_store_tree(u8 src, u8 base, s16 offset,
+                                     struct bpf_insn *buf, u8 depth, u8 value)
 {
-	u8 reg;
+	int cnt = 0, branch, join;
 
-	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
-		if (reg != src_reg && reg != base_reg)
-			return reg;
+	if (!depth) {
+		buf[0] = BPF_ST_MEM(BPF_B, base, offset, value);
+		return 1;
 	}
-	return -EINVAL;
+	branch = cnt++;
+	cnt += instantiate_high_store_tree(src, base, offset, buf + cnt, depth - 1, value);
+	join = cnt++;
+	buf[branch] = BPF_JMP_IMM(BPF_JSET, src, 1U << (8 + depth - 1), cnt - branch - 1);
+	cnt += instantiate_high_store_tree(src, base, offset, buf + cnt,
+					 depth - 1, value + (1U << (depth - 1)));
+	buf[join] = BPF_JMP_A(cnt - join - 1);
+	return cnt;
 }
 
 static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf,
@@ -369,7 +378,6 @@ static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf,
 {
 	u8 src_reg, base_reg, byte_lane;
 	s16 offset;
-	int temp;
 	int err;
 
 	err = decode_store(payload,
@@ -383,15 +391,7 @@ static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf,
 		insn_buf[0] = BPF_STX_MEM(size, base_reg, src_reg, offset);
 		return 1;
 	}
-	temp = mov_store_temp(src_reg, base_reg);
-	if (temp < 0)
-		return temp;
-	insn_buf[0] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp, KINSN_X86_PROOF_RHS_OFF);
-	insn_buf[1] = BPF_MOV64_REG(temp, src_reg);
-	insn_buf[2] = BPF_ALU64_IMM(BPF_RSH, temp, 8);
-	insn_buf[3] = BPF_STX_MEM(BPF_B, base_reg, temp, offset);
-	insn_buf[4] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10, KINSN_X86_PROOF_RHS_OFF);
-	return 5;
+	return instantiate_high_store_tree(src_reg, base_reg, offset, insn_buf, 8, 0);
 }
 
 static int instantiate_mov_imm_store(u64 payload, struct bpf_insn *insn_buf,
@@ -805,22 +805,13 @@ static void emit_store_reg_prefix(u8 *buf, u32 *len, u8 size, u8 src_reg,
 	kinsn_emit_u8(buf, len, size == BPF_B ? 0x88 : 0x89);
 }
 
-static void emit_mov_store_slot(u8 *buf, u32 *len, u8 temp, u8 frame, bool load)
-{
-	kinsn_emit_rex(buf, len, true, kinsn_x86_ext(temp), false, kinsn_x86_ext(frame));
-	kinsn_emit_u8(buf, len, load ? 0x8b : 0x89);
-	kinsn_emit_modrm_mem(buf, len, temp, frame, KINSN_X86_PROOF_RHS_OFF);
-}
-
 static int emit_store_reg_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			      const struct bpf_prog *prog, u8 size, bool arch_base)
 {
 	u8 buf[32];
 	u8 src_reg, base_reg, byte_lane;
-	u8 frame = kinsn_x86_reg_for_prog(prog, BPF_REG_10);
 	s16 offset;
 	u32 len = 0;
-	int temp = -1;
 	int err;
 
 	err = decode_store(payload,
@@ -830,21 +821,21 @@ static int emit_store_reg_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return err;
 	if (byte_lane && size != BPF_B)
 		return -EINVAL;
-	if (byte_lane) {
-		temp = mov_store_temp(src_reg, base_reg);
-		if (temp < 0)
-			return temp;
-		temp = kinsn_x86_reg_for_prog(prog, temp);
-	}
 	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
 	base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
 	if (!kinsn_x86_valid(src_reg) || !kinsn_x86_valid(base_reg))
 		return -EINVAL;
-	if (temp >= 0) {
-		/* Extract bits 15:8 in a live temporary. This also supports high-byte
-		 * stores with extended bases, which cannot encode AH/CH/DH/BH.
-		 */
-		emit_mov_store_slot(buf, &len, temp, frame, false);
+	if (byte_lane && !kinsn_x86_ext(src_reg) && kinsn_x86_code(src_reg) <= 3 &&
+	    !kinsn_x86_ext(base_reg)) {
+		kinsn_emit_u8(buf, &len, 0x88);
+		kinsn_emit_modrm_mem_raw(buf, &len, kinsn_x86_code(src_reg) + 4, base_reg, offset);
+		return kinsn_emit_finish(image, off, emit, buf, len);
+	}
+	if (byte_lane) {
+		/* R11 is the JIT's AX scratch register, outside all mapped BPF
+		 * registers. Extended operands cannot encode AH/CH/DH/BH. */
+		u8 temp = KINSN_X86_REG_R11;
+
 		kinsn_emit_rex_rr(buf, &len, true, src_reg, temp);
 		kinsn_emit_u8(buf, &len, 0x89);
 		kinsn_emit_u8(buf, &len, 0xc0 | (kinsn_x86_code(src_reg) << 3) | kinsn_x86_code(temp));
@@ -856,8 +847,6 @@ static int emit_store_reg_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	}
 	emit_store_reg_prefix(buf, &len, size, src_reg, base_reg);
 	kinsn_emit_modrm_mem(buf, &len, src_reg, base_reg, offset);
-	if (temp >= 0)
-		emit_mov_store_slot(buf, &len, temp, frame, true);
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
@@ -1173,7 +1162,7 @@ static int emit_movsxd_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_movb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 4 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 766,
 	.max_emit_bytes = 32,
 	.instantiate_insn = instantiate_movb,
 	.emit_x86 = emit_movb_x86,
