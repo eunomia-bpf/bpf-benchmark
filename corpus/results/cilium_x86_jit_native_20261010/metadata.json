@@ -1,0 +1,34 @@
+{
+  "application": "cilium",
+  "architecture": "x86_64",
+  "bpf_stats_runs": {
+    "jit_native": "x86_kvm_corpus_20261010_061348_451617",
+    "jit_restart_control": "x86_kvm_corpus_20261010_062925_883934"
+  },
+  "cilium_gitlink": "1b721c2964e7799cab3e18c38066905ea240fa34",
+  "functional_gate_runs": {
+    "jit_kinsn_scoped_out": "x86_kvm_corpus_20261010_052139_855300",
+    "jit_native": "x86_kvm_corpus_20261010_052134_234335"
+  },
+  "guest": {
+    "kernel_release": "7.0.0-rc2+",
+    "memory_gib": 64,
+    "timing_vcpus": 8
+  },
+  "host": {
+    "boot_id": "04dc0087-5ccc-4c46-9997-b9a92f0e5167",
+    "cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "kernel": "7.3.0-070300rc3-generic",
+    "timing_vcpu_host_cpus": "0-7"
+  },
+  "profile_result": "cilium_profile_jit_kprog_full_20261010",
+  "repository_head_at_timing_completion": "d92d643dcbb486145e1550356fe1f7e0e66994f7",
+  "runtime_image_sha256": "94f7dc5845b38bc6c81469aee07ad3f320a00de5092d277192e09edf9ea05f44",
+  "samples_per_phase": 5,
+  "throughput_runs": {
+    "jit_native": "x86_kvm_corpus_20261010_055811_906903",
+    "jit_restart_control": "x86_kvm_corpus_20261010_054232_312523"
+  },
+  "warmups_per_phase": 1,
+  "workload_seconds": 60
+}

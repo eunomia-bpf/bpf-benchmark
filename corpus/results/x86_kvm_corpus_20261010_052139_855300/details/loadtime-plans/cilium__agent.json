@@ -1,0 +1,60 @@
+{
+  "cmd": "execute_plan",
+  "steps": [
+    {
+      "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+      "log_level": 1,
+      "name": "noop"
+    },
+    {
+      "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability phase-stable",
+      "log_level": 1,
+      "name": "map_inline"
+    },
+    {
+      "command": "bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "const_prop"
+    },
+    {
+      "command": "bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "dce"
+    },
+    {
+      "command": "bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "wide_mem"
+    },
+    {
+      "command": "bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "bounds_check_merge"
+    },
+    {
+      "command": "bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "skb_load_bytes_spec"
+    },
+    {
+      "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+      "log_level": 1,
+      "name": "noop"
+    },
+    {
+      "command": "bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "const_prop"
+    },
+    {
+      "command": "bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+      "log_level": 1,
+      "name": "dce"
+    },
+    {
+      "command": "case \"${RUN_TARGET_ARCH:-}\" in arm64|aarch64) bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode bulk_memory=disable,endian_fusion=disable,prefetch=disable ;; *) bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=force,wide-load=disable,indexed-load=disable,movbe-load=disable --bytecode-kinsn-mode bulk_memory=disable,prefetch=disable ;; esac",
+      "log_level": 1,
+      "name": "kinsn"
+    }
+  ]
+}

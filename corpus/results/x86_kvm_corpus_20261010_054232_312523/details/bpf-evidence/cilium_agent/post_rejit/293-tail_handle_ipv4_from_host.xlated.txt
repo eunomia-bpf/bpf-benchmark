@@ -1,0 +1,616 @@
+int tail_handle_ipv4_from_host(struct __sk_buff * ctx):
+; int tail_handle_ipv4_from_host(struct __ctx_buff *ctx)
+   0: (71) r6 = *(u8 *)(r1 +126)
+       71 16 7e 00 00 00 00 00
+   1: (54) w6 &= 1
+       54 06 00 00 01 00 00 00
+   2: (15) if r6 == 0x0 goto pc+7
+       15 06 07 00 00 00 00 00
+   3: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+   4: (af) r2 ^= r2
+       af 22 00 00 00 00 00 00
+   5: (85) call bpf_skb_pull_data#9375984
+       85 00 00 00 f0 10 8f 00
+   6: (15) if r0 == 0x0 goto pc+2
+       15 00 02 00 00 00 00 00
+   7: (b4) w0 = 2
+       b4 00 00 00 02 00 00 00
+   8: (95) exit
+       95 00 00 00 00 00 00 00
+   9: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+  10: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+; return ctx->cb[off];
+  11: (61) r7 = *(u32 *)(r6 +48)
+       61 67 30 00 00 00 00 00
+  12: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; ctx->cb[off] = data;
+  13: (63) *(u32 *)(r6 +48) = r1
+       63 16 30 00 00 00 00 00
+; if (!revalidate_data(ctx, &data, &data_end, &ip4))
+  14: (18) r1 = map[id:165][0]+4
+       18 21 00 00 a5 00 00 00 00 00 00 00 04 00 00 00
+; if (!revalidate_data(ctx, &data, &data_end, &ip4))
+  16: (71) r2 = *(u8 *)(r1 +0)
+       71 12 00 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data_end)
+  17: (79) r3 = *(u64 *)(r6 +80)
+       79 63 50 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data)
+  18: (79) r1 = *(u64 *)(r6 +208)
+       79 61 d0 00 00 00 00 00
+; if (data + tot_len > data_end)
+  19: (0f) r1 += r2
+       0f 21 00 00 00 00 00 00
+  20: (b4) w0 = -134
+       b4 00 00 00 7a ff ff ff
+  21: (bf) r2 = r1
+       bf 12 00 00 00 00 00 00
+  22: (07) r2 += 20
+       07 02 00 00 14 00 00 00
+; if (data + tot_len > data_end)
+  23: (2d) if r2 > r3 goto pc+135
+       2d 32 87 00 00 00 00 00
+; if (!CONFIG(enable_ipv4_fragments)) {
+  24: (18) r2 = map[id:165][0]+163
+       18 22 00 00 a5 00 00 00 00 00 00 00 a3 00 00 00
+; if (!CONFIG(enable_ipv4_fragments)) {
+  26: (71) r2 = *(u8 *)(r2 +0)
+       71 22 00 00 00 00 00 00
+; .monitor = TRACE_PAYLOAD_LEN,
+  27: (18) r1 = map[id:165][0]+84
+       18 21 00 00 a5 00 00 00 00 00 00 00 54 00 00 00
+; .monitor = TRACE_PAYLOAD_LEN,
+  29: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; volatile __u32 tc_index = ctx->tc_index;
+  30: (69) r1 = *(u16 *)(r6 +134)
+       69 61 86 00 00 00 00 00
+; volatile __u32 tc_index = ctx->tc_index;
+  31: (63) *(u32 *)(r10 -48) = r1
+       63 1a d0 ff 00 00 00 00
+; return tc_index & TC_INDEX_F_FROM_INGRESS_PROXY;
+  32: (61) r2 = *(u32 *)(r10 -48)
+       61 a2 d0 ff 00 00 00 00
+; volatile __u32 tc_index = ctx->tc_index;
+  33: (63) *(u32 *)(r10 -48) = r1
+       63 1a d0 ff 00 00 00 00
+; return tc_index & TC_INDEX_F_FROM_INGRESS_PROXY;
+  34: (54) w2 &= 1
+       54 02 00 00 01 00 00 00
+; return tc_index & TC_INDEX_F_FROM_EGRESS_PROXY;
+  35: (61) r1 = *(u32 *)(r10 -48)
+       61 a1 d0 ff 00 00 00 00
+; return tc_index & TC_INDEX_F_FROM_EGRESS_PROXY;
+  36: (54) w1 &= 2
+       54 01 00 00 02 00 00 00
+; return tc_index & TC_INDEX_F_FROM_EGRESS_PROXY;
+  37: (4c) w1 |= w2
+       4c 21 00 00 00 00 00 00
+  38: (b4) w8 = 1
+       b4 08 00 00 01 00 00 00
+; if (from_host && tc_index_from_egress_proxy(ctx)) {
+  39: (56) if w1 != 0x0 goto pc+1
+       56 01 01 00 00 00 00 00
+  40: (b4) w8 = 0
+       b4 08 00 00 00 00 00 00
+; if (!revalidate_data(ctx, &data, &data_end, &ip4))
+  41: (18) r1 = map[id:165][0]+4
+       18 21 00 00 a5 00 00 00 00 00 00 00 04 00 00 00
+; if (!revalidate_data(ctx, &data, &data_end, &ip4))
+  43: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data_end)
+  44: (79) r2 = *(u64 *)(r6 +80)
+       79 62 50 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data)
+  45: (79) r9 = *(u64 *)(r6 +208)
+       79 69 d0 00 00 00 00 00
+; if (data + tot_len > data_end)
+  46: (0f) r9 += r1
+       0f 19 00 00 00 00 00 00
+  47: (bf) r1 = r9
+       bf 91 00 00 00 00 00 00
+  48: (07) r1 += 20
+       07 01 00 00 14 00 00 00
+  49: (b4) w0 = -134
+       b4 00 00 00 7a ff ff ff
+; if (data + tot_len > data_end)
+  50: (2d) if r1 > r2 goto pc+108
+       2d 21 6c 00 00 00 00 00
+  51: (63) *(u32 *)(r10 -56) = r7
+       63 7a c8 ff 00 00 00 00
+; return __lookup_ip4_endpoint(ip4->daddr);
+  52: (61) r1 = *(u32 *)(r9 +16)
+       61 91 10 00 00 00 00 00
+  53: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+; struct endpoint_key key __align_stack_8 = {};
+  54: (63) *(u32 *)(r10 -32) = r7
+       63 7a e0 ff 00 00 00 00
+  55: (b7) r2 = 0
+       b7 02 00 00 00 00 00 00
+  56: (7b) *(u64 *)(r10 -48) = r2
+       7b 2a d0 ff 00 00 00 00
+  57: (7b) *(u64 *)(r10 -40) = r2
+       7b 2a d8 ff 00 00 00 00
+  58: (b4) w2 = 1
+       b4 02 00 00 01 00 00 00
+; key.family = ENDPOINT_KEY_IPV4;
+  59: (73) *(u8 *)(r10 -32) = r2
+       73 2a e0 ff 00 00 00 00
+; key.ip4.be32 = ip;
+  60: (63) *(u32 *)(r10 -48) = r1
+       63 1a d0 ff 00 00 00 00
+  61: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+  62: (07) r2 += -48
+       07 02 00 00 d0 ff ff ff
+; return map_lookup_elem(&cilium_lxc, &key);
+  63: (18) r1 = map[id:100]
+       18 11 00 00 64 00 00 00 00 00 00 00 00 00 00 00
+  65: (85) call __htab_map_lookup_elem#315840
+       85 00 00 00 c0 d1 04 00
+  66: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+  67: (07) r0 += 72
+       07 00 00 00 48 00 00 00
+; if (ep) {
+  68: (15) if r0 == 0x0 goto pc+44
+       15 00 2c 00 00 00 00 00
+; int l3_off = ETH_HLEN;
+  69: (18) r1 = map[id:165][0]+4
+       18 21 00 00 a5 00 00 00 00 00 00 00 04 00 00 00
+; int l3_off = ETH_HLEN;
+  71: (71) r2 = *(u8 *)(r1 +0)
+       71 12 00 00 00 00 00 00
+; if (ep->flags & ENDPOINT_MASK_HOST_DELIVERY)
+  72: (61) r1 = *(u32 *)(r0 +8)
+       61 01 08 00 00 00 00 00
+; if (ep->flags & ENDPOINT_MASK_HOST_DELIVERY)
+  73: (54) w1 &= 3
+       54 01 00 00 03 00 00 00
+  74: (61) r7 = *(u32 *)(r10 -56)
+       61 a7 c8 ff 00 00 00 00
+; if (ep->flags & ENDPOINT_MASK_HOST_DELIVERY)
+  75: (56) if w1 != 0x0 goto pc+70
+       56 01 46 00 00 00 00 00
+; mac_t router_mac = ep->node_mac;
+  76: (79) r1 = *(u64 *)(r0 +24)
+       79 01 18 00 00 00 00 00
+; mac_t router_mac = ep->node_mac;
+  77: (7b) *(u64 *)(r10 -16) = r1
+       7b 1a f0 ff 00 00 00 00
+; mac_t lxc_mac = ep->mac;
+  78: (79) r1 = *(u64 *)(r0 +16)
+       79 01 10 00 00 00 00 00
+; mac_t lxc_mac = ep->mac;
+  79: (7b) *(u64 *)(r10 -24) = r1
+       7b 1a e8 ff 00 00 00 00
+; __u8 new_ttl, ttl = ip4->ttl;
+  80: (71) r3 = *(u8 *)(r9 +8)
+       71 93 08 00 00 00 00 00
+; if (ttl <= 1)
+  81: (a6) if w3 < 0x2 goto pc+108
+       a6 03 6c 00 02 00 00 00
+  82: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+; new_ttl = ttl - 1;
+  83: (bc) w4 = w3
+       bc 34 00 00 00 00 00 00
+  84: (04) w4 += -1
+       04 04 00 00 ff ff ff ff
+; ip4->ttl = new_ttl;
+  85: (73) *(u8 *)(r9 +8) = r4
+       73 49 08 00 00 00 00 00
+; return l3_csum_replace(ctx, l3_off + offsetof(struct iphdr, check),
+  86: (04) w2 += 10
+       04 02 00 00 0a 00 00 00
+; (__u32)old_val, (__u32)new_val, len);
+  87: (54) w4 &= 255
+       54 04 00 00 ff 00 00 00
+; return l3_csum_replace(ctx, l3_off + offsetof(struct iphdr, check),
+  88: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+  89: (b4) w5 = 2
+       b4 05 00 00 02 00 00 00
+  90: (85) call bpf_l3_csum_replace#9384208
+       85 00 00 00 10 31 8f 00
+; if (IS_ERR(ret))
+  91: (c6) if w0 s< 0x0 goto pc+118
+       c6 00 76 00 00 00 00 00
+  92: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+; 
+  93: (07) r3 += -16
+       07 03 00 00 f0 ff ff ff
+; return ctx_store_bytes(ctx, off + ETH_ALEN, mac, ETH_ALEN, 0);
+  94: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+  95: (b4) w2 = 6
+       b4 02 00 00 06 00 00 00
+  96: (b4) w4 = 6
+       b4 04 00 00 06 00 00 00
+  97: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+  98: (85) call bpf_skb_store_bytes#9387088
+       85 00 00 00 50 3c 8f 00
+  99: (bc) w1 = w0
+       bc 01 00 00 00 00 00 00
+ 100: (b4) w0 = -141
+       b4 00 00 00 73 ff ff ff
+; if (smac && eth_store_saddr(ctx, smac, 0) < 0)
+ 101: (c6) if w1 s< 0x0 goto pc+57
+       c6 01 39 00 00 00 00 00
+ 102: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+; 
+ 103: (07) r3 += -24
+       07 03 00 00 e8 ff ff ff
+; return ctx_store_bytes(ctx, off, mac, ETH_ALEN, 0);
+ 104: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 105: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+ 106: (b4) w4 = 6
+       b4 04 00 00 06 00 00 00
+ 107: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+ 108: (85) call bpf_skb_store_bytes#9387088
+       85 00 00 00 50 3c 8f 00
+ 109: (bc) w1 = w0
+       bc 01 00 00 00 00 00 00
+ 110: (b4) w0 = -141
+       b4 00 00 00 73 ff ff ff
+; if (dmac && eth_store_daddr(ctx, dmac, 0) < 0)
+ 111: (c6) if w1 s< 0x0 goto pc+47
+       c6 01 2f 00 00 00 00 00
+ 112: (05) goto pc+101
+       05 00 65 00 00 00 00 00
+; info = lookup_ip4_remote_endpoint(ip4->daddr, 0);
+ 113: (61) r1 = *(u32 *)(r9 +16)
+       61 91 10 00 00 00 00 00
+ 114: (b7) r2 = 0
+       b7 02 00 00 00 00 00 00
+; struct ipcache_key key = {};
+ 115: (6b) *(u16 *)(r10 -38) = r2
+       6b 2a da ff 00 00 00 00
+ 116: (6b) *(u16 *)(r10 -40) = r2
+       6b 2a d8 ff 00 00 00 00
+ 117: (6b) *(u16 *)(r10 -36) = r2
+       6b 2a dc ff 00 00 00 00
+ 118: (6b) *(u16 *)(r10 -28) = r2
+       6b 2a e4 ff 00 00 00 00
+ 119: (6b) *(u16 *)(r10 -30) = r2
+       6b 2a e2 ff 00 00 00 00
+ 120: (6b) *(u16 *)(r10 -32) = r2
+       6b 2a e0 ff 00 00 00 00
+ 121: (6b) *(u16 *)(r10 -34) = r2
+       6b 2a de ff 00 00 00 00
+; key.cluster_id = (__u16)cluster_id;
+ 122: (63) *(u32 *)(r10 -44) = r7
+       63 7a d4 ff 00 00 00 00
+; struct ipcache_key key = {};
+ 123: (6b) *(u16 *)(r10 -26) = r7
+       6b 7a e6 ff 00 00 00 00
+ 124: (b4) w2 = 64
+       b4 02 00 00 40 00 00 00
+; key.lpm_key = (struct bpf_lpm_trie_key){ IPCACHE_PREFIX_LEN(prefix), {} };
+ 125: (63) *(u32 *)(r10 -48) = r2
+       63 2a d0 ff 00 00 00 00
+; key.family = ENDPOINT_KEY_IPV4;
+ 126: (b4) w2 = 1
+       b4 02 00 00 01 00 00 00
+ 127: (73) *(u8 *)(r10 -41) = r2
+       73 2a d7 ff 00 00 00 00
+; key.ip4.be32 = addr & GET_PREFIX(prefix);
+ 128: (63) *(u32 *)(r10 -40) = r1
+       63 1a d8 ff 00 00 00 00
+ 129: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; info = lookup_ip4_remote_endpoint(ip4->daddr, 0);
+ 130: (07) r2 += -48
+       07 02 00 00 d0 ff ff ff
+; return map_lookup_elem(map, &key);
+ 131: (18) r1 = map[id:97]
+       18 11 00 00 61 00 00 00 00 00 00 00 00 00 00 00
+ 133: (85) call trie_lookup_elem#349392
+       85 00 00 00 d0 54 05 00
+ 134: (bf) r1 = r0
+       bf 01 00 00 00 00 00 00
+; if (from_proxy) {
+ 135: (54) w8 &= 1
+       54 08 00 00 01 00 00 00
+ 136: (16) if w8 == 0x0 goto pc+4
+       16 08 04 00 00 00 00 00
+ 137: (b4) w1 = 2048
+       b4 01 00 00 00 08 00 00
+; ctx->mark = MARK_MAGIC_SKIP_TPROXY;
+ 138: (63) *(u32 *)(r6 +168) = r1
+       63 16 a8 00 00 00 00 00
+ 139: (61) r7 = *(u32 *)(r10 -56)
+       61 a7 c8 ff 00 00 00 00
+ 140: (05) goto pc+5
+       05 00 05 00 00 00 00 00
+ 141: (b4) w0 = -151
+       b4 00 00 00 69 ff ff ff
+ 142: (61) r7 = *(u32 *)(r10 -56)
+       61 a7 c8 ff 00 00 00 00
+; if (!info || identity_is_world_ipv4(info->sec_identity)) {
+ 143: (15) if r1 == 0x0 goto pc+15
+       15 01 0f 00 00 00 00 00
+; if (!info || identity_is_world_ipv4(info->sec_identity)) {
+ 144: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; if (!info || identity_is_world_ipv4(info->sec_identity)) {
+ 145: (16) if w1 == 0x2 goto pc+13
+       16 01 0d 00 02 00 00 00
+; union macaddr cilium_net_mac = CONFIG(cilium_net_mac);
+ 146: (18) r1 = map[id:165][0]+24
+       18 21 00 00 a5 00 00 00 00 00 00 00 18 00 00 00
+; union macaddr cilium_net_mac = CONFIG(cilium_net_mac);
+ 148: (79) r1 = *(u64 *)(r1 +0)
+       79 11 00 00 00 00 00 00
+ 149: (7b) *(u64 *)(r10 -48) = r1
+       7b 1a d0 ff 00 00 00 00
+ 150: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+; 
+ 151: (07) r3 += -48
+       07 03 00 00 d0 ff ff ff
+; return ctx_store_bytes(ctx, off, mac, ETH_ALEN, 0);
+ 152: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 153: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+ 154: (b4) w4 = 6
+       b4 04 00 00 06 00 00 00
+ 155: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+ 156: (85) call bpf_skb_store_bytes#9387088
+       85 00 00 00 50 3c 8f 00
+; 
+ 157: (c4) w0 s>>= 31
+       c4 00 00 00 1f 00 00 00
+ 158: (54) w0 &= -141
+       54 00 00 00 73 ff ff ff
+; if (IS_ERR(ret))
+ 159: (66) if w0 s> 0xffffffff goto pc+49
+       66 00 31 00 ff ff ff ff
+ 160: (b4) w1 = 62587138
+       b4 01 00 00 02 01 bb 03
+; ctx->cb[off] = data;
+ 161: (63) *(u32 *)(r6 +64) = r1
+       63 16 40 00 00 00 00 00
+ 162: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; ctx->cb[off] = data;
+ 163: (63) *(u32 *)(r6 +60) = r1
+       63 16 3c 00 00 00 00 00
+; ctx->cb[off] = data;
+ 164: (63) *(u32 *)(r6 +52) = r1
+       63 16 34 00 00 00 00 00
+; ctx->cb[off] = data;
+ 165: (63) *(u32 *)(r6 +48) = r7
+       63 76 30 00 00 00 00 00
+; return send_drop_notify_error_ext(ctx, src_sec_identity, ret, ext_err,
+ 166: (84) w0 = -w0
+       84 00 00 00 00 00 00 00
+; ctx->cb[off] = data;
+ 167: (63) *(u32 *)(r6 +56) = r0
+       63 06 38 00 00 00 00 00
+; return ctx->len;
+ 168: (61) r7 = *(u32 *)(r6 +112)
+       61 67 70 00 00 00 00 00
+ 169: (18) r1 = 0x103bb0100
+       18 01 00 00 00 01 bb 03 00 00 00 00 01 00 00 00
+; struct metrics_key key = {};
+ 171: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+; key.reason = reason;
+ 172: (73) *(u8 *)(r10 -8) = r0
+       73 0a f8 ff 00 00 00 00
+ 173: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 174: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; entry = map_lookup_elem(&cilium_metrics, &key);
+ 175: (18) r1 = map[id:98]
+       18 11 00 00 62 00 00 00 00 00 00 00 00 00 00 00
+ 177: (85) call __htab_map_lookup_elem#315840
+       85 00 00 00 c0 d1 04 00
+ 178: (15) if r0 == 0x0 goto pc+3
+       15 00 03 00 00 00 00 00
+ 179: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+ 180: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+ 181: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+; if (entry) {
+ 182: (15) if r0 == 0x0 goto pc+9
+       15 00 09 00 00 00 00 00
+; entry->count += 1;
+ 183: (79) r1 = *(u64 *)(r0 +0)
+       79 01 00 00 00 00 00 00
+ 184: (07) r1 += 1
+       07 01 00 00 01 00 00 00
+ 185: (7b) *(u64 *)(r0 +0) = r1
+       7b 10 00 00 00 00 00 00
+; entry->bytes += bytes;
+ 186: (79) r1 = *(u64 *)(r0 +8)
+       79 01 08 00 00 00 00 00
+ 187: (0f) r1 += r7
+       0f 71 00 00 00 00 00 00
+ 188: (7b) *(u64 *)(r0 +8) = r1
+       7b 10 08 00 00 00 00 00
+ 189: (05) goto pc+13
+       05 00 0d 00 00 00 00 00
+ 190: (b4) w0 = -196
+       b4 00 00 00 3c ff ff ff
+ 191: (05) goto pc-33
+       05 00 df ff 00 00 00 00
+; new_entry.bytes = bytes;
+ 192: (7b) *(u64 *)(r10 -40) = r7
+       7b 7a d8 ff 00 00 00 00
+ 193: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; new_entry.count = 1;
+ 194: (7b) *(u64 *)(r10 -48) = r1
+       7b 1a d0 ff 00 00 00 00
+ 195: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 196: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+ 197: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+ 198: (07) r3 += -48
+       07 03 00 00 d0 ff ff ff
+; map_update_elem(&cilium_metrics, &key, &new_entry, 0);
+ 199: (18) r1 = map[id:98]
+       18 11 00 00 62 00 00 00 00 00 00 00 00 00 00 00
+ 201: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 202: (85) call htab_percpu_map_update_elem#326288
+       85 00 00 00 90 fa 04 00
+; tail_call_static(ctx, cilium_calls, index);
+ 203: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 204: (18) r2 = map[id:166]
+       18 12 00 00 a6 00 00 00 00 00 00 00 00 00 00 00
+ 206: (b7) r3 = 1
+       b7 03 00 00 01 00 00 00
+ 207: (85) call bpf_tail_call#12
+       85 00 00 00 0c 00 00 00
+ 208: (b4) w0 = 2
+       b4 00 00 00 02 00 00 00
+; return tail_handle_ipv4(ctx, ipcache_srcid, true);
+ 209: (95) exit
+       95 00 00 00 00 00 00 00
+ 210: (bc) w1 = w0
+       bc 01 00 00 00 00 00 00
+; 
+ 211: (c4) w0 s>>= 31
+       c4 00 00 00 1f 00 00 00
+ 212: (54) w0 &= -153
+       54 00 00 00 67 ff ff ff
+; if (ret != CTX_ACT_OK)
+ 213: (c6) if w1 s< 0x0 goto pc-55
+       c6 01 c9 ff 00 00 00 00
+; return ctx->len;
+ 214: (61) r7 = *(u32 *)(r6 +112)
+       61 67 70 00 00 00 00 00
+ 215: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; struct metrics_value *entry, new_entry = {};
+ 216: (7b) *(u64 *)(r10 -40) = r1
+       7b 1a d8 ff 00 00 00 00
+ 217: (7b) *(u64 *)(r10 -48) = r1
+       7b 1a d0 ff 00 00 00 00
+ 218: (18) r1 = 0x6d00840100
+       18 01 00 00 00 01 84 00 00 00 00 00 6d 00 00 00
+; struct metrics_key key = {};
+ 220: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+ 221: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 222: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; entry = map_lookup_elem(&cilium_metrics, &key);
+ 223: (18) r1 = map[id:98]
+       18 11 00 00 62 00 00 00 00 00 00 00 00 00 00 00
+ 225: (85) call __htab_map_lookup_elem#315840
+       85 00 00 00 c0 d1 04 00
+ 226: (15) if r0 == 0x0 goto pc+3
+       15 00 03 00 00 00 00 00
+ 227: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+ 228: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+ 229: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+; if (entry) {
+ 230: (15) if r0 == 0x0 goto pc+7
+       15 00 07 00 00 00 00 00
+; entry->count += 1;
+ 231: (79) r1 = *(u64 *)(r0 +0)
+       79 01 00 00 00 00 00 00
+ 232: (07) r1 += 1
+       07 01 00 00 01 00 00 00
+ 233: (7b) *(u64 *)(r0 +0) = r1
+       7b 10 00 00 00 00 00 00
+; entry->bytes += bytes;
+ 234: (79) r1 = *(u64 *)(r0 +8)
+       79 01 08 00 00 00 00 00
+ 235: (0f) r1 += r7
+       0f 71 00 00 00 00 00 00
+ 236: (7b) *(u64 *)(r0 +8) = r1
+       7b 10 08 00 00 00 00 00
+ 237: (05) goto pc+11
+       05 00 0b 00 00 00 00 00
+; new_entry.bytes = bytes;
+ 238: (7b) *(u64 *)(r10 -40) = r7
+       7b 7a d8 ff 00 00 00 00
+ 239: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; new_entry.count = 1;
+ 240: (7b) *(u64 *)(r10 -48) = r1
+       7b 1a d0 ff 00 00 00 00
+ 241: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 242: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+ 243: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+ 244: (07) r3 += -48
+       07 03 00 00 d0 ff ff ff
+; map_update_elem(&cilium_metrics, &key, &new_entry, 0);
+ 245: (18) r1 = map[id:98]
+       18 11 00 00 62 00 00 00 00 00 00 00 00 00 00 00
+ 247: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 248: (85) call htab_percpu_map_update_elem#326288
+       85 00 00 00 90 fa 04 00
+ 249: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+; ctx->cb[off] = data;
+ 250: (63) *(u32 *)(r6 +60) = r1
+       63 16 3c 00 00 00 00 00
+; ctx->cb[off] = data;
+ 251: (63) *(u32 *)(r6 +52) = r1
+       63 16 34 00 00 00 00 00
+ 252: (61) r7 = *(u32 *)(r10 -56)
+       61 a7 c8 ff 00 00 00 00
+; ctx->cb[off] = data;
+ 253: (63) *(u32 *)(r6 +48) = r7
+       63 76 30 00 00 00 00 00
+ 254: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; ctx->cb[off] = data;
+ 255: (63) *(u32 *)(r6 +64) = r1
+       63 16 40 00 00 00 00 00
+; ctx->cb[off] = data;
+ 256: (63) *(u32 *)(r6 +56) = r1
+       63 16 38 00 00 00 00 00
+; return tail_call_policy(ctx, ep->lxc_id);
+ 257: (69) r3 = *(u16 *)(r8 +6)
+       69 83 06 00 00 00 00 00
+; tail_call(ctx, map, slot);
+ 258: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 259: (18) r2 = map[id:106]
+       18 12 00 00 6a 00 00 00 00 00 00 00 00 00 00 00
+ 261: (85) call bpf_tail_call#12
+       85 00 00 00 0c 00 00 00
+ 262: (b4) w0 = -203
+       b4 00 00 00 35 ff ff ff
+ 263: (05) goto pc-105
+       05 00 97 ff 00 00 00 00

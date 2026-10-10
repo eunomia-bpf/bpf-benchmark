@@ -1,0 +1,257 @@
+{
+  "bpf_cost": {
+    "cost_control": {
+      "baseline": {
+        "active_programs": 8,
+        "hot_cil_from_container_ns_per_run": [
+          695.5884678328694,
+          1934.212810328593
+        ],
+        "pooled_ns_per_run": 988.2031462877474,
+        "programs": 53,
+        "run_count": 255480002,
+        "run_time_ns": 252466141790
+      },
+      "baseline_over_post_cost_ratio": 1.087010763006066,
+      "hot_ranked_baseline_over_post_ratios": [
+        1.0782216693637239,
+        1.1189773059517172
+      ],
+      "post_rejit": {
+        "active_programs": 8,
+        "hot_cil_from_container_ns_per_run": [
+          645.1256616307363,
+          1728.554100284901
+        ],
+        "pooled_ns_per_run": 909.1015286315364,
+        "programs": 53,
+        "run_count": 269944385,
+        "run_time_ns": 245406853049
+      }
+    },
+    "cost_kprog": {
+      "baseline": {
+        "active_programs": 8,
+        "hot_cil_from_container_ns_per_run": [
+          648.5847323522897,
+          1755.4846527914763
+        ],
+        "pooled_ns_per_run": 913.6960186243948,
+        "programs": 56,
+        "run_count": 266886525,
+        "run_time_ns": 243853155317
+      },
+      "baseline_over_post_cost_ratio": 1.2285384057310824,
+      "hot_ranked_baseline_over_post_ratios": [
+        1.245359631302312,
+        1.2088788436330191
+      ],
+      "post_rejit": {
+        "active_programs": 6,
+        "hot_cil_from_container_ns_per_run": [
+          520.8011533777147,
+          1452.1592978794747
+        ],
+        "pooled_ns_per_run": 743.7260523252993,
+        "programs": 56,
+        "run_count": 291360856,
+        "run_time_ns": 216692659235
+      }
+    }
+  },
+  "control_adjusted": {
+    "bpf_cost_ratio": 1.130198934124286,
+    "throughput_ratio": 1.5017738438145116,
+    "warning": "Separate treatment/control runs had large and inconsistent restart drift; adjusted ratios are diagnostic, not primary estimates."
+  },
+  "outcomes": {
+    "cost_control": {
+      "baseline": {
+        "allow_direction_1": 255479968,
+        "allow_direction_2": 255479974,
+        "component_errors": 0,
+        "other_verdicts": 8,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 255479990,
+        "sent": 255479352
+      },
+      "post_rejit": {
+        "allow_direction_1": 269944352,
+        "allow_direction_2": 269944356,
+        "component_errors": 0,
+        "other_verdicts": 7,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 269944376,
+        "sent": 269943736
+      }
+    },
+    "cost_kprog": {
+      "baseline": {
+        "allow_direction_1": 266886494,
+        "allow_direction_2": 266886500,
+        "component_errors": 0,
+        "other_verdicts": 8,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 266886513,
+        "sent": 266885880
+      },
+      "post_rejit": {
+        "allow_direction_1": 291360804,
+        "allow_direction_2": 291360807,
+        "component_errors": 0,
+        "other_verdicts": 6,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 291360828,
+        "sent": 291360188
+      }
+    },
+    "throughput_control": {
+      "baseline": {
+        "allow_direction_1": 241693974,
+        "allow_direction_2": 241693980,
+        "component_errors": 0,
+        "other_verdicts": 8,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 241693997,
+        "sent": 241693356
+      },
+      "post_rejit": {
+        "allow_direction_1": 193376008,
+        "allow_direction_2": 193376012,
+        "component_errors": 0,
+        "other_verdicts": 7,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 193376028,
+        "sent": 193375387
+      }
+    },
+    "throughput_kprog": {
+      "baseline": {
+        "allow_direction_1": 254074585,
+        "allow_direction_2": 254074591,
+        "component_errors": 0,
+        "other_verdicts": 8,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 254074608,
+        "sent": 254073969
+      },
+      "post_rejit": {
+        "allow_direction_1": 309685321,
+        "allow_direction_2": 309685324,
+        "component_errors": 0,
+        "other_verdicts": 7,
+        "reason_133": 0,
+        "receiver_drops": 0,
+        "receiver_errors": 0,
+        "receiver_packets": 309685340,
+        "sent": 309684705
+      }
+    }
+  },
+  "runs": {
+    "cost_control": "x86_kvm_corpus_20261010_062925_883934",
+    "cost_kprog": "x86_kvm_corpus_20261010_061348_451617",
+    "throughput_control": "x86_kvm_corpus_20261010_054232_312523",
+    "throughput_kprog": "x86_kvm_corpus_20261010_055811_906903"
+  },
+  "throughput": {
+    "cost_control": {
+      "baseline_pps": {
+        "max": 892869,
+        "median": 890636,
+        "min": 786767,
+        "n": 5
+      },
+      "paired_post_over_baseline": {
+        "max": 1.1503698045291681,
+        "median": 1.0216539300513394,
+        "min": 0.9850549184706827,
+        "n": 5
+      },
+      "post_pps": {
+        "max": 910027,
+        "median": 905073,
+        "min": 879525,
+        "n": 5
+      },
+      "ratio_of_medians": 1.0162097647074675
+    },
+    "cost_kprog": {
+      "baseline_pps": {
+        "max": 901763,
+        "median": 894425,
+        "min": 868711,
+        "n": 5
+      },
+      "paired_post_over_baseline": {
+        "max": 1.1185871941301537,
+        "median": 1.0982463593929062,
+        "min": 1.0704660391976166,
+        "n": 5
+      },
+      "post_pps": {
+        "max": 990715,
+        "median": 971729,
+        "min": 947857,
+        "n": 5
+      },
+      "ratio_of_medians": 1.0864287111831623
+    },
+    "throughput_control": {
+      "baseline_pps": {
+        "max": 849329,
+        "median": 798259,
+        "min": 769300,
+        "n": 5
+      },
+      "paired_post_over_baseline": {
+        "max": 0.9244884960353568,
+        "median": 0.7902403788748429,
+        "min": 0.695410141417519,
+        "n": 5
+      },
+      "post_pps": {
+        "max": 711209,
+        "median": 645188,
+        "min": 590632,
+        "n": 5
+      },
+      "ratio_of_medians": 0.8082439408763321
+    },
+    "throughput_kprog": {
+      "baseline_pps": {
+        "max": 912163,
+        "median": 843734,
+        "min": 775949,
+        "n": 5
+      },
+      "paired_post_over_baseline": {
+        "max": 1.3048344672136958,
+        "median": 1.217861068050163,
+        "min": 1.1227423168885386,
+        "n": 5
+      },
+      "post_pps": {
+        "max": 1076259,
+        "median": 1024124,
+        "min": 1012485,
+        "n": 5
+      },
+      "ratio_of_medians": 1.2137996098296382
+    }
+  }
+}
