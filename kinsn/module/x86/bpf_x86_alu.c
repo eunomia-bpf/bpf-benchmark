@@ -341,40 +341,68 @@ static int x86_alu_narrow_temp(const struct kinsn_x86_alu_payload *alu)
 	return -EINVAL;
 }
 
+/* Decode the original byte entirely in control flow before writing dst.
+ * Each leaf replaces only that byte; all other registers and memory survive. */
+static int instantiate_narrow_byte_tree(u8 dst, struct bpf_insn *insn_buf,
+				       u8 op, u8 depth, u8 value, u8 count)
+{
+	int cnt = 0;
+	int branch;
+	int join;
+	u8 shifted;
+
+	if (!depth) {
+		shifted = op == BPF_LSH ? value << count : value >> count;
+		insn_buf[0] = BPF_ALU64_IMM(BPF_AND, dst, -256);
+		insn_buf[1] = BPF_ALU64_IMM(BPF_OR, dst, shifted);
+		return 2;
+	}
+	branch = cnt++;
+	cnt += instantiate_narrow_byte_tree(dst, insn_buf + cnt, op, depth - 1, value, count);
+	join = cnt++;
+	insn_buf[branch] = BPF_JMP_IMM(BPF_JSET, dst, 1U << (depth - 1), cnt - branch - 1);
+	cnt += instantiate_narrow_byte_tree(dst, insn_buf + cnt, op, depth - 1,
+					   value + (1U << (depth - 1)), count);
+	insn_buf[join] = BPF_JMP_A(cnt - join - 1);
+	return cnt;
+}
+
 static int instantiate_narrow_shift_leaf(const struct kinsn_x86_alu_payload *alu,
 					struct bpf_insn *insn_buf, u8 op,
-					u8 width, u8 temp, u8 count)
+					u8 count)
 {
-	u32 mask = (1U << width) - 1;
-
-	insn_buf[0] = BPF_ALU64_IMM(BPF_AND, alu->dst_reg, mask);
-	insn_buf[1] = BPF_ALU64_IMM(op, alu->dst_reg, count);
-	insn_buf[2] = BPF_ALU64_IMM(BPF_AND, alu->dst_reg, mask);
-	insn_buf[3] = BPF_ALU64_REG(BPF_OR, alu->dst_reg, temp);
-	return 4;
+	if (!count) {
+		insn_buf[0] = BPF_JMP_A(0);
+		return 1;
+	}
+	if (count >= 8) {
+		insn_buf[0] = BPF_ALU64_IMM(BPF_AND, alu->dst_reg, -256);
+		return 1;
+	}
+	return instantiate_narrow_byte_tree(alu->dst_reg, insn_buf, op, 8, 0, count);
 }
 
 /* Capture all five CL count bits before the chosen leaf writes dst, including
- * dst=CL. The one saved high-lane temporary is untouched by the dispatch.
+ * dst=CL. Neither dispatch borrows a register or stack slot.
  */
 static int instantiate_narrow_shift_tree(const struct kinsn_x86_alu_payload *alu,
 					struct bpf_insn *insn_buf, u8 op,
-					u8 width, u8 temp, u8 depth, u8 base)
+					u8 depth, u8 base)
 {
 	int cnt = 0;
 	int branch;
 	int join;
 
 	if (!depth)
-		return instantiate_narrow_shift_leaf(alu, insn_buf, op, width, temp, base);
+		return instantiate_narrow_shift_leaf(alu, insn_buf, op, base);
 	branch = cnt++;
 	cnt += instantiate_narrow_shift_tree(alu, insn_buf + cnt, op,
-					    width, temp, depth - 1, base);
+					    depth - 1, base);
 	join = cnt++;
 	insn_buf[branch] = BPF_JMP_IMM(BPF_JSET, BPF_REG_4,
 				      1U << (depth - 1), cnt - branch - 1);
-	cnt += instantiate_narrow_shift_tree(alu, insn_buf + cnt, op, width,
-					    temp, depth - 1, base + (1U << (depth - 1)));
+	cnt += instantiate_narrow_shift_tree(alu, insn_buf + cnt, op,
+					    depth - 1, base + (1U << (depth - 1)));
 	insn_buf[join] = BPF_JMP_A(cnt - join - 1);
 	return cnt;
 }
@@ -407,29 +435,25 @@ static int instantiate_x86_alu_narrow(u64 payload, struct bpf_insn *insn_buf,
 	} else if (!reg_src && (alu.imm < 0 || alu.imm >= (1U << width))) {
 		return -EINVAL;
 	}
+	if (x86_alu_is_shift(op)) {
+		if (reg_src)
+			return instantiate_narrow_shift_tree(&alu, insn_buf, op, 5, 0);
+		return instantiate_narrow_shift_leaf(&alu, insn_buf, op, alu.imm);
+	}
 	temp = x86_alu_narrow_temp(&alu);
 	if (temp < 0)
 		return temp;
 	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp, KINSN_X86_PROOF_RHS_OFF);
 	insn_buf[cnt++] = BPF_MOV64_REG(temp, alu.dst_reg);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, temp, -(1U << width));
-	if (x86_alu_is_shift(op)) {
-		if (reg_src)
-			cnt += instantiate_narrow_shift_tree(&alu, insn_buf + cnt,
-							    op, width, temp, 5, 0);
-		else
-			cnt += instantiate_narrow_shift_leaf(&alu, insn_buf + cnt,
-							    op, width, temp, alu.imm);
-	} else {
-		if (reg_src)
-			err = emit_bpf_alu_reg(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.src_reg);
-		else
-			err = emit_bpf_alu_imm(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.imm);
-		if (err)
-			return err;
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, alu.dst_reg, (1U << width) - 1);
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, alu.dst_reg, temp);
-	}
+	if (reg_src)
+		err = emit_bpf_alu_reg(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.src_reg);
+	else
+		err = emit_bpf_alu_imm(&insn_buf[cnt++], op, 64, alu.dst_reg, alu.imm);
+	if (err)
+		return err;
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, alu.dst_reg, (1U << width) - 1);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, alu.dst_reg, temp);
 	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10, KINSN_X86_PROOF_RHS_OFF);
 	return cnt;
 }
@@ -788,7 +812,7 @@ static int emit_x86_alu_narrow(u8 *image, u32 *off, bool emit, u64 payload,
 	if (!kinsn_x86_valid(dst_reg))
 		return -EINVAL;
 
-	if (op != BPF_AND && op != BPF_OR) {
+	if (op != BPF_AND && op != BPF_OR && !x86_alu_is_shift(op)) {
 		temp = x86_alu_narrow_temp(alu);
 		if (temp < 0)
 			return temp;
@@ -1235,7 +1259,7 @@ const struct bpf_kinsn bpf_x86_subb_desc = {
 
 const struct bpf_kinsn bpf_x86_shlb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 194,
+	.max_insn_cnt = 7241,
 	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_shlb,
 	.emit_x86 = emit_shlb_x86,
@@ -1243,7 +1267,7 @@ const struct bpf_kinsn bpf_x86_shlb_desc = {
 
 const struct bpf_kinsn bpf_x86_shrb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 194,
+	.max_insn_cnt = 7241,
 	.max_emit_bytes = 24,
 	.instantiate_insn = instantiate_shrb,
 	.emit_x86 = emit_shrb_x86,

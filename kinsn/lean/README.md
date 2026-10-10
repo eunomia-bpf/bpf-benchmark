@@ -274,14 +274,14 @@ The table follows the requested category order.
 | `bpf_x86_rolw` | `x86/bpf_x86_byteorder.c:instantiate_rolw_imm` | `x86/bpf_x86_byteorder.c:emit_rolw_imm_x86` | `ModuleByteorder.bpf_x86_rolw` | proved | 16-bit swap upper bits disagreed |
 | `bpf_x86_sarl` | `x86/bpf_x86_alu.c:instantiate_sarl` | `x86/bpf_x86_alu.c:emit_sarl_x86` | `ModuleAluShift.bpf_x86_sarl` | proved | scratch restore overwrote destination |
 | `bpf_x86_sarq` | `x86/bpf_x86_alu.c:instantiate_sarq` | `x86/bpf_x86_alu.c:emit_sarq_x86` | `ModuleAluShift.bpf_x86_sarq` | proved | scratch restore overwrote destination |
-| `bpf_x86_shlb` | `x86/bpf_x86_alu.c:instantiate_shlb` | `x86/bpf_x86_alu.c:emit_shlb_x86` | `ModuleByteAlu.bpf_x86_shlb` | proved | scratch/ARCH aliases; aliased CL count changed before read |
+| `bpf_x86_shlb` | `x86/bpf_x86_alu.c:instantiate_shlb` | `x86/bpf_x86_alu.c:emit_shlb_x86` | `ModuleByteAlu.bpf_x86_shlb` | proved | destination-only byte dispatch; June SHL/SHR restored |
 | `bpf_x86_shldl` | `x86/bpf_x86_shd.c:instantiate_shldl_imm` | `x86/bpf_x86_shd.c:emit_shldl_imm_x86` | `ModuleShd.bpf_x86_shldl` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
 | `bpf_x86_shldq` | `x86/bpf_x86_shd.c:instantiate_shldq_imm` | `x86/bpf_x86_shd.c:emit_shldq_imm_x86` | `ModuleShd.bpf_x86_shldq` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
 | `bpf_x86_shll` | `x86/bpf_x86_alu.c:instantiate_shll` | `x86/bpf_x86_alu.c:emit_shll_x86` | `ModuleAluShift.bpf_x86_shll` | proved | scratch restore overwrote destination |
 | `bpf_x86_shlq` | `x86/bpf_x86_alu.c:instantiate_shlq` | `x86/bpf_x86_alu.c:emit_shlq_x86` | `ModuleAluShift.bpf_x86_shlq` | proved | scratch restore overwrote destination |
 | `bpf_x86_shlxl` | `x86/bpf_x86_bmi2_shift.c:instantiate_shlxl` | `x86/bpf_x86_bmi2_shift.c:emit_shlxl_x86` | `ModuleBmiShift.bpf_x86_shlxl` | proved | scratch restore overwrote destination |
 | `bpf_x86_shlxq` | `x86/bpf_x86_bmi2_shift.c:instantiate_shlxq` | `x86/bpf_x86_bmi2_shift.c:emit_shlxq_x86` | `ModuleBmiShift.bpf_x86_shlxq` | proved | scratch restore overwrote destination |
-| `bpf_x86_shrb` | `x86/bpf_x86_alu.c:instantiate_shrb` | `x86/bpf_x86_alu.c:emit_shrb_x86` | `ModuleByteAlu.bpf_x86_shrb` | proved | scratch/ARCH aliases; aliased CL count changed before read |
+| `bpf_x86_shrb` | `x86/bpf_x86_alu.c:instantiate_shrb` | `x86/bpf_x86_alu.c:emit_shrb_x86` | `ModuleByteAlu.bpf_x86_shrb` | proved | destination-only byte dispatch; June SHL/SHR restored |
 | `bpf_x86_shrdl` | `x86/bpf_x86_shd.c:instantiate_shrdl_imm` | `x86/bpf_x86_shd.c:emit_shrdl_imm_x86` | `ModuleShd.bpf_x86_shrdl` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
 | `bpf_x86_shrdq` | `x86/bpf_x86_shd.c:instantiate_shrdq_imm` | `x86/bpf_x86_shd.c:emit_shrdq_imm_x86` | `ModuleShd.bpf_x86_shrdq` | proved | destination-only XOR/mask/XOR and rotation; June SHD restored |
 | `bpf_x86_shrl` | `x86/bpf_x86_alu.c:instantiate_shrl` | `x86/bpf_x86_alu.c:emit_shrl_x86` | `ModuleAluShift.bpf_x86_shrl` | proved | scratch restore overwrote destination |
@@ -349,3 +349,9 @@ The October 10 SHLD/SHRD certificates write only the destination. For distinct
 operands the proof has `5 + 5*r` instructions; for self-source it has `1 + 5*r`,
 where `r=n` for SHLD and `r=width-n` for SHRD. The registered maxima are 160
 (32-bit) and 320 (64-bit). The native block is the single June SHLD/SHRD.
+
+The October 10 SHLB/SHRB certificates preserve every register except the
+destination and preserve memory and accesses. Byte dispatch takes 1 instruction
+for counts 0 or at least 8, 1,022 for other immediate counts, and 7,241 for CL.
+The outer CL tree finishes its count decisions before the byte tree writes dst,
+including dst=CL. Native code is the single June byte shift.
