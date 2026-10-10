@@ -68,6 +68,7 @@ RUN apt-get update \
         php-cli \
         procps \
         python3 \
+        python3-pyelftools \
         python3-yaml \
         ruby \
         stress-ng \
@@ -194,6 +195,10 @@ COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
 COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
 COPY --link --from=runner-runtime-host-runner-build /native_loader/libnative_loader.so /usr/local/lib/bpfrejit/libnative_loader.so
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
+COPY --chmod=0644 vendor/bpf/native_compat.h /usr/local/lib/bpfrejit/native/native_compat.h
+COPY --chmod=0755 vendor/bpf/write_native_manifest.py /usr/local/lib/bpfrejit/native/write_native_manifest.py
+COPY vendor/bpf/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf
+COPY vendor/repos/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf-original
 COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs

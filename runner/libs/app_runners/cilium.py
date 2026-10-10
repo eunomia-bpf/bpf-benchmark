@@ -24,7 +24,7 @@ from ..benchmark_net import (
 )
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
-from .native_loader_env import native_loader_manifest_env
+from .native_loader_env import native_loader_enabled, native_loader_manifest_env
 from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
 
@@ -351,6 +351,15 @@ class CiliumRunner(NativeProcessRunner):
 
 
     def _command_env(self) -> Mapping[str, str] | None:
+        if native_loader_enabled():
+            from ..cilium_native_build import prepare_cilium_native_runtime
+
+            configured = os.environ.get("BPFREJIT_CILIUM_NATIVE_EVIDENCE_DIR", "").strip()
+            if not configured:
+                raise RuntimeError(
+                    "Cilium native loader requires BPFREJIT_CILIUM_NATIVE_EVIDENCE_DIR"
+                )
+            return prepare_cilium_native_runtime(Path(configured))
         env = native_loader_manifest_env("cilium")
         return env or None
 

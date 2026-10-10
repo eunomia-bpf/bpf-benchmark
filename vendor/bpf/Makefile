@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
-.PHONY: all clean vmlinux katran bcc tetragon cilium otel tracee native-katran native-bcc native-otel native-cilium native-tracee native-tetragon native-artifacts
+.PHONY: all clean vmlinux katran bcc tetragon cilium otel tracee native-katran native-bcc native-otel native-tracee native-tetragon native-artifacts
 
 ROOT := $(abspath ../..)
 VENDOR := $(ROOT)/vendor
@@ -41,7 +41,6 @@ NATIVE_STAGE_ROOT := $(BUILD)/$(ARCH)/stage
 KATRAN_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/katran
 BCC_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/bcc
 OTEL_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/otelcol-ebpf-profiler
-CILIUM_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/cilium
 TRACEE_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tracee
 TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
@@ -68,8 +67,6 @@ KATRAN_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/katran/%.native.o,$(KATRAN_OBJS
 KATRAN_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/katran/%.proof.ok,$(KATRAN_OBJS))
 BCC_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/bcc/%.native.o,$(BCC_TOOLS))
 BCC_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/bcc/%.proof.ok,$(BCC_TOOLS))
-CILIUM_NATIVE_OBJS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.native.o,$(CILIUM_OBJS))
-CILIUM_NATIVE_PROOF_MARKERS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.proof.ok,$(CILIUM_OBJS))
 OTEL_EBPF_DIR := otel/support/ebpf
 OTEL_NATIVE_UNIT_SRCS := $(wildcard $(OTEL_EBPF_DIR)/*.ebpf.c)
 OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel/%.native.o,$(OTEL_NATIVE_UNIT_SRCS))
@@ -81,34 +78,6 @@ TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
 TRACEE_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/tracee/tracee.proof.ok
 TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok,$(TRACEE_LSM_SUPPORT_SRCS))
 TRACEE_NATIVE_PROOF_MARKERS := $(TRACEE_NATIVE_PROOF_MARKER) $(TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS)
-
-CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
-	-DPOLICY_AUDIT_MODE=1 \
-	-DENABLE_ROUTING=1 -DPOLICY_VERDICT_NOTIFY=1 \
-	-DMONITOR_AGGREGATION=3 -DCT_REPORT_FLAGS=0x0002 \
-	-DENABLE_HOST_FIREWALL=1 \
-	-DENABLE_MASQUERADE_IPV4=1 \
-	-DENABLE_NODEPORT=1 -DENABLE_NODEPORT_ACCELERATION=1 \
-	-DENABLE_DSR_ICMP_ERRORS=1 -DENABLE_DSR=1 -DENABLE_DSR_BYUSER=1 \
-	-DENABLE_HOST_ROUTING=1 -DSERVICE_NO_BACKEND_RESPONSE=1 \
-	-DBPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED=0
-CILIUM_MAX_LB_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) \
-	-DENCAP_IFINDEX=1 -DTUNNEL_MODE=1 \
-	-DLB_SELECTION_PER_SERVICE=1 -DLB_SELECTION_MAGLEV=2 \
-	-DLB_SELECTION_RANDOM=1
-CILIUM_MAX_OVERLAY_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) -DENCAP_IFINDEX=1 \
-	-DTUNNEL_MODE=1 \
-	-DLB_SELECTION_PER_SERVICE=1 -DLB_SELECTION_MAGLEV=2 \
-	-DLB_SELECTION_RANDOM=1
-CILIUM_MAX_HOST_OPTIONS := $(filter-out -DENABLE_HOST_FIREWALL=1,$(CILIUM_MAX_BASE_OPTIONS)) -DENCAP_IFINDEX=1
-CILIUM_MAX_WIREGUARD_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) \
-	-DENCAP_IFINDEX=1 -DTUNNEL_MODE=1 -DENABLE_WIREGUARD=1
-CILIUM_XDP_BASE_OPTIONS := $(filter-out -DENABLE_NODEPORT_ACCELERATION=1,$(CILIUM_MAX_BASE_OPTIONS))
-CILIUM_MAX_XDP_OPTIONS := $(CILIUM_XDP_BASE_OPTIONS) \
-	-DLB_SELECTION_PER_SERVICE=1 -DLB_SELECTION_MAGLEV=2 \
-	-DLB_SELECTION_RANDOM=1
-CILIUM_MAX_LXC_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) -DENCAP_IFINDEX=1
-CILIUM_SIMPLE_OPTIONS := -DENABLE_IPV4=1
 
 all: vmlinux katran bcc tetragon cilium otel tracee
 
@@ -201,25 +170,6 @@ $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c $(BCC_VMLINUX_H) native_c
 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/$(BPF_TARGET_ARCH)" \
 		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
-		$(NATIVE_SYS_INCLUDE_FLAGS) \
-		-o "$@" "$<"
-
-$(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LXC_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_overlay.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_OVERLAY_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_sock.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LB_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_host.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_HOST_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_WIREGUARD_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
-
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h Makefile
-	install -d "$(dir $@)"
-	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
-		-include "$(CURDIR)/native_compat.h" \
-		-I"$(CURDIR)/cilium/bpf" -I"$(CURDIR)/cilium/bpf/include" \
-		-I"$(CURDIR)/cilium/bpf/include/bpf" \
-		-I"$(CURDIR)/cilium/bpf/include/linux" \
-		-I"$(CURDIR)/cilium/bpf/lib" \
 		$(NATIVE_SYS_INCLUDE_FLAGS) \
 		-o "$@" "$<"
 
@@ -555,4 +505,5 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 			--source-object-root "$(VENDOR)/build/$(ARCH)/tetragon" --helper-disambiguate 174 \
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
-native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon
+native-artifacts: native-katran native-bcc native-otel native-tracee native-tetragon
+	rm -rf "$(NATIVE_STAGE_ROOT)/cilium"

@@ -35,6 +35,16 @@ def _workload_result() -> workload.WorkloadResult:
 
 
 class WorkloadContractTests(unittest.TestCase):
+    def test_network_softirq_parser_preserves_per_cpu_napi_placement(self) -> None:
+        parsed = workload._parse_network_softirq_counts(
+            "                    CPU0       CPU1       CPU2\n"
+            "          HI:          1          2          3\n"
+            "      NET_TX:         10         20         30\n"
+            "      NET_RX:        100        200        300\n"
+        )
+        self.assertEqual(parsed["NET_RX"], {"CPU0": 100, "CPU1": 200, "CPU2": 300})
+        self.assertEqual(parsed["NET_TX"], {"CPU0": 10, "CPU1": 20, "CPU2": 30})
+
     def test_bpftool_hex_bytes_are_decoded_for_per_cpu_counters(self) -> None:
         self.assertEqual(app_outcomes._little_endian(["0x62", "0x6b", "0x0c", "0x00"]), 813922)
 

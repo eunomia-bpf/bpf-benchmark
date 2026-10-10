@@ -1021,6 +1021,36 @@ def _netns_read_text(namespace: str, path: str) -> str:
     return run_command(["ip", "netns", "exec", namespace, "cat", path]).stdout or ""
 
 
+def _parse_network_softirq_counts(payload: str) -> dict[str, dict[str, int]]:
+    lines = payload.splitlines()
+    if not lines:
+        raise RuntimeError("/proc/softirqs is empty")
+    cpus = lines[0].split()
+    if not cpus or any(not re.fullmatch(r"CPU\d+", cpu) for cpu in cpus):
+        raise RuntimeError(f"unexpected /proc/softirqs CPU header: {lines[0]!r}")
+    result: dict[str, dict[str, int]] = {}
+    for category in ("NET_RX", "NET_TX"):
+        prefix = f"{category}:"
+        line = next((item for item in lines[1:] if item.strip().startswith(prefix)), None)
+        if line is None:
+            raise RuntimeError(f"/proc/softirqs has no {category} row")
+        values = line.split(":", 1)[1].split()
+        if len(values) != len(cpus):
+            raise RuntimeError(
+                f"/proc/softirqs {category} has {len(values)} counters for {len(cpus)} CPUs"
+            )
+        result[category] = {
+            cpu: int(value) for cpu, value in zip(cpus, values, strict=True)
+        }
+    return result
+
+
+def _network_softirq_counts() -> dict[str, dict[str, int]]:
+    return _parse_network_softirq_counts(
+        Path("/proc/softirqs").read_text(encoding="utf-8")
+    )
+
+
 def _run_namespaced_pktgen_udp(
     duration_s: int | float,
     *,
@@ -1110,6 +1140,9 @@ def _run_namespaced_pktgen_udp(
             "pkt_size": 64,
             "flows": 65535,
             "clone_skb": int(clone_skb),
+            # Linux pktgen exposes one kpktgend_N worker per CPU N.
+            "pktgen_thread_index": int(thread_index),
+            "pktgen_cpu": int(thread_index),
         },
     )
 
@@ -1122,6 +1155,7 @@ def run_cilium_endpoint_pktgen_load(
     if network_device and str(network_device).strip() != BENCHMARK_IFACE:
         raise RuntimeError(f"cilium_endpoint_pktgen requires benchmark interface {BENCHMARK_IFACE}")
     with _cilium_endpoint_pktgen_topology() as (endpoint_a, endpoint_b):
+        softirqs_before = _network_softirq_counts()
         directions = (
             (endpoint_a, endpoint_b, "cilium_endpoint_pktgen_forward"),
             (endpoint_b, endpoint_a, "cilium_endpoint_pktgen_reverse"),
@@ -1161,10 +1195,24 @@ def run_cilium_endpoint_pktgen_load(
         components = tuple(result for result in results if result is not None)
         if len(components) != len(directions):
             raise RuntimeError("cilium endpoint pktgen did not produce every direction result")
+        softirqs_after = _network_softirq_counts()
+        softirq_delta = {
+            category: {
+                cpu: softirqs_after[category][cpu] - before
+                for cpu, before in softirqs_before[category].items()
+            }
+            for category in softirqs_before
+        }
     return _composite(
         workload_name="cilium_endpoint_pktgen",
         components=components,
-        config={"path": "bidirectional-endpoint-to-endpoint"},
+        config={
+            "path": "bidirectional-endpoint-to-endpoint",
+            "pktgen_cpus": [
+                int(component.config["pktgen_cpu"]) for component in components
+            ],
+            "network_softirq_delta_by_cpu": softirq_delta,
+        },
     )
 
 

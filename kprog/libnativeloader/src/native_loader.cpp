@@ -4,6 +4,7 @@
 
 #include "native_loader_manifest.hpp"
 #include "native_data_layout.hpp"
+#include "native_loader_cache.hpp"
 #include "native_loader_fd_scan.hpp"
 
 #include <bpf/bpf.h>
@@ -4278,8 +4279,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
 
     LinkerOutput source = cache;
     if (!cache_hit) {
-        const std::filesystem::path tmp_base =
-            cache_dir / (key + ".tmp." + std::to_string(getpid()));
+        const std::filesystem::path tmp_base = native_link_temporary_base(
+            cache_dir, key, getpid(), syscall(SYS_gettid));
         const auto link_start = std::chrono::steady_clock::now();
         LinkerOutput tmp = invoke_native_link(elf_path, symbol_name, link_args, tmp_base);
         const auto link_end = std::chrono::steady_clock::now();
