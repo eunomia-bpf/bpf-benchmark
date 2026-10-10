@@ -216,7 +216,7 @@ def _namespace_ifindex(namespace: str, iface: str) -> int:
     return int(payload[0]["ifindex"])
 
 
-def _update_katran_route_map(ifindex: int) -> int:
+def _update_katran_route_map(namespace: str, ifindex: int) -> int:
     map_ids = [
         int(record["id"])
         for record in _map_show_records()
@@ -226,7 +226,7 @@ def _update_katran_route_map(ifindex: int) -> int:
         raise RuntimeError("Katran transport devmap was not loaded")
     map_id = max(map_ids)
     value = int(ifindex).to_bytes(4, "little")
-    run_command([
+    ns_exec_command(namespace, [
         resolve_bpftool_binary(), "map", "update", "id", str(map_id),
         "key", "hex", "00", "00", "00", "00",
         "value", "hex", *(f"{byte:02x}" for byte in value),
@@ -401,7 +401,7 @@ class KatranDsrTopology:
             ROUTER_NS, ROUTER_LB_IFACE, KATRAN_ROUTER_NAPI_CPU
         )
         self.route_map_id = _update_katran_route_map(
-            _namespace_ifindex(ROUTER_NS, ROUTER_REAL_IFACE)
+            ROUTER_NS, _namespace_ifindex(ROUTER_NS, ROUTER_REAL_IFACE)
         )
         _nsc(REAL_NS, "addr", "add", f"{VIP_IP}/32", "dev", "lo")
         _nsc(REAL_NS, "link", "add", "name", "ipip0", "type", "ipip", "external")
