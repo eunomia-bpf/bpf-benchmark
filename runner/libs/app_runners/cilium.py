@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, run_command, tail_text
+from ..app_outcomes import cilium_outcome_snapshot, run_with_outcomes
 from ..benchmark_net import (
     BENCHMARK_IFACE,
     BENCHMARK_IFACE_CIDR,
@@ -255,7 +256,12 @@ class CiliumRunner(NativeProcessRunner):
             raise RuntimeError("CiliumRunner could not determine a network device for workload")
         self._pause_agent()
         try:
-            return run_named_workload(self.workload_kind, seconds, network_device=self.device)
+            return run_with_outcomes(
+                lambda: run_named_workload(
+                    self.workload_kind, seconds, network_device=self.device
+                ),
+                cilium_outcome_snapshot,
+            )
         finally:
             self._resume_agent()
 
@@ -269,7 +275,12 @@ class CiliumRunner(NativeProcessRunner):
             raise RuntimeError("CiliumRunner could not determine a network device for workload")
         self._pause_agent()
         try:
-            return run_named_workload(requested_kind, seconds, network_device=self.device)
+            return run_with_outcomes(
+                lambda: run_named_workload(
+                    requested_kind, seconds, network_device=self.device
+                ),
+                cilium_outcome_snapshot,
+            )
         finally:
             self._resume_agent()
 

@@ -31,7 +31,9 @@ from runner.libs.case_common import (
 )
 from runner.libs.kinsn import prepare_kinsn_modules
 from runner.libs import rejit_plan
+from runner.libs.bpf_evidence import capture_bpf_evidence
 from runner.libs.rejit import (
+    _list_app_shim_program_ids,
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     measure_app_phase,
@@ -347,6 +349,29 @@ def _runner_pids(app: AppSpec, runner: AppRunner) -> list[int]:
     if not result:
         raise RuntimeError(f"{app.name}: runner did not expose any shim pids")
     return result
+
+
+def _capture_phase_bpf_evidence(
+    app: AppSpec,
+    phase: str,
+    app_pids: Sequence[int],
+    artifact_session: ArtifactSession | None,
+) -> None:
+    if artifact_session is None:
+        return
+    program_ids = sorted(
+        {
+            program_id
+            for pid in app_pids
+            for program_id in _list_app_shim_program_ids(int(pid))
+        }
+    )
+    capture_bpf_evidence(
+        output_root=artifact_session.run_dir / "details" / "bpf-evidence",
+        app_name=app.name,
+        phase=phase,
+        program_ids=program_ids,
+    )
 
 
 def _build_app_error_result(
@@ -793,6 +818,9 @@ def run_suite(
                         artifacts=_build_runner_artifacts(app, runner),
                     )
                     app_pids = _runner_pids(app, runner)
+                    _capture_phase_bpf_evidence(
+                        app, "baseline", app_pids, artifact_session
+                    )
                     workload_name = _app_workload_name(app)
 
                     phase = "baseline"
@@ -963,6 +991,9 @@ def run_suite(
                         status="ok",
                     )
                     app_pids = _runner_pids(app, runner)
+                    _capture_phase_bpf_evidence(
+                        app, "post_rejit", app_pids, artifact_session
+                    )
 
                     phase = "post_rejit"
                     _print_progress(

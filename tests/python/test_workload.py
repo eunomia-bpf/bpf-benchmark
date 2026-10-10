@@ -115,7 +115,11 @@ class WorkloadContractTests(unittest.TestCase):
             cilium_runner,
             "run_named_workload",
             return_value=result,
-        ) as run_named:
+        ) as run_named, mock.patch.object(
+            cilium_runner,
+            "run_with_outcomes",
+            side_effect=lambda run, snapshot: run(),
+        ):
             self.assertIs(runner._run_workload(1), result)
 
         run_named.assert_called_once_with("network_lossy_multi", 1, network_device=workload.BENCHMARK_IFACE)
@@ -133,7 +137,11 @@ class WorkloadContractTests(unittest.TestCase):
                     runner_module,
                     "run_named_workload",
                     return_value=result,
-                ) as run_named:
+                ) as run_named, mock.patch.object(
+                    runner_module,
+                    "run_with_outcomes",
+                    side_effect=lambda run, snapshot: run(),
+                ):
                     self.assertIs(runner.run_workload(1), result)
 
                 run_named.assert_called_once_with(

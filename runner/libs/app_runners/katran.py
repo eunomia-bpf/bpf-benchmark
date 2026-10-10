@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
+from ..app_outcomes import katran_outcome_snapshot, run_with_outcomes
 from ..kernel_modules import kernel_module_is_builtin, load_kernel_module
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
@@ -860,8 +861,12 @@ class KatranRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")
         if self.workload_kind == "xdp_pktgen":
-            return self._run_pktgen_workload(seconds)
-        return self._run_network_workload(seconds)
+            return run_with_outcomes(
+                lambda: self._run_pktgen_workload(seconds), katran_outcome_snapshot
+            )
+        return run_with_outcomes(
+            lambda: self._run_network_workload(seconds), katran_outcome_snapshot
+        )
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
         requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or self.workload_kind).strip().lower()

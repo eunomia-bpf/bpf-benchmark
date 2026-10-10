@@ -3,6 +3,7 @@
 #include "kernel_offsets.h"
 
 #include "native_loader_manifest.hpp"
+#include "native_data_layout.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -2029,6 +2030,8 @@ struct MapMeta {
     uint32_t max_entries;
     uint64_t kernel_addr;
     uint64_t value_addr;
+    uint32_t btf_id;
+    uint32_t btf_value_type_id;
 };
 
 struct HelperAlias {
@@ -2427,6 +2430,8 @@ MapMeta load_map_meta_from_fd(int map_fd)
         info.max_entries,
         lookup_kernel_map_ptr_by_fd(map_fd),
         lookup_array_value_addr_if_direct(info, map_fd),
+        info.btf_id,
+        info.btf_value_type_id,
     };
 }
 
@@ -2469,6 +2474,8 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             info.max_entries,
             lookup_kernel_map_ptr_by_fd(fd),
             lookup_array_value_addr_if_direct(info, fd),
+            info.btf_id,
+            info.btf_value_type_id,
         });
     }
     closedir(fd_dir);
@@ -3190,6 +3197,52 @@ bool native_data_section_supported(const std::string &section_name)
            section_name.rfind(".rodata", 0) == 0;
 }
 
+uint64_t source_data_symbol_offset(const MapMeta &map,
+                                   const std::string &section_name,
+                                   const std::string &symbol_name,
+                                   uint64_t native_size,
+                                   uint64_t native_offset)
+{
+    if (map.btf_id == 0 || map.btf_value_type_id == 0) {
+        return native_offset;
+    }
+
+    btf *btf_obj = btf__load_from_kernel_by_id(map.btf_id);
+    const long btf_err = libbpf_get_error(btf_obj);
+    if (btf_err) {
+        fail("btf__load_from_kernel_by_id(" + std::to_string(map.btf_id) +
+             ") for data map " + map.name + ": " +
+             std::strerror(static_cast<int>(-btf_err)));
+    }
+
+    const NativeDataSymbolLayout layout = find_source_data_symbol_layout(
+        btf_obj, map.btf_value_type_id, section_name, symbol_name);
+    if (!layout.is_datasec) {
+        btf__free(btf_obj);
+        return native_offset;
+    }
+    if (!layout.section_matches) {
+        btf__free(btf_obj);
+        fail("native data section " + section_name +
+             " does not match the source BTF datasec for map " + map.name);
+    }
+    btf__free(btf_obj);
+    if (!layout.found) {
+        fail("native data symbol " + symbol_name +
+             " is absent from source BTF datasec " + section_name);
+    }
+    if (layout.size != native_size) {
+        fail("native data symbol " + symbol_name + " size " +
+             std::to_string(native_size) + " differs from source BTF size " +
+             std::to_string(layout.size));
+    }
+    if (static_cast<uint64_t>(layout.offset) + layout.size > map.value_size) {
+        fail("source BTF data symbol " + symbol_name + " exceeds map " +
+             map.name + " value_size");
+    }
+    return layout.offset;
+}
+
 std::string bpf_obj_name_truncation(const std::string &name)
 {
     constexpr size_t kMaxBpfObjNameLen = BPF_OBJ_NAME_LEN - 1;
@@ -3620,12 +3673,13 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 close(fd);
                 fail("native data symbol " + std::string(name) + " is below section base");
             }
-            const uint64_t off = sym.st_value - target_shdr.sh_addr;
-            const uint64_t symbol_end = off + sym.st_size;
-            const MapMeta *map = find_array_data_map(load, section, symbol_end);
+            const uint64_t native_off = sym.st_value - target_shdr.sh_addr;
+            const MapMeta *map = find_array_data_map(load, section, 1);
             if (!map) {
                 continue;
             }
+            const uint64_t off = source_data_symbol_offset(
+                *map, section, name, sym.st_size, native_off);
             if (off + sym.st_size > map->value_size) {
                 elf_end(elf);
                 close(fd);
