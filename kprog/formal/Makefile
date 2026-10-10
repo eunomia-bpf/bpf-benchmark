@@ -55,6 +55,7 @@ check:
 	python3 generate_arm64_branch_spec.py --check
 	python3 generate_arm64_branch_emit_spec.py --check
 	python3 generate_arm64_cond_spec.py --check
+	python3 generate_arm64_mem_write_arm_spec.py --check
 	python3 generate_x86_cond_spec.py --check
 	python3 generate_x86_logic_flags_spec.py --check
 	python3 generate_x86_width_spec.py --check
@@ -581,6 +582,12 @@ check:
 	lake env lean KProgFormal/Arm64MemDispatch.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_dispatch_host.c -o build/test_arm64_mem_dispatch_host
 	./build/test_arm64_mem_dispatch_host
+	lake env lean KProgFormal/GeneratedArm64MemWriteArm.lean
+	lake env lean KProgFormal/Arm64MemWriteArmShape.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_write_arm_host.c -o build/test_arm64_mem_write_arm_host
+	./build/test_arm64_mem_write_arm_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_write_arm_route_host.c -o build/test_arm64_mem_write_arm_route_host
+	./build/test_arm64_mem_write_arm_route_host
 	lake env lean KProgFormal/GeneratedArm64StackTag.lean
 	lake env lean KProgFormal/Arm64StackTag.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_tag_host.c -o build/test_arm64_stack_tag_host

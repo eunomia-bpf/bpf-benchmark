@@ -118,6 +118,7 @@ union arm64_sim_gpr {
 #define ARM64_SIM_TAG_MAP_VALUE 6U
 #define ARM64_SIM_TAG_RELOC_ADDR 7U
 #define ARM64_SIM_TAG_RODATA_ADDR 8U
+#include "../formal/generated/arm64_mem_write_arm.h"
 #include "../formal/generated/arm64_adrp.h"
 #include "../formal/generated/arm64_stlxr.h"
 #include "../formal/generated/arm64_mov.h"
@@ -768,12 +769,13 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		}                                                        \
 		__a64_mrt_value_tag;                                     \
 	})
-
 #define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\
 	do {                                                               \
 		__s64 __a64_mwr_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
 		__u8 __a64_mwr_tag = ARM64_SIM_L_REG_TAG(BASE);          \
-		if ((BASE) == ARM64_SP || __a64_mwr_tag == ARM64_SIM_TAG_STACK) {\
+		__u8 __a64_mwr_arm = KPROG_ARM64_MEM_WRITE_ARM(          \
+			((BASE) == ARM64_SP), __a64_mwr_tag);            \
+		if (__a64_mwr_arm == KPROG_ARM64_MEM_WRITE_ARM_STACK) {  \
 			__s64 __a64_mwr_base = (BASE) == ARM64_SP ? __a64_sp :\
 				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
 			ARM64_SIM_L_STACK_WRITE_TAG(__a64_mwr_base + __a64_mwr_off,\

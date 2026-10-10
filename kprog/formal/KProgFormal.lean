@@ -191,6 +191,8 @@ import KProgFormal.GeneratedArm64ByteLane
 import KProgFormal.Arm64ByteLane
 import KProgFormal.GeneratedArm64MemDispatch
 import KProgFormal.Arm64MemDispatch
+import KProgFormal.GeneratedArm64MemWriteArm
+import KProgFormal.Arm64MemWriteArmShape
 import KProgFormal.GeneratedArm64StackTag
 import KProgFormal.Arm64StackTag
 import KProgFormal.GeneratedArm64StackArm
