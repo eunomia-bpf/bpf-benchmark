@@ -86,11 +86,14 @@ VM_EXECUTABLE := $(VM_EXECUTABLE.$(RUN_KEY))
 VM_CPUS.kvm-x86 := 8
 VM_CPUS.qemu-arm64 := 2
 VM_CPUS := $(or $(VM_CPUS),$(VM_CPUS.$(RUN_KEY)))
+VM_CPU_PIN.kvm-x86 := 0-7
+VM_CPU_PIN := $(VM_CPU_PIN.$(RUN_KEY))
 VM_MEM.kvm-x86 := 64G
 VM_MEM.qemu-arm64 := 2G
 VM_MEM := $(or $(VM_MEM),$(VM_MEM.$(RUN_KEY)))
 VNG = $(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose \
-	--cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp \
+	--cpus "$(VM_CPUS)" $(if $(VM_CPU_PIN),--pin "$(VM_CPU_PIN)") --mem "$(VM_MEM)" \
+	--rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp \
 	--append "loglevel=7 panic=30 oops=panic"
 
 RUN_REMOTE_PYTHON_BIN ?= python3

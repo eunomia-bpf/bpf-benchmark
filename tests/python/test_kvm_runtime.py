@@ -13,6 +13,26 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class KvmRuntimeTests(unittest.TestCase):
+    def test_kvm_vcpus_are_pinned_one_per_performance_core(self) -> None:
+        """Catch timing guests sharing arbitrary P-cores instead of distinct pins."""
+        dry_run = subprocess.run(
+            [
+                "make",
+                "--no-print-directory",
+                "--eval",
+                "print-vng:;@echo $(VNG)",
+                "print-vng",
+                "PLATFORM=kvm",
+                "ARCH=x86",
+            ],
+            cwd=ROOT,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        self.assertIn("--cpus 8 --pin 0-7", dry_run.stdout)
+
     def test_guest_docker_uses_private_config_instead_of_host_config(self) -> None:
         """Catch host daemon.json data-root collisions that prevent socket creation."""
         with tempfile.TemporaryDirectory() as tmp:
