@@ -32,15 +32,18 @@ terminate() {
 }
 trap terminate EXIT INT TERM
 
+echo "PREFLIGHT app=$app start=$(date -u +%FT%TZ)"
+BPFREJIT_AWS_KEEP_INSTANCE=1 make "${common[@]}" \
+    WORKLOAD_DURATION=5 SAMPLES=1 BPFREJIT_CORPUS_BPF_STATS=0 \
+    BPFREJIT_SHIM_NATIVE_LOADER=post
 if [[ "$app" == "cilium/agent" ]]; then
-    echo "PREFLIGHT app=$app start=$(date -u +%FT%TZ)"
-    BPFREJIT_AWS_KEEP_INSTANCE=1 make "${common[@]}" \
-        WORKLOAD_DURATION=5 SAMPLES=1 BPFREJIT_CORPUS_BPF_STATS=0 \
-        BPFREJIT_SHIM_NATIVE_LOADER=post
     python3 "$root/corpus/results/aws_katran_cilium_outcomes_20261009/validate-cilium-preflight.py" \
         "$root/corpus/results"
-    echo "PREFLIGHT app=$app end=$(date -u +%FT%TZ)"
+else
+    python3 "$root/corpus/results/aws_katran_cilium_outcomes_20261009/validate-katran-preflight.py" \
+        "$root/corpus/results"
 fi
+echo "PREFLIGHT app=$app end=$(date -u +%FT%TZ)"
 
 run_case() {
     local stats=$1

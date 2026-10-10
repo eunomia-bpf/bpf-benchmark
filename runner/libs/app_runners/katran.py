@@ -616,7 +616,11 @@ DEFAULT_WRK_CONNECTIONS = 10
 DEFAULT_PKTGEN_PKT_SIZE = 64
 DEFAULT_PKTGEN_CLONE_SKB = 0
 PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
-KATRAN_PKTGEN_THREAD_IDS = (0, 1, 2, 3)
+# A veth has one TX queue.  Multiple pktgen workers therefore race on queue 0,
+# producing NETDEV_TX_BUSY errors and, on AWS, no traffic at the XDP hook.
+# Keep the generator on the final vCPU of the paper-compatible 8-vCPU guest;
+# this also leaves CPUs 0--6 available to process the forwarding path.
+KATRAN_PKTGEN_THREAD_IDS = (7,)
 KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
 
 
