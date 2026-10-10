@@ -59,6 +59,29 @@ ROUTER_CLIENT_IFACE = "rtcl0"
 CLIENT_IFACE = "client0"
 ROUTER_REAL_IFACE = "rtreal0"
 REAL_IFACE = "real0"
+KATRAN_PEER_NAPI_CPU = 6
+
+
+def _enable_threaded_peer_napi(namespace: str, iface: str, cpu: int) -> int:
+    ns_exec_command(namespace, [
+        "sh", "-c", f"printf '1\\n' > /sys/class/net/{shlex.quote(iface)}/threaded",
+    ])
+    deadline = time.monotonic() + 5.0
+    prefix = f"napi/{iface}-"
+    while time.monotonic() < deadline:
+        for proc_dir in Path("/proc").iterdir():
+            if not proc_dir.name.isdigit():
+                continue
+            try:
+                comm = (proc_dir / "comm").read_text().strip()
+            except (FileNotFoundError, PermissionError, ProcessLookupError):
+                continue
+            if comm.startswith(prefix):
+                pid = int(proc_dir.name)
+                os.sched_setaffinity(pid, {int(cpu)})
+                return pid
+        time.sleep(0.05)
+    raise RuntimeError(f"threaded NAPI worker for {namespace}/{iface} was not created")
 
 LB_IP = "192.0.2.2"
 ROUTER_LB_IP = "192.0.2.1"
@@ -276,6 +299,7 @@ class KatranDsrTopology:
         self.lb_ifindex = 0
         self.created_hc_ifaces: list[str] = []
         self.peer_xdp_path = ""
+        self.peer_napi_pid = 0
 
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
@@ -329,6 +353,13 @@ class KatranDsrTopology:
             "xdp", "obj", str(peer_xdp), "sec", "xdp",
         ])
         self.peer_xdp_path = str(peer_xdp)
+        # Keep the receive-side NAPI consumer off pktgen's dedicated CPU.  In
+        # softirq mode a fast JIT producer otherwise fills veth's fixed XDP
+        # ring before the same CPU can drain it, producing transport drops
+        # that are unrelated to Katran's BPF result.
+        self.peer_napi_pid = _enable_threaded_peer_napi(
+            ROUTER_NS, ROUTER_LB_IFACE, KATRAN_PEER_NAPI_CPU
+        )
         _nsc(REAL_NS, "addr", "add", f"{VIP_IP}/32", "dev", "lo")
         _nsc(REAL_NS, "link", "add", "name", "ipip0", "type", "ipip", "external")
         _nsc(REAL_NS, "addr", "add", f"{IPIP_DUMMY_IP}/32", "dev", "ipip0")
@@ -368,7 +399,9 @@ class KatranDsrTopology:
                 "iface": self.iface, "router_peer_iface": self.router_peer_iface, "lb_ifindex": self.lb_ifindex,
                 "healthcheck_ifaces": list(self.created_hc_ifaces),
                 "peer_xdp_path": self.peer_xdp_path,
-                "peer_xdp_iface": ROUTER_LB_IFACE}
+                "peer_xdp_iface": ROUTER_LB_IFACE,
+                "peer_napi_pid": self.peer_napi_pid,
+                "peer_napi_cpu": KATRAN_PEER_NAPI_CPU}
 
     def close(self) -> None: self.cleanup()
     def __exit__(self, exc_type, exc, tb) -> None: self.close()
