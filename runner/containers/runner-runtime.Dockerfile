@@ -99,6 +99,7 @@ COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
 
 COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_server_grpc /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/katran/bpf/*.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
+COPY --link --from=runner-runtime-host-runner-build /katran_peer_pass.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/katran_peer_pass.bpf.o
 
 COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
 COPY --link --chmod=0755 \

@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 from runner.libs import workload
+from runner.libs import app_outcomes
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners import cilium as cilium_runner
 from runner.libs.app_runners import katran as katran_runner
@@ -33,6 +34,9 @@ def _workload_result() -> workload.WorkloadResult:
 
 
 class WorkloadContractTests(unittest.TestCase):
+    def test_bpftool_hex_bytes_are_decoded_for_per_cpu_counters(self) -> None:
+        self.assertEqual(app_outcomes._little_endian(["0x62", "0x6b", "0x0c", "0x00"]), 813922)
+
     def test_katran_pktgen_uses_one_dedicated_veth_queue_worker(self) -> None:
         self.assertEqual(katran_runner.KATRAN_PKTGEN_THREAD_IDS, (7,))
         self.assertEqual(katran_runner.DEFAULT_PKTGEN_SRC_PORT, 10000)

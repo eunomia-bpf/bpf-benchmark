@@ -30,7 +30,10 @@ def _little_endian(raw: object) -> int:
     if not isinstance(raw, list):
         return 0
     try:
-        return int.from_bytes(bytes(int(value) for value in raw), "little")
+        return int.from_bytes(
+            bytes(int(value, 0) if isinstance(value, str) else int(value) for value in raw),
+            "little",
+        )
     except (TypeError, ValueError):
         return 0
 

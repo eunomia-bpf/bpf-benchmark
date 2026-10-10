@@ -49,10 +49,15 @@ def capture_bpf_evidence(
     bpftool = resolve_bpftool_binary()
     selected_ids = sorted({int(program_id) for program_id in program_ids if int(program_id) > 0})
     all_programs = _json_payload([bpftool, "-j", "prog", "show"])
+    # The shim IDs identify the programs that are candidates for replacement,
+    # but an application can deliberately attach auxiliary programs outside
+    # the shim (for example Katran's peer-veth XDP_PASS program).  The runtime
+    # container is dedicated to one application, so retain and dump the full
+    # live inventory while separately recording the shim-tracked IDs.
     inventory = [
         dict(record)
         for record in (all_programs if isinstance(all_programs, list) else [])
-        if isinstance(record, Mapping) and int(record.get("id", 0) or 0) in selected_ids
+        if isinstance(record, Mapping) and int(record.get("id", 0) or 0) > 0
     ]
     (output_dir / "program-inventory.json").write_text(
         json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"

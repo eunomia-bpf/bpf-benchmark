@@ -275,6 +275,7 @@ class KatranDsrTopology:
         self.router_peer_iface = router_peer_iface or None
         self.lb_ifindex = 0
         self.created_hc_ifaces: list[str] = []
+        self.peer_xdp_path = ""
 
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
@@ -319,6 +320,15 @@ class KatranDsrTopology:
         _nsc(CLIENT_NS, "link", "set", "dev", CLIENT_IFACE, "up")
         _nsc(REAL_NS, "addr", "add", f"{REAL_IP}/24", "dev", REAL_IFACE)
         _nsc(REAL_NS, "link", "set", "dev", REAL_IFACE, "up")
+        # XDP_TX on a veth requires NAPI/XDP to be enabled on the peer.  Without
+        # this pass-through program veth_xdp_xmit() returns -ENXIO and counts
+        # every successfully processed Katran packet as a TX drop.
+        peer_xdp = _resolve_katran_bpf_artifact("bpf/katran_peer_pass.bpf.o")
+        ns_exec_command(ROUTER_NS, [
+            ip_binary(), "link", "set", "dev", ROUTER_LB_IFACE,
+            "xdp", "obj", str(peer_xdp), "sec", "xdp",
+        ])
+        self.peer_xdp_path = str(peer_xdp)
         _nsc(REAL_NS, "addr", "add", f"{VIP_IP}/32", "dev", "lo")
         _nsc(REAL_NS, "link", "add", "name", "ipip0", "type", "ipip", "external")
         _nsc(REAL_NS, "addr", "add", f"{IPIP_DUMMY_IP}/32", "dev", "ipip0")
@@ -356,7 +366,9 @@ class KatranDsrTopology:
     def metadata(self) -> dict[str, object]:
         return {"namespaces": {"router": ROUTER_NS, "client": CLIENT_NS, "real": REAL_NS},
                 "iface": self.iface, "router_peer_iface": self.router_peer_iface, "lb_ifindex": self.lb_ifindex,
-                "healthcheck_ifaces": list(self.created_hc_ifaces)}
+                "healthcheck_ifaces": list(self.created_hc_ifaces),
+                "peer_xdp_path": self.peer_xdp_path,
+                "peer_xdp_iface": ROUTER_LB_IFACE}
 
     def close(self) -> None: self.cleanup()
     def __exit__(self, exc_type, exc, tb) -> None: self.close()

@@ -46,7 +46,10 @@ def phase_result(phase: dict[str, object]) -> dict[str, object]:
     for name in ("total", "tx", "vip_0", "real_1", "receiver"):
         if abs(observed[name] - sent) > tolerance:
             fail(f"{name}={observed[name]} does not match sent={sent}")
-    if observed["pass"] or observed["drop"]:
+    # Katran's health checker can contribute a handful of XDP_PASS actions
+    # while the timed pktgen stream is running.  They are control traffic, not
+    # a workload outcome; XDP_DROP must remain exactly zero.
+    if observed["pass"] > tolerance or observed["drop"]:
         fail(f"unexpected actions: pass={observed['pass']} drop={observed['drop']}")
     return {"sent": sent, "errors": errors, **observed}
 
