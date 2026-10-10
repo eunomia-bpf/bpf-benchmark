@@ -4,6 +4,7 @@
 
 #include "native_loader_manifest.hpp"
 #include "native_data_layout.hpp"
+#include "native_loader_fd_scan.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -2450,13 +2451,30 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             continue;
         }
         int fd = std::atoi(de->d_name);
-        if (fd < 0 || !fd_is_bpf_map(fd)) {
+        if (fd < 0) {
+            continue;
+        }
+        ScopedFd pinned_fd(pin_open_process_fd_for_scan(fd));
+        if (pinned_fd.get() < 0) {
+            const int saved = errno;
+            if (open_process_fd_went_stale(saved)) {
+                continue;
+            }
+            closedir(fd_dir);
+            fail("duplicate /proc/self/fd/" + std::to_string(fd) +
+                 " for map scan: " + std::strerror(saved));
+        }
+        if (!fd_is_bpf_map(pinned_fd.get())) {
             continue;
         }
         bpf_map_info info = {};
         __u32 info_len = sizeof(info);
-        if (bpf_obj_get_info_by_fd(fd, &info, &info_len) != 0) {
-            continue;
+        const int info_err = bpf_obj_get_info_by_fd(
+            pinned_fd.get(), &info, &info_len);
+        if (info_err != 0) {
+            closedir(fd_dir);
+            fail("bpf_obj_get_info_by_fd (pinned process map) failed: " +
+                 libbpf_error_string(info_err));
         }
         char map_name_buf[sizeof(info.name) + 1] = {};
         std::memcpy(map_name_buf, info.name, sizeof(info.name));
@@ -2472,8 +2490,8 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             info.key_size,
             info.value_size,
             info.max_entries,
-            lookup_kernel_map_ptr_by_fd(fd),
-            lookup_array_value_addr_if_direct(info, fd),
+            lookup_kernel_map_ptr_by_fd(pinned_fd.get()),
+            lookup_array_value_addr_if_direct(info, pinned_fd.get()),
             info.btf_id,
             info.btf_value_type_id,
         });
