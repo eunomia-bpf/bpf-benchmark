@@ -111,18 +111,19 @@ Kinsn/Catalog.lean    JIT register maps, instances, #guard evaluation checks
 AxiomCheck.lean       trust-base audit (build-failing)
 ```
 
-## Module-source coverage (2026-10-06)
+## Module-source coverage (2026-10-10)
 
 The original files and conceptual catalogue above are preserved. The new
 `Kinsn/Module*.lean` files model the module instruction streams, including omitted
 self-moves, ALU32 zero extension, signed immediates, forward branch offsets,
-spills, and reverse-order restores. All **96 non-debug operations are proved**
+and declared operand outputs. Active proofs borrow no mapped register or stack
+slot. All **96 non-debug operations are proved**
 after the module fixes. The table lists each operation's certificate and the
 bug fixed, if any. Both native-lab modules are excluded as requested.
 
 Final checks: both x86 and arm64 modules compile against the existing kernel
-build trees with `KCFLAGS=-Werror`; `lake build` succeeds (938 jobs).
-AxiomCheck audits 3,439 declarations and reports **zero non-standard axioms**.
+build trees with `KCFLAGS=-Werror`; `lake build` succeeds (939 jobs).
+AxiomCheck audits 3,519 declarations and reports **zero non-standard axioms**.
 Only `propext`, `Quot.sound`, and `Classical.choice` are used. No VMs,
 benchmarks, kernel rebuilds, kernel-core edits, or bpfopt edits were performed.
 
@@ -177,7 +178,9 @@ map is the ordinary Linux JIT map. Corrected x86 certificates are generic over
 the stated injective register map and cover optional private-stack R10→R9
 mapping; both ordinary and ARCH emitters apply the program-specific map.
 No current kernel invariant initializes persistent R6–R8 spill slots. Corrected
-ARCH lowerings use live operands, with explicit matching spills where needed.
+ARCH lowerings use live operands and only declared outputs; no incidental
+spill or restore remains. See [the scratch-free report](../docs/scratchfree-20261009.md)
+for the June byte comparison, exact proof lengths, and native exceptions.
 Decoder changes reject writes to read-only R10 and unsupported raw register
 IDs 11–15; loadable operand forms and payload formats are preserved.
 `ModuleDivl.guarded_no_divide_error` proves the native DIV64 path has a nonzero
