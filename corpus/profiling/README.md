@@ -19,7 +19,8 @@ The guest-only collector and its real `perf` binary are staged through the
 result mount, so profiling works with agent 1's validated runtime image and
 does not require an image rebuild. The nested Make invocation treats the
 validated runtime tar as immutable and fails if that tar or its kernel image
-is missing.
+is missing. A staged guest launch script also keeps the virtme kernel command
+line short; the full resolved guest Make command remains in `commands.json`.
 
 Run the complete profile only while holding the coordination file's
 `HOST-EXCLUSIVE` lease:

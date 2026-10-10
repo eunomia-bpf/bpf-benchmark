@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 import shutil
 import signal
 import subprocess
@@ -141,6 +142,16 @@ def _stage_profile_code(destination: Path) -> None:
         shutil.copy2(source / name, package / name)
 
 
+def _stage_guest_script(path: Path, command: Sequence[str]) -> None:
+    if path.exists():
+        raise RuntimeError(f"guest launch script already exists: {path}")
+    path.write_text(
+        "#!/bin/sh\nset -eu\nexec " + shlex.join(str(part) for part in command) + "\n",
+        encoding="utf-8",
+    )
+    path.chmod(0o700)
+
+
 def _running_guests() -> list[int]:
     pids: list[int] = []
     for entry in Path("/proc").iterdir():
@@ -204,12 +215,8 @@ def _stat_command(
 
 def _make_command(
     *,
-    arm: str,
-    duration: int,
     cpus: str,
-    output_dir: Path,
-    perf_root: Path,
-    code_root: Path,
+    guest_script: Path,
 ) -> list[str]:
     return [
         "taskset",
@@ -224,6 +231,20 @@ def _make_command(
         "VM_CPU_PIN=",
         "VM_CPUS=4",
         "VM_MEM=16G",
+        f"CILIUM_PROFILE_GUEST_SCRIPT={guest_script}",
+    ]
+
+
+def _guest_make_command(
+    *, arm: str, duration: int, output_dir: Path, perf_root: Path, code_root: Path
+) -> list[str]:
+    return [
+        "make",
+        "-C",
+        str(ROOT),
+        "__runtime-vm-profile-cilium",
+        "PLATFORM=kvm",
+        "ARCH=x86",
         "BPFREJIT_CORPUS_APPS=cilium/agent",
         f"WORKLOAD_DURATION={duration}",
         "SAMPLES=1",
@@ -231,7 +252,6 @@ def _make_command(
         "BPFREJIT_CORPUS_BPF_STATS=1",
         "TIMEOUT=1800",
         f"CILIUM_PROFILE_ARM={arm}",
-        f"CILIUM_PROFILE_DURATION={duration}",
         f"CILIUM_PROFILE_OUTPUT_DIR={output_dir}",
         f"CILIUM_PROFILE_PERF_ROOT={perf_root}",
         f"CILIUM_PROFILE_CODE_ROOT={code_root}",
@@ -257,13 +277,18 @@ def _run_arm(
     output_dir.mkdir(parents=True, exist_ok=False)
     pmu = _resolve_pmu(cpus)
     stat_command, control, ack = _stat_command(perf, pmu, cpus, output_dir)
-    make_command = _make_command(
+    guest_script = code_root / f"run-{arm}.sh"
+    guest_make_command = _guest_make_command(
         arm=arm,
         duration=duration,
-        cpus=cpus,
         output_dir=output_dir,
         perf_root=perf_root,
         code_root=code_root,
+    )
+    _stage_guest_script(guest_script, guest_make_command)
+    make_command = _make_command(
+        cpus=cpus,
+        guest_script=guest_script,
     )
     metadata: dict[str, object] = {
         "arm": arm,
@@ -274,6 +299,7 @@ def _run_arm(
         "vm_memory": "16G",
         "workload_duration_seconds": duration,
         "make_command": make_command,
+        "guest_make_command": guest_make_command,
         "host_perf_command": stat_command,
         "git_head": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True

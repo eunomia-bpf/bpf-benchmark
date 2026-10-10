@@ -66,12 +66,8 @@ class MarkerAndCommandTest(unittest.TestCase):
 
     def test_make_command_obeys_agent2_guest_limit(self) -> None:
         command = host._make_command(
-            arm="jit",
-            duration=5,
             cpus="16-19",
-            output_dir=Path("/results/profile/jit"),
-            perf_root=Path("/results/profile/.perf-tools"),
-            code_root=Path("/results/profile/.profile-code"),
+            guest_script=Path("/results/profile/.profile-code/run-jit.sh"),
         )
         self.assertEqual(command[:3], ["taskset", "-c", "16-19"])
         self.assertIn("-o", command)
@@ -80,11 +76,11 @@ class MarkerAndCommandTest(unittest.TestCase):
         self.assertIn("VM_CPU_PIN=", command)
         self.assertIn("VM_CPUS=4", command)
         self.assertIn("VM_MEM=16G", command)
-        self.assertIn("BPFREJIT_CORPUS_APPS=cilium/agent", command)
-        self.assertIn("BPFREJIT_CORPUS_BPF_STATS=1", command)
         self.assertIn(
-            "CILIUM_PROFILE_CODE_ROOT=/results/profile/.profile-code", command
+            "CILIUM_PROFILE_GUEST_SCRIPT=/results/profile/.profile-code/run-jit.sh",
+            command,
         )
+        self.assertLess(len(" ".join(command)), 512)
 
     def test_guest_code_is_staged_without_runtime_image_change(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -95,6 +91,23 @@ class MarkerAndCommandTest(unittest.TestCase):
                 sorted(path.name for path in package.iterdir()),
                 ["__init__.py", "guest.py", "perf_control.py"],
             )
+
+    def test_staged_guest_script_carries_profile_environment(self) -> None:
+        command = host._guest_make_command(
+            arm="jit",
+            duration=5,
+            output_dir=Path("/results/profile/jit"),
+            perf_root=Path("/results/profile/.perf-tools"),
+            code_root=Path("/results/profile/.profile-code"),
+        )
+        self.assertIn("BPFREJIT_CORPUS_APPS=cilium/agent", command)
+        self.assertIn("BPFREJIT_CORPUS_BPF_STATS=1", command)
+        self.assertIn("CILIUM_PROFILE_CODE_ROOT=/results/profile/.profile-code", command)
+        with tempfile.TemporaryDirectory() as raw:
+            script = Path(raw) / "run.sh"
+            host._stage_guest_script(script, command)
+            self.assertTrue(script.stat().st_mode & 0o100)
+            self.assertIn("exec make -C", script.read_text(encoding="utf-8"))
 
     def test_profile_output_must_be_in_mounted_result_tree(self) -> None:
         selected = host.RESULT_ROOT / "profile-test"
