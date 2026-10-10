@@ -49,7 +49,12 @@ class WorkloadContractTests(unittest.TestCase):
 
     def test_katran_pktgen_uses_one_dedicated_veth_queue_worker(self) -> None:
         self.assertEqual(katran_runner.KATRAN_PKTGEN_THREAD_IDS, (7,))
-        self.assertNotIn(katran_runner.KATRAN_PEER_NAPI_CPU, katran_runner.KATRAN_PKTGEN_THREAD_IDS)
+        self.assertEqual(
+            len({*katran_runner.KATRAN_PKTGEN_THREAD_IDS,
+                 katran_runner.KATRAN_ROUTER_NAPI_CPU,
+                 katran_runner.KATRAN_RECEIVER_NAPI_CPU}),
+            3,
+        )
         self.assertEqual(katran_runner.DEFAULT_PKTGEN_SRC_PORT, 10000)
         completed = subprocess.CompletedProcess(
             args=[], returncode=0, stdout="kpktgend_0\nkpktgend_7\n", stderr=""

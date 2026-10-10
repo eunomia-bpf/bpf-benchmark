@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ctypes
 import errno
+import json
 import os
 import platform
 import shlex
@@ -59,7 +60,8 @@ ROUTER_CLIENT_IFACE = "rtcl0"
 CLIENT_IFACE = "client0"
 ROUTER_REAL_IFACE = "rtreal0"
 REAL_IFACE = "real0"
-KATRAN_PEER_NAPI_CPU = 6
+KATRAN_RECEIVER_NAPI_CPU = 5
+KATRAN_ROUTER_NAPI_CPU = 6
 
 
 def _enable_threaded_peer_napi(namespace: str, iface: str, cpu: int) -> int:
@@ -204,6 +206,34 @@ def ns_ip_command(namespace: str, command: list[str] | tuple[str, ...], *, check
     return ns_exec_command(namespace, [ip_binary(), *_normalize_ip_command(command)], check=check)
 
 
+def _namespace_ifindex(namespace: str, iface: str) -> int:
+    completed = ns_exec_command(
+        namespace, [ip_binary(), "-j", "link", "show", "dev", iface]
+    )
+    payload = json.loads(completed.stdout or "[]")
+    if not isinstance(payload, list) or not payload:
+        raise RuntimeError(f"could not resolve ifindex for {namespace}/{iface}")
+    return int(payload[0]["ifindex"])
+
+
+def _update_katran_route_map(ifindex: int) -> int:
+    map_ids = [
+        int(record["id"])
+        for record in _map_show_records()
+        if str(record.get("name") or "") == "katran_route"
+    ]
+    if not map_ids:
+        raise RuntimeError("Katran transport devmap was not loaded")
+    map_id = max(map_ids)
+    value = int(ifindex).to_bytes(4, "little")
+    run_command([
+        resolve_bpftool_binary(), "map", "update", "id", str(map_id),
+        "key", "hex", "00", "00", "00", "00",
+        "value", "hex", *(f"{byte:02x}" for byte in value),
+    ])
+    return map_id
+
+
 def link_exists(name: str) -> bool:
     return Path("/sys/class/net").joinpath(name).exists()
 
@@ -300,6 +330,8 @@ class KatranDsrTopology:
         self.created_hc_ifaces: list[str] = []
         self.peer_xdp_path = ""
         self.peer_napi_pid = 0
+        self.receiver_napi_pid = 0
+        self.route_map_id = 0
 
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
@@ -344,13 +376,21 @@ class KatranDsrTopology:
         _nsc(CLIENT_NS, "link", "set", "dev", CLIENT_IFACE, "up")
         _nsc(REAL_NS, "addr", "add", f"{REAL_IP}/24", "dev", REAL_IFACE)
         _nsc(REAL_NS, "link", "set", "dev", REAL_IFACE, "up")
-        # XDP_TX on a veth requires NAPI/XDP to be enabled on the peer.  Without
-        # this pass-through program veth_xdp_xmit() returns -ENXIO and counts
-        # every successfully processed Katran packet as a TX drop.
-        peer_xdp = _resolve_katran_bpf_artifact("bpf/katran_peer_pass.bpf.o")
+        # Keep the outcome path entirely in XDP: Katran still encapsulates and
+        # returns XDP_TX, the router peer redirects that frame to the backend
+        # veth, and the backend XDP sink accounts it in interface RX counters.
+        # This avoids making skb allocation/routing the benchmark bottleneck.
+        peer_xdp = _resolve_katran_bpf_artifact("bpf/katran_transport.bpf.o")
+        ns_exec_command(REAL_NS, [
+            ip_binary(), "link", "set", "dev", REAL_IFACE,
+            "xdp", "obj", str(peer_xdp), "sec", "xdp/receiver_sink",
+        ])
+        self.receiver_napi_pid = _enable_threaded_peer_napi(
+            REAL_NS, REAL_IFACE, KATRAN_RECEIVER_NAPI_CPU
+        )
         ns_exec_command(ROUTER_NS, [
             ip_binary(), "link", "set", "dev", ROUTER_LB_IFACE,
-            "xdp", "obj", str(peer_xdp), "sec", "xdp",
+            "xdp", "obj", str(peer_xdp), "sec", "xdp/router_redirect",
         ])
         self.peer_xdp_path = str(peer_xdp)
         # Keep the receive-side NAPI consumer off pktgen's dedicated CPU.  In
@@ -358,7 +398,10 @@ class KatranDsrTopology:
         # ring before the same CPU can drain it, producing transport drops
         # that are unrelated to Katran's BPF result.
         self.peer_napi_pid = _enable_threaded_peer_napi(
-            ROUTER_NS, ROUTER_LB_IFACE, KATRAN_PEER_NAPI_CPU
+            ROUTER_NS, ROUTER_LB_IFACE, KATRAN_ROUTER_NAPI_CPU
+        )
+        self.route_map_id = _update_katran_route_map(
+            _namespace_ifindex(ROUTER_NS, ROUTER_REAL_IFACE)
         )
         _nsc(REAL_NS, "addr", "add", f"{VIP_IP}/32", "dev", "lo")
         _nsc(REAL_NS, "link", "add", "name", "ipip0", "type", "ipip", "external")
@@ -401,7 +444,11 @@ class KatranDsrTopology:
                 "peer_xdp_path": self.peer_xdp_path,
                 "peer_xdp_iface": ROUTER_LB_IFACE,
                 "peer_napi_pid": self.peer_napi_pid,
-                "peer_napi_cpu": KATRAN_PEER_NAPI_CPU}
+                "peer_napi_cpu": KATRAN_ROUTER_NAPI_CPU,
+                "receiver_xdp_iface": REAL_IFACE,
+                "receiver_napi_pid": self.receiver_napi_pid,
+                "receiver_napi_cpu": KATRAN_RECEIVER_NAPI_CPU,
+                "route_map_id": self.route_map_id}
 
     def close(self) -> None: self.cleanup()
     def __exit__(self, exc_type, exc, tb) -> None: self.close()

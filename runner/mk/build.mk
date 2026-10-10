@@ -90,7 +90,7 @@ HOST_KERNEL_MODULES_ORDER_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/modules.order
 	host-kernel-x86 host-kernel-arm64 \
 	host-kinsn-x86 host-kinsn-arm64 host-native-link host-rust-x86 host-rust-arm64 host-llvm-x86 host-llvm-arm64 host-bpfopt-llvm-x86 host-bpfopt-llvm-arm64 host-bpfperf-x86 \
 	host-shim-x86 host-shim-arm64 host-shim-artifacts \
-	host-runner-x86 host-runner-arm64 host-runner-docker-x86 host-katran-peer-pass-x86 \
+	host-runner-x86 host-runner-arm64 host-runner-docker-x86 host-katran-transport-x86 \
 		host-micro-programs-x86 host-micro-programs-arm64 host-micro-programs-docker-x86 \
 		host-stage2-programs-x86 host-stage2-programs-arm64 host-stage2-programs-docker-x86 \
 		host-x86-sim-proofs host-arm64-sim-proofs host-docker-context-x86 \
@@ -245,12 +245,12 @@ host-runner-x86: RUNNER_LIBBPF_ENV := CC=gcc
 host-runner-x86: RUNNER_STRIP := strip
 host-runner-x86: RUNNER_LLVM_DIR_ARCH := $(RUNNER_LLVM_DIR)
 host-runner-x86: RUNNER_KERNEL_OFFSETS_INCLUDE := $(MICRO_PROGRAM_BUILD_X86)
-host-katran-peer-pass-x86:
+host-katran-transport-x86:
 	install -d "$(RUNNER_DIR)/build-llvmbpf"
 	clang-18 -O2 -g -target bpf -D__TARGET_ARCH_x86 \
 		-I/usr/include/x86_64-linux-gnu -I"$(ROOT_DIR)/vendor/libbpf/src/root/usr/include" \
-		-c "$(RUNNER_DIR)/assets/katran_peer_pass.bpf.c" \
-		-o "$(RUNNER_DIR)/build-llvmbpf/katran_peer_pass.bpf.o"
+		-c "$(RUNNER_DIR)/assets/katran_transport.bpf.c" \
+		-o "$(RUNNER_DIR)/build-llvmbpf/katran_transport.bpf.o"
 host-runner-docker-x86: RUNNER_BUILD_DIR_ARCH := $(HOST_DOCKER_RUNNER_BUILD_X86)
 host-runner-docker-x86: RUNNER_CC := gcc
 host-runner-docker-x86: RUNNER_CXX := g++
@@ -325,7 +325,7 @@ host-docker-context-x86:
 	: >"$(HOST_DOCKER_KERNEL_MODULES_CONTEXT_X86)/lib/modules/$$(uname -r)/modules.order"
 	: >"$(HOST_DOCKER_KERNEL_MODULES_CONTEXT_X86)/lib/modules/$$(uname -r)/modules.builtin"
 
-x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-bpfperf-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-katran-peer-pass-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86 host-merlin-runtime-context
+x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-bpfperf-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-katran-transport-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86 host-merlin-runtime-context
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_X86)"
 	cp "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_X86)/config"
