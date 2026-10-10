@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 2 ]]; then
+	echo "usage: $0 STAGED_MODULES_DIR CURRENT_LINK" >&2
+	exit 2
+fi
+
+stage="$(realpath "$1")"
+current="$2"
+parent="$(dirname "$current")"
+
+if [[ "$(dirname "$stage")" != "$(realpath "$parent")" ]]; then
+	echo "staged modules must be a direct child of $parent: $stage" >&2
+	exit 1
+fi
+if ! find "$stage/lib/modules" -type f -name modules.order -print -quit 2>/dev/null | grep -q .; then
+	echo "staged modules have no modules.order: $stage" >&2
+	exit 1
+fi
+if ! find "$stage/lib/modules" -type f -name 'pktgen.ko*' -print -quit | grep -q .; then
+	echo "staged modules have no pktgen.ko: $stage" >&2
+	exit 1
+fi
+
+link_tmp="$parent/.modules-install-current.$$.tmp"
+trap 'rm -f "$link_tmp"' EXIT
+ln -s "$(basename "$stage")" "$link_tmp"
+mv -Tf "$link_tmp" "$current"
+trap - EXIT

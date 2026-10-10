@@ -74,6 +74,7 @@ X86_RUNTIME_KERNEL_IMAGE := $(VENDOR_BUILD_DIR)/x86/linux/arch/x86/boot/bzImage
 HOST_GO ?= $(or $(GO),go)
 HOST_KERNEL_BUILD_DIR_X86 := $(VENDOR_BUILD_DIR)/x86/linux
 HOST_KERNEL_BUILD_DIR_ARM64 := $(VENDOR_BUILD_DIR)/arm64/linux
+HOST_KERNEL_MODULES_CONTEXT_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/modules-install-current
 HOST_KERNEL_CONFIG_CONTEXT_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/bpf-benchmark-kernel-config-context
 HOST_KERNEL_CONFIG_CONTEXT_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/bpf-benchmark-kernel-config-context
 HOST_KINSN_DIR_X86 := $(ROOT_DIR)/kinsn/module/x86/build
@@ -121,22 +122,20 @@ $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X
 host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
 		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
+	tmp="$$(mktemp -d "$(HOST_KERNEL_BUILD_DIR_X86)/.modules-install.XXXXXX")"; \
 	trap 'rm -rf "$$tmp"' EXIT; \
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	install -d "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/"
+	bash "$(ROOT_DIR)/runner/scripts/publish-kernel-modules" "$$tmp" "$(HOST_KERNEL_MODULES_CONTEXT_X86)"; \
+	trap - EXIT
 
 $(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
 		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
+	tmp="$$(mktemp -d "$(HOST_KERNEL_BUILD_DIR_X86)/.modules-install.XXXXXX")"; \
 	trap 'rm -rf "$$tmp"' EXIT; \
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	install -d "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/"
+	bash "$(ROOT_DIR)/runner/scripts/publish-kernel-modules" "$$tmp" "$(HOST_KERNEL_MODULES_CONTEXT_X86)"; \
+	trap - EXIT
 
 $(HOST_KERNEL_BUILD_DIR_ARM64)/.config: $(ARM64_DEFCONFIG_SRC)
 	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)"
@@ -342,7 +341,7 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot" \
 		--build-context runner-runtime-host-kernel-config="$(HOST_KERNEL_CONFIG_CONTEXT_X86)" \
 		--build-context runner-runtime-host-kernel-offsets="$(MICRO_PROGRAM_BUILD_X86)" \
-		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/lib/modules" \
+		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_MODULES_CONTEXT_X86)/lib/modules" \
 			--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)" \
 			--build-context runner-runtime-host-shim="$(BPFOPT_SHIM_BUILD_X86)" \
 			--build-context runner-runtime-host-native-bpf="$(NATIVE_BPF_ARTIFACTS_X86)" \

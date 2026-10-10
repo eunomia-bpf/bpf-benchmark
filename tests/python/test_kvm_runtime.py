@@ -30,6 +30,46 @@ class CiliumNativeConfigurationTests(unittest.TestCase):
 
 
 class KvmRuntimeTests(unittest.TestCase):
+    def test_module_publish_keeps_last_complete_generation(self) -> None:
+        """Catch interrupted image rebuilds erasing the usable module tree."""
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            current = root / "modules-install-current"
+            publisher = ROOT / "runner/scripts/publish-kernel-modules"
+
+            first = root / ".modules-install.first"
+            first_release = first / "lib/modules/test/kernel/net/core"
+            first_release.mkdir(parents=True)
+            (first / "lib/modules/test/modules.order").write_text(
+                "kernel/net/core/pktgen.ko\n", encoding="utf-8"
+            )
+            (first_release / "pktgen.ko").write_bytes(b"first")
+            subprocess.run(["bash", publisher, first, current], check=True)
+            published = current / "lib/modules/test/kernel/net/core/pktgen.ko"
+            self.assertEqual(published.read_bytes(), b"first")
+
+            incomplete = root / ".modules-install.incomplete"
+            incomplete.mkdir()
+            failed = subprocess.run(
+                ["bash", publisher, incomplete, current],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertEqual(published.read_bytes(), b"first")
+
+            second = root / ".modules-install.second"
+            second_release = second / "lib/modules/test/kernel/net/core"
+            second_release.mkdir(parents=True)
+            (second / "lib/modules/test/modules.order").write_text(
+                "kernel/net/core/pktgen.ko\n", encoding="utf-8"
+            )
+            (second_release / "pktgen.ko").write_bytes(b"second")
+            subprocess.run(["bash", publisher, second, current], check=True)
+            self.assertEqual(published.read_bytes(), b"second")
+            self.assertEqual((first_release / "pktgen.ko").read_bytes(), b"first")
+
     def test_kvm_vcpus_are_pinned_one_per_performance_core(self) -> None:
         """Catch timing guests sharing arbitrary P-cores instead of distinct pins."""
         dry_run = subprocess.run(
