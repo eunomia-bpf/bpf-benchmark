@@ -34,7 +34,7 @@ trap terminate EXIT INT TERM
 
 echo "PREFLIGHT app=$app start=$(date -u +%FT%TZ)"
 BPFREJIT_AWS_KEEP_INSTANCE=1 make "${common[@]}" \
-    WORKLOAD_DURATION=5 SAMPLES=1 BPFREJIT_CORPUS_BPF_STATS=0 \
+    WORKLOAD_DURATION=10 SAMPLES=1 BPFREJIT_CORPUS_BPF_STATS=0 \
     BPFREJIT_SHIM_NATIVE_LOADER=post
 if [[ "$app" == "cilium/agent" ]]; then
     python3 "$root/corpus/results/aws_katran_cilium_outcomes_20261009/validate-cilium-preflight.py" \

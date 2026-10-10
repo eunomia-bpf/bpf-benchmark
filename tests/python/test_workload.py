@@ -37,6 +37,16 @@ class WorkloadContractTests(unittest.TestCase):
     def test_bpftool_hex_bytes_are_decoded_for_per_cpu_counters(self) -> None:
         self.assertEqual(app_outcomes._little_endian(["0x62", "0x6b", "0x0c", "0x00"]), 813922)
 
+    def test_outcome_snapshot_waits_for_async_receiver_drain(self) -> None:
+        snapshots = iter(({"packets": 1}, {"packets": 4}))
+        with mock.patch.object(app_outcomes.time, "sleep") as sleep:
+            result = app_outcomes.run_with_outcomes(
+                _workload_result, lambda: next(snapshots), settle_seconds=2.0
+            )
+        sleep.assert_called_once_with(2.0)
+        self.assertEqual(result.config["outcomes"]["delta"], {"packets": 3})
+        self.assertEqual(result.config["outcomes"]["settle_seconds"], 2.0)
+
     def test_katran_pktgen_uses_one_dedicated_veth_queue_worker(self) -> None:
         self.assertEqual(katran_runner.KATRAN_PKTGEN_THREAD_IDS, (7,))
         self.assertEqual(katran_runner.DEFAULT_PKTGEN_SRC_PORT, 10000)

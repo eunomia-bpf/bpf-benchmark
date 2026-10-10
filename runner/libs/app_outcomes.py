@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import time
 from dataclasses import replace
 from typing import Callable, Mapping, Sequence
 
@@ -99,17 +100,12 @@ def _map_lookup(map_id: int, key: int) -> dict[str, object]:
     return dict(payload) if isinstance(payload, Mapping) else {"raw": payload}
 
 
-def _link_stats(namespace: str, iface: str) -> dict[str, int]:
+def _link_stats(namespace: str | None, iface: str) -> dict[str, int]:
     result: dict[str, int] = {}
     for name in _LINK_STATS:
-        command = [
-            "ip",
-            "netns",
-            "exec",
-            namespace,
-            "cat",
-            f"/sys/class/net/{iface}/statistics/{name}",
-        ]
+        command = ["cat", f"/sys/class/net/{iface}/statistics/{name}"]
+        if namespace:
+            command = ["ip", "netns", "exec", namespace, *command]
         completed = subprocess.run(command, check=True, capture_output=True, text=True)
         result[name] = int(completed.stdout.strip())
     return result
@@ -196,26 +192,41 @@ def katran_outcome_snapshot() -> dict[str, object]:
     real_counters: dict[str, object] = {}
     if real_ids:
         real_counters["real_1"] = _katran_counter(real_ids[-1], 1)
+    interfaces = {
+        "load_balancer/katran0": _link_stats(None, "katran0"),
+        "router/rtlb0": _link_stats("katran-router", "rtlb0"),
+        "router/rtreal0": _link_stats("katran-router", "rtreal0"),
+        "real/real0": _link_stats("katran-real", "real0"),
+    }
     return {
         "stats_map_ids": stats_ids,
         "reals_stats_map_ids": real_ids,
         "counters": counters,
         "real_counters": real_counters,
-        "receiver": _link_stats("katran-real", "real0"),
+        "receiver": interfaces["real/real0"],
+        "interfaces": interfaces,
     }
 
 
 def run_with_outcomes(
     run: Callable[[], WorkloadResult],
     snapshot: Callable[[], dict[str, object]],
+    *,
+    settle_seconds: float = 1.0,
 ) -> WorkloadResult:
     before = snapshot()
     result = run()
+    # XDP_TX into a peer veth is consumed by NAPI asynchronously.  Let that
+    # bounded queue drain before comparing application and receiver counters;
+    # the sleep is outside the timed workload and is recorded in the result.
+    if settle_seconds > 0:
+        time.sleep(settle_seconds)
     after = snapshot()
     config = dict(result.config or {})
     config["outcomes"] = {
         "before": before,
         "after": after,
         "delta": _numeric_delta(before, after),
+        "settle_seconds": settle_seconds,
     }
     return replace(result, config=config)
