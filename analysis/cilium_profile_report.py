@@ -7,6 +7,7 @@ import argparse
 import collections
 import csv
 import json
+import math
 import re
 import subprocess
 import tempfile
@@ -76,27 +77,56 @@ def parse_perf_stat(path: Path) -> dict[str, int]:
     return counters
 
 
-def parse_perf_script(text: str) -> tuple[collections.Counter[str], list[list[str]]]:
-    """Parse perf-script blocks; the first line is the sampled leaf IP."""
+def _branch_symbol(raw: str) -> str:
+    symbol = raw.strip()
+    if "(" in symbol and symbol.endswith(")"):
+        symbol = symbol.rsplit("(", 1)[1][:-1]
+    return re.sub(r"\+(?:0x)?[0-9a-fA-F]+$", "", symbol)
+
+
+def _branch_history(line: str) -> list[str]:
+    symbols: list[str] = []
+    for token in line.split():
+        fields = token.split("/")
+        if len(fields) < 3:
+            continue
+        source, target = (_branch_symbol(fields[0]), _branch_symbol(fields[1]))
+        if source and target:
+            symbols.extend((source, target))
+    return symbols
+
+
+def parse_perf_script(
+    text: str,
+) -> tuple[collections.Counter[str], list[list[str]], list[list[str]]]:
+    """Parse perf-script callchains and LBR branch histories by sample block."""
     counts: collections.Counter[str] = collections.Counter()
     callgraphs: list[list[str]] = []
+    branch_histories: list[list[str]] = []
     for block in re.split(r"\n\s*\n", text.strip()):
         symbols: list[str] = []
+        branches: list[str] = []
         for line in block.splitlines():
             stripped = line.strip()
             match = re.match(r"(?:0x)?[0-9a-fA-F]+\s+(\S+)", stripped)
             if match is not None:
                 symbols.append(match.group(1))
+                branches.extend(_branch_history(stripped[match.end() :]))
         if not symbols:
             continue
         counts[symbols[0]] += 1
         callgraphs.append(symbols)
-    return counts, callgraphs
+        branch_histories.append(branches)
+    return counts, callgraphs, branch_histories
 
 
-def classify_symbol(symbol: str) -> str:
+def classify_symbol(symbol: str, native_symbols: frozenset[str] = frozenset()) -> str:
     lowered = symbol.lower()
-    if lowered.startswith("bpf_prog_") or lowered.startswith("__bpf_prog_"):
+    if (
+        lowered.startswith("bpf_prog_")
+        or lowered.startswith("__bpf_prog_")
+        or symbol in native_symbols
+    ):
         return "bpf_code"
     map_tokens = (
         "map_lookup",
@@ -111,6 +141,7 @@ def classify_symbol(symbol: str) -> str:
         "percpu_array",
         "array_map",
         "bpf_map_",
+        "bpf_common_lru",
     )
     if any(token in lowered for token in map_tokens):
         return "maps"
@@ -119,8 +150,22 @@ def classify_symbol(symbol: str) -> str:
     return "rest"
 
 
+def classify_context(
+    symbols: Sequence[str], native_symbols: frozenset[str] = frozenset()
+) -> str:
+    """Attribute a sample to the first datapath class in leaf-to-root context."""
+    for symbol in symbols:
+        category = classify_symbol(symbol, native_symbols)
+        if category != "rest":
+            return category
+    return "rest"
+
+
 def validate_callgraph_samples(
-    symbol_counts: Mapping[str, int], callgraphs: Sequence[Sequence[str]]
+    symbol_counts: Mapping[str, int],
+    callgraphs: Sequence[Sequence[str]],
+    branch_histories: Sequence[Sequence[str]],
+    native_symbols: frozenset[str] = frozenset(),
 ) -> None:
     resolved_leaves = sum(
         count
@@ -131,11 +176,14 @@ def validate_callgraph_samples(
         raise RuntimeError("perf record contains no resolved leaf symbols")
     if not any(len(callgraph) >= 2 for callgraph in callgraphs):
         raise RuntimeError("perf record contains no callchain with at least two frames")
+    if not any(len(history) >= 2 for history in branch_histories):
+        raise RuntimeError("perf record contains no LBR branch history")
     if not any(
-        classify_symbol(symbol) == "bpf_code" and count > 0
-        for symbol, count in symbol_counts.items()
+        classify_symbol(symbol, native_symbols) == "bpf_code"
+        for symbols in (*callgraphs, *branch_histories)
+        for symbol in symbols
     ):
-        raise RuntimeError("perf record contains no BPF-code leaf samples")
+        raise RuntimeError("perf record contains no BPF-code context")
 
 
 def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
@@ -168,6 +216,7 @@ def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
                 "0",
                 "--sort",
                 "symbol",
+                "--branch-history",
                 *common,
             ],
             check=True,
@@ -175,7 +224,7 @@ def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
             text=True,
         ).stdout
         script = subprocess.run(
-            [str(perf), "script", "-F", "ip,sym", *common],
+            [str(perf), "script", "-F", "ip,sym,brstacksym", *common],
             check=True,
             capture_output=True,
             text=True,
@@ -270,16 +319,24 @@ def _native_sizes(shim_log: Path) -> list[dict[str, object]]:
     return timings
 
 
-def _require_native_size_coverage(
+def _live_native_sizes(
     programs: Sequence[Mapping[str, object]], sizes: Sequence[Mapping[str, object]]
-) -> None:
+) -> list[dict[str, object]]:
     program_ids = {int(row["id"]) for row in programs}
-    native_ids = {int(row["native_id"]) for row in sizes}
-    missing = sorted(program_ids - native_ids)
+    by_native_id: dict[int, dict[str, object]] = {}
+    for raw in sizes:
+        native_id = int(raw["native_id"])
+        if native_id not in program_ids:
+            continue
+        if native_id in by_native_id:
+            raise RuntimeError(f"duplicate native image size for live program ID {native_id}")
+        by_native_id[native_id] = dict(raw)
+    missing = sorted(program_ids - set(by_native_id))
     if missing:
         raise RuntimeError(
             f"native image sizes are missing for post-replacement program IDs: {missing}"
         )
+    return [by_native_id[program_id] for program_id in sorted(program_ids)]
 
 
 def _packet_metrics(workloads: object) -> dict[str, object]:
@@ -385,8 +442,15 @@ def _program_rows(
     return sorted(rows, key=lambda item: (-int(item["run_count"]), int(item["id"])))
 
 
-def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> dict[str, object]:
-    arm_dir = profile_root / arm
+def analyze_run(
+    profile_root: Path,
+    run: Mapping[str, object],
+    perf: Path,
+) -> dict[str, object]:
+    arm = str(run["arm"])
+    run_id = str(run["run_id"])
+    arm_dir = profile_root / str(run["profile_dir"])
+    corpus_run = ROOT / str(run["corpus_run"])
     phase_name = PHASE_BY_ARM[arm]
     app_path = corpus_run / "details" / "apps" / "cilium__agent.json"
     app = _json(app_path)
@@ -402,11 +466,24 @@ def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> d
         / "cilium_agent"
         / phase_name
     )
+    rows = _program_rows(phase, evidence, arm_dir / "guest-bpf-net.json")
+    live_native_sizes: list[dict[str, object]] = []
+    native_symbols: frozenset[str] = frozenset()
+    if arm == "kprog":
+        all_native_sizes = _native_sizes(
+            corpus_run / "details" / "shim-logs" / "cilium__agent.post_rejit.log"
+        )
+        live_native_sizes = _live_native_sizes(rows, all_native_sizes)
+        native_symbols = frozenset(
+            str(record["native_symbol"]) for record in live_native_sizes
+        )
     _, script = _run_perf_reports(perf, arm_dir)
-    symbol_counts, callgraphs = parse_perf_script(script)
+    symbol_counts, callgraphs, branch_histories = parse_perf_script(script)
     if not symbol_counts:
         raise RuntimeError(f"perf record for {arm} contained no symbolized samples")
-    validate_callgraph_samples(symbol_counts, callgraphs)
+    validate_callgraph_samples(
+        symbol_counts, callgraphs, branch_histories, native_symbols
+    )
     idle_samples = sum(
         count for symbol, count in symbol_counts.items() if symbol.lower() in IDLE_SYMBOLS
     )
@@ -415,41 +492,46 @@ def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> d
         for symbol, count in symbol_counts.items()
         if symbol.lower() in UNRESOLVED_SYMBOLS
     )
-    analyzed_symbols = collections.Counter(
-        {
-            symbol: count
-            for symbol, count in symbol_counts.items()
-            if symbol.lower() not in IDLE_SYMBOLS
-            and symbol.lower() not in UNRESOLVED_SYMBOLS
-        }
-    )
-    analyzed_samples = sum(analyzed_symbols.values())
+    categorized_leaves: collections.Counter[tuple[str, str]] = collections.Counter()
+    category_counts: collections.Counter[str] = collections.Counter()
+    for callgraph, history in zip(callgraphs, branch_histories, strict=True):
+        leaf = callgraph[0]
+        if leaf.lower() in IDLE_SYMBOLS or leaf.lower() in UNRESOLVED_SYMBOLS:
+            continue
+        category = classify_context([*callgraph, *history], native_symbols)
+        category_counts[category] += 1
+        categorized_leaves[(leaf, category)] += 1
+    analyzed_samples = sum(category_counts.values())
     if analyzed_samples == 0:
         raise RuntimeError(f"perf record for {arm} has no non-idle resolved samples")
-    category_counts: collections.Counter[str] = collections.Counter()
-    for symbol, count in analyzed_symbols.items():
-        category_counts[classify_symbol(symbol)] += count
     packet_metrics = _packet_metrics(phase.get("workloads"))
     packets = int(packet_metrics["packets_sent"])
     if packets <= 0:
         raise RuntimeError(f"Cilium {arm} workload sent no packets")
     counters = parse_perf_stat(arm_dir / "host-perf-stat.csv")
-    rows = _program_rows(phase, evidence, arm_dir / "guest-bpf-net.json")
     bpf_run_count = sum(int(row["run_count"]) for row in rows)
     bpf_run_time = sum(int(row["run_time_ns"]) for row in rows)
-    sample_period_ns = 1_000_000
+    guest_profile = _json(arm_dir / "guest-profile.json")
+    if not isinstance(guest_profile, Mapping):
+        raise RuntimeError(f"guest profile metadata is malformed: {arm_dir}")
+    sample_period_cycles = int(guest_profile.get("sample_period_cycles", 0) or 0)
+    if sample_period_cycles <= 0:
+        raise RuntimeError(f"guest profile has no positive cycle period: {arm_dir}")
     categories = {
         category: {
             "samples": int(category_counts.get(category, 0)),
             "sample_fraction": category_counts.get(category, 0) / analyzed_samples,
-            "estimated_cpu_ns_per_packet": category_counts.get(category, 0)
-            * sample_period_ns
+            "estimated_guest_cycles_per_packet": category_counts.get(category, 0)
+            * sample_period_cycles
             / packets,
         }
         for category in ("bpf_code", "helpers", "maps", "rest")
     }
     result: dict[str, object] = {
         "arm": arm,
+        "run_id": run_id,
+        "order": str(run["order"]),
+        "position": int(run["position"]),
         "phase": phase_name,
         "corpus_run": str(corpus_run.relative_to(ROOT)),
         "packets": packet_metrics,
@@ -470,10 +552,12 @@ def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> d
             "excluded_idle_samples": idle_samples,
             "unresolved_samples": unresolved_samples,
             "callgraphs": len(callgraphs),
+            "lbr_histories": sum(bool(history) for history in branch_histories),
+            "sample_period_cycles": sample_period_cycles,
             "categories": categories,
             "top_symbols": [
-                {"symbol": symbol, "samples": count, "category": classify_symbol(symbol)}
-                for symbol, count in analyzed_symbols.most_common(40)
+                {"symbol": symbol, "samples": count, "category": category}
+                for (symbol, category), count in categorized_leaves.most_common(40)
             ],
         },
         "bpf": {
@@ -486,11 +570,7 @@ def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> d
         },
     }
     if arm == "kprog":
-        native_sizes = _native_sizes(
-            corpus_run / "details" / "shim-logs" / "cilium__agent.post_rejit.log"
-        )
-        _require_native_size_coverage(rows, native_sizes)
-        result["native_image_sizes"] = native_sizes
+        result["live_native_image_sizes"] = live_native_sizes
     (arm_dir / "report.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -504,9 +584,10 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
     callgraph = result["callgraph"]
     assert isinstance(host, Mapping) and isinstance(bpf, Mapping) and isinstance(callgraph, Mapping)
     lines = [
-        f"# Cilium {result['arm']} profile",
+        f"# Cilium {result['arm']} profile: {result['run_id']}",
         "",
-        f"Corpus run: `{result['corpus_run']}`; selected phase: `{result['phase']}`.",
+        f"Order: `{result['order']}`, position: {result['position']}; corpus run: "
+        f"`{result['corpus_run']}`; selected phase: `{result['phase']}`.",
         "",
         "| Metric | Value |",
         "| --- | ---: |",
@@ -523,12 +604,14 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         f"| excluded idle samples | {callgraph['excluded_idle_samples']} |",
         f"| unresolved samples | {callgraph['unresolved_samples']} |",
         "",
-        "## Resolved non-idle leaf-sample time per packet",
+        "## Resolved non-idle context-attributed cost per packet",
         "",
-        "This heuristic classifies each resolved, non-idle sampled leaf by its symbol name; "
-        "it excludes unresolved leaves and does not attribute inclusive callchain ancestry.",
+        "Each resolved, non-idle sample is assigned to the first datapath class in its "
+        "frame-pointer plus LBR context. This places spin-lock frames reached through "
+        "`htab_lru_map_update_elem` or `bpf_common_lru_pop_free` under maps. Values are "
+        "fixed-period sampled guest cycles, not wall-clock nanoseconds.",
         "",
-        "| Category | Samples | Fraction | Estimated CPU ns/packet |",
+        "| Category | Samples | Fraction | Estimated guest cycles/packet |",
         "| --- | ---: | ---: | ---: |",
     ]
     categories = callgraph["categories"]
@@ -538,7 +621,7 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         assert isinstance(record, Mapping)
         lines.append(
             f"| {name} | {record['samples']} | {float(record['sample_fraction']):.3%} | "
-            f"{float(record['estimated_cpu_ns_per_packet']):.3f} |"
+            f"{float(record['estimated_guest_cycles_per_packet']):.3f} |"
         )
     lines += [
         "",
@@ -570,16 +653,25 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
             f"| {row['id']} | `{row['name']}` | {attach} | {row['run_count']} | "
             f"{float(row['ns_per_run']):.3f} | {row['bytes_jited']} |"
         )
-    if "native_image_sizes" in result:
+    if "live_native_image_sizes" in result:
         lines += [
             "",
-            "## JIT versus whole-program native image size",
+            "## Live-program JIT versus whole-program native image size",
+            "",
+            "Only native IDs in the measured post-replacement BPF counter set are included; "
+            "earlier lifecycle replacements are excluded.",
             "",
             "| Original ID | Native ID | Symbol | JIT bytes | Native blob bytes | Native stub image bytes |",
             "| ---: | ---: | --- | ---: | ---: | ---: |",
         ]
-        native_sizes = result["native_image_sizes"]
+        native_sizes = result["live_native_image_sizes"]
         assert isinstance(native_sizes, list)
+        lines.append(
+            f"| **total ({len(native_sizes)} live)** |  |  | "
+            f"**{sum(int(row['jit_image_bytes']) for row in native_sizes)}** | "
+            f"**{sum(int(row['native_blob_bytes']) for row in native_sizes)}** | "
+            f"**{sum(int(row['native_stub_image_bytes']) for row in native_sizes)}** |"
+        )
         for row in native_sizes:
             assert isinstance(row, Mapping)
             lines.append(
@@ -590,45 +682,104 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
+def _counterbalanced_pairs(
+    results: Sequence[Mapping[str, object]],
+) -> list[tuple[str, Mapping[str, object], Mapping[str, object]]]:
+    grouped: dict[str, dict[str, Mapping[str, object]]] = collections.defaultdict(dict)
+    for result in results:
+        order = str(result["order"])
+        arm = str(result["arm"])
+        if arm in grouped[order]:
+            raise RuntimeError(f"duplicate {arm} run in order {order}")
+        grouped[order][arm] = result
+    pairs: list[tuple[str, Mapping[str, object], Mapping[str, object]]] = []
+    for order in ("jit-kprog", "kprog-jit"):
+        arms = grouped.get(order)
+        if arms is None:
+            continue
+        if set(arms) != {"jit", "kprog"}:
+            raise RuntimeError(f"order {order} does not contain both profile arms")
+        pairs.append((order, arms["jit"], arms["kprog"]))
+    return pairs
+
+
+def _combined_markdown(results: Sequence[Mapping[str, object]]) -> str:
     lines = [
         "# Cilium JIT versus whole-program native profile",
         "",
-        "These profiling runs are separate from timing runs and reuse the unchanged Cilium corpus setup.",
+        "These profiles are separate from timing runs, use the timing topology (host "
+        "P-cores 0--7, 8 vCPUs, 64 GiB), and counterbalance fresh-boot order.",
         "",
-        "| Arm | Packets | BPF runs/packet | cycles/packet | instructions/packet | IPC | branches/packet | branch misses/packet | branch miss rate | cache misses/packet |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Order | Position | Arm | Packets | BPF runs/packet | aggregate BPF ns/run | cycles/packet | instructions/packet | IPC | branches/packet | branch misses/packet | branch miss rate | cache misses/packet |",
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for arm in ("jit", "kprog"):
-        if arm not in results:
-            continue
-        result = results[arm]
+    for result in results:
         packets = result["packets"]
         host = result["host_perf"]
         bpf = result["bpf"]
         assert isinstance(packets, Mapping) and isinstance(host, Mapping) and isinstance(bpf, Mapping)
         lines.append(
-            f"| {arm} | {packets['packets_sent']} | {float(bpf['runs_per_packet']):.3f} | "
+            f"| {result['order']} | {result['position']} | {result['arm']} | "
+            f"{packets['packets_sent']} | {float(bpf['runs_per_packet']):.3f} | "
+            f"{int(bpf['total_run_time_ns']) / int(bpf['total_run_count']):.3f} | "
             f"{float(host['cycles_per_packet']):.3f} | {float(host['instructions_per_packet']):.3f} | "
             f"{float(host['ipc']):.3f} | {float(host['branches_per_packet']):.3f} | "
             f"{float(host['branch_misses_per_packet']):.6f} | "
             f"{float(host['branch_miss_rate']):.6%} | "
             f"{float(host['cache_misses_per_packet']):.6f} |"
         )
+    pairs = _counterbalanced_pairs(results)
+    if pairs:
+        lines += [
+            "",
+            "## Within-order native/JIT ratios",
+            "",
+            "Ratios compare the two fresh boots within each order; values below 1.0 favor native.",
+            "",
+            "| Order | cycles/packet | instructions/packet | branches/packet | branch misses/packet | cache misses/packet | aggregate BPF ns/run |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        ratio_rows: list[list[float]] = []
+        for order, jit, kprog in pairs:
+            jit_host, native_host = jit["host_perf"], kprog["host_perf"]
+            jit_bpf, native_bpf = jit["bpf"], kprog["bpf"]
+            assert isinstance(jit_host, Mapping) and isinstance(native_host, Mapping)
+            assert isinstance(jit_bpf, Mapping) and isinstance(native_bpf, Mapping)
+            values = [
+                float(native_host[key]) / float(jit_host[key])
+                for key in (
+                    "cycles_per_packet",
+                    "instructions_per_packet",
+                    "branches_per_packet",
+                    "branch_misses_per_packet",
+                    "cache_misses_per_packet",
+                )
+            ]
+            values.append(
+                (int(native_bpf["total_run_time_ns"]) / int(native_bpf["total_run_count"]))
+                / (int(jit_bpf["total_run_time_ns"]) / int(jit_bpf["total_run_count"]))
+            )
+            ratio_rows.append(values)
+            lines.append(f"| {order} | " + " | ".join(f"{value:.4f}" for value in values) + " |")
+        if len(ratio_rows) == 2:
+            geomeans = [math.sqrt(first * second) for first, second in zip(*ratio_rows, strict=True)]
+            lines.append(
+                "| counterbalanced geometric mean | "
+                + " | ".join(f"{value:.4f}" for value in geomeans)
+                + " |"
+            )
     lines += [
         "",
         "## Outcome counters",
         "",
-        "| Arm | Sent | Received | Component errors | RX errors | RX drops | Allow dir. 1 | Allow dir. 2 | Other verdicts |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Order | Arm | Sent | Received | Component errors | RX errors | RX drops | Allow dir. 1 | Allow dir. 2 | Other verdicts |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for arm in ("jit", "kprog"):
-        if arm not in results:
-            continue
-        packets = results[arm]["packets"]
+    for result in results:
+        packets = result["packets"]
         assert isinstance(packets, Mapping)
         lines.append(
-            f"| {arm} | {packets['packets_sent']} | {packets['packets_received']} | "
+            f"| {result['order']} | {result['arm']} | {packets['packets_sent']} | {packets['packets_received']} | "
             f"{packets['component_errors']} | {packets['rx_errors']} | {packets['rx_dropped']} | "
             f"{_verdict_count(packets, 'reason=0,direction=1')} | "
             f"{_verdict_count(packets, 'reason=0,direction=2')} | "
@@ -636,42 +787,41 @@ def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
         )
     lines += [
         "",
-        "## Resolved non-idle leaf-sample split",
+        "## Resolved non-idle context-attributed split",
         "",
-        "This heuristic classifies resolved sampled leaves by symbol name. It excludes unresolved leaves and does not attribute inclusive callchain ancestry.",
+        "Frame-pointer and LBR context assigns LRU map spin-lock samples to maps. "
+        "The units are estimated guest sampled cycles per packet.",
         "",
-        "| Arm | BPF code ns/packet | Helpers ns/packet | Maps ns/packet | Rest ns/packet |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        "| Order | Arm | BPF code cycles/packet | Helpers cycles/packet | Maps cycles/packet | Rest cycles/packet |",
+        "| --- | --- | ---: | ---: | ---: | ---: |",
     ]
-    for arm in ("jit", "kprog"):
-        if arm not in results:
-            continue
-        categories = results[arm]["callgraph"]["categories"]  # type: ignore[index]
+    for result in results:
+        callgraph = result["callgraph"]
+        assert isinstance(callgraph, Mapping)
+        categories = callgraph["categories"]
         assert isinstance(categories, Mapping)
         values = []
         for category in ("bpf_code", "helpers", "maps", "rest"):
             record = categories[category]
             assert isinstance(record, Mapping)
-            values.append(float(record["estimated_cpu_ns_per_packet"]))
+            values.append(float(record["estimated_guest_cycles_per_packet"]))
         lines.append(
-            f"| {arm} | {values[0]:.3f} | {values[1]:.3f} | {values[2]:.3f} | {values[3]:.3f} |"
+            f"| {result['order']} | {result['arm']} | {values[0]:.3f} | {values[1]:.3f} | {values[2]:.3f} | {values[3]:.3f} |"
         )
     lines += [
         "",
-        "| Arm | Unresolved leaf samples | Estimated unresolved sampled ns/packet | Unresolved share of non-idle samples |",
-        "| --- | ---: | ---: | ---: |",
+        "| Order | Arm | Unresolved leaf samples | Estimated unresolved sampled cycles/packet | Unresolved share of non-idle samples |",
+        "| --- | --- | ---: | ---: | ---: |",
     ]
-    for arm in ("jit", "kprog"):
-        if arm not in results:
-            continue
-        packets = results[arm]["packets"]
-        callgraph = results[arm]["callgraph"]
+    for result in results:
+        packets = result["packets"]
+        callgraph = result["callgraph"]
         assert isinstance(packets, Mapping) and isinstance(callgraph, Mapping)
         unresolved = int(callgraph["unresolved_samples"])
         non_idle = unresolved + int(callgraph["analyzed_samples"])
         lines.append(
-            f"| {arm} | {unresolved} | "
-            f"{unresolved * 1_000_000 / int(packets['packets_sent']):.3f} | "
+            f"| {result['order']} | {result['arm']} | {unresolved} | "
+            f"{unresolved * int(callgraph['sample_period_cycles']) / int(packets['packets_sent']):.3f} | "
             f"{unresolved / non_idle:.3%} |"
         )
     lines += [
@@ -687,18 +837,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--perf", type=Path, required=True)
     args = parser.parse_args(argv)
     profile_root = args.profile_root.resolve()
-    run_map = _json(profile_root / "corpus-runs.json")
-    if not isinstance(run_map, Mapping):
-        raise RuntimeError("corpus-runs.json must be a mapping")
-    results: dict[str, Mapping[str, object]] = {}
-    for arm, raw_path in run_map.items():
-        arm_name = str(arm)
+    run_plan = _json(profile_root / "profile-runs.json")
+    if not isinstance(run_plan, list) or not run_plan:
+        raise RuntimeError("profile-runs.json must be a non-empty list")
+    results: list[Mapping[str, object]] = []
+    for raw_run in run_plan:
+        if not isinstance(raw_run, Mapping):
+            raise RuntimeError("profile-runs.json contains a malformed run")
+        arm_name = str(raw_run.get("arm"))
         if arm_name not in PHASE_BY_ARM:
-            raise RuntimeError(f"unknown profile arm in corpus-runs.json: {arm_name}")
-        corpus_run = ROOT / str(raw_path)
-        results[arm_name] = analyze_arm(
-            profile_root, arm_name, args.perf.resolve(), corpus_run
-        )
+            raise RuntimeError(f"unknown profile arm in profile-runs.json: {arm_name}")
+        required = {"run_id", "order", "position", "profile_dir", "corpus_run"}
+        missing = sorted(required - set(raw_run))
+        if missing:
+            raise RuntimeError(f"profile run is missing fields: {missing}")
+        results.append(analyze_run(profile_root, raw_run, args.perf.resolve()))
     (profile_root / "summary.json").write_text(
         json.dumps(results, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

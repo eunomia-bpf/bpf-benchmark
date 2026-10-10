@@ -71,10 +71,10 @@ def _parse_cpu_list(text: str) -> set[int]:
 
 def _validate_cpu_allocation(cpu_list: str) -> None:
     selected = _parse_cpu_list(cpu_list)
-    assigned = set(range(16, 20))
+    assigned = set(range(0, 8))
     if selected != assigned:
         raise RuntimeError(
-            f"CILIUM_PROFILE_CPUS must select agent 2's CPUs 16-19, got {cpu_list}"
+            f"CILIUM_PROFILE_CPUS must select timing CPUs 0-7, got {cpu_list}"
         )
 
 
@@ -236,9 +236,9 @@ def _make_command(
         "__profile-cilium-vm",
         "PLATFORM=kvm",
         "ARCH=x86",
-        "VM_CPU_PIN=",
-        "VM_CPUS=4",
-        "VM_MEM=16G",
+        f"VM_CPU_PIN={cpus}",
+        "VM_CPUS=8",
+        "VM_MEM=64G",
         f"CILIUM_PROFILE_GUEST_SCRIPT={guest_script}",
     ]
 
@@ -279,13 +279,16 @@ def _run_arm(
     perf_root: Path,
     code_root: Path,
     root: Path,
+    run_id: str,
+    order: str,
+    position: int,
 ) -> Path:
     phase = ARM_PHASE[arm]
-    output_dir = root / arm
+    output_dir = root / run_id
     output_dir.mkdir(parents=True, exist_ok=False)
     pmu = _resolve_pmu(cpus)
     stat_command, control, ack = _stat_command(perf, pmu, cpus, output_dir)
-    guest_script = code_root / f"run-{arm}.sh"
+    guest_script = code_root / f"run-{run_id.replace('/', '-')}.sh"
     guest_make_command = _guest_make_command(
         arm=arm,
         duration=duration,
@@ -300,11 +303,14 @@ def _run_arm(
     )
     metadata: dict[str, object] = {
         "arm": arm,
+        "run_id": run_id,
+        "order": order,
+        "position": position,
         "phase": phase,
         "host_cpu_set": cpus,
         "host_pmu": pmu,
-        "vm_cpus": 4,
-        "vm_memory": "16G",
+        "vm_cpus": 8,
+        "vm_memory": "64G",
         "workload_duration_seconds": duration,
         "make_command": make_command,
         "guest_make_command": guest_make_command,
@@ -413,6 +419,38 @@ def _parse_arms(raw: str) -> list[str]:
     return arms
 
 
+def _profile_plan(arms: Sequence[str], order: str) -> list[dict[str, object]]:
+    normalized = order.strip().lower()
+    if len(arms) == 1:
+        if normalized not in {"both", "single"}:
+            raise RuntimeError("single-arm profiling requires CILIUM_PROFILE_ORDER=single")
+        arm = arms[0]
+        return [{"run_id": f"single/01-{arm}", "order": "single", "position": 1, "arm": arm}]
+    if list(arms) != ["jit", "kprog"]:
+        raise RuntimeError("counterbalanced profiling requires both jit and kprog arms")
+    orders = {
+        "both": (("jit-kprog", ("jit", "kprog")), ("kprog-jit", ("kprog", "jit"))),
+        "jit-kprog": (("jit-kprog", ("jit", "kprog")),),
+        "kprog-jit": (("kprog-jit", ("kprog", "jit")),),
+    }
+    if normalized not in orders:
+        raise RuntimeError(
+            "CILIUM_PROFILE_ORDER must be both, jit-kprog, or kprog-jit"
+        )
+    plan: list[dict[str, object]] = []
+    for order_name, ordered_arms in orders[normalized]:
+        for position, arm in enumerate(ordered_arms, start=1):
+            plan.append(
+                {
+                    "run_id": f"{order_name}/{position:02d}-{arm}",
+                    "order": order_name,
+                    "position": position,
+                    "arm": arm,
+                }
+            )
+    return plan
+
+
 def _resolve_profile_root(configured: str) -> Path:
     profile_root = (
         Path(configured).resolve()
@@ -442,9 +480,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     duration = int(os.environ.get("CILIUM_PROFILE_DURATION", "60"))
     if duration <= 0:
         raise RuntimeError("CILIUM_PROFILE_DURATION must be positive")
-    cpus = os.environ.get("CILIUM_PROFILE_CPUS", "16-19").strip()
+    cpus = os.environ.get("CILIUM_PROFILE_CPUS", "0-7").strip()
     _validate_cpu_allocation(cpus)
     arms = _parse_arms(os.environ.get("CILIUM_PROFILE_ARM", "all"))
+    plan = _profile_plan(arms, os.environ.get("CILIUM_PROFILE_ORDER", "both"))
     configured_output = os.environ.get("CILIUM_PROFILE_OUTPUT_DIR", "").strip()
     profile_root = _resolve_profile_root(configured_output)
     profile_root.mkdir(parents=True, exist_ok=False)
@@ -454,8 +493,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         _stage_perf_runtime(perf, perf_root)
         _stage_profile_code(code_root)
-        runs = {
-            arm: _run_arm(
+        runs: list[dict[str, object]] = []
+        for planned in plan:
+            arm = str(planned["arm"])
+            corpus_run = _run_arm(
                 arm=arm,
                 duration=duration,
                 cpus=cpus,
@@ -463,12 +504,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 perf_root=perf_root,
                 code_root=code_root,
                 root=profile_root,
+                run_id=str(planned["run_id"]),
+                order=str(planned["order"]),
+                position=int(planned["position"]),
             )
-            for arm in arms
-        }
-        (profile_root / "corpus-runs.json").write_text(
+            runs.append(
+                {
+                    **planned,
+                    "profile_dir": str(planned["run_id"]),
+                    "corpus_run": str(corpus_run.relative_to(ROOT)),
+                }
+            )
+            (profile_root / "profile-runs.json").write_text(
+                json.dumps(runs, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+        (profile_root / "profile-runs.json").write_text(
             json.dumps(
-                {arm: str(path.relative_to(ROOT)) for arm, path in runs.items()},
+                runs,
                 indent=2,
                 sort_keys=True,
             )

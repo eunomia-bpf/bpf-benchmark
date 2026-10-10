@@ -20,6 +20,7 @@ _SYMBOL_SETTINGS = {
     Path("/proc/sys/kernel/kptr_restrict"): "0",
     Path("/proc/sys/net/core/bpf_jit_kallsyms"): "1",
 }
+_SAMPLE_PERIOD_CYCLES = 7_400_000
 
 
 def _required_env(name: str) -> str:
@@ -51,11 +52,13 @@ def _perf_command(perf_root: Path, work_dir: Path) -> list[str]:
         "record",
         "-a",
         "-e",
-        "cpu-clock",
+        "cycles:k",
         "-c",
-        "1000000",
+        str(_SAMPLE_PERIOD_CYCLES),
         "--call-graph",
         "fp",
+        "-j",
+        "any_call,any_ret,k,save_type",
         "--sample-cpu",
         "--delay=-1",
         f"--control=fifo:{control},{ack}",
@@ -166,6 +169,24 @@ def _print_profile_marker(event: str, phase: str) -> None:
     )
 
 
+def _measure_stop_and_capture(
+    measure: object,
+    kwargs: dict[str, object],
+    collector: PerfCollector,
+    output_dir: Path,
+    phase: str,
+) -> dict[str, object]:
+    if not callable(measure):
+        raise TypeError("measurement callback is not callable")
+    result = measure(**kwargs)
+    _print_profile_marker("profile_measurement_done", phase)
+    collector.disable()
+    # pktgen and its symbols only exist after the workload has started.  Keep
+    # the module loaded but stop sampling before taking this audit snapshot.
+    _capture_symbols(output_dir)
+    return result
+
+
 def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
     selected_phase = _configure_arm(arm)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -191,7 +212,6 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
         if phase != selected_phase:
             return original_measure(**kwargs)
 
-        _capture_symbols(output_dir)
         command = _perf_command(local_perf_root, work_dir)
         collector = PerfCollector(
             command=command,
@@ -203,9 +223,9 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
             "arm": arm,
             "phase": phase,
             "perf_command": command,
-            "sample_event": "cpu-clock",
-            "sample_period_ns": 1_000_000,
-            "call_graph": "frame-pointer",
+            "sample_event": "cycles:k",
+            "sample_period_cycles": _SAMPLE_PERIOD_CYCLES,
+            "call_graph": "frame-pointer with LBR call/return branch stack",
             "perf_data": str(output_dir / "guest.perf.data"),
         }
         (output_dir / "guest-profile.json").write_text(
@@ -216,9 +236,9 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
             collector.start()
             collector.enable()
             _print_profile_marker("profile_measurement_start", phase)
-            result = original_measure(**kwargs)
-            _print_profile_marker("profile_measurement_done", phase)
-            collector.disable()
+            result = _measure_stop_and_capture(
+                original_measure, kwargs, collector, output_dir, phase
+            )
             collector.finish()
             if not local_data.is_file():
                 raise RuntimeError("perf record completed without guest-local perf data")

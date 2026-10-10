@@ -18,16 +18,16 @@ SPEC.loader.exec_module(report)
 
 
 class HybridPmuSelectionTest(unittest.TestCase):
-    """Catch counting P-core events while agent 2's guest runs on E-cores."""
+    """Catch collecting timing profiles on the wrong hybrid-core PMU."""
 
-    def test_selects_atom_pmu_for_agent2_cpu_set(self) -> None:
+    def test_selects_core_pmu_for_timing_cpu_set(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             (root / "cpu_core").mkdir()
             (root / "cpu_core" / "cpus").write_text("0-7\n")
             (root / "cpu_atom").mkdir()
             (root / "cpu_atom" / "cpus").write_text("8-23\n")
-            self.assertEqual(host._resolve_pmu("16-19", root), "cpu_atom")
+            self.assertEqual(host._resolve_pmu("0-7", root), "cpu_core")
 
     def test_rejects_cpu_set_crossing_hybrid_pmus(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -39,10 +39,10 @@ class HybridPmuSelectionTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "exactly one PMU"):
                 host._resolve_pmu("7-8", root)
 
-    def test_rejects_cpu_set_outside_agent2_allocation(self) -> None:
-        with self.assertRaisesRegex(RuntimeError, "agent 2's CPUs 16-19"):
-            host._validate_cpu_allocation("0-3")
-        host._validate_cpu_allocation("16,17-19")
+    def test_rejects_cpu_set_outside_timing_allocation(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "timing CPUs 0-7"):
+            host._validate_cpu_allocation("16-19")
+        host._validate_cpu_allocation("0,1-7")
 
 
 class MarkerAndCommandTest(unittest.TestCase):
@@ -71,6 +71,20 @@ class MarkerAndCommandTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "unknown=.*kinsn"):
             host._parse_arms("kinsn")
 
+    def test_both_orders_use_four_fresh_guest_runs(self) -> None:
+        self.assertEqual(
+            host._profile_plan(["jit", "kprog"], "both"),
+            [
+                {"run_id": "jit-kprog/01-jit", "order": "jit-kprog", "position": 1, "arm": "jit"},
+                {"run_id": "jit-kprog/02-kprog", "order": "jit-kprog", "position": 2, "arm": "kprog"},
+                {"run_id": "kprog-jit/01-kprog", "order": "kprog-jit", "position": 1, "arm": "kprog"},
+                {"run_id": "kprog-jit/02-jit", "order": "kprog-jit", "position": 2, "arm": "jit"},
+            ],
+        )
+        self.assertEqual(
+            host._profile_plan(["jit"], "single")[0]["run_id"], "single/01-jit"
+        )
+
     def test_guest_scan_matches_executable_not_package_argument(self) -> None:
         self.assertTrue(
             host._is_qemu_executable(Path("/usr/local/bin/qemu-system-x86_64"))
@@ -84,18 +98,18 @@ class MarkerAndCommandTest(unittest.TestCase):
             )
         )
 
-    def test_make_command_obeys_agent2_guest_limit(self) -> None:
+    def test_make_command_matches_timing_guest(self) -> None:
         command = host._make_command(
-            cpus="16-19",
+            cpus="0-7",
             guest_script=Path("/results/profile/.profile-code/run-jit.sh"),
         )
-        self.assertEqual(command[:3], ["taskset", "-c", "16-19"])
+        self.assertEqual(command[:3], ["taskset", "-c", "0-7"])
         self.assertIn("-o", command)
         self.assertIn("x86-runner-runtime-image-tar", command)
         self.assertIn("__profile-cilium-vm", command)
-        self.assertIn("VM_CPU_PIN=", command)
-        self.assertIn("VM_CPUS=4", command)
-        self.assertIn("VM_MEM=16G", command)
+        self.assertIn("VM_CPU_PIN=0-7", command)
+        self.assertIn("VM_CPUS=8", command)
+        self.assertIn("VM_MEM=64G", command)
         self.assertIn(
             "CILIUM_PROFILE_GUEST_SCRIPT=/results/profile/.profile-code/run-jit.sh",
             command,
@@ -149,6 +163,29 @@ class MarkerAndCommandTest(unittest.TestCase):
             self.assertEqual(command[output_index], "/var/tmp/work/guest.perf.data")
             control = next(item for item in command if item.startswith("--control="))
             self.assertNotIn("corpus/results", control)
+            self.assertIn("cycles:k", command)
+            self.assertIn("any_call,any_ret,k,save_type", command)
+
+    def test_symbol_snapshot_follows_workload_and_sampling_stop(self) -> None:
+        events: list[str] = []
+
+        def measure(**kwargs: object) -> dict[str, object]:
+            self.assertEqual(kwargs, {"sample": 1})
+            events.append("measure")
+            return {"ok": True}
+
+        collector = mock.Mock()
+        collector.disable.side_effect = lambda: events.append("disable")
+        with mock.patch.object(
+            guest, "_print_profile_marker", side_effect=lambda *_: events.append("marker")
+        ), mock.patch.object(
+            guest, "_capture_symbols", side_effect=lambda *_: events.append("snapshot")
+        ):
+            result = guest._measure_stop_and_capture(
+                measure, {"sample": 1}, collector, Path("/results"), "baseline"
+            )
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(events, ["measure", "marker", "disable", "snapshot"])
 
     def test_perf_data_is_published_only_after_driver_returns(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -174,36 +211,52 @@ class ReportParsingTest(unittest.TestCase):
     """Catch lost callgraphs and misclassified datapath samples."""
 
     def test_perf_script_leaf_and_callchain_parsing(self) -> None:
-        text = """ffffffffc0010010 bpf_prog_deadbeef_cil_from_host
+        text = """ffffffffc0010010 bpf_prog_deadbeef_cil_from_host htab_lru_map_update_elem+0x1/_raw_spin_lock+0x2/P/-/3/CALL
         ffffffff81001000 __netif_receive_skb
         ffffffff81002000 net_rx_action
 
-ffffffff81003000 htab_map_lookup_elem
+ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/htab_lru_map_update_elem+0x2/P/-/4/CALL
         ffffffffc0010010 bpf_prog_deadbeef_cil_from_host
 
 """
-        counts, callgraphs = report.parse_perf_script(text)
+        counts, callgraphs, histories = report.parse_perf_script(text)
         self.assertEqual(counts["bpf_prog_deadbeef_cil_from_host"], 1)
-        self.assertEqual(counts["htab_map_lookup_elem"], 1)
+        self.assertEqual(counts["_raw_spin_lock"], 1)
         self.assertEqual(len(callgraphs[0]), 3)
+        self.assertEqual(histories[0][:2], ["htab_lru_map_update_elem", "_raw_spin_lock"])
         self.assertEqual(report.classify_symbol("bpf_prog_deadbeef_cil_from_host"), "bpf_code")
         self.assertEqual(report.classify_symbol("htab_map_lookup_elem"), "maps")
         self.assertEqual(report.classify_symbol("lookup_nulls_elem_raw"), "maps")
         self.assertEqual(report.classify_symbol("bpf_redirect"), "helpers")
+        self.assertEqual(
+            report.classify_context(
+                ["_raw_spin_lock", "bpf_common_lru_pop_free", "bpf_prog_x"]
+            ),
+            "maps",
+        )
         self.assertIn("pv_native_safe_halt", report.IDLE_SYMBOLS)
-        report.validate_callgraph_samples(counts, callgraphs)
+        report.validate_callgraph_samples(counts, callgraphs, histories)
 
     def test_perf_samples_reject_unknown_only_or_leaf_only_data(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "no resolved leaf"):
-            report.validate_callgraph_samples({"[unknown]": 5}, [["[unknown]"]])
+            report.validate_callgraph_samples({"[unknown]": 5}, [["[unknown]"]], [[]])
         with self.assertRaisesRegex(RuntimeError, "no callchain"):
             report.validate_callgraph_samples(
                 {"bpf_prog_deadbeef_cil_from_host": 5},
                 [["bpf_prog_deadbeef_cil_from_host"]],
+                [["bpf_prog_deadbeef_cil_from_host", "net_rx_action"]],
             )
-        with self.assertRaisesRegex(RuntimeError, "no BPF-code leaf"):
+        with self.assertRaisesRegex(RuntimeError, "no LBR"):
             report.validate_callgraph_samples(
-                {"net_rx_action": 5}, [["net_rx_action", "do_softirq"]]
+                {"bpf_prog_deadbeef_cil_from_host": 5},
+                [["bpf_prog_deadbeef_cil_from_host", "do_softirq"]],
+                [[]],
+            )
+        with self.assertRaisesRegex(RuntimeError, "no BPF-code context"):
+            report.validate_callgraph_samples(
+                {"net_rx_action": 5},
+                [["net_rx_action", "do_softirq"]],
+                [["netif_receive_skb", "net_rx_action"]],
             )
 
     def test_perf_stat_rejects_missing_event(self) -> None:
@@ -252,9 +305,21 @@ ffffffff81003000 htab_map_lookup_elem
                 {158: ["tc:lxcbench0:tcx/ingress"]},
             )
 
+    def test_live_native_sizes_exclude_lifecycle_replacements(self) -> None:
+        self.assertEqual(
+            report._live_native_sizes(
+                [{"id": 12}],
+                [
+                    {"native_id": 11, "native_blob_bytes": 100},
+                    {"native_id": 12, "native_blob_bytes": 80},
+                ],
+            ),
+            [{"native_id": 12, "native_blob_bytes": 80}],
+        )
+
     def test_native_size_coverage_rejects_unpaired_program(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "program IDs: \\[12\\]"):
-            report._require_native_size_coverage(
+            report._live_native_sizes(
                 [{"id": 11}, {"id": 12}], [{"native_id": 11}]
             )
 
