@@ -3,10 +3,15 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import time
 from pathlib import Path
 from typing import Mapping, Sequence
 
 from . import resolve_bpftool_binary
+
+
+_MAP_SNAPSHOT_ATTEMPTS = 120
+_MAP_SNAPSHOT_RETRY_SECONDS = 0.1
 
 
 def _safe_name(value: str) -> str:
@@ -37,6 +42,68 @@ def _json_payload(command: Sequence[str]) -> object:
     return json.loads(completed.stdout)
 
 
+def _map_inventory(bpftool: str) -> list[dict[str, object]]:
+    payload = _json_payload([bpftool, "-j", "map", "show"])
+    return [
+        dict(record)
+        for record in (payload if isinstance(payload, list) else [])
+        if isinstance(record, Mapping) and int(record.get("id", 0) or 0) > 0
+    ]
+
+
+def _program_arrays(
+    inventory: Sequence[Mapping[str, object]],
+) -> list[dict[str, object]]:
+    return [dict(record) for record in inventory if str(record.get("type") or "") == "prog_array"]
+
+
+def _program_array_identity(
+    inventory: Sequence[Mapping[str, object]],
+) -> list[tuple[int, str]]:
+    return sorted(
+        (int(record["id"]), str(record.get("name") or ""))
+        for record in _program_arrays(inventory)
+    )
+
+
+def _dump_program_arrays(
+    bpftool: str,
+    inventory: Sequence[Mapping[str, object]],
+) -> dict[int, object]:
+    return {
+        int(record["id"]): _json_payload(
+            [bpftool, "-j", "map", "dump", "id", str(int(record["id"]))]
+        )
+        for record in _program_arrays(inventory)
+    }
+
+
+def _stable_map_snapshot(bpftool: str) -> tuple[list[dict[str, object]], dict[int, object]]:
+    last_error: Exception | None = None
+    for _attempt in range(_MAP_SNAPSHOT_ATTEMPTS):
+        try:
+            before = _map_inventory(bpftool)
+            before_dumps = _dump_program_arrays(bpftool, before)
+            middle = _map_inventory(bpftool)
+            if _program_array_identity(before) != _program_array_identity(middle):
+                time.sleep(_MAP_SNAPSHOT_RETRY_SECONDS)
+                continue
+            after_dumps = _dump_program_arrays(bpftool, middle)
+            after = _map_inventory(bpftool)
+            if (
+                _program_array_identity(middle) == _program_array_identity(after)
+                and before_dumps == after_dumps
+            ):
+                return after, after_dumps
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+            last_error = exc
+        time.sleep(_MAP_SNAPSHOT_RETRY_SECONDS)
+    detail = f": {last_error}" if last_error is not None else ""
+    raise RuntimeError(
+        f"BPF prog_array maps did not stabilize after {_MAP_SNAPSHOT_ATTEMPTS} read-only snapshots{detail}"
+    )
+
+
 def capture_bpf_evidence(
     *,
     output_root: Path,
@@ -62,12 +129,7 @@ def capture_bpf_evidence(
     (output_dir / "program-inventory.json").write_text(
         json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    all_maps = _json_payload([bpftool, "-j", "map", "show"])
-    map_inventory = [
-        dict(record)
-        for record in (all_maps if isinstance(all_maps, list) else [])
-        if isinstance(record, Mapping) and int(record.get("id", 0) or 0) > 0
-    ]
+    map_inventory, stable_program_array_payloads = _stable_map_snapshot(bpftool)
     (output_dir / "map-inventory.json").write_text(
         json.dumps(map_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -79,7 +141,7 @@ def capture_bpf_evidence(
         map_id = int(record["id"])
         map_name = _safe_name(str(record.get("name") or "map"))
         filename = f"map-{map_id}-{map_name}.prog-array.json"
-        payload = _json_payload([bpftool, "-j", "map", "dump", "id", str(map_id)])
+        payload = stable_program_array_payloads[map_id]
         (output_dir / filename).write_text(
             json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
