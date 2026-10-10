@@ -1,6 +1,7 @@
 # Cilium JIT versus whole-program native profile
 
 These profiles are separate from timing runs, use the timing topology (host P-cores 0--7, 8 vCPUs, 64 GiB), and counterbalance fresh-boot order.
+There is one fresh-guest pair per order, so the profile diagnoses mechanisms but does not estimate between-guest uncertainty.
 
 | Order | Position | Arm | Packets | BPF runs/packet | aggregate BPF ns/run | cycles/packet | instructions/packet | IPC | branches/packet | branch misses/packet | branch miss rate | cache misses/packet |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -43,7 +44,7 @@ Ratios compare the two fresh boots within each order; values below 1.0 favor nat
 
 ## Resolved non-idle context-attributed split
 
-Frame-pointer context assigns LRU map spin-lock samples to maps. The units are estimated guest sampled nanoseconds per packet.
+Frame-pointer context assigns LRU map spin-lock samples to maps. The units are estimated guest sampled nanoseconds per packet. These are context associations, not proof that native directly speeds map implementations.
 
 | Order | Arm | BPF code ns/packet | Helpers ns/packet | Maps ns/packet | Rest ns/packet |
 | --- | --- | ---: | ---: | ---: | ---: |

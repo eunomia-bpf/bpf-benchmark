@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import importlib.util
 import json
 import tempfile
@@ -213,6 +214,30 @@ class MarkerAndCommandTest(unittest.TestCase):
 
 class ReportParsingTest(unittest.TestCase):
     """Catch lost callgraphs and misclassified datapath samples."""
+
+    def test_profile_text_artifacts_are_reproducible(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            report_path = root / "perf-report.txt"
+            script_path = root / "perf-script.txt.gz"
+            normalized = report._write_reproducible_text_artifacts(
+                report_path,
+                "row   \nblank\t\n",
+                script_path,
+                "sample\n",
+            )
+            first = script_path.read_bytes()
+            report._write_reproducible_text_artifacts(
+                report_path,
+                "row   \nblank\t\n",
+                script_path,
+                "sample\n",
+            )
+            self.assertEqual(normalized, "row\nblank\n")
+            self.assertEqual(report_path.read_text(encoding="utf-8"), normalized)
+            self.assertEqual(script_path.read_bytes(), first)
+            self.assertEqual(gzip.decompress(first), b"sample\n")
+            self.assertEqual(first[4:8], b"\x00\x00\x00\x00")
 
     def test_perf_script_leaf_and_callchain_parsing(self) -> None:
         text = """ffffffffc0010010 bpf_prog_deadbeef_cil_from_host net_rx_action+0x1/bpf_prog_deadbeef_cil_from_host+0x2/P/-/-/3/CALL/-

@@ -7,6 +7,11 @@ This profile used the runtime image validated by Agent 1
 host P-cores 0--7, eight guest vCPUs, 64 GiB, one 60-second sample per fresh
 guest, BPF statistics enabled, and both guest orders (`JIT -> native` and
 `native -> JIT`). It is a diagnostic profile separate from the timing suite.
+With one fresh-guest pair per order, it identifies repeatable mechanisms but
+does not estimate between-guest uncertainty. The collection-time
+`commands.json` files predate the final tooling commit and do not embed the
+runtime-image identity; the validated image and topology provenance therefore
+also relies on this record and the coordination log.
 
 The counterbalanced geometric-mean native/JIT ratios are 0.8640 for
 cycles/packet, 0.9719 for instructions/packet, 1.0031 for branches/packet,
@@ -28,6 +33,10 @@ The positive sampled ns/packet savings split consistently in both orders:
   to 371--393 ns/run in `native -> JIT`;
 - the rest of the stack contributes 15.9% and 13.3%; and
 - helpers contribute only 0.9% and 1.0%, so helper time is essentially flat.
+
+These figures are sampled context associations: in particular, they do not
+prove that native directly speeds the map implementations. They show that map
+contexts account for most of the observed sampled difference.
 
 All sampled `_raw_spin*` leaves whose callchain passes through
 `htab_lru_map_update_elem` or `bpf_common_lru_pop_free` are classified as

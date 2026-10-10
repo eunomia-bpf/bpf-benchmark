@@ -49,6 +49,23 @@ def _json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _write_reproducible_text_artifacts(
+    report_path: Path,
+    report: str,
+    script_path: Path,
+    script: str,
+) -> str:
+    """Write perf text without tool padding or gzip timestamp drift."""
+    normalized_report = "\n".join(line.rstrip() for line in report.splitlines())
+    if report.endswith("\n"):
+        normalized_report += "\n"
+    report_path.write_text(normalized_report, encoding="utf-8")
+    with script_path.open("wb") as raw:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as output:
+            output.write(script.encode("utf-8"))
+    return normalized_report
+
+
 def _little_endian_hex_octets(value: object) -> int:
     if not isinstance(value, list) or not value:
         raise ValueError(f"expected non-empty octet list, got {value!r}")
@@ -308,9 +325,12 @@ def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
             text=True,
         ).stdout
     script = symbolize_module_ips(script, kallsyms, modules)
-    (arm_dir / "perf-report.txt").write_text(report, encoding="utf-8")
-    with gzip.open(arm_dir / "perf-script.txt.gz", "wt", encoding="utf-8") as output:
-        output.write(script)
+    report = _write_reproducible_text_artifacts(
+        arm_dir / "perf-report.txt",
+        report,
+        arm_dir / "perf-script.txt.gz",
+        script,
+    )
     return report, script
 
 
@@ -827,6 +847,8 @@ def _combined_markdown(results: Sequence[Mapping[str, object]]) -> str:
         "",
         "These profiles are separate from timing runs, use the timing topology (host "
         "P-cores 0--7, 8 vCPUs, 64 GiB), and counterbalance fresh-boot order.",
+        "There is one fresh-guest pair per order, so the profile diagnoses mechanisms "
+        "but does not estimate between-guest uncertainty.",
         "",
         "| Order | Position | Arm | Packets | BPF runs/packet | aggregate BPF ns/run | cycles/packet | instructions/packet | IPC | branches/packet | branch misses/packet | branch miss rate | cache misses/packet |",
         "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
@@ -930,7 +952,8 @@ def _combined_markdown(results: Sequence[Mapping[str, object]]) -> str:
         "## Resolved non-idle context-attributed split",
         "",
         "Frame-pointer context assigns LRU map spin-lock samples to maps. "
-        "The units are estimated guest sampled nanoseconds per packet.",
+        "The units are estimated guest sampled nanoseconds per packet. These are "
+        "context associations, not proof that native directly speeds map implementations.",
         "",
         "| Order | Arm | BPF code ns/packet | Helpers ns/packet | Maps ns/packet | Rest ns/packet |",
         "| --- | --- | ---: | ---: | ---: | ---: |",
