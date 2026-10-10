@@ -1,0 +1,4311 @@
+{
+  "attachment_signature": [
+    {
+      "attach_type": "tcx_egress",
+      "device": "bpfbench0",
+      "program_name": "cil_to_netdev",
+      "program_type": "sched_cls",
+      "type": "tcx"
+    },
+    {
+      "attach_type": "tcx_ingress",
+      "device": "bpfbench0",
+      "program_name": "cil_from_netdev",
+      "program_type": "sched_cls",
+      "type": "tcx"
+    },
+    {
+      "attach_type": "xdp",
+      "device": "bpfbench0",
+      "program_name": "cil_xdp_entry",
+      "program_type": "xdp",
+      "type": "xdp"
+    },
+    {
+      "attach_type": "tcx_egress",
+      "device": "cilium_host",
+      "program_name": "cil_from_host",
+      "program_type": "sched_cls",
+      "type": "tcx"
+    },
+    {
+      "attach_type": "tcx_ingress",
+      "device": "cilium_host",
+      "program_name": "cil_to_host",
+      "program_type": "sched_cls",
+      "type": "tcx"
+    },
+    {
+      "attach_type": "tcx_ingress",
+      "device": "cilium_net",
+      "program_name": "cil_to_host",
+      "program_type": "sched_cls",
+      "type": "tcx"
+    },
+    {
+      "attach_type": "tcx_ingress",
+      "device": "lxcbench0",
+      "program_name": "cil_from_container",
+      "program_type": "sched_cls",
+      "type": "tcx"
+    },
+    {
+      "attach_type": "tcx_ingress",
+      "device": "lxcbench1",
+      "program_name": "cil_from_container",
+      "program_type": "sched_cls",
+      "type": "tcx"
+    }
+  ],
+  "canonical_name_overrides": {
+    "409": "cil_xdp_entry",
+    "413": "cil_lxc_policy",
+    "417": "cil_from_netdev",
+    "419": "tail_ipv4_ct_ingress",
+    "420": "tail_ipv4_policy",
+    "423": "tail_nodeport_nat_egress_ipv4",
+    "424": "tail_no_service_ipv4",
+    "427": "tail_ipv4_to_endpoint",
+    "429": "tail_ipv4_ct_egress",
+    "431": "tail_ipv4_ct_ingress",
+    "433": "tail_handle_ipv4_from_netdev",
+    "436": "tail_drop_notify",
+    "439": "cil_from_host",
+    "442": "tail_ipv4_ct_egress",
+    "446": "tail_handle_ipv4_from_host",
+    "448": "tail_handle_ipv4_cont",
+    "451": "cil_from_container",
+    "452": "tail_drop_notify",
+    "454": "cil_to_netdev",
+    "457": "tail_no_service_ipv4",
+    "459": "tail_handle_ipv4",
+    "460": "tail_drop_notify",
+    "463": "tail_handle_ipv4_cont",
+    "464": "tail_ipv4_to_endpoint",
+    "466": "cil_host_policy",
+    "469": "tail_nodeport_rev_dnat_ipv4",
+    "471": "tail_handle_ipv4",
+    "473": "cil_to_host",
+    "475": "tail_nodeport_rev_dnat_ipv4",
+    "479": "tail_ipv4_policy",
+    "480": "cil_lxc_policy_egress",
+    "483": "tail_handle_snat_fwd_ipv4",
+    "485": "tail_handle_arp",
+    "486": "tail_handle_arp",
+    "487": "tail_nodeport_nat_ingress_ipv4",
+    "490": "cil_from_netdev",
+    "491": "cil_lxc_policy_egress",
+    "494": "tail_drop_notify",
+    "496": "tail_handle_ipv4_from_netdev",
+    "500": "tail_drop_notify",
+    "502": "tail_ipv4_to_endpoint",
+    "504": "cil_host_policy",
+    "506": "tail_handle_ipv4",
+    "508": "tail_no_service_ipv4",
+    "510": "tail_ipv4_policy",
+    "512": "cil_to_netdev",
+    "513": "tail_ipv4_ct_egress",
+    "516": "tail_ipv4_ct_ingress",
+    "518": "tail_handle_snat_fwd_ipv4",
+    "520": "tail_no_service_ipv4",
+    "522": "tail_nodeport_nat_ingress_ipv4",
+    "524": "cil_lxc_policy",
+    "526": "tail_handle_arp",
+    "527": "tail_nodeport_nat_egress_ipv4",
+    "530": "tail_handle_ipv4_cont",
+    "532": "cil_from_host",
+    "534": "tail_nodeport_rev_dnat_ipv4",
+    "536": "tail_handle_ipv4_from_host",
+    "538": "cil_from_container",
+    "539": "cil_to_host",
+    "541": "tail_handle_ipv4_from_netdev",
+    "543": "tail_handle_snat_fwd_ipv4",
+    "545": "tail_nodeport_nat_ingress_ipv4",
+    "547": "cil_from_host",
+    "549": "tail_handle_ipv4_from_host",
+    "551": "cil_from_netdev",
+    "553": "tail_nodeport_nat_egress_ipv4",
+    "555": "cil_host_policy",
+    "557": "tail_no_service_ipv4",
+    "559": "cil_to_netdev",
+    "561": "cil_to_host",
+    "563": "tail_drop_notify"
+  },
+  "inventory_signature": [
+    {
+      "count": 2,
+      "name": "cil_from_container",
+      "type": "sched_cls"
+    },
+    {
+      "count": 1,
+      "name": "cil_from_host",
+      "type": "sched_cls"
+    },
+    {
+      "count": 1,
+      "name": "cil_from_netdev",
+      "type": "sched_cls"
+    },
+    {
+      "count": 1,
+      "name": "cil_host_policy",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "cil_lxc_policy",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "cil_to_host",
+      "type": "sched_cls"
+    },
+    {
+      "count": 1,
+      "name": "cil_to_netdev",
+      "type": "sched_cls"
+    },
+    {
+      "count": 5,
+      "name": "tail_drop_notify",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_handle_arp",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_handle_ipv4",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_handle_ipv4_cont",
+      "type": "sched_cls"
+    },
+    {
+      "count": 3,
+      "name": "tail_handle_ipv4_from_host",
+      "type": "sched_cls"
+    },
+    {
+      "count": 3,
+      "name": "tail_handle_ipv4_from_netdev",
+      "type": "sched_cls"
+    },
+    {
+      "count": 3,
+      "name": "tail_handle_snat_fwd_ipv4",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_ipv4_ct_egress",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_ipv4_ct_ingress",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_ipv4_policy",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_ipv4_to_endpoint",
+      "type": "sched_cls"
+    },
+    {
+      "count": 4,
+      "name": "tail_no_service_ipv4",
+      "type": "sched_cls"
+    },
+    {
+      "count": 3,
+      "name": "tail_nodeport_nat_egress_ipv4",
+      "type": "sched_cls"
+    },
+    {
+      "count": 3,
+      "name": "tail_nodeport_nat_ingress_ipv4",
+      "type": "sched_cls"
+    },
+    {
+      "count": 2,
+      "name": "tail_nodeport_rev_dnat_ipv4",
+      "type": "sched_cls"
+    },
+    {
+      "count": 1,
+      "name": "cil_xdp_entry",
+      "type": "xdp"
+    }
+  ],
+  "live_program_ids": [
+    409,
+    413,
+    420,
+    423,
+    427,
+    431,
+    433,
+    436,
+    439,
+    442,
+    446,
+    451,
+    457,
+    460,
+    463,
+    466,
+    471,
+    473,
+    475,
+    483,
+    486,
+    487,
+    494,
+    496,
+    500,
+    502,
+    506,
+    508,
+    510,
+    513,
+    516,
+    518,
+    520,
+    522,
+    524,
+    526,
+    527,
+    530,
+    534,
+    536,
+    538,
+    539,
+    541,
+    543,
+    545,
+    549,
+    551,
+    553,
+    557,
+    559,
+    563
+  ],
+  "live_programs": [
+    {
+      "bytes_jited": 1175,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 168,
+      "gpl_compatible": true,
+      "id": 409,
+      "jited": true,
+      "kernel_name": "cil_xdp_entry",
+      "loaded_at": 1791623933,
+      "map_ids": [
+        253,
+        110,
+        137,
+        102,
+        103
+      ],
+      "name": "cil_xdp_entry",
+      "orphaned": false,
+      "tag": "70cf77b4e90a6a09",
+      "type": "xdp",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 5575,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 720,
+      "gpl_compatible": true,
+      "id": 413,
+      "jited": true,
+      "kernel_name": "cil_lxc_policy",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        263,
+        99,
+        126,
+        127,
+        128,
+        258,
+        269
+      ],
+      "name": "cil_lxc_policy",
+      "orphaned": false,
+      "tag": "f4e1f23a14f9f66e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 7282,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 928,
+      "gpl_compatible": true,
+      "id": 420,
+      "jited": true,
+      "kernel_name": "tail_ipv4_polic",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        263,
+        99,
+        258,
+        126,
+        127,
+        140,
+        109,
+        100,
+        97,
+        110,
+        116,
+        273
+      ],
+      "name": "tail_ipv4_policy",
+      "orphaned": false,
+      "tag": "299fdfc874a82a6e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 5975,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 768,
+      "gpl_compatible": true,
+      "id": 423,
+      "jited": true,
+      "kernel_name": "tail_nodeport_n",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        99,
+        257,
+        128,
+        125,
+        130,
+        129,
+        145,
+        274
+      ],
+      "name": "tail_nodeport_nat_egress_ipv4",
+      "orphaned": false,
+      "tag": "3c09a402d72db36a",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 7100,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 912,
+      "gpl_compatible": true,
+      "id": 427,
+      "jited": true,
+      "kernel_name": "tail_ipv4_to_en",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        99,
+        98,
+        258,
+        263,
+        126,
+        127,
+        140,
+        109,
+        100,
+        97,
+        110,
+        116,
+        276
+      ],
+      "name": "tail_ipv4_to_endpoint",
+      "orphaned": false,
+      "tag": "c049bdb6b30ee755",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 5012,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 640,
+      "gpl_compatible": true,
+      "id": 431,
+      "jited": true,
+      "kernel_name": "tail_ipv4_ct_in",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        263,
+        262,
+        99,
+        126,
+        127,
+        128,
+        258,
+        278
+      ],
+      "name": "tail_ipv4_ct_ingress",
+      "orphaned": false,
+      "tag": "4efa16342cc9331f",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 8277,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1056,
+      "gpl_compatible": true,
+      "id": 433,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        99,
+        128,
+        257,
+        114,
+        113,
+        126,
+        127,
+        115,
+        120,
+        112,
+        101,
+        143,
+        279
+      ],
+      "name": "tail_handle_ipv4_from_netdev",
+      "orphaned": false,
+      "tag": "7370afcbeadfa1a9",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 819,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 120,
+      "gpl_compatible": true,
+      "id": 436,
+      "jited": true,
+      "kernel_name": "tail_drop_notif",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        110,
+        100,
+        97
+      ],
+      "name": "tail_drop_notify",
+      "orphaned": false,
+      "tag": "da0ee0d9b5225ab5",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 7000,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 896,
+      "gpl_compatible": true,
+      "id": 439,
+      "jited": true,
+      "kernel_name": "cil_from_host",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        110,
+        99,
+        100,
+        97,
+        98,
+        257,
+        123,
+        133,
+        280
+      ],
+      "name": "cil_from_host",
+      "orphaned": false,
+      "tag": "106fe5a0fca70ad6",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 6461,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 832,
+      "gpl_compatible": true,
+      "id": 442,
+      "jited": true,
+      "kernel_name": "tail_ipv4_ct_eg",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        263,
+        262,
+        99,
+        126,
+        127,
+        128,
+        258,
+        282
+      ],
+      "name": "tail_ipv4_ct_egress",
+      "orphaned": false,
+      "tag": "ca1f00b91b95a464",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 1250,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 176,
+      "gpl_compatible": true,
+      "id": 446,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        101,
+        99,
+        257,
+        98,
+        107,
+        284
+      ],
+      "name": "tail_handle_ipv4_from_host",
+      "orphaned": false,
+      "tag": "11b23204fd2a9f91",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 2450,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 320,
+      "gpl_compatible": true,
+      "id": 451,
+      "jited": true,
+      "kernel_name": "cil_from_contai",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        110,
+        100,
+        97,
+        258,
+        99,
+        286
+      ],
+      "name": "cil_from_container",
+      "orphaned": false,
+      "tag": "54476433853bf330",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 2241,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 304,
+      "gpl_compatible": true,
+      "id": 457,
+      "jited": true,
+      "kernel_name": "tail_no_service",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        99,
+        258,
+        288
+      ],
+      "name": "tail_no_service_ipv4",
+      "orphaned": false,
+      "tag": "ba173ac410d68a0e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 842,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 120,
+      "gpl_compatible": true,
+      "id": 460,
+      "jited": true,
+      "kernel_name": "tail_drop_notif",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        110,
+        100,
+        97
+      ],
+      "name": "tail_drop_notify",
+      "orphaned": false,
+      "tag": "da0ee0d9b5225ab5",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 9163,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1168,
+      "gpl_compatible": true,
+      "id": 463,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        260,
+        98,
+        263,
+        262,
+        99,
+        258,
+        126,
+        110,
+        127,
+        100,
+        140,
+        97,
+        101,
+        109,
+        107,
+        290
+      ],
+      "name": "tail_handle_ipv4_cont",
+      "orphaned": false,
+      "tag": "3740b4229e3a5e52",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 16,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 24,
+      "gpl_compatible": true,
+      "id": 466,
+      "jited": true,
+      "kernel_name": "cil_host_policy",
+      "loaded_at": 1791623942,
+      "name": "cil_host_policy",
+      "orphaned": false,
+      "tag": "59f4a931744dcdc6",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 6120,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 784,
+      "gpl_compatible": true,
+      "id": 471,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        128,
+        99,
+        114,
+        126,
+        127,
+        258,
+        98,
+        260,
+        115,
+        120,
+        112,
+        121,
+        293
+      ],
+      "name": "tail_handle_ipv4",
+      "orphaned": false,
+      "tag": "148747939c202986",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 3675,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 480,
+      "gpl_compatible": true,
+      "id": 473,
+      "jited": true,
+      "kernel_name": "cil_to_host",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        110,
+        99,
+        100,
+        97,
+        128,
+        257,
+        294
+      ],
+      "name": "cil_to_host",
+      "orphaned": false,
+      "tag": "e0b8079110f5ced3",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 3433,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 448,
+      "gpl_compatible": true,
+      "id": 475,
+      "jited": true,
+      "kernel_name": "tail_nodeport_r",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        128,
+        99,
+        126,
+        127,
+        116,
+        145,
+        258,
+        296
+      ],
+      "name": "tail_nodeport_rev_dnat_ipv4",
+      "orphaned": false,
+      "tag": "029af8bfd26a3847",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 12947,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1632,
+      "gpl_compatible": true,
+      "id": 483,
+      "jited": true,
+      "kernel_name": "tail_handle_sna",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        101,
+        128,
+        99,
+        126,
+        127,
+        125,
+        257,
+        98,
+        110,
+        100,
+        97,
+        130,
+        129,
+        298
+      ],
+      "name": "tail_handle_snat_fwd_ipv4",
+      "orphaned": false,
+      "tag": "cf07d86877b5b65f",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 772,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 112,
+      "gpl_compatible": true,
+      "id": 486,
+      "jited": true,
+      "kernel_name": "tail_handle_arp",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        262,
+        99,
+        258,
+        300
+      ],
+      "name": "tail_handle_arp",
+      "orphaned": false,
+      "tag": "b64ee819838146ec",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 8313,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1056,
+      "gpl_compatible": true,
+      "id": 487,
+      "jited": true,
+      "kernel_name": "tail_nodeport_n",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        261,
+        128,
+        99,
+        125,
+        126,
+        127,
+        257,
+        116,
+        145,
+        301
+      ],
+      "name": "tail_nodeport_nat_ingress_ipv4",
+      "orphaned": false,
+      "tag": "7370afcbeadfa1a9",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 819,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 120,
+      "gpl_compatible": true,
+      "id": 494,
+      "jited": true,
+      "kernel_name": "tail_drop_notif",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        303,
+        110,
+        100,
+        97
+      ],
+      "name": "tail_drop_notify",
+      "orphaned": false,
+      "tag": "da0ee0d9b5225ab5",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 8277,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1056,
+      "gpl_compatible": true,
+      "id": 496,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        307,
+        99,
+        128,
+        309,
+        114,
+        113,
+        126,
+        127,
+        115,
+        120,
+        112,
+        101,
+        143,
+        311
+      ],
+      "name": "tail_handle_ipv4_from_netdev",
+      "orphaned": false,
+      "tag": "7370afcbeadfa1a9",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 842,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 120,
+      "gpl_compatible": true,
+      "id": 500,
+      "jited": true,
+      "kernel_name": "tail_drop_notif",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        307,
+        110,
+        100,
+        97
+      ],
+      "name": "tail_drop_notify",
+      "orphaned": false,
+      "tag": "da0ee0d9b5225ab5",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 7100,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 912,
+      "gpl_compatible": true,
+      "id": 502,
+      "jited": true,
+      "kernel_name": "tail_ipv4_to_en",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        303,
+        99,
+        98,
+        305,
+        302,
+        126,
+        127,
+        255,
+        109,
+        100,
+        97,
+        110,
+        116,
+        313
+      ],
+      "name": "tail_ipv4_to_endpoint",
+      "orphaned": false,
+      "tag": "c049bdb6b30ee755",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 6120,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 784,
+      "gpl_compatible": true,
+      "id": 506,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        303,
+        128,
+        99,
+        114,
+        126,
+        127,
+        305,
+        98,
+        306,
+        115,
+        120,
+        112,
+        121,
+        314
+      ],
+      "name": "tail_handle_ipv4",
+      "orphaned": false,
+      "tag": "148747939c202986",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 2269,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 304,
+      "gpl_compatible": true,
+      "id": 508,
+      "jited": true,
+      "kernel_name": "tail_no_service",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        307,
+        99,
+        309,
+        315
+      ],
+      "name": "tail_no_service_ipv4",
+      "orphaned": false,
+      "tag": "ba173ac410d68a0e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 7282,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 928,
+      "gpl_compatible": true,
+      "id": 510,
+      "jited": true,
+      "kernel_name": "tail_ipv4_polic",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        303,
+        302,
+        99,
+        305,
+        126,
+        127,
+        255,
+        109,
+        100,
+        97,
+        110,
+        116,
+        316
+      ],
+      "name": "tail_ipv4_policy",
+      "orphaned": false,
+      "tag": "299fdfc874a82a6e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 6461,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 832,
+      "gpl_compatible": true,
+      "id": 513,
+      "jited": true,
+      "kernel_name": "tail_ipv4_ct_eg",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        302,
+        303,
+        99,
+        126,
+        127,
+        128,
+        305,
+        318
+      ],
+      "name": "tail_ipv4_ct_egress",
+      "orphaned": false,
+      "tag": "ca1f00b91b95a464",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 5012,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 640,
+      "gpl_compatible": true,
+      "id": 516,
+      "jited": true,
+      "kernel_name": "tail_ipv4_ct_in",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        302,
+        303,
+        99,
+        126,
+        127,
+        128,
+        305,
+        319
+      ],
+      "name": "tail_ipv4_ct_ingress",
+      "orphaned": false,
+      "tag": "4efa16342cc9331f",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 12947,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1632,
+      "gpl_compatible": true,
+      "id": 518,
+      "jited": true,
+      "kernel_name": "tail_handle_sna",
+      "loaded_at": 1791623942,
+      "map_ids": [
+        307,
+        101,
+        128,
+        99,
+        126,
+        127,
+        125,
+        309,
+        98,
+        110,
+        100,
+        97,
+        130,
+        129,
+        320
+      ],
+      "name": "tail_handle_snat_fwd_ipv4",
+      "orphaned": false,
+      "tag": "cf07d86877b5b65f",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 2241,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 304,
+      "gpl_compatible": true,
+      "id": 520,
+      "jited": true,
+      "kernel_name": "tail_no_service",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        99,
+        305,
+        321
+      ],
+      "name": "tail_no_service_ipv4",
+      "orphaned": false,
+      "tag": "ba173ac410d68a0e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 8313,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1056,
+      "gpl_compatible": true,
+      "id": 522,
+      "jited": true,
+      "kernel_name": "tail_nodeport_n",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        307,
+        128,
+        99,
+        125,
+        126,
+        127,
+        309,
+        116,
+        145,
+        322
+      ],
+      "name": "tail_nodeport_nat_ingress_ipv4",
+      "orphaned": false,
+      "tag": "7370afcbeadfa1a9",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 5575,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 720,
+      "gpl_compatible": true,
+      "id": 524,
+      "jited": true,
+      "kernel_name": "cil_lxc_policy",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        303,
+        302,
+        99,
+        126,
+        127,
+        128,
+        305,
+        323
+      ],
+      "name": "cil_lxc_policy",
+      "orphaned": false,
+      "tag": "f4e1f23a14f9f66e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 772,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 112,
+      "gpl_compatible": true,
+      "id": 526,
+      "jited": true,
+      "kernel_name": "tail_handle_arp",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        303,
+        99,
+        305,
+        324
+      ],
+      "name": "tail_handle_arp",
+      "orphaned": false,
+      "tag": "b64ee819838146ec",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 5975,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 768,
+      "gpl_compatible": true,
+      "id": 527,
+      "jited": true,
+      "kernel_name": "tail_nodeport_n",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        307,
+        99,
+        309,
+        128,
+        125,
+        130,
+        129,
+        145,
+        325
+      ],
+      "name": "tail_nodeport_nat_egress_ipv4",
+      "orphaned": false,
+      "tag": "3c09a402d72db36a",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 9163,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1168,
+      "gpl_compatible": true,
+      "id": 530,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        306,
+        98,
+        302,
+        303,
+        99,
+        305,
+        126,
+        110,
+        127,
+        100,
+        255,
+        97,
+        101,
+        109,
+        107,
+        326
+      ],
+      "name": "tail_handle_ipv4_cont",
+      "orphaned": false,
+      "tag": "3740b4229e3a5e52",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 3433,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 448,
+      "gpl_compatible": true,
+      "id": 534,
+      "jited": true,
+      "kernel_name": "tail_nodeport_r",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        303,
+        128,
+        99,
+        126,
+        127,
+        116,
+        145,
+        305,
+        328
+      ],
+      "name": "tail_nodeport_rev_dnat_ipv4",
+      "orphaned": false,
+      "tag": "029af8bfd26a3847",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 1250,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 176,
+      "gpl_compatible": true,
+      "id": 536,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        307,
+        101,
+        99,
+        309,
+        98,
+        107,
+        329
+      ],
+      "name": "tail_handle_ipv4_from_host",
+      "orphaned": false,
+      "tag": "11b23204fd2a9f91",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 2450,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 320,
+      "gpl_compatible": true,
+      "id": 538,
+      "jited": true,
+      "kernel_name": "cil_from_contai",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        303,
+        110,
+        100,
+        97,
+        305,
+        99,
+        330
+      ],
+      "name": "cil_from_container",
+      "orphaned": false,
+      "tag": "54476433853bf330",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 3675,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 480,
+      "gpl_compatible": true,
+      "id": 539,
+      "jited": true,
+      "kernel_name": "cil_to_host",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        307,
+        110,
+        99,
+        100,
+        97,
+        128,
+        309,
+        331
+      ],
+      "name": "cil_to_host",
+      "orphaned": false,
+      "tag": "e0b8079110f5ced3",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 8277,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1056,
+      "gpl_compatible": true,
+      "id": 541,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        99,
+        128,
+        333,
+        114,
+        113,
+        126,
+        127,
+        115,
+        120,
+        112,
+        101,
+        143,
+        335
+      ],
+      "name": "tail_handle_ipv4_from_netdev",
+      "orphaned": false,
+      "tag": "7370afcbeadfa1a9",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 12947,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1632,
+      "gpl_compatible": true,
+      "id": 543,
+      "jited": true,
+      "kernel_name": "tail_handle_sna",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        101,
+        128,
+        99,
+        126,
+        127,
+        125,
+        333,
+        98,
+        110,
+        100,
+        97,
+        130,
+        129,
+        336
+      ],
+      "name": "tail_handle_snat_fwd_ipv4",
+      "orphaned": false,
+      "tag": "cf07d86877b5b65f",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 8313,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1056,
+      "gpl_compatible": true,
+      "id": 545,
+      "jited": true,
+      "kernel_name": "tail_nodeport_n",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        128,
+        99,
+        125,
+        126,
+        127,
+        333,
+        116,
+        145,
+        337
+      ],
+      "name": "tail_nodeport_nat_ingress_ipv4",
+      "orphaned": false,
+      "tag": "7370afcbeadfa1a9",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 1250,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 176,
+      "gpl_compatible": true,
+      "id": 549,
+      "jited": true,
+      "kernel_name": "tail_handle_ipv",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        101,
+        99,
+        333,
+        98,
+        107,
+        339
+      ],
+      "name": "tail_handle_ipv4_from_host",
+      "orphaned": false,
+      "tag": "11b23204fd2a9f91",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 6482,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 832,
+      "gpl_compatible": true,
+      "id": 551,
+      "jited": true,
+      "kernel_name": "cil_from_netdev",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        110,
+        99,
+        333,
+        98,
+        100,
+        97,
+        123,
+        133,
+        340
+      ],
+      "name": "cil_from_netdev",
+      "orphaned": false,
+      "tag": "ca1f00b91b95a464",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 5975,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 768,
+      "gpl_compatible": true,
+      "id": 553,
+      "jited": true,
+      "kernel_name": "tail_nodeport_n",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        99,
+        333,
+        128,
+        125,
+        130,
+        129,
+        145,
+        341
+      ],
+      "name": "tail_nodeport_nat_egress_ipv4",
+      "orphaned": false,
+      "tag": "3c09a402d72db36a",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 2269,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 304,
+      "gpl_compatible": true,
+      "id": 557,
+      "jited": true,
+      "kernel_name": "tail_no_service",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        99,
+        333,
+        342
+      ],
+      "name": "tail_no_service_ipv4",
+      "orphaned": false,
+      "tag": "ba173ac410d68a0e",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 6350,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 816,
+      "gpl_compatible": true,
+      "id": 559,
+      "jited": true,
+      "kernel_name": "cil_to_netdev",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        110,
+        99,
+        333,
+        128,
+        100,
+        97,
+        126,
+        127,
+        116,
+        145,
+        343
+      ],
+      "name": "cil_to_netdev",
+      "orphaned": false,
+      "tag": "08d22064f58c1e8f",
+      "type": "sched_cls",
+      "uid": 0
+    },
+    {
+      "bytes_jited": 842,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 120,
+      "gpl_compatible": true,
+      "id": 563,
+      "jited": true,
+      "kernel_name": "tail_drop_notif",
+      "loaded_at": 1791623943,
+      "map_ids": [
+        334,
+        110,
+        100,
+        97
+      ],
+      "name": "tail_drop_notify",
+      "orphaned": false,
+      "tag": "da0ee0d9b5225ab5",
+      "type": "sched_cls",
+      "uid": 0
+    }
+  ],
+  "root_program_ids": [
+    409,
+    439,
+    451,
+    473,
+    538,
+    539,
+    551,
+    559
+  ],
+  "tail_call_edges": [
+    {
+      "key": 2060,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 413,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2060,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 413,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2060,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 413,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2060,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 413,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2060,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 413,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2420,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 524,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2420,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 524,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2420,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 524,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2420,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 524,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2420,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 524,
+      "program_name": "cil_lxc_policy"
+    },
+    {
+      "key": 2433,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 466,
+      "program_name": "cil_host_policy"
+    },
+    {
+      "key": 2433,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 466,
+      "program_name": "cil_host_policy"
+    },
+    {
+      "key": 2433,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 466,
+      "program_name": "cil_host_policy"
+    },
+    {
+      "key": 2433,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 466,
+      "program_name": "cil_host_policy"
+    },
+    {
+      "key": 2433,
+      "map_id": 107,
+      "map_name": "cilium_call_pol",
+      "program_id": 466,
+      "program_name": "cil_host_policy"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 436,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 494,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 486,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 6,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 526,
+      "program_name": "tail_handle_arp"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 471,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 7,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 506,
+      "program_name": "tail_handle_ipv4"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 420,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 11,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 510,
+      "program_name": "tail_ipv4_policy"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 427,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 13,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 502,
+      "program_name": "tail_ipv4_to_endpoint"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 475,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 17,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 534,
+      "program_name": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 463,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 26,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 530,
+      "program_name": "tail_handle_ipv4_cont"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 431,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 28,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 516,
+      "program_name": "tail_ipv4_ct_ingress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 442,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 30,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 513,
+      "program_name": "tail_ipv4_ct_egress"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 258,
+      "map_name": "cilium_calls_02",
+      "program_id": 457,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 305,
+      "map_name": "cilium_calls_02",
+      "program_id": 520,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 1,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 460,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 460,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 460,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 460,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 460,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 460,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 460,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 7,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 433,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 433,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 433,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 433,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 433,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 433,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 433,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 15,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 423,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 423,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 423,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 423,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 423,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 423,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 423,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 23,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 446,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 446,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 446,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 446,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 446,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 446,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 446,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 36,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 487,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 487,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 487,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 487,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 487,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 487,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 487,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 483,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 483,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 483,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 483,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 483,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 483,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 257,
+      "map_name": "cilium_calls_ho",
+      "program_id": 483,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 1,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 500,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 500,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 500,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 500,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 500,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 500,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 500,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 1,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 563,
+      "program_name": "tail_drop_notify"
+    },
+    {
+      "key": 7,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 496,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 496,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 496,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 496,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 496,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 496,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 496,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 7,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 541,
+      "program_name": "tail_handle_ipv4_from_netdev"
+    },
+    {
+      "key": 15,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 527,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 527,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 527,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 527,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 527,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 527,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 527,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 15,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 553,
+      "program_name": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "key": 23,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 536,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 536,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 536,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 536,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 536,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 536,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 536,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 23,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 549,
+      "program_name": "tail_handle_ipv4_from_host"
+    },
+    {
+      "key": 36,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 522,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 522,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 522,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 522,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 522,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 522,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 522,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 36,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 545,
+      "program_name": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 518,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 518,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 518,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 518,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 518,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 518,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 518,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 38,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 543,
+      "program_name": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 508,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 508,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 508,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 508,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 508,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 508,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 309,
+      "map_name": "cilium_calls_ne",
+      "program_id": 508,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    },
+    {
+      "key": 45,
+      "map_id": 333,
+      "map_name": "cilium_calls_ne",
+      "program_id": 557,
+      "program_name": "tail_no_service_ipv4"
+    }
+  ]
+}

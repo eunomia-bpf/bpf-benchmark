@@ -1,0 +1,38 @@
+{
+  "application": "cilium",
+  "architecture": "x86_64",
+  "arms": [
+    "kernel-jit",
+    "whole-program-native"
+  ],
+  "cilium_commit": "1b721c2964e7799cab3e18c38066905ea240fa34",
+  "fixed_guest_kernel": "7.0.0-rc2+ #20 SMP PREEMPT_DYNAMIC Sat Oct 10 04:17:43 PDT 2026",
+  "fixed_image": "sha256:4483167ce49bcfd064e88f8728034ebb11975c96740d945389cd278a257a9508",
+  "fixed_image_tar_sha256": "d293c3ec43a6521ec62e517a6c23c25d6b8eb6d5bd1554fc21d888b4ced508b4",
+  "functional_gate_run": "x86_kvm_corpus_20261010_091727_881080",
+  "host": {
+    "boot_id": "04dc0087-5ccc-4c46-9997-b9a92f0e5167",
+    "cpu": "Intel(R) Core(TM) Ultra 9 285K",
+    "host_kernel": "7.3.0-070300rc3-generic",
+    "memory_gib": 125,
+    "timing_cpu_set": "0-7"
+  },
+  "measurement": {
+    "accepted_guests": 24,
+    "attempts": 28,
+    "duration_seconds_per_phase": 60,
+    "fresh_guests_per_treatment_order_per_stats_mode": 3,
+    "guest_memory_gib": 64,
+    "guest_vcpus": 8,
+    "jit_restart_controls_per_stats_mode": 6,
+    "stats_off_primary": true
+  },
+  "profile": {
+    "counterbalanced_geomean_native_over_jit_bpf_ns_per_run": 0.6756,
+    "counterbalanced_geomean_native_over_jit_cycles_per_packet": 0.8640,
+    "guest_callgraph_source": "cpu-clock:k frame-pointer samples",
+    "guest_pmu_available": false,
+    "result": "corpus/results/cilium_profile_jit_kprog_counterbalanced_20261010"
+  },
+  "status": "complete"
+}
