@@ -141,7 +141,18 @@ struct bpf_kinsn {
 			const struct bpf_prog *prog, const u8 *final_ip);
 };
 
+static __always_inline u8 kinsn_payload_reg(u64 payload, u8 shift)
+{
+	return (kinsn_payload_decode(payload) >> shift) & 0xf;
+}
+
+static __always_inline u8 kinsn_payload_u8(u64 payload, u8 shift)
+{
+	return (kinsn_payload_decode(payload) >> shift) & 0xff;
+}
+
 #include "../../../kinsn/module/x86/bpf_x86_rotate.c"
+#include "../../../kinsn/module/x86/bpf_x86_shd.c"
 
 static u64 rotate_imm_payload(u8 form, u8 dst_reg, u8 src_reg, u8 shift)
 {
@@ -292,6 +303,12 @@ static void execute_rotate(const struct bpf_insn *insns, int count, u64 regs[16]
 				value <<= rhs;
 				break;
 			case BPF_OR: value |= rhs; break;
+			case BPF_XOR: value ^= rhs; break;
+			case BPF_RSH:
+				require_true(rhs < (cls == BPF_ALU ? 32U : 64U),
+					     "proof expansion has an out-of-range shift");
+				value >>= rhs;
+				break;
 			default: require_true(false, "unsupported rotate ALU opcode");
 			}
 			regs[insn->dst_reg] = cls == BPF_ALU ? (u32)value : value;
@@ -368,11 +385,66 @@ static void test_instantiate_rol_cl_widths(void)
 	}
 }
 
+/* Catches source/destination alias bugs, wrong selected lanes or rotation
+ * direction, out-of-capacity expansion, and any register/stack borrowing. */
+static void test_instantiate_shd(void)
+{
+	const struct bpf_kinsn *descs[] = {
+		&bpf_x86_shldl_desc, &bpf_x86_shldq_desc,
+		&bpf_x86_shrdl_desc, &bpf_x86_shrdq_desc,
+	};
+	const u64 values[] = { 0, 1, UINT64_MAX, 1ULL << 63,
+		0x0123456789abcdefULL, 0xfedcba9876543210ULL };
+
+	for (unsigned op = 0; op < 4; op++) {
+		unsigned width = (op & 1) ? 64 : 32;
+		bool left = op < 2;
+		u64 mask = width == 64 ? UINT64_MAX : UINT32_MAX;
+		const struct bpf_kinsn *desc = descs[op];
+		struct bpf_insn insns[321];
+
+		for (unsigned alias = 0; alias < 2; alias++) {
+			u8 dst = BPF_REG_0, src = alias ? dst : BPF_REG_9;
+
+			for (unsigned n = 1; n < width; n++) {
+				memset(insns, 0, sizeof(insns));
+				int count = desc->instantiate_insn(dst | (src << 4) | (n << 8), insns);
+
+				require_true(count > 0 && count <= desc->max_insn_cnt,
+					     "SHD expansion exceeds its registered capacity");
+				require_true(insns[desc->max_insn_cnt].code == 0,
+					     "SHD overwrote its capacity guard");
+				for (unsigned a = 0; a < sizeof(values) / sizeof(values[0]); a++) {
+					for (unsigned b = 0; b < sizeof(values) / sizeof(values[0]); b++) {
+						u64 regs[16], before[16];
+
+						for (unsigned r = 0; r < 16; r++)
+							regs[r] = 0xfedcba9876543210ULL + r;
+						regs[src] = values[b];
+						regs[dst] = values[a];
+						memcpy(before, regs, sizeof(regs));
+						u64 x = before[dst] & mask, y = before[src] & mask;
+						u64 want = (left ? (x << n) | (y >> (width - n)) :
+							(x >> n) | (y << (width - n))) & mask;
+
+						execute_rotate(insns, count, regs);
+						require_true(regs[dst] == want, "SHD lane selection differs from oracle");
+						for (unsigned r = 0; r < 16; r++)
+							require_true(r == dst || regs[r] == before[r],
+								     "SHD changed another register");
+					}
+				}
+			}
+		}
+	}
+}
+
 int main(void)
 {
 	test_emit_rol_imm_widths();
 	test_emit_rol_cl_widths();
 	test_emit_rorxl_keeps_distinct_src();
 	test_instantiate_rol_cl_widths();
+	test_instantiate_shd();
 	return 0;
 }
