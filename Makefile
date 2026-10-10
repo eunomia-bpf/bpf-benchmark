@@ -327,9 +327,7 @@ __runtime-vm-docker:
 	truncate -s "$${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
 	mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
 	mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
-	dockerd --data-root /run/bpf-benchmark-docker/data --exec-root /run/bpf-benchmark-docker/exec --pidfile /run/bpf-benchmark-docker/docker.pid --host unix:///run/docker.sock --bridge=none --iptables=false --ip-masq=false --ip-forward=false >/run/bpf-benchmark-docker/dockerd.log 2>&1 &
-	for _ in $$(seq 1 60); do docker info >/dev/null 2>&1 && break; sleep 1; done
-	docker info >/dev/null
+	"$(RUNNER_DIR)/scripts/start-vm-docker"
 
 __runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"

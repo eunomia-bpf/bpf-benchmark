@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root=${BPFREJIT_VM_DOCKER_ROOT:-/run/bpf-benchmark-docker}
+socket=${BPFREJIT_VM_DOCKER_SOCKET:-/run/docker.sock}
+wait_seconds=${BPFREJIT_VM_DOCKER_WAIT_SECONDS:-60}
+dockerd_bin=${DOCKERD_BIN:-dockerd}
+docker_bin=${DOCKER_BIN:-docker}
+config="$root/daemon.json"
+log="$root/dockerd.log"
+
+printf '{}\n' >"$config"
+"$dockerd_bin" \
+    --config-file "$config" \
+    --data-root "$root/data" \
+    --exec-root "$root/exec" \
+    --pidfile "$root/docker.pid" \
+    --host "unix://$socket" \
+    --bridge=none \
+    --iptables=false \
+    --ip-masq=false \
+    --ip-forward=false \
+    >"$log" 2>&1 &
+daemon_pid=$!
+
+for ((attempt = 0; attempt < wait_seconds; attempt++)); do
+    if DOCKER_HOST="unix://$socket" "$docker_bin" info >/dev/null 2>&1; then
+        exit 0
+    fi
+    if ! kill -0 "$daemon_pid" 2>/dev/null; then
+        daemon_status=0
+        wait "$daemon_pid" || daemon_status=$?
+        printf 'guest dockerd exited before becoming ready (status %d):\n' "$daemon_status" >&2
+        sed -n '1,240p' "$log" >&2
+        exit 1
+    fi
+    sleep 1
+done
+
+printf 'guest dockerd did not become ready within %s seconds:\n' "$wait_seconds" >&2
+sed -n '1,240p' "$log" >&2
+kill "$daemon_pid"
+exit 1
