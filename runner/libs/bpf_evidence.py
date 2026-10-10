@@ -37,6 +37,15 @@ def _write_capture(path: Path, command: Sequence[str]) -> dict[str, object]:
     return {"command": record["command"], "returncode": record["returncode"]}
 
 
+def _write_binary_dump(path: Path, command: Sequence[str]) -> dict[str, object]:
+    full_command = [str(part) for part in command] + ["file", str(path)]
+    completed = subprocess.run(full_command, check=False, capture_output=True, text=True)
+    path.with_suffix(path.suffix + ".stderr").write_text(
+        completed.stderr, encoding="utf-8"
+    )
+    return {"command": full_command, "returncode": int(completed.returncode)}
+
+
 def _json_payload(command: Sequence[str]) -> object:
     completed = subprocess.run(command, check=True, capture_output=True, text=True)
     return json.loads(completed.stdout)
@@ -195,9 +204,9 @@ def capture_bpf_evidence(
                 output_dir / f"{stem}.xlated.txt",
                 [bpftool, "prog", "dump", "xlated", "id", str(program_id), "opcodes"],
             ),
-            "jited": _write_capture(
-                output_dir / f"{stem}.jited.txt",
-                [bpftool, "prog", "dump", "jited", "id", str(program_id), "opcodes"],
+            "jited": _write_binary_dump(
+                output_dir / f"{stem}.jited.bin",
+                [bpftool, "prog", "dump", "jited", "id", str(program_id)],
             ),
         }
     manifest = {

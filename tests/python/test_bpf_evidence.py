@@ -9,6 +9,36 @@ from runner.libs import bpf_evidence
 
 
 class BpfEvidenceTests(unittest.TestCase):
+    def test_binary_jit_dump_uses_bpftool_file_output(self) -> None:
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            mock.patch.object(bpf_evidence.subprocess, "run") as run,
+        ):
+            run.return_value = subprocess.CompletedProcess(
+                args=[], returncode=0, stdout="", stderr=""
+            )
+            output = Path(tmp) / "program.jited.bin"
+            record = bpf_evidence._write_binary_dump(
+                output, ["bpftool", "prog", "dump", "jited", "id", "17"]
+            )
+
+        run.assert_called_once_with(
+            [
+                "bpftool",
+                "prog",
+                "dump",
+                "jited",
+                "id",
+                "17",
+                "file",
+                str(output),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(record["returncode"], 0)
+
     def test_captures_every_program_array_map(self) -> None:
         def json_payload(command: list[str]) -> object:
             if command == ["bpftool", "-j", "prog", "show"]:
