@@ -15,6 +15,10 @@ runtime statistics remain enabled, so the ordinary corpus result supplies
 per-program run counts, run time, JIT size, attachment evidence, and workload
 outcomes. Native-loader logs supply the paired original-JIT and native-blob
 image sizes.
+The guest also snapshots network attachments at the measurement boundary so
+program IDs match the counters. Datapath symbol summaries disclose and exclude
+idle-vCPU and unresolved leaf samples from the four-way time split; the raw
+perf report remains available for audit.
 The guest-only collector and its real `perf` binary are staged through the
 result mount, so profiling works with agent 1's validated runtime image and
 does not require an image rebuild. The nested Make invocation treats the

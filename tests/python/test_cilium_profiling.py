@@ -189,6 +189,7 @@ ffffffff81003000 htab_map_lookup_elem
         self.assertEqual(report.classify_symbol("bpf_prog_deadbeef_cil_from_host"), "bpf_code")
         self.assertEqual(report.classify_symbol("htab_map_lookup_elem"), "maps")
         self.assertEqual(report.classify_symbol("bpf_redirect"), "helpers")
+        self.assertIn("pv_native_safe_halt", report.IDLE_SYMBOLS)
         report.validate_callgraph_samples(counts, callgraphs)
 
     def test_perf_samples_reject_unknown_only_or_leaf_only_data(self) -> None:
@@ -230,6 +231,25 @@ ffffffff81003000 htab_map_lookup_elem
             self.assertEqual(rows[0]["jit_image_bytes"], 100)
             self.assertEqual(rows[0]["native_blob_bytes"], 70)
             self.assertEqual(rows[0]["native_stub_image_bytes"], 80)
+
+    def test_program_attach_points_use_measurement_time_net_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            evidence = root / "evidence"
+            evidence.mkdir()
+            (evidence / "manifest.json").write_text(
+                '{"program_array_dumps": {}}\n', encoding="utf-8"
+            )
+            live_net = root / "guest-bpf-net.json"
+            live_net.write_text(
+                '[{"tc":[{"devname":"lxcbench0","kind":"tcx/ingress",'
+                '"prog_id":158}],"xdp":[]}]\n',
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                report._program_attach_points(evidence, live_net),
+                {158: ["tc:lxcbench0:tcx/ingress"]},
+            )
 
     def test_native_size_coverage_rejects_unpaired_program(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "program IDs: \\[12\\]"):

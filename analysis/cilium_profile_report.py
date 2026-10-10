@@ -26,6 +26,19 @@ NATIVE_TIMING_RE = re.compile(
     r"bpf_bytes=(?P<bpf_bytes>\d+) native_bytes=(?P<native_bytes>\d+)"
 )
 PKTS_RE = re.compile(r"pkts-sofar:\s*(\d+)")
+UNRESOLVED_SYMBOLS = frozenset({"[unknown]", "unknown", "[.]", "[k]"})
+IDLE_SYMBOLS = frozenset(
+    {
+        "acpi_idle_do_entry",
+        "arch_cpu_idle",
+        "cpu_startup_entry",
+        "default_idle_call",
+        "do_idle",
+        "mwait_idle",
+        "native_safe_halt",
+        "pv_native_safe_halt",
+    }
+)
 
 
 def _json(path: Path) -> object:
@@ -107,9 +120,10 @@ def classify_symbol(symbol: str) -> str:
 def validate_callgraph_samples(
     symbol_counts: Mapping[str, int], callgraphs: Sequence[Sequence[str]]
 ) -> None:
-    unresolved = {"[unknown]", "unknown", "[.]", "[k]"}
     resolved_leaves = sum(
-        count for symbol, count in symbol_counts.items() if symbol.lower() not in unresolved
+        count
+        for symbol, count in symbol_counts.items()
+        if symbol.lower() not in UNRESOLVED_SYMBOLS
     )
     if resolved_leaves == 0:
         raise RuntimeError("perf record contains no resolved leaf symbols")
@@ -163,9 +177,9 @@ def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
     return report, script
 
 
-def _program_attach_points(evidence: Path) -> dict[int, list[str]]:
+def _program_attach_points(evidence: Path, live_net: Path) -> dict[int, list[str]]:
     attachments: dict[int, set[str]] = collections.defaultdict(set)
-    net = _json(evidence / "bpftool-net.json")
+    net = _json(live_net)
     if isinstance(net, list):
         for namespace in net:
             if not isinstance(namespace, Mapping):
@@ -302,8 +316,10 @@ def _packet_metrics(workloads: object) -> dict[str, int]:
     }
 
 
-def _program_rows(phase: Mapping[str, object], evidence: Path) -> list[dict[str, object]]:
-    attach_points = _program_attach_points(evidence)
+def _program_rows(
+    phase: Mapping[str, object], evidence: Path, live_net: Path
+) -> list[dict[str, object]]:
+    attach_points = _program_attach_points(evidence, live_net)
     programs = phase.get("bpf")
     if not isinstance(programs, Mapping):
         raise RuntimeError("Cilium phase has no BPF counter mapping")
@@ -352,22 +368,41 @@ def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> d
     if not symbol_counts:
         raise RuntimeError(f"perf record for {arm} contained no symbolized samples")
     validate_callgraph_samples(symbol_counts, callgraphs)
+    idle_samples = sum(
+        count for symbol, count in symbol_counts.items() if symbol.lower() in IDLE_SYMBOLS
+    )
+    unresolved_samples = sum(
+        count
+        for symbol, count in symbol_counts.items()
+        if symbol.lower() in UNRESOLVED_SYMBOLS
+    )
+    analyzed_symbols = collections.Counter(
+        {
+            symbol: count
+            for symbol, count in symbol_counts.items()
+            if symbol.lower() not in IDLE_SYMBOLS
+            and symbol.lower() not in UNRESOLVED_SYMBOLS
+        }
+    )
+    analyzed_samples = sum(analyzed_symbols.values())
+    if analyzed_samples == 0:
+        raise RuntimeError(f"perf record for {arm} has no non-idle resolved samples")
     category_counts: collections.Counter[str] = collections.Counter()
-    for symbol, count in symbol_counts.items():
+    for symbol, count in analyzed_symbols.items():
         category_counts[classify_symbol(symbol)] += count
     packet_metrics = _packet_metrics(phase.get("workloads"))
     packets = packet_metrics["packets_sent"]
     if packets <= 0:
         raise RuntimeError(f"Cilium {arm} workload sent no packets")
     counters = parse_perf_stat(arm_dir / "host-perf-stat.csv")
-    rows = _program_rows(phase, evidence)
+    rows = _program_rows(phase, evidence, arm_dir / "guest-bpf-net.json")
     bpf_run_count = sum(int(row["run_count"]) for row in rows)
     bpf_run_time = sum(int(row["run_time_ns"]) for row in rows)
     sample_period_ns = 1_000_000
     categories = {
         category: {
             "samples": int(category_counts.get(category, 0)),
-            "sample_fraction": category_counts.get(category, 0) / sum(symbol_counts.values()),
+            "sample_fraction": category_counts.get(category, 0) / analyzed_samples,
             "estimated_cpu_ns_per_packet": category_counts.get(category, 0)
             * sample_period_ns
             / packets,
@@ -392,11 +427,14 @@ def analyze_arm(profile_root: Path, arm: str, perf: Path, corpus_run: Path) -> d
         },
         "callgraph": {
             "samples": sum(symbol_counts.values()),
+            "analyzed_samples": analyzed_samples,
+            "excluded_idle_samples": idle_samples,
+            "unresolved_samples": unresolved_samples,
             "callgraphs": len(callgraphs),
             "categories": categories,
             "top_symbols": [
                 {"symbol": symbol, "samples": count, "category": classify_symbol(symbol)}
-                for symbol, count in symbol_counts.most_common(40)
+                for symbol, count in analyzed_symbols.most_common(40)
             ],
         },
         "bpf": {
@@ -440,7 +478,9 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         f"| cache misses/packet | {float(host['cache_misses_per_packet']):.6f} |",
         f"| BPF runs/packet | {float(bpf['runs_per_packet']):.3f} |",
         f"| active BPF programs | {bpf['active_programs']} / {bpf['total_programs']} |",
-        f"| call-graph samples | {callgraph['samples']} |",
+        f"| analyzed call-graph samples | {callgraph['analyzed_samples']} / {callgraph['samples']} raw |",
+        f"| excluded idle samples | {callgraph['excluded_idle_samples']} |",
+        f"| unresolved samples | {callgraph['unresolved_samples']} |",
         "",
         "## Sampled time per packet",
         "",

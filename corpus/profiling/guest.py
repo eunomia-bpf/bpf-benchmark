@@ -84,16 +84,21 @@ def _capture_symbols(output_dir: Path) -> None:
         Path("/proc/modules").read_text(encoding="utf-8"), encoding="utf-8"
     )
     bpftool = resolve_bpftool_binary()
-    completed = subprocess.run(
-        [bpftool, "-j", "prog", "show"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    payload = json.loads(completed.stdout)
-    (output_dir / "guest-bpf-programs.json").write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    for filename, arguments in (
+        ("guest-bpf-programs.json", ("prog", "show")),
+        ("guest-bpf-net.json", ("net", "show")),
+    ):
+        completed = subprocess.run(
+            [bpftool, "-j", *arguments],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        (output_dir / filename).write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
 
 
 def _configure_arm(arm: str) -> str:
