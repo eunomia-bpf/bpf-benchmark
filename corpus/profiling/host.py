@@ -1,4 +1,4 @@
-"""Host controller for Cilium JIT, Kinsn, and kprog profiling arms."""
+"""Host controller for Cilium JIT and whole-program native profiling."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ PERF_CANDIDATES = (
     Path("/usr/lib/linux-hwe-6.14-tools-6.14.0-37/perf"),
     Path("/usr/lib/linux-tools-6.8.0-146/perf"),
 )
-ARM_PHASE = {"jit": "baseline", "kinsn": "post_rejit", "kprog": "post_rejit"}
+ARM_PHASE = {"jit": "baseline", "kprog": "post_rejit"}
 PMU_EVENTS = (
     "cpu-cycles",
     "instructions",
@@ -398,7 +398,7 @@ def _run_arm(
 def _parse_arms(raw: str) -> list[str]:
     normalized = raw.strip().lower()
     if normalized == "all":
-        return ["jit", "kinsn", "kprog"]
+        return ["jit", "kprog"]
     arms = [item.strip() for item in normalized.split(",") if item.strip()]
     unknown = sorted(set(arms) - set(ARM_PHASE))
     if not arms or unknown or len(arms) != len(set(arms)):

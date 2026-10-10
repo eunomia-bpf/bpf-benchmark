@@ -10,11 +10,11 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Iterable, Mapping, Sequence
+from typing import Mapping, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PHASE_BY_ARM = {"jit": "baseline", "kinsn": "post_rejit", "kprog": "post_rejit"}
+PHASE_BY_ARM = {"jit": "baseline", "kprog": "post_rejit"}
 NATIVE_JIT_RE = re.compile(
     r"native-loader jit-info (?P<label>original|native) .*? id=(?P<id>\d+) "
     r"type=(?P<type>\d+) name=(?P<name>\S*) tag=(?P<tag>[0-9a-f]+) "
@@ -83,8 +83,6 @@ def parse_perf_script(text: str) -> tuple[collections.Counter[str], list[list[st
 def classify_symbol(symbol: str) -> str:
     lowered = symbol.lower()
     if lowered.startswith("bpf_prog_") or lowered.startswith("__bpf_prog_"):
-        return "bpf_code"
-    if "kinsn" in lowered:
         return "bpf_code"
     map_tokens = (
         "map_lookup",
@@ -510,14 +508,14 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
 
 def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
     lines = [
-        "# Cilium three-arm profile",
+        "# Cilium JIT versus whole-program native profile",
         "",
         "These profiling runs are separate from timing runs and reuse the unchanged Cilium corpus setup.",
         "",
         "| Arm | Packets | BPF runs/packet | cycles/packet | instructions/packet | IPC | branch misses/packet | cache misses/packet |",
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for arm in ("jit", "kinsn", "kprog"):
+    for arm in ("jit", "kprog"):
         if arm not in results:
             continue
         result = results[arm]
@@ -536,7 +534,7 @@ def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
         "| Arm | BPF code ns/packet | Helpers ns/packet | Maps ns/packet | Rest ns/packet |",
         "| --- | ---: | ---: | ---: | ---: |",
     ]
-    for arm in ("jit", "kinsn", "kprog"):
+    for arm in ("jit", "kprog"):
         if arm not in results:
             continue
         categories = results[arm]["callgraph"]["categories"]  # type: ignore[index]

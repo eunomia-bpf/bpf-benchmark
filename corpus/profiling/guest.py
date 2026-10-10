@@ -8,14 +8,14 @@ import platform
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Sequence
 
 from corpus import driver
 from corpus.profiling.perf_control import PerfCollector
 from runner.libs import resolve_bpftool_binary
 
 
-_ARMS = frozenset({"jit", "kinsn", "kprog"})
+_ARMS = frozenset({"jit", "kprog"})
 _SYMBOL_SETTINGS = {
     Path("/proc/sys/kernel/kptr_restrict"): "0",
     Path("/proc/sys/net/core/bpf_jit_kallsyms"): "1",
@@ -104,10 +104,7 @@ def _configure_arm(arm: str) -> str:
         os.environ.pop("BPFREJIT_SHIM_NATIVE_LOADER", None)
         return "baseline"
     os.environ.pop("SKIP_REJIT", None)
-    if arm == "kinsn":
-        os.environ["BPFREJIT_BENCH_PASSES"] = "default"
-        os.environ.pop("BPFREJIT_SHIM_NATIVE_LOADER", None)
-    elif arm == "kprog":
+    if arm == "kprog":
         os.environ.pop("BPFREJIT_BENCH_PASSES", None)
         os.environ["BPFREJIT_SHIM_NATIVE_LOADER"] = "post"
     else:

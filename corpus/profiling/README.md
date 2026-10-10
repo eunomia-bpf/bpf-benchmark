@@ -2,14 +2,14 @@
 
 `make profile-cilium` profiles Cilium separately from the timing suite while
 reusing the unchanged `corpus.driver` application lifecycle and
-`cilium_endpoint_pktgen` workload. The three arms are the kernel JIT baseline,
-the current x86 Kinsn policy, and whole-program native (`kprog`).
+`cilium_endpoint_pktgen` workload. The two arms are the kernel JIT baseline
+and whole-program native (`kprog`).
 
 The host controller confines the four-vCPU, 16-GiB guest to host CPUs 16--19.
 It uses host `perf stat` guest-only events for cycles, instructions, branches,
 branch misses, and cache misses. In the selected corpus phase, a staged real
 `perf record` binary records `cpu-clock` call graphs inside the guest. This
-allows JIT BPF symbols, kprog-backed BPF images, Kinsn functions, helpers, map
+allows JIT BPF symbols, kprog-backed BPF images, helpers, map
 operations, and the remaining kernel stack to be symbolized together. BPF
 runtime statistics remain enabled, so the ordinary corpus result supplies
 per-program run counts, run time, JIT size, attachment evidence, and workload

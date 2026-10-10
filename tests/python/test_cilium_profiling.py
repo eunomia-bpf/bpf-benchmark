@@ -65,6 +65,11 @@ class MarkerAndCommandTest(unittest.TestCase):
                 "post_rejit",
             )
         )
+
+    def test_all_selects_only_jit_and_whole_program_native(self) -> None:
+        self.assertEqual(host._parse_arms("all"), ["jit", "kprog"])
+        with self.assertRaisesRegex(RuntimeError, "unknown=.*kinsn"):
+            host._parse_arms("kinsn")
         self.assertIsNone(
             host._progress_marker(
                 '{"event":"measurement_start","app":"cilium/agent",'
@@ -176,7 +181,6 @@ ffffffff81003000 htab_map_lookup_elem
         self.assertEqual(counts["htab_map_lookup_elem"], 1)
         self.assertEqual(len(callgraphs[0]), 3)
         self.assertEqual(report.classify_symbol("bpf_prog_deadbeef_cil_from_host"), "bpf_code")
-        self.assertEqual(report.classify_symbol("bpf_kinsn_memcpy"), "bpf_code")
         self.assertEqual(report.classify_symbol("htab_map_lookup_elem"), "maps")
         self.assertEqual(report.classify_symbol("bpf_redirect"), "helpers")
         report.validate_callgraph_samples(counts, callgraphs)
