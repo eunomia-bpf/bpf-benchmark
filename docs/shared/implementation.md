@@ -275,6 +275,15 @@ increment is committed and pushed immediately). Current state:
   little-endian assembly in the composed bodies; the AArch64 stack *write*
   helper already routed its slot-tag gate through `KPROG_ARM64_STACK_TAG`, so
   only the read body choice was open.
+  The AArch64 little-endian *store* ladder is likewise no longer open
+  (Step 0122): `ARM64_SIM_L_STORE_ADDR` routes through the generated
+  `KPROG_ARM64_STORE_BYTES` contract, which writes the width's low bytes of
+  the value through a byte pointer with the width-gated ladder and leaves every
+  higher byte untouched, so the store image is a proved table rather than a
+  hand-written lane sequence; `Arm64StoreBytes.lean` equals the generated
+  masked store image to an independent lane-by-lane write-then-read statement
+  and ties it to the load contract (`arm64_store_bytes_load_agree`), leaving
+  the address arithmetic and the destination selection in the composed bodies.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
@@ -302,7 +311,8 @@ increment is committed and pushed immediately). Current state:
   so the predicate-to-emitted-code chain is closed. The AArch64 condition table,
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
   reverse/extend/conditional-select/branch/branch-emission/move-wide/shift/
-  reduction/address-offset/FMOV/load-bytes contracts, and pointer-add/ABI-load
+  reduction/address-offset/FMOV/load-bytes/store-bytes contracts, and
+  pointer-add/ABI-load
   contracts are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,
   `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend`,

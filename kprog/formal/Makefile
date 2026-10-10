@@ -40,6 +40,7 @@ check:
 	python3 generate_arm64_fmov_spec.py --check
 	python3 generate_arm64_fmov_dest_spec.py --check
 	python3 generate_arm64_load_bytes_spec.py --check
+	python3 generate_arm64_store_bytes_spec.py --check
 	python3 generate_arm64_byte_lane_spec.py --check
 	python3 generate_arm64_mem_dispatch_spec.py --check
 	python3 generate_arm64_stack_tag_spec.py --check
@@ -566,6 +567,12 @@ check:
 	lake env lean KProgFormal/Arm64LoadBytes.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_load_bytes_host.c -o build/test_arm64_load_bytes_host
 	./build/test_arm64_load_bytes_host
+	lake env lean KProgFormal/GeneratedArm64StoreBytes.lean
+	lake env lean KProgFormal/Arm64StoreBytes.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_store_bytes_host.c -o build/test_arm64_store_bytes_host
+	./build/test_arm64_store_bytes_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_store_bytes_route_host.c -o build/test_arm64_store_bytes_route_host
+	./build/test_arm64_store_bytes_route_host
 	lake env lean KProgFormal/GeneratedArm64ByteLane.lean
 	lake env lean KProgFormal/Arm64ByteLane.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_byte_lane_host.c -o build/test_arm64_byte_lane_host
