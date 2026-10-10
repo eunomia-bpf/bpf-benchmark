@@ -1,0 +1,1202 @@
+{
+  "arm": "jit",
+  "bpf": {
+    "active_programs": 8,
+    "programs": [
+      {
+        "attach_points": [
+          "tc:lxcbench0:tcx/ingress"
+        ],
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 153,
+        "name": "cil_from_contai",
+        "ns_per_run": 1527.0002331706094,
+        "run_count": 20118316,
+        "run_time_ns": 30720673223,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:lxcbench1:tcx/ingress"
+        ],
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 177,
+        "name": "cil_from_contai",
+        "ns_per_run": 1543.5110891302825,
+        "run_count": 20115509,
+        "run_time_ns": 31048511205,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "xdp:bpfbench0:driver"
+        ],
+        "bytes_jited": 509,
+        "bytes_xlated": 880,
+        "id": 125,
+        "name": "cil_xdp_entry",
+        "ns_per_run": 866.5,
+        "run_count": 2,
+        "run_time_ns": 1733,
+        "type": "xdp"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_host:tcx/egress"
+        ],
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 128,
+        "name": "cil_from_host",
+        "ns_per_run": 1901.0,
+        "run_count": 2,
+        "run_time_ns": 3802,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_host:tcx/ingress"
+        ],
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 154,
+        "name": "cil_to_host",
+        "ns_per_run": 1950.0,
+        "run_count": 2,
+        "run_time_ns": 3900,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_net:tcx/ingress"
+        ],
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 179,
+        "name": "cil_to_host",
+        "ns_per_run": 1067.5,
+        "run_count": 2,
+        "run_time_ns": 2135,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:bpfbench0:tcx/egress"
+        ],
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 192,
+        "name": "cil_to_netdev",
+        "ns_per_run": 1944.0,
+        "run_count": 2,
+        "run_time_ns": 3888,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:bpfbench0:tcx/ingress"
+        ],
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 194,
+        "name": "cil_from_netdev",
+        "ns_per_run": 1601.5,
+        "run_count": 2,
+        "run_time_ns": 3203,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[1113]"
+        ],
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 126,
+        "name": "cil_host_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[1]"
+        ],
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 127,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[17]"
+        ],
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 129,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[26]"
+        ],
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 130,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[30]"
+        ],
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 131,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[13]"
+        ],
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 134,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[7]"
+        ],
+        "bytes_jited": 8254,
+        "bytes_xlated": 14392,
+        "id": 135,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[26]"
+        ],
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 136,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[7]"
+        ],
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 137,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[45]"
+        ],
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 138,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[6]"
+        ],
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 139,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[17]"
+        ],
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 141,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[45]"
+        ],
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 143,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_egressca[2557]"
+        ],
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 144,
+        "name": "cil_lxc_policy_",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[30]"
+        ],
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 145,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[1]"
+        ],
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 146,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[6]"
+        ],
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 147,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[11]"
+        ],
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 148,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[38]"
+        ],
+        "bytes_jited": 12954,
+        "bytes_xlated": 21584,
+        "id": 149,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[23]"
+        ],
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 150,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[2557]"
+        ],
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 151,
+        "name": "cil_lxc_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 152,
+        "name": "cil_from_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[7]"
+        ],
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 155,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[13]"
+        ],
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 157,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[28]"
+        ],
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 158,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[11]"
+        ],
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 159,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[28]"
+        ],
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 160,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[36]"
+        ],
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 161,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[15]"
+        ],
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 162,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 163,
+        "name": "cil_to_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[1]"
+        ],
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 164,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[28]"
+        ],
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 165,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[13]"
+        ],
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 166,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[1]"
+        ],
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 167,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_egressca[2651]"
+        ],
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 168,
+        "name": "cil_lxc_policy_",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[2651]"
+        ],
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 169,
+        "name": "cil_lxc_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[38]"
+        ],
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 171,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[11]"
+        ],
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 172,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[1]"
+        ],
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 173,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[23]"
+        ],
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 174,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[30]"
+        ],
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 175,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[17]"
+        ],
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 176,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[7]"
+        ],
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 178,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 180,
+        "name": "cil_host_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[7]"
+        ],
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 181,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[6]"
+        ],
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 182,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[26]"
+        ],
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 183,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[45]"
+        ],
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 184,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[36]"
+        ],
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 185,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[15]"
+        ],
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 186,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[45]"
+        ],
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 187,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 188,
+        "name": "cil_to_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 189,
+        "name": "cil_from_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 190,
+        "name": "cil_from_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[15]"
+        ],
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 191,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 193,
+        "name": "cil_to_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[7]"
+        ],
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 195,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[38]"
+        ],
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 196,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[1]"
+        ],
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 197,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[23]"
+        ],
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 198,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[36]"
+        ],
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 199,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 200,
+        "name": "cil_host_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[45]"
+        ],
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 201,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 202,
+        "name": "cil_from_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      }
+    ],
+    "runs_per_packet": 1.000003753073979,
+    "total_programs": 72,
+    "total_run_count": 40233837,
+    "total_run_time_ns": 61769203089
+  },
+  "callgraph": {
+    "analyzed_samples": 113931,
+    "callgraphs": 245625,
+    "categories": {
+      "bpf_code": {
+        "estimated_cpu_ns_per_packet": 91.9875946737766,
+        "sample_fraction": 0.03248457399654177,
+        "samples": 3701
+      },
+      "helpers": {
+        "estimated_cpu_ns_per_packet": 34.399035673738666,
+        "sample_fraction": 0.012147703434534939,
+        "samples": 1384
+      },
+      "maps": {
+        "estimated_cpu_ns_per_packet": 567.086992725449,
+        "sample_fraction": 0.2002615618225066,
+        "samples": 22816
+      },
+      "rest": {
+        "estimated_cpu_ns_per_packet": 2138.25797616455,
+        "sample_fraction": 0.7551061607464167,
+        "samples": 86030
+      }
+    },
+    "excluded_idle_samples": 125251,
+    "samples": 245625,
+    "top_symbols": [
+      {
+        "category": "rest",
+        "samples": 28045,
+        "symbol": "_raw_spin_unlock_irqrestore"
+      },
+      {
+        "category": "maps",
+        "samples": 12620,
+        "symbol": "lookup_nulls_elem_raw"
+      },
+      {
+        "category": "maps",
+        "samples": 5969,
+        "symbol": "htab_lru_map_update_elem"
+      },
+      {
+        "category": "rest",
+        "samples": 5067,
+        "symbol": "fib_table_lookup"
+      },
+      {
+        "category": "rest",
+        "samples": 4771,
+        "symbol": "_raw_spin_unlock_irq"
+      },
+      {
+        "category": "rest",
+        "samples": 3822,
+        "symbol": "enqueue_to_backlog"
+      },
+      {
+        "category": "rest",
+        "samples": 2723,
+        "symbol": "pvclock_clocksource_read_nowd"
+      },
+      {
+        "category": "rest",
+        "samples": 2439,
+        "symbol": "__pi_memcpy"
+      },
+      {
+        "category": "rest",
+        "samples": 2362,
+        "symbol": "jhash"
+      },
+      {
+        "category": "rest",
+        "samples": 1938,
+        "symbol": "get_random_u32"
+      },
+      {
+        "category": "maps",
+        "samples": 1848,
+        "symbol": "trie_lookup_elem"
+      },
+      {
+        "category": "rest",
+        "samples": 1749,
+        "symbol": "handle_softirqs"
+      },
+      {
+        "category": "rest",
+        "samples": 1665,
+        "symbol": "skb_defer_free_flush"
+      },
+      {
+        "category": "rest",
+        "samples": 1498,
+        "symbol": "do_softirq"
+      },
+      {
+        "category": "rest",
+        "samples": 1371,
+        "symbol": "__inet_dev_addr_type"
+      },
+      {
+        "category": "rest",
+        "samples": 1341,
+        "symbol": "fib_lookup_good_nhc"
+      },
+      {
+        "category": "rest",
+        "samples": 1326,
+        "symbol": "veth_xmit"
+      },
+      {
+        "category": "rest",
+        "samples": 1282,
+        "symbol": "__netif_receive_skb_core.constprop.0"
+      },
+      {
+        "category": "rest",
+        "samples": 1278,
+        "symbol": "__icmp_send"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 1222,
+        "symbol": "bpf_prog_0c4d509e86c07e4b_tail_handle_ipv4_cont"
+      },
+      {
+        "category": "rest",
+        "samples": 1185,
+        "symbol": "__alloc_skb"
+      },
+      {
+        "category": "rest",
+        "samples": 1050,
+        "symbol": "udp_v4_early_demux"
+      },
+      {
+        "category": "rest",
+        "samples": 974,
+        "symbol": "__mkroute_output"
+      },
+      {
+        "category": "maps",
+        "samples": 962,
+        "symbol": "htab_map_hash"
+      },
+      {
+        "category": "rest",
+        "samples": 958,
+        "symbol": "__skb_flow_dissect"
+      },
+      {
+        "category": "rest",
+        "samples": 955,
+        "symbol": "__rcu_read_lock"
+      },
+      {
+        "category": "rest",
+        "samples": 883,
+        "symbol": "__rcu_read_unlock"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 858,
+        "symbol": "bpf_prog_52497018fcb6fd94_cil_lxc_policy"
+      },
+      {
+        "category": "rest",
+        "samples": 762,
+        "symbol": "__xfrm_decode_session"
+      },
+      {
+        "category": "rest",
+        "samples": 756,
+        "symbol": "ip_route_output_key_hash"
+      },
+      {
+        "category": "rest",
+        "samples": 665,
+        "symbol": "__ip_dev_find"
+      },
+      {
+        "category": "helpers",
+        "samples": 664,
+        "symbol": "bpf_event_output"
+      },
+      {
+        "category": "rest",
+        "samples": 623,
+        "symbol": "kmem_cache_free"
+      },
+      {
+        "category": "rest",
+        "samples": 602,
+        "symbol": "__udp4_lib_lookup"
+      },
+      {
+        "category": "rest",
+        "samples": 593,
+        "symbol": "dst_release"
+      },
+      {
+        "category": "rest",
+        "samples": 558,
+        "symbol": "__dev_queue_xmit"
+      },
+      {
+        "category": "maps",
+        "samples": 547,
+        "symbol": "prealloc_lru_pop"
+      },
+      {
+        "category": "rest",
+        "samples": 543,
+        "symbol": "dev_get_by_index_rcu"
+      },
+      {
+        "category": "rest",
+        "samples": 537,
+        "symbol": "icmp_route_lookup.constprop.0"
+      },
+      {
+        "category": "rest",
+        "samples": 509,
+        "symbol": "udp4_lib_lookup2"
+      }
+    ],
+    "unresolved_samples": 6443
+  },
+  "corpus_run": "corpus/results/x86_kvm_corpus_20261010_053047_825216",
+  "host_perf": {
+    "branch-instructions": 109921875402,
+    "branch-misses": 169660653,
+    "branch_miss_rate": 0.0015434657785770736,
+    "branch_misses_per_packet": 4.21688067556127,
+    "branches_per_packet": 2732.0856309809647,
+    "cache-misses": 358151410,
+    "cache_misses_per_packet": 8.901779717622691,
+    "cpu-cycles": 384280968520,
+    "cycles_per_packet": 9551.224526631739,
+    "instructions": 603403015965,
+    "instructions_per_packet": 14997.457999871054,
+    "ipc": 1.5702131133085133
+  },
+  "packets": {
+    "component_errors": 0,
+    "packets_received": 40233825,
+    "packets_sent": 40233686,
+    "rx_dropped": 0,
+    "rx_errors": 0,
+    "verdicts": {
+      "reason=0,direction=1": {
+        "bytes": 2574967864,
+        "count": 40233816
+      },
+      "reason=0,direction=2": {
+        "bytes": 2574968284,
+        "count": 40233822
+      },
+      "reason=139,direction=2": {
+        "bytes": 350,
+        "count": 5
+      },
+      "reason=3,direction=1": {
+        "bytes": 280,
+        "count": 4
+      }
+    }
+  },
+  "phase": "baseline"
+}
