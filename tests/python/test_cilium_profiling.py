@@ -212,11 +212,11 @@ class ReportParsingTest(unittest.TestCase):
     """Catch lost callgraphs and misclassified datapath samples."""
 
     def test_perf_script_leaf_and_callchain_parsing(self) -> None:
-        text = """ffffffffc0010010 bpf_prog_deadbeef_cil_from_host net_rx_action+0x1/bpf_prog_deadbeef_cil_from_host+0x2/P/-/3/CALL
+        text = """ffffffffc0010010 bpf_prog_deadbeef_cil_from_host net_rx_action+0x1/bpf_prog_deadbeef_cil_from_host+0x2/P/-/-/3/CALL/-
         ffffffff81001000 __netif_receive_skb
         ffffffff81002000 net_rx_action
 
-ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P/-/4/CALL htab_lru_map_update_elem+0x1/bpf_common_lru_pop_free+0x2/P/-/4/CALL
+ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P/-/-/4/CALL/- htab_lru_map_update_elem+0x1/bpf_common_lru_pop_free+0x2/P/-/-/4/CALL/-
         ffffffffc0010010 bpf_prog_deadbeef_cil_from_host
 
 """

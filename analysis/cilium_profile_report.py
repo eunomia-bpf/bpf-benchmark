@@ -89,10 +89,11 @@ def _branch_history(line: str) -> list[tuple[str, str, str]]:
     branches: list[tuple[str, str, str]] = []
     for token in line.split():
         fields = token.split("/")
-        if len(fields) < 3:
+        # perf prints FROM/TO/pred/in_tx/abort/cycles/type/speculation.
+        if len(fields) < 7:
             continue
         source, target = (_branch_symbol(fields[0]), _branch_symbol(fields[1]))
-        branch_type = fields[-1].upper()
+        branch_type = fields[6].upper()
         if source and target and branch_type:
             branches.append((source, target, branch_type))
     return branches
