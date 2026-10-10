@@ -798,6 +798,27 @@ four AUX lane-shift words, several source/destination values, and register
 pairs (including `dst == src` and both `RSP` orderings) against an independent
 lane read/write and stack-base model, comparing the whole register file with
 its tags (79,202 cases).
+The two x86-64 stack helpers' choice of which body moves a word through the
+frame is likewise a generated contract: `generate_x86_stack_arm_spec.py` emits
+`KPROG_X86_STACK_ARM(IS_W64, IS_ALIGNED)`, which names the word-arena access at
+the full 64-bit width code on a qword-aligned resolved index and the
+little-endian byte ladder at every other width and every unaligned index, and
+`X86StackArmShape.lean` proves the generated `armOf` equal to an independent
+width/alignment-literal statement that names the word body exactly at the
+full-width/aligned pair and the byte body at the other three cases, that the
+arm result names agree with the generated table, that the arm codes are
+distinct and their lookup is a left inverse, and — connecting this selection
+contract to the arena contract — that the chosen body matches the
+`X86StackArena` word/byte split. Both `X86_SIM_L_STACK_WRITE` and
+`X86_SIM_L_STACK_READ` compute the two-fact selector and branch through the
+selected body, leaving the byte-window arithmetic, the narrow-value masking,
+and the little-endian assembly in the composed bodies. A generated-header
+oracle cross-checks the compiled selector against an independent literal model
+over all 256×256 boolean-fact pairs (65,540 cases), and a sim-header route
+oracle drives the real stack helpers over every resolved index (aligned and
+unaligned), five width codes (including the absent-code 64-bit fallback), and
+several values against an independent little-endian byte model, comparing the
+whole byte arena and the read-back (117,782 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new

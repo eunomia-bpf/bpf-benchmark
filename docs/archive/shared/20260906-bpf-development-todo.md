@@ -9747,6 +9747,118 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   register-move contract paragraph after the x86 move-with-extension paragraph
   (paper commit pushed to `main`).
 
+## Step 0120 — x86 stack word-path/byte-ladder body-selection contract
+
+- Scope: the x86 simulator's two stack helpers
+  `X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)` and
+  `X86_SIM_L_STACK_READ(OFF, WIDTH)` (`kprog/x86/x86_sim_local_bpf.h`) chose
+  *which body* moves a word through the frame by a hand-written
+  `width == 64 && aligned` test: the word-arena access `q[INDEX >> 3]` at the
+  full 64-bit width on a qword-aligned resolved index, the little-endian byte
+  ladder over `b[]` at every other width and every unaligned index. The
+  byte-window arithmetic and the little-endian value composition were already
+  proved (`X86StackArena.lean`); this closes the open two-fact *body* choice,
+  under one width/alignment-keyed selector. The byte-window arithmetic, the
+  narrow-value masking, and the little-endian assembly stay in the composed
+  bodies. x86-only; the AArch64 simulator has no
+  width/alignment-keyed stack body split, so there is no mirror.
+- Shared spec `kprog/formal/x86_stack_arm_spec.json` (`schema_version` 1,
+  `operation` `x86StackArm`): a `selector`
+  `w64_and_aligned_then_word_else_byte`, `width64_define`/`width64_code`
+  `X86_WIDTH_64`/8, and two ordered arms `(arm, arm_define, body)`
+  `("word", "KPROG_X86_STACK_ARM_WORD", "word_arena_access")`,
+  `("byte", "KPROG_X86_STACK_ARM_BYTE", "byte_ladder_access")`, plus the four
+  `(name, w64, aligned, word)` cases `("qword", true, true, true)`,
+  `("sub_qword_aligned", false, true, false)`,
+  `("qword_unaligned", true, false, false)`,
+  `("sub_qword_unaligned", false, false, false)`.
+  `generate_x86_stack_arm_spec.py` carries independent module-level `_ARMS`/
+  `_CASES` constructions, validates the spec against them, re-derives both live
+  stack-helper regions from the header (`stack_write_region()` slices the
+  `X86_SIM_L_STACK_WRITE` `#define` to `X86_SIM_L_STACK_READ`,
+  `stack_read_region()` slices `X86_SIM_L_STACK_READ` to
+  `X86_SIM_L_STACK_PTR`, continuations flattened), and requires BOTH regions to
+  route through the generated selector `KPROG_X86_STACK_ARM(`, to keep the
+  word-arena `__x86_stack_mem.q` and `KPROG_X86_STACK_WORD_INDEX(`, to keep the
+  byte arena `__x86_stack_mem.b[`, to keep the per-helper ladder
+  (`KPROG_X86_STACK_BYTE(` for write, `KPROG_X86_STACK_ASSEMBLE(` for read),
+  and to have no hand `X86_WIDTH_64 &&` selector. It emits
+  `generated/x86_stack_arm.h` (the plain
+  `KPROG_X86_STACK_ARM(IS_W64, IS_ALIGNED)` parenthesized
+  `((__u8)(((IS_W64) && (IS_ALIGNED)) ? 1 : 0))` macro, the
+  `_WIDTH64`/`_COUNT`/`_ARM_WORD`=1/`_ARM_BYTE`=0 codes, and
+  width/count/distinctness/four-selection drift asserts) and the Lean
+  `KProgFormal.GeneratedX86StackArm` (`Arm` `word`|`byte`, `armOf isW64
+  isAligned := if isW64 && isAligned then .word else .byte`, a four-case
+  `Case` classification, and the `word_refines`/`armOf_refines` theorems).
+  `--check` rc=0.
+- Hand refinement `KProgFormal/X86StackArmShape.lean`: the independent specs
+  `x86StackArmWidth64Spec := 8` and `x86StackArmSpec`/
+  `x86StackArmNamesSpec`/`x86StackArmCodesSpec` (the literal
+  width/alignment-keyed branch, arm codes `[1, 0]`). It proves
+  `x86_stack_arm_refines` (the generated `armOf` equals the independent
+  statement), `_names_refine`, `_codes_refine`, `_codes_length`,
+  `_names_length`, `_codes_nodup`, `_width64_spec_bound` (via
+  `x86WidthCodeSpec .w64`), `_width64_is_w64`, `_count_is_2`,
+  `_of_code_roundtrip`, `_of_code_beyond_is_none`, `_bodies`, `_word_iff`,
+  `_byte_iff`, `_unaligned_never`, `_narrow_never`, `_over_widths`,
+  `_case_dispatch`, `_ladder_total`, `_case_refines`, and --- connecting the
+  selection to the arena contract --- `x86_stack_arm_matches_arena` and
+  `_byte_covers` (via `GeneratedX86StackArena.wordAligned` and
+  `X86StackArena`). Module elaborates rc=0, no `sorry`/`admit`.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_stack_arm.h"`, and both stack helpers now
+  route their word/byte choice through
+  `KPROG_X86_STACK_ARM((X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) == X86_WIDTH_64,
+  KPROG_X86_STACK_WORD_ALIGNED(__x86_stw_index))` (and the `__x86_str_index`
+  mirror for read), keeping the word-arena access, the byte ladder, the
+  byte-window arithmetic, and the helper signatures
+  (`X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)` /
+  `X86_SIM_L_STACK_READ(OFF, WIDTH)`) unchanged. `make build` rc=0 (only
+  pre-existing `-Wc23-extensions` warnings).
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_stack_arm_host.c` includes the generated header (compiling its
+    drift asserts) and drives the compiled selector over all 256×256
+    boolean-fact pairs against an independent literal model, plus the
+    count/selector-table and the boolean-fact selection-drift checks
+    --- `x86 stack arm host cross-check: OK (65540 cases)`.
+  - `test_x86_stack_arm_route_host.c` includes the simulator header
+    (`X86_SIM_ENABLE_STACK`) and drives the real `X86_SIM_L_STACK_WRITE`/
+    `X86_SIM_L_STACK_READ` helpers over every resolved index in
+    `[-X86_SIM_STACK_BYTES, 0)` (aligned and unaligned), five width codes
+    (including the absent-code 64-bit fallback), and six values, comparing the
+    whole byte arena and the read-back against an independent little-endian
+    byte model
+    --- `x86 stack arm route host cross-check: OK (117782 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **149** `cross-check: OK`. Baseline
+  was **147** for Step 0119; Step 0120 adds the two stack-arm oracles and the
+  Lean pair, wired into `kprog/formal/Makefile`, with the two new Lean modules
+  imported in `KProgFormal.lean`.
+- Mutation harness `kprog/formal/build/mut_x86_stack_arm.py`, 50 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end: eleven spec defects (arm-name/body/arm-define/case-name/w64/word/
+  width64/selector drifts and an arm-order swap → generator), ten generator
+  defects (arm-define/width64/word-arena/selector/byte-arena/and-test/armOf/
+  wordSpec/macro text drifts → generator), six generated-C defects
+  (width64/count/word-selection-assert drifts → generator, and
+  word-code/byte-code/macro-inversion drifts → host), eight generated-Lean
+  defects (count/width64/names/codes/armOf drifts → generator and
+  word-code/byte-code/qword-body drifts → refinement), six hand-refinement
+  defects (width64-def drift, the spec shape swap, the names/codes swaps, and
+  the dispatch/bodies claim drifts → refinement), six routed-body defects
+  (dropped include, unrouted selector, drifted word arena/index, drifted
+  assemble ladder, and the reintroduced hand `&&` selection → generator/
+  route), and two generator+artifact pair defects regenerated so `--check`
+  stays green and only the rebuilt-olean refinement/route catches them (a body
+  value drift and a width64 value drift). Three semantically equivalent
+  mutations (an added include-side comment, an added hand-module comment, and a
+  resolved-but-equal generator root path) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the stack
+  body-selection contract paragraph after the `MOV_REG` paragraph (paper commit
+  pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
@@ -9801,7 +9913,12 @@ width from the stack pointer, provenance pointer write at the full width
 otherwise, narrow scalarizing lane write at every narrower width) is now a
 machine-checked contract (Step 0119), leaving the register reads, the
 stack-base addition, and the destination writeback inside the composed arm
-bodies. This closes the open x86 arm-selection list.
+bodies. This closes the open x86 arm-selection list, leaving only one x86
+body-selection surface: the two stack helpers'
+word-path/byte-ladder choice on their resolved width and aligned index, now
+itself a machine-checked two-fact contract (Step 0120), leaving the
+byte-window arithmetic and the little-endian value composition inside the
+composed bodies.
 
 The AArch64 *write-register destination-presence* decision is likewise no longer
 open: the `XZR`/sentinel presence test the three writeback bodies shared is now
