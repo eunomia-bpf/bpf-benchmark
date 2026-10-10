@@ -211,11 +211,11 @@ class ReportParsingTest(unittest.TestCase):
     """Catch lost callgraphs and misclassified datapath samples."""
 
     def test_perf_script_leaf_and_callchain_parsing(self) -> None:
-        text = """ffffffffc0010010 bpf_prog_deadbeef_cil_from_host htab_lru_map_update_elem+0x1/_raw_spin_lock+0x2/P/-/3/CALL
+        text = """ffffffffc0010010 bpf_prog_deadbeef_cil_from_host net_rx_action+0x1/bpf_prog_deadbeef_cil_from_host+0x2/P/-/3/CALL
         ffffffff81001000 __netif_receive_skb
         ffffffff81002000 net_rx_action
 
-ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/htab_lru_map_update_elem+0x2/P/-/4/CALL
+ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P/-/4/CALL htab_lru_map_update_elem+0x1/bpf_common_lru_pop_free+0x2/P/-/4/CALL
         ffffffffc0010010 bpf_prog_deadbeef_cil_from_host
 
 """
@@ -223,7 +223,14 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/htab_lru_map_update_
         self.assertEqual(counts["bpf_prog_deadbeef_cil_from_host"], 1)
         self.assertEqual(counts["_raw_spin_lock"], 1)
         self.assertEqual(len(callgraphs[0]), 3)
-        self.assertEqual(histories[0][:2], ["htab_lru_map_update_elem", "_raw_spin_lock"])
+        self.assertEqual(
+            histories[0][:2],
+            ["bpf_prog_deadbeef_cil_from_host", "net_rx_action"],
+        )
+        self.assertEqual(
+            histories[1],
+            ["_raw_spin_lock", "bpf_common_lru_pop_free", "htab_lru_map_update_elem"],
+        )
         self.assertEqual(report.classify_symbol("bpf_prog_deadbeef_cil_from_host"), "bpf_code")
         self.assertEqual(report.classify_symbol("htab_map_lookup_elem"), "maps")
         self.assertEqual(report.classify_symbol("lookup_nulls_elem_raw"), "maps")
@@ -237,6 +244,32 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/htab_lru_map_update_
         self.assertIn("pv_native_safe_halt", report.IDLE_SYMBOLS)
         report.validate_callgraph_samples(counts, callgraphs, histories)
 
+    def test_completed_lbr_call_does_not_reclassify_rest_sample(self) -> None:
+        active = report.reconstruct_active_lbr(
+            "net_rx_action",
+            [
+                ("bpf_prog_old", "net_rx_action", "RET"),
+                ("net_rx_action", "bpf_prog_old", "CALL"),
+            ],
+        )
+        self.assertEqual(active, ["net_rx_action"])
+        self.assertEqual(report.classify_context(active), "rest")
+
+    def test_native_validation_requires_active_lbr_crossing(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "crossing a live native"):
+            report.validate_callgraph_samples(
+                {"bpf_prog_stub": 1},
+                [["bpf_prog_stub", "bpf_dispatcher"]],
+                [["bpf_prog_stub", "bpf_dispatcher"]],
+                frozenset({"cil_to_host"}),
+            )
+        report.validate_callgraph_samples(
+            {"_raw_spin_lock": 1},
+            [["_raw_spin_lock", "bpf_common_lru_pop_free"]],
+            [["_raw_spin_lock", "cil_to_host", "bpf_dispatcher"]],
+            frozenset({"cil_to_host"}),
+        )
+
     def test_perf_samples_reject_unknown_only_or_leaf_only_data(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "no resolved leaf"):
             report.validate_callgraph_samples({"[unknown]": 5}, [["[unknown]"]], [[]])
@@ -246,7 +279,7 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/htab_lru_map_update_
                 [["bpf_prog_deadbeef_cil_from_host"]],
                 [["bpf_prog_deadbeef_cil_from_host", "net_rx_action"]],
             )
-        with self.assertRaisesRegex(RuntimeError, "no LBR"):
+        with self.assertRaisesRegex(RuntimeError, "no reconstructed active LBR"):
             report.validate_callgraph_samples(
                 {"bpf_prog_deadbeef_cil_from_host": 5},
                 [["bpf_prog_deadbeef_cil_from_host", "do_softirq"]],

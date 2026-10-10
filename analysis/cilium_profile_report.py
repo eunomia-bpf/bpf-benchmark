@@ -84,16 +84,37 @@ def _branch_symbol(raw: str) -> str:
     return re.sub(r"\+(?:0x)?[0-9a-fA-F]+$", "", symbol)
 
 
-def _branch_history(line: str) -> list[str]:
-    symbols: list[str] = []
+def _branch_history(line: str) -> list[tuple[str, str, str]]:
+    branches: list[tuple[str, str, str]] = []
     for token in line.split():
         fields = token.split("/")
         if len(fields) < 3:
             continue
         source, target = (_branch_symbol(fields[0]), _branch_symbol(fields[1]))
-        if source and target:
-            symbols.extend((source, target))
-    return symbols
+        branch_type = fields[-1].upper()
+        if source and target and branch_type:
+            branches.append((source, target, branch_type))
+    return branches
+
+
+def reconstruct_active_lbr(
+    leaf: str, branches: Sequence[tuple[str, str, str]]
+) -> list[str]:
+    """Reconstruct active calls from newest-to-oldest LBR CALL/RET records."""
+    active = [leaf]
+    current = leaf
+    completed_depth = 0
+    for source, target, branch_type in branches:
+        is_return = branch_type == "RET" or branch_type.endswith("_RET")
+        is_call = branch_type == "CALL" or branch_type.endswith("_CALL")
+        if is_return:
+            completed_depth += 1
+        elif is_call and completed_depth:
+            completed_depth -= 1
+        elif is_call and target == current:
+            active.append(source)
+            current = source
+    return active
 
 
 def parse_perf_script(
@@ -102,10 +123,10 @@ def parse_perf_script(
     """Parse perf-script callchains and LBR branch histories by sample block."""
     counts: collections.Counter[str] = collections.Counter()
     callgraphs: list[list[str]] = []
-    branch_histories: list[list[str]] = []
+    branch_histories: list[list[tuple[str, str, str]]] = []
     for block in re.split(r"\n\s*\n", text.strip()):
         symbols: list[str] = []
-        branches: list[str] = []
+        branches: list[tuple[str, str, str]] = []
         for line in block.splitlines():
             stripped = line.strip()
             match = re.match(r"(?:0x)?[0-9a-fA-F]+\s+(\S+)", stripped)
@@ -117,7 +138,11 @@ def parse_perf_script(
         counts[symbols[0]] += 1
         callgraphs.append(symbols)
         branch_histories.append(branches)
-    return counts, callgraphs, branch_histories
+    active_lbr = [
+        reconstruct_active_lbr(callgraph[0], branches)
+        for callgraph, branches in zip(callgraphs, branch_histories, strict=True)
+    ]
+    return counts, callgraphs, active_lbr
 
 
 def classify_symbol(symbol: str, native_symbols: frozenset[str] = frozenset()) -> str:
@@ -177,13 +202,20 @@ def validate_callgraph_samples(
     if not any(len(callgraph) >= 2 for callgraph in callgraphs):
         raise RuntimeError("perf record contains no callchain with at least two frames")
     if not any(len(history) >= 2 for history in branch_histories):
-        raise RuntimeError("perf record contains no LBR branch history")
+        raise RuntimeError("perf record contains no reconstructed active LBR ancestry")
     if not any(
         classify_symbol(symbol, native_symbols) == "bpf_code"
         for symbols in (*callgraphs, *branch_histories)
         for symbol in symbols
     ):
         raise RuntimeError("perf record contains no BPF-code context")
+    if native_symbols and not any(
+        len(history) >= 2 and any(symbol in native_symbols for symbol in history)
+        for history in branch_histories
+    ):
+        raise RuntimeError(
+            "perf record contains no active LBR path crossing a live native BPF frame"
+        )
 
 
 def _run_perf_reports(perf: Path, arm_dir: Path) -> tuple[str, str]:
@@ -494,10 +526,13 @@ def analyze_run(
     )
     categorized_leaves: collections.Counter[tuple[str, str]] = collections.Counter()
     category_counts: collections.Counter[str] = collections.Counter()
+    active_lbr_samples = 0
     for callgraph, history in zip(callgraphs, branch_histories, strict=True):
         leaf = callgraph[0]
         if leaf.lower() in IDLE_SYMBOLS or leaf.lower() in UNRESOLVED_SYMBOLS:
             continue
+        if len(history) >= 2:
+            active_lbr_samples += 1
         category = classify_context([*callgraph, *history], native_symbols)
         category_counts[category] += 1
         categorized_leaves[(leaf, category)] += 1
@@ -552,7 +587,8 @@ def analyze_run(
             "excluded_idle_samples": idle_samples,
             "unresolved_samples": unresolved_samples,
             "callgraphs": len(callgraphs),
-            "lbr_histories": sum(bool(history) for history in branch_histories),
+            "active_lbr_samples": active_lbr_samples,
+            "active_lbr_coverage": active_lbr_samples / analyzed_samples,
             "sample_period_cycles": sample_period_cycles,
             "categories": categories,
             "top_symbols": [
@@ -603,6 +639,8 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         f"| analyzed call-graph samples | {callgraph['analyzed_samples']} / {callgraph['samples']} raw |",
         f"| excluded idle samples | {callgraph['excluded_idle_samples']} |",
         f"| unresolved samples | {callgraph['unresolved_samples']} |",
+        f"| active-LBR coverage | {callgraph['active_lbr_samples']} / "
+        f"{callgraph['analyzed_samples']} ({float(callgraph['active_lbr_coverage']):.3%}) |",
         "",
         "## Resolved non-idle context-attributed cost per packet",
         "",
