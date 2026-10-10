@@ -2,11 +2,14 @@
 
 ## Result
 
-The repaired whole-program-native arm passes the functional gate. It has the
-same eight live attachment locations as JIT (one XDP and seven TCX), replaces
-all 163 discovered programs including tail-call targets, forwards both packet
-directions, and has zero reason-133 policy drops, receiver errors, receiver
-drops, or pktgen errors.
+The repaired whole-program-native arm passes the externally visible functional
+gate. It has the same eight live attachment locations as JIT (one XDP and seven
+TCX), forwards both packet directions, and has zero reason-133 policy drops,
+receiver errors, receiver drops, or pktgen errors. The loader records 163
+replacement events over multiple Cilium generations, including tail-call
+targets; the final measured phase contains 72 native program IDs. This proves
+matching live roots and packet outcomes, not identical internal instruction or
+tail-call work.
 
 The primary stats-off timing result is **1.213800x** by ratio of median packet
 rates: JIT 843,734 pps [775,949, 912,163] and native 1,024,124 pps
@@ -26,12 +29,24 @@ control-adjusted native cost ratio is 1.130199x. The two hot
 `cil_from_container` programs improved by 1.245360x and 1.208879x in the native
 run; the control improved by 1.078222x and 1.118977x.
 
+The same stats-on run's workload-rate medians were 894,425 pps JIT and
+971,729 pps native (1.086429x); its JIT/JIT control moved 890,636 to
+905,073 pps (1.016210x). This rate is supplementary because BPF accounting was
+enabled.
+
 This does **not** reproduce or validate the paper's 2.357974x result. The new
 raw throughput ratio is 48.524% lower relative to that ratio. More importantly,
 the paper-era native path did different packet work: retained source and replay
 evidence shows that it was built without `POLICY_AUDIT_MODE` while the JIT
 Cilium agent ran with audit mode, and its native arm policy-dropped traffic
 that JIT forwarded. See [paper-audit-mode.md](paper-audit-mode.md).
+
+An independent post-run configuration review also found that complete
+compile-time parity still fails: the paper-era `CILIUM_MAX_*` native recipes
+hardcode host-firewall, DSR, and monitor-aggregation defines that the paired
+JIT daemon configuration does not emit. Packet-path parity is established, but
+identical conditional code is not. Consequently these measurements are a
+diagnostic repaired-paper rerun, not a final unbiased native upper bound.
 
 ## Functional gates
 
@@ -103,15 +118,17 @@ Resolved non-idle leaf sampling estimates JIT/native ns per packet as
 operations, and 2,138.258/2,431.623 in the rest of the kernel stack. Native's
 map-leaf estimate improves 8.746% and `lookup_nulls_elem_raw` samples fall
 12,620 to 8,223, but `htab_lru_map_update_elem` rises 5,969 to 7,865 and
-`_raw_spin_unlock_irqrestore` rises 28,045 to 32,742. This explains why the
-better locality counters and map lookups did not produce a net gain in the
-profiled configuration: higher BPF/helper/other-stack work outweighed them.
+`_raw_spin_unlock_irqrestore` rises 28,045 to 32,742. The better locality
+counters and map lookups therefore coexist with no net gain in this one
+profiled pair; the sampled categories alone do not establish causality.
 The split is a leaf-symbol heuristic, not inclusive callchain attribution;
 unresolved leaves are 5.352% for JIT and 0.124% for native.
 
-Across all 163 paired replacements, original JIT images total 687,766 bytes;
-native blobs total 792,890 bytes (+15.285%), and BPF-callable native stubs total
-797,332 bytes (+15.931%). Per-program sizes, run counts, PMU counters, perf
+Across all 163 lifecycle replacement events, original JIT images total 687,766
+bytes; native blobs total 792,890 bytes (+15.285%), and BPF-callable native
+stubs total 797,332 bytes (+15.931%). Restricting the comparison to the final
+72 native IDs gives 301,961 JIT bytes, 353,834 native-blob bytes (+17.179%),
+and 355,802 callable-stub bytes (+17.830%). Per-program sizes, run counts, PMU counters, perf
 data, call graphs, top symbols, kernel symbol/module snapshots, and image
 metadata are retained in the profile result. Gate/timing evidence also retains
 the `bpftool` translated-image output and every raw-JIT dump attempt. The guest
@@ -173,11 +190,23 @@ Remaining differences are recorded rather than hidden:
 - The current native build adds the required data-layout, skb-layout, and audit
   macro fixes. Map FDs are pinned during discovery. These alter only bugs that
   made native do different work from JIT.
+- The inherited paper-era native recipes still use hardcoded `CILIUM_MAX_*`
+  feature sets rather than Cilium's exact per-object generated configuration.
+  In particular they enable host firewall and DSR and force monitor aggregation
+  level 3/`CT_REPORT_FLAGS=0x0002`, while the paired JIT daemon defaults to host
+  firewall off, SNAT load-balancing mode, and monitor aggregation none. This is
+  a known compile-time configuration mismatch even though the observed live
+  hooks, root invocations, verdict class, and delivery match.
 - Outcome snapshots, attachment inventories, JIT/image metadata, and profiling
   are new read-only observations. They are taken outside timing windows; the
   profile itself is a separate diagnostic run.
 - Profiles intentionally use 4 vCPUs, 16 GiB, CPUs 16--19, BPF stats, PMU
   counters, and callgraph sampling; they are not pooled with timing.
+- Timing used one fixed-order two-start transition per guest. Its five samples
+  are repeated measurements, not five independent VM/restart replications;
+  pktgen directions were imbalanced and QEMU helper threads were not isolated
+  from the benchmark P-cores. The large, sign-changing controls make the raw
+  ratios useful observations but not a precise causal speedup.
 
 The timing runtime image SHA-256 is
 `94f7dc5845b38bc6c81469aee07ad3f320a00de5092d277192e09edf9ea05f44`.
