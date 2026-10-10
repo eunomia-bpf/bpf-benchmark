@@ -65,6 +65,21 @@ class WorkloadContractTests(unittest.TestCase):
                 (7,),
             )
 
+    def test_katran_napi_workers_are_pinned_and_realtime(self) -> None:
+        """Catch veth-ring loss when threaded NAPI loses CPU to softirq producers."""
+        with (
+            mock.patch.object(katran_runner.os, "sched_setaffinity") as set_affinity,
+            mock.patch.object(katran_runner.os, "sched_setscheduler") as set_scheduler,
+        ):
+            katran_runner._pin_threaded_napi(123, 6)
+
+        set_affinity.assert_called_once_with(123, {6})
+        set_scheduler.assert_called_once_with(
+            123,
+            katran_runner.os.SCHED_FIFO,
+            katran_runner.os.sched_param(katran_runner.KATRAN_NAPI_RT_PRIORITY),
+        )
+
     def test_namespaced_http_ready_marker_contract(self) -> None:
         process = subprocess.Popen(
             [

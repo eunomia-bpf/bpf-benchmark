@@ -62,6 +62,16 @@ ROUTER_REAL_IFACE = "rtreal0"
 REAL_IFACE = "real0"
 KATRAN_RECEIVER_NAPI_CPU = 5
 KATRAN_ROUTER_NAPI_CPU = 6
+KATRAN_NAPI_RT_PRIORITY = 1
+
+
+def _pin_threaded_napi(pid: int, cpu: int) -> None:
+    os.sched_setaffinity(pid, {int(cpu)})
+    os.sched_setscheduler(
+        pid,
+        os.SCHED_FIFO,
+        os.sched_param(KATRAN_NAPI_RT_PRIORITY),
+    )
 
 
 def _enable_threaded_peer_napi(namespace: str, iface: str, cpu: int) -> int:
@@ -80,7 +90,7 @@ def _enable_threaded_peer_napi(namespace: str, iface: str, cpu: int) -> int:
                 continue
             if comm.startswith(prefix):
                 pid = int(proc_dir.name)
-                os.sched_setaffinity(pid, {int(cpu)})
+                _pin_threaded_napi(pid, cpu)
                 return pid
         time.sleep(0.05)
     raise RuntimeError(f"threaded NAPI worker for {namespace}/{iface} was not created")
@@ -445,9 +455,11 @@ class KatranDsrTopology:
                 "peer_xdp_iface": ROUTER_LB_IFACE,
                 "peer_napi_pid": self.peer_napi_pid,
                 "peer_napi_cpu": KATRAN_ROUTER_NAPI_CPU,
+                "peer_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
                 "receiver_xdp_iface": REAL_IFACE,
                 "receiver_napi_pid": self.receiver_napi_pid,
                 "receiver_napi_cpu": KATRAN_RECEIVER_NAPI_CPU,
+                "receiver_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
                 "route_map_id": self.route_map_id}
 
     def close(self) -> None: self.cleanup()
