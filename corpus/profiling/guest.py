@@ -29,7 +29,7 @@ def _required_env(name: str) -> str:
     return value
 
 
-def _perf_command(perf_root: Path, output_dir: Path) -> list[str]:
+def _perf_command(perf_root: Path, work_dir: Path) -> list[str]:
     if platform.machine() not in {"x86_64", "amd64"}:
         raise RuntimeError("Cilium call-graph profiling currently requires x86_64")
     loader = perf_root / "lib64" / "ld-linux-x86-64.so.2"
@@ -41,8 +41,8 @@ def _perf_command(perf_root: Path, output_dir: Path) -> list[str]:
     )
     if not library_dirs:
         raise RuntimeError(f"staged perf runtime has no libraries under {perf_root}")
-    control = output_dir / "guest-perf.control.fifo"
-    ack = output_dir / "guest-perf.ack.fifo"
+    control = work_dir / "guest-perf.control.fifo"
+    ack = work_dir / "guest-perf.ack.fifo"
     return [
         str(loader),
         "--library-path",
@@ -60,7 +60,7 @@ def _perf_command(perf_root: Path, output_dir: Path) -> list[str]:
         "--delay=-1",
         f"--control=fifo:{control},{ack}",
         "-o",
-        str(output_dir / "guest.perf.data"),
+        str(work_dir / "guest.perf.data"),
     ]
 
 
@@ -118,6 +118,12 @@ def _configure_arm(arm: str) -> str:
 def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
     selected_phase = _configure_arm(arm)
     output_dir.mkdir(parents=True, exist_ok=True)
+    work_dir = Path("/var/tmp") / f"bpf-benchmark-cilium-profile-{os.getpid()}-{arm}"
+    if work_dir.exists():
+        raise RuntimeError(f"guest-local profile work directory exists: {work_dir}")
+    work_dir.mkdir(mode=0o700)
+    local_perf_root = work_dir / "perf-runtime"
+    shutil.copytree(perf_root, local_perf_root)
     original_measure = driver._measure_app_phase_with_stats
     measurement_index = 0
 
@@ -129,11 +135,11 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
             return original_measure(**kwargs)
 
         _capture_symbols(output_dir)
-        command = _perf_command(perf_root, output_dir)
+        command = _perf_command(local_perf_root, work_dir)
         collector = PerfCollector(
             command=command,
-            control_fifo=output_dir / "guest-perf.control.fifo",
-            ack_fifo=output_dir / "guest-perf.ack.fifo",
+            control_fifo=work_dir / "guest-perf.control.fifo",
+            ack_fifo=work_dir / "guest-perf.ack.fifo",
             stderr_path=output_dir / "guest-perf.stderr.log",
         )
         metadata = {
@@ -143,6 +149,7 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
             "sample_event": "cpu-clock",
             "sample_period_ns": 1_000_000,
             "call_graph": "frame-pointer",
+            "perf_data": str(output_dir / "guest.perf.data"),
         }
         (output_dir / "guest-profile.json").write_text(
             json.dumps(metadata, indent=2, sort_keys=True) + "\n",
@@ -154,11 +161,16 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
             result = original_measure(**kwargs)
             collector.disable()
             collector.finish()
+            local_data = work_dir / "guest.perf.data"
+            result_data = output_dir / "guest.perf.data"
+            if not local_data.is_file():
+                raise RuntimeError("perf record completed without guest-local perf data")
+            if result_data.exists():
+                raise RuntimeError(f"refusing to replace perf data: {result_data}")
+            shutil.copy2(local_data, result_data)
         except BaseException:
             collector.abort()
             raise
-        if not (output_dir / "guest.perf.data").is_file():
-            raise RuntimeError("perf record completed without guest.perf.data")
         return result
 
     driver._measure_app_phase_with_stats = profiled_measure
@@ -166,6 +178,7 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
         return driver.main([])
     finally:
         driver._measure_app_phase_with_stats = original_measure
+        shutil.rmtree(work_dir)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

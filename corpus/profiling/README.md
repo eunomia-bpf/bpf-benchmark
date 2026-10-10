@@ -21,6 +21,9 @@ does not require an image rebuild. The nested Make invocation treats the
 validated runtime tar as immutable and fails if that tar or its kernel image
 is missing. A staged guest launch script also keeps the virtme kernel command
 line short; the full resolved guest Make command remains in `commands.json`.
+The staged `perf` runtime and its recording file are copied to guest-local
+ext4 storage before sampling, then the completed raw data is copied back; perf
+therefore never mmaps the virtme/9p result mount during the workload.
 
 Run the complete profile only while holding the coordination file's
 `HOST-EXCLUSIVE` lease:

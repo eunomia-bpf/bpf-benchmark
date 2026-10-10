@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from corpus.profiling import host
+from corpus.profiling import guest, host
 
 
 REPORT_PATH = Path(__file__).resolve().parents[2] / "analysis" / "cilium_profile_report.py"
@@ -114,6 +114,21 @@ class MarkerAndCommandTest(unittest.TestCase):
         self.assertEqual(host._resolve_profile_root(str(selected)), selected)
         with self.assertRaisesRegex(RuntimeError, "must be below"):
             host._resolve_profile_root("/tmp/profile-test")
+
+    def test_perf_operational_files_stay_on_guest_local_storage(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            perf_root = Path(raw) / "perf"
+            (perf_root / "lib64").mkdir(parents=True)
+            (perf_root / "lib64" / "ld-linux-x86-64.so.2").touch()
+            (perf_root / "lib" / "x86_64-linux-gnu").mkdir(parents=True)
+            (perf_root / "lib" / "x86_64-linux-gnu" / "libc.so.6").touch()
+            (perf_root / "usr" / "lib" / "linux-tools").mkdir(parents=True)
+            (perf_root / "usr" / "lib" / "linux-tools" / "perf").touch()
+            command = guest._perf_command(perf_root, Path("/var/tmp/work"))
+            output_index = command.index("-o") + 1
+            self.assertEqual(command[output_index], "/var/tmp/work/guest.perf.data")
+            control = next(item for item in command if item.startswith("--control="))
+            self.assertNotIn("corpus/results", control)
 
 
 class ReportParsingTest(unittest.TestCase):
