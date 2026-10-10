@@ -254,6 +254,7 @@ class CiliumRunner(NativeProcessRunner):
             raise RuntimeError("CiliumRunner requires an explicit workload_kind")
         if not self.device:
             raise RuntimeError("CiliumRunner could not determine a network device for workload")
+        resume_after_workload = not self._agent_paused
         self._pause_agent()
         try:
             return run_with_outcomes(
@@ -263,7 +264,8 @@ class CiliumRunner(NativeProcessRunner):
                 cilium_outcome_snapshot,
             )
         finally:
-            self._resume_agent()
+            if resume_after_workload:
+                self._resume_agent()
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
         if self.session is None:
@@ -273,6 +275,7 @@ class CiliumRunner(NativeProcessRunner):
             raise RuntimeError(f"{type(self).__name__} workload spec is missing a workload kind")
         if not self.device:
             raise RuntimeError("CiliumRunner could not determine a network device for workload")
+        resume_after_workload = not self._agent_paused
         self._pause_agent()
         try:
             return run_with_outcomes(
@@ -282,7 +285,8 @@ class CiliumRunner(NativeProcessRunner):
                 cilium_outcome_snapshot,
             )
         finally:
-            self._resume_agent()
+            if resume_after_workload:
+                self._resume_agent()
 
     def _command(self, binary: Path) -> list[str]:
         if self.etcd_session is None:
@@ -610,6 +614,7 @@ class CiliumRunner(NativeProcessRunner):
             ).start()
             super().start()
             self._setup_managed_endpoints()
+            self._pause_agent()
             return []
         except Exception:
             self.stop()
