@@ -340,6 +340,7 @@ def _native_sizes(shim_log: Path) -> list[dict[str, object]]:
                     "native_id": native_id,
                     "program": record["prog"],
                     "native_symbol": record["symbol"],
+                    "native_ksym": f"bpf_prog_{native['tag']}_{native['name']}",
                     "jit_image_bytes": original["bytes_jited"],
                     "native_blob_bytes": int(record["native_bytes"]),
                     "native_stub_image_bytes": native["bytes_jited"],
@@ -507,7 +508,7 @@ def analyze_run(
         )
         live_native_sizes = _live_native_sizes(rows, all_native_sizes)
         native_symbols = frozenset(
-            str(record["native_symbol"]) for record in live_native_sizes
+            str(record["native_ksym"]) for record in live_native_sizes
         )
     _, script = _run_perf_reports(perf, arm_dir)
     symbol_counts, callgraphs, branch_histories = parse_perf_script(script)

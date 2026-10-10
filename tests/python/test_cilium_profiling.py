@@ -261,13 +261,13 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P
                 {"bpf_prog_stub": 1},
                 [["bpf_prog_stub", "bpf_dispatcher"]],
                 [["bpf_prog_stub", "bpf_dispatcher"]],
-                frozenset({"cil_to_host"}),
+                frozenset({"bpf_prog_e984be621a492c42_cil_to_host"}),
             )
         report.validate_callgraph_samples(
             {"_raw_spin_lock": 1},
             [["_raw_spin_lock", "bpf_common_lru_pop_free"]],
-            [["_raw_spin_lock", "cil_to_host", "bpf_dispatcher"]],
-            frozenset({"cil_to_host"}),
+            [["_raw_spin_lock", "bpf_prog_e984be621a492c42_cil_to_host", "bpf_dispatcher"]],
+            frozenset({"bpf_prog_e984be621a492c42_cil_to_host"}),
         )
 
     def test_perf_samples_reject_unknown_only_or_leaf_only_data(self) -> None:
@@ -318,6 +318,7 @@ ffffffff81003000 _raw_spin_lock bpf_common_lru_pop_free+0x1/_raw_spin_lock+0x2/P
             self.assertEqual(rows[0]["jit_image_bytes"], 100)
             self.assertEqual(rows[0]["native_blob_bytes"], 70)
             self.assertEqual(rows[0]["native_stub_image_bytes"], 80)
+            self.assertEqual(rows[0]["native_ksym"], "bpf_prog_bb_cil")
 
     def test_program_attach_points_use_measurement_time_net_snapshot(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
