@@ -54,52 +54,43 @@ static __always_inline int decode_rotate32_payload(u64 payload,
 	return decode_rotate_payload(payload, 31, dst_reg, src_reg, tmp_reg, shift);
 }
 
-static int instantiate_rotate64(u64 payload, struct bpf_insn *insn_buf)
+/* The legacy temporary field is decoded for ABI compatibility, but never
+ * written: carry is held in the branch path, not in program state. */
+static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, bool is64)
 {
 	u8 dst_reg, src_reg, tmp_reg, shift;
 	int cnt = 0;
+	int i;
 	int err;
 
-	err = decode_rotate64_payload(payload, &dst_reg, &src_reg, &tmp_reg, &shift);
+	err = decode_rotate_payload(payload, is64 ? 63 : 31,
+				    &dst_reg, &src_reg, &tmp_reg, &shift);
 	if (err)
 		return err;
-
-	if (!shift) {
-		insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, src_reg);
-		return cnt;
+	insn_buf[cnt++] = is64 ? BPF_MOV64_REG(dst_reg, src_reg) :
+				BPF_MOV32_REG(dst_reg, src_reg);
+	for (i = 0; i < shift; i++) {
+		insn_buf[cnt++] = is64 ? BPF_JMP_IMM(BPF_JSLT, dst_reg, 0, 2) :
+					BPF_JMP32_IMM(BPF_JSLT, dst_reg, 0, 2);
+		insn_buf[cnt++] = is64 ? BPF_ALU64_IMM(BPF_LSH, dst_reg, 1) :
+					BPF_ALU32_IMM(BPF_LSH, dst_reg, 1);
+		insn_buf[cnt++] = BPF_JMP_A(2);
+		insn_buf[cnt++] = is64 ? BPF_ALU64_IMM(BPF_LSH, dst_reg, 1) :
+					BPF_ALU32_IMM(BPF_LSH, dst_reg, 1);
+		insn_buf[cnt++] = is64 ? BPF_ALU64_IMM(BPF_OR, dst_reg, 1) :
+					BPF_ALU32_IMM(BPF_OR, dst_reg, 1);
 	}
-
-	insn_buf[cnt++] = BPF_MOV64_REG(tmp_reg, src_reg);
-	if (dst_reg != src_reg)
-		insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, src_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, shift);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, tmp_reg, 64 - shift);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, tmp_reg);
 	return cnt;
+}
+
+static int instantiate_rotate64(u64 payload, struct bpf_insn *insn_buf)
+{
+	return instantiate_rotate(payload, insn_buf, true);
 }
 
 static int instantiate_rotate32(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 dst_reg, src_reg, tmp_reg, shift;
-	int cnt = 0;
-	int err;
-
-	err = decode_rotate32_payload(payload, &dst_reg, &src_reg, &tmp_reg, &shift);
-	if (err)
-		return err;
-
-	if (!shift) {
-		insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, src_reg);
-		return cnt;
-	}
-
-	insn_buf[cnt++] = BPF_MOV32_REG(tmp_reg, src_reg);
-	if (dst_reg != src_reg)
-		insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, src_reg);
-	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_LSH, dst_reg, shift);
-	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_RSH, tmp_reg, 32 - shift);
-	insn_buf[cnt++] = BPF_ALU32_REG(BPF_OR, dst_reg, tmp_reg);
-	return cnt;
+	return instantiate_rotate(payload, insn_buf, false);
 }
 
 static inline u32 a64_extr_x(u8 rd, u8 rn, u8 rm, u8 lsb)
@@ -120,20 +111,12 @@ static inline u32 a64_extr_w(u8 rd, u8 rn, u8 rm, u8 lsb)
 	       (u32)rd;
 }
 
-static inline u32 a64_lsr(bool is64, u8 rd, u8 rn, u8 shift)
-{
-	return (is64 ? 0xD3400000U : 0x53000000U) |
-	       ((u32)shift << 16) | ((is64 ? 63U : 31U) << 10) |
-	       ((u32)rn << 5) | (u32)rd;
-}
-
 static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 			     u64 payload, const struct bpf_prog *prog,
 			     bool is64)
 {
 	u8 dst_reg, src_reg, tmp_reg, shift;
 	u32 insn;
-	int cnt = 0;
 	int err;
 
 	(void)prog;
@@ -151,14 +134,6 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 	if (dst_reg == 0xff || src_reg == 0xff || tmp_reg == 0xff)
 		return -EINVAL;
 
-	/* The proof writes the decoded temporary too; expose the same value. */
-	if (shift) {
-		err = kinsn_arm64_emit_one(image, idx, emit,
-					 a64_lsr(is64, tmp_reg, src_reg, (is64 ? 64 : 32) - shift));
-		if (err < 0)
-			return err;
-		cnt += err;
-	}
 
 	if (is64)
 		insn = a64_extr_x(dst_reg, src_reg, src_reg, (-shift) & 63);
@@ -167,7 +142,7 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 	err = kinsn_arm64_emit_one(image, idx, emit, insn);
 	if (err < 0)
 		return err;
-	return cnt + err;
+	return err;
 }
 
 static int emit_rotate64_arm64(u32 *image, int *idx, bool emit,
@@ -190,16 +165,16 @@ static int emit_rotate32_arm64(u32 *image, int *idx, bool emit,
 
 const struct bpf_kinsn bpf_arm64_extr_x_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5,
-	.max_emit_bytes = 8,
+	.max_insn_cnt = 316,
+	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_rotate64,
 	.emit_arm64 = emit_rotate64_arm64,
 };
 
 const struct bpf_kinsn bpf_arm64_extr_w_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5,
-	.max_emit_bytes = 8,
+	.max_insn_cnt = 156,
+	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_rotate32,
 	.emit_arm64 = emit_rotate32_arm64,
 };

@@ -43,6 +43,7 @@ check:
 	python3 generate_arm64_byte_lane_spec.py --check
 	python3 generate_arm64_mem_dispatch_spec.py --check
 	python3 generate_arm64_stack_tag_spec.py --check
+	python3 generate_arm64_stack_arm_spec.py --check
 	python3 generate_arm64_dq_mem_spec.py --check
 	python3 generate_arm64_pair_mem_spec.py --check
 	python3 generate_arm64_mem_prepost_spec.py --check
@@ -108,6 +109,7 @@ check:
 	python3 generate_x86_popcnt_flags_spec.py --check
 	python3 generate_x86_movx_shape_spec.py --check
 	python3 generate_x86_mov_reg_arm_spec.py --check
+	python3 generate_x86_stack_arm_spec.py --check
 	python3 generate_x86_opcode_spec.py --check
 	python3 generate_x86_specialization_spec.py --check
 	lake build
@@ -287,6 +289,12 @@ check:
 	./build/test_x86_mov_reg_arm_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mov_reg_arm_route_host.c -o build/test_x86_mov_reg_arm_route_host
 	./build/test_x86_mov_reg_arm_route_host
+	lake env lean KProgFormal/GeneratedX86StackArm.lean
+	lake env lean KProgFormal/X86StackArmShape.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_stack_arm_host.c -o build/test_x86_stack_arm_host
+	./build/test_x86_stack_arm_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_stack_arm_route_host.c -o build/test_x86_stack_arm_route_host
+	./build/test_x86_stack_arm_route_host
 	./build/test_x86_reg_dispatch_route_host
 	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_presence_host.c -o build/test_x86_reg_presence_host
 	./build/test_x86_reg_presence_host
@@ -570,6 +578,12 @@ check:
 	lake env lean KProgFormal/Arm64StackTag.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_tag_host.c -o build/test_arm64_stack_tag_host
 	./build/test_arm64_stack_tag_host
+	lake env lean KProgFormal/GeneratedArm64StackArm.lean
+	lake env lean KProgFormal/Arm64StackArmShape.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_arm_host.c -o build/test_arm64_stack_arm_host
+	./build/test_arm64_stack_arm_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_arm_route_host.c -o build/test_arm64_stack_arm_route_host
+	./build/test_arm64_stack_arm_route_host
 	lake env lean KProgFormal/GeneratedArm64DqMem.lean
 	lake env lean KProgFormal/Arm64DqMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host

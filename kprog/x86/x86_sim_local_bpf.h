@@ -32,6 +32,7 @@
 #include "../formal/generated/x86_popcnt_flags.h"
 #include "../formal/generated/x86_movx_shape.h"
 #include "../formal/generated/x86_mov_reg_arm.h"
+#include "../formal/generated/x86_stack_arm.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -468,8 +469,11 @@ struct x86_sim_state {
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \
 		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
-		if ((X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) == X86_WIDTH_64 && \
-		    KPROG_X86_STACK_WORD_ALIGNED(__x86_stw_index)) {      \
+		if (KPROG_X86_STACK_ARM(                                  \
+			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
+				    X86_WIDTH_64,                         \
+			    KPROG_X86_STACK_WORD_ALIGNED(                 \
+				    __x86_stw_index))) {                  \
 			__x86_stack_mem.q                               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_stw_index)] = (VALUE);     \
@@ -513,8 +517,11 @@ struct x86_sim_state {
 	({                                                                 \
 		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		__u64 __x86_str_value;                                   \
-		if ((X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) == X86_WIDTH_64 && \
-		    KPROG_X86_STACK_WORD_ALIGNED(__x86_str_index)) {      \
+		if (KPROG_X86_STACK_ARM(                                  \
+			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
+				    X86_WIDTH_64,                         \
+			    KPROG_X86_STACK_WORD_ALIGNED(                 \
+				    __x86_str_index))) {                  \
 			__x86_str_value = __x86_stack_mem.q               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_str_index)];               \

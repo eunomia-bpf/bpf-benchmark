@@ -28,6 +28,8 @@ import KProgFormal.GeneratedX86MovxShape
 import KProgFormal.X86MovxShape
 import KProgFormal.GeneratedX86MovRegArm
 import KProgFormal.X86MovRegShape
+import KProgFormal.GeneratedX86StackArm
+import KProgFormal.X86StackArmShape
 import KProgFormal.X86MemAux
 import KProgFormal.GeneratedArm64MemIndex
 import KProgFormal.Arm64MemIndex
@@ -189,6 +191,8 @@ import KProgFormal.GeneratedArm64MemDispatch
 import KProgFormal.Arm64MemDispatch
 import KProgFormal.GeneratedArm64StackTag
 import KProgFormal.Arm64StackTag
+import KProgFormal.GeneratedArm64StackArm
+import KProgFormal.Arm64StackArmShape
 import KProgFormal.GeneratedArm64DqMem
 import KProgFormal.Arm64DqMemHandler
 import KProgFormal.GeneratedArm64PairMem

@@ -32,41 +32,63 @@ static __always_inline int decode_popcnt_payload(u64 payload, u8 *dst_reg, u8 *s
 	return 0;
 }
 
-static int popcnt_temp(u8 dst_reg, u8 src_reg)
+static int popcnt_low_tree(u8 dst, struct bpf_insn *buf, u8 depth, u8 value)
 {
-	u8 reg;
+	int cnt = 0, branch, join, bit, ones = 0;
 
-	for (reg = BPF_REG_0; reg < BPF_REG_10; reg++) {
-		if (reg != dst_reg && reg != src_reg)
-			return reg;
+	if (!depth) {
+		for (bit = 0; bit < 7; bit++)
+			ones += (value >> bit) & 1;
+		buf[0] = BPF_ALU64_IMM(BPF_AND, dst, -128);
+		buf[1] = BPF_ALU64_IMM(BPF_OR, dst, ones);
+		return 2;
 	}
-	return -EINVAL;
+	branch = cnt++;
+	cnt += popcnt_low_tree(dst, buf + cnt, depth - 1, value);
+	join = cnt++;
+	buf[branch] = BPF_JMP_IMM(BPF_JSET, dst, 1U << (depth - 1), cnt - branch - 1);
+	cnt += popcnt_low_tree(dst, buf + cnt, depth - 1, value + (1U << (depth - 1)));
+	buf[join] = BPF_JMP_A(cnt - join - 1);
+	return cnt;
 }
 
-static int instantiate_popcntq(u64 payload, struct bpf_insn *insn_buf)
+static int popcnt_rotate(u8 dst, struct bpf_insn *buf, int count)
 {
-	u8 dst_reg, src_reg;
-	int temp;
-	int cnt = 0;
-	int i;
-	int err;
+	int i, cnt = 0;
 
-	err = decode_popcnt_payload(payload, &dst_reg, &src_reg);
+	for (i = 0; i < count; i++) {
+		buf[cnt++] = BPF_JMP_IMM(BPF_JSLT, dst, 0, 2);
+		buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst, 1);
+		buf[cnt++] = BPF_JMP_A(2);
+		buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst, 1);
+		buf[cnt++] = BPF_ALU64_IMM(BPF_OR, dst, 1);
+	}
+	return cnt;
+}
+
+static int instantiate_popcntq(u64 payload, struct bpf_insn *buf)
+{
+	u8 dst, src;
+	int cnt = 0, bit, branch, join, err;
+
+	err = decode_popcnt_payload(payload, &dst, &src);
 	if (err)
 		return err;
-	temp = popcnt_temp(dst_reg, src_reg);
-	if (temp < 0)
-		return temp;
-	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp, KINSN_X86_PROOF_RHS_OFF);
-	insn_buf[cnt++] = BPF_MOV64_REG(temp, src_reg);
-	insn_buf[cnt++] = BPF_MOV64_IMM(dst_reg, 64);
-	/* Subtract one for each zero bit; counter starts at 64. */
-	for (i = 0; i < 64; i++) {
-		insn_buf[cnt++] = BPF_JMP_IMM(BPF_JSET, temp, 1, 1);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst_reg, -1);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, temp, 1);
+	buf[cnt++] = BPF_MOV64_REG(dst, src);
+	cnt += popcnt_low_tree(dst, buf + cnt, 7, 0);
+	/* Bits 6:0 hold the count, which fits seven bits even after all 64
+	 * source bits. Higher unprocessed bits remain intact until counted. */
+	for (bit = 7; bit < 64; bit++) {
+		cnt += popcnt_rotate(dst, buf + cnt, 64 - bit);
+		branch = cnt++;
+		cnt += popcnt_rotate(dst, buf + cnt, bit);
+		join = cnt++;
+		buf[branch] = BPF_JMP_IMM(BPF_JSET, dst, 1, cnt - branch - 1);
+		buf[cnt++] = BPF_ALU64_IMM(BPF_AND, dst, -2);
+		cnt += popcnt_rotate(dst, buf + cnt, bit);
+		buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst, 1);
+		buf[join] = BPF_JMP_A(cnt - join - 1);
 	}
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10, KINSN_X86_PROOF_RHS_OFF);
 	return cnt;
 }
 
@@ -76,8 +98,6 @@ static int emit_popcntq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 {
 	u8 buf[24];
 	u8 dst_reg, src_reg;
-	u8 frame = kinsn_x86_reg_for_prog(prog, BPF_REG_10);
-	int temp;
 	u32 len = 0;
 	int err;
 
@@ -87,18 +107,10 @@ static int emit_popcntq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	err = decode_popcnt_payload(payload, &dst_reg, &src_reg);
 	if (err)
 		return err;
-	temp = popcnt_temp(dst_reg, src_reg);
-	if (temp < 0)
-		return temp;
-	temp = kinsn_x86_reg_for_prog(prog, temp);
 	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
 	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(src_reg))
 		return -EINVAL;
-
-	kinsn_emit_rex(buf, &len, true, kinsn_x86_ext(temp), false, kinsn_x86_ext(frame));
-	kinsn_emit_u8(buf, &len, 0x89);
-	kinsn_emit_modrm_mem(buf, &len, temp, frame, KINSN_X86_PROOF_RHS_OFF);
 
 	kinsn_emit_u8(buf, &len, 0xf3);
 	kinsn_emit_rex_rr(buf, &len, true, dst_reg, src_reg);
@@ -108,17 +120,13 @@ static int emit_popcntq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		       (kinsn_x86_code(dst_reg) << 3) |
 		       kinsn_x86_code(src_reg));
 
-	kinsn_emit_rex(buf, &len, true, kinsn_x86_ext(temp), false, kinsn_x86_ext(frame));
-	kinsn_emit_u8(buf, &len, 0x8b);
-	kinsn_emit_modrm_mem(buf, &len, temp, frame, KINSN_X86_PROOF_RHS_OFF);
-
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 const struct bpf_kinsn bpf_x86_popcntq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 196,
-	.max_emit_bytes = 24,
+	.max_insn_cnt = 28954,
+	.max_emit_bytes = 5,
 	.instantiate_insn = instantiate_popcntq,
 	.emit_x86 = emit_popcntq_x86,
 };

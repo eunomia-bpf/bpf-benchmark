@@ -40,6 +40,7 @@
 #include "../formal/generated/arm64_byte_lane.h"
 #include "../formal/generated/arm64_mem_dispatch.h"
 #include "../formal/generated/arm64_stack_tag.h"
+#include "../formal/generated/arm64_stack_arm.h"
 #include "../formal/generated/arm64_stack_arena.h"
 #include "../formal/generated/arm64_stack_index.h"
 #include "../formal/generated/arm64_dq_mem.h"
@@ -540,8 +541,11 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
-		if (__a64_str_width == ARM64_WIDTH_64 &&                  \
-		    KPROG_ARM64_STACK_WORD_ALIGNED(__a64_str_index)) {    \
+		if (KPROG_ARM64_STACK_ARM(                                \
+			    __a64_str_width ==                            \
+				    ARM64_WIDTH_64,                       \
+			    KPROG_ARM64_STACK_WORD_ALIGNED(               \
+				    __a64_str_index))) {                  \
 			__a64_str_value =                                  \
 				__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_str_index)];\
 		} else {                                                   \

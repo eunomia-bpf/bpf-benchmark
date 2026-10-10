@@ -256,6 +256,25 @@ increment is committed and pushed immediately). Current state:
   register reads, the stack-base addition, and the destination writeback in the
   composed arm bodies; the AArch64 simulator has no width/register-keyed
   `MOV_REG` body split, so there is no mirror.
+  The stack helper's choice of *which* body moves a word through the frame is
+  likewise no longer open for x86-64 (Step 0120): both
+  `X86_SIM_L_STACK_WRITE` and `X86_SIM_L_STACK_READ` now route through a
+  generated machine-checked two-fact selector, which names the word-arena
+  access at the full 64-bit width when the resolved index is qword-aligned and
+  the little-endian byte ladder at every other width and every unaligned index,
+  so the body choice is a proved table rather than a restated
+  `width == 64 && aligned` test, leaving the byte-window arithmetic, the
+  narrow-value masking, and the little-endian assembly in the composed
+  bodies; the AArch64 stack *read* helper's body choice is now closed too
+  (Step 0121): `ARM64_SIM_L_STACK_READ` routes through a generated
+  machine-checked two-fact selector, naming the word-arena access at the full
+  64-bit width when the resolved index is qword-aligned and the little-endian
+  byte ladder at every other width and every unaligned index, so the body
+  choice is a proved table rather than the restated
+  `width == 64 && aligned` test, leaving the byte-window arithmetic and the
+  little-endian assembly in the composed bodies; the AArch64 stack *write*
+  helper already routed its slot-tag gate through `KPROG_ARM64_STACK_TAG`, so
+  only the read body choice was open.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

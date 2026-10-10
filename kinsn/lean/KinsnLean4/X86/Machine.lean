@@ -53,6 +53,7 @@ inductive MInsn where
   | mov32 (dst src : GPReg)
   | movzx (bits : Nat) (dst src : GPReg)
   | movswl (dst src : GPReg)
+  | storeHigh8 (src base : GPReg) (off : BitVec 64)
   | storeImm (bytes : Nat) (base : GPReg) (off value : BitVec 64)
   | loadIndex (bytes : Nat) (dst base index : GPReg) (scale : Nat)
       (off : BitVec 64) (be : Bool)
@@ -144,6 +145,7 @@ def MInsn.step (i : MInsn) (s : State) : State :=
   | .movzx bits dst src => s.set dst (BitVec.setWidth 64 (BitVec.setWidth bits (s.regs src)))
   | .movswl dst src => s.set dst (BitVec.setWidth 64
       (BitVec.signExtend 32 (BitVec.setWidth 16 (s.regs src))))
+  | .storeHigh8 src base off => s.write (s.regs base + off) 1 (s.regs src >>> 8)
   | .storeImm n base off v => s.write (s.regs base + off) n v
   | .loadIndex n dst base index scale off be =>
     let a := s.regs base + (s.regs index <<< scale) + off
@@ -177,7 +179,7 @@ def MInsn.step (i : MInsn) (s : State) : State :=
 def MInsn.writes : MInsn → List GPReg
   | .core i => [i.dstReg]
   | .guardedDiv64 _ => [.rax, .rdx]
-  | .cmp .. | .store .. | .prefetch .. | .storeImm .. => []
+  | .cmp .. | .store .. | .prefetch .. | .storeImm .. | .storeHigh8 .. => []
   | .cmov _ _ d _ | .load _ d _ _ _ | .rorx32 d _ _ | .rolW d _
   | .bswap32 d | .not _ d | .imul d _ | .shift _ _ d _ _ | .bzhi _ d _ _
   | .blsi d _ | .blsr d _ | .lea _ d _ _ _ _ => [d]
