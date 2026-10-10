@@ -190,7 +190,11 @@ def _progress_marker(line: str, phase: str) -> str | None:
     if payload.get("app") != "cilium/agent" or payload.get("phase") != phase:
         return None
     event = str(payload.get("event") or "")
-    return event if event in {"measurement_start", "measurement_done"} else None
+    marker_events = {
+        "profile_measurement_start": "measurement_start",
+        "profile_measurement_done": "measurement_done",
+    }
+    return marker_events.get(event)
 
 
 def _stat_command(

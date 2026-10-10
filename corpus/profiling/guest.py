@@ -115,6 +115,55 @@ def _configure_arm(arm: str) -> str:
     return "post_rejit"
 
 
+def _publish_perf_data(local_data: Path, result_data: Path) -> None:
+    if not local_data.is_file():
+        raise RuntimeError("perf record completed without guest-local perf data")
+    local_size = local_data.stat().st_size
+    if local_size == 0:
+        raise RuntimeError(f"perf record produced empty data: {local_data}")
+    if result_data.exists():
+        raise RuntimeError(f"refusing to replace perf data: {result_data}")
+    temporary = result_data.with_name(result_data.name + ".tmp")
+    if temporary.exists():
+        raise RuntimeError(f"refusing to replace temporary perf data: {temporary}")
+    try:
+        shutil.copy2(local_data, temporary)
+        copied_size = temporary.stat().st_size
+        if copied_size != local_size:
+            raise RuntimeError(
+                f"incomplete perf-data copy: expected {local_size} bytes, "
+                f"copied {copied_size}"
+            )
+        temporary.replace(result_data)
+    except BaseException as copy_error:
+        try:
+            temporary.unlink(missing_ok=True)
+        except BaseException as cleanup_error:
+            raise ExceptionGroup(
+                "perf-data publication and temporary-file cleanup both failed",
+                [copy_error, cleanup_error],
+            ) from None
+        raise
+
+
+def _run_driver_then_publish(local_data: Path, result_data: Path) -> int:
+    result = driver.main([])
+    # The selected wrapper emits profile_measurement_done before driver.main
+    # returns. Publishing only here keeps the large 9p copy outside that gate.
+    _publish_perf_data(local_data, result_data)
+    return result
+
+
+def _print_profile_marker(event: str, phase: str) -> None:
+    print(
+        json.dumps(
+            {"event": event, "app": "cilium/agent", "phase": phase},
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+
 def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
     selected_phase = _configure_arm(arm)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -123,7 +172,13 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
         raise RuntimeError(f"guest-local profile work directory exists: {work_dir}")
     work_dir.mkdir(mode=0o700)
     local_perf_root = work_dir / "perf-runtime"
-    shutil.copytree(perf_root, local_perf_root)
+    try:
+        shutil.copytree(perf_root, local_perf_root)
+    except BaseException:
+        shutil.rmtree(work_dir)
+        raise
+    local_data = work_dir / "guest.perf.data"
+    result_data = output_dir / "guest.perf.data"
     original_measure = driver._measure_app_phase_with_stats
     measurement_index = 0
 
@@ -158,16 +213,13 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
         try:
             collector.start()
             collector.enable()
+            _print_profile_marker("profile_measurement_start", phase)
             result = original_measure(**kwargs)
+            _print_profile_marker("profile_measurement_done", phase)
             collector.disable()
             collector.finish()
-            local_data = work_dir / "guest.perf.data"
-            result_data = output_dir / "guest.perf.data"
             if not local_data.is_file():
                 raise RuntimeError("perf record completed without guest-local perf data")
-            if result_data.exists():
-                raise RuntimeError(f"refusing to replace perf data: {result_data}")
-            shutil.copy2(local_data, result_data)
         except BaseException:
             collector.abort()
             raise
@@ -175,7 +227,7 @@ def _profile_driver(arm: str, output_dir: Path, perf_root: Path) -> int:
 
     driver._measure_app_phase_with_stats = profiled_measure
     try:
-        return driver.main([])
+        return _run_driver_then_publish(local_data, result_data)
     finally:
         driver._measure_app_phase_with_stats = original_measure
         shutil.rmtree(work_dir)

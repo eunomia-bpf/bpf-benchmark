@@ -5,6 +5,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from corpus.profiling import guest, host
 
@@ -50,7 +51,7 @@ class MarkerAndCommandTest(unittest.TestCase):
     def test_marker_requires_cilium_and_selected_phase(self) -> None:
         line = json.dumps(
             {
-                "event": "measurement_start",
+                "event": "profile_measurement_start",
                 "app": "cilium/agent",
                 "phase": "post_rejit",
             }
@@ -59,7 +60,15 @@ class MarkerAndCommandTest(unittest.TestCase):
         self.assertIsNone(host._progress_marker(line, "baseline"))
         self.assertIsNone(
             host._progress_marker(
-                '{"event":"measurement_start","app":"katran","phase":"post_rejit"}',
+                '{"event":"profile_measurement_start","app":"katran",'
+                '"phase":"post_rejit"}',
+                "post_rejit",
+            )
+        )
+        self.assertIsNone(
+            host._progress_marker(
+                '{"event":"measurement_start","app":"cilium/agent",'
+                '"phase":"post_rejit"}',
                 "post_rejit",
             )
         )
@@ -129,6 +138,25 @@ class MarkerAndCommandTest(unittest.TestCase):
             self.assertEqual(command[output_index], "/var/tmp/work/guest.perf.data")
             control = next(item for item in command if item.startswith("--control="))
             self.assertNotIn("corpus/results", control)
+
+    def test_perf_data_is_published_only_after_driver_returns(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            local_data = Path(raw) / "local.perf.data"
+            result_data = Path(raw) / "result" / "guest.perf.data"
+            result_data.parent.mkdir()
+            local_data.write_bytes(b"profile")
+
+            def fake_driver_main(argv: list[str]) -> int:
+                self.assertEqual(argv, [])
+                self.assertFalse(result_data.exists())
+                return 0
+
+            with mock.patch.object(guest.driver, "main", side_effect=fake_driver_main):
+                self.assertEqual(
+                    guest._run_driver_then_publish(local_data, result_data), 0
+                )
+            self.assertEqual(result_data.read_bytes(), b"profile")
+            self.assertFalse((result_data.parent / "guest.perf.data.tmp").exists())
 
 
 class ReportParsingTest(unittest.TestCase):
