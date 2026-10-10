@@ -63,6 +63,8 @@ REAL_IFACE = "real0"
 KATRAN_RECEIVER_NAPI_CPU = 5
 KATRAN_ROUTER_NAPI_CPU = 6
 KATRAN_NAPI_RT_PRIORITY = 1
+KATRAN_NAPI_THREADED_MODE = "busy-poll"
+YNL_CLI = Path("/usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl/cli.py")
 
 
 def _pin_threaded_napi(pid: int, cpu: int) -> None:
@@ -75,25 +77,48 @@ def _pin_threaded_napi(pid: int, cpu: int) -> None:
 
 
 def _enable_threaded_peer_napi(namespace: str, iface: str, cpu: int) -> int:
+    if not YNL_CLI.is_file():
+        raise RuntimeError(f"YNL CLI is required for threaded NAPI busy-poll: {YNL_CLI}")
+    ifindex = _namespace_ifindex(namespace, iface)
+
+    def napi_records() -> list[dict[str, object]]:
+        completed = ns_exec_command(namespace, [
+            remote_python_binary(), str(YNL_CLI), "--family", "netdev",
+            "--dump", "napi-get", "--json", json.dumps({"ifindex": ifindex}),
+            "--output-json",
+        ])
+        payload = json.loads(completed.stdout or "[]")
+        if not isinstance(payload, list):
+            raise RuntimeError(
+                f"netdev napi-get returned unexpected payload for {namespace}/{iface}"
+            )
+        return [dict(record) for record in payload if isinstance(record, Mapping)]
+
+    records = napi_records()
+    if len(records) != 1 or int(records[0].get("id", 0) or 0) <= 0:
+        raise RuntimeError(
+            f"expected one NAPI instance for {namespace}/{iface}, got {records!r}"
+        )
+    napi_id = int(records[0]["id"])
     ns_exec_command(namespace, [
-        "sh", "-c", f"printf '1\\n' > /sys/class/net/{shlex.quote(iface)}/threaded",
+        remote_python_binary(), str(YNL_CLI), "--family", "netdev",
+        "--do", "napi-set", "--json",
+        json.dumps({"id": napi_id, "threaded": KATRAN_NAPI_THREADED_MODE}),
+        "--output-json",
     ])
-    deadline = time.monotonic() + 5.0
-    prefix = f"napi/{iface}-"
-    while time.monotonic() < deadline:
-        for proc_dir in Path("/proc").iterdir():
-            if not proc_dir.name.isdigit():
-                continue
-            try:
-                comm = (proc_dir / "comm").read_text().strip()
-            except (FileNotFoundError, PermissionError, ProcessLookupError):
-                continue
-            if comm.startswith(prefix):
-                pid = int(proc_dir.name)
-                _pin_threaded_napi(pid, cpu)
-                return pid
-        time.sleep(0.05)
-    raise RuntimeError(f"threaded NAPI worker for {namespace}/{iface} was not created")
+    configured = next(
+        (record for record in napi_records() if int(record.get("id", 0) or 0) == napi_id),
+        None,
+    )
+    if configured is None or configured.get("threaded") not in (KATRAN_NAPI_THREADED_MODE, 2):
+        raise RuntimeError(
+            f"NAPI busy-poll did not take effect for {namespace}/{iface}: {configured!r}"
+        )
+    pid = int(configured.get("pid", 0) or 0)
+    if pid <= 0:
+        raise RuntimeError(f"threaded NAPI worker for {namespace}/{iface} has no PID")
+    _pin_threaded_napi(pid, cpu)
+    return pid
 
 LB_IP = "192.0.2.2"
 ROUTER_LB_IP = "192.0.2.1"
@@ -396,19 +421,22 @@ class KatranDsrTopology:
             "xdp", "obj", str(peer_xdp), "sec", "xdp/receiver_sink",
         ])
         self.receiver_napi_pid = _enable_threaded_peer_napi(
-            REAL_NS, REAL_IFACE, KATRAN_RECEIVER_NAPI_CPU
+            REAL_NS,
+            REAL_IFACE,
+            KATRAN_RECEIVER_NAPI_CPU,
         )
         ns_exec_command(ROUTER_NS, [
             ip_binary(), "link", "set", "dev", ROUTER_LB_IFACE,
             "xdp", "obj", str(peer_xdp), "sec", "xdp/router_redirect",
         ])
         self.peer_xdp_path = str(peer_xdp)
-        # Keep the receive-side NAPI consumer off pktgen's dedicated CPU.  In
-        # softirq mode a fast JIT producer otherwise fills veth's fixed XDP
-        # ring before the same CPU can drain it, producing transport drops
-        # that are unrelated to Katran's BPF result.
+        # Busy-poll on isolated CPUs so veth's fixed XDP rings are drained
+        # without cross-vCPU wakeup stalls, while retaining a parallel
+        # end-to-end pipeline whose bottleneck is Katran rather than transport.
         self.peer_napi_pid = _enable_threaded_peer_napi(
-            ROUTER_NS, ROUTER_LB_IFACE, KATRAN_ROUTER_NAPI_CPU
+            ROUTER_NS,
+            ROUTER_LB_IFACE,
+            KATRAN_ROUTER_NAPI_CPU,
         )
         self.route_map_id = _update_katran_route_map(
             ROUTER_NS, _namespace_ifindex(ROUTER_NS, ROUTER_REAL_IFACE)
@@ -456,10 +484,12 @@ class KatranDsrTopology:
                 "peer_napi_pid": self.peer_napi_pid,
                 "peer_napi_cpu": KATRAN_ROUTER_NAPI_CPU,
                 "peer_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
+                "peer_napi_threaded_mode": KATRAN_NAPI_THREADED_MODE,
                 "receiver_xdp_iface": REAL_IFACE,
                 "receiver_napi_pid": self.receiver_napi_pid,
                 "receiver_napi_cpu": KATRAN_RECEIVER_NAPI_CPU,
                 "receiver_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
+                "receiver_napi_threaded_mode": KATRAN_NAPI_THREADED_MODE,
                 "route_map_id": self.route_map_id}
 
     def close(self) -> None: self.cleanup()

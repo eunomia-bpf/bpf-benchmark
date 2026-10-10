@@ -119,6 +119,15 @@ vendor/linux-framework/tools/bpf/bpftool/*.cmd
 vendor/linux-framework/tools/bpf/bpftool/*.skel.h
 vendor/linux-framework/tools/bpf/bpftool/FEATURE-DUMP.bpftool
 vendor/linux-framework/tools/bpf/bpftool/vmlinux.h
+!vendor/linux-framework/
+!vendor/linux-framework/tools/
+!vendor/linux-framework/tools/net/
+!vendor/linux-framework/tools/net/ynl/
+!vendor/linux-framework/tools/net/ynl/pyynl/
+!vendor/linux-framework/tools/net/ynl/pyynl/**
+!vendor/linux-framework/Documentation/
+!vendor/linux-framework/Documentation/netlink/
+!vendor/linux-framework/Documentation/netlink/**
 vendor/linux/build
 vendor/linux/build-*
 vendor/linux-baseline/build

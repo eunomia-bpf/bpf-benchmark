@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -lt 2 ]; then
+    echo "usage: $0 KERNEL_DIR COMMAND [ARG ...]" >&2
+    exit 2
+fi
+
+kernel_dir=$1
+shift
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+patch_file="$repo_root/runner/patches/katran-veth-xdp-ring.patch"
+
+if patch --batch --forward --dry-run -d "$kernel_dir" -p1 < "$patch_file"; then
+    patch --batch --forward -d "$kernel_dir" -p1 < "$patch_file"
+elif patch --batch --reverse --dry-run -d "$kernel_dir" -p1 < "$patch_file"; then
+    echo "Katran veth XDP ring patch was already applied; continuing" >&2
+else
+    echo "Katran veth XDP ring patch does not match $kernel_dir" >&2
+    exit 1
+fi
+
+cleanup() {
+    patch --batch --reverse -d "$kernel_dir" -p1 < "$patch_file"
+}
+trap cleanup EXIT
+
+"$@"

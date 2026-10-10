@@ -168,6 +168,8 @@ COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WO
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/${RUN_TARGET_ARCH}/
+COPY --link vendor/linux-framework/tools/net/ynl/pyynl /usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl
+COPY --link vendor/linux-framework/Documentation/netlink /usr/share/ynl
 COPY --link tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \

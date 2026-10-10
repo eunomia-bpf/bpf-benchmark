@@ -119,7 +119,8 @@ $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
 
 host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
+	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
 	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
 	trap 'rm -rf "$$tmp"' EXIT; \
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
@@ -128,7 +129,8 @@ host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/"
 
 $(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
+	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
 	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
 	trap 'rm -rf "$$tmp"' EXIT; \
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \

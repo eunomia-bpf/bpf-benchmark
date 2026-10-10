@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 import unittest
@@ -64,7 +65,7 @@ class WorkloadContractTests(unittest.TestCase):
         self.assertEqual(result.config["outcomes"]["delta"], {"packets": 3})
         self.assertEqual(result.config["outcomes"]["settle_seconds"], 2.0)
 
-    def test_katran_pktgen_uses_one_dedicated_veth_queue_worker(self) -> None:
+    def test_katran_pktgen_uses_isolated_busy_poll_workers(self) -> None:
         self.assertEqual(katran_runner.KATRAN_PKTGEN_THREAD_IDS, (7,))
         self.assertEqual(
             len({*katran_runner.KATRAN_PKTGEN_THREAD_IDS,
@@ -72,6 +73,7 @@ class WorkloadContractTests(unittest.TestCase):
                  katran_runner.KATRAN_RECEIVER_NAPI_CPU}),
             3,
         )
+        self.assertEqual(katran_runner.KATRAN_NAPI_THREADED_MODE, "busy-poll")
         self.assertEqual(katran_runner.DEFAULT_PKTGEN_SRC_PORT, 10000)
         completed = subprocess.CompletedProcess(
             args=[], returncode=0, stdout="kpktgend_0\nkpktgend_7\n", stderr=""
@@ -96,6 +98,39 @@ class WorkloadContractTests(unittest.TestCase):
             katran_runner.os.SCHED_FIFO,
             katran_runner.os.sched_param(katran_runner.KATRAN_NAPI_RT_PRIORITY),
         )
+
+    def test_katran_napi_workers_enable_netdev_busy_poll(self) -> None:
+        """Catch a fallback to wake-driven NAPI that can overflow veth rings."""
+        responses = [
+            subprocess.CompletedProcess(
+                args=[], returncode=0,
+                stdout='[{"id": 41, "ifindex": 9, "threaded": "enabled", "pid": 100}]',
+                stderr="",
+            ),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="{}", stderr=""),
+            subprocess.CompletedProcess(
+                args=[], returncode=0,
+                stdout='[{"id": 41, "ifindex": 9, "threaded": "busy-poll", "pid": 123}]',
+                stderr="",
+            ),
+        ]
+        with (
+            mock.patch.object(katran_runner, "YNL_CLI", katran_runner.Path(__file__)),
+            mock.patch.object(katran_runner, "_namespace_ifindex", return_value=9),
+            mock.patch.object(katran_runner, "remote_python_binary", return_value="python3"),
+            mock.patch.object(katran_runner, "ns_exec_command", side_effect=responses) as ns_exec,
+            mock.patch.object(katran_runner, "_pin_threaded_napi") as pin_worker,
+        ):
+            pid = katran_runner._enable_threaded_peer_napi("katran-router", "rtlb0", 6)
+
+        self.assertEqual(pid, 123)
+        set_command = ns_exec.call_args_list[1].args[1]
+        self.assertIn("napi-set", set_command)
+        self.assertEqual(
+            json.loads(set_command[set_command.index("--json") + 1]),
+            {"id": 41, "threaded": "busy-poll"},
+        )
+        pin_worker.assert_called_once_with(123, 6)
 
     def test_namespaced_http_ready_marker_contract(self) -> None:
         process = subprocess.Popen(
