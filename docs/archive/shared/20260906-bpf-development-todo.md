@@ -10073,6 +10073,109 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   store-bytes contract paragraph and folds "store byte-ladder" into the
   covered-slices list (paper commit pushed to `main`).
 
+## Step 0123 — AArch64 store-helper body-selection contract
+
+- Scope: the AArch64 simulator's store helper
+  `ARM64_SIM_L_MEM_WRITE` (`kprog/arm64/arm64_sim_local_bpf.h`) selected its body
+  with a hand-written `(BASE) == ARM64_SP || __a64_mwr_tag ==
+  ARM64_SIM_TAG_STACK` test inlined in the macro. A store resolves its access to
+  one of two *destinations*: the stack arena write
+  `ARM64_SIM_L_STACK_WRITE_TAG` (through the slot-tag contract
+  `KPROG_ARM64_STACK_TAG`) when the base register is the stack pointer *or* its
+  resolved tag names a stack slot, and the plain little-endian byte store
+  `ARM64_SIM_L_STORE_ADDR` (through the store-bytes contract
+  `KPROG_ARM64_STORE_BYTES`) at every other base.
+- Shared spec `kprog/formal/arm64_mem_write_arm_spec.json` (schema_version 1,
+  operation `arm64MemWriteArm`, selector
+  `base_is_sp_or_stack_tag_then_stack_else_memory`) enumerates the two arms in
+  arm-code order — `stackWrite` = `KPROG_ARM64_MEM_WRITE_ARM_STACK` = 0
+  (`stack_write_tag`), `memoryStore` = `KPROG_ARM64_MEM_WRITE_ARM_MEMORY` = 1
+  (`little_endian_store`) — and the four
+  `(base is SP, stack-tagged) -> stack?` cases: `sp_tagged`, `sp_scalar`,
+  `reg_tagged` all stack, `reg_scalar` memory.
+- Generator `kprog/formal/generate_arm64_mem_write_arm_spec.py` re-derives the
+  live store helper text from the simulator header and requires it to route
+  through the generated selector `KPROG_ARM64_MEM_WRITE_ARM(` while keeping both
+  bodies and dropping the hand-written `ARM64_SP ||` / `== ARM64_SIM_TAG_STACK`
+  tests. It emits the plain-expression, `__u8`-valued C macro
+  `generated/arm64_mem_write_arm.h` (`KPROG_ARM64_MEM_WRITE_ARM(BASE_IS_SP, TAG)`
+  = `((__u8)(((BASE_IS_SP) || (TAG) == ARM64_SIM_TAG_STACK) ? STACK : MEMORY))`,
+  count 2, the two codes, and seven `_Static_assert` drift/gate checks) and the
+  Lean table `KProgFormal/GeneratedArm64MemWriteArm.lean` (inductive `Arm`,
+  `armCount`, `armNames`, `armCodes`, `codeOfArm`, `bodyOfArm`,
+  `armOf (baseIsSp stackTagged) := if baseIsSp || stackTagged then .stackWrite
+  else .memoryStore`, `armOfCode`, inductive `Case`, `classify`, `stackBody`,
+  `stackSpec`, `stack_refines`, `armOfCase`, `armOf_refines`).
+- Hand refinement `KProgFormal/Arm64MemWriteArmShape.lean` states an independent
+  construction (`arm64MemWriteArmSpec`, the disjunction written as a predicate)
+  and proves the 20 shape/refinement theorems, including
+  `arm64_mem_write_arm_refines`, `_names_refine`, `_codes_refine`,
+  `_of_code_roundtrip`, `_of_code_beyond_is_none`, `_bodies`, `_stack_iff`,
+  `_memory_iff`, `_sp_always`, `_tagged_always`, `_memory_never_default`,
+  `_case_dispatch`, `_case_refines`, and the cross-contract ties
+  `_matches_read_src`, `_stack_predicate_agrees`, `_space_agrees` against the
+  generated load dispatch `KPROG_ARM64_MEM_READ_SRC`
+  (`GeneratedArm64MemDispatch`), so the store's destination cannot drift from
+  the load path's space/source table.
+- Routed body: `ARM64_SIM_L_MEM_WRITE` computes the arm via the generated
+  selector into `__u8 __a64_mwr_arm` and `if`/`else` on it
+  (`== KPROG_ARM64_MEM_WRITE_ARM_STACK`), keeping the stack and byte-store
+  bodies; the macro stays effectful (`do { ... } while (0)`). The generated
+  header is included at `arm64_sim_local_bpf.h:121`, after the
+  `ARM64_SIM_TAG_*` decodes it references. The public signature and every caller
+  site are unchanged.
+- Two host oracles, both wired into `kprog/formal/Makefile` immediately after
+  the store-bytes pair:
+  - `test_arm64_mem_write_arm_host.c` includes the generated header (compiling
+    it against hand-written `ARM64_SIM_TAG_*` values), checks every
+    `(base is SP, tag)` pair against an independent disjunction oracle, and
+    checks the generated store classification against the generated load
+    dispatch's own space table across the nine tags --- `arm64 mem write arm
+    host cross-check: OK (24 cases)`.
+  - `test_arm64_mem_write_arm_route_host.c` includes the simulator header
+    (`ARM64_SIM_ENABLE_STACK`) and drives the real `ARM64_SIM_L_MEM_WRITE`
+    through four base kinds --- `ARM64_SP`, a register tagged
+    `ARM64_SIM_TAG_STACK`, a plain scalar register, and a register tagged
+    `ARM64_SIM_TAG_ABI` --- at every width and twelve arena/heap indices,
+    comparing the whole heap image, the whole stack byte image, and the whole
+    slot-tag image against independent models of the arm the contract names (a
+    qword-aligned 64-bit write tags the slot, a sub-qword aligned write
+    scalarises it, an unaligned write leaves it alone), plus a real store-then-
+    read round trip through the routed `ARM64_SIM_L_MEM_READ` at every width ---
+    `arm64 mem write arm route host cross-check: OK (17758119 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **155** `cross-check: OK`. Baseline
+  was **153** for Step 0122; Step 0123 adds the store-arm host and route
+  oracles and the Lean pair. `make -C kprog/arm64 micro-proofs-build` rebuilt
+  all 30 workload-derived artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_mem_write_arm.py`, 51
+  mutations against the live tree, each caught after the four unmutated controls
+  (`gen`, `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  six spec defects (operation/schema/selector/arm-code/arm-define/memory-body
+  drifts → generator), twelve generator defects
+  (operation/Lean-path/C-header-path/arm-row/arm-code/case-row/selector/C-header
+  selector/C-header arm/store-selector-anchor/hand-needle drifts → generator),
+  six generated-C defects (count/code/selector-test/selector-swap/assert-code
+  drifts → host, macro-name drift → route), five generated-Lean defects
+  (armOf/armCodes/armNames/case-table/stackSpec drifts → generator or
+  lean_chain), seven hand-refinement defects (spec/codes/stack-iff/memory-iff/
+  match-read-src drifts → refinement), three routed-body defects (dropped
+  include, unrouted macro, dropped stack/memory body → route or generator), and
+  two generator+artifact pair defects regenerated so `--check` stays green and
+  only the rebuilt-olean refinement catches them (`generator_selector_drift_
+  regenerated` → lean_chain, `generator_case_stack_drift_regenerated` →
+  lean_chain). Four semantically equivalent mutations (an added include-side
+  comment, an added hand-module comment, a resolved-but-equal generator root
+  path, and an added generated-Lean import comment) plus the declared
+  context equivalence `local_selector_arg_swap` (swapping the selector's two
+  arguments) SURVIVE as required: the swap leaves the selector reading
+  `tag != 0`, and the routed base tags are exactly `{ARM64_SIM_TAG_SCALAR 0,
+  ARM64_SIM_TAG_STACK 4}`, so `tag != 0 ⟺ tag == STACK` on the whole routed
+  domain.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  store body-selection paragraph and extends the covered-slices list with the
+  store body-selection arm (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
@@ -10158,6 +10261,16 @@ than a hand-written lane sequence, the write-side mirror of the byte-ladder load
 contract (`arm64_load_bytes_spec.json` / `Arm64LoadBytes.lean`), with the two
 ladders proved a matched pair (`arm64_store_bytes_load_agree`); the address
 arithmetic and the destination selection stay inside the composed bodies.
+
+The AArch64 store helper's *body selection* is likewise no longer open: the
+inlined `(BASE) == ARM64_SP || tag == ARM64_SIM_TAG_STACK` test the
+`ARM64_SIM_L_MEM_WRITE` helper carried is now a machine-checked shared contract
+(Step 0123), so the destination — the stack arena write when the base is the
+stack pointer or its resolved tag names a stack slot, the plain little-endian
+byte store otherwise — is a proved table rather than a restated predicate, tied
+to the load dispatch's own space/source table so the two cannot drift
+(`arm64_mem_write_arm_matches_read_src`); the address arithmetic and the
+composed bodies stay inside the composed body.
 
 The x86 helper-id → helper-body binding the call ladder (`X86_SIM_BPF_CALL_ID`)
 and its routed register form (`X86_SIM_BPF_CALL_REG`, the chain's

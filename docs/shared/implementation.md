@@ -284,6 +284,18 @@ increment is committed and pushed immediately). Current state:
   masked store image to an independent lane-by-lane write-then-read statement
   and ties it to the load contract (`arm64_store_bytes_load_agree`), leaving
   the address arithmetic and the destination selection in the composed bodies.
+  The AArch64 store helper's choice of *which* body writes the resolved
+  access is likewise no longer open (Step 0123): `ARM64_SIM_L_MEM_WRITE` now
+  routes through a generated machine-checked two-fact selector, naming the
+  stack arena write when the base register is the stack pointer or its resolved
+  tag names a stack slot and the plain little-endian byte store at every other
+  base, so the destination is a proved table rather than the restated
+  `BASE == ARM64_SP || tag == TAG_STACK` test. The selector's stack test is
+  character-identical to the load dispatch's own space test, and
+  `Arm64MemWriteArmShape.lean` ties the generated store classification to the
+  load path's space/source table so the two cannot drift
+  (`arm64_mem_write_arm_matches_read_src`), leaving the address arithmetic and
+  the composed bodies.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

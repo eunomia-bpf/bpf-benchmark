@@ -863,6 +863,30 @@ values across all four widths (20,024 cases); a sim-header route oracle drives
 the real write over those inputs against an independent width-masked scatter
 model of the whole heap, plus a store/read-back round trip through the routed
 load at every width (16,486,328 cases).
+The AArch64 store helper's choice of which body writes the resolved access is
+likewise a generated contract: `generate_arm64_mem_write_arm_spec.py` emits
+`KPROG_ARM64_MEM_WRITE_ARM(BASE_IS_SP, TAG)`, which names the stack arena body
+(`ARM64_SIM_L_STACK_WRITE_TAG`) when the base register is the stack pointer or
+its resolved tag names a stack slot and the plain little-endian byte store
+(`ARM64_SIM_L_STORE_ADDR`) at every other base, and
+`Arm64MemWriteArmShape.lean` proves the generated `armOf` equal to an
+independent disjunction statement that names the stack arm at exactly the four
+`(base-is-SP, stack-tagged)` cases where either fact holds, that the arm names
+and codes agree with the generated table, that the arm codes are distinct and
+their lookup is a left inverse, and — connecting this selection contract to the
+load dispatch — that the chosen destination matches the `KPROG_ARM64_MEM_READ_SRC`
+space/source table (so the two cannot drift). `ARM64_SIM_L_MEM_WRITE` computes
+the two-fact selector and branches through the selected body, leaving the
+address arithmetic and the composed bodies. A generated-header oracle
+cross-checks the compiled selector against an independent disjunction oracle
+over every `(base-is-SP, tag)` pair and against the generated load dispatch's
+own space table (24 cases), and a sim-header route oracle drives the real write
+over four base kinds (the stack pointer, a stack-tagged register, a scalar
+register, and a non-stack-tagged register) at every width and twelve
+arena/heap indices against an independent model of both bodies and the
+slot-tag rule, plus the real write/read round-trip, comparing the whole heap
+image, the whole stack byte image, and the whole slot-tag image (17,758,119
+cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
