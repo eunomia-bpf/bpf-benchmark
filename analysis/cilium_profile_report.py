@@ -523,7 +523,10 @@ def _arm_markdown(result: Mapping[str, object]) -> str:
         f"| excluded idle samples | {callgraph['excluded_idle_samples']} |",
         f"| unresolved samples | {callgraph['unresolved_samples']} |",
         "",
-        "## Sampled time per packet",
+        "## Resolved non-idle leaf-sample time per packet",
+        "",
+        "This heuristic classifies each resolved, non-idle sampled leaf by its symbol name; "
+        "it excludes unresolved leaves and does not attribute inclusive callchain ancestry.",
         "",
         "| Category | Samples | Fraction | Estimated CPU ns/packet |",
         "| --- | ---: | ---: | ---: |",
@@ -633,6 +636,10 @@ def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
         )
     lines += [
         "",
+        "## Resolved non-idle leaf-sample split",
+        "",
+        "This heuristic classifies resolved sampled leaves by symbol name. It excludes unresolved leaves and does not attribute inclusive callchain ancestry.",
+        "",
         "| Arm | BPF code ns/packet | Helpers ns/packet | Maps ns/packet | Rest ns/packet |",
         "| --- | ---: | ---: | ---: | ---: |",
     ]
@@ -648,6 +655,24 @@ def _combined_markdown(results: Mapping[str, Mapping[str, object]]) -> str:
             values.append(float(record["estimated_cpu_ns_per_packet"]))
         lines.append(
             f"| {arm} | {values[0]:.3f} | {values[1]:.3f} | {values[2]:.3f} | {values[3]:.3f} |"
+        )
+    lines += [
+        "",
+        "| Arm | Unresolved leaf samples | Estimated unresolved sampled ns/packet | Unresolved share of non-idle samples |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for arm in ("jit", "kprog"):
+        if arm not in results:
+            continue
+        packets = results[arm]["packets"]
+        callgraph = results[arm]["callgraph"]
+        assert isinstance(packets, Mapping) and isinstance(callgraph, Mapping)
+        unresolved = int(callgraph["unresolved_samples"])
+        non_idle = unresolved + int(callgraph["analyzed_samples"])
+        lines.append(
+            f"| {arm} | {unresolved} | "
+            f"{unresolved * 1_000_000 / int(packets['packets_sent']):.3f} | "
+            f"{unresolved / non_idle:.3%} |"
         )
     lines += [
         "",
