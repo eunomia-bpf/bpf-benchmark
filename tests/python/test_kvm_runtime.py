@@ -12,6 +12,23 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 
 
+class CiliumNativeConfigurationTests(unittest.TestCase):
+    def test_native_policy_mode_matches_cilium_runtime(self) -> None:
+        """Catch native policy drops when the runtime is configured to audit."""
+        runner = (ROOT / "runner/libs/app_runners/cilium.py").read_text(
+            encoding="utf-8"
+        )
+        native_makefile = (ROOT / "vendor/bpf/Makefile").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('"--policy-audit-mode=true"', runner)
+        options = native_makefile.split("CILIUM_MAX_BASE_OPTIONS :=", 1)[1].split(
+            "CILIUM_MAX_LB_OPTIONS :=", 1
+        )[0]
+        self.assertIn("-DPOLICY_AUDIT_MODE=1", options)
+
+
 class KvmRuntimeTests(unittest.TestCase):
     def test_kvm_vcpus_are_pinned_one_per_performance_core(self) -> None:
         """Catch timing guests sharing arbitrary P-cores instead of distinct pins."""
