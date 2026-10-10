@@ -355,6 +355,7 @@ def _capture_phase_bpf_evidence(
     app: AppSpec,
     phase: str,
     app_pids: Sequence[int],
+    runner: AppRunner,
     artifact_session: ArtifactSession | None,
 ) -> None:
     if artifact_session is None:
@@ -366,6 +367,7 @@ def _capture_phase_bpf_evidence(
             for program_id in _list_app_shim_program_ids(int(pid))
         }
     )
+    runner.prepare_bpf_evidence_capture()
     capture_bpf_evidence(
         output_root=artifact_session.run_dir / "details" / "bpf-evidence",
         app_name=app.name,
@@ -819,7 +821,7 @@ def run_suite(
                     )
                     app_pids = _runner_pids(app, runner)
                     _capture_phase_bpf_evidence(
-                        app, "baseline", app_pids, artifact_session
+                        app, "baseline", app_pids, runner, artifact_session
                     )
                     workload_name = _app_workload_name(app)
 
@@ -992,7 +994,7 @@ def run_suite(
                     )
                     app_pids = _runner_pids(app, runner)
                     _capture_phase_bpf_evidence(
-                        app, "post_rejit", app_pids, artifact_session
+                        app, "post_rejit", app_pids, runner, artifact_session
                     )
 
                     phase = "post_rejit"

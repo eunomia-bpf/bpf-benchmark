@@ -595,6 +595,9 @@ class CiliumRunner(NativeProcessRunner):
         os.kill(int(process.pid), signal.SIGCONT)
         self._agent_paused = False
 
+    def prepare_bpf_evidence_capture(self) -> None:
+        self._pause_agent()
+
     def start(self) -> list[int]:
         if self.etcd_session is not None:
             raise RuntimeError(f"{type(self).__name__} is already running")
@@ -614,7 +617,6 @@ class CiliumRunner(NativeProcessRunner):
             ).start()
             super().start()
             self._setup_managed_endpoints()
-            self._pause_agent()
             return []
         except Exception:
             self.stop()

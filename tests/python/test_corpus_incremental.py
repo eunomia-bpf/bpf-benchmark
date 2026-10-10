@@ -32,6 +32,7 @@ if str(REPO_ROOT) not in sys.path:
 
 import corpus.driver as driver
 from runner.libs.run_artifacts import ArtifactSession
+from runner.libs.app_runners.base import AppRunner
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +108,40 @@ class TestNativeLoaderConfigValidation(unittest.TestCase):
         with mock.patch.dict(os.environ, env, clear=True):
             with self.assertRaisesRegex(SystemExit, "incompatible with SKIP_REJIT"):
                 driver.parse_args()
+
+
+class TestBpfEvidenceCaptureOrdering(unittest.TestCase):
+    def test_discovers_shim_programs_before_quiescing_runner(self) -> None:
+        """Catch deadlock when SIGSTOP precedes the shim control-socket query."""
+        events: list[str] = []
+
+        class _Runner(AppRunner):
+            def prepare_bpf_evidence_capture(self) -> None:
+                events.append("quiesce")
+
+        artifact_session = mock.Mock()
+        artifact_session.run_dir = Path("/tmp/evidence-order-test")
+        with (
+            mock.patch.object(
+                driver,
+                "_list_app_shim_program_ids",
+                side_effect=lambda pid: events.append(f"list:{pid}") or [pid],
+            ),
+            mock.patch.object(
+                driver,
+                "capture_bpf_evidence",
+                side_effect=lambda **kwargs: events.append("capture"),
+            ),
+        ):
+            driver._capture_phase_bpf_evidence(
+                _FakeApp(name="cilium/agent"),
+                "baseline",
+                [101, 202],
+                _Runner(),
+                artifact_session,
+            )
+
+        self.assertEqual(events, ["list:101", "list:202", "quiesce", "capture"])
 
 
 # ---------------------------------------------------------------------------
