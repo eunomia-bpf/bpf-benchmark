@@ -3,8 +3,10 @@ UNITTEST_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR ?= $(UNITTEST_DIR)/build
 
 CC ?= cc
+CXX ?= c++
 CLANG ?= clang
 CFLAGS ?= -O2 -g -Wall -Wno-cpp
+CXXFLAGS ?= -O2 -g -Wall -Wextra -std=c++20
 # Use -I (not -isystem) so vendor REJIT headers override system linux/bpf.h
 INCLUDES := -I$(ROOT_DIR)/vendor/linux-framework/include/uapi
 
@@ -66,6 +68,9 @@ CLANG_SYS_INCLUDES := $(call get_sys_includes,$(CLANG))
 TEST_SRCS := $(wildcard $(UNITTEST_DIR)/*_test.c)
 TESTS := $(patsubst $(UNITTEST_DIR)/%.c,%,$(TEST_SRCS))
 TEST_BINS := $(addprefix $(BUILD_DIR)/,$(TESTS))
+CPP_TEST_SRCS := $(wildcard $(UNITTEST_DIR)/*_test.cpp)
+CPP_TESTS := $(patsubst $(UNITTEST_DIR)/%.cpp,%,$(CPP_TEST_SRCS))
+CPP_TEST_BINS := $(addprefix $(BUILD_DIR)/,$(CPP_TESTS))
 
 # Also discover module-level tests in module/ subdirectory.
 MODULE_TEST_SRCS := $(wildcard $(UNITTEST_DIR)/module/*_test.c)
@@ -75,16 +80,19 @@ MODULE_TEST_BINS := $(addprefix $(BUILD_DIR)/,$(MODULE_TESTS))
 BPF_PROGS_DIR := $(UNITTEST_DIR)/progs
 BPF_SRCS := $(wildcard $(BPF_PROGS_DIR)/*.bpf.c)
 BPF_OBJS := $(patsubst $(BPF_PROGS_DIR)/%.bpf.c,$(BUILD_DIR)/progs/%.bpf.o,$(BPF_SRCS))
-DEPFILES := $(TEST_BINS:=.d) $(MODULE_TEST_BINS:=.d) $(BPF_OBJS:=.d)
+DEPFILES := $(TEST_BINS:=.d) $(CPP_TEST_BINS:=.d) $(MODULE_TEST_BINS:=.d) $(BPF_OBJS:=.d)
 
 .PHONY: all clean run
 
-all: $(TEST_BINS) $(MODULE_TEST_BINS) $(BPF_OBJS)
+all: $(TEST_BINS) $(CPP_TEST_BINS) $(MODULE_TEST_BINS) $(BPF_OBJS)
 
 # Unified build rule: all tests get libbpf includes and link flags.
 # Tests that don't use libbpf symbols won't pull anything in (static archive).
 $(BUILD_DIR)/%: $(UNITTEST_DIR)/%.c $(LIBBPF_A) $(LIBBPF_HDR) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -MMD -MP -MF $@.d -MT $@ $(INCLUDES) $(LIBBPF_INCLUDES) -o $@ $< $(LIBBPF_A) $(HOST_EXT_LIBS) -lpthread
+
+$(BUILD_DIR)/%: $(UNITTEST_DIR)/%.cpp $(LIBBPF_A) $(LIBBPF_HDR) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -MMD -MP -MF $@.d -MT $@ $(INCLUDES) $(LIBBPF_INCLUDES) -o $@ $< $(LIBBPF_A) $(HOST_EXT_LIBS) -lpthread
 
 $(BUILD_DIR)/module/%: $(UNITTEST_DIR)/module/%.c $(LIBBPF_A) $(LIBBPF_HDR) | $(BUILD_DIR)/module
 	$(CC) $(CFLAGS) -MMD -MP -MF $@.d -MT $@ $(INCLUDES) $(LIBBPF_INCLUDES) -I$(ROOT_DIR)/kinsn/module/include -o $@ $< $(LIBBPF_A) $(HOST_EXT_LIBS) -lpthread
@@ -120,7 +128,7 @@ $(BUILD_DIR) $(BUILD_DIR)/progs $(BUILD_DIR)/module $(VMLINUX_INCLUDE_DIR):
 
 # `make run` executes all discovered tests.
 run: all
-	@for t in $(TESTS) $(MODULE_TESTS); do \
+	@for t in $(TESTS) $(CPP_TESTS) $(MODULE_TESTS); do \
 	    echo "=== $$t ==="; \
 	    $(BUILD_DIR)/$$t $(BUILD_DIR)/progs || exit 1; \
 	done

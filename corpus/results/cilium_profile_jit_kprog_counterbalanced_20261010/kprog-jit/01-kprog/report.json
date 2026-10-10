@@ -1,0 +1,1516 @@
+{
+  "arm": "kprog",
+  "bpf": {
+    "active_programs": 7,
+    "programs": [
+      {
+        "attach_points": [
+          "xdp:bpfbench0:driver"
+        ],
+        "bytes_jited": 1175,
+        "bytes_xlated": 168,
+        "id": 409,
+        "name": "cil_xdp_entry",
+        "ns_per_run": 884.0,
+        "run_count": 1,
+        "run_time_ns": 884,
+        "type": "xdp"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[17]"
+        ],
+        "bytes_jited": 3433,
+        "bytes_xlated": 448,
+        "id": 413,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[7]"
+        ],
+        "bytes_jited": 8277,
+        "bytes_xlated": 1056,
+        "id": 417,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[45]"
+        ],
+        "bytes_jited": 2241,
+        "bytes_xlated": 304,
+        "id": 424,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[2266]"
+        ],
+        "bytes_jited": 5575,
+        "bytes_xlated": 720,
+        "id": 429,
+        "name": "cil_lxc_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[36]"
+        ],
+        "bytes_jited": 8313,
+        "bytes_xlated": 1056,
+        "id": 431,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[30]"
+        ],
+        "bytes_jited": 6461,
+        "bytes_xlated": 832,
+        "id": 434,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[11]"
+        ],
+        "bytes_jited": 7282,
+        "bytes_xlated": 928,
+        "id": 439,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[38]"
+        ],
+        "bytes_jited": 12947,
+        "bytes_xlated": 1632,
+        "id": 441,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[23]"
+        ],
+        "bytes_jited": 1250,
+        "bytes_xlated": 176,
+        "id": 447,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[28]"
+        ],
+        "bytes_jited": 5012,
+        "bytes_xlated": 640,
+        "id": 449,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[1]"
+        ],
+        "bytes_jited": 842,
+        "bytes_xlated": 120,
+        "id": 453,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[6]"
+        ],
+        "bytes_jited": 772,
+        "bytes_xlated": 112,
+        "id": 454,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[1]"
+        ],
+        "bytes_jited": 819,
+        "bytes_xlated": 120,
+        "id": 459,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_host:tcx/egress"
+        ],
+        "bytes_jited": 7000,
+        "bytes_xlated": 896,
+        "id": 460,
+        "name": "cil_from_host",
+        "ns_per_run": 2593.0,
+        "run_count": 1,
+        "run_time_ns": 2593,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[7]"
+        ],
+        "bytes_jited": 6120,
+        "bytes_xlated": 784,
+        "id": 465,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[741]"
+        ],
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 466,
+        "name": "cil_host_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:lxcbench0:tcx/ingress"
+        ],
+        "bytes_jited": 2450,
+        "bytes_xlated": 320,
+        "id": 469,
+        "name": "cil_from_contai",
+        "ns_per_run": 392.6249422577299,
+        "run_count": 50021847,
+        "run_time_ns": 19639824790,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[26]"
+        ],
+        "bytes_jited": 9163,
+        "bytes_xlated": 1168,
+        "id": 475,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_host:tcx/ingress"
+        ],
+        "bytes_jited": 3675,
+        "bytes_xlated": 480,
+        "id": 477,
+        "name": "cil_to_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_02[13]"
+        ],
+        "bytes_jited": 7100,
+        "bytes_xlated": 912,
+        "id": 481,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[15]"
+        ],
+        "bytes_jited": 5975,
+        "bytes_xlated": 768,
+        "id": 482,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[15]"
+        ],
+        "bytes_jited": 5975,
+        "bytes_xlated": 768,
+        "id": 488,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[6]"
+        ],
+        "bytes_jited": 772,
+        "bytes_xlated": 112,
+        "id": 496,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[45]"
+        ],
+        "bytes_jited": 2269,
+        "bytes_xlated": 304,
+        "id": 498,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[45]"
+        ],
+        "bytes_jited": 2241,
+        "bytes_xlated": 304,
+        "id": 500,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[38]"
+        ],
+        "bytes_jited": 12947,
+        "bytes_xlated": 1632,
+        "id": 502,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[13]"
+        ],
+        "bytes_jited": 7100,
+        "bytes_xlated": 912,
+        "id": 504,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[17]"
+        ],
+        "bytes_jited": 3433,
+        "bytes_xlated": 448,
+        "id": 506,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[11]"
+        ],
+        "bytes_jited": 7282,
+        "bytes_xlated": 928,
+        "id": 510,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[36]"
+        ],
+        "bytes_jited": 8313,
+        "bytes_xlated": 1056,
+        "id": 512,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:lxcbench1:tcx/ingress"
+        ],
+        "bytes_jited": 2450,
+        "bytes_xlated": 320,
+        "id": 514,
+        "name": "cil_from_contai",
+        "ns_per_run": 370.9690015186451,
+        "run_count": 50802521,
+        "run_time_ns": 18846160490,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[7]"
+        ],
+        "bytes_jited": 8277,
+        "bytes_xlated": 1056,
+        "id": 516,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[28]"
+        ],
+        "bytes_jited": 5012,
+        "bytes_xlated": 640,
+        "id": 517,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[1]"
+        ],
+        "bytes_jited": 819,
+        "bytes_xlated": 120,
+        "id": 520,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[23]"
+        ],
+        "bytes_jited": 1250,
+        "bytes_xlated": 176,
+        "id": 522,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[1]"
+        ],
+        "bytes_jited": 842,
+        "bytes_xlated": 120,
+        "id": 524,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[26]"
+        ],
+        "bytes_jited": 9163,
+        "bytes_xlated": 1168,
+        "id": 525,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[7]"
+        ],
+        "bytes_jited": 6120,
+        "bytes_xlated": 784,
+        "id": 530,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_net:tcx/ingress"
+        ],
+        "bytes_jited": 3675,
+        "bytes_xlated": 480,
+        "id": 534,
+        "name": "cil_to_host",
+        "ns_per_run": 1265.0,
+        "run_count": 1,
+        "run_time_ns": 1265,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[36]"
+        ],
+        "bytes_jited": 8313,
+        "bytes_xlated": 1056,
+        "id": 538,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[30]"
+        ],
+        "bytes_jited": 6461,
+        "bytes_xlated": 832,
+        "id": 540,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:bpfbench0:tcx/egress"
+        ],
+        "bytes_jited": 6350,
+        "bytes_xlated": 816,
+        "id": 542,
+        "name": "cil_to_netdev",
+        "ns_per_run": 1493.0,
+        "run_count": 1,
+        "run_time_ns": 1493,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[1492]"
+        ],
+        "bytes_jited": 5575,
+        "bytes_xlated": 720,
+        "id": 544,
+        "name": "cil_lxc_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:bpfbench0:tcx/ingress"
+        ],
+        "bytes_jited": 6482,
+        "bytes_xlated": 832,
+        "id": 545,
+        "name": "cil_from_netdev",
+        "ns_per_run": 869.0,
+        "run_count": 1,
+        "run_time_ns": 869,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[7]"
+        ],
+        "bytes_jited": 8277,
+        "bytes_xlated": 1056,
+        "id": 551,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[15]"
+        ],
+        "bytes_jited": 5975,
+        "bytes_xlated": 768,
+        "id": 553,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[45]"
+        ],
+        "bytes_jited": 2269,
+        "bytes_xlated": 304,
+        "id": 555,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[23]"
+        ],
+        "bytes_jited": 1250,
+        "bytes_xlated": 176,
+        "id": 557,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[1]"
+        ],
+        "bytes_jited": 842,
+        "bytes_xlated": 120,
+        "id": 559,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[38]"
+        ],
+        "bytes_jited": 12947,
+        "bytes_xlated": 1632,
+        "id": 561,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      }
+    ],
+    "runs_per_packet": 1.0000014183098647,
+    "total_programs": 51,
+    "total_run_count": 100824373,
+    "total_run_time_ns": 38485992384
+  },
+  "callgraph": {
+    "active_lbr_coverage": 0.0,
+    "active_lbr_samples": 0,
+    "analyzed_samples": 120059,
+    "callgraphs": 491447,
+    "categories": {
+      "bpf_code": {
+        "estimated_guest_ns_per_packet": 87.67733708454803,
+        "sample_fraction": 0.0736304650213645,
+        "samples": 8840
+      },
+      "helpers": {
+        "estimated_guest_ns_per_packet": 84.22578580565406,
+        "sample_fraction": 0.07073189015400762,
+        "samples": 8492
+      },
+      "maps": {
+        "estimated_guest_ns_per_packet": 239.95224163874101,
+        "sample_fraction": 0.20150925794817548,
+        "samples": 24193
+      },
+      "rest": {
+        "estimated_guest_ns_per_packet": 778.9199084386759,
+        "sample_fraction": 0.6541283868764524,
+        "samples": 78534
+      }
+    },
+    "excluded_idle_samples": 371388,
+    "sample_period_ns": 1000000,
+    "samples": 491447,
+    "top_symbols": [
+      {
+        "category": "maps",
+        "samples": 17280,
+        "symbol": "lookup_nulls_elem_raw"
+      },
+      {
+        "category": "rest",
+        "samples": 7715,
+        "symbol": "fib_table_lookup"
+      },
+      {
+        "category": "rest",
+        "samples": 6741,
+        "symbol": "pvclock_clocksource_read_nowd"
+      },
+      {
+        "category": "rest",
+        "samples": 4905,
+        "symbol": "_raw_spin_unlock_irq"
+      },
+      {
+        "category": "rest",
+        "samples": 3343,
+        "symbol": "mod_cur_headers"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 3153,
+        "symbol": "bpf_prog_f4e1f23a14f9f66e_cil_lxc_policy"
+      },
+      {
+        "category": "rest",
+        "samples": 3130,
+        "symbol": "__rcu_read_lock"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 2780,
+        "symbol": "bpf_prog_ca1f00b91b95a464_tail_ipv4_ct_eg"
+      },
+      {
+        "category": "rest",
+        "samples": 2653,
+        "symbol": "fib_lookup_good_nhc"
+      },
+      {
+        "category": "rest",
+        "samples": 2444,
+        "symbol": "enqueue_to_backlog"
+      },
+      {
+        "category": "rest",
+        "samples": 2425,
+        "symbol": "pktgen_thread_worker"
+      },
+      {
+        "category": "maps",
+        "samples": 2419,
+        "symbol": "htab_map_hash"
+      },
+      {
+        "category": "helpers",
+        "samples": 2278,
+        "symbol": "enqueue_to_backlog"
+      },
+      {
+        "category": "rest",
+        "samples": 1973,
+        "symbol": "__mkroute_output"
+      },
+      {
+        "category": "rest",
+        "samples": 1945,
+        "symbol": "__alloc_skb"
+      },
+      {
+        "category": "rest",
+        "samples": 1890,
+        "symbol": "__inet_dev_addr_type"
+      },
+      {
+        "category": "rest",
+        "samples": 1806,
+        "symbol": "__skb_flow_dissect"
+      },
+      {
+        "category": "rest",
+        "samples": 1732,
+        "symbol": "__rcu_read_unlock"
+      },
+      {
+        "category": "rest",
+        "samples": 1634,
+        "symbol": "__xfrm_decode_session"
+      },
+      {
+        "category": "rest",
+        "samples": 1594,
+        "symbol": "__icmp_send"
+      },
+      {
+        "category": "maps",
+        "samples": 1583,
+        "symbol": "trie_lookup_elem"
+      },
+      {
+        "category": "rest",
+        "samples": 1485,
+        "symbol": "get_random_u32"
+      },
+      {
+        "category": "rest",
+        "samples": 1441,
+        "symbol": "__ip_dev_find"
+      },
+      {
+        "category": "rest",
+        "samples": 1352,
+        "symbol": "dst_release"
+      },
+      {
+        "category": "rest",
+        "samples": 1327,
+        "symbol": "kmem_cache_alloc_node_noprof"
+      },
+      {
+        "category": "rest",
+        "samples": 1264,
+        "symbol": "ip_send_check"
+      },
+      {
+        "category": "rest",
+        "samples": 1263,
+        "symbol": "kmem_cache_free"
+      },
+      {
+        "category": "rest",
+        "samples": 1162,
+        "symbol": "icmp_route_lookup.constprop.0"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 1152,
+        "symbol": "bpf_prog_148747939c202986_tail_handle_ipv"
+      },
+      {
+        "category": "rest",
+        "samples": 1129,
+        "symbol": "udp_v4_early_demux"
+      },
+      {
+        "category": "helpers",
+        "samples": 1105,
+        "symbol": "__pi_memcpy"
+      },
+      {
+        "category": "rest",
+        "samples": 1092,
+        "symbol": "ip_route_output_key_hash"
+      },
+      {
+        "category": "rest",
+        "samples": 1058,
+        "symbol": "__netif_receive_skb_core.constprop.0"
+      },
+      {
+        "category": "maps",
+        "samples": 1057,
+        "symbol": "jhash"
+      },
+      {
+        "category": "maps",
+        "samples": 1000,
+        "symbol": "memcmp"
+      },
+      {
+        "category": "rest",
+        "samples": 887,
+        "symbol": "handle_softirqs"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 790,
+        "symbol": "bpf_prog_3740b4229e3a5e52_tail_handle_ipv"
+      },
+      {
+        "category": "rest",
+        "samples": 788,
+        "symbol": "do_softirq"
+      },
+      {
+        "category": "rest",
+        "samples": 780,
+        "symbol": "_raw_spin_trylock"
+      },
+      {
+        "category": "rest",
+        "samples": 744,
+        "symbol": "udp4_csum_init"
+      }
+    ],
+    "unresolved_samples": 0
+  },
+  "corpus_run": "corpus/results/x86_kvm_corpus_20261010_140420_544041",
+  "host_perf": {
+    "branch-instructions": 232603104686,
+    "branch-misses": 174895055,
+    "branch_miss_rate": 0.0007519033558735067,
+    "branch_misses_per_packet": 1.7346530194180505,
+    "branches_per_packet": 2307.015929464574,
+    "cache-misses": 638701031,
+    "cache_misses_per_packet": 6.334797012583185,
+    "cpu-cycles": 450004054652,
+    "cycles_per_packet": 4463.253075694206,
+    "instructions": 1233092648967,
+    "instructions_per_packet": 12230.122153841394,
+    "ipc": 2.7401811966351795
+  },
+  "live_native_image_sizes": [
+    {
+      "bpf_bytecode_bytes": 2240,
+      "jit_image_bytes": 509,
+      "native_blob_bytes": 1161,
+      "native_id": 409,
+      "native_ksym": "bpf_prog_70cf77b4e90a6a09_cil_xdp_entry",
+      "native_stub_image_bytes": 1175,
+      "native_symbol": "cil_xdp_entry",
+      "original_id": 408,
+      "program": "cil_xdp_entry"
+    },
+    {
+      "bpf_bytecode_bytes": 6304,
+      "jit_image_bytes": 3622,
+      "native_blob_bytes": 3403,
+      "native_id": 413,
+      "native_ksym": "bpf_prog_029af8bfd26a3847_tail_nodeport_r",
+      "native_stub_image_bytes": 3433,
+      "native_symbol": "tail_nodeport_rev_dnat_ipv4",
+      "original_id": 410,
+      "program": "tail_nodeport_r"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8254,
+      "native_blob_bytes": 8247,
+      "native_id": 417,
+      "native_ksym": "bpf_prog_7370afcbeadfa1a9_tail_handle_ipv",
+      "native_stub_image_bytes": 8277,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 412,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 4808,
+      "jit_image_bytes": 2774,
+      "native_blob_bytes": 2211,
+      "native_id": 424,
+      "native_ksym": "bpf_prog_ba173ac410d68a0e_tail_no_service",
+      "native_stub_image_bytes": 2241,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 420,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 10408,
+      "jit_image_bytes": 5760,
+      "native_blob_bytes": 5545,
+      "native_id": 429,
+      "native_ksym": "bpf_prog_f4e1f23a14f9f66e_cil_lxc_policy",
+      "native_stub_image_bytes": 5575,
+      "native_symbol": "cil_lxc_policy",
+      "original_id": 425,
+      "program": "cil_lxc_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8283,
+      "native_id": 431,
+      "native_ksym": "bpf_prog_7370afcbeadfa1a9_tail_nodeport_n",
+      "native_stub_image_bytes": 8313,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 426,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 9904,
+      "jit_image_bytes": 5375,
+      "native_blob_bytes": 6431,
+      "native_id": 434,
+      "native_ksym": "bpf_prog_ca1f00b91b95a464_tail_ipv4_ct_eg",
+      "native_stub_image_bytes": 6461,
+      "native_symbol": "tail_ipv4_ct_egress",
+      "original_id": 430,
+      "program": "tail_ipv4_ct_eg"
+    },
+    {
+      "bpf_bytecode_bytes": 13448,
+      "jit_image_bytes": 5580,
+      "native_blob_bytes": 7252,
+      "native_id": 439,
+      "native_ksym": "bpf_prog_299fdfc874a82a6e_tail_ipv4_polic",
+      "native_stub_image_bytes": 7282,
+      "native_symbol": "tail_ipv4_policy",
+      "original_id": 436,
+      "program": "tail_ipv4_polic"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12954,
+      "native_blob_bytes": 12917,
+      "native_id": 441,
+      "native_ksym": "bpf_prog_cf07d86877b5b65f_tail_handle_sna",
+      "native_stub_image_bytes": 12947,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 435,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 447,
+      "native_ksym": "bpf_prog_11b23204fd2a9f91_tail_handle_ipv",
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 442,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 9560,
+      "jit_image_bytes": 5210,
+      "native_blob_bytes": 4982,
+      "native_id": 449,
+      "native_ksym": "bpf_prog_4efa16342cc9331f_tail_ipv4_ct_in",
+      "native_stub_image_bytes": 5012,
+      "native_symbol": "tail_ipv4_ct_ingress",
+      "original_id": 446,
+      "program": "tail_ipv4_ct_in"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 828,
+      "native_id": 453,
+      "native_ksym": "bpf_prog_da0ee0d9b5225ab5_tail_drop_notif",
+      "native_stub_image_bytes": 842,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 448,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 1576,
+      "jit_image_bytes": 927,
+      "native_blob_bytes": 742,
+      "native_id": 454,
+      "native_ksym": "bpf_prog_b64ee819838146ec_tail_handle_arp",
+      "native_stub_image_bytes": 772,
+      "native_symbol": "tail_handle_arp",
+      "original_id": 450,
+      "program": "tail_handle_arp"
+    },
+    {
+      "bpf_bytecode_bytes": 1424,
+      "jit_image_bytes": 382,
+      "native_blob_bytes": 805,
+      "native_id": 459,
+      "native_ksym": "bpf_prog_da0ee0d9b5225ab5_tail_drop_notif",
+      "native_stub_image_bytes": 819,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 456,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 6970,
+      "native_id": 460,
+      "native_ksym": "bpf_prog_106fe5a0fca70ad6_cil_from_host",
+      "native_stub_image_bytes": 7000,
+      "native_symbol": "cil_from_host",
+      "original_id": 455,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 11232,
+      "jit_image_bytes": 6216,
+      "native_blob_bytes": 6090,
+      "native_id": 465,
+      "native_ksym": "bpf_prog_148747939c202986_tail_handle_ipv",
+      "native_stub_image_bytes": 6120,
+      "native_symbol": "tail_handle_ipv4",
+      "original_id": 462,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 466,
+      "native_ksym": "bpf_prog_59f4a931744dcdc6_cil_host_policy",
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 461,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 4080,
+      "jit_image_bytes": 1089,
+      "native_blob_bytes": 2420,
+      "native_id": 469,
+      "native_ksym": "bpf_prog_54476433853bf330_cil_from_contai",
+      "native_stub_image_bytes": 2450,
+      "native_symbol": "cil_from_container",
+      "original_id": 467,
+      "program": "cil_from_contai"
+    },
+    {
+      "bpf_bytecode_bytes": 16176,
+      "jit_image_bytes": 6398,
+      "native_blob_bytes": 9133,
+      "native_id": 475,
+      "native_ksym": "bpf_prog_3740b4229e3a5e52_tail_handle_ipv",
+      "native_stub_image_bytes": 9163,
+      "native_symbol": "tail_handle_ipv4_cont",
+      "original_id": 471,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 3645,
+      "native_id": 477,
+      "native_ksym": "bpf_prog_e0b8079110f5ced3_cil_to_host",
+      "native_stub_image_bytes": 3675,
+      "native_symbol": "cil_to_host",
+      "original_id": 474,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 12544,
+      "jit_image_bytes": 5802,
+      "native_blob_bytes": 7070,
+      "native_id": 481,
+      "native_ksym": "bpf_prog_c049bdb6b30ee755_tail_ipv4_to_en",
+      "native_stub_image_bytes": 7100,
+      "native_symbol": "tail_ipv4_to_endpoint",
+      "original_id": 476,
+      "program": "tail_ipv4_to_en"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 482,
+      "native_ksym": "bpf_prog_3c09a402d72db36a_tail_nodeport_n",
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 479,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 488,
+      "native_ksym": "bpf_prog_3c09a402d72db36a_tail_nodeport_n",
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 485,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 1576,
+      "jit_image_bytes": 927,
+      "native_blob_bytes": 742,
+      "native_id": 496,
+      "native_ksym": "bpf_prog_b64ee819838146ec_tail_handle_arp",
+      "native_stub_image_bytes": 772,
+      "native_symbol": "tail_handle_arp",
+      "original_id": 495,
+      "program": "tail_handle_arp"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 498,
+      "native_ksym": "bpf_prog_ba173ac410d68a0e_tail_no_service",
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 494,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 4808,
+      "jit_image_bytes": 2774,
+      "native_blob_bytes": 2211,
+      "native_id": 500,
+      "native_ksym": "bpf_prog_ba173ac410d68a0e_tail_no_service",
+      "native_stub_image_bytes": 2241,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 497,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 12917,
+      "native_id": 502,
+      "native_ksym": "bpf_prog_cf07d86877b5b65f_tail_handle_sna",
+      "native_stub_image_bytes": 12947,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 499,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 12544,
+      "jit_image_bytes": 5802,
+      "native_blob_bytes": 7070,
+      "native_id": 504,
+      "native_ksym": "bpf_prog_c049bdb6b30ee755_tail_ipv4_to_en",
+      "native_stub_image_bytes": 7100,
+      "native_symbol": "tail_ipv4_to_endpoint",
+      "original_id": 501,
+      "program": "tail_ipv4_to_en"
+    },
+    {
+      "bpf_bytecode_bytes": 6304,
+      "jit_image_bytes": 3622,
+      "native_blob_bytes": 3403,
+      "native_id": 506,
+      "native_ksym": "bpf_prog_029af8bfd26a3847_tail_nodeport_r",
+      "native_stub_image_bytes": 3433,
+      "native_symbol": "tail_nodeport_rev_dnat_ipv4",
+      "original_id": 505,
+      "program": "tail_nodeport_r"
+    },
+    {
+      "bpf_bytecode_bytes": 13448,
+      "jit_image_bytes": 5580,
+      "native_blob_bytes": 7252,
+      "native_id": 510,
+      "native_ksym": "bpf_prog_299fdfc874a82a6e_tail_ipv4_polic",
+      "native_stub_image_bytes": 7282,
+      "native_symbol": "tail_ipv4_policy",
+      "original_id": 508,
+      "program": "tail_ipv4_polic"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8283,
+      "native_id": 512,
+      "native_ksym": "bpf_prog_7370afcbeadfa1a9_tail_nodeport_n",
+      "native_stub_image_bytes": 8313,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 509,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 4080,
+      "jit_image_bytes": 1089,
+      "native_blob_bytes": 2420,
+      "native_id": 514,
+      "native_ksym": "bpf_prog_54476433853bf330_cil_from_contai",
+      "native_stub_image_bytes": 2450,
+      "native_symbol": "cil_from_container",
+      "original_id": 511,
+      "program": "cil_from_contai"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 8247,
+      "native_id": 516,
+      "native_ksym": "bpf_prog_7370afcbeadfa1a9_tail_handle_ipv",
+      "native_stub_image_bytes": 8277,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 513,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 9560,
+      "jit_image_bytes": 5210,
+      "native_blob_bytes": 4982,
+      "native_id": 517,
+      "native_ksym": "bpf_prog_4efa16342cc9331f_tail_ipv4_ct_in",
+      "native_stub_image_bytes": 5012,
+      "native_symbol": "tail_ipv4_ct_ingress",
+      "original_id": 515,
+      "program": "tail_ipv4_ct_in"
+    },
+    {
+      "bpf_bytecode_bytes": 1424,
+      "jit_image_bytes": 382,
+      "native_blob_bytes": 805,
+      "native_id": 520,
+      "native_ksym": "bpf_prog_da0ee0d9b5225ab5_tail_drop_notif",
+      "native_stub_image_bytes": 819,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 519,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 522,
+      "native_ksym": "bpf_prog_11b23204fd2a9f91_tail_handle_ipv",
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 518,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 828,
+      "native_id": 524,
+      "native_ksym": "bpf_prog_da0ee0d9b5225ab5_tail_drop_notif",
+      "native_stub_image_bytes": 842,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 523,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 16176,
+      "jit_image_bytes": 6398,
+      "native_blob_bytes": 9133,
+      "native_id": 525,
+      "native_ksym": "bpf_prog_3740b4229e3a5e52_tail_handle_ipv",
+      "native_stub_image_bytes": 9163,
+      "native_symbol": "tail_handle_ipv4_cont",
+      "original_id": 521,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 11232,
+      "jit_image_bytes": 6216,
+      "native_blob_bytes": 6090,
+      "native_id": 530,
+      "native_ksym": "bpf_prog_148747939c202986_tail_handle_ipv",
+      "native_stub_image_bytes": 6120,
+      "native_symbol": "tail_handle_ipv4",
+      "original_id": 527,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 3645,
+      "native_id": 534,
+      "native_ksym": "bpf_prog_e0b8079110f5ced3_cil_to_host",
+      "native_stub_image_bytes": 3675,
+      "native_symbol": "cil_to_host",
+      "original_id": 529,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8283,
+      "native_id": 538,
+      "native_ksym": "bpf_prog_7370afcbeadfa1a9_tail_nodeport_n",
+      "native_stub_image_bytes": 8313,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 535,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 9904,
+      "jit_image_bytes": 5375,
+      "native_blob_bytes": 6431,
+      "native_id": 540,
+      "native_ksym": "bpf_prog_ca1f00b91b95a464_tail_ipv4_ct_eg",
+      "native_stub_image_bytes": 6461,
+      "native_symbol": "tail_ipv4_ct_egress",
+      "original_id": 537,
+      "program": "tail_ipv4_ct_eg"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6320,
+      "native_id": 542,
+      "native_ksym": "bpf_prog_08d22064f58c1e8f_cil_to_netdev",
+      "native_stub_image_bytes": 6350,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 539,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 10408,
+      "jit_image_bytes": 5760,
+      "native_blob_bytes": 5545,
+      "native_id": 544,
+      "native_ksym": "bpf_prog_f4e1f23a14f9f66e_cil_lxc_policy",
+      "native_stub_image_bytes": 5575,
+      "native_symbol": "cil_lxc_policy",
+      "original_id": 541,
+      "program": "cil_lxc_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 6452,
+      "native_id": 545,
+      "native_ksym": "bpf_prog_ca1f00b91b95a464_cil_from_netdev",
+      "native_stub_image_bytes": 6482,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 543,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 8247,
+      "native_id": 551,
+      "native_ksym": "bpf_prog_7370afcbeadfa1a9_tail_handle_ipv",
+      "native_stub_image_bytes": 8277,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 550,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 553,
+      "native_ksym": "bpf_prog_3c09a402d72db36a_tail_nodeport_n",
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 552,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 555,
+      "native_ksym": "bpf_prog_ba173ac410d68a0e_tail_no_service",
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 554,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 557,
+      "native_ksym": "bpf_prog_11b23204fd2a9f91_tail_handle_ipv",
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 556,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 828,
+      "native_id": 559,
+      "native_ksym": "bpf_prog_da0ee0d9b5225ab5_tail_drop_notif",
+      "native_stub_image_bytes": 842,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 558,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 12917,
+      "native_id": 561,
+      "native_ksym": "bpf_prog_cf07d86877b5b65f_tail_handle_sna",
+      "native_stub_image_bytes": 12947,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 560,
+      "program": "tail_handle_sna"
+    }
+  ],
+  "order": "kprog-jit",
+  "packets": {
+    "component_errors": 0,
+    "packets_received": 100824368,
+    "packets_sent": 100824230,
+    "rx_dropped": 0,
+    "rx_errors": 0,
+    "verdicts": {
+      "reason=0,direction=1": {
+        "bytes": 6452762680,
+        "count": 100824360
+      },
+      "reason=0,direction=2": {
+        "bytes": 6452762820,
+        "count": 100824362
+      },
+      "reason=139,direction=2": {
+        "bytes": 140,
+        "count": 2
+      },
+      "reason=3,direction=1": {
+        "bytes": 140,
+        "count": 2
+      }
+    }
+  },
+  "phase": "post_rejit",
+  "position": 1,
+  "run_id": "kprog-jit/01-kprog"
+}

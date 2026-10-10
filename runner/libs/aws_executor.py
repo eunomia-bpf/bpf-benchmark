@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shlex
 import shutil
 import subprocess
@@ -476,7 +477,18 @@ def _sync_remote_roots(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", ctx.remote_stage_dir)
     remote_path = f"{ctx.remote_stage_dir}/{relative_image_tar}"
     aws_common._ssh_exec(ctx, ip, "mkdir", "-p", str(Path(remote_path).parent))
-    aws_common._scp_to(ctx, ip, image_tar, remote_path)
+    remote_size = aws_common._ssh_exec(
+        ctx,
+        ip,
+        "stat",
+        "-c",
+        "%s",
+        remote_path,
+        check=False,
+        capture_output=True,
+    )
+    if remote_size.returncode != 0 or remote_size.stdout.strip() != str(image_tar.stat().st_size):
+        aws_common._scp_to(ctx, ip, image_tar, remote_path)
 
 
 def _sync_remote_results(
@@ -756,6 +768,15 @@ def _run_aws(ctx: aws_common.AwsExecutorContext) -> None:
         if cleanup_error and hasattr(exc, "add_note"):
             exc.add_note(cleanup_error)
         raise
+    if os.environ.get("BPFREJIT_AWS_KEEP_INSTANCE", "").strip().lower() in {
+        "1", "true", "yes", "on"
+    }:
+        print(
+            f"[aws-executor] Preserved instance {state.get('STATE_INSTANCE_ID', '').strip()} "
+            f"for run token {ctx.run_token}",
+            file=sys.stderr,
+        )
+        return
     aws_common._terminate_instance(ctx, state.get("STATE_INSTANCE_ID", "").strip())
     shutil.rmtree(ctx.run_state_dir, ignore_errors=True)
 

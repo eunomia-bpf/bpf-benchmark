@@ -22,6 +22,11 @@ ARCH     ?= x86
 BZIMAGE  ?= $(X86_RUNTIME_KERNEL_IMAGE)
 SAMPLES  ?= 3
 WORKLOAD_DURATION ?=
+CILIUM_PROFILE_ARM ?= all
+CILIUM_PROFILE_ORDER ?= both
+CILIUM_PROFILE_DURATION ?= 60
+CILIUM_PROFILE_OUTPUT_DIR ?=
+CILIUM_PROFILE_CPUS ?= 0-7
 TIMEOUT  ?= 7200
 BENCH    ?=
 FUZZ_ROUNDS ?= 1000
@@ -86,11 +91,14 @@ VM_EXECUTABLE := $(VM_EXECUTABLE.$(RUN_KEY))
 VM_CPUS.kvm-x86 := 8
 VM_CPUS.qemu-arm64 := 2
 VM_CPUS := $(or $(VM_CPUS),$(VM_CPUS.$(RUN_KEY)))
+VM_CPU_PIN.kvm-x86 := 0-7
+VM_CPU_PIN := $(VM_CPU_PIN.$(RUN_KEY))
 VM_MEM.kvm-x86 := 64G
 VM_MEM.qemu-arm64 := 2G
 VM_MEM := $(or $(VM_MEM),$(VM_MEM.$(RUN_KEY)))
 VNG = $(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose \
-	--cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp \
+	--cpus "$(VM_CPUS)" $(if $(VM_CPU_PIN),--pin "$(VM_CPU_PIN)") --mem "$(VM_MEM)" \
+	--rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp \
 	--append "loglevel=7 panic=30 oops=panic"
 
 RUN_REMOTE_PYTHON_BIN ?= python3
@@ -179,7 +187,9 @@ SUITE_ENV_NAMES = SAMPLES WARMUPS INNER_REPEAT BENCH SUITE RUNTIMES FUZZ_ROUNDS 
 	BPFREJIT_NATIVE_LINK_BINARY BPFREJIT_NATIVE_DISABLE_MAP_LOWERING \
 	BPFREJIT_FTRACE_FUNCTION_PROFILE BPFREJIT_FTRACE_FUNCTIONS \
 	BPFREJIT_KPROBE_FUNCTION_COUNTS BPFREJIT_KPROBE_FUNCTIONS \
-	BPFREJIT_TRACEE_STOP_MODE BPFREJIT_TRACEE_EVENTS
+	BPFREJIT_TRACEE_STOP_MODE BPFREJIT_TRACEE_EVENTS \
+	CILIUM_PROFILE_ARM CILIUM_PROFILE_OUTPUT_DIR \
+	CILIUM_PROFILE_PERF_ROOT CILIUM_PROFILE_CODE_ROOT
 export $(SUITE_ENV_NAMES)
 
 # Per-run identity. RUN_TOKEN must be unique per invocation so AWS remote stage
@@ -205,7 +215,7 @@ RUNTIME_DOCKER = docker run --rm --privileged --pid=host --network=host --ipc=ho
 RUNTIME_DOCKER_RUN = $(RUNTIME_DOCKER) -v "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR):$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m $(RUNTIME_SUITE_MODULE)
 
 .PHONY: check validate lint clean \
-	selftest negative-test test micro corpus all terminate kvm-host-cpu \
+	selftest negative-test test micro corpus profile-cilium all terminate kvm-host-cpu \
 	clean-build clean-results clean-vm-tmp clean-docker-cache
 
 validate:
@@ -270,6 +280,21 @@ kvm-host-cpu:
 micro: micro-$(RUN_KEY)
 corpus: corpus-$(RUN_KEY)
 
+# Profiling is deliberately separate from the timing targets.  The host
+# controller gates guest-only PMU counters at the corpus measurement markers;
+# the guest suite records call graphs while reusing corpus.driver unchanged.
+profile-cilium:
+	CILIUM_PROFILE_ARM="$(CILIUM_PROFILE_ARM)" \
+	CILIUM_PROFILE_ORDER="$(CILIUM_PROFILE_ORDER)" \
+	CILIUM_PROFILE_DURATION="$(CILIUM_PROFILE_DURATION)" \
+	CILIUM_PROFILE_OUTPUT_DIR="$(CILIUM_PROFILE_OUTPUT_DIR)" \
+	CILIUM_PROFILE_CPUS="$(CILIUM_PROFILE_CPUS)" \
+	"$(PYTHON)" -m corpus.profiling.host
+
+__profile-cilium-vm: runtime-kernel-image kvm-host-cpu
+	test -x "$(CILIUM_PROFILE_GUEST_SCRIPT)"
+	$(VNG) --exec "$(CILIUM_PROFILE_GUEST_SCRIPT)"
+
 micro-kvm-x86 micro-qemu-arm64 micro-docker-x86: RUNTIME_SUITE := micro
 corpus-kvm-x86 corpus-qemu-arm64 corpus-docker-x86: RUNTIME_SUITE := corpus
 micro-kvm-x86 corpus-kvm-x86: runtime-kernel-image kvm-host-cpu
@@ -307,9 +332,11 @@ micro-% corpus-% selftest-% negative-test-% test-%:
 
 __runtime-host-micro __runtime-vm-micro: RUNTIME_RESULT_DIR := micro/results
 __runtime-host-corpus __runtime-vm-corpus: RUNTIME_RESULT_DIR := corpus/results
+__runtime-vm-profile-cilium: RUNTIME_RESULT_DIR := corpus/results
 __runtime-vm-test: RUNTIME_RESULT_DIR := tests/results
 __runtime-host-micro __runtime-vm-micro: RUNTIME_SUITE_MODULE := runner.suites.micro
 __runtime-host-corpus __runtime-vm-corpus: RUNTIME_SUITE_MODULE := corpus.driver
+__runtime-vm-profile-cilium: RUNTIME_SUITE_MODULE := corpus.profiling.guest
 __runtime-vm-test: RUNTIME_SUITE_MODULE := runner.suites.test
 
 __runtime-host-micro:
@@ -327,14 +354,19 @@ __runtime-vm-docker:
 	truncate -s "$${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
 	mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
 	mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
-	dockerd --data-root /run/bpf-benchmark-docker/data --exec-root /run/bpf-benchmark-docker/exec --pidfile /run/bpf-benchmark-docker/docker.pid --host unix:///run/docker.sock --bridge=none --iptables=false --ip-masq=false --ip-forward=false >/run/bpf-benchmark-docker/dockerd.log 2>&1 &
-	for _ in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && break; sleep 1; done
-	docker info >/dev/null
+	"$(RUNNER_DIR)/scripts/start-vm-docker"
 
 __runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
 	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
 	$(RUNTIME_DOCKER_RUN)
+
+__runtime-vm-profile-cilium: __runtime-vm-docker
+	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
+	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
+	$(RUNTIME_DOCKER) -e PYTHONPATH="$(CILIUM_PROFILE_CODE_ROOT):$(ROOT_DIR)" \
+		-v "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR):$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)" \
+		"$(RUNTIME_CONTAINER_IMAGE)" python3 -m $(RUNTIME_SUITE_MODULE)
 
 arm64-qemu-root: $(ARM64_QEMU_ROOT)
 

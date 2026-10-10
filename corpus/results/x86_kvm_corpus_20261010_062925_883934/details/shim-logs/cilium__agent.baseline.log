@@ -1,0 +1,1342 @@
+[107.260220 pid=2001 tid=2001] shim_init pid=2001 exe=/usr/local/bin/cilium-agent
+[107.260583 pid=2001 tid=2005] socket: listening on /var/run/bpfrejit/shim-2001.sock
+[107.266449 pid=2001 tid=2001] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=
+[107.266711 pid=2001 tid=2001]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=4
+[107.375973 pid=2001 tid=2014] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=feature_test
+[107.376204 pid=2001 tid=2014]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=5
+[107.377702 pid=2001 tid=2014] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=.test
+[107.377833 pid=2001 tid=2014]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=6
+[107.378708 pid=2001 tid=2011] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=MIT expected_attach=0 attach_btf_id=0 prog_btf_fd=4294967295 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.378860 pid=2001 tid=2011]   PROG_LOAD -> fd=-1 errno=9 kernel_prog_id=0
+[107.379011 pid=2001 tid=2011] BPF_PROG_LOAD type=9 (cgroup_sock) name= insn_cnt=3 hash=145b4e38542e17e8 policy_hash=145b4e38542e17e8 branch_profile_hash=c034a91aebada1a3 license= expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.379102 pid=2001 tid=2011]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=7
+[107.379208 pid=2001 tid=2011] BPF_PROG_LOAD type=2 (kprobe) name= insn_cnt=6 hash=7e4864ff1af3e9d4 policy_hash=7e4864ff1af3e9d4 branch_profile_hash=873c32c9e7033afd license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.379364 pid=2001 tid=2011]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=8
+[107.379599 pid=2001 tid=2011] BPF_PROG_LOAD type=9 (cgroup_sock) name= insn_cnt=4 hash=abbd4ff4f3b12a46 policy_hash=abbd4ff4f3b12a46 branch_profile_hash=a26164fd13e51a74 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.379793 pid=2001 tid=2011]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=9
+[107.379908 pid=2001 tid=2011] BPF_PROG_LOAD type=6 (xdp) name= insn_cnt=3 hash=145b4e38542e17e8 policy_hash=145b4e38542e17e8 branch_profile_hash=b6fb2c4e1395886c license= expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.380025 pid=2001 tid=2011]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=10
+[107.380168 pid=2001 tid=2011] BPF_PROG_LOAD type=6 (xdp) name= insn_cnt=4 hash=583a5affa0a94171 policy_hash=583a5affa0a94171 branch_profile_hash=d4ce706beb5e0f9b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.380283 pid=2001 tid=2011]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=11
+[107.380385 pid=2001 tid=2011] BPF_PROG_LOAD type=6 (xdp) name= insn_cnt=4 hash=66a217e60750b220 policy_hash=66a217e60750b220 branch_profile_hash=d4ce706beb5e0f9b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.380481 pid=2001 tid=2011]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[107.380654 pid=2001 tid=2011] BPF_PROG_LOAD type=6 (xdp) name= insn_cnt=4 hash=00836d4eea575c53 policy_hash=00836d4eea575c53 branch_profile_hash=d4ce706beb5e0f9b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.380761 pid=2001 tid=2011]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[107.458780 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[107.536780 pid=2001 tid=2011] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=3 hash=145b4e38542e17e8 policy_hash=145b4e38542e17e8 branch_profile_hash=f571f2f8d6fcf4ab license=MIT expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[107.537273 pid=2001 tid=2011]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=12
+[107.659433 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[107.860160 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[107.937516 pid=2001 tid=2013] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=cilium_events
+[107.938077 pid=2001 tid=2013]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=7
+[107.938527 pid=2001 tid=2013] BPF_MAP_CREATE type=11 key_size=24 value_size=24 max_entries=512000 name=cilium_ipcache_
+[107.938789 pid=2001 tid=2013]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=8
+[107.941672 pid=2001 tid=2031] BPF_MAP_CREATE type=5 key_size=8 value_size=16 max_entries=1024 name=cilium_metrics
+[107.941001 pid=2041 tid=2041] shim_init pid=2041 exe=/usr/sbin/ipset
+[107.941970 pid=2041 tid=2043] socket: listening on /var/run/bpfrejit/shim-2041.sock
+[107.942143 pid=2001 tid=2031]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=9
+[107.942346 pid=2001 tid=2031] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=64 name=cilium_ratelimi
+[107.942476 pid=2001 tid=2031]   MAP_CREATE -> fd=23 errno=0 kernel_map_id=10
+[107.943586 pid=2044 tid=2044] shim_init pid=2044 exe=/usr/sbin/ipset
+[107.943960 pid=2044 tid=2047] socket: listening on /var/run/bpfrejit/shim-2044.sock
+[107.943822 pid=2045 tid=2045] shim_init pid=2045 exe=/usr/sbin/xtables-nft-multi
+[107.945485 pid=2050 tid=2050] shim_init pid=2050 exe=/usr/sbin/xtables-nft-multi
+[107.949194 pid=2053 tid=2053] shim_init pid=2053 exe=/usr/sbin/xtables-nft-multi
+[107.949842 pid=2053 tid=2055] socket: listening on /var/run/bpfrejit/shim-2053.sock
+[107.951896 pid=2056 tid=2056] shim_init pid=2056 exe=/usr/sbin/xtables-nft-multi
+[107.952534 pid=2056 tid=2058] socket: listening on /var/run/bpfrejit/shim-2056.sock
+[107.954372 pid=2059 tid=2059] shim_init pid=2059 exe=/usr/sbin/xtables-nft-multi
+[107.955122 pid=2059 tid=2061] socket: listening on /var/run/bpfrejit/shim-2059.sock
+[107.956980 pid=2062 tid=2062] shim_init pid=2062 exe=/usr/sbin/xtables-nft-multi
+[107.957566 pid=2062 tid=2064] socket: listening on /var/run/bpfrejit/shim-2062.sock
+[107.959198 pid=2065 tid=2065] shim_init pid=2065 exe=/usr/sbin/xtables-nft-multi
+[107.959889 pid=2065 tid=2067] socket: listening on /var/run/bpfrejit/shim-2065.sock
+[107.961613 pid=2068 tid=2068] shim_init pid=2068 exe=/usr/sbin/xtables-nft-multi
+[107.961973 pid=2068 tid=2070] socket: listening on /var/run/bpfrejit/shim-2068.sock
+[107.963136 pid=2071 tid=2071] shim_init pid=2071 exe=/usr/sbin/xtables-nft-multi
+[107.963655 pid=2071 tid=2073] socket: listening on /var/run/bpfrejit/shim-2071.sock
+[107.965181 pid=2074 tid=2074] shim_init pid=2074 exe=/usr/sbin/xtables-nft-multi
+[107.965858 pid=2074 tid=2076] socket: listening on /var/run/bpfrejit/shim-2074.sock
+[108.061215 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[108.262248 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[108.274693 pid=2001 tid=2031] BPF_MAP_CREATE type=1 key_size=20 value_size=48 max_entries=65535 name=cilium_lxc
+[108.276309 pid=2001 tid=2031]   MAP_CREATE -> fd=25 errno=0 kernel_map_id=11
+[108.276519 pid=2001 tid=2031] BPF_MAP_CREATE type=11 key_size=8 value_size=1 max_entries=65536 name=cilium_cidr_v4_
+[108.276768 pid=2001 tid=2031]   MAP_CREATE -> fd=26 errno=0 kernel_map_id=12
+[108.276893 pid=2001 tid=2031] BPF_MAP_CREATE type=1 key_size=8 value_size=1 max_entries=20971520 name=cilium_cidr_v4_
+[108.462890 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[108.529869 pid=2001 tid=2031]   MAP_CREATE -> fd=27 errno=0 kernel_map_id=13
+[108.530460 pid=2001 tid=2031] BPF_MAP_CREATE type=11 key_size=20 value_size=1 max_entries=65536 name=cilium_cidr_v6_
+[108.531018 pid=2001 tid=2031]   MAP_CREATE -> fd=28 errno=0 kernel_map_id=14
+[108.531165 pid=2001 tid=2031] BPF_MAP_CREATE type=1 key_size=20 value_size=1 max_entries=20971520 name=cilium_cidr_v6_
+[108.663728 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[108.819869 pid=2001 tid=2031]   MAP_CREATE -> fd=29 errno=0 kernel_map_id=15
+[108.820869 pid=2001 tid=2031] BPF_MAP_CREATE type=1 key_size=20 value_size=4 max_entries=16384 name=cilium_node_map
+[108.821156 pid=2001 tid=2031]   MAP_CREATE -> fd=30 errno=0 kernel_map_id=16
+[108.821496 pid=2001 tid=2031] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=65535 name=cilium_call_pol
+[108.821670 pid=2001 tid=2031]   MAP_CREATE -> fd=31 errno=0 kernel_map_id=17
+[108.821918 pid=2001 tid=2031] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=65535 name=cilium_egressca
+[108.822263 pid=2001 tid=2031]   MAP_CREATE -> fd=31 errno=0 kernel_map_id=18
+[108.822407 pid=2001 tid=2031] BPF_MAP_CREATE type=10 key_size=12 value_size=16 max_entries=65536 name=cilium_policyst
+[108.841439 pid=2001 tid=2031]   MAP_CREATE -> fd=31 errno=0 kernel_map_id=19
+[108.842159 pid=2001 tid=2009] BPF_MAP_CREATE type=6 key_size=4 value_size=8 max_entries=1 name=cilium_percpu_t
+[108.842299 pid=2001 tid=2009]   MAP_CREATE -> fd=32 errno=0 kernel_map_id=20
+[108.842454 pid=2001 tid=2009] BPF_MAP_CREATE type=9 key_size=8 value_size=16 max_entries=1024 name=cilium_ratelimi
+[108.842643 pid=2001 tid=2009]   MAP_CREATE -> fd=33 errno=0 kernel_map_id=21
+[108.842778 pid=2001 tid=2009] BPF_MAP_CREATE type=1 key_size=8 value_size=1 max_entries=65536 name=cilium_lb_affin
+[108.845837 pid=2001 tid=2009]   MAP_CREATE -> fd=34 errno=0 kernel_map_id=22
+[108.845990 pid=2001 tid=2009] BPF_MAP_CREATE type=11 key_size=12 value_size=1 max_entries=65536 name=cilium_lb4_sour
+[108.846117 pid=2001 tid=2009]   MAP_CREATE -> fd=35 errno=0 kernel_map_id=23
+[108.846231 pid=2001 tid=2009] BPF_MAP_CREATE type=1 key_size=12 value_size=12 max_entries=65536 name=cilium_lb4_serv
+[108.849777 pid=2001 tid=2009]   MAP_CREATE -> fd=36 errno=0 kernel_map_id=24
+[108.849990 pid=2001 tid=2009] BPF_MAP_CREATE type=1 key_size=4 value_size=12 max_entries=65536 name=cilium_lb4_back
+[108.853654 pid=2001 tid=2009]   MAP_CREATE -> fd=37 errno=0 kernel_map_id=25
+[108.853887 pid=2001 tid=2009] BPF_MAP_CREATE type=1 key_size=2 value_size=6 max_entries=65536 name=cilium_lb4_reve
+[108.856528 pid=2001 tid=2009]   MAP_CREATE -> fd=38 errno=0 kernel_map_id=26
+[108.856741 pid=2001 tid=2009] BPF_MAP_CREATE type=2 key_size=4 value_size=65524 max_entries=1 name=cilium_maglev_i
+[108.856868 pid=2001 tid=2009]   MAP_CREATE -> fd=39 errno=0 kernel_map_id=27
+[108.856975 pid=2001 tid=2009] BPF_MAP_CREATE type=13 key_size=2 value_size=4 max_entries=65536 name=cilium_lb4_magl
+[108.860742 pid=2001 tid=2009]   MAP_CREATE -> fd=40 errno=0 kernel_map_id=28
+[108.860941 pid=2001 tid=2009] BPF_MAP_CREATE type=9 key_size=16 value_size=8 max_entries=295714 name=cilium_lb4_reve
+[108.864462 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[108.876905 pid=2001 tid=2009]   MAP_CREATE -> fd=39 errno=0 kernel_map_id=29
+[108.877161 pid=2001 tid=2009] BPF_MAP_CREATE type=9 key_size=16 value_size=16 max_entries=65536 name=cilium_lb4_affi
+[108.880489 pid=2001 tid=2009]   MAP_CREATE -> fd=41 errno=0 kernel_map_id=30
+[108.880844 pid=2001 tid=2009] BPF_MAP_CREATE type=1 key_size=16 value_size=1 max_entries=100 name=cilium_skip_lb4
+[108.880979 pid=2001 tid=2009]   MAP_CREATE -> fd=42 errno=0 kernel_map_id=31
+[108.881215 pid=2001 tid=2009] BPF_MAP_CREATE type=1 key_size=12 value_size=8 max_entries=524288 name=cilium_auth_map
+[108.885675 pid=2001 tid=2009]   MAP_CREATE -> fd=44 errno=0 kernel_map_id=32
+[108.885886 pid=2001 tid=2009] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=256 name=cilium_runtime_
+[108.886001 pid=2001 tid=2009]   MAP_CREATE -> fd=45 errno=0 kernel_map_id=33
+[108.886127 pid=2001 tid=2009] BPF_MAP_CREATE type=1 key_size=4 value_size=16 max_entries=512 name=cilium_devices
+[108.887998 pid=2001 tid=2009]   MAP_CREATE -> fd=43 errno=0 kernel_map_id=34
+[108.888144 pid=2001 tid=2009] BPF_MAP_CREATE type=9 key_size=14 value_size=40 max_entries=591428 name=cilium_snat_v4_
+[108.929125 pid=2001 tid=2009]   MAP_CREATE -> fd=46 errno=0 kernel_map_id=35
+[108.929647 pid=2001 tid=2009] BPF_MAP_CREATE type=9 key_size=14 value_size=56 max_entries=591428 name=cilium_ct4_glob
+[108.974556 pid=2001 tid=2009]   MAP_CREATE -> fd=47 errno=0 kernel_map_id=36
+[108.974954 pid=2001 tid=2009] BPF_MAP_CREATE type=9 key_size=14 value_size=56 max_entries=295714 name=cilium_ct_any4_
+[108.998586 pid=2001 tid=2009]   MAP_CREATE -> fd=48 errno=0 kernel_map_id=37
+[108.998931 pid=2001 tid=2009] BPF_MAP_CREATE type=9 key_size=12 value_size=4 max_entries=8192 name=cilium_ipv4_fra
+[108.999151 pid=2001 tid=2009]   MAP_CREATE -> fd=49 errno=0 kernel_map_id=38
+[108.999297 pid=2001 tid=2009] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=cilium_signals
+[108.999410 pid=2001 tid=2009]   MAP_CREATE -> fd=49 errno=0 kernel_map_id=39
+[108.999571 pid=2001 tid=2009] BPF_MAP_CREATE type=6 key_size=4 value_size=4 max_entries=33 name=cilium_snat_v4_
+[108.999697 pid=2001 tid=2009]   MAP_CREATE -> fd=50 errno=0 kernel_map_id=40
+[109.040989 pid=2149 tid=2149] shim_init pid=2149 exe=/usr/sbin/xtables-nft-multi
+[109.041397 pid=2001 tid=2013] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=Apache-2.0 expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.041520 pid=2001 tid=2001] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=d7e19a0588bb6d58 license=Apache-2.0 expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.041707 pid=2001 tid=2001]   PROG_LOAD -> fd=68 errno=0 kernel_prog_id=14
+[109.042183 pid=2001 tid=2031] BPF_MAP_CREATE type=1 key_size=4 value_size=4 max_entries=2 name=
+[109.042303 pid=2001 tid=2001] BPF_LINK_CREATE prog_fd=68 target_fd=1 attach_type=46 flags=16
+[109.042398 pid=2001 tid=2031]   MAP_CREATE -> fd=70 errno=0 kernel_map_id=41
+[109.042521 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=13
+[109.042628 pid=2001 tid=2013] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=13453716aec57bda license=Apache-2.0 expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.042731 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=15
+[109.042655 pid=2152 tid=2152] shim_init pid=2152 exe=/usr/sbin/xtables-nft-multi
+[109.043198 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=2 hash=58255400910d7827 policy_hash=58255400910d7827 branch_profile_hash=d7e19a0588bb6d58 license=Apache-2.0 expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.043331 pid=2152 tid=2156] socket: listening on /var/run/bpfrejit/shim-2152.sock
+[109.043321 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=16
+[109.044590 pid=2157 tid=2157] shim_init pid=2157 exe=/usr/sbin/xtables-nft-multi
+[109.044878 pid=2157 tid=2159] socket: listening on /var/run/bpfrejit/shim-2157.sock
+[109.045905 pid=2160 tid=2160] shim_init pid=2160 exe=/usr/sbin/xtables-nft-multi
+[109.046237 pid=2160 tid=2162] socket: listening on /var/run/bpfrejit/shim-2160.sock
+[109.047387 pid=2163 tid=2163] shim_init pid=2163 exe=/usr/sbin/xtables-nft-multi
+[109.047735 pid=2163 tid=2165] socket: listening on /var/run/bpfrejit/shim-2163.sock
+[109.048844 pid=2166 tid=2166] shim_init pid=2166 exe=/usr/sbin/xtables-nft-multi
+[109.049150 pid=2166 tid=2168] socket: listening on /var/run/bpfrejit/shim-2166.sock
+[109.050321 pid=2169 tid=2169] shim_init pid=2169 exe=/usr/sbin/xtables-nft-multi
+[109.050638 pid=2169 tid=2171] socket: listening on /var/run/bpfrejit/shim-2169.sock
+[109.051718 pid=2172 tid=2172] shim_init pid=2172 exe=/usr/sbin/xtables-nft-multi
+[109.052055 pid=2172 tid=2174] socket: listening on /var/run/bpfrejit/shim-2172.sock
+[109.053186 pid=2175 tid=2175] shim_init pid=2175 exe=/usr/sbin/xtables-nft-multi
+[109.053479 pid=2175 tid=2177] socket: listening on /var/run/bpfrejit/shim-2175.sock
+[109.054439 pid=2178 tid=2178] shim_init pid=2178 exe=/usr/sbin/xtables-nft-multi
+[109.054685 pid=2178 tid=2180] socket: listening on /var/run/bpfrejit/shim-2178.sock
+[109.056786 pid=2181 tid=2181] shim_init pid=2181 exe=/usr/sbin/xtables-nft-multi
+[109.057126 pid=2181 tid=2183] socket: listening on /var/run/bpfrejit/shim-2181.sock
+[109.058278 pid=2184 tid=2184] shim_init pid=2184 exe=/usr/sbin/xtables-nft-multi
+[109.058674 pid=2184 tid=2186] socket: listening on /var/run/bpfrejit/shim-2184.sock
+[109.059855 pid=2187 tid=2187] shim_init pid=2187 exe=/usr/sbin/xtables-nft-multi
+[109.060181 pid=2187 tid=2189] socket: listening on /var/run/bpfrejit/shim-2187.sock
+[109.061255 pid=2190 tid=2190] shim_init pid=2190 exe=/usr/sbin/xtables-nft-multi
+[109.061551 pid=2190 tid=2192] socket: listening on /var/run/bpfrejit/shim-2190.sock
+[109.062769 pid=2193 tid=2193] shim_init pid=2193 exe=/usr/sbin/xtables-nft-multi
+[109.063151 pid=2193 tid=2195] socket: listening on /var/run/bpfrejit/shim-2193.sock
+[109.064256 pid=2196 tid=2196] shim_init pid=2196 exe=/usr/sbin/xtables-nft-multi
+[109.064583 pid=2196 tid=2198] socket: listening on /var/run/bpfrejit/shim-2196.sock
+[109.065133 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[109.065585 pid=2199 tid=2199] shim_init pid=2199 exe=/usr/sbin/xtables-nft-multi
+[109.065873 pid=2199 tid=2201] socket: listening on /var/run/bpfrejit/shim-2199.sock
+[109.066850 pid=2202 tid=2202] shim_init pid=2202 exe=/usr/sbin/xtables-nft-multi
+[109.067155 pid=2202 tid=2204] socket: listening on /var/run/bpfrejit/shim-2202.sock
+[109.068168 pid=2205 tid=2205] shim_init pid=2205 exe=/usr/sbin/xtables-nft-multi
+[109.068501 pid=2205 tid=2207] socket: listening on /var/run/bpfrejit/shim-2205.sock
+[109.069621 pid=2208 tid=2208] shim_init pid=2208 exe=/usr/sbin/xtables-nft-multi
+[109.069978 pid=2208 tid=2210] socket: listening on /var/run/bpfrejit/shim-2208.sock
+[109.070967 pid=2211 tid=2211] shim_init pid=2211 exe=/usr/sbin/xtables-nft-multi
+[109.071275 pid=2211 tid=2213] socket: listening on /var/run/bpfrejit/shim-2211.sock
+[109.072375 pid=2214 tid=2214] shim_init pid=2214 exe=/usr/sbin/xtables-nft-multi
+[109.072701 pid=2214 tid=2216] socket: listening on /var/run/bpfrejit/shim-2214.sock
+[109.074044 pid=2217 tid=2217] shim_init pid=2217 exe=/usr/sbin/xtables-nft-multi
+[109.074349 pid=2217 tid=2219] socket: listening on /var/run/bpfrejit/shim-2217.sock
+[109.076812 pid=2220 tid=2220] shim_init pid=2220 exe=/usr/sbin/xtables-nft-multi
+[109.077078 pid=2220 tid=2222] socket: listening on /var/run/bpfrejit/shim-2220.sock
+[109.078978 pid=2223 tid=2223] shim_init pid=2223 exe=/usr/sbin/xtables-nft-multi
+[109.079270 pid=2223 tid=2225] socket: listening on /var/run/bpfrejit/shim-2223.sock
+[109.080311 pid=2226 tid=2226] shim_init pid=2226 exe=/usr/sbin/xtables-nft-multi
+[109.080582 pid=2226 tid=2228] socket: listening on /var/run/bpfrejit/shim-2226.sock
+[109.081605 pid=2229 tid=2229] shim_init pid=2229 exe=/usr/sbin/xtables-nft-multi
+[109.081907 pid=2229 tid=2231] socket: listening on /var/run/bpfrejit/shim-2229.sock
+[109.082936 pid=2232 tid=2232] shim_init pid=2232 exe=/usr/sbin/xtables-nft-multi
+[109.083193 pid=2232 tid=2234] socket: listening on /var/run/bpfrejit/shim-2232.sock
+[109.084329 pid=2235 tid=2235] shim_init pid=2235 exe=/usr/sbin/xtables-nft-multi
+[109.084609 pid=2235 tid=2237] socket: listening on /var/run/bpfrejit/shim-2235.sock
+[109.085983 pid=2238 tid=2238] shim_init pid=2238 exe=/usr/sbin/xtables-nft-multi
+[109.086302 pid=2238 tid=2240] socket: listening on /var/run/bpfrejit/shim-2238.sock
+[109.091191 pid=2001 tid=2001]   LINK_CREATE -> fd=72 errno=0 kernel_link_id=3
+[109.097160 pid=2243 tid=2243] shim_init pid=2243 exe=/usr/sbin/xtables-nft-multi
+[109.099273 pid=2243 tid=2245] socket: listening on /var/run/bpfrejit/shim-2243.sock
+[109.100924 pid=2246 tid=2246] shim_init pid=2246 exe=/usr/sbin/xtables-nft-multi
+[109.101269 pid=2246 tid=2248] socket: listening on /var/run/bpfrejit/shim-2246.sock
+[109.102799 pid=2249 tid=2249] shim_init pid=2249 exe=/usr/sbin/xtables-nft-multi
+[109.103098 pid=2249 tid=2251] socket: listening on /var/run/bpfrejit/shim-2249.sock
+[109.104230 pid=2252 tid=2252] shim_init pid=2252 exe=/usr/sbin/xtables-nft-multi
+[109.104617 pid=2252 tid=2254] socket: listening on /var/run/bpfrejit/shim-2252.sock
+[109.105774 pid=2255 tid=2255] shim_init pid=2255 exe=/usr/sbin/xtables-nft-multi
+[109.106120 pid=2255 tid=2257] socket: listening on /var/run/bpfrejit/shim-2255.sock
+[109.107406 pid=2258 tid=2258] shim_init pid=2258 exe=/usr/sbin/xtables-nft-multi
+[109.108859 pid=2261 tid=2261] shim_init pid=2261 exe=/usr/sbin/xtables-nft-multi
+[109.109117 pid=2261 tid=2263] socket: listening on /var/run/bpfrejit/shim-2261.sock
+[109.110088 pid=2264 tid=2264] shim_init pid=2264 exe=/usr/sbin/xtables-nft-multi
+[109.110421 pid=2264 tid=2266] socket: listening on /var/run/bpfrejit/shim-2264.sock
+[109.111506 pid=2267 tid=2267] shim_init pid=2267 exe=/usr/sbin/xtables-nft-multi
+[109.117173 pid=2270 tid=2270] shim_init pid=2270 exe=/usr/sbin/xtables-nft-multi
+[109.117480 pid=2270 tid=2272] socket: listening on /var/run/bpfrejit/shim-2270.sock
+[109.118474 pid=2273 tid=2273] shim_init pid=2273 exe=/usr/sbin/xtables-nft-multi
+[109.118801 pid=2273 tid=2275] socket: listening on /var/run/bpfrejit/shim-2273.sock
+[109.119863 pid=2276 tid=2276] shim_init pid=2276 exe=/usr/sbin/xtables-nft-multi
+[109.120152 pid=2276 tid=2278] socket: listening on /var/run/bpfrejit/shim-2276.sock
+[109.121275 pid=2280 tid=2280] shim_init pid=2280 exe=/usr/sbin/xtables-nft-multi
+[109.121854 pid=2280 tid=2282] socket: listening on /var/run/bpfrejit/shim-2280.sock
+[109.123792 pid=2283 tid=2283] shim_init pid=2283 exe=/usr/sbin/xtables-nft-multi
+[109.125621 pid=2286 tid=2286] shim_init pid=2286 exe=/usr/sbin/xtables-nft-multi
+[109.126200 pid=2286 tid=2288] socket: listening on /var/run/bpfrejit/shim-2286.sock
+[109.127350 pid=2289 tid=2289] shim_init pid=2289 exe=/usr/sbin/xtables-nft-multi
+[109.127699 pid=2289 tid=2291] socket: listening on /var/run/bpfrejit/shim-2289.sock
+[109.128703 pid=2292 tid=2292] shim_init pid=2292 exe=/usr/sbin/xtables-nft-multi
+[109.128986 pid=2292 tid=2294] socket: listening on /var/run/bpfrejit/shim-2292.sock
+[109.129930 pid=2295 tid=2295] shim_init pid=2295 exe=/usr/sbin/xtables-nft-multi
+[109.130202 pid=2295 tid=2297] socket: listening on /var/run/bpfrejit/shim-2295.sock
+[109.131197 pid=2298 tid=2298] shim_init pid=2298 exe=/usr/sbin/xtables-nft-multi
+[109.131639 pid=2298 tid=2300] socket: listening on /var/run/bpfrejit/shim-2298.sock
+[109.132809 pid=2301 tid=2301] shim_init pid=2301 exe=/usr/sbin/xtables-nft-multi
+[109.133144 pid=2301 tid=2303] socket: listening on /var/run/bpfrejit/shim-2301.sock
+[109.134241 pid=2304 tid=2304] shim_init pid=2304 exe=/usr/sbin/xtables-nft-multi
+[109.134589 pid=2304 tid=2306] socket: listening on /var/run/bpfrejit/shim-2304.sock
+[109.135700 pid=2307 tid=2307] shim_init pid=2307 exe=/usr/sbin/xtables-nft-multi
+[109.136272 pid=2307 tid=2309] socket: listening on /var/run/bpfrejit/shim-2307.sock
+[109.137412 pid=2310 tid=2310] shim_init pid=2310 exe=/usr/sbin/xtables-nft-multi
+[109.137747 pid=2310 tid=2312] socket: listening on /var/run/bpfrejit/shim-2310.sock
+[109.210165 pid=2001 tid=2012] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=4 hash=6347640e785726be policy_hash=6347640e785726be branch_profile_hash=8478e96d26862c72 license= expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.210340 pid=2001 tid=2012]   PROG_LOAD -> fd=65 errno=0 kernel_prog_id=17
+[109.211390 pid=2314 tid=2314] shim_init pid=2314 exe=/usr/bin/dash
+[109.211759 pid=2314 tid=2316] socket: listening on /var/run/bpfrejit/shim-2314.sock
+[109.213368 pid=2314 tid=2314] shim_init pid=2314 exe=/usr/bin/python3.12
+[109.213745 pid=2314 tid=2318] socket: listening on /var/run/bpfrejit/shim-2314.sock
+[109.247153 pid=2319 tid=2319] shim_init pid=2319 exe=/usr/lib/llvm-18/bin/clang
+[109.247856 pid=2319 tid=2321] socket: listening on /var/run/bpfrejit/shim-2319.sock
+[109.265902 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[109.332494 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=3 hash=145b4e38542e17e8 policy_hash=145b4e38542e17e8 branch_profile_hash=ba0e55e7b0f2e629 license= expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.332673 pid=2001 tid=2013]   PROG_LOAD -> fd=63 errno=0 kernel_prog_id=18
+[109.332858 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=9f0429436c98cc4b policy_hash=9f0429436c98cc4b branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.332993 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.333120 pid=2001 tid=2013] BPF_PROG_LOAD type=18 (socket_filter) name= insn_cnt=3 hash=145b4e38542e17e8 policy_hash=145b4e38542e17e8 branch_profile_hash=b1e1f3a3474f38d8 license= expected_attach=10 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.333215 pid=2001 tid=2013]   PROG_LOAD -> fd=63 errno=0 kernel_prog_id=19
+[109.333353 pid=2001 tid=2013] BPF_PROG_LOAD type=18 (socket_filter) name= insn_cnt=4 hash=efcab18e103fecc3 policy_hash=efcab18e103fecc3 branch_profile_hash=e11b16d260d3868f license=GPL expected_attach=10 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.333480 pid=2001 tid=2013]   PROG_LOAD -> fd=63 errno=0 kernel_prog_id=20
+[109.333609 pid=2001 tid=2013] BPF_PROG_LOAD type=18 (socket_filter) name= insn_cnt=4 hash=9262fd513c27b01d policy_hash=9262fd513c27b01d branch_profile_hash=e11b16d260d3868f license=GPL expected_attach=10 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.333734 pid=2001 tid=2013]   PROG_LOAD -> fd=63 errno=0 kernel_prog_id=21
+[109.333828 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=a24c03fedda8ec78 policy_hash=a24c03fedda8ec78 branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.333903 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.334016 pid=2001 tid=2013] BPF_PROG_LOAD type=6 (xdp) name=test insn_cnt=6 hash=f2c52b5b17d11f48 policy_hash=f2c52b5b17d11f48 branch_profile_hash=ab247ceaec83d6c8 license= expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.334113 pid=2001 tid=2013]   PROG_LOAD -> fd=63 errno=0 kernel_prog_id=22
+[109.334259 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=66fd9578da1bab9c policy_hash=66fd9578da1bab9c branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.334380 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=23
+[109.334984 pid=2001 tid=2013] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=4097 hash=dad2efe83d9579b0 policy_hash=dad2efe83d9579b0 branch_profile_hash=056b0b5b49a2ec59 license= expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.335591 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=24
+[109.335820 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name=adjust_mac_room insn_cnt=5 hash=708e759c87fe3b92 policy_hash=708e759c87fe3b92 branch_profile_hash=9f12d2c784f1e786 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.335942 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=25
+[109.336028 pid=2001 tid=2013] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=3 hash=145b4e38542e17e8 policy_hash=145b4e38542e17e8 branch_profile_hash=f571f2f8d6fcf4ab license=MIT expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.336145 pid=2001 tid=2013]   PROG_LOAD -> fd=69 errno=0 kernel_prog_id=26
+[109.336268 pid=2001 tid=2013] BPF_PROG_LOAD type=9 (cgroup_sock) name= insn_cnt=4 hash=caf24c904d99ae9b policy_hash=caf24c904d99ae9b branch_profile_hash=a26164fd13e51a74 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.336392 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=27
+[109.336470 pid=2001 tid=2013] BPF_PROG_LOAD type=18 (socket_filter) name= insn_cnt=4 hash=caf24c904d99ae9b policy_hash=caf24c904d99ae9b branch_profile_hash=e11b16d260d3868f license=GPL expected_attach=10 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.336555 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=28
+[109.336632 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=caf24c904d99ae9b policy_hash=caf24c904d99ae9b branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.336745 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=29
+[109.336821 pid=2001 tid=2013] BPF_PROG_LOAD type=6 (xdp) name= insn_cnt=4 hash=caf24c904d99ae9b policy_hash=caf24c904d99ae9b branch_profile_hash=d4ce706beb5e0f9b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.336932 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=30
+[109.337006 pid=2001 tid=2013] BPF_MAP_CREATE type=9 key_size=1 value_size=1 max_entries=2 name=
+[109.337088 pid=2001 tid=2013]   MAP_CREATE -> fd=67 errno=0 kernel_map_id=42
+[109.337207 pid=2001 tid=2013] BPF_PROG_LOAD type=9 (cgroup_sock) name= insn_cnt=4 hash=b35203a5833d4d57 policy_hash=b35203a5833d4d57 branch_profile_hash=a26164fd13e51a74 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.337328 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=31
+[109.337436 pid=2001 tid=2013] BPF_PROG_LOAD type=18 (socket_filter) name= insn_cnt=4 hash=b35203a5833d4d57 policy_hash=b35203a5833d4d57 branch_profile_hash=e11b16d260d3868f license=GPL expected_attach=10 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.337565 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=32
+[109.337685 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=68fdd4a18626f631 policy_hash=68fdd4a18626f631 branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.337772 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.337906 pid=2001 tid=2013] BPF_PROG_LOAD type=18 (socket_filter) name= insn_cnt=4 hash=f08991ac564fe48c policy_hash=f08991ac564fe48c branch_profile_hash=e11b16d260d3868f license=GPL expected_attach=10 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.338042 pid=2001 tid=2013]   PROG_LOAD -> fd=67 errno=0 kernel_prog_id=33
+[109.338140 pid=2001 tid=2013] BPF_PROG_LOAD type=18 (socket_filter) name= insn_cnt=4 hash=36de2c0cd88b4704 policy_hash=36de2c0cd88b4704 branch_profile_hash=e11b16d260d3868f license=GPL expected_attach=10 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.338239 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.338353 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=3f0a93a1528f319a policy_hash=3f0a93a1528f319a branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.338439 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.338557 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=aa9310926a3bcbb6 policy_hash=aa9310926a3bcbb6 branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.338641 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.338725 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=cd2d1504e99b3cd5 policy_hash=cd2d1504e99b3cd5 branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.338826 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.338907 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name= insn_cnt=4 hash=83dde43a99f0c866 policy_hash=83dde43a99f0c866 branch_profile_hash=24ee01527a08423e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.338990 pid=2001 tid=2013]   PROG_LOAD -> fd=-1 errno=13 kernel_prog_id=0
+[109.339403 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name=probe_fib_looku insn_cnt=23 hash=f436d54fbd8c7ea7 policy_hash=f436d54fbd8c7ea7 branch_profile_hash=03d8f66805321cae license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=67 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.339528 pid=2001 tid=2013]   PROG_LOAD -> fd=69 errno=0 kernel_prog_id=34
+[109.339663 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name=probe_fib_looku insn_cnt=23 hash=ca5c856e97173b3b policy_hash=ca5c856e97173b3b branch_profile_hash=03d8f66805321cae license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=67 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.339796 pid=2001 tid=2013]   PROG_LOAD -> fd=70 errno=0 kernel_prog_id=35
+[109.339944 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name=probe_fib_looku insn_cnt=23 hash=b81a739a980c3e63 policy_hash=b81a739a980c3e63 branch_profile_hash=03d8f66805321cae license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=67 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.340072 pid=2001 tid=2013]   PROG_LOAD -> fd=71 errno=0 kernel_prog_id=36
+[109.340269 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name=probe_fib_looku insn_cnt=23 hash=f436d54fbd8c7ea7 policy_hash=f436d54fbd8c7ea7 branch_profile_hash=03d8f66805321cae license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=67 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.340394 pid=2001 tid=2013]   PROG_LOAD -> fd=69 errno=0 kernel_prog_id=37
+[109.340539 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name=probe_fib_looku insn_cnt=23 hash=ca5c856e97173b3b policy_hash=ca5c856e97173b3b branch_profile_hash=03d8f66805321cae license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=67 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.340671 pid=2001 tid=2013]   PROG_LOAD -> fd=70 errno=0 kernel_prog_id=38
+[109.340809 pid=2001 tid=2013] BPF_PROG_LOAD type=3 (sched_cls) name=probe_fib_looku insn_cnt=23 hash=b81a739a980c3e63 policy_hash=b81a739a980c3e63 branch_profile_hash=03d8f66805321cae license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=67 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.340939 pid=2001 tid=2013]   PROG_LOAD -> fd=71 errno=0 kernel_prog_id=39
+[109.341084 pid=2001 tid=2013] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=4096 name=cilium_l2_respo
+[109.341193 pid=2001 tid=2013]   MAP_CREATE -> fd=67 errno=0 kernel_map_id=43
+[109.341322 pid=2001 tid=2013] BPF_MAP_CREATE type=1 key_size=24 value_size=8 max_entries=4096 name=cilium_l2_respo
+[109.341404 pid=2001 tid=2013]   MAP_CREATE -> fd=69 errno=0 kernel_map_id=44
+[109.467176 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[109.668138 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[109.801831 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=
+[109.802044 pid=2001 tid=2015]   MAP_CREATE -> fd=65 errno=0 kernel_map_id=45
+[109.802298 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[109.802708 pid=2001 tid=2015]   MAP_CREATE -> fd=73 errno=0 kernel_map_id=46
+[109.803154 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=186 max_entries=1 name=.rodata.config
+[109.803299 pid=2001 tid=2015]   MAP_CREATE -> fd=78 errno=0 kernel_map_id=47
+[109.803394 pid=2001 tid=2015] BPF_MAP_CREATE type=6 key_size=4 value_size=28 max_entries=1 name=cilium_xdp_scra
+[109.803504 pid=2001 tid=2015]   MAP_CREATE -> fd=65 errno=0 kernel_map_id=48
+[109.803791 pid=2001 tid=2015] BPF_PROG_LOAD type=6 (xdp) name=cil_xdp_entry insn_cnt=280 hash=101712bfeed14d30 policy_hash=7553fcd85074d673 branch_profile_hash=2bdd3175eb0ef6f7 license=Dual BSD/GPL expected_attach=37 attach_btf_id=0 prog_btf_fd=83 attach_btf_obj_fd=0 attach_prog_fd=0
+[109.804225 pid=2001 tid=2015]   PROG_LOAD -> fd=63 errno=0 kernel_prog_id=40
+[109.804560 pid=2001 tid=2015] BPF_LINK_CREATE prog_fd=4294967295 target_fd=4294967295 attach_type=0 flags=0
+[109.804673 pid=2001 tid=2015]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[109.804782 pid=2001 tid=2015] BPF_LINK_CREATE prog_fd=63 target_fd=3 attach_type=37 flags=4
+[109.830867 pid=2333 tid=2333] shim_init pid=2333 exe=/usr/sbin/xtables-nft-multi
+[109.831294 pid=2333 tid=2335] socket: listening on /var/run/bpfrejit/shim-2333.sock
+[109.854182 pid=2001 tid=2015]   LINK_CREATE -> fd=83 errno=0 kernel_link_id=4
+[109.856081 pid=2337 tid=2337] shim_init pid=2337 exe=/usr/sbin/xtables-nft-multi
+[109.856082 pid=2336 tid=2336] shim_init pid=2336 exe=/usr/bin/dash
+[109.856614 pid=2337 tid=2341] socket: listening on /var/run/bpfrejit/shim-2337.sock
+[109.857621 pid=2336 tid=2336] shim_init pid=2336 exe=/usr/bin/python3.12
+[109.858147 pid=2342 tid=2342] shim_init pid=2342 exe=/usr/sbin/xtables-nft-multi
+[109.858683 pid=2342 tid=2346] socket: listening on /var/run/bpfrejit/shim-2342.sock
+[109.858763 pid=2336 tid=2344] socket: listening on /var/run/bpfrejit/shim-2336.sock
+[109.861392 pid=2347 tid=2347] shim_init pid=2347 exe=/usr/sbin/xtables-nft-multi
+[109.862021 pid=2347 tid=2349] socket: listening on /var/run/bpfrejit/shim-2347.sock
+[109.863722 pid=2350 tid=2350] shim_init pid=2350 exe=/usr/sbin/xtables-nft-multi
+[109.864095 pid=2350 tid=2352] socket: listening on /var/run/bpfrejit/shim-2350.sock
+[109.865670 pid=2353 tid=2353] shim_init pid=2353 exe=/usr/sbin/xtables-nft-multi
+[109.866201 pid=2353 tid=2355] socket: listening on /var/run/bpfrejit/shim-2353.sock
+[109.867767 pid=2356 tid=2356] shim_init pid=2356 exe=/usr/sbin/xtables-nft-multi
+[109.868274 pid=2356 tid=2358] socket: listening on /var/run/bpfrejit/shim-2356.sock
+[109.869923 pid=2359 tid=2359] shim_init pid=2359 exe=/usr/sbin/xtables-nft-multi
+[109.870131 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[109.870370 pid=2359 tid=2361] socket: listening on /var/run/bpfrejit/shim-2359.sock
+[109.872170 pid=2362 tid=2362] shim_init pid=2362 exe=/usr/sbin/xtables-nft-multi
+[109.872671 pid=2362 tid=2364] socket: listening on /var/run/bpfrejit/shim-2362.sock
+[109.874120 pid=2365 tid=2365] shim_init pid=2365 exe=/usr/sbin/xtables-nft-multi
+[109.874514 pid=2365 tid=2367] socket: listening on /var/run/bpfrejit/shim-2365.sock
+[109.875915 pid=2368 tid=2368] shim_init pid=2368 exe=/usr/sbin/xtables-nft-multi
+[109.876460 pid=2368 tid=2370] socket: listening on /var/run/bpfrejit/shim-2368.sock
+[109.878076 pid=2371 tid=2371] shim_init pid=2371 exe=/usr/sbin/xtables-nft-multi
+[109.878604 pid=2371 tid=2373] socket: listening on /var/run/bpfrejit/shim-2371.sock
+[109.879952 pid=2374 tid=2374] shim_init pid=2374 exe=/usr/sbin/xtables-nft-multi
+[109.880298 pid=2374 tid=2376] socket: listening on /var/run/bpfrejit/shim-2374.sock
+[109.881761 pid=2378 tid=2378] shim_init pid=2378 exe=/usr/sbin/xtables-nft-multi
+[109.882309 pid=2378 tid=2380] socket: listening on /var/run/bpfrejit/shim-2378.sock
+[109.883922 pid=2381 tid=2381] shim_init pid=2381 exe=/usr/sbin/xtables-nft-multi
+[109.884380 pid=2381 tid=2383] socket: listening on /var/run/bpfrejit/shim-2381.sock
+[109.885777 pid=2384 tid=2384] shim_init pid=2384 exe=/usr/sbin/xtables-nft-multi
+[109.886245 pid=2384 tid=2386] socket: listening on /var/run/bpfrejit/shim-2384.sock
+[109.887706 pid=2387 tid=2387] shim_init pid=2387 exe=/usr/sbin/xtables-nft-multi
+[109.888119 pid=2387 tid=2389] socket: listening on /var/run/bpfrejit/shim-2387.sock
+[109.889509 pid=2390 tid=2390] shim_init pid=2390 exe=/usr/sbin/xtables-nft-multi
+[109.890040 pid=2390 tid=2392] socket: listening on /var/run/bpfrejit/shim-2390.sock
+[109.891172 pid=2377 tid=2377] shim_init pid=2377 exe=/usr/lib/llvm-18/bin/clang
+[109.891305 pid=2393 tid=2393] shim_init pid=2393 exe=/usr/sbin/xtables-nft-multi
+[109.891495 pid=2377 tid=2395] socket: listening on /var/run/bpfrejit/shim-2377.sock
+[109.894459 pid=2398 tid=2398] shim_init pid=2398 exe=/usr/sbin/xtables-nft-multi
+[109.894852 pid=2398 tid=2400] socket: listening on /var/run/bpfrejit/shim-2398.sock
+[109.896440 pid=2401 tid=2401] shim_init pid=2401 exe=/usr/sbin/xtables-nft-multi
+[109.896998 pid=2401 tid=2403] socket: listening on /var/run/bpfrejit/shim-2401.sock
+[109.914983 pid=2404 tid=2404] shim_init pid=2404 exe=/usr/sbin/xtables-nft-multi
+[109.915489 pid=2404 tid=2406] socket: listening on /var/run/bpfrejit/shim-2404.sock
+[109.917071 pid=2407 tid=2407] shim_init pid=2407 exe=/usr/sbin/xtables-nft-multi
+[109.917576 pid=2407 tid=2409] socket: listening on /var/run/bpfrejit/shim-2407.sock
+[109.932878 pid=2410 tid=2410] shim_init pid=2410 exe=/usr/sbin/xtables-nft-multi
+[109.933541 pid=2410 tid=2412] socket: listening on /var/run/bpfrejit/shim-2410.sock
+[109.940245 pid=2413 tid=2413] shim_init pid=2413 exe=/usr/sbin/xtables-nft-multi
+[109.940963 pid=2413 tid=2415] socket: listening on /var/run/bpfrejit/shim-2413.sock
+[109.942767 pid=2416 tid=2416] shim_init pid=2416 exe=/usr/sbin/xtables-nft-multi
+[109.943459 pid=2416 tid=2418] socket: listening on /var/run/bpfrejit/shim-2416.sock
+[109.944923 pid=2419 tid=2419] shim_init pid=2419 exe=/usr/sbin/xtables-nft-multi
+[109.945465 pid=2419 tid=2421] socket: listening on /var/run/bpfrejit/shim-2419.sock
+[109.947485 pid=2422 tid=2422] shim_init pid=2422 exe=/usr/sbin/xtables-nft-multi
+[109.948141 pid=2422 tid=2424] socket: listening on /var/run/bpfrejit/shim-2422.sock
+[109.950831 pid=2425 tid=2425] shim_init pid=2425 exe=/usr/sbin/xtables-nft-multi
+[109.951593 pid=2425 tid=2427] socket: listening on /var/run/bpfrejit/shim-2425.sock
+[109.954685 pid=2428 tid=2428] shim_init pid=2428 exe=/usr/sbin/xtables-nft-multi
+[109.955248 pid=2428 tid=2430] socket: listening on /var/run/bpfrejit/shim-2428.sock
+[109.957343 pid=2431 tid=2431] shim_init pid=2431 exe=/usr/sbin/xtables-nft-multi
+[109.957891 pid=2431 tid=2433] socket: listening on /var/run/bpfrejit/shim-2431.sock
+[109.960470 pid=2434 tid=2434] shim_init pid=2434 exe=/usr/sbin/xtables-nft-multi
+[109.960960 pid=2434 tid=2436] socket: listening on /var/run/bpfrejit/shim-2434.sock
+[109.962902 pid=2437 tid=2437] shim_init pid=2437 exe=/usr/sbin/xtables-nft-multi
+[109.964901 pid=2440 tid=2440] shim_init pid=2440 exe=/usr/sbin/xtables-nft-multi
+[109.965535 pid=2440 tid=2442] socket: listening on /var/run/bpfrejit/shim-2440.sock
+[109.967248 pid=2443 tid=2443] shim_init pid=2443 exe=/usr/sbin/xtables-nft-multi
+[109.967737 pid=2443 tid=2445] socket: listening on /var/run/bpfrejit/shim-2443.sock
+[109.969487 pid=2446 tid=2446] shim_init pid=2446 exe=/usr/sbin/xtables-nft-multi
+[109.970173 pid=2446 tid=2448] socket: listening on /var/run/bpfrejit/shim-2446.sock
+[109.971868 pid=2449 tid=2449] shim_init pid=2449 exe=/usr/sbin/xtables-nft-multi
+[109.972396 pid=2449 tid=2451] socket: listening on /var/run/bpfrejit/shim-2449.sock
+[109.974322 pid=2452 tid=2452] shim_init pid=2452 exe=/usr/sbin/xtables-nft-multi
+[109.974785 pid=2452 tid=2454] socket: listening on /var/run/bpfrejit/shim-2452.sock
+[109.976425 pid=2455 tid=2455] shim_init pid=2455 exe=/usr/sbin/xtables-nft-multi
+[109.977012 pid=2455 tid=2457] socket: listening on /var/run/bpfrejit/shim-2455.sock
+[109.978753 pid=2458 tid=2458] shim_init pid=2458 exe=/usr/sbin/xtables-nft-multi
+[109.979510 pid=2458 tid=2460] socket: listening on /var/run/bpfrejit/shim-2458.sock
+[109.981008 pid=2461 tid=2461] shim_init pid=2461 exe=/usr/sbin/xtables-nft-multi
+[109.981607 pid=2461 tid=2463] socket: listening on /var/run/bpfrejit/shim-2461.sock
+[109.983458 pid=2464 tid=2464] shim_init pid=2464 exe=/usr/sbin/xtables-nft-multi
+[109.984156 pid=2464 tid=2466] socket: listening on /var/run/bpfrejit/shim-2464.sock
+[109.985923 pid=2467 tid=2467] shim_init pid=2467 exe=/usr/sbin/xtables-nft-multi
+[109.986504 pid=2467 tid=2469] socket: listening on /var/run/bpfrejit/shim-2467.sock
+[109.988330 pid=2470 tid=2470] shim_init pid=2470 exe=/usr/sbin/xtables-nft-multi
+[109.988843 pid=2470 tid=2472] socket: listening on /var/run/bpfrejit/shim-2470.sock
+[109.990337 pid=2473 tid=2473] shim_init pid=2473 exe=/usr/sbin/xtables-nft-multi
+[109.996013 pid=2476 tid=2476] shim_init pid=2476 exe=/usr/sbin/xtables-nft-multi
+[109.998772 pid=2476 tid=2478] socket: listening on /var/run/bpfrejit/shim-2476.sock
+[110.003204 pid=2479 tid=2479] shim_init pid=2479 exe=/usr/sbin/xtables-nft-multi
+[110.003851 pid=2479 tid=2481] socket: listening on /var/run/bpfrejit/shim-2479.sock
+[110.070811 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[110.128570 pid=2001 tid=2015] BPF_MAP_CREATE type=11 key_size=12 value_size=12 max_entries=16384 name=cilium_policy_v
+[110.128987 pid=2001 tid=2015]   MAP_CREATE -> fd=63 errno=0 kernel_map_id=49
+[110.134263 pid=2482 tid=2482] shim_init pid=2482 exe=/usr/bin/dash
+[110.136047 pid=2482 tid=2482] shim_init pid=2482 exe=/usr/bin/python3.12
+[110.136778 pid=2482 tid=2486] socket: listening on /var/run/bpfrejit/shim-2482.sock
+[110.169983 pid=2487 tid=2487] shim_init pid=2487 exe=/usr/lib/llvm-18/bin/clang
+[110.170974 pid=2487 tid=2489] socket: listening on /var/run/bpfrejit/shim-2487.sock
+[110.178802 pid=2490 tid=2490] shim_init pid=2490 exe=/usr/bin/dash
+[110.180092 pid=2490 tid=2490] shim_init pid=2490 exe=/usr/bin/python3.12
+[110.180690 pid=2490 tid=2494] socket: listening on /var/run/bpfrejit/shim-2490.sock
+[110.205166 pid=2496 tid=2496] shim_init pid=2496 exe=/usr/sbin/xtables-nft-multi
+[110.205854 pid=2496 tid=2498] socket: listening on /var/run/bpfrejit/shim-2496.sock
+[110.208471 pid=2499 tid=2499] shim_init pid=2499 exe=/usr/sbin/xtables-nft-multi
+[110.213155 pid=2502 tid=2502] shim_init pid=2502 exe=/usr/sbin/xtables-nft-multi
+[110.213611 pid=2495 tid=2495] shim_init pid=2495 exe=/usr/lib/llvm-18/bin/clang
+[110.214069 pid=2495 tid=2506] socket: listening on /var/run/bpfrejit/shim-2495.sock
+[110.217207 pid=2507 tid=2507] shim_init pid=2507 exe=/usr/sbin/xtables-nft-multi
+[110.217882 pid=2507 tid=2509] socket: listening on /var/run/bpfrejit/shim-2507.sock
+[110.220534 pid=2510 tid=2510] shim_init pid=2510 exe=/usr/sbin/xtables-nft-multi
+[110.221059 pid=2510 tid=2512] socket: listening on /var/run/bpfrejit/shim-2510.sock
+[110.222394 pid=2513 tid=2513] shim_init pid=2513 exe=/usr/sbin/xtables-nft-multi
+[110.223040 pid=2513 tid=2515] socket: listening on /var/run/bpfrejit/shim-2513.sock
+[110.226255 pid=2516 tid=2516] shim_init pid=2516 exe=/usr/sbin/xtables-nft-multi
+[110.227157 pid=2516 tid=2518] socket: listening on /var/run/bpfrejit/shim-2516.sock
+[110.244156 pid=2519 tid=2519] shim_init pid=2519 exe=/usr/sbin/xtables-nft-multi
+[110.244770 pid=2519 tid=2521] socket: listening on /var/run/bpfrejit/shim-2519.sock
+[110.245965 pid=2522 tid=2522] shim_init pid=2522 exe=/usr/sbin/xtables-nft-multi
+[110.246391 pid=2522 tid=2524] socket: listening on /var/run/bpfrejit/shim-2522.sock
+[110.247775 pid=2525 tid=2525] shim_init pid=2525 exe=/usr/sbin/xtables-nft-multi
+[110.248277 pid=2525 tid=2527] socket: listening on /var/run/bpfrejit/shim-2525.sock
+[110.249572 pid=2528 tid=2528] shim_init pid=2528 exe=/usr/sbin/xtables-nft-multi
+[110.250240 pid=2528 tid=2530] socket: listening on /var/run/bpfrejit/shim-2528.sock
+[110.251393 pid=2531 tid=2531] shim_init pid=2531 exe=/usr/sbin/xtables-nft-multi
+[110.251802 pid=2531 tid=2533] socket: listening on /var/run/bpfrejit/shim-2531.sock
+[110.253067 pid=2534 tid=2534] shim_init pid=2534 exe=/usr/sbin/xtables-nft-multi
+[110.253568 pid=2534 tid=2536] socket: listening on /var/run/bpfrejit/shim-2534.sock
+[110.256071 pid=2537 tid=2537] shim_init pid=2537 exe=/usr/sbin/xtables-nft-multi
+[110.256463 pid=2537 tid=2539] socket: listening on /var/run/bpfrejit/shim-2537.sock
+[110.259136 pid=2540 tid=2540] shim_init pid=2540 exe=/usr/sbin/xtables-nft-multi
+[110.259719 pid=2540 tid=2542] socket: listening on /var/run/bpfrejit/shim-2540.sock
+[110.267569 pid=2543 tid=2543] shim_init pid=2543 exe=/usr/sbin/xtables-nft-multi
+[110.268116 pid=2543 tid=2545] socket: listening on /var/run/bpfrejit/shim-2543.sock
+[110.269955 pid=2546 tid=2546] shim_init pid=2546 exe=/usr/sbin/xtables-nft-multi
+[110.270405 pid=2546 tid=2548] socket: listening on /var/run/bpfrejit/shim-2546.sock
+[110.272764 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[110.272357 pid=2549 tid=2549] shim_init pid=2549 exe=/usr/sbin/xtables-nft-multi
+[110.272975 pid=2549 tid=2551] socket: listening on /var/run/bpfrejit/shim-2549.sock
+[110.274714 pid=2552 tid=2552] shim_init pid=2552 exe=/usr/sbin/xtables-nft-multi
+[110.304058 pid=2555 tid=2555] shim_init pid=2555 exe=/usr/sbin/xtables-nft-multi
+[110.305077 pid=2555 tid=2557] socket: listening on /var/run/bpfrejit/shim-2555.sock
+[110.307483 pid=2558 tid=2558] shim_init pid=2558 exe=/usr/sbin/xtables-nft-multi
+[110.308056 pid=2558 tid=2560] socket: listening on /var/run/bpfrejit/shim-2558.sock
+[110.313980 pid=2561 tid=2561] shim_init pid=2561 exe=/usr/sbin/xtables-nft-multi
+[110.314680 pid=2561 tid=2563] socket: listening on /var/run/bpfrejit/shim-2561.sock
+[110.316261 pid=2564 tid=2564] shim_init pid=2564 exe=/usr/sbin/xtables-nft-multi
+[110.316793 pid=2564 tid=2566] socket: listening on /var/run/bpfrejit/shim-2564.sock
+[110.318701 pid=2567 tid=2567] shim_init pid=2567 exe=/usr/sbin/xtables-nft-multi
+[110.319404 pid=2567 tid=2569] socket: listening on /var/run/bpfrejit/shim-2567.sock
+[110.322994 pid=2570 tid=2570] shim_init pid=2570 exe=/usr/sbin/xtables-nft-multi
+[110.324158 pid=2570 tid=2572] socket: listening on /var/run/bpfrejit/shim-2570.sock
+[110.326139 pid=2573 tid=2573] shim_init pid=2573 exe=/usr/sbin/xtables-nft-multi
+[110.326734 pid=2573 tid=2575] socket: listening on /var/run/bpfrejit/shim-2573.sock
+[110.331501 pid=2576 tid=2576] shim_init pid=2576 exe=/usr/sbin/xtables-nft-multi
+[110.332041 pid=2576 tid=2578] socket: listening on /var/run/bpfrejit/shim-2576.sock
+[110.401175 pid=2579 tid=2579] shim_init pid=2579 exe=/usr/sbin/xtables-nft-multi
+[110.402052 pid=2579 tid=2581] socket: listening on /var/run/bpfrejit/shim-2579.sock
+[110.408369 pid=2582 tid=2582] shim_init pid=2582 exe=/usr/sbin/xtables-nft-multi
+[110.409062 pid=2582 tid=2584] socket: listening on /var/run/bpfrejit/shim-2582.sock
+[110.410952 pid=2585 tid=2585] shim_init pid=2585 exe=/usr/sbin/xtables-nft-multi
+[110.411522 pid=2585 tid=2587] socket: listening on /var/run/bpfrejit/shim-2585.sock
+[110.466063 pid=2588 tid=2588] shim_init pid=2588 exe=/usr/sbin/xtables-nft-multi
+[110.466804 pid=2588 tid=2590] socket: listening on /var/run/bpfrejit/shim-2588.sock
+[110.468737 pid=2591 tid=2591] shim_init pid=2591 exe=/usr/sbin/xtables-nft-multi
+[110.469338 pid=2591 tid=2593] socket: listening on /var/run/bpfrejit/shim-2591.sock
+[110.473401 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[110.473762 pid=2594 tid=2594] shim_init pid=2594 exe=/usr/sbin/xtables-nft-multi
+[110.476497 pid=2594 tid=2596] socket: listening on /var/run/bpfrejit/shim-2594.sock
+[110.541815 pid=2597 tid=2597] shim_init pid=2597 exe=/usr/sbin/xtables-nft-multi
+[110.542256 pid=2597 tid=2599] socket: listening on /var/run/bpfrejit/shim-2597.sock
+[110.543723 pid=2600 tid=2600] shim_init pid=2600 exe=/usr/sbin/xtables-nft-multi
+[110.544348 pid=2600 tid=2602] socket: listening on /var/run/bpfrejit/shim-2600.sock
+[110.548184 pid=2603 tid=2603] shim_init pid=2603 exe=/usr/sbin/xtables-nft-multi
+[110.548764 pid=2603 tid=2605] socket: listening on /var/run/bpfrejit/shim-2603.sock
+[110.602092 pid=2606 tid=2606] shim_init pid=2606 exe=/usr/sbin/xtables-nft-multi
+[110.602751 pid=2606 tid=2608] socket: listening on /var/run/bpfrejit/shim-2606.sock
+[110.604028 pid=2609 tid=2609] shim_init pid=2609 exe=/usr/sbin/xtables-nft-multi
+[110.604416 pid=2609 tid=2611] socket: listening on /var/run/bpfrejit/shim-2609.sock
+[110.605893 pid=2612 tid=2612] shim_init pid=2612 exe=/usr/sbin/xtables-nft-multi
+[110.606310 pid=2612 tid=2614] socket: listening on /var/run/bpfrejit/shim-2612.sock
+[110.652780 pid=2615 tid=2615] shim_init pid=2615 exe=/usr/sbin/xtables-nft-multi
+[110.653244 pid=2615 tid=2617] socket: listening on /var/run/bpfrejit/shim-2615.sock
+[110.654505 pid=2618 tid=2618] shim_init pid=2618 exe=/usr/sbin/xtables-nft-multi
+[110.654872 pid=2618 tid=2620] socket: listening on /var/run/bpfrejit/shim-2618.sock
+[110.674444 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[110.703905 pid=2621 tid=2621] shim_init pid=2621 exe=/usr/sbin/xtables-nft-multi
+[110.704629 pid=2621 tid=2623] socket: listening on /var/run/bpfrejit/shim-2621.sock
+[110.706170 pid=2624 tid=2624] shim_init pid=2624 exe=/usr/sbin/xtables-nft-multi
+[110.706665 pid=2624 tid=2626] socket: listening on /var/run/bpfrejit/shim-2624.sock
+[110.762016 pid=2627 tid=2627] shim_init pid=2627 exe=/usr/sbin/xtables-nft-multi
+[110.762663 pid=2627 tid=2629] socket: listening on /var/run/bpfrejit/shim-2627.sock
+[110.764259 pid=2630 tid=2630] shim_init pid=2630 exe=/usr/sbin/xtables-nft-multi
+[110.764709 pid=2630 tid=2632] socket: listening on /var/run/bpfrejit/shim-2630.sock
+[110.812424 pid=2633 tid=2633] shim_init pid=2633 exe=/usr/sbin/xtables-nft-multi
+[110.813165 pid=2633 tid=2635] socket: listening on /var/run/bpfrejit/shim-2633.sock
+[110.815411 pid=2636 tid=2636] shim_init pid=2636 exe=/usr/sbin/xtables-nft-multi
+[110.816121 pid=2636 tid=2638] socket: listening on /var/run/bpfrejit/shim-2636.sock
+[110.818131 pid=2639 tid=2639] shim_init pid=2639 exe=/usr/sbin/xtables-nft-multi
+[110.818844 pid=2639 tid=2641] socket: listening on /var/run/bpfrejit/shim-2639.sock
+[110.869863 pid=2642 tid=2642] shim_init pid=2642 exe=/usr/sbin/xtables-nft-multi
+[110.871271 pid=2642 tid=2644] socket: listening on /var/run/bpfrejit/shim-2642.sock
+[110.875358 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[110.879438 pid=2645 tid=2645] shim_init pid=2645 exe=/usr/sbin/xtables-nft-multi
+[110.879921 pid=2645 tid=2647] socket: listening on /var/run/bpfrejit/shim-2645.sock
+[110.881704 pid=2648 tid=2648] shim_init pid=2648 exe=/usr/sbin/xtables-nft-multi
+[110.882158 pid=2648 tid=2650] socket: listening on /var/run/bpfrejit/shim-2648.sock
+[110.922352 pid=2651 tid=2651] shim_init pid=2651 exe=/usr/sbin/xtables-nft-multi
+[110.922993 pid=2651 tid=2653] socket: listening on /var/run/bpfrejit/shim-2651.sock
+[110.925163 pid=2654 tid=2654] shim_init pid=2654 exe=/usr/sbin/xtables-nft-multi
+[110.925681 pid=2654 tid=2656] socket: listening on /var/run/bpfrejit/shim-2654.sock
+[110.927237 pid=2657 tid=2657] shim_init pid=2657 exe=/usr/sbin/xtables-nft-multi
+[110.927775 pid=2657 tid=2659] socket: listening on /var/run/bpfrejit/shim-2657.sock
+[110.929150 pid=2660 tid=2660] shim_init pid=2660 exe=/usr/sbin/xtables-nft-multi
+[110.929791 pid=2660 tid=2662] socket: listening on /var/run/bpfrejit/shim-2660.sock
+[110.931706 pid=2663 tid=2663] shim_init pid=2663 exe=/usr/sbin/xtables-nft-multi
+[110.932557 pid=2663 tid=2665] socket: listening on /var/run/bpfrejit/shim-2663.sock
+[110.935720 pid=2666 tid=2666] shim_init pid=2666 exe=/usr/sbin/xtables-nft-multi
+[110.936641 pid=2666 tid=2668] socket: listening on /var/run/bpfrejit/shim-2666.sock
+[110.938468 pid=2669 tid=2669] shim_init pid=2669 exe=/usr/sbin/xtables-nft-multi
+[110.939427 pid=2669 tid=2671] socket: listening on /var/run/bpfrejit/shim-2669.sock
+[110.941635 pid=2672 tid=2672] shim_init pid=2672 exe=/usr/sbin/xtables-nft-multi
+[110.944345 pid=2675 tid=2675] shim_init pid=2675 exe=/usr/sbin/xtables-nft-multi
+[110.945054 pid=2675 tid=2677] socket: listening on /var/run/bpfrejit/shim-2675.sock
+[110.946597 pid=2678 tid=2678] shim_init pid=2678 exe=/usr/sbin/xtables-nft-multi
+[110.947196 pid=2678 tid=2680] socket: listening on /var/run/bpfrejit/shim-2678.sock
+[110.948874 pid=2681 tid=2681] shim_init pid=2681 exe=/usr/sbin/xtables-nft-multi
+[110.949236 pid=2681 tid=2683] socket: listening on /var/run/bpfrejit/shim-2681.sock
+[110.950806 pid=2684 tid=2684] shim_init pid=2684 exe=/usr/sbin/xtables-nft-multi
+[110.951573 pid=2684 tid=2686] socket: listening on /var/run/bpfrejit/shim-2684.sock
+[110.953376 pid=2687 tid=2687] shim_init pid=2687 exe=/usr/sbin/xtables-nft-multi
+[110.953887 pid=2687 tid=2689] socket: listening on /var/run/bpfrejit/shim-2687.sock
+[110.955547 pid=2690 tid=2690] shim_init pid=2690 exe=/usr/sbin/xtables-nft-multi
+[110.956114 pid=2690 tid=2692] socket: listening on /var/run/bpfrejit/shim-2690.sock
+[110.960051 pid=2693 tid=2693] shim_init pid=2693 exe=/usr/sbin/xtables-nft-multi
+[110.960783 pid=2693 tid=2695] socket: listening on /var/run/bpfrejit/shim-2693.sock
+[110.962631 pid=2696 tid=2696] shim_init pid=2696 exe=/usr/sbin/xtables-nft-multi
+[110.963326 pid=2696 tid=2698] socket: listening on /var/run/bpfrejit/shim-2696.sock
+[110.964991 pid=2699 tid=2699] shim_init pid=2699 exe=/usr/sbin/xtables-nft-multi
+[110.965575 pid=2699 tid=2701] socket: listening on /var/run/bpfrejit/shim-2699.sock
+[110.967478 pid=2702 tid=2702] shim_init pid=2702 exe=/usr/sbin/xtables-nft-multi
+[110.968047 pid=2702 tid=2704] socket: listening on /var/run/bpfrejit/shim-2702.sock
+[110.970309 pid=2705 tid=2705] shim_init pid=2705 exe=/usr/sbin/xtables-nft-multi
+[110.971513 pid=2705 tid=2707] socket: listening on /var/run/bpfrejit/shim-2705.sock
+[110.974457 pid=2708 tid=2708] shim_init pid=2708 exe=/usr/sbin/xtables-nft-multi
+[110.975211 pid=2708 tid=2710] socket: listening on /var/run/bpfrejit/shim-2708.sock
+[110.976734 pid=2711 tid=2711] shim_init pid=2711 exe=/usr/sbin/xtables-nft-multi
+[110.977443 pid=2711 tid=2713] socket: listening on /var/run/bpfrejit/shim-2711.sock
+[110.979581 pid=2714 tid=2714] shim_init pid=2714 exe=/usr/sbin/xtables-nft-multi
+[110.980059 pid=2714 tid=2716] socket: listening on /var/run/bpfrejit/shim-2714.sock
+[110.981892 pid=2717 tid=2717] shim_init pid=2717 exe=/usr/sbin/xtables-nft-multi
+[110.982415 pid=2717 tid=2719] socket: listening on /var/run/bpfrejit/shim-2717.sock
+[110.984365 pid=2720 tid=2720] shim_init pid=2720 exe=/usr/sbin/xtables-nft-multi
+[110.984843 pid=2720 tid=2722] socket: listening on /var/run/bpfrejit/shim-2720.sock
+[110.986248 pid=2723 tid=2723] shim_init pid=2723 exe=/usr/sbin/xtables-nft-multi
+[110.986830 pid=2723 tid=2725] socket: listening on /var/run/bpfrejit/shim-2723.sock
+[110.988090 pid=2726 tid=2726] shim_init pid=2726 exe=/usr/sbin/xtables-nft-multi
+[110.988779 pid=2726 tid=2728] socket: listening on /var/run/bpfrejit/shim-2726.sock
+[110.990253 pid=2729 tid=2729] shim_init pid=2729 exe=/usr/sbin/xtables-nft-multi
+[110.990761 pid=2729 tid=2731] socket: listening on /var/run/bpfrejit/shim-2729.sock
+[110.992304 pid=2732 tid=2732] shim_init pid=2732 exe=/usr/sbin/xtables-nft-multi
+[110.992820 pid=2732 tid=2734] socket: listening on /var/run/bpfrejit/shim-2732.sock
+[110.994463 pid=2735 tid=2735] shim_init pid=2735 exe=/usr/sbin/xtables-nft-multi
+[110.995035 pid=2735 tid=2737] socket: listening on /var/run/bpfrejit/shim-2735.sock
+[110.996387 pid=2738 tid=2738] shim_init pid=2738 exe=/usr/sbin/xtables-nft-multi
+[111.001366 pid=2741 tid=2741] shim_init pid=2741 exe=/usr/sbin/xtables-nft-multi
+[111.001973 pid=2741 tid=2743] socket: listening on /var/run/bpfrejit/shim-2741.sock
+[111.004587 pid=2744 tid=2744] shim_init pid=2744 exe=/usr/sbin/xtables-nft-multi
+[111.005285 pid=2744 tid=2746] socket: listening on /var/run/bpfrejit/shim-2744.sock
+[111.006794 pid=2747 tid=2747] shim_init pid=2747 exe=/usr/sbin/xtables-nft-multi
+[111.007290 pid=2747 tid=2749] socket: listening on /var/run/bpfrejit/shim-2747.sock
+[111.008751 pid=2750 tid=2750] shim_init pid=2750 exe=/usr/sbin/xtables-nft-multi
+[111.009189 pid=2750 tid=2752] socket: listening on /var/run/bpfrejit/shim-2750.sock
+[111.010678 pid=2753 tid=2753] shim_init pid=2753 exe=/usr/sbin/xtables-nft-multi
+[111.011135 pid=2753 tid=2755] socket: listening on /var/run/bpfrejit/shim-2753.sock
+[111.062519 pid=2756 tid=2756] shim_init pid=2756 exe=/usr/sbin/xtables-nft-multi
+[111.063270 pid=2756 tid=2758] socket: listening on /var/run/bpfrejit/shim-2756.sock
+[111.076465 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[111.112815 pid=2759 tid=2759] shim_init pid=2759 exe=/usr/sbin/xtables-nft-multi
+[111.113551 pid=2759 tid=2761] socket: listening on /var/run/bpfrejit/shim-2759.sock
+[111.180673 pid=2762 tid=2762] shim_init pid=2762 exe=/usr/sbin/xtables-nft-multi
+[111.182429 pid=2762 tid=2764] socket: listening on /var/run/bpfrejit/shim-2762.sock
+[111.189402 pid=2765 tid=2765] shim_init pid=2765 exe=/usr/sbin/xtables-nft-multi
+[111.189934 pid=2765 tid=2767] socket: listening on /var/run/bpfrejit/shim-2765.sock
+[111.193724 pid=2768 tid=2768] shim_init pid=2768 exe=/usr/sbin/xtables-nft-multi
+[111.194561 pid=2768 tid=2770] socket: listening on /var/run/bpfrejit/shim-2768.sock
+[111.252441 pid=2771 tid=2771] shim_init pid=2771 exe=/usr/sbin/xtables-nft-multi
+[111.252945 pid=2771 tid=2773] socket: listening on /var/run/bpfrejit/shim-2771.sock
+[111.278039 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[111.335127 pid=2774 tid=2774] shim_init pid=2774 exe=/usr/sbin/xtables-nft-multi
+[111.338307 pid=2774 tid=2776] socket: listening on /var/run/bpfrejit/shim-2774.sock
+[111.348766 pid=2777 tid=2777] shim_init pid=2777 exe=/usr/sbin/xtables-nft-multi
+[111.349366 pid=2777 tid=2779] socket: listening on /var/run/bpfrejit/shim-2777.sock
+[111.351223 pid=2780 tid=2780] shim_init pid=2780 exe=/usr/sbin/xtables-nft-multi
+[111.351836 pid=2780 tid=2782] socket: listening on /var/run/bpfrejit/shim-2780.sock
+[111.392588 pid=2783 tid=2783] shim_init pid=2783 exe=/usr/sbin/xtables-nft-multi
+[111.393362 pid=2783 tid=2785] socket: listening on /var/run/bpfrejit/shim-2783.sock
+[111.434926 pid=2786 tid=2786] shim_init pid=2786 exe=/usr/sbin/xtables-nft-multi
+[111.435913 pid=2786 tid=2788] socket: listening on /var/run/bpfrejit/shim-2786.sock
+[111.438085 pid=2789 tid=2789] shim_init pid=2789 exe=/usr/sbin/xtables-nft-multi
+[111.439118 pid=2789 tid=2791] socket: listening on /var/run/bpfrejit/shim-2789.sock
+[111.472487 pid=2792 tid=2792] shim_init pid=2792 exe=/usr/sbin/xtables-nft-multi
+[111.473142 pid=2792 tid=2794] socket: listening on /var/run/bpfrejit/shim-2792.sock
+[111.479155 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[111.512190 pid=2795 tid=2795] shim_init pid=2795 exe=/usr/sbin/xtables-nft-multi
+[111.515424 pid=2795 tid=2797] socket: listening on /var/run/bpfrejit/shim-2795.sock
+[111.582882 pid=2001 tid=2007] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ho
+[111.582357 pid=2798 tid=2798] shim_init pid=2798 exe=/usr/sbin/xtables-nft-multi
+[111.583129 pid=2001 tid=2007]   MAP_CREATE -> fd=84 errno=0 kernel_map_id=50
+[111.583269 pid=2798 tid=2800] socket: listening on /var/run/bpfrejit/shim-2798.sock
+[111.583637 pid=2001 tid=2007] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ho
+[111.583889 pid=2001 tid=2007]   MAP_CREATE -> fd=84 errno=0 kernel_map_id=51
+[111.584165 pid=2001 tid=2007] BPF_MAP_CREATE type=1 key_size=4 value_size=16 max_entries=512 name=cilium_devices
+[111.584304 pid=2001 tid=2007]   MAP_CREATE -> fd=89 errno=0 kernel_map_id=52
+[111.584553 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[111.584790 pid=2001 tid=2007]   MAP_CREATE -> fd=92 errno=0 kernel_map_id=53
+[111.585163 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[111.585282 pid=2001 tid=2007]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=54
+[111.585479 pid=2001 tid=2007] BPF_MAP_CREATE type=9 key_size=4 value_size=8 max_entries=591428 name=cilium_nodeport
+[111.619825 pid=2001 tid=2007]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=55
+[111.621003 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=3d4c8ed63cf29cd3 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=106 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.634846 pid=2801 tid=2801] shim_init pid=2801 exe=/usr/sbin/xtables-nft-multi
+[111.635314 pid=2801 tid=2803] socket: listening on /var/run/bpfrejit/shim-2801.sock
+[111.638921 pid=2001 tid=2007]   PROG_LOAD -> fd=72 errno=0 kernel_prog_id=41
+[111.639181 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.638988 pid=2804 tid=2804] shim_init pid=2804 exe=/usr/sbin/xtables-nft-multi
+[111.639315 pid=2001 tid=2007]   PROG_LOAD -> fd=106 errno=0 kernel_prog_id=42
+[111.639373 pid=2804 tid=2806] socket: listening on /var/run/bpfrejit/shim-2804.sock
+[111.639550 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=fea8ab1f3ec64739 policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.639875 pid=2001 tid=2007]   PROG_LOAD -> fd=83 errno=0 kernel_prog_id=43
+[111.640529 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=bf9b68279da6761e policy_hash=6de344d8534cc21a branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.640664 pid=2807 tid=2807] shim_init pid=2807 exe=/usr/sbin/xtables-nft-multi
+[111.641019 pid=2807 tid=2809] socket: listening on /var/run/bpfrejit/shim-2807.sock
+[111.654531 pid=2001 tid=2007]   PROG_LOAD -> fd=107 errno=0 kernel_prog_id=44
+[111.655508 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=44e91d50356bd453 policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.656642 pid=2001 tid=2007]   PROG_LOAD -> fd=109 errno=0 kernel_prog_id=45
+[111.657310 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=fbfdf2c4c4e278c3 policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.658344 pid=2001 tid=2007]   PROG_LOAD -> fd=111 errno=0 kernel_prog_id=46
+[111.658904 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=b8ec7f589a04e61f policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.662143 pid=2001 tid=2007]   PROG_LOAD -> fd=112 errno=0 kernel_prog_id=47
+[111.662892 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=ae12b627337b8f14 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.674583 pid=2001 tid=2007]   PROG_LOAD -> fd=113 errno=0 kernel_prog_id=48
+[111.675210 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=49c616a12168462d policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.675710 pid=2001 tid=2007]   PROG_LOAD -> fd=115 errno=0 kernel_prog_id=49
+[111.676043 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=89f35c04abb0080c policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.676482 pid=2001 tid=2007]   PROG_LOAD -> fd=116 errno=0 kernel_prog_id=50
+[111.677238 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=0e6d2b3c132fb8ba policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=87 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.679775 pid=2001 tid=2007]   PROG_LOAD -> fd=117 errno=0 kernel_prog_id=51
+[111.681019 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=84 map_id=51 key=23 prog_fd=83 prog_id=43 flags=0 ret=0 errno=0
+[111.681396 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=83 id=43 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02b032c ksym1=0x0
+[111.681764 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=84 map_id=51 key=7 prog_fd=107 prog_id=44 flags=0 ret=0 errno=0
+[111.682043 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=107 id=44 type=3 name=tail_handle_ipv tag=1abd822672e38a11 jited_len=8254 xlated_len=14392 nr_jited_ksyms=1 ksym0=0xffffffffc02b0850 ksym1=0x0
+[111.682333 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[111.682565 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=84 map_id=51 key=15 prog_fd=112 prog_id=47 flags=0 ret=0 errno=0
+[111.682672 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=112 id=47 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02b4614 ksym1=0x0
+[111.682853 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=84 map_id=51 key=36 prog_fd=113 prog_id=48 flags=0 ret=0 errno=0
+[111.682956 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=113 id=48 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02b5ff4 ksym1=0x0
+[111.691733 pid=2810 tid=2810] shim_init pid=2810 exe=/usr/sbin/xtables-nft-multi
+[111.692252 pid=2810 tid=2812] socket: listening on /var/run/bpfrejit/shim-2810.sock
+[111.696864 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=84 map_id=51 key=1 prog_fd=116 prog_id=50 flags=0 ret=0 errno=0
+[111.697180 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=116 id=50 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02b8658 ksym1=0x0
+[111.697391 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=84 map_id=51 key=38 prog_fd=72 prog_id=41 flags=0 ret=0 errno=0
+[111.697478 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=72 id=41 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12954 xlated_len=21584 nr_jited_ksyms=1 ksym0=0xffffffffc02ad04c ksym1=0x0
+[111.697722 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_call_pol map_fd=90 map_id=17 key=2142 prog_fd=106 prog_id=42 flags=0 ret=0 errno=0
+[111.697952 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=106 id=42 type=3 name=cil_host_policy tag=691ef55febf78432 jited_len=16 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc02ab648 ksym1=0x0
+[111.698098 pid=2001 tid=2007] BPF_LINK_CREATE prog_fd=115 target_fd=5 attach_type=46 flags=16
+[111.771033 pid=2001 tid=2007]   LINK_CREATE -> fd=87 errno=0 kernel_link_id=5
+[111.771341 pid=2001 tid=2007] BPF_LINK_CREATE prog_fd=111 target_fd=5 attach_type=47 flags=16
+[111.772060 pid=2813 tid=2813] shim_init pid=2813 exe=/usr/sbin/xtables-nft-multi
+[111.772930 pid=2813 tid=2815] socket: listening on /var/run/bpfrejit/shim-2813.sock
+[111.775451 pid=2816 tid=2816] shim_init pid=2816 exe=/usr/sbin/xtables-nft-multi
+[111.776116 pid=2816 tid=2818] socket: listening on /var/run/bpfrejit/shim-2816.sock
+[111.777749 pid=2819 tid=2819] shim_init pid=2819 exe=/usr/sbin/xtables-nft-multi
+[111.778376 pid=2819 tid=2821] socket: listening on /var/run/bpfrejit/shim-2819.sock
+[111.810834 pid=2001 tid=2007]   LINK_CREATE -> fd=87 errno=0 kernel_link_id=6
+[111.813880 pid=2001 tid=2007] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ne
+[111.813249 pid=2822 tid=2822] shim_init pid=2822 exe=/usr/sbin/xtables-nft-multi
+[111.814028 pid=2001 tid=2007]   MAP_CREATE -> fd=121 errno=0 kernel_map_id=56
+[111.814229 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[111.814308 pid=2822 tid=2824] socket: listening on /var/run/bpfrejit/shim-2822.sock
+[111.880178 pid=2001 tid=2007]   MAP_CREATE -> fd=128 errno=0 kernel_map_id=57
+[111.881130 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[111.881767 pid=2001 tid=2007]   MAP_CREATE -> fd=90 errno=0 kernel_map_id=58
+[111.882517 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=43389d6985cd4d7b policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=135 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.883211 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[111.882995 pid=2825 tid=2825] shim_init pid=2825 exe=/usr/sbin/xtables-nft-multi
+[111.884472 pid=2825 tid=2827] socket: listening on /var/run/bpfrejit/shim-2825.sock
+[111.886251 pid=2001 tid=2007]   PROG_LOAD -> fd=108 errno=0 kernel_prog_id=52
+[111.886883 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=d05ee6da8368a4a3 policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.887251 pid=2001 tid=2007]   PROG_LOAD -> fd=135 errno=0 kernel_prog_id=53
+[111.888096 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=7f0f3683073cd0a1 policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.891087 pid=2001 tid=2007]   PROG_LOAD -> fd=137 errno=0 kernel_prog_id=54
+[111.891772 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=e9a37e057d696927 policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.892900 pid=2001 tid=2007]   PROG_LOAD -> fd=138 errno=0 kernel_prog_id=55
+[111.893624 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=321ffa9cfd579ac3 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.894845 pid=2828 tid=2828] shim_init pid=2828 exe=/usr/sbin/xtables-nft-multi
+[111.895848 pid=2828 tid=2830] socket: listening on /var/run/bpfrejit/shim-2828.sock
+[111.905453 pid=2001 tid=2007]   PROG_LOAD -> fd=129 errno=0 kernel_prog_id=56
+[111.905368 pid=2831 tid=2831] shim_init pid=2831 exe=/usr/sbin/xtables-nft-multi
+[111.906164 pid=2831 tid=2833] socket: listening on /var/run/bpfrejit/shim-2831.sock
+[111.906309 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=a1cdb39013e86844 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.922114 pid=2001 tid=2007]   PROG_LOAD -> fd=139 errno=0 kernel_prog_id=57
+[111.922893 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=605 hash=8cce4434750637b1 policy_hash=4a3f46a8764f5bea branch_profile_hash=03900fd2f491421d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.923659 pid=2001 tid=2007]   PROG_LOAD -> fd=141 errno=0 kernel_prog_id=58
+[111.924056 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=0221834093e0a568 policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.924518 pid=2001 tid=2007]   PROG_LOAD -> fd=142 errno=0 kernel_prog_id=59
+[111.924668 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.924911 pid=2001 tid=2007]   PROG_LOAD -> fd=143 errno=0 kernel_prog_id=60
+[111.925620 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=d3350fbf0062bedb policy_hash=77172dccdc980c3b branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.939568 pid=2001 tid=2007]   PROG_LOAD -> fd=145 errno=0 kernel_prog_id=61
+[111.940333 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=0ab11f158b97fb2e policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.941346 pid=2001 tid=2007]   PROG_LOAD -> fd=144 errno=0 kernel_prog_id=62
+[111.941697 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=9e6c44151d578965 policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=133 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.942002 pid=2001 tid=2007]   PROG_LOAD -> fd=146 errno=0 kernel_prog_id=63
+[111.944106 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=121 map_id=56 key=36 prog_fd=129 prog_id=56 flags=0 ret=0 errno=0
+[111.944375 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=129 id=56 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02bdfcc ksym1=0x0
+[111.943829 pid=2834 tid=2834] shim_init pid=2834 exe=/usr/sbin/xtables-nft-multi
+[111.944734 pid=2834 tid=2836] socket: listening on /var/run/bpfrejit/shim-2834.sock
+[111.945253 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=121 map_id=56 key=38 prog_fd=139 prog_id=57 flags=0 ret=0 errno=0
+[111.945552 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=139 id=57 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12981 xlated_len=21632 nr_jited_ksyms=1 ksym0=0xffffffffc02c02d8 ksym1=0x0
+[111.948852 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=121 map_id=56 key=45 prog_fd=141 prog_id=58 flags=0 ret=0 errno=0
+[111.948954 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=141 id=58 type=3 name=tail_no_service tag=705fe169db33280d jited_len=2792 xlated_len=4952 nr_jited_ksyms=1 ksym0=0xffffffffc02c35d0 ksym1=0x0
+[111.954691 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=121 map_id=56 key=7 prog_fd=145 prog_id=61 flags=0 ret=0 errno=0
+[111.955034 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=145 id=61 type=3 name=tail_handle_ipv tag=ff5c3d2ea3cfdd26 jited_len=8242 xlated_len=14312 nr_jited_ksyms=1 ksym0=0xffffffffc02c4450 ksym1=0x0
+[111.956283 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=121 map_id=56 key=1 prog_fd=146 prog_id=63 flags=0 ret=0 errno=0
+[111.956577 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=146 id=63 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02c7250 ksym1=0x0
+[111.956807 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=121 map_id=56 key=15 prog_fd=108 prog_id=52 flags=0 ret=0 errno=0
+[111.956913 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=108 id=52 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02b9c8c ksym1=0x0
+[111.957352 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=121 map_id=56 key=23 prog_fd=135 prog_id=53 flags=0 ret=0 errno=0
+[111.957464 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=135 id=53 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02bb674 ksym1=0x0
+[111.957905 pid=2001 tid=2007] BPF_LINK_CREATE prog_fd=142 target_fd=4 attach_type=46 flags=16
+[111.990083 pid=2001 tid=2007]   LINK_CREATE -> fd=133 errno=0 kernel_link_id=7
+[111.991619 pid=2837 tid=2837] shim_init pid=2837 exe=/usr/sbin/xtables-nft-multi
+[111.992027 pid=2837 tid=2839] socket: listening on /var/run/bpfrejit/shim-2837.sock
+[111.993238 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[111.993395 pid=2001 tid=2007]   MAP_CREATE -> fd=155 errno=0 kernel_map_id=59
+[111.993403 pid=2840 tid=2840] shim_init pid=2840 exe=/usr/sbin/xtables-nft-multi
+[111.993570 pid=2001 tid=2007] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ne
+[111.993694 pid=2001 tid=2007]   MAP_CREATE -> fd=159 errno=0 kernel_map_id=60
+[111.993791 pid=2840 tid=2842] socket: listening on /var/run/bpfrejit/shim-2840.sock
+[111.993975 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[111.994071 pid=2001 tid=2007]   MAP_CREATE -> fd=163 errno=0 kernel_map_id=61
+[111.994934 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=b94968aa553e1ce6 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[111.994972 pid=2843 tid=2843] shim_init pid=2843 exe=/usr/sbin/xtables-nft-multi
+[111.995369 pid=2843 tid=2845] socket: listening on /var/run/bpfrejit/shim-2843.sock
+[111.996572 pid=2846 tid=2846] shim_init pid=2846 exe=/usr/sbin/xtables-nft-multi
+[111.997105 pid=2846 tid=2848] socket: listening on /var/run/bpfrejit/shim-2846.sock
+[112.011240 pid=2001 tid=2007]   PROG_LOAD -> fd=142 errno=0 kernel_prog_id=64
+[112.012023 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=266c1bebf9a80257 policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.014519 pid=2001 tid=2007]   PROG_LOAD -> fd=164 errno=0 kernel_prog_id=65
+[112.014800 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=16af2c9dcb424756 policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.015205 pid=2001 tid=2007]   PROG_LOAD -> fd=166 errno=0 kernel_prog_id=66
+[112.015492 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.015634 pid=2001 tid=2007]   PROG_LOAD -> fd=167 errno=0 kernel_prog_id=67
+[112.016360 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=472c25d32563aa88 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.029029 pid=2001 tid=2007]   PROG_LOAD -> fd=168 errno=0 kernel_prog_id=68
+[112.029420 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=36effd89ae8e5b4d policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.029748 pid=2001 tid=2007]   PROG_LOAD -> fd=174 errno=0 kernel_prog_id=69
+[112.030336 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=4c10cf4bbaf680d4 policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.033566 pid=2001 tid=2007]   PROG_LOAD -> fd=175 errno=0 kernel_prog_id=70
+[112.034003 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=331e812c5a2b2f53 policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.034443 pid=2001 tid=2007]   PROG_LOAD -> fd=176 errno=0 kernel_prog_id=71
+[112.035128 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=0ee8dba8ca37e85b policy_hash=77172dccdc980c3b branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.048882 pid=2001 tid=2007]   PROG_LOAD -> fd=177 errno=0 kernel_prog_id=72
+[112.049673 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=2163d2b96f35554d policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.051447 pid=2001 tid=2007]   PROG_LOAD -> fd=178 errno=0 kernel_prog_id=73
+[112.051897 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=605 hash=ddce9f5dddc889f6 policy_hash=4a3f46a8764f5bea branch_profile_hash=03900fd2f491421d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.052677 pid=2001 tid=2007]   PROG_LOAD -> fd=179 errno=0 kernel_prog_id=74
+[112.053399 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=63175b3a2d1628b5 policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=136 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.054568 pid=2001 tid=2007]   PROG_LOAD -> fd=180 errno=0 kernel_prog_id=75
+[112.055229 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=159 map_id=60 key=36 prog_fd=168 prog_id=68 flags=0 ret=0 errno=0
+[112.055357 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=168 id=68 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02cc0fc ksym1=0x0
+[112.062143 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=159 map_id=60 key=1 prog_fd=174 prog_id=69 flags=0 ret=0 errno=0
+[112.062288 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=174 id=69 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02ce3dc ksym1=0x0
+[112.062954 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=159 map_id=60 key=15 prog_fd=175 prog_id=70 flags=0 ret=0 errno=0
+[112.063208 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=175 id=70 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02ce588 ksym1=0x0
+[112.064231 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=159 map_id=60 key=7 prog_fd=177 prog_id=72 flags=0 ret=0 errno=0
+[112.064563 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=177 id=72 type=3 name=tail_handle_ipv tag=ff5c3d2ea3cfdd26 jited_len=8242 xlated_len=14312 nr_jited_ksyms=1 ksym0=0xffffffffc02d02e0 ksym1=0x0
+[112.064913 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=159 map_id=60 key=45 prog_fd=179 prog_id=74 flags=0 ret=0 errno=0
+[112.065318 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=179 id=74 type=3 name=tail_no_service tag=705fe169db33280d jited_len=2792 xlated_len=4952 nr_jited_ksyms=1 ksym0=0xffffffffc02d30d0 ksym1=0x0
+[112.066204 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=159 map_id=60 key=38 prog_fd=142 prog_id=64 flags=0 ret=0 errno=0
+[112.066617 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=142 id=64 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12981 xlated_len=21632 nr_jited_ksyms=1 ksym0=0xffffffffc02c7418 ksym1=0x0
+[112.067511 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=159 map_id=60 key=23 prog_fd=166 prog_id=66 flags=0 ret=0 errno=0
+[112.067703 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=166 id=66 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02cbbbc ksym1=0x0
+[112.067941 pid=2001 tid=2007] BPF_LINK_CREATE prog_fd=178 target_fd=3 attach_type=46 flags=16
+[112.084838 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[112.084064 pid=2849 tid=2849] shim_init pid=2849 exe=/usr/sbin/xtables-nft-multi
+[112.085436 pid=2849 tid=2851] socket: listening on /var/run/bpfrejit/shim-2849.sock
+[112.087540 pid=2852 tid=2852] shim_init pid=2852 exe=/usr/sbin/xtables-nft-multi
+[112.088578 pid=2852 tid=2854] socket: listening on /var/run/bpfrejit/shim-2852.sock
+[112.090753 pid=2855 tid=2855] shim_init pid=2855 exe=/usr/sbin/xtables-nft-multi
+[112.091615 pid=2855 tid=2857] socket: listening on /var/run/bpfrejit/shim-2855.sock
+[112.095752 pid=2858 tid=2858] shim_init pid=2858 exe=/usr/sbin/xtables-nft-multi
+[112.096276 pid=2858 tid=2860] socket: listening on /var/run/bpfrejit/shim-2858.sock
+[112.110130 pid=2001 tid=2007]   LINK_CREATE -> fd=136 errno=0 kernel_link_id=8
+[112.110681 pid=2001 tid=2007] BPF_LINK_CREATE prog_fd=164 target_fd=3 attach_type=47 flags=16
+[112.133994 pid=2861 tid=2861] shim_init pid=2861 exe=/usr/sbin/xtables-nft-multi
+[112.136464 pid=2864 tid=2864] shim_init pid=2864 exe=/usr/sbin/xtables-nft-multi
+[112.137163 pid=2864 tid=2866] socket: listening on /var/run/bpfrejit/shim-2864.sock
+[112.138903 pid=2867 tid=2867] shim_init pid=2867 exe=/usr/sbin/xtables-nft-multi
+[112.139746 pid=2867 tid=2869] socket: listening on /var/run/bpfrejit/shim-2867.sock
+[112.160170 pid=2001 tid=2007]   LINK_CREATE -> fd=136 errno=0 kernel_link_id=9
+[112.165811 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[112.165988 pid=2001 tid=2007]   MAP_CREATE -> fd=183 errno=0 kernel_map_id=62
+[112.166385 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[112.166607 pid=2001 tid=2007]   MAP_CREATE -> fd=184 errno=0 kernel_map_id=63
+[112.166939 pid=2001 tid=2007] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ho
+[112.167050 pid=2001 tid=2007]   MAP_CREATE -> fd=197 errno=0 kernel_map_id=64
+[112.167206 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=200 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.167363 pid=2001 tid=2007]   PROG_LOAD -> fd=201 errno=0 kernel_prog_id=76
+[112.167614 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=c3f51dacdca8bb64 policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=200 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.168052 pid=2001 tid=2007]   PROG_LOAD -> fd=202 errno=0 kernel_prog_id=77
+[112.168746 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=1f21ee62cfb9f56d policy_hash=6de344d8534cc21a branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=200 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.182978 pid=2001 tid=2007]   PROG_LOAD -> fd=165 errno=0 kernel_prog_id=78
+[112.182731 pid=2870 tid=2870] shim_init pid=2870 exe=/usr/sbin/xtables-nft-multi
+[112.183711 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=8e3b7fd1a0ebdf54 policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.185245 pid=2873 tid=2873] shim_init pid=2873 exe=/usr/sbin/xtables-nft-multi
+[112.185908 pid=2873 tid=2875] socket: listening on /var/run/bpfrejit/shim-2873.sock
+[112.187103 pid=2001 tid=2007]   PROG_LOAD -> fd=181 errno=0 kernel_prog_id=79
+[112.188241 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=73c01b274fd67e40 policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.188955 pid=2876 tid=2876] shim_init pid=2876 exe=/usr/sbin/xtables-nft-multi
+[112.189613 pid=2876 tid=2878] socket: listening on /var/run/bpfrejit/shim-2876.sock
+[112.190855 pid=2001 tid=2007]   PROG_LOAD -> fd=200 errno=0 kernel_prog_id=80
+[112.191879 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=082ebbee570cd179 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.209196 pid=2001 tid=2007]   PROG_LOAD -> fd=204 errno=0 kernel_prog_id=81
+[112.209967 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=de7435dc815f2733 policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.211072 pid=2001 tid=2007]   PROG_LOAD -> fd=206 errno=0 kernel_prog_id=82
+[112.211480 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=d1ce9d9e2af58c8c policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.211756 pid=2001 tid=2007]   PROG_LOAD -> fd=207 errno=0 kernel_prog_id=83
+[112.212378 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=d4ce13a4eb54a8b4 policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.213270 pid=2001 tid=2007]   PROG_LOAD -> fd=208 errno=0 kernel_prog_id=84
+[112.214016 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=9ff72d2ded02f6d9 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.225929 pid=2001 tid=2007]   PROG_LOAD -> fd=210 errno=0 kernel_prog_id=85
+[112.226597 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=32d02aebac059bb3 policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=185 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.226981 pid=2001 tid=2007]   PROG_LOAD -> fd=211 errno=0 kernel_prog_id=86
+[112.242090 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=197 map_id=64 key=1 prog_fd=207 prog_id=83 flags=0 ret=0 errno=0
+[112.242197 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=207 id=83 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02de21c ksym1=0x0
+[112.243521 pid=2879 tid=2879] shim_init pid=2879 exe=/usr/sbin/xtables-nft-multi
+[112.244080 pid=2879 tid=2881] socket: listening on /var/run/bpfrejit/shim-2879.sock
+[112.244408 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=197 map_id=64 key=36 prog_fd=210 prog_id=85 flags=0 ret=0 errno=0
+[112.244655 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=210 id=85 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02df174 ksym1=0x0
+[112.244883 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=197 map_id=64 key=23 prog_fd=202 prog_id=77 flags=0 ret=0 errno=0
+[112.244983 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=202 id=77 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02d4b90 ksym1=0x0
+[112.245323 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=197 map_id=64 key=7 prog_fd=165 prog_id=78 flags=0 ret=0 errno=0
+[112.245433 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=165 id=78 type=3 name=tail_handle_ipv tag=1abd822672e38a11 jited_len=8254 xlated_len=14392 nr_jited_ksyms=1 ksym0=0xffffffffc02d50d4 ksym1=0x0
+[112.245848 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=197 map_id=64 key=15 prog_fd=181 prog_id=79 flags=0 ret=0 errno=0
+[112.245967 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=181 id=79 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02d714c ksym1=0x0
+[112.245876 pid=2882 tid=2882] shim_init pid=2882 exe=/usr/sbin/xtables-nft-multi
+[112.246091 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=197 map_id=64 key=38 prog_fd=204 prog_id=81 flags=0 ret=0 errno=0
+[112.246201 pid=2882 tid=2884] socket: listening on /var/run/bpfrejit/shim-2882.sock
+[112.246309 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=204 id=81 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12954 xlated_len=21584 nr_jited_ksyms=1 ksym0=0xffffffffc02d9f88 ksym1=0x0
+[112.246435 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_call_pol map_fd=196 map_id=17 key=2142 prog_fd=201 prog_id=76 flags=0 ret=0 errno=0
+[112.246536 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=201 id=76 type=3 name=cil_host_policy tag=691ef55febf78432 jited_len=16 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc02ab788 ksym1=0x0
+[112.246742 pid=2001 tid=2007] BPF_LINK_UPDATE link_fd=185 new_prog_fd=211 flags=0 old_prog_fd=0
+[112.246846 pid=2001 tid=2007] BPF_LINK_UPDATE tracking retargeted link_id=5 retained_fd=205 new_prog_id=86
+[112.247002 pid=2001 tid=2007]   LINK_UPDATE -> ret=0 errno=0
+[112.247257 pid=2001 tid=2007] BPF_LINK_UPDATE link_fd=185 new_prog_fd=206 flags=0 old_prog_fd=0
+[112.247361 pid=2001 tid=2007] BPF_LINK_UPDATE tracking retargeted link_id=6 retained_fd=212 new_prog_id=82
+[112.247605 pid=2001 tid=2007]   LINK_UPDATE -> ret=0 errno=0
+[112.250776 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[112.250968 pid=2001 tid=2007]   MAP_CREATE -> fd=218 errno=0 kernel_map_id=65
+[112.251115 pid=2001 tid=2007] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ne
+[112.251218 pid=2001 tid=2007]   MAP_CREATE -> fd=220 errno=0 kernel_map_id=66
+[112.251335 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[112.251439 pid=2001 tid=2007]   MAP_CREATE -> fd=222 errno=0 kernel_map_id=67
+[112.252597 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=6065144727837537 policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=231 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.253782 pid=2001 tid=2007]   PROG_LOAD -> fd=232 errno=0 kernel_prog_id=87
+[112.255127 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=ffa9ea8f670852cc policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=72 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.255641 pid=2001 tid=2007]   PROG_LOAD -> fd=83 errno=0 kernel_prog_id=88
+[112.255870 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=3ff1db0c2ccf0bc0 policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=72 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.256293 pid=2001 tid=2007]   PROG_LOAD -> fd=65 errno=0 kernel_prog_id=89
+[112.257311 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=bdce6eed347d01f3 policy_hash=77172dccdc980c3b branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.271513 pid=2001 tid=2007]   PROG_LOAD -> fd=72 errno=0 kernel_prog_id=90
+[112.272405 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=dc0bd80ccb65015e policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.276008 pid=2001 tid=2007]   PROG_LOAD -> fd=73 errno=0 kernel_prog_id=91
+[112.276661 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=003a5e9761195b22 policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.277702 pid=2001 tid=2007]   PROG_LOAD -> fd=76 errno=0 kernel_prog_id=92
+[112.277952 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.278476 pid=2001 tid=2007]   PROG_LOAD -> fd=78 errno=0 kernel_prog_id=93
+[112.279101 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=605 hash=722c1bdf41afc62c policy_hash=4a3f46a8764f5bea branch_profile_hash=03900fd2f491421d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.279964 pid=2001 tid=2007]   PROG_LOAD -> fd=81 errno=0 kernel_prog_id=94
+[112.280503 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=87835b3687c2bf5b policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.281149 pid=2001 tid=2007]   PROG_LOAD -> fd=82 errno=0 kernel_prog_id=95
+[112.282087 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=c9ff7db471371ff0 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.287033 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[112.298206 pid=2001 tid=2007]   PROG_LOAD -> fd=84 errno=0 kernel_prog_id=96
+[112.299017 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=0daa3ae2dd1c9338 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.310931 pid=2001 tid=2007]   PROG_LOAD -> fd=93 errno=0 kernel_prog_id=97
+[112.311648 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=a30a28107f2d9b87 policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.312114 pid=2886 tid=2886] shim_init pid=2886 exe=/usr/sbin/xtables-nft-multi
+[112.312698 pid=2886 tid=2888] socket: listening on /var/run/bpfrejit/shim-2886.sock
+[112.314202 pid=2001 tid=2007]   PROG_LOAD -> fd=85 errno=0 kernel_prog_id=98
+[112.314504 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=220 map_id=66 key=23 prog_fd=82 prog_id=95 flags=0 ret=0 errno=0
+[112.314622 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=82 id=95 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02e7fac ksym1=0x0
+[112.314793 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=220 map_id=66 key=38 prog_fd=84 prog_id=96 flags=0 ret=0 errno=0
+[112.314896 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=84 id=96 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12981 xlated_len=21632 nr_jited_ksyms=1 ksym0=0xffffffffc02e84d4 ksym1=0x0
+[112.315158 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=220 map_id=66 key=36 prog_fd=93 prog_id=97 flags=0 ret=0 errno=0
+[112.315422 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=93 id=97 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02bbb88 ksym1=0x0
+[112.322076 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=220 map_id=66 key=1 prog_fd=65 prog_id=89 flags=0 ret=0 errno=0
+[112.322302 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=65 id=89 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02e2b0c ksym1=0x0
+[112.322663 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=220 map_id=66 key=7 prog_fd=72 prog_id=90 flags=0 ret=0 errno=0
+[112.322768 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=72 id=90 type=3 name=tail_handle_ipv tag=ff5c3d2ea3cfdd26 jited_len=8242 xlated_len=14312 nr_jited_ksyms=1 ksym0=0xffffffffc02e2ce8 ksym1=0x0
+[112.323050 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=220 map_id=66 key=15 prog_fd=73 prog_id=91 flags=0 ret=0 errno=0
+[112.323164 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=73 id=91 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02e4d4c ksym1=0x0
+[112.323476 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=220 map_id=66 key=45 prog_fd=81 prog_id=94 flags=0 ret=0 errno=0
+[112.323748 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=81 id=94 type=3 name=tail_no_service tag=705fe169db33280d jited_len=2792 xlated_len=4952 nr_jited_ksyms=1 ksym0=0xffffffffc02e7490 ksym1=0x0
+[112.323990 pid=2001 tid=2007] BPF_LINK_UPDATE link_fd=68 new_prog_fd=83 flags=0 old_prog_fd=0
+[112.324132 pid=2001 tid=2007] BPF_LINK_UPDATE tracking retargeted link_id=7 retained_fd=87 new_prog_id=88
+[112.324256 pid=2001 tid=2007]   LINK_UPDATE -> ret=0 errno=0
+[112.326922 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[112.327297 pid=2001 tid=2007]   MAP_CREATE -> fd=95 errno=0 kernel_map_id=68
+[112.327588 pid=2001 tid=2007] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ne
+[112.327799 pid=2001 tid=2007]   MAP_CREATE -> fd=98 errno=0 kernel_map_id=69
+[112.328178 pid=2001 tid=2007] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[112.328368 pid=2001 tid=2007]   MAP_CREATE -> fd=102 errno=0 kernel_map_id=70
+[112.328792 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=53d4eb531490900f policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.329271 pid=2001 tid=2007]   PROG_LOAD -> fd=112 errno=0 kernel_prog_id=99
+[112.329864 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=7aa8ac9559df8402 policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.330852 pid=2001 tid=2007]   PROG_LOAD -> fd=113 errno=0 kernel_prog_id=100
+[112.331853 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=78f14334a8e4b08c policy_hash=77172dccdc980c3b branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.345959 pid=2001 tid=2007]   PROG_LOAD -> fd=114 errno=0 kernel_prog_id=101
+[112.346810 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=7a11d45b76952864 policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.350201 pid=2001 tid=2007]   PROG_LOAD -> fd=115 errno=0 kernel_prog_id=102
+[112.350919 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=37ce2336e00f29cf policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.351417 pid=2001 tid=2007]   PROG_LOAD -> fd=116 errno=0 kernel_prog_id=103
+[112.352694 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.352836 pid=2001 tid=2007]   PROG_LOAD -> fd=117 errno=0 kernel_prog_id=104
+[112.353158 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=b853220407f2d901 policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.353498 pid=2001 tid=2007]   PROG_LOAD -> fd=118 errno=0 kernel_prog_id=105
+[112.354003 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=e7c1dd23e80b937f policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.355200 pid=2001 tid=2007]   PROG_LOAD -> fd=119 errno=0 kernel_prog_id=106
+[112.355713 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=605 hash=f0ad7097e2a44ee2 policy_hash=4a3f46a8764f5bea branch_profile_hash=03900fd2f491421d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.356355 pid=2001 tid=2007]   PROG_LOAD -> fd=120 errno=0 kernel_prog_id=107
+[112.357223 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=f18df753eb51f0d8 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.373198 pid=2001 tid=2007]   PROG_LOAD -> fd=121 errno=0 kernel_prog_id=108
+[112.374243 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=058d9bfcb43158d8 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.385911 pid=2001 tid=2007]   PROG_LOAD -> fd=122 errno=0 kernel_prog_id=109
+[112.386844 pid=2001 tid=2007] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=9695d35ba9765a9a policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=111 attach_btf_obj_fd=0 attach_prog_fd=0
+[112.389712 pid=2001 tid=2007]   PROG_LOAD -> fd=123 errno=0 kernel_prog_id=110
+[112.423811 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=98 map_id=69 key=45 prog_fd=120 prog_id=107 flags=0 ret=0 errno=0
+[112.424059 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=120 id=107 type=3 name=tail_no_service tag=705fe169db33280d jited_len=2792 xlated_len=4952 nr_jited_ksyms=1 ksym0=0xffffffffc02de3d0 ksym1=0x0
+[112.424384 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=98 map_id=69 key=38 prog_fd=121 prog_id=108 flags=0 ret=0 errno=0
+[112.424660 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=121 id=108 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12981 xlated_len=21632 nr_jited_ksyms=1 ksym0=0xffffffffc02f01f0 ksym1=0x0
+[112.424780 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=98 map_id=69 key=36 prog_fd=122 prog_id=109 flags=0 ret=0 errno=0
+[112.424682 pid=2891 tid=2891] shim_init pid=2891 exe=/usr/sbin/xtables-nft-multi
+[112.424877 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=122 id=109 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02f34f8 ksym1=0x0
+[112.425184 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=98 map_id=69 key=23 prog_fd=112 prog_id=99 flags=0 ret=0 errno=0
+[112.425239 pid=2891 tid=2893] socket: listening on /var/run/bpfrejit/shim-2891.sock
+[112.425534 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=112 id=99 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02c64f0 ksym1=0x0
+[112.426252 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=98 map_id=69 key=7 prog_fd=114 prog_id=101 flags=0 ret=0 errno=0
+[112.426365 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=114 id=101 type=3 name=tail_handle_ipv tag=ff5c3d2ea3cfdd26 jited_len=8242 xlated_len=14312 nr_jited_ksyms=1 ksym0=0xffffffffc02eb7c8 ksym1=0x0
+[112.427493 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=98 map_id=69 key=15 prog_fd=115 prog_id=102 flags=0 ret=0 errno=0
+[112.427682 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=115 id=102 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02ed850 ksym1=0x0
+[112.428909 pid=2894 tid=2894] shim_init pid=2894 exe=/usr/sbin/xtables-nft-multi
+[112.429588 pid=2894 tid=2896] socket: listening on /var/run/bpfrejit/shim-2894.sock
+[112.431146 pid=2897 tid=2897] shim_init pid=2897 exe=/usr/sbin/xtables-nft-multi
+[112.431936 pid=2897 tid=2899] socket: listening on /var/run/bpfrejit/shim-2897.sock
+[112.439563 pid=2001 tid=2007] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=98 map_id=69 key=1 prog_fd=118 prog_id=105 flags=0 ret=0 errno=0
+[112.439811 pid=2001 tid=2007] native-loader jit-info prog_array-target fd=118 id=105 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02c6d94 ksym1=0x0
+[112.440109 pid=2001 tid=2014] BPF_LINK_UPDATE link_fd=86 new_prog_fd=113 flags=0 old_prog_fd=0
+[112.440366 pid=2001 tid=2014] BPF_LINK_UPDATE tracking retargeted link_id=8 retained_fd=92 new_prog_id=100
+[112.440632 pid=2001 tid=2014]   LINK_UPDATE -> ret=0 errno=0
+[112.440924 pid=2001 tid=2014] BPF_LINK_UPDATE link_fd=86 new_prog_fd=123 flags=0 old_prog_fd=0
+[112.441166 pid=2001 tid=2014] BPF_LINK_UPDATE tracking retargeted link_id=9 retained_fd=124 new_prog_id=110
+[112.441386 pid=2001 tid=2014]   LINK_UPDATE -> ret=0 errno=0
+[112.446959 pid=2900 tid=2900] shim_init pid=2900 exe=/usr/bin/dash
+[112.447633 pid=2900 tid=2902] socket: listening on /var/run/bpfrejit/shim-2900.sock
+[112.449024 pid=2900 tid=2900] shim_init pid=2900 exe=/usr/bin/python3.12
+[112.449814 pid=2900 tid=2904] socket: listening on /var/run/bpfrejit/shim-2900.sock
+[112.488006 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[112.510205 pid=2905 tid=2905] shim_init pid=2905 exe=/usr/lib/llvm-18/bin/clang
+[112.511450 pid=2905 tid=2908] socket: listening on /var/run/bpfrejit/shim-2905.sock
+[112.512495 pid=2906 tid=2906] shim_init pid=2906 exe=/usr/sbin/xtables-nft-multi
+[112.513129 pid=2906 tid=2910] socket: listening on /var/run/bpfrejit/shim-2906.sock
+[112.562114 pid=2912 tid=2912] shim_init pid=2912 exe=/usr/sbin/xtables-nft-multi
+[112.562954 pid=2912 tid=2914] socket: listening on /var/run/bpfrejit/shim-2912.sock
+[112.572933 pid=2915 tid=2915] shim_init pid=2915 exe=/usr/sbin/xtables-nft-multi
+[112.573518 pid=2915 tid=2917] socket: listening on /var/run/bpfrejit/shim-2915.sock
+[112.580778 pid=2918 tid=2918] shim_init pid=2918 exe=/usr/sbin/xtables-nft-multi
+[112.581626 pid=2918 tid=2920] socket: listening on /var/run/bpfrejit/shim-2918.sock
+[112.612531 pid=2922 tid=2922] shim_init pid=2922 exe=/usr/sbin/xtables-nft-multi
+[112.613029 pid=2922 tid=2924] socket: listening on /var/run/bpfrejit/shim-2922.sock
+[112.662023 pid=2925 tid=2925] shim_init pid=2925 exe=/usr/sbin/xtables-nft-multi
+[112.662704 pid=2925 tid=2927] socket: listening on /var/run/bpfrejit/shim-2925.sock
+[112.689862 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[112.890906 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[113.084420 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=186 max_entries=1 name=.rodata.config
+[113.084873 pid=2001 tid=2015]   MAP_CREATE -> fd=88 errno=0 kernel_map_id=71
+[113.085403 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[113.085787 pid=2001 tid=2015]   MAP_CREATE -> fd=125 errno=0 kernel_map_id=72
+[113.086144 pid=2001 tid=2015] BPF_PROG_LOAD type=6 (xdp) name=cil_xdp_entry insn_cnt=280 hash=7f672e941422abc2 policy_hash=7553fcd85074d673 branch_profile_hash=2bdd3175eb0ef6f7 license=Dual BSD/GPL expected_attach=37 attach_btf_id=0 prog_btf_fd=123 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.086942 pid=2001 tid=2015]   PROG_LOAD -> fd=126 errno=0 kernel_prog_id=111
+[113.087313 pid=2001 tid=2015] BPF_LINK_UPDATE link_fd=123 new_prog_fd=126 flags=0 old_prog_fd=0
+[113.093905 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[113.110225 pid=2001 tid=2015] BPF_LINK_UPDATE tracking retargeted link_id=4 retained_fd=127 new_prog_id=111
+[113.110750 pid=2001 tid=2015]   LINK_UPDATE -> ret=0 errno=0
+[113.112935 pid=2930 tid=2930] shim_init pid=2930 exe=/usr/bin/dash
+[113.113695 pid=2930 tid=2932] socket: listening on /var/run/bpfrejit/shim-2930.sock
+[113.115109 pid=2930 tid=2930] shim_init pid=2930 exe=/usr/bin/python3.12
+[113.115974 pid=2930 tid=2934] socket: listening on /var/run/bpfrejit/shim-2930.sock
+[113.221337 pid=2935 tid=2935] shim_init pid=2935 exe=/usr/lib/llvm-18/bin/clang
+[113.222095 pid=2935 tid=2937] socket: listening on /var/run/bpfrejit/shim-2935.sock
+[113.298076 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[113.482007 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[113.487064 pid=2001 tid=2015]   MAP_CREATE -> fd=126 errno=0 kernel_map_id=73
+[113.487598 pid=2001 tid=2015] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ho
+[113.488185 pid=2001 tid=2015]   MAP_CREATE -> fd=129 errno=0 kernel_map_id=74
+[113.488899 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[113.490168 pid=2001 tid=2015]   MAP_CREATE -> fd=144 errno=0 kernel_map_id=75
+[113.491083 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=a4bc21dfa794fc6f policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.499349 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[113.502562 pid=2001 tid=2015]   PROG_LOAD -> fd=149 errno=0 kernel_prog_id=112
+[113.503155 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.503654 pid=2001 tid=2015]   PROG_LOAD -> fd=150 errno=0 kernel_prog_id=113
+[113.508337 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=068e55983b51f5bf policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.509244 pid=2001 tid=2015]   PROG_LOAD -> fd=151 errno=0 kernel_prog_id=114
+[113.512798 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=4fca1a6abc877f6b policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.530925 pid=2001 tid=2015]   PROG_LOAD -> fd=152 errno=0 kernel_prog_id=115
+[113.532087 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=cc2cd4df90fef403 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.544101 pid=2001 tid=2015]   PROG_LOAD -> fd=153 errno=0 kernel_prog_id=116
+[113.545530 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=050dbd6c3e1c9e81 policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.546762 pid=2001 tid=2015]   PROG_LOAD -> fd=154 errno=0 kernel_prog_id=117
+[113.547411 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=ab3dccefbd78cce2 policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.550010 pid=2001 tid=2015]   PROG_LOAD -> fd=155 errno=0 kernel_prog_id=118
+[113.550739 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=8b9ee9c4770c7bee policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.551163 pid=2001 tid=2015]   PROG_LOAD -> fd=156 errno=0 kernel_prog_id=119
+[113.552106 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=2ec28fd5918c06ec policy_hash=6de344d8534cc21a branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.566765 pid=2001 tid=2015]   PROG_LOAD -> fd=157 errno=0 kernel_prog_id=120
+[113.569375 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=4da5aa4df63a5815 policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.570202 pid=2001 tid=2015]   PROG_LOAD -> fd=158 errno=0 kernel_prog_id=121
+[113.570756 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=9b58c9f97cc1dd28 policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.571949 pid=2001 tid=2015]   PROG_LOAD -> fd=159 errno=0 kernel_prog_id=122
+[113.584252 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=129 map_id=74 key=1 prog_fd=156 prog_id=119 flags=0 ret=0 errno=0
+[113.584642 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=156 id=119 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02b61e0 ksym1=0x0
+[113.587045 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=129 map_id=74 key=7 prog_fd=157 prog_id=120 flags=0 ret=0 errno=0
+[113.587237 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=157 id=120 type=3 name=tail_handle_ipv tag=1abd822672e38a11 jited_len=8254 xlated_len=14392 nr_jited_ksyms=1 ksym0=0xffffffffc02b63b0 ksym1=0x0
+[113.587484 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=129 map_id=74 key=23 prog_fd=158 prog_id=121 flags=0 ret=0 errno=0
+[113.587668 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=158 id=121 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02b8414 ksym1=0x0
+[113.587910 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=129 map_id=74 key=15 prog_fd=149 prog_id=112 flags=0 ret=0 errno=0
+[113.588011 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=149 id=112 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02ad048 ksym1=0x0
+[113.588629 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=129 map_id=74 key=38 prog_fd=152 prog_id=115 flags=0 ret=0 errno=0
+[113.588875 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=152 id=115 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12954 xlated_len=21584 nr_jited_ksyms=1 ksym0=0xffffffffc02aea10 ksym1=0x0
+[113.589066 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ho map_fd=129 map_id=74 key=36 prog_fd=153 prog_id=116 flags=0 ret=0 errno=0
+[113.589182 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=153 id=116 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02b1ce8 ksym1=0x0
+[113.589437 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_call_pol map_fd=128 map_id=17 key=2142 prog_fd=150 prog_id=113 flags=0 ret=0 errno=0
+[113.589665 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=150 id=113 type=3 name=cil_host_policy tag=691ef55febf78432 jited_len=16 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc02ab694 ksym1=0x0
+[113.589876 pid=2001 tid=2015] BPF_LINK_UPDATE link_fd=148 new_prog_fd=151 flags=0 old_prog_fd=0
+[113.589991 pid=2001 tid=2015] BPF_LINK_UPDATE tracking retargeted link_id=5 retained_fd=205 new_prog_id=114
+[113.590091 pid=2001 tid=2015]   LINK_UPDATE -> ret=0 errno=0
+[113.590492 pid=2001 tid=2015] BPF_LINK_UPDATE link_fd=148 new_prog_fd=159 flags=0 old_prog_fd=0
+[113.590740 pid=2001 tid=2015] BPF_LINK_UPDATE tracking retargeted link_id=6 retained_fd=212 new_prog_id=122
+[113.590849 pid=2001 tid=2015]   LINK_UPDATE -> ret=0 errno=0
+[113.593488 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[113.593728 pid=2001 tid=2015]   MAP_CREATE -> fd=150 errno=0 kernel_map_id=76
+[113.594210 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[113.594447 pid=2001 tid=2015]   MAP_CREATE -> fd=163 errno=0 kernel_map_id=77
+[113.594855 pid=2001 tid=2015] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ne
+[113.594970 pid=2001 tid=2015]   MAP_CREATE -> fd=171 errno=0 kernel_map_id=78
+[113.595708 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=bfd5f7817375cce2 policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.599304 pid=2001 tid=2015]   PROG_LOAD -> fd=178 errno=0 kernel_prog_id=123
+[113.602131 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=7f61372091a14f7b policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.603431 pid=2001 tid=2015]   PROG_LOAD -> fd=179 errno=0 kernel_prog_id=124
+[113.603871 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=605 hash=ffb95b341012143a policy_hash=4a3f46a8764f5bea branch_profile_hash=03900fd2f491421d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.604687 pid=2001 tid=2015]   PROG_LOAD -> fd=180 errno=0 kernel_prog_id=125
+[113.605086 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=463757791fe6a5a5 policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.605478 pid=2001 tid=2015]   PROG_LOAD -> fd=181 errno=0 kernel_prog_id=126
+[113.605751 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.605891 pid=2001 tid=2015]   PROG_LOAD -> fd=182 errno=0 kernel_prog_id=127
+[113.606710 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=01efb053d686dfa4 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.624590 pid=2001 tid=2015]   PROG_LOAD -> fd=183 errno=0 kernel_prog_id=128
+[113.625466 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=759f4db551850e2e policy_hash=77172dccdc980c3b branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.639855 pid=2001 tid=2015]   PROG_LOAD -> fd=184 errno=0 kernel_prog_id=129
+[113.640985 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=73f7f939f53d2275 policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.643799 pid=2001 tid=2015]   PROG_LOAD -> fd=186 errno=0 kernel_prog_id=130
+[113.644495 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=3e3c8f8219b2513f policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.644876 pid=2001 tid=2015]   PROG_LOAD -> fd=187 errno=0 kernel_prog_id=131
+[113.645147 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=46efa3fb8016daf0 policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.645739 pid=2001 tid=2015]   PROG_LOAD -> fd=188 errno=0 kernel_prog_id=132
+[113.646520 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=4b580b893f980a10 policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.658242 pid=2001 tid=2015]   PROG_LOAD -> fd=189 errno=0 kernel_prog_id=133
+[113.658935 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=24fc4a8ecf67c677 policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=177 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.660080 pid=2001 tid=2015]   PROG_LOAD -> fd=190 errno=0 kernel_prog_id=134
+[113.673575 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=171 map_id=78 key=45 prog_fd=180 prog_id=125 flags=0 ret=0 errno=0
+[113.673853 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=180 id=125 type=3 name=tail_no_service tag=705fe169db33280d jited_len=2792 xlated_len=4952 nr_jited_ksyms=1 ksym0=0xffffffffc02bee4c ksym1=0x0
+[113.675026 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=171 map_id=78 key=38 prog_fd=183 prog_id=128 flags=0 ret=0 errno=0
+[113.675232 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=183 id=128 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12981 xlated_len=21632 nr_jited_ksyms=1 ksym0=0xffffffffc02bf960 ksym1=0x0
+[113.677764 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=171 map_id=78 key=7 prog_fd=184 prog_id=129 flags=0 ret=0 errno=0
+[113.678021 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=184 id=129 type=3 name=tail_handle_ipv tag=ff5c3d2ea3cfdd26 jited_len=8242 xlated_len=14312 nr_jited_ksyms=1 ksym0=0xffffffffc02c2c78 ksym1=0x0
+[113.686470 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=171 map_id=78 key=1 prog_fd=187 prog_id=131 flags=0 ret=0 errno=0
+[113.686593 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=187 id=131 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02bb8a0 ksym1=0x0
+[113.686926 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=171 map_id=78 key=23 prog_fd=188 prog_id=132 flags=0 ret=0 errno=0
+[113.687040 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=188 id=132 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02c6f7c ksym1=0x0
+[113.687834 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=171 map_id=78 key=36 prog_fd=189 prog_id=133 flags=0 ret=0 errno=0
+[113.688106 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=189 id=133 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02c74bc ksym1=0x0
+[113.688684 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=171 map_id=78 key=15 prog_fd=178 prog_id=123 flags=0 ret=0 errno=0
+[113.688787 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=178 id=123 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02b9ed4 ksym1=0x0
+[113.688981 pid=2001 tid=2015] BPF_LINK_UPDATE link_fd=177 new_prog_fd=181 flags=0 old_prog_fd=0
+[113.689201 pid=2001 tid=2015] BPF_LINK_UPDATE tracking retargeted link_id=7 retained_fd=87 new_prog_id=126
+[113.689393 pid=2001 tid=2015]   LINK_UPDATE -> ret=0 errno=0
+[113.692042 pid=2001 tid=2015] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_ne
+[113.692221 pid=2001 tid=2015]   MAP_CREATE -> fd=197 errno=0 kernel_map_id=79
+[113.692561 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[113.692673 pid=2001 tid=2015]   MAP_CREATE -> fd=209 errno=0 kernel_map_id=80
+[113.692943 pid=2001 tid=2015] BPF_MAP_CREATE type=2 key_size=4 value_size=221 max_entries=1 name=.rodata.config
+[113.693175 pid=2001 tid=2015]   MAP_CREATE -> fd=231 errno=0 kernel_map_id=81
+[113.694002 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_sna insn_cnt=2793 hash=6f4620711bb3aa66 policy_hash=b9843ee58f272a7a branch_profile_hash=5a39199ccc5548f8 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.701433 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[113.710344 pid=2001 tid=2015]   PROG_LOAD -> fd=236 errno=0 kernel_prog_id=135
+[113.710778 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=605 hash=1690641568776214 policy_hash=4a3f46a8764f5bea branch_profile_hash=03900fd2f491421d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.711414 pid=2001 tid=2015]   PROG_LOAD -> fd=237 errno=0 kernel_prog_id=136
+[113.712093 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1897 hash=2ffca922f4f5e10f policy_hash=e7f88e9c11988377 branch_profile_hash=c1aa3e2b86de43c9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.723871 pid=2001 tid=2015]   PROG_LOAD -> fd=238 errno=0 kernel_prog_id=137
+[113.724378 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_host_policy insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=e27ebb8eb5e9ee7a license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.724818 pid=2001 tid=2015]   PROG_LOAD -> fd=239 errno=0 kernel_prog_id=138
+[113.725645 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_host insn_cnt=871 hash=d7683e19dcfa5079 policy_hash=3f6625c53a0023c2 branch_profile_hash=dc31384d334167dd license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.726172 pid=2001 tid=2015]   PROG_LOAD -> fd=240 errno=0 kernel_prog_id=139
+[113.726856 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_netdev insn_cnt=1463 hash=72d9e6936f8ea410 policy_hash=8ecb2c15fcd97cc2 branch_profile_hash=911c030c293cd220 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.729455 pid=2001 tid=2015]   PROG_LOAD -> fd=241 errno=0 kernel_prog_id=140
+[113.730252 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_host insn_cnt=1668 hash=4408c4b2ba79640b policy_hash=d0e715648d4b28a5 branch_profile_hash=2ffc27d741d8fc06 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.731311 pid=2001 tid=2015]   PROG_LOAD -> fd=242 errno=0 kernel_prog_id=141
+[113.732075 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1800 hash=630cbfd77e9ff1f9 policy_hash=77172dccdc980c3b branch_profile_hash=c7686c3564626210 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.746424 pid=2001 tid=2015]   PROG_LOAD -> fd=243 errno=0 kernel_prog_id=142
+[113.747376 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_netdev insn_cnt=1521 hash=4b349f2c8a6a63db policy_hash=01f3156d6a3d3d5a branch_profile_hash=2dfc615c25374e59 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.748275 pid=2001 tid=2015]   PROG_LOAD -> fd=244 errno=0 kernel_prog_id=143
+[113.748838 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_n insn_cnt=1399 hash=5df52e6148386a74 policy_hash=a3fd2536f4d52a10 branch_profile_hash=03b13d23abe64a0e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.752435 pid=2001 tid=2015]   PROG_LOAD -> fd=245 errno=0 kernel_prog_id=144
+[113.752996 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=185 hash=ce2bcfe826533939 policy_hash=e5b6a08a1124ff2a branch_profile_hash=c2cccc00464419f5 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.753507 pid=2001 tid=2015]   PROG_LOAD -> fd=246 errno=0 kernel_prog_id=145
+[113.753959 pid=2001 tid=2015] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=249 hash=de16d9ed8a850b0f policy_hash=e7964adbb029e27a branch_profile_hash=edffe7a0f23c9ca6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=235 attach_btf_obj_fd=0 attach_prog_fd=0
+[113.754444 pid=2001 tid=2015]   PROG_LOAD -> fd=247 errno=0 kernel_prog_id=146
+[113.756518 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=197 map_id=79 key=7 prog_fd=243 prog_id=142 flags=0 ret=0 errno=0
+[113.756732 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=243 id=142 type=3 name=tail_handle_ipv tag=ff5c3d2ea3cfdd26 jited_len=8242 xlated_len=14312 nr_jited_ksyms=1 ksym0=0xffffffffc02f6c54 ksym1=0x0
+[113.757340 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=197 map_id=79 key=15 prog_fd=245 prog_id=144 flags=0 ret=0 errno=0
+[113.757757 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=245 id=144 type=3 name=tail_nodeport_n tag=895bc75433df429c jited_len=6566 xlated_len=11024 nr_jited_ksyms=1 ksym0=0xffffffffc02f8cc8 ksym1=0x0
+[113.822023 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=197 map_id=79 key=1 prog_fd=246 prog_id=145 flags=0 ret=0 errno=0
+[113.822741 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=246 id=145 type=3 name=tail_drop_notif tag=8e7438330e74e062 jited_len=405 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc02d37d0 ksym1=0x0
+[113.837031 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=197 map_id=79 key=23 prog_fd=247 prog_id=146 flags=0 ret=0 errno=0
+[113.837408 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=247 id=146 type=3 name=tail_handle_ipv tag=854ce87f335884f1 jited_len=1262 xlated_len=2112 nr_jited_ksyms=1 ksym0=0xffffffffc02fa688 ksym1=0x0
+[113.838188 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=197 map_id=79 key=38 prog_fd=236 prog_id=135 flags=0 ret=0 errno=0
+[113.838398 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=236 id=135 type=3 name=tail_handle_sna tag=ae490db4c8a04446 jited_len=12981 xlated_len=21632 nr_jited_ksyms=1 ksym0=0xffffffffc02ca51c ksym1=0x0
+[113.839596 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=197 map_id=79 key=45 prog_fd=237 prog_id=136 flags=0 ret=0 errno=0
+[113.839775 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=237 id=136 type=3 name=tail_no_service tag=705fe169db33280d jited_len=2792 xlated_len=4952 nr_jited_ksyms=1 ksym0=0xffffffffc02cd808 ksym1=0x0
+[113.840424 pid=2001 tid=2015] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_ne map_fd=197 map_id=79 key=36 prog_fd=238 prog_id=137 flags=0 ret=0 errno=0
+[113.840716 pid=2001 tid=2015] native-loader jit-info prog_array-target fd=238 id=137 type=3 name=tail_nodeport_n tag=115c9faa5d66d7f4 jited_len=8881 xlated_len=15112 nr_jited_ksyms=1 ksym0=0xffffffffc02ce314 ksym1=0x0
+[113.841394 pid=2001 tid=2015] BPF_LINK_UPDATE link_fd=235 new_prog_fd=244 flags=0 old_prog_fd=0
+[113.841762 pid=2001 tid=2015] BPF_LINK_UPDATE tracking retargeted link_id=8 retained_fd=92 new_prog_id=143
+[113.841972 pid=2001 tid=2015]   LINK_UPDATE -> ret=0 errno=0
+[113.842441 pid=2001 tid=2015] BPF_LINK_UPDATE link_fd=235 new_prog_fd=241 flags=0 old_prog_fd=0
+[113.842658 pid=2001 tid=2015] BPF_LINK_UPDATE tracking retargeted link_id=9 retained_fd=124 new_prog_id=140
+[113.842884 pid=2001 tid=2015]   LINK_UPDATE -> ret=0 errno=0
+[113.903530 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[114.105106 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[114.307114 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[114.509642 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[114.711791 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[114.913564 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[115.115048 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[115.319027 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[115.520668 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[115.721969 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[115.923654 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[116.499089 pid=2001 tid=2331] BPF_MAP_CREATE type=11 key_size=12 value_size=12 max_entries=16384 name=cilium_policy_v
+[116.499338 pid=2001 tid=2331]   MAP_CREATE -> fd=241 errno=0 kernel_map_id=82
+[116.503505 pid=3025 tid=3025] shim_init pid=3025 exe=/usr/bin/dash
+[116.505252 pid=3025 tid=3025] shim_init pid=3025 exe=/usr/bin/python3.12
+[116.505948 pid=3025 tid=3029] socket: listening on /var/run/bpfrejit/shim-3025.sock
+[116.539366 pid=3030 tid=3030] shim_init pid=3030 exe=/usr/lib/llvm-18/bin/clang
+[116.539933 pid=3030 tid=3032] socket: listening on /var/run/bpfrejit/shim-3030.sock
+[116.569394 pid=3033 tid=3033] shim_init pid=3033 exe=/usr/bin/dash
+[116.571209 pid=3033 tid=3033] shim_init pid=3033 exe=/usr/bin/python3.12
+[116.571729 pid=3033 tid=3037] socket: listening on /var/run/bpfrejit/shim-3033.sock
+[116.605050 pid=3038 tid=3038] shim_init pid=3038 exe=/usr/lib/llvm-18/bin/clang
+[116.605556 pid=3038 tid=3040] socket: listening on /var/run/bpfrejit/shim-3038.sock
+[118.027753 pid=2001 tid=2331] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[118.028503 pid=2001 tid=2331]   MAP_CREATE -> fd=252 errno=0 kernel_map_id=83
+[118.029091 pid=2001 tid=2331] BPF_MAP_CREATE type=6 key_size=4 value_size=18 max_entries=1 name=cilium_nodeport
+[118.037470 pid=2001 tid=2331]   MAP_CREATE -> fd=253 errno=0 kernel_map_id=84
+[118.070094 pid=2001 tid=2331] BPF_MAP_CREATE type=6 key_size=4 value_size=60 max_entries=1 name=cilium_tail_cal
+[118.070774 pid=2001 tid=2331]   MAP_CREATE -> fd=257 errno=0 kernel_map_id=85
+[118.071492 pid=2001 tid=2331] BPF_MAP_CREATE type=2 key_size=4 value_size=249 max_entries=1 name=.rodata.config
+[118.071813 pid=2001 tid=2331]   MAP_CREATE -> fd=263 errno=0 kernel_map_id=86
+[118.072236 pid=2001 tid=2331] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_00
+[118.072546 pid=2001 tid=2331]   MAP_CREATE -> fd=264 errno=0 kernel_map_id=87
+[118.073371 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_to_en insn_cnt=1568 hash=44817d7a48fba696 policy_hash=6d1df8bdb0f477cb branch_profile_hash=ddd613c2fc62c4bb license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.079029 pid=2001 tid=2331]   PROG_LOAD -> fd=270 errno=0 kernel_prog_id=147
+[118.080146 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_ct_eg insn_cnt=1238 hash=4193da0e14bc25f0 policy_hash=f675ad296bdb503b branch_profile_hash=975af145b0da876d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.083027 pid=2001 tid=2331]   PROG_LOAD -> fd=271 errno=0 kernel_prog_id=148
+[118.083631 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=cil_lxc_policy_ insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=9aa1858b02063776 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.083921 pid=2001 tid=2331]   PROG_LOAD -> fd=272 errno=0 kernel_prog_id=149
+[118.084715 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_ct_in insn_cnt=1195 hash=798b4b45fc0e6dcc policy_hash=f409804da4110813 branch_profile_hash=e7bc01f8c1cf8636 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.086913 pid=2001 tid=2331]   PROG_LOAD -> fd=273 errno=0 kernel_prog_id=150
+[118.087374 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=178 hash=1daba235e6d968cb policy_hash=e3f460c9b2e3c759 branch_profile_hash=2c93a9bbb64b0875 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.087899 pid=2001 tid=2331]   PROG_LOAD -> fd=274 errno=0 kernel_prog_id=151
+[118.088798 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_polic insn_cnt=1681 hash=7e6d6f4b785b4b5b policy_hash=7b878848e0fb4f3d branch_profile_hash=5c4dea536478af39 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.092929 pid=2001 tid=2331]   PROG_LOAD -> fd=275 errno=0 kernel_prog_id=152
+[118.094018 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_r insn_cnt=788 hash=ae9d33a3f65d4be1 policy_hash=e82c022870b3c58f branch_profile_hash=5e0117a921e727f9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.095614 pid=2001 tid=2331]   PROG_LOAD -> fd=276 errno=0 kernel_prog_id=153
+[118.096503 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=cil_lxc_policy insn_cnt=1301 hash=a4cbd7cb780d28fc policy_hash=c963fcc5698959ec branch_profile_hash=c845745dbd836f2c license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.098967 pid=2001 tid=2331]   PROG_LOAD -> fd=277 errno=0 kernel_prog_id=154
+[118.100859 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=601 hash=03d1221c8810cc8f policy_hash=e45edca3ac0bc80c branch_profile_hash=6b257b43e37f087e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.101589 pid=2001 tid=2331]   PROG_LOAD -> fd=278 errno=0 kernel_prog_id=155
+[118.103636 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_contai insn_cnt=510 hash=7b0b7503d58eefd2 policy_hash=ad5631d8ef3bc496 branch_profile_hash=e9b29b44759c07f6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.104172 pid=2001 tid=2331]   PROG_LOAD -> fd=279 errno=0 kernel_prog_id=156
+[118.104580 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_arp insn_cnt=197 hash=655c0430201dbd5c policy_hash=0c4b6c329a2d3a13 branch_profile_hash=61786338ff02b292 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.104920 pid=2001 tid=2331]   PROG_LOAD -> fd=280 errno=0 kernel_prog_id=157
+[118.105926 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1404 hash=344dcab3fc2fa3b9 policy_hash=cb384568b5426166 branch_profile_hash=fe20ab0a152ed335 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=269 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.121104 pid=2001 tid=2331]   PROG_LOAD -> fd=128 errno=0 kernel_prog_id=158
+[118.121878 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_containe insn_cnt=686 hash=d992c3017da40da7 policy_hash=004f115de718b236 branch_profile_hash=6c987546ebf7aaad license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=148 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.122691 pid=2001 tid=2331]   PROG_LOAD -> fd=65 errno=0 kernel_prog_id=159
+[118.123433 pid=2001 tid=2331] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=2022 hash=8de69b787960b9d1 policy_hash=a361622db01240f5 branch_profile_hash=95b19db5e4bbd8a7 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=68 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.129317 pid=2001 tid=2331]   PROG_LOAD -> fd=72 errno=0 kernel_prog_id=160
+[118.130606 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=6 prog_fd=280 prog_id=157 flags=0 ret=0 errno=0
+[118.130837 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=280 id=157 type=3 name=tail_handle_arp tag=b765989f1c3ad949 jited_len=927 xlated_len=1616 nr_jited_ksyms=1 ksym0=0xffffffffc02ddbd8 ksym1=0x0
+[118.131942 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=7 prog_fd=128 prog_id=158 flags=0 ret=0 errno=0
+[118.132142 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=128 id=158 type=3 name=tail_handle_ipv tag=0481c3c74a1a5681 jited_len=6216 xlated_len=10984 nr_jited_ksyms=1 ksym0=0xffffffffc02deed4 ksym1=0x0
+[118.134811 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=26 prog_fd=72 prog_id=160 flags=0 ret=0 errno=0
+[118.135018 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=72 id=160 type=3 name=tail_handle_ipv tag=0c4d509e86c07e4b jited_len=6398 xlated_len=11104 nr_jited_ksyms=1 ksym0=0xffffffffc02fabd4 ksym1=0x0
+[118.135370 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=13 prog_fd=270 prog_id=147 flags=0 ret=0 errno=0
+[118.135611 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=270 id=147 type=3 name=tail_ipv4_to_en tag=27ca8e01b35b0dd7 jited_len=5802 xlated_len=10368 nr_jited_ksyms=1 ksym0=0xffffffffc02d3988 ksym1=0x0
+[118.135776 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=30 prog_fd=271 prog_id=148 flags=0 ret=0 errno=0
+[118.135885 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=271 id=148 type=3 name=tail_ipv4_ct_eg tag=4c9130241f09acf5 jited_len=5375 xlated_len=9592 nr_jited_ksyms=1 ksym0=0xffffffffc02d50b4 ksym1=0x0
+[118.136107 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=28 prog_fd=273 prog_id=150 flags=0 ret=0 errno=0
+[118.136327 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=273 id=150 type=3 name=tail_ipv4_ct_in tag=efbd688ee1f0f73a jited_len=5210 xlated_len=9224 nr_jited_ksyms=1 ksym0=0xffffffffc02d65dc ksym1=0x0
+[118.146284 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=1 prog_fd=274 prog_id=151 flags=0 ret=0 errno=0
+[118.146647 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=274 id=151 type=3 name=tail_drop_notif tag=17493b5dfc831c38 jited_len=382 xlated_len=696 nr_jited_ksyms=1 ksym0=0xffffffffc02d7a6c ksym1=0x0
+[118.146937 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=11 prog_fd=275 prog_id=152 flags=0 ret=0 errno=0
+[118.147228 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=275 id=152 type=3 name=tail_ipv4_polic tag=5cc8eaf564b252b1 jited_len=5580 xlated_len=9904 nr_jited_ksyms=1 ksym0=0xffffffffc02d9f98 ksym1=0x0
+[118.147652 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=17 prog_fd=276 prog_id=153 flags=0 ret=0 errno=0
+[118.147766 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=276 id=153 type=3 name=tail_nodeport_r tag=d6d2e172087596dd jited_len=3622 xlated_len=6368 nr_jited_ksyms=1 ksym0=0xffffffffc02d7c08 ksym1=0x0
+[118.147938 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=264 map_id=87 key=45 prog_fd=278 prog_id=155 flags=0 ret=0 errno=0
+[118.148212 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=278 id=155 type=3 name=tail_no_service tag=9c2de255a63b2f76 jited_len=2774 xlated_len=4920 nr_jited_ksyms=1 ksym0=0xffffffffc02dcc58 ksym1=0x0
+[118.148517 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_call_pol map_fd=268 map_id=17 key=262 prog_fd=277 prog_id=154 flags=0 ret=0 errno=0
+[118.148719 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=277 id=154 type=3 name=cil_lxc_policy tag=52497018fcb6fd94 jited_len=5760 xlated_len=10104 nr_jited_ksyms=1 ksym0=0xffffffffc02db5bc ksym1=0x0
+[118.148827 pid=2001 tid=2331] BPF_MAP_UPDATE_ELEM prog_array name=cilium_egressca map_fd=255 map_id=18 key=262 prog_fd=272 prog_id=149 flags=0 ret=0 errno=0
+[118.148933 pid=2001 tid=2331] native-loader jit-info prog_array-target fd=272 id=149 type=3 name=cil_lxc_policy_ tag=691ef55febf78432 jited_len=16 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc02abb9c ksym1=0x0
+[118.149320 pid=2001 tid=2331] BPF_LINK_CREATE prog_fd=279 target_fd=7 attach_type=46 flags=16
+[118.180061 pid=2001 tid=2331]   LINK_CREATE -> fd=68 errno=0 kernel_link_id=10
+[118.679373 pid=2001 tid=2031] BPF_MAP_CREATE type=11 key_size=12 value_size=12 max_entries=16384 name=cilium_policy_v
+[118.679521 pid=2001 tid=2031]   MAP_CREATE -> fd=68 errno=0 kernel_map_id=88
+[118.684770 pid=2001 tid=2031] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=50 name=cilium_calls_00
+[118.684910 pid=2001 tid=2031]   MAP_CREATE -> fd=78 errno=0 kernel_map_id=89
+[118.685027 pid=2001 tid=2031] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=.rodata.aux
+[118.685127 pid=2001 tid=2031]   MAP_CREATE -> fd=82 errno=0 kernel_map_id=90
+[118.685431 pid=2001 tid=2031] BPF_MAP_CREATE type=2 key_size=4 value_size=249 max_entries=1 name=.rodata.config
+[118.685523 pid=2001 tid=2031]   MAP_CREATE -> fd=91 errno=0 kernel_map_id=91
+[118.685625 pid=2001 tid=2031] BPF_MAP_CREATE type=6 key_size=4 value_size=60 max_entries=1 name=cilium_tail_cal
+[118.685711 pid=2001 tid=2031]   MAP_CREATE -> fd=93 errno=0 kernel_map_id=92
+[118.685821 pid=2001 tid=2031] BPF_MAP_CREATE type=6 key_size=4 value_size=18 max_entries=1 name=cilium_nodeport
+[118.685896 pid=2001 tid=2031]   MAP_CREATE -> fd=96 errno=0 kernel_map_id=93
+[118.686329 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_ct_eg insn_cnt=1238 hash=f45fec8cdf171aba policy_hash=f675ad296bdb503b branch_profile_hash=975af145b0da876d license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.689122 pid=2001 tid=2031]   PROG_LOAD -> fd=103 errno=0 kernel_prog_id=161
+[118.689608 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=cil_lxc_policy insn_cnt=1301 hash=cbf9a26ad5b44a74 policy_hash=c963fcc5698959ec branch_profile_hash=c845745dbd836f2c license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.691874 pid=2001 tid=2031]   PROG_LOAD -> fd=104 errno=0 kernel_prog_id=162
+[118.692493 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=2022 hash=0c6291a3c33fc0ea policy_hash=a361622db01240f5 branch_profile_hash=95b19db5e4bbd8a7 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.698402 pid=2001 tid=2031]   PROG_LOAD -> fd=105 errno=0 kernel_prog_id=163
+[118.699123 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_polic insn_cnt=1681 hash=c9b2e998bc01d0b9 policy_hash=7b878848e0fb4f3d branch_profile_hash=5c4dea536478af39 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.703022 pid=2001 tid=2031]   PROG_LOAD -> fd=106 errno=0 kernel_prog_id=164
+[118.703569 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_ct_in insn_cnt=1195 hash=02cc573281b68e16 policy_hash=f409804da4110813 branch_profile_hash=e7bc01f8c1cf8636 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.705659 pid=2001 tid=2031]   PROG_LOAD -> fd=107 errno=0 kernel_prog_id=165
+[118.706522 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_ipv insn_cnt=1404 hash=d2f8014faf2f63e4 policy_hash=cb384568b5426166 branch_profile_hash=fe20ab0a152ed335 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.721682 pid=2001 tid=2031]   PROG_LOAD -> fd=108 errno=0 kernel_prog_id=166
+[118.722227 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=cil_lxc_policy_ insn_cnt=2 hash=cb31b0266819cba4 policy_hash=cb31b0266819cba4 branch_profile_hash=9aa1858b02063776 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.722707 pid=2001 tid=2031]   PROG_LOAD -> fd=109 errno=0 kernel_prog_id=167
+[118.723152 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_no_service insn_cnt=601 hash=341eb8f6ccfcae9e policy_hash=e45edca3ac0bc80c branch_profile_hash=6b257b43e37f087e license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.723951 pid=2001 tid=2031]   PROG_LOAD -> fd=110 errno=0 kernel_prog_id=168
+[118.724450 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=cil_from_contai insn_cnt=510 hash=c2216ad0fa40d168 policy_hash=ad5631d8ef3bc496 branch_profile_hash=e9b29b44759c07f6 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.724957 pid=2001 tid=2031]   PROG_LOAD -> fd=111 errno=0 kernel_prog_id=169
+[118.725398 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=cil_to_containe insn_cnt=686 hash=89f674cabe3c6af3 policy_hash=004f115de718b236 branch_profile_hash=6c987546ebf7aaad license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.726050 pid=2001 tid=2031]   PROG_LOAD -> fd=112 errno=0 kernel_prog_id=170
+[118.726427 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_handle_arp insn_cnt=197 hash=88b0a9dedbef1431 policy_hash=0c4b6c329a2d3a13 branch_profile_hash=61786338ff02b292 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.726798 pid=2001 tid=2031]   PROG_LOAD -> fd=113 errno=0 kernel_prog_id=171
+[118.727318 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_ipv4_to_en insn_cnt=1568 hash=03cb86b5789e99b7 policy_hash=6d1df8bdb0f477cb branch_profile_hash=ddd613c2fc62c4bb license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.732525 pid=2001 tid=2031]   PROG_LOAD -> fd=114 errno=0 kernel_prog_id=172
+[118.732790 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_drop_notif insn_cnt=178 hash=f809dccebca12ec7 policy_hash=e3f460c9b2e3c759 branch_profile_hash=2c93a9bbb64b0875 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.732998 pid=2001 tid=2031]   PROG_LOAD -> fd=115 errno=0 kernel_prog_id=173
+[118.733401 pid=2001 tid=2031] BPF_PROG_LOAD type=3 (sched_cls) name=tail_nodeport_r insn_cnt=788 hash=9009bd2f51888c14 policy_hash=e82c022870b3c58f branch_profile_hash=5e0117a921e727f9 license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=102 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.734939 pid=2001 tid=2031]   PROG_LOAD -> fd=116 errno=0 kernel_prog_id=174
+[118.745307 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=1 prog_fd=115 prog_id=173 flags=0 ret=0 errno=0
+[118.745470 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=115 id=173 type=3 name=tail_drop_notif tag=17493b5dfc831c38 jited_len=382 xlated_len=696 nr_jited_ksyms=1 ksym0=0xffffffffc02b6014 ksym1=0x0
+[118.746984 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=17 prog_fd=116 prog_id=174 flags=0 ret=0 errno=0
+[118.747090 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=116 id=174 type=3 name=tail_nodeport_r tag=d6d2e172087596dd jited_len=3622 xlated_len=6368 nr_jited_ksyms=1 ksym0=0xffffffffc02d1a90 ksym1=0x0
+[118.748960 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=30 prog_fd=103 prog_id=161 flags=0 ret=0 errno=0
+[118.749070 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=103 id=161 type=3 name=tail_ipv4_ct_eg tag=4c9130241f09acf5 jited_len=5375 xlated_len=9592 nr_jited_ksyms=1 ksym0=0xffffffffc02b3fec ksym1=0x0
+[118.749819 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=26 prog_fd=105 prog_id=163 flags=0 ret=0 errno=0
+[118.749938 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=105 id=163 type=3 name=tail_handle_ipv tag=0c4d509e86c07e4b jited_len=6398 xlated_len=11104 nr_jited_ksyms=1 ksym0=0xffffffffc02fc528 ksym1=0x0
+[118.750984 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=11 prog_fd=106 prog_id=164 flags=0 ret=0 errno=0
+[118.751088 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=106 id=164 type=3 name=tail_ipv4_polic tag=5cc8eaf564b252b1 jited_len=5580 xlated_len=9904 nr_jited_ksyms=1 ksym0=0xffffffffc02fde6c ksym1=0x0
+[118.751365 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=28 prog_fd=107 prog_id=165 flags=0 ret=0 errno=0
+[118.751465 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=107 id=165 type=3 name=tail_ipv4_ct_in tag=efbd688ee1f0f73a jited_len=5210 xlated_len=9224 nr_jited_ksyms=1 ksym0=0xffffffffc02f57cc ksym1=0x0
+[118.751587 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=7 prog_fd=108 prog_id=166 flags=0 ret=0 errno=0
+[118.751659 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=108 id=166 type=3 name=tail_handle_ipv tag=0481c3c74a1a5681 jited_len=6216 xlated_len=10984 nr_jited_ksyms=1 ksym0=0xffffffffc02ff450 ksym1=0x0
+[118.751811 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=45 prog_fd=110 prog_id=168 flags=0 ret=0 errno=0
+[118.751899 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=110 id=168 type=3 name=tail_no_service tag=9c2de255a63b2f76 jited_len=2774 xlated_len=4920 nr_jited_ksyms=1 ksym0=0xffffffffc02b5514 ksym1=0x0
+[118.752041 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=6 prog_fd=113 prog_id=171 flags=0 ret=0 errno=0
+[118.752107 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=113 id=171 type=3 name=tail_handle_arp tag=b765989f1c3ad949 jited_len=927 xlated_len=1616 nr_jited_ksyms=1 ksym0=0xffffffffc02bea8c ksym1=0x0
+[118.752287 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=78 map_id=89 key=13 prog_fd=114 prog_id=172 flags=0 ret=0 errno=0
+[118.752370 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=114 id=172 type=3 name=tail_ipv4_to_en tag=27ca8e01b35b0dd7 jited_len=5802 xlated_len=10368 nr_jited_ksyms=1 ksym0=0xffffffffc02eb7f0 ksym1=0x0
+[118.752490 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_call_pol map_fd=99 map_id=17 key=333 prog_fd=104 prog_id=162 flags=0 ret=0 errno=0
+[118.752567 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=104 id=162 type=3 name=cil_lxc_policy tag=52497018fcb6fd94 jited_len=5760 xlated_len=10104 nr_jited_ksyms=1 ksym0=0xffffffffc02c4cdc ksym1=0x0
+[118.752674 pid=2001 tid=2031] BPF_MAP_UPDATE_ELEM prog_array name=cilium_egressca map_fd=101 map_id=18 key=333 prog_fd=109 prog_id=167 flags=0 ret=0 errno=0
+[118.752777 pid=2001 tid=2031] native-loader jit-info prog_array-target fd=109 id=167 type=3 name=cil_lxc_policy_ tag=691ef55febf78432 jited_len=16 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc02ab654 ksym1=0x0
+[118.753013 pid=2001 tid=2031] BPF_LINK_CREATE prog_fd=111 target_fd=9 attach_type=46 flags=16
+[118.790165 pid=2001 tid=2031]   LINK_CREATE -> fd=102 errno=0 kernel_link_id=11
+[118.792952 pid=2001 tid=2005] socket: cmd=list_progs len=22
+[188.647213 pid=2001 tid=2005] socket: cmd=measure_start len=25
+[496.123284 pid=2001 tid=2005] socket: cmd=measure_finish len=26

@@ -1,0 +1,62 @@
+pktgen 65536 0 - Live 0xffffffffc07bd000
+xt_CT 12288 3 - Live 0xffffffffc07bc000
+xt_comment 12288 22 - Live 0xffffffffc07ba000
+xt_mark 12288 2 - Live 0xffffffffc07bb000
+cls_bpf 20480 0 - Live 0xffffffffc07b8000
+xt_socket 16384 1 - Live 0xffffffffc07b7000
+nf_socket_ipv4 12288 1 xt_socket, Live 0xffffffffc07b6000
+nf_socket_ipv6 16384 1 xt_socket, Live 0xffffffffc07ae000
+geneve 53248 0 - Live 0xffffffffc07b0000
+ip6_udp_tunnel 16384 1 geneve, Live 0xffffffffc07af000
+udp_tunnel 36864 1 geneve, Live 0xffffffffc07ab000
+bpf_x86_shd 12288 0 [permanent], Live 0xffffffffc07a4000 (OE)
+bpf_x86_rotate 12288 0 [permanent], Live 0xffffffffc079f000 (OE)
+bpf_x86_prefetch 12288 0 [permanent], Live 0xffffffffc07a0000 (OE)
+bpf_x86_popcnt 12288 0 [permanent], Live 0xffffffffc079a000 (OE)
+bpf_x86_not 12288 0 [permanent], Live 0xffffffffc07a2000 (OE)
+bpf_x86_native_lab 57344 106 - Live 0xffffffffc07a9000 (OE)
+bpf_x86_movbe 12288 0 [permanent], Live 0xffffffffc079d000 (OE)
+bpf_x86_mov 32768 0 [permanent], Live 0xffffffffc07a5000 (OE)
+bpf_x86_lea 12288 0 [permanent], Live 0xffffffffc07a3000 (OE)
+bpf_x86_imul 12288 0 [permanent], Live 0xffffffffc07a1000 (OE)
+bpf_x86_cmov 12288 0 [permanent], Live 0xffffffffc0693000 (OE)
+bpf_x86_byteorder 12288 0 [permanent], Live 0xffffffffc079e000 (OE)
+bpf_x86_bmi2_shift 20480 0 [permanent], Live 0xffffffffc079b000 (OE)
+bpf_x86_bmi1 12288 0 [permanent], Live 0xffffffffc0713000 (OE)
+bpf_x86_alu 49152 0 [permanent], Live 0xffffffffc0795000 (OE)
+xfrm_user 77824 4 - Live 0xffffffffc078c000 (E)
+xfrm_algo 16384 1 xfrm_user, Live 0xffffffffc0657000 (E)
+xt_set 20480 0 - Live 0xffffffffc078a000 (E)
+ip_set 69632 1 xt_set, Live 0xffffffffc0784000 (E)
+nft_chain_nat 12288 5 - Live 0xffffffffc066c000 (E)
+nf_nat 69632 1 nft_chain_nat, Live 0xffffffffc077e000 (E)
+xt_addrtype 12288 2 - Live 0xffffffffc063d000 (E)
+nft_compat 24576 30 - Live 0xffffffffc077c000 (E)
+nf_tables 393216 110 nft_chain_nat,nft_compat, Live 0xffffffffc074b000 (E)
+nfnetlink 20480 7 ip_set,nft_compat,nf_tables, Live 0xffffffffc073a000 (E)
+sr_mod 28672 0 - Live 0xffffffffc0748000 (E)
+cdrom 86016 1 sr_mod, Live 0xffffffffc0741000 (E)
+sg 53248 0 - Live 0xffffffffc073c000 (E)
+ghash_clmulni_intel 12288 0 - Live 0xffffffffc0628000 (E)
+bpf_preload 20480 0 - Live 0xffffffffc0623000 (E)
+kvm_intel 327680 0 - Live 0xffffffffc0714000 (E)
+ata_piix 45056 0 - Live 0xffffffffc0711000 (E)
+mousedev 28672 0 - Live 0xffffffffc070f000 (E)
+kvm 1409024 1 kvm_intel, Live 0xffffffffc0694000 (E)
+libata 471040 1 ata_piix, Live 0xffffffffc066d000 (E)
+psmouse 159744 0 - Live 0xffffffffc0658000 (E)
+i2c_piix4 32768 0 - Live 0xffffffffc066a000 (E)
+scsi_mod 331776 3 sr_mod,sg,libata, Live 0xffffffffc063e000 (E)
+i2c_smbus 20480 1 i2c_piix4, Live 0xffffffffc063c000 (E)
+irqbypass 16384 1 kvm, Live 0xffffffffc062d000 (E)
+i2c_core 126976 3 psmouse,i2c_piix4,i2c_smbus, Live 0xffffffffc0633000 (E)
+scsi_common 16384 4 sr_mod,sg,libata,scsi_mod, Live 0xffffffffc0625000 (E)
+button 24576 0 - Live 0xffffffffc061e000 (E)
+atkbd 40960 0 - Live 0xffffffffc0630000 (E)
+vivaldi_fmap 12288 1 atkbd, Live 0xffffffffc062f000 (E)
+libps2 20480 2 psmouse,atkbd, Live 0xffffffffc062e000 (E)
+i8042 49152 0 - Live 0xffffffffc0629000 (E)
+serio 28672 5 psmouse,atkbd,i8042, Live 0xffffffffc0626000 (E)
+virtio_mmio 16384 0 - Live 0xffffffffc0624000 (E)
+virtiofs 45056 0 - Live 0xffffffffc061f000 (E)
+fuse 270336 1 virtiofs, Live 0xffffffffc0600000 (E)

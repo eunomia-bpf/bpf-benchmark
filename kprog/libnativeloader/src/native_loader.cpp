@@ -3,6 +3,9 @@
 #include "kernel_offsets.h"
 
 #include "native_loader_manifest.hpp"
+#include "native_data_layout.hpp"
+#include "native_loader_cache.hpp"
+#include "native_loader_fd_scan.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -2029,6 +2032,8 @@ struct MapMeta {
     uint32_t max_entries;
     uint64_t kernel_addr;
     uint64_t value_addr;
+    uint32_t btf_id;
+    uint32_t btf_value_type_id;
 };
 
 struct HelperAlias {
@@ -2427,6 +2432,8 @@ MapMeta load_map_meta_from_fd(int map_fd)
         info.max_entries,
         lookup_kernel_map_ptr_by_fd(map_fd),
         lookup_array_value_addr_if_direct(info, map_fd),
+        info.btf_id,
+        info.btf_value_type_id,
     };
 }
 
@@ -2445,13 +2452,30 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             continue;
         }
         int fd = std::atoi(de->d_name);
-        if (fd < 0 || !fd_is_bpf_map(fd)) {
+        if (fd < 0) {
+            continue;
+        }
+        ScopedFd pinned_fd(pin_open_process_fd_for_scan(fd));
+        if (pinned_fd.get() < 0) {
+            const int saved = errno;
+            if (open_process_fd_went_stale(saved)) {
+                continue;
+            }
+            closedir(fd_dir);
+            fail("duplicate /proc/self/fd/" + std::to_string(fd) +
+                 " for map scan: " + std::strerror(saved));
+        }
+        if (!fd_is_bpf_map(pinned_fd.get())) {
             continue;
         }
         bpf_map_info info = {};
         __u32 info_len = sizeof(info);
-        if (bpf_obj_get_info_by_fd(fd, &info, &info_len) != 0) {
-            continue;
+        const int info_err = bpf_obj_get_info_by_fd(
+            pinned_fd.get(), &info, &info_len);
+        if (info_err != 0) {
+            closedir(fd_dir);
+            fail("bpf_obj_get_info_by_fd (pinned process map) failed: " +
+                 libbpf_error_string(info_err));
         }
         char map_name_buf[sizeof(info.name) + 1] = {};
         std::memcpy(map_name_buf, info.name, sizeof(info.name));
@@ -2467,8 +2491,10 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             info.key_size,
             info.value_size,
             info.max_entries,
-            lookup_kernel_map_ptr_by_fd(fd),
-            lookup_array_value_addr_if_direct(info, fd),
+            lookup_kernel_map_ptr_by_fd(pinned_fd.get()),
+            lookup_array_value_addr_if_direct(info, pinned_fd.get()),
+            info.btf_id,
+            info.btf_value_type_id,
         });
     }
     closedir(fd_dir);
@@ -3190,6 +3216,50 @@ bool native_data_section_supported(const std::string &section_name)
            section_name.rfind(".rodata", 0) == 0;
 }
 
+std::optional<uint64_t> source_data_symbol_offset(
+    const MapMeta &map,
+    const std::string &section_name,
+    const std::string &symbol_name,
+    uint64_t native_size,
+    uint64_t native_offset)
+{
+    if (map.btf_id == 0 || map.btf_value_type_id == 0) {
+        return native_offset;
+    }
+
+    btf *btf_obj = btf__load_from_kernel_by_id(map.btf_id);
+    const long btf_err = libbpf_get_error(btf_obj);
+    if (btf_err) {
+        fail("btf__load_from_kernel_by_id(" + std::to_string(map.btf_id) +
+             ") for data map " + map.name + ": " +
+             std::strerror(static_cast<int>(-btf_err)));
+    }
+
+    const NativeDataSymbolLayout layout = find_source_data_symbol_layout(
+        btf_obj, map.btf_value_type_id, section_name, symbol_name);
+    btf__free(btf_obj);
+    const NativeDataSymbolOffsetResolution resolution =
+        resolve_source_data_symbol_offset(
+            layout, native_size, native_offset, map.value_size);
+    if (resolution.kind == NativeDataSymbolOffsetKind::SectionMismatch) {
+        fail("native data section " + section_name +
+             " does not match the source BTF datasec for map " + map.name);
+    }
+    if (resolution.kind == NativeDataSymbolOffsetKind::Absent) {
+        return std::nullopt;
+    }
+    if (resolution.kind == NativeDataSymbolOffsetKind::SizeMismatch) {
+        fail("native data symbol " + symbol_name + " size " +
+             std::to_string(native_size) + " differs from source BTF size " +
+             std::to_string(layout.size));
+    }
+    if (resolution.kind == NativeDataSymbolOffsetKind::OutOfBounds) {
+        fail("source BTF data symbol " + symbol_name + " exceeds map " +
+             map.name + " value_size");
+    }
+    return resolution.offset;
+}
+
 std::string bpf_obj_name_truncation(const std::string &name)
 {
     constexpr size_t kMaxBpfObjNameLen = BPF_OBJ_NAME_LEN - 1;
@@ -3620,13 +3690,17 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 close(fd);
                 fail("native data symbol " + std::string(name) + " is below section base");
             }
-            const uint64_t off = sym.st_value - target_shdr.sh_addr;
-            const uint64_t symbol_end = off + sym.st_size;
-            const MapMeta *map = find_array_data_map(load, section, symbol_end);
+            const uint64_t native_off = sym.st_value - target_shdr.sh_addr;
+            const MapMeta *map = find_array_data_map(load, section, 1);
             if (!map) {
                 continue;
             }
-            if (off + sym.st_size > map->value_size) {
+            const std::optional<uint64_t> off = source_data_symbol_offset(
+                *map, section, name, sym.st_size, native_off);
+            if (!off) {
+                continue;
+            }
+            if (*off + sym.st_size > map->value_size) {
                 elf_end(elf);
                 close(fd);
                 fail("native data symbol " + std::string(name) +
@@ -3644,7 +3718,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (load.map_addrs.count(symbol_name)) {
                 continue;
             }
-            load.map_addrs[symbol_name] = map->value_addr + off;
+            load.map_addrs[symbol_name] = map->value_addr + *off;
             load.map_addr_ids[symbol_name] = map->kernel_id;
         }
     }
@@ -4205,8 +4279,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
 
     LinkerOutput source = cache;
     if (!cache_hit) {
-        const std::filesystem::path tmp_base =
-            cache_dir / (key + ".tmp." + std::to_string(getpid()));
+        const std::filesystem::path tmp_base = native_link_temporary_base(
+            cache_dir, key, getpid(), syscall(SYS_gettid));
         const auto link_start = std::chrono::steady_clock::now();
         LinkerOutput tmp = invoke_native_link(elf_path, symbol_name, link_args, tmp_base);
         const auto link_end = std::chrono::steady_clock::now();

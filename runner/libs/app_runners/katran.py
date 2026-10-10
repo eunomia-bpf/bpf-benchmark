@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ctypes
 import errno
+import json
 import os
 import platform
 import shlex
@@ -13,6 +14,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
+from ..app_outcomes import katran_outcome_snapshot, run_with_outcomes
 from ..kernel_modules import kernel_module_is_builtin, load_kernel_module
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
@@ -58,6 +60,65 @@ ROUTER_CLIENT_IFACE = "rtcl0"
 CLIENT_IFACE = "client0"
 ROUTER_REAL_IFACE = "rtreal0"
 REAL_IFACE = "real0"
+KATRAN_RECEIVER_NAPI_CPU = 5
+KATRAN_ROUTER_NAPI_CPU = 6
+KATRAN_NAPI_RT_PRIORITY = 1
+KATRAN_NAPI_THREADED_MODE = "busy-poll"
+YNL_CLI = Path("/usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl/cli.py")
+
+
+def _pin_threaded_napi(pid: int, cpu: int) -> None:
+    os.sched_setaffinity(pid, {int(cpu)})
+    os.sched_setscheduler(
+        pid,
+        os.SCHED_FIFO,
+        os.sched_param(KATRAN_NAPI_RT_PRIORITY),
+    )
+
+
+def _enable_threaded_peer_napi(namespace: str, iface: str, cpu: int) -> int:
+    if not YNL_CLI.is_file():
+        raise RuntimeError(f"YNL CLI is required for threaded NAPI busy-poll: {YNL_CLI}")
+    ifindex = _namespace_ifindex(namespace, iface)
+
+    def napi_records() -> list[dict[str, object]]:
+        completed = ns_exec_command(namespace, [
+            remote_python_binary(), str(YNL_CLI), "--family", "netdev",
+            "--dump", "napi-get", "--json", json.dumps({"ifindex": ifindex}),
+            "--output-json",
+        ])
+        payload = json.loads(completed.stdout or "[]")
+        if not isinstance(payload, list):
+            raise RuntimeError(
+                f"netdev napi-get returned unexpected payload for {namespace}/{iface}"
+            )
+        return [dict(record) for record in payload if isinstance(record, Mapping)]
+
+    records = napi_records()
+    if len(records) != 1 or int(records[0].get("id", 0) or 0) <= 0:
+        raise RuntimeError(
+            f"expected one NAPI instance for {namespace}/{iface}, got {records!r}"
+        )
+    napi_id = int(records[0]["id"])
+    ns_exec_command(namespace, [
+        remote_python_binary(), str(YNL_CLI), "--family", "netdev",
+        "--do", "napi-set", "--json",
+        json.dumps({"id": napi_id, "threaded": KATRAN_NAPI_THREADED_MODE}),
+        "--output-json",
+    ])
+    configured = next(
+        (record for record in napi_records() if int(record.get("id", 0) or 0) == napi_id),
+        None,
+    )
+    if configured is None or configured.get("threaded") not in (KATRAN_NAPI_THREADED_MODE, 2):
+        raise RuntimeError(
+            f"NAPI busy-poll did not take effect for {namespace}/{iface}: {configured!r}"
+        )
+    pid = int(configured.get("pid", 0) or 0)
+    if pid <= 0:
+        raise RuntimeError(f"threaded NAPI worker for {namespace}/{iface} has no PID")
+    _pin_threaded_napi(pid, cpu)
+    return pid
 
 LB_IP = "192.0.2.2"
 ROUTER_LB_IP = "192.0.2.1"
@@ -180,6 +241,34 @@ def ns_ip_command(namespace: str, command: list[str] | tuple[str, ...], *, check
     return ns_exec_command(namespace, [ip_binary(), *_normalize_ip_command(command)], check=check)
 
 
+def _namespace_ifindex(namespace: str, iface: str) -> int:
+    completed = ns_exec_command(
+        namespace, [ip_binary(), "-j", "link", "show", "dev", iface]
+    )
+    payload = json.loads(completed.stdout or "[]")
+    if not isinstance(payload, list) or not payload:
+        raise RuntimeError(f"could not resolve ifindex for {namespace}/{iface}")
+    return int(payload[0]["ifindex"])
+
+
+def _update_katran_route_map(namespace: str, ifindex: int) -> int:
+    map_ids = [
+        int(record["id"])
+        for record in _map_show_records()
+        if str(record.get("name") or "") == "katran_route"
+    ]
+    if not map_ids:
+        raise RuntimeError("Katran transport devmap was not loaded")
+    map_id = max(map_ids)
+    value = int(ifindex).to_bytes(4, "little")
+    ns_exec_command(namespace, [
+        resolve_bpftool_binary(), "map", "update", "id", str(map_id),
+        "key", "hex", "00", "00", "00", "00",
+        "value", "hex", *(f"{byte:02x}" for byte in value),
+    ])
+    return map_id
+
+
 def link_exists(name: str) -> bool:
     return Path("/sys/class/net").joinpath(name).exists()
 
@@ -274,6 +363,10 @@ class KatranDsrTopology:
         self.router_peer_iface = router_peer_iface or None
         self.lb_ifindex = 0
         self.created_hc_ifaces: list[str] = []
+        self.peer_xdp_path = ""
+        self.peer_napi_pid = 0
+        self.receiver_napi_pid = 0
+        self.route_map_id = 0
 
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
@@ -318,6 +411,36 @@ class KatranDsrTopology:
         _nsc(CLIENT_NS, "link", "set", "dev", CLIENT_IFACE, "up")
         _nsc(REAL_NS, "addr", "add", f"{REAL_IP}/24", "dev", REAL_IFACE)
         _nsc(REAL_NS, "link", "set", "dev", REAL_IFACE, "up")
+        # Keep the outcome path entirely in XDP: Katran still encapsulates and
+        # returns XDP_TX, the router peer redirects that frame to the backend
+        # veth, and the backend XDP sink accounts it in interface RX counters.
+        # This avoids making skb allocation/routing the benchmark bottleneck.
+        peer_xdp = _resolve_katran_bpf_artifact("bpf/katran_transport.bpf.o")
+        ns_exec_command(REAL_NS, [
+            ip_binary(), "link", "set", "dev", REAL_IFACE,
+            "xdp", "obj", str(peer_xdp), "sec", "xdp/receiver_sink",
+        ])
+        self.receiver_napi_pid = _enable_threaded_peer_napi(
+            REAL_NS,
+            REAL_IFACE,
+            KATRAN_RECEIVER_NAPI_CPU,
+        )
+        ns_exec_command(ROUTER_NS, [
+            ip_binary(), "link", "set", "dev", ROUTER_LB_IFACE,
+            "xdp", "obj", str(peer_xdp), "sec", "xdp/router_redirect",
+        ])
+        self.peer_xdp_path = str(peer_xdp)
+        # Busy-poll on isolated CPUs so veth's fixed XDP rings are drained
+        # without cross-vCPU wakeup stalls, while retaining a parallel
+        # end-to-end pipeline whose bottleneck is Katran rather than transport.
+        self.peer_napi_pid = _enable_threaded_peer_napi(
+            ROUTER_NS,
+            ROUTER_LB_IFACE,
+            KATRAN_ROUTER_NAPI_CPU,
+        )
+        self.route_map_id = _update_katran_route_map(
+            ROUTER_NS, _namespace_ifindex(ROUTER_NS, ROUTER_REAL_IFACE)
+        )
         _nsc(REAL_NS, "addr", "add", f"{VIP_IP}/32", "dev", "lo")
         _nsc(REAL_NS, "link", "add", "name", "ipip0", "type", "ipip", "external")
         _nsc(REAL_NS, "addr", "add", f"{IPIP_DUMMY_IP}/32", "dev", "ipip0")
@@ -355,7 +478,19 @@ class KatranDsrTopology:
     def metadata(self) -> dict[str, object]:
         return {"namespaces": {"router": ROUTER_NS, "client": CLIENT_NS, "real": REAL_NS},
                 "iface": self.iface, "router_peer_iface": self.router_peer_iface, "lb_ifindex": self.lb_ifindex,
-                "healthcheck_ifaces": list(self.created_hc_ifaces)}
+                "healthcheck_ifaces": list(self.created_hc_ifaces),
+                "peer_xdp_path": self.peer_xdp_path,
+                "peer_xdp_iface": ROUTER_LB_IFACE,
+                "peer_napi_pid": self.peer_napi_pid,
+                "peer_napi_cpu": KATRAN_ROUTER_NAPI_CPU,
+                "peer_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
+                "peer_napi_threaded_mode": KATRAN_NAPI_THREADED_MODE,
+                "receiver_xdp_iface": REAL_IFACE,
+                "receiver_napi_pid": self.receiver_napi_pid,
+                "receiver_napi_cpu": KATRAN_RECEIVER_NAPI_CPU,
+                "receiver_napi_rt_priority": KATRAN_NAPI_RT_PRIORITY,
+                "receiver_napi_threaded_mode": KATRAN_NAPI_THREADED_MODE,
+                "route_map_id": self.route_map_id}
 
     def close(self) -> None: self.cleanup()
     def __exit__(self, exc_type, exc, tb) -> None: self.close()
@@ -614,8 +749,13 @@ DEFAULT_WRK_THREADS = 4
 DEFAULT_WRK_CONNECTIONS = 10
 DEFAULT_PKTGEN_PKT_SIZE = 64
 DEFAULT_PKTGEN_CLONE_SKB = 0
+DEFAULT_PKTGEN_SRC_PORT = 10000
 PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
-KATRAN_PKTGEN_THREAD_IDS = (0, 1, 2, 3)
+# A veth has one TX queue.  Multiple pktgen workers therefore race on queue 0,
+# producing NETDEV_TX_BUSY errors and, on AWS, no traffic at the XDP hook.
+# Keep the generator on the final vCPU of the paper-compatible 8-vCPU guest;
+# this also leaves CPUs 0--6 available to process the forwarding path.
+KATRAN_PKTGEN_THREAD_IDS = (7,)
 KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
 
 
@@ -774,7 +914,10 @@ class KatranRunner(AppRunner):
             self._pktgen_write(thread_path, "rem_device_all")
             self._pktgen_write(thread_path, f"add_device {alias}")
         pktgen_commands = (
-            "flag !SHARED",
+            # This is the packet shape used by the zero-loss paper workload.
+            # FLOW_RND/!SHARED looks successful in pktgen but does not traverse
+            # the veth peer's XDP hook on the kernels used by the AWS runner.
+            "flag SHARED",
             f"clone_skb {DEFAULT_PKTGEN_CLONE_SKB}",
             "burst 1",
             "count 0",
@@ -789,10 +932,10 @@ class KatranRunner(AppRunner):
             f"dst_mac {LB_MAC}",
             f"udp_dst_min {VIP_PORT}",
             f"udp_dst_max {VIP_PORT}",
-            "udp_src_min 1",
-            "udp_src_max 65535",
-            "flows 65535",
-            "flowlen 1",
+            f"udp_src_min {DEFAULT_PKTGEN_SRC_PORT}",
+            f"udp_src_max {DEFAULT_PKTGEN_SRC_PORT}",
+            "flows 0",
+            "flowlen 0",
             "clear_counters",
         )
         for alias in aliases:
@@ -823,7 +966,7 @@ class KatranRunner(AppRunner):
                 stdout=tail_text(self._pktgen_read(f"/proc/net/pktgen/{alias}"), max_lines=200000, max_chars=8388608),
                 stderr="",
                 config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": alias,
-                        "thread_id": int(thread_id), "shared_skb": False,
+                        "thread_id": int(thread_id), "shared_skb": True,
                         "xmit_mode": "start_xmit", "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
                         "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
                         "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT,
@@ -839,7 +982,7 @@ class KatranRunner(AppRunner):
             stdout="",
             stderr=tail_text(stderr or "", max_lines=200000, max_chars=8388608),
             config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": ROUTER_LB_IFACE,
-                    "shared_skb": False, "xmit_mode": "start_xmit",
+                    "shared_skb": True, "xmit_mode": "start_xmit",
                     "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
                     "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
                     "threads": list(pktgen_thread_ids),
@@ -860,8 +1003,12 @@ class KatranRunner(AppRunner):
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")
         if self.workload_kind == "xdp_pktgen":
-            return self._run_pktgen_workload(seconds)
-        return self._run_network_workload(seconds)
+            return run_with_outcomes(
+                lambda: self._run_pktgen_workload(seconds), katran_outcome_snapshot
+            )
+        return run_with_outcomes(
+            lambda: self._run_network_workload(seconds), katran_outcome_snapshot
+        )
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
         requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or self.workload_kind).strip().lower()

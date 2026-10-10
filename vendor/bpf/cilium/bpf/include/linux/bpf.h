@@ -6084,7 +6084,10 @@ struct __sk_buff {
 	void *dev;
 	void *sk;
 	__u64 tstamp;
-	__u32 cb[12];
+	/* BPF-visible cb[] is qdisc_skb_cb(skb)->data, eight bytes into
+	 * sk_buff.cb; bpf_convert_ctx_access() applies this pivot for JIT code. */
+	__u8 __native_qdisc_cb_pad[8];
+	__u32 cb[10];
 	__u8 __native_pad88[24];
 	__u32 len;
 	__u32 data_len;
@@ -6134,6 +6137,7 @@ struct __sk_buff {
 	__u32 truesize;
 };
 #define __native_skb_off(member) __builtin_offsetof(struct __sk_buff, member)
+_Static_assert(__native_skb_off(cb) == 48, "native __sk_buff BPF cb offset");
 _Static_assert(__native_skb_off(len) == 112, "native __sk_buff len offset");
 _Static_assert(__native_skb_off(data_len) == 116, "native __sk_buff data_len offset");
 _Static_assert(__native_skb_off(queue_mapping) == 124, "native __sk_buff queue_mapping offset");

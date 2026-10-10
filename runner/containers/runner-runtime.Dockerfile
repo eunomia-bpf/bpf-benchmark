@@ -68,6 +68,7 @@ RUN apt-get update \
         php-cli \
         procps \
         python3 \
+        python3-pyelftools \
         python3-yaml \
         ruby \
         stress-ng \
@@ -99,6 +100,7 @@ COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
 
 COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_server_grpc /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/katran/bpf/*.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
+COPY --link --from=runner-runtime-host-runner-build /katran_transport.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/katran_transport.bpf.o
 
 COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
 COPY --link --chmod=0755 \
@@ -167,6 +169,8 @@ COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WO
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/${RUN_TARGET_ARCH}/
+COPY --link vendor/linux-framework/tools/net/ynl/pyynl /usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl
+COPY --link vendor/linux-framework/Documentation/netlink /usr/share/ynl
 COPY --link tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \
@@ -191,6 +195,10 @@ COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
 COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
 COPY --link --from=runner-runtime-host-runner-build /native_loader/libnative_loader.so /usr/local/lib/bpfrejit/libnative_loader.so
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
+COPY --chmod=0644 vendor/bpf/native_compat.h /usr/local/lib/bpfrejit/native/native_compat.h
+COPY --chmod=0755 vendor/bpf/write_native_manifest.py /usr/local/lib/bpfrejit/native/write_native_manifest.py
+COPY vendor/bpf/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf
+COPY vendor/repos/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf-original
 COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs

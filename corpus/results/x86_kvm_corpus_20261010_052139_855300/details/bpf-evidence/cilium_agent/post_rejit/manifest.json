@@ -1,0 +1,1941 @@
+{
+  "app": "cilium/agent",
+  "captures": {
+    "bpftool-link": {
+      "command": [
+        "/usr/local/bin/bpftool",
+        "-j",
+        "link",
+        "show"
+      ],
+      "returncode": 0
+    },
+    "bpftool-net": {
+      "command": [
+        "/usr/local/bin/bpftool",
+        "-j",
+        "net"
+      ],
+      "returncode": 0
+    },
+    "ip-link": {
+      "command": [
+        "ip",
+        "-details",
+        "-statistics",
+        "-j",
+        "link",
+        "show"
+      ],
+      "returncode": 0
+    },
+    "ip-link-netns-bpfbench-cepa": {
+      "command": [
+        "ip",
+        "netns",
+        "exec",
+        "bpfbench-cepa",
+        "ip",
+        "-details",
+        "-statistics",
+        "-j",
+        "link",
+        "show"
+      ],
+      "returncode": 0
+    },
+    "ip-link-netns-bpfbench-cepb": {
+      "command": [
+        "ip",
+        "netns",
+        "exec",
+        "bpfbench-cepb",
+        "ip",
+        "-details",
+        "-statistics",
+        "-j",
+        "link",
+        "show"
+      ],
+      "returncode": 0
+    },
+    "ip-link-netns-bpfbenchns": {
+      "command": [
+        "ip",
+        "netns",
+        "exec",
+        "bpfbenchns",
+        "ip",
+        "-details",
+        "-statistics",
+        "-j",
+        "link",
+        "show"
+      ],
+      "returncode": 0
+    },
+    "tc-bpfbench0-egress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "bpfbench0",
+        "egress"
+      ],
+      "returncode": 0
+    },
+    "tc-bpfbench0-ingress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "bpfbench0",
+        "ingress"
+      ],
+      "returncode": 0
+    },
+    "tc-cilium_host-egress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "cilium_host",
+        "egress"
+      ],
+      "returncode": 0
+    },
+    "tc-cilium_host-ingress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "cilium_host",
+        "ingress"
+      ],
+      "returncode": 0
+    },
+    "tc-cilium_net-egress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "cilium_net",
+        "egress"
+      ],
+      "returncode": 0
+    },
+    "tc-cilium_net-ingress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "cilium_net",
+        "ingress"
+      ],
+      "returncode": 0
+    },
+    "tc-lo-egress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "lo",
+        "egress"
+      ],
+      "returncode": 0
+    },
+    "tc-lo-ingress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "lo",
+        "ingress"
+      ],
+      "returncode": 0
+    },
+    "tc-lxcbench0-egress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "lxcbench0",
+        "egress"
+      ],
+      "returncode": 0
+    },
+    "tc-lxcbench0-ingress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "lxcbench0",
+        "ingress"
+      ],
+      "returncode": 0
+    },
+    "tc-lxcbench1-egress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "lxcbench1",
+        "egress"
+      ],
+      "returncode": 0
+    },
+    "tc-lxcbench1-ingress": {
+      "command": [
+        "tc",
+        "-j",
+        "filter",
+        "show",
+        "dev",
+        "lxcbench1",
+        "ingress"
+      ],
+      "returncode": 0
+    }
+  },
+  "phase": "post_rejit",
+  "program_array_dumps": {
+    "108": {
+      "name": "cilium_call_pol",
+      "path": "map-108-cilium_call_pol.prog-array.json"
+    },
+    "109": {
+      "name": "cilium_egressca",
+      "path": "map-109-cilium_egressca.prog-array.json"
+    },
+    "166": {
+      "name": "cilium_calls_ho",
+      "path": "map-166-cilium_calls_ho.prog-array.json"
+    },
+    "170": {
+      "name": "cilium_calls_ne",
+      "path": "map-170-cilium_calls_ne.prog-array.json"
+    },
+    "172": {
+      "name": "cilium_calls_ne",
+      "path": "map-172-cilium_calls_ne.prog-array.json"
+    },
+    "180": {
+      "name": "cilium_calls_03",
+      "path": "map-180-cilium_calls_03.prog-array.json"
+    },
+    "186": {
+      "name": "cilium_calls_00",
+      "path": "map-186-cilium_calls_00.prog-array.json"
+    },
+    "85": {
+      "name": "cilium_calls_00",
+      "path": "map-85-cilium_calls_00.prog-array.json"
+    }
+  },
+  "program_dumps": {
+    "1539": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1539",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1539-cil_xdp_entry.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1539",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1552": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1552",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1552-tail_handle_sna.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1552",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1578": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1578",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1578-cil_host_policy.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1578",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1590": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1590",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1590-cil_from_host.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1590",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1603": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1603",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1603-cil_to_host.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1603",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1616": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1616",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1616-tail_nodeport_n.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1616",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1629": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1629",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1629-tail_nodeport_n.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1629",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1641": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1641",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1641-tail_handle_ipv4_from_netdev.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1641",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1667": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1667",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1667-tail_handle_ipv.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1667",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1680": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1680",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1680-tail_drop_notif.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1680",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1693": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1693",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1693-tail_handle_sna.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1693",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1719": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1719",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1719-tail_nodeport_n.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1719",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1732": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1732",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1732-tail_drop_notif.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1732",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1744": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1744",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1744-tail_handle_ipv4_from_netdev.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1744",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1757": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1757",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1757-tail_no_service.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1757",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1770": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1770",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1770-tail_nodeport_n.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1770",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1821": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1821",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1821-tail_handle_ipv.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1821",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1834": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1834",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1834-cil_to_host.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1834",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1847": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1847",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1847-tail_handle_ipv.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1847",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1873": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1873",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1873-cil_from_netdev.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1873",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1899": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1899",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1899-tail_nodeport_n.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1899",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1924": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1924",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1924-cil_to_netdev.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1924",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1937": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1937",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1937-tail_no_service.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1937",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1950": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1950",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1950-tail_drop_notif.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1950",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1963": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1963",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1963-tail_nodeport_n.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1963",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1976": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1976",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1976-tail_handle_sna.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1976",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "1988": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "1988",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/1988-tail_handle_ipv4_from_netdev.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "1988",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2-dump_bpf_map.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2001": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2001",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2001-tail_ipv4_polic.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2001",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2014": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2014",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2014-tail_handle_ipv.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2014",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2027": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2027",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2027-tail_ipv4_to_en.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2027",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2040": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2040",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2040-tail_no_service.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2040",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2053": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2053",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2053-cil_lxc_policy.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2053",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2066": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2066",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2066-tail_handle_ipv.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2066",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2092": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2092",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2092-tail_drop_notif.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2092",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2105": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2105",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2105-tail_handle_arp.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2105",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2118": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2118",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2118-cil_from_contai.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2118",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2131": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2131",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2131-tail_ipv4_ct_eg.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2131",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2144": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2144",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2144-tail_ipv4_ct_in.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2144",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2157": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2157",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2157-tail_nodeport_r.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2157",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2170": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2170",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2170-cil_lxc_policy.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2170",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2183": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2183",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2183-cil_lxc_policy.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2183",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2196": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2196",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2196-tail_handle_arp.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2196",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2209": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2209",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2209-cil_lxc_policy.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2209",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2222": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2222",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2222-tail_drop_notif.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2222",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2235": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2235",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2235-tail_ipv4_ct_eg.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2235",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2248": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2248",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2248-tail_ipv4_to_en.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2248",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2261": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2261",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2261-tail_no_service.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2261",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2274": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2274",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2274-tail_ipv4_ct_in.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2274",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2287": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2287",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2287-tail_nodeport_r.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2287",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2313": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2313",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2313-tail_handle_ipv.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2313",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2326": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2326",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2326-tail_ipv4_polic.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2326",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2339": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2339",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2339-tail_handle_ipv.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2339",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "2352": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "2352",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/2352-cil_from_contai.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "2352",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "3": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "3",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/3-dump_bpf_prog.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "3",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    },
+    "6": {
+      "jited": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "jited",
+          "id",
+          "6",
+          "file",
+          "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261010_052139_855300/details/bpf-evidence/cilium_agent/post_rejit/6-program.jited.bin"
+        ],
+        "returncode": 255
+      },
+      "xlated": {
+        "command": [
+          "/usr/local/bin/bpftool",
+          "prog",
+          "dump",
+          "xlated",
+          "id",
+          "6",
+          "opcodes"
+        ],
+        "returncode": 0
+      }
+    }
+  },
+  "program_ids": [
+    199,
+    212,
+    225,
+    238,
+    251,
+    264,
+    289,
+    290,
+    305,
+    326,
+    329,
+    342,
+    355,
+    368,
+    381,
+    394,
+    407,
+    431,
+    434,
+    455,
+    462,
+    481,
+    489,
+    505,
+    516,
+    531,
+    543,
+    556,
+    570,
+    578,
+    599,
+    604,
+    615,
+    628,
+    641,
+    653,
+    666,
+    679,
+    692,
+    705,
+    718,
+    731,
+    743,
+    756,
+    769,
+    782,
+    795,
+    808,
+    821,
+    834,
+    846,
+    858,
+    871,
+    884,
+    897,
+    910,
+    923,
+    936,
+    949,
+    962,
+    975,
+    988,
+    1001,
+    1014,
+    1027,
+    1039,
+    1052,
+    1065,
+    1077,
+    1089,
+    1102,
+    1114,
+    1127,
+    1140,
+    1153,
+    1166,
+    1179,
+    1192,
+    1205,
+    1218,
+    1231,
+    1244,
+    1257,
+    1270,
+    1283,
+    1296,
+    1309,
+    1321,
+    1334,
+    1347,
+    1359,
+    1372,
+    1385,
+    1398,
+    1411,
+    1424,
+    1437,
+    1450,
+    1463,
+    1475,
+    1487,
+    1500,
+    1513,
+    1526,
+    1539,
+    1552,
+    1565,
+    1578,
+    1590,
+    1603,
+    1616,
+    1629,
+    1641,
+    1654,
+    1667,
+    1680,
+    1693,
+    1706,
+    1719,
+    1732,
+    1744,
+    1757,
+    1770,
+    1783,
+    1795,
+    1808,
+    1821,
+    1834,
+    1847,
+    1860,
+    1873,
+    1886,
+    1899,
+    1911,
+    1924,
+    1937,
+    1950,
+    1963,
+    1976,
+    1988,
+    2001,
+    2014,
+    2027,
+    2040,
+    2053,
+    2066,
+    2079,
+    2092,
+    2105,
+    2118,
+    2131,
+    2144,
+    2157,
+    2170,
+    2183,
+    2196,
+    2209,
+    2222,
+    2235,
+    2248,
+    2261,
+    2274,
+    2287,
+    2300,
+    2313,
+    2326,
+    2339,
+    2352
+  ]
+}

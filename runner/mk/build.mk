@@ -74,6 +74,7 @@ X86_RUNTIME_KERNEL_IMAGE := $(VENDOR_BUILD_DIR)/x86/linux/arch/x86/boot/bzImage
 HOST_GO ?= $(or $(GO),go)
 HOST_KERNEL_BUILD_DIR_X86 := $(VENDOR_BUILD_DIR)/x86/linux
 HOST_KERNEL_BUILD_DIR_ARM64 := $(VENDOR_BUILD_DIR)/arm64/linux
+HOST_KERNEL_MODULES_CONTEXT_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/modules-install-current
 HOST_KERNEL_CONFIG_CONTEXT_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/bpf-benchmark-kernel-config-context
 HOST_KERNEL_CONFIG_CONTEXT_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/bpf-benchmark-kernel-config-context
 HOST_KINSN_DIR_X86 := $(ROOT_DIR)/kinsn/module/x86/build
@@ -90,7 +91,7 @@ HOST_KERNEL_MODULES_ORDER_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/modules.order
 	host-kernel-x86 host-kernel-arm64 \
 	host-kinsn-x86 host-kinsn-arm64 host-native-link host-rust-x86 host-rust-arm64 host-llvm-x86 host-llvm-arm64 host-bpfopt-llvm-x86 host-bpfopt-llvm-arm64 host-bpfperf-x86 \
 	host-shim-x86 host-shim-arm64 host-shim-artifacts \
-	host-runner-x86 host-runner-arm64 host-runner-docker-x86 \
+	host-runner-x86 host-runner-arm64 host-runner-docker-x86 host-katran-transport-x86 \
 		host-micro-programs-x86 host-micro-programs-arm64 host-micro-programs-docker-x86 \
 		host-stage2-programs-x86 host-stage2-programs-arm64 host-stage2-programs-docker-x86 \
 		host-x86-sim-proofs host-arm64-sim-proofs host-docker-context-x86 \
@@ -119,22 +120,22 @@ $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
 
 host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
+	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
+	tmp="$$(mktemp -d "$(HOST_KERNEL_BUILD_DIR_X86)/.modules-install.XXXXXX")"; \
 	trap 'rm -rf "$$tmp"' EXIT; \
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	install -d "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/"
+	bash "$(ROOT_DIR)/runner/scripts/publish-kernel-modules" "$$tmp" "$(HOST_KERNEL_MODULES_CONTEXT_X86)"; \
+	trap - EXIT
 
 $(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
+	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
+	tmp="$$(mktemp -d "$(HOST_KERNEL_BUILD_DIR_X86)/.modules-install.XXXXXX")"; \
 	trap 'rm -rf "$$tmp"' EXIT; \
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	install -d "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
-	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/"
+	bash "$(ROOT_DIR)/runner/scripts/publish-kernel-modules" "$$tmp" "$(HOST_KERNEL_MODULES_CONTEXT_X86)"; \
+	trap - EXIT
 
 $(HOST_KERNEL_BUILD_DIR_ARM64)/.config: $(ARM64_DEFCONFIG_SRC)
 	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)"
@@ -245,6 +246,12 @@ host-runner-x86: RUNNER_LIBBPF_ENV := CC=gcc
 host-runner-x86: RUNNER_STRIP := strip
 host-runner-x86: RUNNER_LLVM_DIR_ARCH := $(RUNNER_LLVM_DIR)
 host-runner-x86: RUNNER_KERNEL_OFFSETS_INCLUDE := $(MICRO_PROGRAM_BUILD_X86)
+host-katran-transport-x86:
+	install -d "$(RUNNER_DIR)/build-llvmbpf"
+	clang-18 -O2 -g -target bpf -D__TARGET_ARCH_x86 \
+		-I/usr/include/x86_64-linux-gnu -I"$(ROOT_DIR)/vendor/libbpf/src/root/usr/include" \
+		-c "$(RUNNER_DIR)/assets/katran_transport.bpf.c" \
+		-o "$(RUNNER_DIR)/build-llvmbpf/katran_transport.bpf.o"
 host-runner-docker-x86: RUNNER_BUILD_DIR_ARCH := $(HOST_DOCKER_RUNNER_BUILD_X86)
 host-runner-docker-x86: RUNNER_CC := gcc
 host-runner-docker-x86: RUNNER_CXX := g++
@@ -319,7 +326,7 @@ host-docker-context-x86:
 	: >"$(HOST_DOCKER_KERNEL_MODULES_CONTEXT_X86)/lib/modules/$$(uname -r)/modules.order"
 	: >"$(HOST_DOCKER_KERNEL_MODULES_CONTEXT_X86)/lib/modules/$$(uname -r)/modules.builtin"
 
-x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-bpfperf-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86 host-merlin-runtime-context
+x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-bpfperf-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-katran-transport-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86 host-merlin-runtime-context
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_X86)"
 	cp "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_X86)/config"
@@ -334,7 +341,7 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot" \
 		--build-context runner-runtime-host-kernel-config="$(HOST_KERNEL_CONFIG_CONTEXT_X86)" \
 		--build-context runner-runtime-host-kernel-offsets="$(MICRO_PROGRAM_BUILD_X86)" \
-		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/lib/modules" \
+		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_MODULES_CONTEXT_X86)/lib/modules" \
 			--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)" \
 			--build-context runner-runtime-host-shim="$(BPFOPT_SHIM_BUILD_X86)" \
 			--build-context runner-runtime-host-native-bpf="$(NATIVE_BPF_ARTIFACTS_X86)" \

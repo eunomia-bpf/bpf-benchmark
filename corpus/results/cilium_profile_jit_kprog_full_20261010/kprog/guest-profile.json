@@ -1,0 +1,27 @@
+{
+  "arm": "kprog",
+  "call_graph": "frame-pointer",
+  "perf_command": [
+    "/var/tmp/bpf-benchmark-cilium-profile-1782-kprog/perf-runtime/lib64/ld-linux-x86-64.so.2",
+    "--library-path",
+    "/var/tmp/bpf-benchmark-cilium-profile-1782-kprog/perf-runtime/lib/x86_64-linux-gnu:/var/tmp/bpf-benchmark-cilium-profile-1782-kprog/perf-runtime/lib64",
+    "/var/tmp/bpf-benchmark-cilium-profile-1782-kprog/perf-runtime/usr/lib/linux-tools/perf",
+    "record",
+    "-a",
+    "-e",
+    "cpu-clock",
+    "-c",
+    "1000000",
+    "--call-graph",
+    "fp",
+    "--sample-cpu",
+    "--delay=-1",
+    "--control=fifo:/var/tmp/bpf-benchmark-cilium-profile-1782-kprog/guest-perf.control.fifo,/var/tmp/bpf-benchmark-cilium-profile-1782-kprog/guest-perf.ack.fifo",
+    "-o",
+    "/var/tmp/bpf-benchmark-cilium-profile-1782-kprog/guest.perf.data"
+  ],
+  "perf_data": "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/cilium_profile_jit_kprog_full_20261010/kprog/guest.perf.data",
+  "phase": "post_rejit",
+  "sample_event": "cpu-clock",
+  "sample_period_ns": 1000000
+}

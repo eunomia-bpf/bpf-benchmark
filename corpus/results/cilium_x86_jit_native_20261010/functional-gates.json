@@ -1,0 +1,69 @@
+{
+  "kinsn_gate_scoped_out": {
+    "jit": {
+      "allow_direction_1": 5399223,
+      "allow_direction_2": 5399223,
+      "component_errors": 0,
+      "other_verdicts": 1,
+      "reason_133": 0,
+      "receiver_drops": 0,
+      "receiver_errors": 0,
+      "receiver_packets": 5399226,
+      "sent": 5399205
+    },
+    "kinsn": {
+      "allow_direction_1": 6145781,
+      "allow_direction_2": 6145781,
+      "component_errors": 0,
+      "other_verdicts": 0,
+      "reason_133": 0,
+      "receiver_drops": 0,
+      "receiver_errors": 0,
+      "receiver_packets": 6145783,
+      "sent": 6145763
+    },
+    "run": "x86_kvm_corpus_20261010_052139_855300",
+    "status": "passed_before_scope_was_narrowed"
+  },
+  "native_gate": {
+    "attachments": {
+      "jit": 8,
+      "locations": [
+        "bpfbench0:xdp",
+        "bpfbench0:tcx_ingress",
+        "bpfbench0:tcx_egress",
+        "cilium_net:tcx_ingress",
+        "cilium_host:tcx_ingress",
+        "cilium_host:tcx_egress",
+        "lxcbench0:tcx_ingress",
+        "lxcbench1:tcx_ingress"
+      ],
+      "native": 8
+    },
+    "jit": {
+      "allow_direction_1": 3705376,
+      "allow_direction_2": 3705376,
+      "component_errors": 0,
+      "other_verdicts": 0,
+      "reason_133": 0,
+      "receiver_drops": 0,
+      "receiver_errors": 0,
+      "receiver_packets": 3705379,
+      "sent": 3705358
+    },
+    "native": {
+      "allow_direction_1": 1979200,
+      "allow_direction_2": 1979200,
+      "component_errors": 0,
+      "other_verdicts": 0,
+      "reason_133": 0,
+      "receiver_drops": 0,
+      "receiver_errors": 0,
+      "receiver_packets": 1979202,
+      "sent": 1979182
+    },
+    "native_replacements": 163,
+    "run": "x86_kvm_corpus_20261010_052134_234335",
+    "status": "passed"
+  }
+}

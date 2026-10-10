@@ -94,6 +94,16 @@ def _read_app_result(session: ArtifactSession, app_name: str) -> dict:
 # ---------------------------------------------------------------------------
 
 class TestNativeLoaderConfigValidation(unittest.TestCase):
+    def test_native_loader_phase_accepts_counterbalanced_orders(self) -> None:
+        with mock.patch.dict(
+            os.environ, {"BPFREJIT_SHIM_NATIVE_LOADER": "post"}, clear=True
+        ):
+            self.assertEqual(driver._native_loader_phase(), "post")
+        with mock.patch.dict(
+            os.environ, {"BPFREJIT_SHIM_NATIVE_LOADER": "baseline"}, clear=True
+        ):
+            self.assertEqual(driver._native_loader_phase(), "baseline")
+
     def test_post_only_native_loader_rejects_skip_rejit(self) -> None:
         env = {
             "RUN_TARGET_ARCH": "arm64",
@@ -102,6 +112,20 @@ class TestNativeLoaderConfigValidation(unittest.TestCase):
             "RUN_REMOTE_PYTHON_BIN": "python3",
             "RUN_BPFTOOL_BIN": "bpftool",
             "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY": "1",
+            "SKIP_REJIT": "norejit",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            with self.assertRaisesRegex(SystemExit, "incompatible with SKIP_REJIT"):
+                driver.parse_args()
+
+    def test_baseline_only_native_loader_rejects_skip_rejit(self) -> None:
+        env = {
+            "RUN_TARGET_ARCH": "x86_64",
+            "RUN_EXECUTOR": "kvm",
+            "RUN_TOKEN": "unit",
+            "RUN_REMOTE_PYTHON_BIN": "python3",
+            "RUN_BPFTOOL_BIN": "bpftool",
+            "BPFREJIT_SHIM_NATIVE_LOADER": "baseline",
             "SKIP_REJIT": "norejit",
         }
         with mock.patch.dict(os.environ, env, clear=True):

@@ -1,0 +1,72 @@
+{
+  "audited_changed_paths": [
+    {
+      "jit_source_sha256": "c8c68f808972c90ed5002c74f013f6a55386b67e2618a41ef84d997d2960a53f",
+      "native_abi_sha256": "548d77e992ba8225b2f9327890e3e91ad5ca393e640d3288ef26eca1db978882",
+      "path": "bpf_host.c"
+    },
+    {
+      "jit_source_sha256": "8b6f6350a31ec16134c8877bd74fab848e09a85c109f0c6bce149f79d07c6e2b",
+      "native_abi_sha256": "5c2e88b6bbfd5d27d2e55bd3694d6f340e2ed8ea02d77606a0aaac4c4e4cf277",
+      "path": "bpf_lxc.c"
+    },
+    {
+      "jit_source_sha256": "1a95ac36419c3c148384bcde4621ce8e89d3f01df43a18acd99d385ff18086d8",
+      "native_abi_sha256": "0aa2e04ca4beab76721f101a71da48d479c0cdccc9b4a8da6b0b5ae77efce3e0",
+      "path": "include/bpf/access.h"
+    },
+    {
+      "jit_source_sha256": "ac60dfdc7296df713d9f360c55bfe941fcd8199bd68da8a602723a7c8d07ef6a",
+      "native_abi_sha256": "07d2a83e6d726f6b43fe4283ff09c1883e88d390c371a150b60025b7d8838df4",
+      "path": "include/bpf/ctx/skb.h"
+    },
+    {
+      "jit_source_sha256": "e1ddad2dac998db4ded4231acefe341d646b60d504043e43bfc60344701cb1bc",
+      "native_abi_sha256": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+      "path": "include/bpf/ctx/xdp.h"
+    },
+    {
+      "jit_source_sha256": "71195a79c78babfb37e5056face8a1c2bfb1f92250ee871217fea2de37277bb9",
+      "native_abi_sha256": "b05b5f0be5d980a7bc1826878bcd437a154d794a03b9fa3f203d9e8b11d4969a",
+      "path": "include/bpf/helpers.h"
+    },
+    {
+      "jit_source_sha256": "8f76ef3d4af5d04f4e682ec360df4a3a9c1643ed942518f4702d098aba8323bc",
+      "native_abi_sha256": "f08afac687c21334f2671d6f465415549a11e017265f54670d4f94cb1ef7c2c9",
+      "path": "include/bpf/tailcall.h"
+    },
+    {
+      "jit_source_sha256": "137fdab2467c5090f0bf533c00ba3935055022576cc56f4d5820ab89c0ed0740",
+      "native_abi_sha256": "34cf8b6c978854bb115dceaf330c9be0f1dcc7c34d557868e27e61ea13a357e5",
+      "path": "include/linux/bpf.h"
+    },
+    {
+      "jit_source_sha256": "df70bb4b85369506e6f0bc160fc8a7397e32bfe669ec1e5ae7842c398f291e9e",
+      "native_abi_sha256": "dcf275ea85176080684c13e352a0e65dc73a681758a47559f513759982e50455",
+      "path": "lib/arp.h"
+    },
+    {
+      "jit_source_sha256": "c8ce4bdf2b73838831458d48be88a1a90a60734754c3406c5c5a226586118cc2",
+      "native_abi_sha256": "a085c4e5a0eb438886fac7e034a87ac03bda1703ffaad1877e12e37ca3c3e750",
+      "path": "lib/hexdump.h"
+    },
+    {
+      "jit_source_sha256": "244f09ff57b490cbd0e1b8341758d84c98eb970bb9bfc98f2d01fa2052783fa5",
+      "native_abi_sha256": "d53a2226d2f770b77bfe40f6cc9330bbab2be3cc3ebeee02c2a29ab7ee0485ec",
+      "path": "lib/overloadable_skb.h"
+    },
+    {
+      "jit_source_sha256": "543a50f9a107e348b653b77df8a26fc0a5bf00df0d83cb2e859cf0b48fdd6e4e",
+      "native_abi_sha256": "6c7b892c3a24cb6e5563d0766ab570071d1aec5ca9a13255a7674a029ace84ba",
+      "path": "lib/static_data.h"
+    },
+    {
+      "jit_source_sha256": "b0e34ca8c51a213c7464c64d72cdc0838125da79d0575e7991d5a198cc2c4761",
+      "native_abi_sha256": "815a94e93ac455e127eef7bab00f9c570bf2842b37b119dace8285eb7f0c0c01",
+      "path": "lib/subnet.h"
+    }
+  ],
+  "feature_defines_added": [],
+  "purpose": "native-entry-ABI-lowering-only",
+  "status": "pass"
+}

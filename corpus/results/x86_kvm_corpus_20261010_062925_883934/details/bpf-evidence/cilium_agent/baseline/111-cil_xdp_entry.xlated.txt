@@ -1,0 +1,255 @@
+int cil_xdp_entry(struct xdp_md * ctx):
+; int cil_xdp_entry(struct __ctx_buff *ctx)
+   0: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+; if (CONFIG(tracing_ip_option_type) == 0)
+   1: (18) r1 = map[id:71][0]+107
+       18 21 00 00 47 00 00 00 00 00 00 00 6b 00 00 00
+; if (CONFIG(tracing_ip_option_type) == 0)
+   3: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data_end)
+   4: (79) r2 = *(u64 *)(r6 +8)
+       79 62 08 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data)
+   5: (79) r1 = *(u64 *)(r6 +0)
+       79 61 00 00 00 00 00 00
+   6: (b4) w0 = 2
+       b4 00 00 00 02 00 00 00
+; if (data + tot_len > data_end)
+   7: (bf) r3 = r1
+       bf 13 00 00 00 00 00 00
+   8: (07) r3 += 14
+       07 03 00 00 0e 00 00 00
+; if (data + tot_len > data_end)
+   9: (2d) if r3 > r2 goto pc+99
+       2d 23 63 00 00 00 00 00
+; *proto = eth->h_proto;
+  10: (71) r2 = *(u8 *)(r1 +12)
+       71 12 0c 00 00 00 00 00
+  11: (71) r7 = *(u8 *)(r1 +13)
+       71 17 0d 00 00 00 00 00
+  12: (64) w7 <<= 8
+       64 07 00 00 08 00 00 00
+  13: (4c) w7 |= w2
+       4c 27 00 00 00 00 00 00
+; if (!validate_ethertype(ctx, &proto))
+  14: (a6) if w7 < 0x6 goto pc+94
+       a6 07 5e 00 06 00 00 00
+  15: (b4) w8 = 0
+       b4 08 00 00 00 00 00 00
+; __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+  16: (63) *(u32 *)(r10 -8) = r8
+       63 8a f8 ff 00 00 00 00
+  17: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+  18: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+  19: (18) r1 = map[id:48]
+       18 11 00 00 30 00 00 00 00 00 00 00 00 00 00 00
+  21: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+  22: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+  23: (35) if r0 >= 0x1 goto pc+5
+       35 00 05 00 01 00 00 00
+  24: (67) r0 <<= 3
+       67 00 00 00 03 00 00 00
+  25: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  26: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+  27: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+  28: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+  29: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+; if (always_succeeds(data_meta))
+  30: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+; data_meta[off] = datum;
+  31: (63) *(u32 *)(r0 +24) = r8
+       63 80 18 00 00 00 00 00
+; __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+  32: (63) *(u32 *)(r10 -8) = r8
+       63 8a f8 ff 00 00 00 00
+  33: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+  34: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+  35: (18) r1 = map[id:48]
+       18 11 00 00 30 00 00 00 00 00 00 00 00 00 00 00
+  37: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+  38: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+  39: (35) if r0 >= 0x1 goto pc+5
+       35 00 05 00 01 00 00 00
+  40: (67) r0 <<= 3
+       67 00 00 00 03 00 00 00
+  41: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  42: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+  43: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+  44: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+  45: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+; if (always_succeeds(data_meta))
+  46: (15) if r0 == 0x0 goto pc+2
+       15 00 02 00 00 00 00 00
+  47: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; data_meta[off] = datum;
+  48: (63) *(u32 *)(r0 +20) = r1
+       63 10 14 00 00 00 00 00
+; switch (proto) {
+  49: (56) if w7 != 0x8 goto pc+29
+       56 07 1d 00 08 00 00 00
+; if (CONFIG(enable_xdp_prefilter)) {
+  50: (18) r1 = map[id:71][0]+150
+       18 21 00 00 47 00 00 00 00 00 00 00 96 00 00 00
+; if (CONFIG(enable_xdp_prefilter)) {
+  52: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(enable_xdp_prefilter)) {
+  53: (16) if w1 == 0x0 goto pc+25
+       16 01 19 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data_end)
+  54: (79) r2 = *(u64 *)(r6 +8)
+       79 62 08 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data)
+  55: (79) r1 = *(u64 *)(r6 +0)
+       79 61 00 00 00 00 00 00
+; if (ctx_no_room(ipv4_hdr + 1, data_end))
+  56: (bf) r3 = r1
+       bf 13 00 00 00 00 00 00
+  57: (07) r3 += 34
+       07 03 00 00 22 00 00 00
+; if (ctx_no_room(ipv4_hdr + 1, data_end))
+  58: (2d) if r3 > r2 goto pc+18
+       2d 23 12 00 00 00 00 00
+; case   4: __it_mob(d, s, 32);
+  59: (61) r1 = *(u32 *)(r1 +26)
+       61 11 1a 00 00 00 00 00
+  60: (b4) w2 = 32
+       b4 02 00 00 20 00 00 00
+; pfx.lpm.prefixlen = 32;
+  61: (63) *(u32 *)(r10 -8) = r2
+       63 2a f8 ff 00 00 00 00
+; case   4: __it_mob(d, s, 32);
+  62: (63) *(u32 *)(r10 -4) = r1
+       63 1a fc ff 00 00 00 00
+  63: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+  64: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; if (map_lookup_elem(&cilium_cidr_v4_dyn, &pfx))
+  65: (18) r1 = map[id:12]
+       18 11 00 00 0c 00 00 00 00 00 00 00 00 00 00 00
+  67: (85) call trie_lookup_elem#349392
+       85 00 00 00 d0 54 05 00
+; if (map_lookup_elem(&cilium_cidr_v4_dyn, &pfx))
+  68: (55) if r0 != 0x0 goto pc+8
+       55 00 08 00 00 00 00 00
+  69: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; if (map_lookup_elem(&cilium_cidr_v4_fix, &pfx))
+  70: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+  71: (18) r1 = map[id:13]
+       18 11 00 00 0d 00 00 00 00 00 00 00 00 00 00 00
+  73: (85) call __htab_map_lookup_elem#315840
+       85 00 00 00 c0 d1 04 00
+  74: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+  75: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+; 
+  76: (15) if r0 == 0x0 goto pc+2
+       15 00 02 00 00 00 00 00
+  77: (b4) w0 = 1
+       b4 00 00 00 01 00 00 00
+  78: (05) goto pc+30
+       05 00 1e 00 00 00 00 00
+  79: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+  80: (63) *(u32 *)(r10 -8) = r1
+       63 1a f8 ff 00 00 00 00
+  81: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+  82: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+  83: (18) r1 = map[id:48]
+       18 11 00 00 30 00 00 00 00 00 00 00 00 00 00 00
+  85: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+  86: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+  87: (35) if r0 >= 0x1 goto pc+5
+       35 00 05 00 01 00 00 00
+  88: (67) r0 <<= 3
+       67 00 00 00 03 00 00 00
+  89: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  90: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+  91: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+  92: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+  93: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+; return data_meta[off];
+  94: (61) r7 = *(u32 *)(r0 +24)
+       61 07 18 00 00 00 00 00
+  95: (b4) w0 = 2
+       b4 00 00 00 02 00 00 00
+; if (meta_xfer) {
+  96: (16) if w7 == 0x0 goto pc+12
+       16 07 0c 00 00 00 00 00
+; if (!ctx_adjust_meta(ctx, -(int)sizeof(meta_xfer))) {
+  97: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+  98: (b4) w2 = -4
+       b4 02 00 00 fc ff ff ff
+  99: (85) call bpf_xdp_adjust_meta#9343008
+       85 00 00 00 20 90 8e 00
+ 100: (bc) w1 = w0
+       bc 01 00 00 00 00 00 00
+ 101: (b4) w0 = 2
+       b4 00 00 00 02 00 00 00
+; if (!ctx_adjust_meta(ctx, -(int)sizeof(meta_xfer))) {
+ 102: (56) if w1 != 0x0 goto pc+6
+       56 01 06 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data_meta)
+ 103: (79) r1 = *(u64 *)(r6 +16)
+       79 61 10 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data)
+ 104: (79) r2 = *(u64 *)(r6 +0)
+       79 62 00 00 00 00 00 00
+; if (!ctx_no_room(data_meta + 1, data))
+ 105: (bf) r3 = r1
+       bf 13 00 00 00 00 00 00
+ 106: (07) r3 += 4
+       07 03 00 00 04 00 00 00
+; if (!ctx_no_room(data_meta + 1, data))
+ 107: (2d) if r3 > r2 goto pc+1
+       2d 23 01 00 00 00 00 00
+; data_meta[XFER_FLAGS] = meta_xfer;
+ 108: (63) *(u32 *)(r1 +0) = r7
+       63 71 00 00 00 00 00 00
+; return check_filters(ctx);
+ 109: (95) exit
+       95 00 00 00 00 00 00 00

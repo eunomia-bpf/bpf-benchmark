@@ -1,0 +1,2789 @@
+int tail_ipv4_policy(struct __sk_buff * ctx):
+; int tail_ipv4_policy(struct __ctx_buff *ctx)
+   0: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+   1: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; struct ipv4_ct_tuple tuple = {};
+   2: (7b) *(u64 *)(r10 -128) = r1
+       7b 1a 80 ff 00 00 00 00
+   3: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+   4: (6b) *(u16 *)(r10 -116) = r7
+       6b 7a 8c ff 00 00 00 00
+   5: (63) *(u32 *)(r10 -120) = r7
+       63 7a 88 ff 00 00 00 00
+; ctx->cb[off] = data;
+   6: (63) *(u32 *)(r6 +56) = r7
+       63 76 38 00 00 00 00 00
+; return ctx->cb[off];
+   7: (61) r1 = *(u32 *)(r6 +48)
+       61 61 30 00 00 00 00 00
+; ctx->cb[off] = data;
+   8: (63) *(u32 *)(r10 -136) = r1
+       63 1a 78 ff 00 00 00 00
+   9: (63) *(u32 *)(r6 +48) = r7
+       63 76 30 00 00 00 00 00
+; return ctx->cb[off];
+  10: (61) r4 = *(u32 *)(r6 +60)
+       61 64 3c 00 00 00 00 00
+; ctx->cb[off] = data;
+  11: (63) *(u32 *)(r6 +60) = r7
+       63 76 3c 00 00 00 00 00
+; return ctx->cb[off];
+  12: (61) r3 = *(u32 *)(r6 +52)
+       61 63 34 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data_end)
+  13: (79) r1 = *(u64 *)(r6 +80)
+       79 61 50 00 00 00 00 00
+; DEFINE_FUNC_CTX_POINTER(data)
+  14: (79) r8 = *(u64 *)(r6 +208)
+       79 68 d0 00 00 00 00 00
+  15: (b4) w9 = -134
+       b4 09 00 00 7a ff ff ff
+; if (data + tot_len > data_end)
+  16: (bf) r2 = r8
+       bf 82 00 00 00 00 00 00
+  17: (07) r2 += 34
+       07 02 00 00 22 00 00 00
+; if (data + tot_len > data_end)
+  18: (2d) if r2 > r1 goto pc+1156
+       2d 12 84 04 00 00 00 00
+  19: (63) *(u32 *)(r10 -168) = r4
+       63 4a 58 ff 00 00 00 00
+  20: (63) *(u32 *)(r10 -160) = r3
+       63 3a 60 ff 00 00 00 00
+; int ifindex = CONFIG(interface_ifindex);
+  21: (18) r1 = map[id:295][0]+12
+       18 21 00 00 27 01 00 00 00 00 00 00 0c 00 00 00
+; int ifindex = CONFIG(interface_ifindex);
+  23: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+  24: (63) *(u32 *)(r10 -144) = r1
+       63 1a 70 ff 00 00 00 00
+; __u32 zero = 0;
+  25: (63) *(u32 *)(r10 -108) = r7
+       63 7a 94 ff 00 00 00 00
+; orig_sip = ip4->saddr;
+  26: (61) r1 = *(u32 *)(r8 +26)
+       61 81 1a 00 00 00 00 00
+; if (ip4->frag_off & bpf_htons(0x3fff))
+  27: (63) *(u32 *)(r10 -152) = r1
+       63 1a 68 ff 00 00 00 00
+  28: (69) r9 = *(u16 *)(r8 +20)
+       69 89 14 00 00 00 00 00
+; is_untracked_fragment = !CONFIG(enable_ipv4_fragments) && ipfrag_is_fragment(fraginfo);
+  29: (18) r1 = map[id:295][0]+201
+       18 21 00 00 27 01 00 00 00 00 00 00 c9 00 00 00
+; is_untracked_fragment = !CONFIG(enable_ipv4_fragments) && ipfrag_is_fragment(fraginfo);
+  31: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+  32: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+  33: (07) r2 += -108
+       07 02 00 00 94 ff ff ff
+; ct_buffer = map_lookup_elem(&cilium_tail_call_buffer4, &zero);
+  34: (18) r1 = map[id:294]
+       18 11 00 00 26 01 00 00 00 00 00 00 00 00 00 00
+  36: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+  37: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+  38: (35) if r0 >= 0x1 goto pc+5
+       35 00 05 00 01 00 00 00
+  39: (67) r0 <<= 3
+       67 00 00 00 03 00 00 00
+  40: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+  41: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+  42: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+  43: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+  44: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+; if (!ct_buffer)
+  45: (15) if r0 == 0x0 goto pc+36
+       15 00 24 00 00 00 00 00
+; if (ct_buffer->tuple.saddr == 0)
+  46: (61) r1 = *(u32 *)(r0 +4)
+       61 01 04 00 00 00 00 00
+; if (ct_buffer->tuple.saddr == 0)
+  47: (16) if w1 == 0x0 goto pc+34
+       16 01 22 00 00 00 00 00
+; l4_off = ct_buffer->l4_off;
+  48: (61) r5 = *(u32 *)(r0 +56)
+       61 05 38 00 00 00 00 00
+; trace.monitor = ct_buffer->monitor;
+  49: (61) r1 = *(u32 *)(r0 +48)
+       61 01 30 00 00 00 00 00
+; trace.reason = (enum trace_reason)ct_buffer->ret;
+  50: (7b) *(u64 *)(r10 -192) = r1
+       7b 1a 40 ff 00 00 00 00
+  51: (61) r1 = *(u32 *)(r0 +52)
+       61 01 34 00 00 00 00 00
+  52: (63) *(u32 *)(r10 -176) = r1
+       63 1a 50 ff 00 00 00 00
+; switch (ret) {
+  53: (54) w1 &= -2
+       54 01 00 00 fe ff ff ff
+  54: (7b) *(u64 *)(r10 -184) = r0
+       7b 0a 48 ff 00 00 00 00
+  55: (56) if w1 != 0x2 goto pc+28
+       56 01 1c 00 02 00 00 00
+; (ct_state->proxy_redirect && !tc_index_from_egress_proxy(ctx))) {
+  56: (69) r8 = *(u16 *)(r0 +36)
+       69 08 24 00 00 00 00 00
+; (ct_state->proxy_redirect && !tc_index_from_egress_proxy(ctx))) {
+  57: (bc) w1 = w8
+       bc 81 00 00 00 00 00 00
+  58: (54) w1 &= 16
+       54 01 00 00 10 00 00 00
+; (ct_state->proxy_redirect && !tc_index_from_egress_proxy(ctx))) {
+  59: (16) if w1 == 0x0 goto pc+6
+       16 01 06 00 00 00 00 00
+; volatile __u32 tc_index = ctx->tc_index;
+  60: (69) r1 = *(u16 *)(r6 +134)
+       69 61 86 00 00 00 00 00
+; volatile __u32 tc_index = ctx->tc_index;
+  61: (63) *(u32 *)(r10 -104) = r1
+       63 1a 98 ff 00 00 00 00
+  62: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+; return tc_index & TC_INDEX_F_FROM_EGRESS_PROXY;
+  63: (61) r1 = *(u32 *)(r10 -104)
+       61 a1 98 ff 00 00 00 00
+; return tc_index & TC_INDEX_F_FROM_EGRESS_PROXY;
+  64: (54) w1 &= 2
+       54 01 00 00 02 00 00 00
+; if (ct_state_is_from_l7lb(ct_state) ||
+  65: (16) if w1 == 0x0 goto pc+896
+       16 01 80 03 00 00 00 00
+  66: (79) r2 = *(u64 *)(r10 -184)
+       79 a2 48 ff 00 00 00 00
+; 
+  67: (69) r1 = *(u16 *)(r2 +32)
+       69 21 20 00 00 00 00 00
+; if (unlikely(ct_state->rev_nat_index || ct_state->nat_port)) {
+  68: (69) r2 = *(u16 *)(r2 +34)
+       69 22 22 00 00 00 00 00
+  69: (bc) w3 = w2
+       bc 23 00 00 00 00 00 00
+  70: (4c) w3 |= w1
+       4c 13 00 00 00 00 00 00
+  71: (16) if w3 == 0x0 goto pc+846
+       16 03 4e 03 00 00 00 00
+  72: (63) *(u32 *)(r10 -208) = r9
+       63 9a 30 ff 00 00 00 00
+  73: (63) *(u32 *)(r10 -200) = r5
+       63 5a 38 ff 00 00 00 00
+; if (nat_port) {
+  74: (16) if w1 == 0x0 goto pc+246
+       16 01 f6 00 00 00 00 00
+; 
+  75: (79) r2 = *(u64 *)(r10 -184)
+       79 a2 48 ff 00 00 00 00
+  76: (61) r2 = *(u32 *)(r2 +28)
+       61 22 1c 00 00 00 00 00
+; nat_info.port = nat_port;
+  77: (6b) *(u16 *)(r10 -100) = r1
+       6b 1a 9c ff 00 00 00 00
+; nat_info.address = nat_addr;
+  78: (63) *(u32 *)(r10 -104) = r2
+       63 2a 98 ff 00 00 00 00
+  79: (bf) r0 = r10
+       bf a0 00 00 00 00 00 00
+; 
+  80: (07) r0 += -104
+       07 00 00 00 98 ff ff ff
+  81: (05) goto pc+252
+       05 00 fc 00 00 00 00 00
+  82: (b4) w9 = -184
+       b4 09 00 00 48 ff ff ff
+  83: (05) goto pc+1089
+       05 00 41 04 00 00 00 00
+; volatile __u32 tc_index = ctx->tc_index;
+  84: (69) r1 = *(u16 *)(r6 +134)
+       69 61 86 00 00 00 00 00
+; volatile __u32 tc_index = ctx->tc_index;
+  85: (63) *(u32 *)(r10 -104) = r1
+       63 1a 98 ff 00 00 00 00
+  86: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+; return tc_index & TC_INDEX_F_FROM_INGRESS_PROXY;
+  87: (61) r1 = *(u32 *)(r10 -104)
+       61 a1 98 ff 00 00 00 00
+; return tc_index & TC_INDEX_F_FROM_INGRESS_PROXY;
+  88: (54) w1 &= 1
+       54 01 00 00 01 00 00 00
+; if (tc_index_from_ingress_proxy(ctx))
+  89: (56) if w1 != 0x0 goto pc+661
+       56 01 95 02 00 00 00 00
+  90: (bf) r9 = r0
+       bf 09 00 00 00 00 00 00
+; if (ret == CT_NEW && ip4->saddr == CONFIG(service_loopback_ipv4).be32 &&
+  91: (61) r1 = *(u32 *)(r10 -176)
+       61 a1 50 ff 00 00 00 00
+  92: (56) if w1 != 0x0 goto pc+28
+       56 01 1c 00 00 00 00 00
+; if (ret == CT_NEW && ip4->saddr == CONFIG(service_loopback_ipv4).be32 &&
+  93: (61) r1 = *(u32 *)(r8 +26)
+       61 81 1a 00 00 00 00 00
+; if (ret == CT_NEW && ip4->saddr == CONFIG(service_loopback_ipv4).be32 &&
+  94: (18) r2 = map[id:295][0]+48
+       18 22 00 00 27 01 00 00 00 00 00 00 30 00 00 00
+; if (ret == CT_NEW && ip4->saddr == CONFIG(service_loopback_ipv4).be32 &&
+  96: (61) r2 = *(u32 *)(r2 +0)
+       61 22 00 00 00 00 00 00
+; if (ret == CT_NEW && ip4->saddr == CONFIG(service_loopback_ipv4).be32 &&
+  97: (5e) if w1 != w2 goto pc+23
+       5e 21 17 00 00 00 00 00
+  98: (63) *(u32 *)(r10 -200) = r5
+       63 5a 38 ff 00 00 00 00
+  99: (bf) r2 = r9
+       bf 92 00 00 00 00 00 00
+; if (tuple->nexthdr == IPPROTO_TCP)
+ 100: (71) r3 = *(u8 *)(r2 +12)
+       71 23 0c 00 00 00 00 00
+; 
+ 101: (18) r1 = map[id:135]
+       18 11 00 00 87 00 00 00 00 00 00 00 00 00 00 00
+ 103: (16) if w3 == 0x6 goto pc+2
+       16 03 02 00 06 00 00 00
+ 104: (18) r1 = map[id:136]
+       18 11 00 00 88 00 00 00 00 00 00 00 00 00 00 00
+; __u8 flags = tuple->flags;
+ 106: (71) r7 = *(u8 *)(r2 +13)
+       71 27 0d 00 00 00 00 00
+ 107: (b4) w3 = 0
+       b4 03 00 00 00 00 00 00
+; tuple->flags = TUPLE_F_OUT;
+ 108: (73) *(u8 *)(r2 +13) = r3
+       73 32 0d 00 00 00 00 00
+ 109: (bf) r8 = r2
+       bf 28 00 00 00 00 00 00
+; entry = map_lookup_elem(map, tuple);
+ 110: (85) call bpf_map_lookup_elem#258544
+       85 00 00 00 f0 f1 03 00
+ 111: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+; tuple->flags = flags;
+ 112: (73) *(u8 *)(r8 +13) = r7
+       73 78 0d 00 00 00 00 00
+ 113: (61) r5 = *(u32 *)(r10 -200)
+       61 a5 38 ff 00 00 00 00
+; return entry && entry->lb_loopback;
+ 114: (15) if r0 == 0x0 goto pc+6
+       15 00 06 00 00 00 00 00
+ 115: (b4) w1 = 8
+       b4 01 00 00 08 00 00 00
+; return entry && entry->lb_loopback;
+ 116: (69) r3 = *(u16 *)(r0 +36)
+       69 03 24 00 00 00 00 00
+; return entry && entry->lb_loopback;
+ 117: (54) w3 &= 8
+       54 03 00 00 08 00 00 00
+ 118: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+ 119: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+; if (ret == CT_NEW && ip4->saddr == CONFIG(service_loopback_ipv4).be32 &&
+ 120: (56) if w3 != 0x0 goto pc+640
+       56 03 80 02 00 00 00 00
+ 121: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+; if (unlikely(ct_state->loopback))
+ 122: (69) r1 = *(u16 *)(r9 +36)
+       69 91 24 00 00 00 00 00
+ 123: (54) w1 &= 1
+       54 01 00 00 01 00 00 00
+ 124: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+; if (unlikely(ct_state->loopback))
+ 125: (56) if w1 != 0x0 goto pc+625
+       56 01 71 02 00 00 00 00
+; is_untracked_fragment, src_label, SECLABEL_IPV4,
+ 126: (18) r1 = map[id:295][0]+152
+       18 21 00 00 27 01 00 00 00 00 00 00 98 00 00 00
+; is_untracked_fragment, src_label, SECLABEL_IPV4,
+ 128: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; tuple->nexthdr, l4_off, is_untracked_fragment,
+ 129: (71) r7 = *(u8 *)(r9 +12)
+       71 97 0c 00 00 00 00 00
+; return policy_can_ingress(ctx, src_id, dst_id, ETH_P_IP, tuple->dport,
+ 130: (71) r1 = *(u8 *)(r9 +8)
+       71 91 08 00 00 00 00 00
+ 131: (bf) r2 = r9
+       bf 92 00 00 00 00 00 00
+ 132: (71) r9 = *(u8 *)(r2 +9)
+       71 29 09 00 00 00 00 00
+ 133: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+; struct policy_key key = {
+ 134: (73) *(u8 *)(r10 -8) = r2
+       73 2a f8 ff 00 00 00 00
+ 135: (61) r2 = *(u32 *)(r10 -136)
+       61 a2 78 ff 00 00 00 00
+ 136: (63) *(u32 *)(r10 -12) = r2
+       63 2a f4 ff 00 00 00 00
+ 137: (b4) w2 = 64
+       b4 02 00 00 40 00 00 00
+; .lpm_key = { POLICY_FULL_PREFIX, {} }, /* always look up with unwildcarded data */
+ 138: (63) *(u32 *)(r10 -16) = r2
+       63 2a f0 ff 00 00 00 00
+; return policy_can_ingress(ctx, src_id, dst_id, ETH_P_IP, tuple->dport,
+ 139: (64) w9 <<= 8
+       64 09 00 00 08 00 00 00
+ 140: (4c) w9 |= w1
+       4c 19 00 00 00 00 00 00
+; struct policy_key key = {
+ 141: (73) *(u8 *)(r10 -7) = r7
+       73 7a f9 ff 00 00 00 00
+ 142: (6b) *(u16 *)(r10 -6) = r9
+       6b 9a fa ff 00 00 00 00
+; if (CONFIG(allow_icmp_frag_needed) || CONFIG(enable_icmp_rule)) {
+ 143: (18) r1 = map[id:295][0]+206
+       18 21 00 00 27 01 00 00 00 00 00 00 ce 00 00 00
+; if (CONFIG(allow_icmp_frag_needed) || CONFIG(enable_icmp_rule)) {
+ 145: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (proto == IPPROTO_ICMP) {
+ 146: (56) if w7 != 0x1 goto pc+31
+       56 07 1f 00 01 00 00 00
+ 147: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+; if (ctx_load_bytes(ctx, off, &icmphdr, sizeof(icmphdr)) < 0)
+ 148: (07) r3 += -104
+       07 03 00 00 98 ff ff ff
+ 149: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 150: (bc) w2 = w5
+       bc 52 00 00 00 00 00 00
+ 151: (b4) w4 = 8
+       b4 04 00 00 08 00 00 00
+ 152: (85) call bpf_skb_load_bytes#9369872
+       85 00 00 00 10 f9 8e 00
+; if (ctx_load_bytes(ctx, off, &icmphdr, sizeof(icmphdr)) < 0)
+ 153: (c6) if w0 s< 0x0 goto pc+517
+       c6 00 05 02 00 00 00 00
+; if (CONFIG(allow_icmp_frag_needed)) {
+ 154: (18) r1 = map[id:295][0]+206
+       18 21 00 00 27 01 00 00 00 00 00 00 ce 00 00 00
+; if (CONFIG(allow_icmp_frag_needed)) {
+ 156: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(allow_icmp_frag_needed)) {
+ 157: (16) if w1 == 0x0 goto pc+13
+       16 01 0d 00 00 00 00 00
+; if (icmphdr.type == ICMP_DEST_UNREACH &&
+ 158: (71) r1 = *(u8 *)(r10 -104)
+       71 a1 98 ff 00 00 00 00
+; if (icmphdr.type == ICMP_DEST_UNREACH &&
+ 159: (56) if w1 != 0x3 goto pc+11
+       56 01 0b 00 03 00 00 00
+ 160: (71) r1 = *(u8 *)(r10 -103)
+       71 a1 99 ff 00 00 00 00
+ 161: (56) if w1 != 0x4 goto pc+9
+       56 01 09 00 04 00 00 00
+ 162: (b4) w5 = 1
+       b4 05 00 00 01 00 00 00
+ 163: (b4) w8 = 0
+       b4 08 00 00 00 00 00 00
+ 164: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 165: (63) *(u32 *)(r10 -208) = r1
+       63 1a 30 ff 00 00 00 00
+ 166: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 167: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+; if (verdict != CTX_ACT_OK || ret != CT_ESTABLISHED)
+ 168: (61) r1 = *(u32 *)(r10 -176)
+       61 a1 50 ff 00 00 00 00
+ 169: (16) if w1 == 0x1 goto pc+745
+       16 01 e9 02 01 00 00 00
+ 170: (05) goto pc+508
+       05 00 fc 01 00 00 00 00
+; if (CONFIG(enable_icmp_rule))
+ 171: (18) r1 = map[id:295][0]+207
+       18 21 00 00 27 01 00 00 00 00 00 00 cf 00 00 00
+; if (CONFIG(enable_icmp_rule))
+ 173: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(enable_icmp_rule))
+ 174: (16) if w1 == 0x0 goto pc+3
+       16 01 03 00 00 00 00 00
+; key.dport = bpf_u8_to_be16(icmphdr.type);
+ 175: (71) r1 = *(u8 *)(r10 -104)
+       71 a1 98 ff 00 00 00 00
+ 176: (64) w1 <<= 8
+       64 01 00 00 08 00 00 00
+; key.dport = bpf_u8_to_be16(icmphdr.type);
+ 177: (6b) *(u16 *)(r10 -6) = r1
+       6b 1a fa ff 00 00 00 00
+ 178: (63) *(u32 *)(r10 -200) = r7
+       63 7a 38 ff 00 00 00 00
+ 179: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 180: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+; policy = map_lookup_elem(map, &key);
+ 181: (18) r1 = map[id:247]
+       18 11 00 00 f7 00 00 00 00 00 00 00 00 00 00 00
+ 183: (85) call trie_lookup_elem#349392
+       85 00 00 00 d0 54 05 00
+; if (likely(policy && policy->precedence == MAX_PRECEDENCE)) {
+ 184: (15) if r0 == 0x0 goto pc+277
+       15 00 15 01 00 00 00 00
+ 185: (b7) r3 = 0
+       b7 03 00 00 00 00 00 00
+ 186: (61) r1 = *(u32 *)(r0 +4)
+       61 01 04 00 00 00 00 00
+; if (likely(policy && policy->precedence == MAX_PRECEDENCE)) {
+ 187: (16) if w1 == 0xffffffff goto pc+27
+       16 01 1b 00 ff ff ff ff
+ 188: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; key.sec_label = 0;
+ 189: (63) *(u32 *)(r10 -12) = r1
+       63 1a f4 ff 00 00 00 00
+ 190: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 191: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+; l4policy = map_lookup_elem(map, &key);
+ 192: (18) r1 = map[id:247]
+       18 11 00 00 f7 00 00 00 00 00 00 00 00 00 00 00
+ 194: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+ 195: (85) call trie_lookup_elem#349392
+       85 00 00 00 d0 54 05 00
+ 196: (b7) r3 = 0
+       b7 03 00 00 00 00 00 00
+ 197: (bf) r1 = r0
+       bf 01 00 00 00 00 00 00
+ 198: (bf) r0 = r7
+       bf 70 00 00 00 00 00 00
+ 199: (7b) *(u64 *)(r10 -216) = r1
+       7b 1a 28 ff 00 00 00 00
+; if (l4policy &&
+ 200: (15) if r1 == 0x0 goto pc+14
+       15 01 0e 00 00 00 00 00
+; l4policy->precedence > policy->precedence ||
+ 201: (61) r1 = *(u32 *)(r0 +4)
+       61 01 04 00 00 00 00 00
+; l4policy->precedence > policy->precedence ||
+ 202: (79) r2 = *(u64 *)(r10 -216)
+       79 a2 28 ff 00 00 00 00
+ 203: (61) r2 = *(u32 *)(r2 +4)
+       61 22 04 00 00 00 00 00
+; l4policy->precedence > policy->precedence ||
+ 204: (2e) if w2 > w1 goto pc+273
+       2e 12 11 01 00 00 00 00
+ 205: (79) r3 = *(u64 *)(r10 -216)
+       79 a3 28 ff 00 00 00 00
+; (l4policy->precedence == policy->precedence &&
+ 206: (5e) if w2 != w1 goto pc+8
+       5e 12 08 00 00 00 00 00
+; l4policy->lpm_prefix_length > policy->lpm_prefix_length)))
+ 207: (69) r1 = *(u16 *)(r0 +2)
+       69 01 02 00 00 00 00 00
+ 208: (74) w1 >>= 3
+       74 01 00 00 03 00 00 00
+; l4policy->lpm_prefix_length > policy->lpm_prefix_length)))
+ 209: (54) w1 &= 31
+       54 01 00 00 1f 00 00 00
+ 210: (79) r3 = *(u64 *)(r10 -216)
+       79 a3 28 ff 00 00 00 00
+; l4policy->lpm_prefix_length > policy->lpm_prefix_length)))
+ 211: (69) r2 = *(u16 *)(r3 +2)
+       69 32 02 00 00 00 00 00
+ 212: (74) w2 >>= 3
+       74 02 00 00 03 00 00 00
+; l4policy->lpm_prefix_length > policy->lpm_prefix_length)))
+ 213: (54) w2 &= 31
+       54 02 00 00 1f 00 00 00
+; if (l4policy &&
+ 214: (2e) if w2 > w1 goto pc+263
+       2e 12 07 01 00 00 00 00
+; p_len = policy->lpm_prefix_length;
+ 215: (69) r7 = *(u16 *)(r0 +2)
+       69 07 02 00 00 00 00 00
+; if (CONFIG(enable_policy_accounting))
+ 216: (18) r1 = map[id:295][0]+208
+       18 21 00 00 27 01 00 00 00 00 00 00 d0 00 00 00
+; if (CONFIG(enable_policy_accounting))
+ 218: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(enable_policy_accounting))
+ 219: (16) if w1 == 0x0 goto pc+62
+       16 01 3e 00 00 00 00 00
+ 220: (7b) *(u64 *)(r10 -208) = r3
+       7b 3a 30 ff 00 00 00 00
+; return ctx->len;
+ 221: (61) r1 = *(u32 *)(r6 +112)
+       61 61 70 00 00 00 00 00
+; __policy_account(remote_id, key.egress, proto, dport, p_len, ctx_full_len(ctx));
+ 222: (7b) *(u64 *)(r10 -216) = r1
+       7b 1a 28 ff 00 00 00 00
+ 223: (71) r2 = *(u8 *)(r10 -8)
+       71 a2 f8 ff 00 00 00 00
+; .endpoint_id = EFFECTIVE_EP_ID,
+ 224: (18) r1 = map[id:295][0]+160
+       18 21 00 00 27 01 00 00 00 00 00 00 a0 00 00 00
+; .endpoint_id = EFFECTIVE_EP_ID,
+ 226: (69) r1 = *(u16 *)(r1 +0)
+       69 11 00 00 00 00 00 00
+; struct policy_stats_key stats_key = {
+ 227: (6b) *(u16 *)(r10 -32) = r1
+       6b 1a e0 ff 00 00 00 00
+ 228: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 229: (73) *(u8 *)(r10 -30) = r1
+       73 1a e2 ff 00 00 00 00
+ 230: (61) r3 = *(u32 *)(r10 -136)
+       61 a3 78 ff 00 00 00 00
+ 231: (63) *(u32 *)(r10 -28) = r3
+       63 3a e4 ff 00 00 00 00
+; __policy_account(remote_id, key.egress, proto, dport, p_len, ctx_full_len(ctx));
+ 232: (54) w2 &= 1
+       54 02 00 00 01 00 00 00
+; struct policy_stats_key stats_key = {
+ 233: (73) *(u8 *)(r10 -24) = r2
+       73 2a e8 ff 00 00 00 00
+; p_len = policy->lpm_prefix_length;
+ 234: (bc) w3 = w7
+       bc 73 00 00 00 00 00 00
+ 235: (54) w3 &= 255
+       54 03 00 00 ff 00 00 00
+ 236: (bc) w2 = w3
+       bc 32 00 00 00 00 00 00
+ 237: (74) w2 >>= 3
+       74 02 00 00 03 00 00 00
+; struct policy_stats_key stats_key = {
+ 238: (73) *(u8 *)(r10 -29) = r2
+       73 2a e3 ff 00 00 00 00
+; if (lpm_prefix_length <= LPM_PROTO_PREFIX_BITS) {
+ 239: (26) if w3 > 0x47 goto pc+5
+       26 03 05 00 47 00 00 00
+; if (lpm_prefix_length < LPM_PROTO_PREFIX_BITS) {
+ 240: (16) if w2 == 0x8 goto pc+2
+       16 02 02 00 08 00 00 00
+ 241: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+ 242: (63) *(u32 *)(r10 -200) = r2
+       63 2a 38 ff 00 00 00 00
+ 243: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+ 244: (05) goto pc+9
+       05 00 09 00 00 00 00 00
+ 245: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+ 246: (bc) w1 = w9
+       bc 91 00 00 00 00 00 00
+; } else if (lpm_prefix_length < LPM_FULL_PREFIX_BITS) {
+ 247: (26) if w3 > 0xbf goto pc+6
+       26 03 06 00 bf 00 00 00
+ 248: (b4) w3 = 24
+       b4 03 00 00 18 00 00 00
+; dport &= bpf_htons((__u16)(0xffff << (LPM_FULL_PREFIX_BITS - lpm_prefix_length)));
+ 249: (1c) w3 -= w2
+       1c 23 00 00 00 00 00 00
+ 250: (b4) w1 = 65535
+       b4 01 00 00 ff ff 00 00
+ 251: (6c) w1 <<= w3
+       6c 31 00 00 00 00 00 00
+ 252: (dc) r1 = be16 r1
+       dc 01 00 00 10 00 00 00
+; dport &= bpf_htons((__u16)(0xffff << (LPM_FULL_PREFIX_BITS - lpm_prefix_length)));
+ 253: (5c) w1 &= w9
+       5c 91 00 00 00 00 00 00
+; stats_key.dport = dport;
+ 254: (6b) *(u16 *)(r10 -22) = r1
+       6b 1a ea ff 00 00 00 00
+; stats_key.protocol = proto;
+ 255: (61) r1 = *(u32 *)(r10 -200)
+       61 a1 38 ff 00 00 00 00
+ 256: (73) *(u8 *)(r10 -23) = r1
+       73 1a e9 ff 00 00 00 00
+ 257: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 258: (07) r2 += -32
+       07 02 00 00 e0 ff ff ff
+; value = map_lookup_elem(&cilium_policystats, &stats_key);
+ 259: (18) r1 = map[id:118]
+       18 11 00 00 76 00 00 00 00 00 00 00 00 00 00 00
+ 261: (85) call htab_lru_percpu_map_lookup_elem#322624
+       85 00 00 00 40 ec 04 00
+; if (value) {
+ 262: (15) if r0 == 0x0 goto pc+5
+       15 00 05 00 00 00 00 00
+ 263: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; __sync_fetch_and_add(&value->packets, 1);
+ 264: (db) lock *(u64 *)(r0 +0) += r1
+       db 10 00 00 00 00 00 00
+; __sync_fetch_and_add(&value->bytes, bytes);
+ 265: (79) r1 = *(u64 *)(r10 -216)
+       79 a1 28 ff 00 00 00 00
+ 266: (db) lock *(u64 *)(r0 +8) += r1
+       db 10 08 00 00 00 00 00
+ 267: (05) goto pc+12
+       05 00 0c 00 00 00 00 00
+; struct policy_stats_value newval = { 1, bytes };
+ 268: (79) r1 = *(u64 *)(r10 -216)
+       79 a1 28 ff 00 00 00 00
+ 269: (7b) *(u64 *)(r10 -96) = r1
+       7b 1a a0 ff 00 00 00 00
+ 270: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+ 271: (7b) *(u64 *)(r10 -104) = r1
+       7b 1a 98 ff 00 00 00 00
+ 272: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 273: (07) r2 += -32
+       07 02 00 00 e0 ff ff ff
+ 274: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+ 275: (07) r3 += -104
+       07 03 00 00 98 ff ff ff
+; map_update_elem(&cilium_policystats, &stats_key, &newval, BPF_NOEXIST);
+ 276: (18) r1 = map[id:118]
+       18 11 00 00 76 00 00 00 00 00 00 00 00 00 00 00
+ 278: (b4) w4 = 1
+       b4 04 00 00 01 00 00 00
+ 279: (85) call htab_lru_percpu_map_update_elem#328048
+       85 00 00 00 70 01 05 00
+ 280: (bf) r0 = r8
+       bf 80 00 00 00 00 00 00
+ 281: (79) r3 = *(u64 *)(r10 -208)
+       79 a3 30 ff 00 00 00 00
+ 282: (b4) w8 = 2
+       b4 08 00 00 02 00 00 00
+; p_len = policy->lpm_prefix_length;
+ 283: (54) w7 &= 255
+       54 07 00 00 ff 00 00 00
+; p_len > LPM_PROTO_PREFIX_BITS ? POLICY_MATCH_L3_L4 :	/* 1. id/proto/port */
+ 284: (26) if w7 > 0x47 goto pc+3
+       26 07 03 00 47 00 00 00
+ 285: (b4) w8 = 1
+       b4 08 00 00 01 00 00 00
+ 286: (a6) if w7 < 0x8 goto pc+1
+       a6 07 01 00 08 00 00 00
+ 287: (b4) w8 = 5
+       b4 08 00 00 05 00 00 00
+ 288: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+; *cookie = policy->cookie;
+ 289: (61) r1 = *(u32 *)(r0 +8)
+       61 01 08 00 00 00 00 00
+; if (unlikely(policy->deny))
+ 290: (63) *(u32 *)(r10 -208) = r1
+       63 1a 30 ff 00 00 00 00
+ 291: (69) r1 = *(u16 *)(r0 +2)
+       69 01 02 00 00 00 00 00
+ 292: (64) w1 <<= 16
+       64 01 00 00 10 00 00 00
+ 293: (c4) w1 s>>= 16
+       c4 01 00 00 10 00 00 00
+ 294: (bc) w2 = w1
+       bc 12 00 00 00 00 00 00
+ 295: (54) w2 &= 1
+       54 02 00 00 01 00 00 00
+ 296: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+; if (unlikely(policy->deny))
+ 297: (56) if w2 != 0x0 goto pc+369
+       56 02 71 01 00 00 00 00
+; auth_type = policy->auth_type;
+ 298: (bc) w7 = w1
+       bc 17 00 00 00 00 00 00
+ 299: (54) w7 &= 65280
+       54 07 00 00 00 ff 00 00
+ 300: (74) w7 >>= 8
+       74 07 00 00 08 00 00 00
+; if (unlikely(policy2 && policy2->precedence == policy->precedence &&
+ 301: (15) if r3 == 0x0 goto pc+10
+       15 03 0a 00 00 00 00 00
+ 302: (c6) if w1 s< 0x0 goto pc+9
+       c6 01 09 00 00 00 00 00
+ 303: (61) r1 = *(u32 *)(r0 +4)
+       61 01 04 00 00 00 00 00
+ 304: (61) r2 = *(u32 *)(r3 +4)
+       61 32 04 00 00 00 00 00
+ 305: (5e) if w2 != w1 goto pc+6
+       5e 12 06 00 00 00 00 00
+ 306: (69) r1 = *(u16 *)(r3 +2)
+       69 31 02 00 00 00 00 00
+ 307: (74) w1 >>= 8
+       74 01 00 00 08 00 00 00
+ 308: (bc) w2 = w1
+       bc 12 00 00 00 00 00 00
+ 309: (54) w2 &= 127
+       54 02 00 00 7f 00 00 00
+; if (unlikely(policy2 && policy2->precedence == policy->precedence &&
+ 310: (be) if w2 <= w7 goto pc+1
+       be 72 01 00 00 00 00 00
+ 311: (bc) w7 = w1
+       bc 17 00 00 00 00 00 00
+; 
+ 312: (69) r4 = *(u16 *)(r0 +0)
+       69 04 00 00 00 00 00 00
+ 313: (54) w7 &= 127
+       54 07 00 00 7f 00 00 00
+; if (unlikely(auth_type)) {
+ 314: (16) if w7 == 0x0 goto pc+1
+       16 07 01 00 00 00 00 00
+ 315: (05) goto pc+351
+       05 00 5f 01 00 00 00 00
+ 316: (b4) w5 = 1
+       b4 05 00 00 01 00 00 00
+ 317: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+; if (verdict != CTX_ACT_OK || ret != CT_ESTABLISHED)
+ 318: (61) r1 = *(u32 *)(r10 -176)
+       61 a1 50 ff 00 00 00 00
+ 319: (16) if w1 == 0x1 goto pc+595
+       16 01 53 02 01 00 00 00
+ 320: (05) goto pc+358
+       05 00 66 01 00 00 00 00
+ 321: (6b) *(u16 *)(r10 -104) = r2
+       6b 2a 98 ff 00 00 00 00
+; if (CONFIG(debug_lb))
+ 322: (18) r1 = map[id:295][0]+109
+       18 21 00 00 27 01 00 00 00 00 00 00 6d 00 00 00
+; if (CONFIG(debug_lb))
+ 324: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+ 325: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 326: (07) r2 += -104
+       07 02 00 00 98 ff ff ff
+; return map_lookup_elem(&cilium_lb4_reverse_nat, &index);
+ 327: (18) r1 = map[id:125]
+       18 11 00 00 7d 00 00 00 00 00 00 00 00 00 00 00
+ 329: (85) call __htab_map_lookup_elem#315840
+       85 00 00 00 c0 d1 04 00
+ 330: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+ 331: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+ 332: (b4) w9 = 0
+       b4 09 00 00 00 00 00 00
+; if (!nat)
+ 333: (15) if r0 == 0x0 goto pc+255
+       15 00 ff 00 00 00 00 00
+; 
+ 334: (54) w8 &= 1
+       54 08 00 00 01 00 00 00
+ 335: (79) r5 = *(u64 *)(r10 -184)
+       79 a5 48 ff 00 00 00 00
+; __be32 old_sip = tuple->saddr, sum = 0;
+ 336: (71) r1 = *(u8 *)(r5 +5)
+       71 51 05 00 00 00 00 00
+ 337: (64) w1 <<= 8
+       64 01 00 00 08 00 00 00
+ 338: (71) r2 = *(u8 *)(r5 +4)
+       71 52 04 00 00 00 00 00
+ 339: (4c) w1 |= w2
+       4c 21 00 00 00 00 00 00
+ 340: (71) r2 = *(u8 *)(r5 +6)
+       71 52 06 00 00 00 00 00
+ 341: (64) w2 <<= 16
+       64 02 00 00 10 00 00 00
+ 342: (71) r3 = *(u8 *)(r5 +7)
+       71 53 07 00 00 00 00 00
+ 343: (64) w3 <<= 24
+       64 03 00 00 18 00 00 00
+ 344: (4c) w3 |= w2
+       4c 23 00 00 00 00 00 00
+ 345: (4c) w3 |= w1
+       4c 13 00 00 00 00 00 00
+; __be32 old_sip = tuple->saddr, sum = 0;
+ 346: (63) *(u32 *)(r10 -32) = r3
+       63 3a e0 ff 00 00 00 00
+; if (CONFIG(debug_lb))
+ 347: (18) r1 = map[id:295][0]+109
+       18 21 00 00 27 01 00 00 00 00 00 00 6d 00 00 00
+; if (CONFIG(debug_lb))
+ 349: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; tuple->saddr = nat->address;
+ 350: (71) r1 = *(u8 *)(r0 +1)
+       71 01 01 00 00 00 00 00
+ 351: (71) r2 = *(u8 *)(r0 +0)
+       71 02 00 00 00 00 00 00
+ 352: (71) r3 = *(u8 *)(r0 +3)
+       71 03 03 00 00 00 00 00
+ 353: (7b) *(u64 *)(r10 -168) = r0
+       7b 0a 58 ff 00 00 00 00
+ 354: (71) r4 = *(u8 *)(r0 +2)
+       71 04 02 00 00 00 00 00
+; tuple->saddr = nat->address;
+ 355: (73) *(u8 *)(r5 +6) = r4
+       73 45 06 00 00 00 00 00
+ 356: (73) *(u8 *)(r5 +7) = r3
+       73 35 07 00 00 00 00 00
+ 357: (73) *(u8 *)(r5 +4) = r2
+       73 25 04 00 00 00 00 00
+ 358: (73) *(u8 *)(r5 +5) = r1
+       73 15 05 00 00 00 00 00
+; if (loopback) {
+ 359: (16) if w8 == 0x0 goto pc+47
+       16 08 2f 00 00 00 00 00
+ 360: (79) r1 = *(u64 *)(r10 -184)
+       79 a1 48 ff 00 00 00 00
+; __be32 old_dip = tuple->daddr;
+ 361: (71) r8 = *(u8 *)(r1 +3)
+       71 18 03 00 00 00 00 00
+ 362: (71) r2 = *(u8 *)(r1 +2)
+       71 12 02 00 00 00 00 00
+ 363: (63) *(u32 *)(r10 -216) = r2
+       63 2a 28 ff 00 00 00 00
+ 364: (71) r2 = *(u8 *)(r1 +0)
+       71 12 00 00 00 00 00 00
+ 365: (63) *(u32 *)(r10 -224) = r2
+       63 2a 20 ff 00 00 00 00
+ 366: (71) r7 = *(u8 *)(r1 +1)
+       71 17 01 00 00 00 00 00
+; if (CONFIG(debug_lb))
+ 367: (18) r1 = map[id:295][0]+109
+       18 21 00 00 27 01 00 00 00 00 00 00 6d 00 00 00
+; if (CONFIG(debug_lb))
+ 369: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+ 370: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+; __be32 old_dip = tuple->daddr;
+ 371: (07) r3 += -32
+       07 03 00 00 e0 ff ff ff
+; ret = ctx_store_bytes(ctx, l3_off + offsetof(struct iphdr, daddr), &old_sip, 4, 0);
+ 372: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 373: (b4) w2 = 30
+       b4 02 00 00 1e 00 00 00
+ 374: (b4) w4 = 4
+       b4 04 00 00 04 00 00 00
+ 375: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+ 376: (85) call bpf_skb_store_bytes#9387088
+       85 00 00 00 50 3c 8f 00
+ 377: (b4) w9 = -141
+       b4 09 00 00 73 ff ff ff
+; if (IS_ERR(ret))
+ 378: (c6) if w0 s< 0x0 goto pc+210
+       c6 00 d2 00 00 00 00 00
+ 379: (16) if w0 == 0x2 goto pc+209
+       16 00 d1 00 02 00 00 00
+; 
+ 380: (64) w7 <<= 8
+       64 07 00 00 08 00 00 00
+ 381: (61) r1 = *(u32 *)(r10 -224)
+       61 a1 20 ff 00 00 00 00
+ 382: (4c) w7 |= w1
+       4c 17 00 00 00 00 00 00
+ 383: (61) r1 = *(u32 *)(r10 -216)
+       61 a1 28 ff 00 00 00 00
+ 384: (64) w1 <<= 16
+       64 01 00 00 10 00 00 00
+ 385: (64) w8 <<= 24
+       64 08 00 00 18 00 00 00
+ 386: (4c) w8 |= w1
+       4c 18 00 00 00 00 00 00
+ 387: (4c) w8 |= w7
+       4c 78 00 00 00 00 00 00
+; return csum_add(~(*(__u32 *)from), *(__u32 *)to);
+ 388: (61) r2 = *(u32 *)(r10 -32)
+       61 a2 e0 ff 00 00 00 00
+; tuple->saddr = old_sip;
+ 389: (bc) w1 = w2
+       bc 21 00 00 00 00 00 00
+ 390: (74) w1 >>= 24
+       74 01 00 00 18 00 00 00
+ 391: (79) r3 = *(u64 *)(r10 -184)
+       79 a3 48 ff 00 00 00 00
+ 392: (73) *(u8 *)(r3 +7) = r1
+       73 13 07 00 00 00 00 00
+ 393: (bc) w1 = w2
+       bc 21 00 00 00 00 00 00
+ 394: (74) w1 >>= 16
+       74 01 00 00 10 00 00 00
+ 395: (73) *(u8 *)(r3 +6) = r1
+       73 13 06 00 00 00 00 00
+ 396: (bc) w1 = w2
+       bc 21 00 00 00 00 00 00
+ 397: (74) w1 >>= 8
+       74 01 00 00 08 00 00 00
+ 398: (73) *(u8 *)(r3 +5) = r1
+       73 13 05 00 00 00 00 00
+ 399: (73) *(u8 *)(r3 +4) = r2
+       73 23 04 00 00 00 00 00
+; return csum_add(~(*(__u32 *)from), *(__u32 *)to);
+ 400: (a4) w8 ^= -1
+       a4 08 00 00 ff ff ff ff
+; csum += addend;
+ 401: (bc) w7 = w2
+       bc 27 00 00 00 00 00 00
+ 402: (0c) w7 += w8
+       0c 87 00 00 00 00 00 00
+ 403: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+ 404: (ae) if w7 < w2 goto pc+1
+       ae 27 01 00 00 00 00 00
+ 405: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; return csum + (csum < addend);
+ 406: (0c) w7 += w1
+       0c 17 00 00 00 00 00 00
+; ret = ctx_store_bytes(ctx, l3_off + offsetof(struct iphdr, saddr),
+ 407: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 408: (b4) w2 = 26
+       b4 02 00 00 1a 00 00 00
+ 409: (79) r3 = *(u64 *)(r10 -168)
+       79 a3 58 ff 00 00 00 00
+ 410: (b4) w4 = 4
+       b4 04 00 00 04 00 00 00
+ 411: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+ 412: (85) call bpf_skb_store_bytes#9387088
+       85 00 00 00 50 3c 8f 00
+ 413: (b4) w9 = -141
+       b4 09 00 00 73 ff ff ff
+; if (IS_ERR(ret))
+ 414: (c6) if w0 s< 0x0 goto pc+174
+       c6 00 ae 00 00 00 00 00
+ 415: (16) if w0 == 0x2 goto pc+173
+       16 00 ad 00 02 00 00 00
+; 
+ 416: (61) r1 = *(u32 *)(r10 -32)
+       61 a1 e0 ff 00 00 00 00
+ 417: (a4) w1 ^= -1
+       a4 01 00 00 ff ff ff ff
+ 418: (79) r2 = *(u64 *)(r10 -168)
+       79 a2 58 ff 00 00 00 00
+ 419: (61) r4 = *(u32 *)(r2 +0)
+       61 24 00 00 00 00 00 00
+; csum += addend;
+ 420: (bc) w2 = w4
+       bc 42 00 00 00 00 00 00
+ 421: (0c) w2 += w1
+       0c 12 00 00 00 00 00 00
+ 422: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+ 423: (b4) w3 = 1
+       b4 03 00 00 01 00 00 00
+ 424: (ae) if w2 < w4 goto pc+1
+       ae 42 01 00 00 00 00 00
+ 425: (b4) w3 = 0
+       b4 03 00 00 00 00 00 00
+; return csum + (csum < addend);
+ 426: (0c) w2 += w3
+       0c 32 00 00 00 00 00 00
+; __builtin_constant_p(seed) && seed == 0)
+ 427: (bc) w8 = w2
+       bc 28 00 00 00 00 00 00
+ 428: (0c) w8 += w7
+       0c 78 00 00 00 00 00 00
+ 429: (ae) if w8 < w2 goto pc+1
+       ae 28 01 00 00 00 00 00
+ 430: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 431: (0c) w8 += w1
+       0c 18 00 00 00 00 00 00
+; return l3_csum_replace(ctx, l3_off + offsetof(struct iphdr, check),
+ 432: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 433: (b4) w2 = 24
+       b4 02 00 00 18 00 00 00
+ 434: (b4) w3 = 0
+       b4 03 00 00 00 00 00 00
+ 435: (bc) w4 = w8
+       bc 84 00 00 00 00 00 00
+ 436: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+ 437: (85) call bpf_l3_csum_replace#9384208
+       85 00 00 00 10 31 8f 00
+; if (ipv4_csum_update_by_diff(ctx, l3_off, sum) < 0)
+ 438: (bc) w9 = w0
+       bc 09 00 00 00 00 00 00
+ 439: (c4) w9 s>>= 31
+       c4 09 00 00 1f 00 00 00
+ 440: (54) w9 &= -153
+       54 09 00 00 67 ff ff ff
+ 441: (c6) if w0 s< 0x0 goto pc+147
+       c6 00 93 00 00 00 00 00
+ 442: (61) r1 = *(u32 *)(r10 -208)
+       61 a1 30 ff 00 00 00 00
+ 443: (54) w1 &= -225
+       54 01 00 00 1f ff ff ff
+ 444: (54) w1 &= 65535
+       54 01 00 00 ff ff 00 00
+ 445: (56) if w1 != 0x0 goto pc+143
+       56 01 8f 00 00 00 00 00
+ 446: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 447: (63) *(u32 *)(r10 -224) = r1
+       63 1a 20 ff 00 00 00 00
+ 448: (b4) w1 = 16
+       b4 01 00 00 10 00 00 00
+; csum_l4_offset_and_flags(tuple->nexthdr, &csum_off);
+ 449: (63) *(u32 *)(r10 -216) = r1
+       63 1a 28 ff 00 00 00 00
+ 450: (79) r1 = *(u64 *)(r10 -184)
+       79 a1 48 ff 00 00 00 00
+ 451: (71) r1 = *(u8 *)(r1 +12)
+       71 11 0c 00 00 00 00 00
+ 452: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+; switch (nexthdr) {
+ 453: (63) *(u32 *)(r10 -208) = r2
+       63 2a 30 ff 00 00 00 00
+ 454: (16) if w1 == 0x6 goto pc+55
+       16 01 37 00 06 00 00 00
+ 455: (16) if w1 == 0x3a goto pc+50
+       16 01 32 00 3a 00 00 00
+ 456: (56) if w1 != 0x11 goto pc+60
+       56 01 3c 00 11 00 00 00
+ 457: (b4) w2 = 32
+       b4 02 00 00 20 00 00 00
+ 458: (63) *(u32 *)(r10 -208) = r2
+       63 2a 30 ff 00 00 00 00
+ 459: (b4) w2 = 6
+       b4 02 00 00 06 00 00 00
+; break;
+ 460: (63) *(u32 *)(r10 -216) = r2
+       63 2a 28 ff 00 00 00 00
+ 461: (05) goto pc+48
+       05 00 30 00 00 00 00 00
+ 462: (b4) w8 = 0
+       b4 08 00 00 00 00 00 00
+; key.sec_label = 0;
+ 463: (63) *(u32 *)(r10 -12) = r8
+       63 8a f4 ff 00 00 00 00
+ 464: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 465: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+; l4policy = map_lookup_elem(map, &key);
+ 466: (18) r1 = map[id:247]
+       18 11 00 00 f7 00 00 00 00 00 00 00 00 00 00 00
+ 468: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+ 469: (85) call trie_lookup_elem#349392
+       85 00 00 00 d0 54 05 00
+ 470: (bf) r2 = r0
+       bf 02 00 00 00 00 00 00
+ 471: (bf) r0 = r7
+       bf 70 00 00 00 00 00 00
+ 472: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 473: (63) *(u32 *)(r10 -208) = r1
+       63 1a 30 ff 00 00 00 00
+ 474: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 475: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+ 476: (7b) *(u64 *)(r10 -216) = r2
+       7b 2a 28 ff 00 00 00 00
+; if (l4policy &&
+ 477: (15) if r2 == 0x0 goto pc+189
+       15 02 bd 00 00 00 00 00
+ 478: (7b) *(u64 *)(r10 -224) = r0
+       7b 0a 20 ff 00 00 00 00
+; p_len = l4policy->lpm_prefix_length;
+ 479: (79) r1 = *(u64 *)(r10 -216)
+       79 a1 28 ff 00 00 00 00
+ 480: (69) r7 = *(u16 *)(r1 +2)
+       69 17 02 00 00 00 00 00
+; if (CONFIG(enable_policy_accounting))
+ 481: (18) r1 = map[id:295][0]+208
+       18 21 00 00 27 01 00 00 00 00 00 00 d0 00 00 00
+; if (CONFIG(enable_policy_accounting))
+ 483: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(enable_policy_accounting))
+ 484: (16) if w1 == 0x0 goto pc+141
+       16 01 8d 00 00 00 00 00
+; return ctx->len;
+ 485: (61) r8 = *(u32 *)(r6 +112)
+       61 68 70 00 00 00 00 00
+; __policy_account(0, key.egress, proto, dport, p_len, ctx_full_len(ctx));
+ 486: (71) r2 = *(u8 *)(r10 -8)
+       71 a2 f8 ff 00 00 00 00
+; .endpoint_id = EFFECTIVE_EP_ID,
+ 487: (18) r1 = map[id:295][0]+160
+       18 21 00 00 27 01 00 00 00 00 00 00 a0 00 00 00
+; .endpoint_id = EFFECTIVE_EP_ID,
+ 489: (69) r1 = *(u16 *)(r1 +0)
+       69 11 00 00 00 00 00 00
+; struct policy_stats_key stats_key = {
+ 490: (6b) *(u16 *)(r10 -32) = r1
+       6b 1a e0 ff 00 00 00 00
+ 491: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 492: (73) *(u8 *)(r10 -30) = r1
+       73 1a e2 ff 00 00 00 00
+ 493: (63) *(u32 *)(r10 -28) = r1
+       63 1a e4 ff 00 00 00 00
+; __policy_account(0, key.egress, proto, dport, p_len, ctx_full_len(ctx));
+ 494: (54) w2 &= 1
+       54 02 00 00 01 00 00 00
+; struct policy_stats_key stats_key = {
+ 495: (73) *(u8 *)(r10 -24) = r2
+       73 2a e8 ff 00 00 00 00
+; p_len = l4policy->lpm_prefix_length;
+ 496: (bc) w3 = w7
+       bc 73 00 00 00 00 00 00
+ 497: (54) w3 &= 255
+       54 03 00 00 ff 00 00 00
+ 498: (bc) w2 = w3
+       bc 32 00 00 00 00 00 00
+ 499: (74) w2 >>= 3
+       74 02 00 00 03 00 00 00
+; struct policy_stats_key stats_key = {
+ 500: (73) *(u8 *)(r10 -29) = r2
+       73 2a e3 ff 00 00 00 00
+; if (lpm_prefix_length <= LPM_PROTO_PREFIX_BITS) {
+ 501: (26) if w3 > 0x47 goto pc+92
+       26 03 5c 00 47 00 00 00
+; if (lpm_prefix_length < LPM_PROTO_PREFIX_BITS) {
+ 502: (16) if w2 == 0x8 goto pc+99
+       16 02 63 00 08 00 00 00
+ 503: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+ 504: (63) *(u32 *)(r10 -200) = r2
+       63 2a 38 ff 00 00 00 00
+ 505: (05) goto pc+96
+       05 00 60 00 00 00 00 00
+ 506: (b4) w2 = 2
+       b4 02 00 00 02 00 00 00
+ 507: (63) *(u32 *)(r10 -216) = r2
+       63 2a 28 ff 00 00 00 00
+ 508: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+ 509: (63) *(u32 *)(r10 -208) = r2
+       63 2a 30 ff 00 00 00 00
+ 510: (79) r2 = *(u64 *)(r10 -168)
+       79 a2 58 ff 00 00 00 00
+; if (nat->port) {
+ 511: (71) r3 = *(u8 *)(r2 +4)
+       71 23 04 00 00 00 00 00
+ 512: (71) r2 = *(u8 *)(r2 +5)
+       71 22 05 00 00 00 00 00
+ 513: (64) w2 <<= 8
+       64 02 00 00 08 00 00 00
+ 514: (4c) w2 |= w3
+       4c 32 00 00 00 00 00 00
+; if (nat->port) {
+ 515: (16) if w2 == 0x0 goto pc+61
+       16 02 3d 00 00 00 00 00
+ 516: (05) goto pc+12
+       05 00 0c 00 00 00 00 00
+ 517: (79) r2 = *(u64 *)(r10 -168)
+       79 a2 58 ff 00 00 00 00
+; if (nat->port) {
+ 518: (71) r3 = *(u8 *)(r2 +4)
+       71 23 04 00 00 00 00 00
+ 519: (71) r2 = *(u8 *)(r2 +5)
+       71 22 05 00 00 00 00 00
+ 520: (64) w2 <<= 8
+       64 02 00 00 08 00 00 00
+ 521: (4c) w2 |= w3
+       4c 32 00 00 00 00 00 00
+ 522: (b4) w3 = 1
+       b4 03 00 00 01 00 00 00
+ 523: (63) *(u32 *)(r10 -224) = r3
+       63 3a 20 ff 00 00 00 00
+ 524: (b4) w3 = 0
+       b4 03 00 00 00 00 00 00
+ 525: (63) *(u32 *)(r10 -208) = r3
+       63 3a 30 ff 00 00 00 00
+ 526: (63) *(u32 *)(r10 -216) = r3
+       63 3a 28 ff 00 00 00 00
+ 527: (b4) w9 = 0
+       b4 09 00 00 00 00 00 00
+; if (nat->port) {
+ 528: (16) if w2 == 0x0 goto pc+60
+       16 02 3c 00 00 00 00 00
+ 529: (79) r4 = *(u64 *)(r10 -184)
+       79 a4 48 ff 00 00 00 00
+; ret = reverse_map_l4_port(ctx, tuple->nexthdr, tuple->dport,
+ 530: (71) r3 = *(u8 *)(r4 +8)
+       71 43 08 00 00 00 00 00
+ 531: (71) r7 = *(u8 *)(r4 +9)
+       71 47 09 00 00 00 00 00
+ 532: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; switch (nexthdr) {
+ 533: (66) if w1 s> 0x10 goto pc+4
+       66 01 04 00 10 00 00 00
+ 534: (16) if w1 == 0x1 goto pc+32
+       16 01 20 00 01 00 00 00
+ 535: (16) if w1 == 0x6 goto pc+4
+       16 01 04 00 06 00 00 00
+ 536: (b4) w0 = -142
+       b4 00 00 00 72 ff ff ff
+ 537: (05) goto pc+29
+       05 00 1d 00 00 00 00 00
+ 538: (16) if w1 == 0x3a goto pc+28
+       16 01 1c 00 3a 00 00 00
+ 539: (56) if w1 != 0x11 goto pc-4
+       56 01 fc ff 11 00 00 00
+; ret = reverse_map_l4_port(ctx, tuple->nexthdr, tuple->dport,
+ 540: (64) w7 <<= 8
+       64 07 00 00 08 00 00 00
+ 541: (4c) w7 |= w3
+       4c 37 00 00 00 00 00 00
+; if (port != old_port) {
+ 542: (1e) if w2 == w7 goto pc+24
+       1e 72 18 00 00 00 00 00
+ 543: (6b) *(u16 *)(r10 -16) = r2
+       6b 2a f0 ff 00 00 00 00
+ 544: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+; 
+ 545: (07) r3 += -16
+       07 03 00 00 f0 ff ff ff
+; if (ctx_store_bytes(ctx, l4_off + off, &port, sizeof(port), 0) < 0)
+ 546: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 547: (61) r2 = *(u32 *)(r10 -200)
+       61 a2 38 ff 00 00 00 00
+ 548: (b4) w4 = 2
+       b4 04 00 00 02 00 00 00
+ 549: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+ 550: (85) call bpf_skb_store_bytes#9387088
+       85 00 00 00 50 3c 8f 00
+ 551: (bc) w1 = w0
+       bc 01 00 00 00 00 00 00
+ 552: (b4) w0 = -141
+       b4 00 00 00 73 ff ff ff
+; if (ctx_store_bytes(ctx, l4_off + off, &port, sizeof(port), 0) < 0)
+ 553: (c6) if w1 s< 0x0 goto pc+11
+       c6 01 0b 00 00 00 00 00
+; return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+ 554: (61) r2 = *(u32 *)(r10 -216)
+       61 a2 28 ff 00 00 00 00
+ 555: (61) r1 = *(u32 *)(r10 -200)
+       61 a1 38 ff 00 00 00 00
+ 556: (0c) w2 += w1
+       0c 12 00 00 00 00 00 00
+; if (csum_l4_replace(ctx, l4_off, csum_off, old_port, port, sizeof(port)) < 0)
+ 557: (69) r4 = *(u16 *)(r10 -16)
+       69 a4 f0 ff 00 00 00 00
+; return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+ 558: (61) r5 = *(u32 *)(r10 -208)
+       61 a5 30 ff 00 00 00 00
+ 559: (44) w5 |= 2
+       44 05 00 00 02 00 00 00
+; return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+ 560: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 561: (bc) w3 = w7
+       bc 73 00 00 00 00 00 00
+ 562: (85) call bpf_l4_csum_replace#9384624
+       85 00 00 00 b0 32 8f 00
+; 
+ 563: (c4) w0 s>>= 31
+       c4 00 00 00 1f 00 00 00
+ 564: (54) w0 &= -154
+       54 00 00 00 66 ff ff ff
+; if (IS_ERR(ret))
+ 565: (c6) if w0 s< 0x0 goto pc+1
+       c6 00 01 00 00 00 00 00
+ 566: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+ 567: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+; if (IS_ERR(ret))
+ 568: (c6) if w0 s< 0x0 goto pc+1
+       c6 00 01 00 00 00 00 00
+ 569: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 570: (61) r2 = *(u32 *)(r10 -224)
+       61 a2 20 ff 00 00 00 00
+; if (IS_ERR(ret))
+ 571: (4c) w2 |= w1
+       4c 12 00 00 00 00 00 00
+ 572: (bc) w9 = w0
+       bc 09 00 00 00 00 00 00
+ 573: (c4) w9 s>>= 31
+       c4 09 00 00 1f 00 00 00
+ 574: (5c) w9 &= w0
+       5c 09 00 00 00 00 00 00
+ 575: (54) w2 &= 1
+       54 02 00 00 01 00 00 00
+ 576: (56) if w2 != 0x0 goto pc+12
+       56 02 0c 00 00 00 00 00
+; return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+ 577: (61) r1 = *(u32 *)(r10 -200)
+       61 a1 38 ff 00 00 00 00
+ 578: (61) r2 = *(u32 *)(r10 -216)
+       61 a2 28 ff 00 00 00 00
+ 579: (0c) w2 += w1
+       0c 12 00 00 00 00 00 00
+ 580: (61) r5 = *(u32 *)(r10 -208)
+       61 a5 30 ff 00 00 00 00
+; return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+ 581: (44) w5 |= 16
+       44 05 00 00 10 00 00 00
+ 582: (b4) w9 = 0
+       b4 09 00 00 00 00 00 00
+; return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+ 583: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 584: (b4) w3 = 0
+       b4 03 00 00 00 00 00 00
+ 585: (bc) w4 = w8
+       bc 84 00 00 00 00 00 00
+ 586: (85) call bpf_l4_csum_replace#9384624
+       85 00 00 00 b0 32 8f 00
+; if (csum_off.offset &&
+ 587: (66) if w0 s> 0xffffffff goto pc+1
+       66 00 01 00 ff ff ff ff
+ 588: (b4) w9 = -154
+       b4 09 00 00 66 ff ff ff
+ 589: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+ 590: (c6) if w9 s< 0x0 goto pc+1
+       c6 09 01 00 00 00 00 00
+ 591: (05) goto pc+326
+       05 00 46 01 00 00 00 00
+; switch (ret) {
+ 592: (16) if w9 == 0x0 goto pc+459
+       16 09 cb 01 00 00 00 00
+ 593: (05) goto pc+579
+       05 00 43 02 00 00 00 00
+ 594: (bc) w1 = w9
+       bc 91 00 00 00 00 00 00
+; } else if (lpm_prefix_length < LPM_FULL_PREFIX_BITS) {
+ 595: (26) if w3 > 0xbf goto pc+6
+       26 03 06 00 bf 00 00 00
+ 596: (b4) w3 = 24
+       b4 03 00 00 18 00 00 00
+; dport &= bpf_htons((__u16)(0xffff << (LPM_FULL_PREFIX_BITS - lpm_prefix_length)));
+ 597: (1c) w3 -= w2
+       1c 23 00 00 00 00 00 00
+ 598: (b4) w1 = 65535
+       b4 01 00 00 ff ff 00 00
+ 599: (6c) w1 <<= w3
+       6c 31 00 00 00 00 00 00
+ 600: (dc) r1 = be16 r1
+       dc 01 00 00 10 00 00 00
+; dport &= bpf_htons((__u16)(0xffff << (LPM_FULL_PREFIX_BITS - lpm_prefix_length)));
+ 601: (5c) w1 &= w9
+       5c 91 00 00 00 00 00 00
+; stats_key.dport = dport;
+ 602: (6b) *(u16 *)(r10 -22) = r1
+       6b 1a ea ff 00 00 00 00
+; stats_key.protocol = proto;
+ 603: (61) r1 = *(u32 *)(r10 -200)
+       61 a1 38 ff 00 00 00 00
+ 604: (73) *(u8 *)(r10 -23) = r1
+       73 1a e9 ff 00 00 00 00
+ 605: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 606: (07) r2 += -32
+       07 02 00 00 e0 ff ff ff
+; value = map_lookup_elem(&cilium_policystats, &stats_key);
+ 607: (18) r1 = map[id:118]
+       18 11 00 00 76 00 00 00 00 00 00 00 00 00 00 00
+ 609: (85) call htab_lru_percpu_map_lookup_elem#322624
+       85 00 00 00 40 ec 04 00
+; if (value) {
+ 610: (15) if r0 == 0x0 goto pc+4
+       15 00 04 00 00 00 00 00
+ 611: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; __sync_fetch_and_add(&value->packets, 1);
+ 612: (db) lock *(u64 *)(r0 +0) += r1
+       db 10 00 00 00 00 00 00
+; __sync_fetch_and_add(&value->bytes, bytes);
+ 613: (db) lock *(u64 *)(r0 +8) += r8
+       db 80 08 00 00 00 00 00
+ 614: (05) goto pc+11
+       05 00 0b 00 00 00 00 00
+; struct policy_stats_value newval = { 1, bytes };
+ 615: (7b) *(u64 *)(r10 -96) = r8
+       7b 8a a0 ff 00 00 00 00
+ 616: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+ 617: (7b) *(u64 *)(r10 -104) = r1
+       7b 1a 98 ff 00 00 00 00
+ 618: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 619: (07) r2 += -32
+       07 02 00 00 e0 ff ff ff
+ 620: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+ 621: (07) r3 += -104
+       07 03 00 00 98 ff ff ff
+; map_update_elem(&cilium_policystats, &stats_key, &newval, BPF_NOEXIST);
+ 622: (18) r1 = map[id:118]
+       18 11 00 00 76 00 00 00 00 00 00 00 00 00 00 00
+ 624: (b4) w4 = 1
+       b4 04 00 00 01 00 00 00
+ 625: (85) call htab_lru_percpu_map_update_elem#328048
+       85 00 00 00 70 01 05 00
+ 626: (b4) w3 = 4
+       b4 03 00 00 04 00 00 00
+; p_len = l4policy->lpm_prefix_length;
+ 627: (54) w7 &= 255
+       54 07 00 00 ff 00 00 00
+; p_len == 0 ? POLICY_MATCH_ALL :					/* 6. ANY/ANY/ANY */
+ 628: (a6) if w7 < 0x8 goto pc+3
+       a6 07 03 00 08 00 00 00
+ 629: (b4) w3 = 6
+       b4 03 00 00 06 00 00 00
+ 630: (a6) if w7 < 0x48 goto pc+1
+       a6 07 01 00 48 00 00 00
+ 631: (b4) w3 = 3
+       b4 03 00 00 03 00 00 00
+ 632: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 633: (79) r2 = *(u64 *)(r10 -216)
+       79 a2 28 ff 00 00 00 00
+; *cookie = policy->cookie;
+ 634: (61) r1 = *(u32 *)(r2 +8)
+       61 21 08 00 00 00 00 00
+; if (unlikely(policy->deny))
+ 635: (63) *(u32 *)(r10 -208) = r1
+       63 1a 30 ff 00 00 00 00
+ 636: (69) r1 = *(u16 *)(r2 +2)
+       69 21 02 00 00 00 00 00
+ 637: (64) w1 <<= 16
+       64 01 00 00 10 00 00 00
+ 638: (c4) w1 s>>= 16
+       c4 01 00 00 10 00 00 00
+ 639: (bc) w2 = w1
+       bc 12 00 00 00 00 00 00
+ 640: (54) w2 &= 1
+       54 02 00 00 01 00 00 00
+ 641: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+ 642: (bc) w8 = w3
+       bc 38 00 00 00 00 00 00
+ 643: (79) r5 = *(u64 *)(r10 -224)
+       79 a5 20 ff 00 00 00 00
+; if (unlikely(policy->deny))
+ 644: (56) if w2 != 0x0 goto pc+22
+       56 02 16 00 00 00 00 00
+; auth_type = policy->auth_type;
+ 645: (bc) w7 = w1
+       bc 17 00 00 00 00 00 00
+ 646: (54) w7 &= 65280
+       54 07 00 00 00 ff 00 00
+ 647: (74) w7 >>= 8
+       74 07 00 00 08 00 00 00
+; if (unlikely(policy2 && policy2->precedence == policy->precedence &&
+ 648: (15) if r5 == 0x0 goto pc+13
+       15 05 0d 00 00 00 00 00
+ 649: (c6) if w1 s< 0x0 goto pc+12
+       c6 01 0c 00 00 00 00 00
+ 650: (79) r1 = *(u64 *)(r10 -216)
+       79 a1 28 ff 00 00 00 00
+ 651: (61) r1 = *(u32 *)(r1 +4)
+       61 11 04 00 00 00 00 00
+ 652: (79) r2 = *(u64 *)(r10 -224)
+       79 a2 20 ff 00 00 00 00
+ 653: (61) r2 = *(u32 *)(r2 +4)
+       61 22 04 00 00 00 00 00
+ 654: (5e) if w2 != w1 goto pc+7
+       5e 12 07 00 00 00 00 00
+ 655: (79) r1 = *(u64 *)(r10 -224)
+       79 a1 20 ff 00 00 00 00
+ 656: (69) r1 = *(u16 *)(r1 +2)
+       69 11 02 00 00 00 00 00
+ 657: (74) w1 >>= 8
+       74 01 00 00 08 00 00 00
+ 658: (bc) w2 = w1
+       bc 12 00 00 00 00 00 00
+ 659: (54) w2 &= 127
+       54 02 00 00 7f 00 00 00
+; if (unlikely(policy2 && policy2->precedence == policy->precedence &&
+ 660: (be) if w2 <= w7 goto pc+1
+       be 72 01 00 00 00 00 00
+ 661: (bc) w7 = w1
+       bc 17 00 00 00 00 00 00
+; 
+ 662: (79) r1 = *(u64 *)(r10 -216)
+       79 a1 28 ff 00 00 00 00
+ 663: (69) r4 = *(u16 *)(r1 +0)
+       69 14 00 00 00 00 00 00
+ 664: (54) w7 &= 127
+       54 07 00 00 7f 00 00 00
+ 665: (bc) w8 = w3
+       bc 38 00 00 00 00 00 00
+; if (unlikely(auth_type)) {
+ 666: (16) if w7 == 0x0 goto pc-351
+       16 07 a1 fe 00 00 00 00
+ 667: (b4) w5 = 65
+       b4 05 00 00 41 00 00 00
+; if (verdict != CTX_ACT_OK || ret != CT_ESTABLISHED)
+ 668: (61) r1 = *(u32 *)(r10 -176)
+       61 a1 50 ff 00 00 00 00
+ 669: (16) if w1 == 0x1 goto pc+245
+       16 01 f5 00 01 00 00 00
+ 670: (05) goto pc+8
+       05 00 08 00 00 00 00 00
+ 671: (b4) w5 = 65
+       b4 05 00 00 41 00 00 00
+ 672: (b4) w8 = 0
+       b4 08 00 00 00 00 00 00
+ 673: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 674: (63) *(u32 *)(r10 -208) = r1
+       63 1a 30 ff 00 00 00 00
+ 675: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 676: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+ 677: (61) r1 = *(u32 *)(r10 -176)
+       61 a1 50 ff 00 00 00 00
+ 678: (16) if w1 == 0x1 goto pc+236
+       16 01 ec 00 01 00 00 00
+; return ctx->len;
+ 679: (61) r9 = *(u32 *)(r6 +112)
+       61 69 70 00 00 00 00 00
+ 680: (79) r1 = *(u64 *)(r10 -184)
+       79 a1 48 ff 00 00 00 00
+; tuple->nexthdr, POLICY_INGRESS, 0,
+ 681: (71) r0 = *(u8 *)(r1 +12)
+       71 10 0c 00 00 00 00 00
+; send_policy_verdict_notify(ctx, src_label, tuple->dport,
+ 682: (71) r2 = *(u8 *)(r1 +8)
+       71 12 08 00 00 00 00 00
+ 683: (63) *(u32 *)(r10 -232) = r2
+       63 2a 18 ff 00 00 00 00
+ 684: (71) r1 = *(u8 *)(r1 +9)
+       71 11 09 00 00 00 00 00
+; __u64 cap_len = min_t(__u64, TRACE_PAYLOAD_LEN, ctx_len);
+ 685: (7b) *(u64 *)(r10 -224) = r1
+       7b 1a 20 ff 00 00 00 00
+ 686: (18) r1 = map[id:295][0]+84
+       18 21 00 00 27 01 00 00 00 00 00 00 54 00 00 00
+; __u64 cap_len = min_t(__u64, TRACE_PAYLOAD_LEN, ctx_len);
+ 688: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+ 689: (b7) r2 = 2
+       b7 02 00 00 02 00 00 00
+; struct ratelimit_key rkey = {
+ 690: (7b) *(u64 *)(r10 -16) = r2
+       7b 2a f0 ff 00 00 00 00
+; if (!policy_verdict_filter_allow(POLICY_VERDICT_LOG_FILTER, dir))
+ 691: (18) r2 = map[id:295][0]+240
+       18 22 00 00 27 01 00 00 00 00 00 00 f0 00 00 00
+; if (!policy_verdict_filter_allow(POLICY_VERDICT_LOG_FILTER, dir))
+ 693: (61) r2 = *(u32 *)(r2 +0)
+       61 22 00 00 00 00 00 00
+ 694: (b4) w3 = 1
+       b4 03 00 00 01 00 00 00
+; volatile __u8 d = dir;
+ 695: (73) *(u8 *)(r10 -104) = r3
+       73 3a 98 ff 00 00 00 00
+; return ((filter & d) > 0);
+ 696: (71) r3 = *(u8 *)(r10 -104)
+       71 a3 98 ff 00 00 00 00
+; return ((filter & d) > 0);
+ 697: (5c) w2 &= w3
+       5c 32 00 00 00 00 00 00
+ 698: (bc) w3 = w9
+       bc 93 00 00 00 00 00 00
+ 699: (63) *(u32 *)(r10 -216) = r9
+       63 9a 28 ff 00 00 00 00
+; __u64 cap_len = min_t(__u64, TRACE_PAYLOAD_LEN, ctx_len);
+ 700: (ae) if w9 < w1 goto pc+1
+       ae 19 01 00 00 00 00 00
+ 701: (bc) w3 = w1
+       bc 13 00 00 00 00 00 00
+; if (!policy_verdict_filter_allow(POLICY_VERDICT_LOG_FILTER, dir))
+ 702: (16) if w2 == 0x0 goto pc+48
+       16 02 30 00 00 00 00 00
+; if (CONFIG(events_map_rate_limit) > 0) {
+ 703: (18) r1 = map[id:295][0]+132
+       18 21 00 00 27 01 00 00 00 00 00 00 84 00 00 00
+; if (CONFIG(events_map_rate_limit) > 0) {
+ 705: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; value->tokens--;
+ 706: (79) r9 = *(u64 *)(r10 -224)
+       79 a9 20 ff 00 00 00 00
+; send_policy_verdict_notify(ctx, src_label, tuple->dport,
+ 707: (64) w9 <<= 8
+       64 09 00 00 08 00 00 00
+ 708: (61) r1 = *(u32 *)(r10 -232)
+       61 a1 18 ff 00 00 00 00
+ 709: (4c) w9 |= w1
+       4c 19 00 00 00 00 00 00
+; __notify_common_hdr(CILIUM_NOTIFY_POLICY_VERDICT, 0),
+ 710: (18) r1 = map[id:295][0]+160
+       18 21 00 00 27 01 00 00 00 00 00 00 a0 00 00 00
+; __notify_common_hdr(CILIUM_NOTIFY_POLICY_VERDICT, 0),
+ 712: (69) r1 = *(u16 *)(r1 +0)
+       69 11 00 00 00 00 00 00
+ 713: (61) r2 = *(u32 *)(r6 +152)
+       61 62 98 00 00 00 00 00
+; msg = (typeof(msg)) {
+ 714: (6b) *(u16 *)(r10 -102) = r1
+       6b 1a 9a ff 00 00 00 00
+ 715: (63) *(u32 *)(r10 -100) = r2
+       63 2a 9c ff 00 00 00 00
+ 716: (61) r1 = *(u32 *)(r10 -216)
+       61 a1 28 ff 00 00 00 00
+ 717: (63) *(u32 *)(r10 -96) = r1
+       63 1a a0 ff 00 00 00 00
+ 718: (61) r1 = *(u32 *)(r10 -136)
+       61 a1 78 ff 00 00 00 00
+ 719: (63) *(u32 *)(r10 -88) = r1
+       63 1a a8 ff 00 00 00 00
+ 720: (63) *(u32 *)(r10 -84) = r4
+       63 4a ac ff 00 00 00 00
+ 721: (61) r1 = *(u32 *)(r10 -208)
+       61 a1 30 ff 00 00 00 00
+ 722: (63) *(u32 *)(r10 -72) = r1
+       63 1a b8 ff 00 00 00 00
+ 723: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 724: (63) *(u32 *)(r10 -76) = r1
+       63 1a b4 ff 00 00 00 00
+ 725: (63) *(u32 *)(r10 -68) = r1
+       63 1a bc ff 00 00 00 00
+ 726: (b4) w1 = 5
+       b4 01 00 00 05 00 00 00
+ 727: (6b) *(u16 *)(r10 -104) = r1
+       6b 1a 98 ff 00 00 00 00
+ 728: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+ 729: (6b) *(u16 *)(r10 -90) = r1
+       6b 1a a6 ff 00 00 00 00
+ 730: (73) *(u8 *)(r10 -78) = r0
+       73 0a b2 ff 00 00 00 00
+ 731: (6b) *(u16 *)(r10 -92) = r3
+       6b 3a a4 ff 00 00 00 00
+; .dst_port	= bpf_ntohs(dst_port),
+ 732: (dc) r9 = be16 r9
+       dc 09 00 00 10 00 00 00
+; msg = (typeof(msg)) {
+ 733: (6b) *(u16 *)(r10 -80) = r9
+       6b 9a b0 ff 00 00 00 00
+; msg = (typeof(msg)) {
+ 734: (64) w8 <<= 3
+       64 08 00 00 03 00 00 00
+ 735: (54) w8 &= 56
+       54 08 00 00 38 00 00 00
+ 736: (4c) w5 |= w8
+       4c 85 00 00 00 00 00 00
+; msg = (typeof(msg)) {
+ 737: (73) *(u8 *)(r10 -77) = r5
+       73 5a b3 ff 00 00 00 00
+; (cap_len << 32) | BPF_F_CURRENT_CPU,
+ 738: (67) r3 <<= 32
+       67 03 00 00 20 00 00 00
+ 739: (18) r1 = 0xffffffff
+       18 01 00 00 ff ff ff ff 00 00 00 00 00 00 00 00
+; (cap_len << 32) | BPF_F_CURRENT_CPU,
+ 741: (4f) r3 |= r1
+       4f 13 00 00 00 00 00 00
+ 742: (bf) r8 = r4
+       bf 48 00 00 00 00 00 00
+ 743: (bf) r4 = r10
+       bf a4 00 00 00 00 00 00
+; send_policy_verdict_notify(ctx, src_label, tuple->dport,
+ 744: (07) r4 += -104
+       07 04 00 00 98 ff ff ff
+; ctx_event_output(ctx, &cilium_events,
+ 745: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 746: (18) r2 = map[id:106]
+       18 12 00 00 6a 00 00 00 00 00 00 00 00 00 00 00
+ 748: (b4) w5 = 40
+       b4 05 00 00 28 00 00 00
+ 749: (85) call bpf_skb_event_output#9349392
+       85 00 00 00 10 a9 8e 00
+ 750: (bf) r4 = r8
+       bf 84 00 00 00 00 00 00
+; if (ret == CT_NEW) {
+ 751: (61) r1 = *(u32 *)(r10 -176)
+       61 a1 50 ff 00 00 00 00
+ 752: (56) if w1 != 0x0 goto pc+162
+       56 01 a2 00 00 00 00 00
+ 753: (b4) w2 = 64
+       b4 02 00 00 40 00 00 00
+ 754: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; ct_state_new.proxy_redirect = *proxy_port > 0;
+ 755: (bc) w3 = w4
+       bc 43 00 00 00 00 00 00
+ 756: (54) w3 &= 65535
+       54 03 00 00 ff ff 00 00
+ 757: (79) r9 = *(u64 *)(r10 -184)
+       79 a9 48 ff 00 00 00 00
+; ct_state_new.proxy_redirect = *proxy_port > 0;
+ 758: (56) if w3 != 0x0 goto pc+2
+       56 03 02 00 00 00 00 00
+ 759: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 760: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+ 761: (7b) *(u64 *)(r10 -200) = r4
+       7b 4a 38 ff 00 00 00 00
+; if (tuple->nexthdr == IPPROTO_TCP)
+ 762: (71) r3 = *(u8 *)(r9 +12)
+       71 93 0c 00 00 00 00 00
+; 
+ 763: (18) r4 = map[id:135]
+       18 14 00 00 87 00 00 00 00 00 00 00 00 00 00 00
+ 765: (16) if w3 == 0x6 goto pc+2
+       16 03 02 00 06 00 00 00
+ 766: (18) r4 = map[id:136]
+       18 14 00 00 88 00 00 00 00 00 00 00 00 00 00 00
+ 768: (7b) *(u64 *)(r10 -208) = r4
+       7b 4a 30 ff 00 00 00 00
+ 769: (b7) r3 = 0
+       b7 03 00 00 00 00 00 00
+; struct ct_entry entry = { };
+ 770: (7b) *(u64 *)(r10 -56) = r3
+       7b 3a c8 ff 00 00 00 00
+ 771: (7b) *(u64 *)(r10 -64) = r3
+       7b 3a c0 ff 00 00 00 00
+ 772: (7b) *(u64 *)(r10 -72) = r3
+       7b 3a b8 ff 00 00 00 00
+ 773: (7b) *(u64 *)(r10 -80) = r3
+       7b 3a b0 ff 00 00 00 00
+ 774: (7b) *(u64 *)(r10 -88) = r3
+       7b 3a a8 ff 00 00 00 00
+ 775: (7b) *(u64 *)(r10 -96) = r3
+       7b 3a a0 ff 00 00 00 00
+ 776: (7b) *(u64 *)(r10 -104) = r3
+       7b 3a 98 ff 00 00 00 00
+; bool is_tcp = tuple->nexthdr == IPPROTO_TCP;
+ 777: (71) r8 = *(u8 *)(r9 +12)
+       71 98 0c 00 00 00 00 00
+ 778: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+; entry->nat_port = state->nat_port;
+ 779: (6b) *(u16 *)(r10 -64) = r4
+       6b 4a c0 ff 00 00 00 00
+; entry->src_sec_id = state->src_sec_id;
+ 780: (61) r4 = *(u32 *)(r10 -136)
+       61 a4 78 ff 00 00 00 00
+ 781: (63) *(u32 *)(r10 -60) = r4
+       63 4a c4 ff 00 00 00 00
+; case   8: jmp_8:   __it_mob(d, s, 64);
+ 782: (7b) *(u64 *)(r10 -104) = r3
+       7b 3a 98 ff 00 00 00 00
+ 783: (7b) *(u64 *)(r10 -96) = r3
+       7b 3a a0 ff 00 00 00 00
+; entry->proxy_redirect = state->proxy_redirect;
+ 784: (4c) w1 |= w2
+       4c 21 00 00 00 00 00 00
+; entry->from_l7lb = state->from_l7lb;
+ 785: (6b) *(u16 *)(r10 -68) = r1
+       6b 1a bc ff 00 00 00 00
+ 786: (b4) w9 = 60
+       b4 09 00 00 3c 00 00 00
+; if (CONFIG(enable_jiffies))
+ 787: (18) r1 = map[id:295][0]+6
+       18 21 00 00 27 01 00 00 00 00 00 00 06 00 00 00
+; if (CONFIG(enable_jiffies))
+ 789: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(enable_jiffies))
+ 790: (16) if w1 == 0x0 goto pc+5
+       16 01 05 00 00 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 791: (18) r1 = map[id:295][0]+8
+       18 21 00 00 27 01 00 00 00 00 00 00 08 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 793: (61) r9 = *(u32 *)(r1 +0)
+       61 19 00 00 00 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 794: (24) w9 *= 60
+       24 09 00 00 3c 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 795: (74) w9 >>= 8
+       74 09 00 00 08 00 00 00
+; if (tcp) {
+ 796: (56) if w8 != 0x6 goto pc+20
+       56 08 14 00 06 00 00 00
+; entry->seen_non_syn |= !syn;
+ 797: (69) r2 = *(u16 *)(r10 -68)
+       69 a2 bc ff 00 00 00 00
+; if (CONFIG(enable_jiffies))
+ 798: (18) r1 = map[id:295][0]+6
+       18 21 00 00 27 01 00 00 00 00 00 00 06 00 00 00
+; if (CONFIG(enable_jiffies))
+ 800: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (entry->seen_non_syn) {
+ 801: (54) w2 &= 16
+       54 02 00 00 10 00 00 00
+; if (entry->seen_non_syn) {
+ 802: (16) if w2 == 0x0 goto pc+6
+       16 02 06 00 00 00 00 00
+ 803: (b4) w9 = 8000
+       b4 09 00 00 40 1f 00 00
+; if (CONFIG(enable_jiffies))
+ 804: (16) if w1 == 0x0 goto pc+12
+       16 01 0c 00 00 00 00 00
+ 805: (b4) w1 = 8000
+       b4 01 00 00 40 1f 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 806: (18) r2 = map[id:295][0]+8
+       18 22 00 00 27 01 00 00 00 00 00 00 08 00 00 00
+ 808: (05) goto pc+5
+       05 00 05 00 00 00 00 00
+ 809: (b4) w9 = 60
+       b4 09 00 00 3c 00 00 00
+; if (CONFIG(enable_jiffies))
+ 810: (16) if w1 == 0x0 goto pc+6
+       16 01 06 00 00 00 00 00
+ 811: (b4) w1 = 60
+       b4 01 00 00 3c 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 812: (18) r2 = map[id:295][0]+8
+       18 22 00 00 27 01 00 00 00 00 00 00 08 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 814: (61) r9 = *(u32 *)(r2 +0)
+       61 29 00 00 00 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 815: (2c) w9 *= w1
+       2c 19 00 00 00 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 816: (74) w9 >>= 8
+       74 09 00 00 08 00 00 00
+; if (CONFIG(enable_jiffies))
+ 817: (18) r1 = map[id:295][0]+6
+       18 21 00 00 27 01 00 00 00 00 00 00 06 00 00 00
+; if (CONFIG(enable_jiffies))
+ 819: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; return jiffies64() >> BPF_MONO_SCALER;
+ 820: (18) r0 = 0xffffffff8e009a00
+       18 00 00 00 00 9a 00 8e 00 00 00 00 ff ff ff ff
+ 822: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+; return jiffies64() >> BPF_MONO_SCALER;
+ 823: (77) r0 >>= 8
+       77 00 00 00 08 00 00 00
+; return ktime_get_ns() / NSEC_PER_SEC;
+ 824: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+; bool is_tcp = tuple->nexthdr == IPPROTO_TCP;
+ 825: (16) if w8 == 0x6 goto pc+1
+       16 08 01 00 06 00 00 00
+ 826: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+; WRITE_ONCE(entry->lifetime, now + lifetime);
+ 827: (0c) w9 += w0
+       0c 09 00 00 00 00 00 00
+ 828: (63) *(u32 *)(r10 -72) = r9
+       63 9a b8 ff 00 00 00 00
+ 829: (b4) w3 = 5
+       b4 03 00 00 05 00 00 00
+; seen_flags |= accumulated_flags;
+ 830: (64) w1 <<= 1
+       64 01 00 00 01 00 00 00
+; accumulated_flags = READ_ONCE(entry->rx_flags_seen);
+ 831: (71) r2 = *(u8 *)(r10 -61)
+       71 a2 c3 ff 00 00 00 00
+; last_report = READ_ONCE(entry->last_rx_report);
+ 832: (61) r4 = *(u32 *)(r10 -52)
+       61 a4 cc ff 00 00 00 00
+; if (CONFIG(enable_jiffies))
+ 833: (18) r5 = map[id:295][0]+6
+       18 25 00 00 27 01 00 00 00 00 00 00 06 00 00 00
+; if (CONFIG(enable_jiffies))
+ 835: (71) r5 = *(u8 *)(r5 +0)
+       71 55 00 00 00 00 00 00
+; if (CONFIG(enable_jiffies))
+ 836: (16) if w5 == 0x0 goto pc+5
+       16 05 05 00 00 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 837: (18) r3 = map[id:295][0]+8
+       18 23 00 00 27 01 00 00 00 00 00 00 08 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 839: (61) r3 = *(u32 *)(r3 +0)
+       61 33 00 00 00 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 840: (24) w3 *= 5
+       24 03 00 00 05 00 00 00
+; return (__u32)(s * CONFIG(kernel_hz)) >> BPF_MONO_SCALER;
+ 841: (74) w3 >>= 8
+       74 03 00 00 08 00 00 00
+; 
+ 842: (bc) w5 = w2
+       bc 25 00 00 00 00 00 00
+ 843: (4c) w5 |= w1
+       4c 15 00 00 00 00 00 00
+; if (last_report + bpf_sec_to_mono(CT_REPORT_INTERVAL) < now ||
+ 844: (0c) w3 += w4
+       0c 43 00 00 00 00 00 00
+ 845: (79) r8 = *(u64 *)(r10 -184)
+       79 a8 48 ff 00 00 00 00
+; if (last_report + bpf_sec_to_mono(CT_REPORT_INTERVAL) < now ||
+ 846: (ae) if w3 < w0 goto pc+3
+       ae 03 03 00 00 00 00 00
+ 847: (bc) w1 = w5
+       bc 51 00 00 00 00 00 00
+ 848: (54) w1 &= 255
+       54 01 00 00 ff 00 00 00
+ 849: (1e) if w2 == w1 goto pc+5
+       1e 12 05 00 00 00 00 00
+; WRITE_ONCE(entry->rx_flags_seen, seen_flags);
+ 850: (73) *(u8 *)(r10 -61) = r5
+       73 5a c3 ff 00 00 00 00
+; WRITE_ONCE(entry->last_rx_report, now);
+ 851: (63) *(u32 *)(r10 -52) = r0
+       63 0a cc ff 00 00 00 00
+; return TRACE_PAYLOAD_LEN;
+ 852: (18) r1 = map[id:295][0]+84
+       18 21 00 00 27 01 00 00 00 00 00 00 54 00 00 00
+; return TRACE_PAYLOAD_LEN;
+ 854: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; .daddr = tuple->daddr,
+ 855: (71) r1 = *(u8 *)(r8 +1)
+       71 81 01 00 00 00 00 00
+ 856: (64) w1 <<= 8
+       64 01 00 00 08 00 00 00
+ 857: (71) r2 = *(u8 *)(r8 +0)
+       71 82 00 00 00 00 00 00
+ 858: (4c) w1 |= w2
+       4c 21 00 00 00 00 00 00
+ 859: (71) r2 = *(u8 *)(r8 +2)
+       71 82 02 00 00 00 00 00
+ 860: (64) w2 <<= 16
+       64 02 00 00 10 00 00 00
+ 861: (71) r3 = *(u8 *)(r8 +3)
+       71 83 03 00 00 00 00 00
+ 862: (64) w3 <<= 24
+       64 03 00 00 18 00 00 00
+ 863: (4c) w3 |= w2
+       4c 23 00 00 00 00 00 00
+ 864: (4c) w3 |= w1
+       4c 13 00 00 00 00 00 00
+; struct ipv4_ct_tuple icmp_tuple = {
+ 865: (63) *(u32 *)(r10 -32) = r3
+       63 3a e0 ff 00 00 00 00
+; .saddr = tuple->saddr,
+ 866: (71) r1 = *(u8 *)(r8 +7)
+       71 81 07 00 00 00 00 00
+ 867: (71) r2 = *(u8 *)(r8 +6)
+       71 82 06 00 00 00 00 00
+ 868: (71) r3 = *(u8 *)(r8 +4)
+       71 83 04 00 00 00 00 00
+ 869: (71) r4 = *(u8 *)(r8 +5)
+       71 84 05 00 00 00 00 00
+ 870: (b4) w5 = 1
+       b4 05 00 00 01 00 00 00
+; struct ipv4_ct_tuple icmp_tuple = {
+ 871: (73) *(u8 *)(r10 -20) = r5
+       73 5a ec ff 00 00 00 00
+; .saddr = tuple->saddr,
+ 872: (64) w4 <<= 8
+       64 04 00 00 08 00 00 00
+ 873: (4c) w4 |= w3
+       4c 34 00 00 00 00 00 00
+ 874: (64) w2 <<= 16
+       64 02 00 00 10 00 00 00
+ 875: (64) w1 <<= 24
+       64 01 00 00 18 00 00 00
+ 876: (4c) w1 |= w2
+       4c 21 00 00 00 00 00 00
+ 877: (4c) w1 |= w4
+       4c 41 00 00 00 00 00 00
+; struct ipv4_ct_tuple icmp_tuple = {
+ 878: (63) *(u32 *)(r10 -28) = r1
+       63 1a e4 ff 00 00 00 00
+ 879: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+ 880: (63) *(u32 *)(r10 -24) = r1
+       63 1a e8 ff 00 00 00 00
+; .flags = tuple->flags | TUPLE_F_RELATED,
+ 881: (71) r1 = *(u8 *)(r8 +13)
+       71 81 0d 00 00 00 00 00
+; .flags = tuple->flags | TUPLE_F_RELATED,
+ 882: (44) w1 |= 2
+       44 01 00 00 02 00 00 00
+; struct ipv4_ct_tuple icmp_tuple = {
+ 883: (73) *(u8 *)(r10 -19) = r1
+       73 1a ed ff 00 00 00 00
+ 884: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; .daddr = tuple->daddr,
+ 885: (07) r2 += -32
+       07 02 00 00 e0 ff ff ff
+ 886: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+ 887: (07) r3 += -104
+       07 03 00 00 98 ff ff ff
+; err = map_update_elem(map_related, &icmp_tuple, &entry, 0);
+ 888: (18) r1 = map[id:136]
+       18 11 00 00 88 00 00 00 00 00 00 00 00 00 00 00
+ 890: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 891: (85) call htab_lru_map_update_elem#324880
+       85 00 00 00 10 f5 04 00
+ 892: (c6) if w0 s< 0x0 goto pc+17
+       c6 00 11 00 00 00 00 00
+; if (CONFIG(enable_conntrack_accounting)) {
+ 893: (18) r1 = map[id:295][0]+108
+       18 21 00 00 27 01 00 00 00 00 00 00 6c 00 00 00
+; if (CONFIG(enable_conntrack_accounting)) {
+ 895: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(enable_conntrack_accounting)) {
+ 896: (16) if w1 == 0x0 goto pc+4
+       16 01 04 00 00 00 00 00
+ 897: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; entry.packets = 1;
+ 898: (7b) *(u64 *)(r10 -88) = r1
+       7b 1a a8 ff 00 00 00 00
+; return ctx->len;
+ 899: (61) r1 = *(u32 *)(r6 +112)
+       61 61 70 00 00 00 00 00
+; entry.bytes = ctx_full_len(ctx);
+ 900: (7b) *(u64 *)(r10 -80) = r1
+       7b 1a b0 ff 00 00 00 00
+ 901: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+; err = map_update_elem(map_main, tuple, &entry, 0);
+ 902: (07) r3 += -104
+       07 03 00 00 98 ff ff ff
+ 903: (b4) w8 = 0
+       b4 08 00 00 00 00 00 00
+ 904: (79) r1 = *(u64 *)(r10 -208)
+       79 a1 30 ff 00 00 00 00
+ 905: (79) r2 = *(u64 *)(r10 -184)
+       79 a2 48 ff 00 00 00 00
+ 906: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 907: (85) call bpf_map_update_elem#258592
+       85 00 00 00 20 f2 03 00
+ 908: (b4) w9 = 0
+       b4 09 00 00 00 00 00 00
+; if (unlikely(err < 0))
+ 909: (66) if w0 s> 0xffffffff goto pc+3
+       66 00 03 00 ff ff ff ff
+ 910: (b4) w9 = -155
+       b4 09 00 00 65 ff ff ff
+ 911: (bc) w7 = w0
+       bc 07 00 00 00 00 00 00
+ 912: (b4) w8 = 1
+       b4 08 00 00 01 00 00 00
+ 913: (79) r4 = *(u64 *)(r10 -200)
+       79 a4 38 ff 00 00 00 00
+; if (IS_ERR(ret))
+ 914: (56) if w8 != 0x0 goto pc-323
+       56 08 bd fe 00 00 00 00
+; if (*proxy_port > 0)
+ 915: (bc) w1 = w4
+       bc 41 00 00 00 00 00 00
+ 916: (54) w1 &= 65535
+       54 01 00 00 ff ff 00 00
+; if (*proxy_port > 0)
+ 917: (56) if w1 != 0x0 goto pc+44
+       56 01 2c 00 00 00 00 00
+ 918: (b7) r8 = 0
+       b7 08 00 00 00 00 00 00
+; send_trace_notify4(ctx, TRACE_TO_LXC, src_label, SECLABEL_IPV4, orig_sip,
+ 919: (18) r1 = map[id:295][0]+152
+       18 21 00 00 27 01 00 00 00 00 00 00 98 00 00 00
+; send_trace_notify4(ctx, TRACE_TO_LXC, src_label, SECLABEL_IPV4, orig_sip,
+ 921: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; send_trace_notify4(ctx, TRACE_TO_LXC, src_label, SECLABEL_IPV4, orig_sip,
+ 922: (63) *(u32 *)(r10 -184) = r1
+       63 1a 48 ff 00 00 00 00
+ 923: (18) r1 = map[id:295][0]+160
+       18 21 00 00 27 01 00 00 00 00 00 00 a0 00 00 00
+; send_trace_notify4(ctx, TRACE_TO_LXC, src_label, SECLABEL_IPV4, orig_sip,
+ 925: (69) r1 = *(u16 *)(r1 +0)
+       69 11 00 00 00 00 00 00
+; if (CONFIG(tracing_ip_option_type) == 0)
+ 926: (63) *(u32 *)(r10 -168) = r1
+       63 1a 58 ff 00 00 00 00
+ 927: (18) r1 = map[id:295][0]+99
+       18 21 00 00 27 01 00 00 00 00 00 00 63 00 00 00
+; if (CONFIG(tracing_ip_option_type) == 0)
+ 929: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+ 930: (b7) r2 = 0
+       b7 02 00 00 00 00 00 00
+; return *value;
+ 931: (7b) *(u64 *)(r10 -200) = r2
+       7b 2a 38 ff 00 00 00 00
+; return ctx->len;
+ 932: (61) r9 = *(u32 *)(r6 +112)
+       61 69 70 00 00 00 00 00
+ 933: (b7) r1 = 2
+       b7 01 00 00 02 00 00 00
+; struct ratelimit_key rkey = {
+ 934: (7b) *(u64 *)(r10 -48) = r1
+       7b 1a d0 ff 00 00 00 00
+; struct trace_notify msg = {};
+ 935: (7b) *(u64 *)(r10 -56) = r8
+       7b 8a c8 ff 00 00 00 00
+ 936: (7b) *(u64 *)(r10 -64) = r8
+       7b 8a c0 ff 00 00 00 00
+ 937: (7b) *(u64 *)(r10 -72) = r8
+       7b 8a b8 ff 00 00 00 00
+ 938: (7b) *(u64 *)(r10 -80) = r8
+       7b 8a b0 ff 00 00 00 00
+ 939: (7b) *(u64 *)(r10 -88) = r8
+       7b 8a a8 ff 00 00 00 00
+ 940: (7b) *(u64 *)(r10 -96) = r8
+       7b 8a a0 ff 00 00 00 00
+ 941: (7b) *(u64 *)(r10 -104) = r8
+       7b 8a 98 ff 00 00 00 00
+ 942: (18) r1 = 0x2090b0100
+       18 01 00 00 00 01 0b 09 00 00 00 00 02 00 00 00
+; struct metrics_key key = {};
+ 944: (7b) *(u64 *)(r10 -16) = r1
+       7b 1a f0 ff 00 00 00 00
+ 945: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 946: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+; entry = map_lookup_elem(&cilium_metrics, &key);
+ 947: (18) r1 = map[id:108]
+       18 11 00 00 6c 00 00 00 00 00 00 00 00 00 00 00
+ 949: (85) call __htab_map_lookup_elem#315840
+       85 00 00 00 c0 d1 04 00
+ 950: (15) if r0 == 0x0 goto pc+3
+       15 00 03 00 00 00 00 00
+ 951: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+ 952: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+ 953: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+; if (entry) {
+ 954: (15) if r0 == 0x0 goto pc+31
+       15 00 1f 00 00 00 00 00
+; entry->count += 1;
+ 955: (79) r1 = *(u64 *)(r0 +0)
+       79 01 00 00 00 00 00 00
+ 956: (07) r1 += 1
+       07 01 00 00 01 00 00 00
+ 957: (7b) *(u64 *)(r0 +0) = r1
+       7b 10 00 00 00 00 00 00
+; entry->bytes += bytes;
+ 958: (79) r1 = *(u64 *)(r0 +8)
+       79 01 08 00 00 00 00 00
+ 959: (0f) r1 += r9
+       0f 91 00 00 00 00 00 00
+ 960: (7b) *(u64 *)(r0 +8) = r1
+       7b 10 08 00 00 00 00 00
+ 961: (05) goto pc+35
+       05 00 23 00 00 00 00 00
+ 962: (b7) r8 = 0
+       b7 08 00 00 00 00 00 00
+; send_trace_notify4(ctx, TRACE_TO_PROXY, src_label, SECLABEL_IPV4, orig_sip,
+ 963: (18) r1 = map[id:295][0]+152
+       18 21 00 00 27 01 00 00 00 00 00 00 98 00 00 00
+; send_trace_notify4(ctx, TRACE_TO_PROXY, src_label, SECLABEL_IPV4, orig_sip,
+ 965: (61) r9 = *(u32 *)(r1 +0)
+       61 19 00 00 00 00 00 00
+; if (CONFIG(tracing_ip_option_type) == 0)
+ 966: (18) r1 = map[id:295][0]+99
+       18 21 00 00 27 01 00 00 00 00 00 00 63 00 00 00
+; if (CONFIG(tracing_ip_option_type) == 0)
+ 968: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+ 969: (b7) r5 = 0
+       b7 05 00 00 00 00 00 00
+ 970: (7b) *(u64 *)(r10 -200) = r4
+       7b 4a 38 ff 00 00 00 00
+; return ctx->len;
+ 971: (61) r0 = *(u32 *)(r6 +112)
+       61 60 70 00 00 00 00 00
+ 972: (b7) r1 = 2
+       b7 01 00 00 02 00 00 00
+; struct ratelimit_key rkey = {
+ 973: (7b) *(u64 *)(r10 -48) = r1
+       7b 1a d0 ff 00 00 00 00
+; struct trace_notify msg = {};
+ 974: (7b) *(u64 *)(r10 -56) = r8
+       7b 8a c8 ff 00 00 00 00
+ 975: (7b) *(u64 *)(r10 -64) = r8
+       7b 8a c0 ff 00 00 00 00
+ 976: (7b) *(u64 *)(r10 -72) = r8
+       7b 8a b8 ff 00 00 00 00
+ 977: (7b) *(u64 *)(r10 -80) = r8
+       7b 8a b0 ff 00 00 00 00
+ 978: (7b) *(u64 *)(r10 -88) = r8
+       7b 8a a8 ff 00 00 00 00
+ 979: (7b) *(u64 *)(r10 -96) = r8
+       7b 8a a0 ff 00 00 00 00
+ 980: (7b) *(u64 *)(r10 -104) = r8
+       7b 8a 98 ff 00 00 00 00
+; if (CONFIG(events_map_rate_limit) > 0) {
+ 981: (18) r1 = map[id:295][0]+132
+       18 21 00 00 27 01 00 00 00 00 00 00 84 00 00 00
+; if (CONFIG(events_map_rate_limit) > 0) {
+ 983: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+ 984: (79) r8 = *(u64 *)(r10 -192)
+       79 a8 40 ff 00 00 00 00
+; if (CONFIG(events_map_rate_limit) > 0) {
+ 985: (05) goto pc+76
+       05 00 4c 00 00 00 00 00
+; new_entry.bytes = bytes;
+ 986: (7b) *(u64 *)(r10 -24) = r9
+       7b 9a e8 ff 00 00 00 00
+ 987: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; new_entry.count = 1;
+ 988: (7b) *(u64 *)(r10 -32) = r1
+       7b 1a e0 ff 00 00 00 00
+ 989: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 990: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+ 991: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+ 992: (07) r3 += -32
+       07 03 00 00 e0 ff ff ff
+; map_update_elem(&cilium_metrics, &key, &new_entry, 0);
+ 993: (18) r1 = map[id:108]
+       18 11 00 00 6c 00 00 00 00 00 00 00 00 00 00 00
+ 995: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+ 996: (85) call htab_percpu_map_update_elem#326288
+       85 00 00 00 90 fa 04 00
+ 997: (79) r3 = *(u64 *)(r10 -192)
+       79 a3 40 ff 00 00 00 00
+; if (CONFIG(events_map_rate_limit) > 0) {
+ 998: (18) r1 = map[id:295][0]+132
+       18 21 00 00 27 01 00 00 00 00 00 00 84 00 00 00
+; if (CONFIG(events_map_rate_limit) > 0) {
+1000: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+1001: (61) r5 = *(u32 *)(r10 -168)
+       61 a5 58 ff 00 00 00 00
+; __u32 cap_len_default = CONFIG(trace_payload_len);
+1002: (18) r1 = map[id:295][0]+84
+       18 21 00 00 27 01 00 00 00 00 00 00 54 00 00 00
+; __u32 cap_len_default = CONFIG(trace_payload_len);
+1004: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1005: (16) if w3 == 0x0 goto pc+4
+       16 03 04 00 00 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1006: (18) r2 = map[id:295][0]+84
+       18 22 00 00 27 01 00 00 00 00 00 00 54 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1008: (61) r2 = *(u32 *)(r2 +0)
+       61 22 00 00 00 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1009: (5e) if w2 != w3 goto pc+1
+       5e 32 01 00 00 00 00 00
+1010: (bc) w3 = w1
+       bc 13 00 00 00 00 00 00
+; return ctx->len;
+1011: (61) r1 = *(u32 *)(r6 +112)
+       61 61 70 00 00 00 00 00
+; __notify_common_hdr(CILIUM_NOTIFY_TRACE, obs_point),
+1012: (18) r2 = map[id:295][0]+160
+       18 22 00 00 27 01 00 00 00 00 00 00 a0 00 00 00
+; __notify_common_hdr(CILIUM_NOTIFY_TRACE, obs_point),
+1014: (69) r2 = *(u16 *)(r2 +0)
+       69 22 00 00 00 00 00 00
+1015: (61) r4 = *(u32 *)(r6 +152)
+       61 64 98 00 00 00 00 00
+; msg = (typeof(msg)) {
+1016: (6b) *(u16 *)(r10 -102) = r2
+       6b 2a 9a ff 00 00 00 00
+1017: (63) *(u32 *)(r10 -100) = r4
+       63 4a 9c ff 00 00 00 00
+1018: (63) *(u32 *)(r10 -96) = r9
+       63 9a a0 ff 00 00 00 00
+1019: (61) r2 = *(u32 *)(r10 -136)
+       61 a2 78 ff 00 00 00 00
+1020: (63) *(u32 *)(r10 -88) = r2
+       63 2a a8 ff 00 00 00 00
+1021: (61) r2 = *(u32 *)(r10 -184)
+       61 a2 48 ff 00 00 00 00
+1022: (63) *(u32 *)(r10 -84) = r2
+       63 2a ac ff 00 00 00 00
+1023: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+1024: (73) *(u8 *)(r10 -77) = r2
+       73 2a b3 ff 00 00 00 00
+1025: (61) r2 = *(u32 *)(r10 -144)
+       61 a2 70 ff 00 00 00 00
+1026: (63) *(u32 *)(r10 -76) = r2
+       63 2a b4 ff 00 00 00 00
+1027: (61) r2 = *(u32 *)(r10 -152)
+       61 a2 68 ff 00 00 00 00
+1028: (63) *(u32 *)(r10 -72) = r2
+       63 2a b8 ff 00 00 00 00
+1029: (79) r2 = *(u64 *)(r10 -200)
+       79 a2 38 ff 00 00 00 00
+1030: (7b) *(u64 *)(r10 -56) = r2
+       7b 2a c8 ff 00 00 00 00
+1031: (b4) w2 = 4
+       b4 02 00 00 04 00 00 00
+1032: (6b) *(u16 *)(r10 -104) = r2
+       6b 2a 98 ff 00 00 00 00
+1033: (b4) w2 = 2
+       b4 02 00 00 02 00 00 00
+1034: (6b) *(u16 *)(r10 -90) = r2
+       6b 2a a6 ff 00 00 00 00
+1035: (61) r2 = *(u32 *)(r10 -176)
+       61 a2 50 ff 00 00 00 00
+1036: (73) *(u8 *)(r10 -78) = r2
+       73 2a b2 ff 00 00 00 00
+1037: (6b) *(u16 *)(r10 -80) = r5
+       6b 5a b0 ff 00 00 00 00
+; return min_t(__u64, monitor, ctx_full_len(ctx));
+1038: (ae) if w3 < w1 goto pc+1
+       ae 13 01 00 00 00 00 00
+1039: (bc) w3 = w1
+       bc 13 00 00 00 00 00 00
+; msg = (typeof(msg)) {
+1040: (6b) *(u16 *)(r10 -92) = r3
+       6b 3a a4 ff 00 00 00 00
+; (cap_len << 32) | BPF_F_CURRENT_CPU,
+1041: (67) r3 <<= 32
+       67 03 00 00 20 00 00 00
+1042: (18) r1 = 0xffffffff
+       18 01 00 00 ff ff ff ff 00 00 00 00 00 00 00 00
+; (cap_len << 32) | BPF_F_CURRENT_CPU,
+1044: (4f) r3 |= r1
+       4f 13 00 00 00 00 00 00
+1045: (bf) r4 = r10
+       bf a4 00 00 00 00 00 00
+; 
+1046: (07) r4 += -104
+       07 04 00 00 98 ff ff ff
+; ctx_event_output(ctx, &cilium_events,
+1047: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+1048: (18) r2 = map[id:106]
+       18 12 00 00 6a 00 00 00 00 00 00 00 00 00 00 00
+1050: (b4) w5 = 56
+       b4 05 00 00 38 00 00 00
+1051: (85) call bpf_skb_event_output#9349392
+       85 00 00 00 10 a9 8e 00
+1052: (b4) w9 = 0
+       b4 09 00 00 00 00 00 00
+; if (do_redirect)
+1053: (61) r1 = *(u32 *)(r10 -160)
+       61 a1 60 ff 00 00 00 00
+1054: (16) if w1 == 0x0 goto pc+118
+       16 01 76 00 00 00 00 00
+; ret = redirect_ep(ctx, CONFIG(interface_ifindex),
+1055: (18) r1 = map[id:295][0]+12
+       18 21 00 00 27 01 00 00 00 00 00 00 0c 00 00 00
+; ret = redirect_ep(ctx, CONFIG(interface_ifindex),
+1057: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; return redirect(ifindex, flags);
+1058: (b4) w2 = 0
+       b4 02 00 00 00 00 00 00
+1059: (85) call bpf_redirect#9396208
+       85 00 00 00 f0 5f 8f 00
+1060: (bc) w9 = w0
+       bc 09 00 00 00 00 00 00
+1061: (05) goto pc+111
+       05 00 6f 00 00 00 00 00
+; send_trace_notify4(ctx, TRACE_TO_PROXY, src_label, SECLABEL_IPV4, orig_sip,
+1062: (bf) r1 = r4
+       bf 41 00 00 00 00 00 00
+1063: (dc) r1 = be16 r1
+       dc 01 00 00 10 00 00 00
+; __u32 cap_len_default = CONFIG(trace_payload_len);
+1064: (18) r2 = map[id:295][0]+84
+       18 22 00 00 27 01 00 00 00 00 00 00 54 00 00 00
+; __u32 cap_len_default = CONFIG(trace_payload_len);
+1066: (61) r2 = *(u32 *)(r2 +0)
+       61 22 00 00 00 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1067: (16) if w8 == 0x0 goto pc+4
+       16 08 04 00 00 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1068: (18) r3 = map[id:295][0]+84
+       18 23 00 00 27 01 00 00 00 00 00 00 54 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1070: (61) r3 = *(u32 *)(r3 +0)
+       61 33 00 00 00 00 00 00
+; if (monitor == 0 || monitor == CONFIG(trace_payload_len))
+1071: (5e) if w3 != w8 goto pc+1
+       5e 83 01 00 00 00 00 00
+1072: (bc) w8 = w2
+       bc 28 00 00 00 00 00 00
+; return ctx->len;
+1073: (61) r2 = *(u32 *)(r6 +112)
+       61 62 70 00 00 00 00 00
+; __notify_common_hdr(CILIUM_NOTIFY_TRACE, obs_point),
+1074: (18) r3 = map[id:295][0]+160
+       18 23 00 00 27 01 00 00 00 00 00 00 a0 00 00 00
+; __notify_common_hdr(CILIUM_NOTIFY_TRACE, obs_point),
+1076: (69) r3 = *(u16 *)(r3 +0)
+       69 33 00 00 00 00 00 00
+1077: (61) r4 = *(u32 *)(r6 +152)
+       61 64 98 00 00 00 00 00
+; msg = (typeof(msg)) {
+1078: (6b) *(u16 *)(r10 -102) = r3
+       6b 3a 9a ff 00 00 00 00
+1079: (63) *(u32 *)(r10 -100) = r4
+       63 4a 9c ff 00 00 00 00
+1080: (63) *(u32 *)(r10 -96) = r0
+       63 0a a0 ff 00 00 00 00
+1081: (61) r3 = *(u32 *)(r10 -136)
+       61 a3 78 ff 00 00 00 00
+1082: (63) *(u32 *)(r10 -88) = r3
+       63 3a a8 ff 00 00 00 00
+1083: (63) *(u32 *)(r10 -84) = r9
+       63 9a ac ff 00 00 00 00
+1084: (b4) w3 = 0
+       b4 03 00 00 00 00 00 00
+1085: (73) *(u8 *)(r10 -77) = r3
+       73 3a b3 ff 00 00 00 00
+1086: (61) r3 = *(u32 *)(r10 -144)
+       61 a3 70 ff 00 00 00 00
+1087: (63) *(u32 *)(r10 -76) = r3
+       63 3a b4 ff 00 00 00 00
+1088: (61) r3 = *(u32 *)(r10 -152)
+       61 a3 68 ff 00 00 00 00
+1089: (63) *(u32 *)(r10 -72) = r3
+       63 3a b8 ff 00 00 00 00
+1090: (7b) *(u64 *)(r10 -56) = r5
+       7b 5a c8 ff 00 00 00 00
+1091: (b4) w3 = 260
+       b4 03 00 00 04 01 00 00
+1092: (6b) *(u16 *)(r10 -104) = r3
+       6b 3a 98 ff 00 00 00 00
+1093: (b4) w3 = 2
+       b4 03 00 00 02 00 00 00
+1094: (6b) *(u16 *)(r10 -90) = r3
+       6b 3a a6 ff 00 00 00 00
+1095: (61) r3 = *(u32 *)(r10 -176)
+       61 a3 50 ff 00 00 00 00
+1096: (73) *(u8 *)(r10 -78) = r3
+       73 3a b2 ff 00 00 00 00
+1097: (6b) *(u16 *)(r10 -80) = r1
+       6b 1a b0 ff 00 00 00 00
+1098: (79) r9 = *(u64 *)(r10 -184)
+       79 a9 48 ff 00 00 00 00
+; return min_t(__u64, monitor, ctx_full_len(ctx));
+1099: (ae) if w8 < w2 goto pc+1
+       ae 28 01 00 00 00 00 00
+1100: (bc) w8 = w2
+       bc 28 00 00 00 00 00 00
+; msg = (typeof(msg)) {
+1101: (6b) *(u16 *)(r10 -92) = r8
+       6b 8a a4 ff 00 00 00 00
+; (cap_len << 32) | BPF_F_CURRENT_CPU,
+1102: (67) r8 <<= 32
+       67 08 00 00 20 00 00 00
+1103: (18) r1 = 0xffffffff
+       18 01 00 00 ff ff ff ff 00 00 00 00 00 00 00 00
+; (cap_len << 32) | BPF_F_CURRENT_CPU,
+1105: (4f) r8 |= r1
+       4f 18 00 00 00 00 00 00
+1106: (bf) r4 = r10
+       bf a4 00 00 00 00 00 00
+; 
+1107: (07) r4 += -104
+       07 04 00 00 98 ff ff ff
+; ctx_event_output(ctx, &cilium_events,
+1108: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+1109: (18) r2 = map[id:106]
+       18 12 00 00 6a 00 00 00 00 00 00 00 00 00 00 00
+1111: (bf) r3 = r8
+       bf 83 00 00 00 00 00 00
+1112: (b4) w5 = 56
+       b4 05 00 00 38 00 00 00
+1113: (85) call bpf_skb_event_output#9349392
+       85 00 00 00 10 a9 8e 00
+; *tuple_out = *tuple;
+1114: (71) r1 = *(u8 *)(r9 +9)
+       71 91 09 00 00 00 00 00
+1115: (64) w1 <<= 8
+       64 01 00 00 08 00 00 00
+1116: (71) r2 = *(u8 *)(r9 +8)
+       71 92 08 00 00 00 00 00
+1117: (4c) w1 |= w2
+       4c 21 00 00 00 00 00 00
+1118: (71) r3 = *(u8 *)(r9 +10)
+       71 93 0a 00 00 00 00 00
+1119: (64) w3 <<= 16
+       64 03 00 00 10 00 00 00
+1120: (71) r2 = *(u8 *)(r9 +11)
+       71 92 0b 00 00 00 00 00
+1121: (64) w2 <<= 24
+       64 02 00 00 18 00 00 00
+1122: (4c) w2 |= w3
+       4c 32 00 00 00 00 00 00
+1123: (4c) w2 |= w1
+       4c 12 00 00 00 00 00 00
+1124: (71) r1 = *(u8 *)(r9 +0)
+       71 91 00 00 00 00 00 00
+1125: (71) r3 = *(u8 *)(r9 +1)
+       71 93 01 00 00 00 00 00
+1126: (67) r3 <<= 8
+       67 03 00 00 08 00 00 00
+1127: (4f) r3 |= r1
+       4f 13 00 00 00 00 00 00
+1128: (71) r4 = *(u8 *)(r9 +2)
+       71 94 02 00 00 00 00 00
+1129: (67) r4 <<= 16
+       67 04 00 00 10 00 00 00
+1130: (71) r1 = *(u8 *)(r9 +3)
+       71 91 03 00 00 00 00 00
+1131: (67) r1 <<= 24
+       67 01 00 00 18 00 00 00
+1132: (4f) r1 |= r4
+       4f 41 00 00 00 00 00 00
+1133: (71) r4 = *(u8 *)(r9 +13)
+       71 94 0d 00 00 00 00 00
+1134: (64) w4 <<= 8
+       64 04 00 00 08 00 00 00
+1135: (71) r5 = *(u8 *)(r9 +12)
+       71 95 0c 00 00 00 00 00
+1136: (4c) w4 |= w5
+       4c 54 00 00 00 00 00 00
+1137: (6b) *(u16 *)(r10 -116) = r4
+       6b 4a 8c ff 00 00 00 00
+1138: (63) *(u32 *)(r10 -120) = r2
+       63 2a 88 ff 00 00 00 00
+1139: (4f) r1 |= r3
+       4f 31 00 00 00 00 00 00
+1140: (71) r2 = *(u8 *)(r9 +5)
+       71 92 05 00 00 00 00 00
+1141: (64) w2 <<= 8
+       64 02 00 00 08 00 00 00
+1142: (71) r3 = *(u8 *)(r9 +4)
+       71 93 04 00 00 00 00 00
+1143: (4c) w2 |= w3
+       4c 32 00 00 00 00 00 00
+1144: (71) r3 = *(u8 *)(r9 +6)
+       71 93 06 00 00 00 00 00
+1145: (64) w3 <<= 16
+       64 03 00 00 10 00 00 00
+1146: (71) r4 = *(u8 *)(r9 +7)
+       71 94 07 00 00 00 00 00
+1147: (64) w4 <<= 24
+       64 04 00 00 18 00 00 00
+1148: (4c) w4 |= w3
+       4c 34 00 00 00 00 00 00
+1149: (4c) w4 |= w2
+       4c 24 00 00 00 00 00 00
+1150: (67) r4 <<= 32
+       67 04 00 00 20 00 00 00
+1151: (4f) r4 |= r1
+       4f 14 00 00 00 00 00 00
+1152: (7b) *(u64 *)(r10 -128) = r4
+       7b 4a 80 ff 00 00 00 00
+; if (CONFIG(enable_tproxy) && !from_host)
+1153: (18) r1 = map[id:295][0]+128
+       18 21 00 00 27 01 00 00 00 00 00 00 80 00 00 00
+; if (CONFIG(enable_tproxy) && !from_host)
+1155: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+1156: (61) r2 = *(u32 *)(r10 -168)
+       61 a2 58 ff 00 00 00 00
+; if (CONFIG(enable_tproxy) && !from_host)
+1157: (56) if w2 != 0x0 goto pc+0
+       56 02 00 00 00 00 00 00
+; ctx->mark |= MARK_MAGIC_TO_PROXY;
+1158: (79) r3 = *(u64 *)(r10 -200)
+       79 a3 38 ff 00 00 00 00
+; ctx->mark = MARK_MAGIC_TO_PROXY | proxy_port << 16;
+1159: (bc) w1 = w3
+       bc 31 00 00 00 00 00 00
+1160: (64) w1 <<= 16
+       64 01 00 00 10 00 00 00
+; ctx->mark = MARK_MAGIC_TO_PROXY | proxy_port << 16;
+1161: (44) w1 |= 512
+       44 01 00 00 00 02 00 00
+; ctx->mark = MARK_MAGIC_TO_PROXY | proxy_port << 16;
+1162: (63) *(u32 *)(r6 +168) = r1
+       63 16 a8 00 00 00 00 00
+1163: (b4) w9 = 0
+       b4 09 00 00 00 00 00 00
+; if (CONFIG(enable_tproxy) && proxy_port && !from_host) {
+1164: (18) r1 = map[id:295][0]+128
+       18 21 00 00 27 01 00 00 00 00 00 00 80 00 00 00
+; if (CONFIG(enable_tproxy) && proxy_port && !from_host) {
+1166: (71) r1 = *(u8 *)(r1 +0)
+       71 11 00 00 00 00 00 00
+; if (CONFIG(enable_tproxy) && proxy_port && !from_host) {
+1167: (56) if w2 != 0x0 goto pc+3
+       56 02 03 00 00 00 00 00
+1168: (bc) w2 = w3
+       bc 32 00 00 00 00 00 00
+1169: (54) w2 &= 65535
+       54 02 00 00 ff ff 00 00
+1170: (16) if w2 == 0x0 goto pc+0
+       16 02 00 00 00 00 00 00
+; ctx_store_meta(ctx, CB_PROXY_MAGIC, ctx->mark);
+1171: (61) r1 = *(u32 *)(r6 +168)
+       61 61 a8 00 00 00 00 00
+; ctx->cb[off] = data;
+1172: (63) *(u32 *)(r6 +48) = r1
+       63 16 30 00 00 00 00 00
+; if (IS_ERR(ret))
+1173: (c6) if w9 s< 0x0 goto pc+1
+       c6 09 01 00 00 00 00 00
+1174: (56) if w9 != 0x2 goto pc+61
+       56 09 3d 00 02 00 00 00
+; return send_drop_notify_ext(ctx, src_label, SECLABEL_IPV4, LXC_ID,
+1175: (18) r1 = map[id:295][0]+152
+       18 21 00 00 27 01 00 00 00 00 00 00 98 00 00 00
+; return send_drop_notify_ext(ctx, src_label, SECLABEL_IPV4, LXC_ID,
+1177: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; return send_drop_notify_ext(ctx, src_label, SECLABEL_IPV4, LXC_ID,
+1178: (18) r2 = map[id:295][0]+160
+       18 22 00 00 27 01 00 00 00 00 00 00 a0 00 00 00
+; return send_drop_notify_ext(ctx, src_label, SECLABEL_IPV4, LXC_ID,
+1180: (69) r2 = *(u16 *)(r2 +0)
+       69 22 00 00 00 00 00 00
+; ctx->cb[off] = data;
+1181: (63) *(u32 *)(r6 +60) = r2
+       63 26 3c 00 00 00 00 00
+1182: (b4) w2 = 157090306
+       b4 02 00 00 02 02 5d 09
+; ctx->cb[off] = data;
+1183: (63) *(u32 *)(r6 +64) = r2
+       63 26 40 00 00 00 00 00
+; ctx->cb[off] = data;
+1184: (63) *(u32 *)(r6 +52) = r1
+       63 16 34 00 00 00 00 00
+; ctx->cb[off] = data;
+1185: (61) r1 = *(u32 *)(r10 -136)
+       61 a1 78 ff 00 00 00 00
+1186: (63) *(u32 *)(r6 +48) = r1
+       63 16 30 00 00 00 00 00
+; return send_drop_notify_ext(ctx, src_label, SECLABEL_IPV4, LXC_ID,
+1187: (bc) w1 = w9
+       bc 91 00 00 00 00 00 00
+1188: (c4) w1 s>>= 31
+       c4 01 00 00 1f 00 00 00
+1189: (ac) w9 ^= w1
+       ac 19 00 00 00 00 00 00
+1190: (1c) w9 -= w1
+       1c 19 00 00 00 00 00 00
+; return send_drop_notify_ext(ctx, src_label, SECLABEL_IPV4, LXC_ID,
+1191: (54) w7 &= 255
+       54 07 00 00 ff 00 00 00
+1192: (64) w7 <<= 8
+       64 07 00 00 08 00 00 00
+1193: (bc) w1 = w9
+       bc 91 00 00 00 00 00 00
+1194: (54) w1 &= 255
+       54 01 00 00 ff 00 00 00
+1195: (4c) w1 |= w7
+       4c 71 00 00 00 00 00 00
+; ctx->cb[off] = data;
+1196: (63) *(u32 *)(r6 +56) = r1
+       63 16 38 00 00 00 00 00
+; return ctx->len;
+1197: (61) r7 = *(u32 *)(r6 +112)
+       61 67 70 00 00 00 00 00
+1198: (18) r1 = 0x2095d0100
+       18 01 00 00 00 01 5d 09 00 00 00 00 02 00 00 00
+; struct metrics_key key = {};
+1200: (7b) *(u64 *)(r10 -32) = r1
+       7b 1a e0 ff 00 00 00 00
+; key.reason = reason;
+1201: (73) *(u8 *)(r10 -32) = r9
+       73 9a e0 ff 00 00 00 00
+1202: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+1203: (07) r2 += -32
+       07 02 00 00 e0 ff ff ff
+; entry = map_lookup_elem(&cilium_metrics, &key);
+1204: (18) r1 = map[id:108]
+       18 11 00 00 6c 00 00 00 00 00 00 00 00 00 00 00
+1206: (85) call __htab_map_lookup_elem#315840
+       85 00 00 00 c0 d1 04 00
+1207: (15) if r0 == 0x0 goto pc+3
+       15 00 03 00 00 00 00 00
+1208: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+1209: (79) r0 = *(u64 *)(r0 +0)
+       79 00 00 00 00 00 00 00
+1210: (bf) r0 = &(void __percpu *)(r0)
+       bf 00 ff ff 00 00 00 00
+; if (entry) {
+1211: (15) if r0 == 0x0 goto pc+7
+       15 00 07 00 00 00 00 00
+; entry->count += 1;
+1212: (79) r1 = *(u64 *)(r0 +0)
+       79 01 00 00 00 00 00 00
+1213: (07) r1 += 1
+       07 01 00 00 01 00 00 00
+1214: (7b) *(u64 *)(r0 +0) = r1
+       7b 10 00 00 00 00 00 00
+; entry->bytes += bytes;
+1215: (79) r1 = *(u64 *)(r0 +8)
+       79 01 08 00 00 00 00 00
+1216: (0f) r1 += r7
+       0f 71 00 00 00 00 00 00
+1217: (7b) *(u64 *)(r0 +8) = r1
+       7b 10 08 00 00 00 00 00
+1218: (05) goto pc+11
+       05 00 0b 00 00 00 00 00
+; new_entry.bytes = bytes;
+1219: (7b) *(u64 *)(r10 -96) = r7
+       7b 7a a0 ff 00 00 00 00
+1220: (b7) r1 = 1
+       b7 01 00 00 01 00 00 00
+; new_entry.count = 1;
+1221: (7b) *(u64 *)(r10 -104) = r1
+       7b 1a 98 ff 00 00 00 00
+1222: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+1223: (07) r2 += -32
+       07 02 00 00 e0 ff ff ff
+1224: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+1225: (07) r3 += -104
+       07 03 00 00 98 ff ff ff
+; map_update_elem(&cilium_metrics, &key, &new_entry, 0);
+1226: (18) r1 = map[id:108]
+       18 11 00 00 6c 00 00 00 00 00 00 00 00 00 00 00
+1228: (b4) w4 = 0
+       b4 04 00 00 00 00 00 00
+1229: (85) call htab_percpu_map_update_elem#326288
+       85 00 00 00 90 fa 04 00
+; tail_call_static(ctx, cilium_calls, index);
+1230: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+1231: (18) r2 = map[id:296]
+       18 12 00 00 28 01 00 00 00 00 00 00 00 00 00 00
+1233: (b7) r3 = 1
+       b7 03 00 00 01 00 00 00
+1234: (85) call bpf_tail_call#12
+       85 00 00 00 0c 00 00 00
+1235: (b4) w9 = 2
+       b4 09 00 00 02 00 00 00
+; }
+1236: (bc) w0 = w9
+       bc 90 00 00 00 00 00 00
+1237: (95) exit
+       95 00 00 00 00 00 00 00

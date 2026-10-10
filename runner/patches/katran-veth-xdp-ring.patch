@@ -1,0 +1,16 @@
+diff --git a/drivers/net/veth.c b/drivers/net/veth.c
+index 910fbfb48328..4a873f378bb0 100644
+--- a/drivers/net/veth.c
++++ b/drivers/net/veth.c
+@@ -36,3 +36,10 @@
+ #define VETH_XDP_FLAG		BIT(0)
+-#define VETH_RING_SIZE		256
++/*
++ * The benchmark's all-XDP Katran topology has independently scheduled veth
++ * NAPI stages.  The upstream ring is only about 150 us of buffering at the
++ * measured rate, so normal guest scheduling jitter appears as transport loss
++ * even though each consumer has spare steady-state capacity.  This queueing
++ * does not add work to Katran's measured BPF program or change attachments.
++ */
++#define VETH_RING_SIZE		4096
+ #define VETH_XDP_HEADROOM	(XDP_PACKET_HEADROOM + NET_IP_ALIGN)

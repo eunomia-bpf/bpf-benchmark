@@ -1,0 +1,6 @@
+int cil_host_policy(struct __sk_buff * ctx):
+; return 0;
+   0: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+   1: (95) exit
+       95 00 00 00 00 00 00 00

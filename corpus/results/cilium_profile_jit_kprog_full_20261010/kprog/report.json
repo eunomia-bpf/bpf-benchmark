@@ -1,0 +1,2834 @@
+{
+  "arm": "kprog",
+  "bpf": {
+    "active_programs": 5,
+    "programs": [
+      {
+        "attach_points": [
+          "tc:lxcbench1:tcx/ingress"
+        ],
+        "bytes_jited": 1709,
+        "bytes_xlated": 240,
+        "id": 520,
+        "name": "cil_from_contai",
+        "ns_per_run": 1664.6881202361833,
+        "run_count": 19474537,
+        "run_time_ns": 32419030391,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:lxcbench0:tcx/ingress"
+        ],
+        "bytes_jited": 1709,
+        "bytes_xlated": 240,
+        "id": 433,
+        "name": "cil_from_contai",
+        "ns_per_run": 1643.8718824989694,
+        "run_count": 19453923,
+        "run_time_ns": 31979757024,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "xdp:bpfbench0:driver"
+        ],
+        "bytes_jited": 1096,
+        "bytes_xlated": 152,
+        "id": 409,
+        "name": "cil_xdp_entry",
+        "ns_per_run": 1141.0,
+        "run_count": 1,
+        "run_time_ns": 1141,
+        "type": "xdp"
+      },
+      {
+        "attach_points": [
+          "tc:bpfbench0:tcx/egress"
+        ],
+        "bytes_jited": 6740,
+        "bytes_xlated": 864,
+        "id": 543,
+        "name": "cil_to_netdev",
+        "ns_per_run": 2056.0,
+        "run_count": 1,
+        "run_time_ns": 2056,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:bpfbench0:tcx/ingress"
+        ],
+        "bytes_jited": 3660,
+        "bytes_xlated": 480,
+        "id": 547,
+        "name": "cil_from_netdev",
+        "ns_per_run": 1392.0,
+        "run_count": 1,
+        "run_time_ns": 1392,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[1400]"
+        ],
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 412,
+        "name": "cil_host_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[17]"
+        ],
+        "bytes_jited": 3433,
+        "bytes_xlated": 448,
+        "id": 414,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[1]"
+        ],
+        "bytes_jited": 1121,
+        "bytes_xlated": 152,
+        "id": 416,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[11]"
+        ],
+        "bytes_jited": 7359,
+        "bytes_xlated": 944,
+        "id": 419,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[26]"
+        ],
+        "bytes_jited": 13320,
+        "bytes_xlated": 1680,
+        "id": 420,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[23]"
+        ],
+        "bytes_jited": 1250,
+        "bytes_xlated": 176,
+        "id": 421,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[30]"
+        ],
+        "bytes_jited": 6461,
+        "bytes_xlated": 832,
+        "id": 424,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[13]"
+        ],
+        "bytes_jited": 7039,
+        "bytes_xlated": 896,
+        "id": 429,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[30]"
+        ],
+        "bytes_jited": 6461,
+        "bytes_xlated": 832,
+        "id": 431,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[7]"
+        ],
+        "bytes_jited": 12264,
+        "bytes_xlated": 1552,
+        "id": 432,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 6740,
+        "bytes_xlated": 864,
+        "id": 436,
+        "name": "cil_to_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[26]"
+        ],
+        "bytes_jited": 13320,
+        "bytes_xlated": 1680,
+        "id": 437,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_host:tcx/ingress"
+        ],
+        "bytes_jited": 2914,
+        "bytes_xlated": 384,
+        "id": 442,
+        "name": "cil_to_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[7]"
+        ],
+        "bytes_jited": 6130,
+        "bytes_xlated": 784,
+        "id": 444,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[28]"
+        ],
+        "bytes_jited": 5012,
+        "bytes_xlated": 640,
+        "id": 445,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[1]"
+        ],
+        "bytes_jited": 819,
+        "bytes_xlated": 120,
+        "id": 450,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[7]"
+        ],
+        "bytes_jited": 6130,
+        "bytes_xlated": 784,
+        "id": 452,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[38]"
+        ],
+        "bytes_jited": 13230,
+        "bytes_xlated": 1680,
+        "id": 455,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_egressca[1973]"
+        ],
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 456,
+        "name": "cil_lxc_policy_",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[13]"
+        ],
+        "bytes_jited": 7039,
+        "bytes_xlated": 896,
+        "id": 459,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[1]"
+        ],
+        "bytes_jited": 819,
+        "bytes_xlated": 120,
+        "id": 460,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[15]"
+        ],
+        "bytes_jited": 5975,
+        "bytes_xlated": 768,
+        "id": 462,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[45]"
+        ],
+        "bytes_jited": 2241,
+        "bytes_xlated": 304,
+        "id": 464,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[1973]"
+        ],
+        "bytes_jited": 5575,
+        "bytes_xlated": 720,
+        "id": 467,
+        "name": "cil_lxc_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[28]"
+        ],
+        "bytes_jited": 5012,
+        "bytes_xlated": 640,
+        "id": 468,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3660,
+        "bytes_xlated": 480,
+        "id": 471,
+        "name": "cil_from_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_01[6]"
+        ],
+        "bytes_jited": 772,
+        "bytes_xlated": 112,
+        "id": 472,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[6]"
+        ],
+        "bytes_jited": 772,
+        "bytes_xlated": 112,
+        "id": 473,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[17]"
+        ],
+        "bytes_jited": 3433,
+        "bytes_xlated": 448,
+        "id": 476,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ho[36]"
+        ],
+        "bytes_jited": 8321,
+        "bytes_xlated": 1056,
+        "id": 478,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_host:tcx/egress"
+        ],
+        "bytes_jited": 3779,
+        "bytes_xlated": 496,
+        "id": 482,
+        "name": "cil_from_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[45]"
+        ],
+        "bytes_jited": 2241,
+        "bytes_xlated": 304,
+        "id": 483,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3779,
+        "bytes_xlated": 496,
+        "id": 488,
+        "name": "cil_from_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[11]"
+        ],
+        "bytes_jited": 7359,
+        "bytes_xlated": 944,
+        "id": 490,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[23]"
+        ],
+        "bytes_jited": 1250,
+        "bytes_xlated": 176,
+        "id": 491,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[15]"
+        ],
+        "bytes_jited": 5975,
+        "bytes_xlated": 768,
+        "id": 493,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[36]"
+        ],
+        "bytes_jited": 8321,
+        "bytes_xlated": 1056,
+        "id": 495,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[7]"
+        ],
+        "bytes_jited": 6130,
+        "bytes_xlated": 784,
+        "id": 498,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[7]"
+        ],
+        "bytes_jited": 12264,
+        "bytes_xlated": 1552,
+        "id": 499,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[30]"
+        ],
+        "bytes_jited": 6461,
+        "bytes_xlated": 832,
+        "id": 502,
+        "name": "tail_ipv4_ct_eg",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[17]"
+        ],
+        "bytes_jited": 3433,
+        "bytes_xlated": 448,
+        "id": 504,
+        "name": "tail_nodeport_r",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 6740,
+        "bytes_xlated": 864,
+        "id": 505,
+        "name": "cil_to_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3660,
+        "bytes_xlated": 480,
+        "id": 510,
+        "name": "cil_from_netdev",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_egressca[58]"
+        ],
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 511,
+        "name": "cil_lxc_policy_",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[1]"
+        ],
+        "bytes_jited": 1121,
+        "bytes_xlated": 152,
+        "id": 514,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[1]"
+        ],
+        "bytes_jited": 819,
+        "bytes_xlated": 120,
+        "id": 515,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 518,
+        "name": "cil_host_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[6]"
+        ],
+        "bytes_jited": 772,
+        "bytes_xlated": 112,
+        "id": 522,
+        "name": "tail_handle_arp",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tc:cilium_net:tcx/ingress"
+        ],
+        "bytes_jited": 2914,
+        "bytes_xlated": 384,
+        "id": 523,
+        "name": "cil_to_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[45]"
+        ],
+        "bytes_jited": 2241,
+        "bytes_xlated": 304,
+        "id": 525,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_call_pol[58]"
+        ],
+        "bytes_jited": 5575,
+        "bytes_xlated": 720,
+        "id": 527,
+        "name": "cil_lxc_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[26]"
+        ],
+        "bytes_jited": 13320,
+        "bytes_xlated": 1680,
+        "id": 530,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[38]"
+        ],
+        "bytes_jited": 13230,
+        "bytes_xlated": 1680,
+        "id": 531,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[13]"
+        ],
+        "bytes_jited": 7039,
+        "bytes_xlated": 896,
+        "id": 534,
+        "name": "tail_ipv4_to_en",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[45]"
+        ],
+        "bytes_jited": 2269,
+        "bytes_xlated": 304,
+        "id": 535,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[28]"
+        ],
+        "bytes_jited": 5012,
+        "bytes_xlated": 640,
+        "id": 537,
+        "name": "tail_ipv4_ct_in",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_00[11]"
+        ],
+        "bytes_jited": 7359,
+        "bytes_xlated": 944,
+        "id": 539,
+        "name": "tail_ipv4_polic",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[38]"
+        ],
+        "bytes_jited": 13230,
+        "bytes_xlated": 1680,
+        "id": 541,
+        "name": "tail_handle_sna",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[23]"
+        ],
+        "bytes_jited": 1250,
+        "bytes_xlated": 176,
+        "id": 545,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[7]"
+        ],
+        "bytes_jited": 12264,
+        "bytes_xlated": 1552,
+        "id": 549,
+        "name": "tail_handle_ipv",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[15]"
+        ],
+        "bytes_jited": 5975,
+        "bytes_xlated": 768,
+        "id": 551,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 553,
+        "name": "cil_host_policy",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 2914,
+        "bytes_xlated": 384,
+        "id": 555,
+        "name": "cil_to_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[45]"
+        ],
+        "bytes_jited": 2269,
+        "bytes_xlated": 304,
+        "id": 557,
+        "name": "tail_no_service",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[36]"
+        ],
+        "bytes_jited": 8321,
+        "bytes_xlated": 1056,
+        "id": 559,
+        "name": "tail_nodeport_n",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [],
+        "bytes_jited": 3779,
+        "bytes_xlated": 496,
+        "id": 561,
+        "name": "cil_from_host",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      },
+      {
+        "attach_points": [
+          "tail-call:cilium_calls_ne[1]"
+        ],
+        "bytes_jited": 1121,
+        "bytes_xlated": 152,
+        "id": 563,
+        "name": "tail_drop_notif",
+        "ns_per_run": null,
+        "run_count": 0,
+        "run_time_ns": 0,
+        "type": "sched_cls"
+      }
+    ],
+    "runs_per_packet": 1.0000035706648969,
+    "total_programs": 72,
+    "total_run_count": 38928463,
+    "total_run_time_ns": 64398792004
+  },
+  "callgraph": {
+    "analyzed_samples": 120179,
+    "callgraphs": 245841,
+    "categories": {
+      "bpf_code": {
+        "estimated_cpu_ns_per_packet": 100.20981124180943,
+        "sample_fraction": 0.03245991396167384,
+        "samples": 3901
+      },
+      "helpers": {
+        "estimated_cpu_ns_per_packet": 37.86446084860987,
+        "sample_fraction": 0.0122650379850057,
+        "samples": 1474
+      },
+      "maps": {
+        "estimated_cpu_ns_per_packet": 517.4895276765576,
+        "sample_fraction": 0.1676249594355087,
+        "samples": 20145
+      },
+      "rest": {
+        "estimated_cpu_ns_per_packet": 2431.622794754791,
+        "sample_fraction": 0.7876500886178117,
+        "samples": 94659
+      }
+    },
+    "excluded_idle_samples": 125513,
+    "samples": 245841,
+    "top_symbols": [
+      {
+        "category": "rest",
+        "samples": 32742,
+        "symbol": "_raw_spin_unlock_irqrestore"
+      },
+      {
+        "category": "maps",
+        "samples": 8223,
+        "symbol": "lookup_nulls_elem_raw"
+      },
+      {
+        "category": "maps",
+        "samples": 7865,
+        "symbol": "htab_lru_map_update_elem"
+      },
+      {
+        "category": "rest",
+        "samples": 4598,
+        "symbol": "_raw_spin_unlock_irq"
+      },
+      {
+        "category": "rest",
+        "samples": 3965,
+        "symbol": "mod_cur_headers"
+      },
+      {
+        "category": "rest",
+        "samples": 3784,
+        "symbol": "fib_table_lookup"
+      },
+      {
+        "category": "rest",
+        "samples": 3736,
+        "symbol": "enqueue_to_backlog"
+      },
+      {
+        "category": "rest",
+        "samples": 2663,
+        "symbol": "pvclock_clocksource_read_nowd"
+      },
+      {
+        "category": "rest",
+        "samples": 2636,
+        "symbol": "__pi_memcpy"
+      },
+      {
+        "category": "rest",
+        "samples": 2192,
+        "symbol": "jhash"
+      },
+      {
+        "category": "rest",
+        "samples": 1922,
+        "symbol": "get_random_u32"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 1718,
+        "symbol": "bpf_prog_7cae18cdf59b850b_tail_handle_ipv"
+      },
+      {
+        "category": "rest",
+        "samples": 1582,
+        "symbol": "__netif_receive_skb_core.constprop.0"
+      },
+      {
+        "category": "rest",
+        "samples": 1568,
+        "symbol": "skb_defer_free_flush"
+      },
+      {
+        "category": "rest",
+        "samples": 1555,
+        "symbol": "handle_softirqs"
+      },
+      {
+        "category": "maps",
+        "samples": 1535,
+        "symbol": "trie_lookup_elem"
+      },
+      {
+        "category": "rest",
+        "samples": 1518,
+        "symbol": "veth_xmit"
+      },
+      {
+        "category": "rest",
+        "samples": 1390,
+        "symbol": "do_softirq"
+      },
+      {
+        "category": "rest",
+        "samples": 1298,
+        "symbol": "__icmp_send"
+      },
+      {
+        "category": "rest",
+        "samples": 1296,
+        "symbol": "fib_lookup_good_nhc"
+      },
+      {
+        "category": "rest",
+        "samples": 1266,
+        "symbol": "__inet_dev_addr_type"
+      },
+      {
+        "category": "rest",
+        "samples": 1146,
+        "symbol": "__alloc_skb"
+      },
+      {
+        "category": "maps",
+        "samples": 1058,
+        "symbol": "htab_map_hash"
+      },
+      {
+        "category": "rest",
+        "samples": 964,
+        "symbol": "udp_v4_early_demux"
+      },
+      {
+        "category": "rest",
+        "samples": 955,
+        "symbol": "pktgen_thread_worker"
+      },
+      {
+        "category": "rest",
+        "samples": 955,
+        "symbol": "__mkroute_output"
+      },
+      {
+        "category": "rest",
+        "samples": 910,
+        "symbol": "__rcu_read_unlock"
+      },
+      {
+        "category": "rest",
+        "samples": 840,
+        "symbol": "__rcu_read_lock"
+      },
+      {
+        "category": "rest",
+        "samples": 811,
+        "symbol": "kmem_cache_free"
+      },
+      {
+        "category": "rest",
+        "samples": 799,
+        "symbol": "__xfrm_decode_session"
+      },
+      {
+        "category": "bpf_code",
+        "samples": 791,
+        "symbol": "bpf_prog_959eb13e161210ad_tail_ipv4_polic"
+      },
+      {
+        "category": "rest",
+        "samples": 760,
+        "symbol": "ip_route_output_key_hash"
+      },
+      {
+        "category": "rest",
+        "samples": 743,
+        "symbol": "__ip_dev_find"
+      },
+      {
+        "category": "rest",
+        "samples": 730,
+        "symbol": "__skb_flow_dissect"
+      },
+      {
+        "category": "rest",
+        "samples": 719,
+        "symbol": "__dev_queue_xmit"
+      },
+      {
+        "category": "rest",
+        "samples": 687,
+        "symbol": "dev_get_by_index_rcu"
+      },
+      {
+        "category": "rest",
+        "samples": 606,
+        "symbol": "kmem_cache_alloc_node_noprof"
+      },
+      {
+        "category": "rest",
+        "samples": 601,
+        "symbol": "__udp4_lib_lookup"
+      },
+      {
+        "category": "maps",
+        "samples": 589,
+        "symbol": "prealloc_lru_pop"
+      },
+      {
+        "category": "helpers",
+        "samples": 537,
+        "symbol": "bpf_perf_event_output"
+      }
+    ],
+    "unresolved_samples": 149
+  },
+  "corpus_run": "corpus/results/x86_kvm_corpus_20261010_053449_422289",
+  "host_perf": {
+    "branch-instructions": 111810470913,
+    "branch-misses": 132105630,
+    "branch_miss_rate": 0.0011815139398061538,
+    "branch_misses_per_packet": 3.3935606886132574,
+    "branches_per_packet": 2872.2138387719956,
+    "cache-misses": 275910809,
+    "cache_misses_per_packet": 7.087662160847202,
+    "cpu-cycles": 383735477132,
+    "cycles_per_packet": 9857.487754468957,
+    "instructions": 591986457936,
+    "instructions_per_packet": 15207.088235702107,
+    "ipc": 1.5426941036581936
+  },
+  "native_image_sizes": [
+    {
+      "bpf_bytecode_bytes": 2240,
+      "jit_image_bytes": 509,
+      "native_blob_bytes": 1082,
+      "native_id": 237,
+      "native_stub_image_bytes": 1096,
+      "native_symbol": "cil_xdp_entry",
+      "original_id": 236,
+      "program": "cil_xdp_entry"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 241,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 238,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8254,
+      "native_blob_bytes": 12234,
+      "native_id": 243,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 242,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 245,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 244,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 247,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 246,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 249,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 248,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 251,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 250,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 253,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 252,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 255,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 254,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12954,
+      "native_blob_bytes": 13200,
+      "native_id": 257,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 256,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 259,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 258,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 261,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 260,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 263,
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 262,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 265,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 264,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 267,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 266,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 269,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 268,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 271,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 270,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 13200,
+      "native_id": 273,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 272,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 12234,
+      "native_id": 275,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 274,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 277,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 276,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 279,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 278,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 281,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 280,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 283,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 282,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 285,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 284,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 287,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 286,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 289,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 288,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 291,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 290,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 293,
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 292,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 295,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 294,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 297,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 296,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 299,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 298,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 301,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 300,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 303,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 302,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 13200,
+      "native_id": 305,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 304,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 12234,
+      "native_id": 307,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 306,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 309,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 308,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 311,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 310,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 313,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 312,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12954,
+      "native_blob_bytes": 13200,
+      "native_id": 315,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 314,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8254,
+      "native_blob_bytes": 12234,
+      "native_id": 317,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 316,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 319,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 318,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 321,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 320,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 323,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 322,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 325,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 324,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 327,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 326,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 329,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 328,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 331,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 330,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 333,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 332,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 335,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 334,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 337,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 336,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 339,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 338,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 341,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 340,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 12234,
+      "native_id": 343,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 342,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 345,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 344,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 347,
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 346,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 349,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 348,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 351,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 350,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 13200,
+      "native_id": 353,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 352,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 355,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 354,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 357,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 356,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 359,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 358,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 12234,
+      "native_id": 361,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 360,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 363,
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 362,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 365,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 364,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 367,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 366,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 369,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 368,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 371,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 370,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 373,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 372,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 375,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 374,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 377,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 376,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 13200,
+      "native_id": 379,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 378,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 9904,
+      "jit_image_bytes": 5375,
+      "native_blob_bytes": 6431,
+      "native_id": 381,
+      "native_stub_image_bytes": 6461,
+      "native_symbol": "tail_ipv4_ct_egress",
+      "original_id": 380,
+      "program": "tail_ipv4_ct_eg"
+    },
+    {
+      "bpf_bytecode_bytes": 6304,
+      "jit_image_bytes": 3622,
+      "native_blob_bytes": 3403,
+      "native_id": 383,
+      "native_stub_image_bytes": 3433,
+      "native_symbol": "tail_nodeport_rev_dnat_ipv4",
+      "original_id": 382,
+      "program": "tail_nodeport_r"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 385,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_lxc_policy_egress",
+      "original_id": 384,
+      "program": "cil_lxc_policy_"
+    },
+    {
+      "bpf_bytecode_bytes": 11232,
+      "jit_image_bytes": 6216,
+      "native_blob_bytes": 6100,
+      "native_id": 387,
+      "native_stub_image_bytes": 6130,
+      "native_symbol": "tail_handle_ipv4",
+      "original_id": 386,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 9560,
+      "jit_image_bytes": 5210,
+      "native_blob_bytes": 4982,
+      "native_id": 389,
+      "native_stub_image_bytes": 5012,
+      "native_symbol": "tail_ipv4_ct_ingress",
+      "original_id": 388,
+      "program": "tail_ipv4_ct_in"
+    },
+    {
+      "bpf_bytecode_bytes": 13448,
+      "jit_image_bytes": 5580,
+      "native_blob_bytes": 7329,
+      "native_id": 391,
+      "native_stub_image_bytes": 7359,
+      "native_symbol": "tail_ipv4_policy",
+      "original_id": 390,
+      "program": "tail_ipv4_polic"
+    },
+    {
+      "bpf_bytecode_bytes": 1424,
+      "jit_image_bytes": 382,
+      "native_blob_bytes": 805,
+      "native_id": 393,
+      "native_stub_image_bytes": 819,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 392,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 5488,
+      "jit_image_bytes": 1888,
+      "native_blob_bytes": 2108,
+      "native_id": 395,
+      "native_stub_image_bytes": 2138,
+      "native_symbol": "cil_to_container",
+      "original_id": 394,
+      "program": "cil_to_containe"
+    },
+    {
+      "bpf_bytecode_bytes": 4080,
+      "jit_image_bytes": 1089,
+      "native_blob_bytes": 1679,
+      "native_id": 397,
+      "native_stub_image_bytes": 1709,
+      "native_symbol": "cil_from_container",
+      "original_id": 396,
+      "program": "cil_from_contai"
+    },
+    {
+      "bpf_bytecode_bytes": 12544,
+      "jit_image_bytes": 5802,
+      "native_blob_bytes": 7009,
+      "native_id": 399,
+      "native_stub_image_bytes": 7039,
+      "native_symbol": "tail_ipv4_to_endpoint",
+      "original_id": 398,
+      "program": "tail_ipv4_to_en"
+    },
+    {
+      "bpf_bytecode_bytes": 10408,
+      "jit_image_bytes": 5760,
+      "native_blob_bytes": 5545,
+      "native_id": 401,
+      "native_stub_image_bytes": 5575,
+      "native_symbol": "cil_lxc_policy",
+      "original_id": 400,
+      "program": "cil_lxc_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 16176,
+      "jit_image_bytes": 6398,
+      "native_blob_bytes": 13290,
+      "native_id": 403,
+      "native_stub_image_bytes": 13320,
+      "native_symbol": "tail_handle_ipv4_cont",
+      "original_id": 402,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 4808,
+      "jit_image_bytes": 2774,
+      "native_blob_bytes": 2211,
+      "native_id": 405,
+      "native_stub_image_bytes": 2241,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 404,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 1576,
+      "jit_image_bytes": 927,
+      "native_blob_bytes": 742,
+      "native_id": 407,
+      "native_stub_image_bytes": 772,
+      "native_symbol": "tail_handle_arp",
+      "original_id": 406,
+      "program": "tail_handle_arp"
+    },
+    {
+      "bpf_bytecode_bytes": 2240,
+      "jit_image_bytes": 509,
+      "native_blob_bytes": 1082,
+      "native_id": 409,
+      "native_stub_image_bytes": 1096,
+      "native_symbol": "cil_xdp_entry",
+      "original_id": 408,
+      "program": "cil_xdp_entry"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 412,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 410,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 6304,
+      "jit_image_bytes": 3622,
+      "native_blob_bytes": 3403,
+      "native_id": 414,
+      "native_stub_image_bytes": 3433,
+      "native_symbol": "tail_nodeport_rev_dnat_ipv4",
+      "original_id": 411,
+      "program": "tail_nodeport_r"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 416,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 413,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 13448,
+      "jit_image_bytes": 5580,
+      "native_blob_bytes": 7329,
+      "native_id": 419,
+      "native_stub_image_bytes": 7359,
+      "native_symbol": "tail_ipv4_policy",
+      "original_id": 418,
+      "program": "tail_ipv4_polic"
+    },
+    {
+      "bpf_bytecode_bytes": 16176,
+      "jit_image_bytes": 6398,
+      "native_blob_bytes": 13290,
+      "native_id": 420,
+      "native_stub_image_bytes": 13320,
+      "native_symbol": "tail_handle_ipv4_cont",
+      "original_id": 415,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 421,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 417,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 9904,
+      "jit_image_bytes": 5375,
+      "native_blob_bytes": 6431,
+      "native_id": 424,
+      "native_stub_image_bytes": 6461,
+      "native_symbol": "tail_ipv4_ct_egress",
+      "original_id": 422,
+      "program": "tail_ipv4_ct_eg"
+    },
+    {
+      "bpf_bytecode_bytes": 10408,
+      "jit_image_bytes": 5760,
+      "native_blob_bytes": 5545,
+      "native_id": 425,
+      "native_stub_image_bytes": 5575,
+      "native_symbol": "cil_lxc_policy",
+      "original_id": 423,
+      "program": "cil_lxc_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 12544,
+      "jit_image_bytes": 5802,
+      "native_blob_bytes": 7009,
+      "native_id": 429,
+      "native_stub_image_bytes": 7039,
+      "native_symbol": "tail_ipv4_to_endpoint",
+      "original_id": 426,
+      "program": "tail_ipv4_to_en"
+    },
+    {
+      "bpf_bytecode_bytes": 9904,
+      "jit_image_bytes": 5375,
+      "native_blob_bytes": 6431,
+      "native_id": 431,
+      "native_stub_image_bytes": 6461,
+      "native_symbol": "tail_ipv4_ct_egress",
+      "original_id": 427,
+      "program": "tail_ipv4_ct_eg"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8254,
+      "native_blob_bytes": 12234,
+      "native_id": 432,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 428,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 4080,
+      "jit_image_bytes": 1089,
+      "native_blob_bytes": 1679,
+      "native_id": 433,
+      "native_stub_image_bytes": 1709,
+      "native_symbol": "cil_from_container",
+      "original_id": 430,
+      "program": "cil_from_contai"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 436,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 434,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 16176,
+      "jit_image_bytes": 6398,
+      "native_blob_bytes": 13290,
+      "native_id": 437,
+      "native_stub_image_bytes": 13320,
+      "native_symbol": "tail_handle_ipv4_cont",
+      "original_id": 435,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 5488,
+      "jit_image_bytes": 1888,
+      "native_blob_bytes": 2108,
+      "native_id": 441,
+      "native_stub_image_bytes": 2138,
+      "native_symbol": "cil_to_container",
+      "original_id": 439,
+      "program": "cil_to_containe"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 442,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 438,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 11232,
+      "jit_image_bytes": 6216,
+      "native_blob_bytes": 6100,
+      "native_id": 444,
+      "native_stub_image_bytes": 6130,
+      "native_symbol": "tail_handle_ipv4",
+      "original_id": 440,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 9560,
+      "jit_image_bytes": 5210,
+      "native_blob_bytes": 4982,
+      "native_id": 445,
+      "native_stub_image_bytes": 5012,
+      "native_symbol": "tail_ipv4_ct_ingress",
+      "original_id": 443,
+      "program": "tail_ipv4_ct_in"
+    },
+    {
+      "bpf_bytecode_bytes": 5488,
+      "jit_image_bytes": 1888,
+      "native_blob_bytes": 2108,
+      "native_id": 447,
+      "native_stub_image_bytes": 2138,
+      "native_symbol": "cil_to_container",
+      "original_id": 446,
+      "program": "cil_to_containe"
+    },
+    {
+      "bpf_bytecode_bytes": 1424,
+      "jit_image_bytes": 382,
+      "native_blob_bytes": 805,
+      "native_id": 450,
+      "native_stub_image_bytes": 819,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 448,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 11232,
+      "jit_image_bytes": 6216,
+      "native_blob_bytes": 6100,
+      "native_id": 452,
+      "native_stub_image_bytes": 6130,
+      "native_symbol": "tail_handle_ipv4",
+      "original_id": 451,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12954,
+      "native_blob_bytes": 13200,
+      "native_id": 455,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 449,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 456,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_lxc_policy_egress",
+      "original_id": 454,
+      "program": "cil_lxc_policy_"
+    },
+    {
+      "bpf_bytecode_bytes": 12544,
+      "jit_image_bytes": 5802,
+      "native_blob_bytes": 7009,
+      "native_id": 459,
+      "native_stub_image_bytes": 7039,
+      "native_symbol": "tail_ipv4_to_endpoint",
+      "original_id": 453,
+      "program": "tail_ipv4_to_en"
+    },
+    {
+      "bpf_bytecode_bytes": 1424,
+      "jit_image_bytes": 382,
+      "native_blob_bytes": 805,
+      "native_id": 460,
+      "native_stub_image_bytes": 819,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 457,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 462,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 458,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 4808,
+      "jit_image_bytes": 2774,
+      "native_blob_bytes": 2211,
+      "native_id": 464,
+      "native_stub_image_bytes": 2241,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 461,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 10408,
+      "jit_image_bytes": 5760,
+      "native_blob_bytes": 5545,
+      "native_id": 467,
+      "native_stub_image_bytes": 5575,
+      "native_symbol": "cil_lxc_policy",
+      "original_id": 466,
+      "program": "cil_lxc_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 9560,
+      "jit_image_bytes": 5210,
+      "native_blob_bytes": 4982,
+      "native_id": 468,
+      "native_stub_image_bytes": 5012,
+      "native_symbol": "tail_ipv4_ct_ingress",
+      "original_id": 463,
+      "program": "tail_ipv4_ct_in"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 471,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 465,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 1576,
+      "jit_image_bytes": 927,
+      "native_blob_bytes": 742,
+      "native_id": 472,
+      "native_stub_image_bytes": 772,
+      "native_symbol": "tail_handle_arp",
+      "original_id": 469,
+      "program": "tail_handle_arp"
+    },
+    {
+      "bpf_bytecode_bytes": 1576,
+      "jit_image_bytes": 927,
+      "native_blob_bytes": 742,
+      "native_id": 473,
+      "native_stub_image_bytes": 772,
+      "native_symbol": "tail_handle_arp",
+      "original_id": 470,
+      "program": "tail_handle_arp"
+    },
+    {
+      "bpf_bytecode_bytes": 6304,
+      "jit_image_bytes": 3622,
+      "native_blob_bytes": 3403,
+      "native_id": 476,
+      "native_stub_image_bytes": 3433,
+      "native_symbol": "tail_nodeport_rev_dnat_ipv4",
+      "original_id": 474,
+      "program": "tail_nodeport_r"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 478,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 475,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 479,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_lxc_policy_egress",
+      "original_id": 477,
+      "program": "cil_lxc_policy_"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 482,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 480,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 4808,
+      "jit_image_bytes": 2774,
+      "native_blob_bytes": 2211,
+      "native_id": 483,
+      "native_stub_image_bytes": 2241,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 481,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 4080,
+      "jit_image_bytes": 1089,
+      "native_blob_bytes": 1679,
+      "native_id": 485,
+      "native_stub_image_bytes": 1709,
+      "native_symbol": "cil_from_container",
+      "original_id": 484,
+      "program": "cil_from_contai"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 488,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 486,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 13448,
+      "jit_image_bytes": 5580,
+      "native_blob_bytes": 7329,
+      "native_id": 490,
+      "native_stub_image_bytes": 7359,
+      "native_symbol": "tail_ipv4_policy",
+      "original_id": 487,
+      "program": "tail_ipv4_polic"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 491,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 489,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 493,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 492,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 495,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 494,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 11232,
+      "jit_image_bytes": 6216,
+      "native_blob_bytes": 6100,
+      "native_id": 498,
+      "native_stub_image_bytes": 6130,
+      "native_symbol": "tail_handle_ipv4",
+      "original_id": 497,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 12234,
+      "native_id": 499,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 496,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 9904,
+      "jit_image_bytes": 5375,
+      "native_blob_bytes": 6431,
+      "native_id": 502,
+      "native_stub_image_bytes": 6461,
+      "native_symbol": "tail_ipv4_ct_egress",
+      "original_id": 500,
+      "program": "tail_ipv4_ct_eg"
+    },
+    {
+      "bpf_bytecode_bytes": 6304,
+      "jit_image_bytes": 3622,
+      "native_blob_bytes": 3403,
+      "native_id": 504,
+      "native_stub_image_bytes": 3433,
+      "native_symbol": "tail_nodeport_rev_dnat_ipv4",
+      "original_id": 503,
+      "program": "tail_nodeport_r"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 505,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 501,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 5488,
+      "jit_image_bytes": 1888,
+      "native_blob_bytes": 2108,
+      "native_id": 508,
+      "native_stub_image_bytes": 2138,
+      "native_symbol": "cil_to_container",
+      "original_id": 506,
+      "program": "cil_to_containe"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 510,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 507,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 511,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_lxc_policy_egress",
+      "original_id": 509,
+      "program": "cil_lxc_policy_"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 514,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 512,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 1424,
+      "jit_image_bytes": 382,
+      "native_blob_bytes": 805,
+      "native_id": 515,
+      "native_stub_image_bytes": 819,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 513,
+      "program": "tail_drop_notif"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 518,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 516,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 4080,
+      "jit_image_bytes": 1089,
+      "native_blob_bytes": 1679,
+      "native_id": 520,
+      "native_stub_image_bytes": 1709,
+      "native_symbol": "cil_from_container",
+      "original_id": 517,
+      "program": "cil_from_contai"
+    },
+    {
+      "bpf_bytecode_bytes": 1576,
+      "jit_image_bytes": 927,
+      "native_blob_bytes": 742,
+      "native_id": 522,
+      "native_stub_image_bytes": 772,
+      "native_symbol": "tail_handle_arp",
+      "original_id": 521,
+      "program": "tail_handle_arp"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 523,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 519,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 4808,
+      "jit_image_bytes": 2774,
+      "native_blob_bytes": 2211,
+      "native_id": 525,
+      "native_stub_image_bytes": 2241,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 524,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 10408,
+      "jit_image_bytes": 5760,
+      "native_blob_bytes": 5545,
+      "native_id": 527,
+      "native_stub_image_bytes": 5575,
+      "native_symbol": "cil_lxc_policy",
+      "original_id": 526,
+      "program": "cil_lxc_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 16176,
+      "jit_image_bytes": 6398,
+      "native_blob_bytes": 13290,
+      "native_id": 530,
+      "native_stub_image_bytes": 13320,
+      "native_symbol": "tail_handle_ipv4_cont",
+      "original_id": 529,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 13200,
+      "native_id": 531,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 528,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 12544,
+      "jit_image_bytes": 5802,
+      "native_blob_bytes": 7009,
+      "native_id": 534,
+      "native_stub_image_bytes": 7039,
+      "native_symbol": "tail_ipv4_to_endpoint",
+      "original_id": 533,
+      "program": "tail_ipv4_to_en"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 535,
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 532,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 9560,
+      "jit_image_bytes": 5210,
+      "native_blob_bytes": 4982,
+      "native_id": 537,
+      "native_stub_image_bytes": 5012,
+      "native_symbol": "tail_ipv4_ct_ingress",
+      "original_id": 536,
+      "program": "tail_ipv4_ct_in"
+    },
+    {
+      "bpf_bytecode_bytes": 13448,
+      "jit_image_bytes": 5580,
+      "native_blob_bytes": 7329,
+      "native_id": 539,
+      "native_stub_image_bytes": 7359,
+      "native_symbol": "tail_ipv4_policy",
+      "original_id": 538,
+      "program": "tail_ipv4_polic"
+    },
+    {
+      "bpf_bytecode_bytes": 22344,
+      "jit_image_bytes": 12981,
+      "native_blob_bytes": 13200,
+      "native_id": 541,
+      "native_stub_image_bytes": 13230,
+      "native_symbol": "tail_handle_snat_fwd_ipv4",
+      "original_id": 540,
+      "program": "tail_handle_sna"
+    },
+    {
+      "bpf_bytecode_bytes": 11704,
+      "jit_image_bytes": 5222,
+      "native_blob_bytes": 6710,
+      "native_id": 543,
+      "native_stub_image_bytes": 6740,
+      "native_symbol": "cil_to_netdev",
+      "original_id": 542,
+      "program": "cil_to_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 1992,
+      "jit_image_bytes": 1262,
+      "native_blob_bytes": 1220,
+      "native_id": 545,
+      "native_stub_image_bytes": 1250,
+      "native_symbol": "tail_handle_ipv4_from_host",
+      "original_id": 544,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 12168,
+      "jit_image_bytes": 3386,
+      "native_blob_bytes": 3630,
+      "native_id": 547,
+      "native_stub_image_bytes": 3660,
+      "native_symbol": "cil_from_netdev",
+      "original_id": 546,
+      "program": "cil_from_netdev"
+    },
+    {
+      "bpf_bytecode_bytes": 14400,
+      "jit_image_bytes": 8242,
+      "native_blob_bytes": 12234,
+      "native_id": 549,
+      "native_stub_image_bytes": 12264,
+      "native_symbol": "tail_handle_ipv4_from_netdev",
+      "original_id": 548,
+      "program": "tail_handle_ipv"
+    },
+    {
+      "bpf_bytecode_bytes": 11192,
+      "jit_image_bytes": 6566,
+      "native_blob_bytes": 5945,
+      "native_id": 551,
+      "native_stub_image_bytes": 5975,
+      "native_symbol": "tail_nodeport_nat_egress_ipv4",
+      "original_id": 550,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 16,
+      "jit_image_bytes": 16,
+      "native_blob_bytes": 2,
+      "native_id": 553,
+      "native_stub_image_bytes": 16,
+      "native_symbol": "cil_host_policy",
+      "original_id": 552,
+      "program": "cil_host_policy"
+    },
+    {
+      "bpf_bytecode_bytes": 6968,
+      "jit_image_bytes": 859,
+      "native_blob_bytes": 2884,
+      "native_id": 555,
+      "native_stub_image_bytes": 2914,
+      "native_symbol": "cil_to_host",
+      "original_id": 554,
+      "program": "cil_to_host"
+    },
+    {
+      "bpf_bytecode_bytes": 4840,
+      "jit_image_bytes": 2792,
+      "native_blob_bytes": 2239,
+      "native_id": 557,
+      "native_stub_image_bytes": 2269,
+      "native_symbol": "tail_no_service_ipv4",
+      "original_id": 556,
+      "program": "tail_no_service"
+    },
+    {
+      "bpf_bytecode_bytes": 15176,
+      "jit_image_bytes": 8881,
+      "native_blob_bytes": 8291,
+      "native_id": 559,
+      "native_stub_image_bytes": 8321,
+      "native_symbol": "tail_nodeport_nat_ingress_ipv4",
+      "original_id": 558,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "bpf_bytecode_bytes": 13344,
+      "jit_image_bytes": 3945,
+      "native_blob_bytes": 3749,
+      "native_id": 561,
+      "native_stub_image_bytes": 3779,
+      "native_symbol": "cil_from_host",
+      "original_id": 560,
+      "program": "cil_from_host"
+    },
+    {
+      "bpf_bytecode_bytes": 1480,
+      "jit_image_bytes": 405,
+      "native_blob_bytes": 1107,
+      "native_id": 563,
+      "native_stub_image_bytes": 1121,
+      "native_symbol": "tail_drop_notify",
+      "original_id": 562,
+      "program": "tail_drop_notif"
+    }
+  ],
+  "packets": {
+    "component_errors": 0,
+    "packets_received": 38928460,
+    "packets_sent": 38928324,
+    "rx_dropped": 0,
+    "rx_errors": 0,
+    "verdicts": {
+      "reason=0,direction=1": {
+        "bytes": 2491424696,
+        "count": 38928454
+      },
+      "reason=0,direction=2": {
+        "bytes": 2491424766,
+        "count": 38928455
+      },
+      "reason=139,direction=2": {
+        "bytes": 140,
+        "count": 2
+      },
+      "reason=3,direction=1": {
+        "bytes": 70,
+        "count": 1
+      }
+    }
+  },
+  "phase": "post_rejit"
+}

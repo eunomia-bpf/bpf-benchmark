@@ -31,7 +31,9 @@ from runner.libs.case_common import (
 )
 from runner.libs.kinsn import prepare_kinsn_modules
 from runner.libs import rejit_plan
+from runner.libs.bpf_evidence import capture_bpf_evidence
 from runner.libs.rejit import (
+    _list_app_shim_program_ids,
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     measure_app_phase,
@@ -162,42 +164,44 @@ def _env_bool(name: str, default: bool = False) -> bool:
     raise SystemExit(f"{name} must be boolean: empty, 0/1, false/true, no/yes, or off/on")
 
 
-def _native_loader_post_only_enabled() -> bool:
+def _native_loader_phase() -> str:
     mode = _env_str(_CORPUS_NATIVE_LOADER_POST_ONLY_ENV).lower()
     if mode in {"1", "true", "yes", "on", "post", "post_only", "post-only", "post_rejit"}:
-        return True
+        return "post"
     if mode not in {"", "0", "false", "no", "off"}:
         raise SystemExit(
             f"{_CORPUS_NATIVE_LOADER_POST_ONLY_ENV} must be boolean or post-only mode"
         )
     raw = _env_str("BPFREJIT_SHIM_NATIVE_LOADER").lower()
     if not raw or raw in {"0", "false", "no", "off", "1", "true", "yes", "on"}:
-        return False
+        return "off"
     if raw in {"post", "post_only", "post-only", "post_rejit"}:
-        return True
+        return "post"
+    if raw in {"baseline", "baseline_only", "baseline-only", "pre", "pre_only", "pre-only"}:
+        return "baseline"
     raise SystemExit(
-        "BPFREJIT_SHIM_NATIVE_LOADER must be empty, 0/1, true/false, or post"
+        "BPFREJIT_SHIM_NATIVE_LOADER must be empty, 0/1, true/false, post, or baseline"
     )
 
 
 def _validate_native_loader_skip_rejit(
     *,
     skip_rejit: bool,
-    native_loader_post_only: bool,
+    native_loader_phase: str,
 ) -> None:
-    if not (skip_rejit and native_loader_post_only):
+    if not (skip_rejit and native_loader_phase != "off"):
         return
     raise SystemExit(
-        "native-loader post-only mode is incompatible with SKIP_REJIT; "
+        "native-loader single-phase mode is incompatible with SKIP_REJIT; "
         "unset SKIP_REJIT to benchmark native replacement, or unset "
         f"{_CORPUS_NATIVE_LOADER_POST_ONLY_ENV}/BPFREJIT_SHIM_NATIVE_LOADER=post "
         "to run a no-ReJIT diagnostic"
     )
 
 
-def _effective_rejit_enabled_passes(*, native_loader_post_only: bool) -> list[str]:
+def _effective_rejit_enabled_passes(*, native_loader_phase: str) -> list[str]:
     enabled_passes = benchmark_rejit_enabled_passes()
-    if native_loader_post_only and "BPFREJIT_BENCH_PASSES" not in os.environ:
+    if native_loader_phase != "off" and "BPFREJIT_BENCH_PASSES" not in os.environ:
         return []
     return enabled_passes
 
@@ -254,10 +258,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         if not value:
             raise SystemExit(f"{name} is required; run corpus through Make")
     skip_rejit = _skip_rejit_enabled()
-    native_loader_post_only = _native_loader_post_only_enabled()
+    native_loader_phase = _native_loader_phase()
     _validate_native_loader_skip_rejit(
         skip_rejit=skip_rejit,
-        native_loader_post_only=native_loader_post_only,
+        native_loader_phase=native_loader_phase,
     )
     ns = argparse.Namespace(
         workspace=str(ROOT_DIR),
@@ -347,6 +351,67 @@ def _runner_pids(app: AppSpec, runner: AppRunner) -> list[int]:
     if not result:
         raise RuntimeError(f"{app.name}: runner did not expose any shim pids")
     return result
+
+
+def _capture_phase_bpf_evidence(
+    app: AppSpec,
+    phase: str,
+    app_pids: Sequence[int],
+    artifact_session: ArtifactSession | None,
+    program_name_log: Path | None = None,
+) -> Path | None:
+    if artifact_session is None:
+        return None
+    program_ids = sorted(
+        {
+            program_id
+            for pid in app_pids
+            for program_id in _list_app_shim_program_ids(int(pid))
+        }
+    )
+    return capture_bpf_evidence(
+        output_root=artifact_session.run_dir / "details" / "bpf-evidence",
+        app_name=app.name,
+        phase=phase,
+        program_ids=program_ids,
+        program_name_log=program_name_log,
+    )
+
+
+def _validate_cilium_live_inventory_parity(baseline_dir: Path, post_dir: Path) -> None:
+    def load(path: Path) -> Mapping[str, object]:
+        payload = json.loads((path / "live-program-graph.json").read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise RuntimeError(f"invalid Cilium live-program graph: {path}")
+        return payload
+
+    baseline = load(baseline_dir)
+    post = load(post_dir)
+    mismatches = {
+        field: {"baseline": baseline.get(field), "post_rejit": post.get(field)}
+        for field in ("inventory_signature", "attachment_signature")
+        if baseline.get(field) != post.get(field)
+    }
+    parity_path = post_dir.parent / "inventory-parity.json"
+    parity_path.write_text(
+        json.dumps(
+            {
+                "status": "fail" if mismatches else "pass",
+                "mismatches": mismatches,
+                "baseline_live_program_count": len(baseline.get("live_program_ids", [])),
+                "post_rejit_live_program_count": len(post.get("live_program_ids", [])),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    if mismatches:
+        raise RuntimeError(
+            "Cilium JIT/native live program inventory differs: "
+            + json.dumps(mismatches, sort_keys=True)
+        )
 
 
 def _build_app_error_result(
@@ -669,6 +734,10 @@ def run_suite(
     partial_results: "dict[str, dict[str, object]] | None" = None,
 ) -> dict[str, object]:
     workspace = ROOT_DIR
+    if artifact_session is not None:
+        os.environ["BPFREJIT_CILIUM_NATIVE_EVIDENCE_DIR"] = str(
+            artifact_session.run_dir / "details" / "cilium-native-config"
+        )
     suite_path = suite.manifest_path.resolve()
     workload_seconds = _workload_seconds(args)
     samples = _sample_count(args)
@@ -676,25 +745,27 @@ def run_suite(
     skip_rejit = bool(getattr(args, "skip_rejit", False))
     workload_only = bool(getattr(args, "workload_only", False))
     collect_bpf_stats = bool(getattr(args, "collect_bpf_stats", True))
-    native_loader_post_only = _native_loader_post_only_enabled()
+    native_loader_phase = _native_loader_phase()
     _validate_native_loader_skip_rejit(
         skip_rejit=skip_rejit,
-        native_loader_post_only=native_loader_post_only,
+        native_loader_phase=native_loader_phase,
     )
-    post_only_native_env = _current_native_loader_env()
-    if native_loader_post_only:
+    phase_native_env = _current_native_loader_env()
+    if native_loader_phase == "post":
         _apply_env_updates(_disable_native_loader_env())
+    elif native_loader_phase == "baseline":
+        _apply_env_updates(_enable_native_loader_env(phase_native_env))
     _print_progress(
         "native_loader_mode",
-        post_only=native_loader_post_only,
-        saved_env_keys=sorted(post_only_native_env),
+        phase=native_loader_phase,
+        saved_env_keys=sorted(phase_native_env),
         active_env_keys=_active_native_loader_env_keys(),
     )
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     total_apps = len(suite.apps)
     apply_enabled_passes = _effective_rejit_enabled_passes(
-        native_loader_post_only=native_loader_post_only
+        native_loader_phase=native_loader_phase
     )
 
     # Kinsn modules are only valid on the benchmark kernel that built them.
@@ -711,6 +782,7 @@ def run_suite(
             lifecycle: LifecycleRunResult | None = None
             startup_error = ""
             phase = ""
+            baseline_evidence_dir: Path | None = None
             try:
                 with _timeout_scope(float(getattr(args, "app_timeout_s", 0.0) or 0.0),
                                     f"{app.name} app lifecycle"):
@@ -793,6 +865,20 @@ def run_suite(
                         artifacts=_build_runner_artifacts(app, runner),
                     )
                     app_pids = _runner_pids(app, runner)
+                    baseline_name_log = None
+                    if app.runner == "cilium" and native_loader_phase == "baseline":
+                        baseline_name_log = _shim_log_path(
+                            app,
+                            "baseline",
+                            artifact_session=artifact_session,
+                        )
+                    baseline_evidence_dir = _capture_phase_bpf_evidence(
+                        app,
+                        "baseline",
+                        app_pids,
+                        artifact_session,
+                        baseline_name_log,
+                    )
                     workload_name = _app_workload_name(app)
 
                     phase = "baseline"
@@ -885,8 +971,10 @@ def run_suite(
                             artifact_session=artifact_session,
                         )),
                     }
-                    if native_loader_post_only:
-                        loadtime_env.update(_enable_native_loader_env(post_only_native_env))
+                    if native_loader_phase == "post":
+                        loadtime_env.update(_enable_native_loader_env(phase_native_env))
+                    elif native_loader_phase == "baseline":
+                        loadtime_env.update(_disable_native_loader_env())
                     _print_progress(
                         "native_loader_phase_env",
                         app=app.name,
@@ -903,17 +991,20 @@ def run_suite(
                     if skip_rejit:
                         _print_progress("rejit_skipped", app=app.name, runner=app.runner)
                         lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
-                    elif native_loader_post_only and not apply_enabled_passes:
+                    elif native_loader_phase != "off" and not apply_enabled_passes:
                         lifecycle.rejit_result = {
                             "status": "ok",
-                            "mode": "native_loader",
+                            "mode": (
+                                "native_loader" if native_loader_phase == "post"
+                                else "jit_restart_after_native"
+                            ),
                             "enabled_passes": [],
                         }
                         _print_progress(
                             "loadtime_plan_done",
                             app=app.name,
                             runner=app.runner,
-                            status="native_loader_only",
+                            status=str(lifecycle.rejit_result["mode"]),
                         )
                     else:
                         _print_progress("loadtime_plan_start", app=app.name, runner=app.runner)
@@ -963,6 +1054,28 @@ def run_suite(
                         status="ok",
                     )
                     app_pids = _runner_pids(app, runner)
+                    post_name_log = None
+                    if app.runner == "cilium" and native_loader_phase == "post":
+                        post_name_log = _shim_log_path(
+                            app,
+                            "post_rejit",
+                            artifact_session=artifact_session,
+                        )
+                    post_evidence_dir = _capture_phase_bpf_evidence(
+                        app,
+                        "post_rejit",
+                        app_pids,
+                        artifact_session,
+                        post_name_log,
+                    )
+                    if (
+                        app.runner == "cilium"
+                        and baseline_evidence_dir is not None
+                        and post_evidence_dir is not None
+                    ):
+                        _validate_cilium_live_inventory_parity(
+                            baseline_evidence_dir, post_evidence_dir
+                        )
 
                     phase = "post_rejit"
                     _print_progress(
@@ -1296,9 +1409,9 @@ def main(argv: list[str] | None = None) -> int:
     suite = _filter_suite_apps(load_app_suite_from_yaml(Path(args.suite).resolve()))
     resolved_workload_seconds = _workload_seconds(args)
     resolved_samples = _sample_count(args)
-    native_loader_post_only = _native_loader_post_only_enabled()
+    native_loader_phase = _native_loader_phase()
     effective_enabled_passes = _effective_rejit_enabled_passes(
-        native_loader_post_only=native_loader_post_only
+        native_loader_phase=native_loader_phase
     )
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()

@@ -222,7 +222,16 @@ class SourceProgramMeta(NamedTuple):
     helpers: set[int]
 
 
-def scan_bpf_source_programs(source_obj: Path) -> dict[str, SourceProgramMeta]:
+def source_symbol_binding_allowed(binding: str, *, include_local: bool) -> bool:
+    allowed = {"STB_GLOBAL", "STB_WEAK"}
+    if include_local:
+        allowed.add("STB_LOCAL")
+    return binding in allowed
+
+
+def scan_bpf_source_programs(
+    source_obj: Path, *, include_local: bool = False
+) -> dict[str, SourceProgramMeta]:
     try:
         from elftools.elf.elffile import ELFFile
     except ImportError as exc:
@@ -236,7 +245,9 @@ def scan_bpf_source_programs(source_obj: Path) -> dict[str, SourceProgramMeta]:
             raise SystemExit(f"source BPF object has no .symtab: {source_obj}")
         for sym in symtab.iter_symbols():
             info = sym["st_info"]
-            if info["type"] != "STT_FUNC" or info["bind"] not in {"STB_GLOBAL", "STB_WEAK"}:
+            if info["type"] != "STT_FUNC" or not source_symbol_binding_allowed(
+                info["bind"], include_local=include_local
+            ):
                 continue
             if not isinstance(sym["st_shndx"], int):
                 continue
@@ -341,6 +352,7 @@ def main() -> None:
     parser.add_argument("--skip-prefix", action="append", default=["LBB", "__check_"])
     parser.add_argument("--dedupe-program", choices=("none", "last"), default="none")
     parser.add_argument("--source-object-root", type=Path)
+    parser.add_argument("--include-local-source-programs", action="store_true")
     parser.add_argument("--helper-disambiguate", action="append", type=lambda v: int(v, 0), default=[])
     args = parser.parse_args()
 
@@ -361,7 +373,12 @@ def main() -> None:
             if not source_obj.is_file():
                 raise SystemExit(f"source BPF object not found for {obj}: {source_obj}")
             source_meta = source_meta_cache.setdefault(
-                source_obj, scan_bpf_source_programs(source_obj))
+                source_obj,
+                scan_bpf_source_programs(
+                    source_obj,
+                    include_local=args.include_local_source_programs,
+                ),
+            )
         prefixes = attrs.get("source_map_prefixes") or [None]
         for symbol in text_symbols(args.llvm_nm, obj, tuple(args.skip_prefix)):
             if attrs.get("symbol") and symbol != attrs["symbol"]:

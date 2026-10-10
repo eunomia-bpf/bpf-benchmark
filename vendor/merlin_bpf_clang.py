@@ -222,6 +222,18 @@ def main() -> int:
     parser.add_argument("--align-plugin", required=True)
     args, clang_args = parser.parse_known_args()
 
+    # Cilium's native arm is built only after Cilium has emitted the concrete
+    # node/netdev/endpoint headers.  Intercept the very same BPF compile command
+    # and produce its native companion before returning the BPF ELF to Cilium.
+    # This keeps feature configuration out of the benchmark framework.
+    if os.environ.get("BPFREJIT_CILIUM_NATIVE_BUILD_ROOT", "").strip():
+        from runner.libs.cilium_native_build import (
+            is_cilium_native_compile,
+            run_paired_cilium_compile,
+        )
+        if is_cilium_native_compile(clang_args):
+            return run_paired_cilium_compile(args.clang, clang_args)
+
     if args.mode == "none":
         return delegate(args.clang, clang_args)
 
