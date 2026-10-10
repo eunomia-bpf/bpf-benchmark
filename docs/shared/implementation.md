@@ -244,6 +244,18 @@ increment is committed and pushed immediately). Current state:
   leaving the source-width fallback, the register read, and the destination
   writeback in the composed arm bodies; the AArch64 simulator has no
   opcode-keyed MOVX extension split, so there is no mirror.
+  The `MOV_REG` register arm's choice of *which* body a `mov` runs is likewise
+  no longer open for x86-64 (Step 0119): the arm now routes both its standalone
+  `X86_SIM_L_EXEC_MOV_REG_AUX`
+  body and its inline opcode arm through a generated machine-checked selector,
+  which names the stack-base write at the full 64-bit width when the source is
+  the stack pointer, the provenance-preserving pointer write at the full width
+  for every other source, and the narrow scalarizing lane write at every
+  narrower width whatever the source, so the body choice is a proved table
+  rather than a restated `width == 64 && src == rsp` ladder, leaving the
+  register reads, the stack-base addition, and the destination writeback in the
+  composed arm bodies; the AArch64 simulator has no width/register-keyed
+  `MOV_REG` body split, so there is no mirror.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

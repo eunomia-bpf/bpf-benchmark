@@ -771,6 +771,33 @@ opcodes, five flag codes (including 0), several AUX source widths (including
 the absent-code fallback), high-bit source values, and register pairs against
 an independent sign/zero-extension model, comparing the whole register file
 with its tags (118,802 cases).
+The x86-64 `MOV_REG` register arm's choice of which body a `mov` runs is
+likewise a generated contract: `generate_x86_mov_reg_arm_spec.py` emits
+`KPROG_X86_MOV_REG_ARM(W, RSP)`, which names the stack-base pointer write at
+the full 64-bit width code when the encoded source register is the stack
+pointer, the provenance-preserving pointer write at the full width for every
+other source, and the narrow scalarizing lane write at every other width code
+whatever the source (the stack-pointer test nested inside the width test), and
+`X86MovRegShape.lean` proves the generated `armOf` equal to an independent
+width/register-literal statement that names the stack-pointer body exactly at
+the full-width/`X86_RSP` pair, that the generated opcode is the literal the
+opcode contract already names for `X86_OP_MOV_REG`, that the arm result names
+agree with the generated table, that the arm codes are distinct and their
+lookup is a left inverse, and — connecting this selection contract to the value
+composition — that the selected arm's effect is the per-arm step
+`X86MovHandler` proves (the stack-base write at `stackPtr`, the provenance
+copy at `pointer`, the RSP-ignoring narrow write at `narrow`). Both the
+standalone `X86_SIM_L_EXEC_MOV_REG_AUX` body and the inline `X86_OP_MOV_REG`
+arm compute the selector and branch through the selected body, leaving the
+register reads, the stack-base addition, and the destination writeback in the
+composed arm bodies. A generated-header oracle cross-checks the compiled
+selector against an independent literal model over all 256×256 width/register
+byte pairs (65,540 cases), and a sim-header route oracle drives the real
+`MOV_REG` arm over five flag codes (including the absent-code 64-bit fallback),
+four AUX lane-shift words, several source/destination values, and register
+pairs (including `dst == src` and both `RSP` orderings) against an independent
+lane read/write and stack-base model, comparing the whole register file with
+its tags (79,202 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2303,6 +2330,9 @@ narrowed-source contract),
 x86 `MOVZX`/`MOVSX` register opcode-keyed extension-shape selection (and the
 simulator's routing of both the standalone `MOVX` body and its inline arm
 through the generated opcode-keyed selector),
+x86 `MOV_REG` width/register-keyed body selection (and the simulator's routing
+of both the standalone `MOV_REG` body and its inline arm through the generated
+selector),
 packed-AUX layout,
 register-lane AUX layout,
 AArch64 packed-AUX layout,

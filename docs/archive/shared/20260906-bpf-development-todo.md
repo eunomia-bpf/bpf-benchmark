@@ -9632,6 +9632,121 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   move-with-extension contract paragraph after the x86 population-count flag
   paragraph (paper commit pushed to `main`).
 
+## Step 0119 — x86 MOV_REG width/register-keyed body-selection contract
+
+- Scope: the x86 simulator's `X86_OP_MOV_REG` arm
+  (`kprog/x86/x86_sim_local_bpf.h`, both the standalone
+  `X86_SIM_L_EXEC_MOV_REG_AUX` body and the inline `X86_OP_MOV_REG` arm)
+  chose *which body* a register `mov` runs by a hand-written
+  `width == 64 && src == rsp` / `width == 64` / else ladder. The `MOV_REG`
+  *value* composition was already proved (`X86MovHandler.lean`); this closes
+  the open arm-level choice of body, under one width/register-keyed selector.
+  The register reads, the stack-base addition, and the destination writeback
+  stay in the composed bodies. x86-only; the AArch64 simulator has no
+  width/register-keyed `MOV_REG` body split, so there is no mirror.
+- Shared spec `kprog/formal/x86_mov_reg_arm_spec.json` (`schema_version` 1,
+  `operation` `x86MovRegArmSelector`): a `selector`
+  `width64_and_rsp_then_arm`, `opcode_define`/`opcode` `X86_OP_MOV_REG`/2,
+  `full_width_define`/`full_width_code` `KPROG_X86_MOV_REG_FULL_WIDTH`/8,
+  `rsp_define`/`rsp_code` `X86_RSP`/4, and three ordered arms
+  `(arm, arm_define, effect, width_class)`
+  `("stackPtr", "KPROG_X86_MOV_REG_ARM_STACK_PTR", "stack_base_pointer_write",
+  "full")`, `("pointer", "KPROG_X86_MOV_REG_ARM_POINTER",
+  "provenance_pointer_write", "full")`, `("narrow",
+  "KPROG_X86_MOV_REG_ARM_NARROW", "width_scalarizing_write", "narrow")`.
+  `generate_x86_mov_reg_arm_spec.py` carries an independent module-level
+  `_ARMS` construction, validates the spec, re-derives both live regions from
+  the header (`arm_region()` slices the inline `MOV_REG` arm opener to the
+  `MOVZX` arm; `macro_region()` slices the standalone `#define` body to the
+  next `#define`; `flat()` flattens `\`-continuations and whitespace is
+  collapsed so the substring checks are exact), and `check_against_header()`
+  calls `check_region()` on BOTH regions (exactly-one-arm only on the inline
+  region), requiring the generated selector
+  `KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC))`, all three arm codes, the
+  stack-base `X86_SIM_L_STACK_PTR(` resolution, the
+  `X86_SIM_L_READ_REG_PTR(SRC)`/`X86_SIM_L_REG_TAG(SRC)` pointer move, the
+  narrow `X86_SIM_L_READ_REG_WIDTH_SHIFT(`/`X86_SIM_L_WRITE_REG_WIDTH_SHIFT(`
+  pair, and rejecting a hand `X86_WIDTH_64`/`== X86_RSP` selection. It emits
+  `generated/x86_mov_reg_arm.h` (the `KPROG_X86_MOV_REG_ARM(W, RSP)` nested
+  ternary — the stack-pointer test inside the width test, so a narrow `mov`
+  ignores register identity — the `_COUNT`/`_ARM_*`/`_FULL_WIDTH` codes, and
+  opcode/width/rsp/count/distinctness/four-selection drift asserts) and the
+  Lean `KProgFormal.GeneratedX86MovRegArm`. `--check` rc=0.
+- Hand refinement `KProgFormal/X86MovRegShape.lean`: the independent specs
+  `x86MovRegShapeOpcodeSpec := 2`, `x86MovRegShapeFullWidthSpec := 8`,
+  `x86MovRegShapeRspSpec := 4`, and `x86MovRegShapeSpec`/
+  `x86MovRegShapeNamesSpec` (the literal width/register-keyed branch). It
+  proves `x86_mov_reg_arm_refines` (the generated `armOf` equals the
+  independent statement), `_names_refine`, `_codes_length`, `_names_length`,
+  `_codes_nodup`, `_opcode_spec_bound` (via `x86OpcodeSpec.lookup`),
+  `_full_width_spec_bound` (via `x86WidthCodeSpec .w64`), `_rsp_spec_bound`
+  (via `GeneratedX86RegDispatch.numberOfName "rsp"`),
+  `_arm_of_code_roundtrip`, `_arm_of_code_beyond_is_none`,
+  `_opcode_is_mov_reg`, `_full_width_is_w64`, `_rsp_code_is_rsp`,
+  `_arm_count_is_3`, `_arm_effects`, `_arm_width_classes`,
+  `_shape_stack_iff`, `_shape_pointer_iff`, `_shape_narrow_iff`,
+  `_shape_narrow_ignores_rsp`, `_shape_over_widths`, `_shape_case_dispatch`,
+  `_shape_ladder_total`, `_arm_is_mov_reg`, and --- connecting the selection
+  to the value composition --- `x86_mov_reg_arm_matches_handler` (the arm the
+  selector names maps to exactly the `X86MovHandler` step
+  `stackPtr`→`x86_mov_reg_rsp_uses_stack_base`,
+  `pointer`→`x86_mov_reg_copies_provenance`,
+  `narrow`→`x86_mov_reg_narrow_ignores_rsp`).
+  Module elaborates rc=0, no `sorry`/`admit`.
+- Routing in `kprog/x86/x86_sim_local_bpf.h`: a new
+  `#include "../formal/generated/x86_mov_reg_arm.h"`, and both the standalone
+  `X86_SIM_L_EXEC_MOV_REG_AUX` body and the inline `MOV_REG` arm now route
+  through `KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC))` as an explicit
+  three-way `if/else if (== ..._STACK_PTR/..._POINTER/..._NARROW)` (so
+  `check_region()` can require all three arm names), keeping the stack-base
+  addition, the pointer read/tag move, the narrow lane read/write, and the
+  loader ABI (the `X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)` /
+  `X86_SIM_L_EXEC_MOV_REG(DST, SRC, FLAGS)` signatures) unchanged. `make build`
+  rc=0 (only pre-existing `-Wc23-extensions` warnings).
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_x86_mov_reg_arm_host.c` includes the generated header (compiling its
+    drift asserts) and drives the compiled selector over all 256×256
+    width/register byte pairs against an independent literal model, plus the
+    count/decode/distinctness/named-selection checks
+    --- `x86 mov_reg arm host cross-check: OK (65540 cases)`.
+  - `test_x86_mov_reg_arm_route_host.c` includes the simulator header and
+    drives the real `X86_SIM_L_EXEC` `MOV_REG` arm over five flag codes
+    (including the absent-code 64-bit fallback), four AUX lane-shift words,
+    five source and four destination values, and six register pairs
+    (including `{RAX,RSP}`, `{RSP,RBX}`, `{RSP,RSP}`), comparing the whole
+    16-cell register file (value and tag) and requiring the flags to stay put
+    against an independent lane read/write and stack-base model
+    --- `x86 mov_reg arm route host cross-check: OK (79202 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **147** `cross-check: OK`. Baseline
+  was **145** for Step 0118; Step 0119 adds the two `MOV_REG`-arm oracles and
+  the Lean pair, wired into `kprog/formal/Makefile`, with the two new Lean
+  modules imported in `KProgFormal.lean`.
+- Mutation harness `kprog/formal/build/mut_x86_mov_reg_arm.py`, 55 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end: ten spec defects (arm-name swap, effect swaps, result/width-class/
+  arm-define/rsp/opcode/full-width drifts, and an arm-order swap →
+  generator), thirteen generator defects (arm-define/full-width/opcode/rsp/
+  selector/arm-opener/arm-closer/codes/ctor text and the armOf/rspOf nested
+  drifts → generator), eight generated-C defects (the count/stack-code/
+  narrow-code/full-width drifts → host, and the opcode/count/selector/8-RAX
+  assert drifts → generator), eight generated-Lean defects (count/codes/names/
+  stack-code/pointer-code drifts → refinement and the armOf-shape/full-width/
+  rsp-code drifts → generator), seven hand-refinement defects (width/rsp/
+  opcode-def drifts, the shape arg swap, the names swap, and the spec-case/
+  handler-arm claim drifts → refinement), six routed-body defects (dropped
+  include, unrouted selector, drifted stack/pointer tests, dropped
+  destination/source lane shifts → route oracle), and two generator+artifact
+  pair defects regenerated so `--check` stays green and only the rebuilt-olean
+  refinement/route catches them (an rsp-value drift and a codes-value drift).
+  Three semantically equivalent mutations (an added include-side comment, an
+  added hand-module comment, and a resolved-but-equal generator root path)
+  SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the
+  register-move contract paragraph after the x86 move-with-extension paragraph
+  (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
@@ -9679,8 +9794,14 @@ register-source `MOVZX`/`MOVSX` arm's choice of which extension function widens
 the source is likewise no longer open: the opcode-keyed extension-shape
 selection is now a machine-checked contract (Step 0118), leaving the
 source-width fallback, the register read, and the destination writeback inside
-the composed arm bodies. Still-open x86 arm selection includes the `MOV_REG`
-three-way arm.
+the composed arm bodies. The x86 `MOV_REG` arm's choice of body on its
+resolved width and encoded source register is likewise no longer open: the
+width/register-keyed body selection (stack-base pointer write at the full
+width from the stack pointer, provenance pointer write at the full width
+otherwise, narrow scalarizing lane write at every narrower width) is now a
+machine-checked contract (Step 0119), leaving the register reads, the
+stack-base addition, and the destination writeback inside the composed arm
+bodies. This closes the open x86 arm-selection list.
 
 The AArch64 *write-register destination-presence* decision is likewise no longer
 open: the `XZR`/sentinel presence test the three writeback bodies shared is now
