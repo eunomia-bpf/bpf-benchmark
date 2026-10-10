@@ -3031,9 +3031,13 @@ not establish complete native-byte semantic equivalence.
   the pre-change object, `build`/`run` load the object, and the full formal
   check and the 30 micro proofs remain green.
 - Open AArch64 boundary after this increment: the pre/post-index writeback and
-  pointer-tag propagation, the stack pointer helper, `ARM64_SIM_L_STACK_READ_TAG`
-  and `ARM64_SIM_L_STACK_WRITE`'s selection (byte-ladder part is already the
-  generated load contract), and native-byte equivalence.
+  pointer-tag propagation, the stack pointer helper, and native-byte
+  equivalence. `ARM64_SIM_L_STACK_READ_TAG` and the tag-slot gate in
+  `ARM64_SIM_L_STACK_WRITE_TAG` are now the generated, refined
+  `KPROG_ARM64_STACK_TAG` contract (the stack slot-tag refinement below), and
+  `ARM64_SIM_L_STACK_READ`'s word-path/byte-ladder *body* choice is now the
+  generated `KPROG_ARM64_STACK_ARM` contract (Step 0121); the byte-ladder part
+  of the write is already the generated load contract.
 
 ### AArch64 stack slot-tag refinement, 2026-09-16
 
@@ -9858,6 +9862,121 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the stack
   body-selection contract paragraph after the `MOV_REG` paragraph (paper commit
   pushed to `main`).
+
+## Step 0121 — AArch64 stack read word-path/byte-ladder body-selection contract
+
+- Scope: the AArch64 simulator's stack read helper
+  `ARM64_SIM_L_STACK_READ(OFF, WIDTH)` (`kprog/arm64/arm64_sim_local_bpf.h`)
+  chose *which body* reads a word through the frame by a hand-written
+  `width == 64 && aligned` test: the word-arena access
+  `__a64_stack.q[INDEX >> 3]` at the full 64-bit width on a qword-aligned
+  resolved index, the little-endian byte ladder over `b[]`
+  (`KPROG_ARM64_LOAD_BYTES`) at every other width and every unaligned index.
+  The byte-window arithmetic and the little-endian value composition were
+  already proved (`Arm64StackArena.lean`, `Arm64LoadBytes.lean`); this closes
+  the open two-fact *body* choice, under one width/alignment-keyed selector.
+  The byte-window arithmetic and the little-endian assembly stay in the
+  composed bodies. The stack *write* helper already routed its slot-tag gate
+  through `KPROG_ARM64_STACK_TAG` (Step 0042), so the read body choice was the
+  only remaining open stack body-selection surface on AArch64 — the x86 mirror
+  of Step 0120.
+- Shared spec `kprog/formal/arm64_stack_arm_spec.json` (`schema_version` 1,
+  `operation` `arm64StackArm`): a `selector`
+  `w64_and_aligned_then_word_else_byte`, `width64_define`/`width64_code`
+  `ARM64_WIDTH_64`/8, and two ordered arms `(arm, arm_define, body)`
+  `("word", "KPROG_ARM64_STACK_ARM_WORD", "word_arena_access")`,
+  `("byte", "KPROG_ARM64_STACK_ARM_BYTE", "byte_ladder_access")`, plus the four
+  `(name, w64, aligned, word)` cases `("qword", true, true, true)`,
+  `("sub_qword_aligned", false, true, false)`,
+  `("qword_unaligned", true, false, false)`,
+  `("sub_qword_unaligned", false, false, false)`.
+  `generate_arm64_stack_arm_spec.py` carries independent module-level `_ARMS`/
+  `_CASES` constructions, validates the spec against them, re-derives the live
+  stack-read region from the header (`stack_read_region()` slices the
+  `ARM64_SIM_L_STACK_READ` `#define` to `ARM64_SIM_L_STACK_READ_TAG`,
+  continuations flattened), and requires the region to route through the
+  generated selector `KPROG_ARM64_STACK_ARM(`, to keep the word-arena
+  `__a64_stack.q` and `KPROG_ARM64_STACK_WORD_INDEX(`, to keep the byte arena
+  `__a64_stack.b[`, to keep the read ladder `KPROG_ARM64_LOAD_BYTES(`, and to
+  have no hand `ARM64_WIDTH_64 &&` selector. It emits
+  `generated/arm64_stack_arm.h` (the plain
+  `KPROG_ARM64_STACK_ARM(IS_W64, IS_ALIGNED)` parenthesized
+  `((__u8)(((IS_W64) && (IS_ALIGNED)) ? 1 : 0))` macro, the
+  `_WIDTH64`/`_COUNT`/`_ARM_WORD`=1/`_ARM_BYTE`=0 codes, and
+  width/count/distinctness/four-selection drift asserts) and the Lean
+  `KProgFormal.GeneratedArm64StackArm` (`Arm` `word`|`byte`, `armOf isW64
+  isAligned := if isW64 && isAligned then .word else .byte`, a four-case
+  `Case` classification, and the `word_refines`/`armOf_refines` theorems).
+  `--check` rc=0.
+- Hand refinement `KProgFormal/Arm64StackArmShape.lean`: the independent specs
+  `arm64StackArmWidth64Spec := 8` and `arm64StackArmSpec`/
+  `arm64StackArmNamesSpec`/`arm64StackArmCodesSpec` (the literal
+  width/alignment-keyed branch, arm codes `[1, 0]`). It proves
+  `arm64_stack_arm_refines` (the generated `armOf` equals the independent
+  statement), `_names_refine`, `_codes_refine`, `_codes_length`,
+  `_names_length`, `_codes_nodup`, `_width64_spec_bound` (via
+  `arm64WidthCodeSpec .w64`), `_width64_is_w64`, `_count_is_2`,
+  `_of_code_roundtrip`, `_of_code_beyond_is_none`, `_bodies`, `_word_iff`,
+  `_byte_iff`, `_unaligned_never`, `_narrow_never`, `_over_widths`,
+  `_case_dispatch`, `_ladder_total`, `_case_refines`, and --- connecting the
+  selection to the arena contract --- `arm64_stack_arm_matches_arena` and
+  `_byte_covers` (via `GeneratedArm64StackArena.wordAligned` and
+  `arm64StackArenaWordAlignedSpec`). Module elaborates rc=0, no
+  `sorry`/`admit`.
+- Routing in `kprog/arm64/arm64_sim_local_bpf.h`: a new
+  `#include "../formal/generated/arm64_stack_arm.h"`, and the read helper now
+  routes its word/byte choice through
+  `KPROG_ARM64_STACK_ARM(__a64_str_width == ARM64_WIDTH_64,
+  KPROG_ARM64_STACK_WORD_ALIGNED(__a64_str_index))`, keeping the word-arena
+  access, the byte ladder, the byte-window arithmetic, and the helper signature
+  (`ARM64_SIM_L_STACK_READ(OFF, WIDTH)`) unchanged. `make -C kprog/arm64
+  micro-proofs-build` rebuilt all 30 workload-derived artifacts, all `ok`.
+- Two host oracles, both wired into `kprog/formal/Makefile`:
+  - `test_arm64_stack_arm_host.c` includes the generated header (compiling its
+    drift asserts) and drives the compiled selector over all 256×256
+    boolean-fact pairs against an independent literal model, plus the
+    count/selector-table and the eight width-code
+    (`ARM64_WIDTH_{8,16,32,64}` against `= 64` and `0 == 64`) selection-drift
+    checks --- `arm64 stack arm host cross-check: OK (65540 cases)`.
+  - `test_arm64_stack_arm_route_host.c` includes the simulator header
+    (`ARM64_SIM_ENABLE_STACK`) and drives the real `ARM64_SIM_L_STACK_READ`
+    helper over every resolved index for every width against an independent
+    model that computes *both* bodies (the covering `q[idx >> 3]` word slot and
+    the little-endian byte ladder) and the independent name of the selected arm:
+    a wrongly selected body — the floor-aligned word window for an unaligned
+    index, or a truncated window — diverges from the model; it also checks the
+    qword-aligned word body against the byte ladder over the same 8-byte
+    window, the real write/read round-trip over every width and offset against
+    the model's write, and the arm selector against the code defines
+    --- `arm64 stack arm route host cross-check: OK (167478 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **151** `cross-check: OK`. Baseline
+  was **149** for Step 0120; Step 0121 adds the two stack-arm oracles and the
+  Lean pair, wired into `kprog/formal/Makefile`, with the two new Lean modules
+  imported in `KProgFormal.lean`.
+- Mutation harness `kprog/formal/build/mut_arm64_stack_arm.py`, 48 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end: nine spec defects (arm-name/body/arm-define/case-name/w64/word/
+  width64/selector drifts and an arm-order swap → generator), nine generator
+  defects (width64/word-arena/selector/byte-arena/and-test/armOf/wordSpec/macro
+  text drifts → generator), six generated-C defects (width64/count/
+  word-selection-assert drifts → generator, and word-code/byte-code/
+  macro-inversion drifts → host), eight generated-Lean defects
+  (count/width64/names/codes/armOf drifts → generator and word-code/byte-code/
+  qword-body drifts → refinement), six hand-refinement defects (width64-def
+  drift, the spec shape swap, the names/codes swaps, and the dispatch/bodies
+  claim drifts → refinement), six routed-body defects (dropped include,
+  unrouted selector — count 1 here, since only the read helper routes — drifted
+  word arena/index, drifted assemble ladder, and the reintroduced hand `&&`
+  selection → generator/route), and two generator+artifact pair defects
+  regenerated so `--check` stays green and only the rebuilt-olean refinement/
+  route catches them (a body value drift and a width64 value drift). Three
+  semantically equivalent mutations (an added include-side comment, an added
+  hand-module comment, and a resolved-but-equal generator root path) SURVIVE as
+  required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  stack body-selection contract paragraph (paper commit pushed to `main`).
 
 ## Next after 0076
 

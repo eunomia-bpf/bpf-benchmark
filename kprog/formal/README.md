@@ -819,6 +819,28 @@ oracle drives the real stack helpers over every resolved index (aligned and
 unaligned), five width codes (including the absent-code 64-bit fallback), and
 several values against an independent little-endian byte model, comparing the
 whole byte arena and the read-back (117,782 cases).
+The AArch64 stack *read* helper's choice of which body reads a word through
+the frame is likewise a generated contract: `generate_arm64_stack_arm_spec.py`
+emits `KPROG_ARM64_STACK_ARM(IS_W64, IS_ALIGNED)`, which names the word-arena
+access at the full 64-bit width code on a qword-aligned resolved index and the
+little-endian byte ladder over `b[]` at every other width and every unaligned
+index, and `Arm64StackArmShape.lean` proves the generated `armOf` equal to an
+independent width/alignment-literal statement that names the word body exactly
+at the full-width/aligned pair and the byte body at the other three cases, that
+the arm result names agree with the generated table, that the arm codes are
+distinct and their lookup is a left inverse, and — connecting this selection
+contract to the arena contract — that the chosen body matches the
+`Arm64StackArena` word/byte split. `ARM64_SIM_L_STACK_READ` computes the
+two-fact selector and branches through the selected body, leaving the
+byte-window arithmetic and the little-endian assembly in the composed bodies;
+the stack *write* helper already routed its slot-tag gate through the
+machine-checked `KPROG_ARM64_STACK_TAG` contract, so only the read body choice
+was open. A generated-header oracle cross-checks the compiled selector against
+an independent literal model over all 256×256 boolean-fact pairs (65,540
+cases), and a sim-header route oracle drives the real read helper over every
+resolved index and every width against an independent model of both bodies and
+the selected arm, plus the real write/read round-trip, comparing each read
+against the body the independent selector names (167,478 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
