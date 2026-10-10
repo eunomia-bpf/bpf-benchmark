@@ -3,70 +3,51 @@ import KinsnLean4.Kinsn.ModuleByteAlu
 
 namespace Kinsn.ModuleNarrowXor
 
-def slot : BitVec 64 := -8
-
-/-- x86/bpf_x86_alu.c:instantiate_x86_alu_mem's byte/word case. The LDX
-    zero-extends, so XOR64 already preserves the destination's upper lane. -/
+/-- The memory forms expose a second output holding the loaded byte/word. -/
 def memoryBpf (n : Nat) (indexed : Bool) (d b i t : BPF.Reg) (scale : Nat)
     (off : BitVec 64) : List BPF.MInsn :=
-  [.store 8 .r10 (.reg t) slot] ++
-    (ModuleWideAlu.address indexed t b i scale).map BPF.MInsn.core ++
-    [.load n t t off, .core (.alu .xor .w64 d (.reg t)), .load 8 t .r10 slot]
+  (ModuleWideAlu.address indexed t b i scale).map BPF.MInsn.core ++
+    [.load n t t off, .core (.alu .xor .w64 d (.reg t))]
 
-/-- x86/bpf_x86_alu.c:emit_xorb_sib_x86/emit_alu_mem_x86: native XORB SIB
-    or XORW direct memory, with exactly the proof's mapped temporary accesses. -/
 def memoryNative (m : X86RegMap) (n : Nat) (indexed : Bool) (d b i t : BPF.Reg)
     (scale : Nat) (off : BitVec 64) : List X86.MInsn :=
-  [.store 8 (m.map t) (m.map .r10) slot,
-    if indexed then .aluMemIndexNarrow .xor (n*8) (m.map d) (m.map b) (m.map i) scale off
-      else .aluMemNarrow .xor (n*8) (m.map d) (m.map b) off,
-    .load 8 (m.map t) (m.map .r10) slot]
+  [if indexed then .loadIndex n (m.map t) (m.map b) (m.map i) scale off false
+      else .load n (m.map t) (m.map b) off,
+    .aluNarrow .xor 64 (m.map d) (m.map t)]
 
 def memorySpec (n : Nat) (indexed : Bool) (d b i t : BPF.Reg) (scale : Nat)
     (off : BitVec 64) (s : Outcome) : Outcome :=
-  let saved := ModuleMemory.storeSpec 8 t .r10 slot s
-  let a := saved.regs b + (if indexed then saved.regs i <<< scale else 0) + off
-  let v := Machine.loadLE saved.mem a n
-  let aSlot := saved.regs .r10 + slot
-  let restored := Machine.loadLE saved.mem aSlot 8
-  { regs := (saved.regs.set d (saved.regs d ^^^ v)).set t restored
-    mem := saved.mem
-    trace := (saved.trace ++ [.read a n v]) ++ [.read aSlot 8 restored] }
-
-theorem xor_load_value (n : Nat) (hn : n = 1 ∨ n = 2) (mem : Machine.Memory)
-    (a v : BitVec 64) :
-    X86.writeWidth (n*8) v (v ^^^ Machine.loadLE mem a n) = v ^^^ Machine.loadLE mem a n := by
-  rcases hn with rfl | rfl
-  all_goals apply BitVec.eq_of_getLsbD_eq
-  all_goals intro j hj
-  all_goals interval_cases j
-  all_goals simp [X86.writeWidth, Bits.lowMask, Machine.loadLE]
+  let a := s.regs b + (if indexed then s.regs i <<< scale else 0) + off
+  let v := Machine.loadLE s.mem a n
+  { regs := (s.regs.set t v).set d (s.regs d ^^^ v)
+    mem := s.mem
+    trace := s.trace ++ [.read a n v] }
 
 theorem memory_bpf_correct (n : Nat) (indexed : Bool) (d b i t : BPF.Reg)
     (scale : Nat) (off : BitVec 64) (hs : scale ≤ 3) (ht : t ≠ d)
     (hi : t ≠ i) (hf : t ≠ .r10) (hd : d ≠ .r10) (s : BPF.State) :
     observeBpf (BPF.mexec (memoryBpf n indexed d b i t scale off) s) =
       memorySpec n indexed d b i t scale off (observeBpf s) := by
-  simp only [memoryBpf, List.cons_append, List.nil_append, BPF.mexec]
+  simp only [memoryBpf]
   rw [ModuleDispatch.exec_core_tail, ModuleWideAlu.address_exec indexed t b i scale hi hs]
   simp [BPF.mexec, BPF.MInsn.step, BPF.Insn.step, BPF.AluOp.eval, BPF.Src.eval,
-    memorySpec, ModuleMemory.storeSpec, observeBpf, Machine.State.read,
+    memorySpec, observeBpf, Machine.State.read,
     Machine.State.write, Machine.State.set, BPF.RegFile.set, Ne.symm ht,
     Ne.symm hf, Ne.symm hd, List.append_assoc]
   funext q
   by_cases hqt : q = t <;> by_cases hqd : q = d
   all_goals simp_all [BPF.RegFile.set]
 
-theorem memory_native_correct (m : X86RegMap) (n : Nat) (hn : n = 1 ∨ n = 2)
+theorem memory_native_correct (m : X86RegMap) (n : Nat)
     (indexed : Bool) (d b i t : BPF.Reg) (scale : Nat) (off : BitVec 64)
-    (hd : d ≠ .r10) (s : X86.State) :
+    (ht : t ≠ d) (s : X86.State) :
     observeX86 m (X86.mexec (memoryNative m n indexed d b i t scale off) s) =
       memorySpec n indexed d b i t scale off (observeX86 m s) := by
   cases indexed <;>
     simp [memoryNative, X86.mexec_cons, X86.mexec_nil, X86.MInsn.step, memorySpec,
-      ModuleMemory.storeSpec, observeX86, Machine.State.read, Machine.State.write,
-      Machine.State.set, X86.AluOp.eval, xor_load_value n hn,
-      m.inj.eq_iff, Ne.symm hd, List.append_assoc]
+      observeX86, Machine.State.read, Machine.State.write,
+      Machine.State.set, X86.AluOp.eval, X86.writeWidth,
+      m.inj.eq_iff, BPF.RegFile.set, ht, Ne.symm ht, List.append_assoc]
   all_goals funext q
   all_goals by_cases hqt : q = t <;> by_cases hqd : q = d
   all_goals simp_all [BPF.RegFile.set]
@@ -79,7 +60,7 @@ def memoryCert (m : X86RegMap) (n : Nat) (hn : n = 1 ∨ n = 2) (indexed : Bool)
   native := memoryNative m n indexed d b i t scale off
   writeSet := [d, t]
   bpfCorrect := memory_bpf_correct n indexed d b i t scale off hs ht hi hf hd
-  nativeCorrect := memory_native_correct m n hn indexed d b i t scale off hd
+  nativeCorrect := memory_native_correct m n indexed d b i t scale off ht
   bpfWrites := by
     intro r hr
     simp only [memoryBpf, BPF.mwrites, List.flatMap_append, List.flatMap_cons,

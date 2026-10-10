@@ -91,10 +91,10 @@ struct kinsn_x86_alu_payload {
 
 /*
  * One kinsn name covers one x86 mnemonic+width, while this payload describes
- * the operand form. That keeps final native emission one instruction
- * (for example, bpf_x86_addq -> one addq) without creating separate kfuncs
- * for addq_rr/addq_imm/addq_mem. Verifier scratch registers are internal to
- * instantiate_insn() and are not part of the payload ABI.
+ * the operand form. Register/immediate forms write only dst. Memory forms
+ * declare a second output, data_reg: the lowest writable BPF register not
+ * equal to dst, base, or the active index. Both proof and native leave the
+ * zero-extended loaded operand in data_reg. There is no hidden scratch state.
  */
 static __always_inline int decode_x86_alu_payload(u64 payload,
 						  struct kinsn_x86_alu_payload *alu)
@@ -195,10 +195,9 @@ static __always_inline int emit_bpf_alu_imm(struct bpf_insn *insn, u8 op,
 	return 0;
 }
 
-/* A live temporary is chosen from the BPF register file, excluding every
- * operand. Its save/restore is emitted natively as well as in the proof.
- */
-static int x86_alu_mem_temp(const struct kinsn_x86_alu_payload *alu)
+/* The memory form's declared data output. Its final value, unlike a borrowed
+ * temporary, is visible to both the verifier and the native caller. */
+static int x86_alu_data_output(const struct kinsn_x86_alu_payload *alu)
 {
 	bool indexed = alu->form == KINSN_X86_ALU_FORM_SIB ||
 		       alu->form == KINSN_X86_ALU_FORM_ARCH_SIB;
@@ -224,11 +223,9 @@ static int instantiate_x86_alu_mem(const struct kinsn_x86_alu_payload *alu,
 
 	if (width != 8 && width != 16 && width != 32 && width != 64)
 		return -EINVAL;
-	temp = x86_alu_mem_temp(alu);
+	temp = x86_alu_data_output(alu);
 	if (temp < 0)
 		return temp;
-	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, temp,
-				    KINSN_X86_PROOF_RHS_OFF);
 	insn_buf[cnt++] = BPF_MOV64_REG(temp, alu->base_reg);
 	if (indexed) {
 		for (i = 0; i < (1U << alu->scale_log2); i++)
@@ -241,8 +238,6 @@ static int instantiate_x86_alu_mem(const struct kinsn_x86_alu_payload *alu,
 			       alu->dst_reg, temp);
 	if (err)
 		return err;
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, temp, BPF_REG_10,
-				    KINSN_X86_PROOF_RHS_OFF);
 	return cnt;
 }
 
@@ -604,23 +599,6 @@ static int instantiate_xorw(u64 payload, struct bpf_insn *insn_buf)
 	return instantiate_x86_alu_mem(&decoded, insn_buf, BPF_XOR, 16);
 }
 
-static __always_inline void emit_rex8_mem(u8 *buf, u32 *len, u8 reg_field,
-					  u8 base_reg, u8 index_reg,
-					  bool has_index)
-{
-	u8 rex = 0x40;
-
-	if (kinsn_x86_ext(reg_field))
-		rex |= 0x04;
-	if (has_index && kinsn_x86_ext(index_reg))
-		rex |= 0x02;
-	if (kinsn_x86_ext(base_reg))
-		rex |= 0x01;
-	if (rex != 0x40 || kinsn_x86_needs_rex8(reg_field) ||
-	    (has_index && kinsn_x86_needs_rex8(index_reg)))
-		kinsn_emit_u8(buf, len, rex);
-}
-
 static void emit_alu_temp_slot(u8 *buf, u32 *len, u8 temp, u8 frame, bool load)
 {
 	kinsn_emit_rex(buf, len, true, kinsn_x86_ext(temp), false, kinsn_x86_ext(frame));
@@ -628,79 +606,58 @@ static void emit_alu_temp_slot(u8 *buf, u32 *len, u8 temp, u8 frame, bool load)
 	kinsn_emit_modrm_mem(buf, len, temp, frame, KINSN_X86_PROOF_RHS_OFF);
 }
 
+/* One operand read into the declared data output, followed by register ALU.
+ * No program-stack access is part of this operation. */
+static int emit_alu_data_x86(u8 *image, u32 *off, bool emit,
+			     const struct kinsn_x86_alu_payload *alu,
+			     const struct bpf_prog *prog, u8 width,
+			     u8 opcode, bool indexed)
+{
+	u8 buf[24];
+	u8 dst, base, index = 0, data;
+	u32 len = 0;
+	int out;
+
+	out = x86_alu_data_output(alu);
+	if (out < 0)
+		return out;
+	data = kinsn_x86_reg_for_prog(prog, out);
+	dst = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
+	base = kinsn_x86_reg_for_prog(prog, alu->base_reg);
+	if (indexed)
+		index = kinsn_x86_reg_for_prog(prog, alu->index_reg);
+	kinsn_emit_rex(buf, &len, width == 64, kinsn_x86_ext(data),
+		       indexed && kinsn_x86_ext(index), kinsn_x86_ext(base));
+	if (width < 32) {
+		kinsn_emit_u8(buf, &len, 0x0f);
+		kinsn_emit_u8(buf, &len, width == 8 ? 0xb6 : 0xb7);
+	} else {
+		kinsn_emit_u8(buf, &len, 0x8b);
+	}
+	if (indexed)
+		kinsn_emit_sib_mem(buf, &len, data, base, index, alu->scale_log2, alu->offset);
+	else
+		kinsn_emit_modrm_mem(buf, &len, data, base, alu->offset);
+	kinsn_emit_rex_rr(buf, &len, width != 32, dst, data);
+	kinsn_emit_u8(buf, &len, opcode);
+	kinsn_emit_u8(buf, &len, 0xc0 | (kinsn_x86_code(dst) << 3) | kinsn_x86_code(data));
+	return kinsn_emit_finish(image, off, emit, buf, len);
+}
+
 static int emit_alu_mem_x86(u8 *image, u32 *off, bool emit,
 			    const struct kinsn_x86_alu_payload *alu,
 			    const struct bpf_prog *prog, u8 width,
-			    u8 opcode, bool is16, bool is8)
+			    u8 opcode)
 {
-	u8 buf[32];
-	u8 dst_reg, base_reg;
-	u32 len = 0;
-	int temp = -1;
-	u8 frame = kinsn_x86_reg_for_prog(prog, BPF_REG_10);
-
-	dst_reg = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
-	base_reg = kinsn_x86_reg_for_prog(prog, alu->base_reg);
-	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(base_reg))
-		return -EINVAL;
-
-	if (!is8) {
-		temp = x86_alu_mem_temp(alu);
-		if (temp < 0)
-			return temp;
-		emit_alu_temp_slot(buf, &len, kinsn_x86_reg_for_prog(prog, temp),
-				   frame, false);
-	}
-	if (is16)
-		kinsn_emit_u8(buf, &len, 0x66);
-	if (is8)
-		emit_rex8_mem(buf, &len, dst_reg, base_reg, 0, false);
-	else
-		kinsn_emit_rex(buf, &len, width == 64,
-			       kinsn_x86_ext(dst_reg), false,
-			       kinsn_x86_ext(base_reg));
-	kinsn_emit_u8(buf, &len, opcode);
-	kinsn_emit_modrm_mem(buf, &len, dst_reg, base_reg, alu->offset);
-
-	if (temp >= 0)
-		emit_alu_temp_slot(buf, &len, kinsn_x86_reg_for_prog(prog, temp),
-				   frame, true);
-	return kinsn_emit_finish(image, off, emit, buf, len);
+	return emit_alu_data_x86(image, off, emit, alu, prog,
+				 width, opcode, false);
 }
 
 static int emit_alu_sib_x86(u8 *image, u32 *off, bool emit,
 			    const struct kinsn_x86_alu_payload *alu,
 			    const struct bpf_prog *prog, u8 width, u8 opcode)
 {
-	u8 buf[32];
-	u8 dst_reg, base_reg, index_reg;
-	u32 len = 0;
-	int temp = -1;
-	u8 frame = kinsn_x86_reg_for_prog(prog, BPF_REG_10);
-
-	dst_reg = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
-	base_reg = kinsn_x86_reg_for_prog(prog, alu->base_reg);
-	index_reg = kinsn_x86_reg_for_prog(prog, alu->index_reg);
-	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(base_reg) ||
-	    !kinsn_x86_valid(index_reg))
-		return -EINVAL;
-
-	if (width == 32 || width == 64) {
-		temp = x86_alu_mem_temp(alu);
-		if (temp < 0)
-			return temp;
-		emit_alu_temp_slot(buf, &len, kinsn_x86_reg_for_prog(prog, temp),
-				   frame, false);
-	}
-	kinsn_emit_rex(buf, &len, width == 64, kinsn_x86_ext(dst_reg),
-		       kinsn_x86_ext(index_reg), kinsn_x86_ext(base_reg));
-	kinsn_emit_u8(buf, &len, opcode);
-	kinsn_emit_sib_mem(buf, &len, dst_reg, base_reg, index_reg,
-			   alu->scale_log2, alu->offset);
-	if (temp >= 0)
-		emit_alu_temp_slot(buf, &len, kinsn_x86_reg_for_prog(prog, temp),
-				   frame, true);
-	return kinsn_emit_finish(image, off, emit, buf, len);
+	return emit_alu_data_x86(image, off, emit, alu, prog, width, opcode, true);
 }
 
 static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
@@ -723,7 +680,7 @@ static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
 		if (x86_alu_is_shift(op))
 			return -EINVAL;
 		return emit_alu_mem_x86(image, off, emit, alu, prog, width,
-					rr_opcode | 0x02, false, false);
+					rr_opcode | 0x02);
 	}
 
 	if (alu->form == KINSN_X86_ALU_FORM_SIB ||
@@ -950,31 +907,7 @@ static int emit_xorb_sib_x86(u8 *image, u32 *off, bool emit,
 			     const struct kinsn_x86_alu_payload *alu,
 			     const struct bpf_prog *prog)
 {
-	u8 buf[32];
-	u8 dst_reg, base_reg, index_reg;
-	u32 len = 0;
-	u8 frame = kinsn_x86_reg_for_prog(prog, BPF_REG_10);
-	int temp;
-
-	temp = x86_alu_mem_temp(alu);
-	if (temp < 0)
-		return temp;
-	temp = kinsn_x86_reg_for_prog(prog, temp);
-	dst_reg = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
-	base_reg = kinsn_x86_reg_for_prog(prog, alu->base_reg);
-	index_reg = kinsn_x86_reg_for_prog(prog, alu->index_reg);
-	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(base_reg) ||
-	    !kinsn_x86_valid(index_reg))
-		return -EINVAL;
-
-	emit_alu_temp_slot(buf, &len, temp, frame, false);
-	emit_rex8_mem(buf, &len, dst_reg, base_reg, index_reg, true);
-	kinsn_emit_u8(buf, &len, 0x32);
-	kinsn_emit_sib_mem(buf, &len, dst_reg, base_reg, index_reg,
-			   alu->scale_log2, alu->offset);
-
-	emit_alu_temp_slot(buf, &len, temp, frame, true);
-	return kinsn_emit_finish(image, off, emit, buf, len);
+	return emit_alu_data_x86(image, off, emit, alu, prog, 8, 0x33, true);
 }
 
 static int emit_xorb_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -1016,7 +949,7 @@ static int emit_xorw_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	    decoded.form != KINSN_X86_ALU_FORM_ARCH_MEM)
 		return -EINVAL;
 	return emit_alu_mem_x86(image, off, emit, &decoded, prog, 16,
-				0x33, true, false);
+				0x33);
 }
 
 static int emit_incb_x86(u8 *image, u32 *off, bool emit,
