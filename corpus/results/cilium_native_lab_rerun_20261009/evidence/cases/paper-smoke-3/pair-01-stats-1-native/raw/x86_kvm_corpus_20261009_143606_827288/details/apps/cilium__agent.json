@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "modprobe pktgen failed: modprobe: FATAL: Module pktgen not found in directory /artifacts/lib/modules/7.0.0-rc2+; modprobe pktgen failed: modprobe: FATAL: Module pktgen not found in directory /artifacts/lib/modules/7.0.0-rc2+",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}

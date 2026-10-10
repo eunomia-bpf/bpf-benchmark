@@ -1,0 +1,98 @@
+"""Experiment-local observation; calls the unmodified corpus measurement."""
+import json
+import os
+import pathlib
+import signal
+import subprocess
+import time
+
+ROOT = pathlib.Path('/workspaces/repository/corpus/results/cilium_native_lab_20261009')
+
+def capture(out, name, command):
+    p = subprocess.run(command, capture_output=True)
+    (out / name).write_bytes(p.stdout)
+    if p.stderr or p.returncode:
+        (out / (name + '.stderr')).write_bytes(p.stderr)
+    with (out / 'commands.jsonl').open('a') as f:
+        f.write(json.dumps({'time':time.time(), 'argv':command, 'returncode':p.returncode})+'\n')
+    return p
+
+def snapshot(out, label, images=False):
+    capture(out, label+'-programs.json', ['bpftool','-j','prog','show'])
+    maps = capture(out, label+'-maps.json', ['bpftool','-j','map','show'])
+    if maps.returncode == 0:
+        for m in json.loads(maps.stdout):
+            if 'metrics' in m.get('name','') or m['type'] == 'prog_array':
+                capture(out, f'{label}-map-{m["id"]}-{m["name"]}.json', ['bpftool','-j','map','dump','id',str(m['id'])])
+    capture(out, label+'-net.json', ['bpftool','-j','net','show'])
+    capture(out, label+'-links.json', ['bpftool','-j','link','show'])
+    capture(out, label+'-interfaces.json', ['ip','-s','-j','link','show'])
+    for ns in ['bpfbench-cepa','bpfbench-cepb']:
+        capture(out, label+'-'+ns+'.json', ['ip','-n',ns,'-s','-j','link','show'])
+    capture(out, label+'-affinities.txt', ['ps','-eLo','pid,tid,psr,comm'])
+    k = pathlib.Path('/proc/kallsyms').read_text()
+    (out / (label+'-bpf-kallsyms.txt')).write_text(''.join(l+'\n' for l in k.splitlines() if 'bpf_prog_' in l or 'native' in l))
+    if images:
+        d=out/'images';d.mkdir(exist_ok=True)
+        progs=json.loads((out/(label+'-programs.json')).read_text())
+        for p in progs:
+            for kind in ['jited','xlated']:
+                capture(out,f'dump-{p["id"]}-{kind}.txt',['bpftool','prog','dump',kind,'id',str(p['id']),'file',str(d/f'{p["id"]}-{p["name"]}-{kind}.bin')])
+        (out/'kallsyms.txt').write_text(k)
+        capture(out, 'dmesg.txt', ['dmesg'])
+
+def install():
+    import runner.libs.rejit as rejit
+    original=rejit.measure_app_phase
+    ordinal=0
+    def observe(**kwargs):
+        nonlocal ordinal
+        cfg=json.loads((ROOT/'phase-config.json').read_text())
+        phase='jit' if ordinal == 0 else cfg['second_arm']
+        out=ROOT/cfg['name']/f'{ordinal:02}-{phase}'
+        out.mkdir(parents=True,exist_ok=True)
+        ordinal+=1
+        for pid in kwargs.get('app_pids',[]):
+            for t in pathlib.Path(f'/proc/{pid}/task').iterdir():
+                os.sched_setaffinity(int(t.name), {2,3,4,5})
+        for p in pathlib.Path('/proc').iterdir():
+            if p.name.isdecimal():
+                try:
+                    comm=(p/'comm').read_text().strip()
+                except FileNotFoundError:
+                    continue
+                if comm in ['kpktgend_0','kpktgend_1']:
+                    os.sched_setaffinity(int(p.name),{int(comm[-1])})
+        (out/'phase.json').write_text(json.dumps({'arm':phase,'start':time.time(),'kernel':os.uname().release,'boot_id':pathlib.Path('/proc/sys/kernel/random/boot_id').read_text().strip(),'pid_affinity':sorted(os.sched_getaffinity(0)),'config':cfg},indent=2)+'\n')
+        snapshot(out,'before',True)
+        perf=None
+        f=None
+        if cfg['mode'] in ['perf-stat','perf-record']:
+            pathlib.Path('/proc/sys/kernel/kptr_restrict').write_text('0\n')
+            pathlib.Path('/proc/sys/net/core/bpf_jit_kallsyms').write_text('1\n')
+            f=(out/'perf-stderr.txt').open('w')
+            if cfg['mode']=='perf-stat':
+                argv=['/usr/local/bin/lab-perf','stat','-a','-x,','-e','cycles,instructions,branches,branch-misses,L1-icache-load-misses,iTLB-load-misses','-o',str(out/'perf-stat.csv')]
+            else:
+                argv=['/usr/local/bin/lab-perf','record','-a','-g','-F','199','-o',str(out/'perf.data')]
+            perf=subprocess.Popen(argv,stdout=f,stderr=f)
+            time.sleep(.5)
+        t=time.time()
+        (out/'timed-start.txt').write_text(str(t)+'\n')
+        try:
+            result=original(**kwargs)
+            (out/'raw-phase.json').write_text(json.dumps(result,indent=2)+'\n')
+            return result
+        finally:
+            (out/'timed-end.txt').write_text(str(time.time())+'\n')
+            if perf:
+                if perf.poll() is None:
+                    perf.send_signal(signal.SIGINT)
+                rc=perf.wait(timeout=60)
+                f.close()
+                (out/'perf-exit.txt').write_text(str(rc)+'\n')
+                if cfg['mode']=='perf-record' and (out/'perf.data').exists():
+                    capture(out,'perf-report.txt',['/usr/local/bin/lab-perf','report','--stdio','--no-children','-i',str(out/'perf.data'),'--sort','symbol,dso','--percent-limit','0'])
+                    capture(out,'perf-script.txt',['/usr/local/bin/lab-perf','script','-i',str(out/'perf.data'),'-F','comm,pid,tid,cpu,time,event,ip,sym,dso'])
+            snapshot(out,'after')
+    rejit.measure_app_phase=observe

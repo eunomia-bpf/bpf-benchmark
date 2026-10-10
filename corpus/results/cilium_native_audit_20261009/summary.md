@@ -24,3 +24,10 @@ The existing AWS path supports custom x86 kernel deployment; no native-platform 
 The Makefile AWS native preflight entered only local kernel compilation, then was interrupted after `aws --profile codex-ec2 ... sts get-caller-identity` failed with exit 255: profile absent; default SSH key absent; no AWS credential environment variables. Logs and exact command are retained. No guest ran on the lab host. **Instances started: 0; termination required: 0; AWS cost: 0.** Planned resources were `t3.small`, `us-east-1`; intended kernel `24cd6e63ce91`, `7.0.0-rc2+`. No AWS kernel was observed. Restore existing credential/key paths to perform the requested comparison; its absence is not a measured native failure.
 
 No existing result, framework code, workload, launcher, or paper number was changed.
+
+The subsequent [October 9 lab rerun](../cilium_native_lab_rerun_20261009/summary.md)
+completed the historical pinned pairs/controls and one current-master pair,
+then was interrupted by the reported host reboot about 16:04–16:05 UTC.
+Its native arm policy-dropped traffic that JIT forwarded; retained timing/PPS
+ratios therefore do not establish equivalent-forwarding speedups. This later
+record does not change the old audit's measurements or confidence limits.

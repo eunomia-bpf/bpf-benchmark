@@ -1,0 +1,40 @@
+{
+  "bpf_stats": true,
+  "completed_at": "2026-10-09T14:56:22.981534+00:00",
+  "config": {
+    "enabled_passes": [
+      "noop",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "lea",
+      "ccmp",
+      "bulk_memory",
+      "prefetch",
+      "wide_mem",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "noop",
+      "const_prop",
+      "dce"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-10-09T14:56:22.981539+00:00",
+  "last_updated_at": "2026-10-09T14:56:22.981534+00:00",
+  "launcher_boot_id": "775b0c3e-c078-4e5d-a8d3-4d9373cb7b7e",
+  "launcher_pid": 1868,
+  "launcher_start_ticks": 4915,
+  "manifest": "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-10-09T14:53:44.346060+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 30.0
+}

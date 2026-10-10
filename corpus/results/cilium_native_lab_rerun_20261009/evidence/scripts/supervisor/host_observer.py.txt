@@ -1,0 +1,19 @@
+import json
+import pathlib
+import subprocess
+import sys
+import time
+
+out=pathlib.Path(sys.argv[1])
+root=pathlib.Path('/sys/fs/cgroup/kubepods.slice')
+paths=list(root.glob('*/*.slice/cpu.stat'))
+with out.open('a',buffering=1) as f:
+    while True:
+        groups={}
+        for p in paths:
+            try:
+                groups[str(p.parent)]=dict(l.split() for l in p.read_text().splitlines())
+            except FileNotFoundError:
+                groups[str(p.parent)]={'removed':True}
+        f.write(json.dumps({'time':time.time(),'pid1_start':subprocess.check_output(['ps','-o','lstart=','-p','1'],text=True).strip(),'loadavg':pathlib.Path('/proc/loadavg').read_text().strip(),'cpu_stat':pathlib.Path('/proc/stat').read_text().splitlines()[:25],'workspaces':groups,'processes':subprocess.check_output(['ps','-eLo','pid,tid,pcpu,psr,comm','--sort=-pcpu'],text=True).splitlines()[:30]})+'\n')
+        time.sleep(2)

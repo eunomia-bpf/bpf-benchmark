@@ -1,0 +1,17 @@
+{
+  "time": "2026-10-09T14:17:15Z",
+  "pid1_start": "Mon Oct  5 14:33:47 2026",
+  "boot_id": "8a085fbc-151f-4763-91dd-edebba7a1ff4",
+  "current_commit": "9be2b6a199d4ae4d2a2a1e9a437fa9aca0222f5d",
+  "paper_commit": "9f3855f6fa1c43027cfe0788615b6efb247f2a4d",
+  "paper_kernel": "8e116c79d1043f8e4dadd708f3a1ee5a26d19246",
+  "current_kernel": "24cd6e63ce912a4e220ca1cae3137ab29706551b",
+  "host": "Linux coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-xfqrt 7.3.0-070300rc3-generic #202609132247 SMP PREEMPT_DYNAMIC Sun Sep 13 23:07:09 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+  "p_cores": "0-7",
+  "pinning": {
+    "vcpus": "0-5 -> host P-cores 0-5",
+    "pktgen": "guest 0,1 -> host 0,1",
+    "application": "guest 2-5 -> host 2-5"
+  },
+  "reboots": []
+}

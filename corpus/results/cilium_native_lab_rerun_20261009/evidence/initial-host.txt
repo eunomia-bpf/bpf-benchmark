@@ -1,0 +1,59 @@
+Fri Oct  9 14:14:48 UTC 2026
+coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-xfqrt
+Linux coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-xfqrt 7.3.0-070300rc3-generic #202609132247 SMP PREEMPT_DYNAMIC Sun Sep 13 23:07:09 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+Mon Oct  5 14:33:47 2026
+8a085fbc-151f-4763-91dd-edebba7a1ff4
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  24
+On-line CPU(s) list:                     0-23
+Vendor ID:                               GenuineIntel
+BIOS Vendor ID:                          Intel(R) Corporation
+Model name:                              Intel(R) Core(TM) Ultra 9 285K
+BIOS Model name:                         Intel(R) Core(TM) Ultra 9 285K To Be Filled By O.E.M. CPU @ 4.5GHz
+BIOS CPU family:                         775
+CPU family:                              6
+Model:                                   198
+Thread(s) per core:                      1
+Core(s) per socket:                      24
+Socket(s):                               1
+Stepping:                                2
+CPU(s) scaling MHz:                      87%
+CPU max MHz:                             3700.0000
+CPU min MHz:                             800.0000
+BogoMIPS:                                7372.80
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a rdseed adx smap clflushopt clwb intel_pt sha_ni xsaveopt xsavec xgetbv1 xsaves split_lock_detect user_shstk avx_vnni lass lam wbnoinvd dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req hfi vnmi umip pku ospke waitpkg gfni vaes vpclmulqdq rdpid bus_lock_detect movdiri movdir64b fsrm md_clear serialize arch_lbr ibt flush_l1d arch_capabilities
+Virtualization:                          VT-x
+L1d cache:                               768 KiB (20 instances)
+L1i cache:                               1.3 MiB (20 instances)
+L2 cache:                                40 MiB (12 instances)
+L3 cache:                                36 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-23
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Ghostwrite:                Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Old microcode:             Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS Not affected; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+0::/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod901a2100_a80e_45e9_9fea_d320be468e69.slice/cri-containerd-a0f86debf758e45c8a0d1d158ce02e84e08b9fe9174fca2eea9119fc0d96d29b.scope
+1.79 1.50 1.84 1/4820 1377526
+Filesystem                                              Size  Used Avail Use% Mounted on
+/dev/longhorn/pvc-5d4c4db8-b59c-44d0-a162-0ff347a6a005  251G  236G   16G  94% /workspaces
+overlay                                                 1.8T  1.7T  173G  91% /
+9be2b6a199d4ae4d2a2a1e9a437fa9aca0222f5d

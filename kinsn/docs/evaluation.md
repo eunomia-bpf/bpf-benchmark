@@ -23,6 +23,18 @@ corpus patterns, whether the transformed programs still pass ReJIT and run
 the application workloads, and whether the extra kfunc call path pays for
 itself in measured BPF and workload costs.
 
+The Cilium native comparison has a separate
+[October 9 audit](../../corpus/results/cilium_native_audit_20261009/summary.md)
+and [interrupted pinned lab rerun](../../corpus/results/cilium_native_lab_rerun_20261009/summary.md).
+The rerun completed historical pairs/controls and one current-master stats-on
+pair before the reported 16:04–16:05 UTC host reboot. That current pair's
+5.054801x ns/run and 3.813351x generated-PPS ratios accompany 110,502,719
+native policy drops versus zero JIT policy drops and about 28.9 million
+forwards per direction. Historical native also lost five TCX attachments;
+current native retained all seven but still dropped the traffic. These
+unequal packet paths do not establish equivalent-forwarding speedups.
+The record preserves raw evidence without changing paper numbers.
+
 The current research questions are:
 
 - **RQ1 Correctness:** does the kinsn umbrella pass preserve real corpus app

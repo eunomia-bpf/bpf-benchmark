@@ -1,0 +1,47 @@
+"""Independent offline arithmetic for completed corpus Cilium phases."""
+import collections
+import json
+import pathlib
+import re
+import statistics
+
+root=pathlib.Path('/workspaces/repository/corpus/results/cilium_native_lab_20261009')
+rows=[]
+def pps(workload):
+    if 'components' in workload:
+        return sum(pps(c) for c in workload['components'])
+    metrics=workload.get('metrics',{})
+    if 'ops_per_sec' in metrics:
+        return metrics['ops_per_sec']
+    s=workload.get('stdout','')
+    matches=re.findall(r'\b(\d+)pps\b',s)
+    if not matches:
+        raise ValueError('No PPS in workload')
+    return int(matches[-1])
+
+for f in root.glob('*/pair-*/raw/*/details/apps/cilium__agent.json'):
+    d=json.loads(f.read_text())
+    match=re.match(r'pair-(\d+)-stats-([01])-(native|control)',f.parents[4].name)
+    if not match:continue
+    groups={}
+    for arm in ['baseline','post_rejit']:
+        phase=d.get(arm)
+        if not phase:continue
+        progs=list(phase['bpf'].values())
+        count=sum(p['run_cnt_delta'] for p in progs)
+        runtime=sum(p['run_time_ns_delta'] for p in progs)
+        per_name=collections.defaultdict(lambda: [0,0,0])
+        for p in progs:
+            a=per_name[p['name']+'/'+p['type']]
+            a[0]+=p['run_cnt_delta'];a[1]+=p['run_time_ns_delta'];a[2]+=1
+        groups[arm]={'count':count,'time_ns':runtime,'ns_per_run':runtime/count if count else None,'pps':statistics.median(pps(w) for w in phase['workloads']),'programs':len(progs),'inventory':dict(collections.Counter(p['name']+'/'+p['type'] for p in progs)),'per_name':dict(per_name)}
+    row={'file':str(f),'series':f.parents[5].name,'pair':int(match[1]),'stats':int(match[2]),'control':match[3]=='control','status':d['status'],'error':d.get('error'),'arms':groups}
+    if set(groups)=={'baseline','post_rejit'}:
+        a,b=groups['baseline'],groups['post_rejit']
+        row['inventory_matches']=a['inventory']==b['inventory']
+        row['throughput_ratio']=b['pps']/a['pps']
+        row['ns_per_run_ratio']=a['ns_per_run']/b['ns_per_run'] if a['ns_per_run'] and b['ns_per_run'] else None
+    rows.append(row)
+dest=pathlib.Path('/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/evidence/independent-arithmetic.json')
+dest.write_text(json.dumps(rows,indent=2)+'\n')
+print(json.dumps([{k:r[k] for k in ['series','pair','stats','control','status','inventory_matches','throughput_ratio','ns_per_run_ratio'] if k in r} for r in rows],indent=2))

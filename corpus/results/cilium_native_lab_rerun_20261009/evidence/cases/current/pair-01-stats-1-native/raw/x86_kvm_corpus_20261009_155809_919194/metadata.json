@@ -1,0 +1,21 @@
+{
+  "bpf_stats": true,
+  "completed_at": "2026-10-09T16:01:01.650859+00:00",
+  "config": {
+    "enabled_passes": []
+  },
+  "details_dir": "details",
+  "generated_at": "2026-10-09T16:01:01.650865+00:00",
+  "last_updated_at": "2026-10-09T16:01:01.650859+00:00",
+  "launcher_boot_id": "7c990f2c-5bb9-4975-9327-2dd196703521",
+  "launcher_pid": 1866,
+  "launcher_start_ticks": 4378,
+  "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-10-09T15:58:09.919194+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 30.0
+}

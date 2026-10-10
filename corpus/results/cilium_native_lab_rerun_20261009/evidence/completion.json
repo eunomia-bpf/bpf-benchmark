@@ -1,0 +1,259 @@
+{
+  "completed_scheduled_invocations": [
+    {
+      "run": "paper/pair-01-stats-0-control",
+      "started_at": "2026-10-09T14:59:51.650940+00:00",
+      "ended_at": "2026-10-09T15:03:16.086123+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_150036_811924"
+      ]
+    },
+    {
+      "run": "paper/pair-01-stats-0-native",
+      "started_at": "2026-10-09T14:56:24.381699+00:00",
+      "ended_at": "2026-10-09T14:59:51.646366+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_145707_868000"
+      ]
+    },
+    {
+      "run": "paper/pair-01-stats-1-control",
+      "started_at": "2026-10-09T14:52:55.511942+00:00",
+      "ended_at": "2026-10-09T14:56:24.375680+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_145344_346060"
+      ]
+    },
+    {
+      "run": "paper/pair-01-stats-1-native",
+      "started_at": "2026-10-09T14:49:23.589890+00:00",
+      "ended_at": "2026-10-09T14:52:55.505311+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_145016_312942"
+      ]
+    },
+    {
+      "run": "paper/pair-02-stats-0-control",
+      "started_at": "2026-10-09T15:13:34.691995+00:00",
+      "ended_at": "2026-10-09T15:16:57.154165+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_151415_747507"
+      ]
+    },
+    {
+      "run": "paper/pair-02-stats-0-native",
+      "started_at": "2026-10-09T15:10:08.281687+00:00",
+      "ended_at": "2026-10-09T15:13:34.684105+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_151053_506002"
+      ]
+    },
+    {
+      "run": "paper/pair-02-stats-1-control",
+      "started_at": "2026-10-09T15:06:43.442935+00:00",
+      "ended_at": "2026-10-09T15:10:08.274691+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_150727_620765"
+      ]
+    },
+    {
+      "run": "paper/pair-02-stats-1-native",
+      "started_at": "2026-10-09T15:03:16.092295+00:00",
+      "ended_at": "2026-10-09T15:06:43.436849+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_150401_346406"
+      ]
+    },
+    {
+      "run": "paper/pair-03-stats-0-control",
+      "started_at": "2026-10-09T15:27:06.232363+00:00",
+      "ended_at": "2026-10-09T15:30:27.243849+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_152746_188832"
+      ]
+    },
+    {
+      "run": "paper/pair-03-stats-0-native",
+      "started_at": "2026-10-09T15:23:42.104855+00:00",
+      "ended_at": "2026-10-09T15:27:06.226126+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_152423_803796"
+      ]
+    },
+    {
+      "run": "paper/pair-03-stats-1-control",
+      "started_at": "2026-10-09T15:20:21.587704+00:00",
+      "ended_at": "2026-10-09T15:23:42.099693+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_152101_476068"
+      ]
+    },
+    {
+      "run": "paper/pair-03-stats-1-native",
+      "started_at": "2026-10-09T15:16:57.161033+00:00",
+      "ended_at": "2026-10-09T15:20:21.580620+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_151738_710630"
+      ]
+    },
+    {
+      "run": "paper/pair-04-stats-0-control",
+      "started_at": "2026-10-09T15:40:35.217258+00:00",
+      "ended_at": "2026-10-09T15:43:56.542812+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_154115_295776"
+      ]
+    },
+    {
+      "run": "paper/pair-04-stats-0-native",
+      "started_at": "2026-10-09T15:37:11.764398+00:00",
+      "ended_at": "2026-10-09T15:40:35.210518+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_153753_840434"
+      ]
+    },
+    {
+      "run": "paper/pair-04-stats-1-control",
+      "started_at": "2026-10-09T15:33:49.862760+00:00",
+      "ended_at": "2026-10-09T15:37:11.757939+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_153430_849887"
+      ]
+    },
+    {
+      "run": "paper/pair-04-stats-1-native",
+      "started_at": "2026-10-09T15:30:27.250225+00:00",
+      "ended_at": "2026-10-09T15:33:49.856417+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_153108_378914"
+      ]
+    },
+    {
+      "run": "paper/pair-05-stats-0-control",
+      "started_at": "2026-10-09T15:54:07.137244+00:00",
+      "ended_at": "2026-10-09T15:57:21.696661+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_155442_686571"
+      ]
+    },
+    {
+      "run": "paper/pair-05-stats-0-native",
+      "started_at": "2026-10-09T15:50:41.193233+00:00",
+      "ended_at": "2026-10-09T15:54:07.129105+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_155124_007083"
+      ]
+    },
+    {
+      "run": "paper/pair-05-stats-1-control",
+      "started_at": "2026-10-09T15:47:18.944237+00:00",
+      "ended_at": "2026-10-09T15:50:41.185079+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_154800_064360"
+      ]
+    },
+    {
+      "run": "paper/pair-05-stats-1-native",
+      "started_at": "2026-10-09T15:43:56.549846+00:00",
+      "ended_at": "2026-10-09T15:47:18.936135+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_154435_785882"
+      ]
+    },
+    {
+      "run": "current/pair-01-stats-1-native",
+      "started_at": "2026-10-09T15:57:24.392440+00:00",
+      "ended_at": "2026-10-09T16:01:03.165385+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/repository/corpus/results/x86_kvm_corpus_20261009_155809_919194"
+      ]
+    }
+  ],
+  "unfinished_scheduled_invocations": [
+    {
+      "run": "current/pair-01-stats-1-control",
+      "status": "interrupted",
+      "exit_record_present": false
+    }
+  ],
+  "smoke_invocations": [
+    {
+      "run": "paper-smoke/pair-01-stats-1-native",
+      "started_at": "2026-10-09T14:32:08.431604+00:00",
+      "ended_at": "2026-10-09T14:33:16.826907+00:00",
+      "exit_code": 2,
+      "app_errors": [],
+      "result_dirs": []
+    },
+    {
+      "run": "paper-smoke-2/pair-01-stats-1-native",
+      "started_at": "2026-10-09T14:33:29.011425+00:00",
+      "ended_at": "2026-10-09T14:34:20.489643+00:00",
+      "exit_code": 2,
+      "app_errors": [],
+      "result_dirs": []
+    },
+    {
+      "run": "paper-smoke-3/pair-01-stats-1-native",
+      "started_at": "2026-10-09T14:35:14.655519+00:00",
+      "ended_at": "2026-10-09T14:36:25.226187+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_143606_827288"
+      ]
+    },
+    {
+      "run": "paper-smoke-4/pair-01-stats-1-native",
+      "started_at": "2026-10-09T14:39:36.292890+00:00",
+      "ended_at": "2026-10-09T14:42:00.071424+00:00",
+      "exit_code": 0,
+      "app_errors": [],
+      "result_dirs": [
+        "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/corpus/results/x86_kvm_corpus_20261009_144042_089215"
+      ]
+    }
+  ]
+}

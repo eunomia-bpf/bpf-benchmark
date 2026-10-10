@@ -1,0 +1,26 @@
+[
+  {
+    "label": "paper",
+    "program_key": "xdp:bpfbench0:driver",
+    "pairs": 5,
+    "paired_ns_ratio_median": 1.0561184723304755,
+    "paired_ns_ratio_min": 0.7569296375266524,
+    "paired_ns_ratio_max": 1.1536082474226803
+  },
+  {
+    "label": "paper",
+    "program_key": "tc:lxcbench1:tcx/ingress",
+    "pairs": 5,
+    "paired_ns_ratio_median": 6.1407567217431085,
+    "paired_ns_ratio_min": 5.995250399582195,
+    "paired_ns_ratio_max": 7.767456728530208
+  },
+  {
+    "label": "paper",
+    "program_key": "tc:lxcbench0:tcx/ingress",
+    "pairs": 5,
+    "paired_ns_ratio_median": 6.080014517628186,
+    "paired_ns_ratio_min": 5.847833988542662,
+    "paired_ns_ratio_max": 7.53928592873561
+  }
+]

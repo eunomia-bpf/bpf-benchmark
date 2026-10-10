@@ -1,0 +1,21 @@
+Task: re-measure the kinsn paper's Cilium native-execution result on the lab host, with CPU pinning and controls. The operator asked for this run on lab explicitly. Finish it in this run.
+
+Background (read first): /workspaces/repository/corpus/results/cilium_native_audit_20261009/ (summary.md, part-a.md, part-b.md, check-code-identity.py). The paper prints "2.358x (488.7 -> 262.3 ns/run)" for Cilium native execution, from the 2026-05-29 pair of runs. The audit found that 2.358x is the stats-off throughput ratio (1,639,482 -> 3,865,856 PPS), while the ns/run ratio is 1.863x; the stats-off native phase loaded 56 programs against 62 for the JIT phase; endpoint addresses changed after restart; there were no verdict/drop counters; no restart control and no CPU pinning. Leading code candidates for those runs: bpf-benchmark 9f3855f6fa1c, kernel 8e116c79d104.
+
+What to run (in the bpf-benchmark-dev Workspace, which is on lab; use the repository's own corpus/KVM path for the Cilium native comparison):
+- Code: first the paper-era candidates (a separate worktree at 9f3855f6fa1c with its kernel 8e116c79d104), to test the paper's number; then current master if its native path still runs Cilium, to show today's result. Say exactly what differs from the paper's runs (Cilium version, traffic, program set).
+- Pinning: lab is a Core Ultra 9 285K; pin the guest vCPUs and the traffic generator to fixed, separate P-cores (the paper era used taskset -c 0-7 for a short time), keep them identical in every phase, and record the pinning and the host load (other Workspaces share this host; record their CPU use during each phase).
+- Design: kernel JIT and native interleaved, at least five pairs (ABAB...), plus no-op controls (JIT after the same restart, JIT vs JIT) to measure drift. Each phase records: the program inventory (must be the same program set in both arms; if not, report it and say which programs differ), per-program run_cnt and ns/run (stats on), throughput (stats off, separately), and verdict/drop counters (add them if the path does not record them, e.g. from Cilium metrics or map dumps). Save the JIT and native images of every loaded program (bpftool prog dump jited / xlated) so code identity can be checked later.
+- Report medians and spread per program and overall, the ns/run ratio and the throughput ratio separately, the no-op drift, and whether the old 2.358x and 1.863x are reproduced.
+
+Host safety: the lab host has rebooted several times while guests ran. Run one guest at a time. If the host reboots during this task (the Workspace container restarts; check `ps -o lstart= -p 1`), record the time and what was running, and retry at most once; after a second reboot stop and report instead of retrying.
+
+Commit the new result directory under corpus/results/ with metadata (commits, kernel, pinning, host load) and push to master (merge origin/master first; never rewrite history). Do not change existing results or any number in the paper. Write the summary (under 800 words) also to /workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/summary.md.
+
+Reply with: what ran (commits, pinning, phases), the numbers (ns/run ratio, throughput ratio, drift, per-program), whether the program sets matched, whether the paper's numbers reproduce, any host reboot, and the pushed commit.
+
+Profiling (also requested): in separate phases from the timed measurements (profiling perturbs timing), profile both arms on the same pinning and traffic:
+- `perf stat` inside the guest for cycles, instructions, IPC, branch misses, L1i/iTLB misses where available, per arm, at least two runs each;
+- `perf record -a -g` inside the guest for each arm, with BPF JIT symbols (kallsyms) and a way to attribute samples to the native images (record their load addresses and map samples to programs); report the top symbols and the split between BPF program code, BPF helpers and maps, the kernel network stack and other kernel time, per arm;
+- explain from the profile where the native arm saves time, and whether it skips work the JIT arm does (fewer programs, different paths, fewer helper calls).
+Commit the perf data summaries (not huge raw perf.data files over 50 MB; keep those in the supervisor directory) with the result.

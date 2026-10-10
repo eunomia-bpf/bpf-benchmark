@@ -1,0 +1,104 @@
+{
+  "paper_commit": "9f3855f6fa1c43027cfe0788615b6efb247f2a4d",
+  "current_commit": "9be2b6a199d4ae4d2a2a1e9a437fa9aca0222f5d",
+  "paper_kernel_commit": "8e116c79d1043f8e4dadd708f3a1ee5a26d19246",
+  "current_kernel_commit": "24cd6e63ce912a4e220ca1cae3137ab29706551b",
+  "cilium_commit": "1b721c2964e7799cab3e18c38066905ea240fa34",
+  "cilium_version": "1.20.0-dev",
+  "pinning": {
+    "host_P_cores": "0-7",
+    "guest_vcpu_to_host": {
+      "0": 1,
+      "1": 4,
+      "2": 0,
+      "3": 3
+    },
+    "pktgen_guest_cpus": [
+      0,
+      1
+    ],
+    "application_guest_cpus": [
+      2,
+      3
+    ],
+    "qemu_emulator_host_cpus": [
+      6,
+      7
+    ]
+  },
+  "vm_cpus": 4,
+  "vm_memory": "24G",
+  "samples_per_phase": 1,
+  "warmups_per_phase": 1,
+  "workload_seconds": 30,
+  "stats_modes": [
+    1,
+    0
+  ],
+  "host_load_record": "Per-CPU /proc/stat and every pod cgroup cpu.stat sampled every 2 seconds; own pod is 901a2100_a80e_45e9_9fea_d320be468e69. Other pod names are not available inside this workspace.",
+  "image_build": "make -f corpus/results/cilium_native_lab_20261009/artifacts.mk paper-image/current-image",
+  "old_run_difference": "New build from candidate commits, Ubuntu dependency image from October, GCC 13.3/Clang 18; 4 vCPUs/24G and fixed P-core pins, 1x30s with 1 warmup versus historical 3x180s with 1 warmup and default 8 vCPUs/64G. Endpoint addresses remain allocated anew by the unchanged Cilium runner. Historical exact binaries/HEADs remain unavailable.",
+  "cilium_executable_version": "cilium-agent 1.20.0-dev; go1.26.8 linux/amd64",
+  "current_native_objects": "Prebuilt October 6 native/proof objects from unchanged Cilium source; captured from immutable runtime image, no fresh proof rebuild.",
+  "observer_change": "Version commands added before cycle 3 control; measurement hooks and counter/dump logic unchanged.",
+  "status": "interrupted",
+  "recorded_at": "2026-10-10T00:04:18.950176+00:00",
+  "source_supervisor": "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009",
+  "source_result_directory": "/workspaces/repository/corpus/results/cilium_native_lab_20261009",
+  "host": {
+    "machine": "lab",
+    "workspace": "bpf-benchmark-dev",
+    "cpu": "Intel Core Ultra 9 285K",
+    "workspace_hostname": "coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-xfqrt",
+    "host_kernel": "7.3.0-070300rc3-generic",
+    "initial_pid1_start": "2026-10-05T14:33:47Z",
+    "initial_boot_id": "8a085fbc-151f-4763-91dd-edebba7a1ff4"
+  },
+  "kernels": {
+    "historical_release": "7.0.0-rc2+",
+    "historical_build": "#1 SMP PREEMPT_DYNAMIC Fri Oct 9 14:21:30 UTC 2026",
+    "current_release": "7.0.0-rc2+",
+    "current_build": "#31 SMP PREEMPT_DYNAMIC Fri Oct 9 14:42:06 UTC 2026"
+  },
+  "timestamps": {
+    "supervisor_start_record": "2026-10-09T14:17:15Z",
+    "historical_started_at": "2026-10-09T14:49:23.589890+00:00",
+    "historical_completed_at": "2026-10-09T15:57:21.696661+00:00",
+    "current_pair_started_at": "2026-10-09T15:57:24.392440+00:00",
+    "current_pair_completed_at": "2026-10-09T16:01:03.165385+00:00",
+    "current_control_started_at": "2026-10-09T16:01:03.178933+00:00",
+    "current_control_post_start_snapshot_completed_at": "2026-10-09T16:03:51.413873Z",
+    "run_log_mtime": "2026-10-09T16:04:14.167738+00:00"
+  },
+  "interruption": {
+    "cause": "host reboot reported by operator",
+    "reported_window_start": "2026-10-09T16:04:00Z",
+    "reported_window_end": "2026-10-09T16:05:00Z",
+    "exact_reboot_time": null,
+    "reboot_cause": null,
+    "active_invocation": "current/pair-01-stats-1-control",
+    "persisted_checker_recorded_reboots": 0,
+    "checker_caveat": "No post-reboot update; empty list is not evidence that no reboot occurred.",
+    "retry_recorded": false,
+    "final_summary_or_commit_recorded": false
+  },
+  "completed": {
+    "historical_make_invocations": 20,
+    "historical_phases": 40,
+    "historical_native_pairs_per_stats_mode": 5,
+    "historical_jit_jit_controls_per_stats_mode": 5,
+    "current_native_stats_on_pairs": 1,
+    "current_completed_phases": 2,
+    "current_completed_controls": 0,
+    "current_stats_off_pairs": 0,
+    "profiling_completed": 0
+  },
+  "recording_constraints": {
+    "new_measurements_run": false,
+    "new_vms_run": false,
+    "paper_numbers_changed": false,
+    "existing_measurement_data_modified": false
+  },
+  "planned_pairs_per_stats_mode": 5,
+  "planned_restart_controls_per_stats_mode": 5
+}

@@ -1,0 +1,36 @@
+{
+  "run": "paper/pair-01-stats-0-control",
+  "command": [
+    "taskset",
+    "-c",
+    "6,7",
+    "make",
+    "-C",
+    "/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree",
+    "-o",
+    "runtime-kernel-image",
+    "corpus",
+    "PLATFORM=kvm",
+    "ARCH=x86",
+    "VM_CPUS=4",
+    "VM_MEM=24G",
+    "BPFREJIT_CORPUS_APPS=cilium/agent",
+    "SAMPLES=1",
+    "WARMUPS=1",
+    "WORKLOAD_DURATION=30",
+    "BPFREJIT_CORPUS_BPF_STATS=0",
+    "KEEP_WORKDIRS=1",
+    "TIMEOUT=1800",
+    "VM_EXECUTABLE=/workspaces/repository/corpus/results/cilium_native_lab_20261009/vng-audit.py",
+    "RUN_TOKEN=cilium-lab-paper-1-0-True",
+    "SKIP_REJIT=norejit",
+    "RUNTIME_CONTAINER_IMAGE=bpf-benchmark/cilium-audit-paper:20261009",
+    "RUNTIME_IMAGE_TAR=/tmp/cilium-paper-runtime-20261009.tar"
+  ],
+  "started": 1791557991.6509397,
+  "status": "running",
+  "boot": {
+    "pid1_start": "Mon Oct  5 14:33:47 2026",
+    "boot_id": "8a085fbc-151f-4763-91dd-edebba7a1ff4"
+  }
+}

@@ -1,0 +1,4 @@
+import os
+if os.environ.get('BPFREJIT_INSIDE_RUNTIME_CONTAINER') == '1':
+    import lab_observer
+    lab_observer.install()

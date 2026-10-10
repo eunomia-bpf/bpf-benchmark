@@ -1,0 +1,5622 @@
+[
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper-smoke-4/pair-01-stats-1-native/raw/x86_kvm_corpus_20261009_144042_089215/details/apps/cilium__agent.json",
+    "series": "paper-smoke-4",
+    "pair": 1,
+    "stats": 1,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 6845620,
+        "time_ns": 13105648532,
+        "ns_per_run": 1914.457497202591,
+        "pps": 685990,
+        "programs": 56,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_host/sched_cls": 2,
+          "cil_host_policy/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_from_netdev/sched_cls": 1
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            1052,
+            1
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            6845616,
+            13105642648,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            1,
+            1116,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            2246,
+            2
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1470,
+            1
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 20405611,
+        "time_ns": 5123794482,
+        "ns_per_run": 251.09733210144995,
+        "pps": 2041633,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_no_service/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "cil_from_contai/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            943,
+            1
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_contai/sched_cls": [
+            20405610,
+            5123793539,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.9761847840347526,
+    "ns_per_run_ratio": 7.6243641506676765
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-01-stats-0-native/raw/x86_kvm_corpus_20261009_145707_868000/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 1,
+    "stats": 0,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1067990,
+        "programs": 62,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_contai/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_netdev/sched_cls": 3,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_host_policy/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_to_host/sched_cls": 3,
+          "cil_to_netdev/sched_cls": 3
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            3
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 2406882,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.253655933107988,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-04-stats-1-control/raw/x86_kvm_corpus_20261009_153430_849887/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 4,
+    "stats": 1,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 29962562,
+        "time_ns": 33880026814,
+        "ns_per_run": 1130.7453219120582,
+        "pps": 1001578,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_from_host/sched_cls": 1,
+          "cil_host_policy/sched_cls": 1,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_to_host/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_from_netdev/sched_cls": 1,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            809,
+            1
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1353,
+            1
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1699,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1314,
+            1
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1230,
+            1
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            29962556,
+            33880020409,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 29439656,
+        "time_ns": 34421872315,
+        "ns_per_run": 1169.2348686071603,
+        "pps": 984644,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "cil_host_policy/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_from_netdev/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            865,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            1,
+            1334,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1004,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1386,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            29439652,
+            34421867726,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 0.9830926797513524,
+    "ns_per_run_ratio": 0.967081424161638
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-05-stats-1-control/raw/x86_kvm_corpus_20261009_154800_064360/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 5,
+    "stats": 1,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 30158209,
+        "time_ns": 33839974670,
+        "ns_per_run": 1122.0817081677496,
+        "pps": 1007437,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_host_policy/sched_cls": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 1,
+          "cil_to_host/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            896,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1304,
+            1
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1491,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1189,
+            1
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1272,
+            1
+          ],
+          "cil_from_contai/sched_cls": [
+            30158203,
+            33839968518,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 28799981,
+        "time_ns": 34520459752,
+        "ns_per_run": 1198.6278654836613,
+        "pps": 962113,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_host/sched_cls": 3,
+          "cil_host_policy/sched_cls": 3,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_to_host/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            853,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1546,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            2728,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1004,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1154,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            28799975,
+            34520452467,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 0.9550105862699106,
+    "ns_per_run_ratio": 0.9361385134451015
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-03-stats-0-native/raw/x86_kvm_corpus_20261009_152423_803796/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 3,
+    "stats": 0,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1046645,
+        "programs": 56,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_to_host/sched_cls": 3,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_host_policy/sched_cls": 2,
+          "cil_from_host/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 2407456,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_no_service/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.3001648123289176,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-04-stats-1-native/raw/x86_kvm_corpus_20261009_153108_378914/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 4,
+    "stats": 1,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 31779900,
+        "time_ns": 33010259986,
+        "ns_per_run": 1038.7150364223928,
+        "pps": 1063079,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_to_host/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_host_policy/sched_cls": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 1,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            1059,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1752,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1218,
+            1
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            975,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1295,
+            1
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            31779894,
+            33010253687,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 67944081,
+        "time_ns": 11919732362,
+        "ns_per_run": 175.43444824870028,
+        "pps": 2270424,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            963,
+            1
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            67944080,
+            11919731399,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.135705813020481,
+    "ns_per_run_ratio": 5.920815705190832
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-01-stats-1-native/raw/x86_kvm_corpus_20261009_145016_312942/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 1,
+    "stats": 1,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 25717238,
+        "time_ns": 36415648448,
+        "ns_per_run": 1416.0015336017032,
+        "pps": 858973,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_host/sched_cls": 3,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_host_policy/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 2,
+          "cil_from_netdev/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            1355,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1282,
+            3
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            1,
+            1216,
+            3
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            25717233,
+            36415641740,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1843,
+            2
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1012,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 66325206,
+        "time_ns": 12273189573,
+        "ns_per_run": 185.0456306611396,
+        "pps": 2213827,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            1283,
+            1
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            66325205,
+            12273188290,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.5772952118401857,
+    "ns_per_run_ratio": 7.652174917843492
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-03-stats-0-control/raw/x86_kvm_corpus_20261009_152746_188832/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 3,
+    "stats": 0,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1094937,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_to_host/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_host_policy/sched_cls": 3,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_from_netdev/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_to_netdev/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1084314,
+        "programs": 56,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_host_policy/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_to_host/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 0.9902980719438652,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-05-stats-0-control/raw/x86_kvm_corpus_20261009_155442_686571/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 5,
+    "stats": 0,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1009958,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_host_policy/sched_cls": 1,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_to_host/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 1,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1023990,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_to_host/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 1,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_host_policy/sched_cls": 1,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": true,
+    "throughput_ratio": 1.013893647062551,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-02-stats-1-control/raw/x86_kvm_corpus_20261009_150727_620765/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 2,
+    "stats": 1,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 31599404,
+        "time_ns": 33381468385,
+        "ns_per_run": 1056.3955062253706,
+        "pps": 1054203,
+        "programs": 62,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_to_netdev/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_host/sched_cls": 3,
+          "cil_from_netdev/sched_cls": 3,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_host_policy/sched_cls": 3,
+          "cil_to_host/sched_cls": 3
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            1088,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1059,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1129,
+            3
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1210,
+            3
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            31599398,
+            33381461888,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            2011,
+            3
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 31391860,
+        "time_ns": 33167165576,
+        "ns_per_run": 1056.553054709087,
+        "pps": 1048292,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_host_policy/sched_cls": 1,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_host/sched_cls": 1,
+          "cil_to_host/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            674,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1724,
+            1
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            2405,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1008,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1399,
+            1
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            31391854,
+            33167158366,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 0.9943929205285889,
+    "ns_per_run_ratio": 0.9998508844558119
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-04-stats-0-native/raw/x86_kvm_corpus_20261009_153753_840434/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 4,
+    "stats": 0,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1016598,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_to_host/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_host/sched_cls": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_host_policy/sched_cls": 1,
+          "tail_no_service/sched_cls": 4,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_from_netdev/sched_cls": 1,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 2411280,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.3719110208755083,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-02-stats-0-native/raw/x86_kvm_corpus_20261009_151053_506002/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 2,
+    "stats": 0,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1076995,
+        "programs": 62,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "cil_from_contai/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_netdev/sched_cls": 3,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_host_policy/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 2427897,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.254325228993635,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-02-stats-0-control/raw/x86_kvm_corpus_20261009_151415_747507/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 2,
+    "stats": 0,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1061425,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_host_policy/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_netdev/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_to_netdev/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1062978,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_host_policy/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_netdev/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_to_netdev/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": true,
+    "throughput_ratio": 1.0014631273994865,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-04-stats-0-control/raw/x86_kvm_corpus_20261009_154115_295776/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 4,
+    "stats": 0,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1095746,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_to_host/sched_cls": 2,
+          "cil_host_policy/sched_cls": 1,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_from_host/sched_cls": 1,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1142018,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_to_host/sched_cls": 3,
+          "cil_host_policy/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "cil_from_netdev/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 1.0422287646954678,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-05-stats-1-native/raw/x86_kvm_corpus_20261009_154435_785882/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 5,
+    "stats": 1,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 30117799,
+        "time_ns": 33854275597,
+        "ns_per_run": 1124.0620736262965,
+        "pps": 1005734,
+        "programs": 56,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_host_policy/sched_cls": 2,
+          "cil_to_host/sched_cls": 3,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            710,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1408,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1841,
+            3
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1299,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1516,
+            1
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            30117793,
+            33854268823,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 67290307,
+        "time_ns": 12419003740,
+        "ns_per_run": 184.55858345244286,
+        "pps": 2246594,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            938,
+            1
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            67290306,
+            12419002802,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.233785474091559,
+    "ns_per_run_ratio": 6.090543461046586
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-03-stats-1-control/raw/x86_kvm_corpus_20261009_152101_476068/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 3,
+    "stats": 1,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 31943330,
+        "time_ns": 32650705846,
+        "ns_per_run": 1022.1447120885643,
+        "pps": 1067614,
+        "programs": 56,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_host_policy/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_host/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_to_host/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            841,
+            1
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1389,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1263,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1062,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1368,
+            1
+          ],
+          "cil_from_contai/sched_cls": [
+            31943324,
+            32650699923,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 31187874,
+        "time_ns": 33167031446,
+        "ns_per_run": 1063.4591971867014,
+        "pps": 1042296,
+        "programs": 56,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_host/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "cil_host_policy/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            918,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1274,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1072,
+            1
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            31187871,
+            33167028182,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": true,
+    "throughput_ratio": 0.9762854364967114,
+    "ns_per_run_ratio": 0.9611508507261667
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-01-stats-0-control/raw/x86_kvm_corpus_20261009_150036_811924/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 1,
+    "stats": 0,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1077543,
+        "programs": 62,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_to_host/sched_cls": 3,
+          "cil_from_netdev/sched_cls": 3,
+          "cil_host_policy/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 1052244,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_host_policy/sched_cls": 1,
+          "cil_to_host/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_host/sched_cls": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_no_service/sched_cls": 4,
+          "cil_to_netdev/sched_cls": 1,
+          "cil_from_netdev/sched_cls": 1,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 0.9765215866095367,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-01-stats-1-control/raw/x86_kvm_corpus_20261009_145344_346060/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 1,
+    "stats": 1,
+    "control": true,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 30682358,
+        "time_ns": 33763581887,
+        "ns_per_run": 1100.4233079804362,
+        "pps": 1025338,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_contai/sched_cls": 2,
+          "cil_from_host/sched_cls": 3,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_host_policy/sched_cls": 3,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_to_host/sched_cls": 3,
+          "cil_to_netdev/sched_cls": 2,
+          "cil_from_netdev/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            760,
+            1
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_contai/sched_cls": [
+            30682352,
+            33763575282,
+            2
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1199,
+            3
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            2401,
+            3
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1399,
+            2
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            846,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 30967194,
+        "time_ns": 33351616545,
+        "ns_per_run": 1076.9983404050106,
+        "pps": 1034801,
+        "programs": 62,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_to_host/sched_cls": 3,
+          "cil_host_policy/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_to_netdev/sched_cls": 3,
+          "tail_handle_sna/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 3,
+          "cil_from_netdev/sched_cls": 3,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_contai/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            701,
+            1
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            3178,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1079,
+            3
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1041,
+            3
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            971,
+            3
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_contai/sched_cls": [
+            30967188,
+            33351609575,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 1.0092291517528853,
+    "ns_per_run_ratio": 1.0217502355357544
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-05-stats-0-native/raw/x86_kvm_corpus_20261009_155124_007083/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 5,
+    "stats": 0,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 992362,
+        "programs": 53,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_from_host/sched_cls": 1,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_to_host/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_host_policy/sched_cls": 1,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            0,
+            0,
+            1
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 0,
+        "time_ns": 0,
+        "ns_per_run": null,
+        "pps": 2391813,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            0,
+            0,
+            1
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.4102222777575117,
+    "ns_per_run_ratio": null
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-03-stats-1-native/raw/x86_kvm_corpus_20261009_151738_710630/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 3,
+    "stats": 1,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 30397023,
+        "time_ns": 33865632662,
+        "ns_per_run": 1114.110176578805,
+        "pps": 1016065,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_host_policy/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_netdev/sched_cls": 2,
+          "cil_to_netdev/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            893,
+            1
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1340,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1479,
+            3
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1084,
+            2
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1791,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            30397017,
+            33865626075,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 68855333,
+        "time_ns": 11896585275,
+        "ns_per_run": 172.7765266199497,
+        "pps": 2301665,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            869,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            68855332,
+            11896584406,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.2652733831004905,
+    "ns_per_run_ratio": 6.4482727970881895
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper/pair-02-stats-1-native/raw/x86_kvm_corpus_20261009_150401_346406/details/apps/cilium__agent.json",
+    "series": "paper",
+    "pair": 2,
+    "stats": 1,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 31201834,
+        "time_ns": 33290877495,
+        "ns_per_run": 1066.9525866652582,
+        "pps": 1042113,
+        "programs": 62,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_no_service/sched_cls": 4,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_to_host/sched_cls": 3,
+          "cil_to_netdev/sched_cls": 3,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_from_host/sched_cls": 3,
+          "cil_host_policy/sched_cls": 3,
+          "cil_from_netdev/sched_cls": 3
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            1119,
+            1
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_from_contai/sched_cls": [
+            31201828,
+            33290870812,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1433,
+            3
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1521,
+            3
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1271,
+            3
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1339,
+            3
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 68650552,
+        "time_ns": 11987793252,
+        "ns_per_run": 174.62049324818247,
+        "pps": 2292528,
+        "programs": 27,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_drop_notif/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 4,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_no_service/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            970,
+            1
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            68650551,
+            11987792282,
+            2
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 2.199884273586454,
+    "ns_per_run_ratio": 6.1101223963949804
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/paper-smoke-3/pair-01-stats-1-native/raw/x86_kvm_corpus_20261009_143606_827288/details/apps/cilium__agent.json",
+    "series": "paper-smoke-3",
+    "pair": 1,
+    "stats": 1,
+    "control": false,
+    "status": "error",
+    "error": "modprobe pktgen failed: modprobe: FATAL: Module pktgen not found in directory /artifacts/lib/modules/7.0.0-rc2+; modprobe pktgen failed: modprobe: FATAL: Module pktgen not found in directory /artifacts/lib/modules/7.0.0-rc2+",
+    "arms": {}
+  },
+  {
+    "file": "/workspaces/repository/corpus/results/cilium_native_lab_20261009/current/pair-01-stats-1-native/raw/x86_kvm_corpus_20261009_155809_919194/details/apps/cilium__agent.json",
+    "series": "current",
+    "pair": 1,
+    "stats": 1,
+    "control": false,
+    "status": "ok",
+    "error": "",
+    "arms": {
+      "baseline": {
+        "count": 28916804,
+        "time_ns": 34658028978,
+        "ns_per_run": 1198.542860338231,
+        "pps": 966419,
+        "programs": 56,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "cil_to_host/sched_cls": 3,
+          "tail_nodeport_n/sched_cls": 6,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_from_host/sched_cls": 2,
+          "tail_handle_ipv/sched_cls": 10,
+          "tail_drop_notif/sched_cls": 5,
+          "cil_host_policy/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "cil_from_netdev/sched_cls": 1,
+          "cil_to_netdev/sched_cls": 1,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            720,
+            1
+          ],
+          "cil_to_host/sched_cls": [
+            2,
+            1649,
+            3
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_from_host/sched_cls": [
+            1,
+            1328,
+            2
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1327,
+            1
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            988,
+            1
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            28916798,
+            34658022966,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "post_rejit": {
+        "count": 110502724,
+        "time_ns": 26201278063,
+        "ns_per_run": 237.1097934472638,
+        "pps": 3685295,
+        "programs": 60,
+        "inventory": {
+          "cil_xdp_entry/xdp": 1,
+          "tail_drop_notif/sched_cls": 5,
+          "tail_nodeport_n/sched_cls": 6,
+          "cil_from_host/sched_cls": 3,
+          "tail_handle_ipv/sched_cls": 10,
+          "cil_host_policy/sched_cls": 3,
+          "cil_to_host/sched_cls": 3,
+          "tail_handle_sna/sched_cls": 3,
+          "cil_to_netdev/sched_cls": 2,
+          "cil_from_netdev/sched_cls": 2,
+          "tail_no_service/sched_cls": 4,
+          "tail_ipv4_to_en/sched_cls": 2,
+          "tail_ipv4_ct_in/sched_cls": 2,
+          "tail_nodeport_r/sched_cls": 2,
+          "cil_from_contai/sched_cls": 2,
+          "cil_lxc_policy/sched_cls": 2,
+          "cil_lxc_policy_/sched_cls": 2,
+          "tail_ipv4_ct_eg/sched_cls": 2,
+          "tail_ipv4_polic/sched_cls": 2,
+          "tail_handle_arp/sched_cls": 2
+        },
+        "per_name": {
+          "cil_xdp_entry/xdp": [
+            1,
+            1118,
+            1
+          ],
+          "tail_drop_notif/sched_cls": [
+            0,
+            0,
+            5
+          ],
+          "tail_nodeport_n/sched_cls": [
+            0,
+            0,
+            6
+          ],
+          "cil_from_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_ipv/sched_cls": [
+            0,
+            0,
+            10
+          ],
+          "cil_host_policy/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_host/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "tail_handle_sna/sched_cls": [
+            0,
+            0,
+            3
+          ],
+          "cil_to_netdev/sched_cls": [
+            1,
+            1125,
+            2
+          ],
+          "cil_from_netdev/sched_cls": [
+            1,
+            1242,
+            2
+          ],
+          "tail_no_service/sched_cls": [
+            0,
+            0,
+            4
+          ],
+          "tail_ipv4_to_en/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_in/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_nodeport_r/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_from_contai/sched_cls": [
+            110502721,
+            26201274578,
+            2
+          ],
+          "cil_lxc_policy/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "cil_lxc_policy_/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_ct_eg/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_ipv4_polic/sched_cls": [
+            0,
+            0,
+            2
+          ],
+          "tail_handle_arp/sched_cls": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    },
+    "inventory_matches": false,
+    "throughput_ratio": 3.813351144793304,
+    "ns_per_run_ratio": 5.054801165793273
+  }
+]

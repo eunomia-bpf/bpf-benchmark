@@ -1,0 +1,1309 @@
+diff --git a/vendor/bpf/Makefile b/vendor/bpf/Makefile
+index 2df25ae12..1c02d08b7 100644
+--- a/vendor/bpf/Makefile
++++ b/vendor/bpf/Makefile
+@@ -18,9 +18,17 @@ LLVM_STRIP ?= llvm-strip-18
+ BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
+ VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
+ NATIVE_LINK ?= $(ROOT)/native-sim/x86/native_lab/native_link/target/release/native-link
++NATIVE_LINK_PROOF_FLAGS ?= --preserve-entry-abi
+ 
+ OUT := $(BUILD)/$(ARCH)/$(KERNEL_RELEASE)
+ VMLINUX_H := targets/$(ARCH)/$(KERNEL_RELEASE)/vmlinux.h
++BPF_TARGET_ARCH := $(if $(filter arm64 aarch64,$(ARCH)),arm64,x86)
++TARGET_ARCH_DEFINE := __TARGET_ARCH_$(BPF_TARGET_ARCH)
++VMLINUX_GUARD_ARCH := $(shell printf '%s' '$(BPF_TARGET_ARCH)' | tr '[:lower:]' '[:upper:]')
++BCC_VMLINUX_H := bcc/libbpf-tools/$(BPF_TARGET_ARCH)/vmlinux.h
++TETRAGON_VMLINUX_H := tetragon/bpf/include/vmlinux_generated_$(BPF_TARGET_ARCH).h
++NATIVE_SYS_INCLUDE_FLAGS ?= -I/usr/include -I/usr/include/x86_64-linux-gnu
++SYS_INCLUDE_FLAGS ?= $(NATIVE_SYS_INCLUDE_FLAGS)
+ 
+ KATRAN_OBJS := balancer healthchecking_ipip healthchecking xdp_root
+ BCC_TOOLS_WITH_COMMA := capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife
+@@ -39,13 +47,18 @@ TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
+ TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
+ NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
+ NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
+-	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
++	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics \
++		-ffixed-x18 -ffixed-x26 -ffixed-x27 \
++		-ffixed-x28)
+ NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
++	-D$(TARGET_ARCH_DEFINE) \
++	-fms-extensions \
+ 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
+ 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
+ 	-fno-optimize-sibling-calls \
+ 	-Wno-unknown-attributes -mllvm -switch-to-lookup=false
+ KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
++	-D$(TARGET_ARCH_DEFINE) \
+ 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
+ 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
+ 	-fno-optimize-sibling-calls \
+@@ -76,7 +89,8 @@ CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
+ 	-DENABLE_MASQUERADE_IPV4=1 \
+ 	-DENABLE_NODEPORT=1 -DENABLE_NODEPORT_ACCELERATION=1 \
+ 	-DENABLE_DSR_ICMP_ERRORS=1 -DENABLE_DSR=1 -DENABLE_DSR_BYUSER=1 \
+-	-DENABLE_HOST_ROUTING=1 -DSERVICE_NO_BACKEND_RESPONSE=1
++	-DENABLE_HOST_ROUTING=1 -DSERVICE_NO_BACKEND_RESPONSE=1 \
++	-DBPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED=0
+ CILIUM_MAX_LB_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) \
+ 	-DENCAP_IFINDEX=1 -DTUNNEL_MODE=1 \
+ 	-DLB_SELECTION_PER_SERVICE=1 -DLB_SELECTION_MAGLEV=2 \
+@@ -103,18 +117,18 @@ clean:
+ 	$(MAKE) -C "$(CURDIR)/cilium/bpf" clean >/dev/null
+ 	$(MAKE) -C "$(CURDIR)/otel/support/ebpf" clean >/dev/null
+ 
+-vmlinux: $(VMLINUX_H) bcc/libbpf-tools/x86/vmlinux.h tetragon/bpf/include/vmlinux_generated_x86.h
++vmlinux: $(VMLINUX_H) $(BCC_VMLINUX_H) $(TETRAGON_VMLINUX_H)
+ 
+ $(VMLINUX_H): $(VMLINUX_BTF)
+ 	install -d "$(dir $@)"
+ 	"$(BPFTOOL)" btf dump file "$(VMLINUX_BTF)" format c > "$@"
+ 
+-bcc/libbpf-tools/x86/vmlinux.h: $(VMLINUX_H)
++$(BCC_VMLINUX_H): $(VMLINUX_H)
+ 	install -D -m 0644 "$<" "$@"
+ 
+-tetragon/bpf/include/vmlinux_generated_x86.h: $(VMLINUX_H)
++$(TETRAGON_VMLINUX_H): $(VMLINUX_H)
+ 	install -d "$(dir $@)"
+-	sed 's/__VMLINUX_H__/__VMLINUX_GENERATED_X86_H__/g' "$<" > "$@"
++	sed 's/__VMLINUX_H__/__VMLINUX_GENERATED_$(VMLINUX_GUARD_ARCH)_H__/g' "$<" > "$@"
+ 
+ katran:
+ 	install -d "$(OUT)/katran"
+@@ -126,16 +140,16 @@ katran:
+ 		| "$(LLC)" -march=bpf -filetype=obj -o "$(OUT)/katran/$${src}.bpf.o"; \
+ 	done
+ 
+-bcc: bcc/libbpf-tools/x86/vmlinux.h
++bcc: $(BCC_VMLINUX_H)
+ 	$(MAKE) -C "$(CURDIR)/bcc/libbpf-tools" CLANG="$(CLANG)" LLVM_STRIP="$(LLVM_STRIP)" \
+ 		OUTPUT="$(OUT)/bcc/output" APPS="$(BCC_TOOLS)" LIBBPF_OBJ= \
+-		INCLUDES="-I/usr/include -I/usr/include/x86_64-linux-gnu" \
++		INCLUDES="$(SYS_INCLUDE_FLAGS)" \
+ 		$(BCC_OBJS)
+ 
+-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h
++tetragon: $(TETRAGON_VMLINUX_H)
+ 	install -d "$(OUT)/tetragon"
+ 	$(MAKE) -C "$(CURDIR)/tetragon/bpf" CLANG="$(CLANG)" LLC="$(LLC)" \
+-		BPF_TARGET_ARCH=x86 \
++		BPF_TARGET_ARCH=$(BPF_TARGET_ARCH) \
+ 		OBJS='$$(filter-out $$(OBJSDIR)bpf_map_test_p1.o $$(OBJSDIR)bpf_map_test_p2.o $$(OBJSDIR)bpf_map_test_p3.o,$$(PROCESSOBJ) $$(CGROUPOBJ) $$(ALIGNCHECKEROBJ))' \
+ 		DEPS='$$(patsubst $$(OBJSDIR)%.o,$$(DEPSDIR)%.d,$$(OBJS))' -j"$$(nproc)"
+ 	for obj in "$(CURDIR)/tetragon/bpf/objs/"*.o; do \
+@@ -162,31 +176,31 @@ tracee:
+ 	install -d "$(OUT)/tracee/lsm_support"
+ 	install -D -m 0644 "$(VENDOR)/repos/tracee/pkg/ebpf/c/vmlinux.h" \
+ 		"$(CURDIR)/tracee/pkg/ebpf/c/vmlinux.h"
+-	trace_inc="-I$(CURDIR)/tracee/pkg/ebpf/c -I/usr/include -I/usr/include/x86_64-linux-gnu"; \
+-	"$(CLANG)" -D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
++	trace_inc="-I$(CURDIR)/tracee/pkg/ebpf/c $(SYS_INCLUDE_FLAGS)"; \
++	"$(CLANG)" -D$(TARGET_ARCH_DEFINE) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
+ 		$${trace_inc} -target bpf -O2 -g -mcpu=v2 \
+ 		-c "$(CURDIR)/tracee/pkg/ebpf/c/tracee.bpf.c" \
+ 		-o "$(OUT)/tracee/tracee.bpf.o"; \
+ 	for src in kprobe_check lsm_check; do \
+-		"$(CLANG)" -D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
++		"$(CLANG)" -D$(TARGET_ARCH_DEFINE) -D__BPF_TRACING__ \
+ 			$${trace_inc} -target bpf -O2 -g -mcpu=v2 \
+ 			-c "$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport/$${src}.bpf.c" \
+ 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
+ 	done
+ 
+-$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
++$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c Makefile
+ 	install -d "$(dir $@)"
+ 	"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
+ 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
+-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
++		$(NATIVE_SYS_INCLUDE_FLAGS) \
+ 		-o "$@" "$<"
+ 
+-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h native_compat.h
++$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c $(BCC_VMLINUX_H) native_compat.h Makefile
+ 	install -d "$(dir $@)"
+ 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
+-		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
++		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/$(BPF_TARGET_ARCH)" \
+ 		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
+-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
++		$(NATIVE_SYS_INCLUDE_FLAGS) \
+ 		-o "$@" "$<"
+ 
+ $(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LXC_OPTIONS)
+@@ -197,7 +211,7 @@ $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_M
+ $(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
+ $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
+ 
+-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
++$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h Makefile
+ 	install -d "$(dir $@)"
+ 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
+ 		-include "$(CURDIR)/native_compat.h" \
+@@ -205,13 +219,13 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
+ 		-I"$(CURDIR)/cilium/bpf/include/bpf" \
+ 		-I"$(CURDIR)/cilium/bpf/include/linux" \
+ 		-I"$(CURDIR)/cilium/bpf/lib" \
+-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
++		$(NATIVE_SYS_INCLUDE_FLAGS) \
+ 		-o "$@" "$<"
+ 
+ $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
+ 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
+ 
+-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h
++$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h Makefile
+ 	install -d "$(dir $@)"
+ 	"$(CLANG)" $(NATIVE_CFLAGS) \
+ 		-Wno-unused-function -Wno-unused-variable \
+@@ -220,32 +234,33 @@ $(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors
+ 
+ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
+ 	install -d "$(dir $@)"
+-	"$(CLANG)" -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
++	"$(CLANG)" $(NATIVE_TARGET_FLAGS) -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
+ 
+-$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
++$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h Makefile
+ 	install -d "$(dir $@)"
+ 	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
+ 		-include "$(CURDIR)/native_compat.h" \
+-		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
++		-D$(TARGET_ARCH_DEFINE) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
+ 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
+-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
++		$(NATIVE_SYS_INCLUDE_FLAGS) \
+ 		-o "$@" "$<"
+ 
+-$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
++$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h Makefile
+ 	install -d "$(dir $@)"
+ 	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
+ 		-include "$(CURDIR)/native_compat.h" \
+-		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
++		-D$(TARGET_ARCH_DEFINE) -D__BPF_TRACING__ \
+ 		-I"$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport" \
+ 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
+-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
++		$(NATIVE_SYS_INCLUDE_FLAGS) \
+ 		-o "$@" "$<"
+ 
+ $(NATIVE_LINK):
+ 	cargo build --release --manifest-path "$(ROOT)/native-sim/x86/native_lab/native_link/Cargo.toml"
+ 
+-$(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK)
++$(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK) Makefile
+ 	install -d "$(dir $@)"
++	rm -f "$(NATIVE_OUT)/katran/$*."*.proof.o "$@"
+ 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
+ 	if [[ -z "$${symbols}" ]]; then \
+ 		echo "no native text symbols in $<" >&2; \
+@@ -253,14 +268,16 @@ $(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK)
+ 	fi; \
+ 	for sym in $${symbols}; do \
+ 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
+-			--output "$(NATIVE_OUT)/katran/$*.$${sym}.proof.o" --mode proof; \
++			--output "$(NATIVE_OUT)/katran/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
+ 	done; \
+ 	printf 'ok\n' > "$@"
+ 
+ native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
+ 	install -d "$(NATIVE_OUT)/katran"
+ 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
++	rm -f "$(KATRAN_NATIVE_STAGE_OUT)"/*.native.o "$(KATRAN_NATIVE_STAGE_OUT)"/*.proof.o
+ 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
++	install -m 0644 "$(NATIVE_OUT)/katran"/*.proof.o "$(KATRAN_NATIVE_STAGE_OUT)"
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
+ 		--output "$(NATIVE_OUT)/katran/manifest.json" \
+ 		--object "$(NATIVE_OUT)/katran/balancer.native.o" \
+@@ -272,8 +289,9 @@ native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
+ 		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o" \
+ 		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o"
+ 
+-$(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK)
++$(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK) Makefile
+ 	install -d "$(dir $@)"
++	rm -f "$(NATIVE_OUT)/bcc/$*."*.proof.o "$@"
+ 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
+ 	if [[ -z "$${symbols}" ]]; then \
+ 		echo "no native text symbols in $<" >&2; \
+@@ -281,14 +299,16 @@ $(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK)
+ 	fi; \
+ 	for sym in $${symbols}; do \
+ 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
+-			--output "$(NATIVE_OUT)/bcc/$*.$${sym}.proof.o" --mode proof; \
++			--output "$(NATIVE_OUT)/bcc/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
+ 	done; \
+ 	printf 'ok\n' > "$@"
+ 
+-native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
++native-bcc: $(BCC_VMLINUX_H) $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
+ 	install -d "$(NATIVE_OUT)/bcc"
+ 	install -d "$(BCC_NATIVE_STAGE_OUT)"
++	rm -f "$(BCC_NATIVE_STAGE_OUT)"/*.native.o "$(BCC_NATIVE_STAGE_OUT)"/*.proof.o
+ 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
++	install -m 0644 "$(NATIVE_OUT)/bcc"/*.proof.o "$(BCC_NATIVE_STAGE_OUT)"
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
+ 		--output "$(NATIVE_OUT)/bcc/manifest.json" \
+ 		$(foreach obj,$(BCC_NATIVE_OBJS),--object "$(obj)")
+@@ -296,8 +316,9 @@ native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF
+ 		--output "$(BCC_NATIVE_STAGE_OUT)/manifest.json" \
+ 		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o")
+ 
+-$(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK)
++$(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK) Makefile
+ 	install -d "$(dir $@)"
++	rm -f "$(NATIVE_OUT)/cilium/$*."*.proof.o "$@"
+ 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^__check_/ {print $$1}')"; \
+ 	if [[ -z "$${symbols}" ]]; then \
+ 		echo "no native text symbols in $<" >&2; \
+@@ -305,20 +326,26 @@ $(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK)
+ 	fi; \
+ 	for sym in $${symbols}; do \
+ 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
+-			--output "$(NATIVE_OUT)/cilium/$*.$${sym}.proof.o" --mode proof; \
++			--output "$(NATIVE_OUT)/cilium/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
+ 	done; \
+ 	printf 'ok\n' > "$@"
+ 
+ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
+ 	install -d "$(CILIUM_NATIVE_STAGE_OUT)"
+-	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o
++	rm -f "$(NATIVE_OUT)/cilium/cilium_placeholders."*.proof.o "$(NATIVE_OUT)/cilium/cilium_placeholders.native.o" "$(NATIVE_OUT)/cilium/cilium_placeholders.proof.ok"
++	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o "$(CILIUM_NATIVE_STAGE_OUT)"/*.proof.o
+ 	install -m 0644 $(CILIUM_NATIVE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
++	install -m 0644 "$(NATIVE_OUT)/cilium"/*.proof.o "$(CILIUM_NATIVE_STAGE_OUT)"
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
+ 		--output "$(NATIVE_OUT)/cilium/manifest.json" \
+ 		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
+ 		--object "$(NATIVE_OUT)/cilium/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+ 		--object "$(NATIVE_OUT)/cilium/bpf_sock.native.o" \
+ 		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
++		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
++		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752" \
++		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0" \
++		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696" \
+ 		--object "$(NATIVE_OUT)/cilium/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
+ 		--object "$(NATIVE_OUT)/cilium/bpf_xdp.native.o,prog_type=6"
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
+@@ -327,11 +354,16 @@ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
+ 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+ 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_sock.native.o" \
+ 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
++		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
++		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752" \
++		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0" \
++		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696" \
+ 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
+ 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6"
+ 
+-$(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
++$(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
+ 	install -d "$(dir $@)"
++	rm -f "$(NATIVE_OUT)/otel"/*.proof.o "$@"
+ 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
+ 	if [[ -z "$${symbols}" ]]; then \
+ 		echo "no native text symbols in $<" >&2; \
+@@ -339,22 +371,38 @@ $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
+ 	fi; \
+ 	for sym in $${symbols}; do \
+ 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
+-			--output "$(NATIVE_OUT)/otel/$${sym}.proof.o" --mode proof; \
++			--output "$(NATIVE_OUT)/otel/$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
+ 	done; \
+ 	printf 'ok\n' > "$@"
+ 
+ native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
+ 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
++	rm -f "$(OTEL_NATIVE_STAGE_OUT)"/*.native.o "$(OTEL_NATIVE_STAGE_OUT)"/*.proof.o
+ 	install -m 0644 "$(OTEL_NATIVE_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
++	for obj in $(OTEL_NATIVE_UNIT_OBJS); do \
++		install -m 0644 "$${obj}" "$(OTEL_NATIVE_STAGE_OUT)/$$(basename "$${obj}")"; \
++	done
++	install -m 0644 "$(NATIVE_OUT)/otel"/*.proof.o "$(OTEL_NATIVE_STAGE_OUT)"
++	native_data_args=(); \
++	stage_data_args=(); \
++	for obj in $(OTEL_NATIVE_UNIT_OBJS); do native_data_args+=(--data-object "$${obj}"); done; \
++	for obj in "$(OTEL_NATIVE_STAGE_OUT)"/*.native.o; do \
++		if [[ "$$(basename "$${obj}")" != "otelcol-ebpf-profiler.native.o" ]]; then \
++			stage_data_args+=(--data-object "$${obj}"); \
++		fi; \
++	done; \
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
+ 		--output "$(NATIVE_OUT)/otel/manifest.json" \
+-		--object "$(OTEL_NATIVE_OBJECT)"
++		"$${native_data_args[@]}" \
++		--object "$(OTEL_NATIVE_OBJECT)"; \
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
+ 		--output "$(OTEL_NATIVE_STAGE_OUT)/manifest.json" \
++		"$${stage_data_args[@]}" \
+ 		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
+ 
+-$(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
++$(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
+ 	install -d "$(dir $@)"
++	rm -f "$(NATIVE_OUT)/tracee"/*.proof.o "$@"
+ 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
+ 	if [[ -z "$${symbols}" ]]; then \
+ 		echo "no native text symbols in $<" >&2; \
+@@ -362,12 +410,13 @@ $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
+ 	fi; \
+ 	for sym in $${symbols}; do \
+ 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
+-			--output "$(NATIVE_OUT)/tracee/$${sym}.proof.o" --mode proof; \
++			--output "$(NATIVE_OUT)/tracee/$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
+ 	done; \
+ 	printf 'ok\n' > "$@"
+ 
+-$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.native.o $(NATIVE_LINK)
++$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.native.o $(NATIVE_LINK) Makefile
+ 	install -d "$(dir $@)"
++	rm -f "$(NATIVE_OUT)/tracee/lsm_support/$*."*.proof.o "$@"
+ 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
+ 	if [[ -z "$${symbols}" ]]; then \
+ 		echo "no native text symbols in $<" >&2; \
+@@ -375,34 +424,38 @@ $(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.
+ 	fi; \
+ 	for sym in $${symbols}; do \
+ 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
+-			--output "$(NATIVE_OUT)/tracee/lsm_support/$*.$${sym}.proof.o" --mode proof; \
++			--output "$(NATIVE_OUT)/tracee/lsm_support/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
+ 	done; \
+ 	printf 'ok\n' > "$@"
+ 
+ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
+ 	install -d "$(TRACEE_NATIVE_STAGE_OUT)"
+-	rm -f "$(TRACEE_NATIVE_STAGE_OUT)"/*.native.o
++	rm -f "$(TRACEE_NATIVE_STAGE_OUT)"/*.native.o "$(TRACEE_NATIVE_STAGE_OUT)"/*.proof.o
+ 	for obj in $(TRACEE_NATIVE_OBJS); do \
+ 		install -m 0644 "$${obj}" "$(TRACEE_NATIVE_STAGE_OUT)/$$(basename "$${obj}")"; \
+ 	done
++	install -m 0644 "$(NATIVE_OUT)/tracee"/*.proof.o "$(TRACEE_NATIVE_STAGE_OUT)"
++	install -m 0644 "$(NATIVE_OUT)/tracee/lsm_support"/*.proof.o "$(TRACEE_NATIVE_STAGE_OUT)"
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
++		--dedupe-program last \
+ 		--output "$(NATIVE_OUT)/tracee/manifest.json" \
+ 		--object "$(TRACEE_NATIVE_OBJECT)" \
+ 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(NATIVE_OUT)/tracee/lsm_support/$(src).native.o")
+ 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
++		--dedupe-program last \
+ 		--output "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json" \
+ 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
+ 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
+ 
+-native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(NATIVE_LINK)
++native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
+ 	install -d "$(NATIVE_OUT)/tetragon"
+ 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
+ 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok
+-	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
++	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o "$(TETRAGON_NATIVE_STAGE_OUT)"/*.proof.o
+ 	native_out="$(NATIVE_OUT)/tetragon"; \
+ 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
+ 	common_flags=($(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+-		-D__TARGET_ARCH_x86 \
++		-D$(TARGET_ARCH_DEFINE) \
+ 		-include "$(CURDIR)/native_compat.h" \
+ 		-I"$(CURDIR)/tetragon/bpf" \
+ 		-I"$(CURDIR)/tetragon/bpf/include" \
+@@ -410,26 +463,13 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
+ 		-I"$(CURDIR)/tetragon/bpf/libbpf" \
+ 		-I"$(CURDIR)/tetragon/bpf/process" \
+ 		-I"$(CURDIR)/tetragon/bpf/errmetrics" \
+-		-I/usr/include -I/usr/include/x86_64-linux-gnu); \
++		$(NATIVE_SYS_INCLUDE_FLAGS)); \
+ 	compile_native() { \
+ 		local name="$$1"; \
+ 		local src="$$2"; \
+ 		local extra="$${3:-}"; \
+ 		"$(CLANG)" "$${common_flags[@]}" $${extra} -o "$${native_out}/$${name}.native.o" "$${src}"; \
+ 	}; \
+-	for name in bpf_loader bpf_cgroup bpf_prog_iter \
+-		bpf_execve_event bpf_fork bpf_exit bpf_execve_bprm_commit_creds \
+-		bpf_generic_kprobe bpf_generic_retkprobe bpf_generic_tracepoint \
+-		bpf_generic_uprobe bpf_generic_retuprobe bpf_generic_rawtp \
+-		bpf_generic_usdt bpf_generic_fentry bpf_generic_fexit \
+-		bpf_execve_map_update; do \
+-		compile_native "$${name}" "$(CURDIR)/tetragon/bpf/process/$${name}.c" ""; \
+-	done; \
+-	compile_native bpf_generic_lsm_core "$(CURDIR)/tetragon/bpf/process/bpf_generic_lsm_core.c" "-D__LARGE_BPF_PROG"; \
+-	compile_native bpf_generic_lsm_output "$(CURDIR)/tetragon/bpf/process/bpf_generic_lsm_output.c" "-D__LARGE_BPF_PROG"; \
+-	compile_native bpf_enforcer "$(CURDIR)/tetragon/bpf/process/bpf_enforcer.c" "-D__BPF_OVERRIDE_RETURN"; \
+-	compile_native bpf_multi_enforcer "$(CURDIR)/tetragon/bpf/process/bpf_enforcer.c" "-D__BPF_OVERRIDE_RETURN -D__MULTI_KPROBE"; \
+-	compile_native bpf_fmodret_enforcer "$(CURDIR)/tetragon/bpf/process/bpf_enforcer.c" ""; \
+ 	for name in bpf_execve_event bpf_exit bpf_fork; do \
+ 		compile_native "$${name}_v310" "$(CURDIR)/tetragon/bpf/process/$${name}.c" "-D__RHEL7_BPF_PROG"; \
+ 	done; \
+@@ -485,9 +525,6 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
+ 		set -- $${pair}; \
+ 		compile_native "$$1" "$(CURDIR)/tetragon/bpf/process/$$2" "-D__LARGE_BPF_PROG -D__V511_BPF_PROG -D__V61_BPF_PROG -D__MULTI_KPROBE"; \
+ 	done; \
+-	for name in bpf_cgroup_mkdir bpf_cgroup_rmdir bpf_cgroup_release bpf_cgtracker; do \
+-		compile_native "$${name}" "$(CURDIR)/tetragon/bpf/cgroup/$${name}.c" ""; \
+-	done; \
+ 	for name in bpf_cgroup_mkdir bpf_cgroup_rmdir bpf_cgroup_release; do \
+ 		compile_native "$${name}_v511" "$(CURDIR)/tetragon/bpf/cgroup/$${name}.c" "-D__LARGE_BPF_PROG -D__V511_BPF_PROG"; \
+ 	done; \
+@@ -499,21 +536,22 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
+ 			exit 1; \
+ 		fi; \
+ 		for sym in $${symbols}; do \
+-			"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
+-				--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof; \
++				"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
++					--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
++				done; \
++				printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
++				install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
++				install -m 0644 "$${native_out}/$${base}."*.proof.o "$${stage_out}"; \
+ 			done; \
+-			printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
+-			install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
+-		done; \
+ 		native_args=(); \
+ 		stage_args=(); \
+ 		for obj in "$${native_out}"/*.native.o; do native_args+=(--object "$${obj}"); done; \
+ 		for obj in "$${stage_out}"/*.native.o; do stage_args+=(--object "$${obj}"); done; \
+ 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
+-			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
++			--source-object-root "$(VENDOR)/build/$(ARCH)/tetragon" --helper-disambiguate 174 \
+ 			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
+ 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
+-			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
++			--source-object-root "$(VENDOR)/build/$(ARCH)/tetragon" --helper-disambiguate 174 \
+ 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
+ 
+ native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon
+diff --git a/vendor/bpf/cilium/bpf/bpf_host.c b/vendor/bpf/cilium/bpf/bpf_host.c
+index a49ce65ec..7f32d117b 100644
+--- a/vendor/bpf/cilium/bpf/bpf_host.c
++++ b/vendor/bpf/cilium/bpf/bpf_host.c
+@@ -375,7 +375,7 @@ handle_ipv6_cont(struct __ctx_buff *ctx, __u32 secctx, const bool from_host,
+ 	/* Check if the source and destination IP has same subnet ID. */
+ 	bool same_subnet_id = false;
+ 
+-	if (CONFIG(hybrid_routing_enabled)) {
++	if (CILIUM_HYBRID_ROUTING_ENABLED) {
+ 		__u32 src_subnet_id = lookup_ip6_subnet_id((union v6addr *)&ip6->saddr);
+ 		__u32 dst_subnet_id = lookup_ip6_subnet_id((union v6addr *)&ip6->daddr);
+ 
+@@ -820,7 +820,7 @@ handle_ipv4_cont(struct __ctx_buff *ctx, __u32 secctx, const bool from_host,
+ 	/* Check if the source and destination IP has same subnet ID. */
+ 	bool same_subnet_id = false;
+ 	/* Lookup the subnet IDs for the source and destination IPs in hybrid routing mode. */
+-	if (CONFIG(hybrid_routing_enabled)) {
++	if (CILIUM_HYBRID_ROUTING_ENABLED) {
+ 		__u32 src_subnet_id = lookup_ip4_subnet_id(ip4->saddr);
+ 		__u32 dst_subnet_id = lookup_ip4_subnet_id(ip4->daddr);
+ 
+@@ -1187,8 +1187,8 @@ int cil_from_netdev(struct __ctx_buff *ctx)
+ 	/* Filter allowed vlan id's and pass them back to kernel.
+ 	 * We will see the packet again in from-netdev@eth0.vlanXXX.
+ 	 */
+-	if (ctx->vlan_all) {
+-		__u32 vlan_id = ctx->vlan_tci & 0xfff;
++	if (ctx_has_vlan(ctx)) {
++		__u32 vlan_id = ctx_get_vlan_tci(ctx) & 0xfff;
+ 
+ 		if (vlan_id) {
+ 			if (allow_vlan(ctx_get_ifindex(ctx), vlan_id))
+@@ -1351,8 +1351,8 @@ int cil_to_netdev(struct __ctx_buff *ctx)
+ 
+ 	/* Filter allowed vlan id's and pass them back to kernel.
+ 	 */
+-	if (ctx->vlan_all) {
+-		vlan_id = ctx->vlan_tci & 0xfff;
++	if (ctx_has_vlan(ctx)) {
++		vlan_id = ctx_get_vlan_tci(ctx) & 0xfff;
+ 		if (vlan_id) {
+ 			if (allow_vlan(ctx_get_ifindex(ctx), vlan_id))
+ 				return CTX_ACT_OK;
+diff --git a/vendor/bpf/cilium/bpf/bpf_lxc.c b/vendor/bpf/cilium/bpf/bpf_lxc.c
+index 17f667b7b..b20d9896f 100644
+--- a/vendor/bpf/cilium/bpf/bpf_lxc.c
++++ b/vendor/bpf/cilium/bpf/bpf_lxc.c
+@@ -871,15 +871,13 @@ static __always_inline int handle_ipv6_from_lxc(struct __ctx_buff *ctx, __u32 *d
+ 		const union v6addr *daddr = (union v6addr *)&ip6->daddr;
+ 		bool same_subnet_id = false;
+ 
+-#ifndef MICRO_NATIVE
+-		if (CONFIG(hybrid_routing_enabled)) {
++		if (CILIUM_HYBRID_ROUTING_ENABLED) {
+ 			const union v6addr *saddr = (union v6addr *)&ip6->saddr;
+ 			__u32 src_subnet_id = lookup_ip6_subnet_id(saddr);
+ 			__u32 dst_subnet_id = lookup_ip6_subnet_id(daddr);
+ 
+ 			same_subnet_id = (src_subnet_id == dst_subnet_id) && (src_subnet_id != 0);
+ 		}
+-#endif
+ 
+ 		info = lookup_ip6_remote_endpoint(daddr, 0);
+ 		if (info) {
+@@ -1459,14 +1457,12 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
+ 
+ 	bool same_subnet_id = false;
+ 
+-#ifndef MICRO_NATIVE
+-	if (CONFIG(hybrid_routing_enabled)) {
++	if (CILIUM_HYBRID_ROUTING_ENABLED) {
+ 		__u32 src_subnet_id = lookup_ip4_subnet_id(ip4->saddr);
+ 		__u32 dst_subnet_id = lookup_ip4_subnet_id(ip4->daddr);
+ 
+ 		same_subnet_id = (src_subnet_id == dst_subnet_id) && (src_subnet_id != 0);
+ 	}
+-#endif
+ 
+ 	/* Determine the destination category for policy fallback. */
+ 	info = lookup_ip4_remote_endpoint(ip4->daddr, cluster_id);
+diff --git a/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h b/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h
+index 98445dd58..cb322424a 100644
+--- a/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h
++++ b/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h
+@@ -193,3 +193,19 @@ ctx_get_ingress_ifindex(const struct __sk_buff *ctx)
+ {
+ 	return ctx->ingress_ifindex;
+ }
++
++static __always_inline __maybe_unused bool
++ctx_has_vlan(const struct __sk_buff *ctx)
++{
++#ifdef MICRO_NATIVE
++	return ctx->vlan_all != 0;
++#else
++	return ctx->vlan_present != 0;
++#endif
++}
++
++static __always_inline __maybe_unused __u32
++ctx_get_vlan_tci(const struct __sk_buff *ctx)
++{
++	return ctx->vlan_tci;
++}
+diff --git a/vendor/bpf/cilium/bpf/lib/subnet.h b/vendor/bpf/cilium/bpf/lib/subnet.h
+index d6a96216f..8c062a44e 100644
+--- a/vendor/bpf/cilium/bpf/lib/subnet.h
++++ b/vendor/bpf/cilium/bpf/lib/subnet.h
+@@ -10,6 +10,12 @@
+ 
+ DECLARE_CONFIG(bool, hybrid_routing_enabled, "Enable hybrid mode routing based on subnet IDs")
+ 
++#ifdef BPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED
++#define CILIUM_HYBRID_ROUTING_ENABLED BPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED
++#else
++#define CILIUM_HYBRID_ROUTING_ENABLED CONFIG(hybrid_routing_enabled)
++#endif
++
+ #define SUBNET_MAP_SIZE 1024
+ 
+ struct subnet_key {
+diff --git a/vendor/bpf/native_compat.h b/vendor/bpf/native_compat.h
+index cdb0651a5..820d6e33f 100644
+--- a/vendor/bpf/native_compat.h
++++ b/vendor/bpf/native_compat.h
+@@ -7,6 +7,12 @@
+ #define __BPF_TRACING_H__
+ #define __BPF_CORE_READ_H__
+ #define BPF_NO_PRESERVE_ACCESS_INDEX
++/* Native helper/kfunc shims below own the callable declarations.  Suppress
++ * generated vmlinux kfunc prototypes so a same-named function-like shim does
++ * not rewrite a later prototype while this header is force-included. */
++#ifndef BPF_NO_KFUNC_PROTOTYPES
++#define BPF_NO_KFUNC_PROTOTYPES
++#endif
+ 
+ #ifndef SEC
+ #define SEC(NAME) __attribute__((section(NAME), used))
+@@ -70,56 +76,111 @@
+ #define _(P) (__builtin_preserve_access_index(P))
+ #endif
+ 
++#if defined(__TARGET_ARCH_x86) && !defined(bpf_target_x86)
++#define bpf_target_x86
++#endif
++#if defined(__TARGET_ARCH_arm64) && !defined(bpf_target_arm64)
++#define bpf_target_arm64
++#endif
++
++#define __PT_REGS_CAST(x) ((struct pt_regs *)(x))
++
++#if defined(__TARGET_ARCH_arm64)
++#define __PT_PARM1(x) (__PT_REGS_CAST(x)->regs[0])
++#define __PT_PARM2(x) (__PT_REGS_CAST(x)->regs[1])
++#define __PT_PARM3(x) (__PT_REGS_CAST(x)->regs[2])
++#define __PT_PARM4(x) (__PT_REGS_CAST(x)->regs[3])
++#define __PT_PARM5(x) (__PT_REGS_CAST(x)->regs[4])
++#define __PT_PARM6(x) (__PT_REGS_CAST(x)->regs[5])
++#define __PT_RET(x) (__PT_REGS_CAST(x)->regs[30])
++#define __PT_FP(x) (__PT_REGS_CAST(x)->regs[29])
++#define __PT_RC(x) (__PT_REGS_CAST(x)->regs[0])
++#define __PT_SP(x) (__PT_REGS_CAST(x)->sp)
++#define __PT_IP(x) (__PT_REGS_CAST(x)->pc)
++#else
++#define __PT_PARM1(x) (__PT_REGS_CAST(x)->di)
++#define __PT_PARM2(x) (__PT_REGS_CAST(x)->si)
++#define __PT_PARM3(x) (__PT_REGS_CAST(x)->dx)
++#define __PT_PARM4(x) (__PT_REGS_CAST(x)->cx)
++#define __PT_PARM5(x) (__PT_REGS_CAST(x)->r8)
++#define __PT_PARM6(x) (__PT_REGS_CAST(x)->r9)
++#define __PT_RET(x) (__PT_REGS_CAST(x)->sp)
++#define __PT_FP(x) (__PT_REGS_CAST(x)->bp)
++#define __PT_RC(x) (__PT_REGS_CAST(x)->ax)
++#define __PT_SP(x) (__PT_REGS_CAST(x)->sp)
++#define __PT_IP(x) (__PT_REGS_CAST(x)->ip)
++#endif
++
++#define PT_REGS_PARM1(x) __PT_PARM1(x)
++#define PT_REGS_PARM2(x) __PT_PARM2(x)
++#define PT_REGS_PARM3(x) __PT_PARM3(x)
++#define PT_REGS_PARM4(x) __PT_PARM4(x)
++#define PT_REGS_PARM5(x) __PT_PARM5(x)
++#define PT_REGS_PARM6(x) __PT_PARM6(x)
++#define PT_REGS_RET(x) __PT_RET(x)
++#define PT_REGS_FP(x) __PT_FP(x)
++#define PT_REGS_RC(x) __PT_RC(x)
++#define PT_REGS_SP(x) __PT_SP(x)
++#define PT_REGS_IP(x) __PT_IP(x)
++
++#if defined(__TARGET_ARCH_arm64)
++#define __PT_PARM1_REG regs[0]
++#define __PT_PARM2_REG regs[1]
++#define __PT_PARM3_REG regs[2]
++#define __PT_PARM4_REG regs[3]
++#define __PT_PARM5_REG regs[4]
++#define __PT_PARM6_REG regs[5]
++#define __PT_PARM1_SYSCALL_REG orig_x0
++#define __PT_PARM2_SYSCALL_REG __PT_PARM2_REG
++#define __PT_PARM3_SYSCALL_REG __PT_PARM3_REG
++#define __PT_PARM4_SYSCALL_REG __PT_PARM4_REG
++#define __PT_PARM5_SYSCALL_REG __PT_PARM5_REG
++#define __PT_PARM6_SYSCALL_REG __PT_PARM6_REG
++#define __PT_RET_REG regs[30]
++#define __PT_FP_REG regs[29]
++#define __PT_RC_REG regs[0]
++#define __PT_SP_REG sp
++#define __PT_IP_REG pc
++#else
+ #define __PT_PARM1_REG di
+ #define __PT_PARM2_REG si
+ #define __PT_PARM3_REG dx
+ #define __PT_PARM4_REG cx
+ #define __PT_PARM5_REG r8
+ #define __PT_PARM6_REG r9
++#define __PT_PARM1_SYSCALL_REG __PT_PARM1_REG
++#define __PT_PARM2_SYSCALL_REG __PT_PARM2_REG
++#define __PT_PARM3_SYSCALL_REG __PT_PARM3_REG
++#define __PT_PARM4_SYSCALL_REG r10
++#define __PT_PARM5_SYSCALL_REG __PT_PARM5_REG
++#define __PT_PARM6_SYSCALL_REG __PT_PARM6_REG
+ #define __PT_RET_REG sp
+ #define __PT_FP_REG bp
+ #define __PT_RC_REG ax
+ #define __PT_SP_REG sp
+ #define __PT_IP_REG ip
+-
+-#if defined(__TARGET_ARCH_x86) && !defined(bpf_target_x86)
+-#define bpf_target_x86
+-#endif
+-#if defined(__TARGET_ARCH_arm64) && !defined(bpf_target_arm64)
+-#define bpf_target_arm64
+ #endif
+ 
+-#define __PT_REGS_CAST(x) ((struct pt_regs *)(x))
+-#define PT_REGS_PARM1(x) (__PT_REGS_CAST(x)->__PT_PARM1_REG)
+-#define PT_REGS_PARM2(x) (__PT_REGS_CAST(x)->__PT_PARM2_REG)
+-#define PT_REGS_PARM3(x) (__PT_REGS_CAST(x)->__PT_PARM3_REG)
+-#define PT_REGS_PARM4(x) (__PT_REGS_CAST(x)->__PT_PARM4_REG)
+-#define PT_REGS_PARM5(x) (__PT_REGS_CAST(x)->__PT_PARM5_REG)
+-#define PT_REGS_PARM6(x) (__PT_REGS_CAST(x)->__PT_PARM6_REG)
+-#define PT_REGS_RET(x) (__PT_REGS_CAST(x)->__PT_RET_REG)
+-#define PT_REGS_FP(x) (__PT_REGS_CAST(x)->__PT_FP_REG)
+-#define PT_REGS_RC(x) (__PT_REGS_CAST(x)->__PT_RC_REG)
+-#define PT_REGS_SP(x) (__PT_REGS_CAST(x)->__PT_SP_REG)
+-#define PT_REGS_IP(x) (__PT_REGS_CAST(x)->__PT_IP_REG)
+-#define PT_REGS_RET_CORE(x) PT_REGS_RET(x)
+-#define PT_REGS_FP_CORE(x) PT_REGS_FP(x)
+-#define PT_REGS_RC_CORE(x) PT_REGS_RC(x)
+-#define PT_REGS_SP_CORE(x) PT_REGS_SP(x)
+-#define PT_REGS_IP_CORE(x) PT_REGS_IP(x)
+-#define PT_REGS_PARM1_CORE(x) PT_REGS_PARM1(x)
+-#define PT_REGS_PARM2_CORE(x) PT_REGS_PARM2(x)
+-#define PT_REGS_PARM3_CORE(x) PT_REGS_PARM3(x)
+-#define PT_REGS_PARM4_CORE(x) PT_REGS_PARM4(x)
+-#define PT_REGS_PARM5_CORE(x) PT_REGS_PARM5(x)
+-#define PT_REGS_PARM6_CORE(x) PT_REGS_PARM6(x)
++#define __PT_CORE_READ(x, reg) (__PT_REGS_CAST(x)->reg)
++#define PT_REGS_RET_CORE(x) __PT_CORE_READ(x, __PT_RET_REG)
++#define PT_REGS_FP_CORE(x) __PT_CORE_READ(x, __PT_FP_REG)
++#define PT_REGS_RC_CORE(x) __PT_CORE_READ(x, __PT_RC_REG)
++#define PT_REGS_SP_CORE(x) __PT_CORE_READ(x, __PT_SP_REG)
++#define PT_REGS_IP_CORE(x) __PT_CORE_READ(x, __PT_IP_REG)
++#define PT_REGS_PARM1_CORE(x) __PT_CORE_READ(x, __PT_PARM1_REG)
++#define PT_REGS_PARM2_CORE(x) __PT_CORE_READ(x, __PT_PARM2_REG)
++#define PT_REGS_PARM3_CORE(x) __PT_CORE_READ(x, __PT_PARM3_REG)
++#define PT_REGS_PARM4_CORE(x) __PT_CORE_READ(x, __PT_PARM4_REG)
++#define PT_REGS_PARM5_CORE(x) __PT_CORE_READ(x, __PT_PARM5_REG)
++#define PT_REGS_PARM6_CORE(x) __PT_CORE_READ(x, __PT_PARM6_REG)
+ #define PT_REGS_PARM7_CORE(x) 0
+ #define PT_REGS_PARM8_CORE(x) 0
+-#define PT_REGS_PARM1_CORE_SYSCALL(x) PT_REGS_PARM1(x)
+-#define PT_REGS_PARM2_CORE_SYSCALL(x) PT_REGS_PARM2(x)
+-#define PT_REGS_PARM3_CORE_SYSCALL(x) PT_REGS_PARM3(x)
+-#define PT_REGS_PARM4_CORE_SYSCALL(x) PT_REGS_PARM4(x)
+-#define PT_REGS_PARM5_CORE_SYSCALL(x) PT_REGS_PARM5(x)
+-#define PT_REGS_PARM6_CORE_SYSCALL(x) PT_REGS_PARM6(x)
++#define PT_REGS_PARM1_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM1_SYSCALL_REG)
++#define PT_REGS_PARM2_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM2_SYSCALL_REG)
++#define PT_REGS_PARM3_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM3_SYSCALL_REG)
++#define PT_REGS_PARM4_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM4_SYSCALL_REG)
++#define PT_REGS_PARM5_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM5_SYSCALL_REG)
++#define PT_REGS_PARM6_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM6_SYSCALL_REG)
+ #define PT_REGS_PARM7_CORE_SYSCALL(x) 0
+ #define PT_REGS_SYSCALL_REGS(x) (x)
+ 
+@@ -232,27 +293,43 @@ ____##name(struct pt_regs *ctx, ##args)
+                        __native_core_type_2, \
+                        __native_core_type_1)(src, args)
+ 
++static __always_inline int __native_core_is_null(const void *ptr)
++{
++    return ptr == NULL;
++}
++
++#define __native_core_is_pt_regs_ptr(src) \
++    (__builtin_types_compatible_p(typeof(src), struct pt_regs *) || \
++     __builtin_types_compatible_p(typeof(src), const struct pt_regs *))
++#define __native_core_direct_read(dst, src, a) ({ \
++    int __ret = -1; \
++    if (!__native_core_is_null(src)) { \
++        __builtin_memcpy((void *)(dst), (const void *)&((src)->a), sizeof(*(dst))); \
++        __ret = 0; \
++    } \
++    __ret; \
++})
+ #define __native_core_read_into_1(fn, dst, src, a) \
+     fn((dst), sizeof(*(dst)), &((src)->a))
+ #define __native_core_read_into_2(fn, dst, src, a, b) ({ \
+     typeof((src)->a) __t1; \
+-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
++    fn(&__t1, sizeof(__t1), &((src)->a)); \
+     fn((dst), sizeof(*(dst)), &(__t1->b)); \
+ })
+ #define __native_core_read_into_3(fn, dst, src, a, b, c) ({ \
+     typeof((src)->a) __t1; \
+     typeof(__t1->b) __t2; \
+-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
++    fn(&__t1, sizeof(__t1), &((src)->a)); \
++    fn(&__t2, sizeof(__t2), &(__t1->b)); \
+     fn((dst), sizeof(*(dst)), &(__t2->c)); \
+ })
+ #define __native_core_read_into_4(fn, dst, src, a, b, c, d) ({ \
+     typeof((src)->a) __t1; \
+     typeof(__t1->b) __t2; \
+     typeof(__t2->c) __t3; \
+-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
+-    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
++    fn(&__t1, sizeof(__t1), &((src)->a)); \
++    fn(&__t2, sizeof(__t2), &(__t1->b)); \
++    fn(&__t3, sizeof(__t3), &(__t2->c)); \
+     fn((dst), sizeof(*(dst)), &(__t3->d)); \
+ })
+ #define __native_core_read_into_5(fn, dst, src, a, b, c, d, e) ({ \
+@@ -260,10 +337,10 @@ ____##name(struct pt_regs *ctx, ##args)
+     typeof(__t1->b) __t2; \
+     typeof(__t2->c) __t3; \
+     typeof(__t3->d) __t4; \
+-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
+-    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
+-    bpf_probe_read_kernel(&__t4, sizeof(__t4), &(__t3->d)); \
++    fn(&__t1, sizeof(__t1), &((src)->a)); \
++    fn(&__t2, sizeof(__t2), &(__t1->b)); \
++    fn(&__t3, sizeof(__t3), &(__t2->c)); \
++    fn(&__t4, sizeof(__t4), &(__t3->d)); \
+     fn((dst), sizeof(*(dst)), &(__t4->e)); \
+ })
+ #define __native_core_read_into_6(fn, dst, src, a, b, c, d, e, f) ({ \
+@@ -272,11 +349,11 @@ ____##name(struct pt_regs *ctx, ##args)
+     typeof(__t2->c) __t3; \
+     typeof(__t3->d) __t4; \
+     typeof(__t4->e) __t5; \
+-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
+-    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
+-    bpf_probe_read_kernel(&__t4, sizeof(__t4), &(__t3->d)); \
+-    bpf_probe_read_kernel(&__t5, sizeof(__t5), &(__t4->e)); \
++    fn(&__t1, sizeof(__t1), &((src)->a)); \
++    fn(&__t2, sizeof(__t2), &(__t1->b)); \
++    fn(&__t3, sizeof(__t3), &(__t2->c)); \
++    fn(&__t4, sizeof(__t4), &(__t3->d)); \
++    fn(&__t5, sizeof(__t5), &(__t4->e)); \
+     fn((dst), sizeof(*(dst)), &(__t5->f)); \
+ })
+ #define __native_core_read_into(fn, dst, src, args...) \
+@@ -288,6 +365,43 @@ ____##name(struct pt_regs *ctx, ##args)
+                        __native_core_read_into_2, \
+                        __native_core_read_into_1)(fn, dst, src, args)
+ 
++#define __native_core_read_value_1(fn, dst, src, a) \
++    __builtin_choose_expr(__native_core_is_pt_regs_ptr(src), \
++                          __native_core_direct_read((dst), (src), a), \
++                          fn((dst), sizeof(*(dst)), &((src)->a)))
++#define __native_core_read_value_2(fn, dst, src, a, b) \
++    __native_core_read_into_2(fn, dst, src, a, b)
++#define __native_core_read_value_3(fn, dst, src, a, b, c) \
++    __native_core_read_into_3(fn, dst, src, a, b, c)
++#define __native_core_read_value_4(fn, dst, src, a, b, c, d) \
++    __native_core_read_into_4(fn, dst, src, a, b, c, d)
++#define __native_core_read_value_5(fn, dst, src, a, b, c, d, e) \
++    __native_core_read_into_5(fn, dst, src, a, b, c, d, e)
++#define __native_core_read_value_6(fn, dst, src, a, b, c, d, e, f) \
++    __native_core_read_into_6(fn, dst, src, a, b, c, d, e, f)
++#define __native_core_read_value(fn, dst, src, args...) \
++    __native_core_pick(args, \
++                       __native_core_read_value_6, \
++                       __native_core_read_value_5, \
++                       __native_core_read_value_4, \
++                       __native_core_read_value_3, \
++                       __native_core_read_value_2, \
++                       __native_core_read_value_1)(fn, dst, src, args)
++
++#define __native_core_read_expr_1(src, a) ((src)->a)
++#define __native_core_read_expr_2(src, a, b) (__native_core_read_expr_1(src, a)->b)
++#define __native_core_read_expr_3(src, a, b, c) (__native_core_read_expr_2(src, a, b)->c)
++#define __native_core_read_expr_4(src, a, b, c, d) (__native_core_read_expr_3(src, a, b, c)->d)
++#define __native_core_read_expr_5(src, a, b, c, d, e) (__native_core_read_expr_4(src, a, b, c, d)->e)
++#define __native_core_read_expr_6(src, a, b, c, d, e, f) (__native_core_read_expr_5(src, a, b, c, d, e)->f)
++#define __native_core_read_expr(src, args...) \
++    __native_core_pick(args, \
++                       __native_core_read_expr_6, \
++                       __native_core_read_expr_5, \
++                       __native_core_read_expr_4, \
++                       __native_core_read_expr_3, \
++                       __native_core_read_expr_2, \
++                       __native_core_read_expr_1)(src, args)
+ #ifndef bpf_core_field_exists
+ #ifdef MICRO_NATIVE_TETRAGON
+ /*
+@@ -323,23 +437,30 @@ ____##name(struct pt_regs *ctx, ##args)
+ #ifndef bpf_core_enum_value
+ #define bpf_core_enum_value(type, value) (value)
+ #endif
++#ifdef MICRO_NATIVE_TETRAGON
++#define __native_core_probe_read bpf_probe_read
++#define __native_core_probe_read_str bpf_probe_read_str
++#else
++#define __native_core_probe_read bpf_probe_read_kernel
++#define __native_core_probe_read_str bpf_probe_read_kernel_str
++#endif
+ #ifndef bpf_core_read
+-#define bpf_core_read(dst, sz, src) bpf_probe_read_kernel((dst), (sz), (src))
++#define bpf_core_read(dst, sz, src) __native_core_probe_read((dst), (sz), (src))
+ #endif
+ #ifndef BPF_CORE_READ
+ #define BPF_CORE_READ(src, args...) ({ \
+     __native_core_type(src, args) __r; \
+-    BPF_CORE_READ_INTO(&__r, (src), args); \
++    __native_core_read_value(__native_core_probe_read, &__r, (src), args); \
+     __r; \
+ })
+ #endif
+ #ifndef BPF_CORE_READ_INTO
+ #define BPF_CORE_READ_INTO(dst, src, args...) \
+-    __native_core_read_into(bpf_probe_read_kernel, (dst), (src), args)
++    __native_core_read_into(__native_core_probe_read, (dst), (src), args)
+ #endif
+ #ifndef BPF_CORE_READ_STR_INTO
+ #define BPF_CORE_READ_STR_INTO(dst, src, args...) \
+-    __native_core_read_into(bpf_probe_read_kernel_str, (dst), (src), args)
++    __native_core_read_into(__native_core_probe_read_str, (dst), (src), args)
+ #endif
+ #ifndef bpf_core_read_user
+ #define bpf_core_read_user(dst, sz, src) bpf_probe_read_user((dst), (sz), (src))
+@@ -398,16 +519,25 @@ extern long bpf_skb_load_bytes_relative(void *skb, unsigned int offset,
+                                         unsigned int start_header);
+ 
+ #ifdef MICRO_NATIVE_HELPER_MACROS
++#if defined(__aarch64__)
++/* Keep the helper number in a general register until the indirect branch.
++ * native-link recognizes the resulting MOV-immediate plus BR/BLR pair on
++ * AArch64; the x86 path deliberately keeps its existing RAX convention. */
++#define NATIVE_HELPER_ID_CONSTRAINT "+r"
++#else
++#define NATIVE_HELPER_ID_CONSTRAINT "+a"
++#endif
++
+ static __always_inline unsigned long native_helper_id0(unsigned long id)
+ {
+-    asm volatile("" : "+r"(id) : : "memory");
++    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : : "memory");
+     return id;
+ }
+ 
+ static __always_inline unsigned long native_helper_id1(unsigned long id,
+                                                        unsigned long a0)
+ {
+-    asm volatile("" : "+r"(id) : "r"(a0) : "memory");
++    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0) : "memory");
+     return id;
+ }
+ 
+@@ -415,7 +545,7 @@ static __always_inline unsigned long native_helper_id2(unsigned long id,
+                                                        unsigned long a0,
+                                                        unsigned long a1)
+ {
+-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1) : "memory");
++    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1) : "memory");
+     return id;
+ }
+ 
+@@ -424,7 +554,7 @@ static __always_inline unsigned long native_helper_id3(unsigned long id,
+                                                        unsigned long a1,
+                                                        unsigned long a2)
+ {
+-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
++    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
+     return id;
+ }
+ 
+@@ -434,8 +564,7 @@ static __always_inline unsigned long native_helper_id4(unsigned long id,
+                                                        unsigned long a2,
+                                                        unsigned long a3)
+ {
+-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3)
+-                 : "memory");
++    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3) : "memory");
+     return id;
+ }
+ 
+@@ -446,12 +575,12 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
+                                                        unsigned long a3,
+                                                        unsigned long a4)
+ {
+-    asm volatile("" : "+r"(id)
+-                 : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4)
+-                 : "memory");
++    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4) : "memory");
+     return id;
+ }
+ 
++#undef NATIVE_HELPER_ID_CONSTRAINT
++
+ #define native_bpf_helper0(type, id) ((type)native_helper_id0((unsigned long)(id)))
+ #define native_bpf_helper1(type, id, a0) \
+     ((type)native_helper_id1((unsigned long)(id), (unsigned long)(a0)))
+@@ -575,6 +704,18 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
+     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
+                        NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
+         (dst), (size), (unsafe_ptr))
++/* Tetragon uses the sleepable bpf_copy_from_user_str kfunc with flags=0.
++ * That mode has the same string-copy contract as probe_read_user_str, whose
++ * helper trampoline is available to the native proof path.  Reject every
++ * other mode at compile time instead of silently approximating it. */
++#undef bpf_copy_from_user_str
++#define bpf_copy_from_user_str(dst, size, unsafe_ptr, flags) ({ \
++    _Static_assert(__builtin_constant_p(flags) && (flags) == 0, \
++                   "native bpf_copy_from_user_str requires constant flags=0"); \
++    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
++                       NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
++        (dst), (size), (unsafe_ptr)); \
++})
+ #undef bpf_probe_read_str
+ #define bpf_probe_read_str(dst, size, unsafe_ptr) \
+     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
+diff --git a/vendor/bpf/write_native_manifest.py b/vendor/bpf/write_native_manifest.py
+index 1785355d0..2266460f0 100644
+--- a/vendor/bpf/write_native_manifest.py
++++ b/vendor/bpf/write_native_manifest.py
+@@ -6,7 +6,7 @@ import json
+ import subprocess
+ from collections import defaultdict
+ from pathlib import Path
+-from typing import Iterable
++from typing import Iterable, NamedTuple
+ 
+ 
+ BPF_LD_IMM64 = 0x18
+@@ -73,12 +73,13 @@ CILIUM_MAP_RULES = [
+     map_rule("exact", "cilium_ratelimit", BPF_MAP_TYPE_LRU_HASH, 8, 16, 1024),
+     map_rule("exact", "cilium_lb4_reverse_nat", BPF_MAP_TYPE_HASH, 2, 6, 65536),
+     map_rule("exact", "cilium_lb6_reverse_nat", BPF_MAP_TYPE_HASH, 2, 18, 65536),
+-    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40, 591428),
++    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40),
+     map_rule("exact", "cilium_snat_v4_alloc_retries", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4, 33),
+     map_rule("exact", "cilium_l2_responder_v4", BPF_MAP_TYPE_HASH, 8, 8, 4096),
+     map_rule("exact", "cilium_l2_responder_v6", BPF_MAP_TYPE_HASH, 24, 8, 4096),
+     map_rule("exact", "cilium_devices", BPF_MAP_TYPE_HASH, 4, 16, 512, True),
+     map_rule("exact", "cilium_policy_v2", BPF_MAP_TYPE_LPM_TRIE, 12, 12, 16384, True),
++    map_rule("exact", "cilium_subnet_map", BPF_MAP_TYPE_LPM_TRIE, 24, 4, 1024),
+     map_rule("exact", "cilium_nodeport_nat_buffer", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 18, 1, True),
+     map_rule("exact", "cilium_nodeport_neigh4", BPF_MAP_TYPE_LRU_HASH, 4, 8, object_scoped=True),
+     map_rule("exact", "cilium_nodeport_neigh6", BPF_MAP_TYPE_LRU_HASH, 16, 8, object_scoped=True),
+@@ -88,6 +89,42 @@ CILIUM_MAP_RULES = [
+              object_scoped=True, native_symbol="cilium_calls"),
+ ]
+ 
++MAX_FILTER_VERSION = 64
++MAX_EVENT_ID = 794
++
++TRACEE_VERSIONED_FILTER_MAP_RULES = [
++    map_rule("exact", "events_map_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 4, 64, MAX_EVENT_ID)),
++    map_rule("exact", "uid_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
++    map_rule("exact", "pid_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
++    map_rule("exact", "mnt_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
++    map_rule("exact", "pid_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
++    map_rule("exact", "uts_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 16, 16, 256)),
++    map_rule("exact", "comm_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 16, 16, 256)),
++    map_rule("exact", "cgroup_id_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2,
++             4, MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
++    map_rule("exact", "process_tree_map_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2,
++             4, MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 4, 16, 10240)),
++    map_rule("exact", "binary_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
++             MAX_FILTER_VERSION, True,
++             inner=(BPF_MAP_TYPE_HASH, 260, 16, 256)),
++]
++
+ TRACEE_TETRAGON_MAP_RULES = [
+     map_rule("exact", "execve_calls", BPF_MAP_TYPE_PROG_ARRAY, 4, 4, 2, True),
+     map_rule("exact", "tcpmon_map", BPF_MAP_TYPE_PERF_EVENT_ARRAY, 4, 4, 8, True),
+@@ -133,6 +170,7 @@ TRACEE_TETRAGON_MAP_RULES = [
+     map_rule("exact", "ratelimit_map", BPF_MAP_TYPE_LRU_HASH, 224, 8, object_scoped=True),
+     map_rule("exact", "ratelimit_heap", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 352, 1, True),
+     map_rule("exact", "retprobe_map", BPF_MAP_TYPE_HASH, 16, 24, 1024, True),
++    map_rule("exact", "socktrack_map", BPF_MAP_TYPE_LRU_HASH, 8, 16, 1, True),
+     map_rule("exact", "fdinstall_map", BPF_MAP_TYPE_LRU_HASH, 16, 4104, object_scoped=True),
+     map_rule("exact", "stack_trace_map", BPF_MAP_TYPE_STACK_TRACE, 4, 1016, object_scoped=True),
+     map_rule("exact", "sleepable_preload", BPF_MAP_TYPE_HASH, 8, 4100, object_scoped=True),
+@@ -146,6 +184,7 @@ TRACEE_TETRAGON_MAP_RULES = [
+     map_rule("exact", "config_map", BPF_MAP_TYPE_ARRAY, 4, 736, 1, True),
+     map_rule("exact", "write_offload", BPF_MAP_TYPE_HASH, 8, 16, 1, True),
+     map_rule("exact", "argfilter_maps", BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8, True),
++    *TRACEE_VERSIONED_FILTER_MAP_RULES,
+     map_rule("exact", "policy_filter_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 4, 4, 128, True,
+              inner=(BPF_MAP_TYPE_HASH, 8, 1, 1)),
+     map_rule("exact", "policy_filter_cgroup_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 8, 4, 1024, True,
+@@ -153,10 +192,19 @@ TRACEE_TETRAGON_MAP_RULES = [
+     map_rule("exact", "exit_heap_map", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 40, 1, True),
+ ]
+ 
++OTEL_MAP_RULES = [
++    map_rule("exact", "pid_page_to_map", BPF_MAP_TYPE_LPM_TRIE, 16, 16,
++             native_symbol="pid_page_to_mapping_info"),
++    map_rule("exact", "interpreter_off", BPF_MAP_TYPE_HASH, 8, 40, 32,
++             native_symbol="interpreter_offsets"),
++]
++
+ 
+ def map_rules_for_app(app: str) -> list[dict[str, object]]:
+     if app == "cilium":
+         return CILIUM_MAP_RULES
++    if app == "otelcol-ebpf-profiler":
++        return OTEL_MAP_RULES
+     if app in {"tracee", "tetragon"}:
+         return TRACEE_TETRAGON_MAP_RULES
+     return []
+@@ -169,13 +217,18 @@ def source_object_for_native(root: Path, native_obj: Path) -> Path:
+     return root / f"{name[:-len('.native.o')]}.o"
+ 
+ 
+-def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
++class SourceProgramMeta(NamedTuple):
++    bytecode_len: int
++    helpers: set[int]
++
++
++def scan_bpf_source_programs(source_obj: Path) -> dict[str, SourceProgramMeta]:
+     try:
+         from elftools.elf.elffile import ELFFile
+     except ImportError as exc:
+         raise SystemExit("pyelftools is required for --source-object-root") from exc
+ 
+-    by_program: dict[str, set[int]] = defaultdict(set)
++    by_symbol: dict[str, SourceProgramMeta] = {}
+     with source_obj.open("rb") as f:
+         elf = ELFFile(f)
+         symtab = elf.get_section_by_name(".symtab")
+@@ -198,7 +251,7 @@ def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
+             end = start + size
+             if start < 0 or end > len(data) or size % 8 != 0:
+                 raise SystemExit(f"invalid BPF function bounds for {sym.name} in {source_obj}")
+-            helpers = by_program[sym.name[:15]]
++            helpers: set[int] = set()
+             body = data[start:end]
+             for off in range(0, len(body), 8):
+                 insn = body[off:off + 8]
+@@ -207,7 +260,8 @@ def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
+                 elif insn[0] == BPF_LD_IMM64:
+                     # Skip the second half of an ldimm64 pair.
+                     continue
+-    return by_program
++            by_symbol[sym.name] = SourceProgramMeta(bytecode_len=size, helpers=helpers)
++    return by_symbol
+ 
+ 
+ def helper_signature(helpers: set[int] | None, ids: Iterable[int]) -> tuple[tuple[int, ...], tuple[int, ...]]:
+@@ -230,8 +284,16 @@ def parse_object_spec(raw: str) -> tuple[Path, dict[str, object]]:
+             raise SystemExit(f"invalid --object attribute: {part!r}")
+         if key == "prog_type":
+             attrs["prog_type"] = int(value, 0)
++        elif key == "source_xlated_len":
++            attrs["source_xlated_len"] = int(value, 0)
++        elif key == "source_bytecode_len":
++            attrs["source_bytecode_len"] = int(value, 0)
++        elif key == "symbol":
++            attrs["symbol"] = value
+         elif key == "source_map_prefix":
+             attrs.setdefault("source_map_prefixes", []).append(value)
++        elif key == "source_lacks_map_prefix":
++            attrs.setdefault("source_lacks_map_prefixes", []).append(value)
+         else:
+             raise SystemExit(f"unsupported --object attribute: {key}")
+     return path, attrs
+@@ -258,6 +320,10 @@ def text_symbols(llvm_nm: str, obj: Path, skip_prefixes: tuple[str, ...]) -> lis
+     return out
+ 
+ 
++def manifest_sort_key(key: tuple[object, ...]) -> tuple[str, ...]:
++    return tuple("" if value is None else str(value) for value in key)
++
++
+ def rel_object(output: Path, obj: Path) -> str:
+     try:
+         return str(obj.resolve().relative_to(output.parent.resolve()))
+@@ -271,6 +337,7 @@ def main() -> None:
+     parser.add_argument("--output", required=True, type=Path)
+     parser.add_argument("--llvm-nm", required=True)
+     parser.add_argument("--object", action="append", required=True)
++    parser.add_argument("--data-object", action="append", default=[])
+     parser.add_argument("--skip-prefix", action="append", default=["LBB", "__check_"])
+     parser.add_argument("--dedupe-program", choices=("none", "last"), default="none")
+     parser.add_argument("--source-object-root", type=Path)
+@@ -284,32 +351,45 @@ def main() -> None:
+     helper_forbid_by_key: dict[tuple[object, ...], tuple[int, ...]] = {}
+     selected_by_program: dict[tuple[object, ...], tuple[str, set[str]]] = {}
+     selected_helpers_by_program: dict[tuple[object, ...], tuple[tuple[int, ...], tuple[int, ...]]] = {}
+-    source_helpers_cache: dict[Path, dict[str, set[int]]] = {}
++    source_meta_cache: dict[Path, dict[str, SourceProgramMeta]] = {}
+     for raw in args.object:
+         obj, attrs = parse_object_spec(raw)
+         rel = rel_object(output, obj)
+-        source_helpers: dict[str, set[int]] | None = None
++        source_meta: dict[str, SourceProgramMeta] | None = None
+         if args.source_object_root:
+             source_obj = source_object_for_native(args.source_object_root, obj)
+             if not source_obj.is_file():
+                 raise SystemExit(f"source BPF object not found for {obj}: {source_obj}")
+-            source_helpers = source_helpers_cache.setdefault(
+-                source_obj, scan_bpf_source_helpers(source_obj))
++            source_meta = source_meta_cache.setdefault(
++                source_obj, scan_bpf_source_programs(source_obj))
+         prefixes = attrs.get("source_map_prefixes") or [None]
+         for symbol in text_symbols(args.llvm_nm, obj, tuple(args.skip_prefix)):
++            if attrs.get("symbol") and symbol != attrs["symbol"]:
++                continue
+             program = symbol[:15]
++            meta = None if source_meta is None else source_meta.get(symbol)
++            source_xlated_len = attrs.get("source_xlated_len")
++            source_bytecode_len = attrs.get("source_bytecode_len")
++            if source_bytecode_len is None and meta is not None:
++                source_bytecode_len = meta.bytecode_len
+             required, forbidden = helper_signature(
+-                None if source_helpers is None else source_helpers.get(program),
++                None if meta is None else meta.helpers,
+                 args.helper_disambiguate)
+             for prefix in prefixes:
+                 if args.dedupe_program == "last":
+-                    key = (program, attrs.get("prog_type"), prefix, required, forbidden)
++                    key = (program, attrs.get("prog_type"), prefix,
++                           source_xlated_len, source_bytecode_len,
++                           tuple(attrs.get("source_lacks_map_prefixes", ())),
++                           required, forbidden)
+                     if key not in selected_by_program or selected_by_program[key][0] != rel:
+                         selected_by_program[key] = (rel, set())
+                         selected_helpers_by_program[key] = (required, forbidden)
+                     selected_by_program[key][1].add(symbol)
+                 else:
+-                    key = (program, rel, attrs.get("prog_type"), prefix, required, forbidden)
++                    key = (program, rel, attrs.get("prog_type"), prefix,
++                           source_xlated_len, source_bytecode_len,
++                           tuple(attrs.get("source_lacks_map_prefixes", ())),
++                           required, forbidden)
+                     native_object_by_key[key] = rel
+                     helper_require_by_key[key] = required
+                     helper_forbid_by_key[key] = forbidden
+@@ -317,16 +397,19 @@ def main() -> None:
+ 
+     if args.dedupe_program == "last":
+         for key, (rel, symbols) in selected_by_program.items():
+-            program, prog_type, prefix, required, forbidden = key
+-            out_key = (program, rel, prog_type, prefix, required, forbidden)
++            (program, prog_type, prefix, source_xlated_len, source_bytecode_len,
++             lacks_prefixes, required, forbidden) = key
++            out_key = (program, rel, prog_type, prefix, source_xlated_len,
++                       source_bytecode_len, lacks_prefixes, required, forbidden)
+             native_object_by_key[out_key] = rel
+             helper_require_by_key[out_key] = selected_helpers_by_program[key][0]
+             helper_forbid_by_key[out_key] = selected_helpers_by_program[key][1]
+             entries_by_key[out_key].update(symbols)
+ 
+     objects: list[dict[str, object]] = []
+-    for key in sorted(entries_by_key):
+-        program, rel, prog_type, prefix, _required, _forbidden = key
++    for key in sorted(entries_by_key, key=manifest_sort_key):
++        (program, rel, prog_type, prefix, source_xlated_len,
++         source_bytecode_len, lacks_prefixes, _required, _forbidden) = key
+         symbols = sorted(entries_by_key[key])
+         entry: dict[str, object] = {
+             "program": program,
+@@ -336,8 +419,14 @@ def main() -> None:
+             entry["symbol"] = symbols[0]
+         if prog_type is not None:
+             entry["prog_type"] = prog_type
++        if source_xlated_len is not None:
++            entry["source_xlated_len"] = source_xlated_len
++        if source_bytecode_len is not None:
++            entry["source_bytecode_len"] = source_bytecode_len
+         if prefix is not None:
+             entry["source_map_prefix"] = prefix
++        if lacks_prefixes:
++            entry["source_lacks_map_prefix"] = list(lacks_prefixes)
+         required = helper_require_by_key.get(key, ())
+         forbidden = helper_forbid_by_key.get(key, ())
+         if required:
+@@ -356,6 +445,16 @@ def main() -> None:
+         "status": "native-objects-proof-linked",
+         "objects": objects,
+     }
++    if args.data_object:
++        data_objects = []
++        seen_data_objects: set[str] = set()
++        for raw in args.data_object:
++            rel = rel_object(output, Path(raw))
++            if rel in seen_data_objects:
++                continue
++            seen_data_objects.add(rel)
++            data_objects.append({"native_object": rel})
++        manifest["data_objects"] = data_objects
+     map_rules = map_rules_for_app(args.app)
+     if map_rules:
+         manifest["map_rules"] = map_rules

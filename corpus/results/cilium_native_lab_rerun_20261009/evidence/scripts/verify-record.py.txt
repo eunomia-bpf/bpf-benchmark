@@ -1,0 +1,64 @@
+from pathlib import Path
+import collections,csv,json,math,re,statistics,subprocess
+r=Path('/workspaces/repository/corpus/results/cilium_native_lab_rerun_20261009');e=r/'evidence'
+def rows(name):return list(csv.DictReader((e/name).open()))
+phases=rows('phases.csv');programs=rows('programs.csv');inventories=rows('inventories.csv');verdicts=rows('verdicts.csv');a=json.loads((e/'analysis.json').read_text())
+assert len(phases)==42
+for row in phases:
+ case=e/'cases'/row['run'];app_paths=list(case.glob('raw/*/details/apps/cilium__agent.json'));assert len(app_paths)==1
+ app=json.loads(app_paths[0].read_text());phase=app[row['phase']];bpf=phase['bpf'];count=sum(x['run_cnt_delta'] for x in bpf.values());ns=sum(x['run_time_ns_delta'] for x in bpf.values())
+ assert int(row['run_cnt'])==count and int(row['run_time_ns'])==ns and int(row['tracked_programs'])==len(bpf)
+ if count:assert math.isclose(float(row['ns_per_run']),ns/count,rel_tol=1e-12)
+ pps=statistics.median(sum(int(re.search(r'(\d+)pps',x['stdout'])[1]) for x in w['components']) for w in phase['workloads']);assert pps==int(row['pps'])
+ matches=[x for x in programs if all(x[k]==row[k] for k in ['label','pair','stats','control','phase'])];assert len(matches)==len(bpf)
+ for x in matches:
+  raw=bpf[x['id']];assert int(x['run_cnt'])==raw['run_cnt_delta'] and int(x['run_time_ns'])==raw['run_time_ns_delta']
+ observation=json.loads((case/'observations.json').read_text())['json_files'];prefix=row['phase']+'/'
+ for moment in ['start','end']:
+  progs=observation[prefix+moment+'/programs.json'];expected=collections.Counter((p.get('name',''),p['type']) for p in progs)
+  retained={(x['name'],x['type']):int(x['count']) for x in inventories if all(x[k]==row[k] for k in ['label','pair','stats','control','phase']) and x['scope']=='all-loaded-'+moment};assert dict(expected)==retained
+ def metrics(moment):
+  values={}
+  for key,v in observation.items():
+   if not key.startswith(prefix+moment+'/metrics-map-') or not isinstance(v,list):continue
+   for x in v:
+    if 'values' not in x:continue
+    raw=bytes(int(c,16) for c in x['key']);values[raw.hex()]={'reason':raw[0],'direction':raw[1]&3,'packets':sum(int.from_bytes(bytes(int(c,16) for c in q['value'][:8]),'little') for q in x['values'])}
+  return values
+ start=metrics('start');end=metrics('end');drop=0
+ for x in [v for v in verdicts if all(v[k]==row[k] for k in ['label','pair','stats','control','phase'])]:
+  key=x['key'];before=start.get(key,{}).get('packets',0);after=end.get(key,{}).get('packets',0);assert before==int(x['before_packets']) and after==int(x['after_packets']) and after-before==int(x['delta_packets'])
+  if x['reason']=='133':drop+=after-before
+ assert drop==int(row['policy_drops'])
+ rx=0
+ for namespace in ['bpfbench-cepa','bpfbench-cepb']:
+  key='namespace-'+namespace+'-interfaces.json';s=next(x for x in observation[prefix+'start/'+key] if x['ifname']=='eth0')['stats64'];t=next(x for x in observation[prefix+'end/'+key] if x['ifname']=='eth0')['stats64'];rx+=t['rx']['packets']-s['rx']['packets']
+ assert rx==int(row['receiver_packets'])
+for label,groups in a.items():
+ for group,v in groups.items():
+  control,stats=group.startswith('control'),int(group[-1]);selected=[x for x in phases if x['label']==label and x['control']==str(control) and int(x['stats'])==stats];pairs=sorted(set(x['pair'] for x in selected));pps=[];ns=[]
+  for pair in pairs:
+   arms={x['phase']:x for x in selected if x['pair']==pair};jit=arms['baseline'];second=arms['post_rejit'];pps.append(float(second['pps'])/float(jit['pps']))
+   if stats:ns.append(float(jit['ns_per_run'])/float(second['ns_per_run']))
+  assert len(pairs)==v['paired_pps_ratio']['n'] and math.isclose(statistics.median(pps),v['paired_pps_ratio']['median'],rel_tol=1e-12)
+  if stats:assert math.isclose(statistics.median(ns),v['paired_ns_ratio']['median'],rel_tol=1e-12)
+# Confirm the completed cases' recorded QEMU vCPU affinities.
+windows=0
+for p in (e/'cases').glob('*/*/host-load-boundaries.json'):
+ for sample in json.loads(p.read_text()):
+  found=[]
+  for text in sample['qemu_threads'].values():
+   allowed=re.search(r'^Cpus_allowed_list:\s*(.*)$',text,re.M)[1]
+   if allowed != '6-7':found.append(allowed)
+  assert sorted(found)==['0','1','3','4'],(str(p),found)
+  windows+=1
+# Preserve original doc text and verify only the requested additive links.
+repo=r.parents[2]
+for name in ['corpus/results/README.md','corpus/results/cilium_native_audit_20261009/summary.md','kinsn/docs/evaluation.md']:
+ old=subprocess.check_output(['git','show','HEAD:'+name],cwd=repo,text=True);new=(repo/name).read_text();oldlines=iter(new.splitlines());assert all(any(y==x for y in oldlines) for x in old.splitlines())
+for p in [r/'summary.md',r/'findings.md',e/'README.md']:
+ for link in re.findall(r'\]\(([^)]+)\)',p.read_text()):assert (p.parent/link).exists(),(p,link)
+assert len((r/'summary.md').read_text().split())<800
+assert not any(p.suffix=='.bin' or p.name.endswith('.tar.gz') or p.suffix=='.log' for p in r.rglob('*') if p.is_file())
+for p in r.rglob('*.json'):json.loads(p.read_text())
+print(json.dumps({'status':'passed','completed_raw_phases_verified':len(phases),'per_program_rows_verified':len(programs),'metrics_inventory_receiver_counters':'matched saved raw data','paired_ratio_medians':'matched saved raw data','qemu_affinity_boundary_samples_verified':windows,'document_preservation_and_local_links':'passed','summary_words':len((r/'summary.md').read_text().split()),'new_measurements_or_vms':0},indent=2))
