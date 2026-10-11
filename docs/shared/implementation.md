@@ -327,6 +327,23 @@ increment is committed and pushed immediately). Current state:
   opcode table matches the `ARM64_OP_*` numbers
   (`arm64_dispatch_code_dispatch`), so a member reaches its arm and a
   non-member reaches the caller's unsupported arm.
+  The dispatcher's remaining sixteen individually-gated singleton opcodes are
+  likewise no longer open (Step 0126): the NOP, MOVK, BITFIELD, CMN_IMM,
+  CMN_REG, TST_BIC_REG, BICS_REG, LOAD, STORE, LDP, STP, LOAD_D0, STORE_D0,
+  LOAD_Q0, STORE_Q0 and FMOV gates in `ARM64_SIM_L_EXEC` now route through the
+  generated one-member membership macros `KPROG_ARM64_DISP_<NAME>_HANDLED(OP)`,
+  each a plain `((OP) == ARM64_OP_X)` expression usable inside `_Static_assert`
+  and each bound to its `ARM64_OP_*` number by a code-drift assert and to itself
+  by a coverage assert, so a singleton gate is a proved contract rather than a
+  hand-rolled raw comparison. `Arm64DispatchSingleton.lean` proves each
+  generated membership equal to an independent named singleton list
+  (`arm64_disp_<name>_refines`), that a non-member reaches the caller's
+  unsupported arm (`arm64_singleton_nonmember_unhandled`), that all sixteen
+  opcodes lie in the C opcode-byte range (`arm64_singleton_code_in_range`), and
+  — as the cross-contract to Step 0125 — that the combined singleton and
+  dispatch-family opcode numbers are pairwise distinct
+  (`arm64_dispatch_chain_codes_nodup`), so the ordered chain selects exactly one
+  arm per opcode.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

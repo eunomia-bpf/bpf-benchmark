@@ -931,6 +931,28 @@ operands and requires the whole-state snapshots to agree, the right
 destinations to be written, the flags-only arms to leave the destination
 untouched, and a non-member opcode to reach the unsupported arm exactly once
 (136 cases).
+The dispatcher's remaining sixteen individually-gated singleton opcodes are
+likewise a generated contract: `generate_arm64_dispatch_singleton_spec.py` emits
+`KPROG_ARM64_DISP_<NAME>_HANDLED(OP)` for the NOP, MOVK, BITFIELD, CMN_IMM,
+CMN_REG, TST_BIC_REG, BICS_REG, LOAD, STORE, LDP, STP, LOAD_D0, STORE_D0,
+LOAD_Q0, STORE_Q0 and FMOV arms, each the plain expression
+`((OP) == ARM64_OP_X)` with its `ARM64_OP_*` number `_Static_assert`-pinned to
+`arm64_sim.h` and a coverage assert pinning the macro to its own opcode, and
+`Arm64DispatchSingleton.lean` proves every generated membership equal to an
+independent named singleton list (`arm64_disp_<name>_refines`), that a
+non-member reaches the caller's unsupported arm, that all sixteen opcodes lie in
+the C opcode-byte range, and — as the cross-contract to the dispatch families —
+that the combined singleton and dispatch-family opcode numbers are pairwise
+distinct (`arm64_dispatch_chain_codes_nodup`), so the ordered chain selects
+exactly one arm per opcode. `ARM64_SIM_L_EXEC` now selects each singleton arm
+through the generated predicate instead of the sixteen hand-written raw
+comparisons, leaving the per-arm operand selection and the composed handler
+bodies. A generated-header oracle decides membership from an independent switch
+oracle over all 256 byte values for each singleton (4128 cases), and a sim-header
+route oracle drives each singleton through the real dispatcher over an
+independent flat byte-image model, planting scalar/stack-tagged/ABI-tagged bases
+and sweeping widths × ops × bases × flags × index × immediate with a non-member
+probe reaching the unsupported arm (11083 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new

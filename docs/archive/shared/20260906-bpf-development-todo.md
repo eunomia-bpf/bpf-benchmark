@@ -10375,6 +10375,92 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   dispatch-family membership paragraph and extends the covered-slices list with
   the dispatcher opcode-membership contract (paper commit pushed to `main`).
 
+## Step 0126 — AArch64 dispatcher singleton-opcode contract
+
+- Scope: after Step 0125 replaced the eight immediate/register family gates,
+  the AArch64 dispatcher `ARM64_SIM_L_EXEC` still carried sixteen hand-written
+  `(OP) == ARM64_OP_X` singleton comparisons for the NOP, MOVK, BITFIELD,
+  CMN_IMM, CMN_REG, TST_BIC_REG, BICS_REG, LOAD, STORE, LDP, STP, LOAD_D0,
+  STORE_D0, LOAD_Q0, STORE_Q0 and FMOV arms. Shared JSON spec
+  `kprog/formal/arm64_dispatch_singleton_spec.json` (`schema_version` 1,
+  operation `arm64DispatchSingleton`, sixteen rows in dispatcher order — fmov
+  listed last although numerically 35) drives generator
+  `kprog/formal/generate_arm64_dispatch_singleton_spec.py`, which renders the
+  drift row and one-member membership macro per singleton into
+  `generated/arm64_dispatch_singleton.h` and the `SingletonOp` inductive, opcode
+  table and `Bool` membership predicates into
+  `KProgFormal/GeneratedArm64DispatchSingleton.lean`.
+- Each generated macro is the plain expression
+  `((OP) == ARM64_OP_X)` (not a statement-expression, which cannot appear at
+  file scope or inside `_Static_assert`), so the header also emits one
+  `_Static_assert(ARM64_OP_X == N)` code-drift row and one
+  `_Static_assert(KPROG_ARM64_DISP_X_HANDLED(ARM64_OP_X))` coverage row per
+  singleton. The generator's `--check` re-reads `kprog/arm64/arm64_sim.h` for
+  the `ARM64_OP_*` numbers, asserts the spec table matches, and asserts the live
+  `ARM64_SIM_L_EXEC` region routes each singleton through its generated macro
+  and no longer tests any raw opcode by hand. The generator has its own
+  `python3 generate_arm64_dispatch_singleton_spec.py --check` line in
+  `kprog/formal/Makefile`.
+- All sixteen gates in `ARM64_SIM_L_EXEC` (`kprog/arm64/arm64_sim_local_bpf.h`,
+  include added after the dispatch-family header at line 21) now route through
+  `KPROG_ARM64_DISP_<NAME>_HANDLED(OP)`; the macro-name prefix avoids collision
+  with the pre-existing `KPROG_ARM64_MOVK_HANDLED`, `_BITFIELD_HANDLED`,
+  `_FMOV_HANDLED` and `_VREG_HANDLED`, which take a KIND/DIR/SHIFT argument.
+- Hand Lean `KProgFormal/Arm64DispatchSingleton.lean` (imports
+  `GeneratedArm64DispatchSingleton`, `Arm64DispatchFamily` and
+  `Std.Tactic.BVDecide`) states sixteen independent named singleton lists and
+  spec predicates and proves each generated membership equal to its list
+  (`<name>_refines`, by `cases op <;> simp_all`), plus
+  `arm64_singleton_handled_iff_mem` / `_member_handled` /
+  `_nonmember_unhandled` / `_code_dispatch` (the exact `ARM64_OP_*` numbers) /
+  `_code_in_range` (≤ 67), `arm64_singleton_codes_nodup`, and the cross-contract
+  `arm64_dispatch_chain_codes_nodup` over the combined singleton and
+  dispatch-family opcode numbers (`decide`). `KProgFormal.lean` imports both
+  generated and hand modules (lines 204-205).
+- Host oracle `kprog/formal/test_arm64_dispatch_singleton_host.c` declares all
+  sixteen `ARM64_OP_*` numbers locally from raw architectural values, decides
+  membership from a local `switch` over the raw opcode (never the generated
+  macro), and sweeps all 256 opcodes × 16 singletons plus duplicate rows:
+  `arm64 dispatch singleton host cross-check: OK (4128 cases)`.
+- Route oracle `kprog/formal/test_arm64_dispatch_singleton_route_host.c` drives
+  the generated macros as reached through the real `ARM64_SIM_L_EXEC` chain over
+  an independent flat byte-image model (heap/stack images, tag images, memory
+  base-offset model, write-back and register-width/tag writeback), planting
+  scalar, stack-tagged and ABI-tagged bases and sweeping
+  widths × ops × bases × flags × index × immediate, with a non-member probe
+  (`ARM64_OP_RET`) reaching the unsupported arm:
+  `arm64 dispatch singleton route host cross-check: OK (11083 cases)`.
+- `make -C kprog/formal check` passes with the two new oracle rows raising the
+  cross-check count from **159** (Step 0125 close) to **161**, zero `FAIL`.
+  `make -C kprog arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_dispatch_singleton.py`, 48
+  mutations against the live tree, each caught after the four unmutated controls
+  (`gen`, `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  five spec defects (operation/schema/member-code/member-macro/member-name
+  drifts → generator), eleven generator defects
+  (operation/name-order/opcode-regex/opcode-drift-check/needle-check/
+  hand-check/hand-branch/region-start/region-end/Lean-path/C-header-path
+  drifts → generator), six regenerated generator+artifact pair defects
+  (constructor-render/opcode-render/membership-render → lean_chain,
+  code-assert-render/membership-body-render/coverage-render → host), three
+  generated-C defects (code-assert/coverage-assert drifts → host,
+  membership-body drift → route), three generated-Lean defects
+  (constructor/opcode/membership drifts → lean_chain), nine hand-refinement
+  defects (NOP list/spec/refines-statement/list-concat/opcode-dispatch/
+  opcode-range/non-member-statement/list-nodup/chain-nodup drifts →
+  lean_chain), five routed-body defects (dropped include, dropped NOP gate,
+  swapped FMOV gate → route; NOP gate reverted to the hand-rolled comparison →
+  generator). Five semantically equivalent mutations (an added include-side
+  comment, an added hand-module comment, a resolved-but-equal generator root
+  path, an added generated-Lean import comment, and equal-whitespace spec text)
+  SURVIVE as required, along with the `if not opcodes` guard whose removal is
+  unobservable.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  dispatcher singleton-opcode paragraph and extends the covered-slices list with
+  the singleton opcode-membership contract (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
