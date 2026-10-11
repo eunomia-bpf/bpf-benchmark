@@ -354,6 +354,22 @@ increment is committed and pushed immediately). Current state:
   (`arm64_imm_operand_refines`), that exactly the `_IMM` member of each pair is
   immediate (`arm64_imm_operand_pairs_exclusive`), that the two families are
   disjoint, and that all four opcodes lie in the C opcode-byte range.
+  The sign-extending load arm is likewise no longer open (Step 0128): the LDRSB,
+  LDRSW, and LDRSH arms of `ARM64_SIM_L_EXEC` no longer derive the sign-extending
+  opcode for the shared extract/reverse/extend contract by a raw opcode ternary,
+  but route through the generated `KPROG_ARM64_LDRSX_SXOP(OP, UNSUPPORTED)`
+  statement expression, which selects SXTB for a byte load, SXTW for a word
+  load, and SXTH for a halfword load and forwards any opcode outside the family
+  to the caller-supplied unsupported arm. `Arm64LdrsxOp.lean` proves the
+  generated `sxCode` equal to an independent code-keyed statement
+  (`arm64_ldrsx_op_refines`), that the derived opcode is determined by the load
+  opcode alone (`arm64_ldrsx_op_code_determined`), that each derived opcode is a
+  member of the independent sign-opcode table (`arm64_ldrsx_op_selects_member`)
+  and is never itself a load opcode (`arm64_ldrsx_op_sx_not_load`), that the
+  three load opcodes and the three sign opcodes are each pairwise distinct, that
+  the sign position pinned by `signBits` matches the well-tested load-width
+  contract (`arm64_ldrsx_op_signbits_match_width`), and that every load opcode
+  lies in the numeric case-label range the shared C macro addresses.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
@@ -381,7 +397,8 @@ increment is committed and pushed immediately). Current state:
   so the predicate-to-emitted-code chain is closed. The AArch64 condition table,
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
   reverse/extend/conditional-select/branch/branch-emission/move-wide/shift/
-  reduction/address-offset/FMOV/load-bytes/store-bytes contracts, and
+  reduction/address-offset/FMOV/load-bytes/store-bytes/
+  sign-extending-load-opcode contracts, and
   pointer-add/ABI-load
   contracts are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,

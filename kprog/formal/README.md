@@ -972,6 +972,30 @@ register expressions (5120 cases), and a sim-header route oracle drives the
 generated selector through the real dispatcher arms over an independent
 whole-state model with distinct immediate and register values, all four widths,
 every shift kind and a non-member probe (3804 cases).
+The sign-extending load arm is likewise a generated contract:
+`generate_arm64_ldrsx_op_spec.py` emits `KPROG_ARM64_LDRSX_SXOP(OP, UNSUPPORTED)`
+for the LDRSB/LDRSW/LDRSH arms, a statement expression that seeds its result with
+`0` and selects `ARM64_OP_SXTB`/`ARM64_OP_SXTW`/`ARM64_OP_SXTH` exactly on the
+`case 54U`/`57U`/`63U` load opcodes, forwarding every other opcode to the
+caller-supplied unsupported arm, with each `ARM64_OP_*` number
+`_Static_assert`-pinned to `arm64_sim.h`, and `Arm64LdrsxOp.lean` proves the
+generated `sxCode` equal to an independent code-keyed statement
+(`arm64_ldrsx_op_refines`), that the derived opcode is determined by the load
+opcode alone (`arm64_ldrsx_op_code_determined`), that each derived opcode is a
+member of the independent sign-opcode table
+(`arm64_ldrsx_op_selects_member`) and is never itself a load opcode
+(`arm64_ldrsx_op_sx_not_load`), that the load opcodes and sign opcodes are each
+pairwise distinct, that the sign position pinned by `signBits` matches the
+well-tested load-width contract (`arm64_ldrsx_op_signbits_match_width`), and that
+every load opcode lies in the numeric case-label range the shared macro
+addresses. `ARM64_SIM_L_EXEC` now derives the sign-extending opcode through the
+generated macro instead of the hand-written ternary. A generated-header oracle
+decides the derived opcode from an independent switch oracle over all 256 byte
+values (256 cases), and a sim-header route oracle drives the generated selector
+through the real dispatcher arm over an independent flat byte-image model with an
+independent cast-ladder sign extension, comparing the whole post-state across
+widths, loaded values, registered sign patterns and a non-member probe (98197
+cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new

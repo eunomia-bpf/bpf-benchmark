@@ -10555,6 +10555,105 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   immediate/register operand-source paragraph and extends the covered-slices list
   with the operand-source contract (paper commit pushed to `main`).
 
+## Step 0128 — AArch64 sign-extending load derived-opcode contract
+
+- Scope: after Step 0127 the AArch64 dispatcher `ARM64_SIM_L_EXEC` routed every
+  arm through a generated membership macro and both operand-source selections
+  through a generated selector, but one decision remained inline: the LDRSB,
+  LDRSW and LDRSH arms each derived the sign-extending opcode handed to the
+  shared extract/reverse/extend contract with a raw opcode ternary. Shared JSON
+  spec `kprog/formal/arm64_ldrsx_op_spec.json` (`schema_version` 1, operation
+  `arm64LdrsxOp`, three loads in dispatcher order `ldrSb`/`ldrSw`/`ldrSh`, each
+  with its `ARM64_OP_LDRS*` opcode, the `sxtb`/`sxtw`/`sxth` sign opcode it
+  selects and the sign bit position it signs from) drives generator
+  `kprog/formal/generate_arm64_ldrsx_op_spec.py`, which renders six code-drift
+  rows and the derived-opcode selector into `generated/arm64_ldrsx_op.h` and the
+  `LdrSxLoad` inductive, load-code/sign-code/sign-bits tables into
+  `KProgFormal/GeneratedArm64LdrsxOp.lean`.
+- The generated macro `KPROG_ARM64_LDRSX_SXOP(OP, UNSUPPORTED)` is a statement
+  expression (usable in the arm body but not at file scope or inside
+  `_Static_assert`): it seeds its result with `0`, then `switch (OP)` selects
+  `ARM64_OP_SXTB` on `case 54U`, `ARM64_OP_SXTW` on `case 57U` and
+  `ARM64_OP_SXTH` on `case 63U`, forwarding every other opcode to the
+  caller-supplied `UNSUPPORTED` arm. OP is evaluated exactly once. Unlike the
+  two-member pairs of Steps 0125/0127 this is a three-way load→sign-extend map.
+  The header also emits one `_Static_assert(ARM64_OP_X == N)` code-drift row per
+  load and per sign opcode. The generator's `--check` re-reads
+  `kprog/arm64/arm64_sim.h` for all six `ARM64_OP_*` numbers, asserts the spec
+  table matches and the load/sign-bits orders are `["ldrSb","ldrSw","ldrSh"]`
+  and `[8, 32, 16]`, and asserts the live `ARM64_SIM_L_EXEC` region routes the
+  derived opcode through `ARM64_SIM_L_LDRSX_SXOP((OP)` and no longer tests any
+  raw `ARM64_OP_SXT*` opcode by hand. The generator has its own
+  `python3 generate_arm64_ldrsx_op_spec.py --check` line in
+  `kprog/formal/Makefile`.
+- The load arm in `kprog/arm64/arm64_sim_local_bpf.h` (include added after the
+  operand-source header) now routes through the generated selector: the derived
+  `__a64_l_sxop` feeds the shared `ARM64_SIM_L_EXTREV_SIGNEXT` contract; the
+  former inline ternary is gone. The macro name avoids collision with the
+  pre-existing `KPROG_ARM64_LDRSX_HANDLED` / `KPROG_ARM64_LDRSX_LOAD_WIDTH`
+  (Step 0061).
+- Hand Lean `KProgFormal/Arm64LdrsxOp.lean` (imports
+  `GeneratedArm64LdrsxOp`) states an independent code-keyed
+  `arm64LdrsxOpSxOfCode` statement, the named sign-opcode list
+  (`arm64LdrsxOpSignOps = [60, 47, 21]`) and load-code list
+  (`arm64LdrsxOpLoadCodes = [54, 57, 63]`), and the membership spec predicate
+  `arm64LdrsxOpSpec (op) := sxCode op ∈ arm64LdrsxOpSignOps`, and proves the
+  generated `sxCode` equal to it (`arm64_ldrsx_op_refines`, `_sx_*` dispatch and
+  range lemmas, `_code_determined`, `_selects_member`, `_load_codes_distinct`,
+  `_sx_codes_distinct`, `_sx_not_load`, `_signbits_match_width` against the
+  well-tested load-width contract, `_code_dispatch` with the exact numbers
+  54/57/63 and 60/47/21, and `_code_in_range` ≤ 63, plus the
+  `arm64_ldrsx_op_out_of_family_example` witness). `KProgFormal.lean` imports the
+  generated and hand modules (lines 208-209).
+- Host oracle `kprog/formal/test_arm64_ldrsx_op_host.c` declares the six
+  `ARM64_OP_*` numbers locally from raw architectural values, decides the
+  derived opcode from a local `switch` over the raw load opcode (never the
+  generated macro), and sweeps all 256 opcodes: `arm64 ldrsx op host
+  cross-check: OK (256 cases)`.
+- Route oracle `kprog/formal/test_arm64_ldrsx_op_route_host.c` drives the
+  generated selector as reached through the real `ARM64_SIM_L_EXEC` arm over an
+  independent flat byte-image model with an independent cast-ladder sign
+  extension, comparing the whole post-state (register file value+tag, SP, SIMD
+  quarters, NZCV and both heap/stack images) and sweeping the load arm across
+  widths, loaded values, registered sign patterns and a non-member probe
+  (`ARM64_OP_RET`) reaching the unsupported arm: `arm64 ldrsx op route host
+  cross-check: OK (98197 cases)`.
+- `make -C kprog/formal check` passes with the two new oracle rows raising the
+  cross-check count from **163** (Step 0127 close) to **165**, zero `FAIL`.
+  `make -C kprog arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_ldrsx_op.py`, 82 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file byte-for-byte
+  between mutations and re-checking the baseline green at the end: eight spec
+  defects (operation/schema/load-code/load-code/sign-code/sign-code/sign-macro/
+  sign-bits drifts → generator), twenty-two generator defects
+  (operation/load-code/load-code/sign-code/sign-code/sign-bits/name-order/
+  sign-order/sign-bits-order/opcode-regex/opcode-drift-check/needle-check/
+  hand-check/hand-branch/header-needle/region-start/region-end/selector-needle/
+  header-needle-const/Lean-path/C-header-path drifts → generator, plus the load
+  arm reverted to the hand-rolled ternary → generator), six regenerated
+  generator+artifact pair defects (constructor-render/load-code-render/
+  sign-code-render/sign-bits-render → lean_chain,
+  code-assert-render/case-render/sign-assign-render → host), seven generated-C
+  defects (code-assert/code-assert/code-assert/code-assert/case-label/
+  case-label/case-label drifts → host, an exchanged sign-opcode pair → host, a
+  macro rename → route, and a wrong word-load sign opcode → route), six
+  generated-Lean defects (constructor/load-code/load-code/sign-code/sign-code/
+  sign-bits drifts → lean_chain), twenty hand-refinement defects
+  (code-keyed-statement/list/list/spec/refines-statement/refines-tactic/
+  determined-statement/determined-tactic/member/determined-tactic/distinctness/
+  distinctness/not-load/width-match/dispatch-statement/dispatch-statement/
+  range/example/example/example drifts → lean_chain), and five routed-body
+  defects (dropped include, renamed selector macro, dropped arm selector →
+  route). Six semantically equivalent mutations (an overwritten-then-ignored
+  sign-opcode initializer, an added include-side comment, an added hand-module
+  comment, a resolved-but-equal generator root path, an added generated-Lean
+  import comment, and equal-whitespace spec text) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  sign-extending-load derived-opcode paragraph and extends the covered-slices
+  list with the derived-opcode contract (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
