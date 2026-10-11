@@ -427,6 +427,24 @@ increment is committed and pushed immediately). Current state:
   the count across every width's bit count and drives the result to zero, so
   both the `CF` (`count >= bits`) and `ZF` (`result == 0`) boundaries are
   numerically exercised.
+  The x86-64 helper-call ladder is likewise no longer open as a restated
+  comparison sequence (Step 0132): the runtime `X86_SIM_BPF_CALL_ID` now
+  switches on the generated, static-asserted, machine-checked
+  `KPROG_X86_HELPER_SLOT` selector instead of an inline
+  `__x86_helper_id == X86_SIM_HELPER_bpf_*` ladder, so the helper-id -> body
+  binding the routed register form (`X86_SIM_BPF_CALL_REG`, the chain's
+  `X86_OP_CALL_REG` arm) relies on is a proved contract rather than a
+  hand-written chain; each arm keeps its own body macro, and the default arm
+  keeps the RAX zero-write. `X86HelperDispatch.lean` now also proves the
+  routed body `x86HelperDispatchRoutedBodySpec` runs the table body at each
+  armed id (`x86_helper_dispatch_route_body_refines`), that the selector's
+  slots over the armed ids are distinct and exactly `0 .. 6`
+  (`x86_helper_dispatch_route_labels_distinct`), and that the routed table
+  names the lookup and ktime bodies at the ends
+  (`x86_helper_dispatch_route_body_is_table`); the generator rejects a ladder
+  that does not switch on the selector or that restates an inline id
+  comparison. There is no AArch64 mirror, as the AArch64 call ladder is not
+  id-keyed.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

@@ -10906,6 +10906,82 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   BZHI flag-block paragraph and extends the covered-slices list with the
   two-input flag transition (paper commit pushed to `main`).
 
+## Step 0132 — x86-64 helper-call ladder routing through the generated slot selector
+
+- Scope: after Step 0113 the generated `KPROG_X86_HELPER_SLOT` selector
+  (spec `kprog/formal/x86_helper_dispatch_spec.json`, header
+  `generated/x86_helper_dispatch.h`, hand Lean `KProgFormal/X86HelperDispatch.lean`)
+  was static-asserted and proved, but it was referenced nowhere under
+  `kprog/x86/`: the live `X86_SIM_BPF_CALL_ID` ladder still restated the
+  binding as an inline `if (__x86_helper_id == X86_SIM_HELPER_bpf_*)
+  X86_SIM_BPF_CALL_bpf_*();` chain, so a drift in the generated selector was
+  not behaviourally observable. This step routes the ladder through the
+  selector.
+- `kprog/x86/x86_sim_local_bpf.h`: `X86_SIM_BPF_CALL_ID(ID)` is now a
+  `do { switch (KPROG_X86_HELPER_SLOT((__u64)(ID))) { case
+  KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_<name>): X86_SIM_BPF_CALL_bpf_<name>();
+  break; ... default: X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64); break;
+  } } while (0)` over the same seven arms in the same order
+  (`bpf_map_lookup_elem .. bpf_ktime_get_ns`). Each arm keeps its own body
+  macro; `X86_SIM_BPF_CALL_REG(REG)` is unchanged. The
+  `#include "../formal/generated/x86_helper_dispatch.h"` is unchanged (one
+  occurrence), so the header's per-id `_Static_assert`s still bind the 21
+  hand-written `X86_SIM_HELPER_bpf_*` id values and the arm order to the
+  generated table.
+- Generator `kprog/formal/generate_x86_helper_dispatch_spec.py`: the old
+  `LADDER_ARM`/`LADDER_DEFAULT` shape checks are replaced by the routed-shape
+  regexes `LADDER_SLOT` (`switch (KPROG_X86_HELPER_SLOT((__u64)(ID)))`),
+  `LADDER_ARM` (`case KPROG_X86_HELPER_SLOT(<id define>): <body macro>();`) and
+  `LADDER_DEFAULT`, plus a `LADDER_HAND_TEST` sentinel for the removed inline
+  `__x86_helper_id == X86_SIM_HELPER_bpf_` comparison. `check_against_header()`
+  now rejects a ladder that does not switch on the generated selector
+  (`"x86 helper ladder does not switch on the generated slot selector"`) or that
+  restates an inline helper-id comparison
+  (`"x86 helper ladder restates an inline helper-id comparison"`). Its
+  `python3 generate_x86_helper_dispatch_spec.py --check` Makefile line is
+  unchanged.
+- Hand Lean `KProgFormal/X86HelperDispatch.lean` appends an independent routed
+  body spec `x86HelperDispatchRoutedBodySpec` (a `match` on the independent
+  `x86HelperDispatchSlotOfSpec`) and five routing-composition theorems over it:
+  `x86_helper_dispatch_route_labels_distinct` (the selector's slots over the
+  armed ids are exactly `0 .. 6`, distinct and in order),
+  `x86_helper_dispatch_route_body_is_table` (the routed table names the lookup
+  body at slot 0 and the ktime body at slot 6),
+  `x86_helper_dispatch_route_body_refines` (every armed id routes to the table
+  body `getD i defaultBody`, and the zero id, the first id past the armed range
+  `8`, the last named id `21`, and an id beyond the named space `22` all route
+  to the default body), and two supporting slot/label lemmas. These compose the
+  already-proved `x86_helper_dispatch_slotof_refines` with the routing shape.
+  `KProgFormal.lean` already imports the generated and hand modules.
+- Host oracle `kprog/formal/test_x86_helper_dispatch_host.c` (unchanged
+  behaviour, stale "hand-written if/else-if ladder" doc comment fixed):
+  `x86 helper dispatch host cross-check: OK (4100 cases)`. Route oracle
+  `kprog/formal/test_x86_helper_dispatch_route_host.c` (doc comment fixed to
+  name the routed selector): drives the real `X86_SIM_BPF_CALL_ID` `switch` and
+  the routed `X86_SIM_BPF_CALL_REG` body over every armed id, the zero id, the
+  unarmed named ids and beyond, and all 256 register numbers, comparing the
+  whole changed register state against an independent id-to-body model:
+  `x86 helper dispatch route host cross-check: OK (2882 cases)`.
+- `make -C kprog/formal check` passes with **171** `cross-check: OK` rows and
+  zero `FAIL` (the helper-dispatch oracle rows were already wired into the check
+  target by Step 0113; only the ladder body changed, so the count is
+  unchanged). `make -C kprog/x86 micro-proofs-build` rebuilt all 30
+  workload-derived artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_helper_dispatch.py`, 83 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end. Six semantics-preserving mutations (a resolved-but-equal generator root
+  path, equal-whitespace spec text, an added hand-module namespace comment, an
+  added generated-Lean import comment, equal-spacing generated C
+  `_Static_assert`, and an added include-side comment) SURVIVE as required. The
+  guard-drift mutation points the inline-comparison sentinel at
+  `KPROG_X86_HELPER_SLOT`, text that IS present in the routed ladder, so a
+  wrongly-broadened sentinel is caught rather than silently agreeing.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the x86-64
+  helper-call-ladder routing paragraph and extends the covered-slices list with
+  the routed helper-id dispatch (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

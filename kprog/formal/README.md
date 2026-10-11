@@ -628,18 +628,29 @@ duplicate-free, that the tables hold exactly 7 entries, that `slotOf` maps
 exactly the armed ids `1..7` (slot `i` for id `i+1`) and names the zero id, the
 first unarmed named id `8`, the last named id `21`, and an id beyond the named
 space as no slot, that the id and slot tables invert each other over the armed
-range, and that the default arm body is the RAX zero-write the hand-written
-ladder's `else` runs. The generated header is included in the sim header just
-after the `X86_SIM_HELPER_bpf_*` id defines, so its per-id `_Static_assert`s
-bind all 21 hand-written id values (and the ladder-arm order) to the generated
-table. A generated-header oracle drives the count and slot macros over ids
-`0..4096` and the named ids against an independent `id in 1..7 ? id - 1 : -1`
-model (4,100 cases), and a sim-header route oracle drives the real
-`X86_SIM_BPF_CALL_ID` ladder and the routed `X86_SIM_BPF_CALL_REG` body over
-every armed id, the zero id, the unarmed named ids and beyond, and all 256
-register numbers, serving the four host-calling helpers with fixed-return stubs
-and comparing the whole changed register state against an independent id-to-body
-model (2,882 cases).
+range, and that the default arm body is the RAX zero-write the ladder's
+`default` arm runs. The routed ladder now consumes that selector (STEP 0132):
+`X86_SIM_BPF_CALL_ID` is a `switch` over `KPROG_X86_HELPER_SLOT((__u64)(ID))`
+with one `case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_<name>):` per armed
+body, replacing the former inline `__x86_helper_id == …` chain, and the
+generator rejects a ladder that does not switch on the selector or that restates
+an inline id comparison. `X86HelperDispatch.lean` additionally proves the
+routed body spec `x86HelperDispatchRoutedBodySpec` runs the table body at each
+armed id (`x86_helper_dispatch_route_body_refines`), that the selector's slots
+over the armed ids are exactly `0..6` in distinct order
+(`x86_helper_dispatch_route_labels_distinct`), and that the routed table names
+the lookup and ktime bodies at the ends
+(`x86_helper_dispatch_route_body_is_table`). The generated header is included
+in the sim header just after the `X86_SIM_HELPER_bpf_*` id defines, so its
+per-id `_Static_assert`s bind all 21 hand-written id values (and the ladder-arm
+order) to the generated table. A generated-header oracle drives the count and
+slot macros over ids `0..4096` and the named ids against an independent
+`id in 1..7 ? id - 1 : -1` model (4,100 cases), and a sim-header route oracle
+drives the real `X86_SIM_BPF_CALL_ID` routed ladder and the routed
+`X86_SIM_BPF_CALL_REG` body over every armed id, the zero id, the unarmed named
+ids and beyond, and all 256 register numbers, serving the four host-calling
+helpers with fixed-return stubs and comparing the whole changed register state
+against an independent id-to-body model (2,882 cases).
 The x86-64 `XCHG` arm's choice of body on the resolved operand width is itself
 a generated contract: `generate_x86_xchg_spec.py` emits
 `KPROG_X86_XCHG_FULL_WIDTH` (8), `KPROG_X86_XCHG_ARM_COUNT` (2), the two arm
@@ -2587,9 +2598,9 @@ MULX, MOVBE, LEA and ALU-memory bodies through it), x86 register-number
 dispatch-cell binding (and the simulator's binding of its write/tag X-macro
 dispatch and its `X86_SIM_L_REG_VALUE` read ternary chain to the generated cell
 selector),
-x86 helper-id dispatch-body binding (and the simulator's binding of its
-`X86_SIM_BPF_CALL_ID` call ladder and its id defines to the generated helper
-table),
+x86 helper-id dispatch-body binding (and the simulator's routing of its
+`X86_SIM_BPF_CALL_ID` call ladder through the generated `KPROG_X86_HELPER_SLOT`
+selector and its binding of its id defines to the generated helper table),
 x86 `XCHG` resolved-width arm selection (and the simulator's routing of the
 `X86_OP_XCHG` arm body through the generated full-width selector),
 x86 `DIV` resolved-width quotient/remainder case selection (and the simulator's
