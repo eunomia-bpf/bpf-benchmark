@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+"""Generate the shared AArch64 immediate-operand-source contract.
+
+Two AArch64 handler arms select their operand between the decoded immediate and
+a caller-supplied register expression with an inlined ternary
+
+    __u64 value = (OP) == ARM64_OP_<F>_IMM ? (__u64)(IMM) : <register read>;
+
+the move arm (`MOV_IMM`/`MOV_REG`) and the shift arm (`SHIFT_IMM`/`SHIFT_REG`).
+This contract pins the ISA decision that the `_IMM` member of each pair selects
+the decoded immediate and the `_REG` member selects the caller's register
+expression, and generates a single selector macro both arms share.
+
+The immediate value and the register expression (the source read for the move,
+the second-source read for the shift) stay in the handler; the macro only picks
+between them. All four opcode numbers are re-checked against
+kprog/arm64/arm64_sim.h, so a drift there fails `--check`.
+"""
+import argparse
+import json
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+SPEC = ROOT / "arm64_imm_operand_spec.json"
+SIM_HEADER = ROOT.parent / "arm64/arm64_sim.h"
+HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
+LEAN = ROOT / "KProgFormal/GeneratedArm64ImmOperand.lean"
+CHEADER = ROOT / "generated/arm64_imm_operand.h"
+
+# The two handler arms that still select their operand with an inlined
+# `(OP) == ARM64_OP_<F>_IMM ? IMM : <register read>` ternary, in dispatcher
+# order, each with the immediate and register member of the pair.
+EXPECTED = {
+    "schema_version": 1,
+    "operation": "arm64ImmOperand",
+    "selectors": [
+        {"name": "mov",
+         "imm": {"name": "movImm", "code": 1, "macro": "ARM64_OP_MOV_IMM"},
+         "reg": {"name": "movReg", "code": 2, "macro": "ARM64_OP_MOV_REG"}},
+        {"name": "shift",
+         "imm": {"name": "shiftImm", "code": 8, "macro": "ARM64_OP_SHIFT_IMM"},
+         "reg": {"name": "shiftReg", "code": 9, "macro": "ARM64_OP_SHIFT_REG"}},
+    ],
+}
+
+OPCODE_DEFINE = re.compile(
+    r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
+
+# The live dispatcher text, between the `ARM64_SIM_L_EXEC` `#define` and the
+# `ARM64_SIM_RUN_OP3` wrapper that follows it.
+EXEC_START = "#define ARM64_SIM_L_EXEC(OP"
+EXEC_END = "#define ARM64_SIM_RUN_OP3("
+
+
+def flat(text):
+    """Collapse `\\`-newline continuations so a macro body is one line."""
+    return re.sub(r"\\\s*\n", " ", text)
+
+
+def exec_region():
+    text = HEADER.read_text()
+    start = text.index(EXEC_START)
+    end = text.index(EXEC_END, start)
+    return re.sub(r"\s+", " ", flat(text[start:end]))
+
+
+def check_region(region):
+    """The live dispatcher must select each arm's operand through the generated
+    selector and must not test the raw immediate opcode by hand."""
+    for row in EXPECTED["selectors"]:
+        if "KPROG_ARM64_IMM_RHS((OP)" not in region:
+            raise SystemExit(
+                "arm64 dispatcher does not route the "
+                f"{row['name']} operand through the generated selector")
+        hand = re.compile(r"\(OP\)\s*==\s*" + re.escape(row["imm"]["macro"]) +
+                          r"(?![A-Z0-9_])")
+        if hand.search(region):
+            raise SystemExit(
+                f"arm64 dispatcher still tests the raw {row['name']} immediate "
+                f"opcode by hand ((OP) == {row['imm']['macro']})")
+
+
+def load() -> list[dict]:
+    data = json.loads(SPEC.read_text())
+    if data != EXPECTED:
+        raise SystemExit(f"invalid arm64 imm operand specification: {data!r}")
+    selectors = EXPECTED["selectors"]
+    names = [row["name"] for row in selectors]
+    if names != ["mov", "shift"]:
+        raise SystemExit(f"invalid arm64 imm operand selector order: {names!r}")
+    opcodes = {name: int(value, 16)
+               for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
+    if not opcodes:
+        raise SystemExit(
+            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
+    for row in selectors:
+        for form in ("imm", "reg"):
+            item = row[form]
+            if opcodes.get(item["macro"]) != item["code"]:
+                raise SystemExit(
+                    "arm64 imm operand opcodes drift from "
+                    "kprog/arm64/arm64_sim.h: "
+                    f"spec={item['macro']}={item['code']} "
+                    f"sim={opcodes.get(item['macro'])}")
+    check_region(exec_region())
+    return selectors
+
+
+def render_lean(selectors: list[dict]) -> str:
+    ctors = "\n".join(
+        f"  | {row['imm']['name']}\n  | {row['reg']['name']}" for row in selectors)
+    imm_codes = "\n".join(
+        f"  | .{row['imm']['name']} => {row['imm']['code']}" for row in selectors)
+    reg_codes = "\n".join(
+        f"  | .{row['reg']['name']} => {row['reg']['code']}" for row in selectors)
+    selects = "\n".join(
+        f"  | .{row['imm']['name']} => true\n  | .{row['reg']['name']} => false"
+        for row in selectors)
+    return f'''-- Generated by generate_arm64_imm_operand_spec.py from arm64_imm_operand_spec.json.
+import Std
+namespace KProgFormal.GeneratedArm64ImmOperand
+/-- The four AArch64 opcodes whose handler arm selects its operand between the
+decoded immediate and a register expression: the immediate and register member of
+the move pair and of the shift pair. -/
+inductive ImmOp where
+{ctors}
+deriving DecidableEq, Repr
+/-- The ARM64_OP_* opcode number the arm carries in arm64_sim.h. -/
+def code : ImmOp -> Nat
+{imm_codes}
+{reg_codes}
+/-- Whether this opcode selects the decoded immediate as its operand (rather than
+the caller-supplied register expression). Exactly the `_IMM` member of each pair
+selects the immediate. -/
+def immediate (op : ImmOp) : Bool :=
+  match op with
+{selects}
+end KProgFormal.GeneratedArm64ImmOperand
+'''
+
+
+def render_c(selectors: list[dict]) -> str:
+    asserts = []
+    for row in selectors:
+        for form in ("imm", "reg"):
+            item = row[form]
+            asserts.append(
+                f'_Static_assert({item["macro"]} == {item["code"]}U, '
+                '"arm64 imm operand code drift");')
+    cases = []
+    for row in selectors:
+        cases.append(f"\t\tcase {row['imm']['code']}U:")
+        cases.append("\t\t\t__kprog_a64_io_operand = (IMM);")
+        cases.append("\t\t\tbreak;")
+    body = [
+        "\t({",
+        "\t\t__u64 __kprog_a64_io_operand = (REG);",
+        "",
+        "\t\tswitch (OP) {",
+    ] + cases + [
+        "\t\tdefault:",
+        "\t\t\tbreak;",
+        "\t\t}",
+        "\t\t__kprog_a64_io_operand;",
+        "\t})",
+    ]
+    continued = " \\\n".join(body)
+    return f'''/* Generated by generate_arm64_imm_operand_spec.py from arm64_imm_operand_spec.json. */
+#ifndef KPROG_FORMAL_GENERATED_ARM64_IMM_OPERAND_H
+#define KPROG_FORMAL_GENERATED_ARM64_IMM_OPERAND_H
+/*
+ * The operand-source selection shared by the two AArch64 handler arms that pick
+ * between the decoded immediate and a register expression (the move and the
+ * shift arm): the `_IMM` member of each pair selects the decoded immediate,
+ * every other (register) opcode selects the caller-supplied register
+ * expression. The register expression is the caller's, because the move reads
+ * the source register while the shift reads the second source. A code outside
+ * the two `_IMM` labels is not a selection and returns the register expression.
+ */
+{chr(10).join(asserts)}
+/*
+ * OP is the arm opcode, IMM the decoded immediate and REG the register-form
+ * operand. OP, IMM and REG are each evaluated exactly once, so a register
+ * expression with a side effect still runs at most once. The result is IMM
+ * exactly when OP is one of the two immediate case labels, and REG otherwise.
+ */
+#define KPROG_ARM64_IMM_RHS(OP, IMM, REG)                                  \\
+{continued}
+#endif
+'''
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    selectors = load()
+    outputs = ((LEAN, render_lean(selectors)), (CHEADER, render_c(selectors)))
+    for path, expected in outputs:
+        if args.check:
+            if not path.is_file() or path.read_text() != expected:
+                raise SystemExit(
+                    f"generated arm64 imm operand contract is stale: {path}")
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(expected)
+
+
+if __name__ == "__main__":
+    main()

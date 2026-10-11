@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64ImmOperand","selectors":[{"name":"mov","imm":{"name":"movImm","code":1,"macro":"ARM64_OP_MOV_IMM"},"reg":{"name":"movReg","code":2,"macro":"ARM64_OP_MOV_REG"}},{"name":"shift","imm":{"name":"shiftImm","code":8,"macro":"ARM64_OP_SHIFT_IMM"},"reg":{"name":"shiftReg","code":9,"macro":"ARM64_OP_SHIFT_REG"}}]}

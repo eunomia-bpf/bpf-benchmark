@@ -19,6 +19,7 @@
 #include "../formal/generated/arm64_flag_operand.h"
 #include "../formal/generated/arm64_dispatch_family.h"
 #include "../formal/generated/arm64_dispatch_singleton.h"
+#include "../formal/generated/arm64_imm_operand.h"
 #include "../formal/generated/arm64_bitfield.h"
 #include "../formal/generated/arm64_mul.h"
 #include "../formal/generated/arm64_extrev.h"
@@ -1028,9 +1029,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 					ARM64_SIM_L_REG_TAG(SRC));         \
 			} else {                                           \
 				__u64 __a64_l_value =                      \
-					(OP) == ARM64_OP_MOV_IMM ?         \
-						(__u64)(IMM) :             \
-						ARM64_SIM_L_READ_REG(SRC); \
+					KPROG_ARM64_IMM_RHS((OP), (IMM),   \
+						ARM64_SIM_L_READ_REG(SRC));\
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 			}                                                  \
 		} else if (KPROG_ARM64_DISP_MOVK_HANDLED(OP)) {            \
@@ -1040,7 +1040,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		} else if (KPROG_ARM64_ALU_HANDLED(OP)) {                         \
 			ARM64_SIM_L_EXEC_ALU((OP), (DST), (SRC), (SRC2), __a64_l_width, (AUX), (IMM));\
 		} else if (KPROG_ARM64_SHIFT_OP_HANDLED(OP)) {                        \
-			__u64 __a64_l_amount = (OP) == ARM64_OP_SHIFT_IMM ? (__u64)(IMM) : ARM64_SIM_L_READ_REG(SRC2);\
+			__u64 __a64_l_amount = KPROG_ARM64_IMM_RHS((OP), (IMM),\
+				ARM64_SIM_L_READ_REG(SRC2));\
 			__u64 __a64_l_result = ARM64_SIM_L_SHIFT_VALUE((AUX), ARM64_SIM_L_READ_REG(SRC), __a64_l_amount, __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_MUL_HANDLED(OP)) {                    \

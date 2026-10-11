@@ -203,6 +203,8 @@ import KProgFormal.GeneratedArm64DispatchFamily
 import KProgFormal.Arm64DispatchFamily
 import KProgFormal.GeneratedArm64DispatchSingleton
 import KProgFormal.Arm64DispatchSingleton
+import KProgFormal.GeneratedArm64ImmOperand
+import KProgFormal.Arm64ImmOperand
 import KProgFormal.GeneratedArm64DqMem
 import KProgFormal.Arm64DqMemHandler
 import KProgFormal.GeneratedArm64PairMem

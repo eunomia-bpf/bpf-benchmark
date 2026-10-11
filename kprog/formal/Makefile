@@ -16,6 +16,7 @@ check:
 	python3 generate_arm64_ccmp_handler_spec.py --check
 	python3 generate_arm64_dispatch_family_spec.py --check
 	python3 generate_arm64_dispatch_singleton_spec.py --check
+	python3 generate_arm64_imm_operand_spec.py --check
 	python3 generate_arm64_mod_spec.py --check
 	python3 generate_arm64_bitfield_spec.py --check
 	python3 generate_arm64_mul_spec.py --check
@@ -440,6 +441,12 @@ check:
 	lake env lean KProgFormal/Arm64FlagOperand.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flag_operand_host.c -o build/test_arm64_flag_operand_host
 	./build/test_arm64_flag_operand_host
+	lake env lean KProgFormal/GeneratedArm64ImmOperand.lean
+	lake env lean KProgFormal/Arm64ImmOperand.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_imm_operand_host.c -o build/test_arm64_imm_operand_host
+	./build/test_arm64_imm_operand_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_imm_operand_route_host.c -o build/test_arm64_imm_operand_route_host
+	./build/test_arm64_imm_operand_route_host
 	lake env lean KProgFormal/GeneratedArm64FlagHandler.lean
 	lake env lean KProgFormal/Arm64FlagHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flag_handler_host.c -o build/test_arm64_flag_handler_host
