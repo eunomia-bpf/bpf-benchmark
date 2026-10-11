@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "operation": "arm64DispatchSingleton",
+  "singletons": [
+    {"name": "nop", "code": 0, "op_macro": "ARM64_OP_NOP", "gate_macro": "KPROG_ARM64_DISP_NOP_HANDLED"},
+    {"name": "movk", "code": 5, "op_macro": "ARM64_OP_MOVK", "gate_macro": "KPROG_ARM64_DISP_MOVK_HANDLED"},
+    {"name": "bitfield", "code": 18, "op_macro": "ARM64_OP_BITFIELD", "gate_macro": "KPROG_ARM64_DISP_BITFIELD_HANDLED"},
+    {"name": "cmnImm", "code": 51, "op_macro": "ARM64_OP_CMN_IMM", "gate_macro": "KPROG_ARM64_DISP_CMN_IMM_HANDLED"},
+    {"name": "cmnReg", "code": 58, "op_macro": "ARM64_OP_CMN_REG", "gate_macro": "KPROG_ARM64_DISP_CMN_REG_HANDLED"},
+    {"name": "tstBicReg", "code": 44, "op_macro": "ARM64_OP_TST_BIC_REG", "gate_macro": "KPROG_ARM64_DISP_TST_BIC_REG_HANDLED"},
+    {"name": "bicsReg", "code": 67, "op_macro": "ARM64_OP_BICS_REG", "gate_macro": "KPROG_ARM64_DISP_BICS_REG_HANDLED"},
+    {"name": "load", "code": 31, "op_macro": "ARM64_OP_LOAD", "gate_macro": "KPROG_ARM64_DISP_LOAD_HANDLED"},
+    {"name": "store", "code": 32, "op_macro": "ARM64_OP_STORE", "gate_macro": "KPROG_ARM64_DISP_STORE_HANDLED"},
+    {"name": "ldp", "code": 33, "op_macro": "ARM64_OP_LDP", "gate_macro": "KPROG_ARM64_DISP_LDP_HANDLED"},
+    {"name": "stp", "code": 34, "op_macro": "ARM64_OP_STP", "gate_macro": "KPROG_ARM64_DISP_STP_HANDLED"},
+    {"name": "loadD0", "code": 40, "op_macro": "ARM64_OP_LOAD_D0", "gate_macro": "KPROG_ARM64_DISP_LOAD_D0_HANDLED"},
+    {"name": "storeD0", "code": 41, "op_macro": "ARM64_OP_STORE_D0", "gate_macro": "KPROG_ARM64_DISP_STORE_D0_HANDLED"},
+    {"name": "loadQ0", "code": 42, "op_macro": "ARM64_OP_LOAD_Q0", "gate_macro": "KPROG_ARM64_DISP_LOAD_Q0_HANDLED"},
+    {"name": "storeQ0", "code": 43, "op_macro": "ARM64_OP_STORE_Q0", "gate_macro": "KPROG_ARM64_DISP_STORE_Q0_HANDLED"},
+    {"name": "fmov", "code": 35, "op_macro": "ARM64_OP_FMOV", "gate_macro": "KPROG_ARM64_DISP_FMOV_HANDLED"}
+  ]
+}

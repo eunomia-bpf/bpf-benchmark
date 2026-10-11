@@ -15,6 +15,7 @@ check:
 	python3 generate_arm64_logic_flag_handler_spec.py --check
 	python3 generate_arm64_ccmp_handler_spec.py --check
 	python3 generate_arm64_dispatch_family_spec.py --check
+	python3 generate_arm64_dispatch_singleton_spec.py --check
 	python3 generate_arm64_mod_spec.py --check
 	python3 generate_arm64_bitfield_spec.py --check
 	python3 generate_arm64_mul_spec.py --check
@@ -457,6 +458,12 @@ check:
 	./build/test_arm64_dispatch_family_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_dispatch_family_route_host.c -o build/test_arm64_dispatch_family_route_host
 	./build/test_arm64_dispatch_family_route_host
+	lake env lean KProgFormal/GeneratedArm64DispatchSingleton.lean
+	lake env lean KProgFormal/Arm64DispatchSingleton.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_dispatch_singleton_host.c -o build/test_arm64_dispatch_singleton_host
+	./build/test_arm64_dispatch_singleton_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_dispatch_singleton_route_host.c -o build/test_arm64_dispatch_singleton_route_host
+	./build/test_arm64_dispatch_singleton_route_host
 	lake env lean KProgFormal/Arm64Mod.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mod_host.c -o build/test_arm64_mod_host
 	./build/test_arm64_mod_host
