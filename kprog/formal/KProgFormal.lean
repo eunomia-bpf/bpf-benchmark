@@ -205,6 +205,8 @@ import KProgFormal.GeneratedArm64DispatchSingleton
 import KProgFormal.Arm64DispatchSingleton
 import KProgFormal.GeneratedArm64ImmOperand
 import KProgFormal.Arm64ImmOperand
+import KProgFormal.GeneratedArm64AluOperandSelect
+import KProgFormal.Arm64AluOperandSelect
 import KProgFormal.GeneratedArm64LdrsxOp
 import KProgFormal.Arm64LdrsxOp
 import KProgFormal.GeneratedArm64DqMem

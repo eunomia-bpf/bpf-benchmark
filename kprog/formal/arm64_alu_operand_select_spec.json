@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64AluOperandSelect","default":"register","selectors":[{"name":"alu","imm":{"name":"aluImm","code":6,"macro":"ARM64_OP_ALU_IMM"},"reg":{"name":"aluReg","code":7,"macro":"ARM64_OP_ALU_REG"}}]}

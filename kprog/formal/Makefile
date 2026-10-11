@@ -10,6 +10,7 @@ check:
 	python3 generate_arm64_alu_result_spec.py --check
 	python3 generate_arm64_alu_handler_spec.py --check
 	python3 generate_arm64_alu_operand_spec.py --check
+	python3 generate_arm64_alu_operand_select_spec.py --check
 	python3 generate_arm64_flag_operand_spec.py --check
 	python3 generate_arm64_flag_handler_spec.py --check
 	python3 generate_arm64_logic_flag_handler_spec.py --check
@@ -448,6 +449,12 @@ check:
 	./build/test_arm64_imm_operand_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_imm_operand_route_host.c -o build/test_arm64_imm_operand_route_host
 	./build/test_arm64_imm_operand_route_host
+	lake env lean KProgFormal/GeneratedArm64AluOperandSelect.lean
+	lake env lean KProgFormal/Arm64AluOperandSelect.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_operand_select_host.c -o build/test_arm64_alu_operand_select_host
+	./build/test_arm64_alu_operand_select_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
+	./build/test_arm64_alu_operand_select_route_host
 	lake env lean KProgFormal/GeneratedArm64FlagHandler.lean
 	lake env lean KProgFormal/Arm64FlagHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_flag_handler_host.c -o build/test_arm64_flag_handler_host
