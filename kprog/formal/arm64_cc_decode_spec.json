@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "operation": "arm64CcDecode",
+  "rows": [
+    {"mnemonic": "eq", "cond": "eq", "alias": false},
+    {"mnemonic": "ne", "cond": "ne", "alias": false},
+    {"mnemonic": "cs", "cond": "cs", "alias": false},
+    {"mnemonic": "hs", "cond": "cs", "alias": true},
+    {"mnemonic": "cc", "cond": "cc", "alias": false},
+    {"mnemonic": "lo", "cond": "cc", "alias": true},
+    {"mnemonic": "mi", "cond": "mi", "alias": false},
+    {"mnemonic": "pl", "cond": "pl", "alias": false},
+    {"mnemonic": "vs", "cond": "vs", "alias": false},
+    {"mnemonic": "vc", "cond": "vc", "alias": false},
+    {"mnemonic": "hi", "cond": "hi", "alias": false},
+    {"mnemonic": "ls", "cond": "ls", "alias": false},
+    {"mnemonic": "ge", "cond": "ge", "alias": false},
+    {"mnemonic": "lt", "cond": "lt", "alias": false},
+    {"mnemonic": "gt", "cond": "gt", "alias": false},
+    {"mnemonic": "le", "cond": "le", "alias": false},
+    {"mnemonic": "al", "cond": "al", "alias": false}
+  ]
+}

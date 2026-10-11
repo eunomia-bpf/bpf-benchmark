@@ -12,6 +12,7 @@ from pathlib import Path
 
 import yaml
 
+from generated_arm64_cc_decode import COND
 from generated_arm64_decode import ALU, BITFIELD, MOD, SHIFT
 
 
@@ -24,13 +25,8 @@ PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
 
 WIDTH_CONST = {1: "ARM64_WIDTH_8", 2: "ARM64_WIDTH_16", 4: "ARM64_WIDTH_32", 8: "ARM64_WIDTH_64"}
 # ALU/SHIFT/MOD/BITFIELD mnemonic-to-code tables come from the generated
-# module (kprog/formal/arm64_decode_spec.json), imported at the top.
-COND = {"eq": "ARM64_COND_EQ", "ne": "ARM64_COND_NE", "cs": "ARM64_COND_CS",
-        "hs": "ARM64_COND_CS", "cc": "ARM64_COND_CC", "lo": "ARM64_COND_CC",
-        "mi": "ARM64_COND_MI", "pl": "ARM64_COND_PL", "vs": "ARM64_COND_VS",
-        "vc": "ARM64_COND_VC", "hi": "ARM64_COND_HI", "ls": "ARM64_COND_LS",
-        "ge": "ARM64_COND_GE", "lt": "ARM64_COND_LT", "gt": "ARM64_COND_GT",
-        "le": "ARM64_COND_LE", "al": "ARM64_COND_AL"}
+# module (kprog/formal/arm64_decode_spec.json); the condition mnemonic-to-code
+# table from kprog/formal/arm64_cc_decode_spec.json. Both imported at the top.
 HELPER_IDENTS = {
     1: "bpf_map_lookup_elem",
     2: "bpf_map_update_elem",
