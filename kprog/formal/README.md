@@ -910,6 +910,27 @@ bit, count, and activation against an independent literal oracle over every
 width/lane pair (291 cases), and a sim-header route oracle drives the real write
 over every width and many arena offsets against an independent model of the
 activation, plus the real store/read round-trip (3,843,511 cases).
+The AArch64 dispatcher's eight immediate/register opcode-family gates are
+likewise a generated contract: `generate_arm64_dispatch_family_spec.py` emits
+`KPROG_ARM64_<F>_HANDLED(OP)` for the ALU, SHIFT, SUBS, ADDS, CMP, TST, ANDS and
+CCMP arms, each a plain-expression disjunction over its two member opcodes with
+each member's `ARM64_OP_*` number `_Static_assert`-pinned to `arm64_sim.h`, and
+`Arm64DispatchFamily.lean` proves every generated membership equal to an
+independent named-list membership statement
+(`arm64_dispatch_<F>_refines`), that the eight families are pairwise disjoint so
+the ordered chain takes at most one gate per opcode, and that the generated
+opcode table matches the `ARM64_OP_*` numbers
+(`arm64_dispatch_code_dispatch`), so a member reaches its arm and a non-member
+reaches the caller's unsupported arm. `ARM64_SIM_L_EXEC` now selects each arm
+through the generated predicate instead of the eight hand-written `||` pairs,
+leaving the per-arm operand selection and the composed handler bodies. A
+generated-header oracle decides membership from an independent switch oracle
+over all 256 byte values for each family (2072 cases), and a sim-header route
+oracle drives both members of each family through the real dispatcher with equal
+operands and requires the whole-state snapshots to agree, the right
+destinations to be written, the flags-only arms to leave the destination
+untouched, and a non-member opcode to reach the unsupported arm exactly once
+(136 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new

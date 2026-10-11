@@ -10280,6 +10280,101 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with the stack byte-ladder activation contract (paper commit pushed to
   `main`).
 
+## Step 0125 — AArch64 dispatch-family opcode-membership contract
+
+- Scope: the AArch64 simulator's opcode dispatcher `ARM64_SIM_L_EXEC`
+  (`kprog/arm64/arm64_sim_local_bpf.h`) selected its eight immediate/register
+  family arms through hand-written `||` chains of raw opcode comparisons
+  restated at each gate (`KPROG_ARM64_ALU_HANDLED(OP)` was
+  `(OP) == ARM64_OP_ALU_IMM || (OP) == ARM64_OP_ALU_REG`, and likewise for the
+  SHIFT, SUBS, ADDS, CMP, TST, ANDS and CCMP arms). The member set per family is
+  closed (two opcodes each), the `ARM64_OP_*` numbers live in `arm64_sim.h`, and
+  the eight families are pairwise disjoint, so an opcode takes at most one gate
+  and a code outside every family reaches the caller's unsupported arm.
+- Shared spec `kprog/formal/arm64_dispatch_family_spec.json` (schema_version 1,
+  operation `arm64DispatchFamily`) holds the eight family rows in dispatcher
+  order — `alu`, `shiftOp`, `subs`, `adds`, `cmp`, `tst`, `ands`, `ccmp` — each
+  naming its membership macro and its two member opcodes in the order the live
+  gate tests them (`{name, code, macro}` per member, e.g. `alu` =
+  `KPROG_ARM64_ALU_HANDLED` over `ARM64_OP_ALU_IMM` 6 / `ARM64_OP_ALU_REG` 7;
+  ANDS is register-then-immediate, matching the live gate).
+- Generator `kprog/formal/generate_arm64_dispatch_family_spec.py` re-derives the
+  live dispatcher region between the `ARM64_SIM_L_EXEC(OP` `#define` and the
+  `ARM64_SIM_RUN_OP3(` wrapper and requires each family to be routed through its
+  generated membership macro `KPROG_ARM64_<F>_HANDLED(OP)` while the raw
+  `(OP) == ARM64_OP_*_IMM || (OP) == ARM64_OP_*_REG` pair no longer appears. It
+  re-checks every member code against the `ARM64_OP_*` `#define`s of
+  `kprog/arm64/arm64_sim.h`, requires exactly two distinct members per family,
+  and emits the plain-expression, `_Static_assert`-safe C header
+  `generated/arm64_dispatch_family.h` (sixteen per-member code asserts, eight
+  two-disjunct membership macros, sixteen coverage asserts) and the Lean table
+  `KProgFormal/GeneratedArm64DispatchFamily.lean` (inductive `DispatchOp` with
+  the sixteen constructors, `code`, and the eight `<family>Handled` membership
+  definitions).
+- Hand refinement `KProgFormal/Arm64DispatchFamily.lean` states an independent
+  named-list membership per family (`arm64Disp<F>Ops` lists and
+  `arm64Disp<F>Spec op := op ∈ arm64Disp<F>Ops`; the `Disp` infix keeps the names
+  off `Arm64Decode`'s `arm64AluSpec`/`arm64ShiftSpec`) and proves
+  `arm64_dispatch_<F>_refines` for all eight families
+  (`cases op <;> decide`), `arm64_dispatch_handled_iff_mem`,
+  `arm64_dispatch_families_disjoint` (no two of the eight families share an
+  opcode, so the ordered chain takes at most one gate),
+  `arm64_dispatch_member_handled`, `arm64_dispatch_nonmember_unhandled`,
+  `arm64_dispatch_code_dispatch` (the sixteen mnemonics against the
+  `ARM64_OP_*` numbers), `arm64_dispatch_code_in_range`, and three canonical
+  examples.
+- Routed gates: the eight family `else if` tests now call the generated
+  membership macros; the arm bodies, the operand selection, the
+  `ARM64_SIM_L_UNSUPPORTED_OPCODE()` fallback and every byte-length/backslash
+  column are unchanged so the dispatcher's shape is byte-stable. The generated
+  header is included at `arm64_sim_local_bpf.h:20`, after the `ARM64_OP_*`
+  decodes it compares against.
+- Two host oracles, both wired into `kprog/formal/Makefile` immediately after
+  the CCMP-handler pair:
+  - `test_arm64_dispatch_family_host.c` declares the sixteen `ARM64_OP_*`
+    numbers locally and decides membership from an independent `switch` oracle,
+    then compares it against the generated macros over all 256 byte values for
+    each of the eight families, re-checks every named member explicitly and
+    checks each family's two members are distinct ---
+    `arm64 dispatch family host cross-check: OK (2072 cases)`.
+  - `test_arm64_dispatch_family_route_host.c` includes the simulator header
+    (`ARM64_SIM_ENABLE_STACK`) and drives both members of each family through
+    the real `ARM64_SIM_L_EXEC` with equal operand values, requiring the two
+    full whole-state snapshots (31 GPRs plus tags, SP, NZCV, LR, V0, the 160-byte
+    arena and its slot tags) to be byte-identical and neither to reach the
+    unsupported arm, then requires a writing arm to have changed its destination
+    and a flags-only arm (CMP/TST/CCMP) to have left it untouched, at all four
+    widths, plus a non-member opcode that must reach the unsupported arm exactly
+    once --- `arm64 dispatch family route host cross-check: OK (136 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **159** `cross-check: OK`. Baseline
+  was **157** for Step 0124; Step 0125 adds the dispatch-family host and route
+  oracles and the Lean pair. `make -C kprog/arm64 micro-proofs-build` rebuilt
+  all 30 workload-derived artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_dispatch_family.py`, 48
+  mutations against the live tree, each caught after the four unmutated controls
+  (`gen`, `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  five spec defects (operation/schema/family-macro/member-code/member-macro
+  drifts → generator), fourteen generator defects (operation/family-macro/
+  member-code/member-macro/family-order/Lean-path/C-header-path/member-count/
+  opcode-drift-check/duplicate-check/region-start/region-end/needle-check/
+  hand-pair-check drifts → generator), six regenerated generator+artifact pair
+  defects (constructor-render/opcode-render/disjunct-render → lean_chain,
+  code-assert-render/membership-render/coverage-render → host), three generated-C
+  defects (code-assert/coverage-assert drifts → host, membership-disjunct drift →
+  route), three generated-Lean defects (constructor/opcode/membership-disjunct
+  drifts → lean_chain), eight hand-refinement defects (ALU list/shift spec/
+  refines statement/iff statement/opcode-dispatch/opcode-range/non-member
+  statement drifts → lean_chain), five routed-body defects (dropped include,
+  dropped ALU gate, widened SHIFT gate, swapped CCMP gate → route; ALU gate
+  reverted to the hand-rolled `||` pair → generator). Five semantically
+  equivalent mutations (an added include-side comment, an added hand-module
+  comment, a resolved-but-equal generator root path, an added generated-Lean
+  import comment, and equal-whitespace spec text) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  dispatch-family membership paragraph and extends the covered-slices list with
+  the dispatcher opcode-membership contract (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

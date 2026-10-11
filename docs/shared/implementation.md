@@ -312,6 +312,21 @@ increment is committed and pushed immediately). Current state:
   to the `Arm64ByteLane` extraction, the `Arm64Width` codes and the store-bytes
   contract (`arm64_stack_write_lanes_matches_store_bytes`), so the stack and
   memory byte ladders activate the same lanes at every width.
+  The AArch64 dispatcher's eight immediate/register opcode-family gates are
+  likewise no longer open (Step 0125): `ARM64_SIM_L_EXEC` now selects the ALU,
+  SHIFT, SUBS, ADDS, CMP, TST, ANDS and CCMP arms through the generated
+  membership predicates `KPROG_ARM64_<F>_HANDLED(OP)`, each a plain-expression
+  disjunction over its two member opcodes and each bound by `_Static_assert` to
+  the `ARM64_OP_*` numbers of `arm64_sim.h`, so the arm selection is a proved
+  table rather than the eight restated `(OP) == ARM64_OP_*_IMM || ...` pairs,
+  leaving the per-arm operand selection and the composed handler bodies.
+  `Arm64DispatchFamily.lean` proves every generated membership equal to an
+  independent named-list statement over the sixteen opcodes
+  (`arm64_dispatch_<F>_refines`), that the eight families are pairwise disjoint
+  so the ordered chain takes at most one gate per opcode, and that the generated
+  opcode table matches the `ARM64_OP_*` numbers
+  (`arm64_dispatch_code_dispatch`), so a member reaches its arm and a
+  non-member reaches the caller's unsupported arm.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
