@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "operation": "x86MulxArmSelector",
+  "selector": "single_width_code_then_arm",
+  "width_code_bits": 8,
+  "opcode_define": "X86_OP_MULX",
+  "opcode": 57,
+  "special_width_define": "KPROG_X86_MULX_SPECIAL_WIDTH",
+  "special_width_code": 4,
+  "arms": [
+    {
+      "arm": "singleProduct",
+      "arm_define": "KPROG_X86_MULX_ARM_SINGLE_PRODUCT",
+      "is_special_width": 1,
+      "effect": "single_product_split",
+      "width_class": "w32"
+    },
+    {
+      "arm": "limbLadder",
+      "arm_define": "KPROG_X86_MULX_ARM_LIMB_LADDER",
+      "is_special_width": 0,
+      "effect": "four_limb_ladder",
+      "width_class": "other"
+    }
+  ]
+}

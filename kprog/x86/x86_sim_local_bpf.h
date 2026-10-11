@@ -33,6 +33,7 @@
 #include "../formal/generated/x86_movx_shape.h"
 #include "../formal/generated/x86_mov_reg_arm.h"
 #include "../formal/generated/x86_stack_arm.h"
+#include "../formal/generated/x86_mulx_arm.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -1380,7 +1381,8 @@ struct x86_sim_state {
 		__u64 __x86_l_rhs = X86_SIM_L_READ_REG(SRC);             \
 		__u64 __x86_l_low;                                       \
 		__u64 __x86_l_high;                                      \
-		if (__x86_l_width == X86_WIDTH_32) {                      \
+		if (KPROG_X86_MULX_ARM(__x86_l_width) ==                  \
+		    KPROG_X86_MULX_ARM_SINGLE_PRODUCT) {                  \
 			__u64 __x86_l_product = (__u64)(__u32)__x86_l_lhs *\
 					       (__u64)(__u32)__x86_l_rhs;\
 			__x86_l_low = (__u32)__x86_l_product;             \

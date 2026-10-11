@@ -227,3 +227,5 @@ import KProgFormal.GeneratedArm64RegDispatch
 import KProgFormal.Arm64RegDispatch
 import KProgFormal.GeneratedControlFlowTrace
 import KProgFormal.ControlFlowTrace
+import KProgFormal.GeneratedX86MulxArm
+import KProgFormal.X86MulxArmHandler
