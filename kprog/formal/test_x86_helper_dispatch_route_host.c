@@ -2,8 +2,9 @@
  * Host cross-check for the x86-64 simulator's routing of a decoded helper id
  * through the generated helper-dispatch contract (STEP 0113).
  *
- * The runtime body `X86_SIM_BPF_CALL_ID` dispatches a 64-bit helper id through
- * the hand-written `if/else-if` ladder; `X86_SIM_BPF_CALL_REG` reads the id out
+ * The runtime body `X86_SIM_BPF_CALL_ID` dispatches a 64-bit helper id by
+ * switching on the generated `KPROG_X86_HELPER_SLOT` selector (STEP 0132);
+ * `X86_SIM_BPF_CALL_REG` reads the id out
  * of a register and calls it, and the chain's `X86_OP_CALL_REG` arm is exactly
  * `X86_SIM_BPF_CALL_REG((SRC))`. This oracle drives the real simulator state
  * over the whole named id space (the armed ids `1 .. 7`, the zero id, and the

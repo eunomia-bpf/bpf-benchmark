@@ -3,15 +3,16 @@
  * (STEP 0113).
  *
  * The module under test is `generated/x86_helper_dispatch.h`. It fixes the
- * ladder slot the simulator's hand-written `X86_SIM_BPF_CALL_ID` ladder
- * dispatches each decoded 64-bit BPF helper id to: the seven armed helpers
+ * ladder slot the simulator's `X86_SIM_BPF_CALL_ID` ladder dispatches each
+ * decoded 64-bit BPF helper id to: the seven armed helpers
  * `bpf_map_lookup_elem .. bpf_ktime_get_ns` are the ids `1 .. 7` in that
  * ladder order, so slot `i` is helper id `i + 1`, and every other id
  * (the zero id, the named-but-unarmed ids `8 .. 21`, and every id above them)
  * reaches the default zero-write arm.
  *
- * The simulator binds a helper id to a body by the hand-written `if/else-if`
- * ladder; the generated header's `_Static_assert`s pin each
+ * The simulator binds a helper id to a body by switching on the generated
+ * `KPROG_X86_HELPER_SLOT` selector; the generated header's `_Static_assert`s
+ * pin each
  * `X86_SIM_HELPER_bpf_*` id define to the generated `helperIds` table. This
  * oracle drives the contract's `KPROG_X86_HELPER_SLOT` /
  * `KPROG_X86_HELPER_COUNT`, restates the binding from the raw helper ids, and

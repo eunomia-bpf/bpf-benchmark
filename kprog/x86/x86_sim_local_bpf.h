@@ -2179,23 +2179,38 @@ struct x86_sim_state {
 
 #define X86_SIM_BPF_CALL_ID(ID)                                             \
 	do {                                                               \
-		__u64 __x86_helper_id = (ID);                             \
-		if (__x86_helper_id == X86_SIM_HELPER_bpf_map_lookup_elem) {\
+		switch (KPROG_X86_HELPER_SLOT((__u64)(ID))) {              \
+		case KPROG_X86_HELPER_SLOT(                                \
+			X86_SIM_HELPER_bpf_map_lookup_elem):               \
 			X86_SIM_BPF_CALL_bpf_map_lookup_elem();           \
-		} else if (__x86_helper_id == X86_SIM_HELPER_bpf_map_update_elem) {\
+			break;                                             \
+		case KPROG_X86_HELPER_SLOT(                                \
+			X86_SIM_HELPER_bpf_map_update_elem):               \
 			X86_SIM_BPF_CALL_bpf_map_update_elem();           \
-		} else if (__x86_helper_id == X86_SIM_HELPER_bpf_map_delete_elem) {\
+			break;                                             \
+		case KPROG_X86_HELPER_SLOT(                                \
+			X86_SIM_HELPER_bpf_map_delete_elem):               \
 			X86_SIM_BPF_CALL_bpf_map_delete_elem();           \
-		} else if (__x86_helper_id == X86_SIM_HELPER_bpf_get_current_uid_gid) {\
+			break;                                             \
+		case KPROG_X86_HELPER_SLOT(                                \
+			X86_SIM_HELPER_bpf_get_current_uid_gid):           \
 			X86_SIM_BPF_CALL_bpf_get_current_uid_gid();       \
-		} else if (__x86_helper_id == X86_SIM_HELPER_bpf_get_current_pid_tgid) {\
+			break;                                             \
+		case KPROG_X86_HELPER_SLOT(                                \
+			X86_SIM_HELPER_bpf_get_current_pid_tgid):          \
 			X86_SIM_BPF_CALL_bpf_get_current_pid_tgid();      \
-		} else if (__x86_helper_id == X86_SIM_HELPER_bpf_get_smp_processor_id) {\
+			break;                                             \
+		case KPROG_X86_HELPER_SLOT(                                \
+			X86_SIM_HELPER_bpf_get_smp_processor_id):          \
 			X86_SIM_BPF_CALL_bpf_get_smp_processor_id();      \
-		} else if (__x86_helper_id == X86_SIM_HELPER_bpf_ktime_get_ns) {\
+			break;                                             \
+		case KPROG_X86_HELPER_SLOT(                                \
+			X86_SIM_HELPER_bpf_ktime_get_ns):                  \
 			X86_SIM_BPF_CALL_bpf_ktime_get_ns();              \
-		} else {                                                   \
+			break;                                             \
+		default:                                                   \
 			X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64);\
+			break;                                             \
 		}                                                          \
 	} while (0)
 

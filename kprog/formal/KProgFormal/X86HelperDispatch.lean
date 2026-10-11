@@ -182,4 +182,65 @@ theorem x86_helper_dispatch_case_dispatch :
       slotOf (21 : BitVec 64) = none := by
   refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
 
+/-- Independent model of the routed `X86_SIM_BPF_CALL_ID` ladder: the body the
+switch selects for a decoded helper id. The switch keys on the generated slot
+selector, so slot `i` runs armed body `i` and every id that names no slot
+reaches the default zero-write arm. Built from the independent `1 .. 7` tables,
+not the generated ones. -/
+def x86HelperDispatchRoutedBodySpec (id : BitVec 64) : String :=
+  match x86HelperDispatchSlotOfSpec id with
+  | some i => x86HelperDispatchBodiesSpec.getD i defaultBody
+  | none => defaultBody
+
+/-- The routed selector rolls the armed ids `1 .. 7` up to the distinct case
+labels `0 .. 6` in arm order, so no two arms share a `case` and the switch
+cannot fold two helpers onto one body. -/
+theorem x86_helper_dispatch_route_labels_distinct :
+    (x86HelperDispatchIdsSpec.map
+        (fun n => slotOf (BitVec.ofNat 64 n))) =
+      (List.range helperCount).map some ∧
+      (List.range helperCount).Nodup := by
+  refine ⟨?_, ?_⟩ <;> native_decide
+
+/-- The routed selector's value for each armed id equals its arm index, so the
+`case KPROG_X86_HELPER_SLOT(<armed id>)` label the C ladder writes is exactly
+slot `i` for arm `i`. -/
+theorem x86_helper_dispatch_route_case_is_index :
+    (List.range helperCount).all
+        (fun i => slotOf (BitVec.ofNat 64 (i + 1)) = some i) = true := by
+  native_decide
+
+/-- The routed selector never returns the `KPROG_X86_HELPER_SLOT_NONE` arm for
+an armed id, so every armed helper runs its own body and never falls through to
+the default arm. -/
+theorem x86_helper_dispatch_route_armed_never_default :
+    (List.range helperCount).all
+        (fun i => slotOf (BitVec.ofNat 64 (i + 1)) ≠ none) = true := by
+  native_decide
+
+/-- The routed ladder runs armed body `i` for armed id `i + 1` and the default
+zero-write arm for every id that names no slot, matching the independent routed
+body model over the whole armed range and the unarmed tail. -/
+theorem x86_helper_dispatch_route_body_refines :
+    (List.range helperCount).all
+        (fun i => x86HelperDispatchRoutedBodySpec (BitVec.ofNat 64 (i + 1)) =
+          x86HelperDispatchBodiesSpec.getD i defaultBody) = true ∧
+      x86HelperDispatchRoutedBodySpec (0 : BitVec 64) = defaultBody ∧
+      x86HelperDispatchRoutedBodySpec (8 : BitVec 64) = defaultBody ∧
+      x86HelperDispatchRoutedBodySpec (21 : BitVec 64) = defaultBody ∧
+      x86HelperDispatchRoutedBodySpec (22 : BitVec 64) = defaultBody := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
+
+/-- The routed ladder's first and last armed slots invoke exactly the
+`X86_SIM_BPF_CALL_bpf_map_lookup_elem` and `X86_SIM_BPF_CALL_bpf_ktime_get_ns`
+body macros, so the C `case` bodies line up with the generated body table
+order. -/
+theorem x86_helper_dispatch_route_body_is_table :
+    x86HelperDispatchBodiesSpec.getD 0 defaultBody =
+        "X86_SIM_BPF_CALL_bpf_map_lookup_elem" ∧
+      x86HelperDispatchBodiesSpec.getD 6 defaultBody =
+        "X86_SIM_BPF_CALL_bpf_ktime_get_ns" := by
+  refine ⟨?_, ?_⟩ <;> native_decide
+
+
 end KProgFormal

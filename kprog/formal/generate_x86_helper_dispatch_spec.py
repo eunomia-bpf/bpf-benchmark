@@ -69,11 +69,19 @@ HELPER_DEFINE = re.compile(
     r"^#define\s+(X86_SIM_HELPER_bpf_[A-Za-z0-9_]+)\s+([0-9]+)ULL\s*$", re.M)
 LADDER_START = "#define X86_SIM_BPF_CALL_ID(ID)"
 LADDER_END = "#define X86_SIM_BPF_CALL_REG(REG)"
+# The routed ladder switches on the generated slot selector; each armed arm is
+# a `case KPROG_X86_HELPER_SLOT(<id define>):` invoking its body macro.
+LADDER_SLOT = re.compile(
+    r"switch\s*\(\s*KPROG_X86_HELPER_SLOT\(\s*\(\s*__u64\s*\)\s*\(\s*ID\s*\)"
+    r"\s*\)\s*\)")
 LADDER_ARM = re.compile(
-    r"if\s*\(\s*__x86_helper_id\s*==\s*(X86_SIM_HELPER_bpf_[A-Za-z0-9_]+)\s*\)"
-    r"\s*\{\s*(X86_SIM_BPF_CALL_bpf_[A-Za-z0-9_]+)\s*\(\s*\)\s*;")
+    r"case\s+KPROG_X86_HELPER_SLOT\(\s*(X86_SIM_HELPER_bpf_[A-Za-z0-9_]+)\s*\)"
+    r"\s*:\s*(X86_SIM_BPF_CALL_bpf_[A-Za-z0-9_]+)\s*\(\s*\)\s*;")
 LADDER_DEFAULT = re.compile(
-    r"else\s*\{\s*(X86_SIM_L_WRITE_REG_WIDTH\s*\([^;]*?\))\s*;")
+    r"default\s*:\s*(X86_SIM_L_WRITE_REG_WIDTH\s*\([^;]*?\))\s*;")
+# The hand-written inline id comparisons the routed ladder replaces.
+LADDER_HAND_TEST = re.compile(
+    r"__x86_helper_id\s*==\s*X86_SIM_HELPER_bpf_")
 
 
 def flat(text):
@@ -115,6 +123,13 @@ def ladder_default():
 
 def check_against_header():
     """The live ladder must equal the independent enumeration, arm for arm."""
+    region = ladder_region()
+    if not LADDER_SLOT.search(region):
+        raise SystemExit(
+            "x86 helper ladder does not switch on the generated slot selector")
+    if LADDER_HAND_TEST.search(region):
+        raise SystemExit(
+            "x86 helper ladder restates an inline helper-id comparison")
     arms = ladder_arms()
     if [name for name, _b, _i in arms] != [name for name, _i, _b in _ARMED]:
         raise SystemExit(f"ladder arm order disagrees: {arms!r}")
