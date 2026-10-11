@@ -13,6 +13,7 @@ from pathlib import Path
 import yaml
 
 from generated_x86_alu_decode import ALU_AUX
+from generated_x86_cc_decode import CC_AUX
 from generated_x86_opcode import X86_OPCODE, X86_OPCODE_NAME
 from generated_x86_reg_lane_aux import c_reg_lane_aux
 from generated_x86_specialization import (X86_SPECIALIZATION_AUX_CALL,
@@ -67,45 +68,6 @@ for base, names in {
             width = 8
         shift = 8 if name in {"ah", "bh", "ch", "dh"} else 0
         REGS[name] = (f"X86_{base}", width, shift)
-
-CC_AUX = {
-    "ja": "X86_CC_A",
-    "jae": "X86_CC_AE",
-    "jb": "X86_CC_B",
-    "jbe": "X86_CC_BE",
-    "je": "X86_CC_E",
-    "jne": "X86_CC_NE",
-    "jg": "X86_CC_G",
-    "jge": "X86_CC_GE",
-    "jl": "X86_CC_L",
-    "jle": "X86_CC_LE",
-    "js": "X86_CC_S",
-    "jns": "X86_CC_NS",
-    "cmova": "X86_CC_A",
-    "cmovb": "X86_CC_B",
-    "cmovbe": "X86_CC_BE",
-    "cmove": "X86_CC_E",
-    "cmovg": "X86_CC_G",
-    "cmovge": "X86_CC_GE",
-    "cmovae": "X86_CC_AE",
-    "cmovl": "X86_CC_L",
-    "cmovle": "X86_CC_LE",
-    "cmovne": "X86_CC_NE",
-    "cmovns": "X86_CC_NS",
-    "cmovs": "X86_CC_S",
-    "seta": "X86_CC_A",
-    "setae": "X86_CC_AE",
-    "setb": "X86_CC_B",
-    "setbe": "X86_CC_BE",
-    "sete": "X86_CC_E",
-    "setg": "X86_CC_G",
-    "setge": "X86_CC_GE",
-    "setl": "X86_CC_L",
-    "setle": "X86_CC_LE",
-    "setne": "X86_CC_NE",
-    "setns": "X86_CC_NS",
-    "sets": "X86_CC_S",
-}
 
 WIDTH_CONST = {
     8: "X86_WIDTH_8",

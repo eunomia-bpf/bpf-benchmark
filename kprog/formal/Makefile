@@ -63,6 +63,7 @@ check:
 	python3 generate_arm64_mem_write_arm_spec.py --check
 	python3 generate_arm64_stack_write_lanes_spec.py --check
 	python3 generate_x86_cond_spec.py --check
+	python3 generate_x86_cc_decode_spec.py --check
 	python3 generate_x86_logic_flags_spec.py --check
 	python3 generate_x86_width_spec.py --check
 	python3 generate_x86_immediate_spec.py --check
@@ -359,6 +360,10 @@ check:
 	./build/test_x86_setcc_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_setcc_route_host.c -o build/test_x86_setcc_route_host
 	./build/test_x86_setcc_route_host
+	lake env lean KProgFormal/GeneratedX86CcDecode.lean
+	lake env lean KProgFormal/X86CcDecode.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_cc_decode_host.c -o build/test_x86_cc_decode_host
+	./build/test_x86_cc_decode_host
 	lake env lean KProgFormal/GeneratedX86SetccMem.lean
 	lake env lean KProgFormal/X86SetccMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_setcc_mem_host.c -o build/test_x86_setcc_mem_host
