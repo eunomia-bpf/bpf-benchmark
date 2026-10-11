@@ -370,6 +370,19 @@ increment is committed and pushed immediately). Current state:
   the sign position pinned by `signBits` matches the well-tested load-width
   contract (`arm64_ldrsx_op_signbits_match_width`), and that every load opcode
   lies in the numeric case-label range the shared C macro addresses.
+  The ALU arm's operand *source* selection is likewise no longer open (Step
+  0129): the generic ALU arm no longer decides the right-hand operand source by
+  a raw `(OP) == ARM64_OP_ALU_IMM` test, but routes the 0/1 decision through the
+  generated `KPROG_ARM64_ALU_OPERAND_SELECT(OP)` statement expression, which
+  returns 1 exactly on the `ARM64_OP_ALU_IMM` code and 0 (the register form) for
+  every other code, feeding the existing `KPROG_ARM64_ALU_RHS` value contract.
+  `Arm64AluOperandSelect.lean` proves the generated `immediate` predicate equal
+  to an independent named-list membership (`arm64_alu_operand_select_refines`),
+  that no register-form opcode selects the immediate
+  (`arm64_alu_operand_select_reg_never_immediate`), that the two opcode lists
+  are disjoint (`arm64_alu_operand_select_lists_disjoint`), the exact 6/7 code
+  dispatch and case-label range, and composes the decision into the existing
+  `arm64_alu_operand_handler_refines` theorem.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
@@ -398,7 +411,7 @@ increment is committed and pushed immediately). Current state:
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
   reverse/extend/conditional-select/branch/branch-emission/move-wide/shift/
   reduction/address-offset/FMOV/load-bytes/store-bytes/
-  sign-extending-load-opcode contracts, and
+  sign-extending-load-opcode/ALU-arm-operand-source contracts, and
   pointer-add/ABI-load
   contracts are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,

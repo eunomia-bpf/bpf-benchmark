@@ -996,6 +996,30 @@ through the real dispatcher arm over an independent flat byte-image model with a
 independent cast-ladder sign extension, comparing the whole post-state across
 widths, loaded values, registered sign patterns and a non-member probe (98197
 cases).
+The ALU arm's operand-source decision is likewise a generated contract:
+`generate_arm64_alu_operand_select_spec.py` emits
+`KPROG_ARM64_ALU_OPERAND_SELECT(OP)` for the generic ALU arm
+(`ALU_IMM`/`ALU_REG`), a statement expression that seeds its result with `0`
+(the register form) and sets it to `1` exactly on the `ALU_IMM` case, every other
+code falling through to the register form, with each `ARM64_OP_*` number
+`_Static_assert`-pinned to `arm64_sim.h`; the macro returns the 0/1 *decision*
+that the existing `KPROG_ARM64_ALU_RHS` value contract takes as its first
+argument, so the two compose rather than duplicate. `Arm64AluOperandSelect.lean`
+proves the generated `immediate` predicate equal to an independent named-list
+membership (`arm64_alu_operand_select_refines`), that no register-form opcode
+selects the immediate (`arm64_alu_operand_select_reg_never_immediate`), that the
+two opcode lists are disjoint (`arm64_alu_operand_select_lists_disjoint`), the
+exact 6/7 code dispatch and case-label range, the operand-value `Mode` bridge,
+and the composition into `arm64_alu_operand_handler_refines`
+(`arm64_alu_operand_select_composes`). `ARM64_SIM_L_EXEC` now routes the ALU
+arm's source decision through the generated macro instead of the hand-written
+opcode test. A generated-header oracle decides the source from an independent
+switch oracle over all 256 byte values (256 cases), and a sim-header route
+oracle drives the generated selector through the real dispatcher arm over an
+independent flat byte-image model, comparing the whole post-state across four
+widths, six ALU operations, the immediate and register forms, a non-member probe,
+the pointer-preserving 64-bit ADD path, a scalar-source path and an SP
+destination (21688 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new
@@ -2602,8 +2626,10 @@ CNEG condition-gated negation, ORN complemented-logical-OR composition, ADRP
 relocation-tag selection, STLXR exclusive-store-status encoding, MOV
 provenance-path routing, sign-extending-load width selection, and plain-load
 provenance preservation, pair-load provenance routing, FMOV
-destination routing, conditional-select pointer-path routing, and flag-family
-operand-source selection,
+destination routing, conditional-select pointer-path routing, flag-family
+operand-source selection, and the ALU-arm operand-source selection (and the
+simulator's routing of the ALU arm's source decision through
+`KPROG_ARM64_ALU_OPERAND_SELECT`),
 plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other

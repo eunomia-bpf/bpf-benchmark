@@ -10654,6 +10654,90 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   sign-extending-load derived-opcode paragraph and extends the covered-slices
   list with the derived-opcode contract (paper commit pushed to `main`).
 
+## Step 0129 — AArch64 ALU-arm operand-source-selection contract
+
+- Scope: after Step 0128 the AArch64 dispatcher `ARM64_SIM_L_EXEC` routed every
+  arm through a generated membership macro, both immediate/register
+  operand-source selections through a generated selector, and the
+  sign-extending load's derived opcode through a generated selector, but one
+  raw opcode decision remained in the simulator: the generic ALU arm decided
+  the right-hand operand *source* — decoded immediate versus second-source
+  register read — with an inline `(OP) == ARM64_OP_ALU_IMM` test that fed the
+  first argument of `KPROG_ARM64_ALU_RHS`. Shared JSON spec
+  `kprog/formal/arm64_alu_operand_select_spec.json` (`schema_version` 1,
+  operation `arm64AluOperandSelect`, `default` `register`, one selector `alu`
+  with the `aluImm`=`ARM64_OP_ALU_IMM`=6 / `aluReg`=`ARM64_OP_ALU_REG`=7 pair)
+  drives generator `kprog/formal/generate_arm64_alu_operand_select_spec.py`,
+  which renders two code-drift rows and the source decision into
+  `generated/arm64_alu_operand_select.h` and the `AluOperandSelectOp`
+  inductive with its `code`/`immediate` tables into
+  `KProgFormal/GeneratedArm64AluOperandSelect.lean`.
+- The generated macro `KPROG_ARM64_ALU_OPERAND_SELECT(OP)` is a statement
+  expression (usable in the arm body but not at file scope or inside
+  `_Static_assert`): it seeds its 0/1 result with `0` (the register form) and
+  sets it to `1` on `case 6U` (the decoded-immediate form), with every other
+  code falling through to the register form and never aborting. OP is
+  evaluated exactly once. The immediate/register *value* choice itself stays
+  the existing `KPROG_ARM64_ALU_RHS` contract (Step 0126), which takes this
+  0/1 decision as its first argument; the new macro returns only the decision,
+  so it composes with, rather than duplicates, that contract. The header also
+  emits one `_Static_assert(ARM64_OP_X == N)` code-drift row per pair member.
+  The generator's `--check` re-reads `kprog/arm64/arm64_sim.h` for both
+  `ARM64_OP_*` numbers, asserts the spec table matches, asserts the selector
+  order is `["alu"]` and the default is `register`, and asserts the live
+  `ARM64_SIM_L_EXEC` region routes the source through
+  `KPROG_ARM64_ALU_OPERAND_SELECT((OP)` and no longer tests any raw
+  `(OP) == ARM64_OP_ALU_IMM` by hand. The generator has its own
+  `python3 generate_arm64_alu_operand_select_spec.py --check` line in
+  `kprog/formal/Makefile`.
+- The ALU arm in `kprog/arm64/arm64_sim_local_bpf.h` (include added after the
+  generic-operand header) now routes `KPROG_ARM64_ALU_RHS`'s first argument
+  through the generated selector; the former inline opcode test is gone.
+- Hand Lean `KProgFormal/Arm64AluOperandSelect.lean` (imports
+  `GeneratedArm64AluOperandSelect` and the existing `GeneratedArm64AluOperand`
+  / `Arm64AluOperandHandler`) states an independent named-list statement —
+  `arm64AluOperandSelectImmOps = [.aluImm]`,
+  `arm64AluOperandSelectRegOps = [.aluReg]`, and the membership predicate
+  `arm64AluOperandSelectSpec op := op ∈ arm64AluOperandSelectImmOps` — and
+  proves the generated `immediate` equal to it
+  (`arm64_alu_operand_select_refines`), the immediate-iff-membership form
+  (`_immediate_iff_mem`), that no register-form opcode selects the immediate
+  (`_reg_never_immediate`), that the two lists are disjoint
+  (`_lists_disjoint`), the exact code dispatch 6/7 (`_code_dispatch`), the
+  case-label range bound ≤ 7 (`_code_in_range`), the operand-value `Mode`
+  bridge (`aluOperandSelectMode` with `_mode_immediate_iff` /
+  `_mode_immediate_iff_mem` / `_code_six_is_immediate`), and the composition
+  into the existing ALU operand handler theorem (`_composes`, bridging to
+  `arm64_alu_operand_handler_refines`), plus two membership examples and a
+  worked `rhs` example showing the immediate form bypassing the source
+  modifier while the register form applies it. `KProgFormal.lean` imports the
+  generated and hand modules (lines 208-209).
+- Host oracle `kprog/formal/test_arm64_alu_operand_select_host.c` declares both
+  `ARM64_OP_*` numbers locally from raw architectural values, decides the
+  source from a local `switch` over the raw opcode (never the generated macro),
+  and sweeps all 256 opcodes: `arm64 alu operand select host cross-check: OK
+  (256 cases)`.
+- Route oracle `kprog/formal/test_arm64_alu_operand_select_route_host.c` drives
+  the generated selector as reached through the real `ARM64_SIM_L_EXEC` ALU arm
+  over an independent flat byte-image model, comparing the whole post-state
+  (register file value+tag, SP, SIMD quarters, NZCV and both heap/stack images)
+  and sweeping 4 widths × 6 ALU ops × the immediate form (four immediates) and
+  register form (all source modifiers × shifts), plus a non-member `ARM64_OP_RET`
+  probe per width, the pointer-preserving 64-bit ADD path, a scalar-source path
+  and an SP-destination path: `arm64 alu operand select route host cross-check:
+  OK (21688 cases)`.
+- `make -C kprog/formal check` passes with the two new oracle rows raising the
+  cross-check count from **165** (Step 0128 close) to **167**, zero `FAIL`.
+  `make -C kprog arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_alu_operand_select.py`, 59
+  mutations against the live tree, each caught after the four unmutated controls
+  (`gen`, `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  ALU-arm operand-source-selection paragraph and extends the covered-slices
+  list with the operand-source decision (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
