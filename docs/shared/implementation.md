@@ -405,6 +405,28 @@ increment is committed and pushed immediately). Current state:
   numeric arm codes to the hand-written decodes by `_Static_assert`, and the
   AArch64 simulator's multiply-into-two-registers analogue is not a width-keyed
   two-body split, so there is no mirror.
+  The `BZHI`/`BZHI_MEM` arms' flag block is likewise no longer open for x86-64
+  (Step 0131): both arms compose one `X86_SIM_L_EXEC_BZHI_STEP` that routes its
+  flag block through a generated machine-checked transition
+  (`KPROG_X86_SET_BZHI_FLAGS`) which clears `SF`/`OF`, sets `CF` from the
+  byte-masked count reaching the width's bit count, and sets `ZF` from the
+  width-narrowed result being zero, so the flag consequence - including its
+  *two* independent inputs - is a proved contract rather than a restated
+  comparison sequence, leaving the register/memory reads, the masked-count
+  bit clear, and the destination writeback in the composed step body.
+  `X86BzhiFlags.lean` proves the generated `eval` equal to an independent
+  literal statement built from its two predicate inputs
+  (`x86_bzhi_set_flags_refines`), that the generated flag sources match the
+  spec (`x86_bzhi_set_flags_cf_source_refines`,
+  `x86_bzhi_set_flags_zf_source_refines`,
+  `x86_bzhi_set_flags_clears_sf_of`), and that the two inputs are ordered
+  count-then-result; unlike `POPCNT` this contract takes two flag inputs, so a
+  single-input logic-flag reuse would be wrong; the AArch64 simulator has no
+  bit-clear-with-flags instruction, so there is no mirror. The routed flag
+  block is cross-checked by `test_x86_bzhi_flags_route_host.c`, which sweeps
+  the count across every width's bit count and drives the result to zero, so
+  both the `CF` (`count >= bits`) and `ZF` (`result == 0`) boundaries are
+  numerically exercised.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

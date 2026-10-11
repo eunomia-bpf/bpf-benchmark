@@ -10820,6 +10820,92 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   MULX width-keyed arm-selection paragraph and extends the covered-slices list
   with the width-keyed band decision (paper commit pushed to `main`).
 
+## Step 0131 — x86-64 BZHI/BZHI_MEM flag-block machine-checked contract
+
+- Scope: after Step 0107 the x86-64 simulator's `X86_SIM_L_EXEC_BZHI_STEP`
+  composition still wrote the `BZHI`/`BZHI_MEM` flag block by hand
+  (`__x86_cf = __x86_l_count >= __x86_l_bits; __x86_zf = __x86_l_result == 0;
+  __x86_sf = 0; __x86_of = 0;`). Shared JSON spec
+  `kprog/formal/x86_bzhi_flags_spec.json` (`schema_version` 1, operation
+  `x86BzhiFlags`, the two opcodes `bzhi` (`X86_OP_BZHI` / 52) and `bzhiMem`
+  (`X86_OP_BZHI_MEM` / 53), `cf_source` `masked_count_at_least_width_bits`,
+  `zf_source` `result_is_zero`, and the four-flag table `cf` = input
+  `count_at_least_width_bits`, `zf` = input `result_is_zero`, `sf` = const
+  `false`, `of` = const `false`) drives generator
+  `kprog/formal/generate_x86_bzhi_flags_spec.py`, which renders the
+  `KPROG_X86_SET_BZHI_FLAGS` do/while macro, the opcode-code `_Static_assert`s
+  and the `Flags`/`eval` transition into `generated/x86_bzhi_flags.h` and
+  `KProgFormal/GeneratedX86BzhiFlags.lean`.
+- Unlike the `POPCNT` block (Step 0117), which takes one input (the
+  width-narrowed source being zero, assigned to `ZF`), this block takes
+  **two** inputs — the byte-masked count reaching the width's bit count
+  (`CF`) and the cleared result being zero (`ZF`) — so a single-input
+  logic-flag reuse would be wrong. The macro is a do/while, not a plain
+  expression, because it writes four flag cells; the wrapper
+  `X86_SIM_L_SET_BZHI_FLAGS(COUNT, BITS, RESULT)` feeds it
+  `(COUNT) >= (BITS)` and `(RESULT) == 0`.
+- The generator's `--check` re-reads `kprog/x86/x86_sim_local_bpf.h`, asserts
+  the live `X86_SIM_L_EXEC_BZHI_STEP` region still computes the masked-clear
+  value (`kprog_x86_bzhi_value(`), routes its flag block through
+  `X86_SIM_L_SET_BZHI_FLAGS(__x86_l_count, __x86_l_bits, ...)`, and no longer
+  sets `__x86_cf` by hand, that the region is exactly one `#define`, and it
+  rejects any spec drift. It has its own `python3
+  generate_x86_bzhi_flags_spec.py --check` line in `kprog/formal/Makefile`.
+- The routed wrapper lives in `kprog/x86/x86_sim_local_bpf.h` (include added
+  after the `X86_OP_BZHI_*` / `X86_WIDTH_*` decodes); the step's former
+  hand-set flag block is gone. The register/memory reads, the masked-count bit
+  clear, and the destination writeback stay in the composed step body.
+- Hand Lean `KProgFormal/X86BzhiFlags.lean` imports `GeneratedX86BzhiFlags`
+  and states the independent flag statement `x86BzhiSetFlagsSpec count result
+  width` plus the independent `x86BzhiSetCfSpec` / `x86BzhiSetZfSpec`
+  predicates. It proves the generated `eval` equal to that statement
+  (`x86_bzhi_set_flags_refines`), the opcode/bit-width/source
+  reconstruct-and-bound theorems, the flag-source equalities
+  (`x86_bzhi_set_flags_cf_source_refines`,
+  `x86_bzhi_set_flags_zf_source_refines`), the `SF`/`OF` clears
+  (`x86_bzhi_set_flags_clears_sf_of`), the `CF`/`ZF` characterisations
+  (`x86_bzhi_set_flags_cf_is_count_versus_width`,
+  `x86_bzhi_set_flags_cf_independent_of_result`,
+  `x86_bzhi_set_flags_zf_is_result_zero`,
+  `x86_bzhi_set_flags_zf_real_sf_cleared`), and the threshold and
+  below-width/count-behaviour witnesses at the 8- and 64-bit widths; the
+  identifier prefix is `…BzhiSet…` so it does not collide with the
+  `X86BzhiHandler` module's `x86BzhiFlagsSpec`. `KProgFormal.lean` imports the
+  generated and hand modules.
+- Host oracle `kprog/formal/test_x86_bzhi_flags_host.c` declares the
+  `X86_OP_BZHI`/`X86_OP_BZHI_MEM` decodes from raw architectural values,
+  includes `generated/x86_bzhi_flags.h`, drives the macro against a planted
+  all-set flag state over every count≥bits × result-zero combination plus an
+  all-set sentinel, and restates the block from the literal flag rules:
+  `x86 bzhi flags host cross-check: OK (7 cases)`.
+- Route oracle `kprog/formal/test_x86_bzhi_flags_route_host.c` includes the
+  *simulator* header and drives the real `X86_SIM_L_EXEC(X86_OP_BZHI, ...)` and
+  `X86_SIM_L_EXEC(X86_OP_BZHI_MEM, ...)` arms against an independent byte
+  model, sweeping the count across every width's bit count
+  (0/1/7/8/9/15/16/17/31/32/33/63/64/0xff) and the source across values whose
+  bit-clear result is zero and nonzero, so both the `CF` (`count >= bits`) and
+  `ZF` (`result == 0`) boundaries are numerically exercised; it compares the
+  whole register file, its tags, and all four flags. The pre-existing
+  `test_x86_bzhi_route_host.c` could not observe either boundary (its planted
+  count is always ≥ the width's bit count and its result always nonzero, so
+  `CF`≡1 and `ZF`≡0 there): `x86 bzhi flags route host cross-check: OK (36961
+  cases)`.
+- `make -C kprog/formal check` passes with the two new oracle rows raising the
+  cross-check count from **169** (Step 0130 close) to **171**, zero `FAIL`.
+  `make -C kprog/x86 micro-proofs-build` rebuilt all 31 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_bzhi_flags.py`, 81 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end. Six semantics-preserving mutations (an added include-side comment, an
+  added hand-module comment, a resolved-but-equal generator root path, an
+  added generated-Lean import comment, equal-whitespace spec text, and
+  equal-spacing generated C) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the x86-64
+  BZHI flag-block paragraph and extends the covered-slices list with the
+  two-input flag transition (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

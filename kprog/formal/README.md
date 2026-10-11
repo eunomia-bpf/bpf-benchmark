@@ -772,6 +772,30 @@ single-bit, and values whose low byte is zero but whose upper bytes are set),
 and three destination/source pairs against an independent bit-by-bit
 population-count model and an independent flag model, comparing the whole
 register file with its tags and all four flags (5,940 cases).
+The x86-64 `BZHI`/`BZHI_MEM` arms' flag block is likewise a generated
+contract: `generate_x86_bzhi_flags_spec.py` emits
+`KPROG_X86_SET_BZHI_FLAGS(C_CF, C_ZF, C_SF, C_OF,
+COUNT_AT_LEAST_WIDTH_BITS, RESULT_IS_ZERO)`, which clears `SF` and `OF`, sets
+`CF` from its count-versus-width input, and sets `ZF` from its result-zero
+input, and `X86BzhiFlags.lean` proves the generated transition equal to an
+independent statement built from its two predicate inputs, that the generated
+opcodes equal the independent literals and are the codes the opcode contract
+names for `X86_OP_BZHI`/`X86_OP_BZHI_MEM`, that the generated flag sources
+agree with the spec, and that the two inputs are ordered count-then-result;
+it further proves the `SF`/`OF` clears, the `CF` count-versus-width and
+`ZF` result-zero characterisations, and the threshold and below-width
+behaviour at the 8- and 64-bit widths. Unlike `POPCNT` the block takes
+**two** inputs, so a single-input logic-flag reuse would be wrong. The
+generated header is included in the sim header, and the routed step sets its
+flags through the `X86_SIM_L_SET_BZHI_FLAGS` wrapper instead of restating the
+comparison sequence, feeding it the byte-masked count, the resolved width's
+bit count, and the cleared result so both inputs match the proven contract. A
+generated-header oracle drives the macro against an independent literal model
+from a planted all-set pre-state (7 cases), and a sim-header route oracle
+drives the real `BZHI`/`BZHI_MEM` arms over five width codes, counts sweeping
+every width's bit count, and sources whose cleared result is zero and nonzero,
+comparing the whole register file with its tags and all four flags (36,961
+cases).
 The x86-64 `MOVZX`/`MOVSX` register arm's choice of which extension function
 widens the raw source register is likewise a generated contract:
 `generate_x86_movx_shape_spec.py` emits `KPROG_X86_MOVX_SHAPE(OP)`, which names
@@ -2552,6 +2576,9 @@ value stored through the word view reloads byte-for-byte through the byte view
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing and the
+x86 `BZHI`/`BZHI_MEM` two-input flag-block transition (and the simulator's
+routing of the step's flags through the generated clear-`SF`/`OF`,
+set-`CF`-from-count-versus-width, set-`ZF`-from-result-zero contract),
 x86 effective-width resolution (and the simulator's routing of its
 register/stack/flag/ALU/move/compare bodies through it), x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
