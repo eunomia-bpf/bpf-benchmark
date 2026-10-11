@@ -2,17 +2,22 @@
  * Host cross-check for the x86-64 `MOVZX`/`MOVSX` register-source opcode-keyed
  * extension-shape selection contract (STEP 0118).
  *
- * The module under test is `generated/x86_movx_shape.h`. It fixes the extension
- * function the simulator's `X86_OP_MOVZX_REG || X86_OP_MOVSX_REG` arm (and the
- * shared `X86_SIM_L_EXEC_MOVX_REG` body) selects between on the opcode: the sign
- * extension (`x86_sign_extend`) at the `X86_OP_MOVSX_REG` opcode and the zero
- * extension (`x86_apply_width`) at every other opcode. The simulator writes that
- * choice by hand as an `(OP) == X86_OP_MOVSX_REG ?` select, and this oracle
- * drives the contract's `KPROG_X86_MOVX_SHAPE` / `.._COUNT` / `.._SHAPE_*` and
- * restates the selection from the raw opcodes. The two must agree; the generated
- * `_Static_assert`s additionally pin the hand-written `X86_OP_MOVZX_REG` /
- * `X86_OP_MOVSX_REG` decodes to the generated table at compile time. Exit 1 on
- * mismatch.
+ * The module under test is `generated/x86_movx_shape.h`. It fixes two things
+ * the `X86_OP_MOVZX_REG || X86_OP_MOVSX_REG` arm of `X86_SIM_L_EXEC` (and the
+ * shared `X86_SIM_L_EXEC_MOVX_REG` body) decides. First, the extension function
+ * the body selects between on the opcode: the sign extension
+ * (`x86_sign_extend`) at the `X86_OP_MOVSX_REG` opcode and the zero extension
+ * (`x86_apply_width`) at every other opcode, written by hand as an
+ * `(OP) == X86_OP_MOVSX_REG ?` select. Second, the *source width* the selected
+ * function is applied at: the decoded `aux` field names it unless it is the
+ * absent code, in which case the body falls back to its effective width — the
+ * `(AUX) ? (AUX) : __x86_l_width` kernel.
+ * This oracle drives the contract's `KPROG_X86_MOVX_SHAPE` / `.._COUNT`
+ * / `.._SHAPE_*` and `KPROG_X86_MOVX_SRC_WIDTH` / `.._ABSENT_CODE` and restates
+ * both selections from the raw opcodes and width codes. The two must agree; the
+ * generated `_Static_assert`s additionally pin the hand-written
+ * `X86_OP_MOVZX_REG` / `X86_OP_MOVSX_REG` decodes to the generated table at
+ * compile time. Exit 1 on mismatch.
  *
  * Build/run:
  *   cd kprog/formal
@@ -21,9 +26,15 @@
  */
 typedef unsigned char __u8;
 
-/* The hand-written decodes the generated drift checks bind to. */
+/* The hand-written decodes the generated drift checks bind to, and the width
+ * decodes the source-width checks bind to. The former are pinned to the
+ * generated table by the header's `_Static_assert`s. */
 #define X86_OP_MOVZX_REG 0x20U
 #define X86_OP_MOVSX_REG 0x21U
+#define X86_WIDTH_8 1U
+#define X86_WIDTH_16 2U
+#define X86_WIDTH_32 4U
+#define X86_WIDTH_64 8U
 
 #include "generated/x86_movx_shape.h"
 
@@ -39,6 +50,20 @@ static unsigned long cases;
 static int model_arm(unsigned op)
 {
 	return op == X86_OP_MOVSX_REG ? 0 : 1;
+}
+
+/* The width codes the source-width resolution operates at, restated as
+ * literals: the four `x86_width_spec.json` decode values. */
+static const unsigned width_codes[] = {1U, 2U, 4U, 8U};
+#define WIDTH_CODE_COUNT 4U
+
+/* The independent source-width resolution: the decoded `aux` field names the
+ * source width unless it is the absent code, in which case the body falls back
+ * to the effective width passed in. The absent code is restated as a literal so
+ * the model is independent of the generated `.._ABSENT_CODE`. */
+static unsigned model_src_width(unsigned aux, unsigned effective)
+{
+	return aux == 0U ? effective : aux;
 }
 
 int main(void)
@@ -78,6 +103,62 @@ int main(void)
 			       op, got, want);
 			failures++;
 		}
+	}
+
+	/* The source-width selector returns the width the independent model
+	 * resolves, over the whole byte range `aux` can take and a mix of
+	 * effective widths (including two real width codes). */
+	{
+		static const unsigned effectives[] = {1U, 2U, 4U, 8U};
+		unsigned aux;
+		unsigned e;
+
+		for (aux = 0; aux <= 0xffU; aux++) {
+			for (e = 0; e < 4U; e++) {
+				unsigned got = KPROG_X86_MOVX_SRC_WIDTH(
+					(__u8)aux, effectives[e]);
+				unsigned want = model_src_width(aux,
+								effectives[e]);
+
+				cases++;
+				if (got != want) {
+					printf("MISMATCH src width aux=%u eff=%u"
+					       " got=%u want=%u\n",
+					       aux, effectives[e], got, want);
+					failures++;
+				}
+			}
+		}
+	}
+
+	/* The selector is the identity on every real source width: only the
+	 * absent code is rewritten, so no encoded width is distorted. */
+	{
+		unsigned i;
+
+		for (i = 0; i < WIDTH_CODE_COUNT; i++) {
+			cases++;
+			if (KPROG_X86_MOVX_SRC_WIDTH(width_codes[i],
+						     X86_WIDTH_64) !=
+			    width_codes[i]) {
+				printf("MISMATCH src width code %u distorted\n",
+				       width_codes[i]);
+				failures++;
+			}
+		}
+	}
+
+	/* An absent `aux` field resolves to the effective width the body passes
+	 * in, and the absent code collides with no real width code. */
+	cases++;
+	if (KPROG_X86_MOVX_SRC_WIDTH(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE,
+				     X86_WIDTH_64) != X86_WIDTH_64 ||
+	    KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE == 0x1U ||
+	    KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE == 0x2U ||
+	    KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE == 0x4U ||
+	    KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE == 0x8U) {
+		printf("MISMATCH src width absent field drift\n");
+		failures++;
 	}
 
 	/* Each MOVX opcode reaches its own body, and a code that is neither

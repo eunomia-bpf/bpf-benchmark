@@ -8,13 +8,16 @@
  * the raw source lane on the opcode, not the operands. The `X86_OP_MOVSX_REG`
  * body sign-extends the source lane (`x86_sign_extend`); the `X86_OP_MOVZX_REG`
  * body zero-extends it (`x86_apply_width`) and is the default for every other
- * opcode. The *source width* the selected function is applied at is a separate
- * decision (the width resolution `x86_width_effective` names); the
- * destination-width writeback is the plain partial-register write.
+ * opcode. The *source width* the selected function is applied at is resolved by
+ * `KPROG_X86_MOVX_SRC_WIDTH`: the decoded `aux` field names the source width
+ * unless it is the absent code, in which case the body falls back to its
+ * effective (FLAGS-resolved) width; the destination-width writeback is the
+ * plain partial-register write.
  * `KProgFormal/X86MovxShape.lean` proves the generated `armOf` equal to an
  * independent construction from the opcode literals, that the two arm
  * name/code/opcode/result/effect tables are exactly the two extension functions,
- * and that each opcode selects its own function.
+ * and that each opcode selects its own function, and that `srcWidth` is the
+ * identity on every decoded width code and only rewrites the absent code.
  * This header is included after the `X86_OP_MOVZX_REG` / `X86_OP_MOVSX_REG`
  * decodes, so the drift checks bind the hand-written constants to the generated
  * table.
@@ -48,4 +51,49 @@ _Static_assert(KPROG_X86_MOVX_SHAPE(X86_OP_MOVZX_REG) == KPROG_X86_MOVX_SHAPE_ZE
  * zero-extension default. */
 _Static_assert(KPROG_X86_MOVX_SHAPE(0) == KPROG_X86_MOVX_SHAPE_ZERO_EXTEND,
 	       "x86 movx shape absent opcode must reach the default arm");
+/* The decoded source-width code that means "absent": a MOVX body that leaves
+ * its `aux` field empty falls back to its effective width. */
+#define KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE 0U
+/*
+ * Resolve the source width a MOVX body operates at: the decoded `aux` code
+ * unless it is the absent code (0), in which case the body falls back to the width it
+ * passes as its effective width. The operands are evaluated as the body
+ * evaluates them, and the selector is a plain ternary so it is usable from a
+ * `_Static_assert`.
+ */
+#define KPROG_X86_MOVX_SRC_WIDTH(AUX, WIDTH)                                \
+	(((__u8)((AUX))) == KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE ?              \
+	 (__u8)((WIDTH)) : (__u8)((AUX)))
+_Static_assert(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE == 0U,
+	       "x86 movx source width absent code drift");
+/* The resolution is the identity on every real source width: only the absent
+ * code is rewritten. The width decode names (X86_WIDTH_8, X86_WIDTH_16, X86_WIDTH_32, X86_WIDTH_64) are the ones the
+ * rest of the simulator uses. */
+_Static_assert(
+	KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_8, X86_WIDTH_64) == X86_WIDTH_8,
+	"x86 movx source width w8 must be its own source width");
+_Static_assert(
+	KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_16, X86_WIDTH_64) == X86_WIDTH_16,
+	"x86 movx source width w16 must be its own source width");
+_Static_assert(
+	KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_32, X86_WIDTH_64) == X86_WIDTH_32,
+	"x86 movx source width w32 must be its own source width");
+_Static_assert(
+	KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_64, X86_WIDTH_64) == X86_WIDTH_64,
+	"x86 movx source width w64 must be its own source width");
+/* The absent code names no width, so it cannot alias a real source width. */
+_Static_assert(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE != X86_WIDTH_8,
+	"x86 movx source width absent code collides with w8");
+_Static_assert(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE != X86_WIDTH_16,
+	"x86 movx source width absent code collides with w16");
+_Static_assert(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE != X86_WIDTH_32,
+	"x86 movx source width absent code collides with w32");
+_Static_assert(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE != X86_WIDTH_64,
+	"x86 movx source width absent code collides with w64");
+/* An absent `aux` field resolves to the effective width the body passes in,
+ * not to a width code of its own. */
+_Static_assert(
+	KPROG_X86_MOVX_SRC_WIDTH(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE,
+				  X86_WIDTH_64) == X86_WIDTH_64,
+	"x86 movx source width absent field must fall back to the effective width");
 #endif

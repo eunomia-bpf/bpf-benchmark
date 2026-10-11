@@ -11,10 +11,11 @@ extension function* widens the source lane at the *source* width:
   * `X86_OP_MOVZX_REG` zero-extends it (`x86_apply_width`), discarding the sign,
     and is the arm's default for every other opcode.
 
-Only the *which function* choice is keyed on the opcode. The source width the
-chosen function is applied at is a separate decision — `(AUX) ? (AUX) :
-__x86_l_width` — and is not part of this contract (it is the width resolution
-`x86_width_effective` names, Step 0105); the destination-width writeback is the
+Only the *which function* choice is keyed on the opcode. The *source width* the
+chosen function is applied at is resolved by `KPROG_X86_MOVX_SRC_WIDTH`: the
+decoded `AUX` field names the source width unless it is the absent code, in
+which case the body falls back to its effective (FLAGS-resolved) width (the
+`x86_width_effective` kernel, Step 0105). The destination-width writeback is the
 plain partial-register write.
 
 The narrow/sign-extend *values* and the writeback are already proved by
@@ -41,6 +42,7 @@ SPEC = ROOT / "x86_movx_shape_spec.json"
 HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/GeneratedX86MovxShape.lean"
 CHEADER = ROOT / "generated/x86_movx_shape.h"
+WIDTH_SPEC = ROOT / "x86_width_spec.json"
 
 # The independent enumeration of the two arms, in selection order:
 # (arm, arm define, opcode, opcode define, result function, effect).
@@ -50,12 +52,25 @@ _ARMS = [
     ("zero_extend", "KPROG_X86_MOVX_SHAPE_ZERO_EXTEND", 32, "X86_OP_MOVZX_REG",
      "zero_extend", "zero_extend_source_lane"),
 ]
+
+# The independent enumeration of the four width codes the MOVX body can operate
+# at, keyed on their `x86_width_spec.json` names: (name, code, decode define).
+# The generator re-derives the (name, code) pairs from the width specification
+# and requires the live header's decodes, so the source-width contract cannot
+# silently re-key on a changed width kernel.
+_WIDTH_CODES = (("w8", 1, "X86_WIDTH_8"), ("w16", 2, "X86_WIDTH_16"),
+                ("w32", 4, "X86_WIDTH_32"), ("w64", 8, "X86_WIDTH_64"))
+# The independent source-width resolution of a MOVX body: the decoded `aux`
+# field names the source width, unless it is the absent code, in which case the
+# body falls back to its effective (`effective_width`) width.
+_SOURCE_WIDTH = {"field": "aux", "absent_code": 0, "fallback": "effective_width"}
 OPCODE_BITS = 8
 EXPECTED = {
     "schema_version": 1,
     "operation": "x86MovxShapeSelector",
     "selector": "opcode_then_arm",
     "opcode_bits": OPCODE_BITS,
+    "source_width": dict(_SOURCE_WIDTH),
     "arms": [{"arm": arm, "arm_define": define, "opcode": opcode,
               "opcode_define": opcode_define, "result": result,
               "effect": effect}
@@ -74,6 +89,8 @@ ARM_SELECTOR = "KPROG_X86_MOVX_SHAPE((OP))"
 ARM_SIGN_ARM = "KPROG_X86_MOVX_SHAPE_SIGN_EXTEND"
 ARM_SIGN_CALL = "x86_sign_extend("
 ARM_ZERO_CALL = "x86_apply_width("
+SRC_SELECTOR = "KPROG_X86_MOVX_SRC_WIDTH(("
+SRC_RAW_FALLBACK = "src_width = (AUX) ? (AUX)"
 
 
 def flat(text):
@@ -117,6 +134,14 @@ def check_region(region, exactly_one_arm):
         raise SystemExit(
             "x86 movx shape body selects its extension function by hand "
             "instead of through the generated selector")
+    if SRC_SELECTOR not in region:
+        raise SystemExit(
+            "x86 movx shape body does not route its source width through the "
+            "generated selector")
+    if SRC_RAW_FALLBACK in region:
+        raise SystemExit(
+            "x86 movx shape body restates the source-width fallback by hand "
+            "instead of through the generated selector")
 
 
 def check_against_header():
@@ -125,6 +150,20 @@ def check_against_header():
     selector."""
     check_region(arm_region(), exactly_one_arm=True)
     check_region(macro_region(), exactly_one_arm=False)
+
+
+def load_width_codes():
+    """Re-derive the four width codes from the public `x86_width_spec.json`
+    kernel, so the source-width contract is stated against the width names the
+    rest of the simulator uses rather than a private copy."""
+    data = json.loads(WIDTH_SPEC.read_text())
+    if data.get("operation") != "x86Width" or len(data.get("widths", [])) != 4:
+        raise SystemExit(f"invalid x86 width specification: {data!r}")
+    codes = tuple((w["name"], w["code"]) for w in data["widths"])
+    want = tuple((name, code) for name, code, _define in _WIDTH_CODES)
+    if codes != want:
+        raise SystemExit(f"x86 width codes drifted from the MOVX contract: {codes!r}")
+    return codes
 
 
 def load() -> dict:
@@ -145,6 +184,15 @@ def load() -> dict:
             ("sign_extend", "zero_extend")] != []:
         raise SystemExit(
             "x86 movx shape results must name the extension functions")
+    src = EXPECTED["source_width"]
+    codes = load_width_codes()
+    if src["absent_code"] != 0:
+        raise SystemExit(f"non-canonical x86 movx source-width absent code: {src!r}")
+    if src["absent_code"] in [code for _name, code, _define in _WIDTH_CODES]:
+        raise SystemExit(
+            f"x86 movx source-width absent code collides with a width code: {src!r}")
+    if src["fallback"] != "effective_width":
+        raise SystemExit(f"unknown x86 movx source-width fallback: {src!r}")
     check_against_header()
     return EXPECTED
 
@@ -152,6 +200,7 @@ def load() -> dict:
 def render_lean(spec: dict) -> str:
     arms = spec["arms"]
     bits = spec["opcode_bits"]
+    src = spec["source_width"]
     names = ", ".join(f'"{row["arm"]}"' for row in arms)
     codes = ", ".join(str(index) for index, _row in enumerate(arms))
     ctor = ", ".join(f".{row['arm']}" for row in arms)
@@ -163,6 +212,7 @@ def render_lean(spec: dict) -> str:
         f'  | .{row["arm"]} => "{row["result"]}"' for row in arms)
     effect_of = "\n".join(
         f'  | .{row["arm"]} => "{row["effect"]}"' for row in arms)
+    width_codes = ", ".join(str(code) for _name, code, _define in _WIDTH_CODES)
     first = arms[0]
     other = arms[1]["arm"]
     return f'''-- Generated by generate_x86_movx_shape_spec.py from x86_movx_shape_spec.json.
@@ -204,15 +254,30 @@ def armOf (op : Nat) : Arm :=
 arm. -/
 def armOfCode (code : Nat) : Option Arm :=
   (armCodes.zip [{ctor}]).lookup code
-end KProgFormal.GeneratedX86MovxShape
+/-- The decoded field the MOVX body reads its source width from. -/
+def srcWidthField : String := "{src["field"]}"
+/-- The decoded source-width code that means "absent": a body that leaves its
+`{src["field"]}` field empty falls back to its effective width. -/
+def srcWidthAbsentCode : Nat := {src["absent_code"]}
+/-- The source-width code each real width name resolves to, in width order. -/
+def srcWidthCodes : List Nat := [{width_codes}]
+/-- Resolve the decoded source width a MOVX body operates at: the decoded
+`{src["field"]}` code unless it is the absent code ({src["absent_code"]}), in which case the body
+falls back to its effective (FLAGS-resolved) width. The fallback is a separate
+resolution (`effective_width`, the width kernel), not a width code. -/
+def srcWidth (aux : Nat) (effective : Nat) : Nat :=
+  if aux = srcWidthAbsentCode then effective else aux
 '''
 
 
 def render_c(spec: dict) -> str:
     arms = spec["arms"]
     count = len(arms)
+    src = spec["source_width"]
+    absent = src["absent_code"]
     first = arms[0]
     last = arms[1]
+    width_names = ", ".join(define for _n, _c, define in _WIDTH_CODES)
     arm_defines = "\n".join(
         f'#define {row["arm_define"]} {index}U'
         for index, row in enumerate(arms))
@@ -225,6 +290,15 @@ def render_c(spec: dict) -> str:
         f'{row["arm_define"]},\n'
         f'\t       "x86 movx shape {row["arm"]} selection drift");'
         for row in arms)
+    src_identity = "\n".join(
+        f'_Static_assert(\n'
+        f'\tKPROG_X86_MOVX_SRC_WIDTH({define}, X86_WIDTH_64) == {define},\n'
+        f'\t"x86 movx source width {name} must be its own source width");'
+        for name, _code, define in _WIDTH_CODES)
+    src_distinct = "\n".join(
+        f'_Static_assert(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE != {define},\n'
+        f'\t"x86 movx source width absent code collides with {name}");'
+        for name, _code, define in _WIDTH_CODES)
     return f'''/* Generated by generate_x86_movx_shape_spec.py from x86_movx_shape_spec.json. */
 #ifndef KPROG_FORMAL_GENERATED_X86_MOVX_SHAPE_H
 #define KPROG_FORMAL_GENERATED_X86_MOVX_SHAPE_H
@@ -235,13 +309,16 @@ def render_c(spec: dict) -> str:
  * the raw source lane on the opcode, not the operands. The `X86_OP_MOVSX_REG`
  * body sign-extends the source lane (`x86_sign_extend`); the `X86_OP_MOVZX_REG`
  * body zero-extends it (`x86_apply_width`) and is the default for every other
- * opcode. The *source width* the selected function is applied at is a separate
- * decision (the width resolution `x86_width_effective` names); the
- * destination-width writeback is the plain partial-register write.
+ * opcode. The *source width* the selected function is applied at is resolved by
+ * `KPROG_X86_MOVX_SRC_WIDTH`: the decoded `aux` field names the source width
+ * unless it is the absent code, in which case the body falls back to its
+ * effective (FLAGS-resolved) width; the destination-width writeback is the
+ * plain partial-register write.
  * `KProgFormal/X86MovxShape.lean` proves the generated `armOf` equal to an
  * independent construction from the opcode literals, that the two arm
  * name/code/opcode/result/effect tables are exactly the two extension functions,
- * and that each opcode selects its own function.
+ * and that each opcode selects its own function, and that `srcWidth` is the
+ * identity on every decoded width code and only rewrites the absent code.
  * This header is included after the `X86_OP_MOVZX_REG` / `X86_OP_MOVSX_REG`
  * decodes, so the drift checks bind the hand-written constants to the generated
  * table.
@@ -268,6 +345,33 @@ _Static_assert({first["arm_define"]} != {last["arm_define"]},
  * zero-extension default. */
 _Static_assert(KPROG_X86_MOVX_SHAPE(0) == {last["arm_define"]},
 \t       "x86 movx shape absent opcode must reach the default arm");
+/* The decoded source-width code that means "absent": a MOVX body that leaves
+ * its `aux` field empty falls back to its effective width. */
+#define KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE {absent}U
+/*
+ * Resolve the source width a MOVX body operates at: the decoded `aux` code
+ * unless it is the absent code ({absent}), in which case the body falls back to the width it
+ * passes as its effective width. The operands are evaluated as the body
+ * evaluates them, and the selector is a plain ternary so it is usable from a
+ * `_Static_assert`.
+ */
+#define KPROG_X86_MOVX_SRC_WIDTH(AUX, WIDTH)                                \\
+\t(((__u8)((AUX))) == KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE ?              \\
+\t (__u8)((WIDTH)) : (__u8)((AUX)))
+_Static_assert(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE == {absent}U,
+\t       "x86 movx source width absent code drift");
+/* The resolution is the identity on every real source width: only the absent
+ * code is rewritten. The width decode names ({width_names}) are the ones the
+ * rest of the simulator uses. */
+{src_identity}
+/* The absent code names no width, so it cannot alias a real source width. */
+{src_distinct}
+/* An absent `aux` field resolves to the effective width the body passes in,
+ * not to a width code of its own. */
+_Static_assert(
+\tKPROG_X86_MOVX_SRC_WIDTH(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE,
+\t\t\t\t  X86_WIDTH_64) == X86_WIDTH_64,
+\t"x86 movx source width absent field must fall back to the effective width");
 #endif
 '''
 

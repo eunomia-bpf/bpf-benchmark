@@ -1664,7 +1664,8 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_MOVX_REG(OP, DST, SRC, FLAGS, AUX)                   \
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
-		__u8 __x86_l_src_width = (AUX) ? (AUX) : __x86_l_width;   \
+		__u8 __x86_l_src_width =                                  \
+			KPROG_X86_MOVX_SRC_WIDTH((AUX), __x86_l_width);   \
 		__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));          \
 		__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);            \
 		if (__x86_l_shape ==                                      \
@@ -1900,7 +1901,9 @@ struct x86_sim_state {
 			}                                                 \
 		} else if ((OP) == X86_OP_MOVZX_REG ||                    \
 			   (OP) == X86_OP_MOVSX_REG) {                    \
-			__u8 __x86_l_src_width = (AUX) ? (AUX) : __x86_l_width;\
+			__u8 __x86_l_src_width =                          \
+				KPROG_X86_MOVX_SRC_WIDTH((AUX),           \
+					__x86_l_width);                   \
 			__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));   \
 			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);     \
 			if (__x86_l_shape ==                               \

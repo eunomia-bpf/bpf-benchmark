@@ -41,4 +41,16 @@ def armOf (op : Nat) : Arm :=
 arm. -/
 def armOfCode (code : Nat) : Option Arm :=
   (armCodes.zip [.sign_extend, .zero_extend]).lookup code
-end KProgFormal.GeneratedX86MovxShape
+/-- The decoded field the MOVX body reads its source width from. -/
+def srcWidthField : String := "aux"
+/-- The decoded source-width code that means "absent": a body that leaves its
+`aux` field empty falls back to its effective width. -/
+def srcWidthAbsentCode : Nat := 0
+/-- The source-width code each real width name resolves to, in width order. -/
+def srcWidthCodes : List Nat := [1, 2, 4, 8]
+/-- Resolve the decoded source width a MOVX body operates at: the decoded
+`aux` code unless it is the absent code (0), in which case the body
+falls back to its effective (FLAGS-resolved) width. The fallback is a separate
+resolution (`effective_width`, the width kernel), not a width code. -/
+def srcWidth (aux : Nat) (effective : Nat) : Nat :=
+  if aux = srcWidthAbsentCode then effective else aux

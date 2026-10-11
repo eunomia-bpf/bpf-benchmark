@@ -7,9 +7,11 @@
  * widens the raw 64-bit source register through the generated
  * `KPROG_X86_MOVX_SHAPE` opcode selector: the sign extension at the
  * `X86_OP_MOVSX_REG` opcode and the zero extension at every other opcode. The
- * source width the chosen function is applied at stays the inline
- * `(AUX) ? (AUX) : __x86_l_width` fallback, and the destination-width writeback
- * is the plain partial-register write.
+ * source width the chosen function is applied at is resolved through the
+ * generated `KPROG_X86_MOVX_SRC_WIDTH` selector (the decoded AUX names the
+ * width unless it is the absent code, in which case the body falls back to its
+ * effective width), and the destination-width writeback is the plain
+ * partial-register write.
  *
  * This oracle restates the whole routed effect independently — read the full
  * source register, apply the sign/zero extension at the resolved source width,
@@ -236,6 +238,25 @@ static void check_selectors(void)
 		printf("MISMATCH movx shape selector drift\n");
 		failures++;
 	}
+
+	/* The source-width resolution the routed body performs must agree with
+	 * the generated selector: the decoded AUX names the width unless it is
+	 * the absent code, when the body falls back to the effective width. */
+	cases++;
+	if (KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_8, X86_WIDTH_64) != X86_WIDTH_8 ||
+	    KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_16, X86_WIDTH_64) !=
+		    X86_WIDTH_16 ||
+	    KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_32, X86_WIDTH_64) !=
+		    X86_WIDTH_32 ||
+	    KPROG_X86_MOVX_SRC_WIDTH(X86_WIDTH_64, X86_WIDTH_64) !=
+		    X86_WIDTH_64 ||
+	    KPROG_X86_MOVX_SRC_WIDTH(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE,
+				     X86_WIDTH_8) != X86_WIDTH_8 ||
+	    KPROG_X86_MOVX_SRC_WIDTH(KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE,
+				     X86_WIDTH_32) != X86_WIDTH_32) {
+		printf("MISMATCH movx source width selector drift\n");
+		failures++;
+	}
 }
 
 int main(void)
@@ -245,7 +266,7 @@ int main(void)
 		0U, X86_WIDTH_8, X86_WIDTH_16, X86_WIDTH_32, X86_WIDTH_64,
 	};
 	/* AUX source widths: the absent-code fallback plus each real width, so the
-	 * inline `(AUX) ? (AUX) : __x86_l_width` fallback is exercised. */
+	 * routed `KPROG_X86_MOVX_SRC_WIDTH` fallback is exercised. */
 	static const unsigned aux_codes[5] = {
 		0U, X86_WIDTH_8, X86_WIDTH_16, X86_WIDTH_32, X86_WIDTH_64,
 	};

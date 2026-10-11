@@ -3,6 +3,11 @@
   "operation": "x86MovxShapeSelector",
   "selector": "opcode_then_arm",
   "opcode_bits": 8,
+  "source_width": {
+    "field": "aux",
+    "absent_code": 0,
+    "fallback": "effective_width"
+  },
   "arms": [
     {
       "arm": "sign_extend",

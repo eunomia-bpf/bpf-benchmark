@@ -208,4 +208,91 @@ theorem x86_movx_shape_matches_handler :
         "zero_extend") := by
   refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩⟩ <;> native_decide
 
+/-- Independent statement of the decoded source-width code that means "absent":
+the code a MOVX body leaves in an empty `aux` field. -/
+def x86MovxSrcWidthAbsentSpec : Nat := 0
+
+/-- Independent statement of the MOVX source-width resolution: the decoded `aux`
+code names the source width unless it is the absent code, in which case the body
+falls back to the effective (FLAGS-resolved) width it passes in. This is the
+`(AUX) ? (AUX) : __x86_l_width` kernel the two live MOVX bodies restated. -/
+def x86MovxSrcWidthSpec (aux effective : Nat) : Nat :=
+  if aux = x86MovxSrcWidthAbsentSpec then effective else aux
+
+/-- The generated source-width resolution equals the independent literal
+construction, so the routed selector cannot drift from the fallback it states. -/
+theorem x86_movx_src_width_refines (aux effective : Nat) :
+    GeneratedX86MovxShape.srcWidth aux effective =
+      x86MovxSrcWidthSpec aux effective := by
+  rfl
+
+/-- The generated absent code is the independent absent code. -/
+theorem x86_movx_src_width_absent_refines :
+    GeneratedX86MovxShape.srcWidthAbsentCode = x86MovxSrcWidthAbsentSpec := rfl
+
+/-- The generated field name is the `aux` field the MOVX bodies read. -/
+theorem x86_movx_src_width_field_is_aux :
+    GeneratedX86MovxShape.srcWidthField = "aux" := rfl
+
+/-- An absent `aux` field resolves to the effective width the body passes in,
+not to a width code of its own. -/
+theorem x86_movx_src_width_absent_is_effective (effective : Nat) :
+    x86MovxSrcWidthSpec x86MovxSrcWidthAbsentSpec effective = effective := by
+  rfl
+
+/-- A decoded width code is its own source width: the resolution is the identity
+on every real width, and only rewrites the absent code. -/
+theorem x86_movx_src_width_identity_on_width (w : X86Width) (effective : Nat) :
+    x86MovxSrcWidthSpec (x86WidthCodeSpec w) effective = x86WidthCodeSpec w := by
+  cases w <;> rfl
+
+/-- The absent code names no width, so the fallback only fires on a genuinely
+unused `aux` field and every real code is used as decoded. -/
+theorem x86_movx_src_width_absent_names_no_width (w : X86Width) :
+    x86WidthCodeSpec w ≠ x86MovxSrcWidthAbsentSpec := by cases w <;> decide
+
+/-- The generated source-width code table is exactly the four width codes the
+width kernel names, so the source-width contract is keyed on the same codes the
+rest of the simulator uses. -/
+theorem x86_movx_src_width_codes_refine :
+    GeneratedX86MovxShape.srcWidthCodes =
+      List.map x86WidthCodeSpec [.w8, .w16, .w32, .w64] := by
+  native_decide
+
+/-- A resolved source width is never absent when the fallback names a real
+width, so the extension function is handed a genuine width code and never the
+absent code. -/
+theorem x86_movx_src_width_resolves_to_width (aux effective : Nat)
+    (h : effective ≠ x86MovxSrcWidthAbsentSpec) :
+    x86MovxSrcWidthSpec aux effective ≠ x86MovxSrcWidthAbsentSpec := by
+  by_cases haux : aux = x86MovxSrcWidthAbsentSpec
+  · simp [x86MovxSrcWidthSpec, haux, h]
+  · simp [x86MovxSrcWidthSpec, haux]
+
+/-- **The composed MOVX source-width resolution always yields a real width.**
+The body's `__x86_l_width` is the effective-width kernel applied to the FLAGS
+code and `__x86_l_src_width` is this kernel applied to `aux`; whatever the FLAGS
+code and `aux` are, the extension function receives a genuine width code, never
+the absent code. -/
+theorem x86_movx_src_width_composed_is_width (aux flags : Nat) :
+    x86MovxSrcWidthSpec aux (x86EffectiveCodeSpec flags) ≠
+      x86MovxSrcWidthAbsentSpec := by
+  apply x86_movx_src_width_resolves_to_width
+  unfold x86EffectiveCodeSpec x86AbsentCodeSpec x86DefaultCodeSpec
+    x86MovxSrcWidthAbsentSpec
+  by_cases h : flags = 0 <;> simp [h]
+
+/-- **The resolved source width is the width the handler's op operates at.** When
+the `aux` field names a width, the source-width kernel hands the proved value
+function (`x86MovxRegStepSpec`) that width's code, so the arm's opcode selection
+and the source-width resolution agree on the width the extension runs at. -/
+theorem x86_movx_src_width_matches_handler (w : X86Width) (effective : Nat) :
+    x86MovxSrcWidthSpec (x86WidthCodeSpec w) effective = x86WidthCodeSpec w ∧
+      x86MovxRegStepSpec { dst := { bits := 0, tag := .scalar } }
+        0x11223344556688ff .movzx w .w32 =
+        { dst := x86RegWriteSpec { bits := 0, tag := .scalar }
+            (x86NarrowSpec 0x11223344556688ff w) .w32 } :=
+  ⟨x86_movx_src_width_identity_on_width w effective,
+   x86_movzx_is_narrow _ _ _ _⟩
+
 end KProgFormal
