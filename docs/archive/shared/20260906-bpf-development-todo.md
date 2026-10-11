@@ -11059,6 +11059,74 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   MOVX source-width resolution paragraph and extends the covered-slices list
   with the routed source-width resolution (paper commit pushed to `main`).
 
+## Step 0134 — x86-64 condition-mnemonic decode through the generated contract
+
+- Scope: the artifact encoder
+  (`kprog/x86/micro-prog/generate_micro_sim_proofs.py`) restated its 36
+  `jcc`/`cmovcc`/`setcc` condition mnemonics as a literal `CC_AUX` dict mapping
+  each mnemonic to an `X86_CC_*` token, with no shared contract binding that
+  table to the condition codes the simulator's `X86_CC_*` decodes name (whose
+  numeric values are already the generated `x86_cond_spec.json` contract). A
+  drift in either side was not observable. This step generates the table from
+  one specification and cross-checks each row against the condition contract.
+- Spec `kprog/formal/x86_cc_decode_spec.json`: schema_version 1, operation
+  `x86CcDecode`, `families:["j","cmov","set"]`, the 12 encoder suffixes, and 36
+  `{mnemonic,family,suffix,cond}` rows in `CC_AUX` order (`cond` equals
+  `suffix`).
+- Generator `kprog/formal/generate_x86_cc_decode_spec.py`: module-level
+  `FAMILIES`/`SUFFIXES`/`EXPECTED` re-checked element-wise; `cond_codes()` reads
+  `x86_cond_spec.json` at load time (not imported) and `load()` rejects a suffix
+  that names no condition, a mnemonic not equal to family+suffix, and a
+  non-exhaustive/duplicated family. Emits the C header
+  `generated/x86_cc_decode.h`, the Lean `KProgFormal/GeneratedX86CcDecode.lean`,
+  and the encoder table `kprog/x86/micro-prog/generated_x86_cc_decode.py`
+  (byte-identical to the deleted literal dict). `python3
+  generate_x86_cc_decode_spec.py && ... --check` returns 0; the `--check` row is
+  added at `kprog/formal/Makefile:66`.
+- Generated C header: the 12 `_Static_assert(X86_CC_<S> == <n>U, ...)` code
+  pins, `KPROG_X86_CC_DECODE_SUFFIX_{A..NS}` ordinals and `.._TEXT_*` strings, a
+  plain-ternary `KPROG_X86_CC_DECODE_CC(SUFFIX)` selector (12 arms and a `0`
+  default, so it is `_Static_assert`-usable), the per-suffix selection asserts,
+  a suffix-count assert, a totality assert (an absent code reaches `0`), the
+  family-prefix strings, and the 36 `.._MNEMONIC_*` strings.
+- Hand Lean `KProgFormal/X86CcDecode.lean`: an independent 36-triple
+  `ccMnemonicSpec`, the condition-contract `ccCondSpec`, and `ccSuffixSpec`,
+  proving the generated projection equal to the independent enumeration
+  (`x86_cc_decode_refines`), each code equal to the condition contract's code
+  (`x86_cc_decode_code_matches_cond`), the reached suffixes exactly the
+  non-parity names (`x86_cc_decode_suffixes_exact`), the mnemonic = family +
+  suffix composition (`x86_cc_decode_mnemonic_composition`), the parity absence
+  (`x86_cc_decode_parity_absent`), the codes exactly the non-parity codes
+  (`x86_cc_decode_codes_exact`), and the three families each reaching all 12
+  conditions (`x86_cc_decode_families_uniform`). `lake build
+  KProgFormal.GeneratedX86CcDecode && lake env lean
+  KProgFormal/X86CcDecode.lean` returns 0.
+- Encoder routing `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
+  literal `CC_AUX` dict is replaced by `from generated_x86_cc_decode import
+  CC_AUX`; all 15 consumer sites resolve to the import. `make -C kprog/x86
+  micro-proofs-build` rebuilt all 30 workload-derived artifacts, all `ok`, and a
+  full SHA-256 snapshot of the encoder output directory showed no drift.
+- Host oracle `kprog/formal/test_x86_cc_decode_host.c`: restates the 36
+  mnemonics with their family/suffix decomposition, the 12 suffixes, and the
+  suffix→code map by hand, then drives the generated selector over every suffix
+  code, an out-of-range slice, each mnemonic's hand-derived suffix, and the
+  parity absence: `x86 cc decode host cross-check: OK (152 cases)`.
+- `make -C kprog/formal check` passes with **172** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  oracle rows were added; 171→172).
+- Mutation harness `kprog/formal/build/mut_x86_cc_decode.py`, 30 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `encoder`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end.
+  It includes the load-time condition-contract cross-check (a code shift in
+  `x86_cond_spec.json` makes the generator stale) and the encoder detector that
+  imports the live `CC_AUX`. Two semantics-preserving mutations (a
+  resolved-but-equal generator root path, an added hand-module namespace
+  comment) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the x86-64
+  condition-mnemonic decode paragraph and extends the covered-slices list with
+  the condition-mnemonic decode contract (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
@@ -11071,7 +11139,13 @@ x86, Step 0112) and the value computation inside the composed body. The encoder'
 operation *token* is likewise no longer wholly open: the objdump-mnemonic →
 `X86_OP_*` token set and its codes are now a shared generated contract binding
 the simulator, the Lean model, and the artifact encoder (Step 0110), leaving the
-textual mnemonic that selects a token inside the parser. The index-register decode into the AUX index byte
+textual mnemonic that selects a token inside the parser. The *condition* text
+inside that mnemonic is likewise no longer wholly open: the
+`jcc`/`cmovcc`/`setcc` condition suffix → `X86_CC_*` code table the encoder
+selects from is now a shared generated contract binding the encoder, the C
+condition predicate, and the Lean model, and Lean checks every row against the
+condition contract (Step 0134), leaving the operand text and the rest of the
+parser inside the composed body. The index-register decode into the AUX index byte
 is no longer wholly open: the sentinel *presence* decision over that byte is
 now a machine-checked contract for both x86 (Step 0101) and AArch64 (Step 0102),
 leaving the register-value read inside the composed body. Specialization

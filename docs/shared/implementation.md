@@ -468,6 +468,23 @@ increment is committed and pushed immediately). Current state:
   rejects a body that does not route through it or that restates the inline
   fallback. There is no AArch64 mirror, as the AArch64 register-MOV selects its
   width by typed operand rather than a decoded fallback code.
+  The x86-64 condition-mnemonic decode is likewise no longer wholly open
+  (Step 0134): the artifact encoder's 36 `jcc`/`cmovcc`/`setcc` condition
+  mnemonics were a literal `CC_AUX` dict restating each mnemonic's
+  `X86_CC_*` token; they are now generated from `x86_cc_decode_spec.json` into
+  the encoder mapping, the C `generated/x86_cc_decode.h`, and Lean. The
+  generator re-reads `x86_cond_spec.json` on every `--check` and rejects a
+  suffix that names no condition, so the encoder's 12 suffixes are exactly the
+  condition contract's names minus the parity pair `o`/`no`. `X86CcDecode.lean`
+  proves the generated `(mnemonic, token, code)` projection equal to an
+  independent enumeration (`x86_cc_decode_refines`), each code equal to the
+  condition contract's code (`x86_cc_decode_code_matches_cond`), the reached
+  suffixes exactly the non-parity names (`x86_cc_decode_suffixes_exact`), and
+  the mnemonic = family + suffix composition
+  (`x86_cc_decode_mnemonic_composition`); the generated C selector is a plain
+  ternary so it is `_Static_assert`-usable, and the host oracle drives it over
+  every suffix code, an out-of-range slice, and the parity absence. The operand
+  text and the rest of the parser remain boundaries.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

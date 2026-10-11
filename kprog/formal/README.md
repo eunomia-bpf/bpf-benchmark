@@ -189,6 +189,17 @@ Lean. Lean checks both fields against an independent enumeration. This binds an
 already parsed mnemonic to the C ALU code consumed by the handlers; objdump,
 assembly parsing, operand-form selection, and handler semantics outside the
 separately proved operations remain boundaries.
+The 36 accepted `jcc`/`cmovcc`/`setcc` condition mnemonics are likewise
+generated from `x86_cc_decode_spec.json` into the encoder's Python `CC_AUX`
+mapping, the C `generated/x86_cc_decode.h`, and Lean. Each mnemonic is a family
+prefix plus a condition suffix; the generator re-reads `x86_cond_spec.json` on
+every `--check` and rejects a suffix that names no condition, so the 12 suffixes
+the encoder reaches are exactly the condition contract's names minus the parity
+pair `o`/`no`. Lean checks the generated mnemonic, token, and code projection
+against an independent enumeration and each code against the shared condition
+contract. This binds the encoder's *condition* text to the C condition code
+consumed by the evaluators; assembly parsing and the rest of the textual
+mnemonic remain boundaries.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the
@@ -2525,6 +2536,26 @@ binding mutations---two generated-code duplicates, a rebound handler selector,
 four dispatcher distortions in the simulator header, a spec code change, and an
 independent Lean code-spec shift---each change the oracle or the refinement
 theorem.
+
+The x86 condition-mnemonic decode contract binds the `X86_CC_*` codes the
+artifact encoder's `CC_AUX` mapping selects for its 36 `jcc`/`cmovcc`/`setcc`
+mnemonics. `X86CcDecode.lean` projects the generated table to
+`(mnemonic, token, code)` triples and proves the projection equal to an
+independent enumeration (`x86_cc_decode_refines`), proves each code equal to
+the shared condition contract's code for the same suffix name
+(`x86_cc_decode_code_matches_cond`), proves the reached suffixes are exactly the
+non-parity names (`x86_cc_decode_suffixes_exact`), and proves every mnemonic is
+its family prefix plus its suffix (`x86_cc_decode_mnemonic_composition`). The
+host cross-check includes `generated/x86_cond.h` and
+`generated/x86_cc_decode.h` and drives the generated selector over every
+suffix code, an out-of-range slice, each mnemonic's hand-derived suffix, and the
+parity absence. Thirty binding mutations---six spec distortions, a
+condition-contract code shift, two generator-table changes, six generated-C
+header distortions, four generated-Lean changes, four hand-refinement changes,
+two encoder-table changes, an encoder-import rename, and two regenerated
+generator/render drifts---each change the oracle or the refinement theorem, and
+a renamed encoder import and a drifted encoder table value are caught by the
+encoder's live `CC_AUX`.
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
