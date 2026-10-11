@@ -953,6 +953,25 @@ route oracle drives each singleton through the real dispatcher over an
 independent flat byte-image model, planting scalar/stack-tagged/ABI-tagged bases
 and sweeping widths × ops × bases × flags × index × immediate with a non-member
 probe reaching the unsupported arm (11083 cases).
+The dispatcher's two remaining operand-source selections are likewise a
+generated contract: `generate_arm64_imm_operand_spec.py` emits
+`KPROG_ARM64_IMM_RHS(OP, IMM, REG)` for the move arm (MOV_IMM/MOV_REG, register
+form reads the source) and the shift arm (SHIFT_IMM/SHIFT_REG, register form
+reads the second source), a statement expression that seeds its result with
+`(REG)` and sets it to `(IMM)` exactly on the two `_IMM` opcodes, with each
+`ARM64_OP_*` number `_Static_assert`-pinned to `arm64_sim.h`, and
+`Arm64ImmOperand.lean` proves the generated `immediate` predicate equal to an
+independent named-list membership (`arm64_imm_operand_refines`), that exactly
+the `_IMM` member of each pair is immediate
+(`arm64_imm_operand_pairs_exclusive`), that the two families are disjoint, and
+that all four opcodes lie in the C opcode-byte range. `ARM64_SIM_L_EXEC` now
+selects both operands through the generated macro instead of the two hand-written
+ternaries. A generated-header oracle decides immediate membership from an
+independent switch oracle over all 256 byte values × five immediates × four
+register expressions (5120 cases), and a sim-header route oracle drives the
+generated selector through the real dispatcher arms over an independent
+whole-state model with distinct immediate and register values, all four widths,
+every shift kind and a non-member probe (3804 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new

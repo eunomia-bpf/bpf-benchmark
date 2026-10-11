@@ -343,7 +343,17 @@ increment is committed and pushed immediately). Current state:
   — as the cross-contract to Step 0125 — that the combined singleton and
   dispatch-family opcode numbers are pairwise distinct
   (`arm64_dispatch_chain_codes_nodup`), so the ordered chain selects exactly one
-  arm per opcode.
+  arm per opcode. The two remaining operand-source selections in
+  `ARM64_SIM_L_EXEC` are likewise no longer open (Step 0127): the move arm's
+  value source and the shift arm's amount source now route through the
+  generated `KPROG_ARM64_IMM_RHS(OP, IMM, REG)`, whose statement expression
+  selects the decoded immediate exactly on the two `_IMM` opcodes and the
+  caller-supplied register expression otherwise, so the move reads the source
+  register and the shift the second source. `Arm64ImmOperand.lean` proves the
+  generated `immediate` predicate equal to an independent named-list membership
+  (`arm64_imm_operand_refines`), that exactly the `_IMM` member of each pair is
+  immediate (`arm64_imm_operand_pairs_exclusive`), that the two families are
+  disjoint, and that all four opcodes lie in the C opcode-byte range.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

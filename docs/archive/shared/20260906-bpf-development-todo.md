@@ -10461,6 +10461,100 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   dispatcher singleton-opcode paragraph and extends the covered-slices list with
   the singleton opcode-membership contract (paper commit pushed to `main`).
 
+## Step 0127 — AArch64 immediate/register operand-source contract
+
+- Scope: after Step 0126 the AArch64 dispatcher `ARM64_SIM_L_EXEC` routed every
+  arm through a generated membership macro, but two handler arms still selected
+  their operand between the decoded immediate and a register expression with an
+  inlined ternary: the move arm (MOV_IMM/MOV_REG, whose register form reads
+  `SRC`) and the shift arm (SHIFT_IMM/SHIFT_REG, whose register form reads
+  `SRC2`). Shared JSON spec `kprog/formal/arm64_imm_operand_spec.json`
+  (`schema_version` 1, operation `arm64ImmOperand`, two selector families `mov`
+  and `shift` in dispatcher order, each with the immediate and register member
+  of the pair) drives generator
+  `kprog/formal/generate_arm64_imm_operand_spec.py`, which renders the four
+  code-drift rows and the operand-source selector into
+  `generated/arm64_imm_operand.h` and the `ImmOp` inductive, opcode table and
+  `immediate` predicate into `KProgFormal/GeneratedArm64ImmOperand.lean`.
+- The generated macro `KPROG_ARM64_IMM_RHS(OP, IMM, REG)` is a statement
+  expression (usable in the two arm bodies but not at file scope or inside
+  `_Static_assert`): it seeds its result with `(REG)`, then `switch (OP)` sets it
+  to `(IMM)` on the two `_IMM` labels (`case 1U`/`case 8U`), so exactly the
+  `_IMM` member of each pair selects the decoded immediate and every other
+  opcode selects the caller-supplied register expression. OP, IMM and REG are
+  each evaluated exactly once, so a register expression with a side effect still
+  runs at most once. The header also emits one `_Static_assert(ARM64_OP_X == N)`
+  code-drift row per pair member. The generator's `--check` re-reads
+  `kprog/arm64/arm64_sim.h` for the four `ARM64_OP_*` numbers, asserts the spec
+  table matches and the selector order is `["mov","shift"]`, and asserts the live
+  `ARM64_SIM_L_EXEC` region routes the move and shift operands through
+  `KPROG_ARM64_IMM_RHS((OP)` and no longer tests either raw immediate opcode by
+  hand. The generator has its own
+  `python3 generate_arm64_imm_operand_spec.py --check` line in
+  `kprog/formal/Makefile`.
+- Both arms in `kprog/arm64/arm64_sim_local_bpf.h` (include added after the
+  dispatch-singleton header at line 22) now route through the generated selector:
+  the move arm's `__a64_l_value` and the shift arm's `__a64_l_amount`; the two
+  former inline ternaries are gone. The macro name avoids collision with the
+  pre-existing `KPROG_ARM64_ALU_RHS`, which takes an `IS_IMMEDIATE` flag instead.
+- Hand Lean `KProgFormal/Arm64ImmOperand.lean` (imports
+  `GeneratedArm64ImmOperand`) states the two independent named opcode lists
+  (`arm64ImmOperandImmOps = [.movImm, .shiftImm]`,
+  `arm64ImmOperandRegOps = [.movReg, .shiftReg]`) and the membership spec
+  predicate `arm64ImmOperandSpec (op) := op ∈ arm64ImmOperandImmOps`, and proves
+  the generated `immediate` predicate equal to it (`arm64_imm_operand_refines`,
+  by `cases op <;> simp_all`), plus `_immediate_iff_mem`,
+  `_reg_never_immediate`, `_lists_disjoint`, `_pairs_exclusive` (each `_IMM`
+  member immediate and its `_REG` peer not), `_code_dispatch` (the exact
+  `ARM64_OP_*` numbers 1/2/8/9) and `_code_in_range` (≤ 9). `KProgFormal.lean`
+  imports the generated and hand modules (lines 206-207).
+- Host oracle `kprog/formal/test_arm64_imm_operand_host.c` declares the four
+  `ARM64_OP_*` numbers locally from raw architectural values, decides immediate
+  membership from a local `switch` over the raw opcode (never the generated
+  macro), and sweeps all 256 opcodes × 5 immediates × 4 register expressions:
+  `arm64 imm operand host cross-check: OK (5120 cases)`.
+- Route oracle `kprog/formal/test_arm64_imm_operand_route_host.c` drives the
+  generated selector as reached through the real `ARM64_SIM_L_EXEC` arms over an
+  independent whole-state model (register file value+tag, SP, SIMD quarters,
+  NZCV and both heap/stack images), planting distinct nonzero immediates and
+  register patterns so a selector that picked the wrong operand diverges, and
+  sweeping the four selector opcodes over the four effective widths (the move
+  register form preserves provenance through the tag-copy path at doubleword
+  width and goes through the width-narrowed scalar path otherwise) with every
+  shift kind, plus a non-member probe (`ARM64_OP_RET`) reaching the unsupported
+  arm exactly once: `arm64 imm operand route host cross-check: OK (3804 cases)`.
+- `make -C kprog/formal check` passes with the two new oracle rows raising the
+  cross-check count from **161** (Step 0126 close) to **163**, zero `FAIL`.
+  `make -C kprog arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_imm_operand.py`, 57 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file byte-for-byte
+  between mutations and re-checking the baseline green at the end: five spec
+  defects (operation/schema/immediate-code/immediate-code/register-macro drifts →
+  generator), thirteen generator defects
+  (operation/immediate-code/immediate-code/selector-order/opcode-regex/
+  opcode-drift-check/needle-check/hand-check/hand-branch/region-start/region-end/
+  Lean-path/C-header-path drifts → generator), six regenerated
+  generator+artifact pair defects (constructor-render/immediate-code-render/
+  immediate-predicate-render → lean_chain, code-assert-render/case-render/
+  body-render → host), seven generated-C defects
+  (code-assert/code-assert/case-label/register-case-label/immediate-assign/
+  register-init drifts and a macro-rename → host, plus a macro-name drift →
+  route), three generated-Lean defects (constructor/immediate-code/
+  register-code/immediate-predicate drifts → lean_chain), twelve hand-refinement
+  defects (list/list/spec/refines-statement/iff-membership/register-never/
+  disjointness/pair-exclusivity/opcode-dispatch/opcode-range/example/example
+  drifts → lean_chain), five routed-body defects (dropped include, byte-swapped
+  move-operands, dropped shift second-source → route; both arms reverted to the
+  hand-rolled comparison → generator). Five semantically equivalent mutations
+  (an added include-side comment, an added hand-module comment, a
+  resolved-but-equal generator root path, an added generated-Lean import comment,
+  and equal-whitespace spec text) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  immediate/register operand-source paragraph and extends the covered-slices list
+  with the operand-source contract (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
