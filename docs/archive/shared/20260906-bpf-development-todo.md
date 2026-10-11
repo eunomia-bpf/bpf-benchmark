@@ -10176,6 +10176,110 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   store body-selection paragraph and extends the covered-slices list with the
   store body-selection arm (paper commit pushed to `main`).
 
+## Step 0124 — AArch64 stack byte-ladder per-lane activation contract
+
+- Scope: the AArch64 simulator's stack write helper
+  `ARM64_SIM_L_STACK_WRITE_TAG` (`kprog/arm64/arm64_sim_local_bpf.h`) narrowed a
+  resolved access to the byte arena `__a64_stack.b[]` through a little-endian
+  byte ladder whose eight lane writes were gated by hand-written
+  `__a64_stw_width >= ARM64_WIDTH_16` / `>= ARM64_WIDTH_32` /
+  `== ARM64_WIDTH_64` tests restated at each lane. The width set is closed (the
+  four `ARM64_WIDTH_*` codes) and the activation is monotone: an access of `n`
+  bytes writes exactly lanes `0..n-1`, so the width's active-lane mask has its
+  low `n` bits set.
+- Shared spec `kprog/formal/arm64_stack_write_lanes_spec.json` (schema_version 1,
+  operation `arm64StackWriteLanes`, selector `width_mask_low_lanes_active`)
+  enumerates the four widths — `w8`/`w16`/`w32`/`w64` with codes `1/2/4/8`,
+  byte counts `1/2/4/8` and masks `1/3/15/255` — the eight lanes
+  (`lane0..lane7`, indices `0..7`), and the per-width activation row
+  (`n` leading `true`s, the rest `false`).
+- Generator `kprog/formal/generate_arm64_stack_write_lanes_spec.py` re-derives
+  the live stack-write helper text from the simulator header and requires it to
+  route its lanes through the generated predicate
+  `KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(` while keeping the byte-lane extraction
+  (`KPROG_ARM64_BYTE_AT(`), the byte arena write (`__a64_stack.b[`) and the
+  width-narrowing value (`KPROG_ARM64_APPLY_WIDTH(`), and dropping both the
+  `__a64_stw_width >= ARM64_WIDTH_16` and `>= ARM64_WIDTH_32` hand gates. It
+  emits the plain-expression, `_Static_assert`-safe C header
+  `generated/arm64_stack_write_lanes.h` (the `?:`-chain mask macro
+  `KPROG_ARM64_STACK_WRITE_MASK`, the eight lane-number defines,
+  `.._LANE_SLOTS 8U`, `.._LANE_COUNT`, `.._LANE_ACTIVE(WIDTH, LANE) =
+  ((__u8)((MASK(WIDTH) >> (LANE)) & 1U))`, four width-code asserts, eight
+  mask/count asserts and thirty-two full activation asserts) and the Lean table
+  `KProgFormal/GeneratedArm64StackWriteLanes.lean` (inductive `Width`/`Lane`,
+  `widthCode`, `byteCount`, `widthMask`, `laneIndex`,
+  `laneActive (width lane) := decide ((widthMask width >>> laneIndex lane) &&& 1
+  = 1)`, `activeLanes`, `laneSpec`, `laneActive_refines`, `activeLanes_length`,
+  `widthMask_is_low_bits`).
+- Hand refinement `KProgFormal/Arm64StackWriteLanesShape.lean` states an
+  independent literal construction (`arm64StackWriteLanesCountSpec`/`MaskSpec`/
+  `LaneSpec`) and proves the shape/theorem set, including
+  `arm64_stack_write_lanes_refines` (the generated mask-bit activation equals
+  the independent `laneIndex < byteCount` bound), `_spec_iff`,
+  `_mask_refines`, `_count_refines`, `_lane_refines`, `_length`,
+  `_mask_is_low_bits`, `_monotone` (an active lane stays active at every wider
+  access), `_lane0_always`, `_above_never`, `_codes_match_width`
+  (against `arm64WidthCodeSpec`), `_matches_store_bytes` (against the generated
+  `GeneratedArm64StoreBytes` byte counts and codes), `_lane_is_byte_lane`
+  (against the `GeneratedArm64ByteLane` shift), `_over_widths`, and the three
+  canonical examples; the hypothesis-carrying monotonicity and above-never
+  theorems are closed by `revert h <;> cases <;> decide`.
+- Routed body: the ladder's eight lane `if`s now test
+  `KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, k)`; the slot-tag gate
+  (`KPROG_ARM64_STACK_TAG`), the scalar tag store, the `KPROG_ARM64_BYTE_AT`
+  extraction and the `ARM64_SIM_L_UNSUPPORTED_OPCODE()` fallback are unchanged,
+  and the ladder body is not re-indented. The generated header is included at
+  `arm64_sim_local_bpf.h:47`, after the `ARM64_WIDTH_*` decodes and the
+  byte-lane extraction it references. The public signature and every caller
+  site (`ARM64_SIM_L_STORE_Q0_STACK`, the `ARM64_SIM_L_MEM_WRITE` stack arm) are
+  unchanged.
+- Two host oracles, both wired into `kprog/formal/Makefile` immediately after
+  the stack-arm pair:
+  - `test_arm64_stack_write_lanes_host.c` includes the generated header
+    (compiling it against hand-written `ARM64_WIDTH_*` values), checks every
+    `(width, lane)` pair's mask bit, count and activation against an
+    independent literal oracle, and checks the mask is each width's low-bit set
+    --- `arm64 stack write lanes host cross-check: OK (291 cases)`.
+  - `test_arm64_stack_write_lanes_route_host.c` includes the simulator header
+    (`ARM64_SIM_ENABLE_STACK`) and drives the real
+    `ARM64_SIM_L_STACK_WRITE_TAG` at every width and many arena offsets,
+    comparing the whole stack byte image and the whole slot-tag image against
+    independent models of the activation the contract names (an `n`-byte write
+    touches exactly bytes `0..n-1`, higher bytes untouched), plus a real
+    store-then-read round trip through the routed `ARM64_SIM_L_STACK_READ` at
+    every width --- `arm64 stack write lanes route host cross-check: OK
+    (3843511 cases)`.
+- Gate `make -C kprog/formal check` rc=0, **157** `cross-check: OK`. Baseline
+  was **155** for Step 0123; Step 0124 adds the stack-write-lanes host and route
+  oracles and the Lean pair. `make -C kprog/arm64 micro-proofs-build` rebuilt
+  all 30 workload-derived artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_stack_write_lanes.py`, 59
+  mutations against the live tree, each caught after the four unmutated controls
+  (`gen`, `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  eight spec defects (operation/schema/selector/width-code/width-bytes/mask/
+  lane-index/activation drifts → generator), fourteen generator defects
+  (operation/selector/width-code/width-bytes/lane-index/Lean-path/C-header-path/
+  lane-predicate-anchor/hand-gate-anchor/region-start/region-end/Lean-lane-spec/
+  Lean-lane-active drifts → generator), ten generated-C defects (mask/count/
+  lane-define/slot-count/active-shift/assert-width/assert-mask/assert-count/
+  assert-active/assert-slots drifts → host), eight generated-Lean defects
+  (widthCode/byteCount/widthMask/laneIndex/laneActive/activeLanes/laneSpec/
+  laneActive_refines drifts → lean_chain), nine hand-refinement defects
+  (count-spec/mask-spec/lane-spec/refines/lane0-always/above-never/over-widths/
+  store-bytes drifts → lean_chain), four routed-body defects (dropped include,
+  dropped lane-7 gate, widened lane-1 gate, restored hand gate → route or
+  generator), and three generator+artifact pair defects regenerated so `--check`
+  stays green and only the rebuilt artifacts catch them (count-render → host,
+  mask-render and lane-active-render → lean_chain). Five semantically equivalent
+  mutations (an added include-side comment, an added hand-module comment, a
+  resolved-but-equal generator root path, an added generated-Lean import
+  comment, and equal-whitespace spec text) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  stack byte-ladder activation paragraph and extends the covered-slices list
+  with the stack byte-ladder activation contract (paper commit pushed to
+  `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
@@ -10271,6 +10375,20 @@ byte store otherwise — is a proved table rather than a restated predicate, tie
 to the load dispatch's own space/source table so the two cannot drift
 (`arm64_mem_write_arm_matches_read_src`); the address arithmetic and the
 composed bodies stay inside the composed body.
+
+The AArch64 stack *write* helper's little-endian *byte ladder* is likewise no
+longer open: the width-keyed lane gating the `ARM64_SIM_L_STACK_WRITE_TAG`
+helper restated at each of its eight byte-arena writes is now a machine-checked
+shared contract (Step 0124), so the stack write image — the width's low bytes
+of the value, every higher byte untouched — activates a proved monotone lane
+table (`w8`→`0x01`, `w16`→`0x03`, `w32`→`0x0f`, `w64`→`0xff`) rather than four
+hand-written `>= ARM64_WIDTH_16`/`>= ARM64_WIDTH_32`/`== ARM64_WIDTH_64` gate
+blocks, the write-side stack counterpart of the read body selection
+(`KPROG_ARM64_STACK_ARM`, Step 0121) and of the memory-side store ladder
+(`KPROG_ARM64_STORE_BYTES`, Step 0122), with the stack and memory ladders
+proved to activate the same lanes at every width
+(`arm64_stack_write_lanes_matches_store_bytes`); the byte-window arithmetic and
+the little-endian value composition stay inside the composed bodies.
 
 The x86 helper-id → helper-body binding the call ladder (`X86_SIM_BPF_CALL_ID`)
 and its routed register form (`X86_SIM_BPF_CALL_REG`, the chain's

@@ -887,6 +887,29 @@ arena/heap indices against an independent model of both bodies and the
 slot-tag rule, plus the real write/read round-trip, comparing the whole heap
 image, the whole stack byte image, and the whole slot-tag image (17,758,119
 cases).
+The AArch64 stack write helper's per-lane width gating is likewise a generated
+contract: `generate_arm64_stack_write_lanes_spec.py` emits
+`KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(WIDTH, LANE)` with the plain-expression
+low-bit mask `KPROG_ARM64_STACK_WRITE_MASK(WIDTH)` (`w8`→`0x01`, `w16`→`0x03`,
+`w32`→`0x0f`, `w64`→`0xff`), which activates byte lane `k` exactly when
+`k < byteCount(width)`, and `Arm64StackWriteLanesShape.lean` proves the
+generated mask-bit activation equal to an independent
+lane-index-versus-byte-count bound, that the byte counts, masks, and lane
+numbers equal their independent literals, that the mask is each width's low-bit
+set and its set-bit count is the byte count, that an active lane stays active at
+every wider access while a lane at or above the byte count is never written, and
+--- connecting this to the memory-side ladder and the byte-lane extraction ---
+that the stack and memory byte ladders activate the same lanes and width codes
+at every width (`arm64_stack_write_lanes_matches_store_bytes`).
+`ARM64_SIM_L_STACK_WRITE_TAG` now gates each of its eight byte-arena lane writes
+through the generated predicate instead of the four hand-written
+`>= ARM64_WIDTH_16`/`>= ARM64_WIDTH_32`/`== ARM64_WIDTH_64` gate blocks, leaving
+the byte-window arithmetic and the little-endian value composition in the
+composed bodies. A generated-header oracle checks the compiled predicate's mask
+bit, count, and activation against an independent literal oracle over every
+width/lane pair (291 cases), and a sim-header route oracle drives the real write
+over every width and many arena offsets against an independent model of the
+activation, plus the real store/read round-trip (3,843,511 cases).
 The simulator's memory read path now routes its read-source classification
 through the machine-checked `KPROG_X86_MEM_READ_SRC` contract instead of
 restating the stack/ABI/ordinary predicate ladder inline. The new

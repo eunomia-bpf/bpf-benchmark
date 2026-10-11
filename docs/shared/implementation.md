@@ -296,6 +296,22 @@ increment is committed and pushed immediately). Current state:
   load path's space/source table so the two cannot drift
   (`arm64_mem_write_arm_matches_read_src`), leaving the address arithmetic and
   the composed bodies.
+  The AArch64 stack *write* byte ladder's per-lane width gates are likewise no
+  longer open (Step 0124): `ARM64_SIM_L_STACK_WRITE_TAG` now gates each of its
+  eight byte-arena writes through the generated activation predicate
+  `KPROG_ARM64_STACK_WRITE_LANE_ACTIVE`, backed by the width's active-lane mask
+  (`w8`→`0x01`, `w16`→`0x03`, `w32`→`0x0f`, `w64`→`0xff`, the low `n` bits set
+  for an `n`-byte access), so the byte ladder's activation is a proved monotone
+  table rather than the four restated `>= ARM64_WIDTH_16`/`>= ARM64_WIDTH_32`/
+  `== ARM64_WIDTH_64` gate blocks, leaving the byte-window arithmetic and the
+  little-endian value composition in the composed bodies. The contract is the
+  write-side counterpart of the read body selection (`KPROG_ARM64_STACK_ARM`,
+  Step 0121) and of the memory-side store ladder (`KPROG_ARM64_STORE_BYTES`,
+  Step 0122): `Arm64StackWriteLanesShape.lean` proves the generated
+  mask-bit activation equal to an independent literal construction and ties it
+  to the `Arm64ByteLane` extraction, the `Arm64Width` codes and the store-bytes
+  contract (`arm64_stack_write_lanes_matches_store_bytes`), so the stack and
+  memory byte ladders activate the same lanes at every width.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register
