@@ -44,6 +44,7 @@
 #include "../formal/generated/arm64_stack_arm.h"
 #include "../formal/generated/arm64_stack_arena.h"
 #include "../formal/generated/arm64_stack_index.h"
+#include "../formal/generated/arm64_stack_write_lanes.h"
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
@@ -583,32 +584,34 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__a64_stack.b[__a64_stw_index] =                   \
 				KPROG_ARM64_BYTE_AT(0, __a64_stw_value,    \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
-			if (__a64_stw_width >= ARM64_WIDTH_16)            \
-				__a64_stack.b[__a64_stw_index + 1] =       \
-					KPROG_ARM64_BYTE_AT(1, __a64_stw_value,\
-						ARM64_SIM_L_UNSUPPORTED_OPCODE());\
-			if (__a64_stw_width >= ARM64_WIDTH_32) {          \
-				__a64_stack.b[__a64_stw_index + 2] =       \
-					KPROG_ARM64_BYTE_AT(2, __a64_stw_value,\
-						ARM64_SIM_L_UNSUPPORTED_OPCODE());\
-				__a64_stack.b[__a64_stw_index + 3] =       \
-					KPROG_ARM64_BYTE_AT(3, __a64_stw_value,\
-						ARM64_SIM_L_UNSUPPORTED_OPCODE());\
-			}                                                 \
-			if (__a64_stw_width == ARM64_WIDTH_64) {          \
-				__a64_stack.b[__a64_stw_index + 4] =       \
-					KPROG_ARM64_BYTE_AT(4, __a64_stw_value,\
-						ARM64_SIM_L_UNSUPPORTED_OPCODE());\
-				__a64_stack.b[__a64_stw_index + 5] =       \
-					KPROG_ARM64_BYTE_AT(5, __a64_stw_value,\
-						ARM64_SIM_L_UNSUPPORTED_OPCODE());\
-				__a64_stack.b[__a64_stw_index + 6] =       \
-					KPROG_ARM64_BYTE_AT(6, __a64_stw_value,\
-						ARM64_SIM_L_UNSUPPORTED_OPCODE());\
-				__a64_stack.b[__a64_stw_index + 7] =       \
-					KPROG_ARM64_BYTE_AT(7, __a64_stw_value,\
-						ARM64_SIM_L_UNSUPPORTED_OPCODE());\
-			}                                                 \
+		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 1))\
+			__a64_stack.b[__a64_stw_index + 1] =       \
+				KPROG_ARM64_BYTE_AT(1, __a64_stw_value,\
+					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 2))\
+			__a64_stack.b[__a64_stw_index + 2] =       \
+				KPROG_ARM64_BYTE_AT(2, __a64_stw_value,\
+					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 3))\
+			__a64_stack.b[__a64_stw_index + 3] =       \
+				KPROG_ARM64_BYTE_AT(3, __a64_stw_value,\
+					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 4))\
+			__a64_stack.b[__a64_stw_index + 4] =       \
+				KPROG_ARM64_BYTE_AT(4, __a64_stw_value,\
+					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 5))\
+			__a64_stack.b[__a64_stw_index + 5] =       \
+				KPROG_ARM64_BYTE_AT(5, __a64_stw_value,\
+					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 6))\
+			__a64_stack.b[__a64_stw_index + 6] =       \
+				KPROG_ARM64_BYTE_AT(6, __a64_stw_value,\
+					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
+		if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(__a64_stw_width, 7))\
+			__a64_stack.b[__a64_stw_index + 7] =       \
+				KPROG_ARM64_BYTE_AT(7, __a64_stw_value,\
+					ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 		}                                                         \
 	} while (0)
 

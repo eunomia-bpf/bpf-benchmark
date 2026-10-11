@@ -197,6 +197,8 @@ import KProgFormal.GeneratedArm64StackTag
 import KProgFormal.Arm64StackTag
 import KProgFormal.GeneratedArm64StackArm
 import KProgFormal.Arm64StackArmShape
+import KProgFormal.GeneratedArm64StackWriteLanes
+import KProgFormal.Arm64StackWriteLanesShape
 import KProgFormal.GeneratedArm64DqMem
 import KProgFormal.Arm64DqMemHandler
 import KProgFormal.GeneratedArm64PairMem
