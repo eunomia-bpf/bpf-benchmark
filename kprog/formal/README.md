@@ -200,6 +200,19 @@ against an independent enumeration and each code against the shared condition
 contract. This binds the encoder's *condition* text to the C condition code
 consumed by the evaluators; assembly parsing and the rest of the textual
 mnemonic remain boundaries.
+The 17 accepted AArch64 condition mnemonics are generated the same way from
+`arm64_cc_decode_spec.json` into the encoder's Python `COND` mapping, the C
+`generated/arm64_cc_decode.h`, and Lean. The generator re-reads
+`arm64_cond_spec.json` on every `--check` and rejects a mnemonic that names no
+condition; the 15 canonical mnemonics name every condition exactly once, and
+the two architectural aliases `hs`/`lo` name the same conditions as `cs`/`cc`,
+so the 17 mnemonics cover 15 distinct codes. Lean checks the generated
+`(mnemonic, token, code)` projection against an independent enumeration, each
+code against the shared condition contract, the canonical mnemonics against the
+full condition order, and the alias set and alias-equal-code facts
+(`arm64_cc_decode_alias_same_code`). This binds the encoder's *condition* text
+to the C condition code the evaluators consume; assembly parsing and the rest
+of the textual mnemonic remain boundaries.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the
@@ -2521,6 +2534,29 @@ Twelve binding mutations---generated ALU/MOD code shifts, a duplicate bitfield
 code, three AUX-field packing distortions in the simulator header, a renamed
 spec mnemonic, two generated-code shifts, two generated-mnemonic changes, and an
 independent-list code change---each change the oracle or a refinement theorem.
+
+The AArch64 condition-mnemonic decode contract binds the `ARM64_COND_*` codes
+the artifact encoder's `COND` mapping selects for its 17 condition mnemonics.
+`Arm64CcDecode.lean` projects the generated table to
+`(mnemonic, token, code)` triples and proves the projection equal to an
+independent enumeration (`arm64_cc_decode_refines`), proves each code equal to
+the shared condition contract's code for the condition name the mnemonic
+selects (`arm64_cc_decode_code_matches_cond`), proves the reached conditions are
+exactly the contract's fifteen (`arm64_cc_decode_conds_exact`), proves the
+canonical mnemonics cover every condition once
+(`arm64_cc_decode_canonical_covers`), and proves the aliases are exactly
+`hs`/`lo` and land on the same codes as `cs`/`cc`
+(`arm64_cc_decode_aliases_exact`, `arm64_cc_decode_alias_same_code`,
+`arm64_cc_decode_alias_not_canonical`). The host cross-check includes
+`generated/arm64_cc_decode.h` and drives the generated selector over every
+mnemonic code, a dense out-of-range slice, the alias-equal-code facts, and a
+per-condition reachability sweep. Thirty-two binding mutations---five spec
+distortions, a condition-contract code shift, two generator-table changes,
+seven generated-C header distortions, five generated-Lean changes, four
+hand-refinement changes, two encoder-table changes, an encoder-import rename,
+and two regenerated generator/render drifts---each change the oracle or the
+refinement theorem, and a renamed encoder import and a drifted encoder table
+value are caught by the encoder's live `COND`.
 
 The x86 ALU mnemonic-to-code decode contract binds the `X86_ALU_*` constants
 that the x86 simulator dispatcher and the Lean model share.

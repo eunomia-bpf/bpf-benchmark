@@ -500,6 +500,24 @@ increment is committed and pushed immediately). Current state:
   and TST/TST-BIC no-write behavior over the AND/BIC families, and
   `arm64_ccmp_handler_refines` composes all supported conditions with the
   compare/fallback flag paths while preserving register/SP state.
+  The AArch64 condition-mnemonic decode is likewise no longer wholly open
+  (Step 0135): the artifact encoder's 17 condition mnemonics were a literal
+  `COND` dict restating each mnemonic's `ARM64_COND_*` token; they are now
+  generated from `arm64_cc_decode_spec.json` into the encoder mapping, the C
+  `generated/arm64_cc_decode.h`, and Lean. The generator re-reads
+  `arm64_cond_spec.json` on every `--check` and rejects a mnemonic that names
+  no condition; the 15 canonical mnemonics name every condition exactly once
+  and the aliases `hs`/`lo` name the same conditions as `cs`/`cc`, so 17
+  mnemonics cover 15 distinct codes. `Arm64CcDecode.lean` proves the generated
+  `(mnemonic, token, code)` projection equal to an independent enumeration
+  (`arm64_cc_decode_refines`), each code equal to the condition contract's code
+  (`arm64_cc_decode_code_matches_cond`), the reached conditions exactly the
+  contract's fifteen (`arm64_cc_decode_conds_exact`), the canonical mnemonics
+  covering each condition once (`arm64_cc_decode_canonical_covers`), and the
+  alias set and alias-equal-code facts; the generated C selector is a plain
+  ternary so it is `_Static_assert`-usable, and the host oracle drives it over
+  every mnemonic code, an out-of-range slice, and the alias facts. Assembly
+  parsing and the rest of the textual mnemonic remain boundaries.
   Remaining work also includes the load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

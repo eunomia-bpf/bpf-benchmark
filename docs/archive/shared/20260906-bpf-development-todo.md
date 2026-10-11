@@ -11127,6 +11127,76 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   condition-mnemonic decode paragraph and extends the covered-slices list with
   the condition-mnemonic decode contract (paper commit pushed to `main`).
 
+## Step 0135 — AArch64 condition-mnemonic decode through the generated contract
+
+- Scope: the artifact encoder
+  (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`) restated its 17
+  condition mnemonics as a literal `COND` dict mapping each mnemonic to an
+  `ARM64_COND_*` token, with no shared contract binding that table to the
+  condition codes the simulator's `ARM64_COND_*` decodes name (whose numeric
+  values are already the generated `arm64_cond_spec.json` contract). Unlike
+  x86, two mnemonics alias one code (`hs`→`ARM64_COND_CS`, `lo`→`ARM64_COND_CC`),
+  so the alias fact is itself proved. A drift in either side was not
+  observable. This step generates the table from one specification and
+  cross-checks each row against the condition contract.
+- Spec `kprog/formal/arm64_cc_decode_spec.json`: schema_version 1, operation
+  `arm64CcDecode`, and 17 `{mnemonic,cond,alias}` rows in `COND` order; `alias`
+  is true only for `hs`/`lo`.
+- Generator `kprog/formal/generate_arm64_cc_decode_spec.py`: module-level
+  `EXPECTED` re-checked element-wise; `cond_codes()` reads `arm64_cond_spec.json`
+  at load time (not imported); `load()` rejects a mnemonic that names no
+  condition, a canonical (non-alias) mnemonic set that is not exactly the
+  contract's condition order, an alias naming no canonical condition, and a
+  duplicate mnemonic. Emits the C header `generated/arm64_cc_decode.h`, the Lean
+  `KProgFormal/GeneratedArm64CcDecode.lean`, and the encoder table
+  `kprog/arm64/micro-prog/generated_arm64_cc_decode.py` (byte-identical to the
+  deleted literal dict). `python3 generate_arm64_cc_decode_spec.py && ... --check`
+  returns 0; the `--check` row is added at `kprog/formal/Makefile:63`.
+- Generated C header: the 15 `_Static_assert(ARM64_COND_<C> == <n>U, ...)` code
+  pins, `KPROG_ARM64_CC_DECODE_MNEMONIC_{EQ..AL}` ordinals and `.._TEXT_*`
+  strings, mnemonic/condition count defines, a plain-ternary
+  `KPROG_ARM64_CC_DECODE_COND(MNEMONIC)` selector (17 arms and a `0` default, so
+  it is `_Static_assert`-usable), the per-mnemonic selection asserts, count
+  asserts, a totality assert (an absent code reaches `0`), and the alias asserts
+  (`hs`→`CS`, `lo`→`CC`).
+- Hand Lean `KProgFormal/Arm64CcDecode.lean`: an independent 17-triple
+  `ccArm64MnemonicSpec`, the condition-contract `ccArm64CondSpec`, and
+  `ccArm64AliasSpec`, proving the generated projection equal to the independent
+  enumeration (`arm64_cc_decode_refines`), each code equal to the condition
+  contract's code (`arm64_cc_decode_code_matches_cond`), the reached conditions
+  exactly the contract's fifteen (`arm64_cc_decode_conds_exact`), the canonical
+  mnemonics covering each condition once (`arm64_cc_decode_canonical_covers`),
+  the aliases exactly `hs`/`lo` (`arm64_cc_decode_aliases_exact`), the alias
+  codes equal to their canonical spellings (`arm64_cc_decode_alias_same_code`),
+  and that an alias is only ever `hs`/`lo`
+  (`arm64_cc_decode_alias_not_canonical`). `lake build
+  KProgFormal.GeneratedArm64CcDecode && lake env lean
+  KProgFormal/Arm64CcDecode.lean` returns 0.
+- Encoder routing `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`: the
+  literal `COND` dict is replaced by `from generated_arm64_cc_decode import
+  COND`; all consumer sites resolve to the import.
+- Host oracle `kprog/formal/test_arm64_cc_decode_host.c`: restates the 17
+  mnemonics and the mnemonic→code map by hand, then drives the generated
+  selector over every mnemonic code, a dense out-of-range slice, the
+  alias-equal-code facts, and a per-condition reachability sweep:
+  `arm64 cc decode host cross-check: OK (76 cases)`.
+- `make -C kprog/formal check` passes with **173** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  oracle rows were added; 172→173).
+- Mutation harness `kprog/formal/build/mut_arm64_cc_decode.py`, 32 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `encoder`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end.
+  It includes the load-time condition-contract cross-check (a code shift in
+  `arm64_cond_spec.json` makes the generator stale) and the encoder detector that
+  imports the live `COND` after clearing `arm64/micro-prog/__pycache__` and
+  running `python3 -B`. Two semantics-preserving mutations (a resolved-but-equal
+  generator root path, an added hand-module namespace comment) SURVIVE as
+  required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  aliased-condition-mnemonic paragraph and extends the covered-slices list with
+  the AArch64 condition-mnemonic decode contract (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
@@ -11242,6 +11312,13 @@ blocks, the write-side stack counterpart of the read body selection
 proved to activate the same lanes at every width
 (`arm64_stack_write_lanes_matches_store_bytes`); the byte-window arithmetic and
 the little-endian value composition stay inside the composed bodies.
+
+The AArch64 *condition* mnemonic the encoder turns into an `ARM64_COND_*` code
+is likewise no longer wholly open: the 17-mnemonic condition table the encoder
+selects from is now a shared generated contract binding the encoder, the C
+condition predicate, and the Lean model, with the two architectural aliases
+`hs`/`lo` proved to name the same codes as `cs`/`cc` (Step 0135), leaving the
+rest of the textual mnemonic inside the parser.
 
 The x86 helper-id → helper-body binding the call ladder (`X86_SIM_BPF_CALL_ID`)
 and its routed register form (`X86_SIM_BPF_CALL_REG`, the chain's
