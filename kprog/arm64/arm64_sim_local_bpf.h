@@ -127,6 +127,7 @@ union arm64_sim_gpr {
 #include "../formal/generated/arm64_stlxr.h"
 #include "../formal/generated/arm64_mov.h"
 #include "../formal/generated/arm64_ldrsx.h"
+#include "../formal/generated/arm64_ldrsx_op.h"
 #include "../formal/generated/arm64_load_tag.h"
 #include "../formal/generated/arm64_pair_load_tag.h"
 #define ARM64_SIM_L_ADRP_TAG(OP)                                            \
@@ -139,6 +140,8 @@ union arm64_sim_gpr {
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 #define ARM64_SIM_L_LDRSX_LOAD_WIDTH(OP)                                    \
 	KPROG_ARM64_LDRSX_LOAD_WIDTH((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
+#define ARM64_SIM_L_LDRSX_SXOP(OP)                                          \
+	KPROG_ARM64_LDRSX_SXOP((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 #define ARM64_SIM_L_LOAD_TAG_PRESERVE(OP, TAG, WIDTH)                       \
 	KPROG_ARM64_LOAD_TAG_PRESERVE((OP), (TAG), (WIDTH),                \
 				      ARM64_SIM_L_UNSUPPORTED_OPCODE())
@@ -1210,8 +1213,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		} else if (KPROG_ARM64_LDRSX_HANDLED(OP)) {                \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_SIM_L_LDRSX_LOAD_WIDTH((OP)));\
-			__u64 __a64_l_sxop = (OP) == ARM64_OP_LDRSB ? ARM64_OP_SXTB :\
-				(OP) == ARM64_OP_LDRSW ? ARM64_OP_SXTW : ARM64_OP_SXTH;\
+			__u64 __a64_l_sxop = ARM64_SIM_L_LDRSX_SXOP((OP));\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(__a64_l_sxop, __a64_l_value, __a64_l_width), __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if (KPROG_ARM64_DISP_STORE_HANDLED(OP)) {               \
