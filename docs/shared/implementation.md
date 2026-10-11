@@ -383,6 +383,28 @@ increment is committed and pushed immediately). Current state:
   are disjoint (`arm64_alu_operand_select_lists_disjoint`), the exact 6/7 code
   dispatch and case-label range, and composes the decision into the existing
   `arm64_alu_operand_handler_refines` theorem.
+  The `MULX` arm's choice of body on its resolved operand width is likewise no
+  longer open for x86-64 (Step 0130): `X86_SIM_L_EXEC_MULX` now routes through
+  the generated machine-checked selector `KPROG_X86_MULX_ARM(WIDTH)`, which
+  names the 32x32 single-product split exactly at the 4 (32-bit) width code and
+  the four-limb radix-`2^32` ladder at every other code, so the band choice is a
+  proved table rather than a restated `__x86_l_width == X86_WIDTH_32` test,
+  leaving the register reads, the low/high split, and the two destination
+  writes in the composed arm body. `X86MulxArmHandler.lean` proves the generated
+  `armOf` equal to an independent literal statement built from the width
+  contract's own `x86WidthCodeSpec .w32` (`x86_mulx_arm_refines`), that the
+  single-product arm is selected exactly at the 32-bit width code and the ladder
+  arm at every other code (`x86_mulx_arm_single_iff_w32`,
+  `x86_mulx_arm_ladder_iff_not_w32`, `x86_mulx_arm_over_widths`), that the
+  generated code tables have exactly the declared arm count and no duplicates,
+  and composes the selection into the existing
+  `X86MulxHandler.lean` width-discrimination theorem
+  (`x86_mulx_arm_single_iff_handler_w32`); it does not re-prove the multiply
+  arithmetic, which `X86MulxHandler.lean` already covers. The generated C
+  header additionally pins the generated table's special-width code and the
+  numeric arm codes to the hand-written decodes by `_Static_assert`, and the
+  AArch64 simulator's multiply-into-two-registers analogue is not a width-keyed
+  two-body split, so there is no mirror.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

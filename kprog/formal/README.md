@@ -688,6 +688,31 @@ over five flag codes (including 0), two source registers, and explicit
 dividend/high/divisor tables against an independent quotient/remainder model,
 comparing the whole register file with its tags and requiring the flags to stay
 put (48,515 cases).
+The x86-64 `MULX` arm's choice of which of its two bodies runs is likewise a
+generated contract: `generate_x86_mulx_arm_spec.py` emits
+`KPROG_X86_MULX_SPECIAL_WIDTH` (4), `KPROG_X86_MULX_ARM_COUNT` (2), the two arm
+defines, and the `KPROG_X86_MULX_ARM(WIDTH)` selector, and `X86MulxArmHandler.lean`
+proves the generated `armOf` equal to an independent selector built from the
+width contract's own `x86WidthCodeSpec .w32` (the single-product arm at the
+32-bit code, the four-limb ladder at every other code), that the arm-name table
+equals an independent literal order, that the tables hold exactly `armCount`
+entries and the codes are duplicate-free, that `armOfCode` inverts `codeOfArm`
+on the two arms and names no code beyond them, that the resolved width code is
+8 bits and the special-width code is exactly the 32-bit width's code, and---the
+semantic split---that the single-product arm is selected exactly at the 32-bit
+code and the ladder at every other code, so the band choice is a proved table
+rather than a restated `__x86_l_width == X86_WIDTH_32` test. The generated
+header is included in the sim header just after the `X86_OP_MULX`/width
+decodes, and the routed arm selects its body through
+`KPROG_X86_MULX_ARM(__x86_l_width)`; the register reads, the low/high split, and
+the two destination writes stay in the composed arm body. A generated-header
+oracle cross-checks the compiled selector against an independent literal model
+whose arm codes are fixed numbers rather than the generated defines (261 cases),
+and a sim-header route oracle drives the real `MULX` body over the four widths
+and the absent-code fallback, every `AUX` destination form (including the
+no-register sentinel), and a spread of source/destination pairs against an
+independent `RDX`-left-operand two-destination model, comparing the whole
+register file with its tags (168,965 cases).
 The x86-64 `SHLD`/`SHRD` immediate arm's choice of body and flag family on the
 opcode is likewise a generated contract: `generate_x86_doubleshift_arm_spec.py`
 emits `KPROG_X86_DOUBLESHIFT_ARM_COUNT` (2), the two arm defines, and two
@@ -2543,6 +2568,8 @@ x86 `XCHG` resolved-width arm selection (and the simulator's routing of the
 x86 `DIV` resolved-width quotient/remainder case selection (and the simulator's
 routing of the `X86_OP_DIV` arm bodies through the generated width-keyed
 selector),
+x86 `MULX` resolved-width arm selection (and the simulator's routing of the
+`X86_OP_MULX` arm body through the generated width-keyed selector),
 x86 `SHLD`/`SHRD` immediate opcode-keyed body and flag-family selection (and the
 simulator's routing of the arm body and its shift-flag family through the
 generated opcode-keyed selectors behind the count-zero step gate),

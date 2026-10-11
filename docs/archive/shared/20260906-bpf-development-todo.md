@@ -10738,6 +10738,88 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   ALU-arm operand-source-selection paragraph and extends the covered-slices
   list with the operand-source decision (paper commit pushed to `main`).
 
+## Step 0130 — x86-64 MULX width-keyed arm-selection contract
+
+- Scope: after Step 0114 (XCHG) the x86-64 simulator's `X86_SIM_L_EXEC_MULX`
+  macro still chose between its two bodies — the single 32x32-product split and
+  the four-limb radix-`2^32` ladder — with an inline hand-written
+  `if (__x86_l_width == X86_WIDTH_32)` test. Shared JSON spec
+  `kprog/formal/x86_mulx_arm_spec.json` (`schema_version` 1, operation
+  `x86MulxArmSelector`, selector `single_width_code_then_arm`, `width_code_bits`
+  8, `opcode_define` `X86_OP_MULX` / `opcode` 57, `special_width_define`
+  `KPROG_X86_MULX_SPECIAL_WIDTH` / `special_width_code` 4, and the two-arm table
+  `singleProduct` (define `KPROG_X86_MULX_ARM_SINGLE_PRODUCT`, `is_special_width`
+  1, effect `single_product_split`, class `w32`) / `limbLadder` (define
+  `KPROG_X86_MULX_ARM_LIMB_LADDER`, `is_special_width` 0, effect
+  `four_limb_ladder`, class `other`)) drives generator
+  `kprog/formal/generate_x86_mulx_arm_spec.py`, which renders the arm defines,
+  count, width-keyed selector, code-drift `_Static_assert`s and the
+  `Arm`/`armOf`/`codeOfArm` table into `generated/x86_mulx_arm.h` and
+  `KProgFormal/GeneratedX86MulxArm.lean`.
+- The generated macro `KPROG_X86_MULX_ARM(WIDTH)` is a plain expression,
+  `(((__u8)((WIDTH))) == KPROG_X86_MULX_SPECIAL_WIDTH ? ..._SINGLE_PRODUCT :
+  ..._LIMB_LADDER)`, so it is usable both in the arm body and inside a
+  `_Static_assert`; the input is evaluated once. The header also emits
+  `_Static_assert` rows pinning `X86_OP_MULX`, the special-width code
+  (`X86_WIDTH_32 == KPROG_X86_MULX_SPECIAL_WIDTH`), the arm count, the arm-code
+  distinctness, and the width→arm mapping at 8/16/32/64. The generator's
+  `--check` re-reads `kprog/x86/x86_sim_local_bpf.h`, asserts the live
+  `X86_SIM_L_EXEC_MULX` region routes through `KPROG_X86_MULX_ARM(__x86_l_width)`
+  and no longer restates a raw `__x86_l_width == X86_WIDTH_32` test by hand, and
+  rejects any spec drift. The generator has its own
+  `python3 generate_x86_mulx_arm_spec.py --check` line in
+  `kprog/formal/Makefile`.
+- The `MULX` arm in `kprog/x86/x86_sim_local_bpf.h` (include added after the
+  `X86_OP_MULX` / `X86_WIDTH_*` decodes) now routes its body choice through the
+  generated selector; the former inline width test is gone. The register reads,
+  the low/high split, and the two destination writes stay in the composed arm
+  body.
+- Hand Lean `KProgFormal/X86MulxArmHandler.lean` imports
+  `GeneratedX86MulxArm` and the existing `X86Width` / `X86MulxHandler` modules
+  and states an independent literal selector `x86MulxArmSpec width := if width =
+  x86WidthCodeSpec .w32 then .singleProduct else .limbLadder` plus the literal
+  name list `x86MulxArmNamesSpec`. It proves the generated `armOf` equal to that
+  independent statement (`x86_mulx_arm_refines`), the name table equal to the
+  literal order (`x86_mulx_names_refine`), the exact arm count and code/name
+  table lengths, the arm-code nodup, the single-iff-32 and ladder-iff-not-32
+  characterisations (`x86_mulx_arm_single_iff_w32`,
+  `x86_mulx_arm_ladder_iff_not_w32`), the width→arm behaviour over the four real
+  width codes (`x86_mulx_arm_over_widths`), the `armOfCode` round-trip and
+  beyond-domain `none`, the opcode/bit-width/special-width/count literal pins,
+  the width-class and effect tables, the special-width uniqueness, and the case
+  dispatch (17 theorems); it does **not** re-prove the multiply arithmetic,
+  which `X86MulxHandler.lean` already covers, and it composes the selection into
+  that handler's width discrimination (`x86_mulx_arm_single_iff_handler_w32`).
+  `KProgFormal.lean` imports the generated and hand modules.
+- Host oracle `kprog/formal/test_x86_mulx_arm_host.c` declares the `X86_OP_MULX`
+  / `X86_WIDTH_*` decodes locally from raw architectural values and restates the
+  selection from the raw width codes with **literal** model arm codes (`0`/`1`)
+  rather than the generated defines, so a drift in either generated code is a
+  mismatch rather than a tautology; it pins the count, special-width, arm-code
+  literals and distinctness, and sweeps all 256 width codes:
+  `x86 mulx arm host cross-check: OK (261 cases)`.
+- Route oracle `kprog/formal/test_x86_mulx_arm_route_host.c` drives the real
+  `X86_SIM_L_EXEC(X86_OP_MULX, dst, src, flags, aux, 0ULL)` arm against an
+  independent `RDX`-left-operand / two-destination model over
+  flags{w8,w16,w32,w64,absent} × aux{`X86_REG_NONE`,`X86_RCX`,`X86_RAX`,`X86_R8`}
+  × 16 dst × 16 src, comparing the whole register file:
+  `x86 mulx arm route host cross-check: OK (168965 cases)`.
+- `make -C kprog/formal check` passes with the two new oracle rows raising the
+  cross-check count from **167** (Step 0129 close) to **169**, zero `FAIL`.
+  `make -C kprog/x86 micro-proofs-build` rebuilt all 31 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_mulx_arm.py`, 78 mutations against
+  the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file byte-for-byte
+  between mutations and re-checking the baseline green at the end. Six semantics-
+  preserving mutations (an added include-side comment, an added hand-module
+  comment, a resolved-but-equal generator root path, an added generated-Lean
+  import comment, equal-whitespace spec text, and equal-spacing generated C)
+  SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the x86-64
+  MULX width-keyed arm-selection paragraph and extends the covered-slices list
+  with the width-keyed band decision (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
