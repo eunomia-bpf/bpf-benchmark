@@ -34,6 +34,7 @@
 #include "../formal/generated/x86_mov_reg_arm.h"
 #include "../formal/generated/x86_stack_arm.h"
 #include "../formal/generated/x86_mulx_arm.h"
+#include "../formal/generated/x86_bzhi_flags.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -591,6 +592,19 @@ struct x86_sim_state {
 		KPROG_X86_SET_POPCNT_FLAGS(                               \
 			__x86_cf, __x86_zf, __x86_sf, __x86_of,           \
 			x86_apply_width((SRC), __x86_pc_width) == 0);     \
+	} while (0)
+
+/*
+ * The `BZHI`/`BZHI_MEM` flag block. `CF` is the byte-masked count reaching the
+ * resolved width's bit count, `ZF` the real zero test of the cleared result,
+ * and `SF`/`OF` are cleared; unlike the logical shape, `SF` is not the result
+ * sign and `CF` is not a borrow.
+ */
+#define X86_SIM_L_SET_BZHI_FLAGS(COUNT, BITS, RESULT)                       \
+	do {                                                               \
+		KPROG_X86_SET_BZHI_FLAGS(                                 \
+			__x86_cf, __x86_zf, __x86_sf, __x86_of,           \
+			(COUNT) >= (BITS), (RESULT) == 0);                \
 	} while (0)
 
 #define X86_SIM_L_SET_SUB_FLAGS(LHS, RHS, RESULT, WIDTH)                    \
@@ -1283,10 +1297,8 @@ struct x86_sim_state {
 		__u64 __x86_l_result =                                   \
 			kprog_x86_bzhi_value(__x86_l_src, __x86_l_count,  \
 					     __x86_l_width);              \
-		__x86_cf = __x86_l_count >= __x86_l_bits;                 \
-		__x86_of = 0;                                             \
-		__x86_sf = 0;                                             \
-		__x86_zf = __x86_l_result == 0;                           \
+		X86_SIM_L_SET_BZHI_FLAGS(__x86_l_count, __x86_l_bits,    \
+					 __x86_l_result);                  \
 		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,          \
 					  __x86_l_width);                    \
 	} while (0)

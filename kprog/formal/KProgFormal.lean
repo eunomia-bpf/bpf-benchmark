@@ -113,6 +113,8 @@ import KProgFormal.GeneratedX86Andn
 import KProgFormal.X86AndnHandler
 import KProgFormal.GeneratedX86Bzhi
 import KProgFormal.X86BzhiHandler
+import KProgFormal.GeneratedX86BzhiFlags
+import KProgFormal.X86BzhiFlags
 import KProgFormal.GeneratedX86Bt
 import KProgFormal.X86BtHandler
 import KProgFormal.GeneratedX86CmpOp

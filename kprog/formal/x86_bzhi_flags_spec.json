@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "operation": "x86BzhiFlags",
+  "opcodes": [
+    {"name": "bzhi", "define": "X86_OP_BZHI", "code": 52},
+    {"name": "bzhiMem", "define": "X86_OP_BZHI_MEM", "code": 53}
+  ],
+  "cf_source": "masked_count_at_least_width_bits",
+  "zf_source": "result_is_zero",
+  "flags": {
+    "cf": {"op": "input", "name": "count_at_least_width_bits"},
+    "zf": {"op": "input", "name": "result_is_zero"},
+    "sf": {"op": "const", "value": false},
+    "of": {"op": "const", "value": false}
+  }
+}
