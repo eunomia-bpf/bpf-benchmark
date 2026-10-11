@@ -10982,6 +10982,83 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   helper-call-ladder routing paragraph and extends the covered-slices list with
   the routed helper-id dispatch (paper commit pushed to `main`).
 
+## Step 0133 — x86-64 MOVX source-width resolution through the generated selector
+
+- Scope: the generated `x86_movx_shape_spec.json` `source_width` block, its
+  header `generated/x86_movx_shape.h`, and its hand Lean
+  `KProgFormal/X86MovxShape.lean` existed and were static-asserted and proved,
+  but the source-width resolution was restated by hand at both live `MOVZX`/
+  `MOVSX` bodies in `kprog/x86/x86_sim_local_bpf.h` as an inline
+  `__x86_l_src_width = (AUX) ? (AUX) : __x86_l_width;` ternary, so a drift in
+  the generated selector was not behaviourally observable. This step routes
+  both bodies through the selector.
+- `kprog/x86/x86_sim_local_bpf.h`: both `MOVZX`/`MOVSX` bodies (the standalone
+  shared macro `X86_SIM_L_EXEC_MOVX_REG`, and the `X86_OP_MOVZX_REG ||
+  X86_OP_MOVSX_REG` arm) now compute
+  `__u8 __x86_l_src_width = KPROG_X86_MOVX_SRC_WIDTH((AUX), __x86_l_width);`.
+  `generated/x86_movx_shape.h` is already included (one occurrence), so the
+  header's `_Static_assert`s bind the absent code, the four width-code
+  identities, their distinctness, and the absent→effective fallback to the
+  hand-written `X86_WIDTH_*` decodes.
+- Spec `kprog/formal/x86_movx_shape_spec.json`: one `source_width` block
+  `{"field":"aux","absent_code":0,"fallback":"effective_width"}`. Generator
+  `kprog/formal/generate_x86_movx_shape_spec.py`: the routed-shape checks
+  require the selector sentinel `KPROG_X86_MOVX_SRC_WIDTH((` in BOTH the macro
+  and arm regions and reject the restated inline fallback
+  `src_width = (AUX) ? (AUX)` in both; `load_width_codes()` re-derives the four
+  `(name, code)` pairs from the public `kprog/formal/x86_width_spec.json` kernel
+  and rejects any drift from the MOVX contract; `load()` rejects a non-canonical
+  absent code, an absent code colliding with a width code, and an unknown
+  fallback. The generator renders the Lean surface (`srcWidthField`,
+  `srcWidthAbsentCode`, `srcWidthCodes`, `srcWidth(aux,effective)`) and the C
+  surface (`KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE`, a plain-ternary
+  `KPROG_X86_MOVX_SRC_WIDTH(AUX, WIDTH)` so it is `_Static_assert`-usable, and
+  the per-width identity / distinctness / fallback asserts). `python3
+  generate_x86_movx_shape_spec.py && ... --check` returns 0. The
+  `--check` row already existed at `kprog/formal/Makefile:119`.
+- Hand Lean `KProgFormal/X86MovxShape.lean`: adds the independent
+  `x86MovxSrcWidthAbsentSpec`/`x86MovxSrcWidthSpec` and proves the generated
+  `srcWidth` refines it (`x86_movx_src_width_refines`,
+  `..._absent_refines`), that the field is `aux`
+  (`x86_movx_src_width_field_is_aux`), that the resolution is the identity on
+  every real width (`x86_movx_src_width_identity_on_width`) and resolves an
+  absent field to the effective width (`x86_movx_src_width_absent_is_effective`,
+  `x86_movx_src_width_absent_names_no_width`),
+  that it covers exactly the four width codes
+  (`x86_movx_src_width_codes_refine`, `..._resolves_to_width`), and that it
+  composes with the width kernel so a resolved source width is never the absent
+  code (`x86_movx_src_width_composed_is_width`) and matches the handler
+  (`x86_movx_src_width_matches_handler`).
+  `lake build KProgFormal.GeneratedX86MovxShape && lake env lean
+  KProgFormal/X86MovxShape.lean` returns 0.
+- Host oracle `kprog/formal/test_x86_movx_shape_host.c`: extended with the four
+  width decodes, the width-code table, an independent
+  `model_src_width(aux,effective)`, an `aux`×`effective` sweep (0..0xff × the
+  four effectives), the identity-on-real-width block, and the
+  absent-fallback/no-collision block; the opcode-arm sweep is retained:
+  `x86 movx shape host cross-check: OK (1289 cases)`.
+- Route oracle `kprog/formal/test_x86_movx_shape_route_host.c` (doc comment
+  updated to name the selector): the selector-agreement block re-checks the
+  src-width identity on each real width and the absent→effective fallback
+  against the independent model: `x86 movx shape route host cross-check: OK
+  (118803 cases)`.
+- `make -C kprog/formal check` passes with **171** `cross-check: OK` rows and
+  zero `FAIL` (the movx oracle rows were already wired into the check target;
+  only the body and the oracle contents changed, so the count is unchanged).
+  `make -C kprog/x86 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_movx_src_width.py`, 66 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end. Six semantics-preserving mutations (a resolved-but-equal generator root
+  path, equal-whitespace spec text, equal-spacing generated C `_Static_assert`,
+  an added generated-Lean import comment, an added hand-module namespace
+  comment, and equal-spacing public width-spec text) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the x86-64
+  MOVX source-width resolution paragraph and extends the covered-slices list
+  with the routed source-width resolution (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

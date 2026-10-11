@@ -445,6 +445,29 @@ increment is committed and pushed immediately). Current state:
   that does not switch on the selector or that restates an inline id
   comparison. There is no AArch64 mirror, as the AArch64 call ladder is not
   id-keyed.
+  The MOVX source width is likewise no longer open for x86-64 (Step 0133):
+  both live `MOVZX`/`MOVSX` bodies (the standalone shared macro
+  `X86_SIM_L_EXEC_MOVX_REG` and the routed `X86_OP_MOVZX_REG`/`X86_OP_MOVSX_REG`
+  arm) now resolve the width they widen at through the generated,
+  static-asserted, machine-checked `KPROG_X86_MOVX_SRC_WIDTH` selector instead
+  of an inline `(AUX) ? (AUX) : __x86_l_width` fallback, so the source-width
+  resolution the bodies rely on is a proved contract rather than a restated
+  ternary. The resolution reads the decoded `aux` field and falls back to the
+  body's effective (FLAGS-resolved) width only when that field is absent
+  (`0`), re-deriving the four width codes from the public `x86_width_spec.json`
+  kernel so the contract is stated against the width names the rest of the
+  simulator uses; `X86MovxShape.lean` proves it refines the independent
+  `x86MovxSrcWidthSpec` (`x86_movx_src_width_refines`), is the identity on
+  every real width (`x86_movx_src_width_identity_on_width`), resolves an absent
+  field to the effective width (`x86_movx_src_width_absent_refines`,
+  `..._field_is_aux`), covers exactly the four width codes
+  (`x86_movx_src_width_codes_refine`), and composes with the width kernel so a
+  resolved source width is never the absent code
+  (`x86_movx_src_width_composed_is_width`, `..._matches_handler`); the selector
+  is a plain ternary so it is usable from a `_Static_assert`, and the generator
+  rejects a body that does not route through it or that restates the inline
+  fallback. There is no AArch64 mirror, as the AArch64 register-MOV selects its
+  width by typed operand rather than a decoded fallback code.
 - Open on the AArch64 side: parser/register-number and packed-AUX field
   selection beyond typed operands, including CCMP condition/fallback decoding.
   The generic immediate/register

@@ -822,15 +822,30 @@ the value composition — that the selected arm's per-opcode extension picks the
 `X86MovxRegHandler` extension (`sign_extend` at `MOVSX`, `zero_extend` at
 `MOVZX`). Both the standalone `X86_SIM_L_EXEC_MOVX_REG` body and the inline
 `X86_OP_MOVZX_REG || X86_OP_MOVSX_REG` arm compute the selector and branch the
-widened value through the selected function, leaving the source-width fallback
-(`(AUX) ? (AUX) : __x86_l_width`, the separate width contract) and the
-partial-register writeback in the composed arm bodies. A generated-header
-oracle cross-checks the compiled selector against an independent literal model
-(260 cases), and a sim-header route oracle drives the real `MOVX` arm over both
-opcodes, five flag codes (including 0), several AUX source widths (including
-the absent-code fallback), high-bit source values, and register pairs against
-an independent sign/zero-extension model, comparing the whole register file
-with its tags (118,802 cases).
+widened value through the selected function, leaving only the partial-register
+writeback in the composed arm bodies. The source width both bodies widen at is
+itself a generated contract (STEP 0133): `generate_x86_movx_shape_spec.py` also
+emits `KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE` (0) and the plain-ternary
+`KPROG_X86_MOVX_SRC_WIDTH(AUX, WIDTH)`, re-deriving the four width codes from the
+public `x86_width_spec.json` so the contract is stated against the width names
+the rest of the simulator uses, and `X86MovxShape.lean` proves the generated
+`srcWidth` refines an independent `x86MovxSrcWidthSpec`, that it is the identity
+on every real width and resolves only the absent code to the effective width,
+that it covers exactly the four width codes, and that it composes with the width
+kernel so a resolved source width is never the absent code. Both live bodies now
+compute `__x86_l_src_width = KPROG_X86_MOVX_SRC_WIDTH((AUX), __x86_l_width)`
+instead of the former inline `(AUX) ? (AUX) : __x86_l_width` fallback, and the
+generator rejects a body that does not route through the selector or that
+restates the inline fallback. A generated-header oracle cross-checks the
+compiled opcode-shape selector over the whole opcode byte range and the compiled
+source-width selector over the whole `aux` byte range crossed with the real
+effective widths against an independent literal model of each selection (1,289
+cases), and a
+sim-header route oracle drives the real `MOVX` arm over both opcodes, five flag
+codes (including 0), several AUX source widths (including the absent-code
+fallback), high-bit source values, and register pairs against an independent
+sign/zero-extension model, comparing the whole register file with its tags
+(118,803 cases).
 The x86-64 `MOV_REG` register arm's choice of which body a `mov` runs is
 likewise a generated contract: `generate_x86_mov_reg_arm_spec.py` emits
 `KPROG_X86_MOV_REG_ARM(W, RSP)`, which names the stack-base pointer write at
@@ -2616,7 +2631,9 @@ arithmetic flags through the generated clear-`CF`/`SF`/`OF`, set-`ZF`-from-
 narrowed-source contract),
 x86 `MOVZX`/`MOVSX` register opcode-keyed extension-shape selection (and the
 simulator's routing of both the standalone `MOVX` body and its inline arm
-through the generated opcode-keyed selector),
+through the generated opcode-keyed selector and its routing of both bodies'
+source-width resolution through the generated `KPROG_X86_MOVX_SRC_WIDTH`
+selector),
 x86 `MOV_REG` width/register-keyed body selection (and the simulator's routing
 of both the standalone `MOV_REG` body and its inline arm through the generated
 selector),
