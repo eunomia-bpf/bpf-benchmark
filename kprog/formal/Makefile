@@ -68,6 +68,7 @@ check:
 	python3 generate_arm64_stack_read_tag_source_spec.py --check
 	python3 generate_arm64_helper_arg_ptr_spec.py --check
 	python3 generate_arm64_mem_base_src_spec.py --check
+	python3 generate_arm64_mem_index_value_spec.py --check
 	python3 generate_arm64_dq_mem_extra_spec.py --check
 	python3 generate_x86_cond_spec.py --check
 	python3 generate_x86_cc_decode_spec.py --check
@@ -698,6 +699,12 @@ check:
 	./build/test_arm64_mem_base_src_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_base_src_route_host.c -o build/test_arm64_mem_base_src_route_host
 	./build/test_arm64_mem_base_src_route_host
+	lake env lean KProgFormal/GeneratedArm64MemIndexValue.lean
+	lake env lean KProgFormal/Arm64MemIndexValueShape.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_index_value_host.c -o build/test_arm64_mem_index_value_host
+	./build/test_arm64_mem_index_value_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_index_value_route_host.c -o build/test_arm64_mem_index_value_route_host
+	./build/test_arm64_mem_index_value_route_host
 	lake env lean KProgFormal/GeneratedArm64DqMemExtra.lean
 	lake env lean KProgFormal/Arm64DqMemExtraShape.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_extra_host.c -o build/test_arm64_dq_mem_extra_host
