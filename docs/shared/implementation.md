@@ -598,7 +598,50 @@ increment is committed and pushed immediately). Current state:
   refinement theorem, while the last two genuine-equivalence rewrites are
   the two the proof correctly does not flag. The out-of-range width codes
   and the byte-ladder lanes remain boundaries.
-  Remaining work also includes the load/store address and tag paths,
+  The AArch64 stack slot tag read source is likewise no longer open
+  (Step 0138): the simulator's `ARM64_SIM_L_STACK_READ_TAG` read helper
+  returned the tag of a stack slot read from a closed pair of facts ---
+  the slot's word in the per-slot tag array when the read is 64-bit and
+  the slot is 8-aligned, the scalar marker otherwise --- with the
+  read-side `KPROG_ARM64_STACK_TAG(` slot-tag predicate as the inline
+  gate and the 2-way source selection living only in the read-helper
+  body. A drift in the source selection was not observable. This step
+  generates the 2-way source selector from
+  `arm64_stack_read_tag_source_spec.json` into the C
+  `generated/arm64_stack_read_tag_source.h` (the
+  `KPROG_ARM64_STACK_READ_TAG_SOURCE` plain-ternary selector, the
+  source-code defines, and the count, distinctness, and selection
+  `_Static_assert`s) and `KProgFormal/GeneratedArm64StackReadTagSource.lean`,
+  and routes the live read helper through the generated selector,
+  removing the hand gate from the read path; the write-side routing of
+  Step 0137 is unchanged. `Arm64StackReadTagSourceShape.lean` proves the
+  generated selector equal to an independent literal over every fact
+  pair (`arm64_stack_read_tag_source_refines`), the name and code tables
+  against independent enumerations, the code round-trip and out-of-range
+  facts, the two distinct storage effects, the four-case dispatch, the
+  read stack-tag-array source equal to the read-side
+  `KPROG_ARM64_STACK_TAG` predicate over the same fact pair
+  (`arm64_stack_read_tag_source_matches_read_tag`), and the read
+  stack-tag-array source firing exactly where the Step 0137 write
+  helper's word-and-tag action fires
+  (`arm64_stack_read_tag_source_matches_write_word_arm`); the 15-case
+  host oracle drives the generated selector against an independent
+  2-way restatement, and the route oracle drives the real read through
+  the generated selector against an independent slot-tag-array and
+  byte-image model over a 20000-iteration sweep with each write commit
+  mirrored into the model (60142 cases). 33 binding mutations --- five
+  specification distortions, four generator-table changes, a
+  sim-header selector-to-hand-gate revert, seven generated-C header
+  distortions (including the regenerated generator/render drift), seven
+  generated-Lean changes (including the regenerated generator/render
+  drift), five hand-refinement changes, and two sim-header read
+  inversions --- each of the first 31 changes the oracle, the
+  generator check, or a refinement theorem, while the last two
+  genuine-equivalence rewrites are the two the proof correctly does not
+  flag. The out-of-range source codes remain boundaries.
+  Remaining work also includes the load/store address and tag paths, with
+  the stack slot tag write action and read source now closed (Steps 0137
+  and 0138),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

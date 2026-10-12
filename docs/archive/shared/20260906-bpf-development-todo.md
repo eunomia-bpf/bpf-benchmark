@@ -11358,6 +11358,94 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   path and an added hand-module namespace comment) SURVIVE as required.
   Per detector: `gen` 10, `lean_chain` 11, `host` 5, `route` 2.
 
+## Step 0138 — AArch64 stack slot-tag read source selection through the generated contract
+
+- Scope: the AArch64 simulator's `ARM64_SIM_L_STACK_READ_TAG` read helper
+  (`kprog/arm64/arm64_sim_local_bpf.h`) returned the tag of a stack slot
+  read from a closed pair of facts — whether the read width is 64 bits and
+  whether the stack slot is 8-aligned — and picked the tag source by hand:
+  the slot's word in the per-slot tag array when 64-bit and aligned, the
+  scalar marker otherwise, with the read-side `KPROG_ARM64_STACK_TAG(`
+  slot-tag predicate as the inline gate. This step generates the 2-way
+  source selector from one specification and routes the live read helper
+  through the generated `KPROG_ARM64_STACK_READ_TAG_SOURCE` selector,
+  removing the hand gate from the read path. This is the read-side mirror
+  of Step 0137's write-side 3-way action and closes the read/write
+  symmetry of the stack-tag family: the `.stackTagArray` source fires on
+  the same fact pair the 0121 `KPROG_ARM64_STACK_TAG` gate and the 0137
+  write helper's word-and-tag action fire on.
+- Spec `kprog/formal/arm64_stack_read_tag_source_spec.json`: schema_version 1,
+  operation `arm64StackReadTagSource`, and two sources — `stackTagArray`
+  (code 0, effect `slot_tag_array`), `scalarDefault` (code 1, effect
+  `scalar_default`) — plus four cases classifying every (isW64, isAligned)
+  fact pair into its source.
+- Generator `kprog/formal/generate_arm64_stack_read_tag_source_spec.py`:
+  `load()` re-reads the sim header on every `--check` and rejects a spec
+  that does not biject the expected sources/cases table, an effect that
+  names no storage effect, and a read region that names no generated
+  selector or still names a hand `KPROG_ARM64_STACK_TAG(` gate. Emits the
+  C header `generated/arm64_stack_read_tag_source.h` (the
+  `KPROG_ARM64_STACK_READ_TAG_SOURCE(IS_W64, IS_ALIGNED)` 2-way selector,
+  the source-code defines, and the count, distinctness, and selection
+  `_Static_assert`s) and the Lean
+  `KProgFormal/GeneratedArm64StackReadTagSource.lean`. `--check`
+  returns 0; the `--check` row is added at `kprog/formal/Makefile:68`.
+- Generated C header `kprog/formal/generated/arm64_stack_read_tag_source.h`:
+  `KPROG_ARM64_STACK_READ_TAG_SOURCE_COUNT 2U`, the two source-code
+  defines (`…_STACK_TAG_ARRAY 0U`, `…_SCALAR_DEFAULT 1U`), the plain-ternary
+  2-way selector macro, and the count, two-pair distinctness, exact-code,
+  and four fact-pair selection `_Static_assert`s.
+- Hand Lean `kprog/formal/KProgFormal/Arm64StackReadTagSourceShape.lean`:
+  independent literal statements of the 2-way selector, the two source
+  names, the two source codes, and the four-case dispatch, with theorems
+  `arm64_stack_read_tag_source_refines` (the generated selector equals the
+  independent literal over every fact pair), `_names_refine`,
+  `_codes_refine`, `_codes_length`/`_names_length`, `_codes_nodup`,
+  `_count_is_2`, `_of_code_roundtrip`, `_of_code_beyond_is_none`,
+  `_effects`, `_case_dispatch`, `_case_refines`,
+  `_matches_read_tag` (the read stack-tag-array source is the 0121
+  read-side `KPROG_ARM64_STACK_TAG` predicate over the same fact pair),
+  and `_matches_write_word_arm` (the read stack-tag-array source fires
+  exactly where the 0137 write helper's word-and-tag action fires, so the
+  read and write sides of the stack-tag family agree on which slots carry
+  a slot tag); all `native_decide`/`rfl`/`decide`. `lake build
+  KProgFormal.GeneratedArm64StackReadTagSource && lake env lean
+  KProgFormal/Arm64StackReadTagSourceShape.lean` returns 0.
+- Sim-header routing `kprog/arm64/arm64_sim_local_bpf.h`: the read
+  helper body now computes its tag source through the generated
+  `KPROG_ARM64_STACK_READ_TAG_SOURCE` selector and the hand
+  `KPROG_ARM64_STACK_TAG(` gate is removed from the read path; the
+  write-side routing and the byte image are unchanged.
+- Host oracle `kprog/formal/test_arm64_stack_read_tag_source_host.c`:
+  restates the 2-way source selection from the two raw facts, drives the
+  generated selector over every fact pair and width code, and pins the
+  source codes and count:
+  `arm64 stack read tag source host cross-check: OK (15 cases)`.
+- Route oracle `kprog/formal/test_arm64_stack_read_tag_source_route_host.c`:
+  drives the real `ARM64_SIM_L_STACK_READ_TAG` read through the generated
+  selector against an independent slot-tag-array and byte-image model
+  over a 20000-iteration sweep, with each write commit mirrored into the
+  model so every read has a defined expected tag:
+  `arm64 stack read tag source route host cross-check: OK (60142 cases)`.
+- `make -C kprog/formal check` passes with **178** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 176→178).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_stack_read_tag_source.py`,
+  33 mutations against the live tree, each caught after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the baseline
+  green at the end: 31 of the 33 are caught---five specification
+  distortions, four generator-table changes, a sim-header
+  selector-to-hand-gate revert, six generated-C header distortions plus
+  the regenerated generator/render drift, six generated-Lean distortions
+  plus the regenerated generator/render drift, five hand-refinement
+  changes, and two sim-header read inversions---while two
+  genuine-equivalence rewrites (a resolved-but-equal generator root path
+  and an added hand-module namespace comment) SURVIVE as required.
+  Per detector: `gen` 10, `lean_chain` 12, `host` 7, `route` 2.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

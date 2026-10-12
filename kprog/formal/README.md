@@ -259,6 +259,34 @@ oracle drives the real write through the generated selector against an
 independent byte-image and slot-tag model with the read-back through the
 real read helper. The out-of-range width codes and the byte-ladder lanes
 remain boundaries.
+The two AArch64 stack slot-tag read sources are generated the same way
+from `arm64_stack_read_tag_source_spec.json` into the C
+`generated/arm64_stack_read_tag_source.h` (the
+`KPROG_ARM64_STACK_READ_TAG_SOURCE` plain-ternary 2-way selector, the
+source-code defines, and the count, distinctness, and selection
+`_Static_assert`s) and
+`KProgFormal/GeneratedArm64StackReadTagSource.lean`. The generator
+re-reads the simulator header on every `--check` and rejects a read
+region that names no generated selector or still names a hand
+`KPROG_ARM64_STACK_TAG(` gate. The simulator's
+`ARM64_SIM_L_STACK_READ_TAG` read helper routes through the generated
+selector, so the hand gate is out of the read path and the write-side
+routing of Step 0137 is unchanged. This is the read-side mirror of the
+write-side 3-way action: the `.stackTagArray` source fires on the same
+fact pair the 0121 slot-tag predicate and the 0137 word-and-tag action
+fire on. Lean checks the generated selector against an independent
+literal over every fact pair, the name and code tables against
+independent enumerations, the code round-trip and out-of-range facts,
+the four-case dispatch, the read stack-tag-array source against the
+read-side slot-tag predicate
+(`arm64_stack_read_tag_source_matches_read_tag`), and the read
+stack-tag-array source against the 0137 write word-and-tag action
+(`arm64_stack_read_tag_source_matches_write_word_arm`); the host oracle
+drives the generated selector against an independent 2-way
+restatement, and the route oracle drives the real read through the
+generated selector against an independent slot-tag-array and
+byte-image model with each write commit mirrored into the model. The
+out-of-range source codes remain boundaries.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the
