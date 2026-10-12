@@ -1,0 +1,488 @@
+guest-start 2026-10-11T23:21:29Z
+Linux virtme-ng 7.0.0-rc2+ #7 SMP PREEMPT_DYNAMIC Sun Oct 11 16:17:38 PDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/vendor/build/x86/linux/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`YmFzaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL2d1ZXN0LXJ1bi5zaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL3J1bnMva2luc24tY3VycmVudA==` virtme_chdir=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+8
+model name	: Intel(R) Core(TM) Ultra 9 285K
+[    0.002248] tsc: Detected 3686.400 MHz processor
+suite-start 2026-10-11T23:21:30Z
+make: Entering directory '/home/yunwei37/workspace/bpf-benchmark-rerun-20261009'
+install -d /run/bpf-benchmark-docker /run/bpf-benchmark-docker/data /run/bpf-benchmark-docker/exec
+truncate -s "${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+"/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/runner/scripts/start-vm-docker"
+install -d "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results"
+"/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/runner/scripts/bpfrejit-install" --image "bpf-benchmark/runner-runtime:x86_64" "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/.cache/container-images/x86_64-runner-runtime.image.tar"
+Loaded image: bpf-benchmark/runner-runtime:x86_64
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host -e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root -e TARGET="x86-kvm" -e RUN_TARGET_NAME="x86-kvm" -e RUN_TOKEN="9d0da3cd" -e RUN_TARGET_ARCH="x86_64" -e RUN_EXECUTOR="kvm" -e RUN_REMOTE_PYTHON_BIN="python3" -e RUN_RUNTIME_PYTHON_BIN="python3" -e RUN_BPFTOOL_BIN="bpftool" -e RUN_NATIVE_REPOS_CSV="bcc,katran,tracee,tetragon" -e MICRO_PROGRAM_DIR="/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/programs" -e SAMPLES="4" -e WARMUPS="0" -e INNER_REPEAT="10"  -e SUITE="micro/results/kinsn_load_time_current_20261011/suite-paper62.yaml" -e RUNTIMES="kernel,kernel_rejit" -e FUZZ_ROUNDS="1000"    -e BPFREJIT_BENCH_PASSES="kinsn"            -e MERLIN_COMPILETIME_MODE="none"                    -e CILIUM_PROFILE_ARM="all"    -w "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009" -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro -v "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results:/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results" "bpf-benchmark/runner-runtime:x86_64" python3 -m runner.suites.micro
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.
+[bench] (1/62) simple
+  kernel           compile last 24213175 ns | exec last 89 ns | result 12345678
+  kernel_rejit     compile last 29421540 ns | exec last 87 ns | result 12345678
+[bench] (2/62) simple_packet
+  kernel           compile last 9129156 ns | exec last 107 ns | result 12345678
+  kernel_rejit     compile last 8438231 ns | exec last 110 ns | result 12345678
+[bench] (3/62) memory_pair_sum
+  kernel           compile last 10190079 ns | exec last 119 ns | result 0
+  kernel_rejit     compile last 66474708 ns | exec last 90 ns | result 0
+[bench] (4/62) bitcount
+  kernel           compile last 98270643 ns | exec last 99 ns | result 0
+  kernel_rejit     compile last 96675131 ns | exec last 136 ns | result 0
+[bench] (5/62) log2_fold
+  kernel           compile last 14349781 ns | exec last 120 ns | result 0
+  kernel_rejit     compile last 14932306 ns | exec last 140 ns | result 0
+[bench] (6/62) dep_chain_short
+  kernel           compile last 26314114 ns | exec last 115 ns | result 0
+  kernel_rejit     compile last 10964827 ns | exec last 105 ns | result 0
+[bench] (7/62) dep_chain_long
+  kernel           compile last 12392975 ns | exec last 93 ns | result 0
+  kernel_rejit     compile last 24983220 ns | exec last 86 ns | result 0
+[bench] (8/62) binary_search
+  kernel           compile last 46366023 ns | exec last 127 ns | result 0
+  kernel_rejit     compile last 22688624 ns | exec last 144 ns | result 0
+[bench] (9/62) branch_layout
+  kernel           compile last 15588618 ns | exec last 98 ns | result 0
+  kernel_rejit     compile last 22226161 ns | exec last 122 ns | result 0
+[bench] (10/62) switch_dispatch
+  kernel           compile last 43309437 ns | exec last 140 ns | result 0
+  kernel_rejit     compile last 39332383 ns | exec last 165 ns | result 0
+[bench] (11/62) branch_dense
+  kernel           compile last 18178939 ns | exec last 134 ns | result 0
+  kernel_rejit     compile last 25783856 ns | exec last 118 ns | result 0
+[bench] (12/62) cmov_select
+  kernel           compile last 13898992 ns | exec last 105 ns | result 0
+  kernel_rejit     compile last 15396568 ns | exec last 148 ns | result 0
+[bench] (13/62) cmov_dense
+  kernel           compile last 12100408 ns | exec last 224 ns | result 5741686263220583387
+  kernel_rejit     compile last 13388286 ns | exec last 173 ns | result 5741686263220583387
+[bench] (14/62) checksum
+  kernel           compile last 45047939 ns | exec last 110 ns | result 0
+  kernel_rejit     compile last 43099917 ns | exec last 103 ns | result 0
+[bench] (15/62) load_word32
+  kernel           compile last 14628562 ns | exec last 126 ns | result 0
+  kernel_rejit     compile last 8271047 ns | exec last 121 ns | result 0
+[bench] (16/62) load_byte
+  kernel           compile last 8926878 ns | exec last 121 ns | result 0
+  kernel_rejit     compile last 59938200 ns | exec last 70 ns | result 0
+[bench] (17/62) load_byte_recompose
+  kernel           compile last 10717104 ns | exec last 107 ns | result 0
+  kernel_rejit     compile last 11436347 ns | exec last 140 ns | result 0
+[bench] (18/62) load_native_u64
+  kernel           compile last 14781963 ns | exec last 114 ns | result 0
+  kernel_rejit     compile last 11793350 ns | exec last 97 ns | result 0
+[bench] (19/62) packet_parse
+  kernel           compile last 10779904 ns | exec last 85 ns | result 0
+  kernel_rejit     compile last 11528047 ns | exec last 151 ns | result 0
+[bench] (20/62) bounds_ladder
+  kernel           compile last 9233315 ns | exec last 107 ns | result 0
+  kernel_rejit     compile last 11411778 ns | exec last 102 ns | result 0
+[bench] (21/62) bounds_check_heavy
+  kernel           compile last 96661936 ns | exec last 134 ns | result 0
+  kernel_rejit     compile last 97379871 ns | exec last 128 ns | result 0
+[bench] (22/62) stride_load_4
+  kernel           compile last 48641311 ns | exec last 116 ns | result 0
+  kernel_rejit     compile last 8681998 ns | exec last 138 ns | result 0
+[bench] (23/62) stride_load_16
+  kernel           compile last 8378130 ns | exec last 156 ns | result 0
+  kernel_rejit     compile last 9600846 ns | exec last 79 ns | result 0
+[bench] (24/62) mixed_alu_mem
+  kernel           compile last 19065515 ns | exec last 130 ns | result 0
+  kernel_rejit     compile last 18701974 ns | exec last 108 ns | result 0
+[bench] (25/62) spill_pressure
+  kernel           compile last 37397114 ns | exec last 129 ns | result 0
+  kernel_rejit     compile last 14308440 ns | exec last 107 ns | result 0
+[bench] (26/62) multi_acc_4
+  kernel           compile last 11434173 ns | exec last 74 ns | result 0
+  kernel_rejit     compile last 12545735 ns | exec last 136 ns | result 0
+[bench] (27/62) multi_acc_8
+  kernel           compile last 16901637 ns | exec last 62 ns | result 0
+  kernel_rejit     compile last 9877683 ns | exec last 125 ns | result 0
+[bench] (28/62) fibonacci_iter
+  kernel           compile last 11101578 ns | exec last 133 ns | result 0
+  kernel_rejit     compile last 69702413 ns | exec last 87 ns | result 0
+[bench] (29/62) fibonacci_iter_packet
+  kernel           compile last 64944258 ns | exec last 54 ns | result 0
+  kernel_rejit     compile last 12736915 ns | exec last 134 ns | result 0
+[bench] (30/62) fixed_loop_small
+  kernel           compile last 12937339 ns | exec last 125 ns | result 0
+  kernel_rejit     compile last 37950678 ns | exec last 81 ns | result 0
+[bench] (31/62) fixed_loop_large
+  kernel           compile last 11443558 ns | exec last 54 ns | result 0
+  kernel_rejit     compile last 10060333 ns | exec last 94 ns | result 0
+[bench] (32/62) nested_loop_2
+  kernel           compile last 13927308 ns | exec last 129 ns | result 0
+  kernel_rejit     compile last 19012398 ns | exec last 138 ns | result 0
+[bench] (33/62) nested_loop_3
+  kernel           compile last 19091813 ns | exec last 81 ns | result 0
+  kernel_rejit     compile last 37715530 ns | exec last 158 ns | result 0
+[bench] (34/62) code_clone_2
+  kernel           compile last 10372587 ns | exec last 119 ns | result 0
+  kernel_rejit     compile last 27414527 ns | exec last 92 ns | result 0
+[bench] (35/62) code_clone_8
+  kernel           compile last 13791294 ns | exec last 96 ns | result 0
+  kernel_rejit     compile last 15481666 ns | exec last 122 ns | result 0
+[bench] (36/62) large_mixed_500
+  kernel           compile last 41103957 ns | exec last 130 ns | result 0
+  kernel_rejit     compile last 17159426 ns | exec last 99 ns | result 0
+[bench] (37/62) large_mixed_1000
+  kernel           compile last 23395606 ns | exec last 143 ns | result 0
+  kernel_rejit     compile last 25497305 ns | exec last 112 ns | result 0
+[bench] (38/62) bpf_call_chain
+  kernel           compile last 12976361 ns | exec last 509 ns | result 16747631233129837311
+  kernel_rejit     compile last 13385300 ns | exec last 529 ns | result 16747631233129837311
+[bench] (39/62) memcmp_prefix_64
+  kernel           compile last 11753997 ns | exec last 126 ns | result 0
+  kernel_rejit     compile last 11438421 ns | exec last 136 ns | result 0
+[bench] (40/62) packet_parse_vlans_tcpopts
+  kernel           compile last 32266322 ns | exec last 109 ns | result 0
+  kernel_rejit     compile last 19263140 ns | exec last 169 ns | result 0
+[bench] (41/62) local_call_fanout
+  kernel           compile last 12489140 ns | exec last 136 ns | result 0
+  kernel_rejit     compile last 13626012 ns | exec last 108 ns | result 0
+[bench] (42/62) packet_rss_hash
+  kernel           compile last 17436927 ns | exec last 114 ns | result 0
+  kernel_rejit     compile last 15448413 ns | exec last 123 ns | result 0
+[bench] (43/62) imm64_storm
+  kernel           compile last 10429697 ns | exec last 356 ns | result 8004644859348874360
+  kernel_rejit     compile last 11460155 ns | exec last 430 ns | result 8004644859348874360
+[bench] (44/62) alu32_64_pingpong
+  kernel           compile last 10070962 ns | exec last 115 ns | result 0
+  kernel_rejit     compile last 13886286 ns | exec last 130 ns | result 0
+[bench] (45/62) branch_fanout_32
+  kernel           compile last 42510445 ns | exec last 144 ns | result 0
+  kernel_rejit     compile last 48862545 ns | exec last 142 ns | result 0
+[bench] (46/62) deep_guard_tree_8
+  kernel           compile last 11402825 ns | exec last 126 ns | result 0
+  kernel_rejit     compile last 12465436 ns | exec last 104 ns | result 0
+[bench] (47/62) mega_basic_block_2048
+  kernel           compile last 33319798 ns | exec last 1749 ns | result 12922509338478190001
+  kernel_rejit     compile last 30645965 ns | exec last 2278 ns | result 12922509338478190001
+[bench] (48/62) rotate64_hash
+  kernel           compile last 9380194 ns | exec last 271 ns | result 5099286188975296341
+  kernel_rejit     compile last 12116201 ns | exec last 152 ns | result 5099286188975296341
+[bench] (49/62) packet_redundant_bounds
+  kernel           compile last 8566341 ns | exec last 157 ns | result 0
+  kernel_rejit     compile last 10840529 ns | exec last 121 ns | result 0
+[bench] (50/62) const_fold_chain
+  kernel           compile last 11903866 ns | exec last 134 ns | result 0
+  kernel_rejit     compile last 21419783 ns | exec last 156 ns | result 0
+[bench] (51/62) struct_field_cluster
+  kernel           compile last 8718382 ns | exec last 121 ns | result 0
+  kernel_rejit     compile last 9778072 ns | exec last 134 ns | result 0
+[bench] (52/62) bitfield_extract
+  kernel           compile last 11620180 ns | exec last 118 ns | result 0
+  kernel_rejit     compile last 10771171 ns | exec last 108 ns | result 0
+[bench] (53/62) smallmul_strength_reduce
+  kernel           compile last 10634763 ns | exec last 167 ns | result 0
+  kernel_rejit     compile last 8437962 ns | exec last 139 ns | result 0
+[bench] (54/62) cond_select_dense
+  kernel           compile last 11944341 ns | exec last 230 ns | result 6468442125814067127
+  kernel_rejit     compile last 11698540 ns | exec last 1165 ns | result 6468442125814067127
+[bench] (55/62) rotate_dense
+  kernel           compile last 15801330 ns | exec last 410 ns | result 5916845847335106223
+  kernel_rejit     compile last 13536059 ns | exec last 414 ns | result 5916845847335106223
+[bench] (56/62) addr_calc_stride
+  kernel           compile last 9595492 ns | exec last 270 ns | result 4561879430438898569
+  kernel_rejit     compile last 55274162 ns | exec last 439 ns | result 4561879430438898569
+[bench] (57/62) extract_dense
+  kernel           compile last 10840328 ns | exec last 515 ns | result 13503953896175513275
+  kernel_rejit     compile last 11717659 ns | exec last 357 ns | result 13503953896175513275
+[bench] (58/62) endian_swap_dense
+  kernel           compile last 12672480 ns | exec last 270 ns | result 4354685567075941419
+  kernel_rejit     compile last 9526397 ns | exec last 305 ns | result 4354685567075941419
+[bench] (59/62) branch_flip_dense
+  kernel           compile last 16551611 ns | exec last 554 ns | result 5840696475078013905
+  kernel_rejit     compile last 27579413 ns | exec last 821 ns | result 5840696475078013905
+[bench] (60/62) tc_bitcount
+  kernel           compile last 70306450 ns | exec last 8 ns | result 18446744073709551615
+  kernel_rejit     compile last 70753000 ns | exec last 10 ns | result 18446744073709551615
+[bench] (61/62) tc_checksum
+  kernel           compile last 44321692 ns | exec last 16 ns | result 18446744073709551615
+  kernel_rejit     compile last 40074748 ns | exec last 10 ns | result 18446744073709551615
+[bench] (62/62) cgroup_hash_chain
+  kernel           compile last 16061457 ns | exec last 17 ns | result 18446744073709551615
+  kernel_rejit     compile last 12594027 ns | exec last 10 ns | result 18446744073709551615
+[done] wrote /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/x86_kvm_micro_20261011_232314_616634/metadata.json
+make: Leaving directory '/home/yunwei37/workspace/bpf-benchmark-rerun-20261009'
+suite-end 2026-10-11T23:40:26Z rc=0
+8982.40 BogoMIPS)
+[    0.225576] node 0 deferred pages initialised in 30ms
+[    0.225649] Memory: 65810944K/67108344K available (16491K kernel code, 9695K rwdata, 12548K rodata, 4024K init, 7316K bss, 1288236K reserved, 0K cma-reserved)
+[    0.232915] devtmpfs: initialized
+[    0.232999] x86/mm: Memory block size: 1024MB
+[    0.233997] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.233997] posixtimers hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.234421] futex hash table entries: 2048 (131072 bytes on 1 NUMA nodes, total 128 KiB, linear).
+[    0.235964] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.236674] DMA: preallocated 4096 KiB GFP_KERNEL pool for atomic allocations
+[    0.237451] DMA: preallocated 4096 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.238284] DMA: preallocated 4096 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.239128] audit: initializing netlink subsys (disabled)
+[    0.239693] audit: type=2000 audit(1791760878.743:1): state=initialized audit_enabled=0 res=1
+[    0.239693] thermal_sys: Registered thermal governor 'fair_share'
+[    0.242614] thermal_sys: Registered thermal governor 'step_wise'
+[    0.243240] thermal_sys: Registered thermal governor 'user_space'
+[    0.243877] cpuidle: using governor ladder
+[    0.243877] cpuidle: using governor menu
+[    0.243877] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.244110] PCI: Using configuration type 1 for base access
+[    0.244750] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.244750] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.244750] HugeTLB: 16380 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.244750] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.244934] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.253074] ACPI: Added _OSI(Module Device)
+[    0.253510] ACPI: Added _OSI(Processor Device)
+[    0.253969] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.254846] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.262623] ACPI: \_SB_: platform _OSC: OS support mask [00227eff]
+[    0.263373] ACPI: Interpreter enabled
+[    0.263802] ACPI: PM: (supports S0 S4 S5)
+[    0.272614] ACPI: Using IOAPIC for interrupt routing
+[    0.273153] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.274129] PCI: Using E820 reservations for host bridge windows
+[    0.274794] ACPI: Enabled 2 GPEs in block 00 to 0F
+[    0.276720] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.277383] acpi PNP0A03:00: _OSC: OS supports [ASPM ClockPM Segments MSI HPX-Type3]
+[    0.278187] acpi PNP0A03:00: _OSC: not requesting OS control; OS requires [ExtendedConfig ASPM ClockPM MSI]
+[    0.279199] acpi PNP0A03:00: _OSC: platform retains control of PCIe features (AE_ERROR)
+[    0.280043] acpi PNP0A03:00: fail to add MMCONFIG information, can't access extended configuration space under this bridge
+[    0.281385] acpiphp: Slot [2] registered
+[    0.281831] acpiphp: Slot [3] registered
+[    0.282246] acpiphp: Slot [4] registered
+[    0.282624] acpiphp: Slot [5] registered
+[    0.283062] acpiphp: Slot [6] registered
+[    0.283477] acpiphp: Slot [7] registered
+[    0.283895] acpiphp: Slot [8] registered
+[    0.284370] acpiphp: Slot [9] registered
+[    0.284788] acpiphp: Slot [10] registered
+[    0.285212] acpiphp: Slot [11] registered
+[    0.285635] acpiphp: Slot [12] registered
+[    0.286092] acpiphp: Slot [13] registered
+[    0.286515] acpiphp: Slot [14] registered
+[    0.286940] acpiphp: Slot [15] registered
+[    0.287362] acpiphp: Slot [16] registered
+[    0.287795] acpiphp: Slot [17] registered
+[    0.288231] acpiphp: Slot [18] registered
+[    0.288654] acpiphp: Slot [19] registered
+[    0.289081] acpiphp: Slot [20] registered
+[    0.289550] acpiphp: Slot [21] registered
+[    0.289976] acpiphp: Slot [22] registered
+[    0.290398] acpiphp: Slot [23] registered
+[    0.290824] acpiphp: Slot [24] registered
+[    0.291291] acpiphp: Slot [25] registered
+[    0.291741] acpiphp: Slot [26] registered
+[    0.292164] acpiphp: Slot [27] registered
+[    0.292586] acpiphp: Slot [28] registered
+[    0.292622] acpiphp: Slot [29] registered
+[    0.293045] acpiphp: Slot [30] registered
+[    0.293470] acpiphp: Slot [31] registered
+[    0.293908] PCI host bridge to bus 0000:00
+[    0.294333] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.295042] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.295734] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.296496] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.297265] pci_bus 0000:00: root bus resource [mem 0x380000000000-0x38007fffffff window]
+[    0.298094] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.298717] pci 0000:00:00.0: [8086:1237] type 00 class 0x060000 conventional PCI endpoint
+[    0.300017] pci 0000:00:01.0: [8086:7000] type 00 class 0x060100 conventional PCI endpoint
+[    0.301359] pci 0000:00:01.1: [8086:7010] type 00 class 0x010180 conventional PCI endpoint
+[    0.303161] pci 0000:00:01.1: BAR 4 [io  0xc200-0xc20f]
+[    0.303760] pci 0000:00:01.1: BAR 0 [io  0x01f0-0x01f7]: legacy IDE quirk
+[    0.304456] pci 0000:00:01.1: BAR 1 [io  0x03f6]: legacy IDE quirk
+[    0.305086] pci 0000:00:01.1: BAR 2 [io  0x0170-0x0177]: legacy IDE quirk
+[    0.305783] pci 0000:00:01.1: BAR 3 [io  0x0376]: legacy IDE quirk
+[    0.306749] pci 0000:00:01.3: [8086:7113] type 00 class 0x068000 conventional PCI endpoint
+[    0.307978] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    0.308728] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    0.309791] pci 0000:00:02.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.312132] pci 0000:00:02.0: BAR 0 [io  0xc000-0xc03f]
+[    0.312621] pci 0000:00:02.0: BAR 1 [mem 0xfebf7000-0xfebf7fff]
+[    0.313276] pci 0000:00:02.0: BAR 4 [mem 0x380000000000-0x380000003fff 64bit pref]
+[    0.314912] pci 0000:00:03.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.317579] pci 0000:00:03.0: BAR 0 [io  0xc040-0xc07f]
+[    0.318130] pci 0000:00:03.0: BAR 1 [mem 0xfebf8000-0xfebf8fff]
+[    0.318768] pci 0000:00:03.0: BAR 4 [mem 0x380000004000-0x380000007fff 64bit pref]
+[    0.320269] pci 0000:00:04.0: [8086:25ab] type 00 class 0x088000 conventional PCI endpoint
+[    0.321783] pci 0000:00:04.0: BAR 0 [mem 0xfebf9000-0xfebf900f]
+[    0.322889] pci 0000:00:05.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.325510] pci 0000:00:05.0: BAR 0 [io  0xc080-0xc0bf]
+[    0.326069] pci 0000:00:05.0: BAR 1 [mem 0xfebfa000-0xfebfafff]
+[    0.326727] pci 0000:00:05.0: BAR 4 [mem 0x380000008000-0x38000000bfff 64bit pref]
+[    0.328711] pci 0000:00:06.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.330772] pci 0000:00:06.0: BAR 0 [io  0xc0c0-0xc0ff]
+[    0.331352] pci 0000:00:06.0: BAR 1 [mem 0xfebfb000-0xfebfbfff]
+[    0.331991] pci 0000:00:06.0: BAR 4 [mem 0x38000000c000-0x38000000ffff 64bit pref]
+[    0.333476] pci 0000:00:07.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.335842] pci 0000:00:07.0: BAR 0 [io  0xc100-0xc13f]
+[    0.336397] pci 0000:00:07.0: BAR 1 [mem 0xfebfc000-0xfebfcfff]
+[    0.337034] pci 0000:00:07.0: BAR 4 [mem 0x380000010000-0x380000013fff 64bit pref]
+[    0.339093] pci 0000:00:08.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.341054] pci 0000:00:08.0: BAR 0 [io  0xc140-0xc17f]
+[    0.341611] pci 0000:00:08.0: BAR 1 [mem 0xfebfd000-0xfebfdfff]
+[    0.342252] pci 0000:00:08.0: BAR 4 [mem 0x380000014000-0x380000017fff 64bit pref]
+[    0.343484] pci 0000:00:09.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.345513] pci 0000:00:09.0: BAR 0 [io  0xc180-0xc1bf]
+[    0.346070] pci 0000:00:09.0: BAR 1 [mem 0xfebfe000-0xfebfefff]
+[    0.346710] pci 0000:00:09.0: BAR 4 [mem 0x380000018000-0x38000001bfff 64bit pref]
+[    0.348696] pci 0000:00:0a.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.350530] pci 0000:00:0a.0: BAR 0 [io  0xc1c0-0xc1ff]
+[    0.351081] pci 0000:00:0a.0: BAR 1 [mem 0xfebff000-0xfebfffff]
+[    0.351716] pci 0000:00:0a.0: BAR 4 [mem 0x38000001c000-0x38000001ffff 64bit pref]
+[    0.355364] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.356060] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.356728] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.357445] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.358388] ACPI: PCI: Interrupt link LNKS configured for IRQ 9
+[    0.359319] iommu: Default domain type: Translated
+[    0.359319] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.359319] pps_core: LinuxPPS API ver. 1 registered
+[    0.359319] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.359319] PTP clock support registered
+[    0.362652] EDAC MC: Ver: 3.0.0
+[    0.363209] NetLabel: Initializing
+[    0.363615] NetLabel:  domain hash size = 128
+[    0.364065] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.364649] NetLabel:  unlabeled traffic allowed by default
+[    0.365222] PCI: Using ACPI for IRQ routing
+[    0.365839] e820: register RAM buffer resource [mem 0x0009fc00-0x0009ffff]
+[    0.366542] e820: register RAM buffer resource [mem 0xbffe0000-0xbfffffff]
+[    0.367309] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.367309] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.372852] clocksource: Switched to clocksource kvm-clock
+[    0.373513] VFS: Disk quotas dquot_6.6.0
+[    0.373927] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.374632] netfs: FS-Cache loaded
+[    0.374933] pnp: PnP ACPI init
+[    0.375404] pnp: PnP ACPI: found 5 devices
+[    0.381698] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.382674] NET: Registered PF_INET protocol family
+[    0.383426] IP idents hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.393715] tcp_listen_portaddr_hash hash table entries: 32768 (order: 7, 524288 bytes, linear)
+[    0.394643] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.395492] TCP established hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.396860] TCP bind hash table entries: 65536 (order: 9, 2097152 bytes, linear)
+[    0.397893] TCP: Hash tables configured (established 524288 bind 65536)
+[    0.398747] MPTCP token hash table entries: 65536 (order: 9, 1572864 bytes, linear)
+[    0.399606] UDP hash table entries: 32768 (order: 9, 2097152 bytes, linear)
+[    0.400629] UDP-Lite hash table entries: 32768 (order: 9, 2097152 bytes, linear)
+[    0.401733] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.402334] NET: Registered PF_XDP protocol family
+[    0.402839] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.403470] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.404103] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.404805] pci_bus 0000:00: resource 7 [mem 0xc0000000-0xfebfffff window]
+[    0.405502] pci_bus 0000:00: resource 8 [mem 0x380000000000-0x38007fffffff window]
+[    0.406304] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    0.406937] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    0.407644] PCI: CLS 0 bytes, default 64
+[    0.408093] PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+[    0.408260] Trying to unpack rootfs image as initramfs...
+[    0.408751] software IO TLB: mapped [mem 0x00000000bb377000-0x00000000bf377000] (64MB)
+[    0.410857] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x6a464ae9873, max_idle_ns: 881590529744 ns
+[    0.414615] Freeing initrd memory: 12708K
+[    0.418280] Initialise system trusted keyrings
+[    0.418769] Key type blacklist registered
+[    0.419355] workingset: timestamp_bits=36 max_order=24 bucket_order=0
+[    0.420241] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.421510] 9p: Installing v9fs 9p2000 file system support
+[    0.423357] integrity: Platform Keyring initialized
+[    0.423919] cryptd: max_cpu_qlen set to 1000
+[    0.429540] Key type asymmetric registered
+[    0.429968] Asymmetric key parser 'x509' registered
+[    0.430479] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 248)
+[    0.431290] io scheduler mq-deadline registered
+[    0.431759] io scheduler kyber registered
+[    0.432192] io scheduler bfq registered
+[    0.433872] ACPI: \_SB_.LNKB: Enabled at IRQ 10
+[    0.435629] ACPI: \_SB_.LNKC: Enabled at IRQ 11
+[    0.437310] ACPI: \_SB_.LNKA: Enabled at IRQ 10
+[    0.441380] ACPI: \_SB_.LNKD: Enabled at IRQ 11
+[    0.445318] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    0.446419] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    0.541195] loop: module loaded
+[    0.541717] tun: Universal TUN/TAP device driver, 1.6
+[    0.542366] rtc_cmos 00:04: RTC can wake from S4
+[    0.543259] rtc_cmos 00:04: registered as rtc0
+[    0.543777] rtc_cmos 00:04: setting system clock to 2026-10-11T23:21:18 UTC (1791760878)
+[    0.544704] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    0.545480] intel_pstate: CPU model not supported
+[    0.545982] hid: raw HID events driver (C) Jiri Kosina
+[    0.546926] NET: Registered PF_INET6 protocol family
+[    0.547720] Segment Routing with IPv6
+[    0.548111] In-situ OAM (IOAM) with IPv6
+[    0.548540] NET: Registered PF_PACKET protocol family
+[    0.549089] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+[    0.550497] 9pnet: Installing 9P2000 support
+[    0.552979] IPI shorthand broadcast: enabled
+[    0.554793] sched_clock: Marking stable (552340456, 566068)->(557368869, -4462345)
+[    0.562676] registered taskstats version 1
+[    0.563223] Loading compiled-in X.509 certificates
+[    0.564127] Loaded X.509 cert 'Build time autogenerated kernel key: c38c9930c11fabfd073438ef5a1ecc5133745824'
+[    0.566480] Demotion targets for Node 0: null
+[    0.567050] Key type .fscrypt registered
+[    0.567518] Key type fscrypt-provisioning registered
+[    0.568048] ima: No TPM chip found, activating TPM-bypass!
+[    0.568619] ima: Allocated hash algorithm: sha256
+[    0.569136] ima: No architecture policies found
+[    0.569935] clk: Disabling unused clocks
+[    0.577954] Freeing unused decrypted memory: 2036K
+[    0.580220] Freeing unused kernel image (initmem) memory: 4024K
+[    0.580659] Write protecting the kernel read-only data: 32768k
+[    0.586034] Freeing unused kernel image (text/rodata gap) memory: 1940K
+[    0.589007] Freeing unused kernel image (rodata/data gap) memory: 1788K
+[    0.589456] Run /init as init process
+[    0.590042] virtme initramfs: loading fuse.ko...
+[    0.594668] fuse: module verification failed: signature and/or required key missing - tainting kernel
+[    0.630360] fuse: init (API version 7.45)
+[    0.631493] virtme initramfs: loading virtiofs.ko...
+[    0.640652] virtme initramfs: loading virtio_mmio.ko...
+[    0.643795] virtme initramfs: loading serio.ko...
+[    0.645429] virtme initramfs: loading i8042.ko...
+[    0.648458] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    0.649621] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    0.649957] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    0.650698] virtme initramfs: loading libps2.ko...
+[    0.656851] virtme initramfs: loading vivaldi-fmap.ko...
+[    0.658734] virtme initramfs: loading atkbd.ko...
+[    0.661751] virtme initramfs: mounting hostfs...
+[    0.662020] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
+[    0.662450] virtio-fs: tag <ROOTFS> not found
+[    0.670539] virtme initramfs: done; switching to real root
+[    3.061084] virtme-ng-init: Failed to open path '/var/lib/containers/storage': Permission denied
+[    3.061084] Failed to opendir() '/proc/self/fd/5': Permission denied
+[    3.084624] virtme-ng-init: you have CONFIG_UEVENT_HELPER on, turn it off
+[    3.277605] virtme-ng-init: Starting systemd-udevd version 255.4-1ubuntu8.17
+[    3.279078] virtme-ng-init: triggering udev coldplug
+[    7.837525] virtme-ng-init: waiting for udev to settle
+[    8.053775] input: Power Button as /devices/platform/LNXPWRBN:00/input/input2
+[    8.055341] ACPI: button: Power Button [PWRF]
+[    8.078376] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input4
+[    8.082413] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input3
+[    8.082838] piix4_smbus 0000:00:01.3: SMBus Host Controller at 0x700, revision 0
+[    8.085164] i2c i2c-0: Memory type 0x07 not supported yet, not instantiating SPD
+[    8.090913] SCSI subsystem initialized
+[    8.227085] scsi host0: ata_piix
+[    8.227444] scsi host1: ata_piix
+[    8.227963] ata1: PATA max MWDMA2 cmd 0x1f0 ctl 0x3f6 bmdma 0xc200 irq 14 lpm-pol 0
+[    8.228508] ata2: PATA max MWDMA2 cmd 0x170 ctl 0x376 bmdma 0xc208 irq 15 lpm-pol 0
+[    8.290808] mousedev: PS/2 mouse device common for all mice
+[    8.390740] ata2: found unknown device (class 0)
+[    8.391581] ata2.00: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100
+[    8.393129] scsi 1:0:0:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5
+[    8.721767] scsi 1:0:0:0: Attached scsi generic sg0 type 5
+[    8.891420] sr 1:0:0:0: [sr0] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray
+[    8.891981] cdrom: Uniform CD-ROM driver Revision: 3.20
+[   10.773492] virtme-ng-init: udev is done
+[   10.778442] virtme-ng-init: initialization done
+[   13.219657] loop0: detected capacity change from 0 to 134217728
+[   13.248376] EXT4-fs (loop0): mounted filesystem a1187d58-4b26-4eca-846d-058b3cdca688 r/w with ordered data mode. Quota mode: none.
+[   29.660434] Initializing XFRM netlink socket
+[  110.059054] bpf_x86_alu: loading out-of-tree module taints kernel.
+[ 1152.249021] ACPI: PM: Preparing to enter system sleep state S5
+[ 1152.259751] kvm: exiting hardware virtualization
+[ 1152.263065] reboot: Power down

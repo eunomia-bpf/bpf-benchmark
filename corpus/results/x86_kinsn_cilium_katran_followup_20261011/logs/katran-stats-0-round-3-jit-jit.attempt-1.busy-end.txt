@@ -1,0 +1,26 @@
+2026-10-12T07:40:14Z
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   5250 root      20   0 1782872 150264  43348 S 133.3   0.1     28,42 containerd
+2773292 yunwei37  20   0 2427288 621724 171616 S 116.7   0.5 239:16.94 telegram-deskto
+3628759 root      20   0 7477996   5.7g   1.2g S 100.0   4.6  45:30.46 LeanNativePrepa
+3740945 root      20   0   28.0g  24.7g   3.3g S 100.0  19.7   3:19.95 Lean49Arithmeti
+3748731 root      20   0 5968080   5.2g   3.3g R 100.0   4.2   0:44.18 repl
+3751724 root      20   0  154404 116872  10552 R 100.0   0.1   0:00.36 cc1
+3748685 root      20   0 8466440   7.4g   3.3g S  91.7   5.9   0:43.36 Lean49Arithmeti
+3260038 root      20   0   78796  67892  11616 S  58.3   0.1  34:21.57 python3
+3398647 root      20   0  151736  69096  11516 S  33.3   0.1  31:52.11 python3
+     15 root      20   0       0      0      0 I   8.3   0.0   2:51.85 rcu_preempt
+   3026 root      20   0 1694176 188912  40068 S   8.3   0.1  96:24.64 k3s-agent
+ 539954 root      20   0 1478224 153492  25056 S   8.3   0.1  39:22.64 longhorn-manage
+ 547958 root      20   0 1274860  12912   7376 S   8.3   0.0   1:38.65 containerd-shim
+ 961403 yunwei37  20   0  254228  58220  14004 S   8.3   0.0  71:40.63 Xvfb
+3751750 yunwei37  20   0   16052   6568   4304 R   8.3   0.0   0:00.02 top
+5250 psr= 20 allowed=0-23
+2773292 psr=  9 allowed=8-23
+3628759 psr=  8 allowed=8
+3748685 psr=  9 allowed=8-23
+3740945 psr= 15 allowed=8-23
+3748731 psr= 16 allowed=8-23
+3751724 psr= allowed=
+541360 psr= 13 allowed=0-23
+3398647 psr= 11 allowed=8-23

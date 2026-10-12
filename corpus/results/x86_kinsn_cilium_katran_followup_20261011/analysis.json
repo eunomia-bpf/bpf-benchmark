@@ -1,0 +1,572 @@
+{
+  "attempts": {
+    "cilium": {
+      "accepted_cells": 20,
+      "attempts": 21,
+      "rejected_attempts": 1
+    },
+    "katran": {
+      "accepted_cells": 24,
+      "attempts": 25,
+      "rejected_attempts": 1
+    }
+  },
+  "cilium": {
+    "kinsn_sites_and_programs_per_guest": [
+      [
+        3762,
+        131
+      ]
+    ],
+    "outcome_totals": {
+      "drops": 0,
+      "other_verdicts": 353,
+      "pktgen_errors": 0,
+      "receiver_drops": 0,
+      "receiver_errors": 0,
+      "receiver_packets": 3168954752,
+      "sent": 3168949139
+    },
+    "receiver_minus_sent": {
+      "max": 142.0,
+      "median": 140.0,
+      "min": 136.0,
+      "n": 40,
+      "q1": 140.0,
+      "q3": 141.0
+    },
+    "stats_0": {
+      "jit_jit_second_over_first": {
+        "max": 1.0675821160019414,
+        "median": 1.0138284388481569,
+        "min": 1.000610072363265,
+        "n": 6,
+        "q1": 1.006327459094468,
+        "q3": 1.036781799874868
+      },
+      "kinsn_over_jit_throughput": {
+        "combined": {
+          "max": 1.0695584903575177,
+          "median": 1.0421771814686693,
+          "min": 1.0288514633859747,
+          "n": 6,
+          "q1": 1.030910061400466,
+          "q3": 1.059710376787666
+        },
+        "jit-kinsn": {
+          "max": 1.0695584903575177,
+          "median": 1.0421771814686693,
+          "min": 1.0288514633859747,
+          "n": 6,
+          "q1": 1.030910061400466,
+          "q3": 1.059710376787666
+        },
+        "live_image_bytes_treatment_over_jit": {
+          "max": 1.0065997277933283,
+          "median": 1.0065997277933283,
+          "min": 1.0065997277933283,
+          "n": 6,
+          "q1": 1.0065997277933283,
+          "q3": 1.0065997277933283
+        }
+      },
+      "native_over_jit_throughput": {
+        "combined": {
+          "max": 1.2227649476155371,
+          "median": 1.2167879439029559,
+          "min": 1.2108109401903748,
+          "n": 2,
+          "q1": 1.2137994420466653,
+          "q3": 1.2197764457592466
+        },
+        "jit-native": {
+          "max": 1.2227649476155371,
+          "median": 1.2167879439029559,
+          "min": 1.2108109401903748,
+          "n": 2,
+          "q1": 1.2137994420466653,
+          "q3": 1.2197764457592466
+        },
+        "live_image_bytes_treatment_over_jit": {
+          "max": 1.1067127192419302,
+          "median": 1.1067127192419302,
+          "min": 1.1067127192419302,
+          "n": 2,
+          "q1": 1.1067127192419302,
+          "q3": 1.1067127192419302
+        },
+        "native-jit": {
+          "n": 0
+        }
+      }
+    },
+    "stats_1": {
+      "jit_jit_second_over_first": {
+        "max": 1.0090591718962936,
+        "median": 0.9935425988248069,
+        "min": 0.9409873754626338,
+        "n": 3,
+        "q1": 0.9672649871437203,
+        "q3": 1.0013008853605503
+      },
+      "kinsn_over_jit_throughput": {
+        "combined": {
+          "max": 1.102920025337523,
+          "median": 1.0336675548076473,
+          "min": 1.0213455958867341,
+          "n": 3,
+          "q1": 1.0275065753471906,
+          "q3": 1.0682937900725853
+        },
+        "jit-kinsn": {
+          "max": 1.102920025337523,
+          "median": 1.0336675548076473,
+          "min": 1.0213455958867341,
+          "n": 3,
+          "q1": 1.0275065753471906,
+          "q3": 1.0682937900725853
+        },
+        "jit_ns_per_run": {
+          "max": 803.1717184532156,
+          "median": 794.1405711131313,
+          "min": 727.9437132520766,
+          "n": 3,
+          "q1": 761.0421421826039,
+          "q3": 798.6561447831734
+        },
+        "jit_over_treatment_bpf_cost": {
+          "max": 1.2558592570045775,
+          "median": 1.0716268481669773,
+          "min": 1.0421736515152127,
+          "n": 3,
+          "q1": 1.056900249841095,
+          "q3": 1.1637430525857773
+        },
+        "live_image_bytes_treatment_over_jit": {
+          "max": 1.0065997277933283,
+          "median": 1.0065997277933283,
+          "min": 1.0065997277933283,
+          "n": 3,
+          "q1": 1.0065997277933283,
+          "q3": 1.0065997277933283
+        },
+        "treatment_ns_per_run": {
+          "max": 749.4882382118781,
+          "median": 698.4860077720462,
+          "min": 632.3483835340609,
+          "n": 3,
+          "q1": 665.4171956530536,
+          "q3": 723.9871229919621
+        }
+      }
+    }
+  },
+  "cilium_inventory_parity": [
+    {
+      "cell": "cilium-stats-0-round-1-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-0-round-1-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-0-round-2-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-0-round-2-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-0-round-2-jit-native",
+      "name_granularity": "full",
+      "role": "jit-native"
+    },
+    {
+      "cell": "cilium-stats-0-round-3-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-0-round-3-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-0-round-4-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-0-round-4-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-0-round-5-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-0-round-5-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-0-round-5-jit-native",
+      "name_granularity": "full",
+      "role": "jit-native"
+    },
+    {
+      "cell": "cilium-stats-0-round-6-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-0-round-6-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-1-round-1-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-1-round-1-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-1-round-2-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-1-round-2-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    },
+    {
+      "cell": "cilium-stats-1-round-3-jit-jit",
+      "name_granularity": "kernel",
+      "role": "jit-jit"
+    },
+    {
+      "cell": "cilium-stats-1-round-3-jit-kinsn",
+      "name_granularity": "kernel",
+      "role": "jit-kinsn"
+    }
+  ],
+  "host_boot_ids": [
+    "04dc0087-5ccc-4c46-9997-b9a92f0e5167"
+  ],
+  "katran": {
+    "jit_ns_per_run_fast_mode": {
+      "max": 157.51755647903704,
+      "median": 153.34071380710418,
+      "min": 143.55371350789602,
+      "n": 8,
+      "q1": 149.9589808343822,
+      "q3": 155.81324146682908
+    },
+    "jit_ns_per_run_slow_mode": {
+      "max": 192.30502062127147,
+      "median": 181.21473330506953,
+      "min": 169.17439443717595,
+      "n": 7,
+      "q1": 175.61279770129772,
+      "q3": 187.71826635596975
+    },
+    "kinsn_candidate_rejections": [
+      {
+        "cell": "katran-stats-0-round-1-jit-kinsn",
+        "kinsn_rejected_errno": 7
+      },
+      {
+        "cell": "katran-stats-0-round-2-jit-kinsn",
+        "kinsn_rejected_errno": 7
+      },
+      {
+        "cell": "katran-stats-0-round-3-jit-kinsn",
+        "kinsn_rejected_errno": 7
+      },
+      {
+        "cell": "katran-stats-1-round-1-jit-kinsn",
+        "kinsn_rejected_errno": 7
+      },
+      {
+        "cell": "katran-stats-1-round-2-jit-kinsn",
+        "kinsn_rejected_errno": 7
+      },
+      {
+        "cell": "katran-stats-1-round-3-jit-kinsn",
+        "kinsn_rejected_errno": 7
+      }
+    ],
+    "kinsn_sites_and_programs_per_guest": [
+      [
+        0,
+        0
+      ]
+    ],
+    "outcome_totals": {
+      "drops": 0,
+      "other_verdicts": 104,
+      "pktgen_errors": 983031343,
+      "receiver_drops": 2048412706,
+      "receiver_errors": 0,
+      "receiver_packets": 6255394889,
+      "sent": 6610521715
+    },
+    "pps_fast": {
+      "max": 3397337.0,
+      "median": 2692257.0,
+      "min": 2232220.0,
+      "n": 29,
+      "q1": 2488843.0,
+      "q3": 3189651.0
+    },
+    "pps_slow": {
+      "max": 1975865.0,
+      "median": 1471791.0,
+      "min": 1252198.0,
+      "n": 19,
+      "q1": 1405218.0,
+      "q3": 1594746.5
+    },
+    "receiver_minus_sent": {
+      "max": 8.0,
+      "median": 6.0,
+      "min": -164504893.0,
+      "n": 48,
+      "q1": 4.0,
+      "q3": 6.0
+    },
+    "same_transport_mode_stats_on": {
+      "jit_jit_first_over_second_ns": {
+        "max": 0.9568067588395454,
+        "median": 0.9568067588395454,
+        "min": 0.9568067588395454,
+        "n": 1,
+        "q1": 0.9568067588395454,
+        "q3": 0.9568067588395454,
+        "values": [
+          0.9568067588395454
+        ]
+      },
+      "jit_over_kinsn_bpf_cost": {
+        "max": 1.0259382196878268,
+        "median": 1.0259382196878268,
+        "min": 1.0259382196878268,
+        "n": 1,
+        "q1": 1.0259382196878268,
+        "q3": 1.0259382196878268,
+        "values": [
+          1.0259382196878268
+        ]
+      },
+      "jit_over_native_bpf_cost": {
+        "max": 1.1339623374790608,
+        "median": 1.0486665373468513,
+        "min": 0.9388516006550217,
+        "n": 5,
+        "q1": 1.0240526357107944,
+        "q3": 1.0587263608699533,
+        "values": [
+          0.9388516006550217,
+          1.0240526357107944,
+          1.0486665373468513,
+          1.0587263608699533,
+          1.1339623374790608
+        ]
+      }
+    },
+    "stats_0": {
+      "jit_jit_second_over_first": {
+        "max": 1.6147219639855004,
+        "median": 0.9538168061681618,
+        "min": 0.4457673648318352,
+        "n": 3,
+        "q1": 0.6997920854999985,
+        "q3": 1.284269385076831
+      },
+      "kinsn_over_jit_throughput": {
+        "combined": {
+          "max": 2.3001248286804556,
+          "median": 0.5899677137816141,
+          "min": 0.5335905034584162,
+          "n": 3,
+          "q1": 0.5617791086200151,
+          "q3": 1.4450462712310348
+        },
+        "jit-kinsn": {
+          "max": 2.3001248286804556,
+          "median": 0.5899677137816141,
+          "min": 0.5335905034584162,
+          "n": 3,
+          "q1": 0.5617791086200151,
+          "q3": 1.4450462712310348
+        },
+        "live_image_bytes_treatment_over_jit": {
+          "n": 0
+        }
+      },
+      "native_over_jit_throughput": {
+        "combined": {
+          "max": 2.323013121636683,
+          "median": 0.9689169607975171,
+          "min": 0.4415969019808123,
+          "n": 6,
+          "q1": 0.9112088859563949,
+          "q3": 1.6433925811003758
+        },
+        "jit-native": {
+          "max": 1.8630142633070053,
+          "median": 0.9845275344804869,
+          "min": 0.9533063871145473,
+          "n": 3,
+          "q1": 0.9689169607975171,
+          "q3": 1.423770898893746
+        },
+        "live_image_bytes_treatment_over_jit": {
+          "n": 0
+        },
+        "native-jit": {
+          "max": 2.323013121636683,
+          "median": 0.8971763855703441,
+          "min": 0.4415969019808123,
+          "n": 3,
+          "q1": 0.6693866437755782,
+          "q3": 1.6100947536035135
+        }
+      }
+    },
+    "stats_1": {
+      "jit_jit_second_over_first": {
+        "max": 1.6928314289592767,
+        "median": 0.9451180052717169,
+        "min": 0.5519464271359995,
+        "n": 3,
+        "q1": 0.7485322162038581,
+        "q3": 1.3189747171154969
+      },
+      "kinsn_over_jit_throughput": {
+        "combined": {
+          "max": 2.080257836295122,
+          "median": 1.521439033455431,
+          "min": 1.140051003767818,
+          "n": 3,
+          "q1": 1.3307450186116245,
+          "q3": 1.8008484348752765
+        },
+        "jit-kinsn": {
+          "max": 2.080257836295122,
+          "median": 1.521439033455431,
+          "min": 1.140051003767818,
+          "n": 3,
+          "q1": 1.3307450186116245,
+          "q3": 1.8008484348752765
+        },
+        "jit_ns_per_run": {
+          "max": 181.21473330506953,
+          "median": 174.28738846066338,
+          "min": 169.17439443717595,
+          "n": 3,
+          "q1": 171.73089144891966,
+          "q3": 177.75106088286645
+        },
+        "jit_over_treatment_bpf_cost": {
+          "max": 1.2544012297998668,
+          "median": 1.133565143021879,
+          "min": 1.0259382196878268,
+          "n": 3,
+          "q1": 1.0797516813548529,
+          "q3": 1.1939831864108728
+        },
+        "live_image_bytes_treatment_over_jit": {
+          "n": 0
+        },
+        "treatment_ns_per_run": {
+          "max": 164.89725325629496,
+          "median": 153.7515417914535,
+          "min": 144.46313428278557,
+          "n": 3,
+          "q1": 149.10733803711952,
+          "q3": 159.3243975238742
+        }
+      },
+      "native_over_jit_throughput": {
+        "combined": {
+          "max": 1.6417102333934184,
+          "median": 1.0842923044945885,
+          "min": 0.8473983553810849,
+          "n": 6,
+          "q1": 0.9929382910745381,
+          "q3": 1.2373942708670276
+        },
+        "jit-native": {
+          "max": 1.2616279534067296,
+          "median": 1.1646932232479212,
+          "min": 1.0038913857412557,
+          "n": 3,
+          "q1": 1.0842923044945885,
+          "q3": 1.2131605883273253
+        },
+        "jit_ns_per_run": {
+          "max": 192.30502062127147,
+          "median": 154.77688487591433,
+          "min": 149.73339579475558,
+          "n": 6,
+          "q1": 153.00815397658232,
+          "q3": 171.5906392773692
+        },
+        "jit_over_treatment_bpf_cost": {
+          "max": 1.19231164603345,
+          "median": 1.0536964491084024,
+          "min": 0.9388516006550217,
+          "n": 6,
+          "q1": 1.0302061111198086,
+          "q3": 1.115153343326784
+        },
+        "live_image_bytes_treatment_over_jit": {
+          "n": 0
+        },
+        "native-jit": {
+          "max": 1.6417102333934184,
+          "median": 0.9892872595189656,
+          "min": 0.8473983553810849,
+          "n": 3,
+          "q1": 0.9183428074500253,
+          "q3": 1.315498746456192
+        },
+        "treatment_ns_per_run": {
+          "max": 169.58677926534088,
+          "median": 149.39394291692048,
+          "min": 144.20685059792714,
+          "n": 6,
+          "q1": 148.34677203450022,
+          "q3": 157.21141573048143
+        }
+      }
+    },
+    "throughput_valid": false,
+    "transport_mode_by_arm": {
+      "jit-first/fast": 4,
+      "jit-first/slow": 2,
+      "jit-second/fast": 4,
+      "jit-second/slow": 2,
+      "jit/fast": 9,
+      "jit/slow": 9,
+      "kinsn/fast": 3,
+      "kinsn/slow": 3,
+      "native/fast": 9,
+      "native/slow": 3
+    }
+  }
+}

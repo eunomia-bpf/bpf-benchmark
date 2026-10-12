@@ -1,0 +1,26 @@
+2026-10-12T07:51:38Z
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+3771013 root      20   0 8613776   7.3g   3.3g S 109.1   5.9   4:31.62 Lean49Arithmeti
+2773292 yunwei37  20   0 2427288 620292 171996 S 100.0   0.5 253:55.80 telegram-deskto
+3628759 root      20   0 8526704   6.9g   1.2g S 100.0   5.5  56:53.77 LeanNativePrepa
+3781743 root      20   0 8712464   7.5g   3.3g S 100.0   6.0   0:52.56 Lean49Arithmeti
+3784126 root      20   0  357840 270908 237844 R  90.9   0.2   0:00.10 lake
+3398647 root      20   0  151736  69096  11516 S  36.4   0.1  35:09.49 python3
+ 541360 root      20   0 1244216  22860   7544 S  18.2   0.0  57:37.13 node_exporter
+ 549470 root      20   0       0      0      0 S   9.1   0.0   0:06.46 jbd2/sdn-8
+ 961403 yunwei37  20   0  254228  58220  14004 S   9.1   0.0  72:49.75 Xvfb
+3784124 yunwei37  20   0   16052   6576   4308 R   9.1   0.0   0:00.02 top
+      1 root      20   0   29216  16996   7648 S   0.0   0.0   8:21.04 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.58 kthreadd
+      3 root      20   0       0      0      0 S   0.0   0.0   0:00.00 pool_workqueue_release
+      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/R-rcu_gp
+      5 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/R-sync_wq
+3628759 psr=  8 allowed=8
+3781743 psr= 13 allowed=8-23
+2773292 psr= 17 allowed=8-23
+3771013 psr= 23 allowed=8-23
+3702507 psr= 23 allowed=8-23
+3784214 psr= 13 allowed=8-23
+3260038 psr= 10 allowed=8-23
+3398647 psr= 10 allowed=8-23
+541360 psr= 13 allowed=0-23
