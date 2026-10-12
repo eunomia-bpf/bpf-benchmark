@@ -50,6 +50,7 @@
 #include "../formal/generated/arm64_stack_index.h"
 #include "../formal/generated/arm64_stack_write_lanes.h"
 #include "../formal/generated/arm64_stack_write_tag_action.h"
+#include "../formal/generated/arm64_stack_read_tag_source.h"
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
@@ -571,8 +572,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	({                                                                 \
 		__u32 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_srt_width = (WIDTH);                           \
-		KPROG_ARM64_STACK_TAG(__a64_srt_width == ARM64_WIDTH_64,  \
-				      KPROG_ARM64_STACK_WORD_ALIGNED(__a64_srt_index))\
+		__u8 __a64_srt_source =                                   \
+			KPROG_ARM64_STACK_READ_TAG_SOURCE(                \
+				__a64_srt_width == ARM64_WIDTH_64,        \
+				KPROG_ARM64_STACK_WORD_ALIGNED(__a64_srt_index));\
+		(__a64_srt_source ==                                      \
+		 KPROG_ARM64_STACK_READ_TAG_SOURCE_STACK_TAG_ARRAY)       \
 			? __a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index)]\
 			: ARM64_SIM_TAG_SCALAR;                           \
 	})
