@@ -20,7 +20,7 @@ Operations* (ACM ATC '26) points here. Where its parts live:
 | Lean 4 proofs that each operation's native code matches its proof sequence | [`kinsn/lean/`](kinsn/lean/README.md) |
 | Microbenchmarks (12 derived from production programs, 15 synthetic, plus 2 baselines) | [`micro/programs/`](micro/programs/) |
 | Paper data, figures and number regeneration (no VM) | [`kinsn/paper/atc26/`](kinsn/paper/atc26/README.md) |
-| Evaluation guide, including corrections after the camera-ready | [`docs/atc26-artifact-evaluation.md`](docs/atc26-artifact-evaluation.md) |
+| Evaluation guide: setup, checks, and the paper's results with their data and commands | [`docs/atc26-artifact-evaluation.md`](docs/atc26-artifact-evaluation.md) |
 
 ```bash
 git clone https://github.com/eunomia-bpf/bpf-benchmark.git

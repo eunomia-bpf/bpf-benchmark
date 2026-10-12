@@ -72,10 +72,6 @@ checkout.
 | `docs/kprog-simulator-in-ebpf` | `350aa2a2798a484197bb1f7462d01716591f6c74` | simulator notes | author material | private |
 | `docs/speculative-optimization` | `604b807337c4a0ebb87a0ed2e4dae275410a01c1` | prior paper material | author material | private |
 
-The `atc26-ae-1` release recorded `llvm-backend/llvm` at
-`01c8ff3766fcf8089c509ff58be535b1488dc7d9` and `vendor/linux-framework` at
-`ddb3cbb286aed1fff579600794debe4927c76cc1`.
-
 ## Vendored in-tree (not submodules)
 
 - `vendor/bpf/{bcc,cilium,katran,otel,tetragon,tracee}/` — third-party

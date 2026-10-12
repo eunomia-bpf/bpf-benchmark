@@ -14,4 +14,8 @@ now a historical record in the [ReJIT archive](../../rejit/docs/archive/bpfopt_d
 | Speculative ReJIT | [design](../../rejit/docs/design.md), [evaluation](../../rejit/docs/evaluation.md) | [archive](../../rejit/docs/archive/README.md) |
 | Shared framework | [design](../shared/design.md), [evaluation](../shared/evaluation.md) | [archive](shared/README.md) |
 
+The ATC '26 artifact-evaluation round is recorded in
+[atc26-artifact-evaluation-ae-round.md](atc26-artifact-evaluation-ae-round.md);
+the current guide is [../atc26-artifact-evaluation.md](../atc26-artifact-evaluation.md).
+
 The complete old-to-new path table is in [MOVED.md](../MOVED.md).
