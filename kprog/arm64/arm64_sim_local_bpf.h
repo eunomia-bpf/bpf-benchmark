@@ -49,6 +49,7 @@
 #include "../formal/generated/arm64_stack_arena.h"
 #include "../formal/generated/arm64_stack_index.h"
 #include "../formal/generated/arm64_stack_write_lanes.h"
+#include "../formal/generated/arm64_stack_write_tag_action.h"
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
@@ -581,12 +582,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u32 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_stw_width = (WIDTH);                           \
 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
-		if (KPROG_ARM64_STACK_TAG(__a64_stw_width == ARM64_WIDTH_64,\
-					  KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index))) {\
+		__u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
+			__a64_stw_width == ARM64_WIDTH_64,                \
+			KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index));  \
+		if (__a64_stw_action ==                                     \
+		    KPROG_ARM64_STACK_WRITE_TAG_ACTION_WRITE_WORD_AND_TAG) {\
 			__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = __a64_stw_value;\
 			__a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = (TAG);\
 		} else {                                                   \
-			if (KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index))\
+			if (__a64_stw_action ==                           \
+			    KPROG_ARM64_STACK_WRITE_TAG_ACTION_CLEAR_TAG_AND_WRITE_BYTES)\
 				__a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = ARM64_SIM_TAG_SCALAR;\
 			__a64_stack.b[__a64_stw_index] =                   \
 				KPROG_ARM64_BYTE_AT(0, __a64_stw_value,    \
