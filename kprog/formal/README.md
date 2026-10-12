@@ -343,6 +343,39 @@ register's pointer at distinct arena indices, and drives the real read,
 read-tag, and write helpers at both base-address sources over every width
 and several value patterns against an independent base-address model
 (205324 cases). The out-of-range source codes remain boundaries.
+The AArch64 vector memory step's per-lane extra offset is generated the same
+way from `arm64_dq_mem_extra_spec.json` into the C
+`generated/arm64_dq_mem_extra.h` (the `KPROG_ARM64_DQ_MEM_EXTRA`
+plain-ternary 3-way selector, the outcome-code and byte-offset defines, and
+the count, distinctness, exact-code, high-lane-stride, base-offset, and
+fact-pair selection `_Static_assert`s) and
+`KProgFormal/GeneratedArm64DqMemExtra.lean`. The generator re-reads the
+simulator header on every `--check` and rejects a vector memory step region
+that names no generated selector or still names the hand first-position
+ternary. The simulator's shared `ARM64_SIM_L_DQ_MEM_STEP` step routes its
+per-lane extra offset through the generated selector, so the hand nested
+ternary on `__a64_vreg_p == 0U` / `__a64_dq_lanes > 1U` is out of the step
+and the DQ lane plan, the vector half plan of Step 0143, the offset contract,
+and the base-address source of Step 0140 are unchanged. This extends the
+stack slot-tag family to the vector memory path: the `.highLane` offset fires
+on the closed ordered fact pair (not the first plan position, and a high lane
+present) the two preceding contracts already consume. Lean checks the
+generated selector against an independent 3-way literal over every fact pair,
+the name and code tables against independent enumerations, the code round-trip
+and out-of-range facts, the three distinct plan effects, the four-case
+dispatch, the high-lane arm firing exactly on the closed ordered fact pair
+(`arm64_dq_mem_extra_selects_high_lane`), the three offsets' distinctness,
+and the two cross-contracts tying the high-lane offset to the DQ lane stride
+(`arm64_dq_mem_extra_matches_dq_stride`) and to the vector half offset
+(`arm64_dq_mem_extra_matches_vreg_half`); the 21-case host oracle drives the
+generated selector against an independent 3-way restatement over both facts
+and the four opcode lanes, and the route oracle declares the full register
+file and stack, plants the base registers' pointers and provenance tags, and
+drives the real step in both directions over every opcode, base class,
+pre/post flag combination, index mode, and several immediates against an
+independent model that walks the lane plan position-by-position and recomputes
+each position's extra offset from its own fact pair (62424 cases), so a
+dropped or added high-lane offset is numerically distinguishable.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the

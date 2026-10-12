@@ -722,10 +722,59 @@ increment is committed and pushed immediately). Current state:
   the generator check, or a refinement theorem, while the last three
   genuine-equivalence rewrites are the three the proof correctly does not
   flag. The out-of-range source codes remain boundaries.
+  The AArch64 vector memory step's per-lane extra offset is likewise no
+  longer open (Step 0141): the shared step `ARM64_SIM_L_DQ_MEM_STEP` moves
+  the SIMD register's halves to or from memory one lane at a time and
+  computed each moved lane's *extra* byte offset by hand through a nested
+  ternary on `__a64_vreg_p == 0U` (is this the first plan position) and
+  `__a64_dq_lanes > 1U` (does the transfer have a high lane at all),
+  yielding `0 / 8 / 0` --- the first-lane offset zero, one 64-bit lane
+  stride for the `.Q0` transfer's second position, and the base offset zero
+  when the plan has a single position. This step generates the 3-way offset
+  selector from `arm64_dq_mem_extra_spec.json` into the C
+  `generated/arm64_dq_mem_extra.h` (the `KPROG_ARM64_DQ_MEM_EXTRA`
+  plain-ternary selector, the outcome-code and byte-offset defines, and the
+  count, distinctness, exact-code, high-lane-stride, base-offset, and
+  fact-pair selection `_Static_assert`s) and
+  `KProgFormal/GeneratedArm64DqMemExtra.lean`, and routes the step through
+  the generated selector, removing the hand nested ternary from the step;
+  the DQ lane plan, the vector half plan of Step 0143, the offset contract,
+  and the base-address source of Step 0140 are unchanged.
+  `Arm64DqMemExtraShape.lean` proves the generated selector equal to an
+  independent 3-way literal over every fact pair
+  (`arm64_dq_mem_extra_refines`), the name and code tables against
+  independent enumerations, the code round-trip and out-of-range facts, the
+  three distinct plan effects, the four-case dispatch, the high-lane arm
+  firing exactly on the closed ordered fact pair
+  (`arm64_dq_mem_extra_selects_high_lane`), the three offsets' distinctness,
+  and the two cross-contracts tying the high-lane offset to the 0141 DQ lane
+  stride (`arm64_dq_mem_extra_matches_dq_stride`, `GeneratedArm64DqMem.transfer`
+  at lane 1 for both the `.Q0` load and store) and to the 0143 vector half
+  offset (`arm64_dq_mem_extra_matches_vreg_half`,
+  `GeneratedArm64Vreg.halfOffset`) with the two contracts agreeing on the
+  half plan for all four opcodes; the 21-case host oracle drives the
+  generated selector against an independent 3-way restatement over both
+  facts and the four opcode lanes, and the route oracle declares the full
+  register file and stack, plants the base registers' pointers and
+  provenance tags, and drives the real step in both directions over every
+  opcode, base class, pre/post flag combination, index mode, and several
+  immediates against an independent model that walks the lane plan
+  position-by-position and recomputes each position's extra offset from its
+  own fact pair (62424 cases), so a dropped or added high-lane offset is
+  numerically distinguishable. 48 binding mutations --- six specification
+  distortions, eleven generator-table changes, sixteen generated-C header
+  distortions (including the two regenerated generator/render drifts),
+  thirteen generated-Lean changes (including the regenerated
+  generator/render drift), six hand-refinement changes, and three
+  sim-header selector reverts --- each of the first 45 changes the oracle,
+  the generator check, or a refinement theorem, while the last three
+  genuine-equivalence rewrites are the three the proof correctly does not
+  flag.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
-  pointer source now closed (Steps 0137, 0138, and 0139) and the memory
-  base-address source now closed (Step 0140),
+  pointer source now closed (Steps 0137, 0138, and 0139), the memory
+  base-address source now closed (Step 0140), and the vector memory step's
+  per-lane extra offset now closed (Step 0141),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

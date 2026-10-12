@@ -11631,6 +11631,125 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   comment, and a cosmetic count-guard message) SURVIVE as required. Per
   detector: `gen` 12, `lean_chain` 12, `host` 7, `route` 2.
 
+## Step 0141 — AArch64 vector lane extra-offset selection through the generated contract
+
+- Scope: the AArch64 simulator's shared vector memory step
+  `ARM64_SIM_L_DQ_MEM_STEP` (`kprog/arm64/arm64_sim_local_bpf.h`), which moves
+  the SIMD register's halves to or from memory one lane at a time and computed
+  each moved lane's *extra* byte offset by hand through a nested ternary on
+  `__a64_vreg_p == 0U` (is this the first plan position) and
+  `__a64_dq_lanes > 1U` (does the transfer have a high lane at all), yielding
+  `0 / 8 / 0`: the first-lane offset zero for the first plan position, one
+  64-bit lane stride for the second position of a `.Q0` transfer, and the
+  base offset zero when the plan has only one position. This step generates
+  the 3-way offset selector from one specification and routes the step
+  through the generated `KPROG_ARM64_DQ_MEM_EXTRA` selector, removing the
+  hand nested ternary from the step. It is the per-lane *offset* companion to
+  the 0141 DQ lane plan (which owns the access direction, lane count, and lane
+  stride) and the 0143 vector half plan (which owns which state field each
+  lane lands in): the `.highLane` offset fires exactly on the closed fact pair
+  the two preceding contracts already consume.
+- Spec `kprog/formal/arm64_dq_mem_extra_spec.json`: schema_version 1,
+  operation `arm64DqMemExtraOffset`, selector
+  `first_lane_then_zero_else_high_lane_present_then_high_lane_stride_else_zero`,
+  and three outcomes --- `firstLane` (code 0, offset 0, effect
+  `plan_first_lane_offset`), `highLane` (code 1, offset 8, effect
+  `plan_high_lane_offset`), `singleLane` (code 2, offset 0, effect
+  `plan_single_lane_offset`) --- plus four cases classifying every
+  (is first lane, high present) fact pair into its outcome.
+- Generator `kprog/formal/generate_arm64_dq_mem_extra_spec.py`: `load()`
+  re-reads the sim header on every `--check` and rejects a spec that does not
+  biject the expected outcomes/cases table (including the exact `[0, 1, 2]`
+  code order and the three-outcome count), a case whose outcome does not match
+  the independent 3-way selection, and a vector memory step region that names
+  no generated selector or still names the hand first-position ternary. Emits
+  the C header `generated/arm64_dq_mem_extra.h` (the
+  `KPROG_ARM64_DQ_MEM_EXTRA(IS_FIRST_LANE, HAS_HIGH_LANE)` plain-ternary
+  3-way selector, the outcome-code and byte-offset defines, and the count,
+  distinctness, exact-code, high-lane-stride, base-offset, and four fact-pair
+  selection `_Static_assert`s) and the Lean
+  `KProgFormal/GeneratedArm64DqMemExtra.lean`. `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:71`.
+- Generated C header `kprog/formal/generated/arm64_dq_mem_extra.h`:
+  `KPROG_ARM64_DQ_MEM_EXTRA_COUNT 3U`, the three outcome-code defines
+  (`…_FIRST_LANE_BYTES 0U`, `…_HIGH_LANE_BYTES 1U`, `…_SINGLE_LANE_BYTES 2U`),
+  the three byte-offset defines with the `_BYTES_OFFSET` suffix
+  (`…_FIRST_LANE_BYTES_OFFSET 0U`, `…_HIGH_LANE_BYTES_OFFSET 8U`,
+  `…_SINGLE_LANE_BYTES_OFFSET 0U`), the plain-ternary 3-way selector macro,
+  and the count, distinctness, exact-code, high-lane-offset-equals-DQ-stride,
+  base-offset, and four fact-pair selection `_Static_assert`s. The header uses
+  only literal inputs, so it is included after the `ARM64_DQ_MEM` lane stride
+  defines and before the `ARM64_WIDTH_*` decodes and the `ARM64_SIM_TAG_*`
+  names.
+- Generated Lean `kprog/formal/KProgFormal/GeneratedArm64DqMemExtra.lean`:
+  the `Outcome` type, `outcomeCount := 3`, the outcome-name and code tables,
+  `codeOfOutcome`/`outcomeOfCode`, `effectOfOutcome`, the 3-way
+  `extraOffsetOf`, the four-case `Case`/`classify`/`outcomeOfCase`
+  classification, the independent `highLaneFact` conjunction, and the
+  `highLaneFact_refines`/`extraOffsetOf_refines` theorems.
+- Hand Lean `kprog/formal/KProgFormal/Arm64DqMemExtraShape.lean`: independent
+  literal statements of the 3-way selector, the three outcome names, the three
+  codes, the three offsets, and the four-case dispatch, with theorems
+  `arm64_dq_mem_extra_refines` (the generated selector equals the independent
+  3-way literal over every fact pair), `_names_refine`, `_codes_refine`,
+  `_codes_length`/`_names_length`, `_codes_nodup`, `_count_is_3`,
+  `_of_code_roundtrip`, `_of_code_beyond_is_none`, `_effects`,
+  `_case_dispatch`, `_case_refines`, `_selects_high_lane` (the high-lane arm
+  fires exactly on the closed ordered fact pair), `_offsets_distinct`, and the
+  two cross-contracts `arm64_dq_mem_extra_matches_dq_stride` (the high-lane
+  offset is the 0141 DQ lane stride / `GeneratedArm64DqMem.transfer` at lane
+  1, for both the `.Q0` load and store) and
+  `arm64_dq_mem_extra_matches_vreg_half` (the high-lane offset is the 0143
+  vector half offset / `GeneratedArm64Vreg.halfOffset`, and the two contracts
+  agree on the half plan for all four opcodes); all
+  `native_decide`/`rfl`/`decide`.
+  `lake build KProgFormal.GeneratedArm64DqMemExtra && lake env lean
+  KProgFormal/Arm64DqMemExtraShape.lean` returns 0, and
+  `lake build KProgFormal` builds 271/271.
+- Sim-header routing `kprog/arm64/arm64_sim_local_bpf.h`: the shared vector
+  memory step now computes its per-lane extra offset through the generated
+  `KPROG_ARM64_DQ_MEM_EXTRA` selector and the hand nested ternary on
+  `__a64_vreg_p == 0U` / `__a64_dq_lanes > 1U` is removed from the step, while
+  the DQ lane plan (the 0141 access direction, lane count, and lane stride),
+  the vector half plan of Step 0143, the offset contract
+  (`ARM64_SIM_L_MEM_BASE_OFF`), and the base-address source of Step 0140 are
+  unchanged.
+- Host oracle `kprog/formal/test_arm64_dq_mem_extra_host.c`: restates the
+  3-way offset selection from the raw fact pair, drives the generated selector
+  over every fact pair and the four opcode lanes, and pins the outcome codes,
+  byte offsets, and count: `arm64 dq mem extra host cross-check: OK (21
+  cases)`.
+- Route oracle `kprog/formal/test_arm64_dq_mem_extra_route_host.c`: declares
+  the full register file and stack, plants the base registers' pointers and
+  provenance tags, and drives the real `ARM64_SIM_L_DQ_MEM_STEP` (both
+  directions, every opcode, every base class, every pre/post flag combination,
+  both index modes, and several immediates) against an independent model that
+  walks the lane plan position-by-position and recomputes each position's
+  extra offset from its own fact pair, so a dropped or added high-lane offset
+  is numerically distinguishable; compares the whole register file with its
+  tags, the stack pointer, the SIMD quarters, and all 4 KiB of the memory
+  window: `arm64 dq mem extra route host cross-check: OK (62424 cases)`.
+- `make -C kprog/formal check` passes with **184** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 182→184).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_dq_mem_extra.py`,
+  48 mutations against the live tree, each caught after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the baseline
+  green at the end: 45 of the 48 are caught---six specification
+  distortions, eleven generator-table changes, sixteen generated-C header
+  distortions (including the two regenerated generator/render drifts),
+  thirteen generated-Lean distortions (including the regenerated
+  generator/render drift), six hand-refinement changes, and three
+  sim-header selector reverts, each of these a change the generator check,
+  a refinement theorem, or an oracle flags---while three
+  genuine-equivalence rewrites (a
+  resolved-but-equal generator root path, an added hand-module namespace
+  comment, and a cosmetic count-guard message) SURVIVE as required. Per
+  detector: `gen` 14, `lean_chain` 13, `host` 16, `route` 2.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
