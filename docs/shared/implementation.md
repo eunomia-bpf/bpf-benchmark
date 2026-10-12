@@ -555,6 +555,49 @@ increment is committed and pushed immediately). Current state:
   the last two are equivalences the proof correctly does not flag. The
   `KPROG_ARM64_HELPER_ROW` out-of-range default and the sim-header body
   macros remain boundaries.
+  The AArch64 stack *write* slot-tag action selection is likewise no longer
+  open (Step 0137): the simulator's `ARM64_SIM_L_STACK_WRITE_TAG` write
+  helper selected between three slot-tag actions from a closed pair of
+  facts --- the qword write and tag store exactly when the access is
+  64-bit and the slot is 8-aligned, the aligned tag clear and byte-ladder
+  write at every aligned sub-qword access, and the plain byte write
+  otherwise --- with the hand `KPROG_ARM64_STACK_TAG(` gate and the
+  three-arm selection living only in the write-helper body. A drift in
+  the action selection was not observable. This step generates the 3-way
+  selector from `arm64_stack_write_tag_action_spec.json` into the C
+  `generated/arm64_stack_write_tag_action.h` (the
+  `KPROG_ARM64_STACK_WRITE_TAG_ACTION` plain-ternary selector, the
+  action-code defines, and the count, distinctness, and selection
+  `_Static_assert`s) and `KProgFormal/GeneratedArm64StackWriteTagAction.lean`,
+  and routes the live write helper through the generated selector,
+  removing the hand gate from the write path (Step 0137 delta from 0124,
+  which kept a hand gate plus a parallel contract); the read-side
+  slot-tag helper still uses the hand gate. `Arm64StackWriteTagActionShape.lean`
+  proves the generated selector equal to an independent literal over
+  every fact pair (`arm64_stack_write_tag_action_refines`), the name and
+  code tables against independent enumerations, the code round-trip and
+  out-of-range facts, the three distinct storage effects, the four-case
+  dispatch, the write word/tag arm equal to the read-side
+  `KPROG_ARM64_STACK_TAG` predicate over the same fact pair
+  (`arm64_stack_write_tag_action_matches_read_tag`), the word arm's qword
+  write equal to the 0124 width-64 active-lane footprint
+  (`arm64_stack_write_tag_action_word_writes_full_qword`), and both byte
+  actions' footprint equal to the width's active byte lanes
+  (`arm64_stack_write_tag_action_byte_footprint`); the 15-case host oracle
+  drives the generated selector against an independent 3-way restatement,
+  and the route oracle drives the real write through the generated
+  selector against an independent byte-image and slot-tag model over a
+  20000-iteration sweep with the read-back through the real read helper
+  (9084766 cases). 30 binding mutations --- five specification
+  distortions, four generator-table changes, a sim-header
+  selector-to-hand-gate revert, five generated-C header distortions
+  (including the regenerated generator/render drift), six generated-Lean
+  changes (including the regenerated generator/render drift), five
+  hand-refinement changes, and two sim-header write inversions --- each
+  of the first 28 changes the oracle, the generator check, or a
+  refinement theorem, while the last two genuine-equivalence rewrites are
+  the two the proof correctly does not flag. The out-of-range width codes
+  and the byte-ladder lanes remain boundaries.
   Remaining work also includes the load/store address and tag paths,
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any

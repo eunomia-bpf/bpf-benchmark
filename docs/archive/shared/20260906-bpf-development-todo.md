@@ -11271,6 +11271,93 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   covered-slices list with the helper-ident and compact-slot selection contract
   (paper commit f8a0522 pushed to `main`).
 
+## Step 0137 — AArch64 stack-write slot-tag action selection through the generated contract
+
+- Scope: the AArch64 simulator's `ARM64_SIM_L_STACK_WRITE_TAG` write helper
+  (`kprog/arm64/arm64_sim_local_bpf.h`) selected between three slot-tag
+  actions from a closed pair of facts — whether the access width is 64 bits
+  and whether the stack slot is 8-aligned — with no contract binding that
+  selection to a generated selector or to Lean. The hand `KPROG_ARM64_STACK_TAG(`
+  gate and the three-arm selection lived only in the write-helper body, so
+  a drift in the action selection was not observable. This step generates
+  the 3-way action selector from one specification and routes the live
+  write helper through the generated `KPROG_ARM64_STACK_WRITE_TAG_ACTION`
+  selector, removing the hand gate from the write path (Step 0137 delta
+  from 0124, which kept a hand gate plus a parallel contract); the
+  read-side slot-tag helper still uses the hand gate and is unchanged.
+- Spec `kprog/formal/arm64_stack_write_tag_action_spec.json`: schema_version 1,
+  operation `arm64StackWriteTagAction`, and three actions — `writeWordAndTag`
+  (code 0, effect `word_write_tag`), `clearTagAndWriteBytes` (code 1,
+  effect `clear_tag_bytes`), `writeBytesNoTag` (code 2, effect
+  `bytes_no_tag`) — plus four cases classifying every (isW64, isAligned)
+  fact pair into its action.
+- Generator `kprog/formal/generate_arm64_stack_write_tag_action_spec.py`:
+  `load()` re-reads the sim header on every `--check` and rejects a spec
+  that does not biject the expected actions/cases table, an effect that
+  names no storage effect, and a write region that names no generated
+  selector or still names a hand `KPROG_ARM64_STACK_TAG(` gate. Emits the
+  C header `generated/arm64_stack_write_tag_action.h` (the
+  `KPROG_ARM64_STACK_WRITE_TAG_ACTION(IS_W64, IS_ALIGNED)` 3-way selector,
+  the action-code defines, and the count, distinctness, and selection
+  `_Static_assert`s) and the Lean
+  `KProgFormal/GeneratedArm64StackWriteTagAction.lean`. `--check`
+  returns 0; the `--check` row is added at `kprog/formal/Makefile:67`.
+- Generated C header `kprog/formal/generated/arm64_stack_write_tag_action.h`:
+  `KPROG_ARM64_STACK_WRITE_TAG_ACTION_COUNT 3U`, the three action-code
+  defines (`…_WRITE_WORD_AND_TAG 0U`, `…_CLEAR_TAG_AND_WRITE_BYTES 1U`,
+  `…_WRITE_BYTES_NO_TAG 2U`), the plain-ternary 3-way selector macro, and
+  the count, three-pair distinctness, exact-code, and four fact-pair
+  selection `_Static_assert`s.
+- Hand Lean `kprog/formal/KProgFormal/Arm64StackWriteTagActionShape.lean`:
+  independent literal statements of the 3-way selector, the three action
+  names, the three action codes, and the four-case dispatch, with theorems
+  `arm64_stack_write_tag_action_refines` (the generated selector equals the
+  independent literal over every fact pair), `_names_refine`,
+  `_codes_refine`, `_codes_length`/`_names_length`, `_codes_nodup`,
+  `_count_is_3`, `_of_code_roundtrip`, `_of_code_beyond_is_none`,
+  `_effects`, `_case_dispatch`, `_case_refines`,
+  `_matches_read_tag` (the write word/tag arm is the read-side
+  `KPROG_ARM64_STACK_TAG` predicate over the same fact pair),
+  `_word_writes_full_qword` (the word arm's qword write is the 0124
+  width-64 active-lane footprint), and `_byte_footprint` (both byte
+  actions write exactly the width's active lanes); all `native_decide`.
+  `lake build KProgFormal.GeneratedArm64StackWriteTagAction && lake env
+  lean KProgFormal/Arm64StackWriteTagActionShape.lean` returns 0.
+- Sim-header routing `kprog/arm64/arm64_sim_local_bpf.h`: the write
+  helper body now computes its action through the generated
+  `KPROG_ARM64_STACK_WRITE_TAG_ACTION` selector and the hand
+  `KPROG_ARM64_STACK_TAG(` gate is removed from the write path; the
+  byte-ladder lanes 0–7 and the read-side slot-tag helper are unchanged.
+- Host oracle `kprog/formal/test_arm64_stack_write_tag_action_host.c`:
+  restates the 3-way selection from the two raw facts, drives the
+  generated selector over every fact pair and width code, and pins the
+  action codes and counts:
+  `arm64 stack write tag action host cross-check: OK (15 cases)`.
+- Route oracle `kprog/formal/test_arm64_stack_write_tag_action_route_host.c`:
+  drives the real `ARM64_SIM_L_STACK_WRITE_TAG` write through the
+  generated selector against an independent byte-image and slot-tag model
+  over a 20000-iteration sweep, with the read-back through the real read
+  helper: `arm64 stack write tag action route host cross-check:
+  OK (9084766 cases)`.
+- `make -C kprog/formal check` passes with **176** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 174→176).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_stack_write_tag_action.py`,
+  30 mutations against the live tree, each caught after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the baseline
+  green at the end: 28 of the 30 are caught---five specification
+  distortions, four generator-table changes, a sim-header
+  selector-to-hand-gate revert, five generated-C header distortions
+  (including the regenerated generator/render drift), six generated-Lean
+  changes (including the regenerated generator/render drift), five
+  hand-refinement changes, and two sim-header write inversions---while
+  two genuine-equivalence rewrites (a resolved-but-equal generator root
+  path and an added hand-module namespace comment) SURVIVE as required.
+  Per detector: `gen` 10, `lean_chain` 11, `host` 5, `route` 2.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
