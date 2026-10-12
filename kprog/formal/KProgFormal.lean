@@ -207,6 +207,8 @@ import KProgFormal.GeneratedArm64StackReadTagSource
 import KProgFormal.Arm64StackReadTagSourceShape
 import KProgFormal.GeneratedArm64HelperArgPtr
 import KProgFormal.Arm64HelperArgPtrShape
+import KProgFormal.GeneratedArm64MemBaseSrc
+import KProgFormal.Arm64MemBaseSrcShape
 import KProgFormal.GeneratedArm64DispatchFamily
 import KProgFormal.Arm64DispatchFamily
 import KProgFormal.GeneratedArm64DispatchSingleton
