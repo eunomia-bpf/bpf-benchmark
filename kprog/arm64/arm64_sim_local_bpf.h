@@ -52,6 +52,7 @@
 #include "../formal/generated/arm64_stack_write_tag_action.h"
 #include "../formal/generated/arm64_stack_read_tag_source.h"
 #include "../formal/generated/arm64_helper_arg_ptr.h"
+#include "../formal/generated/arm64_mem_base_src.h"
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
@@ -737,8 +738,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			((BASE) == ARM64_SP), __a64_mrd_tag, (WIDTH));   \
 		switch (__a64_mrd_src) {                                 \
 		case KPROG_ARM64_MEM_SRC_STACK: {                        \
-			__s64 __a64_mrd_base = (BASE) == ARM64_SP ? __a64_sp :\
-				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
+		__u8 __a64_mrd_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
+			(BASE) == ARM64_SP);                             \
+		__s64 __a64_mrd_base =                               \
+			(__a64_mrd_bsrc == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER)\
+				? __a64_sp                              \
+				: (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
 			__a64_mrd_value = ARM64_SIM_L_STACK_READ(        \
 				__a64_mrd_base + __a64_mrd_off, (WIDTH));\
 			break;                                             \
@@ -773,8 +778,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_mrt_value_tag;                                \
 		switch (__a64_mrt_src) {                                 \
 		case KPROG_ARM64_MEM_TAG_STACK: {                        \
-			__s64 __a64_mrt_base = (BASE) == ARM64_SP ? __a64_sp :\
-				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
+		__u8 __a64_mrt_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
+			(BASE) == ARM64_SP);                             \
+		__s64 __a64_mrt_base =                               \
+			(__a64_mrt_bsrc == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER)\
+				? __a64_sp                              \
+				: (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
 			__a64_mrt_value_tag = ARM64_SIM_L_STACK_READ_TAG( \
 				__a64_mrt_base + __a64_mrt_off, (WIDTH));\
 			break;                                             \
@@ -803,8 +812,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_mwr_arm = KPROG_ARM64_MEM_WRITE_ARM(          \
 			((BASE) == ARM64_SP), __a64_mwr_tag);            \
 		if (__a64_mwr_arm == KPROG_ARM64_MEM_WRITE_ARM_STACK) {  \
-			__s64 __a64_mwr_base = (BASE) == ARM64_SP ? __a64_sp :\
-				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
+		__u8 __a64_mwr_bsrc = KPROG_ARM64_MEM_BASE_SRC(       \
+			(BASE) == ARM64_SP);                             \
+		__s64 __a64_mwr_base =                               \
+			(__a64_mwr_bsrc == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER)\
+				? __a64_sp                              \
+				: (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
 			ARM64_SIM_L_STACK_WRITE_TAG(__a64_mwr_base + __a64_mwr_off,\
 						    (WIDTH), (VALUE), (TAG));\
 		} else {                                                   \
