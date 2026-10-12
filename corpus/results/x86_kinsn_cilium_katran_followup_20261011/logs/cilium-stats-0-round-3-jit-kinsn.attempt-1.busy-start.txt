@@ -1,0 +1,23 @@
+2026-10-12T05:43:09Z
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+3418174 root      20   0 8679312   7.6g   3.3g S 109.1   6.0   1:59.11 Lean49Arithmeti
+3418904 root      20   0 4846084   4.1g   3.3g R 100.0   3.3   1:44.06 repl
+3415161 root      20   0 3103596   1.7g   1.5g S 100.0   1.3   3:05.25 LeanNativePrepa
+3421955 root      20   0 9941336   8.4g   3.3g S 100.0   6.7   0:43.56 Lean49Arithmeti
+3398647 root      20   0  150712  67908  11540 S  27.3   0.1   2:08.35 python3
+ 541578 root      20   0 5959764  33764   8304 S  18.2   0.0  49:32.98 longhorn-instan
+   2508 root      20   0 1493716  67028  14184 S   9.1   0.1  46:31.40 tailscaled
+ 532370 root      20   0 1274604  13904   8440 S   9.1   0.0   3:50.47 containerd-shim
+ 539954 root      20   0 1478224 157332  25176 S   9.1   0.1  37:11.24 longhorn-manage
+2472660 yunwei37  20   0   41448  26440  10452 S   9.1   0.0   0:00.80 python3
+3015987 root      20   0 3058040  28576  11048 S   9.1   0.0   1:23.76 longhorn
+3423112 yunwei37  20   0   16052   6584   4320 R   9.1   0.0   0:00.01 top
+      1 root      20   0   29216  16272   7528 S   0.0   0.0   8:00.22 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.56 kthreadd
+      3 root      20   0       0      0      0 S   0.0   0.0   0:00.00 pool_workqueue_release
+3415161 psr=  8 allowed=8
+3418174 psr= 13 allowed=8-23
+3418904 psr= 16 allowed=8-23
+3421955 psr= 14 allowed=8-23
+3260038 psr=  9 allowed=8-23
+2773292 psr=  9 allowed=8-23

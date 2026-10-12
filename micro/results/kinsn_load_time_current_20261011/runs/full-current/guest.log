@@ -1,0 +1,211 @@
+guest-start 2026-10-12T00:06:51Z
+Linux virtme-ng 7.0.0-rc2+ #7 SMP PREEMPT_DYNAMIC Sun Oct 11 16:17:38 PDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/vendor/build/x86/linux/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`YmFzaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL2d1ZXN0LXJ1bi5zaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL3J1bnMvZnVsbC1jdXJyZW50` virtme_chdir=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+8
+model name	: Intel(R) Core(TM) Ultra 9 285K
+[    0.002243] tsc: Detected 3686.400 MHz processor
+suite-start 2026-10-12T00:06:51Z
+make: Entering directory '/home/yunwei37/workspace/bpf-benchmark-rerun-20261009'
+install -d /run/bpf-benchmark-docker /run/bpf-benchmark-docker/data /run/bpf-benchmark-docker/exec
+truncate -s "${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+"/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/runner/scripts/start-vm-docker"
+install -d "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results"
+"/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/runner/scripts/bpfrejit-install" --image "bpf-benchmark/runner-runtime:x86_64" "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/.cache/container-images/x86_64-runner-runtime.image.tar"
+Loaded image: bpf-benchmark/runner-runtime:x86_64
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host -e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root -e TARGET="x86-kvm" -e RUN_TARGET_NAME="x86-kvm" -e RUN_TOKEN="4718fc6d" -e RUN_TARGET_ARCH="x86_64" -e RUN_EXECUTOR="kvm" -e RUN_REMOTE_PYTHON_BIN="python3" -e RUN_RUNTIME_PYTHON_BIN="python3" -e RUN_BPFTOOL_BIN="bpftool" -e RUN_NATIVE_REPOS_CSV="bcc,katran,tracee,tetragon" -e MICRO_PROGRAM_DIR="/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/programs" -e SAMPLES="2" -e WARMUPS="0" -e INNER_REPEAT="10"  -e SUITE="micro/results/kinsn_load_time_current_20261011/suite-paper62.yaml" -e RUNTIMES="kernel,kernel_rejit" -e FUZZ_ROUNDS="1000"                -e MERLIN_COMPILETIME_MODE="none"                    -e CILIUM_PROFILE_ARM="all"    -w "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009" -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro -v "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results:/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results" "bpf-benchmark/runner-runtime:x86_64" python3 -m runner.suites.micro
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.
+[bench] (1/62) simple
+  kernel           compile last 17214297 ns | exec last 33 ns | result 12345678
+  kernel_rejit     compile last 19263610 ns | exec last 51 ns | result 12345678
+[bench] (2/62) simple_packet
+  kernel           compile last 10947854 ns | exec last 69 ns | result 12345678
+  kernel_rejit     compile last 11400660 ns | exec last 55 ns | result 12345678
+[bench] (3/62) memory_pair_sum
+  kernel           compile last 9772851 ns | exec last 95 ns | result 0
+  kernel_rejit     compile last 15491865 ns | exec last 85 ns | result 0
+[bench] (4/62) bitcount
+  kernel           compile last 100910823 ns | exec last 81 ns | result 0
+  kernel_rejit     compile last 97421923 ns | exec last 123 ns | result 0
+[bench] (5/62) log2_fold
+  kernel           compile last 16051202 ns | exec last 54 ns | result 0
+  kernel_rejit     compile last 16945755 ns | exec last 36 ns | result 0
+[bench] (6/62) dep_chain_short
+  kernel           compile last 7177053 ns | exec last 110 ns | result 0
+  kernel_rejit     compile last 7827838 ns | exec last 37 ns | result 0
+[bench] (7/62) dep_chain_long
+  kernel           compile last 13125319 ns | exec last 198 ns | result 0
+  kernel_rejit     compile last 10560841 ns | exec last 75 ns | result 0
+[bench] (8/62) binary_search
+  kernel           compile last 23875177 ns | exec last 155 ns | result 0
+  kernel_rejit     compile last 25623316 ns | exec last 48 ns | result 0
+[bench] (9/62) branch_layout
+  kernel           compile last 15751753 ns | exec last 95 ns | result 0
+  kernel_rejit     compile last 19330844 ns | exec last 71 ns | result 0
+[bench] (10/62) switch_dispatch
+  kernel           compile last 41909973 ns | exec last 41 ns | result 0
+  kernel_rejit     compile last 40480501 ns | exec last 42 ns | result 0
+[bench] (11/62) branch_dense
+  kernel           compile last 20372284 ns | exec last 81 ns | result 0
+  kernel_rejit     compile last 19833720 ns | exec last 62 ns | result 0
+[bench] (12/62) cmov_select
+  kernel           compile last 15882460 ns | exec last 45 ns | result 0
+  kernel_rejit     compile last 22612023 ns | exec last 117 ns | result 0
+[bench] (13/62) cmov_dense
+  kernel           compile last 27088431 ns | exec last 174 ns | result 5741686263220583387
+  kernel_rejit     compile last 10310790 ns | exec last 161 ns | result 5741686263220583387
+[bench] (14/62) checksum
+  kernel           compile last 41269825 ns | exec last 59 ns | result 0
+  kernel_rejit     compile last 40587025 ns | exec last 49 ns | result 0
+[bench] (15/62) load_word32
+  kernel           compile last 11231323 ns | exec last 107 ns | result 0
+  kernel_rejit     compile last 8198784 ns | exec last 54 ns | result 0
+[bench] (16/62) load_byte
+  kernel           compile last 8040535 ns | exec last 57 ns | result 0
+  kernel_rejit     compile last 6762049 ns | exec last 55 ns | result 0
+[bench] (17/62) load_byte_recompose
+  kernel           compile last 11110776 ns | exec last 87 ns | result 0
+  kernel_rejit     compile last 12018850 ns | exec last 76 ns | result 0
+[bench] (18/62) load_native_u64
+  kernel           compile last 9329869 ns | exec last 45 ns | result 0
+  kernel_rejit     compile last 7792615 ns | exec last 36 ns | result 0
+[bench] (19/62) packet_parse
+  kernel           compile last 12051101 ns | exec last 55 ns | result 0
+  kernel_rejit     compile last 9919156 ns | exec last 108 ns | result 0
+[bench] (20/62) bounds_ladder
+  kernel           compile last 12780243 ns | exec last 89 ns | result 0
+  kernel_rejit     compile last 9530718 ns | exec last 68 ns | result 0
+[bench] (21/62) bounds_check_heavy
+  kernel           compile last 92743663 ns | exec last 111 ns | result 0
+  kernel_rejit     compile last 93224995 ns | exec last 65 ns | result 0
+[bench] (22/62) stride_load_4
+  kernel           compile last 10474914 ns | exec last 95 ns | result 0
+  kernel_rejit     compile last 11533091 ns | exec last 54 ns | result 0
+[bench] (23/62) stride_load_16
+  kernel           compile last 18953924 ns | exec last 87 ns | result 0
+  kernel_rejit     compile last 8118708 ns | exec last 61 ns | result 0
+[bench] (24/62) mixed_alu_mem
+  kernel           compile last 15649625 ns | exec last 73 ns | result 0
+  kernel_rejit     compile last 21484571 ns | exec last 93 ns | result 0
+[bench] (25/62) spill_pressure
+  kernel           compile last 13934520 ns | exec last 64 ns | result 0
+  kernel_rejit     compile last 8616839 ns | exec last 47 ns | result 0
+[bench] (26/62) multi_acc_4
+  kernel           compile last 14210321 ns | exec last 73 ns | result 0
+  kernel_rejit     compile last 18072373 ns | exec last 53 ns | result 0
+[bench] (27/62) multi_acc_8
+  kernel           compile last 11158662 ns | exec last 89 ns | result 0
+  kernel_rejit     compile last 9952314 ns | exec last 78 ns | result 0
+[bench] (28/62) fibonacci_iter
+  kernel           compile last 10786561 ns | exec last 91 ns | result 0
+  kernel_rejit     compile last 12592028 ns | exec last 93 ns | result 0
+[bench] (29/62) fibonacci_iter_packet
+  kernel           compile last 12833512 ns | exec last 105 ns | result 0
+  kernel_rejit     compile last 14257330 ns | exec last 97 ns | result 0
+[bench] (30/62) fixed_loop_small
+  kernel           compile last 10078559 ns | exec last 74 ns | result 0
+  kernel_rejit     compile last 9622369 ns | exec last 72 ns | result 0
+[bench] (31/62) fixed_loop_large
+  kernel           compile last 13101149 ns | exec last 61 ns | result 0
+  kernel_rejit     compile last 12896033 ns | exec last 80 ns | result 0
+[bench] (32/62) nested_loop_2
+  kernel           compile last 9723425 ns | exec last 55 ns | result 0
+  kernel_rejit     compile last 10247873 ns | exec last 69 ns | result 0
+[bench] (33/62) nested_loop_3
+  kernel           compile last 11378497 ns | exec last 74 ns | result 0
+  kernel_rejit     compile last 12512551 ns | exec last 61 ns | result 0
+[bench] (34/62) code_clone_2
+  kernel           compile last 10134415 ns | exec last 59 ns | result 0
+  kernel_rejit     compile last 8376562 ns | exec last 143 ns | result 0
+[bench] (35/62) code_clone_8
+  kernel           compile last 12918816 ns | exec last 73 ns | result 0
+  kernel_rejit     compile last 11454675 ns | exec last 57 ns | result 0
+[bench] (36/62) large_mixed_500
+  kernel           compile last 23837777 ns | exec last 144 ns | result 0
+  kernel_rejit     compile last 27165796 ns | exec last 127 ns | result 0
+[bench] (37/62) large_mixed_1000
+  kernel           compile last 28519827 ns | exec last 68 ns | result 0
+  kernel_rejit     compile last 26648251 ns | exec last 104 ns | result 0
+[bench] (38/62) bpf_call_chain
+  kernel           compile last 9746941 ns | exec last 805 ns | result 16747631233129837311
+  kernel_rejit     compile last 11097548 ns | exec last 491 ns | result 16747631233129837311
+[bench] (39/62) memcmp_prefix_64
+  kernel           compile last 12849560 ns | exec last 49 ns | result 0
+  kernel_rejit     compile last 8900204 ns | exec last 63 ns | result 0
+[bench] (40/62) packet_parse_vlans_tcpopts
+  kernel           compile last 9496764 ns | exec last 55 ns | result 0
+  kernel_rejit     compile last 10829576 ns | exec last 97 ns | result 0
+[bench] (41/62) local_call_fanout
+  kernel           compile last 12244622 ns | exec last 60 ns | result 0
+  kernel_rejit     compile last 13634220 ns | exec last 63 ns | result 0
+[bench] (42/62) packet_rss_hash
+  kernel           compile last 9654424 ns | exec last 96 ns | result 0
+  kernel_rejit     compile last 17446555 ns | exec last 65 ns | result 0
+[bench] (43/62) imm64_storm
+  kernel           compile last 13220412 ns | exec last 365 ns | result 8004644859348874360
+  kernel_rejit     compile last 11367894 ns | exec last 386 ns | result 8004644859348874360
+[bench] (44/62) alu32_64_pingpong
+  kernel           compile last 21401597 ns | exec last 74 ns | result 0
+  kernel_rejit     compile last 11246375 ns | exec last 93 ns | result 0
+[bench] (45/62) branch_fanout_32
+  kernel           compile last 49745236 ns | exec last 92 ns | result 0
+  kernel_rejit     compile last 43461586 ns | exec last 48 ns | result 0
+[bench] (46/62) deep_guard_tree_8
+  kernel           compile last 17171810 ns | exec last 46 ns | result 0
+  kernel_rejit     compile last 14814726 ns | exec last 38 ns | result 0
+[bench] (47/62) mega_basic_block_2048
+  kernel           compile last 38090879 ns | exec last 1928 ns | result 12922509338478190001
+  kernel_rejit     compile last 37917225 ns | exec last 1917 ns | result 12922509338478190001
+[bench] (48/62) rotate64_hash
+  kernel           compile last 13472965 ns | exec last 191 ns | result 5099286188975296341
+  kernel_rejit     compile last 24885642 ns | exec last 101 ns | result 5099286188975296341
+[bench] (49/62) packet_redundant_bounds
+  kernel           compile last 8791264 ns | exec last 72 ns | result 0
+  kernel_rejit     compile last 11447504 ns | exec last 104 ns | result 0
+[bench] (50/62) const_fold_chain
+  kernel           compile last 10669253 ns | exec last 114 ns | result 0
+  kernel_rejit     compile last 8850270 ns | exec last 124 ns | result 0
+[bench] (51/62) struct_field_cluster
+  kernel           compile last 20444103 ns | exec last 56 ns | result 0
+  kernel_rejit     compile last 13899017 ns | exec last 103 ns | result 0
+[bench] (52/62) bitfield_extract
+  kernel           compile last 9237041 ns | exec last 126 ns | result 0
+  kernel_rejit     compile last 15515592 ns | exec last 72 ns | result 0
+[bench] (53/62) smallmul_strength_reduce
+  kernel           compile last 8716297 ns | exec last 55 ns | result 0
+  kernel_rejit     compile last 9810562 ns | exec last 87 ns | result 0
+[bench] (54/62) cond_select_dense
+  kernel           compile last 20999439 ns | exec last 216 ns | result 6468442125814067127
+  kernel_rejit     compile last 12632798 ns | exec last 192 ns | result 6468442125814067127
+[bench] (55/62) rotate_dense
+  kernel           compile last 16530966 ns | exec last 483 ns | result 5916845847335106223
+  kernel_rejit     compile last 18220750 ns | exec last 408 ns | result 5916845847335106223
+[bench] (56/62) addr_calc_stride
+  kernel           compile last 20372887 ns | exec last 385 ns | result 4561879430438898569
+  kernel_rejit     compile last 8760997 ns | exec last 251 ns | result 4561879430438898569
+[bench] (57/62) extract_dense
+  kernel           compile last 11666182 ns | exec last 469 ns | result 13503953896175513275
+  kernel_rejit     compile last 14831044 ns | exec last 508 ns | result 13503953896175513275
+[bench] (58/62) endian_swap_dense
+  kernel           compile last 14679879 ns | exec last 281 ns | result 4354685567075941419
+  kernel_rejit     compile last 11077881 ns | exec last 264 ns | result 4354685567075941419
+[bench] (59/62) branch_flip_dense
+  kernel           compile last 22404128 ns | exec last 468 ns | result 5840696475078013905
+  kernel_rejit     compile last 25682275 ns | exec last 417 ns | result 5840696475078013905
+[bench] (60/62) tc_bitcount
+  kernel           compile last 68026698 ns | exec last 10 ns | result 18446744073709551615
+  kernel_rejit     compile last 70371550 ns | exec last 10 ns | result 18446744073709551615
+[bench] (61/62) tc_checksum
+  kernel           compile last 43305734 ns | exec last 9 ns | result 18446744073709551615
+  kernel_rejit     compile last 40166896 ns | exec last 8 ns | result 18446744073709551615
+[bench] (62/62) cgroup_hash_chain
+  kernel           compile last 13847429 ns | exec last 9 ns | result 18446744073709551615
+  kernel_rejit     compile last 8775560 ns | exec last 17 ns | result 18446744073709551615
+[done] wrote /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/x86_kvm_micro_20261012_000759_475082/metadata.json
+make: Leaving directory '/home/yunwei37/workspace/bpf-benchmark-rerun-20261009'
+suite-end 2026-10-12T00:20:29Z rc=0

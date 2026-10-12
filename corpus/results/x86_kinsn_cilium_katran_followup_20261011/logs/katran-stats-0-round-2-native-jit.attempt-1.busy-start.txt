@@ -1,0 +1,23 @@
+2026-10-12T07:13:49Z
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+2773292 yunwei37  20   0 2427288 615480 169488 S 116.7   0.5 204:34.29 telegram-deskto
+3628759 root      20   0 5380844   3.1g   1.2g S 100.0   2.5  19:05.73 LeanNativePrepa
+3682755 root      20   0 4168904   3.5g   3.2g R 100.0   2.8   0:02.35 Lean49Arithmeti
+3672914 root      20   0 8696076   7.5g   3.3g S  91.7   6.0   4:05.59 Lean49Arithmeti
+3682739 root      20   0 4182032   3.5g   3.3g R  91.7   2.8   0:03.54 repl
+3612445 root      20   0   67828  56996  11336 S  58.3   0.0   3:35.25 python3
+3398647 root      20   0  151736  69096  11516 S  33.3   0.1  24:38.61 python3
+3683022 yunwei37  20   0 1726264 119480  95976 S  16.7   0.1   0:00.11 coder
+   2508 root      20   0 1493716  64532  10852 S   8.3   0.0  48:14.09 tailscaled
+ 961403 yunwei37  20   0  254228  58220  14004 S   8.3   0.0  68:56.86 Xvfb
+3016314 root      20   0 2918948  27232  11328 S   8.3   0.0   1:24.19 longhorn
+3683146 yunwei37  20   0   16052   6620   4352 R   8.3   0.0   0:00.02 top
+      1 root      20   0   29216  16996   7648 S   0.0   0.0   8:15.96 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.57 kthreadd
+      3 root      20   0       0      0      0 S   0.0   0.0   0:00.00 pool_workqueue_release
+2773292 psr=  9 allowed=8-23
+3672914 psr= 21 allowed=8-23
+3682739 psr= 14 allowed=8-23
+3682755 psr= 12 allowed=8-23
+3628759 psr=  8 allowed=8
+3398647 psr= 11 allowed=8-23

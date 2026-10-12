@@ -1,0 +1,25 @@
+arm=pilot premods=- token=ecbf7866 start=2026-10-11T23:09:22Z
+kernel=fd63e2b6284376797ea8e0fce7238d459f5c36ea5f1f0b759b8b290f43f6d09d  /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/vendor/build/x86/linux/arch/x86/boot/bzImage
+image_tar=2110699520 2026-10-11 16:08:02.053278785 -0700
+clone_head=e3f503e1e5b80b6d308792eeb83ffeaab1705334
+make_var TARGET=x86-kvm
+make_var RUN_TARGET_NAME=x86-kvm
+make_var RUN_TARGET_ARCH=x86_64
+make_var RUN_EXECUTOR=kvm
+make_var RUNTIME_CONTAINER_IMAGE=bpf-benchmark/runner-runtime:x86_64
+make_var RUNTIME_IMAGE_TAR=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/.cache/container-images/x86_64-runner-runtime.image.tar
+make_var RUN_REMOTE_PYTHON_BIN=python3
+make_var RUN_RUNTIME_PYTHON_BIN=python3
+make_var RUN_BPFTOOL_BIN=bpftool
+make_var RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon
+make_var RUN_TOKEN=ecbf7866
+make_var SUITE=micro/results/kinsn_load_time_current_20261011/suite-pilot.yaml
+make_var RUNTIME_ENV_BASE_NAMES=TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV MICRO_PROGRAM_DIR
+make_var MICRO_PROGRAM_DIR=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/programs
+make_var RUNTIMES=kernel_rejit,kernel
+make_var SAMPLES=1
+make_var WARMUPS=0
+make_var INNER_REPEAT=1
+make_var BPFREJIT_BENCH_PASSES=kinsn
+guest_cmd=bash /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/guest-run.sh /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/runs/pilot - TARGET=x86-kvm RUN_TARGET_NAME=x86-kvm RUN_TARGET_ARCH=x86_64 RUN_EXECUTOR=kvm RUNTIME_CONTAINER_IMAGE=bpf-benchmark/runner-runtime:x86_64 RUNTIME_IMAGE_TAR=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/.cache/container-images/x86_64-runner-runtime.image.tar RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_BIN=python3 RUN_BPFTOOL_BIN=bpftool RUN_NATIVE_REPOS_CSV=bcc\,katran\,tracee\,tetragon RUN_TOKEN=ecbf7866 SUITE=micro/results/kinsn_load_time_current_20261011/suite-pilot.yaml RUNTIME_ENV_BASE_NAMES=TARGET\ RUN_TARGET_NAME\ RUN_TOKEN\ RUN_TARGET_ARCH\ RUN_EXECUTOR\ RUN_REMOTE_PYTHON_BIN\ RUN_RUNTIME_PYTHON_BIN\ RUN_BPFTOOL_BIN\ RUN_NATIVE_REPOS_CSV\ MICRO_PROGRAM_DIR MICRO_PROGRAM_DIR=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/programs RUNTIMES=kernel_rejit\,kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1 BPFREJIT_BENCH_PASSES=kinsn
+vng_rc=255 end=2026-10-11T23:10:58Z

@@ -1,0 +1,23 @@
+2026-10-12T06:51:02Z
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   5250 root      20   0 1782732 153252  43108 S 127.3   0.1     28,09 containerd
+2773292 yunwei37  20   0 2427288 609940 166944 S 127.3   0.5 175:09.86 telegram-deskto
+3619889 root      20   0       0      0      0 R 100.0   0.0   0:02.57 repl
+3469376 root      20   0 6430136   4.9g   1.2g S 100.0   3.9  52:01.75 LeanNativePrepa
+3616917 root      20   0 8958096   7.7g   3.3g S 100.0   6.1   1:22.42 Lean49Arithmeti
+3619516 root      20   0 8393912   7.3g   3.3g S 100.0   5.9   0:09.99 Lean49Arithmeti
+ 961403 yunwei37  20   0  254228  58220  14004 R  18.2   0.0  66:39.93 Xvfb
+3398647 root      20   0  151736  69080  11516 S  18.2   0.1  18:56.38 python3
+3612445 root      20   0   65480  55300  11336 S   9.1   0.0   0:30.09 python3
+3883372 root      20   0   19.4g   2.3g  41704 S   9.1   1.8  30:29.32 omp
+      1 root      20   0   29216  16984   7644 S   0.0   0.0   8:12.60 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.57 kthreadd
+      3 root      20   0       0      0      0 S   0.0   0.0   0:00.00 pool_workqueue_release
+      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/R-rcu_gp
+      5 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/R-sync_wq
+5250 psr= 20 allowed=0-23
+2773292 psr= 13 allowed=8-23
+3616917 psr=  9 allowed=8-23
+3469376 psr=  8 allowed=8
+3619516 psr= 23 allowed=8-23
+3619976 psr= 18 allowed=8-23

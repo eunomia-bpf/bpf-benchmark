@@ -53,6 +53,28 @@ def test_cilium_inventory_parity_rejects_extra_native_program(tmp_path: Path) ->
     assert record["status"] == "fail"
 
 
+def test_cilium_inventory_parity_kernel_names_accept_truncated_rewrite(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline"
+    post = tmp_path / "post"
+    _write_graph(baseline, name="cil_from_container", count=2)
+    _write_graph(post, name="cil_from_contai", count=2)
+    with pytest.raises(RuntimeError, match="live program inventory differs"):
+        _validate_cilium_live_inventory_parity(baseline, post)
+    _validate_cilium_live_inventory_parity(baseline, post, kernel_names=True)
+    record = json.loads((tmp_path / "inventory-parity.json").read_text(encoding="utf-8"))
+    assert record["status"] == "pass"
+    assert record["name_granularity"] == "kernel"
+
+
+def test_cilium_inventory_parity_kernel_names_still_reject_count_change(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline"
+    post = tmp_path / "post"
+    _write_graph(baseline, name="cil_from_container", count=2)
+    _write_graph(post, name="cil_from_contai", count=3)
+    with pytest.raises(RuntimeError, match="live program inventory differs"):
+        _validate_cilium_live_inventory_parity(baseline, post, kernel_names=True)
+
+
 def test_native_program_names_are_recovered_by_exact_program_id(tmp_path: Path) -> None:
     log_path = tmp_path / "shim.log"
     log_path.write_text(

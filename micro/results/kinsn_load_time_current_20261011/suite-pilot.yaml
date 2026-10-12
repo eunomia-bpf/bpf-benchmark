@@ -1,0 +1,336 @@
+# 62-program population of the paper load-time claim (Apr29/May14 runs), taken from
+# bpf-benchmark fed5531cd micro/config/micro_pure_jit.yaml (the manifest of the May14 campaigns).
+# Objects in ./programs were built from the same fed5531cd sources with clang-18 -O2 -g and have
+# the same instruction counts as the May14 loads.  Changes for the current runner: the old input
+# generators no longer exist, so input_generator and expected_result are dropped (programs run on
+# a zero-filled input of kernel_input_size bytes; load time does not depend on input), and
+# expected_retval is the zero-input return value observed in the pilot run (-1 = unknown).
+suite_name: micro_staged_codegen_paper62
+paths:
+  program_dir: micro/results/kinsn_load_time_current_20261011/programs
+build:
+  runner_binary: runner/build/micro_exec
+benchmark_defaults:
+  io_mode: staged
+runtimes:
+  - name: kernel
+  - name: kernel_rejit
+benchmarks:
+  - name: simple
+    base_name: simple
+    kernel_input_size: 64
+    expected_retval: -1
+    tags: [baseline, pure-jit]
+  - name: simple_packet
+    base_name: simple_packet
+    io_mode: packet
+    kernel_input_size: 64
+    expected_retval: -1
+    tags: [baseline, packet-backed, helper-free]
+  - name: memory_pair_sum
+    base_name: memory_pair_sum
+    kernel_input_size: 16
+    expected_retval: -1
+    tags: [memory, baseline, pure-jit]
+  - name: bitcount
+    base_name: bitcount
+    kernel_input_size: 2056
+    expected_retval: -1
+    tags: [bitops, pure-jit]
+  - name: log2_fold
+    base_name: log2_fold
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [bitops, branch, pure-jit]
+  - name: dep_chain_short
+    base_name: dep_chain_short
+    kernel_input_size: 520
+    expected_retval: -1
+    tags: [compute, dep-chain, pure-jit]
+  - name: dep_chain_long
+    base_name: dep_chain_long
+    kernel_input_size: 2056
+    expected_retval: -1
+    tags: [compute, dep-chain, pure-jit]
+  - name: binary_search
+    base_name: binary_search
+    kernel_input_size: 392
+    expected_retval: -1
+    tags: [branch, search, pure-jit]
+  - name: branch_layout
+    base_name: branch_layout
+    kernel_input_size: 3464
+    expected_retval: -1
+    tags: [branch, layout, pure-jit]
+  - name: switch_dispatch
+    base_name: switch_dispatch
+    kernel_input_size: 516
+    expected_retval: -1
+    tags: [branch, dispatch, pure-jit]
+  - name: branch_dense
+    base_name: branch_dense
+    kernel_input_size: 520
+    expected_retval: -1
+    tags: [branch, dense, pure-jit]
+  - name: cmov_select
+    base_name: cmov_select
+    kernel_input_size: 3464
+    expected_retval: -1
+    tags: [branch, select, cmov, pure-jit]
+  - name: cmov_dense
+    base_name: cmov_dense
+    kernel_input_size: 1024
+    expected_retval: -1
+    tags: [branch, select, cmov, dense, pure-jit]
+  - name: checksum
+    base_name: checksum
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [alu, memory, pure-jit]
+  - name: load_word32
+    base_name: load_word32
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [memory, load-width, byte-recompose, pure-jit]
+  - name: load_byte
+    base_name: load_byte
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [memory, load-width, control, pure-jit]
+  - name: load_byte_recompose
+    base_name: load_byte_recompose
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [memory, byte-recompose, causal-isolation, pure-jit]
+  - name: load_native_u64
+    base_name: load_native_u64
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [memory, control, causal-isolation, pure-jit]
+  - name: packet_parse
+    base_name: packet_parse
+    kernel_input_size: 3464
+    expected_retval: -1
+    tags: [memory, parse, bounds, pure-jit]
+  - name: bounds_ladder
+    base_name: bounds_ladder
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [bounds, verifier-like, pure-jit]
+  - name: bounds_check_heavy
+    base_name: bounds_check_heavy
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [bounds, branch-heavy, fixed-offsets, switch-dispatch, pure-jit]
+  - name: stride_load_4
+    base_name: stride_load_4
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [memory, stride, pure-jit]
+  - name: stride_load_16
+    base_name: stride_load_16
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [memory, stride, pure-jit]
+  - name: mixed_alu_mem
+    base_name: mixed_alu_mem
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [alu, memory, mixed, pure-jit]
+  - name: spill_pressure
+    base_name: spill_pressure
+    kernel_input_size: 520
+    expected_retval: -1
+    tags: [compute, reg-pressure, pure-jit]
+  - name: multi_acc_4
+    base_name: multi_acc_4
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [compute, ilp, pure-jit]
+  - name: multi_acc_8
+    base_name: multi_acc_8
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [compute, ilp, pure-jit]
+  - name: fibonacci_iter
+    base_name: fibonacci_iter
+    kernel_input_size: 16
+    expected_retval: -1
+    tags: [compute, loop, pure-jit]
+  - name: fibonacci_iter_packet
+    base_name: fibonacci_iter_packet
+    io_mode: packet
+    kernel_input_size: 16
+    expected_retval: -1
+    tags: [compute, loop, packet-backed, helper-free]
+  - name: fixed_loop_small
+    base_name: fixed_loop_small
+    kernel_input_size: 16
+    expected_retval: -1
+    tags: [compute, loop, pure-jit]
+  - name: fixed_loop_large
+    base_name: fixed_loop_large
+    kernel_input_size: 16
+    expected_retval: -1
+    tags: [compute, loop, pure-jit]
+  - name: nested_loop_2
+    base_name: nested_loop_2
+    kernel_input_size: 2064
+    expected_retval: -1
+    tags: [compute, loop, nested, pure-jit]
+  - name: nested_loop_3
+    base_name: nested_loop_3
+    kernel_input_size: 2064
+    expected_retval: -1
+    tags: [compute, loop, nested, pure-jit]
+  - name: code_clone_2
+    base_name: code_clone_2
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [compute, code-size, pure-jit]
+  - name: code_clone_8
+    base_name: code_clone_8
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [compute, code-size, pure-jit]
+  - name: large_mixed_500
+    base_name: large_mixed_500
+    kernel_input_size: 264
+    expected_retval: -1
+    tags: [compute, memory, code-size, pure-jit]
+  - name: large_mixed_1000
+    base_name: large_mixed_1000
+    kernel_input_size: 264
+    expected_retval: -1
+    tags: [compute, memory, code-size, pure-jit]
+  - name: bpf_call_chain
+    base_name: bpf_call_chain
+    kernel_input_size: 64
+    expected_retval: -1
+    tags: [call, bpf-to-bpf, local-call, pure-jit]
+  - name: memcmp_prefix_64
+    base_name: memcmp_prefix_64
+    kernel_input_size: 196
+    expected_retval: -1
+    tags: [memory, compare, branch, pure-jit]
+  - name: packet_parse_vlans_tcpopts
+    base_name: packet_parse_vlans_tcpopts
+    io_mode: packet
+    kernel_input_size: 74
+    expected_retval: -1
+    tags: [packet, parse, bounds, variable-offsets, pure-jit]
+  - name: local_call_fanout
+    base_name: local_call_fanout
+    kernel_input_size: 392
+    expected_retval: -1
+    tags: [call, bpf-to-bpf, local-call, reg-pressure, pure-jit]
+  - name: packet_rss_hash
+    base_name: packet_rss_hash
+    io_mode: packet
+    kernel_input_size: 54
+    expected_retval: -1
+    tags: [packet, hash, endian, pure-jit]
+  - name: imm64_storm
+    base_name: imm64_storm
+    kernel_input_size: 32
+    expected_retval: -1
+    tags: [compute, immediates, code-size, pure-jit]
+  - name: alu32_64_pingpong
+    base_name: alu32_64_pingpong
+    kernel_input_size: 520
+    expected_retval: -1
+    tags: [alu, mixed-width, pure-jit]
+  - name: branch_fanout_32
+    base_name: branch_fanout_32
+    kernel_input_size: 516
+    expected_retval: -1
+    tags: [branch, fanout, pure-jit]
+  - name: deep_guard_tree_8
+    base_name: deep_guard_tree_8
+    kernel_input_size: 516
+    expected_retval: -1
+    tags: [branch, nested, guards, pure-jit]
+  - name: mega_basic_block_2048
+    base_name: mega_basic_block_2048
+    kernel_input_size: 64
+    expected_retval: -1
+    tags: [compute, code-size, straight-line, pure-jit]
+  - name: rotate64_hash
+    base_name: rotate64_hash
+    kernel_input_size: 64
+    expected_retval: -1
+    tags: [compute, rotate, hash, pure-jit]
+  - name: packet_redundant_bounds
+    base_name: packet_redundant_bounds
+    io_mode: packet
+    kernel_input_size: 776
+    expected_retval: -1
+    tags: [packet, bounds, redundant-checks, pure-jit]
+  - name: const_fold_chain
+    base_name: const_fold_chain
+    kernel_input_size: 520
+    expected_retval: -1
+    tags: [compute, constants, mixed-width, pure-jit]
+  - name: struct_field_cluster
+    base_name: struct_field_cluster
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [memory, fields, fixed-offsets, pure-jit]
+  - name: bitfield_extract
+    base_name: bitfield_extract
+    kernel_input_size: 520
+    expected_retval: -1
+    tags: [memory, fields, bitfield, pure-jit]
+  - name: smallmul_strength_reduce
+    base_name: smallmul_strength_reduce
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [alu, strength-reduce, lea-like, pure-jit]
+  - name: cond_select_dense
+    base_name: cond_select_dense
+    kernel_input_size: 3328
+    expected_retval: -1
+    tags: [branch, select, cmov, canonical, pure-jit]
+  - name: rotate_dense
+    base_name: rotate_dense
+    kernel_input_size: 64
+    expected_retval: -1
+    tags: [compute, rotate, canonical, pure-jit]
+  - name: addr_calc_stride
+    base_name: addr_calc_stride
+    kernel_input_size: 2048
+    expected_retval: -1
+    tags: [memory, stride, lea, canonical, pure-jit]
+  - name: extract_dense
+    base_name: extract_dense
+    kernel_input_size: 2048
+    expected_retval: -1
+    tags: [memory, fields, bitfield, canonical, pure-jit]
+  - name: endian_swap_dense
+    base_name: endian_swap_dense
+    kernel_input_size: 1024
+    expected_retval: -1
+    tags: [memory, endian, canonical, pure-jit]
+  - name: branch_flip_dense
+    base_name: branch_flip_dense
+    kernel_input_size: 2048
+    expected_retval: -1
+    tags: [branch, branch-flip, canonical, pure-jit]
+  - name: tc_bitcount
+    base_name: tc_bitcount
+    io_mode: staged
+    kernel_input_size: 2056
+    expected_retval: -1
+    tags: [tc, pure-jit, non-xdp, kernel-only]
+  - name: tc_checksum
+    base_name: tc_checksum
+    io_mode: staged
+    kernel_input_size: 1032
+    expected_retval: -1
+    tags: [tc, pure-jit, non-xdp, kernel-only]
+  - name: cgroup_hash_chain
+    base_name: cgroup_hash_chain
+    io_mode: staged
+    kernel_input_size: 72
+    expected_retval: -1
+    tags: [cgroup-skb, pure-jit, non-xdp, kernel-only]

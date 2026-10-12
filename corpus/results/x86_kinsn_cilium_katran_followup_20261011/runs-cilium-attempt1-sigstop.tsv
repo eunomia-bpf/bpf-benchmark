@@ -1,0 +1,9 @@
+cell	stats	round	role	run_dir	host_boot_id	started_utc	ended_utc	rc
+cilium-stats-0-round-1-jit-kinsn	0	1	jit-kinsn	/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261012_000334_905799	04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T00:02:23Z	2026-10-12T00:06:47Z	0
+cilium-stats-0-round-1-jit-jit	0	1	jit-jit	/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261012_002144_110538	04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T00:20:31Z	2026-10-12T00:24:32Z	0
+cilium-stats-0-round-2-jit-jit	0	2	jit-jit	/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261012_043542_599647	04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T04:34:26Z	2026-10-12T04:38:33Z	0
+cilium-stats-0-round-2-jit-kinsn	0	2	jit-kinsn	/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261012_043947_209774	04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T04:38:33Z	2026-10-12T04:43:00Z	0
+cilium-stats-0-round-2-jit-native	0	2	jit-native	/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261012_044415_424733	04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T04:43:00Z	2026-10-12T04:49:00Z	0
+cilium-stats-0-round-3-jit-kinsn	0	3	jit-kinsn	/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261012_045121_284123	04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T04:49:00Z	2026-10-12T04:55:00Z	0
+cilium-stats-0-round-3-jit-jit	0	3	jit-jit	/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/corpus/results/x86_kvm_corpus_20261012_045726_134020	04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T04:55:00Z	2026-10-12T05:00:34Z	0
+cilium-stats-0-round-4-jit-jit	0	4	jit-jit		04dc0087-5ccc-4c46-9997-b9a92f0e5167	2026-10-12T05:00:34Z	2026-10-12T05:08:34Z	124

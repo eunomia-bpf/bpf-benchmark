@@ -378,25 +378,63 @@ def _capture_phase_bpf_evidence(
     )
 
 
-def _validate_cilium_live_inventory_parity(baseline_dir: Path, post_dir: Path) -> None:
+def _kernel_name_signature(payload: Mapping[str, object], field: str) -> object:
+    """Return a live-graph signature at the kernel's 15-byte program-name granularity.
+
+    A load-time rewrite such as kinsn can leave programs without BTF function
+    names, so only their truncated kernel names are visible while the other arm
+    shows full names.
+    """
+    items = payload.get(field)
+    if not isinstance(items, list):
+        return items
+    if field == "inventory_signature":
+        counts: dict[tuple[str, str], int] = {}
+        for item in items:
+            key = (str(item["type"]), str(item["name"])[:15])
+            counts[key] = counts.get(key, 0) + int(item["count"])
+        return [
+            {"type": type_name, "name": name, "count": count}
+            for (type_name, name), count in sorted(counts.items())
+        ]
+    return sorted(
+        ({**item, "program_name": str(item["program_name"])[:15]} for item in items),
+        key=lambda item: json.dumps(item, sort_keys=True),
+    )
+
+
+def _validate_cilium_live_inventory_parity(
+    baseline_dir: Path, post_dir: Path, *, kernel_names: bool = False
+) -> None:
+    """Fail unless both arms run the same live programs on the same attachments.
+
+    With ``kernel_names`` the arms are compared at kernel-name granularity; use
+    it when no arm's names come from a native-loader log.
+    """
     def load(path: Path) -> Mapping[str, object]:
         payload = json.loads((path / "live-program-graph.json").read_text(encoding="utf-8"))
         if not isinstance(payload, Mapping):
             raise RuntimeError(f"invalid Cilium live-program graph: {path}")
         return payload
 
+    def signature(payload: Mapping[str, object], field: str) -> object:
+        if kernel_names:
+            return _kernel_name_signature(payload, field)
+        return payload.get(field)
+
     baseline = load(baseline_dir)
     post = load(post_dir)
     mismatches = {
-        field: {"baseline": baseline.get(field), "post_rejit": post.get(field)}
+        field: {"baseline": signature(baseline, field), "post_rejit": signature(post, field)}
         for field in ("inventory_signature", "attachment_signature")
-        if baseline.get(field) != post.get(field)
+        if signature(baseline, field) != signature(post, field)
     }
     parity_path = post_dir.parent / "inventory-parity.json"
     parity_path.write_text(
         json.dumps(
             {
                 "status": "fail" if mismatches else "pass",
+                "name_granularity": "kernel" if kernel_names else "full",
                 "mismatches": mismatches,
                 "baseline_live_program_count": len(baseline.get("live_program_ids", [])),
                 "post_rejit_live_program_count": len(post.get("live_program_ids", [])),
@@ -1074,7 +1112,9 @@ def run_suite(
                         and post_evidence_dir is not None
                     ):
                         _validate_cilium_live_inventory_parity(
-                            baseline_evidence_dir, post_evidence_dir
+                            baseline_evidence_dir,
+                            post_evidence_dir,
+                            kernel_names=native_loader_phase == "off",
                         )
 
                     phase = "post_rejit"
