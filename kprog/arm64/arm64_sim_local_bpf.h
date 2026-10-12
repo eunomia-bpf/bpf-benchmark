@@ -54,6 +54,7 @@
 #include "../formal/generated/arm64_helper_arg_ptr.h"
 #include "../formal/generated/arm64_mem_base_src.h"
 #include "../formal/generated/arm64_dq_mem.h"
+#include "../formal/generated/arm64_dq_mem_extra.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
 #include "../formal/generated/arm64_vreg.h"
@@ -883,11 +884,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				KPROG_ARM64_VREG_OP_STORE_Q0_SELECT(__a64_vreg_p);\
 			__s64 __a64_vreg_off = (__s64)                \
 				KPROG_ARM64_VREG_HALF_OFFSET(__a64_vreg_half);\
-			__s64 __a64_dq_extra = __a64_vreg_p == 0U ?   \
-				0 :                                   \
-				__a64_dq_lanes > 1U ?                 \
-					(__s64)KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE :\
-					0;                            \
+			__s64 __a64_dq_extra = KPROG_ARM64_DQ_MEM_EXTRA(   \
+				__a64_vreg_p == 0U, __a64_dq_lanes > 1U);\
 			if (__a64_dq_load) {                          \
 				__u64 __a64_dq_value =                \
 					ARM64_SIM_L_MEM_READ((BASE), (INDEX),\
