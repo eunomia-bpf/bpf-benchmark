@@ -1,0 +1,7 @@
+guest-start 2026-10-11T23:14:30Z
+Linux virtme-ng 7.0.0-rc2+ #6 SMP PREEMPT_DYNAMIC Sun Oct 11 15:54:37 PDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/vendor/build/x86/linux/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`YmFzaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL2d1ZXN0LXJ1bi5zaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL3J1bnMvcGlsb3Q=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+8
+model name	: Intel(R) Core(TM) Ultra 9 285K
+[    0.002254] tsc: Detected 3686.400 MHz processor
+required kprobes missing

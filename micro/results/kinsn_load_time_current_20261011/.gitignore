@@ -1,0 +1,9 @@
+# Bulky raw run outputs; their committed forms are the .gz copies next to them
+# (result.json.gz, kprobe-trace.txt.gz), which analyze.py reads when the originals are absent.
+runs/*/result/metadata.json
+runs/*/result/details/result.json
+runs/*/result/details/jit_dumps/
+runs/*/result/details/code_compare/
+runs/*/kprobe-trace.txt
+runs/kinsn-current-r2/result-partial/
+__pycache__/

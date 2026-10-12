@@ -1,0 +1,24 @@
+arm=full-current premods=- token=4718fc6d start=2026-10-12T00:02:23Z
+kernel=b295c01b62200479932e2f1388b220afd34d2eccd3fe302ad5d4bf4b06963108  /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/vendor/build/x86/linux/arch/x86/boot/bzImage
+image_tar=2110702592 2026-10-11 16:22:13.731491274 -0700
+clone_head=e3f503e1e5b80b6d308792eeb83ffeaab1705334
+make_var TARGET=x86-kvm
+make_var RUN_TARGET_NAME=x86-kvm
+make_var RUN_TARGET_ARCH=x86_64
+make_var RUN_EXECUTOR=kvm
+make_var RUNTIME_CONTAINER_IMAGE=bpf-benchmark/runner-runtime:x86_64
+make_var RUNTIME_IMAGE_TAR=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/.cache/container-images/x86_64-runner-runtime.image.tar
+make_var RUN_REMOTE_PYTHON_BIN=python3
+make_var RUN_RUNTIME_PYTHON_BIN=python3
+make_var RUN_BPFTOOL_BIN=bpftool
+make_var RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon
+make_var RUN_TOKEN=4718fc6d
+make_var SUITE=micro/results/kinsn_load_time_current_20261011/suite-paper62.yaml
+make_var RUNTIME_ENV_BASE_NAMES=TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV MICRO_PROGRAM_DIR
+make_var MICRO_PROGRAM_DIR=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/programs
+make_var RUNTIMES=kernel,kernel_rejit
+make_var SAMPLES=2
+make_var WARMUPS=0
+make_var INNER_REPEAT=10
+guest_cmd=bash /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/guest-run.sh /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/runs/full-current
+vng_rc=0 end=2026-10-12T00:20:31Z

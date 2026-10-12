@@ -1,0 +1,10 @@
+p:kl/load bpf_prog_load ptype=+0(%di):u32 insn_cnt=+4(%di):u32 log_level=+24(%di):u32 name=+48(%di):string
+r16:kl/load_ret bpf_prog_load ret=$retval:s32
+p:kl/check bpf_check
+r16:kl/check_ret bpf_check ret=$retval:s32
+p:kl/sel bpf_prog_select_runtime len=+12(%di):u32 vi=+992(+80(%di)):u32
+r16:kl/sel_ret bpf_prog_select_runtime jlen=+16($retval):u32
+p:kl/lower lower_kinsn_proof_regions
+r16:kl/lower_ret lower_kinsn_proof_regions ret=$retval:s32
+p:kl/docheck do_check_common
+r16:kl/docheck_ret do_check_common ret=$retval:s32

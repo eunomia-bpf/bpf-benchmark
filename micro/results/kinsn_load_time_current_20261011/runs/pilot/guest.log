@@ -1,0 +1,150 @@
+guest-start 2026-10-11T23:15:16Z
+Linux virtme-ng 7.0.0-rc2+ #6 SMP PREEMPT_DYNAMIC Sun Oct 11 15:54:37 PDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/vendor/build/x86/linux/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`YmFzaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL2d1ZXN0LXJ1bi5zaCAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay1yZXJ1bi0yMDI2MTAwOS9taWNyby9yZXN1bHRzL2tpbnNuX2xvYWRfdGltZV9jdXJyZW50XzIwMjYxMDExL3J1bnMvcGlsb3Q=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark-rerun-20261009 debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+8
+model name	: Intel(R) Core(TM) Ultra 9 285K
+[    0.002229] tsc: Detected 3686.400 MHz processor
+suite-start 2026-10-11T23:15:17Z
+make: Entering directory '/home/yunwei37/workspace/bpf-benchmark-rerun-20261009'
+install -d /run/bpf-benchmark-docker /run/bpf-benchmark-docker/data /run/bpf-benchmark-docker/exec
+truncate -s "${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+"/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/runner/scripts/start-vm-docker"
+install -d "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results"
+"/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/runner/scripts/bpfrejit-install" --image "bpf-benchmark/runner-runtime:x86_64" "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/.cache/container-images/x86_64-runner-runtime.image.tar"
+Loaded image: bpf-benchmark/runner-runtime:x86_64
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host -e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root -e TARGET="x86-kvm" -e RUN_TARGET_NAME="x86-kvm" -e RUN_TOKEN="8b14fac7" -e RUN_TARGET_ARCH="x86_64" -e RUN_EXECUTOR="kvm" -e RUN_REMOTE_PYTHON_BIN="python3" -e RUN_RUNTIME_PYTHON_BIN="python3" -e RUN_BPFTOOL_BIN="bpftool" -e RUN_NATIVE_REPOS_CSV="bcc,katran,tracee,tetragon" -e MICRO_PROGRAM_DIR="/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/programs" -e SAMPLES="1" -e WARMUPS="0" -e INNER_REPEAT="1"  -e SUITE="micro/results/kinsn_load_time_current_20261011/suite-pilot.yaml" -e RUNTIMES="kernel_rejit,kernel" -e FUZZ_ROUNDS="1000"    -e BPFREJIT_BENCH_PASSES="kinsn"            -e MERLIN_COMPILETIME_MODE="none"                    -e CILIUM_PROFILE_ARM="all"    -w "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009" -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro -v "/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results:/home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results" "bpf-benchmark/runner-runtime:x86_64" python3 -m runner.suites.micro
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.
+[bench] (1/62) simple
+  error simple/kernel_rejit retval mismatch: 2 != -1
+[bench] (2/62) simple_packet
+  error simple_packet/kernel_rejit retval mismatch: 2 != -1
+[bench] (3/62) memory_pair_sum
+  error memory_pair_sum/kernel_rejit retval mismatch: 2 != -1
+[bench] (4/62) bitcount
+  error bitcount/kernel_rejit retval mismatch: 0 != -1
+[bench] (5/62) log2_fold
+  error log2_fold/kernel_rejit retval mismatch: 0 != -1
+[bench] (6/62) dep_chain_short
+  error dep_chain_short/kernel_rejit retval mismatch: 0 != -1
+[bench] (7/62) dep_chain_long
+  error dep_chain_long/kernel_rejit retval mismatch: 0 != -1
+[bench] (8/62) binary_search
+  error binary_search/kernel_rejit retval mismatch: 0 != -1
+[bench] (9/62) branch_layout
+  error branch_layout/kernel_rejit retval mismatch: 0 != -1
+[bench] (10/62) switch_dispatch
+  error switch_dispatch/kernel_rejit retval mismatch: 0 != -1
+[bench] (11/62) branch_dense
+  error branch_dense/kernel_rejit retval mismatch: 0 != -1
+[bench] (12/62) cmov_select
+  error cmov_select/kernel_rejit retval mismatch: 0 != -1
+[bench] (13/62) cmov_dense
+  error cmov_dense/kernel_rejit retval mismatch: 2 != -1
+[bench] (14/62) checksum
+  error checksum/kernel_rejit retval mismatch: 0 != -1
+[bench] (15/62) load_word32
+  error load_word32/kernel_rejit retval mismatch: 0 != -1
+[bench] (16/62) load_byte
+  error load_byte/kernel_rejit retval mismatch: 0 != -1
+[bench] (17/62) load_byte_recompose
+  error load_byte_recompose/kernel_rejit retval mismatch: 0 != -1
+[bench] (18/62) load_native_u64
+  error load_native_u64/kernel_rejit retval mismatch: 0 != -1
+[bench] (19/62) packet_parse
+  error packet_parse/kernel_rejit retval mismatch: 0 != -1
+[bench] (20/62) bounds_ladder
+  error bounds_ladder/kernel_rejit retval mismatch: 0 != -1
+[bench] (21/62) bounds_check_heavy
+  error bounds_check_heavy/kernel_rejit retval mismatch: 0 != -1
+[bench] (22/62) stride_load_4
+  error stride_load_4/kernel_rejit retval mismatch: 0 != -1
+[bench] (23/62) stride_load_16
+  error stride_load_16/kernel_rejit retval mismatch: 0 != -1
+[bench] (24/62) mixed_alu_mem
+  error mixed_alu_mem/kernel_rejit retval mismatch: 0 != -1
+[bench] (25/62) spill_pressure
+  error spill_pressure/kernel_rejit retval mismatch: 0 != -1
+[bench] (26/62) multi_acc_4
+  error multi_acc_4/kernel_rejit retval mismatch: 0 != -1
+[bench] (27/62) multi_acc_8
+  error multi_acc_8/kernel_rejit retval mismatch: 0 != -1
+[bench] (28/62) fibonacci_iter
+  error fibonacci_iter/kernel_rejit retval mismatch: 0 != -1
+[bench] (29/62) fibonacci_iter_packet
+  error fibonacci_iter_packet/kernel_rejit retval mismatch: 0 != -1
+[bench] (30/62) fixed_loop_small
+  error fixed_loop_small/kernel_rejit retval mismatch: 0 != -1
+[bench] (31/62) fixed_loop_large
+  error fixed_loop_large/kernel_rejit retval mismatch: 0 != -1
+[bench] (32/62) nested_loop_2
+  error nested_loop_2/kernel_rejit retval mismatch: 0 != -1
+[bench] (33/62) nested_loop_3
+  error nested_loop_3/kernel_rejit retval mismatch: 0 != -1
+[bench] (34/62) code_clone_2
+  error code_clone_2/kernel_rejit retval mismatch: 0 != -1
+[bench] (35/62) code_clone_8
+  error code_clone_8/kernel_rejit retval mismatch: 0 != -1
+[bench] (36/62) large_mixed_500
+  error large_mixed_500/kernel_rejit retval mismatch: 0 != -1
+[bench] (37/62) large_mixed_1000
+  error large_mixed_1000/kernel_rejit retval mismatch: 0 != -1
+[bench] (38/62) bpf_call_chain
+  error bpf_call_chain/kernel_rejit retval mismatch: 2 != -1
+[bench] (39/62) memcmp_prefix_64
+  error memcmp_prefix_64/kernel_rejit retval mismatch: 0 != -1
+[bench] (40/62) packet_parse_vlans_tcpopts
+  error packet_parse_vlans_tcpopts/kernel_rejit retval mismatch: 0 != -1
+[bench] (41/62) local_call_fanout
+  error local_call_fanout/kernel_rejit retval mismatch: 0 != -1
+[bench] (42/62) packet_rss_hash
+  error packet_rss_hash/kernel_rejit retval mismatch: 0 != -1
+[bench] (43/62) imm64_storm
+  error imm64_storm/kernel_rejit retval mismatch: 2 != -1
+[bench] (44/62) alu32_64_pingpong
+  error alu32_64_pingpong/kernel_rejit retval mismatch: 0 != -1
+[bench] (45/62) branch_fanout_32
+  error branch_fanout_32/kernel_rejit retval mismatch: 0 != -1
+[bench] (46/62) deep_guard_tree_8
+  error deep_guard_tree_8/kernel_rejit retval mismatch: 0 != -1
+[bench] (47/62) mega_basic_block_2048
+  error mega_basic_block_2048/kernel_rejit retval mismatch: 2 != -1
+[bench] (48/62) rotate64_hash
+  error rotate64_hash/kernel_rejit retval mismatch: 2 != -1
+[bench] (49/62) packet_redundant_bounds
+  error packet_redundant_bounds/kernel_rejit retval mismatch: 0 != -1
+[bench] (50/62) const_fold_chain
+  error const_fold_chain/kernel_rejit retval mismatch: 0 != -1
+[bench] (51/62) struct_field_cluster
+  error struct_field_cluster/kernel_rejit retval mismatch: 0 != -1
+[bench] (52/62) bitfield_extract
+  error bitfield_extract/kernel_rejit retval mismatch: 0 != -1
+[bench] (53/62) smallmul_strength_reduce
+  error smallmul_strength_reduce/kernel_rejit retval mismatch: 0 != -1
+[bench] (54/62) cond_select_dense
+  error cond_select_dense/kernel_rejit retval mismatch: 2 != -1
+[bench] (55/62) rotate_dense
+  error rotate_dense/kernel_rejit retval mismatch: 2 != -1
+[bench] (56/62) addr_calc_stride
+  error addr_calc_stride/kernel_rejit retval mismatch: 2 != -1
+[bench] (57/62) extract_dense
+  error extract_dense/kernel_rejit retval mismatch: 2 != -1
+[bench] (58/62) endian_swap_dense
+  error endian_swap_dense/kernel_rejit retval mismatch: 2 != -1
+[bench] (59/62) branch_flip_dense
+  error branch_flip_dense/kernel_rejit retval mismatch: 2 != -1
+[bench] (60/62) tc_bitcount
+  error tc_bitcount/kernel_rejit retval mismatch: 2 != -1
+[bench] (61/62) tc_checksum
+  error tc_checksum/kernel_rejit retval mismatch: 2 != -1
+[bench] (62/62) cgroup_hash_chain
+  error cgroup_hash_chain/kernel_rejit retval mismatch: 0 != -1
+[micro-suite][ERROR] command failed (1): /usr/bin/python3 /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/driver.py --runtime kernel_rejit --runtime kernel --samples 1 --warmups 0 --inner-repeat 1 --output /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/x86-kvm_micro.json --suite /home/yunwei37/workspace/bpf-benchmark-rerun-20261009/micro/results/kinsn_load_time_current_20261011/suite-pilot.yaml
+make: *** [Makefile:362: __runtime-vm-micro] Error 1
+make: Leaving directory '/home/yunwei37/workspace/bpf-benchmark-rerun-20261009'
+suite-end 2026-10-11T23:19:25Z rc=2

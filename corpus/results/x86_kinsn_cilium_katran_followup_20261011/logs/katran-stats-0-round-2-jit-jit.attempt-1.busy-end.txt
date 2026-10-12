@@ -1,0 +1,24 @@
+2026-10-12T07:13:48Z
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+2773292 yunwei37  20   0 2427288 615308 169488 S 109.1   0.5 204:33.31 telegram-deskto
+3628759 root      20   0 5380844   3.1g   1.2g S 109.1   2.5  19:05.01 LeanNativePrepa
+3672914 root      20   0 8696076   7.5g   3.3g S 100.0   6.0   4:04.86 Lean49Arithmeti
+3682739 root      20   0 4181984   3.5g   3.3g R 100.0   2.8   0:02.81 repl
+3682755 root      20   0 4069908   3.3g   3.2g R 100.0   2.7   0:01.63 Lean49Arithmeti
+      1 root      20   0   29216  16996   7648 R  36.4   0.0   8:15.95 systemd
+   3071 yunwei37  20   0   24724  12484   7104 R  27.3   0.0   3:05.85 systemd
+   3234 gdm       20   0   24556  12700   7364 R  27.3   0.0   3:05.77 systemd
+ 541360 root      20   0 1244216  24820   7540 S  27.3   0.0  56:38.76 node_exporter
+   5018 gdm       20   0  459820   5252   4312 S  18.2   0.0   3:15.25 gsd-housekeepin
+   5250 root      20   0 1782592 151392  43280 S  18.2   0.1     28,24 containerd
+3398647 root      20   0  151736  69096  11516 S  18.2   0.1  24:38.41 python3
+   1910 message+  20   0   12644   6472   3548 S   9.1   0.0   1:40.12 dbus-daemon
+   1981 root      20   0   20292   8968   6244 S   9.1   0.0   0:14.46 systemd-logind
+   1989 root      20   0  470704  10404   7340 S   9.1   0.0   1:06.21 udisksd
+2773292 psr=  9 allowed=8-23
+3628759 psr=  8 allowed=8
+3672914 psr= 21 allowed=8-23
+3682739 psr= 14 allowed=8-23
+3682755 psr= 13 allowed=8-23
+3026 psr=  3 allowed=0-23
+3398647 psr= 11 allowed=8-23
