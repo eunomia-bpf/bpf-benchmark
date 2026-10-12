@@ -2,8 +2,9 @@
 
 This document is the **artifact "read me"** for the accepted ATC 2026 paper
 *"BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native
-Operations"*. The current supporting LaTeX source is `docs/paper/main.tex`;
-see the metadata caveat below. Follow this evaluator-facing guide in order.
+Operations"*. The current supporting LaTeX source is `docs/paper/main.tex`, a
+private author submodule that evaluators cannot fetch; see the metadata caveat
+below. Follow this evaluator-facing guide in order.
 
 - Current supporting paper source: [`docs/paper/main.tex`](../docs/paper/main.tex)
 - Repository root: [`README.md`](../README.md)
@@ -24,6 +25,43 @@ see the metadata caveat below. Follow this evaluator-facing guide in order.
   RQ4 lacks a validated single-command recipe. The
   [claim mapping](#9-reproducing-the-papers-experiments) marks the remaining
   gaps explicitly.
+
+> **Camera-ready status (2026-10-12): read this first.** The paper changed
+> after the AE round. Where older sections of this guide disagree with this
+> list, the list is current.
+>
+> - **The paper's Lean proofs** (9,047 lines, Lean 4.28 with Mathlib) are
+>   [`kinsn/lean/`](../kinsn/lean/README.md); check them with
+>   `cd kinsn/lean && lake exe cache get && lake build` (the build fails on any
+>   `sorry` or non-standard axiom). The 9,047-line version is commit
+>   `07a79f948` (2026-10-06); later commits add proofs (9,479 lines on
+>   2026-10-12). `kprog/formal/` (Lean 4.19), which §6 below runs, is a
+>   separate proof suite for the whole-program native simulator.
+> - **Kernel:** `vendor/linux-framework` is the public
+>   [`eunomia-bpf/linux`](https://github.com/eunomia-bpf/linux) branch
+>   `kinsn-only` (the paper prototype); the Kinsn operations are the modules in
+>   [`kinsn/module/`](../kinsn/module/). The upstream RFC described in
+>   [`kinsn/README.md`](../kinsn/README.md) is a later redesign, not this code.
+> - **Host:** the paper's x86-64 platform is an Intel Core Ultra 9 285K host
+>   running an 8-vCPU / 64 GB KVM guest on Linux `7.0.0-rc2+`.
+> - **RQ4 native upper bound:** the camera-ready reports 1.194× Cilium
+>   throughput and 659.2 → 463.9 ns per BPF run, from
+>   [`corpus/results/cilium_x86_config_parity_counterbalanced_20261010/`](../corpus/results/cilium_x86_config_parity_counterbalanced_20261010/SUMMARY.md)
+>   (profile: `corpus/results/cilium_profile_jit_kprog_counterbalanced_20261010/`).
+>   The 2.358× and 488.7 → 262.3 ns/run in §9 and in `kinsn/paper/atc26/` are
+>   from the submitted version; that native build lacked the JIT arm's policy
+>   audit mode and dropped the workload's packets
+>   (`corpus/results/cilium_native_audit_20261009/`).
+> - **Load time:** the 0.99× object-load ratio in §9 times the original
+>   object's load in both runtimes; the Kinsn-rewritten program is loaded later,
+>   outside the timed fields. Its own kernel load is measured in
+>   [`micro/results/kinsn_load_time_current_20261011/`](../micro/results/kinsn_load_time_current_20261011/README.md):
+>   1.28× the original's with the June modules (52 of 62 programs load) and
+>   2.03× with the current modules (48 of 62).
+> - **Kinsn on Cilium with the current modules,** in the RQ4 setup: 1.042×
+>   ([`corpus/results/x86_kinsn_cilium_katran_followup_20261011/`](../corpus/results/x86_kinsn_cilium_katran_followup_20261011/SUMMARY.md));
+>   the paper's 1.074× is the June measurement.
+> - **Cloning:** initialize only the public submodules listed in §5.
 
 ---
 
@@ -59,7 +97,8 @@ The artifact contains four components. Each maps to a part of the paper.
 |---|---|---|
 | `bpfopt` bytecode optimizer + stock-kernel userspace shim | `bpfopt/` (`shim/`, `llvm/`, `kinsnprober/`) | \S\ref{sec:implementation}; the load-time lowering/restore stage |
 | Kinsn native-operation kernel modules | `kinsn/module/x86/`, `kinsn/module/arm64/` | \S\ref{sec:kinsn}; the seven hardware-idiom descriptor families |
-| Lean 4 semantic proofs + host cross-checks | `kprog/formal/`, `kprog/x86/`, `kprog/arm64/` | abstract + \S\ref{sec:implementation}; "each native emit computes the same result as its proof sequence" |
+| Lean 4 proofs that each Kinsn operation's native code computes the same result as its proof sequence (the paper's proofs) | `kinsn/lean/` | abstract, \S\ref{sec:implementation} |
+| Lean 4 semantic proofs + host cross-checks for the whole-program native simulator | `kprog/formal/`, `kprog/x86/`, `kprog/arm64/` | abstract + \S\ref{sec:implementation}; "each native emit computes the same result as its proof sequence" |
 | Make-backed benchmark harness (micro + production corpus) | `Makefile`, `runner/`, `micro/`, `corpus/` | \S\ref{sec:evaluation} (RQ1–RQ4) |
 
 Supporting material: `docs/shared/implementation.md` (current proof/coverage boundary),
@@ -74,9 +113,10 @@ plotting scripts).
 The artifact was developed and validated on:
 
 - **OS:** Ubuntu 24.04 (Linux) container/host, x86-64
-- **CPU:** Intel Core Ultra 9 285K (x86-64); the paper's *reported* x86 platform is
-  an Intel Xeon Silver 4210R @ 2.40 GHz host running an 8-vCPU / 64 GB KVM guest
-  on Linux `7.0.0-rc2+`
+- **CPU:** Intel Core Ultra 9 285K (x86-64), which is also the paper's x86
+  platform: an 8-vCPU / 64 GB KVM guest on Linux `7.0.0-rc2+`. (Earlier
+  versions of this guide named an Intel Xeon Silver 4210R host; the camera-ready
+  paper states the Core Ultra 9 285K.)
 - **Kernel for benchmarks:** the in-repo `vendor/linux-framework` build
   (release string `7.0.0-rc2+`), run inside KVM via `virtme-ng`
 - **ARM64 column in the paper:** AWS `t4g.small` (2 vCPU, 2 GiB, Graviton2),
@@ -97,6 +137,7 @@ The artifact was developed and validated on:
 | virtme-ng (`vng`) | 1.41 |
 | docker | 29.8.0 |
 | Lean (`lean-toolchain`) | `leanprover/lean4:v4.19.0` (pinned in `kprog/formal/lean-toolchain`) |
+| Lean for the paper's proofs | `leanprover/lean4:v4.28.0` with Mathlib `v4.28.0` (pinned in `kinsn/lean/lean-toolchain`) |
 
 Rust and Go are required by the full build and are pinned by the tracked
 `.devcontainer/Dockerfile`; the versions above were verified in the preparation
@@ -158,12 +199,23 @@ submodules:
 ```bash
 git clone https://github.com/eunomia-bpf/bpf-benchmark.git
 cd bpf-benchmark
-git submodule update --init --recursive
+git submodule update --init --recursive -- \
+    vendor/linux-framework llvm-backend/llvm vendor/libbpf vendor/llvmbpf \
+    vendor/repos/bcc vendor/repos/bpftrace vendor/repos/cilium \
+    vendor/repos/cilium-ebpf vendor/repos/katran \
+    vendor/repos/opentelemetry-ebpf-profiler vendor/repos/tetragon \
+    vendor/repos/tracee
 ```
+
+Do not run a bare `git submodule update --init --recursive`: four submodules
+(`docs/paper`, `docs/kprog-simulator-in-ebpf`, `docs/speculative-optimization`,
+`vendor/academic-writing-skills`) are private author repositories that fail to
+fetch without access, and no command in this guide needs them.
+`vendor/repos/deepflow` and `docs/ebpf27-bpfoptbench` are public but unused here.
 
 For a frozen version, use an
 [immutable GitHub release tag](https://github.com/eunomia-bpf/bpf-benchmark/releases)
-and run `git submodule update --init --recursive` after selecting that tag.
+and run the public-submodule command above after selecting that tag.
 The release notes identify the corresponding archive and source revision. The
 repository tracks submodules under `vendor/` (notably `vendor/linux-framework`
 for the kernel, `vendor/libbpf`, `vendor/llvmbpf`, and `llvm-backend/llvm`).
@@ -237,6 +289,22 @@ make -C kprog/formal check
 # 3. x86 simulator proof artifacts (negative artifact + workload-derived artifacts).
 make -C kprog/x86 micro-proofs-build
 ```
+
+**The paper's own proofs and numbers.** Two more no-VM checks cover the paper
+directly:
+
+```bash
+# 4. The paper's Lean proofs: each Kinsn operation's native code computes the
+#    same result as its proof sequence (Lean 4.28 + Mathlib; needs elan).
+(cd kinsn/lean && lake exe cache get && lake build)
+
+# 5. Regenerate the paper's numbers, tables and figures from the shipped data.
+make -C kinsn/paper/atc26
+```
+
+[`kinsn/lean/README.md`](../kinsn/lean/README.md) lists what is proved;
+[`kinsn/paper/atc26/README.md`](../kinsn/paper/atc26/README.md) lists the
+bundle's dependencies (Python 3.11+, pdflatex) and outputs.
 
 ### Why `make check` is not in the fast path
 
@@ -430,7 +498,7 @@ genuinely distinct pass pipeline.
 and neither is a directory that merely exists.
 
 These are **development runs on the tested machine**, not the paper's reported
-Xeon/AWS numbers. See the honesty note at the top of this guide.
+paper-scale x86-64/AWS numbers. See the honesty note at the top of this guide.
 
 ---
 
@@ -480,9 +548,9 @@ metric rows.
 | RQ1 overhead | open+load (`compile_ns`) ratio; bare `object_load_ns` reported alongside | included in `make micro` | `micro/results/` | Command path yes; retained 62-case row `PASS` on the paper-matched open+load quantity (bare `object_load_ns` rounds to 1.00×), fresh-generation repeated-sample row `PARTIAL` at 1.14× |
 | RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; throughput derives from retained JSON; the 4086 count is a full-scale run, with the same-policy `kinsn` rerun deriving 2988 fresh |
 | RQ3 policy | site-count vs profitability | four-arm Cilium ladder + two-arm Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points and all six fresh site counts (Cilium 4017/3512/3517/2988; Katran 21/64) derive from retained raw JSON; the June per-pass site reports are missing, so the June site counts are declared and the fresh ladder's ordering diverges from June's |
-| RQ4 native bound | 2.358×, 488.7→262.3 ns/run | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; the paper's 113/22/89 loader counts stay declared, and a fresh native-post run derives 179 loads / 135 replacements / 0 pass-through / 33 feature-probe skips / 11 pre-init loads plus 89 manifest objects across 6 native objects |
+| RQ4 native bound | 2.358×, 488.7→262.3 ns/run (submitted version; the camera-ready reports 1.194×, 659.2→463.9 ns/run from `corpus/results/cilium_x86_config_parity_counterbalanced_20261010/`) | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; the paper's 113/22/89 loader counts stay declared, and a fresh native-post run derives 179 loads / 135 replacements / 0 pass-through / 33 feature-probe skips / 11 pre-init loads plus 89 manifest objects across 6 native objects |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
-| Proofs | "emit computes the same result as its proof sequence" | `make -C kprog/formal check` | stdout | **Yes** |
+| Proofs | "emit computes the same result as its proof sequence" | `(cd kinsn/lean && lake exe cache get && lake build)` for the paper's Kinsn proofs; `make -C kprog/formal check` for the simulator proofs | stdout | **Yes** |
 The RQ3 policy-arm commands below select the pass names and 3-sample,
 30-second workload settings recorded in the retained Cilium/Katran run
 metadata. The Cilium ladder starts from the coverage-max arm and disables
@@ -637,6 +705,16 @@ check; the retained pair now satisfies both, so the row is `PASS`. This
 historical-name mapping is still plausible, not proven to be the paper's exact
 population, and the field-semantics reading above is inferred from the runner's
 `compile_ns` definition rather than stated by the paper.
+
+**What these fields time (2026-10-11).** In the `kernel_rejit` runtime,
+`micro_exec` times the open+load of the *original* object before it waits for
+the ReJIT signal; the Kinsn-rewritten program is loaded afterwards by the shim,
+outside both `compile_ns` and `object_load_ns`. The 0.99× above therefore
+compares two loads of the same original program. The rewritten program's own
+kernel load is measured in
+[`micro/results/kinsn_load_time_current_20261011/`](../micro/results/kinsn_load_time_current_20261011/README.md):
+1.28× the original's with the June modules (52 of 62 programs load) and 2.03×
+with the current modules (48 of 62).
 
 A search across all current Git May/June `details/loadtime-reports`,
 `loadtime-plans`, or `shim-logs` files found none for the historical corpus
@@ -1227,7 +1305,7 @@ At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are
 template placeholders and require the actual camera-ready identifiers.
 
-**Measurement boundary.** The paper-scale x86 Xeon and ARM64 AWS figures were
+**Measurement boundary.** The paper-scale x86-64 and ARM64 AWS figures were
 not re-measured while preparing this package. A fresh local KVM six-application
 corpus run `x86_kvm_corpus_20260923_114624_121697` reached terminal success
 (suite `completed`, all six apps `ok`, all six ReJIT `ok`) under the default
@@ -1235,7 +1313,7 @@ corpus run `x86_kvm_corpus_20260923_114624_121697` reached terminal success
 `docs/artifacts/evidence/kvm-six-app-success/`. Its `make corpus` log shows every
 step of the 11-step load-time plan completing for the previously failing heavy
 Tracee program `trace_security_`. This establishes six successful workloads, but
-it is a single-sample 10-second configuration, not a paper-scale Xeon/AWS rerun.
+it is a single-sample 10-second configuration, not a paper-scale x86-64/AWS rerun.
 The earlier six-app preparation run `x86_kvm_corpus_20260921_211712_637406` has
 top-level status `error`; its hash-bound compact evidence
 (`docs/artifacts/evidence/kvm-six-app-coverage/`) supports ReJIT/Kinsn
@@ -1248,7 +1326,9 @@ workload.
 ## 13. Reproducibility platform (short text for the submission form)
 
 > BPF-Ext reproduces on Ubuntu 24.04 x86-64. A fast path requiring no VM runs the
-> Lean 4 proof suite, the generated-contract drift checks, and the independent C
+> paper's Lean 4 proofs of the Kinsn operations (`cd kinsn/lean && lake exe
+> cache get && lake build`, Lean 4.28 with Mathlib), the simulator's Lean 4
+> proof suite, the generated-contract drift checks, and the independent C
 > host cross-checks (`make -C kprog/formal check`; `make -C kprog/x86
 > micro-proofs-build`). End-to-end measurement uses an in-repo Linux
 > `7.0.0-rc2+` kernel inside KVM via virtme-ng, driven only through `make`

@@ -7,6 +7,44 @@
 > Start with this GitHub guide; [Zenodo](https://doi.org/10.5281/zenodo.22907396)
 > holds the immutable archival backup.
 
+## BPF-Ext / Kinsn artifact (ATC '26)
+
+The paper *BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native
+Operations* (ACM ATC '26) points here. Where its parts live:
+
+| Paper part | Location |
+| --- | --- |
+| BPF-Ext kernel support (verifier lowering and restore, x86-64 and arm64 JIT) | `vendor/linux-framework`: [`eunomia-bpf/linux`](https://github.com/eunomia-bpf/linux), branch `kinsn-only` |
+| Kinsn operations | [`kinsn/module/`](kinsn/module/) (x86-64 and arm64 kernel modules) |
+| Compile-time recognizer and bytecode optimizer | [`llvm-backend/llvm`](https://github.com/eunomia-bpf/bpf-kinsn-llvm), [`bpfopt/`](bpfopt/) |
+| Lean 4 proofs that each operation's native code matches its proof sequence | [`kinsn/lean/`](kinsn/lean/README.md) |
+| Microbenchmarks (12 derived from production programs, 15 synthetic, plus 2 baselines) | [`micro/programs/`](micro/programs/) |
+| Paper data, figures and number regeneration (no VM) | [`kinsn/paper/atc26/`](kinsn/paper/atc26/README.md) |
+| Evaluation guide, including corrections after the camera-ready | [`docs/atc26-artifact-evaluation.md`](docs/atc26-artifact-evaluation.md) |
+
+```bash
+git clone https://github.com/eunomia-bpf/bpf-benchmark.git
+cd bpf-benchmark
+git submodule update --init --recursive -- \
+    vendor/linux-framework llvm-backend/llvm vendor/libbpf vendor/llvmbpf \
+    vendor/repos/bcc vendor/repos/bpftrace vendor/repos/cilium \
+    vendor/repos/cilium-ebpf vendor/repos/katran \
+    vendor/repos/opentelemetry-ebpf-profiler vendor/repos/tetragon \
+    vendor/repos/tracee
+
+(cd kinsn/lean && lake exe cache get && lake build)   # the paper's proofs
+make -C kinsn/paper/atc26                             # the paper's numbers and figures
+```
+
+Do not run a bare `git submodule update --init --recursive`: four submodules
+(`docs/paper`, `docs/kprog-simulator-in-ebpf`, `docs/speculative-optimization`,
+`vendor/academic-writing-skills`) are private author repositories that fail to
+fetch without access, and no documented command needs them. See
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for every submodule.
+
+The upstream kernel RFC described in [`kinsn/README.md`](kinsn/README.md) is a
+later redesign and is not the kernel code of this artifact.
+
 Auto-research framework and benchmark for agentic OS kernel extension
 optimization.
 
@@ -20,7 +58,8 @@ This repository is the execution substrate and artifact workspace for the
 `bpf-bench` paper draft in
 [`docs/ebpf27-bpfoptbench/`](docs/ebpf27-bpfoptbench/). It also provides the
 artifact and evaluation harness for Kinsn (short for *kernel operation*) and its paper,
-[`Kinsn: Safely Extending the eBPF Compilation Pipeline with Native Operations`](docs/paper/main.tex).
+*BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations*
+(ACM ATC '26; see the section above).
 The current `bpf-bench` instantiation covers six production eBPF applications,
 146 comparable BPF program measurements, and 42 microbenchmark tasks, with
 correctness and integrity checks designed to prevent reward hacking.
@@ -127,7 +166,13 @@ Runtime image layering and host/runtime boundaries are documented in
 ## Quick Start
 
 ```bash
-git submodule update --init --recursive
+# Public submodules only; see "BPF-Ext / Kinsn artifact" above.
+git submodule update --init --recursive -- \
+    vendor/linux-framework llvm-backend/llvm vendor/libbpf vendor/llvmbpf \
+    vendor/repos/bcc vendor/repos/bpftrace vendor/repos/cilium \
+    vendor/repos/cilium-ebpf vendor/repos/katran \
+    vendor/repos/opentelemetry-ebpf-profiler vendor/repos/tetragon \
+    vendor/repos/tracee
 
 # Static validation and tests through the supported Makefile entrypoint.
 make check

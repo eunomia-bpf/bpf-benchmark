@@ -10,6 +10,7 @@ The draft [kernel PR](https://github.com/yunwei37/linux/pull/3) implements kfunc
 
 The prototype backs the paper *BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations* and its earlier naming. Its components are:
 
+- Kernel support in `vendor/linux-framework` ([`eunomia-bpf/linux`](https://github.com/eunomia-bpf/linux), branch `kinsn-only`).
 - [Kernel modules](module/) for x86 and arm64 and [Lean proofs](lean/README.md).
 - [Target prober](kinsnprober/) and [LLVM/bytecode selector](../bpfopt/llvm/README.md), with policies in [runner/config/passes/](../runner/config/passes/).
 - [ATC'26 paper data, plots, and provenance](paper/atc26/README.md): `make -C kinsn/paper/atc26` regenerates the local paper bundle and its discrepancy report.
