@@ -11535,6 +11535,102 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   namespace comment, and a cosmetic count-guard message) SURVIVE as
   required. Per detector: `gen` 12, `lean_chain` 12, `host` 7, `route` 2.
 
+## Step 0140 — AArch64 memory base-address source selection through the generated contract
+
+- Scope: the AArch64 simulator's scalar memory access helpers
+  `ARM64_SIM_L_MEM_READ`, `ARM64_SIM_L_MEM_READ_TAG`, and
+  `ARM64_SIM_L_MEM_WRITE` (`kprog/arm64/arm64_sim_local_bpf.h`), which each
+  resolve the arena base address of a stack-arena access from a single
+  closed fact --- whether the base register is the stack pointer --- and
+  picked the base source by hand: the stack pointer register (`__a64_sp`)
+  when the base *is* the stack pointer, the base register's own arena
+  pointer otherwise, with the `(BASE) == ARM64_SP ? __a64_sp` hand ternary
+  as the inline gate. The same 2-way selection is repeated verbatim at three
+  body sites, so a drift in any one of them was not observable. This step
+  generates the 2-way source selector from one specification and routes all
+  three bodies through the generated `KPROG_ARM64_MEM_BASE_SRC` selector,
+  removing the hand gate from the helper path. This extends the stack
+  slot-tag family of Steps 0137 (write action), 0138 (read source), and 0139
+  (helper-argument pointer) to the memory base address: the `.spRegister`
+  source fires exactly on the `(base == SP)` fact the 0123 store-body
+  selection and the 0121 stack-tag predicate already consume.
+- Spec `kprog/formal/arm64_mem_base_src_spec.json`: schema_version 1,
+  operation `arm64MemBaseSrc`, and two sources --- `spRegister` (code 0,
+  effect `stack_pointer_register`), `gprBase` (code 1, effect
+  `gpr_arena_base`) --- plus two cases classifying every (base is SP) fact
+  value into its source.
+- Generator `kprog/formal/generate_arm64_mem_base_src_spec.py`: `load()`
+  re-reads the sim header on every `--check` and rejects a spec that does
+  not biject the expected sources/cases table, an effect that names no
+  storage effect, and a memory-helper region that names no generated
+  selector or still names the hand `== ARM64_SP ? __a64_sp` gate. Emits the
+  C header `generated/arm64_mem_base_src.h` (the
+  `KPROG_ARM64_MEM_BASE_SRC(BASE_IS_SP)` 2-way selector, the source-code
+  defines, and the count, distinctness, exact-code, and selection
+  `_Static_assert`s) and the Lean
+  `KProgFormal/GeneratedArm64MemBaseSrc.lean`. `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:70`.
+- Generated C header `kprog/formal/generated/arm64_mem_base_src.h`:
+  `KPROG_ARM64_MEM_BASE_SRC_COUNT 2U`, the two source-code defines
+  (`…_SP_REGISTER 0U`, `…_GPR_BASE 1U`), the plain-ternary 2-way selector
+  macro, and the count, distinctness, exact-code, and two fact-value
+  selection `_Static_assert`s. The header uses only literal inputs, so it is
+  included in the early include block before the `ARM64_SIM_TAG_*` names.
+- Hand Lean `kprog/formal/KProgFormal/Arm64MemBaseSrcShape.lean`:
+  independent literal statements of the 2-way selector, the two source
+  names, the two source codes, and the two-case dispatch, with theorems
+  `arm64_mem_base_src_refines` (the generated selector equals the independent
+  literal over every fact value), `_names_refine`, `_codes_refine`,
+  `_codes_length`/`_names_length`, `_codes_nodup`, `_count_is_2`,
+  `_of_code_roundtrip`, `_of_code_beyond_is_none`, `_effects`,
+  `_case_dispatch`, `_case_refines`, `_selects_sp` (the stack-pointer arm
+  fires exactly on the base-is-SP fact), and the two cross-contract theorems
+  `arm64_mem_base_src_matches_write_arm` (the source is the stack-pointer
+  source exactly where the 0123 store-body selection names its stack write
+  arm) and `arm64_mem_base_src_matches_read_src` (the source is the
+  stack-pointer source exactly where the 0121 read value source names the
+  stack space); all `native_decide`/`rfl`/`decide`.
+  `lake build KProgFormal.GeneratedArm64MemBaseSrc && lake env lean
+  KProgFormal/Arm64MemBaseSrcShape.lean` returns 0.
+- Sim-header routing `kprog/arm64/arm64_sim_local_bpf.h`: the three memory
+  helper bodies now compute their base-address source through the generated
+  `KPROG_ARM64_MEM_BASE_SRC` selector and the hand `== ARM64_SP ? __a64_sp`
+  gate is removed from every body, while the offset contract
+  (`ARM64_SIM_L_MEM_BASE_OFF`), the arm/source selection of Steps 0123, and
+  the stack-read/stack-write routings of Steps 0138/0137 are unchanged.
+- Host oracle `kprog/formal/test_arm64_mem_base_src_host.c`: restates the
+  2-way source selection from the raw fact, drives the generated selector
+  over the real computed `(reg == 32)` fact for a spread of register
+  numbers, and pins the source codes and count: `arm64 mem base src host
+  cross-check: OK (15 cases)`.
+- Route oracle `kprog/formal/test_arm64_mem_base_src_route_host.c`:
+  declares the full register file and stack, plants the stack pointer and a
+  stack-tagged register's pointer at distinct arena indices with distinct
+  byte images, and drives the real `ARM64_SIM_L_MEM_READ`,
+  `ARM64_SIM_L_MEM_READ_TAG`, and `ARM64_SIM_L_MEM_WRITE` helpers at both
+  base-address sources, every width, and several value patterns against an
+  independent base-address model, comparing the whole stack byte image with
+  its slot tags, the stack pointer, and all 4 KiB of the memory window:
+  `arm64 mem base src route host cross-check: OK (205324 cases)`.
+- `make -C kprog/formal check` passes with **182** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 180→182).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_mem_base_src.py`,
+  36 mutations against the live tree, each caught after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the baseline
+  green at the end: 33 of the 36 are caught---six specification
+  distortions, four generator-table changes, two sim-header selector
+  reverts, six generated-C header distortions plus the regenerated
+  generator/render drift, six generated-Lean distortions plus the
+  regenerated generator/render drift, five hand-refinement changes, and two
+  sim-header helper inversions---while three genuine-equivalence rewrites (a
+  resolved-but-equal generator root path, an added hand-module namespace
+  comment, and a cosmetic count-guard message) SURVIVE as required. Per
+  detector: `gen` 12, `lean_chain` 12, `host` 7, `route` 2.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

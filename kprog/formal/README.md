@@ -313,6 +313,36 @@ pointer and provenance tag, and drives the real helper over every
 general-purpose register and every provenance class plus the stack pointer
 against an independent model of the selection (786 cases). The out-of-range
 source codes remain boundaries.
+The two AArch64 memory base-address sources are generated the same way from
+`arm64_mem_base_src_spec.json` into the C
+`generated/arm64_mem_base_src.h` (the `KPROG_ARM64_MEM_BASE_SRC`
+plain-ternary 2-way selector, the source-code defines, and the count,
+distinctness, exact-code, and selection `_Static_assert`s) and
+`KProgFormal/GeneratedArm64MemBaseSrc.lean`. The generator re-reads the
+simulator header on every `--check` and rejects a memory-helper region that
+names no generated selector or still names the hand `== ARM64_SP ? __a64_sp`
+gate. The simulator's `ARM64_SIM_L_MEM_READ`, `ARM64_SIM_L_MEM_READ_TAG`,
+and `ARM64_SIM_L_MEM_WRITE` helpers all route through the generated
+selector, so the hand gate is out of the helper path (the three bodies
+previously repeated it verbatim) and the offset contract, the arm/source
+selection of Step 0123, and the stack-read/stack-write routings of Steps
+0138/0137 are unchanged. This extends the stack slot-tag family: the
+`.spRegister` source fires on the same base-is-SP fact the 0123 store-body
+selection and the 0121 slot-tag predicate name. Lean checks the generated
+selector against an independent literal over every fact value, the name and
+code tables against independent enumerations, the code round-trip and
+out-of-range facts, the two-case dispatch, the stack-pointer arm firing
+exactly on the base-is-SP fact (`arm64_mem_base_src_selects_sp`), and the two
+cross-contracts tying the source to the store-body selection
+(`arm64_mem_base_src_matches_write_arm`) and to the read value source
+(`arm64_mem_base_src_matches_read_src`); the 15-case host oracle drives the
+generated selector against an independent 2-way restatement over the real
+computed register-is-32 fact, and the route oracle declares the full
+register file and stack, plants the stack pointer and a stack-tagged
+register's pointer at distinct arena indices, and drives the real read,
+read-tag, and write helpers at both base-address sources over every width
+and several value patterns against an independent base-address model
+(205324 cases). The out-of-range source codes remain boundaries.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the

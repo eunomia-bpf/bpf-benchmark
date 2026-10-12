@@ -679,9 +679,53 @@ increment is committed and pushed immediately). Current state:
   theorem, while the last three genuine-equivalence rewrites are the three
   the proof correctly does not flag. The out-of-range source codes remain
   boundaries.
+  The AArch64 memory base-address source is likewise no longer open
+  (Step 0140): the simulator's scalar memory access helpers
+  `ARM64_SIM_L_MEM_READ`, `ARM64_SIM_L_MEM_READ_TAG`, and
+  `ARM64_SIM_L_MEM_WRITE` each resolved the arena base address of a
+  stack-arena access from a single closed fact --- whether the base register
+  is the stack pointer: the stack pointer register when the base is the
+  stack pointer, the base register's own arena pointer otherwise --- with the
+  `(BASE) == ARM64_SP ? __a64_sp` hand ternary as the inline gate repeated
+  verbatim at three body sites, so a drift in any one of them was not
+  observable. This step generates the 2-way source selector from
+  `arm64_mem_base_src_spec.json` into the C
+  `generated/arm64_mem_base_src.h` (the `KPROG_ARM64_MEM_BASE_SRC`
+  plain-ternary selector, the source-code defines, and the count,
+  distinctness, exact-code, and selection `_Static_assert`s) and
+  `KProgFormal/GeneratedArm64MemBaseSrc.lean`, and routes all three bodies
+  through the generated selector, removing the hand gate from the helper
+  path; the offset contract, the arm/source selection of Step 0123, and the
+  stack-read/stack-write routings of Steps 0138/0137 are unchanged.
+  `Arm64MemBaseSrcShape.lean` proves the generated selector equal to an
+  independent literal over every fact value
+  (`arm64_mem_base_src_refines`), the name and code tables against
+  independent enumerations, the code round-trip and out-of-range facts, the
+  two distinct storage effects, the two-case dispatch, the stack-pointer arm
+  firing exactly on the base-is-SP fact
+  (`arm64_mem_base_src_selects_sp`), and the two cross-contracts tying the
+  source to the 0123 store-body selection
+  (`arm64_mem_base_src_matches_write_arm`) and to the 0121 read value source
+  (`arm64_mem_base_src_matches_read_src`); the 15-case host oracle drives the
+  generated selector against an independent 2-way restatement over the real
+  computed register-is-32 fact, and the route oracle declares the full
+  register file and stack, plants the stack pointer and a stack-tagged
+  register's pointer at distinct arena indices, and drives the real read,
+  read-tag, and write helpers at both base-address sources over every width
+  and several value patterns against an independent base-address model
+  (205324 cases). 36 binding mutations --- six specification distortions,
+  four generator-table changes, two sim-header selector reverts, six
+  generated-C header distortions (including the regenerated
+  generator/render drift), six generated-Lean changes (including the
+  regenerated generator/render drift), five hand-refinement changes, and two
+  sim-header helper inversions --- each of the first 33 changes the oracle,
+  the generator check, or a refinement theorem, while the last three
+  genuine-equivalence rewrites are the three the proof correctly does not
+  flag. The out-of-range source codes remain boundaries.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
-  pointer source now closed (Steps 0137, 0138, and 0139),
+  pointer source now closed (Steps 0137, 0138, and 0139) and the memory
+  base-address source now closed (Step 0140),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
