@@ -65,6 +65,7 @@ check:
 	python3 generate_arm64_mem_write_arm_spec.py --check
 	python3 generate_arm64_stack_write_lanes_spec.py --check
 	python3 generate_arm64_stack_write_tag_action_spec.py --check
+	python3 generate_arm64_stack_read_tag_source_spec.py --check
 	python3 generate_x86_cond_spec.py --check
 	python3 generate_x86_cc_decode_spec.py --check
 	python3 generate_x86_logic_flags_spec.py --check
@@ -676,6 +677,12 @@ check:
 	./build/test_arm64_stack_write_tag_action_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_write_tag_action_route_host.c -o build/test_arm64_stack_write_tag_action_route_host
 	./build/test_arm64_stack_write_tag_action_route_host
+	lake env lean KProgFormal/GeneratedArm64StackReadTagSource.lean
+	lake env lean KProgFormal/Arm64StackReadTagSourceShape.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_read_tag_source_host.c -o build/test_arm64_stack_read_tag_source_host
+	./build/test_arm64_stack_read_tag_source_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_read_tag_source_route_host.c -o build/test_arm64_stack_read_tag_source_route_host
+	./build/test_arm64_stack_read_tag_source_route_host
 	lake env lean KProgFormal/GeneratedArm64DqMem.lean
 	lake env lean KProgFormal/Arm64DqMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
