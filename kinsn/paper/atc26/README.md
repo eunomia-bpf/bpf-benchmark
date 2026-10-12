@@ -11,6 +11,19 @@ The report expectations and regenerated application policy artifacts also apply
 the authors' October 9 median and Core Ultra 9 285K host corrections. Pinned
 paper/audit snapshots and historical inventory text retain their original values.
 
+> **Changes in the camera-ready after this snapshot (2026-10-12).** RQ4's
+> whole-program native result is now 1.194× Cilium throughput and
+> 659.2 → 463.9 ns per BPF run
+> (`../../../corpus/results/cilium_x86_config_parity_counterbalanced_20261010/`).
+> The RQ4 inputs below (`x86_kvm_corpus_20260529_*`, 2.358× and
+> 488.7 → 262.3 ns/run) are from the submitted version; that native build lacked
+> the JIT arm's policy audit mode and dropped the workload's packets
+> (`../../../corpus/results/cilium_native_audit_20261009/`). The 0.99× load-time
+> field times the original object's load in both runtimes; the rewritten
+> program's load is measured in
+> `../../../micro/results/kinsn_load_time_current_20261011/`. This bundle does
+> not yet regenerate these newer results.
+
 From the bpf-benchmark root, regenerate and verify everything with:
 
 ```sh
@@ -108,7 +121,7 @@ this map into individual claims and exact file/line locations.
 | `data/corpus/aws_arm64_corpus_20260605_080836_924256` | §6 RQ2/RQ3 conservative Katran; 1.065063x median throughput / 0.941 BPF-cost ratio |
 | `data/corpus/aws_arm64_corpus_20260605_094729_221231` | §6 RQ3 coverage-max Katran; 0.984357x median throughput / 1.006 BPF-cost ratio |
 | `data/corpus/x86_kvm_corpus_20260529_033517_489159` | §6 RQ4 Cilium native counters; median 488.676 → 262.303 ns/run |
-| `data/corpus/x86_kvm_corpus_20260529_040554_604387` | §6 RQ4 Cilium native throughput; 2.357974x and native-gap calculation |
+| `data/corpus/x86_kvm_corpus_20260529_040554_604387` | §6 RQ4 Cilium native throughput; 2.357974x and native-gap calculation (submitted version; see the note above) |
 
 The report explains the 0.99 load-time field mismatch, corrected application
 mean/median values, 5.4% rounding, corrected Core Ultra host, sampling and BPF-stat

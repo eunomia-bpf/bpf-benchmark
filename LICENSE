@@ -19,27 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-================================================================================
-SCOPE AND THIRD-PARTY MATERIAL
-================================================================================
-
-The MIT license above applies to the original material of this repository:
-the benchmark harness (`runner/`, `corpus/`, `micro/`, `tests/`), the `bpfopt`
-optimizer and shim (`bpfopt/`), the Kinsn kernel modules (`module/`), the
-formalization and simulator code (`kprog/`), and this repository's
-documentation.
-
-Third-party and vendored material is covered by its own licenses, which are
-authoritative for those paths. See `THIRD_PARTY_NOTICES.md` for the full list
-and the license of each component. In particular:
-
-- `vendor/linux-framework/` — Linux kernel, GPL-2.0 (`COPYING`).
-- `llvm-backend/llvm/` — LLVM, Apache-2.0 with LLVM Exceptions (`LICENSE.TXT`).
-- `vendor/libbpf/` — LGPL-2.1 or BSD-2-Clause (`LICENSE`).
-- `vendor/llvmbpf/` — MIT (`LICENSE`).
-- `vendor/bpf/{bcc,cilium,katran,otel,tetragon,tracee}/` — the respective
-  upstream application projects, each under its own license.
-
-Nothing in this file relicenses, supersedes, or alters the terms of any
-third-party component.
