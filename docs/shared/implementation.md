@@ -639,9 +639,49 @@ increment is committed and pushed immediately). Current state:
   generator check, or a refinement theorem, while the last two
   genuine-equivalence rewrites are the two the proof correctly does not
   flag. The out-of-range source codes remain boundaries.
+  The AArch64 BPF helper-argument pointer source is likewise no longer open
+  (Step 0139): the simulator's `ARM64_SIM_L_HELPER_ARG_PTR` helper resolved
+  the pointer a BPF helper call receives in a register argument from a single
+  closed fact --- whether the argument register's provenance tag is the stack
+  tag: the stack arena pointer at the register pointer's biased arena index
+  when the register is stack tagged, the register's raw pointer otherwise ---
+  with the `ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK ?` hand ternary
+  as the inline gate and the 2-way source selection living only in the helper
+  body. A drift in the source selection was not observable. This step
+  generates the 2-way source selector from `arm64_helper_arg_ptr_spec.json`
+  into the C `generated/arm64_helper_arg_ptr.h` (the
+  `KPROG_ARM64_HELPER_ARG_PTR_BODY` plain-ternary selector, the source-code
+  defines, and the count, distinctness, exact-code, and selection
+  `_Static_assert`s) and `KProgFormal/GeneratedArm64HelperArgPtr.lean`, and
+  routes the live helper through the generated selector, removing the hand
+  gate from the helper path; the stack-read and stack-write routings of Steps
+  0138/0137 are unchanged. `Arm64HelperArgPtrShape.lean` proves the generated
+  selector equal to an independent literal over every fact value
+  (`arm64_helper_arg_ptr_refines`), the name and code tables against
+  independent enumerations, the code round-trip and out-of-range facts, the
+  two distinct storage effects, the two-case dispatch, the
+  stack-arena-pointer arm firing exactly on the stack-tag fact
+  (`arm64_helper_arg_ptr_source_selects_stack`), and the arena byte the
+  stack-arena-pointer arm addresses equal to the 0112 stack index contract
+  (`arm64_helper_arg_ptr_stack_index`, tying `index 96 off` to
+  `(ptrIndex 96 off).truncate 32`); the 14-case host oracle drives the
+  generated selector against an independent 2-way restatement, and the route
+  oracle declares the full register file and stack, plants each register's
+  pointer and provenance tag, and drives the real helper over every
+  general-purpose register and every provenance class plus the stack pointer
+  against an independent model of the selection (786 cases). 36 binding
+  mutations --- six specification distortions, four generator-table changes,
+  two sim-header selector reverts, six generated-C header distortions
+  (including the regenerated generator/render drift), six generated-Lean
+  changes (including the regenerated generator/render drift), five
+  hand-refinement changes, and two sim-header helper inversions --- each of
+  the first 33 changes the oracle, the generator check, or a refinement
+  theorem, while the last three genuine-equivalence rewrites are the three
+  the proof correctly does not flag. The out-of-range source codes remain
+  boundaries.
   Remaining work also includes the load/store address and tag paths, with
-  the stack slot tag write action and read source now closed (Steps 0137
-  and 0138),
+  the stack slot tag write action and read source and the BPF helper-argument
+  pointer source now closed (Steps 0137, 0138, and 0139),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

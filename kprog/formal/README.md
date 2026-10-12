@@ -287,6 +287,32 @@ restatement, and the route oracle drives the real read through the
 generated selector against an independent slot-tag-array and
 byte-image model with each write commit mirrored into the model. The
 out-of-range source codes remain boundaries.
+The two AArch64 BPF helper-argument pointer sources are generated the same
+way from `arm64_helper_arg_ptr_spec.json` into the C
+`generated/arm64_helper_arg_ptr.h` (the
+`KPROG_ARM64_HELPER_ARG_PTR_BODY` plain-ternary 2-way selector, the
+source-code defines, and the count, distinctness, exact-code, and selection
+`_Static_assert`s) and `KProgFormal/GeneratedArm64HelperArgPtr.lean`. The
+generator re-reads the simulator header on every `--check` and rejects a
+helper region that names no generated selector or still names the hand
+register-tag `?` gate. The simulator's `ARM64_SIM_L_HELPER_ARG_PTR` helper
+routes through the generated selector, so the hand gate is out of the helper
+path and the stack-read and stack-write routings of Steps 0138/0137 are
+unchanged. This extends the stack slot-tag family: the `.stackArenaPtr`
+source fires on the same stack-tag fact the 0121 slot-tag predicate names.
+Lean checks the generated selector against an independent literal over
+every fact value, the name and code tables against independent
+enumerations, the code round-trip and out-of-range facts, the two-case
+dispatch, the stack-arena-pointer arm firing exactly on the stack-tag fact
+(`arm64_helper_arg_ptr_source_selects_stack`), and the arena byte the
+stack-arena-pointer arm addresses against the 0112 stack index contract
+(`arm64_helper_arg_ptr_stack_index`); the 14-case host oracle drives the
+generated selector against an independent 2-way restatement, and the route
+oracle declares the full register file and stack, plants each register's
+pointer and provenance tag, and drives the real helper over every
+general-purpose register and every provenance class plus the stack pointer
+against an independent model of the selection (786 cases). The out-of-range
+source codes remain boundaries.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the

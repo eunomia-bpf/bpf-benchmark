@@ -11446,6 +11446,95 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   and an added hand-module namespace comment) SURVIVE as required.
   Per detector: `gen` 10, `lean_chain` 12, `host` 7, `route` 2.
 
+## Step 0139 — AArch64 BPF helper-argument pointer source selection through the generated contract
+
+- Scope: the AArch64 simulator's `ARM64_SIM_L_HELPER_ARG_PTR` helper
+  (`kprog/arm64/arm64_sim_local_bpf.h`), which resolves the pointer a BPF
+  helper call receives in a register argument from a single closed fact —
+  whether the argument register's provenance tag is the stack tag — and
+  picked the pointer source by hand: the stack arena pointer at the
+  register pointer's biased arena index when the register is stack tagged,
+  the register's raw pointer otherwise, with the
+  `ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK ?` hand ternary as the
+  inline gate. This step generates the 2-way source selector from one
+  specification and routes the live helper through the generated
+  `KPROG_ARM64_HELPER_ARG_PTR_BODY` selector, removing the hand gate from
+  the helper path. This extends the stack slot-tag family of Steps 0137
+  (write action) and 0138 (read source) to the helper-argument pointer
+  path: the `.stackArenaPtr` source fires on the same stack-tag fact the
+  0121 `KPROG_ARM64_STACK_TAG` predicate names.
+- Spec `kprog/formal/arm64_helper_arg_ptr_spec.json`: schema_version 1,
+  operation `arm64HelperArgPtr`, and two sources — `stackArenaPtr` (code 0,
+  effect `stack_arena_ptr`), `rawPtr` (code 1, effect `raw_ptr`) — plus two
+  cases classifying every (is stack tagged) fact value into its source.
+- Generator `kprog/formal/generate_arm64_helper_arg_ptr_spec.py`: `load()`
+  re-reads the sim header on every `--check` and rejects a spec that does
+  not biject the expected sources/cases table, an effect that names no
+  storage effect, and a helper region that names no generated selector or
+  still names the hand register-tag `?` gate. Emits the C header
+  `generated/arm64_helper_arg_ptr.h` (the
+  `KPROG_ARM64_HELPER_ARG_PTR_BODY(IS_STACK_TAGGED)` 2-way selector, the
+  source-code defines, and the count, distinctness, exact-code, and
+  selection `_Static_assert`s) and the Lean
+  `KProgFormal/GeneratedArm64HelperArgPtr.lean`. `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:69`.
+- Generated C header `kprog/formal/generated/arm64_helper_arg_ptr.h`:
+  `KPROG_ARM64_HELPER_ARG_PTR_BODY_COUNT 2U`, the two source-code defines
+  (`…_STACK_ARENA_PTR 0U`, `…_RAW_PTR 1U`), the plain-ternary 2-way
+  selector macro, and the count, distinctness, exact-code, and two
+  fact-value selection `_Static_assert`s. The header uses only literal
+  inputs, so it is included in the early include block before the
+  `ARM64_SIM_TAG_*` names.
+- Hand Lean `kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean`:
+  independent literal statements of the 2-way selector, the two source
+  names, the two source codes, and the two-case dispatch, with theorems
+  `arm64_helper_arg_ptr_refines` (the generated selector equals the
+  independent literal over every fact value), `_names_refine`,
+  `_codes_refine`, `_codes_length`/`_names_length`, `_codes_nodup`,
+  `_count_is_2`, `_of_code_roundtrip`, `_of_code_beyond_is_none`,
+  `_effects`, `_case_dispatch`, `_case_refines`,
+  `_source_selects_stack` (the stack-arena-pointer arm fires exactly on
+  the stack-tag fact), and `_stack_index` (the arena byte the
+  stack-arena-pointer arm addresses is the 0112 stack index contract, tying
+  `index 96 off` to `(ptrIndex 96 off).truncate 32` via
+  `arm64_stack_index_ptr_truncation`); all `native_decide`/`rfl`/`decide`.
+  `lake build KProgFormal.GeneratedArm64HelperArgPtr && lake env lean
+  KProgFormal/Arm64HelperArgPtrShape.lean` returns 0.
+- Sim-header routing `kprog/arm64/arm64_sim_local_bpf.h`: the helper body
+  now computes its pointer source through the generated
+  `KPROG_ARM64_HELPER_ARG_PTR_BODY` selector and the hand register-tag `?`
+  gate is removed from the helper path; the stack-read and stack-write
+  routings of Steps 0138/0137 are unchanged.
+- Host oracle `kprog/formal/test_arm64_helper_arg_ptr_host.c`: restates the
+  2-way source selection from the raw fact, drives the generated selector
+  over every fact value and tag code, and pins the source codes and count:
+  `arm64 helper arg pointer host cross-check: OK (14 cases)`.
+- Route oracle `kprog/formal/test_arm64_helper_arg_ptr_route_host.c`:
+  declares the full register file and stack, plants each register's pointer
+  and provenance tag, and drives the real `ARM64_SIM_L_HELPER_ARG_PTR`
+  helper over every general-purpose register and every provenance class
+  plus the stack pointer against an independent model of the 2-way
+  selection: `arm64 helper arg pointer route host cross-check: OK (786
+  cases)`.
+- `make -C kprog/formal check` passes with **180** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 178→180).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_helper_arg_ptr.py`,
+  36 mutations against the live tree, each caught after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the baseline
+  green at the end: 33 of the 36 are caught---six specification
+  distortions, four generator-table changes, two sim-header
+  selector reverts, six generated-C header distortions plus the
+  regenerated generator/render drift, six generated-Lean distortions plus
+  the regenerated generator/render drift, five hand-refinement changes,
+  and two sim-header helper inversions---while three genuine-equivalence
+  rewrites (a resolved-but-equal generator root path, an added hand-module
+  namespace comment, and a cosmetic count-guard message) SURVIVE as
+  required. Per detector: `gen` 12, `lean_chain` 12, `host` 7, `route` 2.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
