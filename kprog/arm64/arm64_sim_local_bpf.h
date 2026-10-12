@@ -36,6 +36,7 @@
 #include "../formal/generated/arm64_orn.h"
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_mem_index.h"
+#include "../formal/generated/arm64_mem_index_value.h"
 #include "../formal/generated/arm64_reg_presence.h"
 #include "../formal/generated/arm64_reg_dispatch.h"
 #include "../formal/generated/arm64_fmov.h"
@@ -687,11 +688,14 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_MEM_BASE_OFF(AUX, INDEX, IMM)                           \
 	({                                                                 \
 		__u8 __a64_mbo_has_index = KPROG_ARM64_MEM_INDEX_PRESENT(INDEX);  \
+		__u8 __a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(        \
+			__a64_mbo_has_index);                             \
 		__s64 __a64_mbo_off = (__s64)KPROG_ARM64_MEM_OFFSET(      \
 			KPROG_ARM64_MEM_PREPOST_SUPPRESS(AUX),            \
 			__a64_mbo_has_index,                              \
 			(IMM),                                            \
-			(__a64_mbo_has_index                              \
+			(__a64_mbo_isrc                                   \
+				 == KPROG_ARM64_MEM_INDEX_VALUE_REGISTER  \
 				 ? ARM64_SIM_L_MOD_VALUE((INDEX),         \
 					ARM64_SIM_L_MOD(AUX),             \
 					ARM64_SIM_L_SHIFT(AUX),           \
