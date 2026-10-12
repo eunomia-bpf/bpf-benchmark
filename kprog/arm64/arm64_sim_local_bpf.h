@@ -51,6 +51,7 @@
 #include "../formal/generated/arm64_stack_write_lanes.h"
 #include "../formal/generated/arm64_stack_write_tag_action.h"
 #include "../formal/generated/arm64_stack_read_tag_source.h"
+#include "../formal/generated/arm64_helper_arg_ptr.h"
 #include "../formal/generated/arm64_dq_mem.h"
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
@@ -638,10 +639,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_STACK_PTR(OFF)                                         \
 	((void *)&__a64_stack.b[KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS)])
 
-#define ARM64_SIM_L_HELPER_ARG_PTR(REG)                                    \
-	(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK ?                 \
-	 ARM64_SIM_L_STACK_PTR((__s64)(long)ARM64_SIM_L_READ_REG_PTR(REG)) :\
-	 ARM64_SIM_L_READ_REG_PTR(REG))
+#define ARM64_SIM_L_HELPER_ARG_PTR(REG)                                   \
+	({                                                                 \
+		__u8 __a64_hap_source =                                   \
+			KPROG_ARM64_HELPER_ARG_PTR_BODY(                 \
+				ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK);   \
+		(__a64_hap_source == KPROG_ARM64_HELPER_ARG_PTR_BODY_STACK_ARENA_PTR)\
+			? ARM64_SIM_L_STACK_PTR(                          \
+				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(REG)) \
+			: ARM64_SIM_L_READ_REG_PTR(REG);                \
+	})
 
 #define ARM64_SIM_L_STORE_Q0_STACK(OFF)                                    \
 	do {                                                               \
