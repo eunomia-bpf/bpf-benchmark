@@ -770,11 +770,62 @@ increment is committed and pushed immediately). Current state:
   the generator check, or a refinement theorem, while the last three
   genuine-equivalence rewrites are the three the proof correctly does not
   flag.
+  The AArch64 memory address offset's index-value source is likewise no
+  longer open (Step 0142): the offset `ARM64_SIM_L_MEM_BASE_OFF` computes
+  the byte displacement a load/store adds to its base register, and while
+  its index *presence* was already generated (Step 0102) it still picked
+  the *value* the present index register contributes by hand through a
+  ternary on the computed `__a64_mbo_has_index` fact --- the
+  source-modified index register value when the addressing mode carries an
+  index register, a literal zero when it does not (the sentinel index
+  operand `ARM64_REG_NONE`). This step generates the 2-way index-value
+  source selector from `arm64_mem_index_value_spec.json` into the C
+  `generated/arm64_mem_index_value.h` (the `KPROG_ARM64_MEM_INDEX_VALUE`
+  plain-ternary selector, the `…_REGISTER` / `…_ZERO` source codes, and the
+  count, distinctness, exact-code, and fact/value selection
+  `_Static_assert`s) and `KProgFormal/GeneratedArm64MemIndexValue.lean`, and
+  routes the offset body through the generated selector while still calling
+  `ARM64_SIM_L_MOD_VALUE((INDEX), …)` as the register source's argument, so
+  the hand ternary is out of the body; the index-presence contract of Step
+  0102, the writeback-suppress decode, the offset contract, the
+  base-address source of Step 0140, and the pre/post step are unchanged.
+  `Arm64MemIndexValueShape.lean` proves the generated selector equal to an
+  independent 2-way literal over the one fact
+  (`arm64_mem_index_value_refines`), the name and code tables against
+  independent enumerations, the code round-trip and out-of-range facts, the
+  two distinct effects, the two-case dispatch, the register source firing
+  exactly on the has-index fact (`arm64_mem_index_value_selects_register`),
+  the agreement with the 0102 presence fact on the same byte fact
+  (`arm64_mem_index_value_matches_present`, `GeneratedArm64MemIndex.present`),
+  and the two cross-contracts tying the register source to the index
+  register *value* the offset consumes
+  (`arm64_mem_index_value_register_is_index`) and tying the selected source
+  to `GeneratedArm64MemOffset.value`'s index argument for both the pre/post
+  and the plain offset forms (`arm64_mem_index_value_matches_offset`); the
+  17-case host oracle drives the compiled selector over both raw presence
+  facts and the sentinel's neighbours against an independent 2-way
+  restatement, and the 3015-case route oracle declares the full register
+  file and stack, seeds every general register with a distinct
+  per-register pattern, plants a nonzero value at each candidate index
+  register, and drives the real offset over every index operand, AUX index
+  lane, flag byte, register value and immediate against an independent
+  model that restates the presence fact, the index-value source selection,
+  and the immediate suppression from the raw `AUX` word, so a collapsed
+  selection or a swapped pair of arms is numerically distinguishable. 42
+  binding mutations --- six specification distortions, four
+  generator-table changes, twelve generated-C header distortions
+  (including the two regenerated generator/render drifts), twelve
+  generated-Lean changes (including the regenerated generator/render
+  drift), seven hand-refinement changes, and three sim-header selector
+  reverts/swaps --- each of the first 39 changes the oracle, the generator
+  check, or a refinement theorem, while the last three genuine-equivalence
+  rewrites are the three the proof correctly does not flag.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
   pointer source now closed (Steps 0137, 0138, and 0139), the memory
-  base-address source now closed (Step 0140), and the vector memory step's
-  per-lane extra offset now closed (Step 0141),
+  base-address source now closed (Step 0140), the vector memory step's
+  per-lane extra offset now closed (Step 0141), and the memory address
+  offset's index-value source now closed (Step 0142),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

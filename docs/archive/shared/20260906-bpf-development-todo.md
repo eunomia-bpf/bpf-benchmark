@@ -11750,6 +11750,83 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   comment, and a cosmetic count-guard message) SURVIVE as required. Per
   detector: `gen` 14, `lean_chain` 13, `host` 16, `route` 2.
 
+## Step 0142 — AArch64 memory index-value source selection through the generated contract
+
+- Scope: the AArch64 simulator's memory address offset
+  `ARM64_SIM_L_MEM_BASE_OFF` (`kprog/arm64/arm64_sim_local_bpf.h`), which
+  computes the byte offset a load/store adds to its base register. Its index
+  *presence* is already generated (Step 0102,
+  `generated/arm64_mem_index.h`), but the *value* the present index register
+  contributes was still picked by hand through a ternary on the computed
+  `__a64_mbo_has_index` fact --- the source-modified index register value when
+  the addressing mode carries an index register, a literal zero when it does
+  not (the sentinel index operand `ARM64_REG_NONE`, whose byte tag is
+  `KPROG_ARM64_MEM_INDEX_SENTINEL`). This step generates the 2-way
+  index-value source selector from `arm64_mem_index_value_spec.json` into the
+  C `generated/arm64_mem_index_value.h` (the `KPROG_ARM64_MEM_INDEX_VALUE`
+  plain-ternary selector, the `…_REGISTER` / `…_ZERO` source codes, and the
+  count, distinctness, exact-code, and fact/value selection
+  `_Static_assert`s) and `KProgFormal/GeneratedArm64MemIndexValue.lean`, and
+  routes the offset body through the generated selector ---
+  `__a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(__a64_mbo_has_index)` ---
+  while still calling `ARM64_SIM_L_MOD_VALUE((INDEX), ARM64_SIM_L_MOD(AUX),
+  ARM64_SIM_L_SHIFT(AUX), ARM64_WIDTH_64)` as the register source's argument,
+  so the hand ternary is out of the body. The index-presence contract of Step
+  0102, the writeback-suppress decode, the offset contract of
+  `GeneratedArm64MemOffset`, the base-address source of Step 0140, and the
+  pre/post step are unchanged.
+- `Arm64MemIndexValueShape.lean` proves the generated `sourceOf` equal to an
+  independent 2-way literal over the one fact
+  (`arm64_mem_index_value_refines`), the source-name and source-code tables
+  against independent enumerations, the code round-trip and out-of-range
+  facts, both distinct effects, the two-case dispatch, that the register
+  source is named exactly on the has-index fact while zero is named otherwise
+  (`arm64_mem_index_value_selects_register`, `sourceOf hasIndex =
+  .registerIndex ↔ hasIndex`), that the contract agrees with the Step 0102
+  presence fact on the same byte fact (`arm64_mem_index_value_matches_present`,
+  `GeneratedArm64MemIndex.present`), and the two cross-contracts tying the
+  register source to the index register *value* the offset consumes
+  (`arm64_mem_index_value_register_is_index`) and tying the selected source to
+  `GeneratedArm64MemOffset.value`'s index argument for both the pre/post and
+  the plain offset forms (`arm64_mem_index_value_matches_offset`), so the
+  index-value selection and the offset's index contribution cannot disagree.
+- The 17-case host oracle `test_arm64_mem_index_value_host.c` drives the
+  compiled selector over both raw presence facts and the sentinel's
+  neighbours against an independent 2-way restatement, pinning the source
+  codes and the count. The 3015-case route oracle
+  `test_arm64_mem_index_value_route_host.c` includes the simulator header,
+  declares the full register file and stack, seeds every general register with
+  a distinct per-register pattern (high bits set so a 64-bit-vs-narrow read is
+  observable), plants a *nonzero* value at each candidate index register, and
+  drives the real `ARM64_SIM_L_MEM_BASE_OFF` over every index operand, AUX
+  index lane (deliberately allowed to disagree with the operand), flag byte,
+  register value and immediate against an independent model that restates the
+  presence fact, the index-value source selection, and the immediate
+  suppression from the raw `AUX` word --- so a body that collapsed the
+  selection (always the index value, or always zero) or swapped its arms is
+  numerically distinguishable. The generated selector must also agree with the
+  independent 2-way statement at the presence fact and must name the register
+  source exactly at a present index.
+- `make -C kprog/formal check` passes with **186** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 184→186).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_mem_index_value.py`,
+  42 mutations against the live tree, each caught after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the baseline
+  green at the end: 39 of the 42 are caught---six specification distortions,
+  four generator-table changes, twelve generated-C header distortions
+  (including the two regenerated generator/render drifts), twelve
+  generated-Lean distortions (including the regenerated generator/render
+  drift), seven hand-refinement changes, and three sim-header selector
+  reverts/swaps, each of these a change the generator check, a refinement
+  theorem, or an oracle flags---while three genuine-equivalence rewrites (a
+  resolved-but-equal generator root path, an added hand-module namespace
+  comment, and a cosmetic count-guard message) SURVIVE as required. Per
+  detector: `gen` 13, `lean_chain` 12, `host` 12, `route` 2.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

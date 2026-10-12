@@ -376,6 +376,45 @@ pre/post flag combination, index mode, and several immediates against an
 independent model that walks the lane plan position-by-position and recomputes
 each position's extra offset from its own fact pair (62424 cases), so a
 dropped or added high-lane offset is numerically distinguishable.
+The AArch64 memory address offset's index-value source is generated the same
+way from `arm64_mem_index_value_spec.json` into the C
+`generated/arm64_mem_index_value.h` (the `KPROG_ARM64_MEM_INDEX_VALUE`
+plain-ternary 2-way selector, the `…_REGISTER` / `…_ZERO` source codes, and
+the count, distinctness, exact-code, and fact/value selection
+`_Static_assert`s) and `KProgFormal/GeneratedArm64MemIndexValue.lean`. The
+generator re-reads the simulator header on every `--check` and rejects a
+memory-base-offset region that names no generated selector or still picks its
+index value by hand through the `has_index` ternary. The simulator's
+`ARM64_SIM_L_MEM_BASE_OFF` offset routes the value its present index register
+contributes through the generated selector, so the hand ternary on the
+computed `__a64_mbo_has_index` fact is out of the body while
+`ARM64_SIM_L_MOD_VALUE((INDEX), …)` is still called as the register source's
+argument; the index-presence contract of Step 0102, the writeback-suppress
+decode, the offset contract, the base-address source of Step 0140, and the
+pre/post step are unchanged. This extends the memory family with the one
+value-selection fact the offset already resolves: the register source fires
+on the presence contract's own byte fact (not the sentinel index operand), and
+the zero source carries no index contribution into the offset. Lean checks the
+generated selector against an independent 2-way literal over the one fact, the
+name and code tables against independent enumerations, the code round-trip
+and out-of-range facts, the two distinct effects, the two-case dispatch, the
+register source firing exactly on the has-index fact
+(`arm64_mem_index_value_selects_register`), the agreement with the 0102
+presence fact (`arm64_mem_index_value_matches_present`), and the two
+cross-contracts tying the register source to the index register *value*
+(`arm64_mem_index_value_register_is_index`) and to
+`GeneratedArm64MemOffset.value`'s index argument
+(`arm64_mem_index_value_matches_offset`); the 17-case host oracle drives the
+compiled selector over both raw presence facts and the sentinel's neighbours
+against an independent 2-way restatement, and the 3015-case route oracle
+includes the simulator header, declares the full register file and stack,
+seeds every general register with a distinct per-register pattern, plants a
+nonzero value at each candidate index register, and drives the real offset
+over every index operand, AUX index lane, flag byte, register value and
+immediate against an independent model that restates the presence fact, the
+index-value source selection, and the immediate suppression from the raw
+`AUX` word, so a collapsed selection or a swapped pair of arms is numerically
+distinguishable.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the
