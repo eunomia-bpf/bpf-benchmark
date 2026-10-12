@@ -518,7 +518,45 @@ increment is committed and pushed immediately). Current state:
   ternary so it is `_Static_assert`-usable, and the host oracle drives it over
   every mnemonic code, an out-of-range slice, and the alias facts. Assembly
   parsing and the rest of the textual mnemonic remain boundaries.
+  The AArch64 BPF helper-ident contract is likewise no longer wholly open
+  (Step 0136): the artifact encoder's 61 BPF helper-ident rows were a
+  literal `HELPER_IDENTS` dict restating each kernel id's helper name, with
+  no shared contract binding that table to the simulator's
+  `ARM64_SIM_BPF_CALL_*` bodies or the per-program compact helper table the
+  encoder emits (which renumbers a program's called helpers to their
+  1-based lexicographic rank over the used names); the five sim-header
+  forwarding macros additionally pin that rank for their targets. A drift
+  in any artifact was not observable. This step generates the table from
+  `arm64_helper_idents_spec.json` into the encoder's Python
+  `generated_arm64_helper_idents.py`, the C `generated/arm64_helper_idents.h`
+  (`KPROG_ARM64_HELPER_ROW` by-id selector, the out-of-range default, and the
+  five `KPROG_ARM64_HELPER_DELEGATE_*` compact-slot pins), and
+  `KProgFormal/GeneratedArm64HelperIdents.lean`. The generator re-reads the
+  simulator header on every `--check` and rejects a row whose name is not a
+  sim-header body macro, a duplicate id or name, and a forwarding target that
+  names no source or target macro. `Arm64HelperIdents.lean` proves the
+  generated `(id, name)` projection equal to an independent enumeration
+  (`helper_idents_refines`), the names pairwise distinct
+  (`helper_idents_names_nodup`), the ids strictly increasing
+  (`helper_idents_ids_strictly_increasing`), each forwarding target's pinned
+  compact slot equal to its 1-based lexicographic rank over the full
+  61-name table (`helper_delegate_ranks`), and every name's own slot equal
+  to its rank (`helper_slot_ranks`); the 69-case host oracle drives the
+  generated row selector over every kernel id, the out-of-range default, the
+  two counts, and the five forwarding slots against an independent
+  restatement, and the encoder now imports the generated table instead of
+  the deleted literal dict. 29 binding mutations---five spec distortions,
+  two simulator-body macro add/remove and a retargeted forwarding macro, two
+  generator-table changes, five generated-C header distortions, two
+  generated-Lean changes, four hand-refinement changes, three encoder-table
+  changes, an encoder-import rename, two regenerated generator/render
+  drifts, and two genuine-equivalence rewrites---each of the first 27
+  changes the oracle, the generator check, or a refinement theorem, while
+  the last two are equivalences the proof correctly does not flag. The
+  `KPROG_ARM64_HELPER_ROW` out-of-range default and the sim-header body
+  macros remain boundaries.
   Remaining work also includes the load/store address and tag paths,
+
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

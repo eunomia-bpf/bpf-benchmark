@@ -11197,6 +11197,80 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   aliased-condition-mnemonic paragraph and extends the covered-slices list with
   the AArch64 condition-mnemonic decode contract (paper commit pushed to `main`).
 
+## Step 0136 — AArch64 per-program compact helper-table contract through the generated spec
+
+- Scope: the artifact encoder
+  (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`) restated its 61 BPF
+  helper-ident rows as a literal `HELPER_IDENTS` dict mapping each kernel id to
+  a helper name, with no shared contract binding that table to the simulator's
+  `ARM64_SIM_BPF_CALL_*` bodies (whose forwarding macros additionally pin the
+  compact slot of the target they forward to) or to the per-program compact
+  helper table the encoder emits (which renumbers a program's called helpers to
+  their 1-based lexicographic rank over the used names). Unlike x86, the
+  compact slot a forwarding target pins is the *target's* rank over the full
+  61-name table, so the five `KPROG_ARM64_HELPER_DELEGATE_*` pins are proved
+  facts, not a restatement. A drift in any artifact was not observable. This
+  step generates the table from one specification and cross-checks every row
+  and delegate slot against an independent enumeration.
+- Spec `kprog/formal/arm64_helper_idents_spec.json`: schema_version 1, operation
+  `arm64HelperIdents`, and 61 `{id,name}` rows in id-sorted order.
+- Generator `kprog/formal/generate_arm64_helper_idents_spec.py`: `load()`
+  re-reads the simulator header on every `--check` and rejects a row whose name
+  is not a sim-header body macro (the body-macro set must biject the 61 spec
+  names), a duplicate kernel id or name, and a forwarding target that names no
+  source or target macro. Emits the C header `generated/arm64_helper_idents.h`
+  (the `KPROG_ARM64_HELPER_ROW` by-id selector with its out-of-range default and
+  the five `KPROG_ARM64_HELPER_DELEGATE_*` compact-slot pins), the Lean
+  `KProgFormal/GeneratedArm64HelperIdents.lean`, and the encoder table
+  `kprog/arm64/micro-prog/generated_arm64_helper_idents.py`. `--check`
+  returns 0; the `--check` row is added at `kprog/formal/Makefile:64`.
+- Generated C header `kprog/formal/generated/arm64_helper_idents.h`:
+  `KPROG_ARM64_HELPER_IDENTS_COUNT 61U`, `KPROG_ARM64_HELPER_DELEGATE_COUNT
+  5U`, the `KPROG_ARM64_HELPER_ROW(KERNEL_ID)` 1-based by-id ordinal (0
+  out-of-range, per-row and out-of-range `_Static_assert`s), and the five
+  delegate compact-slot pins (`_BPF_GET_CURRENT_TASK_BTF 11U`,
+  `_BPF_TASK_PT_REGS 11U`, `_BPF_COPY_FROM_USER_TASK 2U`,
+  `_BPF_IMA_FILE_HASH 25U`, `_BPF_MAP_LOOKUP_PERCPU_ELEM 32U`).
+- Hand Lean `kprog/formal/KProgFormal/Arm64HelperIdents.lean`: an independent
+  61-pair `helperIdentsSpec` and a `allHelperIdents` constructor enumeration, with
+  theorems `helper_idents_refines` (the generated `(id,name)` projection equal to
+  the independent enumeration), `helper_idents_names_nodup`,
+  `helper_idents_ids_strictly_increasing`, `helper_delegate_ranks` (each
+  forwarding target's pinned slot equals its 1-based lexicographic rank over the
+  full 61-name table), and `helper_slot_ranks` (every name's own slot equals its
+  rank); all `native_decide`. `lake build
+  KProgFormal.GeneratedArm64HelperIdents && lake env lean
+  KProgFormal/Arm64HelperIdents.lean` returns 0.
+- Encoder routing `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`: the
+  61-entry inline `HELPER_IDENTS` dict is replaced by `from
+  generated_arm64_helper_idents import HELPER_IDENTS`; all consumer sites resolve
+  to the import.
+- Host oracle `kprog/formal/test_arm64_helper_idents_host.c`: restates the 61
+  rows, the out-of-range default, the two counts, and the five forwarding slots
+  by hand, then drives the generated row selector over every kernel id, the
+  out-of-range default, the two counts, and the five forwarding slots against
+  an independent restatement:
+  `arm64 helper idents host cross-check: OK (69 cases)`.
+- `make -C kprog/formal check` passes with **174** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  oracle rows were added; 173→174).
+- Mutation harness `kprog/formal/build/mut_arm64_helper_idents.py`, 29
+  mutations against the live tree, each caught after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `encoder`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the baseline
+  green at the end: 27 of the 29 change the oracle, the generator check, or a
+  refinement theorem---five specification distortions, two simulator-body macro
+  add/remove and a retargeted forwarding macro, two generator-table changes,
+  five generated-C header distortions, two generated-Lean changes, four
+  hand-refinement changes, three encoder-table changes, an encoder-import
+  rename, and two regenerated generator/render drifts---while two
+  genuine-equivalence rewrites (a resolved-but-equal generator root path and an
+  added hand-module namespace comment) SURVIVE as required.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the AArch64
+  helper-ident and compact-slot composition paragraph and extends the
+  covered-slices list with the helper-ident and compact-slot selection contract
+  (paper commit f8a0522 pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

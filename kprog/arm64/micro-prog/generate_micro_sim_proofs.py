@@ -14,6 +14,7 @@ import yaml
 
 from generated_arm64_cc_decode import COND
 from generated_arm64_decode import ALU, BITFIELD, MOD, SHIFT
+from generated_arm64_helper_idents import HELPER_IDENTS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -24,72 +25,12 @@ CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
 
 WIDTH_CONST = {1: "ARM64_WIDTH_8", 2: "ARM64_WIDTH_16", 4: "ARM64_WIDTH_32", 8: "ARM64_WIDTH_64"}
+
 # ALU/SHIFT/MOD/BITFIELD mnemonic-to-code tables come from the generated
 # module (kprog/formal/arm64_decode_spec.json); the condition mnemonic-to-code
-# table from kprog/formal/arm64_cc_decode_spec.json. Both imported at the top.
-HELPER_IDENTS = {
-    1: "bpf_map_lookup_elem",
-    2: "bpf_map_update_elem",
-    3: "bpf_map_delete_elem",
-    4: "bpf_probe_read",
-    5: "bpf_ktime_get_ns",
-    6: "bpf_trace_printk",
-    7: "bpf_get_prandom_u32",
-    8: "bpf_get_smp_processor_id",
-    9: "bpf_skb_store_bytes",
-    10: "bpf_l3_csum_replace",
-    11: "bpf_l4_csum_replace",
-    12: "bpf_tail_call",
-    13: "bpf_clone_redirect",
-    14: "bpf_get_current_pid_tgid",
-    15: "bpf_get_current_uid_gid",
-    16: "bpf_get_current_comm",
-    21: "bpf_skb_set_tunnel_key",
-    23: "bpf_redirect",
-    25: "bpf_perf_event_output",
-    26: "bpf_skb_load_bytes",
-    27: "bpf_get_stackid",
-    28: "bpf_csum_diff",
-    31: "bpf_skb_change_proto",
-    32: "bpf_skb_change_type",
-    33: "bpf_skb_under_cgroup",
-    35: "bpf_get_current_task",
-    37: "bpf_current_task_under_cgroup",
-    38: "bpf_skb_change_tail",
-    39: "bpf_skb_pull_data",
-    43: "bpf_skb_change_head",
-    44: "bpf_xdp_adjust_head",
-    45: "bpf_probe_read_str",
-    46: "bpf_get_socket_cookie",
-    50: "bpf_skb_adjust_room",
-    65: "bpf_xdp_adjust_tail",
-    67: "bpf_get_stack",
-    68: "bpf_skb_load_bytes_relative",
-    69: "bpf_fib_lookup",
-    80: "bpf_get_current_cgroup_id",
-    95: "bpf_sk_fullsock",
-    112: "bpf_probe_read_user",
-    113: "bpf_probe_read_kernel",
-    114: "bpf_probe_read_user_str",
-    115: "bpf_probe_read_kernel_str",
-    118: "bpf_jiffies64",
-    122: "bpf_get_netns_cookie",
-    125: "bpf_ktime_get_boot_ns",
-    127: "bpf_seq_write",
-    148: "bpf_copy_from_user",
-    152: "bpf_redirect_neigh",
-    158: "bpf_get_current_task_btf",
-    161: "bpf_ima_inode_hash",
-    174: "bpf_get_attach_cookie",
-    175: "bpf_task_pt_regs",
-    183: "bpf_get_func_arg",
-    184: "bpf_get_func_ret",
-    185: "bpf_get_func_arg_cnt",
-    186: "bpf_get_retval",
-    191: "bpf_copy_from_user_task",
-    193: "bpf_ima_file_hash",
-    195: "bpf_map_lookup_percpu_elem",
-}
+# table from kprog/formal/arm64_cc_decode_spec.json; the BPF helper-ident
+# table from kprog/formal/arm64_helper_idents_spec.json. All imported at the
+# top.
 GPR_WRITE_OPS = {
     "add", "sub", "and", "bic", "eor", "orr", "orn",
     "adds", "subs",

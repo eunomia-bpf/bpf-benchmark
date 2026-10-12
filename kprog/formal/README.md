@@ -213,6 +213,27 @@ full condition order, and the alias set and alias-equal-code facts
 (`arm64_cc_decode_alias_same_code`). This binds the encoder's *condition* text
 to the C condition code the evaluators consume; assembly parsing and the rest
 of the textual mnemonic remain boundaries.
+The 61 AArch64 BPF helper-ident rows are generated the same way from
+`arm64_helper_idents_spec.json` into the encoder's Python
+`generated_arm64_helper_idents.py`, the C `generated/arm64_helper_idents.h`
+(the `KPROG_ARM64_HELPER_ROW` by-id selector with its out-of-range default and
+the five `KPROG_ARM64_HELPER_DELEGATE_*` compact-slot pins), and
+`KProgFormal/GeneratedArm64HelperIdents.lean`. The generator re-reads the
+simulator header on every `--check` and rejects a row whose name is not a
+sim-header body macro, a duplicate id or name, and a forwarding target that
+names no source or target macro; the body-macro set must biject the 61 spec
+names. The per-program compact table the encoder emits renumbers a program's
+called helpers to their 1-based lexicographic rank over the used names, and
+the five sim-header forwarding macros pin that rank of their targets over the
+full 61-name table, so the pins are proved facts, not a restatement. Lean
+checks the generated `(id, name)` projection against an independent
+enumeration, the names' pairwise distinctness and the ids' strict
+increase, each forwarding target's pinned slot against its full-table rank
+(`helper_delegate_ranks`), and every name's own slot against its rank
+(`helper_slot_ranks`); the host oracle drives the row selector over every
+kernel id, the out-of-range default, the two counts, and the five forwarding
+slots against an independent restatement. The `KPROG_ARM64_HELPER_ROW`
+out-of-range default and the sim-header body macros remain boundaries.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the
@@ -2557,6 +2578,31 @@ hand-refinement changes, two encoder-table changes, an encoder-import rename,
 and two regenerated generator/render drifts---each change the oracle or the
 refinement theorem, and a renamed encoder import and a drifted encoder table
 value are caught by the encoder's live `COND`.
+
+The AArch64 BPF helper-ident and compact-slot contract binds the 61 kernel
+helper ids the AArch64 simulator recognizes, the helper name each one
+denotes, and the per-program compact renumbering the artifact encoder
+emits. `Arm64HelperIdents.lean` projects the generated table to `(id, name)`
+pairs and proves the projection equal to an independent hand enumeration
+(`helper_idents_refines`), the names pairwise distinct
+(`helper_idents_names_nodup`), the ids strictly increasing
+(`helper_idents_ids_strictly_increasing`), each forwarding macro's pinned
+compact slot equal to the 1-based lexicographic rank, over the full
+61-name table, of the helper it forwards to (`helper_delegate_ranks`), and
+every name's own slot equal to its rank over the used names
+(`helper_slot_ranks`)---deliberately not a restatement of the generated
+match arms. The host cross-check includes `generated/arm64_helper_idents.h`
+and drives the generated row selector over every kernel id, the out-of-range
+default, the two counts, and the five forwarding slots against an
+independent restatement. Twenty-nine binding mutations---five spec
+distortions, two simulator-body macro add/remove and a retargeted
+forwarding macro, two generator-table changes, five generated-C header
+distortions, two generated-Lean changes, four hand-refinement changes,
+three encoder-table changes, an encoder-import rename, two regenerated
+generator/render drifts, and two genuine-equivalence rewrites---each of the
+first twenty-seven changes the oracle, the generator check, or a refinement
+theorem, while the last two are equivalences the proof correctly does not
+flag.
 
 The x86 ALU mnemonic-to-code decode contract binds the `X86_ALU_*` constants
 that the x86 simulator dispatcher and the Lean model share.
