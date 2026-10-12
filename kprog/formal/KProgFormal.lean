@@ -203,6 +203,8 @@ import KProgFormal.GeneratedArm64StackWriteLanes
 import KProgFormal.Arm64StackWriteLanesShape
 import KProgFormal.GeneratedArm64StackWriteTagAction
 import KProgFormal.Arm64StackWriteTagActionShape
+import KProgFormal.GeneratedArm64StackReadTagSource
+import KProgFormal.Arm64StackReadTagSourceShape
 import KProgFormal.GeneratedArm64DispatchFamily
 import KProgFormal.Arm64DispatchFamily
 import KProgFormal.GeneratedArm64DispatchSingleton
