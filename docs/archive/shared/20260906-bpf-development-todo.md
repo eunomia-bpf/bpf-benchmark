@@ -12170,6 +12170,123 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   and a no-op `(__u64)` cast on the written value) SURVIVE as required. Per
   detector: `gen` 15, `lean_chain` 11, `host` 5, `route` 2.
 
+## Step 0146 — x86-64 stack byte-ladder per-lane activation contract
+
+- Scope: the x86-64 simulator's stack write helper `X86_SIM_L_STACK_WRITE` and
+  stack read helper `X86_SIM_L_STACK_READ` (`kprog/x86/x86_sim_local_bpf.h`)
+  narrowed a resolved access to the byte arena `__x86_stack_mem.b[]` through a
+  little-endian byte ladder whose eight lane writes (the write helper) and eight
+  lane assemblies (the read helper) were gated by hand-written
+  `__x86_stw_width` / `__x86_str_width` `>= X86_WIDTH_16` / `>=
+  X86_WIDTH_32` / `== X86_WIDTH_64` tests restated at each lane. The width set
+  is closed (the four `X86_WIDTH_*` codes) and the activation is monotone: an
+  access of `n` bytes touches exactly lanes `0..n-1`, so the width's active-lane
+  mask has its low `n` bits set. Unlike the AArch64 Step 0124 write-only helper,
+  the x86-64 read helper is itself an eight-lane assemble ladder, so this step
+  is one contract routed through **two** helper bodies with identical width
+  gates.
+- Shared spec `kprog/formal/x86_stack_write_lanes_spec.json` (schema_version 1,
+  operation `x86StackWriteLanes`, selector `width_mask_low_lanes_active`)
+  enumerates the four widths — `w8`/`w16`/`w32`/`w64` with codes `1/2/4/8`,
+  byte counts `1/2/4/8` and masks `1/3/15/255` — the eight lanes
+  (`lane0..lane7`, indices `0..7`), and the per-width activation row
+  (`n` leading `true`s, the rest `false`).
+- Generator `kprog/formal/generate_x86_stack_write_lanes_spec.py` re-derives the
+  live stack helper text from the simulator header and requires it to route its
+  lanes through the generated predicate `KPROG_X86_STACK_WRITE_LANE_ACTIVE(`
+  while keeping the byte-lane extraction/write (`KPROG_X86_STACK_BYTE(`), the
+  byte arena (`__x86_stack_mem.b[`), the width-narrowing value
+  (`KPROG_X86_STACK_APPLY_WIDTH(`) and the little-endian assembly
+  (`KPROG_X86_STACK_ASSEMBLE(`), and dropping all six hand gates
+  (`HAND_GATE_16`/`_32`/`_STR_16`/`_STR_32`/`_64`/`_STR_64`). It emits the
+  plain-expression, `_Static_assert`-safe C header
+  `generated/x86_stack_write_lanes.h` (the `?:`-chain mask macro
+  `KPROG_X86_STACK_WRITE_MASK`, the eight lane-number defines,
+  `.._LANE_SLOTS 8U`, `.._LANE_COUNT`, `.._LANE_ACTIVE(WIDTH, LANE) =
+  ((__u8)((MASK(WIDTH) >> (LANE)) & 1U))`, four width-code asserts, eight
+  mask/count asserts and thirty-two full activation asserts) and the Lean table
+  `KProgFormal/GeneratedX86StackWriteLanes.lean` (inductive `Width`/`Lane`,
+  `widthCode`, `byteCount`, `widthMask`, `laneIndex`,
+  `laneActive (width lane) := decide ((widthMask width >>> laneIndex lane) &&& 1
+  = 1)`, `activeLanes`, `laneSpec`, `laneActive_refines`,
+  `activeLanes_length`, `widthMask_is_low_bits`). `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:134`.
+- Hand refinement `KProgFormal/X86StackWriteLanesShape.lean` states an
+  independent literal construction (`x86StackWriteLanesCountSpec`/`MaskSpec`/
+  `LaneSpec`) and proves the shape/theorem set, including
+  `x86_stack_write_lanes_refines` (the generated mask-bit activation equals the
+  independent `laneIndex < byteCount` bound), `_spec_iff`, `_mask_refines`,
+  `_count_refines`, `_lane_refines`, `_length`, `_mask_is_low_bits`,
+  `_monotone` (an active lane stays active at every wider access — exactly the
+  nested `>= 16`/`>= 32`/`== 64` gate structure), `_lane0_always`,
+  `_above_never`, `_codes_match_width` (against `x86WidthCodeSpec`),
+  `_matches_store_bytes` (against the generated `GeneratedX86MemAccess.byteCount`
+  and `GeneratedX86Width.code` — the two modules that carry the byte counts and
+  codes, since x86 has no single module carrying both), `_lane_is_byte_lane`
+  (against the `GeneratedX86StackArena` byte), `_over_widths`, and the three
+  canonical examples; the hypothesis-carrying monotonicity and above-never
+  theorems are closed by `revert h <;> cases <;> decide`. `lake build
+  KProgFormal.GeneratedX86StackWriteLanes` and `lake env lean
+  KProgFormal/X86StackWriteLanesShape.lean` return 0.
+- Routed bodies: the write ladder's eight lane `if`s now test
+  `KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, k)` and the read ladder's
+  eight lane-assembly `if`s test
+  `KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, k)`; the byte-window
+  arithmetic, the scalar first-lane write/read and the little-endian
+  composition are unchanged, and the ladder bodies are not re-indented. The
+  generated header is included at `x86_sim_local_bpf.h:39`, after the other
+  generated arm includes. The public signatures and every caller site are
+  unchanged.
+- Two host oracles, both wired into `kprog/formal/Makefile` immediately after
+  the write-width-arm pair:
+  - `test_x86_stack_write_lanes_host.c` includes the generated header
+    (compiling it against hand-written `X86_WIDTH_*` values), checks every
+    `(width, lane)` pair's mask bit, count and activation against an
+    independent literal oracle, and checks the mask is each width's low-bit set
+    --- `x86 stack write lanes host cross-check: OK (291 cases)`.
+  - `test_x86_stack_write_lanes_route_host.c` includes the simulator header
+    (`X86_SIM_ENABLE_STACK`) and drives the real `X86_SIM_L_STACK_WRITE` at
+    every width and many arena offsets, then the real `X86_SIM_L_STACK_READ`
+    (the essential round-trip detector for the read-side ladder), comparing the
+    whole stack byte image against independent models of the activation (an
+    `n`-byte access touches exactly bytes `0..n-1`, higher bytes untouched) and
+    of the little-endian assembly --- `x86 stack write lanes route host
+    cross-check: OK (1401654 cases)`.
+- Gate `make -C kprog/formal check` rc=0. Baseline was **192** for Step 0145;
+  Step 0146 adds the stack-write-lanes generator `--check`, the Lean pair, and
+  the host and route oracles (192→194). `make -C
+  kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived artifacts,
+  all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_stack_write_lanes.py`, 63
+  mutations against the live tree, each caught after the four unmutated controls
+  (`gen`, `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  eight spec defects (operation/schema/selector/width-code/width-bytes/mask/
+  lane-index/activation drifts → generator), thirteen generator defects
+  (operation/selector/width-code/width-bytes/lane-index/Lean-path/C-header-path/
+  lane-predicate-anchor/hand-gate-anchor/region-start/region-end/Lean-lane-spec/
+  Lean-lane-active drifts → generator), ten generated-C defects (mask/count/
+  lane-define/slot-count/active-shift/assert-width/assert-mask/assert-count/
+  assert-active/assert-slots drifts → host), eight generated-Lean defects
+  (widthCode/byteCount/widthMask/laneIndex/laneActive/activeLanes/laneSpec/
+  laneActive_refines drifts → lean_chain), nine hand-refinement defects
+  (count-spec/mask-spec/lane-spec/refines/lane0-always/above-never/over-widths/
+  store-bytes drifts → lean_chain), seven routed-ladder defects (dropped
+  include, dropped lane-7 gate, widened lane-1 gate, dropped write lane-3 gate,
+  dropped read lane-7 gate, widened read lane-1 gate, read assemble-lane drift,
+  restored hand gate → route or generator), and three generator+artifact pair
+  defects regenerated so `--check` stays green and only the rebuilt artifacts
+  catch them (count-render → host, mask-render and lane-active-render →
+  lean_chain). Five semantically equivalent mutations (an added include-side
+  comment, an added hand-module comment, a resolved-but-equal generator root
+  path, an added generated-Lean import comment, and equal-whitespace spec text)
+  SURVIVE as required. Per detector: `gen` 15, `lean_chain` 11, `host` 5,
+  `route` 7 (the four unmutated controls pass before and after).
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the x86-64
+  stack byte-ladder activation paragraph, extends the covered-slices list with
+  the stack byte-ladder activation family, and lists the two helpers it routes
+  (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

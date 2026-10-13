@@ -955,6 +955,55 @@ increment is committed and pushed immediately). Current state:
   generator docstrings, an added hand-module namespace comment, and a no-op
   `(__u64)` cast on the written value) are the four the proof correctly does not
   flag.
+  The x86-64 stack byte-ladder per-lane activation is likewise no longer open
+  (Step 0146): the simulator's stack write helper `X86_SIM_L_STACK_WRITE` and
+  its stack read helper `X86_SIM_L_STACK_READ` narrow a resolved access to the
+  byte arena `__x86_stack_mem.b[]` through a little-endian byte ladder whose
+  eight lane writes (and eight lane assemblies) were gated by hand-written
+  `__x86_stw_width`/`__x86_str_width` `>= X86_WIDTH_16` / `>= X86_WIDTH_32` /
+  `== X86_WIDTH_64` tests restated at each lane. This step generates the
+  activation from `x86_stack_write_lanes_spec.json` into the C
+  `generated/x86_stack_write_lanes.h` (the width's active-lane mask,
+  `w8`→`0x01`, `w16`→`0x03`, `w32`→`0x0f`, `w64`→`0xff`, the eight lane-number
+  defines, the lane count and slot count, the plain-expression predicate
+  `KPROG_X86_STACK_WRITE_LANE_ACTIVE(WIDTH, LANE) =
+  ((__u8)((MASK(WIDTH) >> (LANE)) & 1U))`, and the width-code, mask, count and
+  per-lane activation `_Static_assert`s) and `KProgFormal/GeneratedX86StackWriteLanes.lean`,
+  and routes *both* helpers' ladders through the one generated predicate, so
+  the four restated gate blocks are out of both bodies. Unlike the AArch64
+  Step 0124 (one write helper), the x86-64 read helper is itself a hand-written
+  eight-lane assemble ladder, so the single contract covers both the write and
+  the read byte arena access; the resolved width (`__x86_stw_width` /
+  `__x86_str_width`, post the `X86_SIM_L_EFFECTIVE_WIDTH` bridge) is the
+  predicate's argument, and the byte-window arithmetic and the little-endian
+  value composition stay in the bodies.
+  `X86StackWriteLanesShape.lean` proves the generated mask-bit activation equal
+  to an independent literal construction (`x86_stack_write_lanes_refines`), the
+  mask/byte-count/lane-number refinements, the activation's monotonicity
+  (`x86_stack_write_lanes_monotone`, an active lane stays active at every wider
+  access, exactly the nested `>= 16`/`>= 32`/`== 64` gate structure) and its
+  above-width falsehood, and ties the lane set to the `GeneratedX86StackArena`
+  byte extraction (`x86_stack_write_lanes_lane_is_byte_lane`), the width codes
+  to the `X86Width` contract (`x86_stack_write_lanes_codes_match_width`) and the
+  byte counts and codes to the memory-access contract
+  (`x86_stack_write_lanes_matches_store_bytes`, the stack and memory byte
+  ladders activate the same lanes at every width). The 291-case host oracle
+  drives the compiled generated header against an independent literal oracle,
+  and the 1401654-case route oracle declares the stack arena and drives the
+  real `X86_SIM_L_STACK_WRITE` then `X86_SIM_L_STACK_READ` at every width and
+  many arena offsets against independent models of the activation and of the
+  little-endian assembly, so a wrong width code, a swapped lane, a dropped gate
+  or an ungated lane is numerically distinguishable. 63 binding mutations ---
+  eight specification distortions, thirteen generator-anchor changes, ten
+  generated-C header distortions, eight generated-Lean changes, nine
+  hand-refinement changes, seven sim-header routed-ladder revert/drop/widen
+  mutations (both ladders, including a dropped lane-3 gate and an assemble-lane
+  swap), and three generator+artifact pair defects regenerated so the
+  `--check` stays green --- each change the oracle, the generator check, or a
+  refinement theorem, while the five genuine-equivalence rewrites (an added
+  include-side comment, an added hand-module comment, a resolved-but-equal
+  generator root path, an added generated-Lean import comment, and
+  equal-whitespace spec text) are the five the proof correctly does not flag.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
   pointer source now closed (Steps 0137, 0138, and 0139), the memory
@@ -963,7 +1012,8 @@ increment is committed and pushed immediately). Current state:
   offset's index-value source now closed (Step 0142), and the vector memory
   step's half state-field selection now closed (Step 0143), and the
   write-register width body-selection now closed (Step 0144), the x86-64
-  write-register width body-selection now closed (Step 0145),
+  write-register width body-selection now closed (Step 0145), the x86-64
+  stack byte-ladder per-lane activation now closed (Step 0146),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

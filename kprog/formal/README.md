@@ -1057,6 +1057,33 @@ model that applies the width inside each body (byte lane per shift,
 word-preserving, zero-extending dword, full qword), comparing the whole register
 file with its tags, so a wrong selector code or a swapped body assignment is
 numerically distinguishable.
+The x86-64 stack helpers' per-lane width gating is likewise a generated contract:
+`generate_x86_stack_write_lanes_spec.py` from `x86_stack_write_lanes_spec.json`
+emits `KPROG_X86_STACK_WRITE_LANE_ACTIVE(WIDTH, LANE)` with the plain-expression
+low-bit mask `KPROG_X86_STACK_WRITE_MASK(WIDTH)` (`w8`→`0x01`, `w16`→`0x03`,
+`w32`→`0x0f`, `w64`→`0xff`), which activates byte lane `k` exactly when
+`k < byteCount(width)`, and `X86StackWriteLanesShape.lean` proves the generated
+mask-bit activation equal to an independent lane-index-versus-byte-count bound
+(`x86_stack_write_lanes_refines`), that the byte counts, masks, and lane numbers
+equal their independent literals, that the mask is each width's low-bit set, that
+an active lane stays active at every wider access while a lane at or above the
+byte count is never touched, that the lane's byte extraction is the
+`GeneratedX86StackArena` byte, that the width codes are the `X86Width`
+contract's own codes, and --- connecting this to the memory-side ladder --- that
+the stack and memory byte ladders activate the same lanes and width codes at
+every width (`x86_stack_write_lanes_matches_store_bytes`). Unlike the AArch64
+Step 0124 write-only helper, the x86-64 read helper `X86_SIM_L_STACK_READ` is
+itself a hand-written eight-lane assemble ladder, so the one contract is routed
+through *both* `X86_SIM_L_STACK_WRITE` and `X86_SIM_L_STACK_READ`: each now gates
+its eight lane writes (resp. eight lane assemblies) through the generated
+predicate instead of the four hand-written
+`>= X86_WIDTH_16`/`>= X86_WIDTH_32`/`== X86_WIDTH_64` gate blocks, leaving the
+byte-window arithmetic and the little-endian value composition in the composed
+bodies. A generated-header oracle checks the compiled predicate's mask bit,
+count, and activation against an independent literal oracle over every
+width/lane pair (291 cases), and a sim-header route oracle drives the real write
+then read over every width and many arena offsets against independent models of
+the activation and of the little-endian assembly (1,401,654 cases).
 The x86-64 `SHLD`/`SHRD` immediate arm's choice of body and flag family on the
 opcode is likewise a generated contract: `generate_x86_doubleshift_arm_spec.py`
 emits `KPROG_X86_DOUBLESHIFT_ARM_COUNT` (2), the two arm defines, and two
