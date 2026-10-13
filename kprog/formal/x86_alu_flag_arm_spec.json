@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "operation": "x86AluFlagArmSelector",
+  "selector": "alu_token_then_flag_body",
+  "alu_code_bits": 8,
+  "arms": [
+    {
+      "arm": "add",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_ADD",
+      "alu_codes": [0, 15],
+      "alu_defines": ["X86_ALU_ADD", "X86_ALU_ADC"],
+      "flag_body": "add_flags",
+      "case_macro": "X86_SIM_L_SET_ADD_FLAGS",
+      "cf_restore": false,
+      "effect": "sum_flags"
+    },
+    {
+      "arm": "inc",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_INC",
+      "alu_codes": [10],
+      "alu_defines": ["X86_ALU_INC"],
+      "flag_body": "add_flags",
+      "case_macro": "X86_SIM_L_SET_ADD_FLAGS",
+      "cf_restore": true,
+      "effect": "increment_flags_preserve_cf"
+    },
+    {
+      "arm": "dec",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_DEC",
+      "alu_codes": [13],
+      "alu_defines": ["X86_ALU_DEC"],
+      "flag_body": "sub_flags",
+      "case_macro": "X86_SIM_L_SET_SUB_FLAGS",
+      "cf_restore": true,
+      "effect": "decrement_flags_preserve_cf"
+    },
+    {
+      "arm": "sub",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_SUB",
+      "alu_codes": [1],
+      "alu_defines": ["X86_ALU_SUB"],
+      "flag_body": "sub_flags",
+      "case_macro": "X86_SIM_L_SET_SUB_FLAGS",
+      "cf_restore": false,
+      "effect": "difference_flags"
+    },
+    {
+      "arm": "sbb",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_SBB",
+      "alu_codes": [12],
+      "alu_defines": ["X86_ALU_SBB"],
+      "flag_body": "sbb_flags",
+      "case_macro": "X86_SIM_L_SET_SBB_FLAGS",
+      "cf_restore": false,
+      "effect": "borrow_difference_flags"
+    },
+    {
+      "arm": "neg",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_NEG",
+      "alu_codes": [14],
+      "alu_defines": ["X86_ALU_NEG"],
+      "flag_body": "sub_flags",
+      "case_macro": "X86_SIM_L_SET_SUB_FLAGS",
+      "cf_restore": false,
+      "effect": "negation_flags"
+    },
+    {
+      "arm": "not",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_NOT",
+      "alu_codes": [11],
+      "alu_defines": ["X86_ALU_NOT"],
+      "flag_body": "preserve_flags",
+      "case_macro": "KPROG_X86_PRESERVE_FLAGS",
+      "cf_restore": false,
+      "effect": "flags_unchanged"
+    },
+    {
+      "arm": "shift",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_SHIFT",
+      "alu_codes": [5, 6, 7, 8],
+      "alu_defines": ["X86_ALU_SHL", "X86_ALU_SHR", "X86_ALU_SAR", "X86_ALU_ROL"],
+      "flag_body": "shift_flags",
+      "case_macro": "X86_SIM_L_SET_SHIFT_FLAGS",
+      "cf_restore": false,
+      "effect": "shift_flags"
+    },
+    {
+      "arm": "imul",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_IMUL",
+      "alu_codes": [9],
+      "alu_defines": ["X86_ALU_IMUL"],
+      "flag_body": "imul_flags",
+      "case_macro": "X86_SIM_L_SET_IMUL_FLAGS",
+      "cf_restore": false,
+      "effect": "multiply_overflow_flags"
+    },
+    {
+      "arm": "logic",
+      "arm_define": "KPROG_X86_ALU_FLAG_ARM_LOGIC",
+      "alu_codes": [2, 3, 4],
+      "alu_defines": ["X86_ALU_XOR", "X86_ALU_OR", "X86_ALU_AND"],
+      "flag_body": "logic_flags",
+      "case_macro": "X86_SIM_L_SET_LOGIC_FLAGS",
+      "cf_restore": false,
+      "effect": "bitwise_flags_default"
+    }
+  ]
+}

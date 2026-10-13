@@ -37,6 +37,7 @@
 #include "../formal/generated/x86_bzhi_flags.h"
 #include "../formal/generated/x86_write_width_arm.h"
 #include "../formal/generated/x86_stack_write_lanes.h"
+#include "../formal/generated/x86_alu_flag_arm.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -704,29 +705,40 @@ struct x86_sim_state {
 #define X86_SIM_L_SET_ALU_FLAGS(LHS, RHS, RESULT, ALU, WIDTH)               \
 	do {                                                               \
 		__u8 __x86_l_old_cf = __x86_cf;                          \
-		if ((ALU) == X86_ALU_ADD || (ALU) == X86_ALU_ADC)         \
+		switch (KPROG_X86_ALU_FLAG_ARM((ALU))) {                 \
+		case KPROG_X86_ALU_FLAG_ARM_ADD:                         \
 			X86_SIM_L_SET_ADD_FLAGS((LHS), (RHS), (RESULT), (WIDTH));\
-		else if ((ALU) == X86_ALU_INC) {                          \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_INC:                         \
 			X86_SIM_L_SET_ADD_FLAGS((LHS), 1, (RESULT), (WIDTH));\
 			__x86_cf = __x86_l_old_cf;                         \
-		} else if ((ALU) == X86_ALU_DEC) {                          \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_DEC:                         \
 			X86_SIM_L_SET_SUB_FLAGS((LHS), 1, (RESULT), (WIDTH));\
 			__x86_cf = __x86_l_old_cf;                         \
-		} else if ((ALU) == X86_ALU_SUB)                          \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_SUB:                         \
 			X86_SIM_L_SET_SUB_FLAGS((LHS), (RHS), (RESULT), (WIDTH));\
-		else if ((ALU) == X86_ALU_SBB)                            \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_SBB:                         \
 			X86_SIM_L_SET_SBB_FLAGS((LHS), (RHS), 0, (RESULT), (WIDTH));\
-		else if ((ALU) == X86_ALU_NEG)                            \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_NEG:                         \
 			X86_SIM_L_SET_SUB_FLAGS(0, (LHS), (RESULT), (WIDTH));\
-		else if ((ALU) == X86_ALU_NOT)                            \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_NOT:                         \
 			KPROG_X86_PRESERVE_FLAGS();                       \
-		else if ((ALU) == X86_ALU_SHL || (ALU) == X86_ALU_SHR ||  \
-			 (ALU) == X86_ALU_SAR || (ALU) == X86_ALU_ROL)    \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_SHIFT:                       \
 			X86_SIM_L_SET_SHIFT_FLAGS((LHS), (RHS), (RESULT), (ALU), (WIDTH));\
-		else if ((ALU) == X86_ALU_IMUL)                           \
+			break;                                             \
+		case KPROG_X86_ALU_FLAG_ARM_IMUL:                        \
 			X86_SIM_L_SET_IMUL_FLAGS((LHS), (RHS), (WIDTH));   \
-		else                                                      \
+			break;                                             \
+		default:                                                  \
 			X86_SIM_L_SET_LOGIC_FLAGS((RESULT), (WIDTH));      \
+			break;                                             \
+		}                                                         \
 	} while (0)
 
 #define X86_SIM_L_EVAL_CC(CC)                                               \
