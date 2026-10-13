@@ -12417,6 +12417,172 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   the ALU-token flag-body-selection family, and lists the entry it routes
   (paper commit pushed to `main`).
 
+## Step 0148 — x86-64 dispatch-family token-membership contract
+
+- Scope: the x86-64 simulator's dispatch-family membership gates
+  `KPROG_X86_MOV_LOAD_PTR_HANDLED`, `KPROG_X86_MOVX_REG_HANDLED`,
+  `KPROG_X86_MOV_LOAD_HANDLED`, `KPROG_X86_MOV_STORE_HANDLED`,
+  `KPROG_X86_ALU_IMM_HANDLED`, `KPROG_X86_ALU_REG_HANDLED`,
+  `KPROG_X86_CMP_IMM_HANDLED`, `KPROG_X86_CMP_REG_HANDLED`,
+  `KPROG_X86_CMP_MEM_HANDLED`, and
+  `KPROG_X86_DOUBLE_SHIFT_HANDLED` (`kprog/x86/x86_sim_local_bpf.h`),
+  which the dispatcher's `else if` chain tests in that order, each a
+  hand-written disjunction over `X86_OP_*` tokens (a member of one family
+  is dispatched by exactly one gate: the families are disjoint and their
+  order is fixed by the chain). This step generates the ten
+  token-membership tests from `x86_dispatch_family_spec.json` into the C
+  `generated/x86_dispatch_family.h` (the ten `KPROG_X86_<F>_HANDLED(OP)`
+  membership macros, the twenty-four `X86_OP_* == code` token-code drift
+  asserts binding the hand-written decode to the generated sets, and the
+  twenty-four per-token coverage asserts naming every member through its
+  own gate) and `KProgFormal/GeneratedX86DispatchFamily.lean`, and routes
+  each family arm through its generated gate so the hand disjunctions are
+  out of the body. This is the x86-side mirror of the AArch64
+  dispatch-family style (the token-keyed selector style is Step 0116's;
+  the arm-code selector style is Step 0147's, but here membership is the
+  contract, not body selection, so the generated artefact is a family of
+  membership macros, one per gate, in the gate order the dispatcher reads).
+- Semantic note: the ten families are disjoint over the simulated opcode
+  set; `KPROG_X86_<F>_HANDLED(OP)` is true for exactly the family's member
+  tokens, so the ordered dispatcher chain has at most one taken gate per
+  opcode and an opcode outside every family falls through every gate to the
+  chain's tail (a member token misrouted to another arm, a gate-order swap
+  that exposes a different body to the same tuple, a family overlap, or a
+  dropped token is distinguishable in the route oracle, where each routed
+  family arm is executed under a pinned whole-state against an independent
+  model).
+- Spec `kprog/formal/x86_dispatch_family_spec.json`: schema_version 1,
+  operation `x86DispatchFamily`, and the ten families with their gate macro
+  and member tokens in gate order --- `movLoadPtr` (`KPROG_X86_MOV_LOAD_PTR_HANDLED`,
+  `X86_OP_MOV_LOAD_MAP_PTR` code 44, `X86_OP_MOV_LOAD_HELPER_ID` code 45),
+  `movxReg` (`KPROG_X86_MOVX_REG_HANDLED`, `X86_OP_MOVZX_REG` code 32,
+  `X86_OP_MOVSX_REG` code 33), `movLoad` (`KPROG_X86_MOV_LOAD_HANDLED`,
+  `X86_OP_MOV_LOAD` code 6, `X86_OP_MOV_LOAD_SCALAR` code 37,
+  `X86_OP_MOVSX_LOAD` code 34), `movStore`
+  (`KPROG_X86_MOV_STORE_HANDLED`, `X86_OP_MOV_STORE_IMM` code 7,
+  `X86_OP_MOV_STORE_REG` code 8), `aluImm` (`KPROG_X86_ALU_IMM_HANDLED`,
+  `X86_OP_ALU_IMM` code 10, `X86_OP_ADD_IMM` code 3), `aluReg`
+  (`KPROG_X86_ALU_REG_HANDLED`, `X86_OP_ALU_REG` code 11,
+  `X86_OP_ADD_REG` code 4, `X86_OP_XOR_REG` code 5), `cmpImm`
+  (`KPROG_X86_CMP_IMM_HANDLED`, `X86_OP_CMP_IMM` code 12,
+  `X86_OP_TEST_IMM` code 14), `cmpReg` (`KPROG_X86_CMP_REG_HANDLED`,
+  `X86_OP_CMP_REG` code 13, `X86_OP_TEST_REG` code 15), `cmpMem`
+  (`KPROG_X86_CMP_MEM_HANDLED`, `X86_OP_CMP_MEM_IMM` code 29,
+  `X86_OP_TEST_MEM_IMM` code 30, `X86_OP_CMP_MEM_REG` code 31,
+  `X86_OP_TEST_MEM_REG` code 59), and `doubleShift`
+  (`KPROG_X86_DOUBLE_SHIFT_HANDLED`, `X86_OP_SHLD_IMM` code 27,
+  `X86_OP_SHRD_IMM` code 28).
+- Generator `kprog/formal/generate_x86_dispatch_family_spec.py`: `load()`
+  requires the JSON to equal the generator's expected table verbatim
+  (`EXPECTED`), asserts the family order and per-opcode code drift against
+  `kprog/x86/x86_sim.h`'s `#define X86_OP_* 0x..U` definitions, and rejects
+  duplicate names or a family with fewer than two members;
+  `check_against_header()` re-reads the sim header on every `--check` and
+  requires the dispatcher chain to route through the ten generated gates in
+  the spec's gate order and not to keep the raw hand disjunction. Emits the
+  C header `generated/x86_dispatch_family.h` and the Lean
+  `KProgFormal/GeneratedX86DispatchFamily.lean`. `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:139`.
+- Generated C header `kprog/formal/generated/x86_dispatch_family.h`: the
+  ten `KPROG_X86_<F>_HANDLED(OP)` membership macros, the twenty-four
+  token-code drift `_Static_assert`s (`X86_OP_MOV_LOAD_MAP_PTR == 44U`, …
+  `X86_OP_SHRD_IMM == 28U`), and the twenty-four per-member coverage
+  `_Static_assert`s (each member named by its own gate).
+- Generated Lean `kprog/formal/KProgFormal/GeneratedX86DispatchFamily.lean`:
+  the `DispatchOp` inductive over the twenty-four opcodes (with its
+  count-restating docstring), the `code : DispatchOp -> Nat` table, and the
+  ten `<family>Handled` membership functions.
+- Hand Lean `kprog/formal/KProgFormal/X86DispatchFamily.lean`: independent
+  named member lists for each of the ten families (`x86DispMovLoadPtrOps`,
+  `x86DispMovxRegOps`, `x86DispMovLoadOps`, `x86DispMovStoreOps`,
+  `x86DispAluImmOps`, `x86DispAluRegOps`, `x86DispCmpImmOps`,
+  `x86DispCmpRegOps`, `x86DispCmpMemOps`, `x86DispDoubleShiftOps`,
+  structurally separate from the generated disjunctions), with theorems
+  `x86_dispatch_<f>_refines` per family (the generated `<f>Handled` equals
+  the independent list membership on all twenty-four opcodes),
+  `x86_dispatch_handled_iff_mem` (all ten gates hold exactly on their
+  family's list), `x86_dispatch_families_disjoint` (all forty-five family
+  pairs), `x86_dispatch_member_handled` (a family member is handled by some
+  gate), `x86_dispatch_nonmember_unhandled` (an opcode outside every family
+  is handled by no gate), `x86_dispatch_code_dispatch` (the `code` table
+  equals the twenty-four `X86_OP_*` numbers the C macros compare against),
+  `x86_dispatch_code_in_range`, and three canonical examples; all
+  `decide`/`simp [ops]`. `lake build` and `lake env lean
+  KProgFormal/X86DispatchFamily.lean` return 0.
+- Sim-header routing `kprog/x86/x86_sim_local_bpf.h`: the ten dispatcher
+  family arms now test the generated gates ---
+  `KPROG_X86_MOV_LOAD_PTR_HANDLED(OP)` at `:1874`,
+  `KPROG_X86_MOVX_REG_HANDLED(OP)` at `:1923`,
+  `KPROG_X86_MOV_LOAD_HANDLED(OP)` at `:1939`,
+  `KPROG_X86_MOV_STORE_HANDLED(OP)` at `:1945`,
+  `KPROG_X86_ALU_IMM_HANDLED(OP)` at `:1957`,
+  `KPROG_X86_ALU_REG_HANDLED(OP)` at `:1959`,
+  `KPROG_X86_CMP_IMM_HANDLED(OP)` at `:1969`,
+  `KPROG_X86_CMP_REG_HANDLED(OP)` at `:1972`,
+  `KPROG_X86_CMP_MEM_HANDLED(OP)` at `:1975`, and
+  `KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)` at `:2107` --- the hand token
+  disjunctions are out of the arms, and the include
+  `#include "../formal/generated/x86_dispatch_family.h"` is added at
+  `x86_sim_local_bpf.h:41` beside the other generated arm includes, while
+  the unsupported arm and every arm body are unchanged.
+- Host oracle `kprog/formal/test_x86_dispatch_family_host.c`: declares the
+  raw `X86_OP_*` numbers locally, states an independent per-family
+  `switch`-based membership oracle and member table, and sweeps all \(256\)
+  byte values against every family plus every explicit member and a
+  pairwise-distinctness check, so a wrong table, a widened or narrowed
+  family, or a duplicated member is caught: `OK (2603 cases)`.
+- Chain oracle `kprog/formal/test_x86_specialization_chain_host.c`
+  (extended): the specialization chain's `--check` and its host re-parse
+  now resolve the chain's `KPROG_X86_<F>_HANDLED(OP)` guards through the
+  generated family header's member sets (a new `family_gate_members()` /
+  `load_families()` reader), so a family drift is caught against the same
+  generated header the dispatcher expands: `OK (192 cases)`.
+- Route oracle `kprog/formal/test_x86_dispatch_family_route_host.c`:
+  drives the real dispatcher with every family member under a pinned
+  whole-state (sixteen GPRs with provenance tags, four flags, XMM0, return
+  address, the 64-byte stack arena, and a 512-byte heap), comparing against
+  (i) the family's body macro invoked directly with the arm's tuple for the
+  seven forwarding families and (ii) an independent from-scratch model for
+  the three inline-bodied families (`movLoadPtr`, `movxReg`,
+  `doubleShift`), plus a non-member `X86_OP_RET` drive that must leave the
+  state byte-identical to its seed, so a wrong gate, a dropped token, a
+  family overlap, or a misroute is caught:
+  `OK (1141 cases)`.
+- Gate `make -C kprog/formal check` rc=0 with **198** `cross-check: OK`
+  rows and zero `FAIL` (Step 0147 closed at 196; the two new rows are the
+  dispatch-family host and route cross-checks). `make -C kprog/arm64
+  micro-proofs-build` rebuilt all 30 workload-derived artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_dispatch_family.py`, 30
+  mutations against the live tree, each run after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the
+  baseline green at the end: 24 caught --- six specification distortions
+  (schema bump, operation rename, first-family rename, `testMemReg` code
+  drift, `cmpMem` macro drift, `doubleShift` macro rename), three
+  generator defects (`genpy_names_head_drift`, `genpy_names_tail_drift`,
+  and the sim-header rogue hand test `sim_rogue_cmp_mem_macro` of the
+  `cmpMem` member set), four generated-C header distortions (`movzx`
+  code drift, `aluReg` tail drop, `cmpMem` extra member, and the
+  generated-`DispatchOp` code assertion the host oracle reads back),
+  five generated-Lean changes (`code` rename, `shld` code drift,
+  `aluReg`/`movx` handled renames, `xor` disjunct drift), five
+  hand-refinement changes (movLoad/movxReg list drifts and overlaps and
+  the movx example flip), and three routed mutations (a duplicated
+  `cmpMem` immediate gate, a pinned double-shift arm, a map-pointer/
+  helper-id tag swap) --- while the six genuine-equivalence rewrites (a
+  generator docstring `genpy_docstring_edit`, a generated-C comment
+  `gen_c_members_comment_edit`, a generator EXPECTED comment
+  `genpy_expected_head_edit`, an added hand-module comment
+  `hand_namespace_comment`, and the two sim-header whitespace/paren
+  equivalences `equiv_sim_gate_extra_tab_survives` /
+  `equiv_sim_nop_redundant_paren_survives`) SURVIVE as required. The
+  caught-by split in this run is `gen` 9 / `lean_chain` 9 / `host` 3 /
+  `route` 3.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the
+  x86-64 dispatch-family token-membership paragraph, extends the
+  covered-slices list with the dispatch-family token-membership family,
+  and lists the gate it routes (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
