@@ -1016,6 +1016,47 @@ and the absent-code fallback, every `AUX` destination form (including the
 no-register sentinel), and a spread of source/destination pairs against an
 independent `RDX`-left-operand two-destination model, comparing the whole
 register file with its tags (168,965 cases).
+The x86-64 register-writeback body `X86_SIM_L_WRITE_REG_WIDTH_SHIFT`, which every
+GPR write routes through, likewise selects its writeback body through a
+generated contract: `generate_x86_write_width_arm_spec.py` from
+`x86_write_width_arm_spec.json` emits the C
+`generated/x86_write_width_arm.h` — the `KPROG_X86_WRITE_WIDTH_ARM(CODE)`
+nested-ternary 4-way selector, the four `KPROG_X86_WRITE_WIDTH_ARM_B8`/`_B16`/
+`_B32`/`_B64` arm codes, `KPROG_X86_WRITE_WIDTH_ARM_COUNT`, and the count,
+distinctness, per-width selection, and absent-code `_Static_assert`s — and the
+Lean `KProgFormal/GeneratedX86WriteWidthArm.lean`. The generator re-reads the
+simulator header on every `--check` and rejects a write-width region that names
+no generated selector, omits any of the four bodies or their case macros, or
+still contains the hand width ladder `if (__x86_wr_width == X86_WIDTH_8)`. The
+body previously resolved the decoded width through `X86_SIM_L_EFFECTIVE_WIDTH`
+and then picked, by hand, one byte lane at the 8-bit code, the low word at the
+16-bit code, the low dword at the 32-bit code, and the full qword at every other
+code; it now routes each body through the generated selector, so the hand ladder
+is out of the body, while the effective-width bridge, the delegating wrapper
+`X86_SIM_L_WRITE_REG_WIDTH`, and the pointer-writeback helpers are unchanged.
+`X86WriteWidthArmShape.lean` proves the generated `armOf` equal to an independent
+4-way width-code ladder built on the width contract's own `x86WidthCodeSpec`
+literals (`x86_write_width_arm_refines`), the arm-name and arm-code tables, the
+code round-trip and out-of-range facts, the per-width map of
+`[w8, w16, w32, w64]` to `[b8, b16, b32, b64]`
+(`x86_write_width_arm_over_widths`), each body's width code bound to the width
+contract's own code for that size (`x86_write_width_arm_width_codes`), the four
+distinct bodies and case macros, the width classes, the ladder's totality, and
+that an absent width reaches the default qword body
+(`x86_write_width_arm_default_is_qword`). Unlike the AArch64 write-register body
+(Step 0144, whose value is masked before the body choice, making its two bodies
+observationally equal), the x86 width is applied *inside* each body's write macro
+and the written value is not pre-masked, so the four bodies write the destination
+register genuinely differently; the 258-case host oracle drives the compiled
+selector over the raw resolved width code against an independent 4-way
+restatement, and the 30726-case sim-header route oracle declares the full
+register file, seeds every GPR, and drives the real
+`X86_SIM_L_WRITE_REG_WIDTH_SHIFT` over every GPR, the widths `{0, 8, 16, 32, 64,
+3}`, the destination shifts `{0, 8}`, and several values against an independent
+model that applies the width inside each body (byte lane per shift,
+word-preserving, zero-extending dword, full qword), comparing the whole register
+file with its tags, so a wrong selector code or a swapped body assignment is
+numerically distinguishable.
 The x86-64 `SHLD`/`SHRD` immediate arm's choice of body and flag family on the
 opcode is likewise a generated contract: `generate_x86_doubleshift_arm_spec.py`
 emits `KPROG_X86_DOUBLESHIFT_ARM_COUNT` (2), the two arm defines, and two

@@ -907,6 +907,54 @@ increment is committed and pushed immediately). Current state:
   reverts/swaps/neutralizations --- each of the first 38 changes the oracle, the
   generator check, or a refinement theorem, while the last four
   genuine-equivalence rewrites are the four the proof correctly does not flag.
+
+  The x86-64 write-register width body-selection is now likewise closed
+  (Step 0145): the writeback body `X86_SIM_L_WRITE_REG_WIDTH_SHIFT` --- the body
+  every GPR write routes through --- first resolves the decoded operand width
+  through the Step-0075 `x86_width_effective` bridge and then picked the
+  writeback body by hand from a ladder over the resolved width code: one byte
+  lane at the 8-bit code (`X86_SIM_L_WRITE_REG8_VALUE_CASE`), the low word at
+  the 16-bit code (`X86_SIM_L_WRITE_REG16_VALUE_CASE`), the low dword at the
+  32-bit code (`X86_SIM_L_WRITE_REG32_VALUE_CASE`), and the full qword at every
+  other code (`X86_SIM_L_WRITE_REG64_VALUE_CASE`). This step generates the
+  4-way width-code selector from `x86_write_width_arm_spec.json` into the C
+  `generated/x86_write_width_arm.h` (the `KPROG_X86_WRITE_WIDTH_ARM`
+  nested-ternary selector, the four `…_B8`/`…_B16`/`…_B32`/`…_B64` arm codes,
+  and the count, distinctness, per-width selection, and absent-code
+  `_Static_assert`s) and `KProgFormal/GeneratedX86WriteWidthArm.lean`, and
+  routes the body through the generated selector, so the hand width ladder is
+  out of the body; the effective-width bridge `X86_SIM_L_EFFECTIVE_WIDTH`, the
+  delegating wrapper `X86_SIM_L_WRITE_REG_WIDTH`, and the pointer-writeback
+  helpers are unchanged. Unlike Step 0144, the width is applied *inside* each
+  body's write macro and `__x86_wr_next` is not pre-masked, so the four bodies
+  write the destination register genuinely differently and a wrong selector
+  code or a swapped body is observable in the route oracle.
+  `X86WriteWidthArmShape.lean` proves the generated selector equal to an
+  independent 4-way width-code ladder built on the width contract's own
+  `x86WidthCodeSpec` literals (`x86_write_width_arm_refines`), the arm-name and
+  arm-code tables, the code round-trip and out-of-range facts, the per-width map
+  of `[w8, w16, w32, w64]` to `[b8, b16, b32, b64]`
+  (`x86_write_width_arm_over_widths`), each body's width code bound to the width
+  contract's own code for that size (`x86_write_width_arm_width_codes`), the
+  four distinct bodies and case macros, the width classes, the ladder's
+  totality, and that an absent width reaches the default qword body
+  (`x86_write_width_arm_default_is_qword`), so the body choice and the resolved
+  width cannot disagree; the 258-case host oracle drives the compiled selector
+  over the raw resolved width code against an independent 4-way restatement, and
+  the 30726-case route oracle declares the full register file and drives the
+  real `X86_SIM_L_WRITE_REG_WIDTH_SHIFT` over every GPR, the widths
+  `{0, 8, 16, 32, 64, 3}`, the destination shifts `{0, 8}`, and several values
+  against an independent model that applies the width inside each body (byte
+  lane per shift, word-preserving, zero-extending dword, full qword), so a wrong
+  selector code or a swapped body assignment is numerically distinguishable. 37
+  binding mutations --- eight specification distortions, six generator-table
+  changes, two sim-header selector reverts, five generated-C header
+  distortions, five generated-Lean changes, six hand-refinement changes, and one
+  sim-header width-test swap --- each change the oracle, the generator check, or
+  a refinement theorem, while the last four genuine-equivalence rewrites (two
+  generator docstrings, an added hand-module namespace comment, and a no-op
+  `(__u64)` cast on the written value) are the four the proof correctly does not
+  flag.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
   pointer source now closed (Steps 0137, 0138, and 0139), the memory
@@ -914,7 +962,8 @@ increment is committed and pushed immediately). Current state:
   per-lane extra offset now closed (Step 0141), and the memory address
   offset's index-value source now closed (Step 0142), and the vector memory
   step's half state-field selection now closed (Step 0143), and the
-  write-register width body-selection now closed (Step 0144),
+  write-register width body-selection now closed (Step 0144), the x86-64
+  write-register width body-selection now closed (Step 0145),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

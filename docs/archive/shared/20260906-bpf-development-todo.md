@@ -12056,6 +12056,120 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   SURVIVE as required. Per detector: `gen` 14, `lean_chain` 14, `host` 9,
   `route` 1.
 
+## Step 0145 — x86-64 write-register width body-selection through the generated contract
+
+- Scope: the x86-64 simulator's writeback body
+  `X86_SIM_L_WRITE_REG_WIDTH_SHIFT` (`kprog/x86/x86_sim_local_bpf.h`), which
+  every GPR write in the simulator routes through. It first resolves the
+  decoded operand width through the Step-0075 `x86_width_effective` bridge
+  (`KPROG_X86_WIDTH_EFFECTIVE`, owned by `generated/x86_width.h`) and then
+  picked the writeback body by hand from a ladder over the *resolved* width
+  code --- `if (__x86_wr_width == X86_WIDTH_8)` writing one byte lane
+  (`X86_SIM_L_WRITE_REG8_VALUE_CASE`), the 16-bit code the low word
+  (`X86_SIM_L_WRITE_REG16_VALUE_CASE`), the 32-bit code the low dword
+  (`X86_SIM_L_WRITE_REG32_VALUE_CASE`), and every other code the full qword
+  (`X86_SIM_L_WRITE_REG64_VALUE_CASE`). This step generates the 4-way
+  width-code selector from `x86_write_width_arm_spec.json` into the C
+  `generated/x86_write_width_arm.h` (the `KPROG_X86_WRITE_WIDTH_ARM` nested
+  ternary selector, the four `KPROG_X86_WRITE_WIDTH_ARM_B8`/`_B16`/`_B32`/`_B64`
+  arm codes, the count, distinctness, per-width selection, and absent-code
+  `_Static_assert`s) and `KProgFormal/GeneratedX86WriteWidthArm.lean`, and
+  routes the body through the generated selector ---
+  `if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==
+  KPROG_X86_WRITE_WIDTH_ARM_B8)` withdrawing to the hand ladder --- so the hand
+  width ladder is out of the body.
+- Semantic note: unlike Step 0144 (whose value was pre-masked before the body
+  choice, making its two bodies observationally equal), the width here is
+  applied *inside* each body's write macro (`KPROG_X86_WRITE_REG8` writes a
+  single byte lane, `KPROG_X86_WRITE_REG16` the low word, `KPROG_X86_WRITE_REG32`
+  the low dword, `KPROG_X86_WRITE_REG64` the whole register) and `__x86_wr_next`
+  is not pre-masked, so the four bodies write the destination register
+  genuinely differently. A wrong selector code or a swapped body therefore
+  changes the written register bytes and is observable in the route oracle.
+- Spec `kprog/formal/x86_write_width_arm_spec.json`: schema_version 1, operation
+  `x86WriteWidthArmSelector`, selector `resolved_width_code_then_write_body`,
+  width_code_bits 8, and four arms --- `b8` (arm_define
+  `KPROG_X86_WRITE_WIDTH_ARM_B8`, width_code 1, body `byte_lane_writeback`,
+  case_macro `X86_SIM_L_WRITE_REG8_VALUE_CASE`, width_class narrow), `b16`
+  (`…_B16`, code 2, `word_writeback`, `X86_SIM_L_WRITE_REG16_VALUE_CASE`,
+  narrow), `b32` (`…_B32`, code 4, `dword_writeback`,
+  `X86_SIM_L_WRITE_REG32_VALUE_CASE`, narrow), and `b64` (`…_B64`, code 8,
+  `qword_writeback`, `X86_SIM_L_WRITE_REG64_VALUE_CASE`, full).
+- Generator `kprog/formal/generate_x86_write_width_arm_spec.py`: `load()`
+  re-reads the sim header on every `--check` and rejects a spec that does not
+  biject the expected arms table (including the exact width-code order and the
+  four-arm count), a width-class ladder that is not
+  `["narrow", "narrow", "narrow", "full"]`, a default arm that is not the qword
+  one, and a write-width region that names no generated selector, omits any of
+  the four bodies or their case macros, or still contains the hand width ladder
+  `if (__x86_wr_width == X86_WIDTH_8)`. Emits the C header
+  `generated/x86_write_width_arm.h` (the `KPROG_X86_WRITE_WIDTH_ARM(CODE)`
+  nested-ternary 4-way selector, the four arm-code defines, and the count,
+  distinctness, per-width selection, and absent-code `_Static_assert`s) and the
+  Lean `KProgFormal/GeneratedX86WriteWidthArm.lean`. `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:133`.
+- Generated C header `kprog/formal/generated/x86_write_width_arm.h`:
+  `KPROG_X86_WRITE_WIDTH_ARM_COUNT 4U`, the four arm-code defines
+  (`KPROG_X86_WRITE_WIDTH_ARM_B8 0U` / `_B16 1U` / `_B32 2U` / `_B64 3U`), the
+  nested-ternary 4-way selector macro, and the count, distinctness, per-width
+  selection (each `X86_WIDTH_*` code to its own body), and absent-code (code 0
+  to the default qword body) `_Static_assert`s.
+- Generated Lean `kprog/formal/KProgFormal/GeneratedX86WriteWidthArm.lean`: the
+  `Arm` type, `armCount := 4`, `widthCodeBits := 8`, the arm-name and code
+  tables, `codeOfArm`/`widthCodeOfArm`/`bodyOfArm`/`caseMacroOfArm`/
+  `widthClassOfArm`, the 4-way `armOf`, and `armOfCode`
+  (`armOfCode 4/5/8/255 = none`).
+- Hand Lean `kprog/formal/KProgFormal/X86WriteWidthArmShape.lean`: independent
+  literal statements of the 4-way width-code ladder (built on the width
+  contract's own `x86WidthCodeSpec` literals), the four arm names, and the four
+  bodies, with theorems `x86_write_width_arm_refines` (the generated selector
+  equals the independent width-code ladder over every width), `_names_refine`,
+  `_codes_length`/`_names_length`, `_codes_nodup`, `_over_widths` (maps
+  `[w8, w16, w32, w64]` to `[b8, b16, b32, b64]`), `_of_code_roundtrip`,
+  `_of_code_beyond_is_none`, `_case_dispatch`, `_ladder_total`,
+  `_width_code_bits_is_8`, `_count_is_4`, `_width_codes` (each body's width code
+  is the width contract's own code for that size), `_bodies`, `_case_macros`,
+  `_width_classes`, and `_default_is_qword`; all `native_decide`/`rfl`/`decide`.
+  `lake build KProgFormal.GeneratedX86WriteWidthArm` and
+  `lake env lean KProgFormal/X86WriteWidthArmShape.lean` return 0.
+- Sim-header routing `kprog/x86/x86_sim_local_bpf.h`: the writeback body now
+  selects its body through the generated `KPROG_X86_WRITE_WIDTH_ARM` selector,
+  the hand width ladder is out of the body, and the include
+  `#include "../formal/generated/x86_write_width_arm.h"` is added beside the
+  other generated arm includes (after `x86_bzhi_flags.h`), while the
+  effective-width bridge `X86_SIM_L_EFFECTIVE_WIDTH`, the delegating wrapper
+  `X86_SIM_L_WRITE_REG_WIDTH`, and the pointer-writeback helpers are unchanged.
+- Host oracle `kprog/formal/test_x86_write_width_arm_host.c`: restates the 4-way
+  writeback-body selection from the raw resolved width code and drives the
+  generated selector and the four arm-code defines, pinning the arm codes, the
+  count, and the four width decodes: `OK (258 cases)`.
+- Route oracle `kprog/formal/test_x86_write_width_arm_route_host.c`: declares the
+  full register file, seeds every GPR, and drives the real
+  `X86_SIM_L_WRITE_REG_WIDTH_SHIFT` over every GPR, the widths
+  `{0, 8, 16, 32, 64, 3}` (including the absent code and an unnamed code), the
+  destination shifts `{0, 8}`, and several values against an independent model
+  that applies the width inside each body (byte lane per shift, word-preserving,
+  zero-extending dword, full qword), so the body-sensitive expectation catches a
+  wrong selector code or a swapped body; compares the whole register file value
+  and tag: `OK (30726 cases)`.
+- `make -C kprog/formal check` passes with **192** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 190→192).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_write_width_arm.py`, 37 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end: 33 of the 37 are caught --- eight specification distortions, six
+  generator-table changes, two sim-header selector reverts (the hand ladder
+  reintroduced and the selector name neutralized), five generated-C header
+  distortions, five generated-Lean distortions, six hand-refinement changes,
+  and one sim-header width-test swap --- while four genuine-equivalence
+  rewrites (two generator docstrings, an added hand-module namespace comment,
+  and a no-op `(__u64)` cast on the written value) SURVIVE as required. Per
+  detector: `gen` 15, `lean_chain` 11, `host` 5, `route` 2.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
