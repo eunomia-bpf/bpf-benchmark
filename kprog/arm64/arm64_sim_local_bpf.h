@@ -59,6 +59,7 @@
 #include "../formal/generated/arm64_pair_mem.h"
 #include "../formal/generated/arm64_mem_prepost.h"
 #include "../formal/generated/arm64_vreg.h"
+#include "../formal/generated/arm64_vreg_field.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -888,6 +889,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				KPROG_ARM64_VREG_OP_STORE_Q0_SELECT(__a64_vreg_p);\
 			__s64 __a64_vreg_off = (__s64)                \
 				KPROG_ARM64_VREG_HALF_OFFSET(__a64_vreg_half);\
+			__u8 __a64_vreg_field = KPROG_ARM64_VREG_FIELD(       \
+				__a64_vreg_off == (__s64)             \
+					KPROG_ARM64_VREG_HIGH_OFFSET);\
 			__s64 __a64_dq_extra = KPROG_ARM64_DQ_MEM_EXTRA(   \
 				__a64_vreg_p == 0U, __a64_dq_lanes > 1U);\
 			if (__a64_dq_load) {                          \
@@ -896,13 +900,13 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 						(AUX), (IMM),         \
 						__a64_dq_extra,       \
 						KPROG_ARM64_DQ_MEM_LANE_STRIDE);\
-				if (__a64_vreg_off == (__s64)         \
-						KPROG_ARM64_VREG_HIGH_OFFSET)\
+				if (__a64_vreg_field ==               \
+						KPROG_ARM64_VREG_HIGH_FIELD)\
 					__a64_v0_hi = __a64_dq_value; \
 				else                                  \
 					__a64_v0 = __a64_dq_value;    \
-			} else if (__a64_vreg_off == (__s64)          \
-					KPROG_ARM64_VREG_HIGH_OFFSET) { \
+			} else if (__a64_vreg_field ==                \
+					KPROG_ARM64_VREG_HIGH_FIELD) { \
 				ARM64_SIM_L_MEM_WRITE((BASE), (INDEX),\
 					(AUX), (IMM), __a64_dq_extra,\
 					KPROG_ARM64_DQ_MEM_LANE_STRIDE,\
