@@ -12561,13 +12561,14 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   drift, `cmpMem` macro drift, `doubleShift` macro rename), three
   generator defects (`genpy_names_head_drift`, `genpy_names_tail_drift`,
   and the sim-header rogue hand test `sim_rogue_cmp_mem_macro` of the
-  `cmpMem` member set), four generated-C header distortions (`movzx`
-  code drift, `aluReg` tail drop, `cmpMem` extra member, and the
-  generated-`DispatchOp` code assertion the host oracle reads back),
+  `cmpMem` member set), three generated-C header distortions (the
+  `movzx` code drift, the `aluReg` tail drop, and the `cmpMem` extra
+  member; the generated-`DispatchOp` opcode readback the host oracle
+  restates is guarded by the code-assert row itself),
   five generated-Lean changes (`code` rename, `shld` code drift,
-  `aluReg`/`movx` handled renames, `xor` disjunct drift), five
-  hand-refinement changes (movLoad/movxReg list drifts and overlaps and
-  the movx example flip), and three routed mutations (a duplicated
+  `aluReg`/`movx` handled renames, `xor` disjunct drift), four
+  hand-refinement changes (the movLoad/movxReg/cmpMem list drifts and
+  overlaps and the movx example flip), and three routed mutations (a duplicated
   `cmpMem` immediate gate, a pinned double-shift arm, a map-pointer/
   helper-id tag swap) --- while the six genuine-equivalence rewrites (a
   generator docstring `genpy_docstring_edit`, a generated-C comment

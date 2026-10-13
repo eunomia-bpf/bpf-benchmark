@@ -1113,6 +1113,40 @@ entry over all sixteen tokens, every modeled width and several operand triples
 against an independent per-token model (including the INC/DEC carry-preserve
 behaviour), so a wrong selector code, a swapped body, a dropped carry-restore or
 a dropped token is numerically distinguishable.
+The x86-64 dispatcher's ten opcode-family membership gates are likewise a
+generated contract: `generate_x86_dispatch_family_spec.py` emits
+`KPROG_X86_<F>_HANDLED(OP)` for the `MOV_LOAD_PTR`, `MOVX_REG`, `MOV_LOAD`,
+`MOV_STORE`, `ALU_IMM`, `ALU_REG`, `CMP_IMM`, `CMP_REG`, `CMP_MEM` and
+`DOUBLE_SHIFT` arms over the twenty-four opcodes they name in chain order
+(the map-pointer/helper-id load pair `44`/`45`, the MOVZX/MOVSX register pair
+`32`/`33`, the `MOV_LOAD` triple `6`/`37`/`34`, the store pair `7`/`8`, the
+ALU-immediate pair `10`/`3`, the ALU-register triple `11`/`4`/`5`, the
+CMP/TEST immediate pair `12`/`14`, the CMP/TEST register pair `13`/`15`, the
+CMP/TEST memory quad `29`/`30`/`31`/`59`, and the SHLD/SHRD pair `27`/`28`),
+each a plain-expression disjunction usable inside `_Static_assert`, with every
+member opcode `_Static_assert`-pinned to `x86_sim.h` and the generator
+requiring verbatim names and codes, rejecting dup names and <2-member
+families, and re-reading the sim header to require the ten routed gates and no
+raw hand disjunction. `X86DispatchFamily.lean` proves every generated family
+membership equal to an independent named-list statement
+(`x86_dispatch_<f>_refines` for all ten), that a family member is handled by
+some gate and an opcode outside every family by none
+(`x86_dispatch_member_handled` / `x86_dispatch_nonmember_unhandled`), that the
+generated opcode table matches the `X86_OP_*` numbers
+(`x86_dispatch_code_dispatch`, `x86_dispatch_code_in_range`), and that the ten
+families are pairwise disjoint across all 45 pairs
+(`x86_dispatch_families_disjoint`), so the ordered chain takes at most one
+gate per opcode. The generated C header carries the 10 macros, 24 code-drift
+asserts, and 24 coverage asserts and no member-count define; the host oracle
+sweeps all 256 byte values against every family from an independent switch
+oracle plus explicit member and pairwise-distinctness rows (2603 cases), the
+chain oracle re-runs the whole specialization chain against the generated
+families after reading the gate macros back out of the header (192 cases), and
+the route oracle drives the real dispatcher — seven families through their
+body macro with the arm's exact argument tuple, three inline-bodied families
+through independent models, and a byte-identical non-member probe — over
+widths × ops × aux × widths (1141 cases), so a wrong gate, a dropped token, a
+family overlap, or a misroute is numerically distinguishable.
 The x86-64 `SHLD`/`SHRD` immediate arm's choice of body and flag family on the
 opcode is likewise a generated contract: `generate_x86_doubleshift_arm_spec.py`
 emits `KPROG_X86_DOUBLESHIFT_ARM_COUNT` (2), the two arm defines, and two
