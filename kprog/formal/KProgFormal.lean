@@ -32,6 +32,8 @@ import KProgFormal.GeneratedX86StackArm
 import KProgFormal.X86StackArmShape
 import KProgFormal.GeneratedX86WriteWidthArm
 import KProgFormal.X86WriteWidthArmShape
+import KProgFormal.GeneratedX86StackWriteLanes
+import KProgFormal.X86StackWriteLanesShape
 import KProgFormal.X86MemAux
 import KProgFormal.GeneratedArm64MemIndex
 import KProgFormal.Arm64MemIndex
