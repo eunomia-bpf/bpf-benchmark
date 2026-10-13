@@ -71,6 +71,7 @@ check:
 	python3 generate_arm64_mem_index_value_spec.py --check
 	python3 generate_arm64_dq_mem_extra_spec.py --check
 	python3 generate_arm64_vreg_field_spec.py --check
+	python3 generate_arm64_write_arm_spec.py --check
 	python3 generate_x86_cond_spec.py --check
 	python3 generate_x86_cc_decode_spec.py --check
 	python3 generate_x86_logic_flags_spec.py --check
@@ -718,6 +719,12 @@ check:
 	./build/test_arm64_vreg_field_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_vreg_field_route_host.c -o build/test_arm64_vreg_field_route_host
 	./build/test_arm64_vreg_field_route_host
+	lake env lean KProgFormal/GeneratedArm64WriteArm.lean
+	lake env lean KProgFormal/Arm64WriteArmShape.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_write_arm_host.c -o build/test_arm64_write_arm_host
+	./build/test_arm64_write_arm_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_write_arm_route_host.c -o build/test_arm64_write_arm_route_host
+	./build/test_arm64_write_arm_route_host
 	lake env lean KProgFormal/GeneratedArm64DqMem.lean
 	lake env lean KProgFormal/Arm64DqMemHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
