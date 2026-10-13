@@ -1004,6 +1004,45 @@ increment is committed and pushed immediately). Current state:
   include-side comment, an added hand-module comment, a resolved-but-equal
   generator root path, an added generated-Lean import comment, and
   equal-whitespace spec text) are the five the proof correctly does not flag.
+  The x86-64 ALU-token flag-body selection is likewise no longer open
+  (Step 0147): the simulator's flag-setting entry `X86_SIM_L_SET_ALU_FLAGS`
+  picked the flag body by hand from a chain over the sixteen `X86_ALU_*`
+  operation codes, whose token→body map is not injective (the ADD and ADC codes
+  both reach the add body, the SHL/SHR/SAR/ROL codes all reach the shift body,
+  and the INC/DEC families reach the add/sub bodies but then restore the
+  incoming carry). This step generates the token→body selection from
+  `x86_alu_flag_arm_spec.json` into the C `generated/x86_alu_flag_arm.h` (the
+  `KPROG_X86_ALU_FLAG_ARM(ALU)` nested-ternary selector, the ten
+  `KPROG_X86_ALU_FLAG_ARM_*` arm codes, the count, the sixteen token-code drift
+  checks, distinctness, per-token selection, default and unknown-token
+  `_Static_assert`s) and `KProgFormal/GeneratedX86AluFlagArm.lean`, and routes
+  the body through the generated selector with the logic body as the default,
+  so the hand token ladder is out of the body. The generator cross-checks each
+  arm's token defines against the ALU-decode contract (the mnemonic lower-cased
+  → `X86_ALU_` + upper), asserts the two collapses and the total coverage of all
+  sixteen codes, and re-reads the sim header to require the routed selector, the
+  `__x86_l_old_cf` save/restore, the INC/DEC carry restores and the default
+  logic body while dropping the hand ladder. `X86AluFlagArmShape.lean` proves
+  the generated `armOf` equal to an independent token ladder built on the ALU
+  contract's own codes (`x86_alu_flag_arm_refines`), the ten arm-name/flag-body/
+  case-macro/effect refinements, the two token collapses (`_collapses`), that
+  the carry-restoring arms are exactly the increment/decrement families
+  (`_cf_restores`), the token-ladder totality and default, and the code
+  round-trip and out-of-range falsehood. The 259-case host oracle drives the
+  compiled generated header against an independent per-token oracle, and the
+  776162-case route oracle declares the full register file and drives the real
+  flag-setting entry over all sixteen tokens, every modeled width and several
+  operand triples against an independent per-token model (including the INC/DEC
+  carry-preserve behaviour), so a wrong selector code, a swapped body, a dropped
+  carry-restore or a dropped token is numerically distinguishable. 36 binding
+  mutations --- eight specification distortions, four generator-anchor changes,
+  one sim-header selector revert, five generated-C header distortions, five
+  generated-Lean changes, six hand-refinement changes, and four sim-header
+  routed body/token/operand/carry-restore mutations --- each change the oracle,
+  the generator check, or a refinement theorem, while the three
+  genuine-equivalence rewrites (a generator docstring, an added hand-module
+  comment, and a C case-label space) are the three the proof correctly does not
+  flag.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
   pointer source now closed (Steps 0137, 0138, and 0139), the memory
@@ -1013,7 +1052,8 @@ increment is committed and pushed immediately). Current state:
   step's half state-field selection now closed (Step 0143), and the
   write-register width body-selection now closed (Step 0144), the x86-64
   write-register width body-selection now closed (Step 0145), the x86-64
-  stack byte-ladder per-lane activation now closed (Step 0146),
+  stack byte-ladder per-lane activation now closed (Step 0146), and the
+  x86-64 ALU-token flag-body selection now closed (Step 0147),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

@@ -1084,6 +1084,35 @@ count, and activation against an independent literal oracle over every
 width/lane pair (291 cases), and a sim-header route oracle drives the real write
 then read over every width and many arena offsets against independent models of
 the activation and of the little-endian assembly (1,401,654 cases).
+The x86-64 flag-setting entry's token→body selection is likewise a generated
+contract: `generate_x86_alu_flag_arm_spec.py` from `x86_alu_flag_arm_spec.json`
+emits the C `generated/x86_alu_flag_arm.h` — the
+`KPROG_X86_ALU_FLAG_ARM(ALU)` nested-ternary selector, the ten
+`KPROG_X86_ALU_FLAG_ARM_*` arm codes, `KPROG_X86_ALU_FLAG_ARM_COUNT`, the
+sixteen token-code drift checks, and the count, distinctness, per-token
+selection, default and unknown-token `_Static_assert`s — and the Lean table
+`GeneratedX86AluFlagArm.lean`, and routes `X86_SIM_L_SET_ALU_FLAGS`'s body
+through the selector with the logic body as the default. The generator
+cross-checks each arm's token defines against the ALU-decode contract (the
+mnemonic lower-cased → `X86_ALU_` + upper), asserts the two collapses (the ADD
+and ADC codes both reach the add body; the SHL/SHR/SAR/ROL codes all reach the
+shift body) and the total coverage of all sixteen codes, and re-reads the sim
+header to require the routed selector, the `__x86_l_old_cf` save/restore, the
+INC/DEC carry restores, the `KPROG_X86_PRESERVE_FLAGS()` not arm and the default
+logic body while dropping the hand token ladder (`X86_ALU_ADD ||`, …). The hand
+module proves the generated `armOf` equal to an independent token ladder built
+on the ALU contract's own `x86AluCodeSpec` codes
+(`x86_alu_flag_arm_refines`), the ten arm-name/flag-body/case-macro/effect
+refinements, the two token collapses (`x86_alu_flag_arm_collapses`), that the
+carry-restoring arms are exactly the increment/decrement families
+(`x86_alu_flag_arm_cf_restores`), the token-ladder totality and default, and
+the code round-trip and out-of-range facts. The 259-case host oracle drives the
+compiled header against an independent per-token oracle, and the 776,162-case
+route oracle declares the full register file and drives the real flag-setting
+entry over all sixteen tokens, every modeled width and several operand triples
+against an independent per-token model (including the INC/DEC carry-preserve
+behaviour), so a wrong selector code, a swapped body, a dropped carry-restore or
+a dropped token is numerically distinguishable.
 The x86-64 `SHLD`/`SHRD` immediate arm's choice of body and flag family on the
 opcode is likewise a generated contract: `generate_x86_doubleshift_arm_spec.py`
 emits `KPROG_X86_DOUBLESHIFT_ARM_COUNT` (2), the two arm defines, and two

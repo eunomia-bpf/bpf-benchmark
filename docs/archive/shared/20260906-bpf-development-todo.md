@@ -12287,6 +12287,136 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   the stack byte-ladder activation family, and lists the two helpers it routes
   (paper commit pushed to `main`).
 
+## Step 0147 — x86-64 ALU-token flag-body-selection contract
+
+- Scope: the x86-64 simulator's flag-setting entry
+  `X86_SIM_L_SET_ALU_FLAGS` (`kprog/x86/x86_sim_local_bpf.h`), the helper every
+  arithmetic/logical handler routes its flag production through, which picked
+  the flag body by hand from a chain over the `X86_ALU_*` operation token. The
+  token set is the sixteen `X86_ALU_*` codes (an 8-bit field), and the mapping
+  from token to flag body is *not* injective: the ADD and ADC codes both reach
+  the add body, the SHL/SHR/SAR/ROL codes all reach the shift body, and the
+  INC/DEC families reach the add/sub bodies but then restore the incoming carry
+  (the architectural `INC`/`DEC` carry preservation). This step generates the
+  token→body selection from `x86_alu_flag_arm_spec.json` into the C
+  `generated/x86_alu_flag_arm.h` (the `KPROG_X86_ALU_FLAG_ARM(ALU)`
+  nested-ternary selector, the ten `KPROG_X86_ALU_FLAG_ARM_*` arm codes, the
+  count, the sixteen token-code drift checks, distinctness, per-token selection,
+  default and unknown-token `_Static_assert`s) and
+  `KProgFormal/GeneratedX86AluFlagArm.lean`, and routes the body through the
+  generated selector --- `switch (KPROG_X86_ALU_FLAG_ARM((ALU)))` over the ten
+  `case KPROG_X86_ALU_FLAG_ARM_*` bodies with the logic body as the `default:` ---
+  so the hand token ladder is out of the body. This is the x86-side mirror of
+  the AArch64 Step 0066 (the token-keyed selector style is Step 0116's).
+- Semantic note: the selector takes the *raw* `X86_ALU_*` token; the SBB/ADC
+  handler split stays in each caller's outer guard, so the body is total over
+  every code through the `default:` logic arm and there is no unsupported case.
+  The increment/decrement arms keep the `__x86_l_old_cf` save/restore; the not
+  arm keeps `KPROG_X86_PRESERVE_FLAGS()`; the multiply arm keeps the CF/OF-only
+  body; a wrong selector code, a swapped body, a dropped carry-restore or a
+  dropped token is numerically observable in the route oracle.
+- Spec `kprog/formal/x86_alu_flag_arm_spec.json`: schema_version 1, operation
+  `x86AluFlagArmSelector`, selector `alu_token_then_flag_body`, alu_code_bits 8,
+  and ten arms --- `add` (`…_ARM_ADD`, codes `[0, 15]` = ADD/ADC, body
+  `add_flags`, case `X86_SIM_L_SET_ADD_FLAGS`, no restore, effect
+  `sum_flags`), `inc` (`…_ARM_INC`, `[10]` = INC, `add_flags`,
+  `X86_SIM_L_SET_ADD_FLAGS`, restore, `increment_flags_preserve_cf`), `dec`
+  (`…_ARM_DEC`, `[13]` = DEC, `sub_flags`, `X86_SIM_L_SET_SUB_FLAGS`, restore,
+  `decrement_flags_preserve_cf`), `sub` (`…_ARM_SUB`, `[1]`, `sub_flags`,
+  `X86_SIM_L_SET_SUB_FLAGS`, `difference_flags`), `sbb` (`…_ARM_SBB`, `[12]`,
+  `sbb_flags`, `X86_SIM_L_SET_SBB_FLAGS`, `borrow_difference_flags`), `neg`
+  (`…_ARM_NEG`, `[14]`, `sub_flags`, `X86_SIM_L_SET_SUB_FLAGS`,
+  `negation_flags`), `not` (`…_ARM_NOT`, `[11]`, `preserve_flags`,
+  `KPROG_X86_PRESERVE_FLAGS`, `flags_unchanged`), `shift` (`…_ARM_SHIFT`,
+  `[5, 6, 7, 8]` = SHL/SHR/SAR/ROL, `shift_flags`,
+  `X86_SIM_L_SET_SHIFT_FLAGS`, `shift_flags`), `imul` (`…_ARM_IMUL`, `[9]`,
+  `imul_flags`, `X86_SIM_L_SET_IMUL_FLAGS`, `multiply_overflow_flags`), and
+  `logic` (`…_ARM_LOGIC`, `[2, 3, 4]` = XOR/OR/AND, `logic_flags`,
+  `X86_SIM_L_SET_LOGIC_FLAGS`, `bitwise_flags_default`).
+- Generator `kprog/formal/generate_x86_alu_flag_arm_spec.py`: `load()`
+  cross-checks each `alu_defines[i]` against `x86_alu_decode_spec.json`'s
+  `operations` (the mnemonic lower-cased → `X86_ALU_` + upper), asserts the two
+  collapses (ADD/ADC→add, SHL/SHR/SAR/ROL→shift) and the total coverage of all
+  sixteen codes; `check_against_header()` re-reads the sim header on every
+  `--check` and requires the flag-setting region to route through
+  `KPROG_X86_ALU_FLAG_ARM((`, name every non-default arm's case, keep the
+  `__x86_l_old_cf` save/restore, the `1`/`0` operands and
+  `KPROG_X86_PRESERVE_FLAGS()`, have `SET_LOGIC_FLAGS` as the default body, and
+  drop the hand token ladder (`X86_ALU_ADD ||`, …). Emits the C header
+  `generated/x86_alu_flag_arm.h` and the Lean
+  `KProgFormal/GeneratedX86AluFlagArm.lean`. `--check` returns 0; the `--check`
+  row is added at `kprog/formal/Makefile:138`.
+- Generated C header `kprog/formal/generated/x86_alu_flag_arm.h`:
+  `KPROG_X86_ALU_FLAG_ARM_COUNT 10U`, the ten arm-code defines
+  (`…_ARM_ADD 0U` / `_INC 1U` / `_DEC 2U` / `_SUB 3U` / `_SBB 4U` / `_NEG 5U` /
+  `_NOT 6U` / `_SHIFT 7U` / `_IMUL 8U` / `_LOGIC 9U`), the nested-ternary
+  selector macro, and the count, sixteen token-code drift, distinctness,
+  per-token selection, default and unknown-token (`0xffU` → logic)
+  `_Static_assert`s.
+- Generated Lean `kprog/formal/KProgFormal/GeneratedX86AluFlagArm.lean`: the
+  `Arm` type, `armCount := 10`, `aluCodeBits := 8`, the arm-name and code
+  tables, `codeOfArm`/`aluCodesOfArm`/`flagBodyOfArm`/`caseMacroOfArm`/
+  `cfRestoreOfArm`/`effectOfArm`, the token-keyed `armOf`, and `armOfCode`.
+- Hand Lean `kprog/formal/KProgFormal/X86AluFlagArmShape.lean`: independent
+  literal statements of the token ladder (built on the ALU contract's own
+  `x86AluCodeSpec` codes), the ten arm names, flag bodies, case macros and
+  effects, with theorems `x86_alu_flag_arm_refines` (the generated `armOf`
+  equals the independent token ladder), `_names_refine`, `_codes_length`/
+  `_names_length`, `_codes_nodup`, `_over_tokens`, `_collapses` (ADD/ADC→add and
+  SHL/SHR/SAR/ROL→shift), `_of_code_roundtrip`, `_of_code_beyond_is_none`,
+  `_code_bits_is_8`, `_count_is_10`, `_flag_bodies`, `_case_macros`,
+  `_cf_restores` (exactly the increment/decrement families),
+  `_effects`/`_effects_distinct`, `_ladder_total`, `_case_dispatch` and
+  `_default_is_logic`; all `native_decide`/`rfl`/`decide`. `lake build
+  KProgFormal.GeneratedX86AluFlagArm` and `lake env lean
+  KProgFormal/X86AluFlagArmShape.lean` return 0.
+- Sim-header routing `kprog/x86/x86_sim_local_bpf.h`: the flag-setting body now
+  selects its body through the generated `KPROG_X86_ALU_FLAG_ARM((ALU))`
+  selector, the hand token ladder is out of the body, and the include
+  `#include "../formal/generated/x86_alu_flag_arm.h"` is added beside the other
+  generated arm includes (`x86_sim_local_bpf.h:40`), while the
+  `__x86_l_old_cf` save/restore, the INC/DEC carry restores, and the `(LHS, RHS,
+  RESULT, ALU, WIDTH)` signature are unchanged, so the six call sites
+  (`x86_sim_local_bpf.h:1077,1124,1155,1173,1217,1261`) need no change.
+- Host oracle `kprog/formal/test_x86_alu_flag_arm_host.c`: restates the token-keyed
+  flag-body selection from the raw `X86_ALU_*` token and drives the generated
+  selector and the ten arm-code defines, pinning the arm codes, the count, the
+  per-token selection and the two collapses: `OK (259 cases)`.
+- Route oracle `kprog/formal/test_x86_alu_flag_arm_route_host.c`: declares the
+  full register file, seeds every GPR, and drives the real
+  `X86_SIM_L_SET_ALU_FLAGS` over all sixteen tokens, the width codes
+  `{0, 8, 16, 32, 64}`, and several `(lhs, rhs, result)` triples against an
+  independent per-token model (add/inc, sub/dec, sbb with borrow 0, neg,
+  not-preserve, shift, imul CF/OF-only, logic), including the INC/DEC
+  carry-preserve behaviour, so a wrong selector code, a swapped body, a dropped
+  carry-restore or a dropped token is numerically distinguishable; it also pins
+  `KPROG_X86_ALU_FLAG_ARM_COUNT == 10U` and each token's selection:
+  `OK (776162 cases)`.
+- Gate `make -C kprog/formal check` rc=0. Baseline was **194** for Step 0146;
+  Step 0147 adds the ALU-flag-arm generator `--check`, the Lean pair, and the
+  host and route oracles (194→196), zero `FAIL`. `make -C kprog/arm64
+  micro-proofs-build` rebuilt all 30 workload-derived artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_x86_alu_flag_arm.py`, 36 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the end:
+  33 of the 36 are caught --- eight specification distortions (schema/
+  operation/selector/bits/ADD-codes/SBB-body/SBB-macro/logic-effect), four
+  generator defects (bits/selector-const/arm ADD-codes/arm logic-codes), one
+  sim-header selector revert, five generated-C header distortions (count/assert
+  count/distinctness/SUB-select/default), five generated-Lean changes
+  (count/code/codes/ladder/effect), six hand-refinement changes
+  (spec/names/flag-body/macro/effect/over-tokens), and four sim-header routed
+  mutations (INC body→sub flags, shift token dropped, NEG operands swapped, INC
+  carry-restore dropped) --- while three genuine-equivalence rewrites (a
+  generator docstring, an added hand-module comment, and a C case-label space)
+  SURVIVE as required. Per detector: `gen` 13, `lean_chain` 11, `host` 5,
+  `route` 4.
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` adds the x86-64
+  ALU-token flag-body-selection paragraph, extends the covered-slices list with
+  the ALU-token flag-body-selection family, and lists the entry it routes
+  (paper commit pushed to `main`).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
