@@ -78,10 +78,10 @@ EXPECTED = {
 }
 COLUMNS = ("arm", "arm_define", "opcode", "opcode_define", "result", "effect")
 
-# The live routed arm text, between the MOVX arm opener (a `\`-continued `||`)
-# and the `MOV_LOAD` arm. The opener is located after `flat()`.
-ARM_START = "} else if ((OP) == X86_OP_MOVZX_REG ||"
-ARM_END = "} else if ((OP) == X86_OP_MOV_LOAD ||"
+# The live routed arm text, between the generated MOVX register-pair family gate
+# and the generated MOV_LOAD family gate.
+ARM_START = "} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {"
+ARM_END = "} else if (KPROG_X86_MOV_LOAD_HANDLED(OP)) {"
 # The standalone shared body, between its `#define` and the next `#define`.
 MACRO_START = "#define X86_SIM_L_EXEC_MOVX_REG(OP, DST, SRC, FLAGS, AUX)"
 MACRO_END = "#define X86_SIM_L_EXEC_CMP_IMM_OP_AUX(OP, DST, FLAGS, AUX, IMM)"
@@ -128,7 +128,7 @@ def check_region(region, exactly_one_arm):
     if ARM_ZERO_CALL not in region:
         raise SystemExit(
             "x86 movx shape body does not compute the zero extension")
-    if exactly_one_arm and region.count("} else if ((OP) ==") != 1:
+    if exactly_one_arm and region.count("} else if (") != 1:
         raise SystemExit("x86 movx shape arm region is not exactly one arm")
     if "X86_OP_MOVSX_REG ?" in region:
         raise SystemExit(

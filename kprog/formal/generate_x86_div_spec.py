@@ -76,9 +76,10 @@ EXPECTED = {
 COLUMNS = ("arm", "arm_define", "width_code", "write_count", "dividend_high",
            "high_gate", "effect", "width_class")
 
-# The live routed arm text, between the `DIV` arm opener and the `SHLD_IMM` arm.
+# The live routed arm text, between the `DIV` arm opener and the generated
+# double-shift family gate.
 ARM_START = "} else if ((OP) == X86_OP_DIV) {"
-ARM_END = "} else if ((OP) == X86_OP_SHLD_IMM ||"
+ARM_END = "} else if (KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)) {"
 ARM_SELECTOR = "KPROG_X86_DIV_ARM(__x86_l_width)"
 ARM_WIDTH_WRITE = "X86_SIM_L_WRITE_REG_WIDTH"
 ARM_HIGH_READ = "X86_SIM_L_READ_REG(X86_RDX)"

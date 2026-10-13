@@ -38,6 +38,7 @@
 #include "../formal/generated/x86_write_width_arm.h"
 #include "../formal/generated/x86_stack_write_lanes.h"
 #include "../formal/generated/x86_alu_flag_arm.h"
+#include "../formal/generated/x86_dispatch_family.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -1870,8 +1871,7 @@ struct x86_sim_state {
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		if ((OP) == X86_OP_NOP) {                                  \
 			(void)0;                                           \
-		} else if ((OP) == X86_OP_MOV_LOAD_MAP_PTR ||             \
-			   (OP) == X86_OP_MOV_LOAD_HELPER_ID) {            \
+		} else if (KPROG_X86_MOV_LOAD_PTR_HANDLED(OP)) {          \
 			__u8 __x86_l_pw_tag =                             \
 				KPROG_X86_PTR_WRITE_TAG(                  \
 					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
@@ -1920,8 +1920,7 @@ struct x86_sim_state {
 					__x86_l_value, __x86_l_width,      \
 					KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));\
 			}                                                 \
-		} else if ((OP) == X86_OP_MOVZX_REG ||                    \
-			   (OP) == X86_OP_MOVSX_REG) {                    \
+		} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {              \
 			__u8 __x86_l_src_width =                          \
 				KPROG_X86_MOVX_SRC_WIDTH((AUX),           \
 					__x86_l_width);                   \
@@ -1937,16 +1936,13 @@ struct x86_sim_state {
 			}                                                  \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_width);        \
-			} else if ((OP) == X86_OP_MOV_LOAD ||                     \
-				   (OP) == X86_OP_MOV_LOAD_SCALAR ||              \
-				   (OP) == X86_OP_MOVSX_LOAD) {                   \
+			} else if (KPROG_X86_MOV_LOAD_HANDLED(OP)) {              \
 				X86_SIM_L_EXEC_MOV_LOAD((OP), (DST), (SRC), (FLAGS),\
 							(AUX), (IMM));          \
 			} else if ((OP) == X86_OP_MOVBE_LOAD) {                   \
 				X86_SIM_L_EXEC_MOVBE_LOAD((DST), (SRC), (FLAGS),\
 							  (AUX), (IMM));     \
-			} else if ((OP) == X86_OP_MOV_STORE_IMM ||                \
-				   (OP) == X86_OP_MOV_STORE_REG) {                \
+			} else if (KPROG_X86_MOV_STORE_HANDLED(OP)) {             \
 				X86_SIM_L_EXEC_STORE((OP), (DST), (SRC), (FLAGS),  \
 						     (AUX), (IMM));               \
 		} else if ((OP) == X86_OP_MOVBE_STORE) {                  \
@@ -1958,12 +1954,9 @@ struct x86_sim_state {
 			X86_SIM_L_EXEC_STORE_XMM0((DST), (AUX), (IMM));  \
 		} else if ((OP) == X86_OP_LEA) {                          \
 			X86_SIM_L_EXEC_LEA((DST), (SRC), (FLAGS), (AUX), (IMM));\
-		} else if ((OP) == X86_OP_ALU_IMM ||                      \
-			   (OP) == X86_OP_ADD_IMM) {                      \
+		} else if (KPROG_X86_ALU_IMM_HANDLED(OP)) {               \
 			X86_SIM_L_EXEC_ALU_IMM((DST), (FLAGS), (AUX), (IMM));\
-		} else if ((OP) == X86_OP_ALU_REG ||                      \
-			   (OP) == X86_OP_ADD_REG ||                      \
-			   (OP) == X86_OP_XOR_REG) {                      \
+		} else if (KPROG_X86_ALU_REG_HANDLED(OP)) {               \
 			X86_SIM_L_EXEC_ALU_REG((DST), (SRC), (FLAGS), (AUX));\
 		} else if ((OP) == X86_OP_ALU_MEM) {                      \
 			X86_SIM_L_EXEC_ALU_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
@@ -1973,18 +1966,13 @@ struct x86_sim_state {
 			X86_SIM_L_EXEC_ALU_MEM_IMM((DST), (FLAGS), (AUX), (IMM));\
 		} else if ((OP) == X86_OP_ALU_MEM_REG) {                  \
 			X86_SIM_L_EXEC_ALU_MEM_REG((DST), (SRC), (FLAGS), (AUX), (IMM));\
-		} else if ((OP) == X86_OP_CMP_IMM ||                      \
-			   (OP) == X86_OP_TEST_IMM) {                    \
+		} else if (KPROG_X86_CMP_IMM_HANDLED(OP)) {               \
 			X86_SIM_L_EXEC_CMP_IMM_OP_AUX((OP), (DST), (FLAGS),\
 				(AUX), (IMM));                                 \
-		} else if ((OP) == X86_OP_CMP_REG ||                      \
-			   (OP) == X86_OP_TEST_REG) {                    \
+		} else if (KPROG_X86_CMP_REG_HANDLED(OP)) {               \
 			X86_SIM_L_EXEC_CMP_REG_OP_AUX((OP), (DST), (SRC), \
 				(FLAGS), (AUX));                              \
-		} else if ((OP) == X86_OP_CMP_MEM_IMM ||                  \
-			   (OP) == X86_OP_TEST_MEM_IMM ||                 \
-			   (OP) == X86_OP_CMP_MEM_REG ||                  \
-			   (OP) == X86_OP_TEST_MEM_REG) {                 \
+		} else if (KPROG_X86_CMP_MEM_HANDLED(OP)) {               \
 			X86_SIM_L_EXEC_CMP_MEM((OP), (DST), (SRC), (FLAGS),\
 					       (AUX), (IMM));             \
 		} else if ((OP) == X86_OP_CMP_REG_MEM) {                  \
@@ -2116,8 +2104,7 @@ struct x86_sim_state {
 				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_q, X86_WIDTH_64);\
 				X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_rem, X86_WIDTH_64);\
 			}                                                   \
-		} else if ((OP) == X86_OP_SHLD_IMM ||                     \
-			   (OP) == X86_OP_SHRD_IMM) {                    \
+		} else if (KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)) {          \
 			__u64 __x86_l_dst = X86_SIM_L_READ_REG(DST);     \
 			__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);     \
 			__u64 __x86_l_result;                            \

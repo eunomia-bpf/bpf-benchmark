@@ -146,6 +146,12 @@ OPCODE_DEFINE = re.compile(
 CHAIN_START = "#define X86_SIM_L_EXEC(OP, DST, SRC, FLAGS, AUX, IMM)"
 CHAIN_END = "#define X86_SIM_RUN_OP("
 HANDLER = re.compile(r"(X86_SIM_(?:L_EXEC_[A-Z0-9_]+|BPF_CALL_[A-Z0-9_]+))\s*\(")
+# The generated dispatch-family header the chain's family gates expand through.
+FAMILY_HEADER = ROOT / "generated/x86_dispatch_family.h"
+GATE = re.compile(r"\b(KPROG_X86_[A-Z0-9_]+_HANDLED)\s*\(")
+FAMILY_MEMBERS = re.compile(
+    r"^#define\s+(KPROG_X86_[A-Z0-9_]+_HANDLED)\(OP\)\s+((?:[^\n]*\\\n)*[^\n]*\n)",
+    re.M)
 
 
 def macro_name(call):
@@ -213,11 +219,31 @@ def arm_handler(arm):
     return names[0] if len(names) == 1 else ""
 
 
+def family_gate_members():
+    """The generated family gate's opcode members, read from the generated
+    dispatch-family header. Each gate expands to the tokens its membership
+    macro names, so the chain's `KPROG_X86_<F>_HANDLED(OP)` guards resolve to
+    the same tokens the header would test."""
+    text = FAMILY_HEADER.read_text()
+    members = {}
+    for match in FAMILY_MEMBERS.finditer(text):
+        body = re.sub(r"\\\s*\n", " ", match.group(2))
+        members[match.group(1)] = re.findall(r"\(OP\)\s*==\s*(X86_OP_[A-Z0-9_]+)",
+                                             body)
+    return members
+
+
 def chain_table():
     table = {}
+    members = family_gate_members()
     for arm in chain_arms():
         handler = arm_handler(arm)
-        for token in re.findall(r"\(OP\)\s*==\s*(X86_OP_[A-Z0-9_]+)", arm):
+        tokens = re.findall(r"\(OP\)\s*==\s*(X86_OP_[A-Z0-9_]+)", arm)
+        for gate in GATE.findall(arm):
+            if gate not in members:
+                raise SystemExit("chain tests an unknown family gate: " + gate)
+            tokens.extend(members[gate])
+        for token in tokens:
             table[token] = handler
     return table
 

@@ -71,9 +71,9 @@ EXPECTED = {
 COLUMNS = ("arm", "arm_define", "opcode", "opcode_define", "result",
            "flag_family_code", "flag_family_define", "effect")
 
-# The live routed arm text, between the double-shift arm opener and the `PUSH`
-# arm. The opener spans a `\`-continued `||`, so it is located after `flat()`.
-ARM_START = "} else if ((OP) == X86_OP_SHLD_IMM ||"
+# The live routed arm text, between the generated double-shift family gate and
+# the `PUSH` arm.
+ARM_START = "} else if (KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)) {"
 ARM_END = "} else if ((OP) == X86_OP_PUSH) {"
 ARM_SELECTOR = "KPROG_X86_DOUBLESHIFT_ARM((OP))"
 ARM_FLAGS = "KPROG_X86_DOUBLESHIFT_ARM_FLAGS((OP))"
@@ -115,7 +115,7 @@ def check_against_header():
     if ARM_STEP_GATE not in region:
         raise SystemExit(
             "x86 doubleshift arm has no count-zero step gate")
-    if flat(region).count("} else if ((OP) ==") != 1:
+    if flat(region).count("} else if (") != 1:
         raise SystemExit(
             "x86 doubleshift arm region is not exactly one arm")
     if "X86_ALU_SHL" in region or "X86_ALU_SHR" in region:

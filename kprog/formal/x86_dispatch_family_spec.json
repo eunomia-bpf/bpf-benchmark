@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "operation": "x86DispatchFamily",
+  "families": [
+    {"name": "movLoadPtr", "macro": "KPROG_X86_MOV_LOAD_PTR_HANDLED", "members": [
+      {"name": "movLoadMapPtr", "code": 44, "macro": "X86_OP_MOV_LOAD_MAP_PTR"},
+      {"name": "movLoadHelperId", "code": 45, "macro": "X86_OP_MOV_LOAD_HELPER_ID"}]},
+    {"name": "movxReg", "macro": "KPROG_X86_MOVX_REG_HANDLED", "members": [
+      {"name": "movzxReg", "code": 32, "macro": "X86_OP_MOVZX_REG"},
+      {"name": "movsxReg", "code": 33, "macro": "X86_OP_MOVSX_REG"}]},
+    {"name": "movLoad", "macro": "KPROG_X86_MOV_LOAD_HANDLED", "members": [
+      {"name": "movLoad", "code": 6, "macro": "X86_OP_MOV_LOAD"},
+      {"name": "movLoadScalar", "code": 37, "macro": "X86_OP_MOV_LOAD_SCALAR"},
+      {"name": "movsxLoad", "code": 34, "macro": "X86_OP_MOVSX_LOAD"}]},
+    {"name": "movStore", "macro": "KPROG_X86_MOV_STORE_HANDLED", "members": [
+      {"name": "movStoreImm", "code": 7, "macro": "X86_OP_MOV_STORE_IMM"},
+      {"name": "movStoreReg", "code": 8, "macro": "X86_OP_MOV_STORE_REG"}]},
+    {"name": "aluImm", "macro": "KPROG_X86_ALU_IMM_HANDLED", "members": [
+      {"name": "aluImm", "code": 10, "macro": "X86_OP_ALU_IMM"},
+      {"name": "addImm", "code": 3, "macro": "X86_OP_ADD_IMM"}]},
+    {"name": "aluReg", "macro": "KPROG_X86_ALU_REG_HANDLED", "members": [
+      {"name": "aluReg", "code": 11, "macro": "X86_OP_ALU_REG"},
+      {"name": "addReg", "code": 4, "macro": "X86_OP_ADD_REG"},
+      {"name": "xorReg", "code": 5, "macro": "X86_OP_XOR_REG"}]},
+    {"name": "cmpImm", "macro": "KPROG_X86_CMP_IMM_HANDLED", "members": [
+      {"name": "cmpImm", "code": 12, "macro": "X86_OP_CMP_IMM"},
+      {"name": "testImm", "code": 14, "macro": "X86_OP_TEST_IMM"}]},
+    {"name": "cmpReg", "macro": "KPROG_X86_CMP_REG_HANDLED", "members": [
+      {"name": "cmpReg", "code": 13, "macro": "X86_OP_CMP_REG"},
+      {"name": "testReg", "code": 15, "macro": "X86_OP_TEST_REG"}]},
+    {"name": "cmpMem", "macro": "KPROG_X86_CMP_MEM_HANDLED", "members": [
+      {"name": "cmpMemImm", "code": 29, "macro": "X86_OP_CMP_MEM_IMM"},
+      {"name": "testMemImm", "code": 30, "macro": "X86_OP_TEST_MEM_IMM"},
+      {"name": "cmpMemReg", "code": 31, "macro": "X86_OP_CMP_MEM_REG"},
+      {"name": "testMemReg", "code": 59, "macro": "X86_OP_TEST_MEM_REG"}]},
+    {"name": "doubleShift", "macro": "KPROG_X86_DOUBLE_SHIFT_HANDLED", "members": [
+      {"name": "shldImm", "code": 27, "macro": "X86_OP_SHLD_IMM"},
+      {"name": "shrdImm", "code": 28, "macro": "X86_OP_SHRD_IMM"}]}
+  ]
+}

@@ -86,9 +86,10 @@ EXPECTED = {
 }
 COLUMNS = ("arm", "arm_define", "effect", "width_class")
 
-# The live routed arm text, between the MOV_REG arm opener and the MOVX arm.
+# The live routed arm text, between the MOV_REG arm opener and the generated
+# MOVX register-pair family gate.
 ARM_START = "} else if ((OP) == X86_OP_MOV_REG) {"
-ARM_END = "} else if ((OP) == X86_OP_MOVZX_REG ||"
+ARM_END = "} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {"
 # The standalone shared body, between its `#define` and the next `#define`.
 MACRO_START = "#define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)"
 MACRO_END = "#define X86_SIM_L_EXEC_MOV_REG(DST, SRC, FLAGS)"
