@@ -820,12 +820,56 @@ increment is committed and pushed immediately). Current state:
   reverts/swaps --- each of the first 39 changes the oracle, the generator
   check, or a refinement theorem, while the last three genuine-equivalence
   rewrites are the three the proof correctly does not flag.
+  The AArch64 vector memory step's half state-field selection is likewise no
+  longer open (Step 0143): the shared step `ARM64_SIM_L_DQ_MEM_STEP` moves
+  each moved lane into or out of one of the SIMD register's two half state
+  fields (`__a64_v0` / `__a64_v0_hi`), and while the lane's *offset* was
+  already generated (Step 0141) it still picked the *field* that offset lands
+  in by hand on both the load and the store arm through
+  `if (__a64_vreg_off == (__s64) KPROG_ARM64_VREG_HIGH_OFFSET)`. This step
+  generates the 2-way field selector from `arm64_vreg_field_spec.json` into
+  the C `generated/arm64_vreg_field.h` (the `KPROG_ARM64_VREG_FIELD`
+  plain-ternary selector, the `…_LOW_FIELD` / `…_HIGH_FIELD` field codes, and
+  the count, distinctness, exact-code, and half-offset/fact selection
+  `_Static_assert`s) and `KProgFormal/GeneratedArm64VregField.lean`, and
+  routes the step through the generated selector on both arms, so the two
+  hand offset tests are out of the body; the DQ lane plan of Step 0141, the
+  per-lane extra offset, the offset contract, the base-address source of Step
+  0140, and the pre/post step are unchanged.
+  `Arm64VregFieldShape.lean` proves the generated selector equal to an
+  independent 2-way literal over the one fact
+  (`arm64_vreg_field_refines`), the field-name and field-code tables against
+  independent enumerations, the code round-trip and out-of-range facts, both
+  distinct effects, the two-case dispatch, that the high field is named
+  exactly on the fact (`arm64_vreg_field_selects_high_field`), and the
+  cross-contracts tying the selection to the 0054 vector half plan for every
+  half (`arm64_vreg_field_matches_vreg_half`,
+  `arm64_vreg_field_matches_vreg_plan`,
+  `arm64_vreg_field_offsets_are_half_offsets`), so the field selection and
+  the half plan cannot disagree about which state field a lane lands in; the
+  7-case host oracle drives the compiled selector over the raw computed
+  offset against an independent 2-way restatement, and the 62427-case route
+  oracle declares the full register file and stack, plants the base
+  registers' pointers and provenance tags, and drives the real step in both
+  directions over every opcode, base class, pre/post flag combination, index
+  mode, and several immediates against an independent model that restates
+  the half-field selection from the raw offset, so a body that always wrote
+  one field, or swapped the two fields, is numerically distinguishable. 44
+  binding mutations --- six specification distortions, five generator-table
+  changes, nine generated-C header distortions (including the two
+  regenerated generator/render drifts), five generated-Lean changes, seven
+  hand-refinement changes, and six sim-header selector
+  reverts/swaps/neutralizations --- each of the first 41 changes the oracle,
+  the generator check, or a refinement theorem, while the last three
+  genuine-equivalence rewrites are the three the proof correctly does not
+  flag.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
   pointer source now closed (Steps 0137, 0138, and 0139), the memory
   base-address source now closed (Step 0140), the vector memory step's
   per-lane extra offset now closed (Step 0141), and the memory address
-  offset's index-value source now closed (Step 0142),
+  offset's index-value source now closed (Step 0142), and the vector memory
+  step's half state-field selection now closed (Step 0143),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of

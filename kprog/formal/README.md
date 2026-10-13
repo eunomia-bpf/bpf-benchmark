@@ -415,6 +415,40 @@ immediate against an independent model that restates the presence fact, the
 index-value source selection, and the immediate suppression from the raw
 `AUX` word, so a collapsed selection or a swapped pair of arms is numerically
 distinguishable.
+The AArch64 vector memory step's half state-field selection is generated the
+same way from `arm64_vreg_field_spec.json` into the C
+`generated/arm64_vreg_field.h` (the `KPROG_ARM64_VREG_FIELD` plain-ternary
+2-way selector, the `…_LOW_FIELD` / `…_HIGH_FIELD` field codes, and the
+count, distinctness, exact-code, and half-offset/fact selection
+`_Static_assert`s) and `KProgFormal/GeneratedArm64VregField.lean`. The
+generator re-reads the simulator header on every `--check` and rejects a
+vector memory step region that names no generated selector or still picks its
+field by hand through the `if (__a64_vreg_off == …HIGH_OFFSET)` test. The
+simulator's shared `ARM64_SIM_L_DQ_MEM_STEP` step routes the field each moved
+lane lands in through the generated selector on both the load and the store
+arm, so the two hand offset tests are out of the body; the DQ lane plan of
+Step 0141, the per-lane extra offset, the offset contract, the base-address
+source of Step 0140, and the pre/post step are unchanged. This extends the
+vector memory step with the one field-selection fact the lane offset already
+resolves: the high field fires exactly on the closed offset-equals-high fact,
+and Lean ties the selection to the 0054 vector half plan for every half so the
+two contracts cannot disagree about which state field a lane lands in. Lean
+checks the generated selector against an independent 2-way literal over the
+one fact, the field-name and field-code tables against independent
+enumerations, the code round-trip and out-of-range facts, both distinct
+effects, the two-case dispatch, the high field firing exactly on the fact
+(`arm64_vreg_field_selects_high_field`), and the cross-contracts to the half
+plan (`arm64_vreg_field_matches_vreg_half`,
+`arm64_vreg_field_matches_vreg_plan`,
+`arm64_vreg_field_offsets_are_half_offsets`); the 7-case host oracle drives
+the compiled selector over the raw computed offset against an independent
+2-way restatement, and the 62427-case route oracle includes the simulator
+header, declares the full register file and stack, plants the base registers'
+pointers and provenance tags, and drives the real step in both directions
+over every opcode, base class, pre/post flag combination, index mode, and
+several immediates against an independent model that restates the half-field
+selection from the raw offset, so a body that always wrote one field, or
+swapped the two fields, is numerically distinguishable.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the

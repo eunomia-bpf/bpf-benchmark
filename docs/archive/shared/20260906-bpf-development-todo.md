@@ -11646,7 +11646,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   through the generated `KPROG_ARM64_DQ_MEM_EXTRA` selector, removing the
   hand nested ternary from the step. It is the per-lane *offset* companion to
   the 0141 DQ lane plan (which owns the access direction, lane count, and lane
-  stride) and the 0143 vector half plan (which owns which state field each
+  stride) and the 0054 vector half plan (which owns which state field each
   lane lands in): the `.highLane` offset fires exactly on the closed fact pair
   the two preceding contracts already consume.
 - Spec `kprog/formal/arm64_dq_mem_extra_spec.json`: schema_version 1,
@@ -11699,7 +11699,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   two cross-contracts `arm64_dq_mem_extra_matches_dq_stride` (the high-lane
   offset is the 0141 DQ lane stride / `GeneratedArm64DqMem.transfer` at lane
   1, for both the `.Q0` load and store) and
-  `arm64_dq_mem_extra_matches_vreg_half` (the high-lane offset is the 0143
+  `arm64_dq_mem_extra_matches_vreg_half` (the high-lane offset is the 0054
   vector half offset / `GeneratedArm64Vreg.halfOffset`, and the two contracts
   agree on the half plan for all four opcodes); all
   `native_decide`/`rfl`/`decide`.
@@ -11711,7 +11711,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `KPROG_ARM64_DQ_MEM_EXTRA` selector and the hand nested ternary on
   `__a64_vreg_p == 0U` / `__a64_dq_lanes > 1U` is removed from the step, while
   the DQ lane plan (the 0141 access direction, lane count, and lane stride),
-  the vector half plan of Step 0143, the offset contract
+  the vector half plan of Step 0054, the offset contract
   (`ARM64_SIM_L_MEM_BASE_OFF`), and the base-address source of Step 0140 are
   unchanged.
 - Host oracle `kprog/formal/test_arm64_dq_mem_extra_host.c`: restates the
@@ -11826,6 +11826,122 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   resolved-but-equal generator root path, an added hand-module namespace
   comment, and a cosmetic count-guard message) SURVIVE as required. Per
   detector: `gen` 13, `lean_chain` 12, `host` 12, `route` 2.
+
+
+## Step 0143 — AArch64 vector memory step's half state-field selection through the generated contract
+
+- Scope: the AArch64 simulator's shared vector memory step
+  `ARM64_SIM_L_DQ_MEM_STEP` (`kprog/arm64/arm64_sim_local_bpf.h`), which moves
+  each moved lane into or out of one of the SIMD register's two half state
+  fields (`__a64_v0` / `__a64_v0_hi`). The moved lane's *offset* was already
+  generated (Step 0141, `KPROG_ARM64_DQ_MEM_EXTRA`, which owns the per-lane
+  extra offset and, via `KPROG_ARM64_VREG_HALF_OFFSET`, computes
+  `__a64_vreg_off`), but the *field* that offset lands in was still picked by
+  hand on both the load and the store arm through
+  `if (__a64_vreg_off == (__s64) KPROG_ARM64_VREG_HIGH_OFFSET)` selecting
+  `__a64_v0_hi` (high half) vs `__a64_v0` (low half). This step generates the
+  2-way field selector from `arm64_vreg_field_spec.json` into the C
+  `generated/arm64_vreg_field.h` (the `KPROG_ARM64_VREG_FIELD` plain-ternary
+  selector, the `…_LOW_FIELD` / `…_HIGH_FIELD` field codes, and the count,
+  distinctness, exact-code, and half-offset/fact selection
+  `_Static_assert`s) and `KProgFormal/GeneratedArm64VregField.lean`, and
+  routes the step through the generated selector ---
+  `__a64_vreg_field = KPROG_ARM64_VREG_FIELD(__a64_vreg_off == (__s64)
+  KPROG_ARM64_VREG_HIGH_OFFSET)` --- on both arms, so the two hand offset
+  tests are out of the body. It is the per-lane *state-field* companion to the
+  0141 per-lane extra offset and the 0054 vector half plan: the same closed
+  offset-equals-high fact pair the two preceding contracts already consume.
+- Spec `kprog/formal/arm64_vreg_field_spec.json`: schema_version 1,
+  operation `arm64VregField`, selector
+  `offset_is_high_then_high_field_else_low_field`, and two fields --- `low`
+  (field_define `KPROG_ARM64_VREG_LOW_FIELD`, code 0, effect
+  `low_half_state_field`) and `high` (field_define
+  `KPROG_ARM64_VREG_HIGH_FIELD`, code 1, effect `high_half_state_field`) ---
+  plus two cases classifying the (is high field) fact into its field.
+- Generator `kprog/formal/generate_arm64_vreg_field_spec.py`: `load()` re-reads
+  the sim header on every `--check` and rejects a spec that does not biject
+  the expected fields/cases table (including the exact `[0, 1]` code order and
+  the two-field count), a case whose field does not match the independent
+  2-way selection, and a vector memory step region that names no generated
+  selector or still names the hand `if (__a64_vreg_off == …HIGH_OFFSET)` gate.
+  Emits the C header `generated/arm64_vreg_field.h` (the
+  `KPROG_ARM64_VREG_FIELD(IS_HIGH_FIELD)` plain-ternary 2-way selector, the
+  field-code defines, and the count, distinctness, exact-code, and
+  high/low half-offset selection `_Static_assert`s) and the Lean
+  `KProgFormal/GeneratedArm64VregField.lean`. `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:73`.
+- Generated C header `kprog/formal/generated/arm64_vreg_field.h`:
+  `KPROG_ARM64_VREG_FIELD_COUNT 2U`, the two field-code defines
+  (`KPROG_ARM64_VREG_LOW_FIELD 0U` / `KPROG_ARM64_VREG_HIGH_FIELD 1U`), the
+  plain-ternary 2-way selector macro, and the count, distinctness, exact-code,
+  and the two half-offset selection `_Static_assert`s (selecting on
+  `KPROG_ARM64_VREG_HIGH_OFFSET` / `KPROG_ARM64_VREG_LOW_OFFSET` directly;
+  the earlier cross-pin that divided the two offsets by
+  `KPROG_ARM64_VREG_LOW_OFFSET` is not used because that constant is `0U`).
+  The header uses only literal inputs, so it is included after the
+  `ARM64_SIM_L_DQ_MEM_STEP` step's half-offset defines.
+- Generated Lean `kprog/formal/KProgFormal/GeneratedArm64VregField.lean`: the
+  `Field` type, `fieldCount := 2`, the field-name and code tables,
+  `codeOfField`/`fieldOfCode`, `effectOfField`, the 2-way `fieldOf`, the
+  two-case `Case`/`classify`/`fieldOfCase` classification, the independent
+  `highFieldFact` identity, and the `highFieldFact_refines`/`fieldOf_refines`
+  theorems.
+- Hand Lean `kprog/formal/KProgFormal/Arm64VregFieldShape.lean`: independent
+  literal statements of the 2-way selector, the two field names, the two
+  codes, the two half offsets, and the two-case dispatch, with theorems
+  `arm64_vreg_field_refines` (the generated selector equals the independent
+  2-way literal over every fact), `_names_refine`, `_codes_refine`,
+  `_codes_length`/`_names_length`, `_codes_nodup`, `_count_is_2`,
+  `_of_code_roundtrip`, `_of_code_beyond_is_none`, `_effects`,
+  `_case_dispatch`, `_case_refines`, `_selects_high_field` (the high field is
+  named exactly on the closed fact), `_offsets_distinct`, and the
+  cross-contracts `arm64_vreg_field_matches_vreg_half` (the field selection
+  agrees with the 0054 vector half plan for every half),
+  `arm64_vreg_field_matches_vreg_plan`, and
+  `arm64_vreg_field_offsets_are_half_offsets`; all
+  `native_decide`/`rfl`/`decide`.
+  `lake build KProgFormal.GeneratedArm64VregField KProgFormal.Arm64VregFieldShape`
+  returns 0.
+- Sim-header routing `kprog/arm64/arm64_sim_local_bpf.h`: the shared vector
+  memory step now computes its per-lane half field through the generated
+  `KPROG_ARM64_VREG_FIELD` selector on both the load and the store arm, and
+  the hand `if (__a64_vreg_off == (__s64) KPROG_ARM64_VREG_HIGH_OFFSET)` tests
+  are removed from the body, while the DQ lane plan (the 0141 access
+  direction, lane count, and lane stride), the per-lane extra offset (Step
+  0141), the offset contract (`ARM64_SIM_L_MEM_BASE_OFF`), and the
+  base-address source of Step 0140 are unchanged.
+- Host oracle `kprog/formal/test_arm64_vreg_field_host.c`: restates the 2-way
+  field selection from the raw computed offset and drives the generated
+  selector and the two field-code defines, pinning the field codes and count:
+  `arm64 vreg field host cross-check: OK (7 cases)`.
+- Route oracle `kprog/formal/test_arm64_vreg_field_route_host.c`: declares the
+  full register file and stack, plants the base registers' pointers and
+  provenance tags, and drives the real `ARM64_SIM_L_DQ_MEM_STEP` (both
+  directions, every opcode, every base class, every pre/post flag combination,
+  both index modes, and several immediates) against an independent model that
+  restates the half-field selection from the raw offset, so a body that always
+  wrote one field, or swapped the two fields, is numerically distinguishable;
+  compares the whole register file with its tags, the stack pointer, the SIMD
+  quarters, and all 4 KiB of the memory window:
+  `arm64 vreg field route host cross-check: OK (62427 cases)`.
+- `make -C kprog/formal check` passes with **188** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 186→188).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_vreg_field.py`, 44 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end: 41 of the 44 are caught --- six specification distortions, five
+  generator-table changes, nine generated-C header distortions (including the
+  two regenerated generator/render drifts), five generated-Lean distortions,
+  seven hand-refinement changes, and six sim-header selector
+  reverts/swaps/neutralizations, each of these a change the generator check, a
+  refinement theorem, or an oracle flags --- while three genuine-equivalence
+  rewrites (a resolved-but-equal generator root path, an added hand-module
+  namespace comment, and a cosmetic count-guard message) SURVIVE as required.
+  Per detector: `gen` 14, `lean_chain` 12, `host` 11, `route` 4.
 
 ## Next after 0076
 
