@@ -36,6 +36,8 @@ import KProgFormal.GeneratedX86StackWriteLanes
 import KProgFormal.X86StackWriteLanesShape
 import KProgFormal.GeneratedX86AluFlagArm
 import KProgFormal.X86AluFlagArmShape
+import KProgFormal.GeneratedX86DispatchFamily
+import KProgFormal.X86DispatchFamily
 import KProgFormal.X86MemAux
 import KProgFormal.GeneratedArm64MemIndex
 import KProgFormal.Arm64MemIndex
