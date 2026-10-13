@@ -215,6 +215,8 @@ import KProgFormal.GeneratedArm64MemIndexValue
 import KProgFormal.Arm64MemIndexValueShape
 import KProgFormal.GeneratedArm64VregField
 import KProgFormal.Arm64VregFieldShape
+import KProgFormal.GeneratedArm64WriteArm
+import KProgFormal.Arm64WriteArmShape
 import KProgFormal.GeneratedArm64DispatchFamily
 import KProgFormal.Arm64DispatchFamily
 import KProgFormal.GeneratedArm64DispatchSingleton
