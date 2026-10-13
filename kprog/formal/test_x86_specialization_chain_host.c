@@ -7,7 +7,9 @@
  * parsing `../x86/x86_sim_local_bpf.h`, so a drift between the two would be
  * invisible to the generator alone. This oracle re-parses the live
  * `X86_SIM_L_EXEC` body text at run time --- its arms are the `(OP) == X86_OP_*`
- * guards, split at brace depth 0 --- and confirms
+ * guards (or the generated `KPROG_X86_<F>_HANDLED(OP)` family gates, expanded
+ * through `generated/x86_dispatch_family.h`), split at brace depth 0 --- and
+ * confirms
  *   1. every arm guard names a canonical token, and no token is selected by two
  *      arms (so a deleted, duplicated, or re-split arm is caught);
  *   2. the handler set of each arm matches the independent table below, which
@@ -48,6 +50,127 @@ struct spec {
 	const char *token;
 	const char *handler;
 };
+
+/* The generated dispatch-family header: each routed family gate
+ * `KPROG_X86_<F>_HANDLED(OP)` expands to the member tokens its generated
+ * membership macro names. The chain's family arms are read through this table
+ * so a routed gate resolves to the same tokens the header would test. */
+static int is_ident(char c);
+static void arm_handler(const char *arm, size_t len, char *out, size_t out_size);
+
+struct family {
+	char *gate;
+	char *members[8];
+	unsigned count;
+};
+
+static struct family FAMILIES[16];
+static unsigned family_count = 0;
+
+/* The NUL-terminated identifier at [begin, end). */
+static char *copy_ident(const char *begin, const char *end)
+{
+	size_t n = (size_t)(end - begin);
+	char *out = malloc(n + 1);
+
+	if (out == NULL) {
+		fprintf(stderr, "out of memory\n");
+		exit(1);
+	}
+	memcpy(out, begin, n);
+	out[n] = '\0';
+	return out;
+}
+
+/* Read `#define KPROG_X86_<F>_HANDLED(OP) ...` bodies from the generated family
+ * header, one entry per gate, member tokens in the order the macro names them. */
+static void load_families(const char *text)
+{
+	const char *at = text;
+
+	while (family_count < 16 &&
+	       (at = strstr(at, "#define KPROG_X86_")) != NULL) {
+		const char *name = at + strlen("#define ");
+		const char *p = name;
+		const char *mac_end;
+		struct family *fam = &FAMILIES[family_count];
+
+		while (is_ident(*p))
+			p++;
+		if (strncmp(p, "(OP)", 4) != 0) {
+			at = p;
+			continue;
+		}
+		fam->gate = copy_ident(name, p);
+		fam->count = 0;
+		mac_end = strstr(p, "\n#define ");
+		if (mac_end == NULL)
+			mac_end = p + strlen(p);
+		while (fam->count < 8) {
+			const char *body = strstr(p, "(OP) == X86_OP_");
+			const char *tok;
+			const char *e;
+
+			if (body == NULL || body >= mac_end)
+				break;
+			tok = body + strlen("(OP) == ");
+			e = tok;
+			while (is_ident(*e))
+				e++;
+			fam->members[fam->count++] = copy_ident(tok, e);
+			p = e;
+		}
+		if (fam->count > 0)
+			family_count++;
+		at = mac_end;
+	}
+}
+
+/* The family a routed gate names, or NULL. */
+static const struct family *family_for(const char *gate, size_t gate_len)
+{
+	unsigned i;
+
+	for (i = 0; i < family_count; i++)
+		if (strlen(FAMILIES[i].gate) == gate_len &&
+		    strncmp(FAMILIES[i].gate, gate, gate_len) == 0)
+			return &FAMILIES[i];
+	return NULL;
+}
+
+/* Count `KPROG_X86_<F>_HANDLED(OP)` guards within [begin, end) whose family
+ * names `token`; record the first such arm's handler. Returns 0 when absent. */
+static unsigned arm_gate_occurrences(const char *begin, const char *end,
+				     const char *token, char *handler_out,
+				     size_t handler_size)
+{
+	const char *scan = begin;
+	unsigned found = 0;
+
+	handler_out[0] = '\0';
+	while (scan < end && (scan = strstr(scan, "KPROG_X86_")) != NULL) {
+		const char *p = scan;
+		const struct family *fam;
+		unsigned m;
+
+		while (p < end && is_ident(*p))
+			p++;
+		if (p - scan > 8 && strncmp(p - 8, "_HANDLED", 8) == 0) {
+			fam = family_for(scan, (size_t)(p - scan));
+			if (fam != NULL)
+				for (m = 0; m < fam->count; m++)
+					if (strcmp(fam->members[m], token) == 0) {
+						found++;
+						break;
+					}
+		}
+		scan = p > scan ? p : scan + 1;
+	}
+	if (found > 0)
+		arm_handler(begin, (size_t)(end - begin), handler_out,
+			    handler_size);
+	return found;
+}
 
 static const struct spec SPEC[] = {
 	{ "X86_OP_NOP", "" },
@@ -236,6 +359,8 @@ static unsigned arm_token_occurrences(const char *begin, const char *end,
 			found++;
 		scan = name;
 	}
+	found += arm_gate_occurrences(begin, end, token, handler_out,
+				      handler_size);
 	if (found > 0)
 		arm_handler(begin, (size_t)(end - begin), handler_out,
 			    handler_size);
@@ -246,6 +371,7 @@ int main(void)
 {
 	char *text = read_whole_file("../x86/x86_sim_local_bpf.h");
 	char *sim_text = read_whole_file("../x86/x86_sim.h");
+	char *family_text = read_whole_file("generated/x86_dispatch_family.h");
 	unsigned seen[SPEC_COUNT];
 	const char *body;
 	const char *inner_begin;
@@ -256,9 +382,19 @@ int main(void)
 	const char *arm_begin;
 	unsigned arm_count = 0;
 
-	if (text == NULL || sim_text == NULL) {
+	if (text == NULL || sim_text == NULL || family_text == NULL) {
+		fprintf(stderr, "cannot read simulator or family header\n");
 		free(text);
 		free(sim_text);
+		free(family_text);
+		return 1;
+	}
+	load_families(family_text);
+	if (family_count == 0) {
+		fprintf(stderr, "no dispatch families parsed\n");
+		free(text);
+		free(sim_text);
+		free(family_text);
 		return 1;
 	}
 	memset(seen, 0, sizeof seen);
@@ -451,6 +587,7 @@ int main(void)
 
 	free(text);
 	free(sim_text);
+	free(family_text);
 	if (failures == 0)
 		printf("x86 specialization chain host cross-check: OK (%u cases)\n",
 		       cases);
