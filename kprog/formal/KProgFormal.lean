@@ -30,6 +30,8 @@ import KProgFormal.GeneratedX86MovRegArm
 import KProgFormal.X86MovRegShape
 import KProgFormal.GeneratedX86StackArm
 import KProgFormal.X86StackArmShape
+import KProgFormal.GeneratedX86WriteWidthArm
+import KProgFormal.X86WriteWidthArmShape
 import KProgFormal.X86MemAux
 import KProgFormal.GeneratedArm64MemIndex
 import KProgFormal.Arm64MemIndex
