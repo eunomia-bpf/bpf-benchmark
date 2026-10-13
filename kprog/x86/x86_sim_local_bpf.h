@@ -35,6 +35,7 @@
 #include "../formal/generated/x86_stack_arm.h"
 #include "../formal/generated/x86_mulx_arm.h"
 #include "../formal/generated/x86_bzhi_flags.h"
+#include "../formal/generated/x86_write_width_arm.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -414,19 +415,22 @@ struct x86_sim_state {
 			X86_SIM_L_EFFECTIVE_WIDTH(__x86_wr_raw_width);             \
 		__u8 __x86_wr_shift = (DST_SHIFT);                          \
 		__u64 __x86_wr_next = (VALUE);                            \
-		if (__x86_wr_width == X86_WIDTH_8) {                      \
+		if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==            \
+		    KPROG_X86_WRITE_WIDTH_ARM_B8) {                        \
 			switch (REG) {                                    \
 			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG8_VALUE_CASE)\
 			default:                                          \
 				break;                                    \
 			}                                                 \
-		} else if (__x86_wr_width == X86_WIDTH_16) {              \
+		} else if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==    \
+			   KPROG_X86_WRITE_WIDTH_ARM_B16) {                \
 			switch (REG) {                                    \
 			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG16_VALUE_CASE)\
 			default:                                          \
 				break;                                    \
 			}                                                 \
-		} else if (__x86_wr_width == X86_WIDTH_32) {              \
+		} else if (KPROG_X86_WRITE_WIDTH_ARM(__x86_wr_width) ==    \
+			   KPROG_X86_WRITE_WIDTH_ARM_B32) {                \
 			switch (REG) {                                    \
 			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG32_VALUE_CASE)\
 			default:                                          \
