@@ -60,6 +60,7 @@
 #include "../formal/generated/arm64_mem_prepost.h"
 #include "../formal/generated/arm64_vreg.h"
 #include "../formal/generated/arm64_vreg_field.h"
+#include "../formal/generated/arm64_write_arm.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -326,7 +327,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		if ((REG) == ARM64_SP) {                                  \
 			__a64_sp = (__s64)__a64_l_next;                   \
 		} else if (KPROG_ARM64_REG_WRITABLE(REG)) {                \
-			if ((WIDTH) == ARM64_WIDTH_32) {                  \
+		if (KPROG_ARM64_WRITE_ARM((WIDTH) == ARM64_WIDTH_32) == \
+		    KPROG_ARM64_WRITE_ARM_NARROW) {                \
 				switch (REG) {                            \
 				ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG32_CASE)\
 				default: break;                           \
