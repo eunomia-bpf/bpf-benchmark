@@ -1,0 +1,718 @@
+/*
+ * Host cross-check for the AArch64 simulator's routing of the vector
+ * `.D0` / `.Q0` memory-transfer handler bodies through the machine-checked
+ * half state-field contract `generated/arm64_vreg_field.h` (STEP 0143).
+ * The bodies under test are the real simulator macros `ARM64_SIM_L_LOAD_D0_MEM`,
+ * `ARM64_SIM_L_LOAD_Q0_MEM`, `ARM64_SIM_L_STORE_D0_MEM` and
+ * `ARM64_SIM_L_STORE_Q0_MEM`, driven both directly and through the
+ * `ARM64_SIM_L_EXEC` dispatcher arms.
+ *
+ * The routed fact this oracle exercises is the *state field* each moved half
+ * lands in, selected from the single closed fact that the half's slot offset is
+ * the high half's offset (`KPROG_ARM64_VREG_HALF_OFFSET` against
+ * `KPROG_ARM64_VREG_HIGH_OFFSET`). Each position is planted so a wrong selection
+ * is numerically distinguishable:
+ *
+ *   - A `.D0` transfer (one position, the low half) must land in `__a64_v0`, so
+ *     a misroute that wrote `__a64_v0_hi` would leave the low field unchanged
+ *     and the high field clobbered.
+ *   - A `.Q0` transfer's first position (the low half) must land in `__a64_v0`
+ *     and its second position (the high half, slot offset 8) in `__a64_v0_hi`,
+ *     with the two halves planted to distinct values, so a swapped field
+ *     selection shows up as both fields differing.
+ *
+ * The memory, register and stack sides of the step are the same
+ * `ARM64_SIM_L_DQ_MEM_STEP` body the per-lane extra-offset contract routes, so
+ * the model restates the whole body: the direction and lane count from the
+ * generated per-opcode constants, the per-lane extra offset from the raw
+ * `__a64_vreg_p == 0U` / `__a64_dq_lanes > 1U` facts, and the state field from
+ * the raw half offset.
+ *
+ * Every value the body can touch is compared after each case: all 31 general
+ * registers (value and provenance tag), the stack pointer, the two SIMD
+ * quarters `__a64_v0` / `__a64_v0_hi`, the whole 160-byte stack image with its
+ * 20 slot tags, and the whole 4 KiB memory window byte for byte.
+ *
+ * Build and run:
+ *   cd kprog/formal &&
+ *   cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog \
+ *      -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
+ *      test_arm64_vreg_field_route_host.c \
+ *      -o build/test_arm64_vreg_field_route_host &&
+ *   ./build/test_arm64_vreg_field_route_host
+ */
+
+#define ARM64_SIM_ENABLE_STACK 1
+typedef unsigned char __u8;
+typedef unsigned short __u16;
+typedef unsigned int __u32;
+typedef unsigned long long __u64;
+typedef signed long long __s64;
+typedef signed int __s32;
+
+#define __always_inline inline
+
+#include "../arm64/arm64_sim_local_bpf.h"
+
+#include <stdio.h>
+#include <string.h>
+
+/* The simulator header expects this hook; the oracle drives only fully
+ * supported arms, so the no-op stub is never the reason for a difference. */
+static void arm64_sim_unsupported_opcode(void)
+{
+}
+
+static int failures;
+static unsigned long cases;
+
+/* The register file the model tracks, kept parallel to the simulator's own
+ * state so the whole file (value and tag) can be compared after every case. */
+static __u64 mreg[31];
+static __u8 mtag[31];
+static __s64 msp;
+
+/* The memory window the base registers point into. `heap` is the simulator's
+ * backing store; `heap_exp` is the model's expected image. The two are
+ * separate arrays so the simulator's writes stay observable. */
+#define HEAP_BYTES 4096U
+#define SCALAR_BASE_OFF 1024U
+#define ABI_BASE_OFF 2048U
+#define RELOC_BASE_OFF 3072U
+static __u8 heap[HEAP_BYTES];
+static __u8 heap_exp[HEAP_BYTES];
+static __u8 heap_img[HEAP_BYTES];
+
+/* The stack arena image, indexed exactly as `ARM64_SIM_L_STACK_*` index it
+ * (bias included). */
+#define STACK_BYTES 160U
+#define STACK_SLOTS 20U
+static __u8 stk_exp[STACK_BYTES];
+static __u8 stk_tag_exp[STACK_SLOTS];
+static __u8 stk_img[STACK_BYTES];
+static __u8 stk_tag_img[STACK_SLOTS];
+
+/* The stack base pointer value the oracle plants: with the simulator's
+ * `ARM64_SIM_STACK_BIAS` of 96, an access at offset 0 lands at arena index 32,
+ * leaving room for the driven immediates and the second `.Q0` lane. */
+#define STACK_BASE_VAL (-64LL)
+
+/* The index register value: nonzero so the addressing mode is observable, and
+ * small so every derived offset stays inside the planted windows. */
+#define INDEX_VALUE 1ULL
+
+/* A deterministic register pattern: distinct per index, with high bits set so
+ * a 64-bit-vs-narrow write is observable. */
+static __u64 pattern_reg(unsigned i)
+{
+	return 0x9e3779b97f4a7c15ULL * (__u64)(i + 1U) + 0x0123456789abcdefULL;
+}
+
+/* A non-scalar tag pattern: never `ARM64_SIM_TAG_SCALAR`, so a form that
+ * scalarizes changes the destination tag. */
+static __u8 pattern_tag(unsigned i)
+{
+	return (__u8)(1U + (i % 5U));
+}
+
+/* ------------------------------------------------------------------ */
+/* The flat little-endian byte image and the model's own read/write.    */
+/* ------------------------------------------------------------------ */
+
+/* Raw offset of an address into the simulator's memory window. */
+static unsigned long heap_off(__u64 addr)
+{
+	return (unsigned long)(addr - (__u64)(unsigned long)heap);
+}
+
+/* Assemble `width` little-endian bytes from the model image. This is an
+ * independent restatement of `KPROG_ARM64_LOAD_BYTES` for the four width
+ * codes (whose numeric value is exactly the byte count). */
+static __u64 img_load(const __u8 *base, unsigned width)
+{
+	__u64 v = 0;
+	unsigned i;
+
+	for (i = 0; i < width; i++)
+		v |= (__u64)base[i] << (8U * i);
+	return v;
+}
+
+/* Scatter `APPLY_WIDTH(VALUE, WIDTH)` as `width` little-endian bytes. */
+static void img_store(__u8 *base, unsigned width, __u64 value)
+{
+	__u64 v = KPROG_ARM64_APPLY_WIDTH(value, width);
+	unsigned i;
+
+	for (i = 0; i < width; i++)
+		base[i] = (__u8)(v >> (8U * i));
+}
+
+static __u64 heap_read(__u64 addr, unsigned width)
+{
+	return img_load(&heap_exp[heap_off(addr)], width);
+}
+
+static void heap_write(__u64 addr, unsigned width, __u64 value)
+{
+	img_store(&heap_exp[heap_off(addr)], width, value);
+}
+
+/* `ARM64_SIM_L_STACK_READ`: a 64-bit access at a qword-aligned slot reads the
+ * slot as a word, every other access assembles bytes. */
+static __u64 stack_read(__u32 idx, unsigned width)
+{
+	if (width == ARM64_WIDTH_64 && (idx & 7U) == 0U)
+		return img_load(&stk_exp[idx], ARM64_WIDTH_64);
+	return img_load(&stk_exp[idx], width);
+}
+
+/* `ARM64_SIM_L_STACK_WRITE_TAG`: the qword-aligned 64-bit case stores the word
+ * and the slot tag; the byte case scatters `width` bytes and, at a qword
+ * boundary, drops the slot tag to scalar. */
+static void stack_write(__u32 idx, unsigned width, __u64 value, __u8 tag)
+{
+	__u64 v = KPROG_ARM64_APPLY_WIDTH(value, width);
+
+	if (KPROG_ARM64_STACK_TAG(width == ARM64_WIDTH_64, (idx & 7U) == 0U)) {
+		img_store(&stk_exp[idx], ARM64_WIDTH_64, v);
+		stk_tag_exp[idx >> 3] = tag;
+	} else {
+		if ((idx & 7U) == 0U)
+			stk_tag_exp[idx >> 3] = ARM64_SIM_TAG_SCALAR;
+		img_store(&stk_exp[idx], width, v);
+	}
+}
+
+/* The base register's value and provenance tag, as the memory macros read
+ * them. */
+static __u64 m_base_val(unsigned base)
+{
+	return base == ARM64_SP ? (__u64)msp : mreg[base];
+}
+
+static __u8 m_base_tag(unsigned base)
+{
+	return base == ARM64_SP ? ARM64_SIM_TAG_STACK : mtag[base];
+}
+
+/* `ARM64_SIM_L_MEM_BASE_OFF` with the source modifier the oracle drives at its
+ * identity (MOD == 0), so the index register contributes its raw value. */
+static __s64 model_base_off(unsigned aux, unsigned index, __s64 imm)
+{
+	return (__s64)KPROG_ARM64_MEM_OFFSET(
+		(__u64)(ARM64_SIM_L_MEM_FLAGS(aux) &
+			(ARM64_MEM_PRE | ARM64_MEM_POST)),
+		index != ARM64_REG_NONE,
+		(__u64)imm,
+		index != ARM64_REG_NONE ? mreg[index] : 0ULL);
+}
+
+/* `ARM64_SIM_L_MEM_READ`, restated over the flat image. */
+static __u64 model_mem_read(unsigned base, unsigned index, unsigned aux,
+			    __s64 imm, __s64 extra, unsigned width)
+{
+	__s64 off = model_base_off(aux, index, imm) + extra;
+	__u8 tag = m_base_tag(base);
+	__u64 bv = m_base_val(base);
+
+	if (base == ARM64_SP || tag == ARM64_SIM_TAG_STACK) {
+		__s64 b = (__s64)bv;
+
+		return stack_read((__u32)(ARM64_SIM_STACK_BIAS + (b + off)),
+				  width);
+	}
+	if (tag == ARM64_SIM_TAG_ABI && width == ARM64_WIDTH_64)
+		return heap_read(bv + (__u64)off, ARM64_WIDTH_64);
+	if (tag == ARM64_SIM_TAG_RELOC_ADDR && width == ARM64_WIDTH_64)
+		return bv;
+	return heap_read(bv + (__u64)off, width);
+}
+
+/* `ARM64_SIM_L_MEM_WRITE`, restated over the flat image. */
+static void model_mem_write(unsigned base, unsigned index, unsigned aux,
+			    __s64 imm, __s64 extra, unsigned width,
+			    __u64 value, __u8 tag)
+{
+	__s64 off = model_base_off(aux, index, imm) + extra;
+	__u8 t = m_base_tag(base);
+
+	if (base == ARM64_SP || t == ARM64_SIM_TAG_STACK) {
+		__s64 b = (__s64)m_base_val(base);
+
+		stack_write((__u32)(ARM64_SIM_STACK_BIAS + (b + off)), width,
+			    value, tag);
+	} else {
+		heap_write(m_base_val(base) + (__u64)off, width, value);
+	}
+}
+
+/* `ARM64_SIM_L_MEM_PRE` / `ARM64_SIM_L_MEM_POST` writeback. */
+static void model_writeback(unsigned base, __s64 imm)
+{
+	if (base == ARM64_SP)
+		msp += imm;
+	else
+		mreg[base] = mreg[base] + (__u64)imm;
+}
+
+/* The independent per-lane extra-offset selection, restated from the raw fact
+ * pair the step computes (is this the first plan position; does the transfer
+ * have a high lane at all), never from the generated selector: the first-lane
+ * offset is zero, the high-lane offset is the DQ lane stride, and the
+ * single-lane offset is zero. */
+static __s64 model_extra(unsigned is_first_lane, unsigned high_present)
+{
+	if (is_first_lane)
+		return 0;
+	if (high_present)
+		return (__s64)KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE;
+	return 0;
+}
+
+/* The shared `ARM64_SIM_L_DQ_MEM_STEP` body, with the direction and lane count
+ * restated from the generated per-opcode constants, the per-lane extra offset
+ * from the independent fact restatement above, and the state field each moved
+ * half lands in from the raw half offset. The step walks the lane plan one
+ * position at a time, so the model does too: position zero moves the low half
+ * (low field), the second position (only present for a two-lane transfer) moves
+ * the high half (high field), each position's address carries `model_extra` of
+ * its own facts, and each position's value lands in the field its own half
+ * offset selects. */
+static void model_dq(unsigned op, unsigned base, unsigned index, unsigned aux,
+		     __s64 imm, __u64 *v0, __u64 *v0_hi)
+{
+	unsigned idx = KPROG_ARM64_DQ_MEM_INDEX(op);
+	unsigned access;
+	unsigned lanes;
+	unsigned p;
+
+	if (idx == KPROG_ARM64_DQ_MEM_OP_LOAD_D0_INDEX) {
+		access = KPROG_ARM64_DQ_MEM_OP_LOAD_D0_ACCESS;
+		lanes = KPROG_ARM64_DQ_MEM_OP_LOAD_D0_LANES;
+	} else if (idx == KPROG_ARM64_DQ_MEM_OP_LOAD_Q0_INDEX) {
+		access = KPROG_ARM64_DQ_MEM_OP_LOAD_Q0_ACCESS;
+		lanes = KPROG_ARM64_DQ_MEM_OP_LOAD_Q0_LANES;
+	} else if (idx == KPROG_ARM64_DQ_MEM_OP_STORE_D0_INDEX) {
+		access = KPROG_ARM64_DQ_MEM_OP_STORE_D0_ACCESS;
+		lanes = KPROG_ARM64_DQ_MEM_OP_STORE_D0_LANES;
+	} else {
+		access = KPROG_ARM64_DQ_MEM_OP_STORE_Q0_ACCESS;
+		lanes = KPROG_ARM64_DQ_MEM_OP_STORE_Q0_LANES;
+	}
+
+	if (ARM64_SIM_L_MEM_FLAGS(aux) & ARM64_MEM_PRE)
+		model_writeback(base, imm);
+	for (p = 0; p < lanes; p++) {
+		unsigned first = (p == 0U);
+		__s64 extra = model_extra(first, lanes > 1U);
+		unsigned half = first ? KPROG_ARM64_VREG_HALF_LOW
+				      : KPROG_ARM64_VREG_HALF_HIGH;
+		__s64 half_off = (__s64)KPROG_ARM64_VREG_HALF_OFFSET(half);
+		unsigned high = half_off == (__s64)KPROG_ARM64_VREG_HIGH_OFFSET;
+
+		if (access == KPROG_ARM64_DQ_MEM_ACCESS_LOAD) {
+			__u64 v = model_mem_read(base, index, aux, imm, extra,
+						 KPROG_ARM64_DQ_MEM_LANE_STRIDE);
+
+			if (high)
+				*v0_hi = v;
+			else
+				*v0 = v;
+		} else {
+			model_mem_write(base, index, aux, imm, extra,
+					KPROG_ARM64_DQ_MEM_LANE_STRIDE,
+					high ? *v0_hi : *v0,
+					ARM64_SIM_TAG_SCALAR);
+		}
+	}
+	if (ARM64_SIM_L_MEM_FLAGS(aux) & ARM64_MEM_POST)
+		model_writeback(base, imm);
+}
+
+/* ------------------------------------------------------------------ */
+/* The checker.                                                        */
+/* ------------------------------------------------------------------ */
+
+/* Plant the two register files with the same pattern, and anchor the base and
+ * index registers for the class the case drives. Written as a macro so it
+ * expands in the checker's own state scope. */
+#define PLANT_STATE(BASE, INDEX)                                           \
+	do {                                                               \
+		unsigned __pl_i;                                          \
+		for (__pl_i = 0; __pl_i < 31U; __pl_i++) {                \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG(                    \
+				__pl_i,                                   \
+				(void *)(long)pattern_reg(__pl_i),        \
+				pattern_tag(__pl_i));                     \
+			mreg[__pl_i] = pattern_reg(__pl_i);               \
+			mtag[__pl_i] = pattern_tag(__pl_i);               \
+		}                                                         \
+		__a64_sp = STACK_BASE_VAL;                                \
+		msp = STACK_BASE_VAL;                                     \
+		if ((BASE) == ARM64_X2) {                                 \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG(                    \
+				(BASE),                                   \
+				(void *)(long)(heap + SCALAR_BASE_OFF),   \
+				ARM64_SIM_TAG_SCALAR);                    \
+			mreg[BASE] = (__u64)(long)(heap + SCALAR_BASE_OFF);\
+			mtag[BASE] = ARM64_SIM_TAG_SCALAR;                \
+		} else if ((BASE) == ARM64_X3) {                          \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG(                    \
+				(BASE),                                   \
+				(void *)(long)(heap + ABI_BASE_OFF),      \
+				ARM64_SIM_TAG_ABI);                       \
+			mreg[BASE] = (__u64)(long)(heap + ABI_BASE_OFF);  \
+			mtag[BASE] = ARM64_SIM_TAG_ABI;                   \
+		} else if ((BASE) == ARM64_X4) {                          \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG(                    \
+				(BASE),                                   \
+				(void *)(long)(heap + RELOC_BASE_OFF),    \
+				ARM64_SIM_TAG_RELOC_ADDR);                \
+			mreg[BASE] = (__u64)(long)(heap + RELOC_BASE_OFF);\
+			mtag[BASE] = ARM64_SIM_TAG_RELOC_ADDR;            \
+		} else if ((BASE) == ARM64_X5) {                          \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG(                    \
+				(BASE), (void *)(long)STACK_BASE_VAL,     \
+				ARM64_SIM_TAG_STACK);                     \
+			mreg[BASE] = (__u64)STACK_BASE_VAL;               \
+			mtag[BASE] = ARM64_SIM_TAG_STACK;                 \
+		}                                                         \
+		if ((INDEX) != ARM64_REG_NONE) {                          \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG((INDEX),            \
+				(void *)(long)INDEX_VALUE,                \
+				ARM64_SIM_TAG_SCALAR);                    \
+			mreg[INDEX] = INDEX_VALUE;                        \
+			mtag[INDEX] = ARM64_SIM_TAG_SCALAR;               \
+		}                                                         \
+	} while (0)
+
+/* Compare the whole simulator state against the model image. */
+#define COMPARE_STATE(OP, BASE, INDEX, FLAGS, IMM, VIA)                    \
+	do {                                                               \
+		unsigned __cs_i;                                          \
+		int __cs_bad = 0;                                         \
+		for (__cs_i = 0; __cs_i < 31U; __cs_i++) {                \
+			__u64 __cs_got = ARM64_SIM_L_READ_REG(__cs_i);    \
+			__u8 __cs_tag = ARM64_SIM_L_REG_TAG(__cs_i);      \
+			cases++;                                          \
+			if (__cs_got != mreg[__cs_i]) {                   \
+				printf("MISMATCH op=%#x base=%u index=%u " \
+				       "flags=%u imm=%lld via=%u reg%u: "  \
+				       "got 0x%llx want 0x%llx\n", (OP),   \
+				       (BASE), (INDEX), (FLAGS),           \
+				       (long long)(IMM), (VIA),            \
+				       (unsigned)__cs_i,                   \
+				       (unsigned long long)__cs_got,       \
+				       (unsigned long long)mreg[__cs_i]);  \
+				failures++;                               \
+				return;                                   \
+			}                                                 \
+			cases++;                                          \
+			if (__cs_tag != mtag[__cs_i]) {                   \
+				printf("MISMATCH op=%#x via=%u reg%u tag: " \
+				       "got %u want %u\n", (OP), (VIA),    \
+				       (unsigned)__cs_i, __cs_tag,         \
+				       mtag[__cs_i]);                      \
+				failures++;                               \
+				return;                                   \
+			}                                                 \
+		}                                                         \
+		cases++;                                                  \
+		if (__a64_sp != msp) {                                    \
+			printf("MISMATCH op=%#x via=%u sp: got %lld "     \
+			       "want %lld\n", (OP), (VIA),                 \
+			       (long long)__a64_sp, (long long)msp);       \
+			failures++;                                       \
+			return;                                           \
+		}                                                         \
+		cases++;                                                  \
+		if (__a64_v0 != m_v0 || __a64_v0_hi != m_v0_hi) {         \
+			printf("MISMATCH op=%#x via=%u v0: got 0x%llx/"    \
+			       "0x%llx want 0x%llx/0x%llx\n", (OP), (VIA), \
+			       (unsigned long long)__a64_v0,               \
+			       (unsigned long long)__a64_v0_hi,            \
+			       (unsigned long long)m_v0,                   \
+			       (unsigned long long)m_v0_hi);               \
+			failures++;                                       \
+			return;                                           \
+		}                                                         \
+		cases++;                                                  \
+		if (memcmp(heap, heap_exp, HEAP_BYTES) != 0 ||            \
+		    memcmp(__a64_stack.b, stk_exp, STACK_BYTES) != 0 ||   \
+		    memcmp(__a64_stack_tag, stk_tag_exp, STACK_SLOTS) != 0) {\
+			printf("MISMATCH op=%#x base=%u index=%u flags=%u " \
+			       "imm=%lld via=%u memory image\n", (OP),     \
+			       (BASE), (INDEX), (FLAGS), (long long)(IMM), \
+			       (VIA));                                    \
+			failures++;                                       \
+			return;                                           \
+		}                                                         \
+		(void)__cs_bad;                                           \
+	} while (0)
+
+static void check_case(unsigned op, unsigned base, unsigned index,
+		       unsigned flags, __s64 imm, unsigned via)
+{
+	__u32 aux = (__u32)flags << 24;
+	__u64 m_v0;
+	__u64 m_v0_hi;
+	unsigned i;
+
+	ARM64_SIM_L_DECLARE_STATE();
+	ARM64_SIM_L_DECLARE_STACK();
+	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;
+	(void)__a64_sim_abi_kind;
+	(void)__a64_n;
+	(void)__a64_z;
+	(void)__a64_c;
+	(void)__a64_v;
+	(void)__a64_lr;
+
+	PLANT_STATE(base, index);
+
+	for (i = 0; i < HEAP_BYTES; i++) {
+		heap[i] = heap_img[i];
+		heap_exp[i] = heap_img[i];
+	}
+	for (i = 0; i < STACK_BYTES; i++) {
+		__a64_stack.b[i] = stk_img[i];
+		stk_exp[i] = stk_img[i];
+	}
+	for (i = 0; i < STACK_SLOTS; i++) {
+		__a64_stack_tag[i] = stk_tag_img[i];
+		stk_tag_exp[i] = stk_tag_img[i];
+	}
+
+	__a64_v0 = pattern_reg(40);
+	__a64_v0_hi = pattern_reg(41);
+	m_v0 = __a64_v0;
+	m_v0_hi = __a64_v0_hi;
+
+	/* ---- independent model ---- */
+	model_dq(op, base, index, aux, imm, &m_v0, &m_v0_hi);
+
+	/* ---- run the real body ---- */
+	if (via) {
+		ARM64_SIM_L_EXEC(op, base, base, index, ARM64_REG_NONE,
+				 ARM64_WIDTH_64, aux, imm);
+	} else {
+		switch (op) {
+		case ARM64_OP_LOAD_D0:
+			ARM64_SIM_L_LOAD_D0_MEM(base, index, aux, imm);
+			break;
+		case ARM64_OP_LOAD_Q0:
+			ARM64_SIM_L_LOAD_Q0_MEM(base, index, aux, imm);
+			break;
+		case ARM64_OP_STORE_D0:
+			ARM64_SIM_L_STORE_D0_MEM(base, index, aux, imm);
+			break;
+		default:
+			ARM64_SIM_L_STORE_Q0_MEM(base, index, aux, imm);
+			break;
+		}
+	}
+
+	COMPARE_STATE(op, base, index, flags, imm, via);
+}
+
+/* The routed selectors and lane-plan constants must agree with the contract
+ * tables, and the arm index must be total. */
+static void check_selectors(void)
+{
+	static const unsigned ops[4] = {
+		ARM64_OP_LOAD_D0, ARM64_OP_LOAD_Q0,
+		ARM64_OP_STORE_D0, ARM64_OP_STORE_Q0,
+	};
+	static const unsigned idxs[4] = {
+		KPROG_ARM64_DQ_MEM_OP_LOAD_D0_INDEX,
+		KPROG_ARM64_DQ_MEM_OP_LOAD_Q0_INDEX,
+		KPROG_ARM64_DQ_MEM_OP_STORE_D0_INDEX,
+		KPROG_ARM64_DQ_MEM_OP_STORE_Q0_INDEX,
+	};
+	static const unsigned accs[4] = {
+		KPROG_ARM64_DQ_MEM_OP_LOAD_D0_ACCESS,
+		KPROG_ARM64_DQ_MEM_OP_LOAD_Q0_ACCESS,
+		KPROG_ARM64_DQ_MEM_OP_STORE_D0_ACCESS,
+		KPROG_ARM64_DQ_MEM_OP_STORE_Q0_ACCESS,
+	};
+	static const unsigned lns[4] = {
+		KPROG_ARM64_DQ_MEM_OP_LOAD_D0_LANES,
+		KPROG_ARM64_DQ_MEM_OP_LOAD_Q0_LANES,
+		KPROG_ARM64_DQ_MEM_OP_STORE_D0_LANES,
+		KPROG_ARM64_DQ_MEM_OP_STORE_Q0_LANES,
+	};
+	unsigned i;
+
+	for (i = 0; i < 4U; i++) {
+		unsigned want_acc = (i < 2U) ? KPROG_ARM64_DQ_MEM_ACCESS_LOAD
+					     : KPROG_ARM64_DQ_MEM_ACCESS_STORE;
+		unsigned want_lanes = ((i & 1U) == 0U) ? 1U : 2U;
+
+		cases++;
+		if (KPROG_ARM64_DQ_MEM_INDEX(ops[i]) != idxs[i]) {
+			printf("MISMATCH dq index op=%#x\n", ops[i]);
+			failures++;
+		}
+		cases++;
+		if (accs[i] != want_acc) {
+			printf("MISMATCH dq access op=%#x\n", ops[i]);
+			failures++;
+		}
+		cases++;
+		if (lns[i] != want_lanes) {
+			printf("MISMATCH dq lanes op=%#x\n", ops[i]);
+			failures++;
+		}
+	}
+
+	/* The selector is total: unlisted opcodes take the last arm. */
+	{
+		static const unsigned untested[4] = { 0x00U, 0x27U, 0x2cU,
+						      0xffU };
+
+		for (i = 0; i < 4U; i++) {
+			cases++;
+			if (KPROG_ARM64_DQ_MEM_INDEX(untested[i]) !=
+					KPROG_ARM64_DQ_MEM_OP_STORE_Q0_INDEX) {
+				printf("MISMATCH dq index totality op=%#x\n",
+				       untested[i]);
+				failures++;
+			}
+		}
+	}
+
+	cases++;
+	if (KPROG_ARM64_DQ_MEM_LANE_STRIDE != ARM64_WIDTH_64) {
+		printf("MISMATCH dq lane stride\n");
+		failures++;
+	}
+	cases++;
+	if (KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE != ARM64_WIDTH_64) {
+		printf("MISMATCH dq high lane stride\n");
+		failures++;
+	}
+	cases++;
+	if (KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE != 8U) {
+		printf("MISMATCH dq extra high lane stride\n");
+		failures++;
+	}
+
+	/* The routed extra-offset selector must name each offset the independent
+	 * fact restatement names, at all four fact pairs, and its outcome codes
+	 * and offset defines must stay the contract's. */
+	cases++;
+	if (KPROG_ARM64_DQ_MEM_EXTRA_COUNT != 3U ||
+	    KPROG_ARM64_DQ_MEM_EXTRA_FIRST_LANE_BYTES != 0U ||
+	    KPROG_ARM64_DQ_MEM_EXTRA_HIGH_LANE_BYTES != 1U ||
+	    KPROG_ARM64_DQ_MEM_EXTRA_SINGLE_LANE_BYTES != 2U) {
+		printf("MISMATCH dq extra outcome table\n");
+		failures++;
+	}
+	{
+		unsigned first;
+		unsigned high;
+
+		for (first = 0; first <= 1U; first++) {
+			for (high = 0; high <= 1U; high++) {
+				cases++;
+				if (KPROG_ARM64_DQ_MEM_EXTRA(first, high) !=
+				    model_extra(first, high)) {
+					printf("MISMATCH dq extra first=%u "
+					       "high=%u\n", first, high);
+					failures++;
+				}
+			}
+		}
+	}
+
+	/* The routed state-field selector must name each field the independent
+	 * half-offset restatement names, at both raw half offsets, and its field
+	 * codes must stay the contract's. */
+	cases++;
+	if (KPROG_ARM64_VREG_FIELD_COUNT != 2U ||
+	    KPROG_ARM64_VREG_LOW_FIELD != 0U ||
+	    KPROG_ARM64_VREG_HIGH_FIELD != 1U) {
+		printf("MISMATCH vreg field table\n");
+		failures++;
+	}
+	{
+		static const unsigned halves[2] = {
+			KPROG_ARM64_VREG_HALF_LOW, KPROG_ARM64_VREG_HALF_HIGH
+		};
+		unsigned h;
+
+		for (h = 0; h < 2U; h++) {
+			__s64 half_off =
+				(__s64)KPROG_ARM64_VREG_HALF_OFFSET(halves[h]);
+			unsigned high = half_off ==
+					(__s64)KPROG_ARM64_VREG_HIGH_OFFSET;
+			unsigned want = high ? KPROG_ARM64_VREG_HIGH_FIELD
+					     : KPROG_ARM64_VREG_LOW_FIELD;
+
+			cases++;
+			if (KPROG_ARM64_VREG_FIELD(high) != want) {
+				printf("MISMATCH vreg field half=%u high=%u\n",
+				       halves[h], high);
+				failures++;
+			}
+		}
+	}
+}
+
+int main(void)
+{
+	static const unsigned opcodes[4] = {
+		ARM64_OP_LOAD_D0, ARM64_OP_LOAD_Q0,
+		ARM64_OP_STORE_D0, ARM64_OP_STORE_Q0,
+	};
+	static const unsigned bases[5] = {
+		ARM64_X2, ARM64_X3, ARM64_X4, ARM64_X5, ARM64_SP,
+	};
+	static const unsigned flag_sets[4] = {
+		0U,
+		ARM64_MEM_PRE,
+		ARM64_MEM_POST,
+		ARM64_MEM_PRE | ARM64_MEM_POST,
+	};
+	static const unsigned indices[2] = { ARM64_REG_NONE, ARM64_X1 };
+	static const __s64 imms[3] = { 0, 8, -8 };
+	unsigned via;
+	unsigned o;
+	unsigned b;
+	unsigned fl;
+	unsigned ix;
+	unsigned im;
+	unsigned i;
+
+	for (i = 0; i < HEAP_BYTES; i++)
+		heap_img[i] = (__u8)(0x30U + i * 7U + (i >> 3));
+	for (i = 0; i < STACK_BYTES; i++)
+		stk_img[i] = (__u8)(0xa0U + i * 3U);
+	for (i = 0; i < STACK_SLOTS; i++)
+		stk_tag_img[i] = (__u8)(i % 3U);
+
+	for (via = 0; via < 2U; via++)
+		for (o = 0; o < 4U; o++)
+			for (b = 0; b < 5U; b++)
+				for (fl = 0; fl < 4U; fl++)
+					for (ix = 0; ix < 2U; ix++)
+						for (im = 0; im < 3U; im++)
+							check_case(opcodes[o],
+								   bases[b],
+								   indices[ix],
+								   flag_sets[fl],
+								   imms[im],
+								   via);
+
+	check_selectors();
+
+	if (failures != 0) {
+		printf("arm64 vreg field route host cross-check: FAIL (%d)\n",
+		       failures);
+		return 1;
+	}
+	printf("arm64 vreg field route host cross-check: OK (%lu cases)\n",
+	       cases);
+	return 0;
+}
