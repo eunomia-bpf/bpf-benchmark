@@ -36,6 +36,7 @@
 #include "../formal/generated/x86_mulx_arm.h"
 #include "../formal/generated/x86_bzhi_flags.h"
 #include "../formal/generated/x86_write_width_arm.h"
+#include "../formal/generated/x86_stack_write_lanes.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -490,32 +491,34 @@ struct x86_sim_state {
 				x86_width_mask(__x86_stw_width);          \
 			__x86_stack_mem.b[__x86_stw_index] =              \
 				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
-			if (__x86_stw_width >= X86_WIDTH_16)              \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 1))\
 				__x86_stack_mem.b[__x86_stw_index + 1] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 1);   \
-			if (__x86_stw_width >= X86_WIDTH_32) {            \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 2))\
 				__x86_stack_mem.b[__x86_stw_index + 2] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 2);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 3))\
 				__x86_stack_mem.b[__x86_stw_index + 3] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 3);   \
-			}                                                 \
-			if (__x86_stw_width == X86_WIDTH_64) {            \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 4))\
 				__x86_stack_mem.b[__x86_stw_index + 4] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 4);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 5))\
 				__x86_stack_mem.b[__x86_stw_index + 5] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 5);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 6))\
 				__x86_stack_mem.b[__x86_stw_index + 6] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 6);   \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 7))\
 				__x86_stack_mem.b[__x86_stw_index + 7] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 7);   \
-			}                                                 \
 		}                                                         \
 	} while (0)
 
@@ -536,32 +539,34 @@ struct x86_sim_state {
 				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
 			__x86_str_value =                                 \
 				__x86_stack_mem.b[__x86_str_index];       \
-			if (__x86_str_width >= X86_WIDTH_16)              \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 1))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_stack_mem.b[__x86_str_index + 1], 1);\
-			if (__x86_str_width >= X86_WIDTH_32) {            \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 2))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_stack_mem.b[__x86_str_index + 2], 2);\
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 3))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_stack_mem.b[__x86_str_index + 3], 3);\
-			}                                                 \
-			if (__x86_str_width == X86_WIDTH_64) {            \
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 4))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_stack_mem.b[__x86_str_index + 4], 4);\
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 5))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_stack_mem.b[__x86_str_index + 5], 5);\
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 6))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_stack_mem.b[__x86_str_index + 6], 6);\
+			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 7))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_stack_mem.b[__x86_str_index + 7], 7);\
-			}                                                 \
 		}                                                         \
 		__x86_str_value;                                          \
 	})
