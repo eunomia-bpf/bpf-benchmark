@@ -11943,6 +11943,119 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   namespace comment, and a cosmetic count-guard message) SURVIVE as required.
   Per detector: `gen` 14, `lean_chain` 12, `host` 11, `route` 4.
 
+## Step 0144 — AArch64 write-register width body-selection through the generated contract
+
+- Scope: the AArch64 simulator's writeback body
+  `ARM64_SIM_L_WRITE_REG_WIDTH` (`kprog/arm64/arm64_sim_local_bpf.h`), which
+  every GPR write in the simulator routes through. It first masks the value to
+  the access width (`KPROG_ARM64_APPLY_WIDTH`, owned by the Step-0075
+  `arm64_width.h` contract) and then picked the writeback body by hand from a
+  single closed fact --- whether the access width code is the 32-bit code ---
+  through `if ((WIDTH) == ARM64_WIDTH_32)` selecting the narrow truncating body
+  (`ARM64_SIM_L_WRITE_REG32_CASE`, storing `(__u32)__a64_l_next`) vs the
+  full-value body (`ARM64_SIM_L_WRITE_REG64_CASE`, storing `__a64_l_next`).
+  This step generates the 2-way selector from `arm64_write_arm_spec.json` into
+  the C `generated/arm64_write_arm.h` (the `KPROG_ARM64_WRITE_ARM` plain-ternary
+  selector, the `…_FULL` / `…_NARROW` arm codes, the count, distinctness,
+  exact-code, and per-width selection `_Static_assert`s) and
+  `KProgFormal/GeneratedArm64WriteArm.lean`, and routes the body through the
+  generated selector ---
+  `if (KPROG_ARM64_WRITE_ARM((WIDTH) == ARM64_WIDTH_32) ==
+  KPROG_ARM64_WRITE_ARM_NARROW)` --- so the hand width test is out of the body.
+  The `ARM64_SP` branch and the `KPROG_ARM64_REG_WRITABLE` guard stay outside
+  the selector (destination identity, not the width body choice).
+- Semantic note: because the value is masked to the width *before* the body
+  choice, the two bodies are observationally equal for every width the
+  simulator reaches (at the 32-bit code the masked value's upper 32 bits are
+  already zero; at the 8/16/64-bit codes the full body writes the already-masked
+  value). The split is a genuine no-op on state, so only a wrong *selector code*
+  or a *swapped body assignment* is observable; the route oracle's expectation
+  is width-body-sensitive for exactly this reason.
+- Spec `kprog/formal/arm64_write_arm_spec.json`: schema_version 1, operation
+  `arm64WriteArm`, selector `w32_then_narrow_else_full`, w32_define
+  `ARM64_WIDTH_32`, w32_code 4, and two arms --- `full` (arm_define
+  `KPROG_ARM64_WRITE_ARM_FULL`, body `full_width_writeback`) and `narrow`
+  (arm_define `KPROG_ARM64_WRITE_ARM_NARROW`, body `narrow_width_writeback`) ---
+  plus two cases classifying the (is w32) fact into its arm.
+- Generator `kprog/formal/generate_arm64_write_arm_spec.py`: `load()` re-reads
+  the sim header on every `--check` and rejects a spec that does not biject the
+  expected arms/cases table (including the exact `[0, 1]` code order and the
+  two-arm count), a case whose arm does not match the independent 2-way
+  selection, and a writeback-body region that names no generated selector or
+  still names the hand `if ((WIDTH) == ARM64_WIDTH_32)` gate. Emits the C header
+  `generated/arm64_write_arm.h` (the `KPROG_ARM64_WRITE_ARM(IS_W32)`
+  plain-ternary 2-way selector, the arm-code defines, and the count,
+  distinctness, exact-code, and per-width selection `_Static_assert`s) and the
+  Lean `KProgFormal/GeneratedArm64WriteArm.lean`. `--check` returns 0; the
+  `--check` row is added at `kprog/formal/Makefile:74`.
+- Generated C header `kprog/formal/generated/arm64_write_arm.h`:
+  `KPROG_ARM64_WRITE_ARM_W32 4U`, `KPROG_ARM64_WRITE_ARM_COUNT 2U`, the two
+  arm-code defines (`KPROG_ARM64_WRITE_ARM_FULL 0U` /
+  `KPROG_ARM64_WRITE_ARM_NARROW 1U`), the plain-ternary 2-way selector macro,
+  and the count, distinctness, exact-code, and per-width selection
+  `_Static_assert`s (cross-pinning `ARM64_WIDTH_32` to the generated `_W32`
+  and selecting each body at its own width fact).
+- Generated Lean `kprog/formal/KProgFormal/GeneratedArm64WriteArm.lean`: the
+  `Arm` type, `armCount := 2`, `w32Code := 4`, the arm-name and code tables,
+  `codeOfArm`/`armOfCode`, `bodyOfArm`, the 2-way `armOf`, the two-case
+  `Case`/`classify`/`fullBody`/`fullSpec` classification, `armOfCase`, and the
+  `full_refines`/`armOf_refines` theorems.
+- Hand Lean `kprog/formal/KProgFormal/Arm64WriteArmShape.lean`: independent
+  literal statements of the 2-way selector, the two arm names, the two codes,
+  the 32-bit literal, and the two-case dispatch, with theorems
+  `arm64_write_arm_refines` (the generated selector equals the independent 2-way
+  literal over every fact), `_names_refine`, `_codes_refine`,
+  `_codes_length`/`_names_length`, `_codes_nodup`, `_w32_spec_bound` (the 32-bit
+  literal is the width contract's own 32-bit code), `_w32_is_w32`, `_count_is_2`,
+  `_of_code_roundtrip`, `_of_code_beyond_is_none`, `_bodies`, `_narrow_iff`,
+  `_full_iff`, `_over_widths` (maps `[w8, w16, w32, w64]` to
+  `[full, full, narrow, full]`), `_case_dispatch`, `_case_refines`,
+  `_narrow_matches_pre_truncation` (the narrow body is selected exactly at the
+  width the pre-truncation step masks to 32 bits), and `_full_covers`; all
+  `native_decide`/`rfl`/`decide`.
+  `lake build KProgFormal.GeneratedArm64WriteArm KProgFormal.Arm64WriteArmShape`
+  returns 0.
+- Sim-header routing `kprog/arm64/arm64_sim_local_bpf.h`: the writeback body now
+  selects its body through the generated `KPROG_ARM64_WRITE_ARM` selector, the
+  hand `if ((WIDTH) == ARM64_WIDTH_32)` test is out of the body, and the include
+  `#include "../formal/generated/arm64_write_arm.h"` is added beside the other
+  generated arm includes, while the `SP` branch, the destination-presence guard,
+  the pre-truncation `KPROG_ARM64_APPLY_WIDTH`, and the pointer-writeback helper
+  `ARM64_SIM_L_WRITE_REG_PTR` are unchanged.
+- Host oracle `kprog/formal/test_arm64_write_arm_host.c`: restates the 2-way
+  writeback-body selection from the raw width fact and drives the generated
+  selector and the two arm-code defines, pinning the arm codes, the count, and
+  the `ARM64_WIDTH_32` decode:
+  `arm64 write arm host cross-check: OK (260 cases)`.
+- Route oracle `kprog/formal/test_arm64_write_arm_route_host.c`: declares the
+  full register file and stack, seeds every GPR, and drives the real
+  `ARM64_SIM_L_WRITE_REG_WIDTH` over the full register-number range, all four
+  width codes, and several values against an independent model that masks first
+  and then truncates exactly when the width code is the 32-bit code, so the
+  width-body-sensitive expectation catches a wrong selector code or a swapped
+  body assignment; compares the whole register file and the stack pointer:
+  `arm64 write arm route host cross-check: OK (6401 cases)`.
+- `make -C kprog/formal check` passes with **190** `cross-check: OK` rows and
+  zero `FAIL` (the new generator `--check`, the two Lean rows, and the host
+  and route oracle rows were added; 188→190).
+- `make -C kprog/arm64 micro-proofs-build` rebuilt all 30 workload-derived
+  artifacts, all `ok`.
+- Mutation harness `kprog/formal/build/mut_arm64_write_arm.py`, 42 mutations
+  against the live tree, each caught after the four unmutated controls (`gen`,
+  `lean_chain`, `host`, `route`) pass, restoring every watched file
+  byte-for-byte between mutations and re-checking the baseline green at the
+  end: 38 of the 42 are caught --- six specification distortions, six
+  generator-table changes, nine generated-C header distortions (including the
+  two regenerated generator/render drifts), seven generated-Lean distortions,
+  seven hand-refinement changes, and three sim-header selector
+  reverts/swaps/neutralizations, each of these a change the generator check, a
+  refinement theorem, or an oracle flags --- while four genuine-equivalence
+  rewrites (a resolved-but-equal generator root path, an added hand-module
+  namespace comment, a cosmetic count-guard message, and the
+  masked-then-truncated body-selector swap that is unobservable on state)
+  SURVIVE as required. Per detector: `gen` 14, `lean_chain` 14, `host` 9,
+  `route` 1.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

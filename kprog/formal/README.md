@@ -449,6 +449,38 @@ over every opcode, base class, pre/post flag combination, index mode, and
 several immediates against an independent model that restates the half-field
 selection from the raw offset, so a body that always wrote one field, or
 swapped the two fields, is numerically distinguishable.
+The AArch64 write-register width body-selection is generated the same way from
+`arm64_write_arm_spec.json` into the C `generated/arm64_write_arm.h` (the
+`KPROG_ARM64_WRITE_ARM` plain-ternary 2-way selector, the `…_FULL` /
+`…_NARROW` arm codes, and the count, distinctness, exact-code, and per-width
+selection `_Static_assert`s) and `KProgFormal/GeneratedArm64WriteArm.lean`. The
+generator re-reads the simulator header on every `--check` and rejects a
+writeback-body region that names no generated selector or still picks its body
+by hand through the `if ((WIDTH) == ARM64_WIDTH_32)` test. The simulator's
+writeback body `ARM64_SIM_L_WRITE_REG_WIDTH`, which every GPR write routes
+through, now selects its body through the generated selector, so the hand width
+test is out of the body; the `SP` branch, the destination-presence guard, the
+pre-truncation `KPROG_ARM64_APPLY_WIDTH`, and the pointer-writeback helper
+`ARM64_SIM_L_WRITE_REG_PTR` are unchanged. Because the value is masked to the
+width before the body choice, the two bodies are observationally equal for
+every width the simulator reaches, so the split is a genuine no-op on state and
+only a wrong selector code or a swapped body assignment is observable. Lean
+checks the generated selector against an independent 2-way literal over the
+width fact, the arm-name and arm-code tables against independent enumerations,
+the code round-trip and out-of-range facts, both bodies, the 32-bit literal's
+binding to the width contract's own code
+(`arm64_write_arm_w32_spec_bound`), the per-width map of `[w8, w16, w32, w64]`
+to `[full, full, narrow, full]` (`arm64_write_arm_over_widths`), the two-case
+dispatch, and that the narrow body is selected exactly at the width the
+pre-truncation step masks to 32 bits
+(`arm64_write_arm_narrow_matches_pre_truncation`); the 260-case host oracle
+drives the compiled selector over the raw width fact against an independent
+2-way restatement, and the 6401-case route oracle includes the simulator
+header, declares the full register file and stack, seeds every general register,
+and drives the real writeback body over the full register-number range, all four
+width codes, and several values against an independent model that masks first
+and then truncates exactly when the width code is the 32-bit code, so a wrong
+selector code or a swapped body assignment is numerically distinguishable.
 INC and DEC in the central result helper specialize the generated ADD and SBB
 contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the
@@ -2264,6 +2296,31 @@ writeback bodies over all 256 register numbers, all four widths and both pointer
 forms, comparing the whole register file with tags and the stack pointer against
 an independent model that writes only when the number is neither `31` nor `0xff`
 (6,913 cases).
+
+The width *body* that writeback body then picks is likewise a generated
+contract: `generate_arm64_write_arm_spec.py` emits `KPROG_ARM64_WRITE_ARM` and
+the `…_FULL` / `…_NARROW` arm codes, and `Arm64WriteArmShape.lean` proves the
+selector equals an independent 2-way literal over the width fact, the arm-name
+and arm-code tables, the code round-trip and out-of-range facts, both bodies,
+the 32-bit literal's binding to the width contract's own code
+(`arm64_write_arm_w32_spec_bound`), the per-width map of `[w8, w16, w32, w64]`
+to `[full, full, narrow, full]` (`arm64_write_arm_over_widths`), the two-case
+dispatch, and that the narrow body is selected exactly at the width the
+pre-truncation step masks to 32 bits
+(`arm64_write_arm_narrow_matches_pre_truncation`), so the body choice and the
+pre-truncation step cannot disagree about which width truncates. Because the
+value is masked to the width before the body choice, the two bodies are
+observationally equal for every width the simulator reaches, so the split is a
+genuine no-op on state and only a wrong selector code or a swapped body
+assignment is observable. `ARM64_SIM_L_WRITE_REG_WIDTH` now selects its body
+through the generated selector, so the hand `if ((WIDTH) == ARM64_WIDTH_32)`
+test is no longer restated in the simulator (the `SP` branch and the
+destination-presence guard stay separate). A generated-header oracle drives the
+selector and the two arm-code defines over the raw width fact against an
+independent 2-way restatement (260 cases), and a sim-header route oracle drives
+the real writeback body over all 256 register numbers, all four width codes and
+several values against an independent model that masks first and then truncates
+exactly when the width code is the 32-bit code (6,401 cases).
 
 The AArch64 register-number -> dispatch-cell binding -- the last openly
 uncontracted AArch64 decode -- is itself a generated contract:

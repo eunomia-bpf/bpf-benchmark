@@ -863,13 +863,58 @@ increment is committed and pushed immediately). Current state:
   the generator check, or a refinement theorem, while the last three
   genuine-equivalence rewrites are the three the proof correctly does not
   flag.
+
+  The AArch64 write-register width body-selection is likewise no longer open
+  (Step 0144): the writeback body `ARM64_SIM_L_WRITE_REG_WIDTH` --- the body
+  every GPR write routes through --- first masks the value to the access width
+  through `KPROG_ARM64_APPLY_WIDTH` (the Step-0075 `arm64_width.h` contract) and
+  then picked, by hand from the single closed fact of whether the width code is
+  the 32-bit code, the narrow truncating body
+  (`ARM64_SIM_L_WRITE_REG32_CASE`, storing `(__u32)__a64_l_next`) vs the
+  full-value body (`ARM64_SIM_L_WRITE_REG64_CASE`, storing `__a64_l_next`)
+  through `if ((WIDTH) == ARM64_WIDTH_32)`. This step generates the 2-way
+  selector from `arm64_write_arm_spec.json` into the C
+  `generated/arm64_write_arm.h` (the `KPROG_ARM64_WRITE_ARM` plain-ternary
+  selector, the `…_FULL` / `…_NARROW` arm codes, and the count, distinctness,
+  exact-code, and per-width selection `_Static_assert`s) and
+  `KProgFormal/GeneratedArm64WriteArm.lean`, and routes the body through the
+  generated selector, so the hand width test is out of the body; the `SP`
+  branch, the destination-presence guard, the pre-truncation step, and the
+  pointer-writeback helper `ARM64_SIM_L_WRITE_REG_PTR` are unchanged. Because
+  the value is masked to the width before the body choice, the two bodies are
+  observationally equal for every width the simulator reaches, so the split is
+  a genuine no-op on state and only a wrong selector code or a swapped body
+  assignment is observable. `Arm64WriteArmShape.lean` proves the generated
+  selector equal to an independent 2-way literal over the width fact
+  (`arm64_write_arm_refines`), the arm-name and arm-code tables, the code
+  round-trip and out-of-range facts, both bodies, the 32-bit literal's binding
+  to the width contract's own code (`arm64_write_arm_w32_spec_bound`), the
+  per-width map of `[w8, w16, w32, w64]` to `[full, full, narrow, full]`
+  (`arm64_write_arm_over_widths`), the two-case dispatch, and that the narrow
+  body is selected exactly at the width the pre-truncation step masks to 32 bits
+  (`arm64_write_arm_narrow_matches_pre_truncation`), so the body choice and the
+  pre-truncation cannot disagree about which width truncates; the 260-case host
+  oracle drives the compiled selector over the raw width fact against an
+  independent 2-way restatement, and the 6401-case route oracle seeds every GPR
+  and drives the real writeback body over the full register-number range, all
+  four width codes, and several values against an independent model that masks
+  first and then truncates exactly when the width code is the 32-bit code, so a
+  wrong selector code or a swapped body assignment is numerically
+  distinguishable. 42 binding mutations --- six specification distortions, six
+  generator-table changes, nine generated-C header distortions (including the
+  two regenerated generator/render drifts), seven generated-Lean changes, seven
+  hand-refinement changes, and three sim-header selector
+  reverts/swaps/neutralizations --- each of the first 38 changes the oracle, the
+  generator check, or a refinement theorem, while the last four
+  genuine-equivalence rewrites are the four the proof correctly does not flag.
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
   pointer source now closed (Steps 0137, 0138, and 0139), the memory
   base-address source now closed (Step 0140), the vector memory step's
   per-lane extra offset now closed (Step 0141), and the memory address
   offset's index-value source now closed (Step 0142), and the vector memory
-  step's half state-field selection now closed (Step 0143),
+  step's half state-field selection now closed (Step 0143), and the
+  write-register width body-selection now closed (Step 0144),
 
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
