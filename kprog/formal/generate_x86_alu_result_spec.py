@@ -19,6 +19,7 @@ only the sixteen real codes through it).
 """
 import argparse
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -27,6 +28,7 @@ DECODE_SPEC = ROOT / "x86_alu_decode_spec.json"
 LEAN = ROOT / "KProgFormal/GeneratedX86AluResult.lean"
 CHEADER = ROOT / "generated/x86_alu_result.h"
 SHIFT_NAMES = ("shl", "shr", "sar", "rol")
+
 NAMES = ["add", "sub", "xor", "or", "and", "shl", "shr", "sar", "rol",
          "imul", "inc", "not", "sbb", "dec", "neg", "adc"]
 OPERATION_BITS = 8
@@ -121,8 +123,39 @@ def load() -> list[dict]:
                 ("GeneratedX86ShiftResult." in row["lean"]):
             raise SystemExit(
                 f"invalid x86 alu result shift delegation: {row!r}")
+        if row["name"] == "not" and "RHS" in row["c"]:
             raise SystemExit("x86 alu result not arm must not read rhs")
     return ops
+
+
+HEADER = ROOT.parent / "x86/x86_sim.h"
+ROUTER_START = "static __always_inline __u64 x86_alu_result("
+ROUTER_END = "static __always_inline __u64 x86_shld("
+ROUTED_MACRO = "KPROG_X86_ALU_RESULT(lhs, rhs, alu, width, (void)0)"
+ROUTED_INCLUDE = '#include "../formal/generated/x86_alu_result.h"'
+HAND_LADDER = "if (alu == X86_ALU_ADD)"
+
+
+def check_against_header(ops: list[dict]) -> None:
+    """The live dispatcher must route through the generated macro."""
+    text = HEADER.read_text()
+    start = text.index(ROUTER_START)
+    end = text.index(ROUTER_END, start)
+    region = re.sub(r"\s+", " ", text[start:end])
+    if ROUTED_MACRO not in region:
+        raise SystemExit(
+            "x86 alu result dispatcher does not route through the generated "
+            "macro")
+    if ROUTED_INCLUDE not in text:
+        raise SystemExit(
+            "x86 sim header does not include the generated alu result header")
+    if HAND_LADDER in region:
+        raise SystemExit(
+            "x86 alu result dispatcher still contains the hand token ladder")
+    for row in ops:
+        if f"case {row['code']}U" not in CHEADER.read_text():
+            raise SystemExit(
+                f"generated alu result header drops case {row['code']}U")
 
 
 def render_lean(ops: list[dict]) -> str:
@@ -187,6 +220,7 @@ def main() -> None:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     ops = load()
+    check_against_header(ops)
     for path, expected in ((LEAN, render_lean(ops)),
                            (CHEADER, render_c(ops))):
         if args.check:
