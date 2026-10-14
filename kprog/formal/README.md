@@ -3055,6 +3055,34 @@ four dispatcher distortions in the simulator header, a spec code change, and an
 independent Lean code-spec shift---each change the oracle or the refinement
 theorem.
 
+The x86 ALU op-step result is likewise a generated contract: the sixteen
+`if/else-if` arms of the simulator's `x86_alu_result` dispatcher
+(`kprog/x86/x86_sim.h`) are `KPROG_X86_ALU_RESULT(LHS, RHS, OP, WIDTH,
+UNSUPPORTED)` in `generated/x86_alu_result.h`, emitted by
+`generate_x86_alu_result_spec.py` from `x86_alu_result_spec.json`, and the
+dispatcher is a one-line wrapper running the caller's `(void)0` action at the
+default arm. Each arm keeps the expression the hand dispatcher had — the
+`KPROG_X86_ADC_RESULT`/`KPROG_X86_SBB_RESULT`/`KPROG_X86_NOT_RESULT` one-step
+macros, the generated `kprog_x86_{shl,shr,sar,rol}_result` helpers at the
+caller's width, and the bitwise/product formulas — and the generator
+cross-checks the sixteen codes against the ALU-decode contract's table, that
+the four shift arms delegate through the shift contract and the NOT arm
+consumes no RHS, so the case labels track the `X86_ALU_*` constants
+part-for-part. The generated Lean twin `GeneratedX86AluResult.result` mirrors
+the arms over `GeneratedX86AluDecode`'s closed 16-constructor `Alu` tokens,
+delegating to `GeneratedX86Adc`/`GeneratedX86SbbResult`/`GeneratedX86Not`/
+`GeneratedX86ShiftResult`, and `X86AluResultSpec.lean` states the
+independent `x86AluResultSpec` over `x86AluCodeSpec` literals and proves
+`x86_alu_result_refines` arm-by-arm through the add/subtract/shift result
+refinements the tokens already had, plus `x86_alu_result_code_dispatch`
+(generated codes equal the independent literals) and
+`x86_alu_result_code_in_range`. The host oracle drives the real macro and the
+routed wrapper over 16 tokens × 6 lhs × 8 rhs × 4 widths from independent
+per-op arithmetic identities (never the macro's own helpers), pins the
+case-label table and its distinctness, and pins the default arm keeping the
+left operand at the sixteen out-of-range operation bytes
+(OK (6304 cases) rows in `make check`).
+
 The x86 condition-mnemonic decode contract binds the `X86_CC_*` codes the
 artifact encoder's `CC_AUX` mapping selects for its 36 `jcc`/`cmovcc`/`setcc`
 mnemonics. `X86CcDecode.lean` projects the generated table to
@@ -3172,7 +3200,10 @@ routing of the step's flags through the generated clear-`SF`/`OF`,
 set-`CF`-from-count-versus-width, set-`ZF`-from-result-zero contract),
 x86 effective-width resolution (and the simulator's routing of its
 register/stack/flag/ALU/move/compare bodies through it), x86
-logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
+logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the
+x86 ALU op-step result composition (and the simulator's routing of the
+`X86_SIM_L_EXEC_ALU_*` arm results through the generated 16-arm
+`KPROG_X86_ALU_RESULT` contract), the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
 x86 operand-register presence (and the simulator's routing of its memory-read,
 MULX, MOVBE, LEA and ALU-memory bodies through it), x86 register-number
 dispatch-cell binding (and the simulator's binding of its write/tag X-macro

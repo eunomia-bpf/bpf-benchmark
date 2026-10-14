@@ -1069,7 +1069,8 @@ increment is committed and pushed immediately). Current state:
   x86-64 ALU-token flag-body selection now closed (Step 0147), the
   x86-64 dispatch-family token-membership now closed (Step 0148), and the
   x86-64 dispatch-singleton opcode-membership now closed (Step 0149), and
-  the x86-64 SHL/SHR/SAR/ROL flag routing now closed (Step 0151),
+  the x86-64 SHL/SHR/SAR/ROL flag routing now closed (Step 0151), and the
+  x86-64 ALU op-step result composition now closed (Step 0153),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

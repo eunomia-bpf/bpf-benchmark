@@ -12826,6 +12826,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   over the added lines (6/6) — the file's pre-existing `\(` / `\)` delta
   (262/263 before, 268/269 after) is unchanged by this edit.
 
+## Step 0153 — x86-64 ALU op-step result through a generated 16-arm contract
+
+- The x86-64 simulator's `x86_alu_result` dispatcher
+  (`kprog/x86/x86_sim.h:249-287` before, commit `e3f105c2b`): sixteen
+  hand-written if/else-if arms over the `X86_ALU_*` tokens are now the
+  generated `KPROG_X86_ALU_RESULT` macro
+  (`kprog/formal/generated/x86_alu_result.h`), emitted by
+  `x86_alu_result_spec.json` through
+  `generate_x86_alu_result_spec.py` exactly like every other contract; the
+  macro keeps the dispatcher's arm expressions — the
+  `KPROG_X86_ADC_RESULT`/`KPROG_X86_SBB_RESULT`/`KPROG_X86_NOT_RESULT`
+  one-step macros, the four generated `kprog_x86_{shl,shr,sar,rol}_result`
+  helpers at the caller's width, and the bitwise/product formulas — starts
+  the result at the left operand, and runs the caller's `UNSUPPORTED` action
+  (here `(void)0`) at the default arm.
+- Proof chain `kprog/formal/KProgFormal/X86AluResultSpec.lean`: the
+  independent `x86AluResultSpec` over `x86AluCodeSpec` literals,
+  `x86_alu_result_refines` through
+  `x86_add/sub/shl/shr/sar/rol_result_refines` per arm,
+  `x86_alu_result_code_dispatch` (generated codes equal the independent
+  literals), and `x86_alu_result_code_in_range` (< 16); the generated
+  `GeneratedX86AluResult.result` mirrors the arms over
+  `GeneratedX86AluDecode`'s 16 closed `Alu` tokens, delegating to
+  `GeneratedX86Adc/SbbResult/Not/ShiftResult`.
+- Gate: `test_x86_alu_result_arm_host.c` OK (6304 cases) — 16 tokens ×
+  6 lhs × 8 rhs × 4 widths through both the real macro and the routed
+  wrapper, plus the case-label/distinctness/default-arm rows;
+  `make -C kprog/formal check`: 202 OK rows, 0 FAIL; `make -C kprog/x86 run`:
+  object builds and the loader loads `x86_sim_hardcoded_xdp` (fd=4).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
