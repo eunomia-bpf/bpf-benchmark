@@ -12694,6 +12694,59 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   this run is `gen` 15 / `lean_chain` 14 / `host` 5 / `route` 6. Total 47
   mutations, 0 failures, `ALL AS EXPECTED`.
 
+## Step 0150 — x86-64 dispatch-singleton paper paragraph
+
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` (paper commit
+  `748fe45`, pushed to `main`; superproject pointer `39956c5d9`): after the
+  AArch64 dispatch-singleton paragraph, adds the x86-64 mirror paragraph
+  (four sentences, lines 385–388) and extends the covered-slices enumeration
+  at line 74 with the dispatch-singleton opcode-membership family
+  ("... ALU-token flag-body-selection, dispatch-family token-membership, and
+  dispatch-singleton opcode-membership families, ...").
+- Paragraph content (quoting the paper's own numbers): the x86-64 dispatcher
+  singleton-opcode membership composition covers the **forty-three** opcodes
+  the instruction dispatcher gates individually in order, one contract per
+  opcode, naming all forty-three one-member sets (NOP through POP); the
+  theorem block proves every generated membership equal to an independent
+  named singleton list for all forty-three, the member/non-member split, the
+  C-opcode-byte range, duplicate-free codes, and the cross-contract that the
+  combined singleton + dispatch-family opcode numbers are pairwise distinct,
+  so the ordered chain selects exactly one arm per opcode; the routing
+  sentence states the dispatcher now routes each singleton gate through the
+  generated one-member `KPROG_X86_DISP_<T>_HANDLED` macro instead of the
+  forty-three hand-written raw comparisons, leaving the per-arm operand
+  selection, the composed handler bodies, and the non-member fall-through
+  unchanged; the oracle sentence pins the independent 11,094-case switch
+  oracle (locally declared raw opcode numbers, all 256 byte values per
+  singleton, explicit member sweep, pairwise distinctness) and the 582-case
+  routed oracle (whole-state model, planted scalar/ABI/heap base registers,
+  `X86_OP_RET` non-member byte-identical), so a dropped or widened family, a
+  reordered or swapped member, or a gate that misclassifies a non-member is
+  numerically distinguishable.
+- Number sources: 43 from `x86_dispatch_singleton_spec.json`
+  (`len(singletons)`), 11,094 from `test_x86_dispatch_singleton_host.c`
+  ("OK (11094 cases)"), 582 from
+  `test_x86_dispatch_singleton_route_host.c` ("OK (582 cases)"),
+  route-oracle mechanics (whole-state snapshot incl. 16 GPR tag pairs,
+  scalar/ABI/heap-tag planting, byte-identical non-member) read from the
+  oracle source (`test_x86_dispatch_singleton_route_host.c:23-25`,
+  `:1800`, `:1810-1813`) rather than paraphrased.
+- Precedent decision: no mutation-tally sentence in this paragraph,
+  mirroring the Step 0148 (dispatch-family, `46d2abe`), Step 0147 (ALU flag
+  body), and Step 0146 (stack byte-ladder, `919d51d`) sibling paragraphs,
+  whose last sentences end with the "numerically distinguishable" line; the
+  older 0142/0143 paragraphs carry "N binding mutations" tails, but the
+  three newest x86 membership/body-selection paragraphs do not. The
+  47-mutation harness evidence with its caught-by split stands recorded in
+  the Step 0149 devlog entry.
+- No code, spec, generator, Lean, sim-header, or evaluation-plan change:
+  the paper's `sections/5-evaluation-plan.tex` is untouched, matching every
+  paper-commit precedent since the safety section took these paragraphs
+  (`git log -- sections/5-evaluation-plan.tex` last at c91eb7f, and none of
+  46d2abe/f052e8e/919d51d touched it); the `make`/latexmk build gate is not
+  available in this environment, so the edit is verified by brace-and-$
+  balance over the new lines plus the diff review.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
