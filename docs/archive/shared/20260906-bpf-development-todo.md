@@ -12797,6 +12797,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   weakening typechecks (weaker obligations prove trivially), so it was
   replaced by a refutation-grade `==` flip on the ROL OF clause.
 
+## Step 0152 — x86-64 shift-flag route-oracle paper paragraph
+
+- Paper `docs/kprog-simulator-in-ebpf/sections/4-safety.tex` (paper commit
+  `a16c990`, pushed to `main`; superproject pointer `e85b24047`): after the
+  packed-AUX composition opening, adds the routed wrapper-oracle sibling
+  paragraph for the shift-flag family (one sentence) and extends the
+  covered-slices enumeration at line 74 ("shift results and shift-flag
+  production (with the routed wrapper-oracle sibling)").
+- Paragraph content (quoting the committed oracles' numbers): 6,504,961
+  routed cases over 4 shift tokens × 5 width codes × 8 left values ×
+  11 count values × 7 result values through the real
+  `X86_SIM_L_SET_SHIFT_FLAGS` wrapper as dispatched from
+  `case KPROG_X86_ALU_FLAG_ARM_SHIFT`; the count table pins count-zero
+  preservation, the count-one overflow boundary, and the 31/32/63/64
+  mask-count edges; the 72-mutation harness split (22 spec/generator,
+  30 Lean chain, 13 host oracle, 4 routed oracle) with 3 genuine
+  equivalence survivors, including the count-guard distortion the host
+  grid cannot see (no rhs=0 case) and the routed grid catches.
+- Number sources: 6,504,961 from
+  `kprog/formal/test_x86_shift_flags_route_host.c`
+  ("OK (6504961 cases)", commit `589f0296b`); 72/69/22/30/13/4/3 from the
+  recorded `mut_x86_shift_flags.py` output
+  (`TOTAL 72 mutations, 0 failures (gen=22 lean_chain=30 host=13 route=4)`,
+  `ALL AS EXPECTED`).
+- Edit shape follows the Step 0149 (`748fe45`) and 0150 paper precedents:
+  no evaluation-plan change, brace balance 0 and `\( \)`-parity preserved
+  over the added lines (6/6) — the file's pre-existing `\(` / `\)` delta
+  (262/263 before, 268/269 after) is unchanged by this edit.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
