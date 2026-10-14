@@ -83,6 +83,7 @@ check:
 	python3 generate_x86_stack_index_spec.py --check
 	python3 generate_x86_stack_arena_spec.py --check
 	python3 generate_x86_shift_result_spec.py --check
+	python3 generate_x86_alu_result_spec.py --check
 	python3 generate_x86_bswap_spec.py --check
 	python3 generate_x86_signed_spec.py --check
 	python3 generate_x86_popcount_spec.py --check
@@ -163,6 +164,10 @@ check:
 	lake env lean KProgFormal/X86AddResult.lean
 	lake env lean KProgFormal/X86SubResult.lean
 	lake env lean KProgFormal/X86AluDecode.lean
+	lake env lean KProgFormal/GeneratedX86AluResult.lean
+	lake env lean KProgFormal/X86AluResultSpec.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_alu_result_arm_host.c -o build/test_x86_alu_result_arm_host
+	./build/test_x86_alu_result_arm_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_alu_decode_host.c -o build/test_x86_alu_decode_host
 	./build/test_x86_alu_decode_host
 	lake env lean KProgFormal/GeneratedX86Opcode.lean

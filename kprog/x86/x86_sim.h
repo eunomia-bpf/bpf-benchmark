@@ -109,6 +109,7 @@
 #include "../formal/generated/x86_not.h"
 #include "../formal/generated/x86_shift_count.h"
 #include "../formal/generated/x86_shift_result.h"
+#include "../formal/generated/x86_alu_result.h"
 #include "../formal/generated/x86_bswap.h"
 #include "../formal/generated/x86_signed.h"
 #include "../formal/generated/x86_popcount.h"
@@ -250,39 +251,7 @@ static __always_inline __u64 x86_popcount64(__u64 value)
 static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 					    __u32 alu, __u8 width)
 {
-	if (alu == X86_ALU_ADD)
-		return KPROG_X86_ADC_RESULT(lhs, rhs, 0);
-	if (alu == X86_ALU_ADC)
-		return lhs + rhs;
-	if (alu == X86_ALU_SUB)
-		return KPROG_X86_SBB_RESULT(lhs, rhs, 0);
-	if (alu == X86_ALU_SBB)
-		return lhs - rhs;
-	if (alu == X86_ALU_XOR)
-		return lhs ^ rhs;
-	if (alu == X86_ALU_OR)
-		return lhs | rhs;
-	if (alu == X86_ALU_AND)
-		return lhs & rhs;
-	if (alu == X86_ALU_SHL)
-		return kprog_x86_shl_result(lhs, rhs, width);
-	if (alu == X86_ALU_SHR)
-		return kprog_x86_shr_result(lhs, rhs, width);
-	if (alu == X86_ALU_SAR)
-		return kprog_x86_sar_result(lhs, rhs, width);
-	if (alu == X86_ALU_ROL)
-		return kprog_x86_rol_result(lhs, rhs, width);
-	if (alu == X86_ALU_IMUL)
-		return lhs * rhs;
-	if (alu == X86_ALU_INC)
-		return KPROG_X86_ADC_RESULT(lhs, 1, 0);
-	if (alu == X86_ALU_DEC)
-		return KPROG_X86_SBB_RESULT(lhs, 1, 0);
-	if (alu == X86_ALU_NOT)
-		return KPROG_X86_NOT_RESULT(lhs);
-	if (alu == X86_ALU_NEG)
-		return KPROG_X86_SBB_RESULT(0, lhs, 0);
-	return lhs;
+	return KPROG_X86_ALU_RESULT(lhs, rhs, alu, width, (void)0);
 }
 
 static __always_inline __u64 x86_shld(__u64 dst, __u64 src, __u64 shift,

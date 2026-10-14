@@ -1,0 +1,17 @@
+{"schema_version": 1, "operation": "x86AluResult", "operation_bits": 8, "width_kind": "GeneratedX86Width.Width", "default_lean": "lhs", "default_c": "(LHS)", "operations": [
+  {"name": "add", "code": 0, "lean": "GeneratedX86Adc.result lhs rhs false", "c": "KPROG_X86_ADC_RESULT(LHS, RHS, 0)"},
+  {"name": "sub", "code": 1, "lean": "GeneratedX86SbbResult.result lhs rhs false", "c": "KPROG_X86_SBB_RESULT(LHS, RHS, 0)"},
+  {"name": "xor", "code": 2, "lean": "lhs ^^^ rhs", "c": "(LHS) ^ (RHS)"},
+  {"name": "or", "code": 3, "lean": "lhs ||| rhs", "c": "(LHS) | (RHS)"},
+  {"name": "and", "code": 4, "lean": "lhs &&& rhs", "c": "(LHS) & (RHS)"},
+  {"name": "shl", "code": 5, "lean": "GeneratedX86ShiftResult.shl lhs rhs width", "c": "kprog_x86_shl_result(LHS, RHS, WIDTH)"},
+  {"name": "shr", "code": 6, "lean": "GeneratedX86ShiftResult.shr lhs rhs width", "c": "kprog_x86_shr_result(LHS, RHS, WIDTH)"},
+  {"name": "sar", "code": 7, "lean": "GeneratedX86ShiftResult.sar lhs rhs width", "c": "kprog_x86_sar_result(LHS, RHS, WIDTH)"},
+  {"name": "rol", "code": 8, "lean": "GeneratedX86ShiftResult.rol lhs rhs width", "c": "kprog_x86_rol_result(LHS, RHS, WIDTH)"},
+  {"name": "imul", "code": 9, "lean": "lhs * rhs", "c": "(LHS) * (RHS)"},
+  {"name": "inc", "code": 10, "lean": "GeneratedX86Adc.result lhs 1 false", "c": "KPROG_X86_ADC_RESULT(LHS, 1, 0)"},
+  {"name": "not", "code": 11, "lean": "GeneratedX86Not.result lhs", "c": "KPROG_X86_NOT_RESULT(LHS)"},
+  {"name": "sbb", "code": 12, "lean": "GeneratedX86SbbResult.result lhs rhs false", "c": "KPROG_X86_SBB_RESULT(LHS, RHS, 0)"},
+  {"name": "dec", "code": 13, "lean": "GeneratedX86SbbResult.result lhs 1 false", "c": "KPROG_X86_SBB_RESULT(LHS, 1, 0)"},
+  {"name": "neg", "code": 14, "lean": "GeneratedX86SbbResult.result 0 lhs false", "c": "KPROG_X86_SBB_RESULT(0, LHS, 0)"},
+  {"name": "adc", "code": 15, "lean": "GeneratedX86Adc.result lhs rhs false", "c": "KPROG_X86_ADC_RESULT(LHS, RHS, 0)"}]}
