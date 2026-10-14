@@ -12584,6 +12584,116 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   covered-slices list with the dispatch-family token-membership family,
   and lists the gate it routes (paper commit pushed to `main`).
 
+## Step 0149 — x86-64 dispatch-singleton opcode-membership contract
+
+- Scope: the dispatcher's remaining forty-three single-member gates in
+  `kprog/x86/x86_sim_local_bpf.h` --- the `X86_SIM_L_EXEC` arms that test a
+  single opcode with a raw hand comparison instead of a shared family
+  macro: the CALL ladder's four encodings and the register protocol call,
+  the register immediate/move arms, the MOVBE load/store pair, the XMM0
+  load/store pair, LEA, the five memory-source ALU arms, the compare
+  register-vs-memory arm, both CMOV arms, both SETCC arms, BSWAP, POPCNT,
+  both SHIFTX arms, both RORX arms, both BZHI arms, the three BT arms, the
+  two IMUL-immediate arms, MULX, REP MOVS, the ANDN pair, XCHG, DIV, PUSH
+  and POP. This step generates those forty-three single-opcode membership
+  tests from `x86_dispatch_singleton_spec.json` into the C
+  `generated/x86_dispatch_singleton.h` (the forty-three
+  `KPROG_X86_DISP_<NAME>_HANDLED(OP)` plain-expression membership macros,
+  the forty-three `X86_OP_* == code` token-code drift asserts binding the
+  hand-written decode to the generated sets, and the forty-three per-token
+  coverage asserts naming every singleton through its own gate) and
+  `KProgFormal/GeneratedX86DispatchSingleton.lean`, and routes each
+  singleton arm through its generated gate so the hand comparisons are out
+  of the body. This is the x86-side mirror of the AArch64
+  dispatch-singleton style (the arm64 singleton family is Step 0126),
+  completing the dispatcher so every gate in the `X86_SIM_L_EXEC` chain is
+  either a generated ten-family membership macro (Step 0148) or one of
+  these generated singleton macros.
+- Spec `kprog/formal/x86_dispatch_singleton_spec.json`: schema_version 1,
+  operation `x86DispatchSingleton`, and the forty-three singletons with
+  their name, code, op macro, and gate macro in the dispatcher's own arm
+  order, with `X86_OP_*` numbers 0..59 as pinned by the spec generator
+  against `kprog/x86/x86_sim.h`.
+- Generator `kprog/formal/generate_x86_dispatch_singleton_spec.py`:
+  `load()` requires the JSON to equal the generator's expected table
+  verbatim (`EXPECTED`), asserts per-opcode code drift against
+  `kprog/x86/x86_sim.h`'s `#define X86_OP_* 0b0..U` definitions and
+  rejects duplicate names; `check_against_header()` re-reads the sim
+  header on every `--check`, requires the dispatcher chain to route the
+  forty-three singleton arms through the generated gates (`NOP` keeps its
+  hand-rolled head shape as the chain's do-nothing first arm), and
+  requires the live dispatcher to not keep any other raw
+  `(OP) == X86_OP_*` comparison. Emits the C header
+  `generated/x86_dispatch_singleton.h` and the Lean
+  `KProgFormal/GeneratedX86DispatchSingleton.lean`. `--check` returns 0;
+  the `--check` row is added at `kprog/formal/Makefile:140`.
+- Hand Lean `kprog/formal/KProgFormal/X86DispatchSingleton.lean`:
+  independent named member lists for each of the forty-three singletons
+  (`x86Disp<Name>Ops`, structurally separate from the generated
+  disjunctions), with theorems `x86_disp_singleton_<name>_refines` per
+  singleton (the generated `<name>Handled` equals the independent list
+  membership), `x86_dispatch_singleton_member_handled` (a singleton member
+  is handled by some gate), `x86_dispatch_singleton_nonmember_unhandled`
+  (an opcode outside every singleton is handled by no gate),
+  `x86_singleton_code_dispatch` (the `code` table equals the forty-three
+  `X86_OP_*` numbers the C macros compare against),
+  `x86_singleton_code_in_range`, `x86_singleton_codes_nodup`, the
+  x86-side cross-contract `x86_dispatch_chain_codes_nodup` (the combined
+  singleton and dispatch-family opcode numbers are pairwise distinct, so
+  the full chain selects at most one arm per opcode), and the canonical
+  examples; all `decide`/`simp [ops]`. `lake env lean
+  KProgFormal/X86DispatchSingleton.lean` returns 0.
+- Neighbor-generator contract refresh: with the singleton arms routed
+  through the generated gates, the XCHG, DIV, MOV_REG, double-shift, and
+  POPCNT arm contracts' `--check` region anchors were updated to the
+  routed gate openers (`KPROG_X86_DISP_XCHG_HANDLED(OP)`,
+  `KPROG_X86_DISP_DIV_HANDLED(OP)`, `KPROG_X86_DISP_MOV_REG_HANDLED(OP)`,
+  `KPROG_X86_DISP_PUSH_HANDLED(OP)`,
+  `KPROG_X86_DISP_POPCNT_HANDLED(OP)`,
+  `KPROG_X86_DISP_SHIFTX_HANDLED(OP)`
+  in the five `generate_x86_*_spec.py` generators, after
+  `generate_x86_dispatch_family_spec.py` set the same precedent for its
+  four neighbors in Step 0148); their generated headers are unchanged and
+  all five re-verified with `--check` rc=0.
+- Host oracle `kprog/formal/test_x86_dispatch_singleton_host.c`: declares
+  the raw `X86_OP_*` numbers locally, states an independent
+  `switch`-based membership oracle with a per-singleton member table, and
+  sweeps all 256 byte values against every singleton plus every explicit
+  member and a byte-identical non-member probe (`X86_OP_RET` outside every
+  gate), so a wrong table, a shifted code, a widened singleton, or a
+  duplicated member is caught: `OK (11094 cases)`.
+- Route oracle `kprog/formal/test_x86_dispatch_singleton_route_host.c`:
+  drives the real dispatcher with every singleton under a pinned
+  whole-state (sixteen GPRs with provenance tags, four condition flags,
+  XMM0, return address, the 64-byte stack arena, and a 512-byte heap),
+  executing each inline-bodied singleton against a hand-written
+  independent model of the arm's exact effect, comparing the whole state
+  snapshot, and requiring the non-member probe to leave the state
+  byte-identical to its seed, so a wrong gate, a dropped token, or a
+  misroute is caught: `OK (582 cases)`.
+- Gate `make -C kprog/formal check` rc=0 with **200** `cross-check: OK`
+  rows and zero `FAIL` (Step 0148 closed at 198; the two new rows are the
+  dispatch-singleton host and route cross-checks).
+- Mutation harness `kprog/formal/build/mut_x86_dispatch_singleton.py`,
+  47 mutations against the live tree, each run after the four unmutated
+  controls (`gen`, `lean_chain`, `host`, `route`) pass, restoring every
+  watched file byte-for-byte between mutations and re-checking the
+  baseline green at the end: 40 caught --- spec distortions (operation
+  rename, schema bump, member-code drifts, singleton and gate-macro
+  renames), generator defects (names-order, opcode-table-regex, drift
+  checks, exec-region anchors, path renames), generated-artifact
+  re-renders fired through the `lean_chain`/`host`/`route` rebuilds, and
+  two live sim-header hand-gate reverts
+  (`sim_nop_gate_hand_rolled`, `sim_callmemcpy_gate_hand_rolled`) that
+  the generator's hand-gate rejection catches --- while 7 SURVIVE as
+  required (the unobservable `generator_missing_opcode_guard_unobservable`
+  guard-removal, five comment/whitespace equivalences across the spec,
+  generator root, generated Lean/C artifacts, hand Lean, and the sim
+  include, plus the route-detector-detached
+  `equivalent_local_include_comment_survives`). The caught-by split in
+  this run is `gen` 15 / `lean_chain` 14 / `host` 5 / `route` 6. Total 47
+  mutations, 0 failures, `ALL AS EXPECTED`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

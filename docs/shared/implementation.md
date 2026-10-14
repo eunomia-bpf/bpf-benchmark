@@ -1053,9 +1053,9 @@ increment is committed and pushed immediately). Current state:
   write-register width body-selection now closed (Step 0144), the x86-64
   write-register width body-selection now closed (Step 0145), the x86-64
   stack byte-ladder per-lane activation now closed (Step 0146), the
-  x86-64 ALU-token flag-body selection now closed (Step 0147), and the
-  x86-64 dispatch-family token-membership now closed (Step 0148),
-
+  x86-64 ALU-token flag-body selection now closed (Step 0147), the
+  x86-64 dispatch-family token-membership now closed (Step 0148), and the
+  x86-64 dispatch-singleton opcode-membership now closed (Step 0149),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
