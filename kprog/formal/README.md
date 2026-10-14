@@ -1206,6 +1206,39 @@ single-bit, and values whose low byte is zero but whose upper bytes are set),
 and three destination/source pairs against an independent bit-by-bit
 population-count model and an independent flag model, comparing the whole
 register file with its tags and all four flags (5,940 cases).
+The x86-64 dispatcher's remaining forty-three individually-gated singleton
+opcodes are likewise a generated contract:
+`generate_x86_dispatch_singleton_spec.py` emits
+`KPROG_X86_DISP_<NAME>_HANDLED(OP)` for the NOP, CALL_MEMCPY, CALL_MEMSET,
+CALL_MEMCPY_REG, CALL_MEMSET_REG, CALL_REG, MOV_IMM, MOV_REG, MOVBE_LOAD,
+MOVBE_STORE, LOAD_XMM0, STORE_XMM0, LEA, ALU_MEM, ALU_MEM_UNARY, ALU_MEM_IMM,
+ALU_MEM_REG, CMP_REG_MEM, CMOV, CMOV_MEM, SETCC, SETCC_MEM, BSWAP, POPCNT,
+SHIFTX, SHIFTX_MEM, RORX, RORX_MEM, BZHI, BZHI_MEM, BT, BT_IMM, BT_MEM_IMM,
+IMUL_IMM, IMUL_MEM_IMM, MULX, REP_MOVS, ANDN, ANDN_MEM, XCHG, DIV, PUSH and POP
+arms, each the plain expression `((OP) == X86_OP_X)` with its `X86_OP_*`
+number `_Static_assert`-pinned to `x86_sim.h` and a coverage assert pinning the
+macro to its own opcode, and `X86DispatchSingleton.lean` proves every generated
+membership equal to an independent named singleton list
+(`x86_disp_singleton_<name>_refines` for all forty-three), that a member of one
+singleton is handled by some gate and an opcode outside every singleton by none
+(`x86_dispatch_singleton_member_handled` /
+`x86_dispatch_singleton_nonmember_unhandled`), that the generated opcode table
+matches the `X86_OP_*` numbers (`x86_singleton_code_dispatch`,
+`x86_singleton_code_in_range`), that the forty-three codes are duplicate-free
+(`x86_singleton_codes_nodup`), and — as the cross-contract to the dispatch
+families — that the combined singleton and family opcode numbers are pairwise
+distinct (`x86_dispatch_chain_codes_nodup`), so the ordered chain selects
+exactly one arm per opcode. `X86_SIM_L_EXEC` now selects each singleton arm
+through the generated predicate instead of the forty-three hand-written raw
+comparisons, leaving the per-arm operand selection and the composed handler
+bodies, and the neighboring XCHG, DIV, MOV_REG, double-shift and POPCNT arm
+contracts read the routed arms through the generated gates. A generated-header
+oracle decides membership from an independent switch oracle over all 256 byte
+values for each singleton and a byte-identical non-member probe (11,094 cases),
+and a sim-header route oracle drives each singleton through the real dispatcher
+— inline-bodied singletons through independent models and the body-macro
+singletons through their argument tuples — plus a non-member probe reaching the
+unsupported arm exactly once (582 cases).
 The x86-64 `BZHI`/`BZHI_MEM` arms' flag block is likewise a generated
 contract: `generate_x86_bzhi_flags_spec.py` emits
 `KPROG_X86_SET_BZHI_FLAGS(C_CF, C_ZF, C_SF, C_OF,
