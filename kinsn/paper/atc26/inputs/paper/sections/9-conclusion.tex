@@ -16,16 +16,16 @@
 \label{sec:conclusion}
 % 结论
 
-We presented \tool, an extension interface that extends the eBPF compilation pipeline with new operations the kernel JIT emits directly.
-% 我们提出了 \tool，一种通过内核 JIT 直接发射的新操作扩展 eBPF 编译管线的扩展接口。
-Each operation has a proof sequence that the existing verifier checks on every load and a native emit that the CPU runs.
-% 每个操作有一个现有验证器在每次加载时检查的证明序列和一个 CPU 运行的本地发射。
-Beyond the one-time kernel patch, the native emit is the only per-operation addition to the TCB.
-% 除了一次性的内核补丁外，本地发射是每个操作对 TCB 的唯一增加。
+We presented \tool, an extension interface that extends the eBPF compilation pipeline with new operations the eBPF JIT emits directly.
+% 我们提出了 \tool，一种通过eBPF JIT 直接发射的新操作扩展 eBPF 编译管线的扩展接口。
+Each operation has a proof sequence that the existing verifier checks on every load and native code that the CPU runs.
+% 每个操作有一个现有验证器在每次加载时检查的证明序列和一个 CPU 运行的本地代码。
+Beyond the one-time kernel patch, the code that generates an operation's native code is the only code it adds to the TCB.
+% 除了一次性的内核补丁外，生成本地代码的代码是每个操作加入 TCB 的唯一代码。
 With \tool, we built \lang, a set of seven hardware-idiom operations.
 % 借助 \tool，我们构建了 \lang，一组七个硬件习语操作。
-Lean 4 proofs show that each \lang native emit computes the same result as its proof sequence.
-% Lean 4 证明表明每个 \lang 本地发射与其证明序列计算相同的结果。
+Lean 4 proofs show that the native code of each \lang operation computes the same result as its proof sequence.
+% Lean 4 证明表明每个 \lang 本地代码与其证明序列计算相同的结果。
 \lang speeds up eBPF microbenchmarks by 24\% on x86-64 and 22\% on ARM64 over the unmodified pipeline, recovering 42\% of the x86-64 gap to native code, and improves production application throughput by up to 12\%.
 % \lang 使 eBPF 微基准测试在 x86-64 上提速 24\%，在 ARM64 上为 22\%，恢复了 x86-64 上与本地代码差距的 42\%，并使生产应用吞吐量提高达 12\%。
 A new operation now ships as a kernel module, and the existing verifier analysis stays untouched.

@@ -19,7 +19,7 @@
   "Cilium_tuned_median": 1.1189352022274368,
   "Katran_selected": 1.065063078455156,
   "Katran_full": 0.9843569275313135,
-  "native": 2.3579740430209055,
+  "native": 1.1938284167055373,
   "Cilium_full_paired_cost": [
     1.009815156129174,
     2
@@ -44,11 +44,33 @@
     "Katran Full": {
       "throughput": 0.9843569275313135,
       "cost": 1.0055597452081135
+    },
+    "Cilium Native": {
+      "throughput": 1.1938284167055373,
+      "cost": 0.703712116861577
     }
   },
   "native_cost": {
-    "baseline": 488.6757932637896,
-    "post_rejit": 262.30271085934515
+    "baseline": 659.1954251184368,
+    "post_rejit": 463.8838080355623
+  },
+  "rq4": {
+    "guests": 6,
+    "throughput": 1.1938284167055373,
+    "control": 1.0377735751980341,
+    "jit_ns": 659.1954251184368,
+    "native_ns": 463.8838080355623,
+    "cost_ratio": 0.703712116861577,
+    "live_programs": [
+      51
+    ],
+    "code_size": 1.1067127192419302
+  },
+  "rq4_profile": {
+    "bpf_code_share": 10.463939839308079,
+    "maps_share": 25.99617042806847,
+    "cycles_ratio": 0.8640480495929949,
+    "orders": 2
   },
   "load_time": {
     "population": 62,

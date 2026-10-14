@@ -10,16 +10,19 @@ def generate(rows, output):
     result = []
     for entry in manifest:
         rel = entry['original_path']
-        # Follow the metadata file through directory renames, back to first addition.
+        # Follow the metadata file (or the declared summary file of a directory
+        # without one) through directory renames, back to first addition.
+        tracked = entry.get('provenance_file', 'metadata.json')
         log = subprocess.check_output(['git', 'log', '--follow', '--diff-filter=A',
-                                       '--format=%H %aI', '--', rel + '/metadata.json'],
+                                       '--format=%H %aI', '--', rel + '/' + tracked],
                                       cwd=BUNDLE.parents[2], text=True).strip().splitlines()
         if not log:
             raise RuntimeError(f'No introducing Git history for {rel}; use a full repository clone')
         commit, date = log[-1].split(' ', 1)
         if commit != entry['introduced_commit']:
             raise RuntimeError(f'Introducing history changed for {rel}: {commit}')
-        m = js(BUNDLE / entry['bundle_path'] / 'metadata.json')
+        meta = BUNDLE / entry['bundle_path'] / 'metadata.json'
+        m = js(meta) if meta.exists() else {}
         prov, host = m.get('provenance', {}), m.get('host', {})
         claims = [dict(claim=r['claim'], file=r['source_file'], line=r['source_line'],
                        kind=r['kind'], value=r['claimed_value'], scope=r['scope'])
@@ -34,6 +37,11 @@ def generate(rows, output):
             notes.append('Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.')
         if rel.endswith(('080836_924256', '094729_221231')):
             notes.append('Recorded bpf_stats=true differs from RQ2 stats-disabled wording. Suite status=error includes other apps; retain Katran measurements.')
+        if rel.endswith('cilium_x86_config_parity_counterbalanced_20261010'):
+            notes.append('Section 6.4 timing: fresh 8-vCPU, 64-GB guests pinned to host P-cores 0-7, six per statistics mode (three per run order) plus JIT-to-JIT controls. '
+                         'samples.csv, guests.csv and live-program-images.csv are the per-phase and per-guest records; SUMMARY.md describes the method.')
+        if rel.endswith('cilium_profile_jit_kprog_counterbalanced_20261010'):
+            notes.append('Section 6.4 profile: the summary files only. The raw perf data (about 360 MB) is in the original directory.')
         result.append((entry | dict(introduced_commit=commit, introduced_commit_date=date,
                            collection_date=m.get('started_at', m.get('generated_at', 'unknown')),
                            platform=m.get('run_type', host.get('platform', 'unknown')),

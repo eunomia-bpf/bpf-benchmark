@@ -59,9 +59,9 @@ The compiled program then attaches to a hook such as XDP or tc.
 % \noindent\textbf{源代码编译。}
 The userspace compiler does most of the pipeline's optimization.
 % 用户空间编译器完成管线的大部分优化。
-A language front end such as Clang lowers the source to LLVM IR, and LLVM's middle end runs its full optimization passes.
+A language front end such as Clang translates the source to LLVM IR, and LLVM's middle end runs its full optimization passes.
 % 语言前端如 Clang 将源代码降低为 LLVM IR，LLVM 中端运行完整的优化遍。
-The eBPF backend then lowers the result to bytecode restricted to the operations the instruction set defines.
+The eBPF backend then translates the result to bytecode restricted to the operations the instruction set defines.
 % 然后 eBPF 后端将结果降低为限制在指令集定义的操作内的字节码。
 Optimization research also targets this stage, where compile-time optimizers such as Merlin~\cite{mao2024merlin}, K2~\cite{xu2021synthesizing}, and EPSO~\cite{zhu2025epso} rewrite programs for speed and size.
 % 优化研究也针对这个阶段，编译时优化器如 Merlin、K2 和 EPSO 重写程序以提高速度和减小大小。
@@ -93,8 +93,8 @@ The verifier then passes the program to the JIT.
 
 \noindent\textbf{JIT compilation.}
 % \noindent\textbf{JIT 编译。}
-The kernel JIT does almost no optimization.
-% 内核 JIT 几乎不做优化。
+The eBPF JIT does almost no optimization.
+% eBPF JIT 几乎不做优化。
 The kernel maintains one such JIT for each supported architecture.
 % 内核为每个支持的架构维护一个这样的 JIT。
 Translation proceeds one opcode at a time, with the eBPF registers \texttt{r0}--\texttt{r10} mapped to fixed native registers.

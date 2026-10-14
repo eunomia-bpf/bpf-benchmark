@@ -1,10 +1,6 @@
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{figures/sec-6-rq3-cilium-katran.pdf}
-  \caption{Application-level \lang{} policy probes. Workload throughput ratios
-  are higher-is-better, while BPF cost ratios are lower-is-better. Cilium
-  compares the full \lang{} policy with the no-bulk policy; Katran compares a
-  more-sites policy with the selected-operation policy. The dashed line marks the
-  original eBPF baseline.}
+  \caption{Application throughput and BPF cost under different \lang{} policies (\S\ref{subsec:policy_sensitivity}). The dashed line marks original eBPF, and the hatched bars replace whole Cilium programs with trusted native code (\S\ref{subsec:native_upper_bound}).}
   \label{fig:app_policy_probes}
 \end{figure}

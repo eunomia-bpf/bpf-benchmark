@@ -4,6 +4,7 @@ from pathlib import Path
 import collections, csv, json, math, re, statistics
 BUNDLE = Path(__file__).resolve().parents[1]
 PAPER = BUNDLE / 'inputs/audit-paper'
+CURRENT = BUNDLE / 'inputs/paper'
 REPO = BUNDLE / 'data'
 def resolve(path): return path.replace('/results/', '/')
 def js(path): return json.loads(path.read_text())
@@ -30,10 +31,19 @@ KC='corpus/results/aws_arm64_corpus_20260605_080836_924256'
 KM='corpus/results/aws_arm64_corpus_20260605_094729_221231'
 NT='corpus/results/x86_kvm_corpus_20260529_040554_604387'
 NC='corpus/results/x86_kvm_corpus_20260529_033517_489159'
+NR='corpus/results/cilium_x86_config_parity_counterbalanced_20261010'
+NP='corpus/results/cilium_profile_jit_kprog_counterbalanced_20261010'
+# Audit-inventory claims about the earlier RQ4 run; the camera-ready replaces them.
+SUPERSEDED_CLAIMS={'Cilium native throughput','Cilium baseline BPF ns/run','Cilium native BPF ns/run',
+    'Cilium BPF-counter speedup','native upper-bound repetition','native replacements',
+    'manifest no-match pass-throughs','Cilium manifest objects','native files',
+    'Cilium fraction of native gap recovered (%)','Cilium native headline speedup'}
+SUPERSEDED_METRICS={'native','native_cost'}
 CHAR_SCRIPT='bpf-benchmark/docs/archive/shared/plot_micro_characterization_20260527.py; paper-provenance/scripts/plot_characterization_pure_percase.py (older 29-case source; final 27-case/4config generator not retained)'
 EVAL_SCRIPT='paper-provenance/scripts/plot_evaluation_kinsn.py (older 29-case source); bpf-benchmark/docs/artifacts/render_claim_table.py (27-case derivation)'
 APP_SCRIPT='bpf-benchmark/docs/archive/shared/kinsn_eval_20260604.py; bpf-benchmark/kinsn/docs/evaluation.md; paper-provenance/scripts/plot_app_case_studies.py (hard-coded plot inputs)'
 NATIVE_SCRIPT='bpf-benchmark/kprog/docs/archive/native_eval_20260529.py; bpf-benchmark/docs/artifacts/render_claim_table.py'
+RQ4_SCRIPT='bpf-benchmark/corpus/results/cilium_x86_config_parity_counterbalanced_20261010/analyze.py; bpf-benchmark/corpus/results/cilium_profile_jit_kprog_counterbalanced_20261010 (summary.json)'
 
 def data(path):return js(REPO/resolve(path)/'details/result.json')
 def med(path,runtime,field='exec_ns'):
@@ -88,20 +98,23 @@ def paired_cost(path,name='cilium__agent.json'):
             post.append(p['run_time_ns_delta']/p['run_cnt_delta'])
     return statistics.median(post)/statistics.median(baseline),len(baseline)
 
-def source_line(file,needle):
-    matches=[(i,l) for i,l in enumerate((PAPER/file).read_text().splitlines(),1) if needle in l and not l.lstrip().startswith('%')]
+def source_line(file,needle,base=PAPER):
+    matches=[(i,l) for i,l in enumerate((base/file).read_text().splitlines(),1) if needle in l and not l.lstrip().startswith('%')]
     if not matches:raise ValueError((file,needle))
     return matches[0]
 
-def add(file,needle,claim,value='',paths=(),script='',recomputed='',match='not recomputed',method='',notes='',kind='empirical',scope='body',line=None):
-    if line is None:line,text=source_line(file,needle)
-    else:text=(PAPER/file).read_text().splitlines()[line-1]
+def add(file,needle,claim,value='',paths=(),script='',recomputed='',match='not recomputed',method='',notes='',kind='empirical',scope='body',line=None,current=False):
+    # Claims introduced by the camera-ready are located directly in the pinned
+    # current paper; audit claims are located in the audit snapshot and mapped later.
+    base=CURRENT if current else PAPER
+    if line is None:line,text=source_line(file,needle,base)
+    else:text=(base/file).read_text().splitlines()[line-1]
     paths=list(paths);current=[resolve(p) for p in paths]
     dates=[];platforms=[];commits=[];statuses=[]
     for p in current:
         d=REPO/p
         if d.is_dir():
-            m=js(d/'metadata.json')
+            m=js(d/'metadata.json') if (d/'metadata.json').exists() else {}
             dates.append(m.get('started_at') or m.get('generated_at') or 'not recorded')
             prov=m.get('provenance') or {};host=m.get('host') or {}
             platforms.append((m.get('run_type') or host.get('platform') or 'platform not recorded')+'; CPU '+str(prov.get('cpu_model','not recorded')))
@@ -112,11 +125,47 @@ def add(file,needle,claim,value='',paths=(),script='',recomputed='',match='not r
     if kind in ('declared count','missing raw'):present='run exists; required raw report absent' if current else 'no raw data in reachable repositories'
     if file.startswith('revision/') and not paths:
         dates=['October 2026 rerun; report directory dated 2026-10-03; exact collection dates unavailable'];platforms=['EC2 c7i.large (x86 Sapphire Rapids) / c7g.large (ARM64 Graviton3), paper-declared'];commits=['not recorded in reachable evidence']
-    ROWS.append(dict(claim_id=f'C{len(ROWS)+1:04d}',version='revision' if file.startswith('revision/') else 'current',scope=scope,kind=kind,source_file='paper/'+file,source_line=line,source_text=text.strip(),claim=claim,claimed_value=str(value),original_data_paths='; '.join(paths),current_data_paths='; '.join(paths),raw_present=present,run_dates='; '.join(dict.fromkeys(dates)),platform='; '.join(dict.fromkeys(platforms)),bpf_benchmark_commit='; '.join(dict.fromkeys(commits)),collector_status='; '.join(dict.fromkeys(statuses)),generator_or_provenance=script,recomputable='yes' if recomputed!='' else 'no' if kind in ('declared count','missing raw') else 'partial/unverified',recomputed_value=str(recomputed),match=match,method=method,notes=notes))
+    ROWS.append(dict(claim_id=f'C{len(ROWS)+1:04d}',version='revision' if file.startswith('revision/') else 'current',scope=scope,kind=kind,source_file='paper/'+file,source_line=line,source_text=text.strip(),claim=claim,claimed_value=str(value),original_data_paths='; '.join(paths),current_data_paths='; '.join(paths),raw_present=present,run_dates='; '.join(dict.fromkeys(dates)),platform='; '.join(dict.fromkeys(platforms)),bpf_benchmark_commit='; '.join(dict.fromkeys(commits)),collector_status='; '.join(dict.fromkeys(statuses)),generator_or_provenance=script,recomputable='yes' if recomputed!='' else 'no' if kind in ('declared count','missing raw') else 'partial/unverified',recomputed_value=str(recomputed),match=match,method=method,notes=notes,located_in='current' if current else 'audit'))
 
-def scalar(file,needle,label,val,actual,paths,script='',digits=3,notes='',method=''):
+def scalar(file,needle,label,val,actual,paths,script='',digits=3,notes='',method='',current=False):
     matched=(round(actual,digits)==round(float(val),digits))
-    add(file,needle,label,val,paths,script,format(actual,'.9g'),'matches rounding' if matched else 'MISMATCH',method,notes)
+    add(file,needle,label,val,paths,script,format(actual,'.9g'),'matches rounding' if matched else 'MISMATCH',method,notes,current=current)
+
+def table(path,name):
+    with (REPO/resolve(path)/name).open(newline='') as f:return list(csv.DictReader(f))
+def rq4():
+    """Camera-ready RQ4 from the counterbalanced fresh-guest run (Section 6.4)."""
+    cells=collections.defaultdict(dict)
+    for r in table(NR,'samples.csv'):cells[r['cell']][r['arm']]=r
+    def guests(stats,roles):
+        return [(c,arms) for c,arms in sorted(cells.items())
+                if next(iter(arms.values()))['stats']==stats and next(iter(arms.values()))['role'] in roles]
+    treat0=guests('0',('jit-native','native-jit'));treat1=guests('1',('jit-native','native-jit'))
+    thr=statistics.median(float(a['native']['pps'])/float(a['jit']['pps']) for _,a in treat0)
+    control=statistics.median(float(a['jit-second']['pps'])/float(a['jit-first']['pps']) for _,a in guests('0',('jit-jit',)))
+    jit_ns=statistics.median(float(a['jit']['pooled_ns_per_run']) for _,a in treat1)
+    native_ns=statistics.median(float(a['native']['pooled_ns_per_run']) for _,a in treat1)
+    images=collections.defaultdict(lambda:collections.defaultdict(int));counts=collections.Counter()
+    for r in table(NR,'live-program-images.csv'):
+        images[r['cell']][r['arm']]+=int(r['bytes_jited']);counts[r['cell'],r['arm']]+=1
+    size=statistics.median(v['native']/v['jit'] for v in images.values())
+    out=dict(guests=len(treat0),throughput=thr,control=control,jit_ns=jit_ns,native_ns=native_ns,
+             cost_ratio=native_ns/jit_ns,live_programs=sorted(set(counts.values())),code_size=size)
+    # The run's own analysis must agree with this recomputation.
+    a=js(REPO/resolve(NR)/'analysis.json')
+    for mine,theirs in [(thr,a['primary_stats_off_throughput_native_over_jit']['combined']['median']),
+                        (control,a['jit_restart_controls_second_over_first']['0']['combined']['median']),
+                        (size,a['live_image_size_native_over_jit']['combined']['median'])]:
+        if not math.isclose(mine,theirs,rel_tol=1e-12):raise RuntimeError(f'RQ4 recomputation differs from analysis.json: {mine} != {theirs}')
+    return out
+def profile():
+    """Section 6.4 perf profile: category shares of the eBPF runs and cycles per packet."""
+    runs=js(REPO/resolve(NP)/'summary.json')
+    jit=[r for r in runs if r['arm']=='jit']
+    share=lambda cat:statistics.mean(r['callgraph']['categories'][cat]['sample_fraction'] for r in jit)*100
+    by={(r['order'],r['arm']):r['host_perf']['cycles_per_packet'] for r in runs}
+    ratios=[by[o,'kprog']/by[o,'jit'] for o in sorted({r['order'] for r in runs})]
+    return dict(bpf_code_share=share('bpf_code'),maps_share=share('maps'),cycles_ratio=gm(ratios),orders=len(ratios))
 
 def main_claims():
     chars={('x86',r):speed(X,r) for r in ('native_kernel','native','llvmbpf')}
@@ -210,18 +259,30 @@ def main_claims():
         scalar(ef,needle,label,val,actual,paths,APP_SCRIPT,method='throughput: median post summed pktgen pps / median baseline pps; cost: median post ns/run / median baseline ns/run over name/type/occurrence paired rows >=100 (two Cilium rows, one Katran row). Counters are phase aggregates, not three independent cost samples.',notes='This paper figure uses the June4/tuned June5 pair, not the separate four-arm June5 ablation ladder.')
     for needle,label,val,p in [('this policy applies','Cilium repeated full site count',4086,CFC),('reduces the number','Cilium no-bulk site count',3512,CNC),('conservative ARM64 policy','Katran repeated conservative site count',21,KC),('coverage-max policy','Katran coverage-max sites',62,KM)]:
         add(ef,needle,label,val,[p],APP_SCRIPT,match='unverifiable original count',notes='No original per-pass report retained.',kind='declared count')
-    cv=cost(NC);nspeed=cv['baseline']/cv['post_rejit']
-    for needle,label,val,actual,p in [('throughput improves by','Cilium native throughput',2.358,throughput(NT),NT),('cost drops from','Cilium baseline BPF ns/run',488.7,cv['baseline'],NC),('cost drops from','Cilium native BPF ns/run',262.3,cv['post_rejit'],NC),('BPF-counter speedup','Cilium BPF-counter speedup',1.86,nspeed,NC),('The 2.358','native upper-bound repetition',2.358,throughput(NT),NT)]:
-        scalar(ef,needle,label,val,actual,[p],NATIVE_SCRIPT,digits=1 if val in (488.7,262.3) else 2 if val==1.86 else 3,method='throughput: stats-off median summed pps; cost: median of retained phase rows run_time_ns_delta/run_cnt_delta, each row >=100')
-    for label,v in [('native replacements',113),('manifest no-match pass-throughs',22),('Cilium manifest objects',89),('native files',8)]:
-        add(ef,'The Cilium native run logs' if v in (113,22) else 'native sidecar data',label,v,[NC,NT],NATIVE_SCRIPT,match='unverifiable original loader count',notes='Original loader stream/sidecar absent. Sept24 evidence has 135 replacements, 0 pass-throughs, 89 objects across 6 files; different generation.',kind='declared count')
-    scalar(ef,'gain recovers 5.4','Cilium fraction of native gap recovered (%)',5.4,(throughput(CF)-1)/(throughput(NT)-1)*100,[CF,NT],NATIVE_SCRIPT,digits=1,method='(kinsn throughput-1)/(native throughput-1)*100')
+    # RQ4 (camera-ready): counterbalanced fresh guests, located in the pinned current paper.
+    r4=rq4();pr=profile()
+    for needle,label,val,actual,digits,method in [
+        ('Cilium throughput improves by','Cilium whole-program native throughput',1.194,r4['throughput'],3,'median over the six statistics-off fresh guests (three per run order) of native pps / eBPF JIT pps in the same guest'),
+        ('cost drops from','Cilium eBPF JIT BPF ns/run',659.2,r4['jit_ns'],1,'median over the six statistics-on guests of pooled entry-program run_time_ns/run_cnt'),
+        ('cost drops from','Cilium native BPF ns/run',463.9,r4['native_ns'],1,'median over the six statistics-on guests of pooled entry-program run_time_ns/run_cnt'),
+        ('cost drops from','Cilium native/eBPF BPF cost ratio',.704,r4['cost_ratio'],3,'median native ns/run / median eBPF JIT ns/run')]:
+        scalar(ef,needle,label,val,actual,[NR],RQ4_SCRIPT,digits=digits,method=method,current=True)
+    add(ef,'all 51 live programs','Cilium live programs running as native code','51',[NR],RQ4_SCRIPT,'; '.join(map(str,r4['live_programs'])),'matches' if r4['live_programs']==[51] else 'MISMATCH','live programs per arm in every treatment guest (live-program-images.csv)',current=True)
+    for needle,label,val,actual,digits,p,method in [
+        ('recovers 38','Cilium Kinsn fraction of the native gap (%)',38,(throughput(CF)-1)/(r4['throughput']-1)*100,0,[CF,NR],'(Kinsn throughput-1)/(native throughput-1)*100'),
+        ('recovers 38','native upper bound repetition',1.194,r4['throughput'],3,[NR],'as the RQ4 throughput above'),
+        ('perf profile of the eBPF run','eBPF run CPU time in the programs\' own instructions (%)',10,pr['bpf_code_share'],0,[NP],'mean over the two eBPF runs of the bpf_code share of guest cpu-clock samples'),
+        ('perf profile of the eBPF run','eBPF run CPU time in map operations (%)',26,pr['maps_share'],0,[NP],'mean over the two eBPF runs of the maps share of guest cpu-clock samples'),
+        ('perf profile of the eBPF run','native reduction in cycles per packet (%)',13.6,(1-pr['cycles_ratio'])*100,1,[NP],'1 - geomean over the two run orders of native/eBPF host cycles per packet'),
+        ('perf profile of the eBPF run','native code size increase (%)',10,(r4['code_size']-1)*100,0,[NR],'sum of bytes_jited over the 51 live programs, native / eBPF JIT')]:
+        scalar(ef,needle,label,val,actual,p,RQ4_SCRIPT,digits=digits,method=method,current=True)
+    scalar('sections/0-abstract.tex','speeding up Cilium by','Cilium native headline speed increase (%)',19,(r4['throughput']-1)*100,[NR],RQ4_SCRIPT,digits=0,current=True)
+    scalar('sections/1-introduction.tex','which reaches 1.194','Cilium native headline speedup',1.194,r4['throughput'],[NR],RQ4_SCRIPT,current=True)
     scalar(ef,'recovers 42','micro fraction of characterization gap recovered (%)',42,(gm(er.values())-1)/(gm(chars['x86','native'])-1)*100,[EX,BX,X],EVAL_SCRIPT,digits=0,method='(kinsn speedup-1)/(native speedup-1)*100')
     for f,needle in [('sections/0-abstract.tex','speeds up eBPF microbenchmarks'),('sections/1-introduction.tex','speeds up eBPF microbenchmarks')]:
         scalar(f,needle,'x86 headline speed increase (%)',24,(gm(er.values())-1)*100,[EX,BX],EVAL_SCRIPT,digits=0)
         scalar(f,needle,'ARM64 headline speed increase (%)',22,(gm(ar.values())-1)*100,[EA],EVAL_SCRIPT,digits=0)
         scalar(f,needle,'production throughput increase up to (%)',12,(throughput(CN)-1)*100,[CN],APP_SCRIPT,digits=0,method='(median post summed pktgen pps / median baseline pps - 1)*100')
-        scalar(f,'reaching 2.358','Cilium native headline speedup',2.358,throughput(NT),[NT],NATIVE_SCRIPT)
     scalar('sections/1-introduction.tex','recovering 42','headline recovered micro gap (%)',42,(gm(er.values())-1)/(gm(chars['x86','native'])-1)*100,[EX,BX,X],EVAL_SCRIPT,digits=0)
     scalar('sections/1-introduction.tex','An implementation','contribution recovered micro gap (%)',42,(gm(er.values())-1)/(gm(chars['x86','native'])-1)*100,[EX,BX,X],EVAL_SCRIPT,digits=0)
     add('sections/1-introduction.tex','Native code size shrinks','native code reduction range','12--23%', [EX,BX,EA],EVAL_SCRIPT,f'{(1-sizes["arm"])*100:.6f}%--{(1-sizes["x86"])*100:.6f}%','matches rounding','native code geomean over all 29 cases')
@@ -236,6 +297,8 @@ def main_claims():
             add('figures/sec-6-kinsn-micro-rq1.tex','sec-6-'+('x86' if arch=='x86' else 'arm64'),arch+' '+name+' plotted kinsn speedup','bar (value derived below)',paths,EVAL_SCRIPT,f'{val:.9f}','recomputed; figure geomeans 1.24/1.22 match','27-case sample medians; x86 separate candidate/baseline; ARM matched kernel/kernel_rejit',kind='figure bar')
     for label,run,n in [('Cilium Full',CF,'cilium__agent.json'),('Cilium No Bulk',CN,'cilium__agent.json'),('Katran Conservative',KC,'katran.json'),('Katran Full',KM,'katran.json')]:
         add('figures/sec-6-kinsn-micro-rq3.tex','includegraphics',label+' throughput bar','1.074/1.119/1.065/0.984',[run],APP_SCRIPT,f'{throughput(run,n):.9f}','matches regenerated labels','median post summed pktgen pps / median baseline pps; four configurations')
+    for label,val,actual in [('Cilium Native throughput bar','1.194',r4['throughput']),('Cilium Native BPF cost bar','0.704',r4['cost_ratio'])]:
+        add('figures/sec-6-kinsn-micro-rq3.tex','includegraphics',label,val,[NR],RQ4_SCRIPT,f'{actual:.9f}','matches regenerated label' if f'{actual:.3f}'==val else 'MISMATCH','hatched whole-program native bars; values as in Section 6.4',kind='figure bar',current=True)
     add(ef,'kernel-side load time','historical load-time campaign protocol','62 cases',[*LX,LP],EVAL_SCRIPT,'62','matches population; different sampling protocol','intersect both May14 runs with Apr29 62-name list; exclude katran_like','Retained historical samples=1, INNER_REPEAT=10; performance figure protocol is samples=3, INNER_REPEAT=100000.')
     add('figures/sec-6-kinsn-micro-rq1.tex','the 27 benchmarks','ARM64 figure population','27',[EA],EVAL_SCRIPT,len(ar),'matches','cases with applied kinsn sites; exclude baseline-only simple/simple_packet')
     return chars,er,ar,sizes

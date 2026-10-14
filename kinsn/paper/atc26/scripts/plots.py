@@ -20,6 +20,8 @@ SHORT_NAMES = ast.literal_eval(next(n.value for n in source.body
 plt.rcParams.update({'font.size': 9, 'pdf.fonttype': 42, 'axes.linewidth': .6,
                      'grid.alpha': .25, 'grid.linewidth': .5})
 COLORS = ['#4C78A8', '#54A24B', '#B279A2']
+POLICY_COST_COLOR = '#D18F32'
+POLICY_Y_MIN = .64
 
 
 def draw(chars, x86, arm64, policy, figures):
@@ -77,30 +79,43 @@ def draw(chars, x86, arm64, policy, figures):
         fig.savefig(figures / filename)
         plt.close(fig)
         points[filename] = dict(zip(names, ys))
-    # Policy inputs use median post/baseline, rounded to three decimals for plotting.
+    # Figure 6 (RQ3, RQ4) in the camera-ready layout of the paper's
+    # figures/scripts/plot_rq3_cilium_katran.py. Values are median post/baseline
+    # ratios rounded to three decimals; the hatched bars are whole-program native.
     # Declared site labels remain annotations, never treated as measured counts.
-    names = ['Cilium Full', 'Cilium No Bulk', 'Katran Full', 'Katran Conservative']
-    labels = ['Cilium\nFull\n4086 sites', 'Cilium\nNo Bulk\n3512 sites',
+    names = ['Cilium Full', 'Cilium No Bulk', 'Cilium Native', 'Katran Full', 'Katran Conservative']
+    labels = ['Cilium\nFull\n4086 sites', 'Cilium\nNo Bulk\n3512 sites', 'Cilium\nNative\nwhole program',
               'Katran\nFull\n62 sites', 'Katran\nConservative\n21 sites']
-    fig, ax = plt.subplots(figsize=(8.15, 3.2))
-    x = np.array([0, 1, 2.65, 3.65])
-    pp = {}
-    for offset, field, color, legend in [(-.195, 'throughput', COLORS[0], 'Workload throughput ↑'),
-                                        (.195, 'cost', '#D18F2F', 'BPF cost ↓')]:
-        ys = [round(policy[n][field], 3) for n in names]
-        pp[field] = dict(zip(names, ys))
-        bars = ax.bar(x+offset, ys, width=.39, color=color, edgecolor='#333333', linewidth=.3, label=legend)
-        for bar, v in zip(bars, ys):
-            ax.text(bar.get_x()+bar.get_width()/2, v+.004, f'{v:.3f}x', ha='center', fontsize=8)
-    ax.axhline(1, color='#555555', linestyle='--', linewidth=.7)
-    ax.set_ylim(.91, 1.195)
-    ax.set_yticks([1, 1.1])
-    ax.set_ylabel('Ratio to stock eBPF')
-    ax.set_xticks(x, labels)
-    ax.grid(axis='y')
-    ax.legend(loc='upper center', ncol=2, frameon=False, fontsize=8)
-    fig.tight_layout()
-    fig.savefig(figures / 'sec-6-rq3-cilium-katran.pdf')
-    plt.close(fig)
+    centers, width = [0.0, 1.07, 2.42, 3.92, 4.99], .44
+    pp = {'throughput': {}, 'cost': {}}
+    style = {'font.family': 'DejaVu Sans', 'font.size': 7.0, 'axes.linewidth': .5,
+             'xtick.major.width': .6, 'ytick.major.width': .6, 'xtick.major.size': 2.5,
+             'ytick.major.size': 2.5, 'hatch.linewidth': .5}
+    with plt.rc_context(style):
+        fig, ax = plt.subplots(figsize=(241.14 / 72.27, 1.75))
+        ax.grid(axis='y', color='#e6e6e6', linewidth=.5, zorder=0)
+        for x, name in zip(centers, names):
+            for dx, field, color in ((-width/2, 'throughput', COLORS[0]), (width/2, 'cost', POLICY_COST_COLOR)):
+                v = round(policy[name][field], 3)
+                pp[field][name] = v
+                ax.bar(x+dx, v-POLICY_Y_MIN, width, bottom=POLICY_Y_MIN, color=color, edgecolor='#3a3a3a',
+                       linewidth=.35, zorder=2, hatch='////' if name == 'Cilium Native' else None)
+                ax.text(x+dx*1.2, v+.003, f'{v:.3f}x', ha='center', va='bottom', fontsize=5.6, zorder=4,
+                        bbox=dict(boxstyle='square,pad=0.05', facecolor='white', edgecolor='none'))
+        ax.axhline(1, color='#555555', linestyle='--', linewidth=.6, zorder=3)
+        ax.set_ylim(POLICY_Y_MIN, 1.34)
+        ax.set_yticks([.7, .8, .9, 1.0, 1.1, 1.2])
+        ax.set_ylabel('Ratio to original eBPF')
+        ax.set_xticks(centers)
+        ax.set_xticklabels(labels, linespacing=1.1, fontsize=6.6)
+        ax.set_xlim(-.55, 5.56)
+        handles = [plt.Rectangle((0, 0), 1, 1, facecolor=c, edgecolor='#3a3a3a', linewidth=.35)
+                   for c in (COLORS[0], POLICY_COST_COLOR)]
+        ax.legend(handles, ['Workload throughput ↑', 'BPF cost ↓'], loc='upper center', ncol=2,
+                  frameon=False, fontsize=6.8, handlelength=1.8, handleheight=.7,
+                  columnspacing=2.0, borderaxespad=.3)
+        fig.tight_layout(pad=.2)
+        fig.savefig(figures / 'sec-6-rq3-cilium-katran.pdf', bbox_inches='tight', pad_inches=.01)
+        plt.close(fig)
     points['sec-6-rq3-cilium-katran.pdf'] = pp
     return points

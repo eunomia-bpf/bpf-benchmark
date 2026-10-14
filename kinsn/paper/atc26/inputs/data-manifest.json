@@ -134,5 +134,22 @@
     "introduced_commit_date": "2026-05-19T20:37:00-07:00",
     "files": 3,
     "bytes": 855575
+  },
+  {
+    "original_path": "corpus/results/cilium_x86_config_parity_counterbalanced_20261010",
+    "bundle_path": "data/corpus/cilium_x86_config_parity_counterbalanced_20261010",
+    "introduced_commit": "91ee7e78eefed2f0a41485fc7eb3402cd94724a3",
+    "introduced_commit_date": "2026-10-10T07:32:04-07:00",
+    "files": 83,
+    "bytes": 2968769
+  },
+  {
+    "original_path": "corpus/results/cilium_profile_jit_kprog_counterbalanced_20261010",
+    "bundle_path": "data/corpus/cilium_profile_jit_kprog_counterbalanced_20261010",
+    "provenance_file": "summary.json",
+    "introduced_commit": "d92d643dcbb486145e1550356fe1f7e0e66994f7",
+    "introduced_commit_date": "2026-10-09T22:51:09-07:00",
+    "files": 4,
+    "bytes": 147670
   }
 ]

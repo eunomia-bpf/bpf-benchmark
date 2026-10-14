@@ -2164,88 +2164,100 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Cilium Full",
     "regenerated": 1.074,
-    "pdf_value": 1.0739999909263793,
-    "absolute_difference": 9.073620743649258e-09,
+    "pdf_value": 1.0740000334258268,
+    "absolute_difference": 3.342582677312578e-08,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 1.074
+    "match": true
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Cilium No Bulk",
     "regenerated": 1.119,
-    "pdf_value": 1.1140000068630502,
-    "absolute_difference": 6.8630501282029854e-09,
+    "pdf_value": 1.1190000403256535,
+    "absolute_difference": 4.032565348310868e-08,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 1.114
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Cilium Native",
+    "regenerated": 1.194,
+    "pdf_value": 1.1940000518253644,
+    "absolute_difference": 5.1825364444368915e-08,
+    "tolerance": 0.0001,
+    "match": true
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Full",
     "regenerated": 0.984,
-    "pdf_value": 0.9949999980079162,
-    "absolute_difference": 1.9920838312259548e-09,
+    "pdf_value": 0.9840000196261736,
+    "absolute_difference": 1.9626173575204575e-08,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 0.995
+    "match": true
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Conservative",
     "regenerated": 1.065,
-    "pdf_value": 1.0729999905279626,
-    "absolute_difference": 9.472037376667686e-09,
+    "pdf_value": 1.0650000099664163,
+    "absolute_difference": 9.966416358864194e-09,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 1.073
+    "match": true
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Cilium Full",
     "regenerated": 1.01,
-    "pdf_value": 1.008999990733597,
-    "absolute_difference": 9.266402978269639e-09,
+    "pdf_value": 1.0100000015332948,
+    "absolute_difference": 1.5332948244406452e-09,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 1.009
+    "match": true
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Cilium No Bulk",
     "regenerated": 1.062,
-    "pdf_value": 1.061999986145378,
-    "absolute_difference": 1.3854622116227233e-08,
+    "pdf_value": 1.0620000205461504,
+    "absolute_difference": 2.05461503366422e-08,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 1.062
+    "match": true
+  },
+  {
+    "artifact": "published",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Cilium Native",
+    "regenerated": 0.704,
+    "pdf_value": 0.704000031892532,
+    "absolute_difference": 3.1892532059707435e-08,
+    "tolerance": 0.0001,
+    "match": true
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Katran Full",
     "regenerated": 1.006,
-    "pdf_value": 1.0059999895383467,
-    "absolute_difference": 1.0461653321414133e-08,
+    "pdf_value": 1.0060000340391446,
+    "absolute_difference": 3.4039144614084194e-08,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 1.006
+    "match": true
   },
   {
     "artifact": "published",
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Katran Conservative",
     "regenerated": 0.941,
-    "pdf_value": 0.9409999893455643,
-    "absolute_difference": 1.0654435667056816e-08,
+    "pdf_value": 0.9410000240727285,
+    "absolute_difference": 2.4072728588286907e-08,
     "tolerance": 0.0001,
-    "match": true,
-    "snapshot_expected_value": 0.941
+    "match": true
   },
   {
     "artifact": "regenerated",
@@ -4412,8 +4424,8 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Cilium Full",
     "regenerated": 1.074,
-    "pdf_value": 1.073999996279678,
-    "absolute_difference": 3.7203220504267165e-09,
+    "pdf_value": 1.0739999782272138,
+    "absolute_difference": 2.1772786240603637e-08,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4422,8 +4434,18 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Cilium No Bulk",
     "regenerated": 1.119,
-    "pdf_value": 1.1189999814486642,
-    "absolute_difference": 1.8551335800864877e-08,
+    "pdf_value": 1.1189999851270405,
+    "absolute_difference": 1.4872959530620733e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "throughput Cilium Native",
+    "regenerated": 1.194,
+    "pdf_value": 1.1939999966267514,
+    "absolute_difference": 3.3732485693604985e-09,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4432,8 +4454,8 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Full",
     "regenerated": 0.984,
-    "pdf_value": 0.984000000804394,
-    "absolute_difference": 8.043939958568558e-10,
+    "pdf_value": 0.9840000196261736,
+    "absolute_difference": 1.9626173575204575e-08,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4442,8 +4464,8 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "throughput Katran Conservative",
     "regenerated": 1.065,
-    "pdf_value": 1.0649999841634938,
-    "absolute_difference": 1.5836506106481352e-08,
+    "pdf_value": 1.0650000099664163,
+    "absolute_difference": 9.966416358864194e-09,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4452,8 +4474,8 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Cilium Full",
     "regenerated": 1.01,
-    "pdf_value": 1.009999986928598,
-    "absolute_difference": 1.3071401960829121e-08,
+    "pdf_value": 1.0100000015332948,
+    "absolute_difference": 1.5332948244406452e-09,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4462,8 +4484,18 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Cilium No Bulk",
     "regenerated": 1.062,
-    "pdf_value": 1.0619999968829734,
-    "absolute_difference": 3.1170266368008015e-09,
+    "pdf_value": 1.0619999653475374,
+    "absolute_difference": 3.4652462677087215e-08,
+    "tolerance": 2e-06,
+    "match": true
+  },
+  {
+    "artifact": "regenerated",
+    "figure": "sec-6-rq3-cilium-katran.pdf",
+    "point": "cost Cilium Native",
+    "regenerated": 0.704,
+    "pdf_value": 0.704000031892532,
+    "absolute_difference": 3.1892532059707435e-08,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4472,8 +4504,8 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Katran Full",
     "regenerated": 1.006,
-    "pdf_value": 1.0059999871296965,
-    "absolute_difference": 1.2870303489620483e-08,
+    "pdf_value": 1.0059999788405316,
+    "absolute_difference": 2.115946839964522e-08,
     "tolerance": 2e-06,
     "match": true
   },
@@ -4482,8 +4514,8 @@
     "figure": "sec-6-rq3-cilium-katran.pdf",
     "point": "cost Katran Conservative",
     "regenerated": 0.941,
-    "pdf_value": 0.9409999903975471,
-    "absolute_difference": 9.602452832879749e-09,
+    "pdf_value": 0.9409999688741154,
+    "absolute_difference": 3.112588453646481e-08,
     "tolerance": 2e-06,
     "match": true
   }

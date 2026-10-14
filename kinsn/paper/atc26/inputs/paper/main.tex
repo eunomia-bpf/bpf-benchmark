@@ -2,8 +2,20 @@
 
 % ATC '26 camera-ready: ACM copyright block, no page numbers, headers or footers.
 \settopmatter{printacmref=true,printfolios=false}
+% Rights block from the ATC '26 HotCRP LaTeX instructions (corrected
+% conference lines) and the completed ACM eRights record (CC-BY).
+\copyrightyear{2026}
+\acmYear{2026}
+\setcopyright{cc}
+\setcctype{by}
+\acmConference[SIGOPS ATC 2026]{The 2026 ACM SIGOPS Annual Technical Conference}{November 15-18, 2026}{Hong Kong, China}
+\acmBooktitle{The 2026 ACM SIGOPS Annual Technical Conference (SIGOPS ATC 2026), November 15-18, 2026, Hong Kong, China}
+\acmDOI{10.1145/3828523.3857078}
+\acmISBN{979-8-4007-2818-1/2026/11}
 
 \input{helpers/packages}
+% Let TeX stretch interword space before overfilling a line.
+\emergencystretch=2em
 
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
@@ -16,22 +28,13 @@
 %% values in them; it is your responsibility as an author to replace
 %% the commands and values with those provided to you when you
 %% complete the rights form.
-% TODO: replace with the exact commands from the ACM e-Rights confirmation email.
-\setcopyright{acmlicensed}
-\copyrightyear{2026}
-\acmYear{2026}
-\acmDOI{XXXXXXX.XXXXXXX}
-\acmISBN{978-X-XXXX-XXXX-X/2026/11}
 %% These commands are for a PROCEEDINGS abstract or paper.
-\acmConference[ATC '26]{2026 ACM SIGOPS Annual Technical Conference}{November 16--18,
-  2026}{Shatin, Hong Kong}
 %%
 %%  Uncomment \acmBooktitle if the title of the proceedings is different
 %%  from ``Proceedings of ...''!
 %%
 %%\acmBooktitle{ATC '26: 2026 ACM SIGOPS Annual Technical Conference,
 %%  November 16--18, 2026, Shatin, Hong Kong}
-\acmISBN{978-1-4503-XXXX-X/2026/11}
 
 
 %%
@@ -76,12 +79,58 @@
 %% allowing the author to define a "short title" to be used in page headers.
 \title{\tool: Safely Extending the eBPF Compilation Pipeline with Native Operations}
 
-\author{Yusheng Zheng$^{1*}$, Zhengjie Ji$^{2*}$, Weichen Tao$^{3}$, Hao Sun$^{4}$, Wei Zhang$^{5}$, Dan Williams$^{2}$, Andi Quinn$^{1}$}
-\thanks{$^*$Equal contribution.}
+% Author names, affiliations, and emails follow the completed ACM eRights
+% record and the HotCRP author list; keep them identical.
+\author{Yusheng Zheng}
+\authornote{Both authors contributed equally to this research.}
 \affiliation{%
-  \institution{$^{1}$UC Santa Cruz \quad $^{2}$Virginia Tech \quad $^{3}$Telecom Paris \quad $^{4}$ETH Zurich \quad $^{5}$University of Connecticut}
-  \country{}}
-\renewcommand{\authorsaddresses}{}
+  \institution{UC Santa Cruz}
+  \city{Santa Cruz}
+  \country{United States}}
+\email{yzhen165@ucsc.edu}
+
+\author{Zhengjie Ji}
+\authornotemark[1]
+\affiliation{%
+  \institution{Virginia Tech}
+  \city{Blacksburg}
+  \country{United States}}
+\email{zhengjie@vt.edu}
+
+\author{Weichen Tao}
+\affiliation{%
+  \institution{Telecom Paris}
+  \city{Palaiseau}
+  \country{France}}
+\email{weichen.tao@telecom-paris.fr}
+
+\author{Hao Sun}
+\affiliation{%
+  \institution{ETH Zurich}
+  \city{Zurich}
+  \country{Switzerland}}
+\email{hao.sun@inf.ethz.ch}
+
+\author{Wei Zhang}
+\affiliation{%
+  \institution{University of Connecticut}
+  \city{Storrs}
+  \country{United States}}
+\email{wei.zhang.gbs@gmail.com}
+
+\author{Dan Williams}
+\affiliation{%
+  \institution{Virginia Tech}
+  \city{Blacksburg}
+  \country{United States}}
+\email{djwillia@vt.edu}
+
+\author{Andi Quinn}
+\affiliation{%
+  \institution{University of California Santa Cruz}
+  \city{Santa Cruz}
+  \country{United States}}
+\email{aquinn1@ucsc.edu}
 
 %%
 %% By default, the full list of authors will be used in the page
@@ -157,7 +206,11 @@
 \input{sections/9-conclusion}
 
 \begin{acks}
-This work is supported in part by the National Science Foundation under Award \#2530909 and by NEUTC.
+We thank our shepherd and the anonymous reviewers for their insightful feedback.
+Williams' group is supported in part by the National Science Foundation (NSF) under Award \#2236966 and by a grant from the eBPF Foundation.
+This work is also supported in part by NSF Award \#2530909 and by NEUTC.
+
+We used Claude and Codex as generative AI tools for coding assistance and language editing.
 \end{acks}
 
 %%
