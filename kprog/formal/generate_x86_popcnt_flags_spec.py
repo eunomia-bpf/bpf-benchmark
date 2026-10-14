@@ -59,10 +59,10 @@ EXPECTED = {
     "flags": FLAGS,
 }
 
-# The live POPCNT arm, between its opener and the `SHIFTX` arm.
-ARM_START = "} else if ((OP) == X86_OP_POPCNT) {"
-ARM_END = "} else if ((OP) == X86_OP_SHIFTX) {"
-ARM_OPCODE = "X86_OP_POPCNT"
+# The live POPCNT arm, between the generated popcnt singleton gate and the
+# generated shiftx family gate.
+ARM_START = "} else if (KPROG_X86_DISP_POPCNT_HANDLED(OP)) {"
+ARM_END = "} else if (KPROG_X86_DISP_SHIFTX_HANDLED(OP)) {"
 ARM_VALUE = "x86_popcount64("
 ARM_FLAG_SET = "X86_SIM_L_SET_POPCNT_FLAGS(__x86_l_src, __x86_l_width)"
 ARM_HAND_FLAGS = "__x86_cf ="
@@ -84,8 +84,6 @@ def check_against_header():
     """The live POPCNT arm must route its flag block through the generated
     transition and set no flag by hand."""
     region = arm_region()
-    if ARM_OPCODE not in region:
-        raise SystemExit("x86 popcnt arm does not name the popcnt opcode")
     if ARM_VALUE not in region:
         raise SystemExit("x86 popcnt arm does not compute the popcount value")
     if ARM_FLAG_SET not in region:
@@ -96,7 +94,7 @@ def check_against_header():
         raise SystemExit(
             "x86 popcnt arm sets its flags by hand instead of through the "
             "generated transition")
-    if flat(region).count("} else if ((OP) ==") != 1:
+    if flat(region).count("} else if (") != 1:
         raise SystemExit("x86 popcnt arm region is not exactly one arm")
 
 

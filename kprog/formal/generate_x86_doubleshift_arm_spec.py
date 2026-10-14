@@ -72,9 +72,9 @@ COLUMNS = ("arm", "arm_define", "opcode", "opcode_define", "result",
            "flag_family_code", "flag_family_define", "effect")
 
 # The live routed arm text, between the generated double-shift family gate and
-# the `PUSH` arm.
+# the generated push singleton gate.
 ARM_START = "} else if (KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)) {"
-ARM_END = "} else if ((OP) == X86_OP_PUSH) {"
+ARM_END = "} else if (KPROG_X86_DISP_PUSH_HANDLED(OP)) {"
 ARM_SELECTOR = "KPROG_X86_DOUBLESHIFT_ARM((OP))"
 ARM_FLAGS = "KPROG_X86_DOUBLESHIFT_ARM_FLAGS((OP))"
 ARM_SHLD_ARM = "KPROG_X86_DOUBLESHIFT_ARM_SHLD"

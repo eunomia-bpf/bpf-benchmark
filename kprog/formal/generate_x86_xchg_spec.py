@@ -67,9 +67,10 @@ EXPECTED = {
 }
 COLUMNS = ("arm", "arm_define", "is_full_width", "effect", "width_class")
 
-# The live routed arm text, between the `XCHG` arm opener and the `DIV` arm.
-ARM_START = "} else if ((OP) == X86_OP_XCHG) {"
-ARM_END = "} else if ((OP) == X86_OP_DIV) {"
+# The live routed arm text, between the generated xchg singleton gate and the
+# generated div singleton gate.
+ARM_START = "} else if (KPROG_X86_DISP_XCHG_HANDLED(OP)) {"
+ARM_END = "} else if (KPROG_X86_DISP_DIV_HANDLED(OP)) {"
 ARM_SELECTOR = "KPROG_X86_XCHG_ARM(__x86_l_width) == KPROG_X86_XCHG_ARM_POINTER_SWAP"
 ARM_POINTER_READ = "X86_SIM_L_READ_REG_PTR"
 ARM_SUBWORD_WRITE = "X86_SIM_L_WRITE_REG_WIDTH"

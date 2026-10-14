@@ -86,9 +86,9 @@ EXPECTED = {
 }
 COLUMNS = ("arm", "arm_define", "effect", "width_class")
 
-# The live routed arm text, between the MOV_REG arm opener and the generated
-# MOVX register-pair family gate.
-ARM_START = "} else if ((OP) == X86_OP_MOV_REG) {"
+# The live routed arm text, between the generated mov-reg singleton gate and
+# the generated movx register-pair family gate.
+ARM_START = "} else if (KPROG_X86_DISP_MOV_REG_HANDLED(OP)) {"
 ARM_END = "} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {"
 # The standalone shared body, between its `#define` and the next `#define`.
 MACRO_START = "#define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)"
@@ -156,7 +156,7 @@ def check_region(region, exactly_one_arm):
         raise SystemExit(
             "x86 mov_reg arm body tests the stack pointer by hand instead of "
             "through the generated selector")
-    if exactly_one_arm and region.count("} else if ((OP) ==") != 1:
+    if exactly_one_arm and region.count("if (KPROG_X86_MOV_REG_ARM") != 3:
         raise SystemExit("x86 mov_reg arm region is not exactly one arm")
 
 

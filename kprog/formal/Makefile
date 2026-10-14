@@ -137,6 +137,7 @@ check:
 	python3 generate_x86_specialization_spec.py --check
 	python3 generate_x86_alu_flag_arm_spec.py --check
 	python3 generate_x86_dispatch_family_spec.py --check
+	python3 generate_x86_dispatch_singleton_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -356,6 +357,12 @@ check:
 	./build/test_x86_dispatch_family_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_dispatch_family_route_host.c -o build/test_x86_dispatch_family_route_host
 	./build/test_x86_dispatch_family_route_host
+	lake env lean KProgFormal/GeneratedX86DispatchSingleton.lean
+	lake env lean KProgFormal/X86DispatchSingleton.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_dispatch_singleton_host.c -o build/test_x86_dispatch_singleton_host
+	./build/test_x86_dispatch_singleton_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_dispatch_singleton_route_host.c -o build/test_x86_dispatch_singleton_route_host
+	./build/test_x86_dispatch_singleton_route_host
 	./build/test_x86_reg_dispatch_route_host
 	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_presence_host.c -o build/test_x86_reg_presence_host
 	./build/test_x86_reg_presence_host
