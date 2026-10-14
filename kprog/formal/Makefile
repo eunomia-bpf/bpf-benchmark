@@ -168,6 +168,8 @@ check:
 	lake env lean KProgFormal/X86AluResultSpec.lean
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_alu_result_arm_host.c -o build/test_x86_alu_result_arm_host
 	./build/test_x86_alu_result_arm_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_alu_result_route_host.c -o build/test_x86_alu_result_route_host
+	./build/test_x86_alu_result_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_alu_decode_host.c -o build/test_x86_alu_decode_host
 	./build/test_x86_alu_decode_host
 	lake env lean KProgFormal/GeneratedX86Opcode.lean

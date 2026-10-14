@@ -3083,6 +3083,23 @@ case-label table and its distinctness, and pins the default arm keeping the
 left operand at the sixteen out-of-range operation bytes
 (OK (6304 cases) rows in `make check`).
 
+The route-oracle sibling includes `kprog/x86/x86_sim_local_bpf.h` and drives
+the *real* `X86_SIM_L_EXEC_ALU_IMM` and `X86_SIM_L_EXEC_ALU_REG` bodies as
+dispatched by the simulator, reproducing the bodies' input staging (the
+register files planted with dst/src cell values and tags, the
+`KPROG_X86_REG_LANE_AUX` dst/src lanes, the seeded incoming flags), comparing
+the full register file with tags and the four flags against an independent
+model written from the generated formulas over 16 op tokens × 5 width codes ×
+2 destination-lane shifts × 2 flag seeds × 6 left values × 6 right values × 2
+forms (23,040 routed pairs, 760,320 full-state checks plus 17 selector pins,
+760,337 rows in `make check`).  An 87-mutation harness over the observed
+surfaces --- 41 caught at the spec/generator stage, 30 by the Lean chain, 7 by
+the host oracle, 5 by the route oracle (the dst/src lane reads dropping one
+byte lane, the SBB/ADC handler arms dropping the live carry/borrow, a dropped
+`SET_ALU_FLAGS` wiring, and a writeback ignoring the destination shift), and 4
+genuine equivalences that survive --- closes the drift paths between the
+generated result/flag formulas and the shipped arm bodies.
+
 The x86 condition-mnemonic decode contract binds the `X86_CC_*` codes the
 artifact encoder's `CC_AUX` mapping selects for its 36 `jcc`/`cmovcc`/`setcc`
 mnemonics. `X86CcDecode.lean` projects the generated table to
@@ -3203,7 +3220,10 @@ register/stack/flag/ALU/move/compare bodies through it), x86
 logical/ADD/SUB/ADC/SBB flag production, x86 shift-flag production, the
 x86 ALU op-step result composition (and the simulator's routing of the
 `X86_SIM_L_EXEC_ALU_*` arm results through the generated 16-arm
-`KPROG_X86_ALU_RESULT` contract), the x86 effective-address offset (and the simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
+`KPROG_X86_ALU_RESULT` contract), the routed `X86_SIM_L_EXEC_ALU_IMM`/`_REG`
+arm bodies (dst/src lane reads, live-carry/borrow handler arms, flag wiring,
+width-and-lane writeback), the x86 effective-address offset (and the
+simulator's routing of `X86_SIM_L_MEM_OFFSET` through it),
 x86 operand-register presence (and the simulator's routing of its memory-read,
 MULX, MOVBE, LEA and ALU-memory bodies through it), x86 register-number
 dispatch-cell binding (and the simulator's binding of its write/tag X-macro

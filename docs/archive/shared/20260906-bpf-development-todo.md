@@ -12856,6 +12856,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `make -C kprog/formal check`: 202 OK rows, 0 FAIL; `make -C kprog/x86 run`:
   object builds and the loader loads `x86_sim_hardcoded_xdp` (fd=4).
 
+## Step 0154 — x86-64 ALU op-step result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_alu_result_route_host.c`, the sim-header companion
+  to the Step 0152/0153 ALU result contract: the oracle includes
+  `kprog/x86/x86_sim_local_bpf.h` and drives the *real*
+  `X86_SIM_L_EXEC_ALU_IMM` and `X86_SIM_L_EXEC_ALU_REG` bodies over 16 op
+  tokens × 5 width codes {0,8,16,32,64} × 2 dst shifts {0,8} × 2 incoming
+  flag seeds × 6 lhs × 6 rhs × 2 forms (imm/reg) = 23,040 routed pairs, each
+  compared with 32 register/tag checks plus one flag-file check (760,320)
+  plus 17 selector pins (decode codes 0..15 plus the SBB/ADC handler
+  ladders) = 760,337 rows; reg form fixes dst=X86_RDX, src=X86_RCX, imm form
+  alternates dst X86_RDX/X86_RCX with the shift digit; full post-state
+  compare (16 general registers + tags + CF/ZF/SF/OF) against an independent
+  model built from the generated formulas (raw-64 result arithmetic,
+  narrow-only flag production, writeback model mirroring
+  `KPROG_X86_WRITE_REG*`).
+- Gate: `x86 alu result route host cross-check: OK (760337 cases)`;
+  `make -C kprog/formal check`: 203 OK rows (was 202), 0 FAIL.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py` (untracked;
+  unconditionally build/run ok, 87-mutation totals quoted; file itself is
+  not committed) now also runs the route detector (cc with the sim header +
+  MUT_ROUTE_INC → build/mut_route_oracle, run) and mutates the *simulator
+  route bodies* in `x86_sim_local_bpf.h` (captured by generated-header
+  byte-exact anchored rewrites, count(old)=1 each):
+  `simlocal_imm_lane_drift` (lhs read ignores dst lane),
+  `simlocal_imm_sbb_cf_drift` (SBB borrow := 0),
+  `simlocal_imm_adc_cf_drift` (ADC carry := 0),
+  `simlocal_imm_alu_flags_drift` (default-arm `SET_ALU_FLAGS` dropped),
+  `simlocal_imm_wb_shift_drift` (SBB-arm writeback shift := 0).
+- Tally: `TOTAL 87 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5)`, `ALL AS EXPECTED` (~96 s); the 4 equivalence survivors are the
+  Step 0153 generator docstring/`ROOT` spelling and the two added comment
+  rewrites.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
