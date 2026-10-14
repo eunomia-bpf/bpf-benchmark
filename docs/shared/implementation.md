@@ -1043,6 +1043,19 @@ increment is committed and pushed immediately). Current state:
   genuine-equivalence rewrites (a generator docstring, an added hand-module
   comment, and a C case-label space) are the three the proof correctly does not
   flag.
+
+  The x86-64 shift-flag route path is now also machine-checked (Step 0151,
+  commit 589f0296b): kprog/formal/test_x86_shift_flags_route_host.c drives
+  the real X86_SIM_L_SET_SHIFT_FLAGS wrapper (routed through
+  case KPROG_X86_ALU_FLAG_ARM_SHIFT) over 6,504,961 wrapper cases
+  (4 shift tokens x 5 widths x 8 lhs x 11 rhs x 7 result values) against an
+  independent walk from the generated Lean semantics, pinning count-zero
+  preservation, the count-one OF boundary, and the 31/32/63/64 mask-count
+  boundaries; the 72-mutation harness catches 69 (gen 22 / lean_chain 30 /
+  host 13 / route 4) with 3 equivalence survivors, including the
+  count-guard mutant that survives the host grid (no rhs=0 case) and is
+  caught by the route grid.
+
   Remaining work also includes the load/store address and tag paths, with
   the stack slot tag write action and read source and the BPF helper-argument
   pointer source now closed (Steps 0137, 0138, and 0139), the memory
@@ -1055,7 +1068,8 @@ increment is committed and pushed immediately). Current state:
   stack byte-ladder per-lane activation now closed (Step 0146), the
   x86-64 ALU-token flag-body selection now closed (Step 0147), the
   x86-64 dispatch-family token-membership now closed (Step 0148), and the
-  x86-64 dispatch-singleton opcode-membership now closed (Step 0149),
+  x86-64 dispatch-singleton opcode-membership now closed (Step 0149), and
+  the x86-64 SHL/SHR/SAR/ROL flag routing now closed (Step 0151),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

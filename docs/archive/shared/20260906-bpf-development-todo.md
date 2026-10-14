@@ -12747,6 +12747,56 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   available in this environment, so the edit is verified by brace-and-$
   balance over the new lines plus the diff review.
 
+## Step 0151 — x86-64 shift-flag route oracle and mutation harness
+
+- Code `589f0296b` (superproject `master`): adds
+  `kprog/formal/test_x86_shift_flags_route_host.c` and three `check` rows.
+  The route oracle includes `kprog/x86/x86_sim_local_bpf.h` and drives the
+  `X86_SIM_L_SET_SHIFT_FLAGS` wrapper as dispatched from
+  `case KPROG_X86_ALU_FLAG_ARM_SHIFT` in `X86_SIM_L_SET_ALU_FLAGS`,
+  reproducing the wrapper's own input derivation (width narrowing via
+  `X86_SIM_L_EFFECTIVE_WIDTH`, `x86_width_bits`/`x86_width_mask`, the sign
+  bit, and the masked `x86_shift_count`), and compares the full register
+  file plus CF/ZF/SF/OF against an independent walk written from the
+  generated Lean semantics.  Coverage: 4 shift tokens × 5 width codes ×
+  8 lhs values × 11 rhs values × 7 result values = 6,504,961 routed cases;
+  result line `x86 shift flags route host cross-check: OK (6504961 cases)`.
+  The value tables pin rhs=0 (all four flags preserved), rhs=1 (the
+  OF-at-count-one boundary), rhs=31/32/33 and rhs=63/64 (mask-count
+  boundaries), and 0xffffffff, with 0x80/0x8000000000000000 lhs values
+  covering the CF last-shifted-bit and SAR sign-saturation paths.
+- The third new `check` row types
+  `KProgFormal/GeneratedX86ShiftFlags.lean` directly, matching the 0147
+  Generated-Lean + hand-Lean row pairs.  Observed gate arithmetic: a `make
+  -C kprog/formal check` run emits one `OK (` row per oracle run only (the
+  `cross-check: OK (N cases)` lines); `lake env lean` / `cc` / `./build`
+  rows do not carry an OK marker.  Baseline had 200 OK rows; after adding
+  the route oracle the run reports 201 OK rows, 0 FAIL:
+  `x86 shift flags route host cross-check: OK (6504961 cases)` is the only
+  addition (diff of `grep "OK ("` against the 0150 baseline log).
+- Mutation harness `kprog/formal/build/mut_x86_shift_flags.py`
+  (evidence only; `build/` is gitignored and no mutator is tracked):
+  72 mutants over the six observed surfaces (`x86_shift_flags_spec.json`,
+  `generate_x86_shift_flags_spec.py`, `generated/x86_shift_flags.h`,
+  `GeneratedX86ShiftFlags.lean`, the hand `X86ShiftFlags.lean`, and the
+  wrapper/`x86_sim_local_bpf.h` routing) against four detectors —
+  spec `--check`, the `lake build` + hand-Lean typing chain, the host
+  oracle, and the route oracle.  Every mutant first runs its designated
+  detector and, on survival, the remaining three; the recorded catch is the
+  detector that actually fired (detector grids differ: the host grid has no
+  rhs=0 case, so `generated_c_count_guard_drift` survives host and is
+  caught by route).  Observed: 69 caught (`gen` 22 / `lean_chain` 30 /
+  `host` 13 / `route` 4) plus 3 genuine equivalences surviving by design
+  (generator `ROOT` resolve spelling, an added local comment, an added
+  hand-Lean comment): `TOTAL 72 mutations, 0 failures (gen=22
+  lean_chain=30 host=13 route=4)`, `ALL AS EXPECTED`.
+- Harness-caught defect fix on the way in: `local_preserve_drift` (mutating
+  `__x86_l_old_cf`) was out of the shift family's scope — only the INC/DEC
+  arms read that line — and was replaced by `local_sign_drift` (the
+  wrapper's `__x86_sh_sign` line); `hand_lean_rol_of_drift`'s `|| true`
+  weakening typechecks (weaker obligations prove trivially), so it was
+  replaced by a refutation-grade `==` flip on the ROL OF clause.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

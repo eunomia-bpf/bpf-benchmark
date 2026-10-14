@@ -3086,6 +3086,22 @@ masked shift count), drives the *real* generated macro, and compares each of
 CF/ZF/SF/OF against an independent restatement of the shift-flag semantics over
 a value/amount/width/old-flags grid.
 
+The route-oracle sibling includes `kprog/x86/x86_sim_local_bpf.h` and drives
+the *real* `X86_SIM_L_SET_SHIFT_FLAGS` wrapper as dispatched from
+`case KPROG_X86_ALU_FLAG_ARM_SHIFT` in `X86_SIM_L_SET_ALU_FLAGS`, reproducing
+the wrapper's input derivation (width narrowing, bit count, sign bit, masked
+shift count), comparing the full register file and the four flags against an
+independent walk written from the generated Lean semantics over 4 shift
+tokens × 5 width codes × 8 lhs values × 11 rhs values × 7 result values
+(6,504,961 routed cases), with rhs tables pinning count-zero preservation,
+the count-one OF boundary, and the 31/32/63/64 mask-count boundaries.  A
+72-mutation harness over the six observed surfaces --- 22 caught at the
+spec/generator stage, 30 by the Lean chain, 13 by the host oracle, 4 by the
+route oracle, and 3 genuine equivalences that survive --- closes the drift
+paths between the generated header bytes and the shipped wrapper
+(e.g. the count-guard survive-on-host/catch-on-route split, because only the
+route grid covers rhs=0).
+
 The x86 packed-AUX layout contract binds the `KPROG_X86_MEM_AUX` packer and its
 four `KPROG_X86_MEM_AUX_*` byte decoders that `x86_sim.h` aliases its
 `X86_MEM_AUX*` / `X86_REG_AUX_*` macros to, so every simulator AUX word shares
