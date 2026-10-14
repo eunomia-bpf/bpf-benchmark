@@ -19,9 +19,17 @@ PAPER = BUNDLE / 'inputs/paper'
 OUT = BUNDLE / 'output'
 
 
+UNMAPPED = []
+
+
 def locate(row):
     """Bind audit claims to the pinned current paper, retaining audit references."""
     row = dict(row)
+    if row.get('located_in') == 'current':
+        # Camera-ready claims are already located in the pinned current paper.
+        row['audit_source_line'] = ''
+        row['audit_source_text'] = ''
+        return row
     rel = row['source_file'].removeprefix('paper/')
     lines = (PAPER / rel).read_text().splitlines()
     text = row['source_text']
@@ -39,18 +47,25 @@ def locate(row):
         # Matching wording alone can confuse nearby RQs. Constrain scalar
         # locations by the printed value already present in the audited line.
         value = str(row['claimed_value']).replace('%', '').replace(' cases', '')
+        unique = False
         if re.fullmatch(r'\d+(?:\.\d+)?(?:--\d+(?:\.\d+)?)?', value):
             pattern = r'(?<![\d.])' + re.escape(value) + r'(?![\d.])'
-            if re.search(pattern, text):
-                numeric = [(i, s) for i, s in candidates if re.search(pattern, s)]
+            # The camera-ready writes thousands with separators (100,000; 4{,}086).
+            plain = lambda s: re.sub(r'(?<=\d)(?:\{,\}|,)(?=\d{3}(?!\d))', '', s)
+            if re.search(pattern, plain(text)):
+                numeric = [(i, s) for i, s in candidates if re.search(pattern, plain(s))]
                 if numeric:
                     candidates = numeric
+                    # A value found on exactly one line identifies the claim's sentence.
+                    unique = len(numeric) == 1
         if rel == 'sections/3-characterization.tex' and row['claim'] == '27 pure-bytecode computation benchmarks':
             candidates = [(i, s) for i, s in candidates if 'We use 27 microbenchmarks' in s]
         if rel == 'sections/1-introduction.tex' and row['claim'] == 'production throughput increase up to (%)':
             candidates = [(i, s) for i, s in candidates if 'On production applications' in s]
         scores = [(difflib.SequenceMatcher(None, text, s.strip()).ratio(), i) for i, s in candidates]
         score, line = max(scores)
+        if unique:
+            score = 1
         if row['claim'] == '27 pure-bytecode computation benchmarks' or (rel == 'sections/1-introduction.tex' and row['claim'] == 'production throughput increase up to (%)'):
             score = 1
         if score < .45 and '12--23' in text:
@@ -67,7 +82,8 @@ def locate(row):
             row['notes'] += ' This example sentence was removed in the current paper revision.'
             return row
         if score < .45:
-            raise RuntimeError(f'Cannot map audit claim to current paper: {rel}: {text}')
+            UNMAPPED.append(f'{rel}: {row["claim"]} = {row["claimed_value"]}: {text}')
+            return row
     row['source_line'] = line
     row['source_text'] = lines[line-1].strip()
     return row
@@ -85,6 +101,18 @@ def all_claims():
                 continue
             key = old['source_file'], int(old['source_line']), old['claim']
             row = dict(old)
+            if row['claim'] in m.SUPERSEDED_CLAIMS:
+                # The camera-ready replaces the earlier RQ4 run; keep the audit row
+                # against the audit snapshot it was written for.
+                row.update(source_file=row['source_file'].replace('paper/', 'audit-paper/', 1),
+                           scope='replaced in the camera-ready; audit snapshot only',
+                           recomputed_value='', recomputable='no', verification='audit snapshot only',
+                           match='replaced in the camera-ready',
+                           audit_source_line=row['source_line'], audit_source_text=row['source_text'],
+                           notes=(row['notes'] + ' ' if row['notes'] else '') +
+                           'The camera-ready Section 6.4 uses the counterbalanced run; see its rows.')
+                rows.append(row)
+                continue
             if row['claim'] == 'five idiom-stress instruction-count expansion':
                 ratios = []
                 for name in ['rotate_dense', 'cond_select_dense', 'load_byte_recompose', 'extract_dense', 'endian_swap_dense']:
@@ -115,7 +143,7 @@ def all_claims():
             rows.append(locate(row))
     # Some detailed audit metrics (e.g. the commented-out summary table) are
     # useful outputs even when the table is no longer included in the body.
-    existing = {(r['source_file'], int(r['audit_source_line']), r['claim']) for r in rows}
+    existing = {(r['source_file'], int(r['audit_source_line'] or r['source_line']), r['claim']) for r in rows}
     for key, row in computed.items():
         if key not in existing:
             row = dict(row, verification='recomputed from data/')
@@ -167,16 +195,20 @@ def all_claims():
                   ('Cilium No Bulk', m.CN, m.CNC, 'cilium__agent.json'),
                   ('Katran Conservative', m.KC, m.KC, 'katran.json'),
                   ('Katran Full', m.KM, m.KM, 'katran.json')]}
+    r4, profile = m.rq4(), m.profile()
+    policy['Cilium Native'] = dict(throughput=r4['throughput'], cost=r4['cost_ratio'])
     vals = dict(characterization={a+' '+rt: m.gm(v) for (a, rt), v in chars.items()},
                 micro_speedup=dict(x86=m.gm(x86), arm64=m.gm(arm)), code_size=sizes,
                 Cilium_full=m.throughput(m.CF),
                 Cilium_tuned_median=m.throughput(m.CN),
                 Katran_selected=m.throughput(m.KC, 'katran.json'),
                 Katran_full=m.throughput(m.KM, 'katran.json'),
-                native=m.throughput(m.NT),
+                native=r4['throughput'],
                 Cilium_full_paired_cost=m.paired_cost(m.CFC),
                 Cilium_no_bulk_paired_cost=m.paired_cost(m.CNC),
-                application_policy=policy, native_cost=m.cost(m.NC))
+                application_policy=policy,
+                native_cost=dict(baseline=r4['jit_ns'], post_rejit=r4['native_ns']),
+                rq4=r4, rq4_profile=profile)
     population = [b['name'] for b in m.data(m.LP)['benchmarks']]
     vals['load_time'] = {'population': len(population)}
     for field in ['object_load_ns', 'compile_ns']:
@@ -190,6 +222,9 @@ def all_claims():
         a, b = m.med(path, runtime, 'size'), m.med(baseline, 'kernel', 'size')
         vals['code_size_27_case_alternative'][label] = m.gm(a[n]/b[n] for n in a if n not in ('simple', 'simple_packet'))
     expected = m.js(BUNDLE / 'inputs/inventory/recomputed-metrics.json')
+    # The inventory's native metrics belong to the earlier RQ4 run, which the
+    # camera-ready replaces; every other inventory metric is recomputed below.
+    expected = {k: v for k, v in expected.items() if k not in m.SUPERSEDED_METRICS}
     def compare(actual, expected, name):
         if isinstance(expected, dict):
             for key, value in expected.items():
@@ -200,6 +235,8 @@ def all_claims():
         elif not math.isclose(actual, expected, rel_tol=1e-12, abs_tol=1e-12):
             raise RuntimeError(f'Inventory recomputation mismatch: {name}: {actual} != {expected}')
     compare(vals, expected, 'metrics')
+    if UNMAPPED:
+        raise RuntimeError('Cannot map audit claims to the current paper:\n' + '\n'.join(UNMAPPED))
     return rows, chars, x86, arm, policy, vals
 
 
@@ -286,7 +323,7 @@ def illustrations():
     shutil.copyfile(work / 'sec-4-pipeline.tex', OUT / 'figures/sec-4-pipeline.tex')
 
 
-def reports(rows, vals):
+def reports(rows, vals, bars):
     fields = list(dict.fromkeys(k for r in rows for k in r))
     with (OUT / 'numbers.csv').open('w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
@@ -299,16 +336,16 @@ def reports(rows, vals):
              'in `numbers.csv`. Empty regenerated cells mean missing evidence or source-only',
              'declarations, never a successful measurement. Table/figure prose is retained',
              'as source, and its unsupported numbers remain explicitly unsupported.',
-             'Application policy and host CPU expectations include the 2026-10-09 author',
-             'corrections. Pinned paper/audit snapshots and archived inventory text retain',
-             'their original values; `claimed_value` reports the corrected expectation.', '',
+             'Claims are checked against the pinned camera-ready paper in `inputs/paper/`.',
+             'Audit-inventory rows keep their audit snapshot (`inputs/audit-paper/`);',
+             '`claimed_value` reports the value printed in the camera-ready.', '',
              '## Regenerated headline values', '',
              '| Quantity | Regenerated |', '| --- | --- |']
     for key in ['micro_speedup', 'code_size', 'Cilium_full',
                 'Cilium_tuned_median', 'Katran_selected', 'Katran_full', 'native']:
         lines.append(f'| {key} | {json.dumps(vals[key])} |')
-    lines += ['', 'All metrics in `inputs/inventory/recomputed-metrics.json` match fresh',
-              'recomputation within 1e-12. All 224 regenerated data bars match PDF geometry;',
+    lines += ['', 'The inventory metrics in `inputs/inventory/recomputed-metrics.json` match fresh',
+              f'recomputation within 1e-12. All {bars} regenerated data bars match PDF geometry;',
               'see `figure-checks.md` and `figure-checks.json`.', '',
               '## Application policy figure (median post / median baseline)', '',
               '| Configuration | Throughput | BPF cost |', '| --- | --- | --- |']
@@ -325,9 +362,12 @@ def reports(rows, vals):
               f"- Corrected throughput means: tuned Cilium 1.114 -> {vals['Cilium_tuned_median']:.9f} (1.119); Katran conservative 1.073 -> {vals['Katran_selected']:.9f} (1.065); Katran all-operations 0.995 -> {vals['Katran_full']:.9f} (0.984). RQ2 repeats the conservative Katran value and uses the same correction. The abstract/introduction up-to-12% claim still rounds to 12% from the median increase (11.893520%).",
               '- Other non-median aggregations: policy BPF costs previously used a geometric mean of paired per-program ratios. '
               f"The median convention gives full/no-bulk Cilium {vals['Cilium_full_paired_cost'][0]:.9f}/{vals['Cilium_no_bulk_paired_cost'][0]:.9f}; full Cilium changes its printed cost from 1.009 to 1.010, no-bulk still rounds to 1.062. Single-row Katran costs remain 0.941/1.006. "
-              f"Native Cilium costs previously used count-weighted phase means; medians are {vals['native_cost']['baseline']:.9f} -> {vals['native_cost']['post_rejit']:.9f} ns/run, retaining printed 488.7 -> 262.3 and 1.86x. Characterization, micro execution/code size, load time, full Cilium and native throughput already use sample medians; their cross-benchmark geometric means are stated explicitly. The separate October revision explicitly uses mean per-call times and lacks raw data; its values are unchanged.",
-              '- Native-gap recovery: printed 5.4%; raw ratios give '
-              f"{(vals['Cilium_full']-1)/(vals['native']-1)*100:.7f}%. Rounded inputs 1.074 and 2.358 give 5.449189%, which rounds to 5.4% (raw inputs round to 5.5%).",
+              'Characterization, micro execution/code size, load time and full Cilium throughput already use sample medians; their cross-benchmark geometric means are stated explicitly. The separate October revision explicitly uses mean per-call times and lacks raw data; its values are unchanged.',
+              f"- RQ4 (Section 6.4): six statistics-off fresh guests, three per run order, give native/eBPF throughput {vals['rq4']['throughput']:.6f} (printed 1.194). "
+              f"Six statistics-on guests give median {vals['rq4']['jit_ns']:.2f} -> {vals['rq4']['native_ns']:.2f} ns per BPF run, ratio {vals['rq4']['cost_ratio']:.6f} (printed 659.2 -> 463.9, 0.704). "
+              f"Every arm runs {'/'.join(map(str, vals['rq4']['live_programs']))} live programs; Kinsn's 1.074x recovers {(vals['Cilium_full']-1)/(vals['rq4']['throughput']-1)*100:.4f}% of the gap (printed 38%). "
+              f"The profile's eBPF runs spend {vals['rq4_profile']['bpf_code_share']:.2f}% of samples in program instructions and {vals['rq4_profile']['maps_share']:.2f}% in map operations (printed about 10% and 26%); "
+              f"native cuts cycles per packet by {(1-vals['rq4_profile']['cycles_ratio'])*100:.2f}% (printed 13.6%), and its live code is {(vals['rq4']['code_size']-1)*100:.2f}% larger (printed 10%).",
               '- Hardware: corrected Core Ultra 9 285K host expectation matches all three x86 micro metadata files. '
               'The claimed 8-vCPU/64-GB VM sizing is not established by the raw runs. ARM metadata says aarch64, '
               'without independently establishing t4g.small/Graviton2. Corpus metadata does not record CPU/source/kernel commits.',
@@ -336,8 +376,6 @@ def reports(rows, vals):
               'Katran retained corpus runs have bpf_stats=true, despite RQ2 saying stats disabled.',
               '- Application sites: Cilium 4086/3512, family counts 2346/385/766/2/587, zero skips/report errors; '
               'Katran 21/62 have no original report streams. Plot annotations are declarations, not regenerated measurements.',
-              '- Native loader: 113 replacements, 22 pass-throughs, 89 objects and 8 files lack original streams/sidecars. '
-              'The native interpretation is traced through the paper-facing analysis; retained raw config alone does not establish native selection.',
               '- Recognizer-inclusive load time: the exact 1.4–2.4x/sub-millisecond campaign is absent. '
               'Retained compile_ns measures open+load; candidate measurements include multiple milliseconds.',
               '- Exact Linux 6.1 rotate dumps / ISA-gap counts are absent. The illustration and table can be reproduced '
@@ -375,7 +413,7 @@ def main():
     tables(chars, policy)
     illustrations()
     prov = provenance.generate(rows, OUT)
-    reports(rows, vals)
+    reports(rows, vals, count)
     print(f'Regenerated 7 figure PDFs, {len(list((OUT / "tables").glob("*.tex")))} table sources, '
           f'{len(rows)} claim/number rows, and provenance for {len(prov)} data directories.')
     print(f'PASS: {count} regenerated PDF bars, archived figure values, and inventory recomputations match.')

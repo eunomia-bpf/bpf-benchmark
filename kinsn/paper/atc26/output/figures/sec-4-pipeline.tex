@@ -38,14 +38,15 @@ panelheading/.style={anchor=west,align=left,inner sep=0pt,font=\sffamily\fontsiz
 \draw[draw=evoedge,fill=white,line width=.5pt] (6.45,5.80) rectangle (11.95,7.95);
 \node[regionlabel] at (9.20,6.10) {Kernel modules};
 \draw[black!55,line width=.55pt,dash pattern=on 2pt off 2pt] (6.10,4.95) -- (6.10,10.85);
-\node[regionlabel,anchor=base east] at (5.88,10.60) {User space};
+\node[regionlabel,anchor=base east] at (5.88,10.60) {Userspace};
 \node[regionlabel,anchor=base west] at (6.32,10.60) {Kernel};
 \node[component,fill=evopurple] (clang) at (2.25,9.375) {Clang};
 \node[component] (verifier) at (10.50,9.375) {eBPF verifier};
 \node[component,draw=evoedge,line width=.8pt] (jit) at (14.90,9.375) {eBPF JIT};
+\node[slot,anchor=north east,fill=evoink,text=white,inner xsep=2pt,inner ysep=1.5pt] at (16.00,9.975) {+ patch};
 \node[component,draw=evoedge,fill=white] (recognizer) at (4.55,7.00) {Compile-time\\recognizer};
 \node[component,fill=white] (expansion) at (7.90,7.00) {Proof\\sequence};
-\node[component,fill=white] (emitter) at (10.50,7.00) {Native\\emit};
+\node[component,fill=white] (emitter) at (10.50,7.00) {Native\\code};
 \foreach \name/\x/\y in {source/.50/9.375,originalnative/17.25/9.75} {
 \coordinate (\name) at (\x,\y);
 \draw[fill=white,line width=.55pt] ($(\name)+(-.25,-.35)$) -- ($(\name)+(.25,-.35)$) -- ($(\name)+(.25,.18)$) -- ($(\name)+(.08,.35)$) -- ($(\name)+(-.25,.35)$) -- cycle;
@@ -73,7 +74,7 @@ panelheading/.style={anchor=west,align=left,inner sep=0pt,font=\sffamily\fontsiz
 \draw[extendedflow] (restorestep.east) -- (p4.west);
 \draw[extendedflow] (p4.east) -- (13.80,9.00);
 \draw[extendedflow] (16.00,9.00) -- (p5.west);
-\node[edgelabel,anchor=south] at (7.90,9.20) {Lower};
+\node[edgelabel,anchor=south] at (7.90,9.20) {Replace};
 \node[edgelabel,anchor=south] at (12.30,9.20) {Restore};
 \draw[callarrow] (7.70,9.00) -- (7.70,7.60);
 \draw[resultarrow] (8.10,7.60) -- (8.10,9.00);
@@ -83,8 +84,10 @@ panelheading/.style={anchor=west,align=left,inner sep=0pt,font=\sffamily\fontsiz
 \draw[extendedflow] (.05,6.35) -- (.65,6.35);
 \node[font=\sffamily\fontsize{8}{9}\selectfont,anchor=west,inner sep=0pt] at (.82,6.90) {Original eBPF};
 \node[font=\sffamily\fontsize{8}{9}\selectfont,anchor=west,inner sep=0pt] at (.82,6.35) {BPF-Ext};
+\node[stepdot] at (.35,5.80) {};
+\node[font=\sffamily\fontsize{8}{9}\selectfont,anchor=west,inner sep=0pt] at (.82,5.80) {Kernel patch};
 \begin{scope}[yshift=0cm]
-\foreach \x/\n/\stage/\representation in {0/1/Input/eBPF bytecode,3.59/2/Rewritten/eBPF + ext.\ insns,7.18/3/Lowered/eBPF bytecode,10.77/4/Restored/eBPF + ext.\ insns,14.36/5/x86-64/Native code} {
+\foreach \x/\n/\stage/\representation in {0/1/Input/eBPF bytecode,3.59/2/Rewritten/eBPF + \lang{},7.18/3/Checked/eBPF bytecode,10.77/4/Restored/eBPF + \lang{},14.36/5/x86-64/Native code} {
 \draw[draw=black!40,fill=white,line width=.55pt] (\x,.05) rectangle (\x+3.14,4.75);
 \node[productnumber] at (\x+.40,4.33) {\n};
 \node[panelheading] at (\x+.77,4.33) {\textbf{\stage}\\\representation};
@@ -92,9 +95,9 @@ panelheading/.style={anchor=west,align=left,inner sep=0pt,font=\sffamily\fontsiz
 }
 \foreach \x in {0,3.59,7.18,10.77} {
   \node[code,text=black!50] at (\x+.22,3.63) {\ldots};
-  \node[code,text=black!50] at (\x+.22,3.30) {r6 = 0};
 }
 \draw[draw=black!35,fill=black!3,line width=.5pt] (.18,1.62) rectangle (2.96,3.00);
+\node[slot,anchor=south east,fill=black!45,text=white,inner xsep=2pt,inner ysep=1.5pt] at (2.96,3.00) {Rotate idiom};
 \node[code] at (.32,2.79) {r1 = r7};
 \node[code] at (.32,2.46) {r7 <{}<= 16};
 \node[code] at (.32,2.13) {r1 >{}>= 48};
@@ -108,21 +111,23 @@ panelheading/.style={anchor=west,align=left,inner sep=0pt,font=\sffamily\fontsiz
   \node[code,text=evoink] at (\x+.32,2.46) {IMM, r7, r7, 16};
   \node[slot] at (\x+.32,1.98) {Call};
   \node[code,text=evoink] at (\x+.32,1.65) {call d\_rot};
+  \node[slot,anchor=south east,fill=evoedge,text=white,inner xsep=2pt,inner ysep=1.5pt] at (\x+2.96,3.00) {\lang\ rotate};
   \node[code,text=black!50] at (\x+.22,1.09) {r0 = r7};
   \node[code,text=black!50] at (\x+.22,.76) {\ldots};
 }
 \draw[draw=evoedge,fill=evogreen,line width=.6pt] (7.36,.94) rectangle (10.14,3.00);
-\node[code,text=evoink] at (7.50,2.79) {[fp-40] = r6};
-\node[code,text=evoink] at (7.50,2.46) {r6 = r7};
-\node[code,text=evoink] at (7.50,2.13) {r7 <{}<= 16};
-\node[code,text=evoink] at (7.50,1.80) {r6 >{}>= 48};
-\node[code,text=evoink] at (7.50,1.47) {r7 |= r6};
-\node[code,text=evoink] at (7.50,1.14) {r6 = [fp-40]};
+\node[slot,anchor=south east,fill=evoedge,text=white,inner xsep=2pt,inner ysep=1.5pt] at (10.14,3.00) {Proof sequence};
+\node[code,text=evoink] at (7.50,2.79) {if r7 s<0 goto +2};
+\node[code,text=evoink] at (7.50,2.46) {r7 <{}<= 1};
+\node[code,text=evoink] at (7.50,2.13) {goto +2};
+\node[code,text=evoink] at (7.50,1.80) {r7 <{}<= 1};
+\node[code,text=evoink] at (7.50,1.47) {r7 |= 1};
+\node[code,text=evoink] at (7.50,1.14) {\ldots{} (16 steps)};
 \node[code,text=black!50] at (7.40,.63) {r0 = r7};
 \node[code,text=black!50] at (7.40,.30) {\ldots};
 \node[code,text=black!50] at (14.58,3.63) {\ldots};
-\node[code,text=black!50] at (14.58,3.30) {xor ebx, ebx};
 \draw[draw=evoedge,fill=evogreen,line width=.6pt] (14.54,2.40) rectangle (17.32,3.00);
+\node[slot,anchor=south east,fill=evoedge,text=white,inner xsep=2pt,inner ysep=1.5pt] at (17.32,3.00) {Native code};
 \node[code,text=evoink] at (14.68,2.70) {rol r13, 16};
 \node[code,text=black!50] at (14.58,2.07) {mov rax, r13};
 \node[code,text=black!50] at (14.58,1.74) {\ldots};

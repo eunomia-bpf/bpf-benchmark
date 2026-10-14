@@ -72,7 +72,7 @@
       {
         "claim": "ARM64 AWS instance/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 38,
+        "line": 36,
         "kind": "empirical",
         "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
         "scope": "body"
@@ -152,7 +152,7 @@
       {
         "claim": "ARM64 AWS instance/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 38,
+        "line": 36,
         "kind": "empirical",
         "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
         "scope": "body"
@@ -198,59 +198,59 @@
     "claims": [
       {
         "claim": "Cilium baseline BPF ns/run",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 117,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "117",
         "kind": "empirical",
         "value": "488.7",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium native BPF ns/run",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 117,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "117",
         "kind": "empirical",
         "value": "262.3",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium BPF-counter speedup",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 117,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "117",
         "kind": "empirical",
         "value": "1.86",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "native replacements",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "113",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "manifest no-match pass-throughs",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "22",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium manifest objects",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "89",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "native files",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "8",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       }
     ]
   },
@@ -277,75 +277,75 @@
     "claims": [
       {
         "claim": "Cilium native throughput",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 117,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "117",
         "kind": "empirical",
         "value": "2.358",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "native upper-bound repetition",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 113,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "113",
         "kind": "empirical",
         "value": "2.358",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "native replacements",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "113",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "manifest no-match pass-throughs",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "22",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium manifest objects",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "89",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "native files",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 119,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "119",
         "kind": "declared count",
         "value": "8",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium fraction of native gap recovered (%)",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 121,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "121",
         "kind": "empirical",
         "value": "5.4",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium native headline speedup",
-        "file": "paper/sections/0-abstract.tex",
-        "line": 48,
+        "file": "audit-paper/sections/0-abstract.tex",
+        "line": "49",
         "kind": "empirical",
         "value": "2.358",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium native headline speedup",
-        "file": "paper/sections/1-introduction.tex",
-        "line": 149,
+        "file": "audit-paper/sections/1-introduction.tex",
+        "line": "156",
         "kind": "empirical",
         "value": "2.358",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       }
     ]
   },
@@ -499,11 +499,11 @@
       },
       {
         "claim": "Cilium fraction of native gap recovered (%)",
-        "file": "paper/sections/7-evaluation.tex",
-        "line": 121,
+        "file": "audit-paper/sections/7-evaluation.tex",
+        "line": "121",
         "kind": "empirical",
         "value": "5.4",
-        "scope": "body"
+        "scope": "replaced in the camera-ready; audit snapshot only"
       },
       {
         "claim": "Cilium Full throughput bar",
@@ -519,6 +519,14 @@
         "line": 3,
         "kind": "figure artifact",
         "value": "sec-6-rq3-cilium-katran.pdf",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium Kinsn fraction of the native gap (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 223,
+        "kind": "empirical",
+        "value": "38",
         "scope": "body"
       }
     ]
@@ -602,7 +610,7 @@
       {
         "claim": "production throughput increase up to (%)",
         "file": "paper/sections/0-abstract.tex",
-        "line": 46,
+        "line": 47,
         "kind": "empirical",
         "value": "12",
         "scope": "body"
@@ -610,7 +618,7 @@
       {
         "claim": "production throughput increase up to (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 147,
+        "line": 152,
         "kind": "empirical",
         "value": "12",
         "scope": "body"
@@ -665,7 +673,7 @@
       {
         "claim": "ARM64 eBPF/native gap",
         "file": "paper/sections/3-characterization.tex",
-        "line": 113,
+        "line": 111,
         "kind": "empirical",
         "value": "1.98",
         "scope": "body"
@@ -681,7 +689,7 @@
       {
         "claim": "ARM64 LLVM-BPF speedup",
         "file": "paper/sections/3-characterization.tex",
-        "line": 214,
+        "line": 216,
         "kind": "empirical",
         "value": "1.92",
         "scope": "body"
@@ -689,7 +697,7 @@
       {
         "claim": "arm optimizing backend recovered gap (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 216,
+        "line": 218,
         "kind": "empirical",
         "value": "94",
         "scope": "body"
@@ -697,7 +705,7 @@
       {
         "claim": "arm bytecode residual gap (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 220,
+        "line": 222,
         "kind": "empirical",
         "value": "6",
         "scope": "body"
@@ -705,7 +713,7 @@
       {
         "claim": "arm in-kernel native execution overhead (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 200,
+        "line": 202,
         "kind": "empirical",
         "value": "5",
         "scope": "body"
@@ -713,7 +721,7 @@
       {
         "claim": "27 pure-bytecode computation benchmarks",
         "file": "paper/sections/3-characterization.tex",
-        "line": 143,
+        "line": 141,
         "kind": "empirical",
         "value": "27",
         "scope": "body"
@@ -721,7 +729,7 @@
       {
         "claim": "in-kernel native overhead range",
         "file": "paper/sections/3-characterization.tex",
-        "line": 194,
+        "line": 196,
         "kind": "empirical",
         "value": "2--5%",
         "scope": "body"
@@ -729,7 +737,7 @@
       {
         "claim": "optimizing backend recovered gap range",
         "file": "paper/sections/3-characterization.tex",
-        "line": 224,
+        "line": 226,
         "kind": "empirical",
         "value": "93--94%",
         "scope": "body"
@@ -1217,7 +1225,7 @@
       {
         "claim": "numerical claim: Figure~\\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation.",
         "file": "paper/sections/3-characterization.tex",
-        "line": 238,
+        "line": 239,
         "kind": "definition/setup",
         "value": "64",
         "scope": "body"
@@ -1225,7 +1233,7 @@
       {
         "claim": "ARM64 AWS instance/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 38,
+        "line": 36,
         "kind": "empirical",
         "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
         "scope": "body"
@@ -1280,7 +1288,7 @@
       {
         "claim": "arm optimizing backend recovered gap (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 216,
+        "line": 218,
         "kind": "empirical",
         "value": "94",
         "scope": "body"
@@ -1288,7 +1296,7 @@
       {
         "claim": "arm bytecode residual gap (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 220,
+        "line": 222,
         "kind": "empirical",
         "value": "6",
         "scope": "body"
@@ -1296,7 +1304,7 @@
       {
         "claim": "arm in-kernel native execution overhead (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 200,
+        "line": 202,
         "kind": "empirical",
         "value": "5",
         "scope": "body"
@@ -1304,7 +1312,7 @@
       {
         "claim": "arm kernel native code size ratio",
         "file": "paper/sections/3-characterization.tex",
-        "line": 255,
+        "line": 259,
         "kind": "empirical",
         "value": "0.49",
         "scope": "body"
@@ -1312,7 +1320,7 @@
       {
         "claim": "27 pure-bytecode computation benchmarks",
         "file": "paper/sections/3-characterization.tex",
-        "line": 143,
+        "line": 141,
         "kind": "empirical",
         "value": "27",
         "scope": "body"
@@ -1320,7 +1328,7 @@
       {
         "claim": "in-kernel native overhead range",
         "file": "paper/sections/3-characterization.tex",
-        "line": 194,
+        "line": 196,
         "kind": "empirical",
         "value": "2--5%",
         "scope": "body"
@@ -1576,7 +1584,7 @@
       {
         "claim": "numerical claim: Figure~\\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation.",
         "file": "paper/sections/3-characterization.tex",
-        "line": 238,
+        "line": 239,
         "kind": "definition/setup",
         "value": "64",
         "scope": "body"
@@ -1584,7 +1592,7 @@
       {
         "claim": "ARM64 AWS instance/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 38,
+        "line": 36,
         "kind": "empirical",
         "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
         "scope": "body"
@@ -1735,7 +1743,7 @@
       {
         "claim": "ARM64 headline speed increase (%)",
         "file": "paper/sections/0-abstract.tex",
-        "line": 46,
+        "line": 47,
         "kind": "empirical",
         "value": "22",
         "scope": "body"
@@ -1743,7 +1751,7 @@
       {
         "claim": "ARM64 headline speed increase (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 152,
         "kind": "empirical",
         "value": "22",
         "scope": "body"
@@ -1751,7 +1759,7 @@
       {
         "claim": "native code reduction range",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 154,
         "kind": "empirical",
         "value": "12--23%",
         "scope": "body"
@@ -1983,7 +1991,7 @@
       {
         "claim": "measurement/population convention: \\texttt{INNER\\_REPEAT=100000}; bars report speedup computed from median",
         "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
-        "line": 22,
+        "line": 20,
         "kind": "empirical",
         "value": "100000",
         "scope": "body"
@@ -1991,7 +1999,7 @@
       {
         "claim": "numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \\S\\ref{sec:characterization} to isolate instruction-selection effects.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 13,
+        "line": 11,
         "kind": "definition/setup",
         "value": "27",
         "scope": "body"
@@ -1999,7 +2007,7 @@
       {
         "claim": "ARM64 AWS instance/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 38,
+        "line": 36,
         "kind": "empirical",
         "value": "The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\\,GiB RAM, AWS Graviton2), using a \\lang-enabled Linux 7.0.0-rc2+ build.",
         "scope": "body"
@@ -2007,7 +2015,7 @@
       {
         "claim": "numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\\times$ indicate faster execution or higher throughput.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 49,
+        "line": 47,
         "kind": "definition/setup",
         "value": "1",
         "scope": "body"
@@ -2015,7 +2023,7 @@
       {
         "claim": "numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\\times$ indicate lower BPF runtime cost.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 51,
+        "line": 49,
         "kind": "definition/setup",
         "value": "1",
         "scope": "body"
@@ -2023,7 +2031,7 @@
       {
         "claim": "numerical claim: For each retained row, we compute \\texttt{run\\_time\\_ns\\_delta}/\\texttt{run\\_cnt\\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 55,
+        "line": 51,
         "kind": "definition/setup",
         "value": "100",
         "scope": "body"
@@ -2251,7 +2259,7 @@
       {
         "claim": "x86 headline speed increase (%)",
         "file": "paper/sections/0-abstract.tex",
-        "line": 46,
+        "line": 47,
         "kind": "empirical",
         "value": "24",
         "scope": "body"
@@ -2259,7 +2267,7 @@
       {
         "claim": "x86 headline speed increase (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 152,
         "kind": "empirical",
         "value": "24",
         "scope": "body"
@@ -2267,7 +2275,7 @@
       {
         "claim": "headline recovered micro gap (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 152,
         "kind": "empirical",
         "value": "42",
         "scope": "body"
@@ -2275,7 +2283,7 @@
       {
         "claim": "contribution recovered micro gap (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 159,
+        "line": 167,
         "kind": "empirical",
         "value": "42",
         "scope": "body"
@@ -2283,7 +2291,7 @@
       {
         "claim": "native code reduction range",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 154,
         "kind": "empirical",
         "value": "12--23%",
         "scope": "body"
@@ -2507,7 +2515,7 @@
       {
         "claim": "measurement/population convention: \\texttt{INNER\\_REPEAT=100000}; bars report speedup computed from median",
         "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
-        "line": 22,
+        "line": 20,
         "kind": "empirical",
         "value": "100000",
         "scope": "body"
@@ -2515,7 +2523,7 @@
       {
         "claim": "numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \\S\\ref{sec:characterization} to isolate instruction-selection effects.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 13,
+        "line": 11,
         "kind": "definition/setup",
         "value": "27",
         "scope": "body"
@@ -2523,7 +2531,7 @@
       {
         "claim": "x86 hardware and VM/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 36,
+        "line": 34,
         "kind": "empirical",
         "value": "Core Ultra 9 285K",
         "scope": "body"
@@ -2531,7 +2539,7 @@
       {
         "claim": "numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\\times$ indicate faster execution or higher throughput.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 49,
+        "line": 47,
         "kind": "definition/setup",
         "value": "1",
         "scope": "body"
@@ -2539,7 +2547,7 @@
       {
         "claim": "numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\\times$ indicate lower BPF runtime cost.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 51,
+        "line": 49,
         "kind": "definition/setup",
         "value": "1",
         "scope": "body"
@@ -2547,7 +2555,7 @@
       {
         "claim": "numerical claim: For each retained row, we compute \\texttt{run\\_time\\_ns\\_delta}/\\texttt{run\\_cnt\\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 55,
+        "line": 51,
         "kind": "definition/setup",
         "value": "100",
         "scope": "body"
@@ -2642,7 +2650,7 @@
       {
         "claim": "x86 headline speed increase (%)",
         "file": "paper/sections/0-abstract.tex",
-        "line": 46,
+        "line": 47,
         "kind": "empirical",
         "value": "24",
         "scope": "body"
@@ -2650,7 +2658,7 @@
       {
         "claim": "x86 headline speed increase (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 152,
         "kind": "empirical",
         "value": "24",
         "scope": "body"
@@ -2658,7 +2666,7 @@
       {
         "claim": "headline recovered micro gap (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 152,
         "kind": "empirical",
         "value": "42",
         "scope": "body"
@@ -2666,7 +2674,7 @@
       {
         "claim": "contribution recovered micro gap (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 159,
+        "line": 167,
         "kind": "empirical",
         "value": "42",
         "scope": "body"
@@ -2674,7 +2682,7 @@
       {
         "claim": "native code reduction range",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 154,
         "kind": "empirical",
         "value": "12--23%",
         "scope": "body"
@@ -2898,7 +2906,7 @@
       {
         "claim": "measurement/population convention: \\texttt{INNER\\_REPEAT=100000}; bars report speedup computed from median",
         "file": "paper/figures/sec-6-kinsn-micro-rq1.tex",
-        "line": 22,
+        "line": 20,
         "kind": "empirical",
         "value": "100000",
         "scope": "body"
@@ -2906,7 +2914,7 @@
       {
         "claim": "numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \\S\\ref{sec:characterization} to isolate instruction-selection effects.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 13,
+        "line": 11,
         "kind": "definition/setup",
         "value": "27",
         "scope": "body"
@@ -2914,7 +2922,7 @@
       {
         "claim": "x86 hardware and VM/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 36,
+        "line": 34,
         "kind": "empirical",
         "value": "Core Ultra 9 285K",
         "scope": "body"
@@ -2922,7 +2930,7 @@
       {
         "claim": "numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\\times$ indicate faster execution or higher throughput.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 49,
+        "line": 47,
         "kind": "definition/setup",
         "value": "1",
         "scope": "body"
@@ -2930,7 +2938,7 @@
       {
         "claim": "numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\\times$ indicate lower BPF runtime cost.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 51,
+        "line": 49,
         "kind": "definition/setup",
         "value": "1",
         "scope": "body"
@@ -2938,7 +2946,7 @@
       {
         "claim": "numerical claim: For each retained row, we compute \\texttt{run\\_time\\_ns\\_delta}/\\texttt{run\\_cnt\\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index.",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 55,
+        "line": 51,
         "kind": "definition/setup",
         "value": "100",
         "scope": "body"
@@ -2977,7 +2985,7 @@
       {
         "claim": "x86 eBPF/native gap",
         "file": "paper/sections/3-characterization.tex",
-        "line": 113,
+        "line": 111,
         "kind": "empirical",
         "value": "1.57",
         "scope": "body"
@@ -2985,7 +2993,7 @@
       {
         "claim": "x86 kernel native speedup",
         "file": "paper/sections/3-characterization.tex",
-        "line": 192,
+        "line": 190,
         "kind": "empirical",
         "value": "1.55",
         "scope": "body"
@@ -2993,7 +3001,7 @@
       {
         "claim": "x86 userspace native speedup",
         "file": "paper/sections/3-characterization.tex",
-        "line": 192,
+        "line": 190,
         "kind": "empirical",
         "value": "1.57",
         "scope": "body"
@@ -3001,7 +3009,7 @@
       {
         "claim": "x86 LLVM-BPF speedup",
         "file": "paper/sections/3-characterization.tex",
-        "line": 214,
+        "line": 216,
         "kind": "empirical",
         "value": "1.53",
         "scope": "body"
@@ -3009,7 +3017,7 @@
       {
         "claim": "x86 optimizing backend recovered gap (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 216,
+        "line": 218,
         "kind": "empirical",
         "value": "93",
         "scope": "body"
@@ -3017,7 +3025,7 @@
       {
         "claim": "x86 bytecode residual gap (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 220,
+        "line": 222,
         "kind": "empirical",
         "value": "7",
         "scope": "body"
@@ -3025,7 +3033,7 @@
       {
         "claim": "x86 in-kernel native execution overhead (%)",
         "file": "paper/sections/3-characterization.tex",
-        "line": 200,
+        "line": 202,
         "kind": "empirical",
         "value": "2",
         "scope": "body"
@@ -3033,7 +3041,7 @@
       {
         "claim": "x86 kernel native code size ratio",
         "file": "paper/sections/3-characterization.tex",
-        "line": 255,
+        "line": 259,
         "kind": "empirical",
         "value": "0.54",
         "scope": "body"
@@ -3041,7 +3049,7 @@
       {
         "claim": "27 pure-bytecode computation benchmarks",
         "file": "paper/sections/3-characterization.tex",
-        "line": 143,
+        "line": 141,
         "kind": "empirical",
         "value": "27",
         "scope": "body"
@@ -3049,7 +3057,7 @@
       {
         "claim": "in-kernel native overhead range",
         "file": "paper/sections/3-characterization.tex",
-        "line": 194,
+        "line": 196,
         "kind": "empirical",
         "value": "2--5%",
         "scope": "body"
@@ -3057,7 +3065,7 @@
       {
         "claim": "optimizing backend recovered gap range",
         "file": "paper/sections/3-characterization.tex",
-        "line": 224,
+        "line": 226,
         "kind": "empirical",
         "value": "93--94%",
         "scope": "body"
@@ -3121,7 +3129,7 @@
       {
         "claim": "headline recovered micro gap (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 145,
+        "line": 152,
         "kind": "empirical",
         "value": "42",
         "scope": "body"
@@ -3129,7 +3137,7 @@
       {
         "claim": "contribution recovered micro gap (%)",
         "file": "paper/sections/1-introduction.tex",
-        "line": 159,
+        "line": 167,
         "kind": "empirical",
         "value": "42",
         "scope": "body"
@@ -3801,7 +3809,7 @@
       {
         "claim": "numerical claim: Figure~\\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation.",
         "file": "paper/sections/3-characterization.tex",
-        "line": 238,
+        "line": 239,
         "kind": "definition/setup",
         "value": "64",
         "scope": "body"
@@ -3809,7 +3817,7 @@
       {
         "claim": "x86 hardware and VM/kernel setup",
         "file": "paper/sections/7-evaluation.tex",
-        "line": 36,
+        "line": 34,
         "kind": "empirical",
         "value": "Core Ultra 9 285K",
         "scope": "body"
@@ -3836,6 +3844,175 @@
         "line": 4,
         "kind": "empirical",
         "value": "27",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/cilium_x86_config_parity_counterbalanced_20261010",
+    "bundle_path": "data/corpus/cilium_x86_config_parity_counterbalanced_20261010",
+    "introduced_commit": "91ee7e78eefed2f0a41485fc7eb3402cd94724a3",
+    "introduced_commit_date": "2026-10-10T07:32:04-07:00",
+    "files": 83,
+    "bytes": 2968769,
+    "collection_date": "unknown",
+    "platform": "unknown",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "complete",
+    "recorded_samples": "unknown",
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.",
+      "Section 6.4 timing: fresh 8-vCPU, 64-GB guests pinned to host P-cores 0-7, six per statistics mode (three per run order) plus JIT-to-JIT controls. samples.csv, guests.csv and live-program-images.csv are the per-phase and per-guest records; SUMMARY.md describes the method."
+    ],
+    "claims": [
+      {
+        "claim": "Cilium whole-program native throughput",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 210,
+        "kind": "empirical",
+        "value": "1.194",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium eBPF JIT BPF ns/run",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 210,
+        "kind": "empirical",
+        "value": "659.2",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium native BPF ns/run",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 210,
+        "kind": "empirical",
+        "value": "463.9",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium native/eBPF BPF cost ratio",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 210,
+        "kind": "empirical",
+        "value": "0.704",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium live programs running as native code",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 215,
+        "kind": "empirical",
+        "value": "51",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium Kinsn fraction of the native gap (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 223,
+        "kind": "empirical",
+        "value": "38",
+        "scope": "body"
+      },
+      {
+        "claim": "native upper bound repetition",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 223,
+        "kind": "empirical",
+        "value": "1.194",
+        "scope": "body"
+      },
+      {
+        "claim": "native code size increase (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 223,
+        "kind": "empirical",
+        "value": "10",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium native headline speed increase (%)",
+        "file": "paper/sections/0-abstract.tex",
+        "line": 53,
+        "kind": "empirical",
+        "value": "19",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium native headline speedup",
+        "file": "paper/sections/1-introduction.tex",
+        "line": 154,
+        "kind": "empirical",
+        "value": "1.194",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium Native throughput bar",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "1.194",
+        "scope": "body"
+      },
+      {
+        "claim": "Cilium Native BPF cost bar",
+        "file": "paper/figures/sec-6-kinsn-micro-rq3.tex",
+        "line": 3,
+        "kind": "figure bar",
+        "value": "0.704",
+        "scope": "body"
+      }
+    ]
+  },
+  {
+    "original_path": "corpus/results/cilium_profile_jit_kprog_counterbalanced_20261010",
+    "bundle_path": "data/corpus/cilium_profile_jit_kprog_counterbalanced_20261010",
+    "provenance_file": "summary.json",
+    "introduced_commit": "d92d643dcbb486145e1550356fe1f7e0e66994f7",
+    "introduced_commit_date": "2026-10-09T22:51:09-07:00",
+    "files": 4,
+    "bytes": 147670,
+    "collection_date": "unknown",
+    "platform": "unknown",
+    "recorded_cpu": "unknown",
+    "recorded_environment": "unknown",
+    "recorded_source_commit": "unknown",
+    "recorded_kernel_commit": "unknown",
+    "recorded_kernel_version": "unknown",
+    "recorded_status": "unknown",
+    "recorded_samples": "unknown",
+    "recorded_bpf_stats": "unknown",
+    "notes": [
+      "Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.",
+      "Section 6.4 profile: the summary files only. The raw perf data (about 360 MB) is in the original directory."
+    ],
+    "claims": [
+      {
+        "claim": "eBPF run CPU time in the programs' own instructions (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 223,
+        "kind": "empirical",
+        "value": "10",
+        "scope": "body"
+      },
+      {
+        "claim": "eBPF run CPU time in map operations (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 223,
+        "kind": "empirical",
+        "value": "26",
+        "scope": "body"
+      },
+      {
+        "claim": "native reduction in cycles per packet (%)",
+        "file": "paper/sections/7-evaluation.tex",
+        "line": 223,
+        "kind": "empirical",
+        "value": "13.6",
         "scope": "body"
       }
     ]

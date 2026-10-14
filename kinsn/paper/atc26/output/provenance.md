@@ -28,7 +28,7 @@ Recorded bpf_stats=true differs from RQ2 stats-disabled wording. Suite status=er
 - `sections/7-evaluation.tex:105` — Katran conservative BPF cost (0.941; body).
 - `sections/7-evaluation.tex:105` — Katran repeated conservative site count (21; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — Katran Conservative throughput bar (1.074/1.119/1.065/0.984; body).
-- `sections/7-evaluation.tex:38` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
+- `sections/7-evaluation.tex:36` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
 - `sections/7-evaluation.tex:105` — Katran conservative throughput under stated median convention (1.065; body).
 
@@ -52,7 +52,7 @@ Recorded bpf_stats=true differs from RQ2 stats-disabled wording. Suite status=er
 - `sections/7-evaluation.tex:105` — Katran coverage-max BPF cost (1.006; body).
 - `sections/7-evaluation.tex:105` — Katran coverage-max sites (62; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — Katran Full throughput bar (1.074/1.119/1.065/0.984; body).
-- `sections/7-evaluation.tex:38` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
+- `sections/7-evaluation.tex:36` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
 - `sections/7-evaluation.tex:105` — Katran coverage-max throughput under stated median convention (0.984; body).
 
@@ -70,13 +70,13 @@ Status: completed; samples: 3; BPF stats: True; files: 4; bytes: 54243.
 
 Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.
 
-- `sections/7-evaluation.tex:117` — Cilium baseline BPF ns/run (488.7; body).
-- `sections/7-evaluation.tex:117` — Cilium native BPF ns/run (262.3; body).
-- `sections/7-evaluation.tex:117` — Cilium BPF-counter speedup (1.86; body).
-- `sections/7-evaluation.tex:119` — native replacements (113; body).
-- `sections/7-evaluation.tex:119` — manifest no-match pass-throughs (22; body).
-- `sections/7-evaluation.tex:119` — Cilium manifest objects (89; body).
-- `sections/7-evaluation.tex:119` — native files (8; body).
+- `audit-paper/sections/7-evaluation.tex:117` — Cilium baseline BPF ns/run (488.7; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:117` — Cilium native BPF ns/run (262.3; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:117` — Cilium BPF-counter speedup (1.86; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — native replacements (113; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — manifest no-match pass-throughs (22; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — Cilium manifest objects (89; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — native files (8; replaced in the camera-ready; audit snapshot only).
 
 ## data/corpus/x86_kvm_corpus_20260529_040554_604387
 
@@ -92,15 +92,15 @@ Status: completed; samples: 3; BPF stats: False; files: 4; bytes: 56750.
 
 Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.
 
-- `sections/7-evaluation.tex:117` — Cilium native throughput (2.358; body).
-- `sections/7-evaluation.tex:113` — native upper-bound repetition (2.358; body).
-- `sections/7-evaluation.tex:119` — native replacements (113; body).
-- `sections/7-evaluation.tex:119` — manifest no-match pass-throughs (22; body).
-- `sections/7-evaluation.tex:119` — Cilium manifest objects (89; body).
-- `sections/7-evaluation.tex:119` — native files (8; body).
-- `sections/7-evaluation.tex:121` — Cilium fraction of native gap recovered (%) (5.4; body).
-- `sections/0-abstract.tex:48` — Cilium native headline speedup (2.358; body).
-- `sections/1-introduction.tex:149` — Cilium native headline speedup (2.358; body).
+- `audit-paper/sections/7-evaluation.tex:117` — Cilium native throughput (2.358; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:113` — native upper-bound repetition (2.358; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — native replacements (113; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — manifest no-match pass-throughs (22; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — Cilium manifest objects (89; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:119` — native files (8; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/7-evaluation.tex:121` — Cilium fraction of native gap recovered (%) (5.4; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/0-abstract.tex:49` — Cilium native headline speedup (2.358; replaced in the camera-ready; audit snapshot only).
+- `audit-paper/sections/1-introduction.tex:156` — Cilium native headline speedup (2.358; replaced in the camera-ready; audit snapshot only).
 
 ## data/corpus/x86_kvm_corpus_20260604_070210_639497
 
@@ -144,9 +144,10 @@ Corpus metadata has no CPU model, source commit, or kernel commit; do not infer 
 
 - `sections/7-evaluation.tex:84` — Cilium full throughput (1.074; body).
 - `sections/7-evaluation.tex:103` — Cilium full policy throughput (1.074; body).
-- `sections/7-evaluation.tex:121` — Cilium fraction of native gap recovered (%) (5.4; body).
+- `audit-paper/sections/7-evaluation.tex:121` — Cilium fraction of native gap recovered (%) (5.4; replaced in the camera-ready; audit snapshot only).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium Full throughput bar (1.074/1.119/1.065/0.984; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
+- `sections/7-evaluation.tex:223` — Cilium Kinsn fraction of the native gap (%) (38; body).
 
 ## data/corpus/x86_kvm_corpus_20260604_232313_992341
 
@@ -181,8 +182,8 @@ Status: completed; samples: 3; BPF stats: False; files: 6; bytes: 208332.
 Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.
 
 - `sections/7-evaluation.tex:103` — Cilium no-bulk throughput (1.119; body).
-- `sections/0-abstract.tex:46` — production throughput increase up to (%) (12; body).
-- `sections/1-introduction.tex:147` — production throughput increase up to (%) (12; body).
+- `sections/0-abstract.tex:47` — production throughput increase up to (%) (12; body).
+- `sections/1-introduction.tex:152` — production throughput increase up to (%) (12; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium No Bulk throughput bar (1.074/1.119/1.065/0.984; body).
 - `figures/sec-6-kinsn-micro-rq3.tex:3` — figure file sec-6-rq3-cilium-katran.pdf (sec-6-rq3-cilium-katran.pdf; body).
 - `sections/7-evaluation.tex:103` — Cilium tuned throughput under stated median convention (1.119; body).
@@ -201,15 +202,15 @@ Status: completed; samples: 1; BPF stats: unknown; files: 3; bytes: 240259.
 
 Recorded aarch64 does not identify Graviton generation or instance type; body declares t4g.small/Graviton2.
 
-- `sections/3-characterization.tex:113` — ARM64 eBPF/native gap (1.98; body).
+- `sections/3-characterization.tex:111` — ARM64 eBPF/native gap (1.98; body).
 - `sections/3-characterization.tex:192` — ARM64 userspace native speedup (1.98; body).
-- `sections/3-characterization.tex:214` — ARM64 LLVM-BPF speedup (1.92; body).
-- `sections/3-characterization.tex:216` — arm optimizing backend recovered gap (%) (94; body).
-- `sections/3-characterization.tex:220` — arm bytecode residual gap (%) (6; body).
-- `sections/3-characterization.tex:200` — arm in-kernel native execution overhead (%) (5; body).
-- `sections/3-characterization.tex:143` — 27 pure-bytecode computation benchmarks (27; body).
-- `sections/3-characterization.tex:194` — in-kernel native overhead range (2--5%; body).
-- `sections/3-characterization.tex:224` — optimizing backend recovered gap range (93--94%; body).
+- `sections/3-characterization.tex:216` — ARM64 LLVM-BPF speedup (1.92; body).
+- `sections/3-characterization.tex:218` — arm optimizing backend recovered gap (%) (94; body).
+- `sections/3-characterization.tex:222` — arm bytecode residual gap (%) (6; body).
+- `sections/3-characterization.tex:202` — arm in-kernel native execution overhead (%) (5; body).
+- `sections/3-characterization.tex:141` — 27 pure-bytecode computation benchmarks (27; body).
+- `sections/3-characterization.tex:196` — in-kernel native overhead range (2--5%; body).
+- `sections/3-characterization.tex:226` — optimizing backend recovered gap range (93--94%; body).
 - `tables/sec-3-micro-summary.tex:15` — arm native speedup (1.98; body).
 - `tables/sec-3-micro-summary.tex:15` — arm native faster cases (>2%) (27; body).
 - `tables/sec-3-micro-summary.tex:16` — arm llvmbpf speedup (1.92; body).
@@ -270,8 +271,8 @@ Recorded aarch64 does not identify Graviton generation or instance type; body de
 - `figures/sec-3-pure-bytecode-percase.tex:3` — arm tracee_syscall_name_table_lookup llvmbpf plotted speedup (bar (value derived below); body).
 - `figures/sec-3-pure-bytecode-percase.tex:4` — measurement/population convention: \caption{Per-case speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, on x86-64 (top) and ARM64 (bottom). Each bar is one non-baseline path. The ARM64 paths come from separate runs, each over its own baseline.} (27; body).
 - `audit-paper/sections/3-characterization.tex:145` — numerical claim: The examples include a consistent-hash load-balancer lookup from \texttt{katran} and a SipHash-like 64-bit-rotation mixer. (64; removed from current body; audit snapshot only).
-- `sections/3-characterization.tex:238` — numerical claim: Figure~\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation. (64; body).
-- `sections/7-evaluation.tex:38` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
+- `sections/3-characterization.tex:239` — numerical claim: Figure~\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation. (64; body).
+- `sections/7-evaluation.tex:36` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
 - `tables/sec-3-micro-summary.tex:4` — measurement/population convention: \caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\%.} (27; 2; body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — figure file sec-3-4config-percase.pdf (sec-3-4config-percase.pdf; body).
 
@@ -290,12 +291,12 @@ Status: completed; samples: 3; BPF stats: unknown; files: 3; bytes: 490771.
 Recorded aarch64 does not identify Graviton generation or instance type; body declares t4g.small/Graviton2.
 
 - `sections/3-characterization.tex:192` — ARM64 kernel native speedup (1.88; body).
-- `sections/3-characterization.tex:216` — arm optimizing backend recovered gap (%) (94; body).
-- `sections/3-characterization.tex:220` — arm bytecode residual gap (%) (6; body).
-- `sections/3-characterization.tex:200` — arm in-kernel native execution overhead (%) (5; body).
-- `sections/3-characterization.tex:255` — arm kernel native code size ratio (0.49; body).
-- `sections/3-characterization.tex:143` — 27 pure-bytecode computation benchmarks (27; body).
-- `sections/3-characterization.tex:194` — in-kernel native overhead range (2--5%; body).
+- `sections/3-characterization.tex:218` — arm optimizing backend recovered gap (%) (94; body).
+- `sections/3-characterization.tex:222` — arm bytecode residual gap (%) (6; body).
+- `sections/3-characterization.tex:202` — arm in-kernel native execution overhead (%) (5; body).
+- `sections/3-characterization.tex:259` — arm kernel native code size ratio (0.49; body).
+- `sections/3-characterization.tex:141` — 27 pure-bytecode computation benchmarks (27; body).
+- `sections/3-characterization.tex:196` — in-kernel native overhead range (2--5%; body).
 - `tables/sec-3-micro-summary.tex:14` — arm native_kernel speedup (1.88; body).
 - `tables/sec-3-micro-summary.tex:14` — arm native_kernel faster cases (>2%) (27; body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — arm bcc_runqlat_log2_histogram_bucket native_kernel plotted speedup (bar (value derived below); body).
@@ -327,8 +328,8 @@ Recorded aarch64 does not identify Graviton generation or instance type; body de
 - `figures/sec-3-pure-bytecode-percase.tex:3` — arm tracee_syscall_name_table_lookup native_kernel plotted speedup (bar (value derived below); body).
 - `figures/sec-3-pure-bytecode-percase.tex:4` — measurement/population convention: \caption{Per-case speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, on x86-64 (top) and ARM64 (bottom). Each bar is one non-baseline path. The ARM64 paths come from separate runs, each over its own baseline.} (27; body).
 - `audit-paper/sections/3-characterization.tex:145` — numerical claim: The examples include a consistent-hash load-balancer lookup from \texttt{katran} and a SipHash-like 64-bit-rotation mixer. (64; removed from current body; audit snapshot only).
-- `sections/3-characterization.tex:238` — numerical claim: Figure~\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation. (64; body).
-- `sections/7-evaluation.tex:38` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
+- `sections/3-characterization.tex:239` — numerical claim: Figure~\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation. (64; body).
+- `sections/7-evaluation.tex:36` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
 - `tables/sec-3-micro-summary.tex:4` — measurement/population convention: \caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\%.} (27; 2; body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — figure file sec-3-4config-percase.pdf (sec-3-4config-percase.pdf; body).
 
@@ -359,9 +360,9 @@ Recorded aarch64 does not identify Graviton generation or instance type; body de
 - `sections/7-evaluation.tex:69` — ARM64 Cilium CT/NAT speedup (1.482; body).
 - `sections/7-evaluation.tex:71` — ARM64 FNV regression speedup (0.862; body).
 - `sections/7-evaluation.tex:71` — ARM64 bitmap regression speedup (0.966; body).
-- `sections/0-abstract.tex:46` — ARM64 headline speed increase (%) (22; body).
-- `sections/1-introduction.tex:145` — ARM64 headline speed increase (%) (22; body).
-- `sections/1-introduction.tex:145` — native code reduction range (12--23%; body).
+- `sections/0-abstract.tex:47` — ARM64 headline speed increase (%) (22; body).
+- `sections/1-introduction.tex:152` — ARM64 headline speed increase (%) (22; body).
+- `sections/1-introduction.tex:154` — native code reduction range (12--23%; body).
 - `figures/sec-6-kinsn-micro-rq1.tex:15` — arm bcc_runqlat_log2_histogram_bucket plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:15` — arm bcc_tcpconnect_ipv4_tuple_filter plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:15` — arm bitmap_popcount_scan plotted kinsn speedup (bar (value derived below); body).
@@ -390,12 +391,12 @@ Recorded aarch64 does not identify Graviton generation or instance type; body de
 - `figures/sec-6-kinsn-micro-rq1.tex:15` — arm tracee_http_method_prefix_detect plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:15` — arm tracee_syscall_name_table_lookup plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:25` — ARM64 figure population (27; body).
-- `figures/sec-6-kinsn-micro-rq1.tex:22` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
-- `sections/7-evaluation.tex:13` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
-- `sections/7-evaluation.tex:38` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
-- `sections/7-evaluation.tex:49` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
-- `sections/7-evaluation.tex:51` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
-- `sections/7-evaluation.tex:55` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
+- `figures/sec-6-kinsn-micro-rq1.tex:20` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
+- `sections/7-evaluation.tex:11` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
+- `sections/7-evaluation.tex:36` — ARM64 AWS instance/kernel setup (The ARM64 experiments run on an AWS t4g.small instance (2 vCPUs, 2\,GiB RAM, AWS Graviton2), using a \lang-enabled Linux 7.0.0-rc2+ build.; body).
+- `sections/7-evaluation.tex:47` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
+- `sections/7-evaluation.tex:49` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
+- `sections/7-evaluation.tex:51` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — figure file sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf (sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf; body).
 
 ## data/micro/x86_kvm_micro_20260429_035938_203074
@@ -472,11 +473,11 @@ Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper 
 - `sections/7-evaluation.tex:66` — zero correctness mismatches on both architectures (0; body).
 - `sections/7-evaluation.tex:74` — 1.4--2.4x end-to-end compile time, remains sub-millisecond (1.4--2.4; <1 ms; body).
 - `sections/7-evaluation.tex:66` — micro fraction of characterization gap recovered (%) (42; body).
-- `sections/0-abstract.tex:46` — x86 headline speed increase (%) (24; body).
-- `sections/1-introduction.tex:145` — x86 headline speed increase (%) (24; body).
-- `sections/1-introduction.tex:145` — headline recovered micro gap (%) (42; body).
-- `sections/1-introduction.tex:159` — contribution recovered micro gap (%) (42; body).
-- `sections/1-introduction.tex:145` — native code reduction range (12--23%; body).
+- `sections/0-abstract.tex:47` — x86 headline speed increase (%) (24; body).
+- `sections/1-introduction.tex:152` — x86 headline speed increase (%) (24; body).
+- `sections/1-introduction.tex:152` — headline recovered micro gap (%) (42; body).
+- `sections/1-introduction.tex:167` — contribution recovered micro gap (%) (42; body).
+- `sections/1-introduction.tex:154` — native code reduction range (12--23%; body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 bcc_runqlat_log2_histogram_bucket plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 bcc_tcpconnect_ipv4_tuple_filter plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 bitmap_popcount_scan plotted kinsn speedup (bar (value derived below); body).
@@ -504,12 +505,12 @@ Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper 
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 trace_event_type_switch_dispatch plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 tracee_http_method_prefix_detect plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 tracee_syscall_name_table_lookup plotted kinsn speedup (bar (value derived below); body).
-- `figures/sec-6-kinsn-micro-rq1.tex:22` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
-- `sections/7-evaluation.tex:13` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
-- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
-- `sections/7-evaluation.tex:49` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
-- `sections/7-evaluation.tex:51` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
-- `sections/7-evaluation.tex:55` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
+- `figures/sec-6-kinsn-micro-rq1.tex:20` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
+- `sections/7-evaluation.tex:11` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
+- `sections/7-evaluation.tex:34` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
+- `sections/7-evaluation.tex:47` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
+- `sections/7-evaluation.tex:49` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
+- `sections/7-evaluation.tex:51` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — figure file sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf (sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf; body).
 
 ## data/micro/x86_kvm_micro_20260526_210351_224315
@@ -533,11 +534,11 @@ Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper 
 - `sections/7-evaluation.tex:66` — zero correctness mismatches on both architectures (0; body).
 - `sections/7-evaluation.tex:74` — 1.4--2.4x end-to-end compile time, remains sub-millisecond (1.4--2.4; <1 ms; body).
 - `sections/7-evaluation.tex:66` — micro fraction of characterization gap recovered (%) (42; body).
-- `sections/0-abstract.tex:46` — x86 headline speed increase (%) (24; body).
-- `sections/1-introduction.tex:145` — x86 headline speed increase (%) (24; body).
-- `sections/1-introduction.tex:145` — headline recovered micro gap (%) (42; body).
-- `sections/1-introduction.tex:159` — contribution recovered micro gap (%) (42; body).
-- `sections/1-introduction.tex:145` — native code reduction range (12--23%; body).
+- `sections/0-abstract.tex:47` — x86 headline speed increase (%) (24; body).
+- `sections/1-introduction.tex:152` — x86 headline speed increase (%) (24; body).
+- `sections/1-introduction.tex:152` — headline recovered micro gap (%) (42; body).
+- `sections/1-introduction.tex:167` — contribution recovered micro gap (%) (42; body).
+- `sections/1-introduction.tex:154` — native code reduction range (12--23%; body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 bcc_runqlat_log2_histogram_bucket plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 bcc_tcpconnect_ipv4_tuple_filter plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 bitmap_popcount_scan plotted kinsn speedup (bar (value derived below); body).
@@ -565,12 +566,12 @@ Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper 
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 trace_event_type_switch_dispatch plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 tracee_http_method_prefix_detect plotted kinsn speedup (bar (value derived below); body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — x86 tracee_syscall_name_table_lookup plotted kinsn speedup (bar (value derived below); body).
-- `figures/sec-6-kinsn-micro-rq1.tex:22` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
-- `sections/7-evaluation.tex:13` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
-- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
-- `sections/7-evaluation.tex:49` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
-- `sections/7-evaluation.tex:51` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
-- `sections/7-evaluation.tex:55` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
+- `figures/sec-6-kinsn-micro-rq1.tex:20` — measurement/population convention: \texttt{INNER\_REPEAT=100000}; bars report speedup computed from median (100000; body).
+- `sections/7-evaluation.tex:11` — numerical claim: First, we reuse the 27 pure-bytecode microbenchmarks from \S\ref{sec:characterization} to isolate instruction-selection effects. (27; body).
+- `sections/7-evaluation.tex:34` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
+- `sections/7-evaluation.tex:47` — numerical claim: Execution-time and throughput ratios are normalized to the stock kernel eBPF JIT, so values above 1$\times$ indicate faster execution or higher throughput. (1; body).
+- `sections/7-evaluation.tex:49` — numerical claim: BPF-cost ratios report post/baseline cost, so values below 1$\times$ indicate lower BPF runtime cost. (1; body).
+- `sections/7-evaluation.tex:51` — numerical claim: For each retained row, we compute \texttt{run\_time\_ns\_delta}/\texttt{run\_cnt\_delta}, drop rows with fewer than 100 runs in either phase, and pair rows by program name, program type, and occurrence index. (100; body).
 - `figures/sec-6-kinsn-micro-rq1.tex:6` — figure file sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf (sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf; body).
 
 ## data/micro/x86_kvm_micro_20260526_210952_650695
@@ -587,17 +588,17 @@ Status: completed; samples: 3; BPF stats: unknown; files: 3; bytes: 855575.
 
 Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper VM sizing is not bound to this measurement.
 
-- `sections/3-characterization.tex:113` — x86 eBPF/native gap (1.57; body).
-- `sections/3-characterization.tex:192` — x86 kernel native speedup (1.55; body).
-- `sections/3-characterization.tex:192` — x86 userspace native speedup (1.57; body).
-- `sections/3-characterization.tex:214` — x86 LLVM-BPF speedup (1.53; body).
-- `sections/3-characterization.tex:216` — x86 optimizing backend recovered gap (%) (93; body).
-- `sections/3-characterization.tex:220` — x86 bytecode residual gap (%) (7; body).
-- `sections/3-characterization.tex:200` — x86 in-kernel native execution overhead (%) (2; body).
-- `sections/3-characterization.tex:255` — x86 kernel native code size ratio (0.54; body).
-- `sections/3-characterization.tex:143` — 27 pure-bytecode computation benchmarks (27; body).
-- `sections/3-characterization.tex:194` — in-kernel native overhead range (2--5%; body).
-- `sections/3-characterization.tex:224` — optimizing backend recovered gap range (93--94%; body).
+- `sections/3-characterization.tex:111` — x86 eBPF/native gap (1.57; body).
+- `sections/3-characterization.tex:190` — x86 kernel native speedup (1.55; body).
+- `sections/3-characterization.tex:190` — x86 userspace native speedup (1.57; body).
+- `sections/3-characterization.tex:216` — x86 LLVM-BPF speedup (1.53; body).
+- `sections/3-characterization.tex:218` — x86 optimizing backend recovered gap (%) (93; body).
+- `sections/3-characterization.tex:222` — x86 bytecode residual gap (%) (7; body).
+- `sections/3-characterization.tex:202` — x86 in-kernel native execution overhead (%) (2; body).
+- `sections/3-characterization.tex:259` — x86 kernel native code size ratio (0.54; body).
+- `sections/3-characterization.tex:141` — 27 pure-bytecode computation benchmarks (27; body).
+- `sections/3-characterization.tex:196` — in-kernel native overhead range (2--5%; body).
+- `sections/3-characterization.tex:226` — optimizing backend recovered gap range (93--94%; body).
 - `tables/sec-3-micro-summary.tex:10` — x86 native_kernel speedup (1.55; body).
 - `tables/sec-3-micro-summary.tex:10` — x86 native_kernel faster cases (>2%) (24; body).
 - `tables/sec-3-micro-summary.tex:11` — x86 native speedup (1.57; body).
@@ -605,8 +606,8 @@ Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper 
 - `tables/sec-3-micro-summary.tex:12` — x86 llvmbpf speedup (1.53; body).
 - `tables/sec-3-micro-summary.tex:12` — x86 llvmbpf faster cases (>2%) (25; body).
 - `sections/7-evaluation.tex:66` — micro fraction of characterization gap recovered (%) (42; body).
-- `sections/1-introduction.tex:145` — headline recovered micro gap (%) (42; body).
-- `sections/1-introduction.tex:159` — contribution recovered micro gap (%) (42; body).
+- `sections/1-introduction.tex:152` — headline recovered micro gap (%) (42; body).
+- `sections/1-introduction.tex:167` — contribution recovered micro gap (%) (42; body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — x86 bcc_runqlat_log2_histogram_bucket native_kernel plotted speedup (bar (value derived below); body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — x86 bcc_tcpconnect_ipv4_tuple_filter native_kernel plotted speedup (bar (value derived below); body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — x86 bitmap_popcount_scan native_kernel plotted speedup (bar (value derived below); body).
@@ -690,8 +691,57 @@ Recorded Core Ultra 9 285K matches the author-corrected host expectation; paper 
 - `figures/sec-3-pure-bytecode-percase.tex:3` — x86 tracee_syscall_name_table_lookup llvmbpf plotted speedup (bar (value derived below); body).
 - `figures/sec-3-pure-bytecode-percase.tex:4` — measurement/population convention: \caption{Per-case speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, on x86-64 (top) and ARM64 (bottom). Each bar is one non-baseline path. The ARM64 paths come from separate runs, each over its own baseline.} (27; body).
 - `audit-paper/sections/3-characterization.tex:145` — numerical claim: The examples include a consistent-hash load-balancer lookup from \texttt{katran} and a SipHash-like 64-bit-rotation mixer. (64; removed from current body; audit snapshot only).
-- `sections/3-characterization.tex:238` — numerical claim: Figure~\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation. (64; body).
-- `sections/7-evaluation.tex:36` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
+- `sections/3-characterization.tex:239` — numerical claim: Figure~\ref{fig:jit-dump} shows a 64-bit rotate with a variable shift under the per-opcode kernel JIT and under direct native compilation. (64; body).
+- `sections/7-evaluation.tex:34` — x86 hardware and VM/kernel setup (Core Ultra 9 285K; body).
 - `tables/sec-3-micro-summary.tex:4` — measurement/population convention: \caption{Speedup over the kernel eBPF JIT on the 27 pure-bytecode microbenchmarks, as the geometric mean of median steady-state time. A path counts as faster on a benchmark when it beats the kernel eBPF JIT by more than 2\%.} (27; 2; body).
 - `figures/sec-3-pure-bytecode-percase.tex:3` — figure file sec-3-4config-percase.pdf (sec-3-4config-percase.pdf; body).
 - `revision/tables/sec-3-microbenchmarks.tex:4` — 27 named computation programs and descriptions (27; body).
+
+## data/corpus/cilium_x86_config_parity_counterbalanced_20261010
+
+Original: `corpus/results/cilium_x86_config_parity_counterbalanced_20261010`.
+
+Introduced by `91ee7e78eefed2f0a41485fc7eb3402cd94724a3` (2026-10-10T07:32:04-07:00).
+
+Collected: unknown; platform: unknown; CPU: unknown; environment: unknown.
+
+Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `unknown`.
+
+Status: complete; samples: unknown; BPF stats: unknown; files: 83; bytes: 2968769.
+
+Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.
+
+Section 6.4 timing: fresh 8-vCPU, 64-GB guests pinned to host P-cores 0-7, six per statistics mode (three per run order) plus JIT-to-JIT controls. samples.csv, guests.csv and live-program-images.csv are the per-phase and per-guest records; SUMMARY.md describes the method.
+
+- `sections/7-evaluation.tex:210` — Cilium whole-program native throughput (1.194; body).
+- `sections/7-evaluation.tex:210` — Cilium eBPF JIT BPF ns/run (659.2; body).
+- `sections/7-evaluation.tex:210` — Cilium native BPF ns/run (463.9; body).
+- `sections/7-evaluation.tex:210` — Cilium native/eBPF BPF cost ratio (0.704; body).
+- `sections/7-evaluation.tex:215` — Cilium live programs running as native code (51; body).
+- `sections/7-evaluation.tex:223` — Cilium Kinsn fraction of the native gap (%) (38; body).
+- `sections/7-evaluation.tex:223` — native upper bound repetition (1.194; body).
+- `sections/7-evaluation.tex:223` — native code size increase (%) (10; body).
+- `sections/0-abstract.tex:53` — Cilium native headline speed increase (%) (19; body).
+- `sections/1-introduction.tex:154` — Cilium native headline speedup (1.194; body).
+- `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium Native throughput bar (1.194; body).
+- `figures/sec-6-kinsn-micro-rq3.tex:3` — Cilium Native BPF cost bar (0.704; body).
+
+## data/corpus/cilium_profile_jit_kprog_counterbalanced_20261010
+
+Original: `corpus/results/cilium_profile_jit_kprog_counterbalanced_20261010`.
+
+Introduced by `d92d643dcbb486145e1550356fe1f7e0e66994f7` (2026-10-09T22:51:09-07:00).
+
+Collected: unknown; platform: unknown; CPU: unknown; environment: unknown.
+
+Recorded source commit: `unknown`; kernel commit: `unknown`; kernel version: `unknown`.
+
+Status: unknown; samples: unknown; BPF stats: unknown; files: 4; bytes: 147670.
+
+Corpus metadata has no CPU model, source commit, or kernel commit; do not infer these from micro runs.
+
+Section 6.4 profile: the summary files only. The raw perf data (about 360 MB) is in the original directory.
+
+- `sections/7-evaluation.tex:223` — eBPF run CPU time in the programs' own instructions (%) (10; body).
+- `sections/7-evaluation.tex:223` — eBPF run CPU time in map operations (%) (26; body).
+- `sections/7-evaluation.tex:223` — native reduction in cycles per packet (%) (13.6; body).

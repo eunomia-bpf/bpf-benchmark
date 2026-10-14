@@ -1,0 +1,48 @@
+{
+  "source_run": "corpus/results/x86_kvm_corpus_20261010_091727_881080",
+  "status": "pass",
+  "compile_time_parity": {
+    "objects": [
+      "bpf_alignchecker",
+      "bpf_host",
+      "bpf_lxc",
+      "bpf_xdp"
+    ],
+    "parity_records": 4,
+    "unexpected_define_differences": 0,
+    "missing_define_differences": 0,
+    "allowed_difference_scope": "compiler target, audited native entry ABI, and exact specialization of the paired JIT rodata hybrid_routing_enabled scalar"
+  },
+  "live_graph": {
+    "jit_roots": 8,
+    "native_roots": 8,
+    "jit_reachable_programs": 51,
+    "native_reachable_programs": 51,
+    "jit_tail_call_edges": 382,
+    "native_tail_call_edges": 382,
+    "attachment_signatures_equal": true,
+    "inventory_signatures_equal": true
+  },
+  "jit": {
+    "pktgen_sent": 7225419,
+    "pktgen_errors": 0,
+    "receiver_packets": 7225443,
+    "receiver_errors": 0,
+    "receiver_drops": 0,
+    "allow_direction_1": 7225439,
+    "allow_direction_2": 7225439,
+    "reason_133": 0,
+    "other_verdicts": 2
+  },
+  "native": {
+    "pktgen_sent": 8172952,
+    "pktgen_errors": 0,
+    "receiver_packets": 8172974,
+    "receiver_errors": 0,
+    "receiver_drops": 0,
+    "allow_direction_1": 8172972,
+    "allow_direction_2": 8172972,
+    "reason_133": 0,
+    "other_verdicts": 0
+  }
+}

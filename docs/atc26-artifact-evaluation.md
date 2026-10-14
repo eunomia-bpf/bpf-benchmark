@@ -129,7 +129,8 @@ fails on purpose rather than silently falling back.
 ## 6. The paper's results, their data and commands
 
 The data directories below are under `micro/results/` and `corpus/results/`;
-copies of all except RQ4 are in `kinsn/paper/atc26/data/`. Run with statistics
+copies of all of them are in `kinsn/paper/atc26/data/`, and `make -C kinsn/paper/atc26`
+checks every number in the table against the camera-ready paper. Run with statistics
 off for throughput and with `BPFREJIT_CORPUS_BPF_STATS=1` for BPF cost.
 
 | Result | Paper | Command | Data |

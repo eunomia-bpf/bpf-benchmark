@@ -1,15 +1,13 @@
 # ATC'26 paper data and regeneration
 
 This bundle preserves the data used by *BPF-Ext: Safely Extending the eBPF
-Compilation Pipeline with Native Operations*, the ATC'26 camera-ready body
-associated with arXiv 2606.24213 v1. It pins the current
-[paper repository](https://github.com/yunwei37/atc26-kinsn-camera-ready) at
-`22810b78eb2b24b1ad5cecfd9e07329f5af9ac10`; the supplied October 7 inventory
-used `d6c50f83dca5298b0f5f7f639f66f6ed5d4e53fa`. Wording edits between those
-snapshots are mapped to current file/line references in the generated report.
-The report expectations and regenerated application policy artifacts also apply
-the authors' October 9 median and Core Ultra 9 285K host corrections. Pinned
-paper/audit snapshots and historical inventory text retain their original values.
+Compilation Pipeline with Native Operations* (ACM ATC '26). It pins the
+camera-ready [paper repository](https://github.com/yunwei37/atc26-kinsn-camera-ready)
+at `067e0ca6a4fad4dd862549a4e3448df4a2ca8878`, copied to `inputs/paper/`. The
+claim inventory in `inputs/inventory/` was written against the October 7
+snapshot `d6c50f83dca5298b0f5f7f639f66f6ed5d4e53fa` (`inputs/audit-paper/`);
+`make` maps every audited claim to its file and line in the camera-ready and
+checks the claims the camera-ready adds in §6.4 against their data.
 
 From the bpf-benchmark root, regenerate and verify everything with:
 
@@ -28,10 +26,11 @@ python3 -m pip install -r requirements.txt
 sudo apt-get install texlive-latex-extra texlive-pictures texlive-fonts-recommended lmodern
 ```
 
-`data/` holds exact copies of nine micro and eight corpus result directories:
-**77 files, 15,224,080 bytes (14.52 MiB)**. Every file was compared byte for
-byte with its original; the originals remain at their existing paths. Nothing
-in `data/` is generated or edited by `make`. Historical metadata retains its
+`data/` holds exact copies of nine micro and ten corpus result directories (of
+the §6.4 profile, only its summary files): **160 files, 18,340,377 bytes
+(17.49 MiB)**. Every file was compared byte for byte with its original; the
+originals remain at their existing paths. Nothing in `data/` is generated or
+edited by `make`. Historical metadata retains its
 original paths, statuses, and unknown source/kernel commits.
 
 `inputs/paper/` contains the pinned body, tables, figures, helpers, and the
@@ -39,7 +38,7 @@ separate October `revision/`. `inputs/audit-paper/` preserves the earlier
 LaTeX snapshot used by the audit calculations. `inputs/inventory/` preserves
 the supplied claim inventory, summary, dependency list, and recomputation
 expectations. The full 4,526-run statistical inventory is outside this
-17-directory paper bundle; it is not a paper performance input.
+19-directory paper bundle; it is not a paper performance input.
 `inputs/idiom-disassembly/` holds the related March disassemblies needed for
 the five-probe expansion calculation. The original plotting sources are
 preserved as text under `scripts/upstream/`; `metrics.py` adapts the audit's
@@ -107,10 +106,15 @@ this map into individual claims and exact file/line locations.
 | `data/corpus/x86_kvm_corpus_20260605_004607_636479` | §6 RQ3 tuned no-bulk Cilium throughput; 1.118935x median |
 | `data/corpus/aws_arm64_corpus_20260605_080836_924256` | §6 RQ2/RQ3 conservative Katran; 1.065063x median throughput / 0.941 BPF-cost ratio |
 | `data/corpus/aws_arm64_corpus_20260605_094729_221231` | §6 RQ3 coverage-max Katran; 0.984357x median throughput / 1.006 BPF-cost ratio |
-| `data/corpus/x86_kvm_corpus_20260529_033517_489159` | §6 RQ4 Cilium native counters; median 488.676 → 262.303 ns/run |
-| `data/corpus/x86_kvm_corpus_20260529_040554_604387` | §6 RQ4 Cilium native throughput; 2.357974x and native-gap calculation |
+| `data/corpus/cilium_x86_config_parity_counterbalanced_20261010` | §6.4 RQ4 Cilium whole-program native: 1.194x throughput (median of six fresh guests), 659.2 → 463.9 ns per BPF run, 51 live programs, native code size; Figure 6 native bars |
+| `data/corpus/cilium_profile_jit_kprog_counterbalanced_20261010` | §6.4 profile: CPU time in program instructions and map operations, cycles per packet |
 
-The report explains the 0.99 load-time field mismatch, corrected application
-mean/median values, 5.4% rounding, corrected Core Ultra host, sampling and BPF-stat
-conventions, missing report streams, and October revision evidence gaps.
+`data/corpus/x86_kvm_corpus_20260529_*` hold the Cilium native run that the
+claim inventory audited; their rows in the report point to
+`inputs/audit-paper/`.
+
+The report explains the 0.99 load-time field mismatch, the application
+mean/median conventions, the §6.4 recomputation, the Core Ultra host, sampling
+and BPF-stat conventions, missing report streams, and October revision
+evidence gaps.
 Analysis stays here, outside the measurement framework.

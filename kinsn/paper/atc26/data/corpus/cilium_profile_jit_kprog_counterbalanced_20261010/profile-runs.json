@@ -1,0 +1,34 @@
+[
+  {
+    "arm": "jit",
+    "corpus_run": "corpus/results/x86_kvm_corpus_20261010_135459_510211",
+    "order": "jit-kprog",
+    "position": 1,
+    "profile_dir": "jit-kprog/01-jit",
+    "run_id": "jit-kprog/01-jit"
+  },
+  {
+    "arm": "kprog",
+    "corpus_run": "corpus/results/x86_kvm_corpus_20261010_135905_293120",
+    "order": "jit-kprog",
+    "position": 2,
+    "profile_dir": "jit-kprog/02-kprog",
+    "run_id": "jit-kprog/02-kprog"
+  },
+  {
+    "arm": "kprog",
+    "corpus_run": "corpus/results/x86_kvm_corpus_20261010_140420_544041",
+    "order": "kprog-jit",
+    "position": 1,
+    "profile_dir": "kprog-jit/01-kprog",
+    "run_id": "kprog-jit/01-kprog"
+  },
+  {
+    "arm": "jit",
+    "corpus_run": "corpus/results/x86_kvm_corpus_20261010_140938_389097",
+    "order": "kprog-jit",
+    "position": 2,
+    "profile_dir": "kprog-jit/02-jit",
+    "run_id": "kprog-jit/02-jit"
+  }
+]

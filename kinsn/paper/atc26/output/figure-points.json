@@ -239,12 +239,14 @@
     "throughput": {
       "Cilium Full": 1.074,
       "Cilium No Bulk": 1.119,
+      "Cilium Native": 1.194,
       "Katran Full": 0.984,
       "Katran Conservative": 1.065
     },
     "cost": {
       "Cilium Full": 1.01,
       "Cilium No Bulk": 1.062,
+      "Cilium Native": 0.704,
       "Katran Full": 1.006,
       "Katran Conservative": 0.941
     }
