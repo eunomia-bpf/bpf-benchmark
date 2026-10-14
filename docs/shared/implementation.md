@@ -1074,7 +1074,12 @@ increment is committed and pushed immediately). Current state:
   ALU op-step result route through the real `X86_SIM_L_EXEC_ALU_IMM`/`_REG`
   arm bodies now closed (Step 0154, 760,337 routed cases; the 87-mutation
   harness adds the five body-macro mutants to the Step 0153 count, split
-  gen 41 / lean_chain 30 / host 7 / route 5),
+  gen 41 / lean_chain 30 / host 7 / route 5), and the x86-64 ALU op-step
+  result route through the routed memory-operand
+  `X86_SIM_L_EXEC_ALU_MEM`/`_UNARY`/`_IMM`/`_REG` arm bodies now closed
+  (Step 0155, 261,137 routed cases; the 92-mutation harness adds five
+  MEM-body mutants to the Step 0154 count, split gen 41 / lean_chain 30 /
+  host 7 / route 5 / route_mem 5),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

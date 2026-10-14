@@ -12891,6 +12891,44 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Step 0153 generator docstring/`ROOT` spelling and the two added comment
   rewrites.
 
+## Step 0155 — x86-64 ALU op-step MEM result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_alu_mem_result_route_host.c`, the memory-operand
+  companion to the Step 0154 route oracle: the oracle includes
+  `kprog/x86/x86_sim_local_bpf.h` and drives the *real* routed MEM bodies
+  `X86_SIM_L_EXEC_ALU_MEM`, `X86_SIM_L_EXEC_ALU_MEM_UNARY`,
+  `X86_SIM_L_EXEC_ALU_MEM_IMM`, and `X86_SIM_L_EXEC_ALU_MEM_REG` as
+  dispatched over 4 forms × 16 op tokens × 5 width codes × 2 incoming flag
+  seeds × 2 carry/borrow seeds × 6 immediate/displacement values =
+  61,440 routed quadruples, each checked for full register/tag/flag state
+  plus the addressed heap/stack bytes (261,137 rows); dst/src are fixed at
+  `X86_RCX`; heap and stack frames are planted at `X86_SIM_HEAP_ORIGIN`
+  (+4096 heap-frame bytes) and `X86_SIM_STACK_BYTES` stack bytes `0xa0+i`;
+  the model's LE byte ladders (`model_store`, line ~373) use `k <
+  (w ? w : 8U)` where a width code is a byte count, and the
+  `load_le` correction (`k < w`) replaced an earlier bit-count loop.
+- Gate: `x86 alu mem result route host cross-check: OK (261137 cases)`;
+  `make -C kprog/formal check`: full run green (make_exit=0, 320.81 s),
+  arm64 rows unchanged.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py` (untracked;
+  file itself is not committed) adds the fifth detector `route_mem`
+  (cc with the sim header + MUT_ROUTE_INC → build/mut_route_mem_oracle,
+  run with timeout 600) and five MEM-body anchored-rewrite mutants
+  (count(old)=1 each): `simlocal_mem_unary_rhs_drift` (UNARY constant rhs
+  1 → 2), `simlocal_mem_imm_disp_drift` (IMM-body disp decode
+  `x86_store_imm_disp(IMM)` → `x86_simm(IMM)`, whole immediate instead of
+  upper-half), `simlocal_mem_rhs_mode_drift` (MEM rhs read lane 0 → 1),
+  `simlocal_mem_reg_rhs_drift` (REG rhs read source `SRC` → `X86_RBX`),
+  and `simlocal_mem_stack_flip_drift` (form-1 store displacement
+  `x86_simm(IMM)` → `x86_simm(IMM) + 1`; an earlier `(DST)==X86_RSP`
+  guard flip is behaviorally impossible under the fixed dst=X86_RCX and
+  was replaced by this store-displacement shift).
+- Tally: `TOTAL 92 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5 route_mem=5)`, `ALL AS EXPECTED` (~174 s); the four
+  equivalence survivors are the Step 0153 generator docstring/`ROOT`
+  spelling and the two added comment rewrites.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

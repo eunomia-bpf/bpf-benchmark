@@ -3100,6 +3100,32 @@ byte lane, the SBB/ADC handler arms dropping the live carry/borrow, a dropped
 genuine equivalences that survive --- closes the drift paths between the
 generated result/flag formulas and the shipped arm bodies.
 
+The routed memory-operand sibling extends the route oracle to the four MEM
+bodies the dispatcher arms route for `X86_OP_ALU_MEM`/`_UNARY`/`_IMM`/`_REG`
+(`X86_SIM_L_EXEC_ALU_MEM`, `..._UNARY`, `..._IMM`, `..._REG` in
+`kprog/x86/x86_sim_local_bpf.h`). It drives the *real* bodies as dispatched,
+reproducing their staged input (dst/src register values and tags, the
+`KPROG_X86_REG_LANE_AUX` memory-descriptor lane, the seeded incoming flags,
+the ELF-heap and stack frames planted at `X86_SIM_HEAP_ORIGIN` and
+`X86_SIM_STACK_BYTES`), and compares the full register file with tags, the
+four flags, and the addressed heap/stack bytes against an independent model
+over 4 forms × 16 op tokens × 5 width codes × 2 incoming flag seeds ×
+2 carry/borrow seeds × 6 immediate/displacement values = 61,440 routed
+quadruples, 261,137 rows in `make check` (each row is one full check: state,
+flags, and bytes per token). The model's little-endian byte ladders were
+corrected during bring-up (the bit-width count was used where the byte count
+belonged: `k < w` became `k < w / 8`... where a width code is a byte count
+`k < w` stands), and the mutation harness gains a fifth detector
+(`route_mem`: cc + run of the 0155 oracle) with the four MEM-body
+anchored-rewrite mutants `simlocal_mem_unary_rhs_drift` (constant rhs 1 -> 2),
+`simlocal_mem_imm_disp_drift` (upper-half displacement decode gets the whole
+immediate), `simlocal_mem_rhs_mode_drift` (memory rhs lane 0 -> 1),
+`simlocal_mem_reg_rhs_drift` (register rhs X86_SIM_L_READ_REG(SRC) ->
+X86_RBX), and `simlocal_mem_stack_flip_drift` (form-1 store displacement
+shifted by one byte) — totalling 92 mutations, 0 failures
+(`gen=41 lean_chain=30 host=7 route=5 route_mem=5`), plus the four
+genuine equivalences that survive.
+
 The x86 condition-mnemonic decode contract binds the `X86_CC_*` codes the
 artifact encoder's `CC_AUX` mapping selects for its 36 `jcc`/`cmovcc`/`setcc`
 mnemonics. `X86CcDecode.lean` projects the generated table to
