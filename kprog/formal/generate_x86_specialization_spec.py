@@ -146,8 +146,8 @@ OPCODE_DEFINE = re.compile(
 CHAIN_START = "#define X86_SIM_L_EXEC(OP, DST, SRC, FLAGS, AUX, IMM)"
 CHAIN_END = "#define X86_SIM_RUN_OP("
 HANDLER = re.compile(r"(X86_SIM_(?:L_EXEC_[A-Z0-9_]+|BPF_CALL_[A-Z0-9_]+))\s*\(")
-# The generated dispatch-family header the chain's family gates expand through.
 FAMILY_HEADER = ROOT / "generated/x86_dispatch_family.h"
+SINGLETON_HEADER = ROOT / "generated/x86_dispatch_singleton.h"
 GATE = re.compile(r"\b(KPROG_X86_[A-Z0-9_]+_HANDLED)\s*\(")
 FAMILY_MEMBERS = re.compile(
     r"^#define\s+(KPROG_X86_[A-Z0-9_]+_HANDLED)\(OP\)\s+((?:[^\n]*\\\n)*[^\n]*\n)",
@@ -220,16 +220,18 @@ def arm_handler(arm):
 
 
 def family_gate_members():
-    """The generated family gate's opcode members, read from the generated
-    dispatch-family header. Each gate expands to the tokens its membership
-    macro names, so the chain's `KPROG_X86_<F>_HANDLED(OP)` guards resolve to
-    the same tokens the header would test."""
-    text = FAMILY_HEADER.read_text()
+    """The generated family and singleton gates' opcode members, read from the
+    generated dispatch-family and dispatch-singleton headers. Each gate
+    expands to the tokens its membership macro names, so the chain's
+    `KPROG_X86_<F>_HANDLED(OP)` and `KPROG_X86_DISP_<T>_HANDLED(OP)` guards
+    resolve to the same tokens the headers would test."""
     members = {}
-    for match in FAMILY_MEMBERS.finditer(text):
-        body = re.sub(r"\\\s*\n", " ", match.group(2))
-        members[match.group(1)] = re.findall(r"\(OP\)\s*==\s*(X86_OP_[A-Z0-9_]+)",
-                                             body)
+    for header in (FAMILY_HEADER, SINGLETON_HEADER):
+        text = header.read_text()
+        for match in FAMILY_MEMBERS.finditer(text):
+            body = re.sub(r"\\\s*\n", " ", match.group(2))
+            members[match.group(1)] = re.findall(
+                r"\(OP\)\s*==\s*(X86_OP_[A-Z0-9_]+)", body)
     return members
 
 

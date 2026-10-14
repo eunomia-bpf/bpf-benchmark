@@ -64,7 +64,7 @@ struct family {
 	unsigned count;
 };
 
-static struct family FAMILIES[16];
+static struct family FAMILIES[64];
 static unsigned family_count = 0;
 
 /* The NUL-terminated identifier at [begin, end). */
@@ -88,7 +88,7 @@ static void load_families(const char *text)
 {
 	const char *at = text;
 
-	while (family_count < 16 &&
+	while (family_count < 64 &&
 	       (at = strstr(at, "#define KPROG_X86_")) != NULL) {
 		const char *name = at + strlen("#define ");
 		const char *p = name;
@@ -372,6 +372,8 @@ int main(void)
 	char *text = read_whole_file("../x86/x86_sim_local_bpf.h");
 	char *sim_text = read_whole_file("../x86/x86_sim.h");
 	char *family_text = read_whole_file("generated/x86_dispatch_family.h");
+	char *singleton_text =
+		read_whole_file("generated/x86_dispatch_singleton.h");
 	unsigned seen[SPEC_COUNT];
 	const char *body;
 	const char *inner_begin;
@@ -382,14 +384,18 @@ int main(void)
 	const char *arm_begin;
 	unsigned arm_count = 0;
 
-	if (text == NULL || sim_text == NULL || family_text == NULL) {
-		fprintf(stderr, "cannot read simulator or family header\n");
+	if (text == NULL || sim_text == NULL || family_text == NULL ||
+	    singleton_text == NULL) {
+		fprintf(stderr,
+			"cannot read simulator or generated dispatch header\n");
 		free(text);
 		free(sim_text);
 		free(family_text);
+		free(singleton_text);
 		return 1;
 	}
 	load_families(family_text);
+	load_families(singleton_text);
 	if (family_count == 0) {
 		fprintf(stderr, "no dispatch families parsed\n");
 		free(text);
