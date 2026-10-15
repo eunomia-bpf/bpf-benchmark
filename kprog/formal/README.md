@@ -3126,6 +3126,35 @@ shifted by one byte) — totalling 92 mutations, 0 failures
 (`gen=41 lean_chain=30 host=7 route=5 route_mem=5`), plus the four
 genuine equivalences that survive.
 
+The x86-64 SHIFTX/RORX routed sibling extends the route oracle to the four
+inline SHIFTX/RORX arm bodies the dispatcher arms route for
+`X86_OP_SHIFTX`/`_MEM` and `X86_OP_RORX`/`_MEM`
+(`KPROG_X86_DISP_SHIFTX_HANDLED`, `..._SHIFTX_MEM_HANDLED`,
+`..._RORX_HANDLED`, `..._RORX_MEM_HANDLED`; the bodies are inlined in
+`X86_SIM_L_EXEC` in `kprog/x86/x86_sim_local_bpf.h` --- the last four x86
+dispatcher arms without a sim-header route oracle). It drives the *real*
+dispatcher forms with the planted staging (dst/src register values and tags,
+the `KPROG_X86_REG_LANE_AUX` memory-descriptor lane with the COUNT_REG source
+shift, the seeded incoming flags, the ELF-heap and stack frames planted at
+`X86_SIM_HEAP_ORIGIN` and `X86_SIM_STACK_BYTES`), and compares the full
+register file with tags, the four flags, and the addressed heap/stack bytes
+against an independent model over 3 shift tokens × 5 width codes ×
+2 incoming flag seeds × 2 index seeds × 6 displacements × 6 counts (the RORX
+forms share the count lane with no token lane) = 5,760 routed cases, 195,841
+rows in `make check`. The flags-preservation pin (neither body writes flags,
+so every case fixes all four model flags equal to the seeded pre-flags) is
+the sixth harness detector's target: `route_shiftx` (cc + run of the 0156
+oracle) with the four SHIFTX/RORX-body anchored-rewrite mutants
+`simlocal_shiftx_r_count_drift` (SHIFTX body register-operand count read
+`X86_SIM_L_READ_REG(AUX)` -> `(SRC)`), `simlocal_shiftx_m_lane_drift`
+(SHIFTX memory-index lane `X86_REG_AUX_GET_SRC_SHIFT(AUX)` ->
+`X86_MEM_AUX_MEM_WIDTH(AUX)`, a different AUX channel),
+`simlocal_rorx_r_count_drift` (register-operand rotate count `(IMM)` ->
+`(IMM) + 1`), and `simlocal_rorx_m_count_drift` (memory-operand rotate count
+`(__u8)(IMM)` -> `(__u8)(IMM) + 1`) --- totalling 96 mutations, 0 failures
+(`gen=41 lean_chain=30 host=7 route=5 route_mem=5 route_shiftx=4`), plus the
+same four genuine equivalences that survive.
+
 The x86 condition-mnemonic decode contract binds the `X86_CC_*` codes the
 artifact encoder's `CC_AUX` mapping selects for its 36 `jcc`/`cmovcc`/`setcc`
 mnemonics. `X86CcDecode.lean` projects the generated table to

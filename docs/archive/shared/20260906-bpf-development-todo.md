@@ -12929,6 +12929,43 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   equivalence survivors are the Step 0153 generator docstring/`ROOT`
   spelling and the two added comment rewrites.
 
+## Step 0156 — x86-64 SHIFTX/RORX result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_shiftx_rorx_route_host.c`, the SHIFTX/RORX
+  companion to the Step 0154/0155 route oracles, closing the last four x86
+  dispatcher arms without a sim-header route oracle: the oracle includes
+  `kprog/x86/x86_sim_local_bpf.h` and drives the *real* inlined
+  SHIFTX/RORX arm bodies under the `KPROG_X86_DISP_{SHIFTX,SHIFTX_MEM,
+  RORX,RORX_MEM}_HANDLED` singleton gates over 2 forms (register/memory)
+  × 3 shift tokens × 5 width codes × 2 incoming flag seeds × 2 index
+  seeds × 6 displacements × 6 left values (SHIFTX; RORX forms share the
+  count lane with no token lane, 6 counts) = 5,760 routed cases, each
+  checked for full register/tag/flag state plus the addressed heap bytes
+  (195,841 rows); the flags-preservation pin fixes every case's four model
+  flags equal to the seeded pre-flags, since neither body writes flags.
+- Gate: `x86 shiftx rorx route host cross-check: OK (195841 cases)`;
+  `make -C kprog/formal check`: full run green (545.15 s), arm64 rows
+  unchanged.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py` (untracked;
+  file itself is not committed) adds the sixth detector `route_shiftx`
+  (cc with the sim header → build/mut_route_shiftx_oracle, run with
+  timeout 600) and four SHIFTX/RORX-body anchored-rewrite mutants
+  (count(old)=1 each): `simlocal_shiftx_r_count_drift` (SHIFTX body
+  register-operand count read `X86_SIM_L_READ_REG(AUX)` → `(SRC)`),
+  `simlocal_shiftx_m_lane_drift` (SHIFTX memory-index lane
+  `X86_REG_AUX_GET_SRC_SHIFT(AUX)` → `X86_MEM_AUX_MEM_WIDTH(AUX)`, a
+  different AUX channel), `simlocal_rorx_r_count_drift` (register-operand
+  rotate count `(IMM)` → `(IMM) + 1`), and `simlocal_rorx_m_count_drift`
+  (memory-operand rotate count `(__u8)(IMM)` → `(__u8)(IMM) + 1`; an
+  earlier plan removing the `(__u8)` cast is a genuine equivalence
+  because `kprog_x86_ror_result` re-masks the count internally and was
+  replaced by this off-by-one).
+- Tally: `TOTAL 96 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5 route_mem=5 route_shiftx=4)`, `ALL AS EXPECTED` (~196 s); the
+  four equivalence survivors are the Step 0153 generator docstring/`ROOT`
+  spelling and the two added comment rewrites.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

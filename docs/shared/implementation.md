@@ -1079,7 +1079,12 @@ increment is committed and pushed immediately). Current state:
   `X86_SIM_L_EXEC_ALU_MEM`/`_UNARY`/`_IMM`/`_REG` arm bodies now closed
   (Step 0155, 261,137 routed cases; the 92-mutation harness adds five
   MEM-body mutants to the Step 0154 count, split gen 41 / lean_chain 30 /
-  host 7 / route 5 / route_mem 5),
+  host 7 / route 5 / route_mem 5), and the x86-64 SHIFTX/RORX variable
+  shift/rotate op-step bodies route through the real inline SHIFTX/RORX
+  dispatcher arm bodies now closed (Step 0156, 5,760 routed cases /
+  195,841 comparison points; the 96-mutation harness adds four
+  SHIFTX/RORX-body mutants to the Step 0155 count, split gen 41 /
+  lean_chain 30 / host 7 / route 5 / route_mem 5 / route_shiftx 4),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
