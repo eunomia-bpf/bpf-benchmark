@@ -1085,6 +1085,11 @@ increment is committed and pushed immediately). Current state:
   195,841 comparison points; the 96-mutation harness adds four
   SHIFTX/RORX-body mutants to the Step 0155 count, split gen 41 /
   lean_chain 30 / host 7 / route 5 / route_mem 5 / route_shiftx 4),
+  and the x86-64 MOVX move-with-extension op-step body routes through the
+  real inline MOVX dispatcher arm bodies now closed (Step 0157, 720 routed
+  cases / 23,761 comparison points; the 100-mutation harness adds four
+  MOVX-body mutants to the Step 0156 count, split gen 41 / lean_chain 30 /
+  host 7 / route 5 / route_mem 5 / route_shiftx 4 / route_movx 4),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

@@ -3155,6 +3155,32 @@ oracle) with the four SHIFTX/RORX-body anchored-rewrite mutants
 (`gen=41 lean_chain=30 host=7 route=5 route_mem=5 route_shiftx=4`), plus the
 same four genuine equivalences that survive.
 
+The x86-64 MOVX register-source routed sibling completes the route-oracle
+family: `test_x86_movx_route_host.c` drives the inline
+`KPROG_X86_MOVX_REG_HANDLED` arm of `X86_SIM_L_EXEC` (the shared
+`X86_OP_MOVZX_REG` (0x20) / `X86_OP_MOVSX_REG` (0x21) body) and compares the
+register file with tags and the four flags against an independent model over
+2 opcodes × 5 width codes × 6 AUX source-width codes (the absent code 0, the
+four real width codes, and the out-of-domain byte 33 as the boundary probe
+the plain masks fall through on) × 6 source values × 2 incoming flag seeds =
+720 routed cases, 23,761 rows in `make check`. The model restates the
+extension shape on the raw opcode (sign at 0x21, zero everywhere else), the
+absent-code source-width fallback to the FLAGS-resolved effective width, and
+the width-local partial-register writeback exactly as the generated
+`x86_movx_shape.h` / `x86_width.h` contracts define them, without the
+macro's own helpers. The flags-preservation pin is the seventh harness
+detector's target: `route_movx` (cc + run of the 0157 oracle) with the
+four MOVX-body anchored-rewrite mutants `simlocal_movx_shape_drift`
+(sign/zero shape condition `==` -> `!=`, sign↔zero swap),
+`simlocal_movx_src_width_drift` (decoded AUX source-width lane
+`(AUX)` -> `0U`, so a non-absent AUX decodes as the absent code),
+`simlocal_movx_src_lane_drift` (source-lane read
+`X86_SIM_L_READ_REG(SRC)` -> `(DST)`), and `simlocal_movx_wb_width_drift`
+(writeback width `__x86_l_width` -> `__x86_l_src_width`) --- totalling 100
+mutations, 0 failures (`gen=41 lean_chain=30 host=7 route=5 route_mem=5
+route_shiftx=4 route_movx=4`), plus the same four genuine equivalences that
+survive.
+
 The x86 condition-mnemonic decode contract binds the `X86_CC_*` codes the
 artifact encoder's `CC_AUX` mapping selects for its 36 `jcc`/`cmovcc`/`setcc`
 mnemonics. `X86CcDecode.lean` projects the generated table to

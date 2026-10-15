@@ -12966,6 +12966,58 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   four equivalence survivors are the Step 0153 generator docstring/`ROOT`
   spelling and the two added comment rewrites.
 
+## Step 0157 — x86-64 MOVX register-source result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_movx_route_host.c`, the MOVX companion to the
+  Step 0154/0155/0156 route oracles, closing the last x86 dispatcher arm
+  without a sim-header route oracle (the route-oracle family is now
+  complete): the oracle includes `kprog/x86/x86_sim_local_bpf.h` and
+  drives the *real* inlined MOVX register arm body under the
+  `KPROG_X86_MOVX_REG_HANDLED` family gate (opcodes
+  `X86_OP_MOVZX_REG` (0x20) / `X86_OP_MOVSX_REG` (0x21)) over 2 opcodes
+  × 5 width codes × 6 AUX source-width codes (the absent code 0, the four
+  real width codes, and the out-of-domain byte 33 as the boundary probe
+  the plain masks fall through on) × 6 source values × 2 incoming flag
+  seeds = 720 routed cases, each checked for full register/tag state plus
+  the unchanged flag bytes (23,761 rows); the model restates the
+  extension shape on the raw opcode (sign at 0x21, zero everywhere
+  else), the absent-code source-width fallback to the FLAGS-resolved
+  effective width, and the width-local partial-register writeback
+  exactly as the generated `x86_movx_shape.h` / `x86_width.h` contracts
+  define them, without the macro's own helpers; the
+  flags-preservation pin fixes every case's four model flags equal to
+  the seeded pre-flags, since the body writes no flags and touches no
+  memory.
+- Gate: `x86 movx reg route host cross-check: OK (23761 cases)`;
+  `make -C kprog/formal check`: full run green (529.49 s), arm64 rows
+  unchanged.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py` (untracked;
+  file itself is not committed) adds the seventh detector `route_movx`
+  (cc with the sim header → build/mut_route_movx_oracle, run with
+  timeout 600) and four MOVX-body anchored-rewrite mutants
+  (count(old)=1 each, all opener-anchored from the unique
+  `} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {` dispatch line because
+  the arm text duplicates the shared `X86_SIM_L_EXEC_MOVX_REG` body
+  macro): `simlocal_movx_shape_drift` (sign/zero shape condition
+  `__x86_l_shape == KPROG_X86_MOVX_SHAPE_SIGN_EXTEND` → `!=`, the
+  sign↔zero swap), `simlocal_movx_src_width_drift` (decoded AUX
+  source-width lane `SRC_WIDTH((AUX),` → `SRC_WIDTH(0U,`, so a
+  non-absent AUX decodes as the absent code and drops the decoded
+  lane), `simlocal_movx_src_lane_drift` (source-lane read
+  `X86_SIM_L_READ_REG(SRC)` → `(DST)`; an earlier
+  `(AUX), __x86_l_width` → `(AUX), X86_WIDTH_64` fallback-argument
+  rewrite is a genuine equivalence because the width-local writeback
+  mask at the same destination width subsumes the aux=0 extension
+  masking for both extension shapes, and was replaced by this
+  aux-decode drop), and `simlocal_movx_wb_width_drift` (writeback width
+  `__x86_l_width` → `__x86_l_src_width`, writing at the extension width
+  instead of the destination width).
+- Tally: `TOTAL 100 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5 route_mem=5 route_shiftx=4 route_movx=4)`, `ALL AS EXPECTED`
+  (~215 s); the four equivalence survivors are the Step 0153 generator
+  docstring/`ROOT` spelling and the two added comment rewrites.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
