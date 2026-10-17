@@ -13018,6 +13018,74 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (~215 s); the four equivalence survivors are the Step 0153 generator
   docstring/`ROOT` spelling and the two added comment rewrites.
 
+## Step 0158 — x86-64 IMUL immediate/memory immediate result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_imul_route_host.c`, the IMUL companion to the
+  Step 0154/0155/0156/0157 route oracles, closing the two x86 multiply
+  op-step arms: the oracle includes `kprog/x86/x86_sim_local_bpf.h` and
+  drives the *real* inlined IMUL arm bodies of `X86_SIM_L_EXEC`
+  (`X86_OP_IMUL_IMM` (0x38) and `X86_OP_IMUL_MEM_IMM` (0x41)) over 5 width
+  codes × 8 left operands × 6 immediate artifacts × 2 incoming flag seeds
+  for the flagged form plus 5 width codes × 5 AUX memory-width codes (the
+  absent code plus the four real codes) × 8 heap fill patterns × 6
+  immediate artifacts × 3 addressing modes (no index, index at scale 1,
+  index at scale 8) × 2 flag seeds for the memory form = 7,680 routed
+  cases, each checked for full register/tag/flag state plus the unchanged
+  heap image (261,121 rows); the register form's right operand is the
+  whole immediate sign-extended at the FLAGS-resolved width (the upper
+  half participates), the memory form re-resolves the store immediate
+  through the `KPROG_X86_IMMEDIATE_VALUE` 32-bit shape and multiplies by
+  the loaded value signed-extended at the memory width, and the flag
+  funnel pin restates the generated `KPROG_X86_SET_IMUL_FLAGS` division
+  with the magnitudes taken from the RAW left operand narrowed to the
+  FLAGS width while the product uses the memory-width-extended left
+  operand (the split a w=32/memory-width-1 case with a `2^30`-shaped
+  right operand distinguishes numerically).
+- **Semantic finding recorded, oracle restates it.** While
+  cross-checking the memory form the oracle surfaced that
+  `X86_SIM_L_EXEC_IMUL_MEM_IMM` passes its pre-extracted store-half
+  displacement through the whole-immediate slot of
+  `X86_SIM_L_READ_MEM_VALUE(..., STORE_DISP=1)`, whose `STORE_DISP`
+  branch applies `x86_store_imm_disp` a second time, so the effective
+  displacement is `(s32)((u64)(s32)(imm >> 32) >> 32)` rather than the
+  single wrap `(s32)(imm >> 32)` (visible whenever the bits above bit 31
+  of the store displacement are nonzero); six byte-level probes confirmed
+  the divergence for the four store-half artifacts with high bits set.
+  Per the route-oracle convention (the model restates what the generated
+  body computes), the oracle was fixed to the two-step wrap — the sim
+  header is untouched — and the pin is documented in both the oracle
+  comment and the model's inline comment.
+- Gate: `x86 imul route host cross-check: OK (261121 cases)`;
+  `make -C kprog/formal check`: full run green (246.51 s), arm64 rows
+  unchanged.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py` (untracked;
+  file itself is not committed) adds the eighth detector `route_imul`:
+  a route_oracle-shaped driver over the two IMUL bodies (cc with the sim
+  header → build/mut_route_imul_oracle, run with timeout 600) and four
+  IMUL-body anchored-rewrite mutants (count(old)=1 each; the memory-body
+  mutants anchor on the pair of preceding product/flag lines because the
+  unwrapped operands occur in both bodies):
+  `simlocal_imul_imm_lhs_drift` (register-form left read
+  `X86_SIM_L_READ_REG(SRC)` → `(DST)`),
+  `simlocal_imul_imm_rhs_width_drift` (whole-immediate rhs
+  sign-extension width `__x86_l_width` → `X86_WIDTH_8`; an earlier plan
+  narrowing the extension to 8 bits via the plain constant was proven a
+  genuine equivalence — the funnel narrows the right magnitude at the
+  body width before the product and the writeback masks at the same
+  width, so a wider extension's extra high bits are masked away again —
+  and the mutant instead skips the extension down, making immediates
+  with bits at or above bit 7 distinct),
+  `simlocal_imul_mem_lhs_raw_drift` (memory-form product left operand
+  drops the memory-width sign extension), and
+  `simlocal_imul_mem_flags_raw_mw_drift` (flag-funnel left magnitude
+  re-extends with the memory width instead of staying raw).
+- Tally: `TOTAL 104 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5 route_mem=5 route_shiftx=4 route_movx=4 route_imul=4)`,
+  `ALL AS EXPECTED` (~122 s); the four equivalence survivors are the
+  Step 0153 generator docstring/`ROOT` spelling and the two added comment
+  rewrites; the sim header is clean after the harness restore.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

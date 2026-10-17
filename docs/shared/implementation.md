@@ -1090,6 +1090,12 @@ increment is committed and pushed immediately). Current state:
   cases / 23,761 comparison points; the 100-mutation harness adds four
   MOVX-body mutants to the Step 0156 count, split gen 41 / lean_chain 30 /
   host 7 / route 5 / route_mem 5 / route_shiftx 4 / route_movx 4),
+  and the x86-64 multiply op-step bodies route through the real inline
+  IMUL immediate and memory-immediate dispatcher arm bodies now closed
+  (Step 0158, 7,680 routed cases / 261,121 comparison points; the
+  104-mutation harness adds four IMUL-body mutants to the Step 0157 count,
+  split gen 41 / lean_chain 30 / host 7 / route 5 / route_mem 5 /
+  route_shiftx 4 / route_movx 4 / route_imul 4),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
