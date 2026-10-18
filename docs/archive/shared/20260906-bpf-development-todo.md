@@ -13086,6 +13086,62 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   Step 0153 generator docstring/`ROOT` spelling and the two added comment
   rewrites; the sim header is clean after the harness restore.
 
+## Step 0159 — x86-64 LEA effective-address result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_lea_route_host.c`, the LEA companion to the
+  Step 0154/0155/0156/0157/0158 route oracles, closing the
+  address-forming op-step arm: the oracle includes
+  `kprog/x86/x86_sim_local_bpf.h` and drives the *real* inlined LEA arm
+  body of `X86_SIM_L_EXEC` (`X86_OP_LEA` (0x09)) over 3 source roots
+  (NONE, the stack pointer, a general mapped-pointer register) × 5
+  width codes (the absent code plus the four real codes) × 4 addressing
+  modes (no index, the RODATA gate, an index at scale 1, an index at
+  scale 8) × 4 immediate artifacts × 2 destination lanes × 2 flag seeds
+  = 960 routed cases, each comparing 16 register values + 16 tags + the
+  heap and stack-arena images + the flag row (34 rows), so 32,640 rows
+  plus the one opcode-code selector row = 32,641 rows in `make check`; the model restates the offset
+  computation (the sign-extended immediate
+  plus, exactly when the AUX index byte is present, the index lane value
+  scaled by the AUX scale lane, in 64-bit wrapping signed arithmetic
+  through the machine-checked `X86_SIM_L_MEM_OFFSET` chain), the four
+  exits (the `X86_LEA_AUX_RODATA` fast path writing the RAW immediate as
+  a scalar — the AUX bits only gate the arm and the offset is never
+  consumed by this exit; the 64-bit stack-pointer arena rebind through
+  `X86_SIM_L_STACK_PTR` over `KPROG_X86_STACK_INDEX`'s 32-bit window
+  wrap, stamping `X86_SIM_TAG_STACK`; the 64-bit general pointer add
+  `KPROG_PTR_ADD64_BITS` with the source tag carried through
+  `KPROG_PTR_ADD64_TAG`; and the narrower-width scalarize through the
+  width-local partial-register write — dword zero-extends, byte and word
+  preserve upper lanes, always the scalar tag), the NONE-source
+  null-pointer base contribution, and the write-free contract (no flag
+  byte and no memory byte change, so the planted heap and stack images
+  come back unchanged).
+- Gate: `x86 lea route host cross-check: OK (32641 cases)`;
+  `make -C kprog/formal check`: full run green (208 `: OK` rows), arm64
+  rows unchanged.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py`
+  (untracked; file itself is not committed) adds the ninth detector
+  `route_lea`: a route_oracle-shaped driver over the LEA body (cc with
+  the sim header → build/mut_route_lea_oracle, run with timeout 600)
+  and four LEA-body anchored-rewrite mutants (count(old)=1 each):
+  `simlocal_lea_width_drift` (the width statement replaced with a
+  literal `1U` width — anchored as the two-line pair with its
+  following offset line because the single width line recurs in fifteen
+  exec macros),
+  `simlocal_lea_offset_index_drift` (the offset AUX byte `(AUX)` ->
+  `0U`, forcing the no-index decode),
+  `simlocal_lea_rodata_gate_drift` (the RODATA gate
+  `X86_LEA_AUX_RODATA` -> `0U`, routing every AUX word into the
+  raw-immediate exit), and
+  `simlocal_lea_stack_src_drift` (the stack-pointer test
+  `(SRC) == X86_RSP` -> `(SRC) == 0U`, spilling the general-register
+  form into the arena arm).
+- Tally: `TOTAL 108 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5 route_mem=5 route_shiftx=4 route_movx=4 route_imul=4
+  route_lea=4)`, `ALL AS EXPECTED`; the four equivalence survivors are
+  unchanged; the sim header is clean after the harness restore.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

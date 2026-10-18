@@ -1096,6 +1096,12 @@ increment is committed and pushed immediately). Current state:
   104-mutation harness adds four IMUL-body mutants to the Step 0157 count,
   split gen 41 / lean_chain 30 / host 7 / route 5 / route_mem 5 /
   route_shiftx 4 / route_movx 4 / route_imul 4),
+  and the x86-64 effective-address op-step body routes through the real
+  inline LEA dispatcher arm body now closed (Step 0159, 960 routed
+  cases / 32,641 comparison points; the 108-mutation harness adds
+  four LEA-body mutants to the Step 0158 count, split gen 41 /
+  lean_chain 30 / host 7 / route 5 / route_mem 5 / route_shiftx 4 /
+  route_movx 4 / route_imul 4 / route_lea 4),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
