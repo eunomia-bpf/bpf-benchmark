@@ -3290,6 +3290,56 @@ comment, resolves the generator root equivalently, and keeps that guard
 mutations, 0 failures (`gen=19 lean_chain=9 host=3 route=11`,
 `ALL AS EXPECTED`).
 
+The x86-64 XCHG routed sibling extends the route-oracle family to the
+width-keyed arm-selection body: `test_x86_xchg_route_host.c` drives the
+`X86_OP_XCHG` dispatcher arm of `X86_SIM_L_EXEC` in
+`x86_sim_local_bpf.h` -- the arm that selects its body through the
+generated `KPROG_X86_XCHG_ARM` contract (the pointer-swap arm at the
+full 64-bit code, the subword-value-swap arm at every other code) --
+and compares the whole register file with tags and the four flags
+against an independent model over 256 operand pairs x 5 width codes
+(the absent code plus the four real codes) = 1,280 routed swaps, each
+comparing the 16 cells (value, tag, and no third-cell movement) and
+the flag row (49 comparison points) plus the five selector rows,
+62,725 comparison points in `make check`. The model restates the
+whole-cell exchange at 64 bits, the low-lane-window exchange below
+(upper bytes kept at 8 and 16 bits, zero-extension at 32), and the
+scalarization of both cells' tags, and the 69-mutation harness over
+the six observed surfaces catches 65 changes against the same four
+detectors (38 at the specification/generator stage, 14 by the Lean
+chain, 13 by the route oracle) plus four genuine equivalences that
+survive. Eleven spec rows (the selector spelling, the opcode, the
+full-width code with its define, both arm names, both effects, both
+width classes, both arm defines, the pointer full-width flag, and the
+width-code width), eleven generator rows (both arms-table rows, the
+width and opcode constants, the opcode define name, the full-width
+code, the arm-selector string, the pointer-read macro name, the
+subword-write macro name, the armOf if-expression; the paired
+width-change with regeneration stays `--check`-green but is caught by
+the routed grid, and the pointer-read/subword-write macro-name drops
+are routed-grid catches too), twelve generated-C rows (the count,
+full-width, and both-arm defines, all six static asserts, and the two
+selector-macro body lines), fourteen generated-Lean rows (the count,
+width-code, opcode, and full-width defs, both tables, both arms'
+code/effect/class rows, the armOf if-expression, and the armOfCode
+zip-lookup; the constant and armOf spellings at the generator stage,
+the arm pattern rows and the zip-lookup by the Lean chain), seven
+hand-Lean rows (the arm-spec, name-table, pointer and subword body
+definitions, the over-widths table, and three theorem statements whose
+retargeted goals break the thin `exact` proofs), and ten
+simulator-header body rows (the generated-header include dropped, the
+arm selector unhooked from the generated macro, both pointer-arm reads
+drifted to neighbouring cells, both pointer-arm writes echoed back to
+their own cell, both subword reads swapped across the two operands,
+and both subword writes hardcoded to the 64-bit width); all ten
+header rows catch. The run parenthesizes a pointer-macro argument,
+repaints selector-line whitespace (the generator's arm-region check
+collapses whitespace), adds a hand-Lean comment, and resolves the
+generator root equivalently (the four genuine equivalences that
+survive by design); the 260-case generated-header host oracle holds
+the four-detector baseline gate. The tally is 69 mutations, 0
+failures (`gen=38 lean_chain=14 route=13`, `ALL AS EXPECTED`).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production

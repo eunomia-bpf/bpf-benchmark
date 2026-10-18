@@ -1123,6 +1123,22 @@ increment is committed and pushed immediately). Current state:
   restatement that survive as genuine route-equivalents), split
   gen 19 / lean_chain 9 / host 3 / route 11 with four genuine
   equivalences surviving),
+  and the x86-64 XCHG width-keyed arm-selection op-step body routes
+  through the real generated-arm dispatcher arm body now closed
+  (Step 0163, 1,280 routed cases / 62,725 comparison points; the
+  69-mutation harness adds the XCHG family across three detectors
+  with 10 sim-header arm-body mutants, all 10 route-caught -- the
+  pointer-arm `READ_REG_PTR`-to-`READ_REG` drop was reclassified a
+  genuine route-equivalent because the two macros expand identically,
+  and the two read-drift rows now read the neighbouring register
+  cell -- and the two generator macro-name drops were retargeted from
+  `--check` to the routed grid since the generated macros are
+  whitespace-collapsed in the sim-header arm region, split
+  gen 38 / lean_chain 14 / route 13 with four genuine equivalences
+  surviving: the pointer-macro argument parenthesis, the
+  selector-line whitespace repaint absorbed by the generator's
+  arm-region collapse, a hand-Lean comment, and the generator `ROOT`
+  spelling),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

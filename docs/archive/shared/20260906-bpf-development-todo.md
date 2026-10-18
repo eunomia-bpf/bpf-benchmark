@@ -13287,6 +13287,72 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   hand-Lean comment, the generator `ROOT` spelling) survive unchanged;
   the sim header is clean after the harness restore.
 
+## Step 0163 — x86 XCHG width-keyed arm-selection route harness coverage
+
+- Scope: the x86-64 XCHG arm-selection contract family (Step 0114's
+  generated two-arm selector: pointer swap at the 64-bit width code,
+  subword low-lane window exchange at every other code) gets its own
+  mutation coverage when the routed dispatcher-arm body is exercised
+  against the 260-case generated-header oracle and a 62,725-case
+  routed grid over 1,280 operand-pair x width-code swaps, closing the
+  arm-body drift space the earlier singles-header harness did not
+  enumerate.
+- Code: new `kprog/formal/build/mut_x86_xchg_arm.py` (untracked; file
+  itself is not committed per the build-dir harness convention)
+  mutating the shared spec (`x86_xchg_spec.json`), the generator
+  (`generate_x86_xchg_spec.py`), the generated C header
+  (`generated/x86_xchg.h`), the generated Lean
+  (`KProgFormal/GeneratedX86Xchg.lean`), the hand Lean
+  (`KProgFormal/X86XchgHandler.lean`), and the sim-header arm body
+  (`kprog/x86/x86_sim_local_bpf.h`), four detectors (generator
+  `--check`, Lean build chain, host 260-case generated-header oracle,
+  route 62,725-case grid) versus Step 0114's route-only singles; the
+  sim header is restored byte-for-byte after every mutant.
+- Gate: `make -C kprog/formal check` — full run green (210 `: OK`
+  rows).
+- Mutation harness `mut_x86_xchg_arm.py`: 69 mutants — 11 spec rows
+  (the selector spelling, the opcode, the full-width code with its
+  define, both arm names, both effects, both width classes, both arm
+  defines, the pointer full-width flag, and the width-code width), 11
+  generator rows (both arms-table rows, the width and opcode
+  constants, the opcode define name, the full-width code, the
+  arm-selector string, the pointer-read macro name, the subword-write
+  macro name, the armOf if-expression, plus the paired full-width
+  change with regeneration that stays `--check`-green and is caught by
+  the routed grid), 12 generated-C rows (the count, full-width, and
+  both-arm defines, all six static asserts, and the two
+  selector-macro body lines), 14 generated-Lean rows (the count,
+  width-code, opcode, and full-width defs, both tables, both arms'
+  code/effect/class rows, the armOf if-expression, and the armOfCode
+  zip-lookup), 7 hand-Lean rows (the arm-spec, name-table, pointer
+  and subword body definitions, the over-widths table, and three
+  theorem statements whose retargeted goals break the thin `exact`
+  proofs), and 10 sim-header arm-body rows (the generated-header
+  include dropped, the arm selector unhooked from the generated
+  macro, both pointer-arm reads drifted to neighbouring cells, both
+  pointer-arm writes echoed back to their own cell, both subword
+  reads swapped across the two operands, and both subword writes
+  hardcoded to the 64-bit width; all 10 catch). 65 of the 69 catch
+  and 4 are genuine equivalences: the pointer-macro argument
+  parenthesis, the selector-line whitespace repaint absorbed by the
+  generator's arm-region whitespace collapse, a hand-Lean comment,
+  and the generator `ROOT` spelling. Two generator macro-name rows
+  (the pointer-read and subword-write constants) were retargeted from
+  `--check` to the routed grid: mutating only the generator string
+  leaves artifacts stale-rendered but route-consistent once the sim
+  header's collapsed arm region still textually contains the macro
+  stem, so the row pairs the generator drop with the matching
+  sim-header body drift; and the pointer-arm
+  `READ_REG_PTR`-to-`READ_REG` read drop was reclassified a genuine
+  route-equivalence because `READ_REG_PTR` expands exactly to
+  `REG_VALUE` — the same read the plain macro makes.
+- Tally: `TOTAL 69 mutations, 0 failures (gen=38 lean_chain=14
+  route=13)`, `ALL AS EXPECTED`; the four equivalence survivors (the
+  pointer-macro argument parenthesis, the selector-line whitespace
+  repaint, a hand-Lean comment, the generator `ROOT` spelling)
+  survive unchanged; the sim header is clean after the harness
+  restore.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
