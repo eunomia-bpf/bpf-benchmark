@@ -13142,6 +13142,62 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   route_lea=4)`, `ALL AS EXPECTED`; the four equivalence survivors are
   unchanged; the sim header is clean after the harness restore.
 
+## Step 0160 — x86-64 MOV immediate/register result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_mov_route_host.c`, the MOV companion to the
+  Step 0154/0155/0156/0157/0158/0159 route oracles, closing the two move
+  op-step arms: the oracle includes `kprog/x86/x86_sim_local_bpf.h` and
+  drives the *real* inlined MOV singleton arm bodies of `X86_SIM_L_EXEC`
+  (`X86_OP_MOV_IMM` (0x01) and `X86_OP_MOV_REG` (0x02)) plus their
+  `X86_SIM_L_EXEC_MOV_IMM_AUX` / `X86_SIM_L_EXEC_MOV_REG_AUX` wrappers
+  over 4 destinations × 5 width codes (the absent code plus the four
+  real codes) × 4 immediate artifacts × 2 AUX lane words (the plain zero
+  word through the dispatcher arm and the high-byte lane word through
+  the AUX entry) for the immediate arm plus 6 source/destination pairs
+  (RAX→RBX, RCX→RDX, R8→R9, RAX→RSP, RSP→RBX, RSP→RSP) × 5 width codes
+  × 4 source values (a small scalar, a mapped-pointer base, and two
+  stack-window probes) × 2 destination values × 2 AUX lane words for the
+  register arm = 640 routed cases, each comparing 16 register values +
+  16 tags + the flag row + the stack-arena image (34 rows), so 21,760
+  rows plus the four selector rows (the two opcode codes, the arm
+  count, and the three-arm selector) = 21,764 rows in `make check`; the
+  model restates the zero-extended immediate at the FLAGS-resolved
+  width, the whole-cell source copy (value and tag) with the stack-base
+  rebind through `X86_SIM_L_STACK_PTR` over `KPROG_X86_STACK_INDEX`'s
+  32-bit window wrap stamping `X86_SIM_TAG_STACK` when the present
+  source is the stack pointer and the `X86_SIM_TAG_MAP_VALUE` tag copy
+  for a mapped pointer, the narrow partial reads and writes at the AUX
+  lane shifts (byte lanes shift only at the byte width, word reads the
+  low half, dword zero-extends, scalarizing the tag), the MOV defines no
+  flags (a nonzero mixed starting state must survive), and the
+  write-free contract (no memory byte change, so the planted stack image
+  comes back unchanged).
+- Gate: `x86 mov route host cross-check: OK (21764 cases)`;
+  `make -C kprog/formal check`: full run green (209 `: OK` rows), arm64
+  rows unchanged.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py`
+  (untracked; file itself is not committed) adds the tenth detector
+  `route_mov`: a route_oracle-shaped driver over the two MOV bodies (cc
+  with the sim header → build/mut_route_mov_oracle, run with timeout
+  600) and four MOV-body anchored-rewrite mutants (count(old)=1 each):
+  `simlocal_mov_imm_lane_drift` (the immediate lane write
+  `KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX)` -> `..._SHIFT(0U)`, dropping
+  the high-byte lane placement),
+  `simlocal_mov_imm_width_drift` (the effective width statement
+  replaced with a literal `1U` width — anchored as the two-line pair
+  with its following write line),
+  `simlocal_mov_reg_stack_tag_drift` (the stack-base tag
+  `X86_SIM_TAG_STACK` -> `X86_SIM_TAG_SCALAR` on the rebind exit), and
+  `simlocal_mov_reg_narrow_shift_drift` (the narrow source lane shift
+  `KPROG_X86_REG_LANE_AUX_SRC_SHIFT(AUX)` -> `..._SHIFT(0U)`).
+- Tally: `TOTAL 112 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5 route_mem=5 route_shiftx=4 route_movx=4 route_imul=4
+  route_lea=4 route_mov=4)`, `ALL AS EXPECTED`; the four equivalence
+  survivors are unchanged; the sim header is clean after the harness
+  restore.
+
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

@@ -3205,6 +3205,27 @@ The x86-64 multiply op-step routed sibling closes the two multiply arms: `test_x
 
 The x86-64 LEA routed sibling extends the route-oracle family to the address-forming arm: `test_x86_lea_route_host.c` drives the inline `X86_OP_LEA` (0x09) arm body of `X86_SIM_L_EXEC` and compares the register file with tags, the four flags, the heap image, and the stack-arena bytes against an independent model over 3 source roots (NONE, the stack pointer, a general mapped-pointer register) × 5 width codes (the absent code plus the four real codes) × 4 addressing modes (no index, the RODATA gate, an index at scale 1, an index at scale 8) × 4 immediate artifacts × 2 destination lanes × 2 flag seeds = 960 routed cases, each comparing 16 registers + 16 tags + the heap and stack images + the flag row (34 rows) plus the one selector row, 32,641 rows in `make check`. The model restates the sign-extended immediate plus the present-index scaled lane sum through the machine-checked `X86_SIM_L_MEM_OFFSET` chain, the four exits (the `X86_LEA_AUX_RODATA` fast path writing the RAW immediate as a scalar, the 64-bit stack-pointer arena rebind stamping `X86_SIM_TAG_STACK`, the 64-bit general pointer add carrying the source tag, and the narrower-width scalarize through the width-local partial-register write), the NONE-source null-pointer base contribution, and the write-free contract: no flag byte and no memory byte change, so the planted heap and stack images come back unchanged. The flags-preservation pin is the ninth harness detector's target: `route_lea` (cc + run of the 0159 oracle) with the four LEA-body anchored-rewrite mutants `simlocal_lea_width_drift` (the width line plus its following offset line replaced with a literal `1U` width --- a two-line anchor because the single width line recurs in fifteen exec macros), `simlocal_lea_offset_index_drift` (the offset AUX register byte `(AUX)` -> `0U`, forcing the no-index decode), `simlocal_lea_rodata_gate_drift` (the RODATA gate `X86_LEA_AUX_RODATA` -> `0U`, making every AUX word take the raw-immediate exit), and `simlocal_lea_stack_src_drift` (the stack-pointer test `(SRC) == X86_RSP` -> `(SRC) == 0U`, spilling the general-register form into the arena arm) --- totalling 108 mutations, 0 failures (`gen=41 lean_chain=30 host=7 route=5 route_mem=5 route_shiftx=4 route_movx=4 route_imul=4 route_lea=4`), plus the same four genuine equivalences that survive.
 
+The x86-64 MOV routed sibling extends the route-oracle family to the two move
+opcodes: `test_x86_mov_route_host.c` drives the inline `X86_OP_MOV_IMM` (0x01)
+and `X86_OP_MOV_REG` (0x02) singleton arm bodies of `X86_SIM_L_EXEC` (and their
+`X86_SIM_L_EXEC_MOV_IMM_AUX` / `X86_SIM_L_EXEC_MOV_REG_AUX` wrappers) and
+compares the register file with tags, the four flags, and the stack-arena image
+against an independent model over 4 destinations × 5 width codes × 4 immediate
+artifacts × 2 AUX lane words for the immediate arm plus 6 source/destination
+pairs (including `rsp` as destination, as source, and as both) × 5 width codes ×
+4 source values × 2 destination values × 2 AUX lane words for the register arm
+= 640 routed cases, each comparing 16 registers + 16 tags + the flag row + the
+stack image (34 rows) plus the four selector rows, 21,764 rows in `make check`.
+The model restates the zero-extended immediate at the FLAGS-resolved width, the
+whole-cell source copy with stack-pointer rebind through the 32-bit window, the
+map/pointer-tag provenance copy, and the narrow partial reads and writes at the
+AUX lane shifts (scalarizing the tag), and the 112-mutation harness adds four
+MOV-body mutants (the immediate lane shift, the width decode, the stack tag,
+and the narrow source shift) to the Step 0159 count, totalling 112 mutations,
+0 failures (`gen=41 lean_chain=30 host=7 route=5 route_mem=5 route_shiftx=4
+route_movx=4 route_imul=4 route_lea=4 route_mov=4`), with the same four
+genuine equivalences surviving.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
