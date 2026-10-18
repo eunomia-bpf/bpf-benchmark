@@ -13418,6 +13418,47 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   generator `ROOT` spelling) survive unchanged; the sim header is
   clean after the harness restore.
 
+## Step 0165 — AArch64 CNT/UADDLV reduction mutation coverage
+
+- Scope: the two-kind AArch64 byte-lane reduction contract family (Step
+  0117's `ARM64_OP_CNT` = 36 = `0x24` arm that popcounts each of the eight
+  source bytes into its own byte lane and `ARM64_OP_UADDLV` = 37 = `0x25`
+  arm that sums the eight byte lanes, ceiling 2040) gets sibling mutation
+  coverage against the host 20,017-case generated-header oracle, closing
+  the contract-family drift space the earlier route-only singles-header
+  view did not enumerate (there is no route detector here because the
+  family has no route test: the wrapper body
+  `ARM64_SIM_L_REDUCTION_VALUE` is reached only through the host test).
+- Code: new `kprog/formal/build/mut_arm64_reduction.py` (untracked; the
+  harness file itself is not committed per the build-dir harness
+  convention) mutating the shared spec (`arm64_reduction_spec.json`), the
+  generator (`generate_arm64_reduction_spec.py`), the generated C header
+  (`generated/arm64_reduction.h`), the generated Lean
+  (`KProgFormal/GeneratedArm64Reduction.lean`), the hand Lean
+  (`KProgFormal/Arm64Reduction.lean`), and the sim-header opcode source
+  (`kprog/arm64/arm64_sim.h`), three detectors (generator `--check`, Lean
+  build chain, host generated-header oracle) with two
+  sim-header opcode-source rows caught by `gen` (both
+  `ARM64_OP_{CNT,UADDLV}` define lines) plus the reduced lane-mask,
+  lane-shift, and case-label drifts and the switch/default runes; the
+  sim header is restored byte-for-byte after every mutant.
+- Gate: `make -C kprog/formal check` — full run green (210 `: OK`
+  rows).
+- Mutation harness `mut_arm64_reduction.py`: 61 mutants over the three
+  detectors, split gen 27 / lean_chain 13 / host 13 with four genuine
+  equivalences surviving (the generator comment, the sim-header define
+  spacing, a hand-Lean comment, and the generator `ROOT` spelling). Two
+  Lean survivor retargets: `hand_lean_range_drift` retargeted from the
+  vacuously-true `35 ≤` goal to `37 ≤ … ∧` (false for the `.cnt` code 36),
+  and `hand_lean_uadd_bound_drift` retargeted from `< 2047` (still true at
+  the 2040 ceiling) to `≤ 2039` (false at the ceiling). The two regenerated
+  generator body rows (the UADDLV lane-shift `+8` and the CNT lane mask
+  `0x7f`) regenerate so `--check` stays green and are caught by the host
+  oracle.
+- Tally: `TOTAL 61 mutations, 0 failures (gen=27 lean_chain=13 host=13)`,
+  `ALL AS EXPECTED`; the sim header is restored byte-for-byte after every
+  mutant and clean after the harness restore.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

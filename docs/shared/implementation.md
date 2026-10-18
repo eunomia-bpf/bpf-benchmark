@@ -1155,6 +1155,16 @@ increment is committed and pushed immediately). Current state:
   surviving: a register-read argument parenthesis, a default-arm
   whitespace repaint absorbed by the generator's arm-region collapse, a
   hand-Lean comment, and the generator `ROOT` spelling),
+  and the AArch64 `CNT`/`UADDLV` byte-lane reduction value family
+  routes through the real generated-reduction macro now closed
+  (Step 0165, 20,017-case generated-header oracle; the 61-mutation
+  harness adds the two reduction opcodes across three detectors with
+  2 sim-header opcode-source mutants, both gen-caught --- the two
+  `ARM64_OP_{CNT,UADDLV}` define-line drifts plus the reduced
+  lane-mask, lane-shift, and case-label drifts and the switch/default
+  runes --- and four genuine equivalences surviving: the generator
+  comment, the sim-header define spacing, a hand-Lean comment, and
+  the generator `ROOT` spelling),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

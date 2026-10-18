@@ -3387,6 +3387,39 @@ equivalences that survive by design); the 260-case generated-header host
 oracle holds the four-detector baseline gate. The tally is 90 mutations,
 0 failures (`gen=41 lean_chain=27 route=18`, `ALL AS EXPECTED`).
 
+The AArch64 `CNT`/`UADDLV` byte-lane reduction contract family gets sibling
+mutation coverage. The family binds the two reduction opcodes whose handlers
+load the generated `KPROG_ARM64_REDUCTION_VALUE` statement expression: the
+`Cnt` arm (`ARM64_OP_CNT` = 36 = `0x24`) popcounts each of the eight source
+bytes into its own byte lane, and the `UADDLV` arm (`ARM64_OP_UADDLV` = 37 =
+`0x25`) sums the eight byte lanes into the low result byte (the arithmetic
+cap is 2040, the 8-byte all-set lane ceiling). The suspect family is the six
+files that carry the reduction contract: the shared spec
+(`arm64_reduction_spec.json`), the generator
+(`generate_arm64_reduction_spec.py`), the generated C
+(`generated/arm64_reduction.h`), the generated Lean
+(`KProgFormal/GeneratedArm64Reduction.lean`), the hand refinement
+(`KProgFormal/Arm64Reduction.lean`), and the sim-header opcode source the
+generator re-reads (`kprog/arm64/arm64_sim.h`). The 61-mutation harness
+runs three detectors - generator `--check`, the Lean chain
+(`lake build` + `lean`), and the host 20017-case generated-header oracle -
+with no route detector because the family has no route test: the wrapper
+body `ARM64_SIM_L_REDUCTION_VALUE` is reached only through the host test.
+The 61 rows catch 57 changes (`gen=27 lean_chain=13 host=13`) and four
+genuine equivalences survive by design: the generator comment, the
+sim-header define spacing, a hand-Lean comment, and the generator `ROOT`
+spelling. Two lookahead rows mutate the `ARM64_OP_{CNT,UADDLV}` sim-header
+define lines themselves and are caught by `gen` (the generator re-reads the
+sim header and fails with an opcode-drift message); the rest cover the
+spec rows (names, both opcode codes, the operation tag, the order), the
+generator rows (the injected body fragments, both per-opcode tables, the
+torsor codes/mnemonics), the generated-C rows (both opcode static asserts,
+the coverage asserts, the two case labels, the lane masks/shifts, the
+switch/default runes), the generated-Lean rows (codes, mnemonics, both arm
+bodies, the popcount ladder), and the hand-Lean rows (the spec statement,
+the byte-popcount cells, both arm bodies, the refinement goal, the range
+and bound facts, and the four example oracle rows). The tally is 61 mutations, 0 failures (`gen=27 lean_chain=13 host=13`, `ALL AS EXPECTED`).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
