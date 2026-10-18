@@ -1139,7 +1139,23 @@ increment is committed and pushed immediately). Current state:
   selector-line whitespace repaint absorbed by the generator's
   arm-region collapse, a hand-Lean comment, and the generator `ROOT`
   spelling),
-  the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
+  the vector/`.D0`/`.Q0` paths,
+  and the x86-64 `DIV` resolved-width case-dispatch arm family routes
+  through the real generated-arm dispatcher body now closed (Step 0164,
+  1,470 routed cases / 48,515 comparison points; the 90-mutation harness
+  adds the four quotient/remainder arms across three detectors with 12
+  sim-header arm-body mutants, all 12 route-caught --- the three operand
+  reads drifted to neighbouring cells, the byte pack-order/target/width
+  drifts, the word pair write-target, the dword window/truncation/width
+  drifts, the qword gate flip and tautology gate, and the overflow-default
+  drifts --- and one generator constant row retargeted from `--check` to
+  the Lean chain because a renamed effect string is invisible to the
+  routed grid until it breaks `x86_div_effects`, split
+  gen 41 / lean_chain 27 / route 18 with four genuine equivalences
+  surviving: a register-read argument parenthesis, a default-arm
+  whitespace repaint absorbed by the generator's arm-region collapse, a
+  hand-Lean comment, and the generator `ROOT` spelling),
+ `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
   condition-to-next-PC relation (flag-based `arm64_conditional_branch_refines`

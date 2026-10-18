@@ -3337,8 +3337,55 @@ repaints selector-line whitespace (the generator's arm-region check
 collapses whitespace), adds a hand-Lean comment, and resolves the
 generator root equivalently (the four genuine equivalences that
 survive by design); the 260-case generated-header host oracle holds
-the four-detector baseline gate. The tally is 69 mutations, 0
-failures (`gen=38 lean_chain=14 route=13`, `ALL AS EXPECTED`).
+the four-detector baseline gate. The x86-64 `DIV` case-dispatch sibling extends the routed dispatcher-arm
+body coverage to the four quotient/remainder arms Step 0115 generated (the
+byte case that packs the quotient and remainder into one 16-bit partial
+write, the word and dword cases that divide the high:low pair and write both
+halves at the access width, and the qword default that alone gates the split
+on the high-half dividend being zero). The route oracle drives the real
+`X86_SIM_L_EXEC` body against an independent quotient/remainder model over
+2 `x` 5 width codes (the absent code plus the four real codes) `x` 7
+dividends `x` 3 high halves `x` 7 divisors = 1,470 routed divides, each
+comparing the 16 cells (value, tag, and no third-cell movement) and the
+flag row (49 comparison points) plus the five selector rows, 48,515
+comparison points in `make check`. The 90-mutation harness over the six
+observed surfaces catches 86 changes against the same four detectors (41 at
+the specification/generator stage, 27 by the Lean chain, 18 by the route
+oracle) plus four genuine equivalences that survive. Thirteen spec rows
+(the selector spelling, the opcode, the opcode define name, the width-code
+width, both arm names, the byte arm define, the qword high half-gate flag,
+the byte write count, the byte high-half name, both effects with the byte
+one named twice, and the full width class), thirteen generator rows
+(every `_ARMS` tuple mutated in place --- the byte write count, the word
+write count, the dword high-half register, the qword width code --- plus
+the width and opcode constants, the opcode define name, the arm-selector
+string, and the width-write/high-read macro names; the latter two pair
+with matching sim-header drift and are caught by the routed grid because
+the generated macros live in whitespace-collapsed arm regions), fourteen
+generated-C rows (the count and both boundary arm defines, all seven
+static asserts, and the four selector-macro comparison/branch lines), and
+sixteen generated-Lean rows (the count, opcode, and width-code defs, both
+tables, the full width-code/write-count/high-half/gate ladders, the named
+effect and class rows, the armOf if-expression ladder, and the armOfCode
+zip-lookup) are caught at the generator stage or by the Lean chain; the
+seventeen hand-Lean rows mutate the arm-spec and name-table definitions,
+the over-widths table, the bytecode-quirk theorems, and eleven statement
+bodies of thin-proof theorems (roundtrip, opcode, count, ladder-total,
+dispatch, nondefault-gated, width-codes, gated-ladder, byte-upper,
+byte-spec, wide-def, wide-both, write-count-effect, beyond-none); all
+seventeen catch because mutating a goal breaks the exact-refine proof even
+when the name is unused. The twelve simulator-header body rows cover the
+three operand reads drifted to neighbouring cells, the byte pack-order
+swap, write-target, and write-width drifts, the word pair write-target
+drift, the dword dividend window and divisor truncation drifts and the
+dword write-width drift, the qword gate flip and tautology-gate drop, and
+the qword quotient/remainder overflow-default drifts; all twelve catch.
+The run parenthesizes a register-file argument, repaints default-arm
+whitespace the generator's arm-region check collapses, adds a hand-Lean
+comment, and resolves the generator root equivalently (the four genuine
+equivalences that survive by design); the 260-case generated-header host
+oracle holds the four-detector baseline gate. The tally is 90 mutations,
+0 failures (`gen=41 lean_chain=27 route=18`, `ALL AS EXPECTED`).
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
