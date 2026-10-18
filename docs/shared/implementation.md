@@ -1114,6 +1114,15 @@ increment is committed and pushed immediately). Current state:
   mutants to the Step 0160 count, split gen 41 / lean_chain 30 / host 7 /
   route 5 / route_mem 5 / route_shiftx 4 / route_movx 4 / route_imul 4 /
   route_lea 4 / route_mov 4 / route_bswap 4),
+  and the x86-64 PUSH/POP stack-transfer op-step body routes through the
+  real inline PUSH/POP stack-transfer dispatcher arm bodies now closed
+  (Step 0162, 900 routed cases / 31,504 comparison points; the
+  46-mutation harness adds the PUSHPOP family across all four detectors
+  with 13 sim-header step-macro mutants (11 route-caught plus the
+  Step 0120 hand stack-write-guard reintroduction and the unchanged-step
+  restatement that survive as genuine route-equivalents), split
+  gen 19 / lean_chain 9 / host 3 / route 11 with four genuine
+  equivalences surviving),
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

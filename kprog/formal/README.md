@@ -3249,6 +3249,47 @@ the full cell) to the Step 0160 count, totalling 116 mutations, 0 failures
 route_imul=4 route_lea=4 route_mov=4 route_bswap=4`), with the same four
 genuine equivalences surviving.
 
+The x86-64 PUSH/POP routed sibling extends the route-oracle family to the
+stack-transfer arm: `test_x86_pushpop_route_host.c` drives the shared
+`X86_SIM_L_EXEC_PUSH_POP_STEP` body of `x86_sim_local_bpf.h` -- the
+composition both one-line opcode wrappers (`X86_SIM_L_EXEC_PUSH`,
+`X86_SIM_L_EXEC_POP`) instantiate and the two `X86_SIM_L_EXEC` dispatcher
+arms route -- and compares the whole register file with tags, the four
+flags, and the stack-arena image against an independent model over both
+opcodes × both drive modes (the direct wrapper call and the dispatcher arm)
+× 5 FLAGS codes (the absent code plus the four real codes) × 5 stack
+pointers × 3 sources × 3 destinations = 900 routed transfer steps, each
+comparing the stack pointer, 16 registers, 16 tags, the whole stack frame,
+and the flag row (35 comparison points) plus the four selector rows,
+31,504 comparison points in `make check`. The model restates the
+pre-decrement store of the whole source register at the hardcoded 64-bit
+width, the post-increment load-and-writeback of the decoded partial width,
+and the flag-free contract (neither body writes a flag), and the 46-mutation
+harness over the six observed surfaces catches 42 changes against the same
+four detectors (19 at the specification/generator stage, 9 by the Lean
+chain, 3 by the host oracle, 11 by the route oracle) plus four genuine
+equivalences that survive. Five spec rows (both opcode codes, the stack
+step, PUSH as postIncrement, POP as hardcoded64), six generator rows
+(the op-code table, both direction/width tables, the phase table, the
+stack step, the collapse check dropped), eleven generated-C rows (both
+opcodes' static asserts, the four table defines, the absent width, the
+step literal; the direction flux absorbed by the selector comparison),
+five generated-Lean rows (both tables, the b16 row, the absent resolve,
+the stack step), five hand-Lean rows (both selector definitions, the step
+amount, the fact rows) and thirteen simulator-header body rows (the
+direction test dropped, the width-source test re-anchored, the
+absent-FLAGS test dropped and inverted, the step literal doubled, both
+pointer steps dropped to identity writes, the PUSH source read from
+`DST`, the POP writeback widened to a whole-cell store, the PUSH store
+narrowed to 8 bits, and the POP read shifted one byte); 11 of the 13
+header rows catch, and the reintroduced hand stack-write guard (Step 0120
+proved the two guards equal) plus the unchanged-step restatement are
+genuine route-equivalences. The run repaints whitespace, adds a hand-Lean
+comment, resolves the generator root equivalently, and keeps that guard
+(the four genuine equivalences that survive by design). The tally is 46
+mutations, 0 failures (`gen=19 lean_chain=9 host=3 route=11`,
+`ALL AS EXPECTED`).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production

@@ -13246,6 +13246,47 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   the harness restore.
 
 
+## Step 0162 — x86 PUSH/POP stack-transfer route harness coverage
+
+- Scope: the x86-64 PUSH/POP shared stack-step contract family tipped from
+  two restated bodies into one routed `X86_SIM_L_EXEC_PUSH_POP_STEP`
+  composition (Step 0082) now gets its own mutation coverage when the
+  routed stack-transfer step body is exercised against the 463-case host
+  oracle and a 31,504-case routed grid, closing the sim-header step-macro
+  drift space the earlier pushpop harness (17 mutants, route-only) did not
+  enumerate.
+- Code: new `kprog/formal/build/mut_x86_pushpop_step.py` (untracked;
+  file itself is not committed per the build-dir harness convention)
+  mutating the shared spec (`x86_pushpop_spec.json`), the generator
+  (`generate_x86_pushpop_spec.py`), the generated C header
+  (`generated/x86_pushpop.h`), the generated Lean
+  (`KProgFormal/GeneratedX86PushPop.lean`), the hand Lean
+  (`KProgFormal/X86PushPopHandler.lean`), and the sim-header step macro
+  (`kprog/x86/x86_sim_local_bpf.h`), four detectors (generator
+  `--check`, Lean build chain, host 463-case oracle, route 31,504-case
+  grid) versus Step 0082's `mut_x86_pushpop_route.py` which drove the
+  sim-header distortions through the route oracle alone; the sim header
+  is restored byte-for-byte after every mutant.
+- Gate: `make -C kprog/formal check` — full run green (210 `: OK` rows).
+- Mutation harness `mut_x86_pushpop_step.py`: 46 mutants — 5 spec rows
+  (both opcodes' codes, the stack step, PUSH as postIncrement, POP as
+  hardcoded64), 6 generator rows, 11 generated-C rows, 5 generated-Lean
+  rows, 5 hand-Lean rows, and 13 sim-header step-macro rows (direction
+  source dropped, width source re-anchored to FLAGS_OR_64, absent-FLAGS
+  default flipped to FLAGS_RESOLVED, stack step doubled, both pointer
+  steps dropped, the POP writeback widened, the PUSH source read from
+  `DST`, the PUSH store narrowed, the POP read shifted, and the Step
+  0120 hand stack-write guard reintroduced; 42 of the 46 catch and 4
+  are genuine equivalences: the reintroduced hand stack-write guard
+  (Step 0120 proved the two guards equal), the unchanged-step
+  restatement, a hand-Lean comment, and the generator `ROOT` resolve
+  spelling.
+- Tally: `TOTAL 46 mutations, 0 failures (gen=19 lean_chain=9 host=3
+  route=11)`, `ALL AS EXPECTED`; the four equivalence survivors (the
+  reintroduced hand stack-write guard, the unchanged-step restatement, a
+  hand-Lean comment, the generator `ROOT` spelling) survive unchanged;
+  the sim header is clean after the harness restore.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
