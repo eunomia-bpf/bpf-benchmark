@@ -1165,6 +1165,21 @@ increment is committed and pushed immediately). Current state:
   runes --- and four genuine equivalences surviving: the generator
   comment, the sim-header define spacing, a hand-Lean comment, and
   the generator `ROOT` spelling),
+  and the AArch64 `MVN`/`NEG` unary value family got the same
+  mutation build-out against the host 40,081-case generated-header oracle
+  (Step 0166; three detectors, no route detector because the family has no
+  route test --- the wrapper body `ARM64_SIM_L_UNARY_VALUE` is reached only
+  through the host test; the 59-mutation harness mutates the two unary
+  opcodes across the spec, generator, generated C and Lean, hand
+  refinement, and the `ARM64_OP_{MVN,NEG}` sim-header define lines with 2
+  sim-header opcode-source mutants both gen-caught, plus the arm-body,
+  case-label, handled-disjunct, width-mask-call, switch/default, and seed
+  drifts --- and four genuine equivalences surviving: the generator
+  comment, a hand-Lean comment, the generator `ROOT` spelling, and the
+  spec-whitespace repaint; the result-seed row retargeted from the host
+  oracle to the generator comparator because the seed is absorbed by the
+  unconditional arm assign, split
+  gen 27 / lean_chain 15 / host 13),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

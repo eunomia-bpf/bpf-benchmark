@@ -13459,6 +13459,49 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `ALL AS EXPECTED`; the sim header is restored byte-for-byte after every
   mutant and clean after the harness restore.
 
+## Step 0166 — AArch64 MVN/NEG unary mutation coverage
+
+- Scope: the two-kind AArch64 unary value contract family (the `ARM64_OP_MVN`
+  = 15 = `0x0f` arm that writes the destination-width-narrowed bitwise
+  complement and the `ARM64_OP_NEG` = 16 = `0x10` arm that writes the
+  destination-width-narrowed two's-complement negation, both per the
+  already-proven Step 0114 value theorem) gets sibling mutation coverage
+  against the host 40,081-case generated-header oracle, closing the
+  contract-family drift space the earlier route-only singles-header view
+  did not enumerate (there is no route detector here because the family has
+  no route test: the wrapper body `ARM64_SIM_L_UNARY_VALUE` is reached only
+  through the host test).
+- Code: new `kprog/formal/build/mut_arm64_unary.py` (untracked; the harness
+  file itself is not committed per the build-dir harness convention)
+  mutating the shared spec (`arm64_unary_spec.json`), the generator
+  (`generate_arm64_unary_spec.py`), the generated C header
+  (`generated/arm64_unary.h`), the generated Lean
+  (`KProgFormal/GeneratedArm64Unary.lean`), the hand Lean
+  (`KProgFormal/Arm64Unary.lean`), and the sim-header opcode source
+  (`kprog/arm64/arm64_sim.h`), three detectors (generator `--check`, Lean
+  build chain, host generated-header oracle) with two sim-header
+  opcode-source rows caught by `gen` (both `ARM64_OP_{MVN,NEG}` define
+  lines) plus the arm-body, case-label, handled-disjunct, width-mask-call,
+  switch/default, and seed drifts; the sim header is restored byte-for-byte
+  after every mutant.
+- Gate: `make -C kprog/formal check` — full run green (210 `: OK` rows).
+- Mutation harness `mut_arm64_unary.py`: 59 mutants over the three
+  detectors, split gen 27 / lean_chain 15 / host 13 with four genuine
+  equivalences surviving (the generator comment, a hand-Lean comment, the
+  generator `ROOT` spelling, and the spec-whitespace repaint). One
+  detector retarget: `generated_c_result_seed_drift` moved from the host
+  oracle to the generator comparator, because seeding the statement
+  expression's result slot is absorbed by every arm's unconditional assign
+  (both real arms overwrite it before use, and the unsupported arm aborts
+  through `UNSUPPORTED`), so the byte-compared artifact catches the repaint
+  the compiled mutant cannot. Four regenerated generator body rows (the
+  `0ULL -` → `0ULL +` NEG expression, the `~value` → `value` MVN body, and
+  both Lean `narrow` arm bodies) regenerate so `--check` stays green and
+  are caught by the host oracle and the Lean chain respectively.
+- Tally: `TOTAL 59 mutations, 0 failures (gen=27 lean_chain=15 host=13)`,
+  `ALL AS EXPECTED`; the sim header is restored byte-for-byte after every
+  mutant and clean after the harness restore.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

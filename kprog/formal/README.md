@@ -3420,6 +3420,44 @@ bodies, the popcount ladder), and the hand-Lean rows (the spec statement,
 the byte-popcount cells, both arm bodies, the refinement goal, the range
 and bound facts, and the four example oracle rows). The tally is 61 mutations, 0 failures (`gen=27 lean_chain=13 host=13`, `ALL AS EXPECTED`).
 
+The AArch64 `MVN`/`NEG` unary value contract family gets sibling mutation
+coverage. The family binds the two unary opcodes whose handlers load the
+generated `KPROG_ARM64_UNARY_VALUE` statement expression: the `MVN` arm
+(`ARM64_OP_MVN` = 15 = `0x0f`) writes the destination-width-narrowed bitwise
+complement of the source, and the `NEG` arm (`ARM64_OP_NEG` = 16 = `0x10`)
+writes the destination-width-narrowed two's-complement negation. The suspect
+family is the six files that carry the unary contract: the shared spec
+(`arm64_unary_spec.json`), the generator
+(`generate_arm64_unary_spec.py`), the generated C
+(`generated/arm64_unary.h`), the generated Lean
+(`KProgFormal/GeneratedArm64Unary.lean`), the hand refinement
+(`KProgFormal/Arm64Unary.lean`), and the sim-header opcode source the
+generator re-reads (`kprog/arm64/arm64_sim.h`). The 59-mutation harness
+runs three detectors - generator `--check`, the Lean chain (`lake build` +
+`lean`), and the host 40081-case generated-header oracle - with no route
+detector because the family has no route test: the wrapper body
+`ARM64_SIM_L_UNARY_VALUE` is reached only through the host test. The 59 rows
+catch 55 changes (`gen=27 lean_chain=15 host=13`) and four genuine
+equivalences survive by design: the generator comment, a hand-Lean comment,
+the generator `ROOT` spelling, and the spec-whitespace repaint. One
+retarget: `generated_c_result_seed_drift` moved from the host oracle to the
+generator comparator, because seeding the statement expression's result slot
+is absorbed by every arm's unconditional assign (real arms and the
+unsupported arm alike) - a no-op the host test cannot observe - while the
+byte-compared artifact catches the repaint. Two lookahead rows mutate the
+`ARM64_OP_{MVN,NEG}` sim-header define lines themselves and are caught by
+`gen` (the generator re-reads the sim header and fails with an opcode-drift
+message); the rest cover the spec rows (names, both opcode codes, the
+operation tag, the order), the generator rows (the injected body fragments
+and both Lean arm bodies), the generated-C rows (both opcode static asserts,
+the coverage assert, the handled-arm disjuncts, both case labels, both arm
+bodies, the width-mask call, the switch/default runes, and both seed lines),
+the generated-Lean rows (the code-mnemonic pair, both arm bodies, and the
+flag row), and the hand-Lean rows (the independent spec arms, the refinement
+goal, the returned-constant rows, the self-inverse and cancellation facts,
+the word bound, and the three example oracle rows). The tally is 59
+mutations, 0 failures (`gen=27 lean_chain=15 host=13`, `ALL AS EXPECTED`).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
