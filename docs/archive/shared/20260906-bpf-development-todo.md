@@ -13198,6 +13198,54 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   restore.
 
 
+## Step 0161 — x86-64 BSWAP result route oracle
+
+- Code: superproject `master`: adds
+  `kprog/formal/test_x86_bswap_route_host.c`, the BSWAP companion to the
+  Step 0154/0155/0156/0157/0158/0159/0160 route oracles, closing the
+  byte-reverse op-step arm: the oracle includes
+  `kprog/x86/x86_sim_local_bpf.h` and drives the *real* inlined BSWAP
+  singleton arm body of `X86_SIM_L_EXEC` (`X86_OP_BSWAP` (0x17), the one
+  dispatcher arm whose value computation stays inline in the chain) over
+  4 destinations (RAX, R15, RSP, RDI) × 5 width codes (the absent code
+  plus the four real codes) × 5 destination values (a byte-lane-swapping
+  showcase, the mapped-pointer base a body must not dereference, two
+  byte probes, and the pattern scalar) × 2 AUX words (the plain zero
+  word a real dispatcher route hands the singleton and the high-byte
+  lane word the arm must ignore) = 200 routed cases, each comparing 16
+  register values + 16 tags + the flag row + the stack-arena image
+  (34 rows), so 6,800 rows plus the two selector rows (the opcode code
+  and the byte-gate non-member pin) = 6,802 rows in `make check`; the
+  model restates the whole-cell 64-bit read, the byte reversal at the
+  FLAGS-resolved width with the bytes above it cleared
+  (`model_bswap` over raw shifts, never the generated helper), the
+  width-local writeback byte/word/dword/qword, and the tag every
+  writeback stamps `X86_SIM_TAG_SCALAR`, with the MOV flags-free and
+  memory-free contract carried over (no flag byte, the planted stack
+  image comes back unchanged).
+- Gate: `x86 bswap route host cross-check: OK (6802 cases)`;
+  `make -C kprog/formal check`: full run green (210 `: OK` rows), arm64
+  rows unchanged.
+- Mutation harness `kprog/formal/build/mut_x86_alu_result.py`
+  (untracked; file itself is not committed) adds the eleventh detector
+  `route_bswap`: a route_oracle-shaped driver over the BSWAP body (cc
+  with the sim header → build/mut_route_bswap_oracle, run with timeout
+  600) and four BSWAP-body anchored-rewrite mutants (count(old)=1 each):
+  `simlocal_bswap_width_call_drift` (the width at the call site forced
+  to the byte code `1U`),
+  `simlocal_bswap_read_src_drift` (the whole-cell read taken from
+  `SRC` instead of `DST`),
+  `simlocal_bswap_value_identity_drift` (the `x86_bswap` call dropped
+  to the identity read), and
+  `simlocal_bswap_wb_width_drift` (the writeback width forced to
+  `X86_WIDTH_64`).
+- Tally: `TOTAL 116 mutations, 0 failures (gen=41 lean_chain=30 host=7
+  route=5 route_mem=5 route_shiftx=4 route_movx=4 route_imul=4
+  route_lea=4 route_mov=4 route_bswap=4)`, `ALL AS EXPECTED`; the four
+  equivalence survivors are unchanged; the sim header is clean after
+  the harness restore.
+
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

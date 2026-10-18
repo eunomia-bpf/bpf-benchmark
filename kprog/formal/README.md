@@ -3226,6 +3226,29 @@ and the narrow source shift) to the Step 0159 count, totalling 112 mutations,
 route_movx=4 route_imul=4 route_lea=4 route_mov=4`), with the same four
 genuine equivalences surviving.
 
+The x86-64 BSWAP routed sibling extends the route-oracle family to the
+byte-reversing arm: `test_x86_bswap_route_host.c` drives the inline
+`X86_OP_BSWAP` (0x17) arm body of `X86_SIM_L_EXEC` -- the one dispatcher arm
+whose value computation stays inline in the chain -- and compares the register
+file with tags, the four flags, and the stack-arena image against an
+independent model over 4 destinations × 5 width codes (the absent code plus
+the four real codes) × 5 destination values (a byte-lane-swapping showcase,
+the mapped-pointer base a body must not dereference, two byte probes, and the
+pattern scalar) × 2 AUX words (the plain zero word a real dispatcher route
+hands the singleton and the high-byte lane word the arm must ignore) = 200
+routed cases, each comparing 16 registers + 16 tags + the flag row + the stack
+image (34 rows) plus the two selector rows, 6,802 rows in `make check`. The
+model restates the whole-cell 64-bit read, the byte reversal at the
+FLAGS-resolved width with the bytes above it cleared, and the width-local
+writeback (byte/word/dword/qword) scalarizing the narrowed tag, and the
+116-mutation harness adds four BSWAP-body mutants (the bswap width forced to
+the byte code at the call site, the whole-cell read taken from the wrong
+register, the reversal dropped to the identity, the writeback width forced to
+the full cell) to the Step 0160 count, totalling 116 mutations, 0 failures
+(`gen=41 lean_chain=30 host=7 route=5 route_mem=5 route_shiftx=4 route_movx=4
+route_imul=4 route_lea=4 route_mov=4 route_bswap=4`), with the same four
+genuine equivalences surviving.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
