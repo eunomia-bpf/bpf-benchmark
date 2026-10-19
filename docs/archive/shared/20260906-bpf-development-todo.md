@@ -13502,6 +13502,47 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `ALL AS EXPECTED`; the sim header is restored byte-for-byte after every
   mutant and clean after the harness restore.
 
+## Step 0167 — AArch64 EXTR/REV/REV16/SXT extraction-family mutation coverage
+
+- Scope: the six-kind AArch64 byte-rotation/reversal/sign-extension value
+  contract family (`ARM64_OP_EXTR` = 17 = `0x11`, `ARM64_OP_REV` = 19 =
+  `0x13`, `ARM64_OP_REV16` = 20 = `0x14`, `ARM64_OP_SXTH` = 21 = `0x15`,
+  `ARM64_OP_SXTW` = 47 = `0x2f`, `ARM64_OP_SXTB` = 60 = `0x3c`, all per the
+  already-proven Step 0114 value theorem plus the REV/REV16/EXTR refinements)
+  gets sibling mutation coverage against the host 120,145-case
+  generated-header oracle (there is no route detector: the wrapper body
+  `ARM64_SIM_L_EXTREV_VALUE` is reached only through the host test).
+- Code: new `kprog/formal/build/mut_arm64_extrev.py` (untracked) mutating the
+  shared spec (`arm64_extrev_spec.json`), the generator
+  (`generate_arm64_extrev_spec.py`), the flags spec
+  (`arm64_flags_spec.json`), the generated C header
+  (`generated/arm64_extrev.h`), the generated Lean
+  (`KProgFormal/GeneratedArm64Extrev.lean`), the hand Lean
+  (`KProgFormal/Arm64Extrev.lean`), and the sim-header opcode source
+  (`kprog/arm64/arm64_sim.h`), three detectors, with one rejected imported
+  flag family (`rev` declared in the flags spec) and 6 sim-header
+  opcode-source rows both caught by `gen`; the sim header is restored
+  byte-for-byte after every mutant.
+- Gate: `make -C kprog/formal check` — full run green (210 `: OK` rows).
+- Tally: `TOTAL 132 mutations, 0 failures (gen=62 lean_chain=30 host=32)`,
+  `ALL AS EXPECTED`. Four genuine equivalences survive by design (the
+  generator comment, a hand-Lean comment, the generator `ROOT` spelling,
+  and the spec-whitespace repaint) plus four detector-invisible rows kept
+  as survivors: the generated-C `REV32` result seed (absorbed by every
+  arm's unconditional assign, mirroring Step 0166 but here invisible to
+  every detector, so the row stays a survivor), both generated-Lean
+  mnemonic rows (no chain consumer reads `mnemonic` in this family), and
+  one hand-Lean `by_cases` row (the mutated `0x40000000` mask still proves
+  the unchanged theorem statement, since the two spec values are
+  unconditionally equal for every input). Shakedown retargets: the
+  generated-Lean `.sxth` value arm has no Lean consumer (the family
+  refinement opens the `signExtend` function directly), so that row became
+  a compile-error mutant; def-line comment repaints are not Lean-visible,
+  so the five hand spec-def rows and two regeneration rows were retargeted
+  to real body mutations (dropped mask bit, byte rotation, sign-mask bit);
+  generator body anchors needed the generator's real body indentation
+  (16-space list rows, 3/4/5-tab C strings) throughout.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

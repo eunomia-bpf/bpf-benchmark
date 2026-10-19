@@ -1180,6 +1180,24 @@ increment is committed and pushed immediately). Current state:
   oracle to the generator comparator because the seed is absorbed by the
   unconditional arm assign, split
   gen 27 / lean_chain 15 / host 13),
+  and the AArch64 `EXTR`/`REV`/`REV16`/`SXTH`/`SXTW`/`SXTB` value family
+  got the six-opcode mutation build-out against the host 120,145-case
+  generated-header oracle (Step 0167; three detectors, no route detector
+  because the family has no route test --- the wrapper body
+  `ARM64_SIM_L_EXTREV_VALUE` is reached only through the host test; the
+  132-mutation harness mutates the six opcodes across the spec, generator,
+  flags spec, generated C and Lean, hand refinement, and the
+  `ARM64_OP_*` sim-header define lines with 2 flag-family rejections and
+  6 sim-header opcode-source mutants both gen-caught, plus the arm-body,
+  case-label, handled-disjunct, width-mask-call, switch/default, and
+  sign-extension drifts --- split
+  gen 62 / lean_chain 30 / host 32 with four genuine equivalences
+  surviving (the generator comment, a hand-Lean comment, the generator
+  `ROOT` spelling, and the spec-whitespace repaint) plus four
+  detector-invisible rows kept as survivors: the generated-C `REV32`
+  result seed absorbed by every arm's unconditional assign, both
+  generated-Lean mnemonic rows with no chain consumer, and one hand-Lean
+  case-split row whose mutated mask still proves the unchanged theorem),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

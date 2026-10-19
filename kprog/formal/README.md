@@ -3458,6 +3458,31 @@ goal, the returned-constant rows, the self-inverse and cancellation facts,
 the word bound, and the three example oracle rows). The tally is 59
 mutations, 0 failures (`gen=27 lean_chain=15 host=13`, `ALL AS EXPECTED`).
 
+The AArch64 extract/reverse/extend value contract family (`ARM64_OP_EXTR`
+= 17 = `0x11`, `ARM64_OP_REV` = 19 = `0x13`, `ARM64_OP_REV16` = 20 = `0x14`,
+`ARM64_OP_SXTH` = 21 = `0x15`, `ARM64_OP_SXTW` = 47 = `0x2f`, and
+`ARM64_OP_SXTB` = 60 = `0x3c`) gets the same mutation build-out in
+`build/mut_arm64_extrev.py` (untracked): 132 mutants across the shared spec,
+the generator, the flags spec (one rejected REV flag-family import), the
+generated C and Lean tables, the hand refinement, and the sim-header
+opcode source, with the sim header restored byte-for-byte after every
+mutant. The three detectors are unchanged (generator `--check`, Lean
+chain, host 120145-case oracle). 124 mutants catch (`gen=62
+lean_chain=30 host=32`) and 8 survive: the four genuine equivalences by
+design (the generator comment, a hand-Lean comment, the generator `ROOT`
+spelling, and the spec-whitespace repaint) plus four detector-invisible
+rows kept as survivors: the generated-C `REV32` result seed, absorbed by
+every arm's unconditional assign; both generated-Lean mnemonic rows,
+because no chain consumer reads `mnemonic` in this family; and one
+hand-Lean case-split row, because the mutated `by_cases` mask still proves
+the unchanged theorem statement. Lean blind spots found during shakedown:
+the `value` match arms for the `SXT` ops have no Lean consumer (the family
+refinement opens the `signExtend` function directly), so the `.sxth` arm
+row was retargeted to a compile-error mutant; and def-line comment
+repaints are not Lean-visible, so the five hand spec-def rows and the
+two generator-comment regeneration rows were retargeted to real body
+mutations (dropped mask bit, byte rotation, sign-mask bit).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
