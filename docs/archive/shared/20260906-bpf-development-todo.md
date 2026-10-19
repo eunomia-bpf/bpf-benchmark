@@ -14161,6 +14161,79 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Residue: all five watched files byte-identical after the run
   (`md5sum` verified); kept `make check` count at 210 `: OK`.
 
+## Step 0177 — AArch64 packed-AUX layout mutation coverage
+
+- Scope: the AArch64 packed-AUX layout contract --- the 32-bit operand word
+  the simulator's ALU, shift, MOVK, memory, bitfield and CCMP handlers share:
+  four byte lanes packed little-endian through one machine-checked packer
+  (`KPROG_ARM64_AUX` plus the four `KPROG_ARM64_AUX_B0..B3` decoders and the
+  `KPROG_ARM64_AUX_REG_NONE` sentinel, `arm64_aux_spec.json` /
+  `generate_arm64_aux_spec.py` / `generated/arm64_aux.h` /
+  `KProgFormal/GeneratedArm64Aux.lean` / `KProgFormal/Arm64Aux.lean`), with
+  the six simulator packer aliases (`ARM64_AUX`, `_ALU`, `_SHIFT`, `_MOVK`,
+  `_MEM`, `_BITFIELD`, `_CCMP` in `arm64_sim.h`) and seven simulator decoder
+  aliases (`ARM64_SIM_L_MOD`..`_CCMP_NZCV` in `arm64_sim_local_bpf.h`) thin
+  aliases of that one layout, so a repaint of any alias sheet must surface
+  through the real macros the oracles compile. The hand Lean refinement pins
+  the four decoders against the independent `(aux >>> 8k) &&& 0xff`
+  restatement, the lane non-interference conjunction, the `regNone`
+  round-trip, and the native-decide examples.
+- Harness: `build/mut_arm64_aux.py` (untracked, 92 single-anchor mutation
+  rows) over nine contract files --- the layout spec, its generator, the
+  generated C header, the generated Lean module, the hand Lean refinement,
+  both alias sheets, and both host oracles (`test_arm64_aux_host.c`
+  586,829-case packer-alias oracle and `test_arm64_aux_route_host.c`
+  1,115,374-case sim-local decoder-alias oracle). Five detectors, one regen
+  stage: `gen` (`generate_arm64_aux_spec.py --check`), `movk_gen`
+  (`generate_arm64_movk_spec.py --check`, whose `ARM64_AUX_MOVK` regex owns
+  the sim-header's MOVK alias), `lean_chain` (`lake build
+  KProgFormal.GeneratedArm64Aux` then `lake env lean
+  KProgFormal/Arm64Aux.lean`), `host` and `route` (both oracles recompiled
+  per row); five rows repaint the generator and regenerate, so the drift
+  lands live in the artifacts and is caught by whichever oracle or Lean build
+  consumes that artifact.
+- Result: `TOTAL 92 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  88 mutants catch (gen 21 --- 11 spec rejections and 10 stale renders minus
+  the 4 regen pairs that instead show live, movk_gen 1, lean_chain 27, host
+  9, route 30): 11 shared-spec drifts (operation, both schema pins, the word
+  and field bit widths, three lane shifts, two lane names, the lane-1/lane-2
+  swap, the `regNone` sentinel), 9 generator drifts (the expected table, the
+  lane-shift check, the Lean and C packer/decoder recipes, the none render),
+  10 generated-C drifts (the packer's `<<` chain bytes and a swapped byte
+  order, the four decoders, the `|`-repaint that reorders to the same value,
+  the sentinel default), 5 generated-Lean drifts (the pack and the four
+  decoders), 20 hand-Lean drifts (the independent restatement's repaints,
+  the dropped `rfl` unfold, three `b1`/`b2`/`b3` goals, the non-interference
+  conjunction and its reorder, the `regNone` round-trip goal, the `aux =
+  0xffU` repaint, example/disjoint value+args repaints, alias-lane
+  repaints, and the three shared-theorem drops), 7 sim-header alias drifts
+  and 7 sim-local alias drifts (every alias repaint catches through whichever
+  oracle recompiles the real macros, except the MOVK one which only the movk
+  generator's regex sees because the aux generator never reads the sim
+  header), 8 host-oracle and 9 route-oracle drifts (the per-lane checks, the
+  lane equalities, the sentinel define, the planted mem/bitfield/ccmp
+  drifts), and 5 regenerated drifts. 4 survive, all marked `equivalent` by
+  design: the alias-sheet doc-comment repaint, the host oracle's redundant
+  `AUX` vs `AUX_ALU` equality repaint (both sides repaint identically, so
+  the comparison recomputes the same equality), and the two summary-line
+  repaints (the success line carries no result bit).
+- Shakedown: retargets were needed for three draft anchors. The hand-Lean
+  lane-1 shared-theorem row first mirrored the goal's conjunction order
+  (reordering `rfl`-proved conjunct pairs survives --- an equivalence the
+  run exposed --- so the row was retargeted to drop the first conjunct; the
+  two-conjunct `rfl` constructor then fails on arity and the rc=1 catches).
+  The Lean and C decoder anchors first sat on the shift-zero branch text
+  that the generator renders twice per file (shift-0 and shifted branches
+  share the def pattern), so they were retargeted onto the
+  `aux >>> {shift}` / `>> {shift}` expressions only the shifted branches
+  render. The sim-header `ARM64_AUX_MOVK` drift row was assigned to the aux
+  generator and survived --- the aux generator never reads the sim header;
+  the movk generator's pinned regex owns that alias, so it became the fifth
+  detector's single row.
+- Residue: all twelve watched files byte-identical after the run
+  (`md5sum` verified), the untracked harness retained for reruns, and
+  `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

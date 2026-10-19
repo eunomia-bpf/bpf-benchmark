@@ -1383,8 +1383,37 @@ increment is committed and pushed immediately). Current state:
   generated-Lean value row is not a Lean identifier (elaborator fails
   before semantics; retargeted onto `imm >>> s`, rejected by the
   refinement), and the hand Lean column-value repaint is dead (the hand
-  theories re-read the generated column; retargeted onto the dispatch
-  theorem row).
+  theories re-read the generated column; retargeted onto the dispatch theorem row).
+  and the AArch64 packed-AUX layout contract (the 32-bit operand word
+    shared by the ALU, shift, MOVK, memory, bitfield and CCMP handlers:
+    four byte lanes packed little-endian through one machine-checked
+    packer, the six simulator packers and seven simulator decoders thin
+    aliases of that one layout, the `ARM64_REG_NONE` sentinel
+    round-tripping through lane 0) got its own single-family harness
+    against the 586,829-case host oracle and the 1,115,374-case route
+    oracle (Step 0177; 92 single-anchor rows over nine files --- the
+    shared spec, its generator, the generated C header, the generated Lean
+    module, the hand refinement, both alias sheets, and both oracles; 5
+    detectors across 7 staged files plus the movk generator's
+    `ARM64_AUX_MOVK` sim-header regex as a fifth detector --- a stale aux
+    `--check`, a Lean chain over generated and hand modules, and two live
+    C oracles recompiled per row; split gen 21 / movk_gen 1 / lean_chain
+    27 / host 9 / route 30 with 4 equivalences: the alias-sheet
+    doc-comment repaint, the host oracle's redundant `AUX` vs `AUX_ALU`
+    equality repaint recomputing the same equality, and the two
+    summary-line repaints carrying no result bit --- every `ARM64_SIM_L_*`
+    decoder-alias repaint catches through the route oracle, and the MOVK
+    packer-alias repaint catches only through the movk generator's regex
+    because the aux generator never reads the sim header; same
+    one-regen-stage shape, no forked-child stage --- the layout is total
+    over all 2^32 words, every lane swept exhaustively over 256 values
+    in-process). Shakedown retargets: the hand-Lean lane-1 shared-theorem
+    row first mirrored the conjunction order (a pure `rfl` reordering
+    survives, so it was retargeted to drop the first conjunct, which the
+    two-conjunct `rfl` constructor rejects on arity), and the decoder
+    anchors first sat on the shift-zero branch text the shifted branches
+    share, retargeted onto the `aux >>>`/`>> {shift}` expressions unique
+    to the shifted arms).
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
