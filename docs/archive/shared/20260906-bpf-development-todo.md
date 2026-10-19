@@ -13584,6 +13584,45 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   retargeted to the false `w32 >>> 31 = 0` goal (the `>>> 33` variant is
   a true weaker statement and survives).
 
+## Step 0169 — AArch64 LSL/LSR/ASR/ROR shift-value mutation coverage
+
+- Scope: the AArch64 shift-value family `ARM64_SHIFT_LSL`/`LSR`/`ASR`/`ROR`
+  (codes 0..3, the four rotate-and-shift results refined against the
+  machine-generated `GeneratedArm64Shift.value` table, Step 0092) gets its
+  own single-family mutation harness against the 20,513-case host
+  generated-header oracle (boundary sweep 4 kinds x 8 values x 8 amounts x 2
+  widths plus a 20,000 fixed-seed sweep and the forked SIGABRT
+  unsupported-kind probe; there is no route detector: the wrapper body
+  `ARM64_SIM_L_SHIFT_VALUE` is reached only through the host test).
+- Code: new `kprog/formal/build/mut_arm64_shift.py` (untracked) mutating
+  five contract files --- the shared spec (`arm64_shift_spec.json`), its
+  generator, the generated C table (`generated/arm64_shift.h`), the
+  generated Lean module (`GeneratedArm64Shift`), and the hand Lean
+  refinement (`Arm64Shift.lean`) --- with the same three detectors as
+  Step 0168: `gen` runs the generator `--check` row, `lean_chain` runs
+  `lake build KProgFormal.GeneratedArm64Shift` plus
+  `lake env lean KProgFormal/Arm64Shift.lean`, and `host` compiles and
+  runs the oracle; no regen stage (the spec is four scalar rows), and no
+  sim-header mutation site (the sim header declares only
+  `ARM64_OP_SHIFT_IMM/REG`, not the shift-kind codes).
+- Gate: `make -C kprog/formal check` --- full run green (210 `: OK` rows).
+- Tally: `TOTAL 85 mutations, 0 failures (gen=33 lean_chain=27 host=24)`
+  plus one retarget, `ALL AS EXPECTED`. 78 mutants catch and 7 survive:
+  the three genuine equivalences by design (the generator `ROOT`
+  spelling, a hand-Lean comment, and the spec-whitespace repaint) plus
+  four detector-invisible rows kept as survivors: the generated-C result
+  seed (every switch arm assigns the result before the macro's single
+  tail expression reads it), the generated-Lean LSL inner-narrow drop
+  and the hand-Lean LSL pre-mask drop (both mathematically absorbed by
+  the result's own width mask and live-probed green), and the rename of
+  the caller-free `arm64_shift_amount_masked` theorem (no file besides
+  its own imports it). Shakedown retarget: the shift generator computes
+  a `ctors` f-string it never interpolates (the Lean inductive comes
+  from the decode generator, not the shift one), so a ctor-spelling
+  mutation is detector-invisible at the shift stage; the row was
+  retargeted to the generator's `[0, 1, 2, 3]` codes-range cross-check,
+  which `--check` rejects.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

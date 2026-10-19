@@ -1213,6 +1213,21 @@ increment is committed and pushed immediately). Current state:
   unconditional assign, both generated-Lean mnemonic rows with no
   chain consumer, and both hand-Lean flags-unchanged proof repaints
   (the `rfl` rewrite still proves the unchanged theorem),
+  and the AArch64 LSL/LSR/ASR/ROR shift-value family got its own
+  single-family harness against the 20,513-case host oracle (Step 0169;
+  same three detectors --- the gen detector runs the generator `--check`
+  row, the Lean chain the generated + hand Lean pair, the host compiles
+  and runs the oracle; five contract files: the shared spec, the
+  generator, the generated C table, the generated Lean module, and the
+  hand refinement --- split gen 31 / lean_chain 23 / host 24 with three
+  genuine equivalences surviving (the generator `ROOT` spelling, a
+  hand-Lean comment, and the spec-whitespace repaint) plus four
+  detector-invisible rows kept as survivors: the generated-C result seed
+  absorbed by the arm assigns, both the generated-Lean LSL inner-narrow
+  drop and the hand-Lean LSL pre-mask drop (width-mask subsumption the
+  prover confirms), and the rename of the caller-free
+  `arm64_shift_amount_masked` theorem; the generator's never-interpolated
+  `ctors` string retargeted the ctor row onto the codes-range check),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

@@ -3500,6 +3500,27 @@ consumer reads `mnemonic` in these families), and both hand-Lean
 flags-unchanged proof repaints (the `rfl` rewrites still prove the
 unchanged theorem statement).
 
+The AArch64 shift-value family (`ARM64_SHIFT_LSL`/`LSR`/`ASR`/`ROR`, codes
+0..3) gets the same mutation build-out in `build/mut_arm64_shift.py`
+(untracked), a single-family harness over five contract files: the shared
+spec (`arm64_shift_spec.json`, 4 rows), its generator, the generated C
+table (`generated/arm64_shift.h`, the static asserts, the handled/unsupported
+gate, the k-mask ternary, the width-mask and the four per-op arms), the
+generated Lean module (`GeneratedArm64Shift`), and the hand Lean refinement
+(`Arm64Shift.lean`), with the same three detectors. 78 mutants catch
+(`gen=31 lean_chain=23 host=24`) and 7 survive: the three genuine equivalences
+by design (the generator `ROOT` spelling, a hand-Lean comment, and the
+spec-whitespace repaint) plus four detector-invisible rows kept as survivors:
+the generated-C result seed (every arm assigns before the switch's only
+consumer reads it), the generated-Lean LSL inner-narrow drop and the hand-Lean
+LSL pre-mask drop (the width-mask of the shift is subsumed by the result's own
+width mask, what `bv_decide` proves), and the rename of the consumers-free
+`arm64_shift_amount_masked` theorem (grep-verified: no file imports it). One
+shakedown retarget: the generator's `ctors` f-string is computed but never
+interpolated in the shift template (the Lean inductive comes from the decode
+generator), so the ctor-spelling row was retargeted to the `[0, 1, 2, 3]`
+codes-range cross-check.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
