@@ -1256,6 +1256,23 @@ increment is committed and pushed immediately). Current state:
   generated-Lean doc-comment typo, and the hand-Lean EOR counterexample
   restatement; no shakedown retargets were needed --- all draft anchors were
   caught on the first full run),
+  and the AArch64 ADRP relocation-tag contract (ADRP GOT/RODATA, codes
+  38/39, tags `ARM64_SIM_TAG_RELOC_ADDR`/`ARM64_SIM_TAG_RODATA_ADDR`)
+  got its own single-family harness against the 257-case full opcode-byte
+  oracle (Step 0172; every one of the 256 opcode bytes forked, each known
+  kind returning the independent classification's tag and each unknown byte
+  aborting through the generated unsupported arm; same three detectors and
+  no regen or sim-header stage --- there is no ADRP route test, and the
+  simulator header only `#include`s the generated `KPROG_ARM64_ADRP_TAG`
+  macro and inline-expands it, so a generated-header drift shows only
+  through the host oracle --- split gen 26 / lean_chain 11 / host 8 with two
+  detector-invisible survivors, joining the three documented equivalences:
+  the generator `ROOT` spelling, the spec-whitespace repaint, and the
+  generated-Lean `.rodata` `isGot`-false arm --- the generated-C tag seed
+  every case arm overwrites and the generated-Lean `.got` mnemonic row no
+  chain consumer reads; one shakedown retarget was needed, the
+  goal-side flip of `arm64_adrp_tag_refines` being `Eq`-symmetric under
+  `rfl`, retargeted onto an independent-`isGot`-index drift),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

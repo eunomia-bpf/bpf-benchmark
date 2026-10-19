@@ -3572,6 +3572,35 @@ dead-result-seed survivor (every switch arm assigns
 No shakedown retargets were needed: all draft anchors were caught on the
 first full run.
 
+
+The AArch64 ADRP relocation-tag contract (the two page-address opcodes
+`ARM64_OP_ADRP_GOT` = 38 = `0x26` and `ARM64_OP_ADRP_RODATA` = 39 = `0x27`,
+the `KPROG_ARM64_ADRP_TAG` switch macro inlining into the simulator's
+`ARM64_SIM_L_EXEC` ADRP arm) gets the same mutation build-out in
+`build/mut_arm64_adrp.py` (untracked), a single-family harness over the same
+five contract files --- the shared spec (`arm64_adrp_spec.json`, 2 rows), its
+generator, the generated C switch macro (`generated/arm64_adrp.h`, the two
+case arms, the tag seed, the switch/default/unsupported tail, and the `GOT`
+handled disjunct), the generated Lean module (`GeneratedArm64Adrp`), and the
+hand Lean refinement (`Arm64Adrp.lean`, including the independent
+Boolean-indexed `7 + if got-kind then 0 else 1` selection form) --- with the
+same three detectors and no regen or sim-header stage (there is no ADRP route
+test; the simulator header only `#include`s the generated header and
+inline-expands `KPROG_ARM64_ADRP_TAG`, so a generated-header drift is
+observable only through the host oracle, whose exhaustive 256-byte opcode
+fork sweep reaches the macro through the same include). 45 mutants catch
+(`gen=26 lean_chain=11 host=8`) and 5 survive: the three documented
+equivalences (the generator `ROOT` spelling repaint, the spec-whitespace
+repaint, and the generated-Lean `.rodata` `isGot`-false arm the independent
+classification already pins) plus two detector-invisible rows kept as
+survivors: the generated-C tag seed (every case arm assigns
+`__kprog_a64_adrp_tag` before the macro's single tail expression reads it)
+and the generated-Lean `.got` mnemonic row (no chain consumer reads
+`mnemonic` in this family). One shakedown retarget was needed: the first
+draft's goal-side flip of `arm64_adrp_tag_refines` survives because
+`Eq` is symmetric under `rfl`, so the row was retargeted to an
+independent-`isGot`-index drift that the `cases op <;> rfl` proof no longer
+closes.
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production

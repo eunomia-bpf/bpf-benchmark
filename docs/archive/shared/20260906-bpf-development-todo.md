@@ -13723,6 +13723,80 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   caught on the first full run (the 4 intended equivalences survived as
   designed).
 
+## Step 0172 — AArch64 ADRP relocation-tag mutation coverage
+
+- Scope: the AArch64 ADRP relocation-tag family
+  `KPROG_ARM64_ADRP_TAG` (the two opcodes `ARM64_OP_ADRP_GOT` = 38 = `0x26`
+  and `ARM64_OP_ADRP_RODATA` = 39 = `0x27`, tracking the
+  `ARM64_SIM_TAG_RELOC_ADDR` = 7 / `ARM64_SIM_TAG_RODATA_ADDR` = 8
+  provenance tags without including `arm64_sim_local_bpf.h`), whose macro
+  the simulator's `ARM64_SIM_L_EXEC` ADRP arm inline-expands through the
+  `ARM64_SIM_L_ADRP_TAG` wrapper. Both opcodes refine the independent
+  Boolean-indexed `7 + (if isGotKind then 0 else 1)` selection statement
+  (deliberately not a restatement of the two-arm match), plus the
+  GOT/RODATA classification (`arm64_adrp_isgot_refines`), the
+  code-dispatch pinning, the tag-distinctness and tag-in-range theorems.
+- Harness: `build/mut_arm64_adrp.py` (untracked, 50 single-anchor
+  mutation rows) over the five contract files --- the shared spec
+  (`arm64_adrp_spec.json`, 2 rows), its generator
+  (`generate_arm64_adrp_spec.py`), the generated C switch macro
+  (`generated/arm64_adrp.h`), the generated Lean module
+  (`GeneratedArm64Adrp.lean`), and the hand Lean refinement
+  (`Arm64Adrp.lean`). Three detectors, no regen stage and no sim-header
+  stage: `gen` (`generate_arm64_adrp_spec.py --check`, which cross-checks
+  the two opcodes against `kprog/arm64/arm64_sim.h` and the two tag macros
+  against `kprog/arm64/arm64_sim_local_bpf.h`), `lean_chain`
+  (`lake build KProgFormal.GeneratedArm64Adrp` then `lake env lean
+  KProgFormal/Arm64Adrp.lean`), and `host` (the 257-case
+  `test_arm64_adrp_host.c` exhaustive opcode-byte sweep: every one of the
+  256 opcode bytes forked, each known kind returning the independent
+  classification's tag, each unknown byte aborting with `SIGABRT`
+  through the generated unsupported arm, plus the GOT/RODATA
+  tag-collision head check). No route detector because no ADRP route test
+  exists: the simulator header only `#include`s the generated header and
+  inline-expands `KPROG_ARM64_ADRP_TAG`, so a generated-header drift is
+  observable only through the host oracle, which reaches the macro through
+  the same include; no opcode-source row exists because
+  `arm64_sim_local_bpf.h` re-declares only the wrapper macros, not the
+  ADRP opcodes.
+- Result: `TOTAL 50 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  45 mutants catch (gen 26, lean_chain 11, host 8): 11 shared-spec row
+  drifts (per-opcode name/code/tag/tag-macro repaints, operation-string
+  drift, schema-version drift, the two-opcode order swap), 18 generator
+  drifts (the per-row `EXPECTED` template drifts, name-order check,
+  tag-table check, Lean `code`/`tag`/`isGot` render drifts, the C body
+  `__kprog_a64_adrp_tag` repaint, the case-label append line, the
+  `default:`/`UNSUPPORTED` row drifts, the OPCODE/TAG regex path and the
+  `LEAN`/`CHEADER` path drifts, and the stale-contract mismatch message),
+  8 generated-C drifts (the per-opcase code/tag static asserts, the
+  `KPROG_ARM64_ADRP_HANDLED` disjunct and its rename, the duplicate-case
+  39U recast, the `case 40U` recast, the tag-arm swap, the duplicate
+  default recast, and the tail `+1` repaint), 4 generated-Lean arm drifts
+  (the `code`/`isGot`/`tag` GOT-row repaints and the RODATA code repaint),
+  and 4 hand-Lean drifts (the independent-spec base/offset/inversion
+  repaints and the code-dispatch repainting to a wrong RODATA code),
+  plus the two false-goal repaints the Lean chain rejects. 5 survive: 3
+  genuine equivalences by design (the generator `ROOT` spelling repaint,
+  the spec-whitespace repaint, and the generated-Lean `.rodata`
+  `isGot`-false arm the independent classification already pins) plus 2
+  detector-invisible rows kept as survivors: the dead
+  `__kprog_a64_adrp_tag = 0` seed literal (every case arm assigns before
+  the macro's single tail expression reads it --- the same
+  detector-invisible shape shift/step 0169 documented) and the
+  generated-Lean `.got` mnemonic row (no chain consumer reads
+  `mnemonic` in this family).
+- Shakedown: one retarget was needed --- the first draft's goal-side flip
+  of `arm64_adrp_tag_refines` (swapping the equation's two sides) survives
+  because `Eq` is symmetric under `rfl`; the row was retargeted onto an
+  independent-`isGot`-index drift (`op == Op.rodata` indexing the
+  independent statement) that the `cases op <;> rfl` proof no longer
+  closes, live-probed erroring exactly at the `rodata` case. One earlier
+  draft row (the stale-contract message repaint) was dropped before the
+  final run when the detector budget showed no consumer.
+- Residue: all five watched files and both sim headers byte-identical to
+  `HEAD` after the run (`md5sum` verified); `make check` stays at 210
+  `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
