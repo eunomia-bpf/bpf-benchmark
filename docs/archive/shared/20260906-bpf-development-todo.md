@@ -14639,6 +14639,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file cneg watchlist verified), the untracked harness retained
   for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0187 — AArch64 logic-flag handler mutation coverage
+
+- Scope: the AND/BIC result-plus-NZCV step with writeback/test modes
+  (`arm64_logic_flag_handler_spec.json`,
+  `generate_arm64_logic_flag_handler_spec.py` with the ALU-decode
+  cross-check, `generated/arm64_logic_flag_handler.h` with the
+  do-while macro and SET-LOGIC-FLAGS tail,
+  `KProgFormal/GeneratedArm64LogicFlagHandler.lean`,
+  `KProgFormal/Arm64LogicFlagHandler.lean` with the independent
+  step spec and four `native_decide` examples,
+  `test_arm64_logic_flag_handler_host.c` — 8×4×2 grid = 64 cases),
+  ...
+- Harness: `build/mut_arm64_logic_flag_handler.py` (untracked), 49
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 16 / lean_chain 13 / host 8 catch split; 12 equivalences
+  (stale-mirror gate disarm, spec/ALU message repaints, import
+  repaint, family-constant and code-arm value repaints, four
+  example renames, two summary-line repaints).
+- Result: TOTAL 49 mutations, 0 failures, 12 equivalences survived
+  (37 catch: 16 gen, 13 lean_chain, 8 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: the writeback/test mode arms repeat in both handler
+  definitions, so the mode-exchange rows re-anchored on whole
+  let-blocks; the step-refinement `· rw` line now mutates count=2
+  (both family arms); three drafted rows relabeled — the two
+  FAMILY constant repaints and the generated code-arm repaint are
+  equivalences because consumers bind names, not values.
+- Residue: all six watched files byte-identical after each run
+  (6-file logic-flag watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

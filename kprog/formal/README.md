@@ -4247,6 +4247,56 @@ proves), and two summary-line repaints carrying no result bit.
 Shakedown relabeled two drafted rows after the first run: the spec
 message repaint and the code-range bound66 repaint (the promote-
 to-catch candidates both shake green as weaker-but-true repaints).
+### Step 0187 — AArch64 logic-flag handler mutation coverage
+
+The `arm64_logic_flag_handler` contract
+(`arm64_logic_flag_handler_spec.json` 1 line,
+`generate_arm64_logic_flag_handler_spec.py` 135 lines,
+`generated/arm64_logic_flag_handler.h` 24 lines,
+`KProgFormal/GeneratedArm64LogicFlagHandler.lean` 35 lines,
+`KProgFormal/Arm64LogicFlagHandler.lean` 99 lines,
+`test_arm64_logic_flag_handler_host.c` 70 lines) fixes the AND/BIC
+result-plus-NZCV step: value = shared ALU result (families 2/3
+cross-checked against the ALU decode table), flags = shared logic
+policy (`KPROG_ARM64_SET_LOGIC_FLAGS` — N from the top result lane,
+Z on all-zero, C=V=0), and the handler composition where ANDS/BICS
+write back the narrowed scalar (`generatedArm64ScalarWrite`) while
+TST/TST-BIC leave register/SP state untouched. The hand Lean side
+restates the result and flag policy independently
+(`arm64AluResultSpec`, `arm64LogicNzc`), refines step and handler
+through the already-proven `arm64_alu_result_refines` /
+`arm64_logic_flags_refines` / `arm64_scalar_write_refines`, and
+proves four `native_decide` examples (ANDS w32 scalarize + negative,
+BICS through XZR discarding the result, TST preserving state,
+TST-BIC no writeback). The host oracle sweeps 8 operand vectors × 
+4 widths × 2 families = 64 cases against a direct AND/BIC restatement.
+
+`build/mut_arm64_logic_flag_handler.py` (49 rows) perturbs the six
+files with the three detectors, 'untracked, 49 single-anchor rows':
+16 catch at the generator stage (spec family/mode field drifts,
+generator mirror drifts, the ALU-arm drift, the result-recipe
+operand swap, the logic-to-SUB policy repaint in both the C and
+Lean recipes, decode-table repointing, and file-path drifts), 13
+catch through the Lean chain (both hand family-arm drifts, the NZCV
+tail repaint, the step-refinement rewrite repaints (both arms), the
+writeback/test mode exchanges in both refinements, the handler-tail
+rewrite repaint, the import drift, and the namespace drift), and 8 
+catch by the host oracle (the BIC-mask repaint `lhs | ~rhs`, the
+negative-bit shift repaint, the zero-check flip, the comparison
+flip including the V-arm, the operand swap in the EXEC call, the
+trailing-coma-free comparator repaints, and the EXEC-argument
+repaints). 12 rows survive as documented equivalences: the disarmed
+spec-mirror guard, the generator spec/ALU message repaints and
+comment-only import repaint (green-run-invisible guard paths), the
+generated family-constant repaints (`FAMILY_AND` 2U→4U and
+`FAMILY_BIC` 3U→4U) and the generated Lean code-arm repaint (the
+bookkeeping values are consumed by name — the macro switch and the
+host driver both reference the macros/constants as identifiers, so
+a value repaint never rebinds), four consumers-free example-theorem
+renames, and two summary-line repaints carrying no result bit.
+Shakedown relabeled three drafted rows after the first run — the
+two family-constant repains and the code-arm repaint (all three
+shake green because the consumers bind names, not values).
 
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
