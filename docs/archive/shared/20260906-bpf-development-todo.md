@@ -14494,6 +14494,46 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file load-bytes watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0183 — AArch64 ALU handler path mutation coverage
+
+- Scope: the provenance dispatch of the generic ALU handler —
+  `KPROG_ARM64_ALU_USE_POINTER` true only for 64-bit ADD, destination
+  not SP, non-scalar source provenance (`arm64_alu_handler_spec.json`,
+  `generate_arm64_alu_handler_spec.py`, `generated/arm64_alu_handler.h`,
+  `KProgFormal/GeneratedArm64AluHandler.lean` with the flat-conjunction
+  `usePointer`, `KProgFormal/Arm64AluHandler.lean` with the independent
+  four-key match `arm64AluUsePointerSpec`, the path refinement,
+  scalar/pointer writeback refinements, the composed handler theorem
+  citing the path proof by name, and four `native_decide` examples,
+  `test_arm64_alu_handler_host.c` — 6×7×2×2 grid = 168 cases), ...
+- Harness: `build/mut_arm64_alu_handler.py` (untracked), 45
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 18 / lean_chain 12 / host 3 catch split; 12 equivalences
+  (stale-mirror gate disarm, generator message repaint, comment-only
+  import repaint, generated-Lean tail comment repaint, hand namespace
+  comment repaint, main-refinement `rw` trailing comma repaint,
+  scalar-writeback tactic shrink, two example-theorem renames, host
+  ops-grid drift (both sides repaint), host widths-grid shrink
+  (coverage caveat), two summary-line repaints).
+- Result: TOTAL 45 mutations, 0 failures, 12 equivalences survived
+  (33 catch: 18 gen, 12 lean_chain, 3 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: three harness-text escaping rounds (literal `\n`/`\t`
+  doubles, the generator's double-backslash line continuations, and
+  the `\t`-vs-tab distinction between the generator source and the
+  emitted header) before the first green run; six drafted rows were
+  relabeled `equivalent_*`: the trailing-comma `rw` repaint, the
+  `rfl`-closes-all scalar tactic shrink, two consumers-free example
+  renames, the host ops-grid drift, and the widths-grid shrink (a
+  coverage shrink the oracle handshake keeps consistent). The path
+  theorem rename was drafted as an equivalence, SURVIVED expectation
+  overturned: it is a catch because the composed handler theorem
+  `rw`s `arm64_alu_handler_path_refines` by name.
+- Residue: all six watched files byte-identical after each run
+  (6-file alu-handler watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

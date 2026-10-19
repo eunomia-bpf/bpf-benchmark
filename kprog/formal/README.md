@@ -4048,6 +4048,56 @@ re-anchored on whole-context blocks; the sweep-width anchor needed the
 C source's three-tab depth; and one survivor row was relabeled
 `equivalent_*` after the first run confirmed the weakened upper-byte
 claim remains a theorem.
+### Step 0183 — AArch64 ALU handler path mutation coverage
+
+The `arm64_alu_handler` contract (`arm64_alu_handler_spec.json` 1 line,
+`generate_arm64_alu_handler_spec.py` 83 lines,
+`generated/arm64_alu_handler.h` 9 lines,
+`KProgFormal/GeneratedArm64AluHandler.lean` 16 lines,
+`KProgFormal/Arm64AluHandler.lean` 175 lines,
+`test_arm64_alu_handler_host.c` 44 lines) fixes the pointer-provenance
+dispatch of the generic ALU handler: `KPROG_ARM64_ALU_USE_POINTER` is
+true only for a 64-bit ADD whose destination is not SP and whose source
+provenance is non-scalar. The generated Lean predicate is a flat
+conjunction; the hand Lean side independently enumerates the same
+condition as a four-key match (`arm64AluUsePointerSpec`, no reuse of
+the generated form), proves the equal-up-to-interface refinement
+(`cases width <;> cases op <;> cases dst <;> cases srcTag <;> decide`)
+plus scalar/pointer writeback refinements and the composed handler
+theorem, and four `native_decide` examples (tagged add keeps provenance,
+tagged sub scalarizes, SP add writes only SP, w32 add zero-extends and
+scalarizes). The host oracle sweeps a 6×7×2×2 grid (widths × ops × sp ×
+scalar) against an independent C restatement — 168 cases.
+
+`build/mut_arm64_alu_handler.py` (45 rows) perturbs the six files with
+the three detectors, 'untracked, 45 single-anchor rows': 18 catch at
+the generator stage (spec JSON drifts on every predicate field,
+generator mirror and pin drifts, file-path drifts, the generated-Lean
+predicate body repaint, and the C conjunction repaints), 12 catch
+through the Lean chain (the generated predicate body repaint, open/
+namespace drift, the hand match-arm repaints making SP or scalar false
+arms true or the fall-through arm true, the path-body repaint, the
+path-tactic shrink dropping the SP/tag enumeration, the rich-blind
+main-refinement repaint, the split-simpset shrink dropping
+`Bool.false_eq_true`, the scalar-writeback width-case drop, and the
+path theorem rename — the main refinement `rw`s it by name, so the
+rename breaks the build and is a catch, unlike consumers-free example
+renames), and 3 catch by the host oracle (the not-SP conjunct drop,
+the oracle repaint, and the macro comparison negation). 12 rows
+survive as documented equivalences: 'the disarmed spec-mirror guard',
+the generator message repaint and comment-only import repaint
+(green-run-invisible guard paths), the generated-Lean tail comment
+repaint, the hand namespace comment repaint, the main-refinement
+`rw` list repaint with a trailing comma (Lean accepts the syntax),
+the scalar-writeback tactic shrink (`cases width <;> rfl` — every
+branch is definitionally closed by `rfl` after the case split), two
+consumers-free example-theorem renames, the host ops-grid drift
+(oracle and macro repaint together), the host widths-grid shrink
+(coverage caveat recorded, handshake stays consistent), and two
+summary-line repaints carrying no result bit. Shakedown relabeled six
+drafted rows `equivalent_*` after the first run confirmed each
+survivor: notably the path-theorem rename is NOT one of them — it was
+retained as a catch because the main refinement cites the name.
 
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
