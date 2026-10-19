@@ -3548,6 +3548,30 @@ amounts to reasserting a `_Static_assert`-already-pinned code, and the default
 `break;`-repaint row (the fourth proven-redundant one) was replaced by a
 duplicate-case-4U label row the compiler rejects outright.
 
+The shared AArch64 ALU op-step result contract (the six operations
+`add`/`sub`/`and`/`bic`/`eor`/`orr`, codes 0..5, the `KPROG_ALU64_RESULT`
+switch macro inlining into the simulator's `ARM64_SIM_L_EXEC_ALU`) gets the
+same mutation build-out in `build/mut_arm64_alu_result.py` (untracked), a
+single-family harness over the same five contract files --- the shared spec
+(`arm64_alu_result_spec.json`, 6 rows), its generator, the generated C
+switch macro (`generated/arm64_alu_result.h`, the per-op case arms, the
+shared result seed, the switch/default/unsupported tail, and the result
+expression), the generated Lean module (`GeneratedArm64AluResult`), and the
+hand Lean refinement (`Arm64AluResult.lean`, including the independent
+`lhs + ~~~rhs + 1` subtraction form, the flag-composition rewrites, and the
+canonical examples) --- with the same three detectors and no regen or
+sim-header stage (the simulator header only `#include`s the generated
+header and inline-expands `KPROG_ALU64_RESULT`, so a generated-header drift
+is observable only through the host oracle, which reaches the macro through
+the same include). 47 mutants catch (`gen=16 lean_chain=20 host=11`) and 4
+survive: the three documented equivalences (the generator `ROOT` spelling
+repaint, the generated-Lean doc-comment typo, and the hand-Lean EOR
+counterexample restatement whose theorem still proves) plus the
+dead-result-seed survivor (every switch arm assigns
+`__kprog_alu64_res` before the macro's single tail expression reads it).
+No shakedown retargets were needed: all draft anchors were caught on the
+first full run.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
