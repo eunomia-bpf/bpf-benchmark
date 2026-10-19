@@ -4633,6 +4633,58 @@ repaint (30 ≤ code ≤ 32 remains provable while the exact
 `code_dispatch` pin stands), and the non-scalar tag-value grid
 repaint that keeps both tag classes injected.
 
+### Step 0195 — AArch64 FMOV destination-routing mutation coverage
+
+The `arm64_fmov_dest` contract (`arm64_fmov_dest_spec.json`
+1 line, `generate_arm64_fmov_dest_spec.py` 169 lines,
+`generated/arm64_fmov_dest.h` 46 lines,
+`KProgFormal/GeneratedArm64FmovDest.lean` 19 lines,
+`KProgFormal/Arm64FmovDest.lean` 71 lines,
+`test_arm64_fmov_dest_host.c` 105 lines) fixes the FMOV
+destination-routing decision: a direction code routs the moved
+value to the vector register `v0` exactly when it is one of the
+four in-range direction codes with an even parity
+(`dirCode < 4 && dirCode % 2 == 0`, d_from_x and s_from_w); the
+two register-half directions write the general-purpose
+destination through the width-narrowed register write; any
+other code reaches the caller-supplied unsupported arm. The
+generated side carries `code`, the four-arm
+`vectorDestination` match in Lean, and the switch-based C macro
+whose case labels are static-asserted against the
+`ARM64_FMOV_*` defines and re-checked against
+`kprog/arm64/arm64_sim.h` at `--check` time; the hand module
+restates the rule arithmetically, proves the refinement, the
+parity tuple, the out-of-range law, the complement iff, the
+opcode pins, and two canonical examples. The host oracle forks
+a child per case over all 256 direction codes: an in-range code
+must match an independent parity oracle and an out-of-range
+code must abort with SIGABRT.
+
+`build/mut_arm64_fmov_dest.py` (51 rows) perturbs the six files
+with the three detectors, all untracked, 51 single-anchor rows:
+16 catch at the generator stage (the op/code/rule spec drifts,
+the per-direction vector-destination flips, the codes and
+routing check repaints, the rendered-C case emitter drift, the
+assignment-polarity repaint, and the generated-path repoint),
+11 catch through the Lean chain (the code drift, the match-arm
+flip, the wildcard repaint, the namespace drift, and the hand
+parity repaints, range repaints, parity-tuple flip, out-of-range
+loosening, opcode pins, and example flips), and 11 catch by the
+host oracle (the oracle parity repaint, the out-of-range bound
+loosening, the exit-bit shift, the SIGFPE repaint, the
+want-sign inversions, and the generated case-label, static
+assert, macro-header, unsupported, and default repaints). 13
+rows survive as documented equivalences: eight unreachable
+error-message repaints (all green-run-invisible), two
+consumers-free theorem renames (the parity tuple rename; the
+spawn-side detach-equivalent complement rename indirectly cites
+the refinement elsewhere in the same module), a true weaker
+range-pin repaint (34 ≤ code ≤ 36 remains provable while the
+exact `code_dispatch` pin stands), and both harness-grid bound
+repaints (the 255-direction host sweep and the parity-tuple
+lemma's `rfl`-closed conjunction) that keep both routing
+classes exercised.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/

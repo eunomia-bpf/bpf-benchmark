@@ -14909,6 +14909,40 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file load-tag watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0195 — AArch64 FMOV destination-routing mutation coverage
+
+- Scope: the FMOV destination-routing decision — a direction
+  code writes v0 exactly when it is an in-range code with even
+  parity (vector-half directions), register-half directions take
+  the width-narrowed register write, any other code the
+  unsupported arm — across the opcode+direction-table case spec,
+  its generator (with arm64_sim.h opcode AND direction
+  cross-checks), the generated C switch macro, the generated
+  Lean module, the hand module (arithmetic restatement,
+  refinement, parity tuple, out-of-range law, complement iff,
+  pins, examples), and a 256-case fork-per-direction host
+  oracle requiring SIGABRT out-of-range.
+- Harness: `build/mut_arm64_fmov_dest.py` (untracked), 51
+  single-anchor rows over the six files with 3 detectors:
+  gen 16 / lean_chain 11 / host 11 catch; 13 equivalences (eight
+  unreachable error-message repaints, two consumers-free
+  theorem renames, a true weaker range-pin repaint, and both
+  harness-grid bound repaints).
+- Result: TOTAL 51 mutations, 0 failures, 13 equivalences
+  survived (38 catch: 16 gen, 11 lean_chain, 11 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: refines rename is NOT consumers-free here — the
+  out_of_range and complement theorems cite it in the same file
+  (chain fails), so the consumers-free rename slot went to the
+  parity tuple instead; the range-pin loosening (35≤code≤35 →
+  34≤code≤36) stays provable with the exact pin standing
+  (the 0194 precedent); the 256→255 direction sweep drops only
+  duplicate abort cases and keeps both routing classes →
+  equivalence.
+- Residue: all six watched files byte-identical after each run
+  (6-file fmov-dest watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
