@@ -4498,6 +4498,48 @@ summary-line repaint, and host grid repaints that mislabel
 which concrete offset/width carries each boolean class while
 still injecting both classes into macro and oracle alike.
 
+### Step 0192 — AArch64 memory-index mutation coverage
+
+The `arm64_mem_index` contract (`arm64_mem_index_spec.json`
+1 line, `generate_arm64_mem_index_spec.py` 155 lines,
+`generated/arm64_mem_index.h` 30 lines,
+`KProgFormal/GeneratedArm64MemIndex.lean` 26 lines,
+`KProgFormal/Arm64MemIndex.lean` 91 lines,
+`test_arm64_mem_index_host.c` 74 lines) fixes the memory-index
+presence selection: the `AUX` index lane's sentinel byte `0xff`
+(`ARM64_REG_NONE`) names the absent arm, every other byte the
+present arm. The generated side carries the `Arm` inductive,
+`indexSentinel`, `arm`/`present` selectors, and the
+`KPROG_ARM64_MEM_INDEX_PRESENT`/`_ARM` macros; the hand module
+restates the selector and presence test independently against
+the literal `0xff`, proves both refinements, pins the sentinel
+against `0xff`/`.absent`/`GeneratedArm64Aux.regNone`, proves the
+absent/present complement, the `hasIndex` consumption by the
+offset contract, two-arm dispatch reachability, and five
+concrete examples. The host oracle sweeps all 256 index bytes
+over both macros plus an arm/present cross-consistency check =
+512 cases.
+
+`build/mut_arm64_mem_index.py` (45 rows) perturbs the six files
+with the three detectors, all untracked, 45 single-anchor rows:
+14 catch at the generator stage (the op/bits/sentinel/arm spec
+drifts, the expected-table sentinel and absent-flag repaints,
+the rendered Lean `if` selector repaint, both rendered C macro
+repaints, and the generated-path repoint), 11 catch through the
+Lean chain (the generated arm-`if` swap, both table-row flips,
+the sentinel drift, the `present` match-body repaint, the
+namespace drift, the hand independent-spec selector swap, both
+refinement-statement repaints, the sentinel-pin drifts, the
+complement inversion, and the consumption vignette repaint), and
+8 catch by the host oracle (the want-present polarity flip, both
+want-arm/cross-check arm repaints, the sentinel self-check
+drift, and the generated constant/macro drifts). 12 rows survive
+as documented equivalences: four unreachable error-message
+repaints and the spec mirror-guard disarm (all
+green-run-invisible), five consumers-free theorem renames, the
+arm-constant repaint whose every use-site re-derives from the
+identifier, and the host summary-line repaint.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/

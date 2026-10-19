@@ -14815,6 +14815,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file stack-tag watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0192 — AArch64 memory-index mutation coverage
+
+- Scope: the sentinel-based memory-index presence selection —
+  `AUX` lane byte `0xff` names the absent arm, every other byte
+  the present arm — across the two-arm case spec, its generator,
+  the generated C header (PRESENT/ARM macros and arm constants),
+  the generated Lean module (`Arm`/`indexSentinel`/`arm`/
+  `present`), the hand module (independent restatements,
+  sentinel pins, complement, `hasIndex` consumption, dispatch,
+  examples), and a 512-case host oracle sweeping all 256 bytes.
+- Harness: `build/mut_arm64_mem_index.py` (untracked), 45
+  single-anchor rows over the six files with 3 detectors:
+  gen 14 / lean_chain 11 / host 8 catch; 12 equivalences
+  (four unreachable error-message repaints, mirror-guard
+  disarm, five consumers-free theorem renames, the arm-constant
+  repaint with lockstep-deriving use-sites, summary repaint).
+- Result: TOTAL 45 mutations, 0 failures, 12 equivalences
+  survived (33 catch: 14 gen, 11 lean_chain, 8 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the arm-constant repaint (ARM_PRESENT 0U→2U)
+  survived because all three host use-sites (want_arm, the
+  cross-check, the macro itself) re-derive from the identifier,
+  lockstep — the 0189 raw-literal lesson applies only when a
+  host literal is compared against the constant; theorem renames
+  in this module are consumers-free (verified by grep) and stay
+  equivalent.
+- Residue: all six watched files byte-identical after each run
+  (6-file mem-index watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
