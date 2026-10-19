@@ -4148,6 +4148,57 @@ catch because the step theorem cites it), three consumers-free
 example-theorem renames, the host loop-start shrinks (incoming/
 cond/fallback starting at 1: pure sample-grid resamples the
 proved contract makes invisible), and two summary-line repaints
+
+### Step 0185 — AArch64 ALU operand mutation coverage
+
+The `arm64_alu_operand` contract (`arm64_alu_operand_spec.json` 1 line,
+`generate_arm64_alu_operand_spec.py` 84 lines,
+`generated/arm64_alu_operand.h` 9 lines,
+`KProgFormal/GeneratedArm64AluOperand.lean` 18 lines,
+`KProgFormal/Arm64AluOperandHandler.lean` 86 lines,
+`test_arm64_alu_operand_host.c` 106 lines) fixes the RHS selection the
+generic ALU handler consumes: `KPROG_ARM64_ALU_RHS` is the immediate
+value when the mode is immediate and `KPROG_ARM64_MOD_VALUE` (the
+shared modifier semantics) when the mode is register, so the operand
+composition closes the free-RHS premise of the ALU-path theorem
+without re-proving the modifier. The hand Lean side mirrors the
+mode dispatch independently (`arm64AluRhsSpec` over
+`arm64ModValueSpec`), refines rhs via `arm64_mod_refines`, composes
+the operand handler over the already-proven `arm64_alu_handler_refines`,
+and proves four `native_decide` examples (immediate bypass, sxtx
+pointer add, lsl w32 scalarize+narrow, immediate SP write). The host
+oracle sweeps mode × 11 modifiers × 8 vectors × 8 shifts × 4 widths =
+5,632 cases against a C modifier oracle covering none/lsl/lsr/asr/
+ror/uxtw/sxtw/uxth/sxth/uxtb/sxtb.
+
+`build/mut_arm64_alu_operand.py` (42 rows) perturbs the six files
+with the three detectors, 'untracked, 42 single-anchor rows': 14
+catch at the generator stage (spec field drifts on both mode rows,
+register_path, and the generator mirror; the rhs register-arm
+argument-order drift; the generated C immediate-value and modifier
+argument repaints that transpose VALUE and SHIFT; file-path drifts),
+9 catch through the Lean chain (generated and hand mode-arm repaints
+including both operand-order mirrors, mode-constructor drifts,
+namespace drift, import drift, the rhs tail `rw` by name), and 8 
+catch by the host oracle (LSL shift-direction repaint, ASR w32
+shift-direction repaint, UXTW shift-direction repaint, SXTB type
+repaint, want-line modifier-argument transpose, comparison flip,
+and the two term-level drifts the mode/vec grid rows expose). 11 rows
+survive as documented equivalences: 'the disarmed spec-mirror guard',
+the generator message repaint and comment-only import repaint
+(green-run-invisible guard paths), the modifier-table message repaint
+(guarded error text keyed to a check the -check run never trips),
+three consumers-free example-theorem renames, the
+`arm64_alu_handler_refines`/`arm64_alu_rhs_refines` rw-order repaint
+(disjoint subterms close in either order), the host mode-loop
+shrink (register-half grid coverage caveat), the mirrored host
+vector walk (`vectors[i]`/`vectors[7-i]` transpose keeps the check
+pair coverage identical), and two summary-line repaints carrying no
+result bit. Shakedown relabeled two drafted rows: the rng-
+argument transposes survive where the operands remain pairwise
+exchangeable under their own trees, and the modifier-table message
+repaint survives as guarded error text.
+
 carrying no result bit.
 
 

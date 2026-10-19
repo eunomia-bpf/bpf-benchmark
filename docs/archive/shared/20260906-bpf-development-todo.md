@@ -14571,6 +14571,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file ccmp watchlist verified), the untracked harness retained
   for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0185 — AArch64 ALU operand mutation coverage
+
+- Scope: the RHS selection the generic ALU handler consumes —
+  immediate bypass vs register-mode source modification
+  (`arm64_alu_operand_spec.json`,
+  `generate_arm64_alu_operand_spec.py` with the eleven-code modifier
+  cross-check, `generated/arm64_alu_operand.h` with the
+  `KPROG_ARM64_ALU_RHS` ternary,
+  `KProgFormal/GeneratedArm64AluOperand.lean` with the Mode dispatch,
+  `KProgFormal/Arm64AluOperandHandler.lean` with `arm64AluRhsSpec`
+  and the composition over `arm64_alu_handler_refines`, and four
+  `native_decide` examples, `test_arm64_alu_operand_host.c` —
+  2×11×8×8×4 grid = 5,632 cases), ...
+- Harness: `build/mut_arm64_alu_operand.py` (untracked), 42
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 14 / lean_chain 9 / host 8 catch split; 11 equivalences
+  (stale-mirror gate disarm, generator message/mod-table-message/
+  import repaints, three example renames, rw-order repaint, host
+  mode-loop shrink, mirrored host vector walk, two summary-line
+  repaints).
+- Result: TOTAL 42 mutations, 0 failures, 11 equivalences survived
+  (31 catch: 14 gen, 9 lean_chain, 8 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: two drafted rows relabeled after the first run — the
+  `rw` operand-order repaint survives (`rw` closes disjoint subterms
+  in either order), and the modifier-table message repaint survives
+  as guarded error text the green run never trips. The VALUE/SHIFT
+  transposes in the generator recipe, the generated C macro, the
+  hand Lean mirrors, and the host oracle are all catches at their
+  own detectors.
+- Residue: all six watched files byte-identical after each run
+  (6-file alu-operand watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
