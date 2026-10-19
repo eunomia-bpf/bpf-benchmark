@@ -14372,6 +14372,47 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `../arm64/` headers), the untracked harness retained for reruns, and
   `make check` kept at 210 `: OK`.
 
+## Step 0180 — AArch64 branch-emission shape mutation coverage
+
+- Scope: the emission-level contract between the AArch64 flag/compare
+  predicates and the generator's actual `goto`/label code:
+  `arm64_branch_emit_spec.json`, `generate_arm64_branch_emit_spec.py`,
+  `generated/arm64_branch_emit.h` (the one-direction directive
+  `KPROG_ARM64_BRANCH_BACKWARD(CURRENT, TARGET)`),
+  `KProgFormal/GeneratedArm64BranchEmit.lean`,
+  `KProgFormal/Arm64BranchEmit.lean` (the
+  `arm64BranchEmitShapeSpec` refinement plus `arm64_branch_emit_refines`
+  over `branchPc`), `test_arm64_branch_emit_host.c` (64-case 8x8
+  current/target direction lattice), ...
+- Harness: `build/mut_arm64_branch_emit.py` (untracked), 71
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 29 / lean_chain 26 / host 16; 14 equivalences (stale-mirror gate
+  disarm, generator message repaint, comment-only import repaint,
+  three consumers-free theorem renames, `split`-chain tail repaint,
+  shape-irrelevance directive swap, lattice fall-through-constant
+  repaint, address-grid resample, two summary-line repaints).
+- Result: TOTAL 71 mutations, 0 failures, 14 equivalences survived
+  (57 catch: 29 gen, 26 lean_chain, 16 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: the drafted `hand_branchpc_two_valued_drift`
+  self-referential goal anchor did not match (the refinement's RHS is
+  `branchPc`); retargeted to dropping `GeneratedArm64BranchEmit.shape`
+  from the unfold line — still provable (split's auto-unfolding closes
+  the goal), so the row became
+  `equivalent_refines_tac_extra_split_survives`; the drafted lattice
+  rewrite survives (any sample of plain addresses keeps the lattice
+  closed because oracle and directive compute the same function, the
+  same equivalence `arm64_branch_emit_shape_irrelevant` states); a top-
+  comment repaint of the re-rendered C header is catchable by the
+  `--check` mirror even though the byte-probe itself is inert; the
+  single-line JSON has no standalone-token boundary, so the inclusion
+  swap anchors on the reordered shape objects directly.
+- Residue: all six watched files byte-identical after each run
+  (`md5sum` verified against the 6-file branch-emit watchlist), the
+  untracked harness retained for reruns, and `make check` kept at 210
+  `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

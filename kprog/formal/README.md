@@ -3878,6 +3878,72 @@ detector applies to this family here); and both order-swap rows need
 comma-joined adjacency because the emitted JSON members carry trailing
 commas verbatim.
 
+### Step 0180 — AArch64 branch-emission shape mutation coverage
+
+The `arm64_branch_emit` contract (`arm64_branch_emit_spec.json` 1 line,
+`generate_arm64_branch_emit_spec.py` 115 lines,
+`generated/arm64_branch_emit.h` 13 lines,
+`KProgFormal/GeneratedArm64BranchEmit.lean` 27 lines,
+`KProgFormal/Arm64BranchEmit.lean` 54 lines,
+`test_arm64_branch_emit_host.c` 93 lines) covers the only emission-level
+bridge in the formal tree: two code shapes the generator emits for every
+branch — a backward edge (target at or below the current address) rendered
+as an inverted conditional jump to a local fall-through label followed by
+an unconditional jump, and a forward edge rendered as a plain conditional
+jump with a fall-through — both selecting one shared next-PC. The
+direction bit is carried by `KPROG_ARM64_BRANCH_BACKWARD(CURRENT, TARGET)`
+as `((__u8)(((TARGET) <= (CURRENT)) ? 1 : 0))`, and every consumer that
+needs the shape reads this one directive.
+
+The hand Lean side proves the bridge in two pieces:
+`arm64BranchEmitShapeSpec = decide (target <= current)` refined against
+`GeneratedArm64BranchEmit.backward (shape current target)` via
+`by_cases h : target <= current <;> simp [h]`, then the emission theorem
+`arm64_branch_emit_refines` proving the shared next-PC equals `branchPc`
+via `split <;> split <;> rfl` — the same 2×2 shape/taken grid the host
+oracle enumerates as its 64-case 8x8 current/target lattice with both
+directions asserted per case.
+
+`build/mut_arm64_branch_emit.py` (474 lines) perturbs the six files with
+71 rows across the three detectors, 'untracked, 71 single-anchor rows':
+29 catch at the generator stage (spec JSON repaints and order/inclusion
+swaps, generator mirror and order pins, file-path and C-body recipe
+drifts, Lean recipe and next-PC recipe drifts), 26 catch through the Lean
+chain (spec-body, theorem-goal and tactic, shape and nextPc recipe holes,
+ctor injection, import and namespace drift, and the proof-strength probes
+that must fail when a directive is genuinely wrong), and 16 catch by the
+host oracle (oracle comparison drifts, emitted backward/forward steering
+swap, branch_pc drifts, `KPROG_ARM64_BRANCH_BACKWARD` macro insert/race
+hole, and address-grid resampling that keeps the 64-case lattice closed).
+14 rows survive as documented equivalences: 'the disarmed spec-mirror
+guard the shape rows already trip', the generator message repaint and
+comment-only import repaint (green-run-invisible guard paths), three
+consumers-free theorem renames (the emitted-side theorems plus the
+`arm64_branch_emit_shape_refines` declaration line, whose statement the
+file re-proves independently of the name), the `split`-chain tail repaint
+that re-proves the same fully-split conjunction, the directive
+irrelevance `arm64_branch_emit_shape_irrelevant` already states (both
+shapes pick the same next PC), the lattice fall-through-constant repaint
+(0x1000/0x2000 -> 0x1001/0x2001) the proved contract makes invisible, and
+two summary-line repaints carrying no result bit. Shakedown retargets:
+the drafted `hand_branchpc_two_valued_drift` self-referential goal anchor
+did not match the real file (the refinement's RHS is `branchPc`, retargetd
+to drop `GeneratedArm64BranchEmit.shape` from the unfold line — still
+provable, split's auto-unfolding closes it, so the row became the
+`equivalent_refines_tac_extra_split_survives` equivalence); the drafted
+`host_addrs_grid_drift` lattice-rewrite survives (any sample of plain
+addresses keeps the lattice closed because oracle and directive compute
+the same function, an equivalence the `arm64_branch_emit_shape_irrelevant`
+theorem states), so the retargeted rows label as equivalences; a comment
+repaint of the re-rendered C header's top comment is catchable by the
+`--check` mirror even though the byte-probe itself is inert; two
+detector-invisible rows from the draft (the emitted `backward`-flag call
+swap and the empty-arm bracket) were replaced by retargeted catchable
+rows; the spec `@@`-swap placeholder needed a direct reordered-JSON edit
+because single-line JSON has no standalone-token boundary to anchor the
+placeholder against.
+
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
