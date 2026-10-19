@@ -14943,6 +14943,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file fmov-dest watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0196 — AArch64 MOV provenance mutation coverage
+
+- Scope: the shared move routing decision — MOV IMM always
+  width-narrowed (immediate carries no tag), MOV REG tag-copy
+  exactly at doubleword width, off-family the unsupported arm
+  behind the HANDLED coverage macro — across the two-opcode
+  case spec, its generator (with arm64_sim.h cross-checks), the
+  generated C switch macro, the generated Lean module, the hand
+  module (restates op=movReg&&width=w64; refinement,
+  never-preserve, w64 iff, sub-word drop, pins, width-matters,
+  examples), and a 1024-case fork-per-case host oracle requiring
+  SIGABRT off-family.
+- Harness: `build/mut_arm64_mov.py` (untracked), 50 single-anchor
+  rows over the six files with 3 detectors: gen 15 / lean_chain
+  10 / host 12 catch; 13 equivalences (six unreachable
+  error-message repaints, three consumers-free theorem renames,
+  a true weaker range-pin repaint, and the width-grid
+  permutation).
+- Result: TOTAL 50 mutations, 0 failures, 13 equivalences
+  survived (37 catch: 15 gen, 10 lean_chain, 12 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the refines rename is consumers-free HERE (only
+  its own definition line, nothing downstream) — the mirror of
+  Step 0195 where in-file consumers made it a catch; width-grid
+  coverage rows need W64 KEPT (dropping it removed the preserve
+  case entirely and was replaced by a permutation keeping all
+  four width classes); the case-1 sets-path injection is a
+  catch: MOV IMM denying the tag-copy path is load-bearing.
+- Residue: all six watched files byte-identical after each run
+  (6-file mov watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

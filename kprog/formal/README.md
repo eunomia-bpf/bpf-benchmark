@@ -4685,6 +4685,54 @@ repaints (the 255-direction host sweep and the parity-tuple
 lemma's `rfl`-closed conjunction) that keep both routing
 classes exercised.
 
+### Step 0196 — AArch64 MOV provenance mutation coverage
+
+The `arm64_mov` contract (`arm64_mov_spec.json` 1 line,
+`generate_arm64_mov_spec.py` 176 lines,
+`generated/arm64_mov.h` 45 lines,
+`KProgFormal/GeneratedArm64Mov.lean` 28 lines,
+`KProgFormal/Arm64Mov.lean` 71 lines,
+`test_arm64_mov_host.c` 114 lines) fixes the shared move routing
+decision: `ARM64_OP_MOV_IMM` (1) always writes a width-narrowed
+value, dropping any source provenance tag (the source is an
+immediate), and `ARM64_OP_MOV_REG` (2) copies the source
+register's tag through the tag-copy register write exactly at
+doubleword width, else the width-narrowed scalar write; an
+opcode outside the family reaches the caller-supplied
+unsupported arm behind `KPROG_ARM64_MOV_HANDLED`, whose both
+family opcodes are coverage static-asserted and re-checked
+against `kprog/arm64/arm64_sim.h` at `--check` time. The
+generated side carries the two-constructor `Mov`, `code`,
+`mnemonic`, and the two-arm `ptrTagPath` match in Lean plus the
+switch-based C macro; the hand module restates
+`op = movReg && width = w64`, proves the refinement, the
+never-preserve law, the w64 iff, the sub-word drop law, both
+opcode pins with in-range bounds, the width-matters law, and
+two canonical examples. The host oracle forks a child per case
+over all 256 opcodes x 4 widths = 1024 cases.
+
+`build/mut_arm64_mov.py` (50 rows) perturbs the six files with
+the three detectors, all untracked, 50 single-anchor rows: 15
+catch at the generator stage (the operation/row drifts, the
+order and macros check repaints, the rendered code-table drift,
+the width-code repaint in the rendered case arm, the
+handled-join repaint, and the generated-path repoint), 10 catch
+through the Lean chain (the code drift, the tag-path arm flip,
+the wildcard repaint, the namespace drift, and the hand
+conjunction repaint, the iff right side, the sub-word bound
+repaint, the opcode pin, and both example flips), and 12 catch
+by the host oracle (all three oracle repaints, the exit-bit
+shift, the SIGFPE repaint, the want-sign inversion, and the
+generated case-1 sets-path injection, case-label renumber,
+polarity flip, handled `&&` repaint, and both coverage/pointer
+assert repaints). 13 rows survive as documented equivalences:
+six unreachable error-message repaints (all
+green-run-invisible), three consumers-free theorem renames (the
+refines rename among them — nothing downstream cites it), a
+true weaker range-pin repaint (0 ≤ imm ≤ 3 remains provable
+while the exact `code_dispatch` pin stands), and the width-grid
+permutation that keeps all four width classes injected.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
