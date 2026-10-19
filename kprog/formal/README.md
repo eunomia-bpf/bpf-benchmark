@@ -4733,6 +4733,55 @@ true weaker range-pin repaint (0 ≤ imm ≤ 3 remains provable
 while the exact `code_dispatch` pin stands), and the width-grid
 permutation that keeps all four width classes injected.
 
+### Step 0197 — AArch64 LDRSX-the-LOAD-WIDTH mutation coverage
+
+The `arm64_ldrsx` contract (`arm64_ldrsx_spec.json` 1 line,
+`generate_arm64_ldrsx_spec.py` 190 lines,
+`generated/arm64_ldrsx.h` 50 lines,
+`KProgFormal/GeneratedArm64LdrSx.lean` 35 lines,
+`KProgFormal/Arm64LdrSx.lean` 94 lines,
+`test_arm64_ldrsx_host.c` 114 lines) pins the load width the three
+sign-extending loads read before sign-extending into the
+destination: `LDRSB` (54) reads a byte, `LDRSW` (57) a word, and
+`LDRSH` (63) a halfword — the load width is fixed by the opcode
+and independent of the destination access width, so a mislabeled
+load reads the wrong number of bytes; an opcode outside the family
+reaches the caller-supplied unsupported arm behind
+`KPROG_ARM64_LDRSX_HANDLED`, whose three opcodes are coverage
+static-asserted and re-checked against `kprog/arm64/arm64_sim.h`
+at `--check` time. The generated side carries the
+three-constructor `LdrSx`, `code`, `mnemonic`, the three-arm
+`loadWidth` match, and the constant-true `flagsUnchanged` in Lean
+plus the switch macro returning the `ARM64_WIDTH_*` code; the hand
+module restates the load width keyed on the numeric code, proves
+the refinement, the code-determined law, the pairwise
+distinctness, the bytes-match law, the strictly-sub-64 law, all
+three opcode pins with in-range bounds, the flags law, and two
+canonical examples. The host oracle forks a child per case over
+all 256 opcodes.
+
+`build/mut_arm64_ldrsx.py` (58 rows) perturbs the six files with
+the three detectors, all untracked, 58 single-anchor rows: 19
+catch at the generator stage (the operation/row drifts, the
+order/widths/macro-pair check repaints, the mnemonic-suffix
+repaint, the rendered arms/case-label/width repaints, the
+handled-join repaint, and the generated-path repoint), 14 catch
+through the Lean chain (both code drifts, the load-width arm
+repaints, the wildcard flip, the namespace drift, the hand
+code-keyed repaint, the distinctness-pair repaint, the
+bytes-match repaint, the sub-64 bound repaint, the opcode pin,
+the flags flip, and both example repaints), and 14 catch by the
+host oracle (all three oracle repaints, the zero-sentinel
+repaint, the exit-mask shift, the SIGFPE repaint, the want-zero
+and want-comparison swaps, and the case-54 label/shared-arm
+repaints). 11 rows survive as documented equivalences: seven
+unreachable error-message repaints (all green-run-invisible)
+including the stale-gate, two consumers-free theorem renames
+(the refinement and the mnemonic repaint's downstream freedom),
+a true weaker range-pin repaint (53 ≤ imm ≤ 63 remains provable
+while the exact `code_dispatch` pin stands), and the generated
+mnemonic repaint that no downstream proof derives.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/

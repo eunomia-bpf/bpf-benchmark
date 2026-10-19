@@ -14975,6 +14975,39 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file mov watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0197 — AArch64 LDRSX-the-LOAD-WIDTH mutation coverage
+
+- Scope: the load width the three sign-extending loads read before
+  sign-extending into the destination — LDRSB (54) a byte, LDRSW
+  (57) a word, LDRSH (63) a halfword, fixed by the opcode and
+  independent of the destination access width — across the
+  three-opcode case spec, its generator (with arm64_sim.h
+  cross-checks and the mnemonic-suffix table), the generated C
+  switch macro, the generated Lean module (LdrSx, code, mnemonic,
+  loadWidth, constant-true flagsUnchanged), the hand module
+  (code-keyed restatement, refinement, code-determined, pairwise
+  distinctness, bytes-match, strictly-sub-64, all three pins,
+  flags law, two examples), and a 256-case fork-per-case host
+  oracle requiring SIGABRT off-family.
+- Harness: `build/mut_arm64_ldrsx.py` (untracked), 58 single-anchor
+  rows over the six files with 3 detectors: gen 19 / lean_chain 14
+  / host 14 catch; 11 equivalences (seven unreachable error-message
+  repaints, two consumers-free theorem renames, a true weaker
+  range-pin repaint, and the generated mnemonic repaint).
+- Result: TOTAL 58 mutations, 0 failures, 11 equivalences
+  survived (47 catch: 19 gen, 14 lean_chain, 14 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the mnemonic repaint survives because only the hand
+  module's `open` names it and nothing derives or consumes the
+  string values — the equivalent-of-rename slot went there
+  instead of a consumers-free theorem rename; the sb range
+  loosen 53 ≤ imm ≤ 63 stays true (exact pin stands, 0194–0196
+  precedent); case-54's width repaint dropping W8→W16 is the
+  load-bearing catch.
+- Residue: all six watched files byte-identical after each run
+  (6-file ldrsx watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
