@@ -4540,6 +4540,53 @@ green-run-invisible), five consumers-free theorem renames, the
 arm-constant repaint whose every use-site re-derives from the
 identifier, and the host summary-line repaint.
 
+### Step 0193 — AArch64 register-presence mutation coverage
+
+The `arm64_reg_presence` contract (`arm64_reg_presence_spec.json`
+1 line, `generate_arm64_reg_presence_spec.py` 169 lines,
+`generated/arm64_reg_presence.h` 34 lines,
+`KProgFormal/GeneratedArm64RegPresence.lean` 31 lines,
+`KProgFormal/Arm64RegPresence.lean` 103 lines,
+`test_arm64_reg_presence_host.c` 82 lines) fixes the
+write-register destination-presence selection: a decoded
+register number is a destination (a GPR) unless it is the zero
+register `31` (`ARM64_XZR`) or the no-register sentinel `0xff`
+(`ARM64_REG_NONE`), both of which discard the write. The
+generated side carries the three-class `Class` inductive,
+`xzrNumber`/`noneNumber`, `classify`/`writable`, and the
+`KPROG_ARM64_REG_WRITABLE`/`_CLASS` macros; the hand module
+restates the class table and presence test against the literal
+numbers, proves both refinements, pins both numbers, links the
+sentinel to the memory-index sentinel, and proves both discard
+arms, reachability, and canonical examples. The host oracle
+sweeps all 256 register bytes over both macros plus a
+class/writable cross-consistency check and two constant
+self-checks = 512 cases.
+
+`build/mut_arm64_reg_presence.py` (56 rows) perturbs the six
+files with the three detectors, all untracked, 56 single-anchor
+rows: 18 catch at the generator stage (the
+op/bits/xzr/none/class-code spec drifts, the expected-table
+writable-flag repaints, the class-rows generator repaint, the
+rendered Lean classifier swap, both rendered C macro repaints,
+and the generated-path repoint), 16 catch through the Lean chain
+(the classifier swap, all three class-table row flips, both
+number-constant drifts, the `writable` match-body repaint, the
+namespace drift, and the hand independent-spec selector swap,
+refinement renames, number-pin drifts, the sentinel-link width
+repaint, and both discard/receive flips), and 9 catch by the
+host oracle (the want-writable `||` repaint, the want-class and
+cross-check class swaps, the sentinel self-check drifts, and
+the generated polarity/`&&`-repaint/swap trio). 13 rows survive
+as documented equivalences: five unreachable error-message
+repaints (including the zero/sentinel collide message) and the
+spec mirror-guard disarm (all green-run-invisible), five
+consumers-free theorem renames, the GPR class-constant repaint
+whose every use-site re-derives from the identifier, the
+decimal-to-hex literal repaint of the host XZR self-check
+(`31U` and `0x1fU` being the same number), and the host
+summary-line repaint.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/

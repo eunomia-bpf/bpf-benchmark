@@ -14845,6 +14845,40 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file mem-index watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0193 — AArch64 register-presence mutation coverage
+
+- Scope: the writeback destination-presence selection — a
+  register number receives a write unless it is the zero
+  register 31 (XZR) or the no-register sentinel 0xff — across
+  the three-class case spec, its generator, the generated C
+  header (WRITABLE/CLASS macros and class constants), the
+  generated Lean module (`Class`/`xzrNumber`/`noneNumber`/
+  `classify`/`writable`), the hand module (independent
+  restatements, number pins, the memory-index sentinel link,
+  discard arms, dispatch, examples), and a 512-case host oracle
+  sweeping all 256 register bytes plus two constant self-checks.
+- Harness: `build/mut_arm64_reg_presence.py` (untracked), 56
+  single-anchor rows over the six files with 3 detectors:
+  gen 18 / lean_chain 16 / host 9 catch; 13 equivalences
+  (five unreachable error-message repaints, mirror-guard
+  disarm, five consumers-free theorem renames, the
+  lockstep-deriving GPR class-constant repaint, the
+  decimal-to-hex literal repaint 31U==0x1fU, summary repaint).
+- Result: TOTAL 56 mutations, 0 failures, 13 equivalences
+  survived (43 catch: 18 gen, 16 lean_chain, 9 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the GPR class-constant repaint survived because
+  want_class, the cross-check, and the macro tail all re-derive
+  from the identifier (lockstep, the 0187 precedent); the host
+  XZR self-check repaint to 0x1fU is numerically identical to
+  31U — decimal-to-hex reliteralizations are equivalences, not
+  catches; the classifier/class-assignment swaps and the
+  &&-to-|| repaint are catches in the same file.
+- Residue: all six watched files byte-identical after each run
+  (6-file reg-presence watchlist verified), the untracked
+  harness retained for reruns, and `make check` kept at
+  210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
