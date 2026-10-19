@@ -15148,6 +15148,48 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file stack-arena watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0202 — AArch64 flag-operand mutation coverage
+
+- Scope: the right-hand-operand selection shared by the six
+  NZCV-producing AArch64 flag-arm pairs (`SUBS`/`ADDS`/`CMP`/`TST`/
+  `ANDS`/`CCMP`): the `_IMM` member of each pair selects the decoded
+  immediate, every other opcode selects the caller-supplied register
+  expression — across the case spec (six opcode fields plus the
+  operation name), its generator (expected family/code rows, error
+  messages, every rendered Lean code-table/selection-match template
+  and every rendered C case/assign/assert/macro template), the
+  generated C header (twelve `_Static_assert` rows, the six-case
+  `KPROG_ARM64_FLAG_RHS` switch labels, the macro declaration), the
+  generated Lean module (namespace, inductive, every `code` row,
+  every `immediate` row), the hand module (independent immediate/
+  register membership lists, the membership-based restatement, every
+  theorem including the twelve-opcode refinement and full code
+  dispatch, every canonical-example value, the open list), and a
+  256-opcode 5120-case host oracle (case labels, selection variables,
+  the mismatch verdict, sweep tables, opcode range).
+- Harness: `build/mut_arm64_flag_operand.py` (untracked), 69
+  single-anchor rows over the six files with 3 detectors: gen 19 /
+  lean_chain 22 / host 8 catch; 20 equivalences (five unreachable
+  generator error-message repaints, ten consumers-free hand renames,
+  the header-guard repaint, the host sweep-value repaints, and the
+  OK-line message).
+- Result: TOTAL 69 mutations, 0 failures, 20 equivalences survived
+  (49 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the members of the exclusive-pairs theorem inside the
+  hand Lean anchor's two-line window made the first pairs repaint a
+  silent no-op (the anchor didn't reach the `.cmp`/`.ccmp` rows);
+  retargeted at `immediate .subsReg = false` -> `= true` so the
+  `decide` actually fails. The open-list rename is catchable here
+  (the hand module's own defs consume the opened names unqualified),
+  unlike consumers-free theorem renames; the host immediates/
+  registers tables and the 256->128 opcode range survive because the
+  oracle re-derives `want` from the same repainted inputs (all six
+  immediate codes lie below 128, so the classification coverage is
+  unchanged).
+- Residue: all six watched files byte-identical after each run
+  (6-file flag-operand watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

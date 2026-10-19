@@ -5259,5 +5259,50 @@ capacity, a duplicate index, a plus-seven capacity shift, and a
 zero-capacity append the round-up absorbs), and the OK-line
 message.
 
+### Step 0202 — AArch64 flag-operand mutation coverage
+
+The `arm64_flag_operand` contract (`arm64_flag_operand_spec.json`
+1 line, `generate_arm64_flag_operand_spec.py` 188 lines,
+`generated/arm64_flag_operand.h` 59 lines,
+`KProgFormal/GeneratedArm64FlagOperand.lean` 52 lines,
+`KProgFormal/Arm64FlagOperand.lean` 90 lines,
+`test_arm64_flag_operand_host.c` 92 lines) pins the ISA decision the
+six NZCV-producing AArch64 flag-arm pairs
+(`SUBS`/`ADDS`/`CMP`/`TST`/`ANDS`/`CCMP`) share: the `_IMM` member of
+each pair selects the decoded immediate as the right-hand operand and
+every other opcode selects the caller-supplied register expression.
+The generated side carries a twelve-constructor `FlagOp` enum with its
+opcode `code` table and the `immediate` selection match, plus a
+twelve-entry `_Static_assert` block and a six-case
+`KPROG_ARM64_FLAG_RHS` statement-expression switch; the hand module
+restates the selection independently (a membership test over named
+immediate and register lists, structurally separate from the
+generated per-constructor match) and proves the refinement on all
+twelve opcodes, the immediate iff-membership biconditional, the
+register-only rule, list disjointness, one immediate and one register
+member per family, the full code dispatch, the 66-bounded code range,
+and three canonical examples. The host oracle sweeps all 256 opcode
+byte values (5120 cases) with distinct immediate and register
+constants: an immediate-form opcode must return the immediate,
+everything else the register expression.
+
+`build/mut_arm64_flag_operand.py` (69 rows) perturbs the six files
+with the three detectors: 19 catch at the generator stage (all six
+spec opcode drifts plus the operation repaint and the expected-field
+drifts at both the compared dict and every rendered Lean and C
+template), 22 catch through the Lean chain (the namespace and
+inductive repaints, every code and selection row of the generated
+match, every hand independent restatement, the exclusive-pairs and
+example values, and the module open list), and 8 catch by the host
+oracle (the generated case labels and macro name the oracle exercises,
+the oracle's own case labels, selection variables, and mismatch
+verdict). 20 rows survive as documented equivalences: five unreachable
+generator error-message repaints, ten consumers-free hand theorem and
+example renames (no module imports the hand module; its own bodies
+still check), the header-guard repaint no green detector compiles,
+the host sweep-value repaints (distinct immediates and registers and a
+shrunken opcode range whose verdicts are already equal — the six
+immediate codes all lie below 128), and the OK-line message.
+
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.
