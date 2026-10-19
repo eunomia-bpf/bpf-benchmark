@@ -15041,6 +15041,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file width watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0199 — AArch64 pair-load-tag mutation coverage
+
+- Scope: the two-slot LDP routing decision (opcode 33): the outer
+  pair gate (`width == 64 && (lo != SCALAR || hi != SCALAR)`) two
+  per-slot tag-class decisions; a two-bit mask (bit 0 low slot,
+  bit 1 high slot) selecting tag-copy vs tag-dropping scalar
+  write, and the unsupported arm for unknown opcodes — across the
+  case spec, its generator (opcode row + name/slot/rule checks),
+  the generated C header (switch macro with gate and slot bits,
+  ROUTE_LOW/ROUTE_HIGH), the generated Lean module
+  (code/slotCount/slotPreserve/pairGate/routeMask), the hand
+  module (per-slot route spec + refinement + gate-iff + drop laws)
+  and a 4096-case fork-per-case host oracle (256 opcodes x 4
+  widths x 4 tag pairs; unknown opcode must SIGABRT).
+- Harness: `build/mut_arm64_pair_load_tag.py` (untracked), 75
+  single-anchor rows over the six files with 3 detectors: gen 18
+  / lean_chain 19 / host 26 catch; 12 equivalences (five
+  unreachable error-message repaints, five consumers-free theorem
+  renames incl. the 33 <= code <= 34 range loosen, two value
+  repaints: opcode loop window and exit message).
+- Result: TOTAL 75 mutations, 0 failures, 12 equivalences
+  survived (63 catch: 18 gen, 19 lean_chain, 26 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the unsupported-arm repaint `UNSUPPORTEDX;` breaks
+  compilation (implicit declaration — abort() is stdlib) and
+  counts per the compile-failure rule; the spec-message repaint
+  touches two identical raises (count=2) and is green-run-
+  invisible (message text only); the width-loop bound repaint
+  shrinks an all-equal sweep — replaced by the waitpid plumbing
+  catch; the range loosening 33<=code<=34 stays true.
+- Residue: all six watched files byte-identical after each run
+  (6-file pair-load-tag watchlist verified), the untracked
+  harness retained for reruns, and `make check` kept at 210
+  `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

@@ -4833,6 +4833,59 @@ intact (the collider disarmed check, the never-evaluated
 effective-path defines, the never-fired unknown-width default
 branch, a boundary-vector value, and the fixed-seed LCG addend).
 
+### Step 0199 — AArch64 pair-load-tag mutation coverage
+
+The `arm64_pair_load_tag` contract (`arm64_pair_load_tag_spec.json`
+1 line, `generate_arm64_pair_load_tag_spec.py` 167 lines,
+`generated/arm64_pair_load_tag.h` 55 lines,
+`KProgFormal/GeneratedArm64PairLoadTag.lean` 25 lines,
+`KProgFormal/Arm64PairLoadTag.lean` 95 lines,
+`test_arm64_pair_load_tag_host.c` 129 lines) fixes the two-slot
+routing decision of the LDP handler (opcode 33): the outer pair
+gate (`width == 64 && (lo != SCALAR || hi != SCALAR)`) guards two
+per-slot tag-class decisions; the result is a two-bit mask, bit 0
+selecting the tag-copy register write for the low slot, bit 1 for
+the high slot, a clear bit the tag-dropping width-narrowed scalar
+write, and an opcode outside the family reaching the
+caller-supplied unsupported arm. The generated side carries
+`code`, `slotCount`, `slotPreserve`, `pairGate`, and the
+gate-then-per-slot `routeMask` in Lean plus the switch-based C
+macro with the gate, the two slot-bit conditionals, and the
+`ROUTE_LOW`/`ROUTE_HIGH` accessors; the hand module restates the
+routing keyed on each slot's bit-count class (deliberately not
+through the gate, proving the gate redundant with the per-slot
+rule) and proves the refinement, the both-scalar-zero law, the
+gate-iff law, the sub-word drop law, the only-high/only-low/
+both-preserve examples, the w64-only routing law, the slot-count
+pin, the opcode pin with in-range bound, and two canonical
+examples. The host oracle forks a child per case over all 256
+opcodes crossed with the four widths and the four tag-class pairs
+(4096 cases): a known pair load must match the independent
+per-slot oracle and an unknown opcode must abort with SIGABRT
+through the generated unsupported arm.
+
+`build/mut_arm64_pair_load_tag.py` (75 rows) perturbs the six
+files with the three detectors, all untracked, 75 single-anchor
+rows: 18 catch at the generator stage (the operation/opcode/slot
+drifts, the name/slot-count and preserve-rule check repaints, the
+rendered Lean code and C static-assert/case-label drifts, the
+gate loose-end repaint, the low-or-set-bit swaps, and the
+generated-module repoint), 19 catch through the Lean chain (the
+generated code/slot repaints, the slotPreserve width repaint, the
+gate condition swap, the complement/shift/false-through repaints
+of the slot terms, the namespace drift, and the route-spec,
+law, and example repaints on the hand side), and 26 catch by the
+host oracle (the case/width drifts, the gate `&&`/`||` repaints,
+the per-slot condition and bit-set swaps, the default-arm
+repaint, the static assert, the route-define rename, the accessor
+bit swaps, the header guard, the unsupported-arm undeclared
+repaint, and the oracle/exit/waitpid repaints). 12 rows survive
+as documented equivalences: five unreachable error-message
+repaints, five consumers-free theorem renames (refines, gate-iff,
+sub-word, w64-only, and the `33 ≤ code ≤ 34` range loosening
+whose bound still holds), and two value repaints that keep the
+protocol intact (the opcode loop window and the exit message).
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
