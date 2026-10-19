@@ -3742,6 +3742,58 @@ row was retargeted to dropping the independent-spec unfold
 (`simp only [value, narrow, mask]` without `arm64StlxrSpec`), which
 `bv_decide` refutes with an opaque `arm64StlxrSpec` counterexample.
 
+
+The AArch64 move-wide insertion contract is the 16-bit halfword insert the
+simulator's `MOVK` handler computes: the low 16 bits of the immediate land at
+one of the four architectural columns 0/16/32/48 and every other destination bit
+is kept, the column coming from the packed AUX word's lane-2 shift field. The
+generated macro is `KPROG_ARM64_MOVK_INSERT` from `generated/arm64_movk.h` (the
+`KPROG_ARM64_MOVK_HANDLED` column guard with the four coverage static
+assertions, the switch over the column with per-column case arms, and the
+mask/shift insert statement), and `KProgFormal/GeneratedArm64Movk.lean` carries
+the four-member `MovkShift` table with `column` and `value`. `Arm64Movk.lean`
+proves the generated masked insert equal to an independent statement --- the
+destination with the 16-bit column cleared or'd with the narrowed immediate
+shifted into place, deliberately not a restatement of the generated mask pair
+--- the width-narrowed composition over every width, the closed column set, the
+four-column dispatch, and six native-decide examples. It gets its own mutation
+build-out in `build/mut_arm64_movk.py` (untracked, 74 single-anchor rows) over
+five contract files --- the column spec (`arm64_movk_spec.json`), its generator
+(`generate_arm64_movk_spec.py`, including the four expected columns, the name
+and order pins, the `ARM64_AUX_MOVK` lane-2 alias regex that re-checks
+`kprog/arm64/arm64_sim.h` on every `--check`, and the stale-output comparison),
+the generated C switch macro (`generated/arm64_movk.h`), the generated Lean
+table (`GeneratedArm64Movk`), and the hand Lean refinement (`Arm64Movk.lean`)
+--- with the same three detectors: gen (`generate_arm64_movk_spec.py
+--check`), lean_chain (`lake build KProgFormal.GeneratedArm64Movk` then
+`lake env lean KProgFormal/Arm64Movk.lean`), and host (the 20,145-case
+`test_arm64_movk_host.c` oracle --- 24 boundary vectors over all four columns,
+the 20,000-iteration fixed-seed sweep crossed with the columns, and the forked
+column-8 abort through the generated unsupported arm; the oracle writes the
+destination into a byte array and replaces the target halfword's two bytes from
+the immediate's low two bytes, structurally separate from the macro's
+shift/mask pair). 68 catch (`gen=30 lean_chain=19 host=18`, three of the host
+catches through compile failures: the column-0 HANDLED repaint the coverage
+static assertion rejects, the dropped `imm` operand of the insert, and the
+`>>=` mask ladder repaint) and 6 survive: the generated-Lean precedence
+repaint (`|||` binds looser than `&&&`, so dropping the inner parentheses
+recomputes the same value), a generator comment probe, a hand dispatch
+doc-comment repaint, the hand-Lean column repaint (the hand probes re-read the
+generated column through `open ... (column)`, so the truth is carried by the
+generated table and the dispatch theorem, not by the hand restatement), the
+compact spec JSON spacing paint, and the macro's dead default-arm mask seed
+(the unsupported arm aborts; the mask assign feeds nothing). All six are
+documented equivalences by design. Shakedown retargets were needed for two
+draft anchors: the bare `dst` repaint in the generated-Lean value row is not a
+Lean identifier (the elaborator rejects the term before any semantics, so the
+row became `imm <<< s` -> `imm >>> s`, which the refinement pins (the
+insertion direction flips) and `bv_decide` refutes with the drift
+counterexample); and the hand-Lean column-value repaint `column .col16 = 15`
+survives --- the hand theories unfold the generated `column`, so the hand
+repaint is a doc-level equivalence --- and the row was retargeted to the same
+value inside `arm64_movk_column_dispatch`, there proved by `decide` against
+the generated table, which fails.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production

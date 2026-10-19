@@ -1356,7 +1356,35 @@ increment is committed and pushed immediately). Current state:
   refinement tactic (`bv_decide` -> `native_decide` stays sound ->
   dropping the independent-spec unfold from the `simp only` set,
   refuted by `bv_decide` with an opaque `arm64StlxrSpec`
-  counterexample).
+  counterexample),
+  and the AArch64 MOVK move-wide insertion contract (the low 16
+  bits of the immediate inserted at one of the four architectural
+  columns 0/16/32/48, keeping every other destination bit, through
+  `KPROG_ARM64_MOVK_INSERT` from `generated/arm64_movk.h`; the column is
+  the AUX lane-2 shift field, which `ARM64_SIM_L_MOVK_VALUE` threads
+  from the `ARM64_SIM_L_SHIFT(AUX)` alias re-checked by the generator's
+  `ARM64_AUX_MOVK` regex) got its own single-family harness against the
+  20,145-case host oracle (Step 0176; 24 boundary vectors over all four
+  columns, a 20,000-iteration fixed-seed sweep and the forked
+  unsupported-column abort probe whose oracle writes the destination
+  into a byte array and overwrites the target halfword's two bytes ---
+  structurally separate from the macro's shift/mask pair; same three
+  detectors and no regen or sim-header stage --- the wrapper threads the
+  column through one `ARM64_SIM_L_MOVK_VALUE` call, so a generated-header
+  drift shows only through the host oracle or a stale `--check`, split
+  gen 30 / lean_chain 19 / host 18 with 6 documented equivalences: the
+  generated-Lean `|||`/`&&&` precedence repaint right-assoc equal, the
+  hand-Lean `column .col16` repaint the generated dispatch disagrees
+  with, the generator comment probe, the hand dispatch doc-comment, a
+  spec JSON spacing paint, and the macro's default-arm mask seed (only
+  the abort arm sets it and then discards it) — the hand column repaint
+  equal until retargeted onto the dispatch `= 15` repaint `decide`
+  rejects). Shakedown retargets: the bare `dst` repaint in the
+  generated-Lean value row is not a Lean identifier (elaborator fails
+  before semantics; retargeted onto `imm >>> s`, rejected by the
+  refinement), and the hand Lean column-value repaint is dead (the hand
+  theories re-read the generated column; retargeted onto the dispatch
+  theorem row).
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

@@ -14074,6 +14074,93 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Residue: all five watched files byte-identical after the run
   (`md5sum` verified); kept `make check` count at 210 `: OK`.
 
+## Step 0176 — AArch64 MOVK move-wide insertion mutation coverage
+
+- Scope: the AArch64 move-wide insertion value
+  `KPROG_ARM64_MOVK_INSERT` --- the low 16 bits of the immediate inserted at
+  one of the four architectural columns 0/16/32/48 while every other
+  destination bit is kept, dispatched from the simulator's
+  `KPROG_ARM64_DISP_MOVK_HANDLED` arm through `ARM64_SIM_L_MOVK_VALUE`
+  (`arm64_sim_local_bpf.h:490` threads the column from
+  `ARM64_SIM_L_SHIFT(AUX)`); the column is the packed AUX word's lane-2
+  shift field, exactly the architectural column for `ARM64_AUX_MOVK(S)`
+  (`KPROG_ARM64_AUX(0U, 0U, (S), 0U)`), which the generator re-checks by
+  regex on every `--check`. The hand Lean refinement pins the independent
+  `arm64MovkValueSpec` (the destination with the 16-bit column cleared or'd
+  with the narrowed immediate shifted into place --- deliberately not a
+  restatement of the generated mask pair), the refinement of the generated
+  `value` over every column/value pair (`bv_decide`), the width-narrowed
+  composition over every width, the closed column set (0 v 16 v 32 v 48),
+  the four-column dispatch, and six `native_decide` examples.
+- Harness: `build/mut_arm64_movk.py` (untracked, 74 single-anchor
+  mutation rows) over five contract files --- the column spec
+  (`arm64_movk_spec.json`: four columns, `arm64Movk`, schema 1), its
+  generator (`generate_arm64_movk_spec.py`: expected-column table, name
+  and order pins, coverage/handled/mask-ladder case recipes, the
+  `ARM64_AUX_MOVK` lane-2 alias regex re-checked against
+  `kprog/arm64/arm64_sim.h`, and the stale-output comparison), the
+  generated C switch macro (`generated/arm64_movk.h`: the
+  `KPROG_ARM64_MOVK_HANDLED` guard, four coverage static assertions, the
+  per-column case arms, the mask seed, the insert statement, and the
+  default/unsupported arms), the generated Lean table
+  (`KProgFormal/GeneratedArm64Movk.lean`; the four-member `MovkShift`
+  enum, `column`, and `value`), and the hand Lean refinement
+  (`KProgFormal/Arm64Movk.lean`). Three detectors, no regen stage and no
+  sim-header stage --- the wrapper threads the column through one
+  `ARM64_SIM_L_MOVK_VALUE` call, so the host oracle reaches the macro
+  through the generated header alone: `gen`
+  (`generate_arm64_movk_spec.py --check`), `lean_chain` (`lake build
+  KProgFormal.GeneratedArm64Movk` then `lake env lean
+  KProgFormal/Arm64Movk.lean`), and `host` (the 20,145-case
+  `test_arm64_movk_host.c` oracle --- 24 boundary vectors over all four
+  columns, the 20,000-iteration fixed-seed sweep crossed with the
+  columns, and the forked column-8 abort through the generated
+  unsupported arm; the masking oracle is an independent byte-array
+  write, replacing the target halfword's two bytes from the immediate's
+  low two bytes, not the macro's shift/mask pair).
+- Result: `TOTAL 74 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  68 mutants catch (gen 30, lean_chain 19, host 18 --- three of the host
+  catches through compile failures: the column-0 `HANDLED` repaint the
+  coverage static assertion rejects at compile time, the dropped `imm`
+  operand of the insert, and the `>>>` mask-ladder repaint; several
+  further gen catches ride `--check` staleness because the generator
+  renders the header): 7 shared-spec drifts (name, both column values,
+  lean text, order swap x2, operation, schema), 26 generator drifts
+  (expected/row/order/macros/regex/coverage/case/mask-ladder/repaints
+  plus both output-path repaints), 12 generated-C drifts (the HANDLED
+  guard x2, a non-covered static assertion, the case label, the mask
+  ladder x3, the switch variable, the default/unsupported arms, the dst/
+  imm/shift seeds, the keep/xor/shift/mask variants of the insert, and
+  the tail +1), 9 generated-Lean drifts (both column values 0/48, the
+  narrowed mask drop, the insert direction, the extra constructor, the
+  plain-identifier drop, and the regenerated value/mask drifts), and 14
+  hand-Lean drifts (the independent spec's or/and/shift repaints, the
+  refines-without-unfold tactic, the iff-rw break, the closed-set v ^,
+  the dispatch `= 15` repaint, and the seven native-decide example
+  repaints). 6 survive, all marked `equivalent` by design: the
+  generated-Lean precedence repaint (`|||` binds looser than `&&&`,
+  right-associative, so dropping the inner parentheses recomputes the
+  same value), the generator comment probe, the hand dispatch
+  doc-comment repaint, the hand-Lean column repaint (the hand theories
+  unfold the generated `column`, so the hand term's value is carried by
+  the generated table and the dispatch theorem, not the hand repaint),
+  the compact spec JSON spacing paint, and the macro's dead default-arm
+  mask seed (the unsupported arm aborts, so the mask assign feeds
+  nothing).
+- Shakedown: retargets were needed for two draft anchors. The bare
+  `dst` repaint in the generated-Lean value row is not a Lean
+  identifier (the elaborator rejects the term before any semantics;
+  retargeted onto the insert direction `imm <<< s` -> `imm >>> s`,
+  which the refinement pins and `bv_decide` refutes). The hand-Lean
+  column-value repaint (`column .col16 = 16` -> `= 15` in the hand
+  statement) survives --- the hand theories unfold the generated
+  column, so the hand repaint is a doc-level equivalence --- and the
+  row was retargeted to the same value inside
+  `arm64_movk_column_dispatch`, there proved by `decide` against the
+  generated table, which fails.
+- Residue: all five watched files byte-identical after the run
+  (`md5sum` verified); kept `make check` count at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
