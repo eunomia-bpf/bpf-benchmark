@@ -14310,6 +14310,68 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `../arm64/` headers), the untracked harness retained for reruns, and
   `make check` kept at 210 `: OK`.
 
+## Step 0179 — AArch64 compare-and-branch predicate mutation coverage
+
+- Scope: the AArch64 compare-and-branch predicate contract --- the
+  four-member CBZ/CBNZ/TBZ/TBNZ predicate family the simulator's
+  compare-and-branch dispatch resolves: each arm decides taken-ness from
+  the register read directly (zero, nonzero, or masked bit at the AUX bit
+  index) and the take forwards the decode flow to the target label
+  (`arm64_branch_spec.json` / `generate_arm64_branch_spec.py` /
+  `generated/arm64_branch.h` / `KProgFormal/GeneratedArm64Branch.lean` /
+  `KProgFormal/Arm64Branch.lean`; the sim-local
+  `ARM64_SIM_A64_{CBZ,CBNZ,TBZ,TBNZ}` wrappers sheet the same predicates
+  into 43 kernel-side `.bpf.c` consumers).
+- Harness: `build/mut_arm64_branch.py` (untracked, 101 single-anchor
+  mutation rows) over six contract files --- the predicate spec (4 kinds,
+  schema 1, `≠` escape in the cbnz arm's JSON), its generator (the
+  `EXPECTED` mirror, kind-name/code order pins, Lean/C recipes), the
+  generated C header (the `KPROG_ARM64_BRANCH_TEST` switch macro, the
+  `KPROG_ARM64_BRANCH_HANDLED` coverage gate, per-kind static asserts),
+  the generated Lean module, the hand Lean refinement (bit-mask/mod-64
+  equivalence, `bitOf`, four-way `rfl`/`decide_eq_decide` refinement,
+  next-PC composition, four canonical examples), and the 80,256-case host
+  oracle (8x8x4 boundary grid plus a 20,000-iteration fixed-seed sweep).
+  Three detectors: `gen` (`--check` re-render), `lean_chain` (`lake build
+  KProgFormal.GeneratedArm64Branch` then `lake env lean
+  KProgFormal/Arm64Branch.lean`), `host` (oracle recompiled per row). No
+  regen stage (the closed four-kind set carries no opcode pins; the
+  mirror + order tripwires pin integrity) and no route detector (the
+  sim-local steering macros swap invisibly under compile-only checks, so
+  kernel-side coverage is delegated to the micro-sim suite).
+- Result: `TOTAL 101 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  93 mutants catch (`gen=46` --- 16 spec rejections, 23 generator drifts,
+  7 generated-header drifts surfaced by re-render; `lean_chain=27` ---
+  7 generated-Lean, 20 hand-Lean; `host=28` --- 20 generated-header
+  drifts, 7 oracle drifts, 1 borderline). 8 survive, all marked
+  `equivalent` by design: the stale-mirror guard disarmed (guards
+  spec-file drift already pinned by the 16 spec rows), the
+  every-arm-overwritten `__kprog_a64_br_taken` seed (switch total over
+  the covered kinds; no default fallthrough row), the duplicated
+  `kinds[]` entry (TBNZ arm stays gen-side-pinned), the fixed-seed
+  sweep reseed (macro and oracle agree per the proved contract on every
+  input), the two boundary-vector/bit-list repaints (set-membership
+  preserved), and the two summary-line repaints carrying no result bit.
+- Shakedown: the four identical `			break; \` lines in the switch
+  macro (one per arm) needed a tbz-arm-plus-break context pair instead
+  of counting the 4x `break;`; the shared `decide_eq_decide]` and
+  `arm64BranchBitOf]` rewrite tails appear twice (both tbz/tbnz halves)
+  and were context-qualified through the per-arm
+  `(by simp [show BitVec.toNat (0|1 : BitVec 64) = ...])` shard lines;
+  the spec order-swap rows need comma-joined adjacency because the
+  emitted JSON members carry trailing commas verbatim; the Unicode-escape
+  rule holds: the spec JSON carries `≠` escaped while the `.lean`
+  files carry the literal `≠` character, so no anchor transports between
+  the two without re-derivation; five sim-local wrapper rows drafted
+  against a `sim_compile` bpf-target syntax detector all survived (a
+  kind-argument swap is semantics-only) and were dropped in favor of
+  kernel-side micro-sim coverage rather than being forced into fake
+  failures.
+- Residue: all six watched files byte-identical after each run
+  (`md5sum` verified against the 9-file branch watchlist covering both
+  `../arm64/` headers), the untracked harness retained for reruns, and
+  `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

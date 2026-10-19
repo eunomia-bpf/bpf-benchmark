@@ -3837,6 +3837,47 @@ comparisons they guard, and the spec's family-order row needs comma-joined
 adjacency because the emitted JSON members carry trailing commas verbatim.
 
 
+The AArch64 compare-and-branch predicate contract gets the same mutation
+build-out in `build/mut_arm64_branch.py` (untracked, 101 single-anchor rows)
+over six contract files --- the predicate spec (`arm64_branch_spec.json`: the
+four kinds with per-kind Lean taken-predicates pinned in schema 1), its
+generator (`generate_arm64_branch_spec.py`: the `EXPECTED` mirror, the
+kind-name/code order pins, and the Lean/C recipes), the generated C header
+(`generated/arm64_branch.h`: the `KPROG_ARM64_BRANCH_TEST` switch macro over
+the four kinds with the `& 63` bit mask, the `KPROG_ARM64_BRANCH_HANDLED`
+coverage gate, and the per-kind static asserts), the generated Lean module
+(`KProgFormal/GeneratedArm64Branch.lean`), the hand Lean refinement
+(`KProgFormal/Arm64Branch.lean`: bit-mask/mod-64 equivalence, `bitOf`, the
+four-way `rfl`/`decide_eq_decide` refinement, next-PC composition, and the
+four canonical examples), and the 80,256-case host oracle
+(`test_arm64_branch_host.c`: boundary vectors over eight values x eight bit
+indices x four kinds plus a 20,000-iteration fixed-seed two-outcome sweep).
+Three detectors run per mutation: the generator `--check` re-render, the Lean
+chain (`lake build` plus elaboration), and the host oracle recompiled per row.
+93 rows catch (`gen=46 lean_chain=27 host=28`) and 8 survive as documented
+equivalences: the generator's stale-mirror guard disarmed (`data !=
+EXPECTED` made unreachable --- the mirror specifically guards spec-file
+drift, which the 16 spec rows already trip independently), the
+`__kprog_a64_br_taken` seed line every executed arm overwrites (the four-arm
+switch is total over the covered kind set, and no row probes the uncovered
+default fallthrough), the duplicated `kinds[]` entry that drops `TBNZ` from
+the host sweep table (TBNZ stays pinned gen-side by the spec/generated Lean
+rows), the fixed-seed sweep constant reseed (macro and oracle agree on every
+input by the proved contract), the two boundary-vector/bit-list repaints
+(each list re-paints the same set membership), and the two summary-line
+repaints carrying no result bit. Shakedown retargets: the four-per-case
+`break;` lines are the only per-arm distinguisher, retargeted to the
+tbz-arm-plus-break pair; the shared `decide_eq_decide` /
+`arm64BranchBitOf` rewrite lines appear twice (both tbz/tbnz halves) and were
+context-qualified through their per-arm `BitVec.toNat (0|1 : BitVec 64)`
+`simp` calls; the sim-local `ARM64_SIM_A64_{CBZ,CBNZ,TBZ,TBNZ}` wrappers in
+`arm64_sim_local_bpf.h` steer 43 downstream kernel-side consumers through
+`goto` macros and are intentionally left to the kernel-side micro-sim suite
+(the compile-only checker cannot see a kind-argument swap, so no route
+detector applies to this family here); and both order-swap rows need
+comma-joined adjacency because the emitted JSON members carry trailing
+commas verbatim.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production

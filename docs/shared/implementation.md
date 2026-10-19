@@ -1447,6 +1447,27 @@ increment is committed and pushed immediately). Current state:
     constant (three NOOPs) were retargeted onto the live comparisons
     they guard; the family-order guard needs comma-joined adjacency
     because the emitted JSON members carry trailing commas verbatim).
+  and the AArch64 compare-and-branch predicate contract (the four-member
+    CBZ/CBNZ/TBZ/TBNZ predicate family the simulator's compare-and-branch
+    dispatch resolves: taken-ness from the register read directly --- zero,
+    nonzero, or masked bit at the AUX bit index --- forwarded to the target
+    label by the sim-local goto steering) got its own single-family harness
+    against the 80,256-case host oracle (Step 0179; 101 single-anchor rows
+    over six files --- the predicate spec, its generator, the generated C
+    switch macro, the generated Lean table, the hand refinement, and the
+    host oracle; 3 detectors --- `--check` re-render, Lean chain, host
+    recompiled per row --- split gen 46 / lean_chain 27 / host 28 with 8
+    equivalences: the spec-file stale-mirror guard disarmed (inert because
+    the spec rows trip the same data path), the every-arm-overwritten
+    result seed, the duplicated kinds[] entry dropping TBNZ gen-side-pinned
+    coverage, the fixed-seed sweep reseed, two boundary-list repaints, and
+    two summary-line repaints carrying no result bit; shakedown retargets:
+    the four identical `break;` lines retargeted to the tbz-arm-plus-break
+    pair, the shared `decide_eq_decide`/`arm64BranchBitOf` rewrite lines
+    context-qualified through their per-arm `BitVec.toNat` simp calls, and
+    the sim-local CBZ/CBNZ/TBZ/TBNZ macros (43 kernel-side consumers)
+    left to the kernel-side micro-sim suite because a kind-argument swap
+    is invisible to a compile-only checker).
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
