@@ -13880,6 +13880,104 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Residue: all five watched files byte-identical to `HEAD` after the run
   (`md5sum` verified); `make check` stays at 210 `: OK`.
 
+## Step 0174 — AArch64 conditional-select pointer-path mutation coverage
+
+- Scope: the AArch64 conditional-select pointer-path decision
+  `KPROG_ARM64_CSEL_PTR_TAG_PATH` --- which register write carries the
+  selected source register's provenance tag across the eight-member
+  csel/cinc/cset/cinv/csinv/csinc/csetm/csneg family. Only the plain
+  `csel` at doubleword width writes through
+  `ARM64_SIM_L_WRITE_REG_PTR_TAG` (copying the selected source
+  register's tag); every other family member and every sub-word width
+  computes a fresh scalar written through the tag-dropping
+  `ARM64_SIM_L_WRITE_REG_WIDTH`. The simulator's `ARM64_SIM_L_CSEL`
+  wrapper threads the live `__a64_l_width` through
+  `KPROG_ARM64_CSEL_PTR_TAG_PATH` at its single call site
+  (`arm64_sim_local_bpf.h:1225`) and branches the two write paths off
+  the result. The hand Lean refinement pins the independent
+  `arm64CselPtrSpec` (`op = .csel && width = .w64`), the refinement of
+  the generated `ptrTagPath` table over every (op, width) pair, the
+  only-csel and iff/sub-word/family-drops corollaries, the eight-way
+  code dispatch, the in-range pin, and the ptr/family/sub-word examples.
+- Harness: `build/mut_arm64_csel_ptr.py` (untracked, 59 single-anchor
+  mutation rows) over six contract files --- the pointer-path spec
+  (`arm64_csel_ptr_spec.json`), the family spec it cross-links
+  (`arm64_csel_spec.json`, the eight opcodes whose codes the generated
+  switch, the opcode cross-check, and the Lean dispatch all consume ---
+  a second shared-spec surface no prior harness watched), the generator
+  (`generate_arm64_csel_ptr_spec.py`, including the four
+  illustrative-lean guards and the stale-output comparison), the
+  generated C switch macro (`generated/arm64_csel_ptr.h`, the eight
+  `_Static_assert` opcode pins, the per-opcode case arms, the default
+  `UNSUPPORTED` arm), the generated Lean table
+  (`KProgFormal/GeneratedArm64CselPtr.lean`, the `ptrTagPath`
+  (op, width) match), and the hand Lean refinement
+  (`KProgFormal/Arm64CselPtr.lean`). Three detectors, no regen stage and
+  no sim-header stage: `gen` (`generate_arm64_csel_ptr_spec.py
+  --check`), `lean_chain` (`lake build KProgFormal.GeneratedArm64CselPtr`
+  then `lake env lean KProgFormal/Arm64CselPtr.lean`), and `host` (the
+  1024-case `test_arm64_csel_ptr_host.c` oracle --- the opcode swept
+  over all 256 byte values crossed with all four widths in forked
+  children; family opcodes required to match an independent
+  opcode-class switch, non-family opcodes asserted to abort with
+  `SIGABRT` through the generated unsupported arm). The wrapper's
+  single call site has no route macro to repaint, so a generated-header
+  drift is observable only through the host oracle, which reaches the
+  macro through the same include.
+- Result: `TOTAL 59 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  57 mutants catch (gen 30, lean_chain 17, host 12): 5 shared-spec row
+  drifts (operation, pointer-op, pointer-rule, family-ref, pointer-op
+  repainted onto `cinc`, schema-version), 1 family-spec cross-link
+  drift (the csel row renamed so the generator's own family-order
+  cross-check fires), 23 generator drifts (operation/pointer-op/
+  pointer-rule/family-ref repaints, the family-order list, the
+  pointer-uniqueness and opcode-table guard inversions, the opcode
+  parse `0x1cU -> 0x1dU` repaint, the opcode cross-check inversion, the
+  stale-output comparison inversion, the render-branch select flip, the
+  lean-arms recipe and both output-path repaints, and the C body macro
+  row repaints: op/width/path seeds, switch/variable, case template,
+  ptr-arm width, drop-line variable, default, unsupported, and tail),
+  10 generated-C drifts (both ended static-assert pins, the switch
+  variable, both case labels, the ptr-arm width, the unsupported drop,
+  the op/width seed swap, and the tail addition), 2 generated-Lean arm
+  drifts (the true row dropped to false and one drop row raised to
+  true), and 16 hand-Lean drifts (the spec body's `&&` -> `||`, the
+  refines goal's swapped operands and `simp_all` repaint, the only-csel
+  hypothesis drop and `simp_all` repaint, the iff goal's `.w32` repaint
+  and decide-only tactic, the sub-word hypothesis drop, the family-drops
+  hypothesis and exact-rewrite drifts, the code dispatch 28 -> 29, the
+  in-range lower bound 28 -> 29, and the ptr/family/sub-word example
+  repaints). 2 survive: the generator `ROOT` spelling repaint (the
+  documented equivalence every generator harness records) and the
+  macro's path-seed initialization (dead code --- every reachable case
+  arm assigns before any read and out-of-family opcodes abort first),
+  both marked `equivalent` by design.
+- Shakedown: retargets were needed for eight survivors. Four generator
+  message repaints (not-unique message, no-opcodes message, opcode-drift
+  message, stale message) survived because their firing branches are
+  unreachable on a green `--check` (message text changes nothing when
+  the guard never fires); each was retargeted onto the comparison the
+  guard actually makes --- the pointer-uniqueness guard inverted, the
+  opcode-table guard inverted, the opcode cross-check inverted, and the
+  stale comparison inverted --- each live-probed to exit 1. The
+  refinement theorem row survived a rename and a `Bool`-ascription
+  goal paint (nothing downstream binds the theorem and the ascription
+  is propositional), so it was retargeted to a goal with the
+  `op`/`width` operands swapped, which the elaborator rejects with an
+  application type mismatch. The soundness tactic repaint `rfl` ->
+  `trivial` survived propositionally, so it was retargeted to
+  `simp_all` (no progress on the four post-`cases` goals); the iff
+  tactic repaint `cases <;> decide` survived but its decide-only
+  repaint cannot close a goal over the free `width` variable (error
+  pointing at the free variable). The in-range pin's upper-bound
+  repaint 69 -> 68/28 stayed provable since `csel` is 28, so it was
+  retargeted to the lower-bound repaint 28 -> 29, which `decide`
+  refutes. One draft row (the path-seed repaint) was demoted to
+  `equivalent` after the shakedown showed it dead code.
+- Residue: all six watched files byte-identical after the run (`md5sum`
+  verified, including the family spec and the sim header passed
+  untouched); `make check` stays at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

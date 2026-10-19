@@ -3639,6 +3639,58 @@ row was retargeted to a `decide` repaint the free flag variables reject
 (`decide` cannot close a goal over variables, the error points at the
 `al` case).
 
+
+The AArch64 conditional-select pointer-path contract decides which register
+write carries the selected source register's provenance tag across the
+eight-member `csel`/`cinc`/`cset`/`cinv`/`csinv`/`csinc`/`csetm`/`csneg`
+family: only the plain `csel` at doubleword width writes through
+`ARM64_SIM_L_WRITE_REG_PTR_TAG`; every other member and every sub-word width
+computes a fresh scalar written through the tag-dropping width-narrowed
+`ARM64_SIM_L_WRITE_REG_WIDTH`. The simulator's `ARM64_SIM_L_CSEL` wrapper
+threads the live width through `KPROG_ARM64_CSEL_PTR_TAG_PATH` at its single
+call site and branches the two write paths off the result. It gets its own
+mutation build-out in `build/mut_arm64_csel_ptr.py` (untracked, 59
+single-anchor rows) over six contract files --- the pointer-path spec
+(`arm64_csel_ptr_spec.json`), the family spec it cross-links
+(`arm64_csel_spec.json`, the eight opcodes the generated switch and the
+opcode cross-check consume), its generator
+(`generate_arm64_csel_ptr_spec.py`, including the four illustrative-lean
+guards whose failure paths are behaviorally reachable and the stale output
+comparison), the generated C switch macro (`generated/arm64_csel_ptr.h`,
+the eight `_Static_assert` opcode pins and the per-opcode case arms), the
+generated Lean table (`GeneratedArm64CselPtr`, the `ptrTagPath`
+(op, width) match), and the hand Lean refinement (`Arm64CselPtr.lean`, the
+independent `arm64CselPtrSpec`, the refinement/only-csel/iff/sub-word/
+family-drops theorems, the eight-way code dispatch, the in-range pin, and
+the ptr/family/sub-word examples) --- with the same three detectors: gen
+(`generate_arm64_csel_ptr_spec.py --check`), lean_chain (`lake build
+KProgFormal.GeneratedArm64CselPtr` then `lake env lean
+KProgFormal/Arm64CselPtr.lean`), and host (the 1024-case
+`test_arm64_csel_ptr_host.c` oracle --- the opcode swept over all 256 byte
+values crossed with all four widths in forked children, a non-family
+opcode asserted to abort with `SIGABRT` through the generated unsupported
+arm, the oracle an independent opcode-class switch structurally different
+from the generated macro). 57 catch (`gen=30 lean_chain=17 host=12`) and 2
+survive: the generator `ROOT` spelling repaint and the macro's path-seed
+initialization (dead code --- every reachable case arm assigns before any
+read, out-of-family opcodes abort first), both documented equivalences by
+design. Shakedown retargets were needed for four generator message
+repaints whose firing branches are unreachable on a green `--check` (the
+family-order repaint became the order-comparison repaint, the
+pointer-uniqueness and opcode-table guards became check inversions, and
+the stale comparison became its own inversion, each live-probed); for the
+refinement theorem (rename and `Bool`-ascription goal paint survive ---
+nothing downstream binds the theorem and the ascription is propositional
+--- retargeted to a goal with the `op`/`width` operands swapped, which the
+elaborator rejects); for the soundness tactic (`trivial` discharges the
+post-`cases` goals propositionally --- retargeted to `simp_all`, which
+makes no progress) and the iff tactic (`cases <;> decide` and decide-only
+both close it --- retargeted to decide-only whose free `width` variable
+`decide` cannot close, error pointing at the free variable); and for the
+in-range pin (repainting the upper bound 69 to either 68 or 28 stays
+provable since `csel` is 28 --- retargeted to the lower bound 28 -> 29,
+which `decide` refutes).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production

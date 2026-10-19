@@ -1289,6 +1289,39 @@ increment is committed and pushed immediately). Current state:
   spec drift and the `rfl` -> `trivial` tactic repaint being
   propositionally sound until retargeted onto a `decide` repaint the free
   flag variables reject),
+  and the AArch64 conditional-select pointer-path contract (which register
+  write carries the selected source's provenance tag across the
+  csel/cinc/cset/cinv/csinv/csinc/csetm/csneg family --- only plain `csel`
+  at doubleword width writes through `ARM64_SIM_L_WRITE_REG_PTR_TAG`, every
+  other member and sub-word width writes a width-narrowed scalar that
+  drops it; the `ARM64_SIM_L_CSEL` wrapper threads the live width through
+  `KPROG_ARM64_CSEL_PTR_TAG_PATH` at its single call site and branches the
+  two write paths off the result) got its own single-family harness over
+  six contract files including the cross-linked family spec the ptr
+  generator re-reads (Step 0174), with the host detector sweeping the
+  opcode over all 256 byte values crossed with all 4 widths in forked
+  children (1024 cases; non-family opcodes asserted to abort through the
+  generated unsupported arm; same three detectors and no route stage ---
+  the wrapper's single call site has no route macro to repaint, the
+  observable write-path behavior is reached only through the macro. The
+  oracle is an independent opcode-class switch structurally different from
+  the generated switch). Split gen 30 / lean_chain 17 / host 12 with two
+  documented survivors: the generator `ROOT` spelling repaint and the
+  macro's dead path-seed initialization (every reachable case arm assigns
+  before any read; out-of-family opcodes abort first). Shakedown
+  retargets: four generator message repaints whose firing branches are
+  unreachable on a green `--check` (family-order repaint -> the
+  order-comparison repaint, pointer-uniqueness and opcode-table guards ->
+  check inversions, stale comparison -> its own inversion, each
+  live-probed); the refinement theorem (rename and `Bool`-ascription goal
+  paint survive, nothing downstream binds the theorem and the ascription
+  is propositional -> goal with the `op`/`width` operands swapped, which
+  the elaborator rejects); the soundness tactic (`trivial` discharges the
+  post-`cases` goals propositionally -> `simp_all`, which makes no
+  progress) and the iff tactic (`cases <;> decide` and decide-only both
+  close it -> decide-only whose free `width` variable `decide` cannot
+  close); the in-range pin (upper-bound repaints stay provable since
+  `csel` is 28 -> lower-bound 28 -> 29, which `decide` refutes).
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
