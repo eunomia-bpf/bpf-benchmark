@@ -3942,6 +3942,56 @@ swap and the empty-arm bracket) were replaced by retargeted catchable
 rows; the spec `@@`-swap placeholder needed a direct reordered-JSON edit
 because single-line JSON has no standalone-token boundary to anchor the
 placeholder against.
+### Step 0181 — AArch64 byte-lane extraction mutation coverage
+
+The `arm64_byte_lane` contract (`arm64_byte_lane_spec.json` 1 line,
+`generate_arm64_byte_lane_spec.py` 138 lines,
+`generated/arm64_byte_lane.h` 70 lines,
+`KProgFormal/GeneratedArm64ByteLane.lean` 38 lines,
+`KProgFormal/Arm64ByteLane.lean` 69 lines,
+`test_arm64_byte_lane_host.c` 117 lines) covers the inverse half of the
+generated load contract: the stack byte scatter takes byte `i` of a
+64-bit word as `(value >> 8*i) & 0xff`. `KPROG_ARM64_BYTE_AT` is a total
+eight-way switch over the lane index whose default arm reaches the
+caller-supplied unsupported hook (SIGABRT-enforced by the host oracle)
+and the direction the load ladder's reassembly needs. The hand Lean side
+proves three things: `arm64_byte_lane_refines` equalizes the generated
+shift-then-narrow `byteAt` with the independent masked-shift form
+(`cases lane <;> simp only [...]] <;> bv_decide`),
+`arm64_byte_lane_shift_dispatch` pins the eight shifts to `0, 8, ..., 56`
+so the C switch's case set covers every lane exactly once, and
+`arm64_byte_lane_load_inverse` reassembles all eight lanes through the
+byte-lane shifts back into the load contract's value for every width,
+plus two `native_decide` canonical examples (lane 2 and 7 of
+`0x0123456789abcdef`).
+
+`build/mut_arm64_byte_lane.py` (62 rows) perturbs the six files with the
+three detectors, 'untracked, 62 single-anchor rows': 30 catch at the
+generator stage (spec JSON drifts and lane inclusion/order rests,
+generator mirror and pin drifts, file-path and Lean/C recipe drifts,
+case and shift-line repaints in the generated C, generated-Lean ctor
+and index/shift drift, and the nine Lean-chain holes), 9 catch through
+the Lean chain (spec-body mask rewrite, dispatch goal/tail drifts,
+inverse goal/tail drifts, example repaints, import drift), and 6 catch
+by the host oracle (oracle byte-view rewrite, comparison flip, sweep
+modulus, unsupported-lane reachability, unsupported-wait repaint).
+17 rows survive as documented equivalences: 'the disarmed spec-mirror
+guard the spec rows already trip', the generator message repaint and
+comment-only import repaint (green-run-invisible guard paths), the
+narrowing `__u16` repaint (a two-step narrowing store keeps the same
+low byte), the stale index-definition repaint (the definition is
+unfolded away but never load-bearing), the `0xffff` mask repaint (any
+aligned mask of at least eight bits narrows to the same lane byte),
+three consumers-free theorem renames and simp-set shrinks `bv_decide`
+closes without, the boundary lane-sweep shrink the 20,000-iteration
+random sweep already covers at every lane, the fixed-seed reseed and
+value-grid resamples (pure workload-sample repaints the proved contract
+makes invisible), a no-op self-assignment insertion, and two
+summary-line repaints carrying no result bit. Shakedown retargets: none
+were needed; every drafted anchor landed byte-exact, and the eight
+survivor rows were relabeled `equivalent_*` after the first run
+confirmed each repaint was semantics-preserving (the narrowing-store
+and mask-width rows surprised: both keep the low byte by construction).
 
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that

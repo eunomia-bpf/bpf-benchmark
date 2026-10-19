@@ -14413,6 +14413,46 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harness retained for reruns, and `make check` kept at 210
   `: OK`.
 
+## Step 0181 — AArch64 byte-lane extraction mutation coverage
+
+- Scope: the inverse half of the generated load contract — the byte
+  the stack scatter takes from a 64-bit word:
+  `arm64_byte_lane_spec.json`, `generate_arm64_byte_lane_spec.py`,
+  `generated/arm64_byte_lane.h` (total eight-way switch
+  `KPROG_ARM64_BYTE_AT(LANE, VALUE, UNSUPPORTED)` with SIGABRT-enforced
+  default arm), `KProgFormal/GeneratedArm64ByteLane.lean`,
+  `KProgFormal/Arm64ByteLane.lean` (refines against the masked-shift
+  form; pins the 0/8/.../56 shift dispatch; proves the lane reassembly
+  equals the load contract's value; two `native_decide` examples),
+  `test_arm64_byte_lane_host.c` (7 boundary words × 8 lanes plus a
+  20,000-iteration fixed-seed sweep plus the unsupported-arm abort
+  check = 20,057 cases), ...
+- Harness: `build/mut_arm64_byte_lane.py` (untracked), 62
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 30 / lean_chain 9 / host 6 (catch split 30/9/6); 17 equivalences
+  (stale-mirror gate disarm, generator message repaint, comment-only
+  import repaint, `__u16` narrowing-store repaint, stale index
+  definition, `0xffff` aligned-mask repaint, three consumer-free
+  theorem renames/simp-set shrinks, boundary lane-sweep shrink,
+  fixed-seed reseed, value-grid resample, no-op self-assignment, two
+  summary-line repaints).
+- Result: TOTAL 62 mutations, 0 failures, 17 equivalences survived
+  (45 catch: 30 gen, 9 lean_chain, 6 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: every drafted anchor landed byte-exact on the first run;
+  no retargets were needed. Eight drafted rows survived and were
+  relabeled `equivalent_*` once each repaint was confirmed
+  semantics-preserving: the `__u16` narrowing store keeps the same low
+  byte, any aligned mask of at least eight bits narrows to the same
+  lane byte, the `index` definition is never load-bearing (only
+  `shift` feeds `byteAt`), and the random sweep already covers every
+  lane the shrunken boundary grid stops enumerating.
+- Residue: all six watched files byte-identical after each run
+  (`md5sum` verified against the 6-file byte-lane watchlist), the
+  untracked harness retained for reruns, and `make check` kept at 210
+  `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
