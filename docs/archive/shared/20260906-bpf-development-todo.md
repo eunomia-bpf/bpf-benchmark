@@ -14453,6 +14453,47 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harness retained for reruns, and `make check` kept at 210
   `: OK`.
 
+## Step 0182 — AArch64 little-endian load mutation coverage
+
+- Scope: the load value ladder — the four architectural widths the
+  stack reads from memory (`arm64_load_bytes_spec.json`,
+  `generate_arm64_load_bytes_spec.py`, `generated/arm64_load_bytes.h`
+  with the `__kprog_a64_lb_` ladder gated by the
+  `>= ARM64_WIDTH_16/32` / `== ARM64_WIDTH_64` comparison chain and
+  closed width codes as `_Static_assert`s,
+  `KProgFormal/GeneratedArm64LoadBytes.lean` with the lane-assembly
+  `value` over w8/w16/w32/w64, `KProgFormal/Arm64LoadBytes.lean` with
+  the independent masked-truncation `arm64LoadBytesSpec` refinement
+  plus width-dispatch, upper-cleared, and three `native_decide`
+  examples, `test_arm64_load_bytes_host.c` — 6 boundary patterns × 4
+  widths plus a 20,000-iteration fixed-seed sweep = 20,024 cases),
+  ...
+- Harness: `build/mut_arm64_load_bytes.py` (untracked), 63
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 29 / lean_chain 16 / host 5 catch split; 13 equivalences
+  (stale-mirror gate disarm, generator message repaint, comment-only
+  import repaint, three consumer-free theorem renames/simp-set
+  changes, high-byte mask repaint biased one lane high, weakened w8
+  upper-byte claim, boundary pattern repaint, fixed-seed reseed,
+  sweep-width rotation, two summary-line repaints).
+- Result: TOTAL 63 mutations, 0 failures, 13 equivalences survived
+  (50 catch: 29 gen, 16 lean_chain, 5 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: three generated-Lean anchors were ambiguous and were
+  re-anchored on whole-block context (the `| .w8 => 1` code line is
+  shared by the `widthCode` and `byteCount` blocks; the w32 lane tail
+  `<<< 24` appears in both the w32 and w64 arms); the sweep anchor
+  needed three-tab depth; one drafted row (the w8-upper claim widened
+  from `>>> 8` to `>>> 16`) survived because the single cleared lane
+  still implies it and was relabeled `equivalent_*`; one drafted
+  equivalent (the refinement simp-set shrink) was retained as a catch
+  because dropping the masked-truncation unfolding really does break
+  the `bv_decide` closure.
+- Residue: all six watched files byte-identical after each run
+  (6-file load-bytes watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

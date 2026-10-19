@@ -3992,6 +3992,62 @@ were needed; every drafted anchor landed byte-exact, and the eight
 survivor rows were relabeled `equivalent_*` after the first run
 confirmed each repaint was semantics-preserving (the narrowing-store
 and mask-width rows surprised: both keep the low byte by construction).
+### Step 0182 — AArch64 little-endian load mutation coverage
+
+The `arm64_load_bytes` contract (`arm64_load_bytes_spec.json` 1 line,
+`generate_arm64_load_bytes_spec.py` 156 lines,
+`generated/arm64_load_bytes.h` 42 lines,
+`KProgFormal/GeneratedArm64LoadBytes.lean` 47 lines,
+`KProgFormal/Arm64LoadBytes.lean` 70 lines,
+`test_arm64_load_bytes_host.c` 114 lines) covers the load value ladder
+itself: the stack reads `byteCount(width)` bytes from memory and
+assembles each at its own lane (`__kprog_a64_lb_value |= addr[i] <<
+8*i`, gated by the `>= ARM64_WIDTH_16/32` and `== ARM64_WIDTH_64`
+comparison chain), zeroing every byte above the width. The generated
+Lean side carries the lane-assembly `value` over the four widths; the
+hand Lean side states the independent contract as a masked truncation
+(`arm64LoadBytesSpec` over `GeneratedArm64Width.mask`) and proves:
+`arm64_load_bytes_refines` (lane assembly = masked truncation,
+`cases width <;> simp only [...] <;> bv_decide`),
+`arm64_load_bytes_width_dispatch` (byte counts 1/2/4/8 and width codes
+1/2/4/8 as eight `rfl`s, so the C ladder's comparison chain covers each
+width exactly once), `arm64_load_bytes_upper_cleared` (bytes above the
+width are zero), and three `native_decide` canonical examples
+(halfword `0xcdef`, word `0x89abcdef`, doubleword identity).
+
+`build/mut_arm64_load_bytes.py` (63 rows) perturbs the six files with
+the three detectors, 'untracked, 63 single-anchor rows': 29 catch at
+the generator stage (spec JSON drifts and width swaps/drops/dups,
+generator mirror and pin drifts, file-path drifts, the lane `>>>`
+shift drift and a lane XOR repaint, the generated C static asserts
+and ladder-gate drifts, and the generated-Lean ctor/code/byteCount
+context drifts), 16 catch through the Lean chain (generated `value`
+arm repaints at the w16/w32/w64 tails, the `value` definition rename,
+the hand spec-arm cross-width repaints, the dispatch goal and 8-tuple
+tail shrink (7 `rfl`s close only 7 goals), the upper-byte goal widening
+(a `>>> 16 = 0` claim on the w32 arm is false), the example repaints,
+the import drift, and one proof-strength probe: the refinement
+simp-set shrink dropping the masked-truncation unfolding genuinely
+breaks the proof (kept as a catch)), and 5 catch by the host oracle
+(byte-count drift, oracle shift repaint, comparison flip, high-byte
+check inversion, byte-1/3/7 lane repaints in the C ladder). 13 rows
+survive as documented equivalences: 'the disarmed spec-mirror guard',
+the generator message repaint and comment-only import repaint
+(green-run-invisible guard paths), three consumers-free theorem
+renames and simp-set changes (`bv_decide` closes the refinement after
+the arm repaints too), the high-byte mask repaint biased one lane high
+(the cleared ladder already zeroed that bit), the weakened w8-upper
+claim (`>>> 16 = 0` still implied by the single cleared lane), the
+boundary pattern repaint, the fixed-seed reseed and sweep-width
+rotation (pure workload-sample repaints the proved contract makes
+invisible), and two summary-line repaints carrying no result bit.
+Shakedown retargets: three generated-Lean anchors were ambiguous
+(`| .w8 => 1` appears in both the `widthCode` and `byteCount` blocks;
+the w32 lane tail appears in both the w32 and w64 arms) and were
+re-anchored on whole-context blocks; the sweep-width anchor needed the
+C source's three-tab depth; and one survivor row was relabeled
+`equivalent_*` after the first run confirmed the weakened upper-byte
+claim remains a theorem.
 
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
