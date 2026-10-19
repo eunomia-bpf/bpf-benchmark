@@ -14671,6 +14671,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file logic-flag watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0188 — AArch64 memory address-offset mutation coverage
+
+- Scope: the load/store address offset — offset access contributes
+  the immediate, pre/post-indexed contributes none here, indexed
+  adds the source-modified index register, 64-bit two's-complement
+  wrapping stated as signed `__s64` addition in the C macro and
+  `BitVec 64` addition in Lean (`arm64_mem_offset_spec.json`,
+  `generate_arm64_mem_offset_spec.py`,
+  `generated/arm64_mem_offset.h` statement-expression macro with
+  evaluate-once locals and no NZCV,
+  `KProgFormal/GeneratedArm64MemOffset.lean` let/if + four-case
+  `valueSpec`, `KProgFormal/Arm64MemOffset.lean` with refinement/
+  dispatch/prepost-independence theorems + three examples,
+  `test_arm64_mem_offset_host.c` — `__int128` oracle over 168-
+  case boundary grid + 20,000 random = 20,168 cases), ...
+- Harness: `build/mut_arm64_mem_offset.py` (untracked), 45
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 15 / lean_chain 13 / host 5 catch split; 12 equivalences
+  (stale-mirror gate disarm, spec/order message repaints, import
+  repaint, evaluate-once assignment comment repaints, four
+  consumers-free theorem/example renames, two summary-line
+  repaints).
+- Result: TOTAL 45 mutations, 0 failures, 12 equivalences survived
+  (33 catch: 15 gen, 13 lean_chain, 5 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: generator C-body anchors needed the literal
+  backslash-t source bytes (`'\\t'` sequences inside the generator
+  strings, not real tabs); the hand refines-theorem and prepost-
+  lemma renames relabeled equivalence after the first run (no
+  downstream consumers).
+- Residue: all six watched files byte-identical after each run
+  (6-file mem-offset watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

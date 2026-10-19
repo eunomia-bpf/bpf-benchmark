@@ -4298,6 +4298,52 @@ Shakedown relabeled three drafted rows after the first run — the
 two family-constant repains and the code-arm repaint (all three
 shake green because the consumers bind names, not values).
 
+### Step 0188 — AArch64 memory address-offset mutation coverage
+
+The `arm64_mem_offset` contract (`arm64_mem_offset_spec.json` 1
+line, `generate_arm64_mem_offset_spec.py` 128 lines,
+`generated/arm64_mem_offset.h` 32 lines,
+`KProgFormal/GeneratedArm64MemOffset.lean` 17 lines,
+`KProgFormal/Arm64MemOffset.lean` 49 lines,
+`test_arm64_mem_offset_host.c` 94 lines) fixes the load/store
+address offset: an offset access contributes the immediate, a
+pre/post-indexed access contributes no immediate here (its
+writeback applies it separately), an indexed access additionally
+adds the already source-modified index register, and the
+accumulation is 64-bit two's-complement wrapping stated two ways —
+signed `__s64` addition in the C statement-expression macro
+(evaluate-once locals, no NZCV), `BitVec 64` addition in the Lean
+contract, with that bit-pattern equivalence as the refinement
+statement. The generated Lean side carries both the let/if form and
+an independent four-case `valueSpec` table; the hand side proves
+the refinement `bv_decide`-wise, the four-case dispatch lemma, the
+prepost-immediate-independence lemma, and three canonical examples.
+The host oracle reconstructs the offset through an `__int128`
+signed accumulator (a different expression tree from the macro's
+if-nesting) over a 168-case boundary grid plus a 20,000-iteration
+fixed-seed random sweep = 20,168 cases.
+
+`build/mut_arm64_mem_offset.py` (45 rows) perturbs the six files
+with the three detectors, 'untracked, 45 single-anchor rows': 15
+catch at the generator stage (spec field drifts, generator mirror
+drifts including the base-reciprocal drift and the four-case table
+swaps mirrored into both backends, and path drifts), 13 catch
+through the Lean chain (both generated let/if drifts, all four
+generated table swaps, the namespace drift, the hand
+`unfold`/`cases` tactic shrinks, and the four dispatch-lemma
+repaints), and 5 catch by the host oracle (the acc-gate flip
+`if (prepost)`, the index-negation drift, and the truncation-mask
+repaint). 12 rows survive as documented equivalences: the disarmed
+spec-mirror guard, the guarded spec/order message repaints, the
+comment-only import repaint, the evaluate-once assignment comment
+repaints (the C locals carry no observer), four consumers-free
+theorem/example renames (the refines theorem and prepost lemma are
+declared and never cited elsewhere, as are the three canonical
+examples), and two summary-line repaints carrying no result bit.
+Shakedown relabeled two drafted rows after the first run — the
+refines-theorem rename and the prepost-lemma rename (both shake
+green because neither theorem has downstream consumers).
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
