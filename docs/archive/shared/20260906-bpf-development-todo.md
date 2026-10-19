@@ -14606,6 +14606,39 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file alu-operand watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0186 — AArch64 CNEG mutation coverage
+
+- Scope: the condition-gated negation value — taken negates
+  (`0 - src` generated vs `~~~src + 1` hand, the same identity
+  stated twice), untaken passes through, width-mask narrowing,
+  opcode 65, flags unchanged (`arm64_cneg_spec.json`,
+  `generate_arm64_cneg_spec.py` with the arm64_sim.h opcode
+  re-parse, `generated/arm64_cneg.h` with the do-while macro and
+  code-drift `_Static_assert`, `KProgFormal/GeneratedArm64Cneg.lean`,
+  `KProgFormal/Arm64Cneg.lean` with refinement + cancel/identity/
+  bound theorems + four `native_decide` examples,
+  `test_arm64_cneg_host.c` — 96 boundary cases + 40,000 random
+  iterations + unsupported-abort probe = 40,097 cases), ...
+- Harness: `build/mut_arm64_cneg.py` (untracked), 46 single-anchor
+  rows over the six files with 3 detectors (`--check` re-render,
+  Lean chain build+elaborate, host recompiled per row): gen 15 /
+  lean_chain 7 / host 9 catch split; 15 equivalences (stale-mirror
+  gate disarm, five guarded error-message repaints, import
+  repaint, five theorem renames, code-range bound66 relaxation,
+  two summary-line repaints).
+- Result: TOTAL 46 mutations, 0 failures, 15 equivalences survived
+  (31 catch: 15 gen, 7 lean_chain, 9 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: the C case-label anchor needed exact trailing-space
+  bytes; the hand refine-tail anchor needed the full two-line
+  tactic block (bare `bv_decide` appears 4×); two drafted rows
+  relabeled after the first run — spec message repaint and the
+  code-range bound66 repaint (both weaker-but-true repaints the
+  detectors can't distinguish).
+- Residue: all six watched files byte-identical after each run
+  (6-file cneg watchlist verified), the untracked harness retained
+  for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

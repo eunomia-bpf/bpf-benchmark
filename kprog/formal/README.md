@@ -4194,12 +4194,59 @@ three consumers-free example-theorem renames, the
 shrink (register-half grid coverage caveat), the mirrored host
 vector walk (`vectors[i]`/`vectors[7-i]` transpose keeps the check
 pair coverage identical), and two summary-line repaints carrying no
-result bit. Shakedown relabeled two drafted rows: the rng-
-argument transposes survive where the operands remain pairwise
-exchangeable under their own trees, and the modifier-table message
-repaint survives as guarded error text.
+result bit. Shakedown relabeled two drafted rows: the rw-order
+repaint survives (disjoint subterms close in either order) and the
+modifier-table message repaint survives as guarded error text.
 
-carrying no result bit.
+### Step 0186 — AArch64 CNEG mutation coverage
+
+The `arm64_cneg` contract (`arm64_cneg_spec.json` 1 line,
+`generate_arm64_cneg_spec.py` 202 lines,
+`generated/arm64_cneg.h` 44 lines,
+`KProgFormal/GeneratedArm64Cneg.lean` 31 lines,
+`KProgFormal/Arm64Cneg.lean` 89 lines,
+`test_arm64_cneg_host.c` 146 lines) fixes the condition-gated
+negation value: a taken condition negates the source (generated
+form `0 - src`, hand form `~~~src + 1` — the same two's-complement
+identity stated independently), an untaken condition passes it
+through, both arms narrow with the shared width mask, opcode 65
+(`ARM64_OP_CNEG`), and no NZCV bit is written. The generator
+re-parses the opcode define from `kprog/arm64/arm64_sim.h` on every
+run and pins code drift with a `_Static_assert`; the host oracle
+re-derives the width mask from a shift of one (never the macro's
+mask ladder), cross-checks the invert-and-add-one identity the Lean
+statement uses, and asserts an out-of-family opcode reaches the
+caller-supplied unsupported arm via SIGABRT. The hand Lean side
+refines value over both condition outcomes and all four widths,
+proves code-in-range/dispatch/flags-unchanged, cancel and identity
+identities, the w32 bound, and four canonical `native_decide`
+examples. The host sweep is 40,097 cases (boundary vectors plus a
+40,000-iteration fixed-seed random walk).
+
+`build/mut_arm64_cneg.py` (46 rows) perturbs the six files with the
+three detectors, 'untracked, 46 single-anchor rows': 15 catch at
+the generator stage (spec operation/name/code/macro drifts,
+generator mirror drifts, the generated Lean arm swap, the generated
+C body repaints (mask complement, operand swap), case-label drift,
+handled/value macro renames, the code-drift static-assert repaint,
+and sim-header repointing), 7 catch through the Lean chain (the
+generated value-arm swap and opcode repaint, flagsUnchanged
+repaint, namespace drift, the hand spec-arm swap (taken/untaken
+exchanged), the `decide` for `bv_decide` downgrade), and 9 catch by
+the host oracle (raw-negation repaint, the identity gate drift,
+the width-mask ladder w31 repaint, comparison flip, operand swap,
+and the out-of-family abort disarm when the probe re-uses the
+supported opcode). 15 rows survive as documented equivalences: the
+disarmed spec-mirror guard, the four guarded error-message
+repaints (spec/order/macros/opcode/drift text the green run never
+trips), the comment-only import repaint, five consumers-free
+theorem renames (flags-unchanged, taken-cancel, untaken-identity,
+and two canonical examples), the code-range bound relaxation
+(65 ≤ 65 ∧ 65 ≤ 66 stays a theorem the weaker statement still
+proves), and two summary-line repaints carrying no result bit.
+Shakedown relabeled two drafted rows after the first run: the spec
+message repaint and the code-range bound66 repaint (the promote-
+to-catch candidates both shake green as weaker-but-true repaints).
 
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
