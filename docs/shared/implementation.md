@@ -1322,6 +1322,41 @@ increment is committed and pushed immediately). Current state:
   close it -> decide-only whose free `width` variable `decide` cannot
   close); the in-range pin (upper-bound repaints stay provable since
   `csel` is 28 -> lower-bound 28 -> 29, which `decide` refutes).
+  and the AArch64 store-exclusive status contract (Step 0175, the one
+  value the `STLXR` handler writes back to the status register --- the
+  store-exclusive succeeds unconditionally, so the status is the success
+  code `0` narrowed to the destination width, written through
+  `ARM64_SIM_L_WRITE_REG_WIDTH` at the fixed `ARM64_WIDTH_32` in the
+  `ARM64_SIM_L_EXEC` dispatch; the generated macro derives it as the
+  width mask subtracting itself and the hand Lean statement does the
+  same, so the refinement is not a bare literal restatement). A
+  53-mutation single-family harness over five files (spec, generator
+  including the order/macros/no-opcodes/opcode-drift guards and the
+  stale-output comparison, generated C switch with the code pin and the
+  `KPROG_ARM64_STLXR_HANDLED` guard + coverage assertion, generated Lean
+  table, hand refinement), no regen or sim-header stage --- the wrapper
+  threads the fixed width 32 through one `ARM64_SIM_L_STLXR_VALUE` call,
+  so the host oracle reaches the macro through the generated header
+  alone. The host detector is the 1028-case sweep: known opcode at all
+  four widths against an independent shift-of-one masking oracle, plus
+  the opcode byte over all 256 values at every width with non-family
+  bytes asserted to abort through the unsupported arm. Split gen 26 /
+  lean_chain 15 / host 8 (one host catch through a compile failure) with
+  four documented survivors: the generator `ROOT` spelling repaint, the
+  generated and hand mnemonic repaints kept behind trailing comments,
+  and the macro's width-seed initialization (dead: the status arm is the
+  mask subtracting itself, so any width repaint still observes
+  `0 - 0`). Shakedown retargets: the `HANDLED` guard repaint (a
+  coverage-assertion message repaint is unobservable by a green
+  `--check` and to the host compile alike -> the guard itself inverted
+  `==` -> `!=`, rejected by the `_Static_assert` coverage check at
+  compile time); the generated value arm (`narrow 0 (Width.w32)` equals
+  `narrow 0 width` at every width since zero is zero at any width ->
+  `narrow 1 width`, rejected by the refinement and the oracle); the
+  refinement tactic (`bv_decide` -> `native_decide` stays sound ->
+  dropping the independent-spec unfold from the `simp only` set,
+  refuted by `bv_decide` with an opaque `arm64StlxrSpec`
+  counterexample).
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

@@ -3691,6 +3691,57 @@ in-range pin (repainting the upper bound 69 to either 68 or 28 stays
 provable since `csel` is 28 --- retargeted to the lower bound 28 -> 29,
 which `decide` refutes).
 
+
+The AArch64 store-exclusive status contract is the one value the simulator's
+`STLXR` handler writes back to the status register: the store-exclusive
+succeeds unconditionally in this simulator, so the status is the success code
+`0` narrowed to the destination width, and the status register write is
+`ARM64_SIM_L_WRITE_REG_WIDTH` at the fixed `ARM64_WIDTH_32` inside the
+`ARM64_SIM_L_EXEC` dispatch. The status is derived rather than restated: the
+generated macro computes it as the destination-width mask with itself
+subtracted, and the independent Lean statement does the same
+(`narrow (mask width - mask width) width`). It gets its own mutation
+build-out in `build/mut_arm64_stlxr.py` (untracked, 53 single-anchor rows)
+over five contract files --- the status spec (`arm64_stlxr_spec.json`), its
+generator (`generate_arm64_stlxr_spec.py`, including the order/macros/
+no-opcodes/opcode-drift guards and the stale-output comparison), the
+generated C switch macro (`generated/arm64_stlxr.h`, the `_Static_assert`
+code pin, the `KPROG_ARM64_STLXR_HANDLED` guard, the coverage assertion, and
+the per-opcode case arm), the generated Lean table
+(`GeneratedArm64Stlxr`, the `value`/`code`/`mnemonic`/`flagsUnchanged`
+definitions), and the hand Lean refinement (`Arm64Stlxr.lean`, the
+independent `arm64StlxrSpec`, the refinement and zero-status theorems, the
+in-range pin, the code dispatch, the flags-unchanged theorem, the w32
+high-half bound, and the two examples) --- with the same three detectors:
+gen (`generate_arm64_stlxr_spec.py --check`), lean_chain (`lake build
+KProgFormal.GeneratedArm64Stlxr` then `lake env lean
+KProgFormal/Arm64Stlxr.lean`), and host (the 1028-case
+`test_arm64_stlxr_host.c` oracle --- the known opcode required to return the
+width-mask-minus-itself masking oracle status at all four destination
+widths, the opcode byte tracked through all 256 values at every width with a
+non-family byte asserted to abort with `SIGABRT` through the generated
+unsupported arm, and the masking oracle an independent shift-of-one
+derivation rather than the macro's width-mask ladder). 49 catch
+(`gen=26 lean_chain=15 host=8`, one of the host catches through a compile
+failure) and 4 survive: the generator `ROOT` spelling repaint, the
+generated table's mnemonic repaint kept behind a trailing comment, the
+same trailing-comment repaint written on the hand side, and the macro's
+width-seed initialization (dead code --- the status arm is the width mask
+subtracting itself, identical for every width mask, so any width repaint
+still observes `0 - 0`), all documented equivalences by design. Shakedown
+retargets were needed for the `HANDLED` guard: a coverage-assertion message
+repaint is unobservable by a green `--check` and equally unobservable to
+the host compile (the message is not checked), so the row was retargeted to
+the guard itself inverted `==` -> `!=`, which the `_Static_assert` coverage
+check rejects at compile time; for the generated value arm, a
+`narrow 0 (Width.w32)` repaint equals `narrow 0 width` at every width (zero
+is zero at any width), so the row was retargeted to `narrow 1 width`, which
+both the refinement and the host oracle reject; and for the refinement
+tactic, the `bv_decide` -> `native_decide` repaint stays sound, and the
+row was retargeted to dropping the independent-spec unfold
+(`simp only [value, narrow, mask]` without `arm64StlxrSpec`), which
+`bv_decide` refutes with an opaque `arm64StlxrSpec` counterexample.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production

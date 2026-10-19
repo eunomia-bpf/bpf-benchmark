@@ -13978,6 +13978,102 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   verified, including the family spec and the sim header passed
   untouched); `make check` stays at 210 `: OK`.
 
+## Step 0175 — AArch64 store-exclusive status mutation coverage
+
+- Scope: the AArch64 store-exclusive status value
+  `KPROG_ARM64_STLXR_VALUE` --- the one value the simulator's `STLXR`
+  handler writes back to the status register. The store-exclusive
+  succeeds unconditionally in this simulator, so the status is the
+  success code `0` narrowed to the destination width, written through
+  `ARM64_SIM_L_WRITE_REG_WIDTH` at the fixed `ARM64_WIDTH_32` inside the
+  `ARM64_SIM_L_EXEC` dispatch (`ARM64_SIM_L_STLXR_VALUE` threads the
+  fixed width through the macro at its single call site,
+  `arm64_sim_local_bpf.h:144`). The hand Lean refinement pins the
+  independent `arm64StlxrSpec` (the destination-width mask with itself
+  subtracted, narrowed --- `narrow (mask width - mask width) width`),
+  the refinement of the generated `value` over every (op, width) pair,
+  the zero-status theorem, the in-range pin, the code dispatch, the
+  flags-unchanged theorem, the w32 high-half bound, and the two zero
+  examples.
+- Harness: `build/mut_arm64_stlxr.py` (untracked, 53 single-anchor
+  mutation rows) over five contract files --- the status spec
+  (`arm64_stlxr_spec.json`), its generator
+  (`generate_arm64_stlxr_spec.py`, including the row-order, macro-prefix,
+  no-opcodes, and opcode-drift guards plus the stale-output
+  comparison), the generated C switch macro
+  (`generated/arm64_stlxr.h`, the `_Static_assert` code pin, the
+  `KPROG_ARM64_STLXR_HANDLED` guard, the coverage assertion, the seed
+  and switch plumbing, the per-opcode case arm, and the
+  default/unsupported arms), the generated Lean table
+  (`KProgFormal/GeneratedArm64Stlxr.lean`, the `value`/`code`/
+  `mnemonic`/`flagsUnchanged` definitions), and the hand Lean refinement
+  (`KProgFormal/Arm64Stlxr.lean`). Three detectors, no regen stage and
+  no sim-header stage --- the wrapper threads the fixed width 32
+  through one `ARM64_SIM_L_STLXR_VALUE` call, so the host oracle reaches
+  the macro through the generated header alone: `gen`
+  (`generate_arm64_stlxr_spec.py --check`), `lean_chain` (`lake build
+  KProgFormal.GeneratedArm64Stlxr` then `lake env lean
+  KProgFormal/Arm64Stlxr.lean`), and `host` (the 1028-case
+  `test_arm64_stlxr_host.c` oracle --- the known opcode required to
+  return the width-mask-minus-itself status at all four destination
+  widths, the opcode byte tracked through all 256 values at every width
+  with a non-family byte asserted to abort with `SIGABRT` through the
+  generated unsupported arm; the masking oracle is an independent
+  shift-of-one derivation, not the macro's width-mask ladder).
+- Result: `TOTAL 53 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  49 mutants catch (gen 26, lean_chain 15, host 8 --- one host catch
+  through a compile failure, the inverted `HANDLED` guard): 5 shared-spec
+  drifts (operation, name, code 56 -> 57, macro,
+  schema-version), 23 generator drifts (operation/row/order/macros/
+  repaints, the no-opcodes guard inversion, the opcode parse
+  `0x38U -> 0x39U` repaint, the opcode cross-check and stale comparison
+  inversions, the ctors/codes/mnemonics/lean-arms recipe repaints, the
+  C-assert `+1U` repaint, the handled/coverage recipe repaints, the
+  C_BODY repaint, the case-label repaint, and both output-path
+  repaints), 8 generated-C drifts (the code pin 56 -> 57, the HANDLED
+  guard inversion, the coverage message repaint (caught by gen through
+  --check, which renders the header), the op seed (OP) -> (WIDTH) swap,
+  the wmask/wmaskX target repaint, the result init `0X`, the switch
+  variable repaint, the case label, the arm repaint, the default label,
+  the dropped UNSUPPORTED (making unknown opcodes exit instead of
+  abort), and the tail repaint; 12 total), 4 generated-Lean drifts
+  (the value arm `narrow 1 width`, the code 57, the flags
+  false), and 10 hand-Lean drifts (the spec `+ 1` repaint, the refines
+  goal operand swap and spec-unfold-drop tactic, the zero 0 -> 1 goal,
+  the range lower-bound 57 repaint, the dispatch 57, the flags false,
+  the w32 bound repaint, and the three example/bound repaints). 4
+  survive: the generator `ROOT` spelling repaint (the documented
+  equivalence every generator harness records), the generated table's
+  mnemonic repaint kept behind a trailing comment, the same
+  trailing-comment repaint written on the hand side, and the macro's
+  width-seed initialization (dead code: the status arm is the width
+  mask subtracting itself, identical for every width mask, so any
+  width repaint still observes `0 - 0`), all marked `equivalent` by
+  design.
+- Shakedown: retargets were needed for three survivors. The HANDLED
+  guard's coverage-assertion message repaint survived both the gen
+  detector (the guard never fires on a green `--check`, so a message
+  change is unobservable) and the host (the compiler checks the
+  assertion, not its message); it was retargeted to the guard itself
+  inverted `==` -> `!=`, which the `_Static_assert` coverage check
+  rejects at compile time and the pre-existing stage-one pin would
+  reject too. The generated value-arm repaint `narrow 0 (Width.w32)`
+  survived because it equals `narrow 0 width` at every width (zero is
+  zero at any width, so the two are propositionally equal and the host
+  oracle observes zero either way); it was retargeted to `narrow
+  1 width`, which the refinement, the zero theorem, and the host
+  oracle all reject. The refinement tactic repaint `bv_decide` ->
+  `native_decide` stayed sound (the four post-`cases` goals are
+  decidable either way); it was retargeted to dropping the
+  independent-spec unfold (`simp only [value, narrow, mask]` without
+  `arm64StlxrSpec`), which `bv_decide` rejects with an opaque
+  `arm64StlxrSpec = 18446744073709551615` counterexample. The width
+  seed was demoted to `equivalent` after the shakedown showed the
+  mask-minus-mask status identical for every width mask (tried the
+  `(OP)` repaint and a literal out-of-table `1` repaint, both green).
+- Residue: all five watched files byte-identical after the run
+  (`md5sum` verified); kept `make check` count at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
