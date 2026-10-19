@@ -4587,6 +4587,52 @@ decimal-to-hex literal repaint of the host XZR self-check
 (`31U` and `0x1fU` being the same number), and the host
 summary-line repaint.
 
+### Step 0194 — AArch64 load-tag mutation coverage
+
+The `arm64_load_tag` contract (`arm64_load_tag_spec.json`
+1 line, `generate_arm64_load_tag_spec.py` 147 lines,
+`generated/arm64_load_tag.h` 42 lines,
+`KProgFormal/GeneratedArm64LoadTag.lean` 26 lines,
+`KProgFormal/Arm64LoadTag.lean` 81 lines,
+`test_arm64_load_tag_host.c` 116 lines) fixes the plain-load
+provenance-routing decision: the destination is written through
+the tag-copy register write (`ARM64_SIM_L_WRITE_REG_PTR_TAG`,
+attaching the memory-read tag) exactly when the access width is
+the doubleword width and the tag is not the bare scalar tag
+(`width == .w64 && !tagIsScalar`); any other opcode reaches the
+caller-supplied unsupported arm. The generated side carries
+`code`, `preserve`, and a congruence lemma in Lean plus the
+switch-based C macro whose case label `31U` is static-asserted
+against `ARM64_OP_LOAD` and cross-checked against
+`kprog/arm64/arm64_sim.h` at `--check` time; the hand module
+restates the rule against the bit count, proves the refinement,
+the sub-word and scalar drop laws, the w64-preserving
+inversion, the iff, the opcode pins, and two canonical
+examples. The host oracle forks a child per case over all 256
+opcodes x 4 widths x 2 tag classes = 2048 cases: a known load
+must match an independent oracle and an unknown opcode must
+abort with SIGABRT through the generated unsupported arm.
+
+`build/mut_arm64_load_tag.py` (49 rows) perturbs the six files
+with the three detectors, all untracked, 49 single-anchor rows:
+14 catch at the generator stage (the op/name/code/rule spec
+drifts, the name/rule check rewrites, the rendered Lean body
+`||` repaint, both rendered C case-arm repaints, and the
+generated-path repoint), 13 catch through the Lean chain (the
+code drift, both preservation-body repaints, the namespace
+drift, and the hand spec `||` and tag-equality repaints, the
+sub-word bound loosening, both drop-law flips, the iff right
+side, the opcode pins, and both example flips), and 10 catch by
+the host oracle (the oracle-op inversion, the width-32 and
+tag-equality repaints, the exit-bit shift, the SIGFPE repaint,
+the want-sign inversion, and the generated case/width/case-
+body drifts). 12 rows survive as documented equivalences: six
+unreachable error-message repaints (all green-run-invisible),
+four consumers-free theorem renames, a true weaker range-pin
+repaint (30 ≤ code ≤ 32 remains provable while the exact
+`code_dispatch` pin stands), and the non-scalar tag-value grid
+repaint that keeps both tag classes injected.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/

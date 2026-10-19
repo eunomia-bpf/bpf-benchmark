@@ -14879,6 +14879,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   harness retained for reruns, and `make check` kept at
   210 `: OK`.
 
+## Step 0194 — AArch64 load-tag mutation coverage
+
+- Scope: the plain-load provenance-routing decision — tag-copy
+  write exactly at doubleword width with a non-scalar tag, the
+  unsupported arm off-family — across the opcode+preserve-rule
+  case spec, its generator (with the arm64_sim.h opcode
+  cross-check), the generated C switch macro, the generated
+  Lean module, the hand module (bit-count key, drop laws,
+  inversion, iff, opcode pins, examples), and a 2048-case
+  fork-per-case host oracle requiring SIGABRT off-family.
+- Harness: `build/mut_arm64_load_tag.py` (untracked), 49
+  single-anchor rows over the six files with 3 detectors:
+  gen 14 / lean_chain 13 / host 10 catch; 12 equivalences (six
+  unreachable error-message repaints, four consumers-free
+  theorem renames, a true weaker range-pin repaint, and the
+  non-scalar tag-value grid repaint).
+- Result: TOTAL 49 mutations, 0 failures, 12 equivalences
+  survived (37 catch: 14 gen, 13 lean_chain, 10 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the range-pin loosening (31≤code≤31 → 30≤code≤32)
+  stays provable — a true weaker statement with the exact
+  `code_dispatch` pin standing is an equivalence, not a catch;
+  the first tags-grid attempt (size-1 array under a 2-iteration
+  loop) was out-of-bounds UB and was replaced before landing by
+  a class-preserving value repaint ({SCALAR,1U} → {SCALAR,2U}),
+  the 0190 grid precedent.
+- Residue: all six watched files byte-identical after each run
+  (6-file load-tag watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
