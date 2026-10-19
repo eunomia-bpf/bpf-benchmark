@@ -14706,6 +14706,39 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file mem-offset watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0189 — AArch64 ADD/SUB flag-handler mutation coverage
+
+- Scope: the arithmetic result-plus-NZCV step with writeback/compare
+  modes (`arm64_flag_handler_spec.json`,
+  `generate_arm64_flag_handler_spec.py` with the ALU-decode
+  cross-check, `generated/arm64_flag_handler.h` with the
+  writeback and compare do-while macros,
+  `KProgFormal/GeneratedArm64FlagHandler.lean`,
+  `KProgFormal/Arm64FlagHandler.lean` with the independent step
+  spec and four `native_decide` examples,
+  `test_arm64_flag_handler_host.c` — signed `__int128` oracle, 
+  8×4×2 grid = 64 cases vs both macros), ...
+- Harness: `build/mut_arm64_flag_handler.py` (untracked), 47
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 16 / lean_chain 13 / host 7 catch split; 11 equivalences
+  (stale-mirror gate disarm, message/import repaints, code-arm
+  value repaint, ADD-operand swap in the result assignment, four
+  example renames, two summary-line repaints).
+- Result: TOTAL 47 mutations, 0 failures, 11 equivalences survived
+  (36 catch: 16 gen, 13 lean_chain, 7 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: a naive comparison-gate repaint made the branch
+  unreachable (weakened oracle cannot fail by construction) —
+  replaced with a gate another vector still condemns; the family
+  user-facing constant repaint relabeled catch — the host threads
+  raw literals 0/1 through the macro switch, unlike 0187's
+  identifier-threaded driver; the ADD-operand swap is a real
+  equivalence (commutative at every masked width).
+- Residue: all six watched files byte-identical after each run
+  (6-file flag-handler watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

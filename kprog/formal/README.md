@@ -4344,6 +4344,60 @@ Shakedown relabeled two drafted rows after the first run — the
 refines-theorem rename and the prepost-lemma rename (both shake
 green because neither theorem has downstream consumers).
 
+### Step 0189 — AArch64 ADD/SUB flag-handler mutation coverage
+
+The `arm64_flag_handler` contract (`arm64_flag_handler_spec.json`
+1 line, `generate_arm64_flag_handler_spec.py` 161 lines,
+`generated/arm64_flag_handler.h` 40 lines,
+`KProgFormal/GeneratedArm64FlagHandler.lean` 41 lines,
+`KProgFormal/Arm64FlagHandler.lean` 113 lines,
+`test_arm64_flag_handler_host.c` 94 lines) fixes the ADD/SUB
+result-plus-NZCV step: value = shared ALU result (families 0/1
+cross-checked against the ALU decode table), flags =
+`applyAdd`/`applySub` on the same operands (the generated C emits
+two macros — `KPROG_ARM64_EXEC_ARITH_WRITEBACK` adding the result
+assignment, `KPROG_ARM64_EXEC_ARITH_COMPARE` flags-only), and the
+handler composition where ADDS/SUBS write back the narrowed scalar
+(`generatedArm64ScalarWrite`) while CMP/CMN leave register/SP state
+untouched. The hand Lean side restates the step independently
+(`arm64AluResultSpec` + `arm64AddNzc`/`arm64SubNzc`), refines step
+and handler, and proves four `native_decide` examples (ADDS w32
+overflow writeback, SUBS through XZR discarding the result, CMP
+preservation, CMN carry without writeback). The host oracle
+re-derives flags through a signed `__int128` comparison — carry as
+an out-of-range test for ADD, an operand compare for SUB — and
+sweeps 8 operand vectors × 4 widths × 2 families = 64 cases
+against both macros with parked sentinel values.
+
+`build/mut_arm64_flag_handler.py` (47 rows) perturbs the six files
+with the three detectors, 'untracked, 47 single-anchor rows': 16
+catch at the generator stage (spec family/mode field drifts
+including the add-flags/sub-alu transposes, generator mirror
+drifts including the result-recipe operand swap and the
+flags-macro repaint across both write arms, and decode-table or
+path repoints), 13 catch through the Lean chain (both generated
+family-arm and flags-arm swaps, the value/flags apply transpose,
+the hand step flags transposes, both writeback comparisons in the
+step refinement, the writeback no-op exchange, the handler-tail
+rewrite repaint, and the import/namespace drifts), and 7 catch by
+the host oracle (the want-operand swap, the carry-arms transpose,
+the overflow-polarity flip, the zero-vs-negative-bit gate repaint,
+the family-constant repaint causing switch-default abort, and the
+comparison gate repaint `cz != want_n` another vector still
+condemns). 11 rows survive as documented equivalences: the
+disarmed spec-mirror guard, the guarded spec/ALU message and
+comment-only import repaints (green-run-invisible), the generated
+Lean code-arm value repaint (no consumer — 0187 precedent), the
+ADD-operand swap in the generated result assignment (commutative
+at every masked width for every input), four consumers-free
+example-theorem renames, and two summary-line repaints carrying no
+result bit. The shakedown also documents a detector-relevant
+contrast with Step 0187: repainting the family
+user-facing constant (`ARITH_FAMILY_ADD 0U→3U`) is a catch here
+because the host threads raw literals 0/1 through the macro
+switch, while the logic-flag handler's repaint survived because its
+driver re-uses the generated macros as identifiers.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
