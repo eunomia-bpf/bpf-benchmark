@@ -1243,6 +1243,19 @@ increment is committed and pushed immediately). Current state:
   the reach-only proof-support lemma, and the duplicate-case recast;
   the UBFX-coverage-assert re-assert row was retargeted onto a
   `BFI + 1U` assert the compiler rejects),
+  and the AArch64 shared six-operation ALU op-step result contract
+  (ADD/SUB/AND/BIC/EOR/ORR, codes 0..5) got its own single-family harness
+  against the 120,073-case host oracle (Step 0171; boundary vectors plus a
+  20,000-iteration fixed-seed sweep over all six ops plus the unsupported-arm
+  abort probe; same three detectors and no regen or sim-header stage --- the
+  simulator header only `#include`s the generated `KPROG_ALU64_RESULT` macro
+  and inline-expands it, so a generated-header drift shows only through the
+  host oracle --- split gen 16 / lean_chain 20 / host 11 with the
+  dead-result-seed row the only detector-invisible survivor, joining the
+  three documented equivalences: the generator `ROOT` spelling, the
+  generated-Lean doc-comment typo, and the hand-Lean EOR counterexample
+  restatement; no shakedown retargets were needed --- all draft anchors were
+  caught on the first full run),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

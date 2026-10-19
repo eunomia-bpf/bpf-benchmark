@@ -13665,6 +13665,64 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `setWidth 63` inner-narrow rows proved live-equivalent per guard, so
   each became its own documented survivor.
 
+## Step 0171 — AArch64 shared ALU op-step result mutation coverage
+
+- Scope: the AArch64 shared ALU op-step result family
+  `KPROG_ALU64_RESULT` (the six operations `add`/`sub`/`and`/`bic`/`eor`/
+  `orr`, codes 0..5, tracking the `ARM64_ALU_*` decode-table values without
+  including `generated/arm64_decode.h`), whose macro the simulator's
+  `ARM64_SIM_L_EXEC_ALU` inline-expands. All six operations refine the
+  independent `arm64AluResultSpec` statement (subtraction deliberately
+  stated as add-of-two's-complement `lhs + ~~~rhs + 1` and BIC with an
+  explicit complement mask, both not reusing the generated forms), plus the
+  code-in-range/dispatch/narrowing theorems, the ADD/SUB/logic
+  flag-composition rewrites, and the canonical wrap/borrow/BIC/EOR/ORR
+  examples.
+- Harness: `build/mut_arm64_alu_result.py` (untracked, 51 single-anchor
+  mutation rows) over the five contract files --- the shared spec
+  (`arm64_alu_result_spec.json`, 6 rows), its generator
+  (`generate_arm64_alu_result_spec.py`), the generated C switch macro
+  (`generated/arm64_alu_result.h`), the generated Lean module
+  (`GeneratedArm64AluResult.lean`), and the hand Lean refinement
+  (`Arm64AluResult.lean`). Three detectors, no regen stage: `gen`
+  (`generate_arm64_alu_result_spec.py --check`, which also cross-checks the
+  codes against `arm64_decode_spec.json`), `lean_chain` (`lake build
+  KProgFormal.GeneratedArm64AluResult` then `lake env lean
+  KProgFormal/Arm64AluResult.lean`), and `host` (the 120,073-case
+  boundary-plus-20000-iteration fixed-seed chase oracle
+  `test_arm64_alu_result_host.c` with its forked-`SIGABRT`
+  unsupported-op-code-6 probe). No route detector and no sim-header stage:
+  the simulator header only `#include`s the generated header and
+  inline-expands `KPROG_ALU64_RESULT` inside `ARM64_SIM_L_EXEC_ALU`, so a
+  generated-header drift is observable only through the host oracle, which
+  reaches the macro through the same include; no opcode-source row exists
+  because `arm64_sim_local_bpf.h` does not re-declare the ALU op codes.
+- Result: `TOTAL 51 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  47 mutants catch (gen 16, lean_chain 20, host 11): 8 shared-spec row
+  drifts (per-row name/code/lean/c repaints, operation-string drift,
+  schema-version drift), 7 generator drifts (order check, codes check, the
+  four per-row `EXPECTED` template drifts, the decode-spec version gate), 12
+  generated-C drifts (add duplicate-case-1U label recast, add/sub/and/bic/
+  eor/orr arm swaps, the switch-variable repaint, default `case 5U:`
+  duplicate, unsupported-identifier rename the compiler rejects, and the
+  tail `+1` repaint), 8 generated-Lean arm drifts (each of the six result
+  arms plus the add `+1` and sub operand-swap repaints), and 12 hand-Lean
+  drifts (the add/sub/and/bic/eor/orr independent-statement repaints, the
+  refines-tactic simplifier-lemma drop, the three wrong-flag-composition
+  rewrites, and the bic/sub/orr/add canonical-example drift each provably
+  false under `native_decide`). 4 survive: the dead
+  `__kprog_alu64_res = 1` seed literal (every switch arm assigns before the
+  macro's single tail expression reads it --- the same detector-invisible
+  shape shift/step 0169 documented), the generator `ROOT` spelling repaint,
+  the generated-Lean doc-comment typo, and the hand-Lean EOR
+  counterexample-constant restatement (the theorem `native_decide` proves
+  is unchanged; live-probed green under the lean detector).
+- Residue: all five watched files and both sim headers byte-identical to
+  `HEAD` after the run (`md5sum` verified); `make check` stays at 210
+  `: OK`. No shakedown retargets were needed --- all 51 draft anchors were
+  caught on the first full run (the 4 intended equivalences survived as
+  designed).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
