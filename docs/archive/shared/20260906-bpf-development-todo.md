@@ -13623,6 +13623,48 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   retargeted to the generator's `[0, 1, 2, 3]` codes-range cross-check,
   which `--check` rejects.
 
+## Step 0170 — AArch64 UBFX/SBFX/UBFIZ/BFXIL/BFI bitfield mutation coverage
+
+- Scope: the AArch64 bitfield-composition family `ARM64_BITFIELD_UBFX`/
+  `SBFX`/`UBFIZ`/`BFXIL`/`BFI` (codes 0..4, the five extracted/inserted-field
+  compositions refined against the machine-generated
+  `GeneratedArm64Bitfield.value` table, Step 0092) gets its own
+  single-family mutation harness against the 126,246-case host
+  generated-header oracle (16 sources x 8 destinations x 20 in-domain field
+  pairs plus 21 guard-exercising pairs x 5 kinds, a 20,000-iteration
+  fixed-seed sweep, and the handled-gate probes; there is no route
+  detector: the wrapper body `ARM64_SIM_L_BITFIELD_VALUE` is reached only
+  through the host test, and the sim header adds only the zero-extended
+  LSB/BITS wrappers plus the unsupported-opcode call to the generated
+  macro).
+- Code: new `kprog/formal/build/mut_arm64_bitfield.py` (untracked) mutating
+  five contract files --- the shared spec (`arm64_bitfield_spec.json`), its
+  generator, the generated C table (`generated/arm64_bitfield.h`), the
+  generated Lean module (`GeneratedArm64Bitfield`), and the hand Lean
+  refinement (`Arm64Bitfield.lean`) --- with the same three detectors as
+  Step 0168/0169: `gen` runs the generator `--check` row, `lean_chain` runs
+  `lake build KProgFormal.GeneratedArm64Bitfield` plus
+  `lake env lean KProgFormal/Arm64Bitfield.lean`, and `host` compiles and
+  runs the oracle; no regen stage (the spec is five scalar rows).
+- Gate: `make -C kprog/formal check` --- full run green (210 `: OK` rows).
+- Tally: `TOTAL 104 mutations, 0 failures (gen=33 lean_chain=30 host=31)`
+  plus three retargets, `ALL AS EXPECTED`. 94 mutants catch and 10
+  survive: the two live-probed equivalences (the rewired default-label
+  rename `defaultX:` silenced as an unused-label warning because the
+  default arm never executes, and the hand-Lean `hb`/`h64` packet-guard
+  repaints) plus eight detector-invisible rows kept as survivors (the
+  dead result-seed literal, the spec-name regex, the
+  conditional-subsumption guard repaints, the triple-concat
+  SASS-layout comment, the unreachable-default UNSUPPORTED-arm name, the
+  reach-only proof-support lemma, and the duplicate-case recast).
+  Shakedown retargets: the UBFX coverage-assert swap
+  (`HANDLED(UBFX) -> HANDLED(4U)`) is a live-true repaint because the
+  handled macro expands to a Boolean constant, so the row moved to the
+  `HANDLED(BFI + 1U)` assert the compiler rejects; the default-break row
+  moved to a duplicate `case 4U:` label; and the generated-Lean
+  `setWidth 63` inner-narrow rows proved live-equivalent per guard, so
+  each became its own documented survivor.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

@@ -1228,6 +1228,21 @@ increment is committed and pushed immediately). Current state:
   prover confirms), and the rename of the caller-free
   `arm64_shift_amount_masked` theorem; the generator's never-interpolated
   `ctors` string retargeted the ctor row onto the codes-range check),
+  and the AArch64 UBFX/SBFX/UBFIZ/BFXIL/BFI bitfield-composition family
+  got its own single-family harness against the 126,246-case host
+  oracle (Step 0170; boundary sweep of 16 sources x 8 destinations x
+  (20 in-domain fields + 21 guard-exercising field pairs) x 5 kinds,
+  a 20,000-iteration fixed-seed sweep and the handled-gate probe; same
+  three detectors and no regen stage --- split gen 33 / lean_chain 30 /
+  host 31 with the two live-probed equivalences (the default-label
+  rename silenced as an unused-label warning, the hand-Lean
+  packet-guard repaint) joining the seven proven-redundant survivors:
+  the dead result-seed literal, the spec-name regex, the
+  conditional-subsumption guard repaints, the triple-concat
+  SASS-layout comment, the unreachable-default UNSUPPORTED-arm name,
+  the reach-only proof-support lemma, and the duplicate-case recast;
+  the UBFX-coverage-assert re-assert row was retargeted onto a
+  `BFI + 1U` assert the compiler rejects),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

@@ -3521,6 +3521,33 @@ interpolated in the shift template (the Lean inductive comes from the decode
 generator), so the ctor-spelling row was retargeted to the `[0, 1, 2, 3]`
 codes-range cross-check.
 
+The AArch64 bitfield-composition family (`ARM64_BITFIELD_UBFX`/`SBFX`/`UBFIZ`/
+`BFXIL`/`BFI`, codes 0..4) gets the same mutation build-out in
+`build/mut_arm64_bitfield.py` (untracked), a single-family harness over the
+same five contract files --- the shared spec (`arm64_bitfield_spec.json`, 5
+rows), its generator, the generated C table (`generated/arm64_bitfield.h`,
+the code asserts, the handled/unsupported gate, the coverage asserts, the
+switch, the guard ternaries and the per-op arms), the generated Lean module
+(`GeneratedArm64Bitfield`), and the hand Lean refinement (`Arm64Bitfield.lean`)
+--- with the same three detectors and no regen or sim-header stage (the 5-row
+scalar spec bakes both codes and arms into the generated files directly; the
+sim header only adds the zero-extended-LSB/BITS wrapper plus the
+`ARM64_SIM_L_UNSUPPORTED_OPCODE` call, and the wrapper routes by
+`ARM64_OP_BITFIELD` dispatch like every other value family, so there is no
+route detector). 94 mutants catch (`gen=33 lean_chain=30 host=31`) and 10
+survive: the two live-probed equivalences (the unused-default-label rename
+`defaultX:`, only a `-Wunused-label` warning because the never-executed default
+arm falls out of the sweep, and the hand-Lean `hb`/`h64` packet-hypothesis
+repaints since the refines theorem statement is unchanged) join the
+seven-documented-redundant survivors (the dead result-seed literal, the
+spec-name regex, the conditional-subsumption guard repaints, the
+triple-concat SASS-layout comment, the unreachable-default UNSUPPORTED-arm
+name, the reach-only proof-support lemma, and the duplicate-case recast).
+Doc-shake findings: the UBFX coverage assert (`HANDLED(ARM64_BITFIELD_UBFX)`)
+amounts to reasserting a `_Static_assert`-already-pinned code, and the default
+`break;`-repaint row (the fourth proven-redundant one) was replaced by a
+duplicate-case-4U label row the compiler rejects outright.
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
