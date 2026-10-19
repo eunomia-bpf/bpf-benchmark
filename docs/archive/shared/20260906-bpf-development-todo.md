@@ -15111,6 +15111,43 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file mem-dispatch watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0201 — AArch64 stack-arena mutation coverage
+
+- Scope: the two overlapping views over the one union storage of the
+  simulator's stack (byte arena `b[]` indexed by the 32-bit stack byte
+  index, word arena `q[]` indexed by that index shifted right 3 under
+  the low-three-bits alignment guard, and the capacity round-up
+  `+7 / 8` that keeps the word view covering the byte view — 20 slots
+  for the enabled 160-byte arena, one slot even disabled) across the
+  case spec, its generator (the rendered Lean template expressions and
+  C macro bodies), the generated C header (WORD_INDEX/_WORD_ALIGNED/
+  _WORDS/_TAG_SLOTS), the generated Lean module (wordIndex/wordAligned/words),
+  the hand module (independent division/remainder/shift-plus-carry
+  round-up restatements plus the refinements, views-coincide, byte
+  lane-0 agreement, six canonical examples), and a 70558-case host
+  oracle (index/capacity grid, coverage/tightness bounds, word
+  round-trip via the byte-lane contract, aliasing sweeps, and an
+  exhaustive 256x256 index-capacity-word sweep).
+- Harness: `build/mut_arm64_stack_arena.py` (untracked), 62
+  single-anchor rows over the six files with 3 detectors: gen 16 /
+  lean_chain 17 / host 15 catch; 14 equivalences (two unreachable
+  error-message repaints, four consumers-free theorem renames, the
+  doc-comment shift, the header-guard repaint, sweep-shape grid
+  repaints, and the OK-line message).
+- Result: TOTAL 62 mutations, 0 failures, 14 equivalences survived
+  (48 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the tag-slots macro drift is caught through generator-
+  stale because no C or Lean consumer reads that macro (the host
+  oracle exercises WORDS but not TAG_SLOTS) — retagging its row from
+  host to gen was the one detector-assignment correction; the open-
+  list rename and the grid repaints (dropped index, zero capacity,
+  duplicate index, plus-seven capacity shift, zero-capacity append)
+  were retagged equivalent because the harness's own restatements
+  re-derive whatever they sweep.
+- Residue: all six watched files byte-identical after each run
+  (6-file stack-arena watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

@@ -5210,5 +5210,54 @@ predicates and the AArch64 and x86 emitted-shape bridges are local control-flow
 refinements (one conditional edge at a time); the whole-program control-flow
 trace contract chains those edges over arbitrary-length paths, but the emitted
 shapes are still not tied to concrete native instruction bytes.
+
+### Step 0201 — AArch64 stack-arena mutation coverage
+
+The `arm64_stack_arena` contract (`arm64_stack_arena_spec.json`
+1 line, `generate_arm64_stack_arena_spec.py` 112 lines,
+`generated/arm64_stack_arena.h` 11 lines,
+`KProgFormal/GeneratedArm64StackArena.lean` 16 lines,
+`KProgFormal/Arm64StackArena.lean` 105 lines,
+`test_arm64_stack_arena_host.c` 231 lines) fixes the two
+overlapping views over the one union storage of the simulator's
+stack: the byte arena `b[]` indexed directly by the 32-bit stack
+byte index and the word arena `q[]` indexed by that index shifted
+right 3, usable only under the low-three-bits alignment guard so
+the 64-bit fast path skips no byte, plus the slot count a byte
+capacity rounds up to (`+7 / 8`, exactly 20 slots for the enabled
+160-byte arena and one slot even for the disabled 1-byte arena,
+so the word view always covers the byte view). The generated side
+carries three Lean definitions (`wordIndex` shift, `wordAligned`
+mask test, `words` round-up) and the four C macros
+`KPROG_ARM64_STACK_WORD_INDEX`, `_WORD_ALIGNED`, `_WORDS`,
+`_TAG_SLOTS`; the hand module restates each independently
+(division, remainder, shift-plus-carry round-up instead of the
+generator's `+7` fold) and proves the three refinements, the
+views-coincide property, the byte lane-0 agreement with the
+byte-lane contract, and six canonical examples. The host oracle
+drives the generated macros over 70558 cases: an index/capacity
+grid with independent division/remainder/round-up restatements,
+coverage and tightness bounds, a word round-trip through the
+byte-lane contract, an aliasing sweep of a filled arena, and an
+exhaustive 256x256 sweep of indices, capacities, and words.
+
+`build/mut_arm64_stack_arena.py` (62 rows) perturbs the six files
+with the three detectors: 16 catch at the generator stage (the
+four spec-field drifts and expected-field drifts and both
+rendered-C/Lean template repaints), 17 catch through the Lean
+chain (the namespace drift, all three generated definitions, all
+three independent restatements, the views-coincide goal, the
+module open list, and every canonical-example value), and 15
+catch by the host oracle (the generated C macro bodies that the
+oracle exercises, every per-case check, and the grid tables). 14
+rows survive as documented equivalences: two unreachable
+error-message repaints, four consumers-free theorem renames (the
+three refinements and views-coincide), the doc-comment shift
+repaint Lean cannot see, the header-guard repaint no detector
+compiles, the sweep-shape grid repaints (a dropped index, a zero
+capacity, a duplicate index, a plus-seven capacity shift, and a
+zero-capacity append the round-up absorbs), and the OK-line
+message.
+
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.
