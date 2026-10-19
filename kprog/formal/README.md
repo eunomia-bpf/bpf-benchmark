@@ -4098,6 +4098,57 @@ summary-line repaints carrying no result bit. Shakedown relabeled six
 drafted rows `equivalent_*` after the first run confirmed each
 survivor: notably the path-theorem rename is NOT one of them — it was
 retained as a catch because the main refinement cites the name.
+### Step 0184 — AArch64 CCMP handler mutation coverage
+
+The `arm64_ccmp_handler` contract (`arm64_ccmp_handler_spec.json` 1
+line, `generate_arm64_ccmp_handler_spec.py` 103 lines,
+`generated/arm64_ccmp_handler.h` 18 lines,
+`KProgFormal/GeneratedArm64CcmpHandler.lean` 26 lines,
+`KProgFormal/Arm64CcmpHandler.lean` 113 lines,
+`test_arm64_ccmp_handler_host.c` 125 lines) fixes the CCMP flag
+transition: `KPROG_ARM64_EXEC_CCMP` runs
+`KPROG_ARM64_EVAL_COND` on the incoming NZCV, takes
+`KPROG_ARM64_SET_SUB_FLAGS` on the true path, and loads
+`(C_N,C_Z,C_C,C_V)` from the fallback immediate's shifts 3/2/1/0 on the
+false path, touching no register state. The generated Lean side
+carries `fallbackFlags` (mask `0x8/0x4/0x2/0x1`) and the `apply` step;
+the hand Lean side states the fallback independently (`getLsbD 3..0`,
+bits above NZCV[3:0] intentionally ignored, matching the C
+extraction), refines fallback/condition/step/handler, and proves four
+`native_decide` examples (true path via SUB flags with regs preserved,
+false path via fallback, w32 overflow, fallback high-nibble
+discard). The host oracle sweeps incoming NZCV × condition × 8
+operand vectors × 4 widths × fallback nibble — 122,880 cases.
+
+`build/mut_arm64_ccmp_handler.py` (57 rows) perturbs the six files
+with the three detectors, 'untracked, 57 single-anchor rows': 17
+catch at the generator stage (spec JSON drifts on every field
+including false-path bit assignments and preserves_registers,
+generator mirror drifts, the canonical condition-table message, the
+Lean flag-row and C-assignment recipe repaints, file-path drifts, the
+generated C eval/nibble/z/macro drifts), 17 catch through the Lean
+chain (fallback-bit repaints, apply condition-argument order, apply
+operand swap, fallback-shift repaint, namespace drift, the hand
+`getLsbD` drifts, the condition-refinement `change` and
+`condition_sound` repaints, the step `rw` and both split-branch
+rewrites, the handler tail `rw`, the import drift, and two
+consumer-cited refinement renames — `arm64_ccmp_fallback_refines` is
+rw'd by `arm64_ccmp_step_refines`'s else branch and its simp-set
+shrink drops the independent-spec unfolding, so both are retained as
+catches), and 10 catch by the host oracle (conditional flip,
+want_n/want_c/want_v fallback-bit drifts, the operand swap in the
+EXEC call, the comparison flip, and the true-path result repaints).
+13 rows survive as documented equivalences: 'the disarmed spec-mirror
+guard', the generator message repaint and comment-only import repaint
+(green-run-invisible guard paths), the cond-table message repaint
+(guarded error text keyed to a check the -check run never trips),
+the generated-Lean comment repaint and hand namespace comment repaint,
+the fallback-refinement rename drafted and re-judged (retained as a
+catch because the step theorem cites it), three consumers-free
+example-theorem renames, the host loop-start shrinks (incoming/
+cond/fallback starting at 1: pure sample-grid resamples the
+proved contract makes invisible), and two summary-line repaints
+carrying no result bit.
 
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that

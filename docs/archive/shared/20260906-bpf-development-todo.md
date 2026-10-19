@@ -14534,6 +14534,43 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file alu-handler watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0184 — AArch64 CCMP handler mutation coverage
+
+- Scope: the CCMP flag transition — evaluate the incoming-NZCV
+  condition, SUB flags on the true path, fallback-immediate nibble on
+  the false path (`arm64_ccmp_handler_spec.json`,
+  `generate_arm64_ccmp_handler_spec.py` with the canonical
+  condition-table cross-check, `generated/arm64_ccmp_handler.h` with
+  the do-while `KPROG_ARM64_EXEC_CCMP` macro,
+  `KProgFormal/GeneratedArm64CcmpHandler.lean` with `fallbackFlags`
+  and `apply`, `KProgFormal/Arm64CcmpHandler.lean` with the
+  fallback/condition/step/handler refinement chain and four
+  `native_decide` examples, `test_arm64_ccmp_handler_host.c` — 16×15
+  ×8×4×16 grid = 122,880 cases), ...
+- Harness: `build/mut_arm64_ccmp_handler.py` (untracked), 57
+  single-anchor rows over the six files with 3 detectors (`--check`
+  re-render, Lean chain build+elaborate, host recompiled per row):
+  gen 17 / lean_chain 17 / host 10 catch split; 13 equivalences
+  (stale-mirror gate disarm, generator message repaint, comment-only
+  import repaint, cond-table message repaint, generated-Lean comment
+  repaint, hand namespace comment repaint, three example-theorem
+  renames, host loop-start shrinks ×3, two summary-line repaints).
+- Result: TOTAL 57 mutations, 0 failures, 13 equivalences survived
+  (44 catch: 17 gen, 17 lean_chain, 10 host), `ALL AS EXPECTED` rc 0
+  across consecutive reruns.
+- Shakedown: the fallback anchor indentation needed the C-style
+  leading brace column; three drafted rows re-judged after the first
+  run: the cond-table message repaint survives (guarded error text
+  the green run never trips), while the fallback-lemma rename and the
+  fallback simp-set shrink are catches because
+  `arm64_ccmp_step_refines` cites the lemma by name and the simp set
+  must unfold the independent spec. The step-split rewrites, the
+  operand swap, the comparison flips, and the fallback-bit drifts are
+  catches at their own detectors.
+- Residue: all six watched files byte-identical after each run
+  (6-file ccmp watchlist verified), the untracked harness retained
+  for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
