@@ -1273,6 +1273,22 @@ increment is committed and pushed immediately). Current state:
   chain consumer reads; one shakedown retarget was needed, the
   goal-side flip of `arm64_adrp_tag_refines` being `Eq`-symmetric under
   `rfl`, retargeted onto an independent-`isGot`-index drift),
+  and the AArch64 condition-code contract (eq/ne/cs/cc/mi/pl/vs/vc/hi/ls/
+  ge/lt/gt/le/al, codes 0..14) got its own single-family harness over the
+  240-case full NZCV-grid oracle plus the forked 241 out-of-range sweep
+  (Step 0173; every one of the 4 flag-states crossed with all 15 codes so
+  each condition's truth table is checked in full, then every condition
+  number 15..255 forked through the unsupported arm; same three detectors
+  and no regen or sim-header stage --- the simulator header re-declares the
+  fifteen `ARM64_COND_*` numbers and its `ARM64_SIM_L_EVAL_COND` wrapper
+  only threads the live flag variables, so a generated-header drift shows
+  only through the host oracle --- split gen 38 / lean_chain 22 / host 9
+  with the generator `ROOT` spelling repaint the only documented survivor;
+  two shakedown retargets were needed, the weakened-canonicalization-gate
+  row being silent on a canonical spec until retargeted onto a two-field
+  spec drift and the `rfl` -> `trivial` tactic repaint being
+  propositionally sound until retargeted onto a `decide` repaint the free
+  flag variables reject),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

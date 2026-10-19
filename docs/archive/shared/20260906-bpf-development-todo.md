@@ -13797,6 +13797,89 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   `HEAD` after the run (`md5sum` verified); `make check` stays at 210
   `: OK`.
 
+## Step 0173 — AArch64 condition-code mutation coverage
+
+- Scope: the AArch64 condition-code family
+  `KPROG_ARM64_EVAL_COND` (the fifteen conditions `eq`/`ne`/`cs`/`cc`/
+  `mi`/`pl`/`vs`/`vc`/`hi`/`ls`/`ge`/`lt`/`gt`/`le`/`al`, codes 0..14,
+  tracking the fourteen `ARM64_COND_*` numbers the sim header re-declares
+  plus the always-true `al`), whose chained-ternary macro the simulator's
+  `ARM64_SIM_L_EVAL_COND` wrapper threads the live
+  `__a64_n`/`__a64_z`/`__a64_c`/`__a64_v` flag variables into. All fifteen
+  conditions refine the independent `Arm64Flags`-record
+  `arm64CondSpec` statement (written per constructor, structurally separate
+  from the generated predicate expressions and reindexed through the
+  `generatedArm64Cond` indirection), plus the soundness theorem over all
+  16 NZCV states, the code-in-range and code-dispatch theorems, the
+  code-distinctness triple, and the AL-always/complements examples.
+- Harness: `build/mut_arm64_cond.py` (untracked, 69 single-anchor
+  mutation rows) over the five contract files --- the shared spec
+  (`arm64_cond_spec.json`, 15 rows), its generator
+  (`generate_arm64_cond_spec.py`, including the fourteen `validate_expr`
+  grammar branches and the per-constructive render templates), the
+  generated C ternary chain (`generated/arm64_cond.h`, the fifteen
+  `_Static_assert` code pins, the chained per-condition ternary arms, and
+  the `{ UNSUPPORTED; 0; }` tail), the generated Lean module
+  (`GeneratedArm64Cond.lean`, the inductive, the `code` projection, and
+  the per-condition `eval` arms), and the hand Lean refinement
+  (`Arm64Cond.lean`, the `Arm64Flags` record, the `arm64CondSpec`
+  independent statement, the `generatedArm64Cond` reindexing, the
+  soundness/range/dispatch/distinctness theorems, and the
+  AL-always/complements examples). Three detectors, no regen stage and no
+  sim-header stage: `gen` (`generate_arm64_cond_spec.py --check`, whose
+  canonicalization gate re-checks name/code per row against the
+  `NAMES` list), `lean_chain` (`lake build
+  KProgFormal.GeneratedArm64Cond` then `lake env lean
+  KProgFormal/Arm64Cond.lean`), and `host` (the 240-case
+  `test_arm64_cond_host.c` full NZCV-grid oracle --- each of the 4
+  flag-states crossed with all 15 codes, each condition's truth table
+  checked in full against an explicit-switch oracle structurally
+  different from the macro's chained ternary --- plus the
+  241 out-of-range code sweep (15..255) forked through the generated
+  unsupported arm with `SIGABRT` asserted). No route detector because the
+  simulator header re-declares the fifteen `ARM64_COND_*` numbers and the
+  wrapper only threads the live flag variables, so a generated-header
+  drift is observable only through the host oracle, which reaches the
+  macro through the same include; no opcode-source row exists because no
+  condition codes are re-declared outside `arm64_sim.h`.
+- Result: `TOTAL 69 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  68 mutants catch (gen 38, lean_chain 22, host 9): 18 shared-spec row
+  drifts (operation-string, schema-version, full-row repaints and
+  per-field code/flag-name/op repaints across eq/ne/cs/cc/mi/pl/vs/vc/
+  hi/ls/ge/lt/gt/le/al, plus the eq/ne order swap through the
+  placeholder-row recast), 19 generator drifts (NAMES order swap,
+  operation/version/count gates, the canonicalization gate, the four
+  render-branch operator/branch repaints, the constructor/codes/cases/
+  assert template drifts, the case prefix/append and final-row template
+  drifts, and the LEAN_PATH/C_PATH output-path drifts), 10 generated-C
+  drifts (the eq/ne/cs/ls/ge/le/gt/al ternary-arm repaints, the
+  unsupported-arm drop, and a code static-assert repaint), 7
+  generated-Lean arm drifts (the ge code projection, the eq/hi/ge/gt/le/
+  al eval repaints), and 14 hand-Lean drifts (the eq/ge/gt/le/al spec
+  repaints, the reindexing head/body drifts, the soundness goal and
+  tactic drifts, the range goal/tactic repaints, the dispatch-ge repaint,
+  the distinctness goal flip, the AL-always repainting onto a false
+  `cc` conjunct, and the complements-NE repaint that equates a
+  condition with its negation). 1 survives: the generator `ROOT`
+  spelling repaint, the documented equivalence by design every generator
+  harness records.
+- Shakedown: two retargets were needed. The first draft's
+  canonicalization-gate repaint (`or` -> `and` between the name and code
+  checks) approves a canonical spec silently because `--check` renders
+  from the canonical spec itself, so the row was retargeted to also drift
+  one spec row on both fields (name `mi` -> `mix` and code 4 -> 5),
+  forcing the weakened gate to fire; live-probed raising
+  `non-canonical AArch64 condition`. The first draft's soundness-tactic
+  repaint (`rfl` -> `trivial`) survives because the post-`cases` goals
+  are propositionally trivial (the tactic discharge is sound), so the
+  row was retargeted to a `decide` repaint, which the free flag
+  variables reject (`decide` cannot close a goal over variables, the
+  error points at the `al` case). One earlier draft row (the
+  soundness-goal repaint to a `&& true` restatement) was dropped when the
+  shakedown showed it a propositional equivalence.
+- Residue: all five watched files byte-identical to `HEAD` after the run
+  (`md5sum` verified); `make check` stays at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

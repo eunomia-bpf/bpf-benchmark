@@ -3601,6 +3601,44 @@ draft's goal-side flip of `arm64_adrp_tag_refines` survives because
 `Eq` is symmetric under `rfl`, so the row was retargeted to an
 independent-`isGot`-index drift that the `cases op <;> rfl` proof no longer
 closes.
+
+The AArch64 condition-code contract binds the fifteen-member flag-decision
+family `eq`/`ne`/`cs`/`cc`/`mi`/`pl`/`vs`/`vc`/`hi`/`ls`/`ge`/`lt`/`gt`/`le`/
+`al` (codes 0..14, the fourteen `ARM64_COND_*` numbers plus the
+always-true `al`, the `KPROG_ARM64_EVAL_COND` chained-ternary macro) that
+the simulator's `ARM64_SIM_L_EVAL_COND` wrapper threads the live
+`__a64_n`/`__a64_z`/`__a64_c`/`__a64_v` flag variables into and that is
+inlined at those wrapper's seven call sites (`jcc`, the conditional-select
+and extract conditions, the conditional-branch and compare-and-branch
+next-PC predicates). It gets the same mutation build-out in
+`build/mut_arm64_cond.py` (untracked), a single-family harness over the
+same five contract files --- the shared spec (`arm64_cond_spec.json`, 15
+rows), its generator (`generate_arm64_cond_spec.py`), the generated C
+ternary chain (`generated/arm64_cond.h`, the fifteen static asserts, the
+chained per-condition ternary arms, and the `UNSUPPORTED; 0` tail), the
+generated Lean module (`GeneratedArm64Cond`, the inductive, the codes, and
+the per-condition `eval` arms), and the hand Lean refinement
+(`Arm64Cond.lean`, including the `Arm64Flags` record, the reindexed
+`generatedArm64Cond`, the soundness/range/dispatch/distinctness theorems,
+and the AL/complements examples) --- with the same three detectors and no
+regen or sim-header stage (the simulator header re-declares the fifteen
+`ARM64_COND_*` numbers and the wrapper only threads the live flag
+variables, so a generated-header drift is observable only through the host
+oracle, whose 4 NZCV-flag-only states crossed with the 15 codes --- 240
+truth-table cases, each condition's full table checked --- plus the
+forked 241 out-of-range code sweep reaches the macro through the same
+include). 68 mutants catch (`gen=38 lean_chain=22 host=9`) and 1 survives:
+the generator `ROOT` spelling repaint, a documented equivalence by design.
+Two shakedown retargets were needed: a weakened generator
+canonicalization gate (`or` -> `and` between the name and code checks)
+approves a canonical spec silently --- the row was retargeted to also
+drift one spec row on both fields, forcing the weakened gate to fire ---
+and the first draft's soundness-tactic repaint (`rfl` -> `trivial`)
+survives because the post-`cases` goals are propositionally trivial: the
+row was retargeted to a `decide` repaint the free flag variables reject
+(`decide` cannot close a goal over variables, the error points at the
+`al` case).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
