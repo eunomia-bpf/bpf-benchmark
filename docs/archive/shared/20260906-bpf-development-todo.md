@@ -15008,6 +15008,39 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file ldrsx watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0198 — AArch64 width/narrowing mutation coverage
+
+- Scope: the four-element width table (codes 1/2/4/8 with masks,
+  sign masks, bit counts 8/16/32/64 per row), narrow as the mask
+  conjunction, zero/sign as the narrow-zero and narrow-top-lsb
+  tests, and the effective-width resolution sending absent code 0
+  to the default doubleword code — across the case spec, its
+  generator (canonical rows + collision/default checks), the
+  generated C header (ternary-mask macros, APPLY_WIDTH, effective
+  ternary), the generated Lean module (Width/code/mask/signMask/
+  bits/narrow/zero/sign/absentCode/defaultCode/effective), the
+  hand module (code wall + 4 refines + sign-mask observation law +
+  effective laws), and a 40080-case host oracle (18 boundary
+  vectors per width + 20000-iteration fixed-seed LCG sweep).
+- Harness: `build/mut_arm64_width.py` (untracked), 87 single-anchor
+  rows over the six files with 3 detectors: gen 30 / lean_chain 23
+  / host 12 catch; 22 equivalences (ten unreachable error-message
+  repaints, six consumers-free theorem renames, six
+  value/unused-path repaints).
+- Result: TOTAL 87 mutations, 0 failures, 22 equivalences
+  survived (65 catch: 30 gen, 23 lean_chain, 12 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the effective-path C defines (ABSENT_CODE vs DEFAULT
+  and the ternary polarity) are never evaluated by the host
+  cross-check — repaints there are green-run-invisible and went
+  to equivalences; the `absentCode` Lean rename is NOT
+  consumers-free (in-file `effective` cites it) — replaced with
+  the value repaint 0→1; unknown-width default branch and test-
+  value repaints (boundary vector, LCG addend) are equivalences.
+- Residue: all six watched files byte-identical after each run
+  (6-file width watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

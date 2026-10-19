@@ -4782,6 +4782,57 @@ a true weaker range-pin repaint (53 ≤ imm ≤ 63 remains provable
 while the exact `code_dispatch` pin stands), and the generated
 mnemonic repaint that no downstream proof derives.
 
+### Step 0198 — AArch64 width/narrowing mutation coverage
+
+The `arm64_width` contract (`arm64_width_spec.json` 1 line,
+`generate_arm64_width_spec.py` 146 lines,
+`generated/arm64_width.h` 34 lines,
+`KProgFormal/GeneratedArm64Width.lean` 43 lines,
+`KProgFormal/Arm64Width.lean` 71 lines,
+`test_arm64_width_host.c` 153 lines) fixes the four simulator
+widths in both encodings (`w8`/`w16`/`w32`/`w64` carry codes
+1/2/4/8, masks `0xff`/`0xffff`/`0xffffffff`/`0xffffffffffffffff`,
+sign masks `0x80`/`0x8000`/`0x80000000`/`0x8000000000000000`, and
+bit counts 8/16/32/64), `narrow` as the mask conjunction, `zero`
+as the narrow-equals-zero test, `sign` as the narrow's top-lsb
+observation, and the effective-width resolution that sends the
+absent decoded code 0 to the default doubleword code 8 while
+leaving every real code untouched. The generated side carries
+`Width`, `code`, `mask`, `signMask`, `bits`, `narrow`, `zero`,
+`sign`, `absentCode`, `defaultCode`, and `effective` in Lean plus
+the C ternary-mask macros, `KPROG_ARM64_APPLY_WIDTH`, the
+absent-code and default defines, and the effective ternary; the
+hand module restates the codes as the refines wall and proves four
+refines, the sign-mask observation law bridging mask test to
+shift test with `bv_decide`, the effective refines plus
+absent-is-default, the absent-names-no-width disjointness, the
+default-is-w64 pin, and the identity-on-real-widths law. The host
+oracle takes `expected_bits` from a code-keyed switch and checks
+bits/mask/sign_mask, 18 boundary vectors per width, and a
+20000-iteration fixed-seed LCG sweep over all four widths (40080
+cases).
+
+`build/mut_arm64_width.py` (87 rows) perturbs the six files with
+the three detectors, all untracked, 87 single-anchor rows: 30
+catch at the generator stage (the operation/row drifts, the
+length/row/zip/set/absent-code/collision/default/default-bits
+check repaints, the rendered Lean tables, the C aggregator and
+apply/eff repaints, and the generated-path repoint), 23 catch
+through the Lean chain (the code/mask/sign/bit drifts on both
+sides, the xor/!=/Lsb-0 repaints of narrow, zero, and sign, the
+default repaint, the effective fallthrough swap, the namespace
+drift, the absent repaint, and the code/mask/bits/effective
+spec repaints), and 12 catch by the host oracle (the width-code
+repaints, the three modulo tails, the apply
+`|`-for-`&` repaint, and the low-mask/sign orn/check-polarity and
+sign-observation shift repaints). 22 rows survive as documented
+equivalences: ten unreachable error-message repaints (all
+green-run-invisible), six consumers-free theorem renames, and six
+value/unused-path repaints that keep every protocol invariant
+intact (the collider disarmed check, the never-evaluated
+effective-path defines, the never-fired unknown-width default
+branch, a boundary-vector value, and the fixed-seed LCG addend).
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
