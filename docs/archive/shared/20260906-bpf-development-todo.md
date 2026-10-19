@@ -13543,6 +13543,47 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   generator body anchors needed the generator's real body indentation
   (16-space list rows, 3/4/5-tab C strings) throughout.
 
+## Step 0168 — AArch64 CNEG/ORN combined mutation coverage
+
+- Scope: the two single-op AArch64 value contract families --- the
+  condition-gated negation `ARM64_OP_CNEG` = 65 = `0x41` (the two's
+  -complement negation of the source selected on an already evaluated
+  condition result, Step 0056) and the complemented logical OR
+  `ARM64_OP_ORN_REG` = 53 = `0x35` (`lhs | ~rhs`, Step 0057) --- get
+  sibling mutation coverage against both the 40,097-case and the
+  40,401-case host generated-header oracles (there is no route detector:
+  the wrapper bodies `ARM64_SIM_L_CNEG_VALUE` and `ARM64_SIM_L_ORN_VALUE`
+  are reached only through the host tests).
+- Code: new combined `kprog/formal/build/mut_arm64_cneg_orn.py` (untracked)
+  mutating ten files for both families --- the two shared specs
+  (`arm64_cneg_spec.json`, `arm64_orn_spec.json`), the two generators, the
+  two generated C headers, the two generated Lean modules, the two hand
+  Lean refinements, and the two sim-header opcode source lines --- with
+  three detectors: `gen` runs both generator `--check` rows, `lean_chain`
+  both `lake build` + `lake env lean` pairs, and `host` compiles and runs
+  both oracles; no regen stage exists because both specs are scalar rows
+  already, and the sim header is restored byte-for-byte after every
+  mutant.
+- Gate: `make -C kprog/formal check` --- full run green (210 `: OK` rows).
+- Tally: `TOTAL 78 mutations, 0 failures (gen=26 lean_chain=25 host=19)`,
+  `ALL AS EXPECTED`. Three genuine equivalences survive by design (the
+  generator `ROOT` spelling, a hand-Lean comment, and the spec-whitespace
+  repaint) plus five detector-invisible rows kept as survivors: the
+  generated-C result seed (absorbed by the unconditional arm assign,
+  mirroring Steps 0166/0167), both generated-Lean mnemonic rows (no chain
+  consumer reads `mnemonic` in these families), and both hand-Lean
+  flags-unchanged proof repaints (the `cases op <;> rfl` -> bare `rfl`
+  rewrite still proves the unchanged theorem statement, since the
+  single-constructor Boolean is constant regardless of the proof shape).
+  Shakedown retargets: dropping a `cases taken`/`cases width` conjunct
+  from the refinement or replacing `cases op <;> rfl` with `rfl` is
+  proof-equivalent for single-constructor families, so the two
+  refinement rows retargeted to a simp-set repaint (dropping
+  `arm64CnegSpec`/`arm64OrnSpec` from the simp set, which the prover
+  rejects with counterexamples), and the two `w32 >>> 32` bound rows
+  retargeted to the false `w32 >>> 31 = 0` goal (the `>>> 33` variant is
+  a true weaker statement and survives).
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

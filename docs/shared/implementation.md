@@ -1198,6 +1198,21 @@ increment is committed and pushed immediately). Current state:
   result seed absorbed by every arm's unconditional assign, both
   generated-Lean mnemonic rows with no chain consumer, and one hand-Lean
   case-split row whose mutated mask still proves the unchanged theorem),
+  and the AArch64 `CNEG`/`ORN_REG` pair got a combined two-family
+  mutation harness against both the 40,097- and the 40,401-case host
+  oracles (Step 0168; three detectors across ten files --- the gen
+  detector runs both generator `--check` rows, the Lean chain both
+  family pairs, the host compiles/runs both oracles, and there is no
+  route detector; the 78-mutation harness mutates both shared specs,
+  both generators, both generated C and Lean tables, both hand
+  refinements, and both `ARM64_OP_*` sim-header define lines --- split
+  gen 26 / lean_chain 25 / host 19 with three genuine equivalences
+  surviving (the generator `ROOT` spelling, a hand-Lean comment, and
+  the spec-whitespace repaint) plus five detector-invisible rows kept
+  as survivors: the generated-C result seed absorbed by every arm's
+  unconditional assign, both generated-Lean mnemonic rows with no
+  chain consumer, and both hand-Lean flags-unchanged proof repaints
+  (the `rfl` rewrite still proves the unchanged theorem),
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

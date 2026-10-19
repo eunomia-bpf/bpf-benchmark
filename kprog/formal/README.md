@@ -3483,6 +3483,23 @@ repaints are not Lean-visible, so the five hand spec-def rows and the
 two generator-comment regeneration rows were retargeted to real body
 mutations (dropped mask bit, byte rotation, sign-mask bit).
 
+The AArch64 condition-gated-negation and complemented-OR pair (`ARM64_OP_CNEG` = 65 = `0x41` and `ARM64_OP_ORN_REG` = 53 = `0x35`) gets the same
+mutation build-out in `build/mut_arm64_cneg_orn.py` (untracked), a
+combined two-family harness over ten contract files: 78 mutants across
+the two shared specs, the two generators, the generated C and Lean
+tables, the hand refinements, and the two sim-header opcode sources,
+sim header restored byte-for-byte after every mutant; the gen detector
+runs both generator `--check` rows, the Lean chain both family pairs,
+and the host compiles/runs both oracles (40,097 + 40,401 cases). 70 catch
+(`gen=26 lean_chain=25 host=19`) and 8 survive: the three genuine
+equivalences by design (the generator `ROOT` spelling, a hand-Lean
+comment, and the spec-whitespace repaint) plus five detector-invisible
+rows kept as survivors: the generated-C result seed (absorbed by the
+unconditional arm assign), both generated-Lean mnemonic rows (no chain
+consumer reads `mnemonic` in these families), and both hand-Lean
+flags-unchanged proof repaints (the `rfl` rewrites still prove the
+unchanged theorem statement).
+
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
 `ROL` operations. `X86ShiftFlags.lean` proves the generated flag production
