@@ -1414,6 +1414,39 @@ increment is committed and pushed immediately). Current state:
     anchors first sat on the shift-zero branch text the shifted branches
     share, retargeted onto the `aux >>>`/`>> {shift}` expressions unique
     to the shifted arms).
+  and the AArch64 conditional-select value contract (the eight-member
+    CSEL/CINC/CSET/CINV/CSINV/CSINC/CSETM/CSNEG value arms the
+    simulator's non-pointer path resolves: select first or second source
+    (or their increments, complements, or the negated second source)
+    under the already-proven condition, composed through the generated
+    bit-mask mux) got its own single-family harness against the
+    160,161-case host mux oracle and the 337-case width-effective route
+    scanner (Step 0178; 112 single-anchor rows over nine files --- the
+    shared spec, its generator, the generated C header, the generated
+    Lean module, the hand refinement, both host oracles, and the sim-local
+    sim wrapper; 4 detectors across 7 staged files --- a re-rendering
+    `--check`, a Lean chain over generated and hand modules, the host
+    mux oracle recompiled per row with a forked child for the
+    non-family abort, and the route scanner driving the whole dispatch
+    through `ARM64_SIM_L_CSEL_VALUE` in-process --- split gen 43 /
+    lean_chain 31 / host 26 / route 5 with 7 equivalences: the
+    every-arm-overwritten result-seed line, the wrapper second-source
+    repaint both oracle exercises keep invisible (the scanner's zeroed
+    flags never select the second source and the host oracle passes
+    explicit sources), three summary-line repaints carrying no result
+    bit, the generator's comment-only appendix, the `trivial` proof
+    repaint of the flag-identity theorem, and the hand doc-comment
+    line). Shakedown retargets: two sim-local repaints were invisible
+    to the width-self-pair scanner because both legs of every
+    (w, effective(w)) pair re-derive the same dispatch --- a forced-take
+    keyed on the effective width and an inverted pointer-path gate ---
+    and were retargeted onto raw-width drifts the absent-to-doubleword
+    escalation exposes (condition interception keyed on the raw absent
+    width code, pointer-path gate routed through the raw width word);
+    the flags-spec check row, codes-assert repaint and coverage-gate
+    constant (three NOOPs) were retargeted onto the live comparisons
+    they guard; the family-order guard needs comma-joined adjacency
+    because the emitted JSON members carry trailing commas verbatim).
  `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

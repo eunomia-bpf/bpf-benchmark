@@ -3795,6 +3795,47 @@ value inside `arm64_movk_column_dispatch`, there proved by `decide` against
 the generated table, which fails.
 
 The AArch64 packed-AUX layout contract gets its own mutation build-out in `build/mut_arm64_aux.py` (untracked, 92 single-anchor rows) over nine contract files --- the shared layout spec (`arm64_aux_spec.json`: four lanes b0..b3 at shifts 0/8/16/24 with the 0xff `reg_none`, `arm64Aux`, schema 1), its generator (`generate_arm64_aux_spec.py`: the `EXPECTED` mirror, the lane-shift check, the Lean packer/decoder recipes and the C packer/decoder recipes, and the stale-output comparison), the generated C header (`generated/arm64_aux.h`: the `KPROG_ARM64_AUX` packer and the four `KPROG_ARM64_AUX_B0..B3` decoders plus `KPROG_ARM64_AUX_REG_NONE`), the generated Lean module (`KProgFormal/GeneratedArm64Aux.lean`: `pack` and the four byte decoders plus `regNone`), the hand Lean refinement (`KProgFormal/Arm64Aux.lean`), both alias sheets (the sim-header packer aliases `ARM64_AUX`, `_ALU`, `_SHIFT`, `_MOVK`, `_MEM`, `_BITFIELD`, `_CCMP` and the sim-local decoder aliases `ARM64_SIM_L_MOD`..`_CCMP_NZCV`), and both host oracles (`test_arm64_aux_host.c` and `test_arm64_aux_route_host.c`). Five detectors, one regen stage: `gen` (`generate_arm64_aux_spec.py --check`), `movk_gen` (`generate_arm64_movk_spec.py --check`, whose `ARM64_AUX_MOVK` regex owns the sim-header's MOVK alias), `lean_chain` (`lake build KProgFormal.GeneratedArm64Aux` then `lake env lean KProgFormal/Arm64Aux.lean`), `host` (the 586,829-case packer-alias oracle over an independent `(aux >> 8k) & 0xff` restatement), and `route` (the 1,115,374-case sim-local decoder-alias oracle). 88 catch (`gen=21 movk_gen=1 lean_chain=27 host=9 route=30` --- 11 spec rejections, 9 stale generator renders plus 4 regen-drift pairs whose repaint lands live in the artifacts, 15 Lean rows over the generated and hand modules, and the alias-driving rows the route oracle sees through the real sim macros) and 4 survive, all documented equivalences by design: the alias-sheet doc-comment repaint, the host oracle's redundant `AUX` vs `AUX_ALU` equality repaint (both sides repaint identically, so the comparison recomputes the same equality), and the two summary-line repaints (the success line carries no result bit). Shakedown retargets: the hand-Lean lane-1 shared-theorem row first repainted the goal's conjunction order (swapping the two conjunct pairs keeps every `rfl` valid and survives, an equivalence the run exposed), so the row was retargeted to drop the first conjunct --- the two-conjunct `rfl` constructor then fails on the constructor count, which catches; the Lean/C decoder anchors were first drawn at the shift-zero branch, which the generator shares with the shifted branch, and were retargeted to the `aux >>>` and `>> {shift}` shift-expressions only the shifted branches render; and the sim-header `ARM64_AUX_MOVK` drift row turned out to be owned by the movk generator's regex (the aux generator never reads the sim header), so it became the fifth detector's single row.
+The AArch64 conditional-select value contract gets its own mutation build-out
+in `build/mut_arm64_csel.py` (untracked, 112 single-anchor rows) over nine
+contract files --- the shared value spec (`arm64_csel_spec.json`: the per-arm
+safety predicates and MOS-mask bit compositions pinned in schema 1), its
+generator (`generate_arm64_csel_spec.py`: the `EXPECTED` mirror, the
+sim-header opcode cross-check, the family-order guard, and the Lean/C
+recipes), the generated C header (`generated/arm64_csel.h`: the
+`KPROG_ARM64_CSEL_VALUE` ternary-switch mux, the `KPROG_ARM64_CSEL_HANDLED`
+dispatch gate, and the `KPROG_ARM64_CSEL_PTR_TAG_PATH` cross-link), the
+generated Lean module (`KProgFormal/GeneratedArm64Csel.lean`), the hand
+refinement (`KProgFormal/Arm64Csel.lean`), the 160,161-case host mux oracle
+(`test_arm64_csel_host.c`: boundary vectors, a 20,000-iteration two-outcome
+eight-opcode value sweep over all four widths, and the forked non-family
+abort probe), and the 337-case width-effective route scanner
+(`test_arm64_width_effective_route_host.c`) that drives the whole dispatch
+through the sim-local `ARM64_SIM_L_CSEL_VALUE` wrapper. Four detectors run
+per mutation: the generator's `--check` re-render, the Lean chain (`lake
+build` + elaboration), the host oracle (in-process plus a forked child for
+the unsupported-opcode abort), and the route scanner (in-process only; the
+semantics at the absent width code are defined, not fatal). 105 rows catch
+(43 at the generator stage, 31 by the Lean chain, 26 by the host oracle, 5
+by the route scanner), and 7 survive as documented equivalences: the
+`__kprog_a64_cv_result` seed initialization every executed arm overwrites,
+the wrapper second-source repaint (both operand exercises under the
+scanner's zeroed flags and the host oracle pass explicit sources, so the
+drift never selects the second source), three summary-line repaints, the
+generator's comment-only appendix, the `trivial` proof repaint of
+the flag-identity theorem, and the doc-comment line of the hand module.
+Shakedown retargets: two sim-local repaints invisible to the width-self-pair
+scanner --- a forced-take drift keyed on the effective width and an inverted
+pointer-path gate, both self-consistent because both legs of every
+width comparison pair re-derive the same dispatch --- were retargeted to drifts
+raw-width drifts the absent-to-doubleword escalation exposes
+(forced condition interception keyed on the raw absent width code, and
+routing the pointer-path gate through the raw width word, probing the route
+scanner into the pointer path at the doubleword leg only), a generator
+error-message repaint and a three-NOOP cluster (flags-spec check inversion,
+codes-assert repaint, coverage-gate constant) were retargeted to the live
+comparisons they guard, and the spec's family-order row needs comma-joined
+adjacency because the emitted JSON members carry trailing commas verbatim.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/

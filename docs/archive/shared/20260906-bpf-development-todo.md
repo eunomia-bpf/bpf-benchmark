@@ -14234,6 +14234,82 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (`md5sum` verified), the untracked harness retained for reruns, and
   `make check` kept at 210 `: OK`.
 
+## Step 0178 — AArch64 conditional-select value mutation coverage
+
+- Scope: the AArch64 conditional-select value contract --- the eight-member
+  CSEL/CINC/CSET/CINV/CSINV/CSINC/CSETM/CSNEG value arms the simulator's
+  non-pointer path resolves: each arm selects one of two register-source
+  expressions under the already-proven condition (first source, second
+  source, their increments, their complements, or the negated second
+  source), composed through the generated bit-mask mux
+  (`arm64_csel_spec.json` / `generate_arm64_csel_spec.py` /
+  `generated/arm64_csel.h` / `KProgFormal/GeneratedArm64Csel.lean` /
+  `KProgFormal/Arm64Csel.lean`, with the sim-local
+  `ARM64_SIM_L_CSEL_VALUE` wrapper and the shared dispatch in
+  `arm64_sim_local_bpf.h`). Distinct from Step 0174's pointer-path
+  contract, which decides which register write carries the provenance tag
+  at doubleword width; this harness covers the tag-dropping value path
+  every other member and width resolves through.
+- Harness: `build/mut_arm64_csel.py` (untracked, 112 single-anchor mutation
+  rows) over nine contract files --- the value spec, its generator, the
+  generated C header, the generated Lean module, the hand Lean refinement,
+  both host oracles (`test_arm64_csel_host.c` 160,161-case mux oracle and
+  `test_arm64_width_effective_route_host.c` 337-case width-effective route
+  scanner), and the sim-local `ARM64_SIM_L_CSEL_VALUE` wrapper/dispatch
+  sheet. Four detectors: `gen` (`generate_arm64_csel_spec.py --check`
+  re-render comparison), `lean_chain` (`lake build
+  KProgFormal.GeneratedArm64Csel` then `lake env lean
+  KProgFormal/Arm64Csel.lean`), `host` (mux oracle recompiled per row,
+  with a forked child for the unsupported-opcode abort which is defined
+  behavior, not fatal), and `route` (width-effective scanner recompiled
+  per row, in-process only --- the absent-width semantics are defined, not
+  fatal). No regen stage: the spec pins its constants, so a stale-`--check`
+  pair is not cleanly applicable.
+- Result: `TOTAL 112 mutations, 0 failures`, `ALL AS EXPECTED`, exit 0.
+  105 mutants catch (gen 43 --- 17 spec rejections, 21 generator drifts,
+  5 generated-header drifts surfaced by re-render; lean_chain 31 --- 11
+  generated-Lean and 20 hand-Lean; host 26; route 5 --- 3 sim-local
+  wrapper/dispatch drifts and 2 oracle drifts), and 7 survive, all marked
+  `equivalent` by design: the `__kprog_a64_cv_result` seed line every
+  executed arm overwrites, the wrapper second-source repaint (both
+  exercises keep the second source invisible --- the route scanner's
+  zeroed flags make EQ false so the first source always wins, and the
+  host oracle passes explicit operands), three summary-line repaints (the
+  success line carries no result bit), the generator's comment-only
+  appendix, the `trivial` proof repaint of the flag-identity theorem (the
+  goal is a propositional tautology), and the doc-comment line of the
+  hand module.
+- Shakedown: the width-effective route scanner compares each width w
+  against `arm64_width_effective(w)`, and the absent code 0 escalates to
+  the doubleword code 8 while every other code is its own effective
+  width, so both legs of every non-zero pair re-derive the same dispatch:
+  two sim-local repaints drafted as width drifts (a forced-take keyed on
+  the effective width, an inverted pointer-path gate) kept the 337-case
+  scanner green because they are self-consistent under that pairing;
+  manual probes confirmed the scanner only reacts to raw-width
+  dependence, and both rows were retargeted onto raw-width drifts the
+  absent-to-doubleword escalation exposes --- condition interception
+  keyed on the raw absent width code
+  (`(FLAGS) == 0U` forced take, caught at width 0 with X1/X3 pattern
+  0x19 vs 0x43 diverging the doubleword leg) and routing the pointer-path
+  gate through the raw width word
+  (`(FLAGS)` passed where the escalated `__a64_l_width` was expected,
+  caught at width 0 with the tag assignment diverging tag=0 vs tag=4).
+  Earlier retargets: a generator error-message repaint was dormant under
+  a green `--check` and became the live `if row["name"] in families:`
+  check inversion; the flags-spec check, codes-assert and coverage-gate
+  rows were NOOPs rebuilt onto the fragments the guards actually compare
+  (`=> {row['code']}` assertions and the `KPROG_ARM64_CSEL_HANDLED(`
+  coverage gate); the spec's family-order row needs comma-joined
+  adjacency because the emitted JSON members carry trailing commas
+  verbatim; the soundness-tactic repaint (``cases op <;> rfl`` ->
+  ``trivial``) survives because the goal discharges both ways and is
+  marked equivalent rather than force-fed a failure artifact.
+- Residue: all nine watched files byte-identical after the run
+  (`md5sum` verified against a 9-file watchlist covering both
+  `../arm64/` headers), the untracked harness retained for reruns, and
+  `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
