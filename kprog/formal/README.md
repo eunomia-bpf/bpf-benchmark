@@ -5304,5 +5304,55 @@ the host sweep-value repaints (distinct immediates and registers and a
 shrunken opcode range whose verdicts are already equal — the six
 immediate codes all lie below 128), and the OK-line message.
 
+### Step 0203 — AArch64 FMOV direction mutation coverage
+
+The `arm64_fmov` contract (`arm64_fmov_spec.json` 1 line,
+`generate_arm64_fmov_spec.py` 186 lines,
+`generated/arm64_fmov.h` 55 lines,
+`KProgFormal/GeneratedArm64Fmov.lean` 40 lines,
+`KProgFormal/Arm64Fmov.lean` 83 lines,
+`test_arm64_fmov_host.c` 120 lines) pins the AArch64 FMOV value
+routing between the vector register `v0` and a general-purpose
+register across the four directions (`D_FROM_X`, `X_FROM_D`,
+`S_FROM_W`, `W_FROM_S`, codes 0..3): the vector-destination
+directions select the source register, the register-destination
+directions keep `v0`, a code outside the four reaches the
+caller-supplied unsupported arm, and the caller applies the width
+(`writesReg` selects the caller's `narrow`). The generated side
+carries the four-constructor `Fmov` enum with its `code`,
+`mnemonic`, and `writesReg` tables and the `value` selection match,
+plus two `_Static_assert` rosters (drift and coverage), the
+`KPROG_ARM64_FMOV_HANDLED` macro, and the four-case
+`KPROG_ARM64_FMOV_VALUE` statement-expression switch with the
+unsupported default; the hand module restates the routing
+independently (a two-destination disjunction that narrows through an
+explicit `narrow`) and proves the refinement over all four
+directions and widths, the code range, the per-arm code/write
+dispatch, the vector- and register-destination value identities, and
+two round-trip/narrowing examples. The host oracle sweeps the four
+directions over a value-table grid plus a 20000-case fixed-seed
+random sweep and requires a code outside 0..3 to abort through the
+generated unsupported arm (20145 cases).
+
+`build/mut_arm64_fmov.py` (70 rows) perturbs the six files with the
+three detectors: 21 catch at the generator stage (the spec direction
+code and writes_reg drifts plus the operation repaint, and every
+expected-row and rendered Lean/C template repaint), 18 catch through
+the Lean chain (the namespace and inductive repaints, every code and
+writesReg row, every value-selection row, the hand disjunction, the
+narrow widths, every hand theorem body and example value, and the
+module open list), and 11 catch by the host oracle (the generated
+case/label result assignments and macro names the oracle exercises,
+the oracle's own direction table, return selection, mismatch
+verdict, macro calls, unsupported-arm exit, and remapped direction
+calls). 20 rows survive as documented equivalences: six unreachable
+generator error-message repaints, the header-guard repaint no green
+detector compiles, the two generated-mnemonic string repaints no Lean
+module and no C path consume, nine consumers-free hand theorem renames
+(no module imports the hand module; its own bodies still check), the
+host sweep repaints (a remapped direction call, a remapped grid call,
+and a swapped value-table entry whose verdicts are already equal),
+and the OK-line message.
+
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.

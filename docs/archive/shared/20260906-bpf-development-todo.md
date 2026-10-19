@@ -15190,6 +15190,52 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file flag-operand watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0203 — AArch64 FMOV direction mutation coverage
+
+- Scope: the FMOV value routing between the vector register `v0` and a
+  general-purpose register across the four directions
+  (`D_FROM_X`/`X_FROM_D`/`S_FROM_W`/`W_FROM_S`, codes 0..3) —
+  vector-destination directions select the source register,
+  register-destination directions keep `v0`, unsupported codes reach
+  the caller-supplied abort arm, and the caller applies the width —
+  across the case spec (direction code and writes_reg fields plus the
+  operation name), its generator (expected rows, error messages,
+  every rendered Lean code/mnemonic/writesReg/value template and
+  every rendered C assert/coverage/case/result/macro template), the
+  generated C header (two `_Static_assert` rosters, the
+  `KPROG_ARM64_FMOV_HANDLED` macro, the four-case
+  `KPROG_ARM64_FMOV_VALUE` switch assignments), the generated Lean
+  module (namespace, inductive, every `code`/`mnemonic`/`writesReg`/
+  `value` row), the hand module (the two-destination disjunction, the
+  `narrow` widths, every theorem body including the four-direction
+  refinement and code/write dispatch, every canonical-example value,
+  the open list), and a four-direction plus 20000-case host oracle
+  (direction table, return selection, mismatch verdict, macro calls,
+  unsupported-arm exit, remapped direction calls, sweep entries).
+- Harness: `build/mut_arm64_fmov.py` (untracked), 70 single-anchor
+  rows over the six files with 3 detectors: gen 21 / lean_chain 18 /
+  host 11 catch; 20 equivalences (six unreachable generator
+  error-message repaints, the header-guard repaint, the two
+  generated-mnemonic string repaints no Lean module and no C path
+  consume, nine consumers-free hand renames, the host sweep
+  repaints, and the OK-line message).
+- Result: TOTAL 70 mutations, 0 failures, 20 equivalences survived
+  (50 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: two silent-no-op repaint classes had to be retargeted —
+  hand theorem renames inside a one-line `theorem` signature anchor
+  that did not include the repainted body text (no-op rows reported
+  as survivors, retargeted at real goal lines such as
+  `GeneratedArm64Fmov.code .d_from_x = 0 ∧` and
+  `value .d_from_x v0 src = src ∧`), and the mnemonic String table
+  repaints, which are honest equivalences because no Lean module and
+  no C path consume `mnemonic` (Arm64Fmov.lean references it zero
+  times). The float-code open-list rename is catchable (the hand
+  module's own defs consume the opened name unqualified),
+  unlike consumers-free theorem renames.
+- Residue: all six watched files byte-identical after each run
+  (6-file fmov watchlist verified), the untracked harness retained
+  for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
