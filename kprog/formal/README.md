@@ -4864,6 +4864,56 @@ opcodes crossed with the four widths and the four tag-class pairs
 per-slot oracle and an unknown opcode must abort with SIGABRT
 through the generated unsupported arm.
 
+### Step 0200 — AArch64 memory-space dispatch mutation coverage
+
+The `arm64_mem_dispatch` contract (`arm64_mem_dispatch_spec.json`
+1 line, `generate_arm64_mem_dispatch_spec.py` 195 lines,
+`generated/arm64_mem_dispatch.h` 54 lines,
+`KProgFormal/GeneratedArm64MemDispatch.lean` 47 lines,
+`KProgFormal/Arm64MemDispatch.lean` 73 lines,
+`test_arm64_mem_dispatch_host.c` 105 lines) fixes the closed
+four-space classification of every load base register: a stack or
+stack-pointer base reads through the stack helper and keeps the
+stack value tag; an ABI base at width 64 does a pointer load tagged
+with the ABI kind; a reloc-address base at width 64 reads the base
+pointer tagged as a map pointer; every other base does the ordinary
+load and yields a scalar tag, and no space changes its selection off
+width 64 (the no-widening property the C chain relies on after its
+stack test). The generated side carries the `Space`/`ValueSrc`/
+`ResultTag` inductives plus the exhaustive Peano tables `valueSrc`/
+`valueTag` in Lean and the `KPROG_ARM64_MEM_SRC_*`/`KPROG_ARM64_
+MEM_TAG_*` define families plus the if/else-chain
+`KPROG_ARM64_MEM_READ_SRC`/`KPROG_ARM64_MEM_READ_TAG` macros in C;
+the hand module restates the classification as predicate nestings
+(the C chain's shape), proves the two refinements over all spaces
+and both widths, the no-widening law, the stack width-independence,
+and the reloc behaviors. The host oracle is an independent predicate
+nesting sweeping is_sp x 9 tags x 4 widths (72 cases) and checks
+src/tag against it plus the src/tag family-split invariant.
+
+`build/mut_arm64_mem_dispatch.py` (64 rows) perturbs the six files
+with the three detectors: 11 catch at the generator stage (the
+spec's operation/stack-row/normal-row/ABI-w64/reloc-tag drifts and
+the generator's operation repaint, ABI-row tag drift, order-check
+inversion, Peano upper-key row drift, fallback repaint, w64-only
+filter inversion, and path repoint), 12 catch through the Lean chain
+(the space enumeration drift, five Peano-row repaints, the two
+predicate-nesting repaints, the no-widening and reloc-law statement
+repaints, and the generated-module repoint), and 20 catch by the
+host oracle (the first-chain `||`→`&&` repaint, the ABI branch's
+tag/width/assignment repaints, the reloc branch's chain repaint,
+the tag-chain assign repaints, both else-arm repaints, and the
+oracle repaints). 21 rows survive as documented equivalences: three
+unreachable error-message repaints, five consumers-free theorem
+renames (both refines, no-widening, stack width-independence, and
+the reloc law), eight coherent define renumberings (`0U`→`5U` on
+the SRC/TAG identifiers) that the reflected oracle and
+family-split check both consume as renamed, the swapped src/tag
+macro reads whose two code families coincide numerically, and the
+sweep-shape repaints the all-equal oracle cannot distinguish (an
+extra ninth tag, a duplicated width column, and the OK-line
+message).
+
 `build/mut_arm64_pair_load_tag.py` (75 rows) perturbs the six
 files with the three detectors, all untracked, 75 single-anchor
 rows: 18 catch at the generator stage (the operation/opcode/slot

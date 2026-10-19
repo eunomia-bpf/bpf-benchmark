@@ -15076,6 +15076,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   harness retained for reruns, and `make check` kept at 210
   `: OK`.
 
+## Step 0200 — AArch64 memory-space dispatch mutation coverage
+
+- Scope: the closed four-space classification of every load base
+  register (stack / stack-pointer -> stack helper + stack tag; ABI
+  and reloc-address bases at width 64 -> pointer load / map-pointer
+  tag; everything else ordinary load + scalar tag; no widening off
+  width 64 changes the selection) across the case spec, its
+  generator (Peano table + C if/else-chain emission), the generated
+  C header (SRC/TAG defines + READ_SRC/READ_TAG macros), the
+  generated Lean module (Space/ValueSrc/ResultTag + valueSrc/
+  valueTag), the hand module (predicate-nesting restatement, two
+  refinements, no-widening, stack width-independence, reloc laws)
+  and a 72-case host oracle (is_sp x 9 tags x 4 widths, plus the
+  src/tag family split invariant).
+- Harness: `build/mut_arm64_mem_dispatch.py` (untracked), 64
+  single-anchor rows over the six files with 3 detectors: gen 11 /
+  lean_chain 12 / host 20 catch; 21 equivalences (three unreachable
+  error-message repaints, five consumers-free theorem renames, eight
+  coherent define renumberings consumed reflectively by the oracle,
+  the swapped src/tag macro reads whose code families coincide, and
+  sweep-shape repaints invisible to an all-equal oracle).
+- Result: TOTAL 64 mutations, 0 failures, 21 equivalences
+  survived (43 catch: 11 gen, 12 lean_chain, 20 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the define renumberings (0U->5U) survive because the
+  host oracle and family-split check reference the same renumbered
+  constants (coherent rename); the src/tag macro swap survives
+  because the SRC and TAG code families coincide numerically
+  (0..3); the tag/widths table repaints shrink nothing the all-
+  equal verdict depends on; the hand theorem renames have no
+  consumers in any Lean module.
+- Residue: all six watched files byte-identical after each run
+  (6-file mem-dispatch watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
