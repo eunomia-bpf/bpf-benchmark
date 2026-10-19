@@ -14777,6 +14777,44 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   harness retained for reruns, and `make check` kept at 210
   `: OK`.
 
+## Step 0191 — AArch64 stack slot-tag mutation coverage
+
+- Scope: the slot-tag selection — 64-bit qword-aligned only, a
+  closed two-condition pair — through the total four-case
+  classifier and tagged table (`arm64_stack_tag_spec.json`,
+  `generate_arm64_stack_tag_spec.py` with the generator-side
+  `taggedSpec` restatement and C ternary,
+  `generated/arm64_stack_tag.h`,
+  `KProgFormal/GeneratedArm64StackTag.lean`,
+  `KProgFormal/Arm64StackTag.lean` with totality/refinement/
+  dispatch/unaligned-never, `test_arm64_stack_tag_host.c` —
+  plain-conjunction oracle, 36 cases; twin shape contracts bind
+  `tagged(classify ...)` as the read/write slot-tag firing
+  predicate).
+- Harness: `build/mut_arm64_stack_tag.py` (untracked), 39
+  single-anchor rows over the six files with 3 detectors:
+  gen 10 / lean_chain 10 / host 5 catch; 14 equivalences
+  (unreachable error-message repaints, mirror-guard disarm,
+  same-tagged-class classifier-arm case-label repaints —
+  consumers bind the composition, not the case identity —
+  rfl-to-decide tactic repaint, three theorem renames, simp
+  list reorder, host class-coverage-preserving grid repaints,
+  summary repaint).
+- Result: TOTAL 39 mutations, 0 failures, 14 equivalences
+  survived (25 catch: 10 gen, 10 lean_chain, 5 host),
+  `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: classifier-arm repaints exposed the distinction
+  between case identity (unbound by consumers — the twin shape
+  contracts decide over tagged(classify ...) directly) and
+  routing correctness (the qword-routing repaint IS a catch
+  because it moves qword's true-tagged row to a false row);
+  host grid repaints that relabel which concrete offset/width
+  carries a boolean class stay equivalent while both classes
+  are still injected for macro and oracle alike.
+- Residue: all six watched files byte-identical after each run
+  (6-file stack-tag watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

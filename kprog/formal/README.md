@@ -4449,6 +4449,55 @@ pairing repaint (each goal closed before the vacuous second
 tactic), and the host bias-constant repaint (bias is a parameter
 both sides re-derive).
 
+### Step 0191 — AArch64 stack slot-tag mutation coverage
+
+The `arm64_stack_tag` contract (`arm64_stack_tag_spec.json`
+1 line, `generate_arm64_stack_tag_spec.py` 127 lines,
+`generated/arm64_stack_tag.h` 16 lines,
+`KProgFormal/GeneratedArm64StackTag.lean` 33 lines,
+`KProgFormal/Arm64StackTag.lean` 43 lines,
+`test_arm64_stack_tag_host.c` 71 lines) fixes the stack
+slot-tag selection: only a 64-bit access at a qword-aligned slot
+carries the slot's stored tag (`(isW64 && isAligned)`), a closed
+two-condition pair routed through a total four-case classifier
+(`qword`, `sub_qword_aligned`, `qword_unaligned`,
+`sub_qword_unaligned`) and its tagged table. The generated Lean
+module restates the conjunction independently (`taggedSpec`) and
+refines classify-then-table to it; the hand module proves
+totality, the refinement via `decide`, the dispatch table, and
+that unaligned access is never tagged; twin shape contracts
+(`Arm64StackReadTagSourceShape`,
+`Arm64StackWriteTagActionShape`) bind
+`tagged(classify ...)` as the read/write slot-tag firing
+predicate. The host oracle sweeps 4 widths x 8 offsets plus all
+four boolean pairs = 36 cases against a plain-conjunction
+oracle.
+
+`build/mut_arm64_stack_tag.py` (39 rows) perturbs the six files
+with the three detectors, all untracked, 39 single-anchor rows:
+10 catch at the generator stage (the op/table-row spec drifts
+including the qword-untagged and sub-qword-tagged flips, the
+expected-table repaint, the tagged-spec `||` repaint, the
+C-ternary `||` repaint, the generated-path repoint, and the
+spec-mirror stale-gate disarm's catch sibling), 10 catch through
+the Lean chain (the qword-table untagging and the three
+sub-arm tagging repaints, the qword-routing classifier repaint,
+the tagged-spec disjunction repaint, the totality `simp`
+citation drift, the refine `cases` and namespace drifts), and 5
+catch by the host oracle (the conjunction-to-disjunction and
+polarity oracle-body repaints, the w64-sense and aligned-sense
+class repaints' catch twins, and the macro-name drift). 14 rows
+survive as documented equivalences: the order/table error-message
+repaints unreachable on valid data, the spec mirror-guard
+disarm, classifier-arm repaints renaming an emitted case label
+within the same tagged class (every consumer binds
+`tagged(classify ...)` — never the case identity), the
+`rfl`-to-`decide` tactic repaint, three consumers-free theorem
+renames, the `simp` lemma-list reorder, the host
+summary-line repaint, and host grid repaints that mislabel
+which concrete offset/width carries each boolean class while
+still injecting both classes into macro and oracle alike.
+
 
 The x86 shift-flag contract binds the `KPROG_X86_SET_SHIFT_FLAGS` macro that
 the simulator's `X86_SIM_L_SET_SHIFT_FLAGS` calls for the `SHL`/`SHR`/`SAR`/
