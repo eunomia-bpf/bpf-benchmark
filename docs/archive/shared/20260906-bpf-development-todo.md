@@ -15518,6 +15518,48 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (vreg watchlist verified), the untracked harness retained for
   reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0210 — AArch64 multiply family mutation coverage
+
+- Scope: the eight multiply arms the simulator's `ARM64_SIM_L_EXEC`
+  handler applies before the width-narrowing register write —
+  `ARM64_OP_MADD` 0x0a, `MSUB` 0x0b, `MUL` 0x0c, `UMULL` 0x0d,
+  `UDIV` 0x0e, `UMULH` 0x2e, `UMADDL` 0x3b, `SMADDL` 0x40. The family
+  is not a decode table: `load()` parses `arm64_sim.h` and exits 1 on
+  opcode drift, cross-checks `arm64_flags_spec.json` so no multiply
+  mnemonic is a flag family (no NZCV), and static asserts re-pin the
+  codes. UMULH's C arm is the hoisted four-partial-product
+  radix-`2^32` ladder; the hand module restates the decomposition,
+  the algebraic ladder, the sign extension, and an independent value
+  spec, and proves refinement per arm, width/NZCV composition, code
+  range/dispatch, and eight `native_decide` examples; the host oracle
+  runs 20 boundary vectors x 8 ops plus a 20000-iteration fixed-seed
+  LCG sweep (160160 cases) against an `unsigned __int128` UMULH
+  oracle and forks the default arm to prove unsupported aborts.
+- Harness: `build/mut_arm64_mul.py` (untracked), 72 single-anchor
+  rows over the six files with 3 detectors: gen 4 / lean_chain 34 /
+  host 15 catch; 19 equivalences (ten unreachable generator
+  error-message repaints, the unused `mnemonic` repaint, a
+  whitespace-only arm edit, the coverage assert on another family
+  opcode, the unused flags/range renames, the unsupported-probe
+  code repaint, the two OK/FAIL message repaints, the LCG seed).
+- Result: TOTAL 72 mutations, 0 failures, 19 equivalences survived
+  (53 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the no-op-mutation audit caught four rows before the
+  first run (the UMULH generated Lean line needed a full-line anchor,
+  the coverage-assert repaint needed an inside-the-anchor needle, the
+  UMADDL/UMULH example repaints needed two-line anchors); run 1
+  settled eleven rows — message-only repaints are equivalences,
+  import/open renames are catches (the module consumes the imported
+  namespace), `flags_unchanged`/`code_in_range` renames are
+  equivalences (no external consumer, unlike the ladder lemmas
+  which X86MulxHandler consumes), the coverage-assert-op repaint is
+  an equivalence (HANDLED is true for every family member), and the
+  udiv example repaint had to change the dividend (the arm ignores
+  the addend, so repainting 0->5 stayed true).
+- Residue: all six watched files byte-identical after each run
+  (mul watchlist verified), the untracked harness retained for
+  reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

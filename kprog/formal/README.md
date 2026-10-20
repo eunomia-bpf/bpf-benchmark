@@ -5462,6 +5462,75 @@ a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
 repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
 and the OK/FAILED message repaints.
 
+### Step 0210 — AArch64 multiply family mutation coverage
+
+The `arm64_mul` contract (`arm64_mul_spec.json` 0 lines -- the spec
+file is the compact one-line JSON, `generate_arm64_mul_spec.py` 284
+lines, `generated/arm64_mul.h` 108 lines,
+`KProgFormal/GeneratedArm64Mul.lean` 51 lines,
+`KProgFormal/Arm64Mul.lean` 370 lines, `test_arm64_mul_host.c` 178
+lines) pins the eight multiply arms the simulator's `ARM64_SIM_L_EXEC`
+handler applies before the width-narrowing register write:
+`ARM64_OP_MADD` 0x0a, `MSUB` 0x0b, `MUL` 0x0c, `UMULL` 0x0d,
+`UDIV` 0x0e, `UMULH` 0x2e, `UMADDL` 0x3b, `SMADDL` 0x40. The family
+is not a decode table -- the opcodes are non-contiguous -- so
+`load()` parses `kprog/arm64/arm64_sim.h` and exits 1 on any
+opcode drift, cross-checks `arm64_flags_spec.json` so no multiply
+mnemonic is declared a flag family (the family writes no NZCV), and
+the emitted static asserts pin the same values at compile time. Each
+spec row carries name/code/macro plus per-arm `lean`/`c` strings;
+UMULH is special-cased: its C arm is the hoisted four-partial-product
+radix-`2^32` ladder (lo, mid1, mid2, hi, one carry out of the 32-bit
+column) rather than an expression string, and its Lean arm is the
+same ladder as a `let` chain. The spec is an exact-match dict; the
+generator re-renders the generated Lean module (`Mul` constructors,
+`code`, `mnemonic`, `value` arms) and C header (per-opcode asserts,
+the `HANDLED` cover, the eight `case` arms, `default: UNSUPPORTED`)
+with byte-for-byte `--check`. The hand module restates everything
+independently: the radix decomposition and carry lemmas, the
+algebraic `arm64MulUmulhNatAlg`, the ladder identity against the
+`Nat` high word (also consumed by `X86MulxHandler`), the sign
+extension helper, the independent `arm64MulValueSpec` (MSub via
+`addend + ~~~(lhs * rhs) + 1`, UMULH via the 128-bit product
+`setWidth 64`, SMADDL via the sign-extension helper), the refinement
+per arm (`simp`/`bv_decide`/ladder lemma), the width composition,
+the NZCV identity, the code range and dispatch, and eight canonical
+`native_decide` examples. The host oracle drives the macro over
+20 boundary vectors x 8 ops plus a 20000-iteration fixed-seed LCG
+sweep (160160 value cases) against an architectural
+`unsigned __int128` UMULH oracle, and forks the `default` arm to
+prove unsupported opcodes invoke the caller's `UNSUPPORTED` (abort)
+instead of silently returning 0.
+
+`build/mut_arm64_mul.py` (72 rows) perturbs the six files with the
+three detectors: 4 catch at the generator stage (the MADD/UDIV/
+SMADDL spec codes and the MADD `lean` string; the generator's own
+UMULH ladder rows are rendered, not re-parsed), 34 catch through the
+Lean chain (the namespace and MADD constructor renames, the
+`.umulh`/`.smaddl` code arms, the MADD/MSUB/UMULL/UDIV/UMULH/
+UMADDL generated value-arm repaints including the two
+UMULH-ladder repaints, the import/open renames, the
+self- and externally-consumed `arm64MulUmulhNatAlg`/
+`arm64MulUmulhAlg`/`arm64MulUmulhLadderEqHighWord`/
+`arm64MulSignExt32Spec`/`arm64MulValueSpec` renames, the
+MADD/MSUB/UMULL/UDIV/UMULH/SMADDL independent-spec repaints, the
+flags/range/dispatch renames and dispatch-value repaint, and seven
+of the eight example repaints), and 15 catch by the host oracle
+(the MADD/UDIV/SMADDL opcode asserts, the UDIV case arm, both
+UMULH case/final repaints, the coverage-assert text repaint, and
+the eight oracle arms MADD/MSUB/UMADDL/UDIV/UMULH/SMADDL/MUL
+repaints). 19 rows survive as documented equivalences: the ten
+unreachable generator error-message repaints (spec, order x2,
+macros, opcodes, no-defines, drift, flags, no-NZCV, stale), the
+unused `mnemonic` string repaint, the whitespace-only generated
+arm edit, the coverage assert repainted onto another family
+opcode (the predicate is true for every member), the
+not-externally-consumed `arm64_mul_flags_unchanged` and
+`arm64_mul_code_in_range` renames, the unsupported-probe code
+repaint (8U reaches the same default/`UNSUPPORTED` arm as 9U), the
+two OK/FAIL message repaints, and the randomized-sweep LCG seed
+bump (the sweep is seeded randomness, not an oracle).
+
 ### Step 0209 — AArch64 vector register mutation coverage
 
 The `arm64_vreg` contract (`arm64_vreg_spec.json` 45 lines,
