@@ -15607,6 +15607,52 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (pairmem watchlist verified), untracked harness retained,
   `make check` kept at 210 `: OK`.
 
+## Step 0212 — AArch64 decode-table mutation coverage
+
+- Scope: the four mnemonic-to-code tables shared by the encoder, C
+  simulator constants, Lean model, and artifact-encoder Python
+  module — ALU add/sub/and/bic/eor/orr -> ARM64_ALU_* 0..5, SHIFT
+  lsl/lsr/asr/ror -> ARM64_SHIFT_* 0..3, MOD /lsl/lsr/asr/ror +
+  uxtw/sxtw/uxth/sxth/uxtb/sxtb -> ARM64_MOD_* 0..10 (empty
+  mnemonic = `none` ctor), BITFIELD ubfx/sbfx/ubfiz/bfxil/bfi ->
+  ARM64_BITFIELD_* 0..4. `load()` checks key set, table set,
+  lengths, canonical row keys, mnemonic/macro/code triplets against
+  the exact-match EXPECTED dict; generator re-renders three outputs
+  byte-for-byte (Lean four-namespace module, C header = sole source
+  of the ARM64_* codes, encoder dicts imported by the micro-prog
+  builder). Hand module restates all four tables independently with
+  projection refinements and per-table code-distinctness theorems;
+  fourteen Lean modules consume the generated decode types so
+  generated and hand renames both break the compile. Host oracle
+  part 1 checks every macro against an independent table with
+  duplicate detection; part 2 round-trips every generated code
+  through the real AUX codec (ALU x MOD, BITFIELD x lsb/width,
+  MEM, MOVK, 0/255 boundaries) against independent byte
+  extractors (1410 cases).
+- Harness: `build/mut_arm64_decode.py` (untracked), 78 rows over
+  seven files (six in-tree + the encoder output), 3 detectors:
+  gen 15 / lean_chain 24 / host 22 catch; 17 equivalences (five
+  unreachable generator error-message repaints, four bare
+  hand-theorem renames, four table-call label repaints,
+  duplicate-detection message, OK banner, probe-line label and
+  bitfield-loop-bound repaints).
+- Result: TOTAL 78 mutations, 0 failures, 17 equivalences survived
+  (61 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the no-op audit caught the generator message with TWO
+  in-file occurrences (both sites need the repaint) and the
+  allAlu ctor list (single-line form, no newline); run 1
+  reclassified 10 rows and dropped 1 — the `.none` mnemonic-arm
+  repaint IS asserted by the hand refinement (catch, not
+  equivalence); appending a duplicate `.orr` to `allAlu` breaks the
+  refinement (row dropped); the four refines theorem renames
+  compile green (bare single-occurrence renames = equivalences);
+  the four check_table call-site string repaints only change error
+  labels (equivalences); the bitfield j<64 loop bound repaint
+  drops no checked case (equivalence).
+- Residue: all seven watched files byte-identical after each run
+  (decode watchlist verified), untracked harness retained,
+  `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

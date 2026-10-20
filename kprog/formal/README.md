@@ -5462,6 +5462,55 @@ a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
 repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
 and the OK/FAILED message repaints.
 
+### Step 0212 — AArch64 decode-table mutation coverage
+
+The `arm64_decode` contract (`arm64_decode_spec.json` 1 line,
+`generate_arm64_decode_spec.py` 152 lines,
+`generated/arm64_decode.h` 33 lines,
+`KProgFormal/GeneratedArm64Decode.lean` 112 lines,
+`KProgFormal/Arm64Decode.lean` 99 lines,
+`test_arm64_decode_host.c` 198 lines, and the artifact-encoder
+output `../arm64/micro-prog/generated_arm64_decode.py`) pins the
+four mnemonic-to-code tables shared by the encoder, the C simulator
+constants, the Lean model, and the Python encoder module: ALU
+add/sub/and/bic/eor/orr -> `ARM64_ALU_*` 0..5, SHIFT lsl/lsr/asr/ror
+-> `ARM64_SHIFT_*` 0..3, MOD ""/lsl/lsr/asr/ror + uxtw/sxtw/uxth/
+sxth/uxtb/sxtb -> `ARM64_MOD_*` 0..10 (the empty mnemonic maps to
+the `none` constructor), and BITFIELD ubfx/sbfx/ubfiz/bfxil/bfi ->
+`ARM64_BITFIELD_*` 0..4. `load()` checks the top-level key set, the
+table set, per-table lengths, per-row canonical keys, and the
+per-row mnemonic/macro/code triplet against the exact-match
+EXPECTED dict; the generator re-renders three outputs
+byte-for-byte (the Lean module spans four namespace/inductive/
+code/mnemonic blocks, the C header is the sole source of the
+`ARM64_*` codes, and the encoder dicts are consumed at import time
+by the micro-program builder). The hand module restates all four
+tables as independent mnemonic/code lists, the constructor
+enumerations, proves each table's projection refinement with
+`native_decide`, and the per-table code-distinctness theorems;
+fourteen Lean modules consume the generated decode types (the
+ALU/mod/shift/bitfield handlers and their generated siblings), so
+generated and hand renames both break the compile - unlike the
+pair-move hand module, which nothing imports.
+
+`build/mut_arm64_decode.py` (78 rows) perturbs the seven files with
+the three detectors: 15 catch at the generator stage (one spec row
+per table plus the operation tag; the seven generator
+expected/schema/render anchors), 24 catch through the Lean chain
+(the four namespaces, constructor renames, code and mnemonic arms,
+the import rename, the hand table-body repaints, constructor-list
+repaints, the projection goal, and the four distinctness goals),
+and 22 catch by the host oracle (the seven header macros, the four
+independent-table rows, the four macro-array repaints, the
+expect_eq sense, the duplicate check, the AUX ALU and shift pack
+repaints, both byte-extractor shifts, the MOVK source repaint). 17
+rows survive as documented equivalences: the five unreachable
+generator error-message repaints, the four bare hand-theorem
+renames (single occurrence each, compile green), the four
+table-call label repaints (error strings only), the
+duplicate-detection message, the OK banner, and the probe-line
+label and bitfield-loop-bound repaints.
+
 ### Step 0211 — AArch64 pair-move mutation coverage
 
 The `arm64_pair_mem` contract (`arm64_pair_mem_spec.json` 1 line,
