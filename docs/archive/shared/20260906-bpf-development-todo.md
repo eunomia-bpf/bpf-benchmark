@@ -15919,6 +15919,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (imulflags watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0221 — x86 little-endian memory access mutation coverage
+
+- Scope: the little-endian load/store byte contract: load assembles the
+  width's bytes (byte i contributes bits 8i..8i+8) then narrows with the
+  width mask; store masks the value then writes the width's bytes,
+  leaving bytes at or above the width untouched. Spec JSON pins the
+  whole metadata template byte-for-byte (little endianness, zero_is_64
+  width rule, load/store/byte_rule wordings, four width rows); generator
+  renders the Lean byteCount/assemble/load/storeByte/store module and
+  the C KPROG_X86_MEM_LOAD/KPROG_X86_MEM_STORE macros. Hand module
+  restates assemble/load/storeByte through the width bridge and proves
+  the three refinements, the byte-count law, and two native_decide
+  examples (0x12345678 w32 load, 0xaabb w16 store bytes); X86MemByte
+  and the refine theorems are consumed by the ten-plus memory handlers.
+- Harness: `build/mut_x86_mem_access.py` (untracked), 49 rows over the
+  six contract files, 3 detectors: gen 17 / lean_chain 16 / host 7
+  catch; 9 equivalences (two unreachable generator error-message
+  repaints, the generated Lean header-comment repaint, the host
+  mismatch/OK/FAILED banner, LCG-seed, and case-counter repaints).
+- Result: TOTAL 49 mutations, 0 failures, 9 equivalences survived
+  (40 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: 3 reclasses (X86MemByte abbrev rename and store-byte
+  refine rename are caught via downstream handlers; cases += 3 is
+  invisible) plus 4 silent no-op probe rows replaced with real
+  semantics repaints (oracle byte-0 skip, checker +1 bias, store
+  reference-byte shift).
+- Residue: all six watched files byte-identical after each run
+  (memaccess watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
