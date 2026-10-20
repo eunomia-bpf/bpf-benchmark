@@ -15423,6 +15423,55 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file dispatch watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0208 — AArch64 source modifier mutation coverage
+
+- Scope: the eleven-arm source-modifier value applied through
+  `ARM64_SIM_L_MOD_VALUE` before an ALU step — the identity arm plus
+  shift (LSL/LSR/ASR), rotate (ROR), and extend
+  (UXTW/SXTW/UXTH/SXTH/UXTB/SXTB) arms, with the shift amount `k`
+  masked to the width (`& 31` on `w32`, `& 63` otherwise) and the
+  extend arms applying the raw shift field exactly like the C
+  macro. Across the case spec (exact-match dict plus the order,
+  codes, and decode-table drift re-checks), the generator (six
+  error messages, the expected dict, the order/codes re-checks, and
+  the rendered Lean arms join and C switch separator), the
+  generated C header (11 `ARM64_MOD_*` static asserts, the total
+  `KPROG_ARM64_MOD_HANDLED` cover, the eleven-arm
+  `KPROG_ARM64_MOD_VALUE` switch), the generated Lean module
+  (`value` over the `GeneratedArm64ModDecode (Mod)` codes), the
+  hand module (the independent `arm64ModValueSpec` restatement, the
+  refinement, the code-range theorem, code dispatch, the `__u8`
+  shift magnitude lemma, the amount-masking quartet, the
+  extend-shift refinement, the fed-ALU composition, and six
+  canonical examples), and the host oracle (the 15 boundary vectors
+  x 11 modifiers x 8 shifts x 4 widths plus a 20000-iteration LCG
+  sweep and HANDLED membership — 225292 cases).
+- Harness: `build/mut_arm64_mod.py` (untracked), 60 single-anchor
+  rows over the six files with 3 detectors: gen 8 / lean_chain 24 /
+  host 11 catch; 17 equivalences (six unreachable generator
+  error-message repaints, the header-guard repaint, five
+  consumers-free hand theorem renames (code-in-range, code
+  dispatch, masked quartet, extend refinement, fed-ALU), and five
+  all-equal-oracle input-side repaints (the shift classifier and
+  LCG seed/stream feed macro and oracle symmetrically, plus the
+  OK/FAIL message repaints)).
+- Result: TOTAL 60 mutations, 0 failures, 17 equivalences survived
+  (43 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the C-separator repaint first looked like a failed
+  catch because the row's replace needle counted offsets in the
+  wrong escaping layer (the anchor constant contains real `\\n`
+  backslash sequences, not newlines) — full old/new statement
+  constants fixed it; `arm64ModShiftOfByte` is internally consumed
+  by the shift-magnitude and extend-shift proofs, so its rename is
+  a catch, while the dispatch/quartet/refinement renames have no
+  consumers and stay equivalences; the three host input-side rows
+  (shift classifier `>=`→`>`, LCG seed bump, `& 0xfe` stream mask)
+  survive because any input they produce feeds macro and oracle
+  symmetrically (all-equal-oracle).
+- Residue: all six watched files byte-identical after each run
+  (6-file mod watchlist verified), the untracked harness retained
+  for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

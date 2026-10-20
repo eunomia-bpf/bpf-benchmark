@@ -5462,6 +5462,70 @@ a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
 repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
 and the OK/FAILED message repaints.
 
+### Step 0208 — AArch64 source modifier mutation coverage
+
+The `arm64_mod` contract (`arm64_mod_spec.json` 1 line,
+`generate_arm64_mod_spec.py` 228 lines,
+`generated/arm64_mod.h` 112 lines,
+`KProgFormal/GeneratedArm64Mod.lean` 25 lines,
+`KProgFormal/Arm64Mod.lean` 160 lines,
+`test_arm64_mod_host.c` 188 lines) pins the eleven-arm AArch64
+source-modifier value the simulator applies through
+`ARM64_SIM_L_MOD_VALUE` before an ALU step: the identity arm plus
+shift (LSL/LSR/ASR), rotate (ROR), and extend
+(UXTW/SXTW/UXTH/SXTH/UXTB/SXTB) arms, with the shift amount `k`
+masked to the width (`& 31` on `w32`, `& 63` otherwise) and the
+extend arms applying the raw shift field exactly like the C macro.
+The spec is an exact-match dict verified byte-for-byte (schema,
+operation, and the eleven operations in
+`none/lsl/lsr/asr/ror/uxtw/sxtw/uxth/sxth/uxtb/sxtb` order with
+codes 0..10 and per-arm `lean`/`c` expression strings), re-checked
+for order, codes, and code drift against the `mod` table of
+`arm64_decode_spec.json`; the generator re-renders the generated
+Lean match and the C `switch` macro with byte-for-byte `--check`.
+The generated Lean module defines `value` over the
+`GeneratedArm64ModDecode (Mod)` codes; the generated C header pins
+the 11 `ARM64_MOD_*` codes with static asserts, defines the total
+`KPROG_ARM64_MOD_HANDLED` cover and the eleven-arm
+`KPROG_ARM64_MOD_VALUE` statement expression. The hand module
+restates all eleven arms independently (`arm64ModValueSpec`:
+narrow/shift/rotate, masked complement-and-subtract sign extension,
+truncation shift pairs), proves the refinement by
+`cases <;> bv_decide`, the code-range theorem (`code mod < 11` by
+`decide`), the code dispatch equalities, the `__u8` shift-vector
+magnitude lemma, the `shift &&& 0x3f` amount-masking quartet, the
+extend-shift refinement over the `arm64ModShiftOfByte` image, the
+fed-ALU composition through `GeneratedArm64AluResult.result .add`
+and `arm64_alu_result_refines`, and six canonical examples
+(UXTB/SXTB/SXTW boundary values, the LSL w32/w64 shift masking, the
+ROR byte rotation, the identity arm) by `native_decide`. The host
+oracle drives `KPROG_ARM64_MOD_VALUE` against an independent
+plain-C oracle over the 15 boundary vectors x 11 modifiers x 8
+shifts x 4 widths plus a 20000-iteration fixed-seed LCG sweep
+(extends restricted to shift < 64) and the HANDLED membership
+checks (225292 cases).
+
+`build/mut_arm64_mod.py` (60 rows) perturbs the six files with the
+three detectors: 8 catch at the generator stage (the spec row
+repaint, the expected-dict, order, code, and decode-table check
+repaints, the rendered Lean arm and C separator repaints, and the
+masked-amount repaints on both render sides), 24 catch through the
+Lean chain (the namespace, every generated and hand modifier arm,
+the let-k masks, the consumed `arm64ModValueSpec`/
+`arm64_mod_refines` renames, the refinement/range/dispatch goal
+repaints, every boundary-example repaint, the shift magnitude
+repaint, and the internally-consumed `arm64ModShiftOfByte` rename),
+and 11 catch by the host oracle (the code asserts, the handled
+cover, the value macro rename, the case-10 repaint, the extend
+cast, and the model LSL/LSR/NONE/UXTB repaints). 17 rows survive as
+documented equivalences: six unreachable generator error-message
+repaints, the header-guard repaint, five consumers-free hand
+theorem renames (code-in-range, code dispatch, masked quartet,
+extend refinement, fed-ALU), and five all-equal-oracle input-side
+repaints (the shift classifier and LCG seed/stream change inputs
+fed symmetrically to macro and oracle, and the OK/FAIL message
+repaints).
+
 ### Step 0207 — AArch64 register dispatch mutation coverage
 
 The `arm64_reg_dispatch` contract (`arm64_reg_dispatch_spec.json` 39
