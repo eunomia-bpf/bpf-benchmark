@@ -15949,6 +15949,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0227 — x86 cmpop mutation coverage
+
+The cmpop contract pins the shared CMP/TEST opcode kernel eight bodies route through (`KPROG_X86_CMPOP_*` selectors over defines `X86_OP_CMP_IMM` 0x0c through `X86_OP_TEST_MEM_REG` 0x3b; rhs immediate for `_IMM` forms and register otherwise, sub flags for CMP and logic flags for TEST, memory lhs and store/simm displacement for memory forms, 64-bit default write width for width-less opcodes). Spec pins all eight rows; generator re-checks the expected table (order, columns, duplicate defines, write-width default) and renders the Lean module and C header byte-for-byte; the header adds static-assert opcode pins plus the `KPROG_X86_CMPOP_OP_*` per-opcode table and selects via `RHS_SOURCE`/`FLAG_KIND`/`LHS_SOURCE`/`DISP_KIND`/`WRITE_WIDTH` macros; the hand module (`X86CmpOpHandler.lean`) restates the tables and proves 18 refinements. Two hosts: `test_x86_cmpop_host.c` (2913 cases) and `test_x86_cmpop_route_host.c` (47529 cases). Shake: 123 rows, 93 caught (32 gen, 30 lean, 9 host, 23 route), 30 equivalents (thin theorem renames without in-module consumers, failure-path-only prints, simulator-helper repaints the routed result never observes).
+
 ## Step 0226 — x86 width-table mutation coverage
 
 - Scope: the operand-width kernel every simulator body and Lean handler
