@@ -5468,6 +5468,13 @@ and the OK/FAILED message repaints.
 
 
 
+
+### Step 0219 — x86 SBB flags mutation coverage
+
+The SBB-flags contract generates the four subtract-with-borrow flag transitions: CF is the borrow chain `(a <u b) || (borrow && a == b)`, ZF is `r == 0`, SF is `(r & sign) != 0`, and OF is the signed-borrow product `(a ^ b) & ((a ^ r) & sign) != 0`. The spec is a typed expression tree over the `a`/`b`/`r`/`sign` word atoms, the `borrow`/`zero` atoms, and the `lor`/`land`/`band`/`ult`/`eq`/`xor`/`nonzero` operators (`lor`/`land` render as `||`/`&&`; `band` renders as a BitVec AND); `load()` pins the schema, operation tag, and flag order, and the generator renders Lean and the C `KPROG_X86_SET_SBB_FLAGS` macro byte-for-byte. The hand module `X86SbbFlags.lean` restates all four flags independently and proves the flags refinement, the width-narrowed step composition (narrowing `a`, `b`, and the SBB-result word before re-deriving the flags), the branch-PC composition, and two `native_decide` boundary theorems pinning signed overflow exactly at the `-1 - 127 - 1` edge.
+
+`build/mut_x86_sbb_flags.py` (untracked) runs 58 rows over the six contract files with three detectors: 41 rows catch (19 at the generator stage, 13 through the Lean chain, 9 by the host oracle), and 17 survive as documented equivalences. The host side drives the memory-ALU handler's SBB arm (the same 22048-case composition as Steps 0214-0218) against the 128-bit borrow oracle. Shake reclassified 3 rows: the 0x7f/0x80 boundary constants sit inside the pinned-OF plateau (swapping either flips `OF` on both sides identically), so both `native_decide` repaints are equivalences, not catches.
+
 ### Step 0218 — x86 SBB result mutation coverage
 
 The SBB-result contract generates the subtract-with-borrow word value shared by the x86 simulator, the Lean model, and the memory-ALU handler: the result expression is `(a - b) - borrow`, with the C rendering extending the borrow bit through `!!(BORROW)` and Lean through `if borrow then 1 else 0`. The spec is a typed expression tree over the `a`/`b` word atoms, the `borrow` atom, and the `sub` binary node; `load()` pins the schema, operation tag, and the single `result` expression name, and the generator renders Lean and the C `KPROG_X86_SBB_RESULT` macro byte-for-byte. The hand module `X86SbbResult.lean` restates the result independently and proves the outright refinement and the width-narrowed composition (`x86_narrow_refines`); eight Lean modules (ALU-result, writeback, cmpop, inc/dec, mem-compare, SBB-flags, sub-result, unary) import the generated or hand module, so renames break the chain.

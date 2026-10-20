@@ -15857,6 +15857,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (sbbresult watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0219 — x86 SBB flags mutation coverage
+
+- Scope: the four subtract-with-borrow flag transitions: CF as the
+  borrow chain (a <u b) || (borrow && a == b), ZF, SF, and the
+  signed-borrow OF product, emitted as the C do/while macro
+  KPROG_X86_SET_SBB_FLAGS and the Lean eval over BitVec combinators.
+  Typed expression-tree spec (word atoms, borrow/zero atoms,
+  lor/land/band/ult/eq/xor/nonzero operators; lor/land render as
+  ||/&&); the hand module restates all four flags and proves the flags
+  refinement, the width-narrowed step composition, the branch-PC
+  composition, and two native_decide boundary theorems at the
+  -1 - 127 - 1 signed-overflow edge. The host side drives the
+  memory-ALU handler's SBB arm against the 128-bit borrow oracle
+  (22048 width/op/carry cases).
+- Harness: `build/mut_x86_sbb_flags.py` (untracked), 58 rows over the
+  six contract files, 3 detectors: gen 19 / lean_chain 13 / host 9
+  catch; 17 equivalences (eight unreachable generator error-message
+  repaints, the generated Lean header-comment repaint, the bare hand
+  theorem rename, both native_decide boundary-constant repaints, the
+  host boundary-table and MISMATCH/OK/FAILED banner repaints).
+- Result: TOTAL 58 mutations, 0 failures, 17 equivalences survived
+  (41 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: run 1 reclassified 2 rows --- the 0x7f/0x80 boundary
+  constants sit inside the pinned-OF plateau, so both native_decide
+  repaints are equivalences (the proven sides flip identically), not
+  catches.
+- Residue: all six watched files byte-identical after each run
+  (sbbflags watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
