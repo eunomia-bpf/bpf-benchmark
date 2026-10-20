@@ -5462,6 +5462,70 @@ a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
 repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
 and the OK/FAILED message repaints.
 
+### Step 0211 — AArch64 pair-move mutation coverage
+
+The `arm64_pair_mem` contract (`arm64_pair_mem_spec.json` 1 line,
+`generate_arm64_pair_mem_spec.py` 199 lines,
+`generated/arm64_pair_mem.h` 53 lines,
+`KProgFormal/GeneratedArm64PairMem.lean` 31 lines,
+`KProgFormal/Arm64PairMemHandler.lean` 96 lines,
+`test_arm64_pair_mem_host.c` 529 lines) pins what the two pair-move
+opcodes do before the address macros take over: `ARM64_OP_LDP` 0x21
+loads two 64-bit slots into a register pair (low slot into DST, high
+slot one 64-bit stride higher into SRC) and `ARM64_OP_STP` 0x22
+stores the pair back out in the same order (low from SRC, high from
+SRC2). `load()` re-checks the exact-match dict per column, exits 1 on
+duplicate defines, and pins the non-contiguous codes against
+`kprog/arm64/arm64_sim.h` at generation time; the generated header
+re-pins them with static asserts and emits the slot/high-slot
+strides, the access codes, the per-opcode ACCESS/INDEX macros, and
+the two-way `KPROG_ARM64_PAIR_MEM_INDEX` chain whose `else` makes the
+selector total off the opcode set (any other code, e.g. `0xff`,
+dispatches to the STP arm index). The contract deliberately does not
+restate the address offset (`MEM_BASE_OFF`) or the pre/post writeback
+(`MEM_PRE`/`MEM_POST`) -- those live in the macro contracts with
+their own proved steps; the pair contract fixes only which two slots
+each opcode transfers and in which order, a full 64-bit access
+each. The hand module restates the ordered slot plan independently
+(`arm64PairMemSlotPlanSpec` is `[0, 8]` for both opcodes) and proves
+the refinement, the slot-count refinement, the access-direction
+dispatch, the slot-plan/count facts, the distinct-slot property, the
+stride, the arm-index dispatch, and the low/high slot examples. The
+host oracle part 1 checks every constant and selector (including the
+total default arm and a collide check that the two access codes
+differ); part 2 drives the full composition of both bodies -
+pre/post writeback, the read-before-write ordering of the load (an
+LDP whose target register is also the base still reads the original
+base), and the register-pair mapping - over the 7-register x
+7-register x 2-tag x 33-base x 3-flags x 4-index x 6-imm grid plus a
+fixed-seed randomized sweep (6984 + 458712 = 465696 cases), and
+`test_arm64_pair_mem_route_host.c` re-derives the same plan through
+the simulator macro (122891 cases).
+
+`build/mut_arm64_pair_mem.py` (90 rows) perturbs the six files with
+the three detectors: 10 catch at the generator stage (the LDP code,
+code index, STP access string, slot count, and high-slot stride in
+the spec; the order, codes, access, and high-stride tables in the
+generator), 17 catch through the Lean chain (the namespace and LDP
+constructor renames, both access arms, both arm indexes, the slot
+count and offset bodies, the import/open renames, the independent
+plan arms (`[0, 8]` -> `[0, 9]`), the access-dispatch goal, the
+distinct-slot goal, the arm-index goal, and the two example goals),
+and 32 catch by the host oracle (the two opcode asserts, the slot
+stride define, the high-slot stride, the slot count, both access
+codes, both per-opcode access macros, both index macros, the two-way
+chain's LDP compare and both arm assignments, the contract step's
+slots/index/access-pick/load-compare and the slot-stride multiply,
+and the model step's slots/index/is-load repaints). 31 rows survive
+as documented equivalences: the seven unreachable generator
+error-message repaints, a whitespace-only generated offset-arm edit,
+the slot-stride assert message repaint, the eleven self-contained
+hand renames (nothing imports the hand module - unlike
+`X86MulxHandler` consuming the multiply ladder - so a
+definition-and-all-references rename compiles green), and the
+eleven message/probe repaints (the nine part-one failure messages,
+the OK/FAIL banner repaints, and the randomized-sweep seed).
+
 ### Step 0210 — AArch64 multiply family mutation coverage
 
 The `arm64_mul` contract (`arm64_mul_spec.json` 0 lines -- the spec

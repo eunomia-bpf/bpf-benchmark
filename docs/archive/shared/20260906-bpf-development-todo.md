@@ -15560,6 +15560,53 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (mul watchlist verified), the untracked harness retained for
   reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0211 — AArch64 pair-move mutation coverage
+
+- Scope: what the two pair-move opcodes do before the address macros
+  take over — `ARM64_OP_LDP` 0x21 loads two 64-bit slots into a
+  register pair (low slot into DST, high slot one 64-bit stride
+  higher into SRC), `ARM64_OP_STP` 0x22 stores the pair back out in
+  the same order (low from SRC, high from SRC2). `load()` re-checks
+  the exact-match dict per column, exits 1 on duplicate defines,
+  pins the non-contiguous codes against `arm64_sim.h`; the generated
+  header re-pins them with static asserts plus the strides, access
+  codes, ACCESS/INDEX macros, and the two-way INDEX chain whose
+  `else` makes the selector total off the opcode set. The contract
+  does not restate `MEM_BASE_OFF` or `MEM_PRE`/`MEM_POST` (they live
+  in macro contracts with their own proved steps); it fixes which
+  two slots each opcode transfers and in which order. Hand module
+  restates the plan `[0, 8]` independently with refinement, count
+  refinement, access dispatch, plan/count facts, distinct-slot,
+  stride, arm-index dispatch, and slot examples; the host oracle
+  part 1 checks every constant including the total default arm
+  (0xff -> STP index) and the access-code collide check, part 2
+  drives both composed bodies (read-before-write load ordering,
+  writeback, pair mapping) over 7-register x 7-register x 2-tag x
+  33-base x 3-flags x 4-index x 6-imm grid plus fixed-seed random
+  = 465696 cases; route test re-derives the plan via the simulator
+  macro (122891 cases).
+- Harness: `build/mut_arm64_pair_mem.py` (untracked), 90 rows over
+  six files, 3 detectors: gen 10 / lean_chain 17 / host 32 catch;
+  31 equivalences (seven unreachable generator error-message
+  repaints, a whitespace-only offset-arm edit, the slot-stride
+  assert message, eleven self-contained hand renames, eleven
+  message/probe repaints: nine part-one messages, OK/FAIL banners,
+  sweep seed).
+- Result: TOTAL 90 mutations, 0 failures, 31 equivalences survived
+  (59 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the no-op audit caught the generated slot-count body
+  repaint (two-line anchor with an escaped newline in the harness
+  literal) and the distinct-slot `≠` goal (line-repr mismatch) before
+  the first run; 14 degenerate count-0 rows were rewritten as true
+  rename rows before running; run 1 reclassified ONE row — the
+  `open GeneratedArm64PairMem (Op Access)` rename is a CATCH, not an
+  equivalence, because the hand module uses `Op` unqualified in both
+  plan defs; hand definition renames are equivalences only because
+  nothing imports the hand module.
+- Residue: all six watched files byte-identical after each run
+  (pairmem watchlist verified), untracked harness retained,
+  `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
