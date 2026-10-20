@@ -15774,6 +15774,34 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (aludecode watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0216 — x86 ADD flags mutation coverage
+
+- Scope: the four addition flag transitions the simulator, Lean model,
+  and memory-ALU handler share: CF as unsigned carry-out (r <u a), ZF,
+  SF, and the signed-overflow product (~(A ^ B) & ((A ^ R) & SIGN))
+  != 0, emitted as the C do/while macro KPROG_X86_SET_ADD_FLAGS and the
+  Lean eval over BitVec combinators. Typed expression-tree spec
+  (load() pins the schema, operation tag, and flag order); the hand
+  module restates all four flags and proves the flags refinement and
+  the branch-PC composition; X86AddResult/X86AluWriteback/X86IncDec
+  import the hand module, so hand renames break the chain. The host
+  side drives the memory-ALU handler's ADD arm against the 128-bit
+  oracle (22048 width/op/carry cases).
+- Harness: `build/mut_x86_add_flags.py` (untracked), 57 rows over the
+  six contract files, 3 detectors: gen 21 / lean_chain 11 / host 9
+  catch; 16 equivalences (eight unreachable generator error-message
+  repaints, the generated Lean header-comment repaint, the bare hand
+  theorem rename, the host boundary-table repaints as valid decimal
+  literals, the MISMATCH/OK/FAILED banner repaints).
+- Result: TOTAL 57 mutations, 0 failures, 16 equivalences survived
+  (41 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: run 1 reclassified 1 row --- the generated Lean module's
+  head-comment repaint is compiler-invisible, so it is an equivalence,
+  not a catch.
+- Residue: all six watched files byte-identical after each run
+  (addflags watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

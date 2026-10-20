@@ -5465,6 +5465,13 @@ and the OK/FAILED message repaints.
 
 
 
+
+### Step 0216 — x86 ADD flags mutation coverage
+
+The ADD-flag contract generates the four addition flag transitions shared by the x86 simulator, the Lean model, and the memory-ALU handler composition: CF is unsigned carry-out `r <u a`, ZF is `r == 0`, SF is `r & sign != 0`, and OF is `~(a ^ b) & ((a ^ r) & sign) != 0`. The spec is a typed expression tree over the `a`/`b`/`r`/`sign` word atoms with `ult`/`eq`/`and`/`xor`/`not`/`nonzero`/`zero` operators; `load()` pins the schema, operation tag, and flag order, and the generator renders Lean (BitVec combinators) and the C `do/while` macro `KPROG_X86_SET_ADD_FLAGS` byte-for-byte. The hand module `X86AddFlags.lean` restates all four flags independently and proves the flags refinement and the branch-PC composition; `X86AddResult`, `X86AluWriteback`, and `X86IncDec` import the hand module, so hand renames break the chain.
+
+`build/mut_x86_add_flags.py` (untracked) runs 57 rows over the six contract files with three detectors: 41 rows catch (21 at the generator stage, 11 through the Lean chain, 9 by the host oracle), and 16 survive as documented equivalences. The host side drives the memory-ALU handler's ADD arm (the same 22048-case composition as Step 0214) against the 128-bit oracle. Shakedown reclassified 1 row: the generated Lean module's header-comment repaint is compiler-invisible, so it is an equivalence, not a catch.
+
 ### Step 0215 — x86 ALU decode mutation coverage
 
 The ALU decode contract pins the parsed-mnemonic code table shared by the x86 simulator, the Lean model, and the artifact encoder: sixteen operations (add, sub, xor, or, and, shl, shr, sar, rol, imul, inc, not, sbb, dec, neg, adc) with mnemonic = name, codes 0-15, and the handler split - sbb maps to the borrow-sensitive handler, adc to the carry-sensitive handler, everything else generic. The spec loader rejects any wrong name/code/handler column and any unknown top-level key, the generator renders the Lean inductive with `code`/`mnemonic`/`handlerForCode`, the C header's sixteen `X86_ALU_*` defines plus the two handler-selector macros, and the app-side `ALU_AUX` python mapping byte-for-byte. The hand module `X86AluDecode.lean` restates all three columns independently and proves the code, mnemonic, and handler refinements plus the packed-AUX round-trip (`x86_alu_aux_handler_refines` extracts the same handler from a typed ALU code shipped through the register-lane AUX); `X86AluResultSpec` and `GeneratedX86AluResult` import the generated module, so generated renames break the chain.
