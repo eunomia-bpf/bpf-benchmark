@@ -15739,6 +15739,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (x86adc watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0215 — x86 ALU decode mutation coverage
+
+- Scope: the parsed-mnemonic code table the simulator, Lean model, and
+  artifact encoder share: sixteen operations (add..sbb,dec,neg,adc)
+  with mnemonic = name, codes 0-15, and the handler split (sbb -> the
+  borrow-sensitive handler, adc -> the carry-sensitive handler, all
+  else generic). The spec loader rejects any wrong name/code/handler
+  column or unknown key; the generator renders the Lean inductive plus
+  code/mnemonic/handlerForCode, the C header's sixteen X86_ALU_*
+  defines and two handler-selector macros, and the app-side ALU_AUX
+  python mapping byte-for-byte. The hand module restates all three
+  columns and proves code/mnemonic/handler refinements plus the
+  packed-AUX round-trip; GeneratedX86AluResult and X86AluResultSpec
+  import the generated module, so generated renames break the chain.
+  The host compares the generated constants with an independent
+  mnemonic table, drives the real x86_alu_result dispatcher against
+  arithmetic-identity recomputations (16x6x8x4 spread), and binds both
+  selector macros plus mutual exclusion to the dispatcher's identity
+  checks (3256 cases).
+- Harness: `build/mut_x86_alu_decode.py` (untracked), 48 rows over
+  seven files (the six contract files plus the app-side
+  generated_x86_alu_decode.py mapping), 3 detectors: gen 15 /
+  lean_chain 13 / host 13 catch; 7 equivalences (four unreachable
+  generator error-message repaints, the self-contained AUX-theorem
+  rename, the MISMATCH/OK banner repaints).
+- Result: TOTAL 48 mutations, 0 failures, 7 equivalences survived
+  (41 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: run 1 reclassified 1 row --- appending an entry to the
+  app-side ALU_AUX mapping is caught by the generator's byte-check
+  (the mapping is a re-rendered output, not a check-free file), so it
+  is a gen-stage catch, not an equivalence.
+- Residue: all seven watched files byte-identical after each run
+  (aludecode watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
