@@ -5354,5 +5354,56 @@ host sweep repaints (a remapped direction call, a remapped grid call,
 and a swapped value-table entry whose verdicts are already equal),
 and the OK-line message.
 
+### Step 0204 — AArch64 NZCV flags mutation coverage
+
+The `arm64_flags` contract (`arm64_flags_spec.json` 1 line,
+`generate_arm64_flags_spec.py` 163 lines,
+`generated/arm64_flags.h` 48 lines,
+`KProgFormal/GeneratedArm64Flags.lean` 48 lines,
+`KProgFormal/Arm64Flags.lean` 128 lines,
+`test_arm64_flags_host.c` 163 lines) pins the AArch64 NZCV flag
+transitions shared by the three families — ADD/ADD-immediate (C is the
+unsigned carry-out, V the signed overflow), SUB/CMP/SUB-immediate (C is
+NOT borrow, i.e. lhs >= rhs, V the signed overflow), and logical
+AND/ORR/EOR/BIC/MOV/TST (C and V cleared) — over the four widths, all
+computed from width-narrowed operands. The spec is an exact-match dict
+(families table, width_rule, overflow doc) verified byte-for-byte by
+`load()`; the generator re-renders the whole generated module and header
+and `--check` compares rendered text. The generated side carries the
+`KPROG_ARM64_SET_ADD_FLAGS`/`SET_SUB_FLAGS`/`SET_LOGIC_FLAGS` macros
+(the four NZCV assignments per family) and the Lean
+`addCarry`/`addOverflow`/`applyAdd`/`subCarry`/`subOverflow`/`applySub`/
+`applyLogic` definitions; the hand module restates the same NZCV
+statement independently as the `Arm64NzcSpec` record plus the
+`arm64{Add,Sub,Logic}Nzc` constructions and proves the three
+refinements by `cases width <;> rfl`, then five canonical examples
+(carry w64, sub-zero w64, signed-overflow w32, borrow w64,
+logical-clears w32) each by `native_decide`. The host oracle checks all
+three families against an independent `__int128` oracle over 12
+boundary vectors across 4 widths plus a 20000-case fixed-seed random
+sweep (60144 cases).
+
+`build/mut_arm64_flags.py` (65 rows) perturbs the six files with the
+three detectors: 9 catch at the generator stage (the spec family
+carry/overflow/opcode/width-rule/overflow-doc repaints and the
+expected-dict value drifts) and 53 catch downstream (22 through the
+Lean chain: the namespace and structure repaints, every generated and
+hand add/sub/logic definition, the generated and hand masked-equality
+overflow conditions, the hand refines theorem renames that Arm64AluResult
+Lean chain, host oracle split: refines theorem
+generated macro repaints per family, the per-family refactor
+cross-family macro-name repaints, the malformed-include and macro-call
+repaints, the per-family mismatch-condition repaints, the mismatch-
+table remap, the widths repaint, and the include repaint). 12 rows
+survive as documented equivalences: two unreachable generator
+error-message repaints, the header-guard repaint no green detector
+compiles, three consumers-free hand renames (add/sub/logic refines;
+no module imports the hand module), the `native_decide` -> `decide`
+tactic swap (both discharge every example), the host add-carry
+`!= 0` -> `== 1` narrowing (the shifted sum is 0 or 1), the
+width-sequence remap and widths-table swap (verdicts are re-derived
+identically from the repainted inputs), and the OK/FAILED message
+repaints.
+
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.

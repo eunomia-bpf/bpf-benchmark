@@ -15236,6 +15236,50 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file fmov watchlist verified), the untracked harness retained
   for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0204 — AArch64 NZCV flags mutation coverage
+
+- Scope: the NZCV flag transitions shared by the three families —
+  ADD `KPROG_ARM64_SET_ADD_FLAGS` (C = unsigned carry-out, V = signed
+  overflow), SUB `SET_SUB_FLAGS` (C = NOT borrow, lhs >= rhs, V =
+  signed overflow), logical `SET_LOGIC_FLAGS` (C = V = 0) — over the
+  four widths, all computed from width-narrowed operands, across the
+  case spec (exact-match families dict, width_rule, overflow doc), the
+  generator (expected-dict values, error messages, the whole-module
+  re-render with byte-for-byte `--check`), the generated C header
+  (three macro bodies, per-family NZCV assignments), the generated
+  Lean module (`addCarry`/`addOverflow`/`applyAdd`/`subCarry`/
+  `subOverflow`/`applySub`/`applyLogic` and the masked-equality
+  overflow conditions), the hand module (the `Arm64NzcSpec` record,
+  the `arm64{Add,Sub,Logic}Nzc` constructions, the three refines
+  theorems consumed downstream by Arm64AluResult, the
+  `cases width <;> rfl` and `native_decide` tactics, five canonical
+  examples), and the host oracle (three `__int128`-based check
+  functions, the mismatch-condition repaints, the macro-call
+  repaints, the include repaint, the 60000-case random sweep and
+  boundary-vector grid, and the OK/FAILED messages).
+- Harness: `build/mut_arm64_flags.py` (untracked), 65 single-anchor
+  rows over the six files with 3 detectors: gen 9 / lean_chain 22 /
+  host 22 catch; 12 equivalences (two unreachable generator
+  error-message repaints, the header-guard repaint, three
+  consumers-free hand renames, the `native_decide` -> `decide` tactic
+  swap, the host add-carry `!= 0` -> `== 1` narrowing, the
+  width-sequence remap and widths-table swap, and the OK/FAILED
+  message repaints).
+- Result: TOTAL 65 mutations, 0 failures, 12 equivalences survived
+  (53 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the generated C header repaints are invisible to the
+  Lean chain (only the host detector consumes the header) so all
+  gh_* rows belong to the host detector; hand theorem renames inside
+  the hand module are consumers-free equivalences (no module imports
+  the hand module), while the `arm64{Add,Sub,Logic}Nzc` definitions
+  ARE consumed by Arm64AluResult and stay catchable; the
+  `native_decide` -> `decide` swap survives because both tactics
+  discharge every example goal; `((i128)l + (i128)r) >> bits != 0`
+  equals `== 1` because the operands are width-narrowed first.
+- Residue: all six watched files byte-identical after each run
+  (6-file flags watchlist verified), the untracked harness retained
+  for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
