@@ -5467,6 +5467,13 @@ and the OK/FAILED message repaints.
 
 
 
+
+### Step 0218 — x86 SBB result mutation coverage
+
+The SBB-result contract generates the subtract-with-borrow word value shared by the x86 simulator, the Lean model, and the memory-ALU handler: the result expression is `(a - b) - borrow`, with the C rendering extending the borrow bit through `!!(BORROW)` and Lean through `if borrow then 1 else 0`. The spec is a typed expression tree over the `a`/`b` word atoms, the `borrow` atom, and the `sub` binary node; `load()` pins the schema, operation tag, and the single `result` expression name, and the generator renders Lean and the C `KPROG_X86_SBB_RESULT` macro byte-for-byte. The hand module `X86SbbResult.lean` restates the result independently and proves the outright refinement and the width-narrowed composition (`x86_narrow_refines`); eight Lean modules (ALU-result, writeback, cmpop, inc/dec, mem-compare, SBB-flags, sub-result, unary) import the generated or hand module, so renames break the chain.
+
+`build/mut_x86_sbb_result.py` (untracked) runs 40 rows over the six contract files with three detectors: 24 rows catch (13 at the generator stage, 6 through the Lean chain, 5 by the host oracle), and 16 survive as documented equivalences. The host side drives the memory-ALU handler's SUB and SBB arms (the same 22048-case composition as Steps 0214-0217) against the 128-bit borrow oracle. Shakedown reclassified 1 row: `(!!(BORROW))` -> `(BORROW)` in the generated C macro is value-preserving over the 0/1 borrow domain the arms pass, so it is an equivalence, not a catch.
+
 ### Step 0217 — x86 SUB flags mutation coverage
 
 The SUB-flag contract generates the four subtraction flag transitions shared by the x86 simulator, the Lean model, and the memory-ALU handler composition: CF is unsigned borrow `a <u b`, ZF is `a == b`, SF is `(r & sign) != 0`, and OF is the signed-borrow product `(a ^ b) & ((a ^ r) & sign) != 0`. The spec is a typed expression tree over the `a`/`b`/`r`/`sign` word atoms with `ult`/`eq`/`and`/`xor`/`nonzero` operators (the subtraction generator drops addition's `zero` and `not` nodes); `load()` pins the schema, operation tag, and flag order, and the generator renders Lean (BitVec combinators) and the C `do/while` macro `KPROG_X86_SET_SUB_FLAGS` byte-for-byte. The hand module `X86SubFlags.lean` restates all four flags independently and proves the flags refinement and the branch-PC composition; seven Lean modules (compare, cmpop, sbb-result, sub-result, unary, inc/dec, writeback handlers) import the hand module, so hand renames break the chain.

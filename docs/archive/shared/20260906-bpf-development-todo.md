@@ -15829,6 +15829,34 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (subflags watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0218 — x86 SBB result mutation coverage
+
+- Scope: the subtract-with-borrow word value ((a - b) - borrow): the C
+  macro KPROG_X86_SBB_RESULT extends the borrow bit through !!(BORROW),
+  Lean through (if borrow then 1 else 0). Typed expression-tree spec
+  (a/b word atoms, the borrow atom, the sub binary; load() pins the
+  schema, operation tag, and the single result expression name); the
+  hand module restates the result and proves the outright refinement
+  and the width-narrowed composition (x86_narrow_refines); eight Lean
+  modules import the generated or hand module, so renames break the
+  chain. The host side drives the memory-ALU handler's SUB and SBB
+  arms against the 128-bit borrow oracle (22048 width/op/carry cases).
+- Harness: `build/mut_x86_sbb_result.py` (untracked), 40 rows over the
+  six contract files, 3 detectors: gen 13 / lean_chain 6 / host 5
+  catch; 16 equivalences (seven unreachable generator error-message
+  repaints, the generated Lean header-comment repaint, the bare hand
+  theorem rename, the !!(BORROW) -> (BORROW) value-preserving macro
+  repaint, the host boundary-table and MISMATCH/OK/FAILED banner
+  repaints).
+- Result: TOTAL 40 mutations, 0 failures, 16 equivalences survived
+  (24 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: run 1 reclassified 1 row --- !!(BORROW) -> (BORROW) is
+  value-preserving over the 0/1 borrow domain the arms pass, so it is
+  an equivalence, not a catch.
+- Residue: all six watched files byte-identical after each run
+  (sbbresult watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
