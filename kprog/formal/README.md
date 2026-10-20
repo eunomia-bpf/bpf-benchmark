@@ -5462,5 +5462,59 @@ a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
 repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
 and the OK/FAILED message repaints.
 
+### Step 0206 — AArch64 pre/post writeback mutation coverage
+
+The `arm64_mem_prepost` contract (`arm64_mem_prepost_spec.json` 1
+line, `generate_arm64_mem_prepost_spec.py` 178 lines,
+`generated/arm64_mem_prepost.h` 43 lines,
+`KProgFormal/GeneratedArm64MemPrepost.lean` 40 lines,
+`KProgFormal/Arm64MemPrepost.lean` 103 lines,
+`test_arm64_mem_prepost_host.c` 184 lines) pins the
+pre/post-indexed address-writeback decode: the packed memory-flag
+byte of an `ARM64_AUX_MEM` operand is its top byte (`>> 24`, mask
+255); `MEM_PRE` (bit 1) applies the immediate before the access and
+`MEM_POST` (bit 2) after it as independent facts (both set applies the
+same immediate twice), an offset access contributes the immediate in
+the address offset, so the offset suppresses the immediate exactly
+when either bit is set; each macro evaluates the flag byte once and
+writes no NZCV. The spec is an exact-match dict verified byte-for-byte
+plus an `ARM64_MEM_PRE`/`MEM_POST` drift cross-check against
+`kprog/arm64/arm64_sim.h`; the generator re-renders the whole
+generated Lean module and C header with byte-for-byte `--check`. The
+generated side carries the top-byte `flags` decode, the
+`preWriteback`/`postWriteback` gates, `suppressOffset`,
+`preDelta`/`postDelta`, the independent raw-flag statements
+`preDeltaSpec`/`postDeltaSpec`/`suppressOffsetSpec`/
+`writebackFormSpec`, and the four `KPROG_ARM64_MEM_PREPOST_*` C
+macros with their PRE/POST static asserts. The hand module restates
+the flag byte as the `(aux.toNat >>> 24) &&& 255` decode, proves the
+gate equalities by `rfl` and `simp`, the delta refinements by
+`exact ⟨rfl, rfl⟩`, the form-ordinal sum by `rfl` and its bound by
+`split <;> split <;> omega`, and three canonical examples (offset 0,
+post 2, both 3) by `decide`. The host oracle compares the macros with
+an independent model in two parts: constants against literals and
+ARM64_MEM_PRE/MEM_POST, then the full decode/select sweep over every
+flag byte 0-255, three low-byte noise words, and six immediates
+(4608 cases).
+
+`build/mut_arm64_mem_prepost.py` (59 rows) perturbs the six files
+with the three detectors: 21 catch at the generator stage (the spec
+bit/shift/mask/selector/operation/schema drifts, the expected-dict
+selector drift, and the PRE/POST constant, rendered gate/delta/
+suppress template, and C macro repaints), 20 catch through the Lean
+chain (the namespace, flags decode, gate bodies, suppress, deltas,
+and spec-statement repaints; the hand open-line rename, the
+flags gate/bound/delta goal repaints, and the three example-goal
+repaints), and 5 catch by the host oracle (the include repaint, the
+model top-byte/pre/post/suppress repaints). 13 rows survive as
+documented equivalences: five unreachable generator error-message
+repaints, the header-guard repaint, the consumers-free
+`suppressOffsetSpec` (no module reads it) and hand `flags_refines`
+theorem renames, the weaker form-bound `≤ 2` to `≤ 3` repaint (the
+weaker statement stays omega-provable), the low-byte noise 0x5a to
+0x5b and immediate 0x1000 to 0x1001 drifts (every case's verdict is
+re-derived identically from the repainted inputs), and the OK/FAILED
+message repaints.
+
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.

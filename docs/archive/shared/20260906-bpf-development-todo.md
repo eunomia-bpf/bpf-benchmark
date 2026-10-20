@@ -15327,6 +15327,56 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file orn watchlist verified), the untracked harness retained
   for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0206 — AArch64 pre/post writeback mutation coverage
+
+- Scope: the pre/post-indexed address-writeback decode of the packed
+  memory-flag byte of an `ARM64_AUX_MEM` operand — the flag byte is
+  the aux word's top byte (`>> 24`, mask 255), `MEM_PRE` (bit 1)
+  applies the immediate before the access and `MEM_POST` (bit 2)
+  after it as independent facts (both set applies the same immediate
+  twice), an offset access keeps the immediate in the address offset,
+  each macro evaluates the flag byte once and writes no NZCV, and the
+  caller supplies the base-register writeback. Across the case spec
+  (exact-match dict plus the `ARM64_MEM_PRE`/`MEM_POST` drift
+  cross-check against `kprog/arm64/arm64_sim.h`), the generator
+  (five error messages, the expected dict, the rendered
+  gate/delta/suppress templates), the generated C header (the four
+  `KPROG_ARM64_MEM_PREPOST_*` macros and their PRE/POST static
+  asserts), the generated Lean module (the top-byte `flags` decode,
+  the `preWriteback`/`postWriteback` gates, `suppressOffset`,
+  `preDelta`/`postDelta`, the raw-flag spec statements, and the
+  `writebackFormSpec` ordinal), the hand module (the
+  `(aux.toNat >>> 24) &&& 255` restatement, the gate equalities by
+  `rfl`/`simp`, the delta refinements by `exact ⟨rfl, rfl⟩`, the
+  form-ordinal sum by `rfl` bound by `split <;> split <;> omega`,
+  three canonical examples by `decide`), and the host oracle (in
+  two parts: constants vs literals then the full decode/select sweep
+  over every flag byte 0-255, three low-byte noise words, six
+  immediates — 4608 cases).
+- Harness: `build/mut_arm64_mem_prepost.py` (untracked), 59
+  single-anchor rows over the six files with 3 detectors: gen 21 /
+  lean_chain 20 / host 5 catch; 13 equivalences (five unreachable
+  generator error-message repaints, the header-guard repaint, the
+  consumers-free `suppressOffsetSpec` and hand `flags_refines`
+  renames, the weaker form-bound `≤ 2` to `≤ 3` repaint, the
+  low-byte-noise 0x5a-to-0x5b and immediate 0x1000-to-0x1001 vector
+  drifts, and the OK/FAILED message repaints).
+- Result: TOTAL 59 mutations, 0 failures, 13 equivalences survived
+  (46 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the C-macro generator anchors must be raw
+  (`r'''`) triple-quoted literals — ordinary triple quotes turn the
+  backslash-line-continuations into literal backslash+n sequences and
+  every C-source anchor misses (the whole 59-row harness reported
+  found=0 until the literals went raw); the `≤ 2` -> `≤ 3` form-bound
+  repaint stays provable as a weaker true statement (`omega`
+  discharges either), and the low-byte noise word and immediate
+  vectors are interchangeable inputs whose per-case verdicts the
+  oracle re-derives identically, so both drifts are all-equal-oracle
+  equivalences rather than catches.
+- Residue: all six watched files byte-identical after each run
+  (6-file pre/post watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
