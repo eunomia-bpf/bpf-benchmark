@@ -15472,6 +15472,52 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file mod watchlist verified), the untracked harness retained
   for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0209 — AArch64 vector register mutation coverage
+
+- Scope: how the four vector memory-transfer opcodes
+  (`ARM64_OP_LOAD_D0` 0x28, `LOAD_Q0` 0x2a, `STORE_D0` 0x29,
+  `STORE_Q0` 0x2b) map onto the two 64-bit vector-register state
+  fields — `__a64_v0` the low half at slot offset 0 and `__a64_v0_hi`
+  the high half at slot offset 8, a `.D0` transfer touching the low
+  half only, a `.Q0` transfer touching the low half then the high
+  half, and the two halves distinct slots. Across the case spec
+  (exact-match dict plus per-column, duplicate, offset-agreement,
+  half-aliasing, and state-field re-checks), the generator (seven
+  error messages, the half-plan driver table, the two-half C
+  selector text), the generated C header (four opcode asserts, the
+  HANDLED cover, slot offsets plus the alias assert, HALF codes and
+  the half-offset macro, per-opcode ACCESS/HALVES/INDEX/SELECT(N)
+  and the four-way INDEX chain), the generated Lean module
+  (constructors plus Access/Half/Halves and the per-opcode
+  access/halves/armIndex/halfCount/halfOffset/plan selectors), the
+  hand module (the independent `arm64VregPlanSpec` plans, transfer
+  list, plan and half-count refinements, access dispatch, half
+  plans, distinct-slot and .Q0-distinct-halves facts, arm-index
+  dispatch, and both slot-offset examples), and the host oracle
+  (SELECT/HALF_OFFSET/INDEX/ACCESS/HALVES selectors driven against
+  a full reimplementation of all four transfer bodies — 9216 cases).
+- Harness: `build/mut_arm64_vreg.py` (untracked), 57 single-anchor
+  rows over the six files with 3 detectors: gen 6 / lean_chain 26 /
+  host 15 catch; 10 equivalences (seven unreachable generator
+  error-message repaints, the internally-consistent `HALF_LOW`
+  index repaint, and the two host OK/FAIL message repaints).
+- Result: TOTAL 57 mutations, 0 failures, 10 equivalences survived
+  (47 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: five theorem-goal repaints first anchored on the
+  theorem-signature line instead of the goal text (no-op edits that
+  compiled green — caught by the no-op-mutation audit); the
+  half-plan goal needed its `.loadD0` arm to disambiguate the two
+  occurrences of `arm64VregPlanSpec .loadQ0 = [.low, .high]`; the
+  `STORE_Q0` select arm swap and the consumed `open` member repaint
+  both flipped from expected-equivalent to catch (the static
+  half-plan check observes the select order; `AccessX` is not a
+  member), and the `HALF_LOW 0U`→`2U` repaint stayed an equivalence
+  (the value feeds only its own comparisons and the `HALF_OFFSET`
+  ternary, so macro and oracle repaint symmetrically).
+- Residue: all six watched files byte-identical after each run
+  (vreg watchlist verified), the untracked harness retained for
+  reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

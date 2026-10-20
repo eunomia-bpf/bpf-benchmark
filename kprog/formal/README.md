@@ -5462,6 +5462,70 @@ a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
 repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
 and the OK/FAILED message repaints.
 
+### Step 0209 — AArch64 vector register mutation coverage
+
+The `arm64_vreg` contract (`arm64_vreg_spec.json` 45 lines,
+`generate_arm64_vreg_spec.py` 291 lines,
+`generated/arm64_vreg.h` 87 lines,
+`KProgFormal/GeneratedArm64Vreg.lean` 62 lines,
+`KProgFormal/Arm64Vreg.lean` 104 lines,
+`test_arm64_vreg_host.c` 546 lines) pins how the four vector
+memory-transfer opcodes (`ARM64_OP_LOAD_D0` 0x28, `LOAD_Q0` 0x2a,
+`STORE_D0` 0x29, `STORE_Q0` 0x2b) map onto the simulator's two
+64-bit vector-register state fields: `__a64_v0` is the low half at
+slot offset 0 and `__a64_v0_hi` is the high half at slot offset 8,
+a `.D0` transfer touches the low half only, a `.Q0` transfer
+touches the low half and then the high half, and the two halves
+are distinct slots. The spec is an exact-match dict (selector,
+state fields, offsets, and the four-opcode table with
+define/code/codeIndex/access/halves columns) re-checked per
+column, for duplicate defines, offset agreement, half-aliasing,
+and the state-field names against
+`../arm64/arm64_sim_local_bpf.h`; the generator re-renders the
+generated Lean module and C header with byte-for-byte `--check`.
+The generated Lean module spans the four `Op` constructors plus
+the `Access`/`Half`/`Halves` codomain types, the per-opcode
+`access`/`halves`/`armIndex` selectors, `halfCount`, `halfOffset`,
+and the per-opcode ordered `plan`. The generated C header pins
+each opcode code with a static assert, the `HANDLED` cover, the
+slot offsets plus the alias assert, the `HALF_LOW`/`HALF_HIGH`/
+`ACCESS_*` codes, the half-offset macro, per-opcode
+`ACCESS`/`HALVES`/`INDEX`/`SELECT(N)` macros, and the four-way
+`INDEX` chain. The hand module restates the four ordered half
+plans independently (`arm64VregPlanSpec`), builds the transfer
+list, proves the plan refinement and half-count refinement by
+`cases <;> rfl`, the access dispatch, the half plans, the
+distinct-slot and `.Q0`-distinct-halves facts, the arm-index
+dispatch, and the low and high half slot-offset examples. The host
+oracle drives the `SELECT`/`HALF_OFFSET`/`INDEX`/`ACCESS`/`HALVES`
+selectors against a full reimplementation of all four transfer
+bodies over a pristine register file, memory, tags, and stack
+(9216 cases).
+
+`build/mut_arm64_vreg.py` (57 rows) perturbs the six files with the
+three detectors: 6 catch at the generator stage (the `loadD0` code
+row and the two slot offsets in the spec, plus the half-plan
+table, the two-half C selector text, and the `__a64_v0` state-field
+driver repaints), 26 catch through the Lean chain (the namespace,
+the `loadD0` constructor rename, every `access`/`halves`/
+`halfCount`/`halfOffset`/`plan`/`armIndex` arm repaint on the
+generated side, and on the hand side the `open` member repaint, the
+`arm64VregPlanSpec` and `arm64VregTransferList` renames, the plan
+d0/q0 repaints, every consumed-goal repaint: refinement, half
+count, access dispatch, half plan, distinct halves, `.Q0` get
+arms, arm-index dispatch, and both slot-offset examples), and 15
+catch by the host oracle (the `loadD0`/`storeQ0` opcode asserts,
+both slot offsets, the `LOAD_D0` select low-half repaint, the
+`STORE_Q0` select arm swap, the access and half-count repaints,
+the `LOAD_D0` index repaint, the oracle's selector, half-offset,
+index, access, and halves macro renames). 10 rows survive as
+documented equivalences: seven unreachable generator error-message
+repaints (spec, column, duplicate, offsets, alias, state drift,
+stale), the internally-consistent low-half-index repaint (`HALF_LOW`
+0U to 2U; the macro feeds only its own comparisons and the
+`HALF_OFFSET` ternary, so macro and oracle repaint symmetrically),
+and the two host OK/FAIL message repaints.
+
 ### Step 0208 — AArch64 source modifier mutation coverage
 
 The `arm64_mod` contract (`arm64_mod_spec.json` 1 line,
