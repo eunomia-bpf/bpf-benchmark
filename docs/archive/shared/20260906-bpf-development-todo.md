@@ -15949,6 +15949,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0226 — x86 width-table mutation coverage
+
+- Scope: the operand-width kernel every simulator body and Lean handler
+  composition routes through: `KPROG_X86_WIDTH_MASK(WIDTH)` /
+  `GeneratedX86Width.mask` — four widths (8/16/32/64-bit with codes
+  1/2/4/8) each pin a mask, sign mask, and bit count, and a decoded width
+  code of 0 (an absent width field) resolves to the 64-bit width
+  (`KPROG_X86_WIDTH_EFFECTIVE`, absent-code pin, 64-bit default).
+- Files: single-line `x86_width_spec.json` (schema/operation metadata,
+  four width rows, the effective entry), `generate_x86_width_spec.py`
+  (exact-table re-check plus byte-for-byte Lean and C renders),
+  `generated/x86_width.h`, `KProgFormal/GeneratedX86Width.lean`,
+  `KProgFormal/X86Width.lean`, plus the two dedicated hosts
+  `test_x86_width_effective_host.c` (1280 cases, the EFFECTIVE macro
+  against an independent `code ? code : 64` model over the full decoded
+  byte range) and `test_x86_width_effective_route_host.c` (518 cases, the
+  simulator's routed register/stack/memory/LEA/move/ALU/IMUL/flag bodies
+  against the same model).
+- Census: 168 rows, 119 catch (43 at the generator, 40 through the Lean
+  chain, 11 on the effective host, 25 on the route host), 49 equivalences
+  survive; the route host additionally observes code-0-equals-code-64 on
+  every routed scenario, so the effective fallback is not
+  macro-only. Green runs `TOTAL 168 mutations, 0 failures, ... ALL AS
+  EXPECTED` confirmed twice consecutively.
+- Equivalence classes: self-consistent spec/generator helper renames,
+  `zip` strict-flag semantics on equal-length lists, dead generator
+  collision branches, generated-file doc-comment repaints invisible
+  outside the render check, failure-path-only printf/banner repaints, the
+  0..254 sweep prefix of an already-agreeing pair,
+  in-module-unreferenced theorem names, include-guard repaints, and
+  single-TU observable-but-equivalent sign/bits arms.
+- Residue: watchlist of seven files byte-identical after each run,
+  untracked harness retained, `make -C kprog/formal check` kept at
+  210 `: OK`.
+
 ## Step 0225 — x86 arithmetic-immediate mutation coverage
 
 - Scope: the shared widening rule consumed by every handler taking an
