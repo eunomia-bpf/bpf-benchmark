@@ -15653,6 +15653,52 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (decode watchlist verified), untracked harness retained,
   `make check` kept at 210 `: OK`.
 
+## Step 0213 — AArch64 vector-lane (D0/Q0) mutation coverage
+
+- Scope: the four vector memory-transfer opcodes the simulator
+  dispatches before the address macros take over ---
+  ARM64_OP_LOAD_D0 0x28 loads the SIMD low 64-bit lane, LOAD_Q0 0x2a
+  loads both 64-bit lanes, STORE_D0 0x29 and STORE_Q0 0x2b store one
+  or both lanes back out in the same order. `load()` compares the
+  whole spec against the exact-match EXPECTED dict, re-checks every
+  column, exits 1 on duplicate defines, and pins lane_stride =
+  ARM64_WIDTH_64 plus high_lane_stride = 8; the generated header
+  re-pins the opcodes with static asserts and emits the four-way
+  KPROG_ARM64_DQ_MEM_INDEX chain whose `else` makes the selector
+  total off the opcode set. The contract fixes only which lanes each
+  opcode transfers and in which order (address offset and pre/post
+  writeback stay in their own macro contracts); the hand module
+  restates the ordered lane plan ([0] / [0, 8]) independently and
+  proves eight facts (transfer-list and lane-count refinements,
+  access dispatch, lane plan, stride, distinct-lane property,
+  arm-index dispatch, low/high examples); host part 1 checks the
+  constants and all four INDEX(ops) plus the 0xff default arm, part 2
+  drives the full composition of both bodies over 9216 grid cases,
+  route recheck 62418 cases.
+- Harness: `build/mut_arm64_dq_mem.py` (untracked), 83 rows over the
+  seven contract files, 3 detectors: gen 17 / lean_chain 19 / host 18
+  catch; 29 equivalences (six unreachable generator error-message
+  repaints, the bare self-contained hand renames — nothing imports
+  either dq-mem module — the literal-8 lane-stride argument that
+  duplicates the generated constant's value, a contract-step comment
+  repaint, and the eleven message/probe repaints).
+- Result: TOTAL 83 mutations, 0 failures, 29 equivalences survived
+  (54 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the Lean-chain detector initially missed every
+  generated-arm repaint because lake served the generated module from
+  a cached olean — fixed by rebuilding `KProgFormal.GeneratedArm64DqMem`
+  (lake build) before the hand check; run 1 reclassified 6 rows (the
+  footer-comment repaint is rendered byte-for-byte by the generator,
+  two self-contained hand renames and the plan-spec rename compile
+  green, the appended-conjunction goal repaint is a shape change not
+  an equivalence, and the lane-stride argument repaint keeps the
+  same value) and dropped 1 no-op row (a model_write comment-line
+  repaint that edited nothing in effect); distinct-goal `\u2260` line
+  needs the 4-space indent anchor.
+- Residue: all seven watched files byte-identical after each run
+  (dqmem watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
