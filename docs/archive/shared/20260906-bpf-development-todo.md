@@ -15949,6 +15949,50 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0224 — x86 MOV_STORE handler-composition mutation coverage
+
+- Scope: the single handler body `X86_SIM_L_EXEC_STORE` shared by
+  X86_OP_MOV_STORE_IMM 0x07 and X86_OP_MOV_STORE_REG 0x08: the opcode's
+  FLAGS code resolves the single write width (64 bits when the opcode
+  carries none --- the same width serves the immediate value and the
+  memory write, and the stack arm re-derives the same expression, unlike
+  the read body's second, AUX-sourced memory width); the displacement
+  form splits the instruction-immediate artifact (the immediate store
+  takes (s32)(IMM >> 32), the register store the whole artifact); the
+  value source is the width-aware immediate rule or the full-64-bit
+  register read; the AUX source shift is read only on the register form
+  and taken modulo 64; the one-fact arm chain sends a stack-pointer
+  destination through the stack helper and every other destination
+  through the ordinary little-endian store. Spec JSON pins the whole
+  metadata template byte-for-byte (selector wording
+  opcode_operand_then_register_identity_arm, operation tag
+  x86StoreHandler, and the five width, two displacement, two value, two
+  shift, and two arm rows); the generator re-checks every row order and
+  resolution and renders the Lean Code/resolveWidth/DispForm/
+  ValueSource/ShiftSource/Arm module and the C WIDTH/DISP/VALUE/
+  SRC_SHIFT/SHIFTED_VALUE/ARM macros byte-for-byte. Hand module restates
+  all five selectors and proves the refinements, the totality law, the
+  stack-arm identity law, the two modulo-64 shift laws, the byte-update
+  bridge shared with movbe/push-pop/setcc-mem, the full step
+  composition, and the two-forms-differ examples.
+- Harness: `build/mut_x86_store.py` (untracked), 73 rows over the six
+  contract files, 3 detectors: gen 32 / lean_chain 12 / host 9 catch;
+  20 equivalences (ten unreachable generator error-message repaints,
+  the dead ARM_CODES map and doc-comment repaints, the self-consistent
+  arm-code renumbering, the include-guard and width-absent pin
+  repaints, the tautological != 0 branch repaint, and the host
+  mismatch/OK banner repaints).
+- Result: TOTAL 73 mutations, 0 failures, 20 equivalences survived
+  (53 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: 2 reclasses --- the KPROG_X86_STORE_WIDTH_ABSENT define
+  repaint cannot be caught (the width macro only emits real codes and
+  the host absent pin compares against a constant the resolution cannot
+  produce), and the generated (IS_STORE_IMM) != 0 ? 0U : branch repaint
+  is tautological C for the 0/1 selector input.
+- Residue: all six watched files byte-identical after each run
+  (store watchlist verified), untracked harness retained, `make check`
+  kept at 210 `: OK`.
+
 ## Step 0223 — x86 MOV_LOAD handler-composition mutation coverage
 
 - Scope: the single handler body `X86_SIM_L_EXEC_MOV_LOAD` shared by
