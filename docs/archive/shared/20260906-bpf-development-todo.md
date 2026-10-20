@@ -15949,6 +15949,44 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0222 — x86 memory read dispatch mutation coverage
+
+- Scope: the read-body value-source selector: a stack-pointer base reads
+  through the stack helper at any width and whatever its tag (register
+  identity first --- the x86 asymmetry against AArch64's tag-first
+  dispatch), an ABI-tagged base reaches the 64-bit pointer load only at
+  width 64, and every other access takes the ordinary byte-ladder load.
+  Spec JSON pins the whole metadata template byte-for-byte (selector
+  wording, operation tag x86MemReadDispatch, eight is_rsp/is_abi/w64
+  rows with their src defines); the generator validates row order
+  against the pinned ORDER tuple and each row's source against
+  SRC_DEFINES, and renders the Lean ValueSrc/valueSrc table and the C
+  KPROG_X86_MEM_READ_SRC predicate byte-for-byte. Hand module restates
+  the dispatch as the C-shaped predicate nesting and proves the
+  refinement plus stack_overrides_tag, abi_requires_width64,
+  no_tag_widening, and all_arms_reachable; X86CmovHandler and
+  X86MovbeHandler consume the generated valueSrc and rw the refinement.
+- Harness: `build/mut_x86_mem_dispatch.py` (untracked), 56 rows over
+  the six contract files, 3 detectors: gen 19 / lean_chain 9 / host 12
+  catch; 16 equivalences (four unreachable generator error-message
+  repaints, the generated Lean header-comment repaint, the two
+  self-consistent define renumberings visible in both macro and
+  oracle, the two in-module theorem renames past their external
+  consumers, and the host mismatch/OK banner repaints).
+- Result: TOTAL 56 mutations, 0 failures, 16 equivalences survived
+  (40 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: 5 reclasses --- the KPROG_X86_MEM_SRC_STACK 0U->5U and
+  KPROG_X86_MEM_SRC_NORMAL_LOAD 2U->7U renumberings are self-consistent
+  in macro and oracle (a STACK/ABI collision at 2U is caught), the
+  refinement theorem rename is caught (rw lists in two handler
+  modules), and stack_overrides_tag/abi_requires_width64 renames
+  survive (no module consumes those names). No-op row found in audit:
+  the double-E stack-assignment repaint's restore edit re-anchored onto
+  the already-replaced text; replaced with a real NORMAL_LOAD repaint.
+- Residue: all six watched files byte-identical after each run
+  (memdispatch watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
