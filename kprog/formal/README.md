@@ -5462,6 +5462,56 @@ a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
 repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
 and the OK/FAILED message repaints.
 
+### Step 0207 — AArch64 register dispatch mutation coverage
+
+The `arm64_reg_dispatch` contract (`arm64_reg_dispatch_spec.json` 39
+lines, `generate_arm64_reg_dispatch_spec.py` 153 lines,
+`generated/arm64_reg_dispatch.h` 60 lines,
+`KProgFormal/GeneratedArm64RegDispatch.lean` 27 lines,
+`KProgFormal/Arm64RegDispatch.lean` 167 lines,
+`test_arm64_reg_dispatch_host.c` 106 lines) pins the
+register-number -> dispatch-cell binding: the 31 general-purpose
+registers are the register numbers `0 .. 30`, in `x0 .. x30` order,
+so the `ARM64_SIM_L_FOR_EACH_GPR` dispatch cell index equals the
+register number, and the zero register (`31`, the stack pointer
+`32`, the no-register sentinel `0xff`) are not dispatch cells. The
+spec is an exact-match dict verified byte-for-byte (schema,
+operation, `reg_bits`, `gpr_count`, and the 31 `x{n}` -> `n` cells),
+re-checked for cell order, cell numbers, and cell-count/gpr_count
+agreement; the generator re-renders the generated Lean module and C
+header with byte-for-byte `--check`. The generated side carries
+`gprCount`/`regBits`, the `cellNumbers`/`cellNames` tables, the
+`cellOf` selector, the inverse `numberOfName`/`nameOfNumber` lookups,
+and the C macros `KPROG_ARM64_GPR_COUNT`/`KPROG_ARM64_GPR_CELL` with
+31 `ARM64_X<n>` static-assert drift checks. The hand module restates
+the tables against independent `List.finRange` constructions
+and proves the lengths, `Nodup`, the `cellOf` literal-bound
+equivalence, the x0/x30/zero/stack-pointer/sentinel boundary
+examples, the full-range round trip, the name<->number round trips,
+and the cross-contract agreements with the register-presence and
+memory-index contracts (`gprCount = xzrNumber`, dispatch none ⇔
+presence discard, sentinel shared), plus the dispatch-subset-of-
+writable classification proofs. The host oracle recompiles with the
+macros and compares `KPROG_ARM64_GPR_CELL` against the identity
+binding over the full byte range (257 cases).
+
+`build/mut_arm64_reg_dispatch.py` (71 rows) perturbs the six files
+with the three detectors: 21 catch at the generator stage (the spec
+bit/count/cell/operation/schema drifts, the expected-dict and
+order/numbers/length check repaints, and the rendered
+cellNumbers/cellNames/cellOf/lookup table and C macro repaints), 30
+catch through the Lean chain (the generated count/tables/cellOf/
+lookup repaints; the hand spec-def repaints consumed by the refine
+theorems, the length-bound weakenings, the `Nodup ∧ False` repaint,
+the bits-is-8 flip, every boundary-goal repaint, the full-range and
+round-trip-goal repaints, and the cross-contract goal repaints), and
+5 catch by the host oracle (the model-cell and got/want repaints, the
+count-vs-31 repaint, and the include repaint). 15 rows survive as
+documented equivalences: five unreachable generator error-message
+repaints, the header-guard repaint, six consumers-free hand theorem
+renames, the `Eq.refl _` proof-term swap for the sentinel-equality
+theorem, and the OK/FAIL message repaints.
+
 ### Step 0206 — AArch64 pre/post writeback mutation coverage
 
 The `arm64_mem_prepost` contract (`arm64_mem_prepost_spec.json` 1

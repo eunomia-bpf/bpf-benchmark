@@ -15377,6 +15377,52 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file pre/post watchlist verified), the untracked harness
   retained for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0207 — AArch64 register dispatch mutation coverage
+
+- Scope: the register-number -> dispatch-cell binding — the 31
+  general-purpose registers are the register numbers `0 .. 30` in
+  `x0 .. x30` order, so the `ARM64_SIM_L_FOR_EACH_GPR` dispatch cell
+  index equals the register number, and the zero register (`31`),
+  the stack pointer (`32`) and the no-register sentinel (`0xff`) are
+  not dispatch cells. Across the case spec (exact-match dict plus
+  the cell-order, cell-numbers, and cell-count/gpr_count re-checks),
+  the generator (five error messages, the expected dict, the
+  order/numbers/length re-checks, and the rendered
+  cellNumbers/cellNames/cellOf/lookup templates), the generated C
+  header (`KPROG_ARM64_GPR_COUNT`, `KPROG_ARM64_GPR_CELL`, 31
+  `ARM64_X<n>` drift asserts), the generated Lean module
+  (`gprCount`/`regBits`, the tables, `cellOf`, the inverse lookups),
+  the hand module (the `List.finRange` restatements, lengths,
+  `Nodup`, `cellOf` literal-bound equivalence, boundary examples
+  x0/x30/zero/stack-pointer/sentinel, full-range round trip,
+  name<->number round trips, the cross-contract agreements with
+  the register-presence and memory-index contracts, and the
+  dispatch-subset-of-writable classification), and the host oracle
+  (the macros vs the identity binding over the full byte range —
+  257 cases).
+- Harness: `build/mut_arm64_reg_dispatch.py` (untracked), 71
+  single-anchor rows over the six files with 3 detectors: gen 21 /
+  lean_chain 30 / host 5 catch; 15 equivalences (five unreachable
+  generator error-message repaints, the header-guard repaint, six
+  consumers-free hand theorem renames (names_refine/numbers_refine,
+  cellof_refines, zero_is_none, the roundtrip pair,
+  case_dispatch), an `Eq.refl _` proof-term swap that keeps the
+  sentinel theorem discharged, and the OK/FAIL message repaints).
+- Result: TOTAL 71 mutations, 0 failures, 15 equivalences survived
+  (56 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: two writable-classification goal repaints first looked
+  like survivors because the row anchors were theorem heads whose
+  goal-substring `.replace()` no-ops (old == new, mutation never
+  applied) — full head+goal statement anchors fixed them into the
+  catches they are (Lean rejects both); the generated-namespace and
+  `regBits` repaints turned out consumed (hand rely on both) and
+  flipped to catches; the `Nat.rfl` proof swap fails typeclass
+  resolution on a `BitVec` equality, so the surviving proof-term
+  swap is `Eq.refl _`.
+- Residue: all six watched files byte-identical after each run
+  (6-file dispatch watchlist verified), the untracked harness
+  retained for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
