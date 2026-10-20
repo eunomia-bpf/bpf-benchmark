@@ -5466,6 +5466,13 @@ and the OK/FAILED message repaints.
 
 
 
+
+### Step 0217 — x86 SUB flags mutation coverage
+
+The SUB-flag contract generates the four subtraction flag transitions shared by the x86 simulator, the Lean model, and the memory-ALU handler composition: CF is unsigned borrow `a <u b`, ZF is `a == b`, SF is `(r & sign) != 0`, and OF is the signed-borrow product `(a ^ b) & ((a ^ r) & sign) != 0`. The spec is a typed expression tree over the `a`/`b`/`r`/`sign` word atoms with `ult`/`eq`/`and`/`xor`/`nonzero` operators (the subtraction generator drops addition's `zero` and `not` nodes); `load()` pins the schema, operation tag, and flag order, and the generator renders Lean (BitVec combinators) and the C `do/while` macro `KPROG_X86_SET_SUB_FLAGS` byte-for-byte. The hand module `X86SubFlags.lean` restates all four flags independently and proves the flags refinement and the branch-PC composition; seven Lean modules (compare, cmpop, sbb-result, sub-result, unary, inc/dec, writeback handlers) import the hand module, so hand renames break the chain.
+
+`build/mut_x86_sub_flags.py` (untracked) runs 53 rows over the six contract files with three detectors: 38 rows catch (18 at the generator stage, 11 through the Lean chain, 9 by the host oracle), and 15 survive as documented equivalences. The host side drives the memory-ALU handler's SUB arm (the same 22048-case composition as Steps 0214/0216) against the 128-bit borrow oracle. First build was green with no reclassifications.
+
 ### Step 0216 — x86 ADD flags mutation coverage
 
 The ADD-flag contract generates the four addition flag transitions shared by the x86 simulator, the Lean model, and the memory-ALU handler composition: CF is unsigned carry-out `r <u a`, ZF is `r == 0`, SF is `r & sign != 0`, and OF is `~(a ^ b) & ((a ^ r) & sign) != 0`. The spec is a typed expression tree over the `a`/`b`/`r`/`sign` word atoms with `ult`/`eq`/`and`/`xor`/`not`/`nonzero`/`zero` operators; `load()` pins the schema, operation tag, and flag order, and the generator renders Lean (BitVec combinators) and the C `do/while` macro `KPROG_X86_SET_ADD_FLAGS` byte-for-byte. The hand module `X86AddFlags.lean` restates all four flags independently and proves the flags refinement and the branch-PC composition; `X86AddResult`, `X86AluWriteback`, and `X86IncDec` import the hand module, so hand renames break the chain.

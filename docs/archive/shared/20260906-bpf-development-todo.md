@@ -15802,6 +15802,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (addflags watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0217 — x86 SUB flags mutation coverage
+
+- Scope: the four subtraction flag transitions the simulator, Lean
+  model, and memory-ALU handler share: CF as unsigned borrow (a <u b),
+  ZF as a == b, SF as (r & sign) != 0, and the signed-borrow OF product
+  ((a ^ b) & ((a ^ r) & sign)) != 0, emitted as the C do/while macro
+  KPROG_X86_SET_SUB_FLAGS and the Lean eval over BitVec combinators.
+  Typed expression-tree spec (the subtraction generator drops
+  addition's zero and not nodes); the hand module restates all four
+  flags and proves the flags refinement and the branch-PC composition;
+  seven Lean modules (compare, cmpop, sbb-result, sub-result, unary,
+  inc/dec, writeback) import the hand module, so hand renames break the
+  chain. The host side drives the memory-ALU handler's SUB arm against
+  the 128-bit borrow oracle (22048 width/op/carry cases).
+- Harness: `build/mut_x86_sub_flags.py` (untracked), 53 rows over the
+  six contract files, 3 detectors: gen 18 / lean_chain 11 / host 9
+  catch; 15 equivalences (seven unreachable generator error-message
+  repaints, the generated Lean header-comment repaint, the bare hand
+  theorem rename, the host boundary-table and MISMATCH/OK/FAILED
+  banner repaints).
+- Result: TOTAL 53 mutations, 0 failures, 15 equivalences survived
+  (38 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: green on the first build; no reclassifications.
+- Residue: all six watched files byte-identical after each run
+  (subflags watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
