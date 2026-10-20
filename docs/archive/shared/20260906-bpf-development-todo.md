@@ -15949,6 +15949,51 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0223 — x86 MOV_LOAD handler-composition mutation coverage
+
+- Scope: the single handler body `X86_SIM_L_EXEC_MOV_LOAD` shared by
+  X86_OP_MOV_LOAD, X86_OP_MOV_LOAD_SCALAR, and X86_OP_MOVSX_LOAD: the
+  write width defaults to 64 bits when the opcode carries none, the
+  memory width falls back to the resolved write width when the
+  addressing mode carries none, and the arm chain tests register
+  identity first (a stack-pointer base always reads the stack at the
+  resolved memory width, at any width and for any opcode), then the ABI
+  pointer arm gated on the plain _MOV_LOAD opcode, both widths 64, and
+  an ABI-tagged non-stack base; every other access takes the ordinary
+  scalar load at the memory width, sign-extended for _MOVSX_LOAD and
+  confined to the write width by the partial-register writeback. Spec
+  JSON pins the whole metadata template byte-for-byte (selector
+  wording, operation tag x86MovLoadHandler, the 25-code
+  width-resolution table and the 32-row arm table); the generator
+  re-checks both row orders and every row's resolution against
+  WIDTH_ORDER and ARM_ORDER and renders the Lean Code/resolveWidth/Arm/
+  arm module and the C WRITE_WIDTH/MEM_WIDTH/ARM macros byte-for-byte.
+  Hand module restates both width fallbacks and the arm predicate
+  nesting and proves two refinements, the totality law, the
+  register-identity law, the ABI conjunction law, all-arms-reachable,
+  and the full step composition plus seven native_decide examples.
+- Harness: `build/mut_x86_mov_load.py` (untracked), 87 rows over the
+  six contract files, 3 detectors: gen 21 / lean_chain 15 / host 23
+  catch; 28 equivalences (eight unreachable generator error-message
+  repaints, the dead ARM_CODES map repaint, the generated and
+  include-guard header repaints, the three self-consistent arm-code
+  renumberings visible in both macro and oracle, the seven in-module
+  theorem renames past their external consumers, and the host
+  mismatch/OK banner repaints).
+- Result: TOTAL 87 mutations, 0 failures, 28 equivalences survived
+  (59 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: 12 reclasses --- genpy_armcodes_repaint is invisible
+  (arm_defines renders from inline tuples, the map is dead); the three
+  KPROG_X86_MOV_LOAD_ARM_STACK/ABI_PTR/ORDINARY define renumberings are
+  self-consistent in macro and oracle; the include-guard repaint is
+  invisible to a single-TU host build; x86MovLoadResolveWidthSpec rename
+  declared equivalent is caught (consumed inside the module); and the
+  seven in-module-only theorem renames survive (no module consumes
+  X86MovLoadHandler's theorem names).
+- Residue: all six watched files byte-identical after each run
+  (movload watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Step 0222 — x86 memory read dispatch mutation coverage
 
 - Scope: the read-body value-source selector: a stack-pointer base reads
