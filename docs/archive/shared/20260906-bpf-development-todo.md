@@ -15887,6 +15887,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (sbbflags watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0220 — x86 IMUL flags mutation coverage
+
+- Scope: the multiply overflow rule: CF/OF set together iff the
+  width-narrowed signed product leaves the signed width range
+  (aAbs != 0 && bAbs > limit / aAbs over signedAbs magnitudes, limit =
+  sign mask for mixed signs, mask-1 for same signs; ZF/SF preserved).
+  Spec JSON pins the whole metadata template byte-for-byte; generator
+  renders the Lean signedAbs/mixedSign/apply module and the C
+  KPROG_X86_SET_IMUL_FLAGS macro. Hand module restates the rule via the
+  width bridge and proves the defined law, the apply refinement, and
+  two native_decide boundary theorems (w16 overflow edge, w8 in-range
+  minimum). Host compares against an independent __int128 signed-product
+  oracle over 15 fixed vectors (with the 0x0164/0xfe3c w16
+  spurious-conjunct discriminator) plus a 20000-iteration LCG sweep.
+- Harness: `build/mut_x86_imul_flags.py` (untracked), 48 rows over the
+  six contract files, 3 detectors: gen 19 / lean_chain 11 / host 9
+  catch; 9 equivalences (two unreachable generator error-message
+  repaints, the generated Lean header-comment repaint, the hand
+  doc-comment repaint, two in-module-only hand theorem renames, the
+  host mismatch/OK banner and LCG-seed repaints).
+- Result: TOTAL 48 mutations, 0 failures, 9 equivalences survived
+  (39 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: 7 reclassifications/repairs --- theorem renames and
+  doc-comment repaint are compiler-invisible; the host limit repaint
+  needed the mixed-sign headroom removed (sign - 1 on both arms); the
+  oracle-minimum repaint moved up to -h + 1 (the -h - 1 product edge is
+  unreachable in range); the C_OF assignment repaint needed the 29-space
+  run matched exactly (a 13-space pattern silently no-ops).
+- Residue: all six watched files byte-identical after each run
+  (imulflags watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
