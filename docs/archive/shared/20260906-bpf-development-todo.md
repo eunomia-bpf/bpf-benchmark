@@ -15280,6 +15280,53 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (6-file flags watchlist verified), the untracked harness retained
   for reruns, and `make check` kept at 210 `: OK`.
 
+## Step 0205 — AArch64 ORN mutation coverage
+
+- Scope: the single AArch64 complemented logical OR arm `orn_reg`
+  (opcode 53, `ARM64_OP_ORN_REG` 0x35U): the value is the OR of the
+  first source with the bitwise complement of the already
+  source-modified second source, narrowed to the destination width,
+  the complement inlined; opcode outside the family reaches the
+  caller-supplied unsupported arm; no arm writes NZCV. Across the
+  case spec (exact-match dict plus the opcode drift cross-check
+  against `kprog/arm64/arm64_sim.h`), the generator (expected-dict
+  values, six error messages, the whole-module re-render with
+  byte-for-byte `--check`), the generated C header (the
+  `KPROG_ARM64_ORN_VALUE` macro's `case 53U` arm, the static asserts,
+  the handled predicate, the include), the generated Lean module (the
+  one-constructor `Orn` enum with `code` 53, `mnemonic` "ORN",
+  `value` the `narrow (lhs ||| ~~~rhs)` match, `flagsUnchanged`
+  true), the hand module (the De Morgan complement restatement
+  `narrow (~~~((~~~lhs) &&& rhs))`, the refinement and De Morgan
+  proofs by `bv_decide`, the code-range/dispatch statements, the
+  flags-unchanged statement, the zero-operand identities, the w32
+  bound, two canonical `native_decide` examples), and the host oracle
+  (independent `(1 << bits) - 1` mask, cross-checks of both operand
+  forms, the boundary grid x every modifier code through
+  `KPROG_ARM64_MOD_VALUE`, the 40000-case fixed-seed random sweep,
+  the unsupported-abort check, and the OK/FAILED messages).
+- Harness: `build/mut_arm64_orn.py` (untracked), 50 single-anchor
+  rows over the six files with 3 detectors: gen 11 / lean_chain 8 /
+  host 10 catch; 21 equivalences (six unreachable generator
+  error-message repaints, the generated-mnemonic string repaint no
+  consumer reads, the header-guard repaint, nine consumers-free hand
+  renames, the code-range 53-to-52 weaken, the canonical main-goal
+  0x0f-to-0x1f repaint, and the OK/FAILED message repaints).
+- Result: TOTAL 50 mutations, 0 failures, 21 equivalences survived
+  (29 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: the generated C body anchor must target the full
+  two-continuation `C_BODY` source block (the substring replace on
+  the single first line was a silent no-op — found=1 then caught=noop
+  first run, rc 1); the hand `53 ≤` goal repaint stays provable
+  (`decide` discharges 52 ≤ code .orn_reg = 53 as a weaker true
+  hypothesis), and `0x0f -> 0x1f` keeps `arm64OrnSpec .orn_reg 0xf0
+  0x1f .w64 = 0xfffffffffffffff0` true (0xf0 | ~0x1f = 0xff..f0), so
+  both goal repaints are all-equal-oracle equivalences rather than
+  catches.
+- Residue: all six watched files byte-identical after each run
+  (6-file orn watchlist verified), the untracked harness retained
+  for reruns, and `make check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:

@@ -5405,5 +5405,62 @@ width-sequence remap and widths-table swap (verdicts are re-derived
 identically from the repainted inputs), and the OK/FAILED message
 repaints.
 
+### Step 0205 — AArch64 ORN mutation coverage
+
+The `arm64_orn` contract (`arm64_orn_spec.json` 1 line,
+`generate_arm64_orn_spec.py` 201 lines,
+`generated/arm64_orn.h` 44 lines,
+`KProgFormal/GeneratedArm64Orn.lean` 30 lines,
+`KProgFormal/Arm64Orn.lean` 82 lines, `test_arm64_orn_host.c` 177
+lines) pins the single AArch64 complemented logical OR arm
+(`orn_reg`, opcode 53 aka `ARM64_OP_ORN_REG` 0x35U): the value is the
+OR of the first source with the bitwise complement of the already
+source-modified second source, narrowed to the destination width, the
+complement inlined so the C macro needs no helper; an opcode outside
+the family reaches the caller-supplied unsupported arm and no arm
+writes NZCV. The spec is an exact-match dict verified byte-for-byte
+plus an opcode drift cross-check against `kprog/arm64/arm64_sim.h`;
+the generator re-renders the whole generated Lean module and C header
+and `--check` compares byte-for-byte. The generated side carries the
+one-constructor `Orn` enum (`code` 53, `mnemonic` "ORN",
+`value` the `narrow (lhs ||| ~~~rhs)` match, `flagsUnchanged` true)
+and the `KPROG_ARM64_ORN_VALUE` macro (the `case 53U` arm over the
+width mask with the outer `UNSUPPORTED` arm). The hand module restates
+the arm independently in its De Morgan complement form
+`narrow (~~~((~~~lhs) &&& rhs))`, proves the refinement by
+`cases op <;> cases width <;> simp only [...]; bv_decide` (the De
+Morgan identity between the two operand forms is discharged the same
+way), and adds the code-range/dispatch statements (53 within [53,53]),
+the flags-unchanged statement, the zero-operand identities all-ones
+and complement, the w32 upper bound, and two canonical examples
+(0xf0 complemented with 0x0f, the w32 truncation) by
+`native_decide`. The host oracle checks the macro against an
+independent `(1 << bits) - 1` mask oracle that cross-checks both
+forms `lhs | ~rhs` and `~(~lhs & rhs)`, over the 10x10 boundary-grid
+vectors across every modifier code (11 mods, composed through
+`KPROG_ARM64_MOD_VALUE`) across 4 widths plus a 40000-case fixed-seed
+random sweep plus the unsupported-abort check (40401 cases).
+
+`build/mut_arm64_orn.py` (50 rows) perturbs the six files with the
+three detectors: 11 catch at the generator stage (the generated Lean
+code-line and mnemonic templates, the generated C arm and
+handled-predicate templates, and the expected-dict/spec drifts), 8
+catch through the Lean chain (the namespace, one-constructor enum,
+code, value-arm, and flags-arm repaints in the generated module; the
+hand spec rename to `arm64OrnXSpec` and the De Morgan hand-statement
+repaints; the open-line rename; the goal repaints the checker
+catches), and 10 catch by the host oracle (the static-assert and
+handled/coverage/case-label repaints, the macro-body repaint, the
+value-decl repaint, the include repaint, the De Morgan oracle
+repaints, the direct-form repaint, and the cond repaint). 21 rows
+survive as documented equivalences: six unreachable generator
+error-message repaints, the generated-mnemonic string repaint no Lean
+or C consumer reads, the header-guard repaint, nine consumers-free
+hand renames (no module imports the hand module; its own refines and
+De Morgan proofs re-discharge), the code-range 53-to-52 weaken (still
+a true, decide-provable statement), the canonical-main 0x0f-to-0x1f
+repaint (0xf0 complemented with 0x1f is still 0xfffffffffffffff0),
+and the OK/FAILED message repaints.
+
 The ABI-load model still abstracts away base-register identity, width checks,
 and memory-boundary checks.
