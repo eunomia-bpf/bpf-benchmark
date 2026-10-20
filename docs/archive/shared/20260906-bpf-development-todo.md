@@ -15612,7 +15612,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Scope: the four mnemonic-to-code tables shared by the encoder, C
   simulator constants, Lean model, and artifact-encoder Python
   module — ALU add/sub/and/bic/eor/orr -> ARM64_ALU_* 0..5, SHIFT
-  lsl/lsr/asr/ror -> ARM64_SHIFT_* 0..3, MOD /lsl/lsr/asr/ror +
+  lsl/lsr/asr/ror -> ARM64_SHIFT_* 0..3, MOD ""/lsl/lsr/asr/ror +
   uxtw/sxtw/uxth/sxth/uxtb/sxtb -> ARM64_MOD_* 0..10 (empty
   mnemonic = `none` ctor), BITFIELD ubfx/sbfx/ubfiz/bfxil/bfi ->
   ARM64_BITFIELD_* 0..4. `load()` checks key set, table set,
