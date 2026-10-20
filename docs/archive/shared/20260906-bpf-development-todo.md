@@ -15699,6 +15699,46 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (dqmem watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0214 — x86 ADC mutation coverage
+
+- Scope: the carry-propagating add the simulator, Lean model, and
+  memory-ALU handler share: `KPROG_X86_ADC_RESULT` adds the carry-in
+  back ((A + B) + (!!(CARRY))) and `KPROG_X86_SET_ADC_FLAGS` assigns
+  CF = unsigned carry-out (R < A or carry-in && R == A), ZF, SF, and
+  the signed-overflow product (~(A ^ B) & ((A ^ R) & SIGN)) != 0.
+  The spec is a typed expression tree (`validate()` type-checks every
+  node, `load()` pins the four flag names in order); the generator
+  renders Lean (BitVec combinators) and C byte-for-byte. The hand
+  module restates the result and flags independently and proves the
+  refinements plus the width-narrowed step and branch-PC
+  compositions; five Lean modules import the generated module, so
+  generated renames break the chain. The host side drives the ADC
+  arm of the memory-ALU handler against a 128-bit carry/borrow
+  oracle (22048 width/op/carry cases; the ADD arm reuses the ADC
+  result macro with carry 0).
+- Harness: `build/mut_x86_adc.py` (untracked), 71 rows over the six
+  contract files, 3 detectors: gen 23 / lean_chain 13 / host 15
+  catch; 20 equivalences (eleven unreachable generator error-message
+  repaints, the value-preserving carry-normalization drop
+  (!!(CARRY)) -> (CARRY) with every fed carry-in 0/1, the bare
+  self-contained hand renames, the MISMATCH/OK/FAILED banner
+  repaints).
+- Result: TOTAL 71 mutations, 0 failures, 20 equivalences survived
+  (51 catch), `ALL AS EXPECTED` rc 0 across consecutive reruns.
+- Shakedown: run 1 reclassified 5 rows --- the CARRY normalization
+  drop keeps the value for every 0/1 carry-in the oracle feeds
+  (equivalence, not catch); `generatedX86AdcFlags` has four internal
+  references and nothing else consumes the hand module, so its
+  rename compiles green; three host repaints whose replacement text
+  formed invalid integer literals (`0x7fffffffXULL`,
+  `0xd1b54a32d192ed0XULL`, `636413622384679300XULL`) break the
+  compile and are catches, not message equivalences. lean_chain
+  rebuilds the generated olean before the hand check (stale-cache
+  lesson from pair_mem/decode).
+- Residue: all six watched files byte-identical after each run
+  (x86adc watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Next after 0076
 
 Remaining x86 open work is *compositional/handwritten*:
