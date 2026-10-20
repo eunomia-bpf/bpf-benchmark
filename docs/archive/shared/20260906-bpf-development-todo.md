@@ -15949,6 +15949,42 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0225 — x86 arithmetic-immediate mutation coverage
+
+- Scope: the shared widening rule consumed by every handler taking an
+  instruction immediate: `KPROG_X86_IMMEDIATE_VALUE(VALUE, WIDTH)` /
+  `GeneratedX86Immediate.value` — the 64-bit artifact carries the
+  immediate, the low 32 bits are the encoded value with exactly one
+  sign-extend flag (`sign_extend_width: w64`), 64-bit readers sign-extend
+  the low word (bit-31 test then recombination with
+  `0xffffffff00000000`) and narrower readers consume the zero-extended
+  low word.
+- Files: single-line `x86_immediate_spec.json` (five metadata fields),
+  `generate_x86_immediate_spec.py` (exact-dict re-check plus byte-for-byte
+  Lean and C renders), `generated/x86_immediate.h`,
+  `KProgFormal/GeneratedX86Immediate.lean`,
+  `KProgFormal/X86Immediate.lean`, plus the two cross-family host suites
+  `test_x86_bt_host.c` and `test_x86_cmpop_host.c` that include the
+  generated header.
+- Census: 67 rows, 50 catch (20 at the generator, 13 through the Lean
+  chain, 9 on the bit-test host, 8 on the compare-op host), 17
+  equivalences survive; the contract has no dedicated host test, so the
+  two retargeted cross-family hosts exercise opposite arms (the bit-test
+  memory-index site always passes `X86_WIDTH_32` — zero-extend — over
+  4883 cases, the compare-op contract sweep drives a sign-extending
+  oracle over `imms {0, 1, 0x80000000, 0x1ffffffff}` across widths —
+  2913 cases); green runs `TOTAL 67 mutations, 0 failures, ... ALL AS
+  EXPECTED` confirmed four consecutive times.
+- Equivalence classes: the two unreachable generator error-message
+  repaints, the `path.parent.mkdir` predicate repaint that `--check`
+  never reaches, the doc-comment repaint, the generated include-guard
+  repaint (single-TU includes make the pair self-consistent), Lean
+  header-comment paints, and the theorem rename with no in-module
+  consumer.
+- Residue: watchlist of seven files byte-identical after each run,
+  untracked harness retained, `make -C kprog/formal check` kept at
+  210 `: OK`.
+
 ## Step 0224 — x86 MOV_STORE handler-composition mutation coverage
 
 - Scope: the single handler body `X86_SIM_L_EXEC_STORE` shared by
