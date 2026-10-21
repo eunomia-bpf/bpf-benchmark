@@ -15949,6 +15949,83 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0250 — x86 memory-unary handler-composition mutation coverage
+
+- Scope: the `INC/DEC/NEG/NOT [mem]` unary-memory handler-composition
+  contract: the hand Lean module `X86MemUnaryHandler.lean` IS the contract
+  (no dedicated spec/generator exists for this family): `generatedX86MemUnaryStep`
+  loads via `GeneratedX86MemAccess.load byte width`, forms
+  `{ dst := { bits := lhs, tag := .scalar }, flags := flags }`, and
+  dispatches `op` to the `generatedX86{Inc,Dec,Neg,Not}LaneHandler` from
+  `X86UnaryWriteback.lean` at the `.low` lane; `generatedX86MemUnaryByte`
+  writes `GeneratedX86MemAccess.store out.dst.bits width i` for
+  `i < GeneratedX86MemAccess.byteCount width` and fetch-through `byte i`
+  else; `x86_mem_unary_step_refines` (`cases op <;> simp only [...]
+  <;> rw [x86_mem_load_refines]` then one
+  `exact x86_{inc,dec,neg,not}_lane_handler_refines` per op),
+  `x86_mem_unary_byte_refines` (`rw [x86_mem_unary_step_refines,
+  x86_mem_byte_count]` + `by_cases` + `rw [x86_mem_store_byte_refines]`
+  in the in-bound arm), and `x86_mem_unary_handler_refines` (flags and
+  per-byte conjunction) close the composition, and a `native_decide`
+  example pins the w8 `NEG 0x80` minimum (`cf := false, zf := true,
+  sf := false, of := false` in, byte 0 stays `0x80` after negation of the
+  signed minimum, byte 1 unchanged at `0xa5`, flags out
+  `{ cf, !zf, sf, of }`).
+- Shakedown: the dedicated host `test_x86_mem_unary_handler_host.c`
+  drives `generated_run` --- the real macro chain `KPROG_X86_MEM_LOAD` &
+  width mask, per-op `KPROG_X86_ADC_RESULT` / `KPROG_X86_SBB_RESULT` /
+  `KPROG_X86_NOT_RESULT` plus `KPROG_X86_SET_{ADD,SUB}_FLAGS` /
+  `KPROG_X86_PRESERVE_FLAGS`, `KPROG_X86_MEM_STORE` --- against an
+  independent modular-`__int128`/`signed_value` oracle (2^width wrapping
+  +1 / -1 / 0-a / ~a, signed-overflow bounds `out.of = sr < lo || sr >
+  hi`, per-byte store-back) over 4 ops x 4 widths x 8 lhs vectors x 16
+  flag tuples = 2,048 boundary cases plus a 20,000-iterate LCG sweep =
+  22,048 cases comparing `memcmp(got_mem, want_mem, 16)` plus the four
+  flag fields; `build/mut_x86_mem_unary.py` (untracked) runs 83
+  single-anchor rows over the two files with two detectors (`lean_chain`
+  = `lake build KProgFormal.X86MemUnaryHandler` olean refresh then
+  `lake env lean`; `host` = direct `cc -Wall -Wextra -O1 -I.` recompile
+  then run --- the Makefile binary is cache-mtime-stale).
+- Live-probe reclassifications: shake 1's single UOS
+  (`host_load`, the `KPROG_X86_MEM_LOAD(mem, w) & m` widening) was
+  live-probed rc 0 OK 22048 and reclassified equivalent (the read
+  macro's internal width masking absorbs the narrowing) before the
+  greens; `lean_ex_value` was pre-re-anchored to the byte-0
+  `= 0x80 ∧ next-call` context because the bare `generatedX86MemUnaryByte
+  .neg { flags }` form is duplicated by the generated-arm byte-1 line.
+- Catches: 63 (26 host / 37 lean) --- the narrow `typedef` break of the
+  `MEM_LOAD` shift widths, the `bits_arm`/`oracle_load`/`signed_sign`
+  oracle repaints breaking the 22,048-comparison, the four per-op arm
+  repaints (`KPROG_X86_ADC_RESULT`/`KPROG_X86_SBB_RESULT` operand and
+  `KPROG_X86_NOT_RESULT ^ m` forms) and the flag-macro/NEG-arg swaps the
+  byte-exact memory cross-check validates, the two carry-restore
+  repaints, the oracle add/sub/neg/zf/sf/of/not/store-back repaints, the
+  memcmp-flag-arg repaint, both call-site repaints, and on the Lean side
+  the whole def/spec body chain plus the four `exact`-arm bullets and
+  the byte/handler/example proof lines at `lake build`.
+- Equivalences: 20 pinned --- the MEM_LOAD `& m` drop (live-probed rc 0
+  OK 22048), the uniform mem-fill `0xa0+i` seed repaint and the f-bit
+  decode repaint the 22,048-case membership preserves, the `- 1`
+  memcmp-length repaint the byte-exact 16-byte image keeps because lane
+  bytes beyond the width coincide (got/want both carry the same
+  beyond-width garbage), six banner/mismatch repaints no oracle
+  validates, the acceptance-preserving vector/width-table/loop-bound/LCG
+  keep-alives (constant +1, LCG bound -1, `v[1] 1->3`, `w[2] 4->8`,
+  `a<7`, `f<15`, `i&3`->`i&2` op spread, `(i>>2)`->`(i>>1)` width
+  spread), the `rw`-lemma reorder proving the same goal, and two
+  zero-external-consumer theorem renames (`x86_mem_unary_handler_refines`,
+  `x86_mem_unary_neg_w8_min_example` --- while the step/byte
+  refine-theorem renames ARE caught at `lake build` because the handler
+  conjunction consumes the byte lemma and the example consumes the step
+  theorem).
+- Run results: three greens `TOTAL 83 mutations, 0 failures, 83
+  equivalences survived` / `ALL AS EXPECTED` rc 0, byte-identical
+  outputs across shakes, sorted-SURVIVED md5
+  `ddf6b4e59372e7e9e149975244faaaeb`.
+- Residue: all watched files byte-identical after each run
+  (mem-unary watchlist verified), untracked harness retained, `make
+  check` kept at 210 `: OK`.
+
 ## Step 0249 — x86 memory-store ALU handler-composition mutation coverage
 
 - Scope: the `ADD/ADC/SUB/SBB [mem], rhs` register-destination-memory
