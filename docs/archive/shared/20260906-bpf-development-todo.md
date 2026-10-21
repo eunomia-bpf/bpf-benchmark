@@ -15949,6 +15949,61 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0255 — x86 xmm0 pair-move mutation coverage
+
+- Scope: the XMM0 pair-move handler-composition contract (the hand Lean
+  module `KProgFormal/X86Xmm0Handler.lean` plus its dedicated host
+  cross-check `test_x86_xmm0_host.c`): the displacement is the whole
+  immediate (`x86Xmm0DispSpec`, the `(s32)(IMM >> 32)` high-half contrasted
+  by `x86_xmm0_disp_forms_whole`), the arm is the one register-identity test
+  (`stackPair` via the stack helper vs `memoryPair` via the process-memory
+  byte functions at the hardcoded width 64 for both lanes in order), the
+  ordinary arm's base form is opcode-opposite (load `absImmPtr`: a
+  `X86_REG_NONE` operand IS the raw artifact with the offset discarded;
+  store `nullBasePlusDisp`: the offset on a null base), and the store's
+  byte function is the pointwise two-lane little-endian
+  `x86Xmm0StoreBytes` (bytes past the pair untouched); the module is
+  consumer-free (no other KProgFormal module references a single
+  declaration).
+- Shaken: `build/mut_x86_xmm0.py` (untracked) 50 single-anchor rows over
+  the two files with the two detectors (`lean` = `lake build
+  KProgFormal.X86Xmm0Handler` olean refresh then `lake env lean`; `host` =
+  direct `cc -Wall -Wextra -O1 -I.` recompile then run, comparing the
+  printed case count against the clean 283 because `main` keeps `return 0`
+  and counts on even when a part's comparator fires).
+- Reclassified: shake 1's 27-case rc-0-only mismatch (the detector saw
+  failed parts only through their shrunk case counts), the two
+  stack-index-sign inversions and the retain-oracle-load swap (the
+  283-case membership preserves them), the banner repaint, and the three
+  self-consumed Lean names were all probed against the live run before the
+  greens: the case-count gate turned the invisible catches into real
+  catches, and the sign inversions stayed equivalents.
+- Catches: 27 (25 host / 2... plus 3 lean re-elaboration catches: see
+  split below) --- the oracle load/store byte-loop shifts, the
+  offset-index inversion, the arm/base/lane table repaints, the
+  lane-geometry pin, the NONE-load-address and NONE-base-pointer
+  repaints, the stack-hi-offset repaint, the store lo-to-hi lane
+  repaints, the inverted whole-vs-high-half pin, the probe-immediate
+  repaint, the banner blank-line repaint, the two example-output
+  repaints, and the three self-consumed Lean names
+  (`x86_xmm0_arm_refines`, `x86_xmm0_store_bytes_refines`, and
+  `x86Xmm0DispSpec` reach the file's own proof scripts; renames fail
+  `lake build` with unknown-identifier errors --- "consumer-free" means
+  no OTHER module imports the family, the module is its own consumer).
+- Equivalences (23): the four membership-invisible repaints (slot
+  modulus, synthetic, pointer stride, tag seed), the two stack-index
+  sign inversions, the retain-oracle-load swap, the two comparator-gate
+  repaints (the lifted `got.lo` check and the duplicated
+  `result_xmm0_hi` line), the `return 1` pin repaint, the four stderr
+  message repaints, the banner blank-line repaint, and nine
+  zero-external-consumer theorem renames.
+- Run: byte-identical greens `rows: 50 as-expected: 50 unexpected: 0
+  broken: 0` / `ALL AS EXPECTED` rc 0 (~30 s each) across four shakes,
+  watched pins `e9591e72b71f45a091ae1a6f069ad724` (host) +
+  `595867dfb5d09730da67b8f77a6acf29` (hand module) verified after every
+  batch, census 128 -> 129 untracked harnesses, `make check` stayed at
+  210 `: OK`.
+
 ## Step 0254 — x86 setcc register+memory mutation coverage
 
 - Scope: the two conditional-set handler-composition contracts (the hand

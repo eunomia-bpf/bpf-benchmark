@@ -5471,6 +5471,67 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0255 — x86 XMM0 pair-move mutation coverage
+
+The XMM0 pair-move contract pins how the two `X86_OP_LOAD_XMM0` (0x30) /
+`X86_OP_STORE_XMM0` (0x31) bodies move one two-lane scalar pair: the hand Lean
+module `X86Xmm0Handler.lean` is the whole contract (no other module consumes
+a single declaration of it); `x86Xmm0DispSpec` takes the displacement as the
+whole immediate (`(s32)(IMM >> 32)` high-half is the contrasted near-miss,
+pinned by `x86_xmm0_disp_forms_whole`), the arm is the one register-identity
+test (`arm isRsp`: the stack arm reads/writes through the stack helper, the
+memory arm through the process-memory byte functions, at the hardcoded width
+64 for both lanes — the low at the address, the high one lane width past it,
+no reversal or interleave, `x86_xmm0_load_store_round_trip`), and the
+ordinary arm's base form is opcode-opposite: `absImmPtr` for the load means a
+`X86_REG_NONE` operand IS the raw artifact with the addressing offset
+discarded, while `nullBasePlusDisp` for the store means a `X86_REG_NONE`
+destination contributes the null pointer and the offset added
+(`x86_xmm0_ordinary_addr_load_ignores_offset` /
+`x86_xmm0_ordinary_addr_store_uses_offset` pin the asymmetry, and the
+`x86_xmm0_store_writes_pair` / `x86_xmm0_store_bytes_above_pair_unchanged`
+theorems pin the pointwise two-lane write); the dedicated host
+`test_x86_xmm0_host.c` drives the real `KPROG_X86_XMM0_*` macro chain and
+`KPROG_X86_MEM_LOAD/STORE` against an independent restated oracle (byte-loop
+`oracle_load`/`oracle_store`, modulo-64 stack helpers, `oracle_mem_offset`)
+over 283 cases: tables (base form, arm, lane offsets, adds-disp), the 192-case
+load composition grid (2 opcodes x 4 bases x 3 index registers x 2 scales x
+4 immediates) and 72-case store grid against the hand restatements, and the
+8 asymmetry pins (whole-vs-high-half slice, NONE-load-ignores-offset,
+register-base agreement, both-lane layout, both-lane store, no-GPR-no-tag,
+the probe-then-wipe pin, the stack/ordinary round trip);
+`build/mut_x86_xmm0.py` (untracked) runs 50 single-anchor rows over the two
+files with the two detectors (`lean` = `lake build KProgFormal.X86Xmm0Handler`
+then `lake env lean`, `host` = direct `cc -Wall -Wextra -O1 -I.` recompile
+then run). The host detector needed the sticky finding of this family: the
+host binary prints `x86 xmm0 handler host cross-check: OK (N cases)` AND
+still exits 0 when a part's comparator fires (the part returns 0, `main`
+keeps counting), so rc alone cannot see a catch — the detector compares the
+printed case count against the clean 283 and treats any other banner as rc 1.
+Three byte-identical greens: `rows: 50 as-expected: 50 unexpected: 0 broken:
+0` `ALL AS EXPECTED` rc 0 (~30 s each) after 27 anchor + classification
+findings; 23 pinned equivalences (the four membership-invisible repaints —
+slot modulus, synthetic, pointer stride, tag seed — the two stack-index sign
+inversions and the retain-oracle-load swap the 283-case sweep preserves, the
+two comparator-gate repaints the lifted `got.lo`/lo-lane check and the
+duplicated `result_xmm0_hi` line the case count never changes, the
+`return 1` pin repaint, the four stderr message repaints, the banner
+blank-line repaint, and nine zero-external-consumer theorem renames — the
+whole module is consumer-free); 27 catches: the oracle load/store byte-loop
+shifts (the 64 increment the span itself proves), the offset-index
+inversion, the arm/base/lane table repaints, the lane-geometry pin, the load
+NONE-address and NONE-base-pointer repaints (the raw-artifact asymmetry),
+the stack-hi-offset repaint, the store lo-to-hi lane repaints, the inverted
+whole-vs-high-half pin, the probe-immediate repaint, and — the lean finding
+— three renames `x86_xmm0_arm_refines`, `x86_xmm0_store_bytes_refines`,
+`x86Xmm0DispSpec` that reach the file's own proof scripts (`lake build`
+fails with unknown-identifier errors, the module is its own consumer) plus
+the two example-output repaints `load_none_example_out` /
+`base_form_example_out` `native_decide` refutes; pins
+`e9591e72b71f45a091ae1a6f069ad724` (host) +
+`595867dfb5d09730da67b8f77a6acf29` (hand module), census 128 -> 129
+untracked harnesses, `make check` stayed at 210 `: OK`.
+
 ### Step 0254 — x86 SETCC register+memory mutation coverage
 
 The two conditional-set handler-composition contracts pin the byte-lane
