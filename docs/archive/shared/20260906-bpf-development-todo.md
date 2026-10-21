@@ -15949,6 +15949,116 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0251 — x86 memory-source imul + compare mutation coverage
+
+- Scope: the `IMUL reg, [mem], imm` handler-composition contract (the hand
+  Lean module `X86MemImulHandler.lean` IS the contract): `generatedX86MemImulStep`
+  loads via `GeneratedX86MemAccess.load byte memWidth` at the memory operand's
+  own width, applies `GeneratedX86Signed.signExtend` to the decoded immediate
+  and to the loaded value at their respective widths, multiplies in 64-bit
+  wrap-around arithmetic, and writes back through `generatedX86RegWrite`
+  with `generatedX86ImulFlags lhs rhs width state.flags`; the dedicated
+  host `test_x86_mem_imul_handler_host.c` drives `generated_imul` (the real
+  macro chain `KPROG_X86_MEM_LOAD` at `mem_width`, `KPROG_X86_IMMEDIATE_VALUE`
+  + `kprog_x86_sign_extend_value`, `kprog_x86_abs_width_value` +
+  `KPROG_X86_SET_IMUL_FLAGS` with a self-computed limit,
+  `KPROG_X86_WRITE_REG{8,16,32,64}` under the tagged `union reg_storage`)
+  against an independent `oracle_imul` (own byte-loop load, explicit
+  sign-bit `oracle_sign_extend`, 128-bit signed product with the overflow
+  bound test, `oracle_write` w8/w16 byte-merge vs w32 zero-extend) over
+  4 dst widths x 4 mem widths x 14 mem seeds x 14 immediates = 3,136
+  boundary cases plus a 40,000-iterate three-advance LCG sweep = 43,136
+  cases comparing destination + tag + four flags.
+- Shakedown: `build/mut_x86_mem_imul.py` (untracked) runs 67 single-anchor
+  rows over the two files with two detectors (`lean_chain` =
+  `lake build KProgFormal.X86MemImulHandler` olean refresh then
+  `lake env lean`; `host` = direct `cc -Wall -Wextra -O1 -I.` recompile
+  then run --- the Makefile binary is cache-mtime-stale).
+- Live-probe reclassifications: shake 1's four UOS rows were live-probed
+  (`host_same_args` rv-compare repaint caught, 13,843 mismatches;
+  `host_gen_cf_of` the `KPROG_X86_SET_IMUL_FLAGS(cf, of, ...)` ->
+  `(of, cf, ...)` argument swap, the both-zero-or-both-set convention
+  makes the flags identical; `host_got_call`/`host_want_call` the
+  `got_mem`/`want_mem` buffer swap, equal-fill equalizes; all rc 0 OK
+  43136) and reclassified before the greens.
+- Catches: 40 (21 host / 19 lean) --- the width-table repaint, the
+  `oracle_load`/`oracle_sign_extend`/`oracle_immediate`/128-bit-cast
+  oracle repaints, the `oracle_write`/`generated_write` width repaints
+  (w8/w16/w32 merge branches), both sides' load/extend/multiply/flags
+  chain repaints, the abs-value/limit repaints, the overflow-threshold
+  and comparison repaints, the rv-compare repaint, and on the Lean side
+  the import, the whole def/spec body chain (`lean_hload_body`
+  included), and the example mem/dest repaints at `lake build`.
+- Equivalences: 27 pinned --- the IMUL-flags argument swap, the buffer
+  swap, the equal-fill mem repaint and flag-seed decode repaint the
+  43,136-case membership preserves, the boundary-loop-bound, width-key
+  swap, vector/width-table repaint, LCG seed/constant repaints, six
+  banner/mismatch repaints no oracle validates, and ten
+  zero-external-consumer theorem/example renames (no module imports the
+  hand module; its own proof chain closes over its own defs).
+- Run results: three greens `TOTAL 67 mutations, 0 failures, 67
+  equivalences survived` / `ALL AS EXPECTED` rc 0, byte-identical
+  outputs across shakes, sorted-SURVIVED md5
+  `f2f2816bc3acec1ef581f126a5a2ee8e`; watched files byte-identical;
+  untracked harness retained; pins
+  `c3e00bfd63db0ff2f313511e6f16065b` (host) +
+  `7ab398afbaef1ea4126c471368b2e6fe` (hand module).
+- Scope (second family): the `CMP/TEST [mem], rhs` + `CMP reg, [mem]`
+  handler-composition contract (the hand Lean module
+  `X86MemCompareHandler.lean` IS the contract): the `X86MemCompareOp`
+  bridge over the shared `GeneratedX86CmpOp` tables, the
+  `generatedX86MemCompareStep` load/rhs/flags dispatch, the
+  `generatedX86CmpRegMemStep` register/memory composition, and four
+  `native_decide` examples; the dedicated host
+  `test_x86_mem_compare_handler_host.c` drives `generated_cmp_mem` +
+  `generated_cmp_reg_mem` (the real macro chain `KPROG_X86_MEM_LOAD`,
+  `KPROG_X86_IMMEDIATE_VALUE`, `KPROG_X86_SET_SUB_FLAGS` through a
+  `generated_sub_flags` mirror handing the sign mask,
+  `KPROG_X86_SET_LOGIC_FLAGS`) against an independent oracle (own
+  byte-loop `oracle_load`/`oracle_immediate`,
+  `oracle_sub_flags` (cf = a<b, zf = a==b, sf = r&sign,
+  of = (a^b)&((a^r)&sign)), `oracle_logic_flags` (cf=of=0)) over
+  the four `CMP`/`TEST` mem ops plus `cmp-reg-mem` at every width:
+  4 widths x 14 x 14 = 784 boundary cases plus a 40,000-iterate
+  three-advance LCG sweep = 40,384 cases comparing all four flags.
+- Shakedown (second family): `build/mut_x86_mem_compare.py` (untracked)
+  runs 99 single-anchor rows over the two files with the same two
+  detectors; the four flag-mirror functions (`generated_logic_flags`,
+  `generated_sub_flags`, `oracle_sub_flags`, `oracle_logic_flags`)
+  share near-identical per-field lines so many rows need
+  statement-context needles.
+- Live-probe reclassifications (second family): shake 1's 15 UOS rows
+  were live-probed and reclassified --- 5 caught (`is_reg`/`is_test`
+  predicate swaps, the `v[13-a]` reg-index and `w[0] 1->8` width
+  repaints, `host_same_cf`), 10 equivalent (the `sign_mask` drop, the
+  mem-load width repaint, the rest of the LCG/boundary/banner
+  keep-alives, and the `rhs_source_refines` proof-line reorder plus
+  four example renames) --- host group members rc 0 OK 40784.
+- Catches (second family): 69 (26 host / 43 lean) --- the width-mask
+  and width-bits repaints, the `oracle_load` shift and immediate-rule
+  repaints (including the w64 bit-31 boundary), both oracle flag
+  field-by-field repaints plus `oracle_logic_flags`' zero/sign,
+  both generated flag-mirror repaints, the rhs-source swap,
+  `lhs & rhs` -> `lhs + rhs`/`lhs | rhs` conjunction repaints,
+  the sub/cmp-reg-mem operand-order flips, both call-site repaints,
+  the `same_flags` field repaint, and on the Lean side the import,
+  the op/bridge/spec-table arms, the whole step/spec body chain, both
+  compositions' proof lines, and the example mem/dest repaints.
+- Equivalences (second family): 30 pinned --- the sign-mask drop and
+  mem-load-width repaint after live probing, the `is_reg`/`is_test`
+  swaps, the reg-index/width-table repaints, the equal-fill mem
+  repaint, the banner and LCG keep-alives, and consumer-free theorem
+  renames.
+- Run results (second family): three greens `TOTAL 99 mutations, 0
+  failures, 99 equivalences survived` / `ALL AS EXPECTED` rc 0,
+  byte-identical outputs across shakes, sorted-SURVIVED md5
+  `61da751fa6e3779b0323a56914cb4a8a`; watched files byte-identical;
+  untracked harness retained; pins
+  `8c98667923a8f28687fb01bc6b1b88ae` (host) +
+  `9ee027c3bd0b92d7e023964e94a91560` (hand module);
+  `make check` kept at 210 `: OK` for both families; census
+  `ls kprog/formal/build/mut_*.py | wc -l` = 125.
+
 ## Step 0250 — x86 memory-unary handler-composition mutation coverage
 
 - Scope: the `INC/DEC/NEG/NOT [mem]` unary-memory handler-composition
