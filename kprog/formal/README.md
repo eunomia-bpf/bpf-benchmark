@@ -5471,6 +5471,57 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0253 — x86 effective-address LEA mutation coverage
+
+The effective-address `LEA` step pins how the composed simulator body forms
+an address and writes it back: `generatedX86LeaStep` takes the offset from the
+shared dedicated contract (`GeneratedX86MemOffset.value`: displacement plus
+index<<scale, both shifts reduced mod 64), then splits the three 64-bit exits
+through `generatedX86LeaPointerWrite`, the writeback the real
+`KPROG_PTR_ADD64_BITS`/`KPROG_PTR_ADD64_TAG` macros mirror — the RODATA fast
+path (`src.isNone && isRodata`) writes the raw immediate and scalarizes
+provenance, the RSP exit resolves `stackBase + src.bits + off` into `.stack`
+provenance, the plain 64-bit exit keeps the source tag, and every narrower
+width writes the partial-register pointer sum through the scalarizing
+writeback; the hand module restates all three exits independently
+(`x86LeaStepSpec` over `GeneratedX86MemOffset.valueSpec` and the pointer-write
+twin) and proves
+`x86_lea_step_refines` (`cases width <;> cases src.isNone <;> cases isRodata
+<;> cases src.isRsp <;> simp only [...]`), the rodata fast-path and
+needs-no-source theorems, the RSP-uses-stack_base and narrow-ignores-RSP
+theorems, and four `native_decide` examples (rodata, indexed, stack pointer,
+w32); the dedicated host `test_x86_lea_handler_host.c` drives `generated_lea`
+— the real `KPROG_X86_MEM_OFFSET` macro and `KPROG_PTR_ADD64_*` under the
+tagged `union reg_storage` — against an independent oracle
+(`offset_oracle` signed-accumulate truncated on return, `oracle_lea`
+re-deriving all three exits, `oracle_write` the partial-register write) over
+61,440 cases (the encoded offset boundary loop at both index arms plus a
+20,000-iterate LCG offset sweep, the LEA boundary grid over 3 source
+registers x 4 widths x 8 displacements x 6 scales x 2 index arms with the
+rodata arm, plus a 40,000-iterate LCG LEA sweep);
+`build/mut_x86_lea.py` (untracked) runs 45 single-anchor rows over the two
+files with the two detectors (`lean` = `lake build
+KProgFormal.X86LeaHandler` then `lake env lean`; `host` = direct
+`cc -Wall -Wextra -O1 -I.` recompile then run — the Makefile binary is
+cache-mtime-stale). Three byte-identical greens: 29 caught (26 host /
+3 lean) — the oracle write masks/sums/tags and rodata fast-path arms, the
+offset accumulate and write-truncation prongs, the generated
+narrow/RSP/generic exit arms and tag/bit writes, the `same_lea` comparator
+gate and rc check, the offset monitor return, the sweep-swap arms, and the
+three exact-bits example repaints — and 16 pinned equivalents (the w64
+keepold oracle arm and w32 writeback repaints the 61,440-case membership
+preserves because no case reaches them; the rodata src/aux repaints the
+gated fast path ignores; the offset index-arm mask drop; the has_rodata
+prong inversion; the `same_lea` label and `check_offset` want repaints the
+rc-0 detector never sees; two LCG sweep-seed repaints the membership
+preserves; and five zero-external-consumer theorem renames/repaints — no
+module imports `X86LeaHandler`); the 0252 `end KProgFormal` namespace
+repaint pattern cannot be an equivalence here because Lean exports the
+declared namespace (the rename fails `lake build` rc 200) and was
+reimplemented as an example-tactic repaint (`:= by` -> `:= b y`). Pins:
+`20c5881d5d498a9a54d7855fc24f282c` (host) + `e6fd2c681a9c05bae66e278d8686c64a`
+(hand module).
+
 ### Step 0252 — x86 two-destination MULX mutation coverage
 
 The two-destination `MULX` handler-composition contract pins the product's

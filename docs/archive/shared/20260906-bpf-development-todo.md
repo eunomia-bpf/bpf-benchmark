@@ -15949,6 +15949,70 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0253 — x86 effective-address lea mutation coverage
+
+- Scope: the effective-address `LEA` handler-composition contract (the
+  hand Lean module `KProgFormal/X86LeaHandler.lean` plus its dedicated
+  host cross-check `test_x86_lea_handler_host.c`): `generatedX86LeaStep`
+  takes the offset from the shared dedicated contract
+  (`GeneratedX86MemOffset.value`: displacement plus `index << scale`, both
+  shifts reduced mod 64) and splits the three 64-bit exits through
+  `generatedX86LeaPointerWrite` (the `KPROG_PTR_ADD64_BITS`/`TAG` mirror):
+  the RODATA fast path (`src.isNone && isRodata`) writes the raw immediate
+  scalarized, the RSP exit resolves `stackBase + src.bits + off` into
+  `.stack` provenance, the plain 64-bit exit keeps the source tag, and
+  every narrower width scalarizes the pointer sum through the
+  partial-register writeback; the twin `x86LeaStepSpec` restates all three
+  exits independently and the four-way `cases`
+  `x86_lea_step_refines` plus the rodata fast-path / needs-no-source /
+  RSP-uses-stack_base / narrow-ignores-RSP theorems and four
+  `native_decide` examples close the module; the host drives
+  `generated_lea` --- the real `KPROG_X86_MEM_OFFSET` macro chain and
+  `KPROG_PTR_ADD64_*` under the tagged `union reg_storage` --- against the
+  independent oracle (`offset_oracle`/`oracle_lea`/`oracle_write` share no
+  arithmetic with the macro chain) over 61,440 cases (offset boundary
+  loop at both index arms + 20,000-iterate LCG offset sweep + the LEA
+  boundary grid over 3 source registers x 4 widths x 8 displacements x 6
+  scales x 2 index arms with the rodata arm + 40,000-iterate LCG LEA
+  sweep).
+- Shaken: `build/mut_x86_lea.py` (untracked) 45 single-anchor rows over
+  the two files with the two detectors (`lean` = `lake build
+  KProgFormal.X86LeaHandler` olean refresh then `lake env lean`; `host` =
+  direct `cc -Wall -Wextra -O1 -I.` recompile then run --- the Makefile
+  binary is cache-mtime-stale).
+- Reclassified: shake 1's nine UNEXPECTED rows (four oracle-side
+  unexercised arms, three comparator/label repaints the rc-0 detector
+  never sees, two sweep-seed repaints the LCG membership preserves, and
+  the namespace repaint) were live-probed and pinned equivalent before
+  the greens; the 0252 `end KProgFormal` namespace repaint cannot be an
+  equivalence here because Lean exports the declared namespace --- the
+  rename fails `lake build` at rc 200 with `invalid 'end'`, an
+  internal-error catch rather than a clean survive, so the row was
+  reimplemented as an example-tactic repaint (`:= by` -> `:= b y`) that
+  only repaints the proof script.
+- Catches: 29 (26 host / 3 lean) --- the oracle write masks/sums/tags and
+  RODATA fast-path arms, the offset accumulate and write-truncation
+  prongs, the generated narrow/RSP/generic exit arms and tag/bit writes,
+  the `same_lea` comparator gate and rc check, the offset monitor return,
+  the sweep-swap arms, and the three exact-bits example repaints
+  (rodata/indexed/stack/w32).
+- Equivalences (16): the w64 keepold oracle arm and w32 writeback
+  repaints the 61,440-case membership preserves (no case reaches those
+  arms), the rodata src/aux repaints the gated fast path ignores, the
+  offset index-arm mask drop, the has_rodata prong inversion, the
+  `same_lea` label and `check_offset` want repaints the rc-0 detector
+  never sees, two LCG sweep-seed repaints the membership preserves, and
+  five zero-external-consumer theorem renames/repaints (the doc-comment
+  repaint plus four theorem renames --- no module imports
+  `X86LeaHandler`, so the file re-elaborates its own proof chain).
+- Run: three byte-identical green shakes `rows: 45 as-expected: 45
+  unexpected: 0 broken: 0` / `ALL AS EXPECTED` rc 0 (~11 s each),
+  sorted-SURVIVED md5 `b811f0755370c77d43f9298c58496b58`, watched pins
+  `20c5881d5d498a9a54d7855fc24f282c` (host) +
+  `e6fd2c681a9c05bae66e278d8686c64a` (hand module) verified after every
+  batch, census 126 -> 127 untracked harnesses, `make check` stayed at
+  210 `: OK`.
+
 ## Step 0252 — x86 two-destination mulx mutation coverage
 
 - Scope: the two-destination `MULX` handler-composition contract (the hand
