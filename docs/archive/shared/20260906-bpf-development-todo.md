@@ -15949,6 +15949,94 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0249 — x86 memory-store ALU handler-composition mutation coverage
+
+- Scope: the `ADD/ADC/SUB/SBB [mem], rhs` register-destination-memory
+  arithmetic handler-composition contract: the hand Lean module
+  `X86MemStoreAluHandler.lean` IS the contract (no dedicated spec/generator
+  for this family — it composes the `GeneratedX86MemAccess` load, the proved
+  four-op arithmetic/register-ALU handlers from `X86MemAluHandler.lean`, and
+  the width-confined `GeneratedX86MemAccess` store):
+  `generatedX86MemDestArithStep` loads via
+  `GeneratedX86MemAccess.load byte width`, forms the scalar-tagged
+  destination state, and dispatches `op` to the
+  `generatedX86{Add,Adc,Sub,Sbb}Handler`;
+  `generatedX86MemDestArithByte` writes
+  `GeneratedX86MemAccess.store out.dst.bits width i` for
+  `i < GeneratedX86MemAccess.byteCount width` and fetch-through
+  `byte i` else; `x86_mem_dest_arith_step_refines` (`cases op <;>
+  simp only [...]` then one `exact x86_{add,adc,sub,sbb}_handler_refines`
+  per op), `x86_mem_dest_arith_byte_refines` (through the step refinement
+  and the byte-count/store lemmas), and
+  `x86_mem_dest_arith_handler_refines` (flags ∧ per-byte conjunction) close
+  the composition, and a `native_decide` example pins the w16
+  `ADC 0xffff` result-with-carry case. The dedicated host
+  `test_x86_mem_store_alu_handler_host.c` drives `generated_run` — the real
+  macro chain `KPROG_X86_MEM_LOAD` & width mask, per-op
+  `KPROG_X86_ADC_RESULT` + `KPROG_X86_SET_{ADD,ADC,SUB,SBB}_FLAGS`,
+  `KPROG_X86_MEM_STORE` — against an independent modular-`__int128` /
+  `signed_value` oracle (2^width wrapping add-with-carry /
+  sub-with-borrow, `out.cf = wide >= mod` vs `a < b + carry`,
+  `out.of = sr < lo || sr > hi`, per-byte store-back) over 4 ops × 4 widths ×
+  8 lhs vectors × 8 rhs vectors × 2 carry tuples = 2,048 boundary cases plus
+  a 20,000-iterate LCG sweep = 22,048 cases, comparing
+  `memcmp(got_mem, want_mem, 16)` plus the four flag fields.
+- Shakedown `build/mut_x86_store_alu.py`: 65 single-anchor rows over the two
+  files with two detectors (`lean_chain` = `lake build
+  KProgFormal.X86MemStoreAluHandler` olean refresh then `lake env lean
+  KProgFormal/X86MemStoreAluHandler.lean`; `host` = direct
+  `cc -Wall -Wextra -O1 -I.` compile into `build/` then execution — the
+  Makefile-wired binary is cache-mtime-stale when only source mtimes change,
+  so the detector must compile its own binary).
+- Static precheck: all 65 row anchors count-pinned before shake 1; four
+  anchors needed statement-context (the two `let lhs :=` per def side —
+  generated-vs-spec the bodies duplicate — and the two `exact`-arm bullets in
+  the step-refine proof for the same reason); the `in.cf` carry-arg needle
+  needed the full two-line `KPROG_X86_SET_ADC_FLAGS` statement context (the
+  argument line itself is duplicated by the SBB arm).
+- First shake: 5 UOS rows, each live-probed and reclassified before the
+  greens — `host_typedef` narrow-`__u64` repaint CAUGHT (the generated
+  `KPROG_X86_MEM_LOAD`'s `<< 32` byte-gather overflows at the narrower
+  type, so the 22,048-comparison fails on every 32/64-bit case);
+  `host_gen_load` `& m`-drop repaint rc 0 OK (the read macro's internal
+  width masking already narrows the load — equivalent, probe-confirmed);
+  `host_got_call` buffer-alias swap CAUGHT here (unlike 0247/0248's uniform
+  mem bytes, this family's oracle fill derives from `lhs`, so aliasing
+  `got_mem` to `want_mem` desynchronizes the burned image);
+  `lean_step_refine_thm` and `lean_byte_refine_thm` renames CAUGHT at the
+  `lake build` stage (the handler conjunction consumes the byte lemma and
+  the example consumes the step theorem — unlike the pure-name theorem rows
+  these are load-bearing renames, not consumer-free ones).
+- 48 catches: 34 through the host (the narrow `typedef` break,
+  `bits(w)`-arm and `oracle_load` shift repaints, `signed_value`
+  sign-branch flip, the four register-ALU arm repaints the byte-exact memory
+  cross-check validates (`KPROG_X86_ADC_RESULT` carry args, flag-macro
+  swaps, SBB arm), `KPROG_X86_MEM_STORE` argument repaint, oracle
+  carry-class/add-wide/cf/of/store repaints, and the `KPROG_X86_SET_ADC_FLAGS`
+  carry-argument repaint at the tracer-decision argument) and 14 through the
+  Lean chain (import repaint, the two step def/lore renames and four op-arm
+  repaints across generated and spec, `cases op`/`rw`/`exact` tactic
+  repaints, the two byte-def repaints (count bound, `.flags` field) on both
+  sides, `by_cases`/`intro` tactic repaints, and the example
+  repaints (.op substitution, byte expectation, flag tuple)).
+- 17 equivalents: the MEM_LOAD `& m` drop the read macro's internal width
+  masking absorbs (live-probed rc 0, OK 22048); the uniform mem fill
+  (`i < 8 ? lhs>>8i : 0xa0+i`) the mem-seed repaint preserves; the six
+  banner/mismatch string repaints no oracle validates; the
+  acceptance-preserving vector/width-table/loop-bound/LCG keep-alives
+  (constant +1, LCG bound −1, `v[1] 1→3`, `w[2] 4→8`, `a<7`, `c<1`,
+  `i&2` / `(i>>2)&2` op/width spreads, seed +1, second LCG constant −1);
+  the `rw`-lemma reorder proving the same goal; the four zero-external-
+  consumer theorem renames (`handler_refines`, `ex_thm`, plus the two
+  byte/step refine theorems reclassified caught above — renamed rows here
+  are the conjunction and the example).
+- Run results: three consecutive byte-identical greens `TOTAL 65 mutations,
+  0 failures, 65 equivalences survived` / `ALL AS EXPECTED` rc 0 with
+  sorted-SURVIVED md5 `0c3a6bcfd54537feb48c6b4bee77dc5b`; both watched files
+  restored byte-identical after every run (pins `e8304770...` host +
+  `b0c6d5d4...` hand module re-verified after each probe batch); untracked
+  harness retained; `make check` kept at 210 `: OK`.
+
 ## Step 0248 — x86 BMI2 memory-source shift mutation coverage
 
 - Scope: the `SHLX/SHRX/SARX dst, [mem], count` + `RORX dst, [mem], imm8`
