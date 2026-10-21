@@ -5471,6 +5471,62 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0254 — x86 SETCC register+memory mutation coverage
+
+The two conditional-set handler-composition contracts pin the byte-lane
+write and the memory-arm selection: the register-form hand module
+`X86SetccHandler.lean` restates the generated `x86SetccStep` body
+independently as `x86SetccStepSpec` (the AUX byte packs
+`(dst_shift << 8) | payload`, the condition table resolves 14 accepted
+codes, and the byte write goes through the scalarizing `KPROG_X86_WRITE_REG8`
+kernel at lane `(dst_shift == 8)`, the truthiness trap — lane 9 selects the
+low byte so the test must be an equality), the memory-form hand module
+`X86SetccMemHandler.lean` restates `x86SetccMemStepSpec` (the address forms
+through `GeneratedX86MemAccess.load byte memWidth` and
+`GeneratedX86MemDispApply.apply`; the RSP arm dereferences the stack or
+indexes `8 + 2*index`, the null-base arm reads the scratch memory, and the
+otherwise arm always loads its own byte; every width arm resolves the same
+`.w8`, the immutable-width invariant
+`x86_setcc_mem_width_refines`/`x86_setcc_mem_width_constant` pair; the AUX
+decodes bridge through `x86_setcc_mem_step_aux_refines` and
+`x86_setcc_mem_step_fields_refines`); the dedicated host oracles
+`test_x86_setcc_host.c` (590,726 cases: 256x256 cond/data sweep, 256-way
+lane truthiness sweep, 16-reg x 256-payload x 8-shift x 16-flags
+composition vs the hand model, a second 16x16x256 full-shift lane sweep, a
+256-shift write8 sweep, and the asymmetric pins including the lane-9
+writes-low pin) and `test_x86_setcc_mem_host.c` (1,053,191 cases: 256-arm x
+16-cond decode sweep, the 256 base table, the 256 offset arm table, the
+786,432-case composition grid over 64 stack dsts x 256 conds x 16 flags x 2
+indexed x 2 widths x 4 immediates, and the asymmetric pins li the
+null-base-scratch and stack-scaled-arm pins) drive the real
+`KPROG_X86_SETCC_*` and `KPROG_X86_WRITE_REG8` macros against independent
+restated models; `build/mut_x86_setcc.py` (untracked) runs 117 single-anchor
+rows over the four files with the three detectors (`lean` = `lake build`
+both hand modules then `lake env lean` each; `host`/`host_mem` = direct
+`cc -Wall -Wextra -O1 -I.` recompile then run — the Makefile binaries are
+cache-mtime-stale). Three byte-identical greens:
+`rows: 117 as-expected: 117 unexpected: 0 broken: 0` `ALL AS EXPECTED` rc 0
+(~128 s each) after 23 anchor-fix and 21 classification iterations;
+shake 1's findings: 21 rows the membership semantics classify as
+equivalent (gate-vacuous comparator repaints and return-path repaints the
+sweep membership preserves, e.g. the part-fail-msg repaint since both
+greens, unchanged-decode and self-disabled gate spellings), four real
+catches the harness reported correctly (`lean_mem_arm_refines` breaks
+`X86CmovHandler.lean`'s consumption of `x86SetccMemDispSpec` through the
+shared arm theorem, `lean_mem_width_refines` breaks the
+`x86SetccMemWidthSpec` bridge the mem module itself consumes in
+`x86_setcc_mem_step_refines`, `host_p6_probe_byte` and
+`host_mem_p4_flags_probe` self-fail the clean binary's own probes), the
+theorem-rename semantics: only `x86_setcc_eval_cond_sound` (register form,
+consumed by `X86CmovHandler.lean` at two exact references) and
+`x86SetccMemDispSpec` (memory form, ditto) have external consumers, all
+other renames elaborate cleanly and survive; pins
+`a5a6667e96a6216894d355d44b1d08a2` (register Lean) +
+`3fa9f22adae924435df2bfffd02f4553` (memory Lean) +
+`8bbda33a5a080075aa1fe6514b5c34f4` (register host) +
+`b4c27120559104068775b5df5a7cc07a` (memory host), and `make check` stayed
+at 210 `: OK`.
+
 ### Step 0253 — x86 effective-address LEA mutation coverage
 
 The effective-address `LEA` step pins how the composed simulator body forms

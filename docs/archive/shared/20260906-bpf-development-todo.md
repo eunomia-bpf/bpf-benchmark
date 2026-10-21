@@ -15949,6 +15949,55 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0254 — x86 setcc register+memory mutation coverage
+
+- Scope: the two conditional-set handler-composition contracts (the hand
+  Lean modules `KProgFormal/X86SetccHandler.lean` (register destination)
+  and `KProgFormal/X86SetccMemHandler.lean` (memory destination) plus
+  their dedicated host cross-checks `test_x86_setcc_host.c` and
+  `test_x86_setcc_mem_host.c`): the register form packs the AUX byte as
+  `(dst_shift << 8) | payload`, resolves the 14 accepted conditions, and
+  writes the 8-bit result through the scalarizing `KPROG_X86_WRITE_REG8`
+  kernel at lane `(dst_shift == 8)` --- the truthiness trap (lane 9
+  selects the low byte, so the lane test must be an equality, not `!= 0`);
+  the memory form addresses through `GeneratedX86MemAccess.load byte
+  memWidth` and `GeneratedX86MemDispApply.apply`, selects its arm on the
+  source offset field (RSP dereferences the stack or indexes `8 + 2*
+  index`, a null base reads the scratch memory, the otherwise arm always
+  loads its own byte), and repaints the selected byte as a fixed 8-bit
+  `CASE storeAligned` w8 write; the immutable-width invariant and the
+  AUX-decode bridges pair the two forms
+  (`x86_setcc_mem_width_refines`, `x86_setcc_mem_width_constant`,
+  `x86_setcc_mem_step_aux_refines`, `x86_setcc_mem_step_fields_refines`).
+- Shaken: `build/mut_x86_setcc.py` (untracked) 117 single-anchor rows
+  over the four files with the three detectors (`lean` = `lake build`
+  both hand modules then `lake env lean` each; `host`/`host_mem` = direct
+  `cc -Wall -Wextra -O1 -I.` recompile then run --- the Makefile binaries
+  are cache-mtime-stale).
+- Reclassified: shake 1's 21 UNEXPECTED rows (gate-vacuous comparator
+  repaints and return-path repaints the sweep membership preserves, i.e.
+  the part-fail-msg, unchanged-decode and self-disabled gate spellings
+  whose edits the rc-0 detector never sees) were live-probed and pinned
+  equivalent before the greens; four rows were confirmed real catches
+  (`lean_mem_arm_refines` breaks the shared-arm bridge
+  `X86CmovHandler.lean` consumes, `lean_mem_width_refines` breaks the
+  mem module's own `x86_setcc_mem_step_refines` width bridge, and
+  `host_p6_probe_byte`/`host_mem_p4_flags_probe` self-fail the clean
+  binaries' own asymmetric pins, so the harness reordered them as
+  catches).
+- Only two external consumers exist: `x86_setcc_eval_cond_sound`
+  (register form, exact-referenced twice by `X86CmovHandler.lean`) and
+  `x86SetccMemDispSpec` (memory form, ditto), so theorem renames of every
+  other declared name elaborate cleanly and survive.
+- Run: three byte-identical green shakes `rows: 117 as-expected: 117
+  unexpected: 0 broken: 0` / `ALL AS EXPECTED` rc 0 (~128 s each), watched
+  pins `a5a6667e96a6216894d355d44b1d08a2` (register Lean) +
+  `3fa9f22adae924435df2bfffd02f4553` (memory Lean) +
+  `8bbda33a5a080075aa1fe6514b5c34f4` (register host) +
+  `b4c27120559104068775b5df5a7cc07a` (memory host) verified after every
+  batch, census 127 -> 128 untracked harnesses, `make check` stayed at
+  210 `: OK`.
+
 ## Step 0253 — x86 effective-address lea mutation coverage
 
 - Scope: the effective-address `LEA` handler-composition contract (the
