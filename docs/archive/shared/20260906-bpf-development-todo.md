@@ -15949,6 +15949,86 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0248 — x86 BMI2 memory-source shift mutation coverage
+
+- Scope: the `SHLX/SHRX/SARX dst, [mem], count` + `RORX dst, [mem], imm8`
+  flagless memory-source shift/rotate handler-composition contract: the hand
+  Lean module `X86MemShiftHandler.lean` IS the contract (no dedicated
+  spec/generator for this family — it composes the `GeneratedX86MemAccess`
+  load, the `GeneratedX86ShiftResult` kernels, and the width-confined
+  `generatedX86RegWrite` writeback): `generatedX86MemShiftStep` loads via
+  `GeneratedX86MemAccess.load byte width` and dispatches `op` to
+  `GeneratedX86ShiftResult.{shl,shr,sar} lhs count width`;
+  `generatedX86MemRorxStep` rotates via `GeneratedX86ShiftResult.ror`; both
+  write back and thread the incoming flags through unchanged
+  (`x86_mem_shift_preserves_flags`, `x86_mem_rorx_preserves_flags` — the
+  architectural property separating the BMI2 forms from their flag-writing
+  legacy counterparts); `x86_mem_shift_step_refines` (`cases op <;>
+  simp only [...]` against the independently stated `x86MemShiftStepSpec`)
+  and `x86_mem_rorx_step_refines` (through the complementary-count
+  `x86_ror_result_refines`) close the two compositions, and three
+  `native_decide` examples pin the 32-bit `SHLX` zero-extension, the 8-bit
+  `SARX` sign-fill, and the 8-bit `RORX` low-bit-to-top. The dedicated host
+  `test_x86_mem_shift_handler_host.c` drives `generated_run` — the real macro
+  chain `KPROG_X86_MEM_LOAD` / `kprog_x86_{shl,shr,sar,ror}_result` /
+  `KPROG_X86_WRITE_REG{8,16,32,64}` — against an independent byte-loop oracle
+  (per-byte little-endian `oracle_load`, width-masked shift/rotate under the
+  63/31 `KPROG_X86_SHIFT_COUNT` BMI2 mask, w8/w16 byte-merge vs w32
+  zero-extension `oracle_write`) over 4 ops × 4 widths × 8 mem vectors ×
+  8 count vectors = 1,024 boundary cases plus a 20,000-iterate LCG sweep =
+  21,024 cases, comparing the width-confined register result byte-exactly.
+- Shakedown `build/mut_x86_mem_shift.py`: 70 single-anchor rows over the two
+  files with two detectors (`lean_chain` = `lake build
+  KProgFormal.X86MemShiftHandler` olean refresh then `lake env lean
+  KProgFormal/X86MemShiftHandler.lean`; `host` = direct
+  `cc -Wall -Wextra -O2 -I.` compile into `build/` then execution — the
+  Makefile-wired binary is cache-mtime-stale when only source mtimes change,
+  so the detector must compile its own binary).
+- Static precheck: all 70 row needles count-pinned before shake 1; four
+  anchors needed statement-context (the two `let lhs :=` per def side —
+  generated-vs-spec the bodies duplicate, and the sar-arm writeback pairs and
+  the RORX-field needle for the same reason); two cross-mutant pairs swapped
+  to repaint directions whose `new` is not already present elsewhere in the
+  file (the LHS-respec rows and the lemma-list `x86_sar_result_refines]`
+  row).
+- 42 catches: 18 through the host (width-committed repaints such as the
+  `width_bits` arm and width mask orphaning the low-lane merge, oracle
+  load/shift/rotate/SAR-fill/writeback repaints, count-mask and zero-count
+  arm flips, generated mem-load/arm/result/writeback repaints, and the
+  check-call argument repaints) and 24 through the Lean chain (import
+  repaints, the `| shl` constructor and step/`Rorx`-def renames,
+  generated-vs-spec result-kernel repaints and LHS swaps, the `cases op`
+  deletion and tactic repaint, `rw`-lemma-line repainting, the
+  `x86_mem_rorx_preserves_flags` body repaint, the three example
+  value/bytes/expected repaints caught at `native_decide`, and the
+  `end KProgFormal` repaint).
+- 28 equivalents: the scalar-tag repaint the `(void)tag` discards; the
+  oracle `0xfffff`-mask, byte-shifted mem fill, and buffer-alias rows the
+  uniform mem bytes equalize; the acceptance-preserving vector/width-table/
+  loop-bound/LCG-member keep-alives (seed +1, constant +1, 19999 bound,
+  `i%3` op spread, `w[]` collapse, `wi<3`/`c<7` loops, `v[1] 1→3`); the six
+  banner/mismatch string repaints no oracle validates; the four
+  zero-external-consumer theorem renames; the `rw`-lemma-line reorder;
+  the `lemma-list shrink to `x86_sar_result_refine` (trailing-s removal
+  caught at `lake build` was re-read live and reclassified caught; this row
+  moved to catches — 42 = 18 host + 24 lean); the `x86MemRorxStepSpec`
+  flags-restatement preserving the value-provable statement; the
+  `cases op <;> rfl` repainting.
+- Live-probe reclassifications this step: `lean_step_rw_sar` lemma-name
+  repaint caught at the `lake build` stage (rc 1); `host_gen_write_w8`
+  scalar-tag repaint (the fifth `KPROG_X86_WRITE_REG8` argument) — direct
+  live probe rc 0, `/tmp/probe_mst` standalone confirmed `tag` is discarded;
+  `lean_rorx_flags_body` (`x86MemRorxStepSpec` restatement) rc 0; and
+  `lean_ex_rorx_value` dst repaint — the first repaint draft `…0001` was
+  invisible to `native_decide` (tag/upper bytes only), repainted to the
+  load-bearing `0xc122334455660000` byte-7 paint and caught.
+- Run results: three consecutive byte-identical greens `TOTAL 70 mutations,
+  0 failures, 70 equivalences survived` / `ALL AS EXPECTED` rc 0 with
+  sorted-SURVIVED md5 `874c6236fca2efc2296b1e6863aff9f5`; both watched files
+  restored byte-identical after every row (pins `abca7add...` host +
+  `0b9743de...` hand module re-verified after each probe batch);
+  untracked harness retained; `make check` kept at 210 `: OK`.
+
 ## Step 0247 — x86 AND/OR/XOR [mem] handler-composition mutation coverage
 
 - Scope: the `AND/OR/XOR [mem], rhs` handler-composition contract: the hand
