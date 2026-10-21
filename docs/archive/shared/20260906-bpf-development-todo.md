@@ -15949,6 +15949,72 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0252 — x86 two-destination mulx mutation coverage
+
+- Scope: the two-destination `MULX` handler-composition contract (the hand
+  Lean module `X86MulxHandler.lean` IS the contract --- no dedicated
+  spec/generator exists for this family; the Step 0130 `mut_x86_mulx_arm.py`
+  covers the width-keyed arm-selection contract over different files):
+  `generatedX86MulxStep` writes two registers --- the product's low half
+  into the destination and its high half into the auxiliary operand ---
+  through `generatedX86RegWrite` under the `(AUX) != X86_REG_NONE` guard and
+  produces no flags; the 32-bit form multiplies the zero-extended low words
+  and splits one 64-bit product, every other width computes the plain 64-bit
+  product for dst plus the `x86MulxHighLadder` four-limb radix-`2^32` ladder
+  for aux, and the ladder equals the 128-bit high word by reuse --- the
+  `x86MulxHighLadderEqUmulhAlg` bridge (`simp only` + `ac_rfl` into
+  `arm64MulUmulhLadderEqHighWord` from `Arm64Mul.lean`), then the refinement,
+  flag-preservation, aux-absent, dst/aux tag scalars, and
+  `x86MulxMask32EqSetWidth` (`bv_decide`) close the module with four
+  `native_decide` examples (w64 max*max `2^128 - 2^65 + 1` -> low 1, high
+  `0xfffffffffffffffe`; w32 max*max split; aux absent; w16 limb branch); the
+  dedicated host `test_x86_mulx_handler_host.c` drives `generated_mulx` (the
+  real `KPROG_X86_WRITE_REG{8,16,32,64}` macros under the tagged
+  `union reg_storage`, aux arm guarded) against an independent exact
+  `__int128`-product oracle over the 18x18 limb-boundary sweep at all four
+  widths plus a 40,000-iterate three-advance LCG sweep, each with and without
+  aux = 41,296 cases comparing dst/aux values and all four flags.
+- Shaken: `build/mut_x86_mulx.py` 71 single-anchor rows over the two files
+  with the two detectors (`lean_chain` = `lake build KProgFormal.X86MulxHandler`
+  olean refresh then `lake env lean`; `host` = direct `cc -Wall -Wextra -O1 -I.`
+  recompile then run --- the Makefile binary is cache-mtime-stale).
+- Reclassified: shake 1's two UOS rows (`host_same_dst` dropping the dst arm
+  out of the comparator, `host_same_aux` re-arming dst over dst_tag) were
+  live-probed rc 0 `OK (41296 cases)` each and pinned equivalent --- the
+  differential pair re-derives both halves from the same `check` inputs, so
+  the aux and flag arms always agree and dropping the dst arm never fires,
+  and dst_tag survives the writeback chain identically on both sides; prior
+  session's mem_imul `got_mem`/`want_mem` buffer-swap lesson does not apply
+  because there is no buffer here.
+- Catches: 45 (19 host / 26 lean) --- every oracle write mask and the
+  low/high extraction shifts, the generated 32-bit single-product split and
+  p0/mid/high ladder limbs, the dst/aux write pairing, the aux-present guard,
+  the flags-pass-through, the width-keyed branch swap, the exact `__int128`
+  product shifts, the `BITVEC` four-limb decomposition and ladder limbs, the
+  spec's w32 product/setWidth widths and aux shift, the w64 product and
+  128-bit aux shift, the step/aux-guard `if` repaints, the roster imports,
+  the state structure and aux field, the step/spec def names, the ladder
+  lemma names (the bridge name is caught because the refinement proof
+  consumes it literally inside the file), and the exact-value example
+  repaints (dst/aux bits in the w64/w32/aux-absent/w16 examples).
+- Equivalences (26): the `low = lhs * rhs` -> `rhs * lhs` operand commutation
+  (integer multiply is commutative, host caught nothing); the comparator
+  repaint pair pinned equivalent above; the flag-seed decode repaint, the
+  aux/boundary loop bound repaint (`c < 17`), the LCG width-position repaint,
+  the `w`-table and `v`-repaint membership keeps, the dst/aux derived-seed
+  and LCG seed/constant repaints, and the five banner/mismatch/fail repaints
+  no oracle validates; and 11 zero-external-consumer name renames (the
+  `x86_mulx_step_refines`/`x86_mulx_preserves_flags`/aux-absent/tag-scalar
+  theorems, the three example names, the doc-comment repaint, and the
+  `end KProgFormal` namespace repaint; no module imports `X86MulxHandler`,
+  so file-internal renames survive the re-elaboration).
+- Run: three byte-identical green shakes `TOTAL 71 mutations, 0 failures,
+  71 equivalences survived` / `ALL AS EXPECTED` rc 0 (~22 s each); watched
+  files byte-identical after every row (pins
+  `fe4f1e7bdebe2d4d43ca49e3d7b6fa8a` host + `f140fb1ddbab840bcc0caab46ed5c484`
+  hand module re-verified); census 126 untracked harnesses; `make check`
+  stayed at 210 `: OK`.
+
 ## Step 0251 — x86 memory-source imul + compare mutation coverage
 
 - Scope: the `IMUL reg, [mem], imm` handler-composition contract (the hand

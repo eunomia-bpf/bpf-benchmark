@@ -5471,6 +5471,57 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0252 — x86 two-destination MULX mutation coverage
+
+The two-destination `MULX` handler-composition contract pins the product's
+two-register writeback (the hand Lean module `X86MulxHandler.lean` is the whole
+contract — no dedicated spec/generator exists for this family): unlike the
+single-destination arithmetic handlers it writes two registers — the low half
+of the product into the destination and the high half into the auxiliary
+operand — and produces no flags at all; `generatedX86MulxStep` splits on the
+width: the 32-bit form multiplies the zero-extended low words and splits that
+single 64-bit product (`(lhs &&& 0xffffffff) * (rhs &&& 0xffffffff)`,
+`product >>> 32` into aux), while every other width computes the plain 64-bit
+product for dst and the `x86MulxHighLadder` four-limb radix-`2^32` ladder for
+aux; the ladder is proved equal to the 128-bit high word by *reuse*, not
+re-derivation: `x86MulxHighLadderEqUmulhAlg` (`simp only [...]` + `ac_rfl`)
+shows the ladder equals the AArch64 `UMULH` ladder up to cross-term order, and
+`arm64MulUmulhLadderEqHighWord` from `Arm64Mul.lean` closes the high-word
+equality; `x86_mulx_step_refines` (`cases width <;> simp only [...],
+rw [x86_reg_write_refines], by_cases auxPresent <;> simp only [...,
+x86MulxHighLadderEqHighWord]`), `x86_mulx_preserves_flags` (no flag written),
+`x86_mulx_aux_absent_preserves_aux` (the `if ((AUX) != X86_REG_NONE)` guard),
+`x86_mulx_dst_tag_scalar`/`x86_mulx_aux_tag_scalar` (both writebacks
+scalarize), and `x86MulxMask32EqSetWidth` (`bv_decide` on the small
+mask-vs-`setWidth` bridge) close the module, four `native_decide` examples pin
+the w64 max*max (`2^128 - 2^65 + 1`: low word 1, high `0xfffffffffffffffe`),
+the w32 max*max split, the aux-absent tag-preservation case, and the w16
+limb-branch case, and the dedicated host `test_x86_mulx_handler_host.c` drives
+`generated_mulx` — the real macro chain `KPROG_X86_WRITE_REG8/16/32/64` under
+the tagged `union reg_storage` — against an independent
+exact-`__int128`-product oracle (`oracle_mulx`/`oracle_write` share no
+arithmetic with the limb ladder) over the 18x18 limb-boundary sweep at all
+four widths plus a 40,000-iterate three-advance LCG sweep, each with and
+without the auxiliary destination = 41,296 cases comparing dst/aux values and
+all four flags; `build/mut_x86_mulx.py` (untracked) runs 71 single-anchor rows
+over the two files with the two detectors (`lean_chain` = `lake build
+KProgFormal.X86MulxHandler` olean refresh then `lake env lean`; `host` =
+direct `cc -Wall -Wextra -O1 -I.` recompile then run — the Makefile binary is
+cache-mtime-stale). Three byte-identical greens: 45 caught (19 host / 26 lean)
+and 26 pinned equivalents (the `low = lhs * rhs` -> `rhs * lhs` operand
+commutation and the flag-seed decode, aux-boundary-loop bound, LCG width
+position, `w`/`v` table repaints, dst/aux derived-seed repaints, LCG
+seed/constant repaints the 41,296-case membership preserves; the `same_mulx`
+dst-arm drop and dst_tag re-arm the four-arm aux+flags comparison keeps after
+live probing (the differential pair always agrees on the aux and flag arms so
+dropping dst never fires, and dst_tag survives the writeback chain identically
+on both sides); five banner/mismatch repaints no oracle validates; and six
+zero-external-consumer theorem/example renames — the step-refine theorem's
+rename survives because the file re-elaborates its own self-contained proof
+chain and no later module consumes this family). Pins:
+`fe4f1e7bdebe2d4d43ca49e3d7b6fa8a` (host) + `f140fb1ddbab840bcc0caab46ed5c484`
+(hand module).
+
 ### Step 0251 — x86 memory-source imul + compare mutation coverage
 
 The memory-source imul contract pins the `IMUL reg, [mem], imm` composition (the hand Lean module `X86MemImulHandler.lean` is the whole contract — no dedicated spec/generator exists for this family): `generatedX86MemImulStep` loads via `GeneratedX86MemAccess.load byte memWidth` at the memory operand's own width, signs up the decoded immediate via `GeneratedX86Signed.signExtend (GeneratedX86Immediate.value rawImm width) width`, multiplies the mem-width sign-extended loaded value by it, and writes back through `generatedX86RegWrite state.dst result width` with `generatedX86ImulFlags lhs rhs width state.flags` seeing the *raw* loaded lhs and the senior-extended immediate; `x86_mem_imul_step_refines` (`simp only [generatedX86MemImulStep, x86MemImulStepSpec, x86_mem_load_refines, x86_immediate_value_refines, x86_sign_extend_refines, x86_reg_write_refines, x86_imul_flags_apply_refines]`), `x86_mem_imul_preserves_zf_sf`/`x86_mem_imul_cf_eq_of`/`x86_mem_imul_tag_scalar` (`rfl`-family), `x86_mem_imul_bytes_congruent` (per-width `simp only [...]` + `h i (by decide)` chains), and `x86_mem_imul_rhs_narrow_reads_low_bits` (`refine ⟨?_, ?_, ?_⟩ <;> simp only [...] <;> bv_decide`) close the contract, four `native_decide` examples pin the w16 `0x7fff x 2` overflow (`0xfffe` + CF/OF together), the w64/w8 narrow-mem sign-extend (`0xff` -> `-3`, flags off), the w8 mixed-sign `-128 x 2` overflow, and the w8 in-range merge, and the dedicated host `test_x86_mem_imul_handler_host.c` drives `generated_imul` — the real macro chain `KPROG_X86_MEM_LOAD` at `mem_width`, `KPROG_X86_IMMEDIATE_VALUE` + `kprog_x86_sign_extend_value`, `kprog_x86_abs_width_value` + `KPROG_X86_SET_IMUL_FLAGS(self-computed limit)`, `KPROG_X86_WRITE_REG{8,16,32,64}` under the tagged `union reg_storage` — against an independent `oracle_imul` (own byte-loop load, explicit sign-bit `oracle_sign_extend`, 128-bit signed product, `overflow = product outside [-2^(bits-1), 2^(bits-1)-1]`, `oracle_write` w8/w16 byte-merge vs w32 zero-extend) over 4 dst widths x 4 mem widths x 14 mem seeds x 14 immediates = 3,136 boundary cases plus a 40,000-iterate three-advance LCG sweep = 43,136 cases comparing destination value + tag + four flags; `build/mut_x86_mem_imul.py` (untracked) runs 67 single-anchor rows over the two files with the two detectors (`lean_chain` = `lake build KProgFormal.X86MemImulHandler` olean refresh then `lake env lean`; `host` = direct `cc -Wall -Wextra -O1 -I.` recompile then run — the Makefile-wired binary is cache-mtime-stale). Three byte-identical greens: 40 caught (21 host / 19 lean) and 27 pinned equivalents (the `KPROG_X86_SET_IMUL_FLAGS(cf, of, ...)` -> `(of, cf, ...)` argument swap the both-zero-or-both-set convention absorbs — live-probed rc 0, OK 43136; the `got_mem`/`want_mem` call-site buffer swap and the equal-fill mem repaint the 43,136-case membership preserves; the flag-seed decode repaint, inner-boundary-loop-bound (`c < 14` -> `c < 13`), width-key `(i>>1)`/`(i>>3)` swap, vector/width-table repaint, LCG seed/constant repaints, and six banner/mismatch/sweep-bound repaints no oracle validates; and ten zero-external-consumer theorem renames — the hand module's own proof chain closes over its own defs; the step refine-theorem rename survives because no other module imports the family). Pins: `c3e00bfd63db0ff2f313511e6f16065b` (host) + `7ab398afbaef1ea4126c471368b2e6fe` (hand module), re-verified after every probe batch.
