@@ -15949,6 +15949,73 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0247 — x86 AND/OR/XOR [mem] handler-composition mutation coverage
+
+- Scope: the `AND/OR/XOR [mem], rhs` handler-composition contract: the hand
+  Lean module `X86MemLogicHandler.lean` IS the contract (no dedicated
+  spec/generator for this family — it composes the `GeneratedX86MemAccess`
+  load/store pieces and the `X86AluWriteback.lean` and/or/xor reg-lane
+  handlers): `generatedX86MemLogicStep` loads via
+  `GeneratedX86MemAccess.load byte width`, forms
+  `{ dst := { bits := lhs, tag := .scalar }, flags := flags }`, and dispatches
+  `op` to `generatedX86{And,Or,Xor}RegLaneHandler state rhs width .low .low`;
+  `generatedX86MemLogicByte` writes the store output for
+  `i < GeneratedX86MemAccess.byteCount width` and fetch-through else; three
+  refine theorems close the step, the byte, and the handler conjunction.
+  The dedicated host `test_x86_mem_logic_handler_host.c` drives `generated_run`
+  — the macro composition `KPROG_X86_MEM_LOAD … & KPROG_X86_WIDTH_MASK`,
+  `KPROG_X86_SET_LOGIC_FLAGS(…, r == 0, !!(r & KPROG_X86_WIDTH_SIGN_MASK(w)))`,
+  `KPROG_X86_MEM_STORE` — against an independent 128-bit-mod `oracle_run`
+  over 3 ops × 4 widths × 8 vector pairs × 16 flag tuples = 1,536 boundary
+  cases plus a 20,000-iteration fixed-seed LCG sweep = 21,536 cases, comparing
+  `memcmp(got_mem, want_mem, 16)` plus the four flag fields.
+- Shakedown `build/mut_x86_mem_logic.py`: 66 rows over two files with two
+  detectors (`lean_chain` = `lake build KProgFormal.X86MemLogicHandler` olean
+  refresh then `lake env lean KProgFormal/X86MemLogicHandler.lean`; `host` =
+  direct `cc -Wall -Wextra -O2 -I.` compile of the host into `build/` then
+  execution — the Makefile-wired binary goes stale-cache when only source
+  mtimes change, so the detector must compile and run its own binary).
+- Static precheck: all 66 row needles count-pinned count(-) before shake 1;
+  the two duplicate-context anchors (`op == OP_AND ?` generated-vs-oracle,
+  the twice-chained LCG state update) needed statement-extended needles; the
+  LCG row repaints both occurrences (count 2).
+- 44 catches: 18 through the Lean chain (import repainting, `X86MemLogicOp`
+  constructor rename, step/byte def renames, generated-arm op toggles (the
+  and/or/xor arm repaints flow into the reg-lane handler), spec-side arm
+  toggles, `cases op` deletion, byte guard repaints (`<` → `<=` on both sides
+  leaks one byte at the load-boundary width and diverges), `by_cases`
+  predicate repaint, `rw [x86_mem_store_byte_refines]` repaint, internal-step
+  `rw` repaint in the handler theorem, example value/bytes/flags repaints,
+  `end KProgFormal` repaint) and 26 through the host (the oracle repaints are
+  caught because the byte-exact cross-check validates the oracle against the
+  generated composition — an oracle-side load shift, arith-op repaint, ZF/SF
+  condition repaint, sign-bit row repaint, mem-shift repaint, LCG constant
+  repaint, or flag-compare repaint diverges on a 21k-case membership; the
+  generated-side repaints are caught by the same comparison through
+  `KPROG_X86_SET_ADD_FLAGS` macro swap, ZF/SF argument repaint, arm repaint,
+  width-table-to-width-leak repaints).
+- 22 equivalents: theorem renames (`x86_mem_logic_step_refines`,
+  `x86_mem_logic_byte_refines`, `x86_mem_logic_handler_refines`,
+  `x86_mem_logic_xor_w16_example`) — the hand module's own proof chain closes
+  over its own defs and `lake env lean` fresh-compiles the file, so renames of
+  names with zero external consumers survive the Lean chain too; the
+  acceptance-preserving vector-table `0 → 2` repaint (the LCG sweep keeps the
+  class live), width-table `{1,2,4,8}→{1,2,8,8}` and loop-bound narrowing
+  `wi<4→3` / `a<8→7` / `f<16→12` / `20000→19999` / `i%3→i%2` / `(i>>2)&3→2`
+  repaints (the 21,536-case membership stays live), the LCG multiplier repaint
+  (both chained occurrences, acceptance-equal), the flag-lane bit-repack
+  `(f>>1)→(f>>2)` (still delivers each flag lane, just relabeled), the
+  `native_decide` → `decide` example (provable by `decide` too), the load-mask
+  drop `& mask` (the load macro never overreads, so dropping the host-side
+  mask is acceptance-equal), the `memcmp` length-1 repaint (byte 15 is fill
+  on both sides), and the six banner/mismatch repaints no oracle validates.
+- Run results: `TOTAL 66 mutations, 0 failures, 66 equivalences survived`,
+  `ALL AS EXPECTED` rc 0; three consecutive byte-identical green shakes with
+  sorted-SURVIVED md5 `360c4ac749510e6de799a72611eb92b9`; pins
+  `e42979cff26b879f423641b4db334924` (host) and
+  `83e6ed88a052c52f91bba3481850da95` (hand module) verified after every batch;
+  untracked harness retained; `make check` kept at 210 `: OK`.
+
 ## Step 0246 — x86 logical-result flag transition mutation coverage
 
 The logic-flags contract pins the two-input logical-result flag transition behind the single `KPROG_X86_SET_LOGIC_FLAGS(C_CF, C_ZF, C_SF, C_OF, ZERO, SIGN)` macro — `CF = 0`, `ZF = ZERO`, `SF = SIGN`, `OF = 0` — and the generated Lean `GeneratedX86LogicFlags.eval` restating the same four arms; the hand module (`X86LogicFlags.lean`) states the independent spec `x86LogicFlagsSpec`, proves `x86_logic_flags_refine` by `rfl`, and bridges the flags through the condition-to-next-PC decision with `x86_logic_branch_refines` (`rw [x86_logic_flags_refine, x86_condition_sound]`); `X86AluWriteback.lean` consumes both sides at sixteen sites and `X86_SIM_L_SET_LOGIC_FLAGS` (the ALU-flag dispatch default arm, the ANDN body, and the CMP/TEST logic arm) is the macro's only C consumer, so there is no dedicated host and the harness runs `gen` byte-exact plus the `lean_chain` (`lake build KProgFormal.X86LogicFlags` olean refresh then `lake env lean`). The single-line spec pins the schema/operation metadata and the four flag expressions (`cf`/`of` const-false, `zf` input `zero`, `sf` input `sign`); the generator re-checks the whole expected dictionary (the `{"schema_version","operation","flags"}` shape gate, the canonical `["cf","zf","sf","of"]` order, and the three-arm expression whitelist) exactly and re-renders the Lean module and the C header byte-for-byte.
