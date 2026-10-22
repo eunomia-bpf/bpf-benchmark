@@ -15949,6 +15949,65 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0259 — x86 register-lane AUX mutation coverage
+
+- Scope: the x86 register-lane AUX packed-layout contract
+  (`x86_reg_lane_aux_spec.json` -> `generate_x86_reg_lane_aux_spec.py` ->
+  `generated/x86_reg_lane_aux.h` + `KProgFormal/GeneratedX86RegLaneAux.lean`,
+  restated independently by `KProgFormal/X86RegLaneAux.lean`, checked by
+  the 7629-case `test_x86_reg_lane_aux_host.c` contract oracle, the three
+  sim-header static-assert lane pins in `x86/x86_sim.h`, the routed
+  `KPROG_X86_REG_LANE_AUX_*` decoder call sites inside
+  `x86/x86_sim_local_bpf.h`'s ALU/CMP/MOV/SETCC step bodies, and the
+  micro-prog encoder `x86/micro-prog/generated_x86_reg_lane_aux.py`
+  (fourth `--check` render target, consumed by
+  `generate_micro_sim_proofs.py`); route oracles are the 760337-case
+  `test_x86_alu_result_route_host.c` and the 14479-case
+  `test_x86_cmpop_route_host.c` (21764-case mov route also registered but
+  not part of the detector).
+- Harness: `build/mut_x86_reg_lane_aux.py` (untracked) — 111
+  single-anchor rows over the nine-file watchlist (spec JSON + generator
+  + generated header + generated Lean + hand Lean + contract host driver
+  + encoder + `x86/x86_sim.h` + `x86/x86_sim_local_bpf.h`), snapshotted
+  and restored byte-exact around every row, four detectors (generator
+  `--check` byte-exactness; `lake build
+  KProgFormal.X86RegLaneAux/KProgFormal.X86AluDecode/
+  KProgFormal.X86SetccHandler` + `lake env lean` chain — consumer-aware,
+  since X86AluDecode plays `x86_reg_lane_aux_payload_roundtrip` and
+  X86SetccHandler plays the payload/dst pair; contract host compile/run;
+  ALU-result + cmpop route hosts compile/run with the vendor libbpf
+  include path).
+- Catches 90: spec field-name/shift/mask/order and `valid_byte_shifts`
+  drifts; generator EXPECTED/render template drifts caught by `--check`
+  byte staleness (Lean pack/decoders, C packer/decoders, the encoder
+  `VALID_BYTE_SHIFTS` policy); generated-C packer/decoder drifts caught
+  at host compile/run; generated/hand Lean packer/decoder drifts and the
+  consumed hand-theorem renames caught by the lake chain
+  (`payload_roundtrip`/`dst_roundtrip` renamed under
+  `X86SetccHandler`/`X86AluDecode`); the three sim-header static-assert
+  value repaints caught at host compile; and the routed call-site
+  repaints caught through the route hosts (ALU immediate payload lane
+  repaint, ALU register source lane zeroing, CMP mem-reg lane swaps).
+- Equivalences 21: three unreachable generator error-message repaints;
+  six unconsumed hand renames/tautologies (`src_roundtrip`,
+  `pack_refines`, `fields_non_interfering`, `typed_lanes_roundtrip`,
+  `example`, the `x86ByteShiftSpec src + 0` rhs repaint — no downstream
+  module plays those names); three byte-level surface repaints no driven
+  byte distinguishes (the sibling-decoder swaps at the MOV-IMM,
+  SETCC-step, SETCC-payload, DISP-MOV-IMM, and DISP-MOV-REG call sites
+  all survive because the planted aux lanes are always equal; packaged
+  as five rows); the host top-byte pin drop (the 19^3 grid only drives
+  byte lanes); the exhaustive-loop transpose; the case-count print
+  gate; the OK-banner repaint; the failure-gate repaint; the packer
+  trailing-whitespace repaint; and the `dst_shift + 0` f-string and
+  genmark repaints that survive only where no byte-compare watches —
+  recorded per-row from live probes.
+- Run: three consecutive byte-exact green shakes — `TOTAL 111
+  mutations, 0 failures, 21 equivalences survived` / `ALL AS EXPECTED`
+  rc 0 (~59 s each) — tree restored after each run (`ulimit -c 0`
+  first). `make check` expected still 210 `: OK`; harness census
+  132 -> 133.
+
 ## Step 0258 — x86 memory-AUX mutation coverage
 
 - Scope: the x86 memory-AUX packed-layout contract

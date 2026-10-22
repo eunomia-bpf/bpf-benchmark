@@ -5471,6 +5471,60 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0259 — x86 register-lane AUX mutation coverage
+
+The x86 register-lane AUX packed-layout contract
+(`x86_reg_lane_aux_spec.json` -> `generate_x86_reg_lane_aux_spec.py` ->
+`generated/x86_reg_lane_aux.h` + `KProgFormal/GeneratedX86RegLaneAux.lean`,
+restated independently by `KProgFormal/X86RegLaneAux.lean`, checked by the
+7629-case `test_x86_reg_lane_aux_host.c` oracle, the sim-header
+static-assert lane pins, and the routed decoders inside
+`x86/x86_sim_local_bpf.h`'s ALU/CMP/MOV/SETCC step bodies that the
+760337-case `test_x86_alu_result_route_host.c` and 21764-case
+`test_x86_mov_route_host.c` oracles drive via the vendor libbpf include
+path, plus the fourth `--check` render target
+`x86/micro-prog/generated_x86_reg_lane_aux.py` consumed by
+`generate_micro_sim_proofs.py`) now has its own single-anchor mutation
+harness, `build/mut_x86_reg_lane_aux.py`: 111 rows over the eight-file
+watchlist (spec JSON + generator + generated header + generated Lean +
+hand Lean + contract host driver + encoder + the routed
+`x86/x86_sim.h`/`x86_sim_local_bpf.h` call sites), snapshotted and
+restored byte-exact around every row, with four detectors (generator
+`--check` byte-exactness, the `lake build
+KProgFormal.X86RegLaneAux/X86AluDecode/X86SetccHandler` +
+`lake env lean` chain — consumer-aware, since X86AluDecode and
+X86SetccHandler play the hand-module roundtrip theorems — the contract
+host compile/run, and the ALU-result + cmpop route hosts compile/run).
+- Catches 90: spec field-name/shift/mask/order and
+  `valid_byte_shifts` drifts, the generator EXPECTED/render template
+  drifts (Lean pack/decoders, C packer/decoders, the encoder
+  `VALID_BYTE_SHIFTS` policy), generated-C packer/decoder drifts caught
+  at host compile/run, generated- and hand-Lean packer/decoder drifts and
+  the consumed-theorem renames caught by the lake chain
+  (`payload_roundtrip`/`dst_roundtrip` renamed under
+  `X86SetccHandler`/`X86AluDecode`), the sim-header static-assert
+  value repaints caught at host compile, and the routed call-site
+  repaints caught through the route hosts (ALU immediate payload lane,
+  ALU register source lane zeroing, CMP mem-reg lane swaps).
+- Equivalences 21: three unreachable generator error-message repaints,
+  the unconsumed hand renames (`src_roundtrip`, `pack_refines`,
+  `fields_non_interfering`, `typed_lanes_roundtrip`, `example`, the
+  `x86ByteShiftSpec src` + 0 tautology), byte-level surface repaints
+  that no driven byte distinguishes (decoder trailing-whitespace and the
+  `dst_shift + 0` f-string repaint are caught, but the sibling-decoder
+  swaps at the MOV-IMM/MOV-REG/SETCC/UNARY call sites and the
+  `0xaU ^ 0xff` payload-lane pin survive because the driven aux lanes
+  are always equal), the host top-byte pin drop (the 19^3 grid already
+  forces byte lanes), the exhaustive-loop transpose, the case-count
+  print gate, the OK-banner repaint, the failure-gate repaint, and the
+  packer trailing-whitespace repaint.
+- Run: three consecutive byte-exact green shakes, `TOTAL 111 mutations,
+  0 failures, 21 equivalences survived` / `ALL AS EXPECTED` rc 0
+  (~59 s each), tree restored each time (no new `git status` entries
+  beyond the pre-existing dirty set), census 132 -> 133 untracked
+  harnesses, `make check` expected still 210 `: OK` (no new oracle
+  hosts).
+
 ### Step 0258 — x86 memory-AUX mutation coverage
 
 The x86 memory-AUX packed-layout contract (`x86_mem_aux_spec.json` ->
