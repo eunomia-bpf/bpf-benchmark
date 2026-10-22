@@ -161,18 +161,6 @@ DETECTORS = {
     "arm_route": detect_arm_route,
 }
 
-DETECTOR_FAMILIES = {
-    "index_gen": ("index_gen", "index_lean_chain", "index_host"),
-    "index_lean_chain": None,
-    "index_host": None,
-    "arena_gen": None,
-    "arena_lean_chain": None,
-    "arena_host": None,
-    "arm_gen": None,
-    "arm_lean_chain": None,
-    "arm_host": ("arm_gen", "arm_lean_chain", "arm_host"),
-    "arm_route": ("arm_gen", "arm_lean_chain", "arm_host", "arm_route"),
-}
 
 
 def regen_index():
@@ -218,7 +206,6 @@ IGI_BASE = '    "index_base": "capacity",'
 IGI_MASK = '    "index_mask_bits": 32,'
 IGI_LEAN_PATH = 'LEAN = ROOT / "KProgFormal/GeneratedX86StackIndex.lean"'
 IGI_CHEADER_PATH = 'CHEADER = ROOT / "generated/x86_stack_index.h"'
-IGI_LEAN_DEF = 'def index (capacity off : BitVec 64) : BitVec 32 :='
 IGI_LEAN_BODY = '  (capacity + off).truncate 32'
 IGI_C_MACRO = '((__u32)((__s64)(OFF) + (__s64)(CAPACITY)))'
 IGH_MACRO = '((__u32)((__s64)(OFF) + (__s64)(CAPACITY)))'
@@ -241,14 +228,9 @@ AGI_LEAN_WIDX = ('def wordIndex (index : BitVec 32) : BitVec 32 := '
                  'index >>> {shift}')
 AGI_LEAN_WALIGNED = ('def wordAligned (index : BitVec 32) : Bool := '
                      '(index &&& {mask}) == 0')
-AGI_LEAN_WORDS = ('def words (capacity : BitVec 32) : BitVec 32 :=\n'
-                  '  (capacity + {mask}) / {1 << shift}')
 AGI_C_WIDX = ('#define KPROG_X86_STACK_WORD_INDEX(INDEX) '
               '((__u32)(INDEX) >> {shift})')
-AGI_C_WALIGNED = '((((__u32)(INDEX) & {mask}U) == 0U) ? 1 : 0)'
-AGI_C_WORDS = '(((__u32)(CAPACITY) + {mask}U) / {1 << shift}U)'
 AGH_WIDX = '#define KPROG_X86_STACK_WORD_INDEX(INDEX) ((__u32)(INDEX) >> 3)'
-AGH_WALIGNED = '((((__u32)(INDEX) & 7U) == 0U) ? 1 : 0)'
 AGH_BYTE = '((__u8)(((__u64)(WORD)) >> (8U * (__u32)(K))))'
 AGH_WORDS = '(((__u32)(CAPACITY) + 7U) / 8U)'
 AGH_ASSEMBLE = '(((__u64)((__u8)(BYTE))) << (8U * (__u32)(K)))'
@@ -258,16 +240,13 @@ AGN_WORDS = 'def words (capacity : BitVec 32) : BitVec 32 :=\n  (capacity + 7) /
 AHN_WIDX = ('def x86StackArenaWordIndexSpec (index : BitVec 32) : BitVec 32 '
             ':= index / 8')
 AHN_WORDS = 'capacity >>> 3 + (if capacity &&& 7 == 0 then 0 else 1)'
-AHN_EXAMPLE = 'theorem x86_stack_arena_example'
 AHN_EXAMPLE_BODY = '    words 128 = 16 \u2227 words 64 = 8 \u2227 words 1 = 1 \u2227'
 
 # ================= stack-arm anchors (from step 0120 harness) =================
 SSA_W64 = '"name": "qword", "w64": true,'
 SSA_WORD = '"aligned": true, "word": true}'
 SSA_BODY_WORD = '"body": "word_arena_access"'
-SSA_BODY_BYTE = '"body": "byte_ladder_access"'
 SSA_ARM_WORD = '"arm": "word",'
-SSA_ARM_BYTE = '"arm": "byte",'
 SSA_DEFINE_WORD = '"arm_define": "KPROG_X86_STACK_ARM_WORD",'
 SSA_NAME_QWORD = '"name": "qword",'
 SSA_WIDTH64 = '"width64_code": 8,'
@@ -287,7 +266,6 @@ GHA_WIDTH64 = "#define KPROG_X86_STACK_ARM_WIDTH64 8U"
 GHA_COUNT = "#define KPROG_X86_STACK_ARM_COUNT 2U"
 GHA_WORD_CODE = "#define KPROG_X86_STACK_ARM_WORD 1U"
 GHA_BYTE_CODE = "#define KPROG_X86_STACK_ARM_BYTE 0U"
-GHA_MACRO_DEFINE = '#define KPROG_X86_STACK_ARM(IS_W64, IS_ALIGNED)'
 GHA_MACRO = '\t((__u8)(((IS_W64) && (IS_ALIGNED)) ? 1 : 0))'
 GHA_ASSERT_WORD = ('_Static_assert(KPROG_X86_STACK_ARM(1, 1) == '
                    'KPROG_X86_STACK_ARM_WORD,')
@@ -307,7 +285,6 @@ HNA_CODES_DEF = "def x86StackArmCodesSpec : List Nat := [1, 0]"
 HNA_DISPATCH = "    armOf true true = .word \u2227 armOf true false = .byte \u2227"
 HNA_BODIES = 'bodyOfArm .word = "word_arena_access" \u2227'
 LOC_INCLUDE = '#include "../formal/generated/x86_stack_arm.h"\n'
-LOC_SELECTOR = "KPROG_X86_STACK_ARM("
 LOC_WORD_ARENA = "__x86_stack_mem.q"
 LOC_WORD_INDEX = "KPROG_X86_STACK_WORD_INDEX("
 LOC_ASSEMBLE = "KPROG_X86_STACK_ASSEMBLE("
