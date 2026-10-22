@@ -16002,6 +16002,68 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0266 — x86 ptr-write handler mutation coverage
+
+- Scope: the x86 two-opcode pointer-write provenance contract:
+  `X86_OP_MOV_LOAD_MAP_PTR` 0x2c / `X86_OP_MOV_LOAD_HELPER_ID` 0x2d are the
+  two opcodes whose register write installs pointer bits together with a
+  provenance tag and no width-confined lane. The chained selector
+  `KPROG_X86_PTR_WRITE_TAG(IS_MAP_PTR, IS_HELPER_ID)` tests the two opcode
+  facts in that order (mapPtr tag 5, helperId tag 7, the `scalar` tag 0 a
+  legal member of the table no pointer-write opcode selects, out-of-range
+  fallthrough `KPROG_X86_PTR_WRITE_TAG_ANY 0xff`; tags pinned to the sim's
+  `X86_SIM_TAG_SCALAR`/`_MAP_PTR`/`_HELPER_ID` values), gates the helper-id
+  arm's preliminary width-64 scalar lane write through
+  `KPROG_X86_PTR_WRITE_IS_HELPER_ID(TAG)` (a lane write the pointer write
+  then replaces bit for bit), and both arms perform the pointer write
+  through `X86_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)(IMM), TAG)`;
+  a tag code is not a width, so neither opcode consults the FLAGS width the
+  shared dispatch chain computed. `x86_ptr_write_spec.json` (41 lines:
+  schema/operation `x86PtrWrite`/selector `opcode_then_provenance_tag` +
+  the 3-row tag table + the 2-row opcode table with `writes_width64`
+  false/true) -> `generate_x86_ptr_write_spec.py` re-checks the whole
+  exact-match expected dictionary and byte-for-byte re-renders
+  `GeneratedX86PtrWrite.lean` + `generated/x86_ptr_write.h` (the `0x2c`/
+  `0x2d` opcode asserts, the three tag asserts, and the two selector
+  macros); the hand Lean module `KProgFormal/X86PtrWriteHandler.lean`
+  restates the tag/codes/selector/width64 tables and the whole-immediate
+  `x86PtrWriteBitsSpec` (the identity, with the near-miss contrast against
+  the immediate-store displacement's `(s32)((IMM) >> 32)` high-half slice)
+  and proves the step refinement, the fields/identity theorems, the
+  whole-artifact example pin, the `X86_REG_NONE` fallthrough, the helper-id
+  absorb lemma, the map-pointer no-scalar-write lemma, the
+  never-scalarizes lemma, and the four canonical examples; and the
+  318-case `test_x86_mov_load_map_ptr_host.c` contract host drives the
+  generated macros exactly as the arms do against a hand-written model of
+  the arm, comparing the whole register file, the lane-write count, and
+  the flags (part 1 tag codes; part 2 the four fact pairs; part 3 the
+  helper-id test over 256 tag bytes; part 4 the 4-opcode x 3-destination x
+  4-immediate arm lockstep; part 5 the seven asymmetry pins).
+- Harness: `build/mut_x86_ptr_write.py` (untracked, census 139 -> 140):
+  121 rows over the six-file watchlist (spec JSON + generator + generated
+  header + generated Lean + hand Lean + contract host), snapshotted and
+  restored byte-exact around every row, three detectors: the
+  `generate_x86_ptr_write_spec.py --check` equality and byte renders, the
+  `lake build KProgFormal.GeneratedX86PtrWrite` + both Lean elaborations,
+  and the compiled and exact-OK-banner-checked host (`OK (318 cases)`.
+- Catches 106: the 21 spec-file rows (schema/operation/selector keys, tag
+  and opcode table cells, the two width64 flips, the two tag crosspaints),
+  the 43 generator rows (expected-dictionary keys and render templates),
+  the 10 generated-C header macro-body rows the host pins, the 14
+  generated-Lean rows (code/tagOf/width64 arms plus the four selector
+  rows), the 17 hand-Lean rows the build or elaboration rejects (the
+  bridge/signature/arm drifts), and the host rows (the banner repaint).
+- Equivalences 15: the three failure-path generator message repaints the
+  OK run never prints (stale/order/duplicate) and the twelve no-consumer
+  hand theorem renames the chain re-discharges (tag-code, tag-select,
+  all-reachable, width64-map, step, step-fields, bits-id, bits-example,
+  none-fallthrough, helper-absorbs, map-no-scalar, never-scalarizes).
+- Run: four consecutive byte-exact green shakes, `TOTAL 121 mutations, 0
+  failures, 15 equivalences survived` / `ALL AS EXPECTED` rc 0 (~33 s
+  each), tree restored each time (no new `git status` entries beyond the
+  pre-existing dirty set), census 139 -> 140 untracked harnesses, 0 core
+  dumps; `make check` expected still 210 `: OK` (no new oracle hosts).
+
 ## Step 0265 — x86 IMUL reg-imm handler mutation coverage
 
 - Scope: the x86 register-source `IMUL` immediate handler-composition
