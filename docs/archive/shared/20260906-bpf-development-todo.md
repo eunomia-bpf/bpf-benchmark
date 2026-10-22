@@ -16002,6 +16002,58 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0262 — x86 REP MOVS block-copy mutation coverage
+
+- Scope: the x86 `REP MOVS` block-copy contract
+  (`x86_rep_movs_spec.json` -> `generate_x86_rep_movs_spec.py` ->
+  `generated/x86_rep_movs.h` + `KProgFormal/GeneratedX86RepMovs.lean`,
+  restated independently by `KProgFormal/X86RepMovsHandler.lean`,
+  checked by the 67-case `test_x86_rep_movs_host.c` oracle over the
+  five width codes and ten counts, and consumed by the real
+  `X86_OP_REP_MOVS` arm in `x86/x86_sim_local_bpf.h` through the
+  `KPROG_X86_REP_MOVS_WIDTH/_BOUND/_COUNT_WIDTH` selectors, which the
+  127-case route-oracle `test_x86_rep_movs_route_host.c` drives
+  through `X86_SIM_L_EXEC_REP_MOVS`).
+- Harness: `build/mut_x86_rep_movs.py` (untracked, census 135 -> 136):
+  149 rows over the eight-file watchlist (spec JSON + generator +
+  generated header + generated Lean + hand Lean + contract host +
+  route host + sim header), snapshotted and restored byte-exact
+  around every row, four detectors: generator `--check` byte-exactness
+  (byte-compares BOTH rendered files — generated C header and
+  generated Lean — so comment drifts the Lean chain no longer binds
+  are caught there), the `lake build
+  KProgFormal.GeneratedX86RepMovs/GeneratedX86Width` + `lake env lean
+  X86RepMovsHandler.lean` chain, the contract host compile/run, and
+  the route host compile/run.
+- Catches 107: spec schema/operation/selector/opcode/bound/width
+  drifts; generator expected-table and render-template drifts
+  (stale-gate repaint, Lean bound/default/count rows, resolve ladder,
+  element-count line, POP-doc drift, rendered C block/width/bound
+  comments and macro assert); generated-C constants; generated-Lean
+  bound/default/count/resolve drifts; hand-Lean restatement drifts
+  (bound, width arms, element/count widths, RCX zeroing,
+  stride/advance bodies, proof-tail `simp`/`rfl` anchors); host
+  model/contract/part2/pin drifts; route-model/bound/elements/copy/
+  pointer/config-check drifts; and the 14 sim-header routed-body
+  repaints (guard, src/dst addresses, load/store call forms, exec
+  width/count/tags/loop/pointers/RCX) caught by compile breaks or
+  127-case divergence.
+- Equivalences 42: the 24 hand-Lean theorem renames (zero external
+  Lean consumers of the hand module), the four generator error-message
+  wording repaints (`--check` never reads the invalid-input paths),
+  the host and route OK-banner repaints, the part2/macro fixture
+  repaints that both sides recompute symmetrically, the pin-2
+  count 100-to-101 drift past the bound, the RCX sentinel repaint
+  (the body zeroes RCX after the plant), the dst-memcmp one-byte tail
+  shorten, and the sim-header displacement-gate/exec-line comment
+  repaints.
+- Run: three consecutive byte-identical green shakes, `TOTAL 149
+  mutations, 0 failures, 42 equivalences survived` / `ALL AS EXPECTED`
+  rc 0 (~43 s each), tree restored each time (no new `git status`
+  entries beyond the pre-existing dirty set), census 135 -> 136
+  untracked harnesses, 0 core dumps; `make check` expected still
+  210 `: OK` (no new oracle hosts).
+
 ## Step 0260 — x86 register-presence mutation coverage
 
 - Scope: the x86 operand-register presence contract
