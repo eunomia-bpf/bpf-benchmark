@@ -15949,6 +15949,53 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0260 — x86 register-presence mutation coverage
+
+- Scope: the x86 operand-register presence contract
+  (`x86_reg_presence_spec.json` -> `generate_x86_reg_presence_spec.py` ->
+  `generated/x86_reg_presence.h` + `KProgFormal/GeneratedX86RegPresence.lean`,
+  restated independently by `KProgFormal/X86RegPresence.lean`, checked by
+  the 768-case `test_x86_reg_presence_host.c` byte-range oracle, and
+  consumed by the memory-operand bodies in `x86/x86_sim_local_bpf.h`
+  through the `KPROG_X86_REG_PRESENT`/`KPROG_X86_REG_ABSENT` guards at
+  more than a dozen call sites).
+- Harness: `build/mut_x86_reg_presence.py` (untracked) — 56
+  single-anchor rows over the six-file watchlist (spec JSON + generator
+  + generated header + generated Lean + hand Lean + contract host
+  driver), snapshotted and restored byte-exact around every row, with
+  three detectors (generator `--check` byte-exactness; the
+  `lake build KProgFormal.GeneratedX86RegPresence/MemIndex/MemAux` +
+  `lake env lean X86RegPresence.lean` chain — consumer-aware, since the
+  hand module plays the sentinel links to the memory-index and packed-AUX
+  sentinels; contract host compile/run).
+- Catches 45: spec operation/reg_bits/sentinel/arm-flag drifts;
+  generator EXPECTED/render-template drifts caught by `--check` byte
+  staleness (Lean arm selector + row ladders, C present/absent/arm
+  ternaries); generated-C polarity/swap drifts, the arm-code constants
+  (both directions, caught exactly when the two arm codes collide),
+  the sentinel drift, and the arm-code drift where the host's
+  arm/present agreement check alone binds; generated-Lean arm swap,
+  row flips, sentinel drift, and namespace repaint; hand-Lean
+  arm/present/absent spec swaps, the complement-line tag, the
+  `_0xff`-pin drift, the sentinel-absent arm flip, the index-sentinel
+  link width repaint, and the namespace drift; and the host
+  want-present/want-absent/want-arm/cross/arm-agree/sentinel drifts.
+- Equivalences 11: five unreachable generator error-message repaints
+  and the stale-gate repaint (the `--check` branch no longer reads
+  drift); the three consumed-by-name-only hand renames
+  (`arm_refines`, `present_refines`, `absent_refines`); the two
+  hand conclusion renames (`case_dispatch`, `examples`); and the
+  host OK-banner repaint — recorded per-row from live probes (the
+  arm-present `0U -> 5U` drift and the arm-absent `1U -> 6U` drift
+  survive because the oracle reads both arm constants through the
+  drifted header, and only an arm-codes collision diverges the
+  `want_arm` selector).
+- Run: three consecutive byte-exact green shakes — `TOTAL 56
+  mutations, 0 failures, 11 equivalences survived` / `ALL AS EXPECTED`
+  rc 0 (~11 s each) — tree restored after each run (`ulimit -c 0`
+  first). `make check` expected still 210 `: OK`; harness census
+  133 -> 134.
+
 ## Step 0259 — x86 register-lane AUX mutation coverage
 
 - Scope: the x86 register-lane AUX packed-layout contract
