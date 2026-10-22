@@ -5471,6 +5471,46 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0258 — x86 memory-AUX mutation coverage
+
+The x86 memory-AUX packed-layout contract (`x86_mem_aux_spec.json` ->
+`generate_x86_mem_aux_spec.py` -> `generated/x86_mem_aux.h` +
+`KProgFormal/GeneratedX86MemAux.lean`, restated independently by
+`KProgFormal/X86MemAux.lean`, checked by the 7904-case
+`test_x86_mem_aux_host.c` oracle and the sim-header alias asserts +
+3650-case `test_x86_mem_read_dispatch_host.c` route oracle) now has its
+own single-anchor mutation harness, `build/mut_x86_mem_aux.py`: 90 rows
+over the seven-file watchlist (spec JSON + generator + generated header +
+generated Lean + hand Lean + contract host driver + the routed
+`x86/x86_sim.h` AUX alias region), snapshotted and restored byte-exact
+around every row, with four detectors (generator `--check`
+byte-exactness, the `lake build KProgFormal.X86MemAux` +
+`lake env lean` chain, the contract host compile/run, and the
+mem-read-dispatch route host compile/run requiring the vendor libbpf
+include path).
+- Catches 82: spec field-name/shift/repaint/order/word-bits drifts, the
+  generator EXPECTED/render template drifts caught by `--check`
+  staleness, generated-C packer/decoder/none-macro drifts caught at host
+  compile/run, generated/hand Lean packer and decoder drifts caught by
+  the lake chain (pack 1 2 3 4 falsification, num-lane repaints, the
+  `indexNone = 0xfe` drift), the sim-header alias and static-assert
+  repaints caught through both host paths, and the route quads-region
+  repaint caught by route compile.
+- Equivalences 8: two unreachable generator error-message repaints, the
+  consumer-free hand renames (`x86_mem_aux_pack_refines`,
+  `x86MemAuxSpec`) and the surviving informativeness renames
+  (`hd_spec_rename`, `hd_pack_refines_rename`), the failures-counter
+  drop (the 7904-case oracle still passes), the exhaustive-loop
+  transpose (the loop still sweeps all lanes), the OK-banner repaint,
+  the case-count print gate (-1 case still true), and the routed
+  allocator comment repaint.
+- Run: three consecutive byte-exact green shakes, `TOTAL 90 mutations,
+  0 failures, 8 equivalences survived` / `ALL AS EXPECTED` rc 0
+  (~18 s each), tree restored each time (no new `git status` entries
+  beyond the pre-existing dirty set), census 131 -> 132 untracked
+  harnesses, `make check` expected still 210 `: OK` (no new oracle
+  hosts).
+
 ### Step 0257 — x86 stack trio mutation coverage
 
 The three stack contracts the x86 simulator's frame helpers route through —

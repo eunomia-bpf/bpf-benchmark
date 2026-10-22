@@ -15949,6 +15949,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0258 — x86 memory-AUX mutation coverage
+
+- Scope: the x86 memory-AUX packed-layout contract
+  (`x86_mem_aux_spec.json` -> `generate_x86_mem_aux_spec.py` ->
+  `generated/x86_mem_aux.h` + `KProgFormal/GeneratedX86MemAux.lean`,
+  restated independently by `KProgFormal/X86MemAux.lean`, checked by the
+  7904-case `test_x86_mem_aux_host.c` contract oracle, the sim-header
+  AUX alias/static-assert pins in `x86/x86_sim.h`, and the 3650-case
+  `test_x86_mem_read_dispatch_host.c` route oracle).
+- Harness: `build/mut_x86_mem_aux.py` (untracked) — 90 single-anchor rows
+  over the seven-file watchlist (spec JSON + generator + generated header
+  + generated Lean + hand Lean + contract host driver + the routed
+  `x86/x86_sim.h` AUX alias region), snapshotted and restored byte-exact
+  around every row, four detectors (generator `--check` byte-exactness,
+  `lake build KProgFormal.X86MemAux` + `lake env lean` chain, contract
+  host compile/run, mem-read-dispatch route host with the vendor libbpf
+  include path).
+- Catches 82: spec field-name/shift/repaint/order/word-bits drifts,
+  generator EXPECTED/render template drifts caught by `--check` staleness,
+  generated-C packer/decoder/none-macro drifts caught at host compile/run,
+  generated/hand Lean packer/decoder drifts caught by the lake chain
+  (pack falsification, num-lane repaints, `indexNone = 0xfe`), the
+  sim-header alias and static-assert repaints caught through both host
+  paths, and the route quads-region repaint caught by route compile.
+- Equivalences 8: two unreachable generator error-message repaints, four
+  consumer-free hand/theorem renames (`x86MemAuxSpec`,
+  `x86_mem_aux_pack_refines`, plus two surviving renames), the
+  failures-counter drop, the exhaustive-loop transpose, the OK-banner
+  repaint, the case-count print gate, and the routed allocator comment
+  repaint.
+- Run: three consecutive byte-exact green shakes — `TOTAL 90 mutations,
+  0 failures, 8 equivalences survived` / `ALL AS EXPECTED` rc 0 (~18 s
+  each) — tree restored after each run (`ulimit -c 0` first). `make
+  check` expected still 210 `: OK`; harness census 131 -> 132.
+
 ## Step 0257 — x86 stack trio mutation coverage
 
 - Scope: the three stack contracts the x86 simulator's frame helpers route
