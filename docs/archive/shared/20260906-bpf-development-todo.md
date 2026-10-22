@@ -16002,6 +16002,58 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0267 — x86 register-dispatch mutation coverage
+
+- Scope: the x86 sixteen-cell register-number contract every register-lane
+  helper and the simulator's subgroup/filter operations consume through the
+  hand-written `X86_SIM_L_FOR_EACH_GPR` X-macro dispatch and the
+  `X86_SIM_L_REG_VALUE` read ternary chain: `x86_reg_dispatch_spec.json`
+  pins sixteen `{name, define, number}` rows `rax..r15` in
+  `X86_RAX..X86_R15` order with numbers `0..15`, `reg_bits` 8, `gpr_count`
+  16, and the `0xff` no-register sentinel;
+  `generate_x86_reg_dispatch_spec.py` re-renders
+  `generated/x86_reg_dispatch.h` (GPR count `KPROG_X86_GPR_COUNT 16U`, the
+  identity cell selector `KPROG_X86_GPR_CELL(REG) ((__u8)((REG)))`,
+  sixteen register-number drift `_Static_assert`s) and
+  `GeneratedX86RegDispatch.lean` byte-for-byte under `--check`; the hand
+  module `X86RegDispatch.lean` restates the `finRange` twin tables and the
+  literal-bound `cellOf` and proves twenty theorems; the 258-case
+  `test_x86_reg_dispatch_host.c` contract host pins count, identity cell
+  selection over all 256 number bytes, and four decode constants; the
+  6401-case `test_x86_reg_dispatch_route_host.c` route host drives the real
+  `X86_SIM_L_WRITE_REG_WIDTH` write dispatch (observing the changed cell
+  through the cell tag at 4 widths x 6 values) and the real
+  `X86_SIM_L_READ_REG` read chain over all 256 numbers.
+- Harness: `build/mut_x86_reg_dispatch.py` (untracked), 118 rows over the
+  eight-file watchlist (spec + generator + generated header + generated
+  Lean + hand Lean + contract host + route host + the
+  `x86_sim_local_bpf.h` routing region: the generated-header include, the
+  three cell-drift asserts, the FOR_EACH_GPR X-rows, the REG_VALUE ternary
+  chain, and the READ_REG width wrapper), four detectors (`--check` gen,
+  Lean chain, 258-case contract host, 6401-case route host).
+- Catches 100: the 7 spec-file rows at the `--check` equality, the 34
+  generator rows (expected-dictionary keys and render templates), the 5
+  generated-C header rows (count/cell macro bodies, count assert, guard,
+  and include doc-line), the 9 generated-Lean rows the build rejects, the
+  24 hand-Lean rows the build or elaboration rejects, the 21 route rows
+  (sim-header include/X-row/drift-assert/read-chain drifts plus the route
+  host's model/count/banner drifts), and the 6 contract-host rows
+  (model/count/banner drifts the exact pin rejects). Unlike the 0266
+  ptr-write harness, these two hosts pin their OK-banners, so banner
+  repaints are catches here (0266's rc-only host detector made its banner
+  row an equivalence there).
+- Equivalences 18: the six failure-path generator messages and the
+  duplicated define-load repaint the OK run never prints, the one
+  no-consumer generated-Lean doc repaint, the seven no-consumer hand
+  theorem renames the chain re-discharges, the two FAIL-banner repaints
+  the rc-only paths cannot see, and the shadowed `X86_SIM_L_READ_REG`
+  wrapper-shift repaint the width-shift call sites control.
+- Run: four consecutive byte-exact green shakes, `TOTAL 118 mutations, 0
+  failures, 18 equivalences survived` / `ALL AS EXPECTED` rc 0 (~29 s
+  each), tree restored each time (no new `git status` entries beyond the
+  pre-existing dirty set), census 140 -> 141 untracked harnesses, 0 core
+  dumps; `make check` stayed 210 `: OK`.
+
 ## Step 0266 — x86 ptr-write handler mutation coverage
 
 - Scope: the x86 two-opcode pointer-write provenance contract:
@@ -16049,10 +16101,12 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Catches 106: the 21 spec-file rows (schema/operation/selector keys, tag
   and opcode table cells, the two width64 flips, the two tag crosspaints),
   the 43 generator rows (expected-dictionary keys and render templates),
-  the 10 generated-C header macro-body rows the host pins, the 14
-  generated-Lean rows (code/tagOf/width64 arms plus the four selector
-  rows), the 17 hand-Lean rows the build or elaboration rejects (the
-  bridge/signature/arm drifts), and the host rows (the banner repaint).
+  the 10 generated-C header macro-body rows the byte compare rejects, the
+  14 generated-Lean rows (code/tagOf/width64 arms plus the four selector
+  rows), and the 21 hand-Lean rows the build or elaboration rejects (the
+  bridge/signature/arm drifts; this harness has no host-detector rows, so
+  no banner repaint catch --- the host detector rc-checks the banner
+  instead of pinning its text).
 - Equivalences 15: the three failure-path generator message repaints the
   OK run never prints (stale/order/duplicate) and the twelve no-consumer
   hand theorem renames the chain re-discharges (tag-code, tag-select,

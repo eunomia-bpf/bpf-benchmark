@@ -5471,6 +5471,67 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0267 — x86 register-dispatch mutation coverage
+
+The x86 sixteen-cell register-number contract (every register-lane helper and
+the simulator's subgroup/filter operations consume the register number through
+the hand-written `X86_SIM_L_FOR_EACH_GPR` X-macro dispatch and the
+`X86_SIM_L_REG_VALUE` read ternary chain; the single-line spec
+`x86_reg_dispatch_spec.json` pins sixteen `{name, define, number}` rows
+`rax..r15` in `X86_RAX..X86_R15` order with numbers `0..15`, the 8-bit number
+width (`reg_bits`), the `gpr_count` 16, and the `0xff` no-register sentinel;
+`generate_x86_reg_dispatch_spec.py` re-renders `generated/x86_reg_dispatch.h`
+and `GeneratedX86RegDispatch.lean` byte-for-byte; the generated header pins
+`KPROG_X86_GPR_COUNT 16U`, the identity cell selector
+`KPROG_X86_GPR_CELL(REG) ((__u8)((REG)))`, and sixteen `_Static_assert`s
+binding the hand-written `X86_R<n>` decodes plus the count assert; the hand
+module `X86RegDispatch.lean` restates the `finRange` twin tables and the
+literal-bound `cellOf` and proves twenty theorems including
+`first_non_gpr_is_none`, `sentinel_is_none`, `full_range`, and
+`case_dispatch`; the 258-case `test_x86_reg_dispatch_host.c` contract host
+drives the generated cell/count macros over all 256 number bytes plus the
+count pin and four decode constants, and the 6401-case
+`test_x86_reg_dispatch_route_host.c` route host plants each of the 256
+numbers through the real `X86_SIM_L_WRITE_REG_WIDTH` write dispatch observing
+the changed cell via the cell tag at 4 widths x 6 values, then reads back
+through the real `X86_SIM_L_READ_REG` chain)
+now has its own mutation harness, `build/mut_x86_reg_dispatch.py`:
+118 rows over the eight-file watchlist (spec JSON + generator + generated
+header + generated Lean + hand Lean + contract host + route host + the
+`x86_sim_local_bpf.h` routing region: the generated-header include, the
+three cell-drift asserts, the `X86_SIM_L_FOR_EACH_GPR` X-macro rows, the
+`X86_SIM_L_REG_VALUE` ternary chain, and the `X86_SIM_L_READ_REG` width
+wrapper), snapshotted and restored byte-exact around every row, four
+detectors (the generator `--check` equality and byte renders, `lake build
+KProgFormal.GeneratedX86RegDispatch` + both Lean elaborations, the compiled
+and exact-OK-banner-checked 258-case contract host, and the 6401-case route
+host compile/run).
+- Catches 100: the 7 spec-file rows at the `--check` equality (schema/
+  operation/reg_bits/gpr_count/sentinel and two cell drifts), the 34
+  generator rows the expected-dictionary keys and render templates the
+  byte-exact re-render compares, the 5 generated-C header rows (count/cell
+  macro bodies, count assert, guard, and the include doc-line the byte
+  compare rejects), the 9 generated-Lean rows (namespace/end/count/bits/
+  tables/cellOf/none-repoint drifts the build rejects), the 24 hand-Lean
+  rows (signature/theorem-body/goal drifts the build or elaboration
+  rejects), the 21 route-detector rows (the sim-header include/X-row/
+  drift-assert/read-chain drifts and the route host's model/count/banner
+  drifts), and the 6 contract-host rows (model/count/banner drifts the
+  exact-pin rejects).
+- Equivalences 18: the six failure-path generator messages and the
+  duplicated define-load repaint the OK run never prints, the one no-consumer
+  generated-Lean doc repaint (`gprCount` comment), the seven no-consumer
+  hand theorem renames the chain re-discharges, the two FAIL-banner
+  repaints the rc-only checks cannot see, and the shadowed
+  `X86_SIM_L_READ_REG` wrapper-shift repaint the width-shift call sites
+  control.
+- Run: four consecutive byte-identical green shakes, `TOTAL 118
+  mutations, 0 failures, 18 equivalences survived (100 catches, 18
+  equivalent survivors)` / `ALL AS EXPECTED` rc 0 (~29 s each), tree
+  restored each time (no new `git status` entries beyond the pre-existing
+  dirty set), census 140 -> 141 untracked harnesses, 0 core dumps;
+  `make check` stayed 210 `: OK`.
+
 ### Step 0266 — x86 ptr-write handler mutation coverage
 
 The x86 two-opcode pointer-write provenance contract (`X86_OP_MOV_LOAD_MAP_PTR`
@@ -5505,14 +5566,15 @@ KProgFormal.GeneratedX86PtrWrite` + both Lean elaborations, and the compiled
 and exact-OK-banner-checked host, banner `OK (318 cases)` pinned).
 - Catches 106: the spec-file rows (schema/operation/selector keys, the tag
   and opcode table cells, the width64 flips, and the tag crosspaints), the
-  generator expected-dictionary and render-template rows including the
-  generated headers byte compare, the generated-C macro bodies the host
-  pins, the generated-Lean code/tagOf/width64 arms and the four selector
-  rows, the hand-Lean signature/theorem-body rows the build rejects, and
-  the OK-banner repaint the exact-pin check catches.
+  40 generator rows the expected-dictionary and render-template byte
+  compares catch, the generated-C macro bodies the `--check` byte
+  compare rejects, the generated-Lean code/tagOf/width64 arms and selector
+  rows, and the hand-Lean signature/theorem-body rows the build rejects
+  (the 24 Lean catches split 9 generated-Lean and 21 hand-Lean rows; no
+  host-detector or banner rows exist in this harness).
 - Equivalences 15: the three failure-path generator message repaints
-  (stale/order/duplicate) the OK run never prints, and the twelve
-  no-consumer hand theorem renames the chain re-discharges
+  (stale/order/duplicate) the OK run never prints, and the twelve no-consumer
+  hand theorem renames the chain re-discharges
   (tag-code/tag-select/all-reachable/width64-map/step/step-fields/bits-id/
   bits-example/none-fallthrough/helper-absorbs/map-no-scalar/
   never-scalarizes).
