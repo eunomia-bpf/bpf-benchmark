@@ -15949,6 +15949,79 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0256 — x86 xmm0 route mutation coverage
+
+- Scope: the XMM0 route handler-composition contract (the routing layer the
+  two pair-move bodies hang from: the dispatcher crosses
+  `KPROG_X86_DISP_LOAD_XMM0_HANDLED`/`KPROG_X86_DISP_STORE_XMM0_HANDLED` in
+  `x86_sim_local_bpf.h` carrying `X86_SIM_L_EXEC_LOAD_XMM0((SRC), (AUX),
+  (IMM))` and `X86_SIM_L_EXEC_STORE_XMM0((DST), (AUX), (IMM))`) and the
+  shared selector macros (the arm table `X86_SIM_L_MEM_XMM0_ARM` plus
+  `KPROG_X86_XMM0_ARM` register identity --- RSP to the stack helper, others
+  into the ordinary arm; the opcode-opposite base form
+  `KPROG_X86_XMM0_BASE_FORM` load 1U = `absImmPtr` / store 0U =
+  `nullBasePlusDisp` with the `X86_REG_NONE` asymmetry pins;
+  `KPROG_X86_XMM0_ADDS_DISP` adding the displacement only on `absImmPtr`;
+  the `KPROG_X86_XMM0_LANE_OFFSET(1)` lane geometry pin), pinned
+  byte-for-byte by `generated/x86_xmm0.h` over `x86_xmm0_spec.json` through
+  `generate_x86_xmm0_spec.py --check` and restated independently by the
+  hand Lean module `KProgFormal/X86Xmm0Handler.lean`
+  (`x86Xmm0ArmSpec`/`x86Xmm0LaneOffsetSpec`/`x86Xmm0BaseFormSpec`); the
+  dedicated host cross-check `test_x86_xmm0_route_host.c` drives the real
+  macro chain over 59 cases (15 load + 14 store + 16 arm/lane/base-form
+  macro checks + 14 routing-macro pins) and prints
+  `x86 xmm0 route host cross-check: OK (59 cases)` while exiting 0 with a
+  failures counter on stderr --- the banner, not rc, is the route catch
+  signal.
+- Shaken: `build/mut_x86_xmm0_route.py` (untracked) 58 single-anchor rows
+  over the seven-file watchlist (route host + sim header + spec JSON +
+  generator + generated header + generated Lean + hand Lean, all
+  snapshotted and restored byte-exact around every row), split route 41 /
+  gen 13 / lean 4, three detectors (route: `cc -Wall -Wextra -O2 -I. -I../x86`
+  recompile then banner compare; gen: `--check` staleness; lean: `lake
+  build` olean refresh then `lake env lean` on the hand module).
+- Finding: the pre-fix two-file WATCHED (0255's shape) leaked the five
+  gen/lean files on interrupted shakes --- every run's restore pass only
+  covered the two watched files while the gen/lean rows mutated
+  `x86_xmm0_spec.json`, `generate_x86_xmm0_spec.py`,
+  `generated/x86_xmm0.h`, `KProgFormal/GeneratedX86Xmm0.lean`, and
+  `KProgFormal/X86Xmm0Handler.lean` in place; the widened seven-file
+  snapshot + restore is the structural fix, and the 10k+ `core.*` dumps the
+  crashed `build/test_arm64_cond_host` loop had stashed under `kprog/formal/`
+  (from a pre-existing crash loop, reproduced no-loop on an isolated rerun)
+  were swept out of the tree.
+- Reclassified: three sticky rows probed against live runs
+  (`hdr_dispatch_xmm0_cross` --- the load/store body swap is preserved by
+  the mirrored 59-case membership because the swapped bodies read/write
+  exactly the planted pair the comparator keys on;
+  `route_plant_lo_repaint` / `route_plant_hi_repaint` --- the plant seeds
+  feed the simulator bodies and the oracle's `put_lane`/`get_lane` through
+  the same variable, so a repaint moves both sides together) plus the
+  `spec_store_baseform_repaint` anchor widened to three-line context after
+  the load-side repaint left two `nullBasePlusDisp` sites in the JSON.
+- Catches: 41 (24 route / 13 gen / 4 lean): the base-form shape swaps, the
+  ADDS_DISP eliminations both directions, the lane-offset-on-address
+  repaints, the stack-index repaints, and the message repaints the stderr
+  counter never touches (route side); all 13 spec repaints tripping
+  `--check` staleness on the input side (`schema_version`, `operation`,
+  `selector`, load op_code/direction/base_form, store base form; the
+  generator EXPECTED `OP_CODES`/`LANE_OFFSETS` rows and the C-header
+  `LANE_HI`/`BASE_ABS_IMM` pin repaints re-delivered by the render diff);
+  all 4 lean repaints (2 hand-module rows re-elaborating
+  `x86Xmm0LaneOffsetSpec`/`x86Xmm0ArmSpec` in place, 2 generated-Lean rows
+  breaking the hand module's refine-by-rfl chain at `lake build`).
+- Equivalences (17): the dispatcher cross, the two plant repaints, the two
+  arena fill repaints, the absimm repaint the base-form-agnostic memory arm
+  rides on, the banner blank-line repaint, the 4 mismatch-message repaints,
+  and the 8 msg1/msg2 message repaints the failures counter never reaches.
+- Run: byte-identical greens `rows: 58 as-expected: 58 unexpected: 0
+  broken: 0` / `ALL AS EXPECTED` rc 0 (~11 s each) across three shakes,
+  watched pins `9f2a0902ae72ee0dde00ee70b1631af8` (route host) +
+  `7b7536548126903d61ac07ba24846800` (sim header) +
+  `595867dfb5d09730da67b8f77a6acf29` (hand module) verified after every
+  batch, census 129 -> 130 untracked harnesses, `make check` kept at 210
+  `: OK`.
+
 ## Step 0255 — x86 xmm0 pair-move mutation coverage
 
 - Scope: the XMM0 pair-move handler-composition contract (the hand Lean
