@@ -16002,6 +16002,54 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0265 — x86 IMUL reg-imm handler mutation coverage
+
+- Scope: the x86 register-source `IMUL` immediate handler-composition
+  contract: `KProgFormal/X86ImulRegImmHandler.lean` (the hand Lean
+  restatement --- `generated_imul_reg` decodes the whole raw immediate
+  through `KPROG_X86_IMMEDIATE_VALUE` and sign-extends it at the
+  destination width (`kprog_x86_sign_extend_value`), multiplies in
+  64-bit wrap-around arithmetic, drives the
+  `KPROG_X86_SET_IMUL_FLAGS` funnel over the two abs values and the
+  width-confined `generatedX86RegWrite`, with the spec twin over
+  `x86RegWriteSpec`/`x86ImulFlagsApplied`, the step refinement, the
+  preserve lemma, and the w16/w64/w8 example pins) and the 41296-case
+  `test_x86_imul_reg_imm_handler_host.c` differential host (the
+  generated macros against an independent `__int128` oracle over the
+  18-element boundary table: 418 sweep scenes x 4 widths, plus 40,000
+  LCG iterates, comparing dst and all four flags; the `.tag` field a
+  dead store in this composition).
+- Harness: `build/mut_x86_imul_regimm.py` (untracked, census 138 ->
+  139): 92 rows over the two-file watchlist (hand Lean + contract
+  host), snapshotted and restored byte-exact around every row, two
+  detectors: the `lake build KProgFormal.X86ImulRegImmHandler` +
+  module elaboration, and the compiled and exact-OK-banner-checked
+  host (`41296 cases`).
+- Catches 63: the Lean side (both def names, the full
+  writeback+flags-body composite drifts the build rejects, the spec
+  rhs/flags composite, the preserve lemma zf-gap, the snext-val and
+  the w16/w64/w8-mix/w8-in example dst/output/flag drifts), and the
+  host side (the width/mask/sext/immediate tables, the generated
+  rhs/abs/limit/flags/writeback arms, the oracle rhs/cast/lo/hi/
+  overflow-bound/write arms, the same-result compare tail, the check
+  want-swap, the sweep width/a/c dims, the LCG iterate dim, and the
+  OK banner repaint the exact-pin check catches).
+- Equivalences 29: the Lean theorem renames and the preserves rfl
+  proof-comment repaint the chain re-discharges, the w16 example
+  state drift the drive recomputes, the host flag-seed shift repaints
+  and the check name repaint the shared-input lockstep cannot
+  distinguish, the v-table and w-table boundary drifts both drives
+  recompute identically, the sweep imm-index swap (`(a+c)` ->
+  `(c+a)`), the LCG seed/constant/call-index repaints the checked
+  outputs cannot observe, and the failure-path banner/mismatch
+  repaints the OK run never prints.
+- Run: three consecutive byte-exact green shakes, `TOTAL 92
+  mutations, 0 failures, 29 equivalences survived` / `ALL AS
+  EXPECTED` rc 0 (~17 s each), tree restored each time (no new `git
+  status` entries beyond the pre-existing dirty set), census 138 ->
+  139 untracked harnesses, 0 core dumps; `make check` expected still
+  210 `: OK` (no new oracle hosts).
+
 ## Step 0264 — x86 IMUL route handler mutation coverage
 
 - Scope: the x86 `IMUL` route contract: the signed-multiply flag
