@@ -15949,6 +15949,48 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0257 — x86 stack trio mutation coverage
+
+- Scope: the three stack contracts the x86 simulator's frame helpers route
+  through, merged into one harness: the frame-offset-to-arena-index map
+  (step 0074, `generated/x86_stack_index.h` + `GeneratedX86StackIndex.lean`
+  + `X86StackIndex.lean` + `test_x86_stack_index_host.c`), the b/q union
+  storage model with its word/byte ladder (step 0075,
+  `generated/x86_stack_arena.h` + `GeneratedX86StackArena.lean` +
+  `X86StackArena.lean` + `test_x86_stack_arena_host.c`), and the
+  word-path/byte-ladder arm selection (step 0120,
+  `generated/x86_stack_arm.h` + `GeneratedX86StackArm.lean` +
+  `X86StackArmShape.lean` + `test_x86_stack_arm_host.c` +
+  `test_x86_stack_arm_route_host.c` + the routed
+  `x86/x86_sim_local_bpf.h` write/read regions).
+- Harness: `build/mut_x86_stack_trio.py` (untracked) — 86 single-anchor
+  rows, twenty-file WATCHED list snapshotted and restored byte-exact around
+  every row, ten detectors (index/arena/arm gen `--check`, index/arena/arm
+  `lake build` + `lake env lean` chains, index/arena/arm compiled host
+  cross-checks, arm route host with the vendor libbpf include path).
+- Catches 79: per-family spec-key repaints, generator render drifts caught
+  by `--check` staleness, regen-paired render drifts baked into artifacts,
+  generated-C macro drifts (index truncation, arena word-index/words/byte/
+  assemble, arm codes + inverted ternary), generated/hand Lean drifts
+  (wordIndex/wordAligned/words/byteAt, armCount/width64Code/armNames/
+  armCodes/armOf/case codes/qword body, hand-shape defs and the example
+  value falsification `words 64 = 9`), the sim-header arm include drop,
+  routed word-arena/word-index/byte-ladder repaints (route compile fails
+  on the nonexistent `.z` union member), and the hand-selection
+  reintroduction (`X86_WIDTH_64 &&` back in the routed region) tripping
+  the generator's region check.
+- Equivalences 3: the sim-header include comment, the hand-index Lean
+  comment, the generator ROOT reshape, and the two compact spec
+  schema-version whitespace relaxations (five equivalent_* rows).
+- Run: three consecutive byte-exact green shakes — `TOTAL 86 mutations,
+  0 failures` / `ALL AS EXPECTED` rc 0 (~20 s each) — tree restored after
+  each run (`ulimit -c 0` first; the ~10413 stale core.* files shed at
+  step start came from an earlier unattended driver, not this harness).
+  `make check` expected still 210 `: OK`; harness census 130 -> 131. The
+  ARM64 stack-arm harness red state (pre-existing anchor-count drift from
+  commit a23a35a63 removing the third `KPROG_ARM64_APPLY_WIDTH(`
+  occurrence) was left untouched — separate future fix.
+
 ## Step 0256 — x86 xmm0 route mutation coverage
 
 - Scope: the XMM0 route handler-composition contract (the routing layer the
