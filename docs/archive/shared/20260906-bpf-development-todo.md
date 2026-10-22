@@ -15949,6 +15949,59 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   (memaccess watchlist verified), untracked harness retained, `make
   check` kept at 210 `: OK`.
 
+## Step 0261 — x86 DIV resolved-width case-dispatch mutation coverage
+
+- Scope: the x86 `DIV` resolved-width case-dispatch contract: the
+  four-arm quotient/remainder ladder — byte (one packed RAX write),
+  word/dword/qword (RAX quotient + RDX remainder, qword gated on the
+  high half) — selected by `KPROG_X86_DIV_ARM(__x86_l_width)` over the
+  resolved operand width code, plus the hand-composed
+  `X86DivHandler.lean` register-effect theorems.
+- Family: `x86_div_spec.json` -> `generate_x86_div_spec.py` ->
+  `generated/x86_div.h` + `KProgFormal/GeneratedX86Div.lean`, restated
+  independently by `KProgFormal/X86DivHandler.lean`; the real
+  `X86_OP_DIV` arm in `x86/x86_sim_local_bpf.h` routes through the
+  generated selector; the contract host `test_x86_div_host.c` sweeps
+  the 256-entry selector byte range; the route host
+  `test_x86_div_route_host.c` drives the real `X86_SIM_L_EXEC` body
+  over the five resolved width codes, 2 source registers, 7 dividends,
+  3 high halves, and 7 divisors (48515 cases).
+- Harness: `build/mut_x86_div_route.py` (untracked), 114 rows over the
+  eight-file watchlist (spec JSON + generator + generated header +
+  generated Lean + hand Lean + contract host + route host + sim
+  header), snapshotted and restored byte-exact around every row, four
+  detectors (generator `--check` byte-exactness — catches every
+  generator-template and generated-file drift and the sim-header
+  routed-arm repaints —, the `lake build`/`lake env lean` hand-module
+  chain, the contract host compile/run, the route host compile/run).
+- Verdict: after shaking 1 fixed the 14 mispaired detector rows (12
+  `gen` reclassifications guided by one-detector-at-a-time
+  reclassification shake, the genuinely-surviving
+  route-engineering-call and route-MISMATCH-message mutations promoted
+  to live-proven equivalences, the plant-regs `(RDX)`-swap mutation
+  replaced by the stronger model/exec state-desync mutation that fires,
+  and the host distinct-check mutation swapped to a gate on the first
+  term that actually fires). 88 catches: spec generator/column/policy
+  drifts, the generator expected-table and render-template drifts
+  (including the `ARM_*` sim-header window anchors, the rendered Lean
+  ladder join, and the C width tests/distinct assert), the generated-C
+  constants (header byte-diff at `--check`), generated-Lean drifts, the
+  hand-Lean restatement swaps, host model and check drifts including
+  the distinctness gate, the route-host model/state-desync, selector
+  and scalarization catches, resolve-width drift, and the five
+  sim-header arm repaints. 26 equivalences, each solo-probed live: the
+  21 hand-Lean consumed theorem renames (renaming leaves every
+  statement elaborating), the two OK-banner repaints, the unreachable
+  route MISMATCH message repaint, the flags comment repaint, and the
+  unconsumed IMM-1 engineering call (48515 cases and the flags
+  unchanged).
+- Run: three consecutive byte-exact green shakes, `TOTAL 114
+  mutations, 0 failures, 26 equivalences survived` / `ALL AS EXPECTED`
+  rc 0 (~34 s each), tree restored each time (no new `git status`
+  entries beyond the pre-existing dirty set), census 134 -> 135
+  untracked harnesses, 0 core dumps; `make check` expected still
+  210 `: OK` (no new oracle hosts).
+
 ## Step 0260 — x86 register-presence mutation coverage
 
 - Scope: the x86 operand-register presence contract
