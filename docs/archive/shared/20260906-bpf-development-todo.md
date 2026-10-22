@@ -16002,6 +16002,58 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0263 — x86 MOVX register-source handler mutation coverage
+
+- Scope: the x86 `MOVX` register-source contract: the sign/zero
+  extension composition the simulator's register-source MOVX arm
+  applies through `X86_SIM_L_EXEC_MOVX_REG` (source width the decoded
+  AUX code via `KPROG_X86_MOVX_SRC_WIDTH` with the effective-width
+  default for the absent code, shape the opcode selector
+  `KPROG_X86_MOVX_SHAPE` — MOVZX narrows, MOVSX sign-extends the
+  source lane — writeback the effective width with a scalar tag),
+  restated independently by `KProgFormal/X86MovxRegHandler.lean`
+  (refinement, tag stamp, narrowing idempotence, upper-source-bit
+  irrelevance, `cdqe`/`movsxd` decodings), checked by the 62,409-case
+  `test_x86_movx_reg_host.c` contract host over every (opcode, raw
+  width, source width) triple plus boundary sources and the LCG
+  sweep, and the 518-case
+  `test_x86_width_effective_route_host.c` route host pinning the
+  absent-code-equals-64 route identically on both drives.
+- Harness: `build/mut_x86_movx_reg.py` (untracked, census 136 -> 137):
+  84 rows over the five-file watchlist (hand Lean, contract host,
+  shape Lean, route host, sim header), snapshotted and restored
+  byte-exact around every row, three detectors: the `lake build` +
+  both Lean elaborations (shape chain then hand module), the compiled
+  and exact-OK-banner-checked contract host
+  (`62409 cases`), and the route host (`518 cases`).
+- Catches 53: hand restatement (generated/spec arm widths, refine
+  `simp` names, the refine equality, `cdqe`/`movsxd` decode pins, the
+  example and idempotence/tag/upper-mask theorems); contract host
+  (sign/zero arm calls, write-back byte lanes and width cases, oracle
+  masks/sign/zero-return/sign-taken arms, output tag, LCG iteration
+  drop, identity-check polarity, OK banner); route host (`movx_reg`
+  call drop, model w32 mask arm, widths-loop truncation — divergence
+  or the exact `518 cases` banner).
+- Equivalences 31: the grader-side fixture repaints both drives
+  recompute (the `zx16_want_lo` value drift is caught by the example
+  pin while the gh-tag renames just repaint), the incoming-seed and
+  LCG-constant drifts the checked outputs cannot observe, the
+  orphaned `0x7fffffff` movzx/movsx coincidence, the failure-path
+  banner/label repaints success never prints, the single-driver
+  value coincidences the w32 model arms keep, and the six `aux==0`
+  inert sim-header body lines (the two `X86_SIM_L_EXEC_MOVX_REG`
+  sign/zero arm calls and their writeback widths, and the
+  `X86_SIM_L_EXEC` dispatcher sign/zero arm calls and its writeback
+  width) whose value effects the raw-vs-effective pair cannot
+  distinguish on `src_width == width` (the value-level dispatcher
+  oracle is `mut_x86_movx_shape.py`'s `model_movx` pair).
+- Run: three consecutive byte-identical green shakes, `TOTAL 84
+  mutations, 0 failures, 31 equivalences survived` / `ALL AS
+  EXPECTED` rc 0 (~60 s each), tree restored each time (no new `git
+  status` entries beyond the pre-existing dirty set), census 136 ->
+  137 untracked harnesses, 0 core dumps; `make check` stayed
+  210 `: OK` (no new oracle hosts).
+
 ## Step 0262 — x86 REP MOVS block-copy mutation coverage
 
 - Scope: the x86 `REP MOVS` block-copy contract
