@@ -5471,6 +5471,56 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0264 — x86 IMUL route handler mutation coverage
+
+The x86 `IMUL` route contract (the signed-multiply flag funnel the
+simulator applies through `X86_SIM_L_SET_IMUL_FLAGS`: the effective
+width resolves through `X86_SIM_L_EFFECTIVE_WIDTH`, the two operand
+abs values narrow through `x86_signed_abs_width`, the limit is the
+sign-or-complement branch `(LHS ^ RHS) & sign ? sign : sign - 1`,
+and the generated `KPROG_X86_SET_IMUL_FLAGS` macro folds
+`ov = a_abs != 0 && b_abs > limit / a_abs` into `cf` and `of`;
+`X86_SIM_L_EXEC_IMUL_IMM`/`_MEM_IMM` restate the body over the sign-
+extended immediate and its dispatcher arms; the hand Lean restatement
+`X86ImulRegImmHandler.lean` proves the reg-imm step refinement, the
+preserve lemma, and the w16/w64/w8 example pins;
+`X86MemImulHandler.lean` the memory-side one; the 518-case
+`test_x86_width_effective_route_host.c` route host drives the funnel
+scenes, the exact `(0xff, 2)` mc input, and the imul-imm/mem-imm
+scenes on the `(w, eff_of(w))` pair)
+now has its own mutation harness, `build/mut_x86_imul_route.py`:
+52 rows over the five-file watchlist (hand Lean + mem Lean + signed
+Lean + route host + sim header), snapshotted and restored byte-exact
+around every row, two detectors (`lake build` + both Lean
+elaborations, and the compiled and exact-OK-banner-checked route
+host).
+- Catches 26: the hand restatement (generated/spec ext widths,
+  the reg-imm flags-apply and writeback narrowing, the spec rhs
+  swap, the preserve-pair swap, the w16/w64/w8 example value and
+  tag drifts, the doubled-`not_false` decide), the mem side
+  (generated/spec load and result widths and the
+  `x86MemLoadSpec` hload rename), the signed arm (`.w16` sign bit)
+  and its `simp` tail, the route host (the mc `of` inversion, the
+  two model-only literal drifts — value divergence or the exact
+  `518 cases` banner), and the sim header (the `1U` sign-extend
+  width and the two broken `#define` param renames).
+- Equivalences 26: the reg-imm theorem renames and the simp-list
+  reorder (the chain re-discharges), the scene-operand repaints
+  (`check_equiv` drives a scene against itself at `(w, eff_of(w))`,
+  so operand shifts move both drives identically), the mc fixed
+  `(0xff, 2)` grid whose funnel computes `ov = 0` at every width
+  the model mirrors, the `x86_signed_abs_width` boundary
+  coincidences at `+1`, the flag-arm-table rows the 518 host never
+  drives (the ARM selector oracle belongs to
+  `mut_x86_alu_flag_arm`), and the dispatcher arm rotation the
+  scenes cannot distinguish.
+- Run: three consecutive byte-identical green shakes, `TOTAL 52
+  mutations, 0 failures, 26 equivalences survived` / `ALL AS
+  EXPECTED` rc 0 (~40 s each), tree restored each time (no new `git
+  status` entries beyond the pre-existing dirty set), census 137 ->
+  138 untracked harnesses, 0 core dumps; `make check` stayed
+  210 `: OK` (no new oracle hosts).
+
 ### Step 0263 — x86 MOVX register-source handler mutation coverage
 
 The x86 `MOVX` register-source contract (the sign/zero-extension

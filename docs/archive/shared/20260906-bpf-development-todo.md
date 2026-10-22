@@ -16002,6 +16002,60 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0264 — x86 IMUL route handler mutation coverage
+
+- Scope: the x86 `IMUL` route contract: the signed-multiply flag
+  funnel the simulator's `X86_SIM_L_SET_IMUL_FLAGS` applies (the
+  effective width resolved through `X86_SIM_L_EFFECTIVE_WIDTH`, the
+  operand abs values narrowed through `x86_signed_abs_width`, the
+  limit the sign-or-complement branch on `(LHS) ^ (RHS) & sign`, and
+  the generated `KPROG_X86_SET_IMUL_FLAGS` macro folding
+  `ov = a_abs != 0 && b_abs > limit / a_abs` into `cf` and `of`;
+  `X86_SIM_L_EXEC_IMUL_IMM`/`_MEM_IMM` restate the body over the
+  sign-extended immediate with the dispatcher arms), restated
+  independently by `KProgFormal/X86ImulRegImmHandler.lean` (the
+  reg-imm step refinement, the writeback pair, the preserve lemma,
+  and the w16/w64/w8 example pins), `KProgFormal/X86MemImulHandler.lean`
+  (the memory-side twin), and `KProgFormal/X86Signed.lean`'s `.w16`
+  sign arm, and checked by the 518-case
+  `test_x86_width_effective_route_host.c` route host over the
+  funnel scenes, the exact `(0xff, 2)` mc input, and the imul
+  scenes on the `(w, eff_of(w))` drives.
+- Harness: `build/mut_x86_imul_route.py` (untracked, census 137 ->
+  138): 52 rows over the five-file watchlist (hand Lean, mem Lean,
+  signed Lean, route host, sim header), snapshotted and restored
+  byte-exact around every row, two detectors: the `lake build` +
+  both Lean elaborations (signed Lean then reg-imm then mem), and
+  the compiled and exact-OK-banner-checked route host
+  (`518 cases`).
+- Catches 26: hand restatement (generated/spec ext widths, the
+  reg-imm flags-apply and writeback narrowing, the spec rhs swap,
+  the preserve-pair swap, the w16/w64/w8 example value and tag
+  drifts, the doubled-`not_false` decide, the mem generated/spec
+  load and result widths, the `x86MemLoadSpec` hload rename, the
+  signed `.w16` sign arm and its `simp` tail); route host (the mc
+  `of` inversion, the two model-only literal drifts, the sweep call
+  drops, and the sweep label repaint — value divergence or the
+  exact `518 cases` banner); sim header (the `1U` sign-extend
+  width and the two broken `#define` param renames).
+- Equivalences 26: the reg-imm theorem renames and the simp-list
+  reorder the chain re-discharges, the scene-operand repaints
+  (`check_equiv` drives a scene against itself at `(w, eff_of(w))`
+  so operand shifts move both drives identically), the mc fixed
+  `(0xff, 2)` grid whose funnel computes `ov = 0` at every width
+  the model mirrors (`a_abs = 1`/`limit = 128` at w8; the
+  value-level oracle lives in `mut_x86_alu_result`'s 261121-case
+  host), the `x86_signed_abs_width` boundary coincidences at `+1`,
+  the flag-arm-table rows the 518 host never drives (the ARM
+  selector oracle belongs to `mut_x86_alu_flag_arm`), and the
+  dispatcher arm rotation the scenes cannot distinguish.
+- Run: three consecutive byte-identical green shakes, `TOTAL 52
+  mutations, 0 failures, 26 equivalences survived` / `ALL AS
+  EXPECTED` rc 0 (~40 s each), tree restored each time (no new `git
+  status` entries beyond the pre-existing dirty set), census 137 ->
+  138 untracked harnesses, 0 core dumps; `make check` stayed
+  210 `: OK` (no new oracle hosts).
+
 ## Step 0263 — x86 MOVX register-source handler mutation coverage
 
 - Scope: the x86 `MOVX` register-source contract: the sign/zero
