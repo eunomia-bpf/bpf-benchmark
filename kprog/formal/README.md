@@ -5653,6 +5653,31 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0286 — x86 memory-source ALU handler contract
+
+The memory-source arithmetic composition is hand-written once:
+`KProgFormal/X86MemAluHandler.lean` defines the `X86MemArithOp` enum
+(add/adc/sub/sbb; consumed by `X86MemStoreAluHandler.lean`'s eight
+store-composition theorems), `generatedX86MemArithHandler` (generated
+byte-load plus lane arithmetic handlers), `x86MemArithHandlerSpec` (the
+independent load/handler specs), `x86_mem_arith_handler_refines` (per-arm
+refinement through `x86_mem_load_refines`), and two `native_decide`
+examples (16-bit ADC carrying over `0xffff` with packet-to-scalar
+provenance; 32-bit borrow with zero-extension).
+`build/mut_x86_mem_alu_handler.py` (untracked, census 159 -> 160) plants
+11 rows over a two-file watchlist (the family plus its store-front
+consumer so the enum alpha rename restores cleanly): a paired lean
+detector (full-library `lake build` olean refresh plus `lake env lean`
+over both files) and the compiled pinned-OK-banner oracle `x86
+memory-ALU handler host cross-check: OK (22048 cases)`. 6 catches
+(enum-arm repaint, generated/spec arm swaps, proof-RW drop, per-arm
+tactic swap, and expected-state repaint) and 5 documented equivalences
+(alpha renames of the spec, the enum across both files, and an example
+theorem, plus doc and blank-line repaints). Four byte-identical green
+shakes (`/tmp/run0286_{1..4}.txt`, all md5
+`5aadd1ec589000f3f924cd4c34e8b0d2`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0285 — shared arm64/x86 next-PC contract
 
 The architectural branch-next-PC model is hand-written once:

@@ -16053,6 +16053,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0286 — x86 memory-source ALU handler contract
+
+- Scope: the memory-source arithmetic composition: the hand-written
+  `KProgFormal/X86MemAluHandler.lean` defines the `X86MemArithOp` enum
+  (add/adc/sub/sbb), `generatedX86MemArithHandler` /
+  `x86MemArithHandlerSpec` (generated-load + lane arithmetic vs
+  independent load/handler specs), `x86_mem_arith_handler_refines`
+  per arm, and two `native_decide` boundary examples (w16 ADC carry,
+  w32 borrow zero-extension);
+- refinement: consumed by `X86MemStoreAluHandler.lean` (7 enum
+  references across its eight store-composition theorems) — the enum
+  alpha rename covers both files;
+- harness: `build/mut_x86_mem_alu_handler.py` (untracked, census 159
+  -> 160), 11 rows over a two-file watchlist, two detectors
+  (full-library `lake build` olean refresh + two `lake env lean`
+  elaborations; the compiled 22048-case memory-ALU host);
+- result: 6 catches (enum-arm repaint, generated/spec arm swaps,
+  proof-RW drop, per-arm tactic swap, expected-state repaint) and 5
+  documented equivalences (alpha renames of the spec, the enum across
+  both files, and an example theorem, plus doc and blank-line
+  repaints);
+- verification: four byte-identical green shakes
+  (`/tmp/run0286_{1..4}.txt`, all md5
+  `5aadd1ec589000f3f924cd4c34e8b0d2`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0285 — shared arm64/x86 next-PC contract
 
 - Scope: the architectural branch-next-PC model: the hand-written
