@@ -5653,6 +5653,32 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0284 — x86 ADD/SUB result identity contract
+
+The thin arithmetic-identity modules are hand-written:
+`KProgFormal/X86AddResult.lean` proves `ADC(a, b, false) = a + b` plus
+the narrowed add-flag step, and `KProgFormal/X86SubResult.lean` proves
+`SBB(a, b, false) = a - b`, the narrowed sub-flag step, and the CMP
+branch-PC composition; their theorem names are consumed downstream by
+`X86AluResultSpec.lean`, `X86AluWriteback.lean`,
+`X86CmpOpHandler.lean`, and `X86MemCompareHandler.lean`.
+`build/mut_x86_addsub_result.py` (untracked, census 157 -> 158) plants
+11 rows over the four-file watchlist (`X86AddResult.lean` +
+`X86SubResult.lean` + the two edit-only consumer files
+`X86AluWriteback.lean`/`X86AluResultSpec.lean` so alpha-rename restores
+are covered): a paired lean detector (`lake build
+KProgFormal.X86AluWriteback` olean refresh plus `lake env lean` over
+both family modules) and the two compiled pinned-OK-banner oracles
+(`x86 alu result arm host cross-check: OK (6304 cases)` and `x86 alu
+result route host cross-check: OK (760337 cases)`). 7 catches (spec
+repaints `a+b+1`/`a-b-1`, theorem renames, proof-RW reduction in both
+step proofs, and the CMP-composition `rw` drop) and 4 documented
+equivalences (full alpha renames across every reference site of the
+renamed symbols). Four byte-identical green shakes
+(`/tmp/run0284_{1..4}.txt`, all md5
+`635ba42bcaefb5c946c1c796aa789387`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0283 — x86 INC/DEC flag-body contract
 
 The register INC/DEC contract is hand-written:

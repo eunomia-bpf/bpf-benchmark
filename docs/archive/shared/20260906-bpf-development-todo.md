@@ -16053,6 +16053,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0284 — x86 ADD/SUB result identity contract
+
+- Scope: the thin arithmetic-identity modules: the hand-written
+  `KProgFormal/X86AddResult.lean` proves `ADC(a, b, false) = a + b`
+  plus the narrowed add-flag step, and
+  `KProgFormal/X86SubResult.lean` proves `SBB(a, b, false) = a - b`,
+  the narrowed sub-flag step, and the CMP branch-PC composition;
+- refinement: theorem names consumed downstream by
+  `X86AluResultSpec.lean`, `X86AluWriteback.lean`,
+  `X86CmpOpHandler.lean`, and `X86MemCompareHandler.lean`;
+- harness: `build/mut_x86_addsub_result.py` (untracked, census 157 ->
+  158), 11 rows over the four-file watchlist (the two family modules
+  plus the two edit-only consumer files so alpha-rename restores are
+  covered), three detectors (paired `lake build` olean refresh + two
+  `lake env lean` elaborations; the compiled 6304-case result-arm
+  host; the compiled 760337-case route host);
+- result: 7 catches (spec repaints `a+b+1`/`a-b-1`, theorem renames,
+  proof-RW reduction in both step proofs, CMP-composition `rw` drop)
+  and 4 documented equivalences (full alpha renames across every
+  reference site of the renamed symbols);
+- verification: four byte-identical green shakes
+  (`/tmp/run0284_{1..4}.txt`, all md5
+  `635ba42bcaefb5c946c1c796aa789387`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0283 — x86 INC/DEC flag-body contract
 
 - Scope: the register INC/DEC flag-body contract: the hand-written
