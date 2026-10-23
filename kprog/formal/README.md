@@ -5471,6 +5471,65 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0268 — x86 opcode mutation coverage
+
+The x86 opcode-number contract (every token the simulator body, the Lean
+model, and the artifact encoder name through the symbolic `X86_OP_*` spellings
+is pinned to its numeric code by the generated contract the three consumers
+share; the single-line spec `x86_opcode_spec.json` pins 72 `{name, define,
+code}` cells (`nop` 0x00 through `callMemcpyReg` 0x46 plus the 0xff `ret` gap)
+and 5 `{name, define, target}` alias cells resolving the width-suffixed
+`movImm64`/`movReg64`/`addImm64`/`addReg64`/`xorReg32` tokens to their
+canonicals; `generate_x86_opcode_spec.py` re-derives both expected tables,
+re-reads `kprog/x86/x86_sim.h` live through the two define regexes, and
+re-renders `generated/x86_opcode.h` (72 token drift asserts + 5 alias identity
+asserts + `KPROG_X86_OPCODE_COUNT 72U`), `GeneratedX86Opcode.lean` (the
+`Op` inductive with `code`/`define` projections), and the encoder's
+`x86/micro-prog/generated_x86_opcode.py` (the `X86_OPCODE` name map and
+`X86_OPCODE_NAME` reverse map) byte-for-byte on every `--check`; the hand
+module `X86Opcode.lean` restates the 72 explicit token/code pairs and the
+constructor list and proves the `x86_opcode_refines` native-decide equality
+plus the `x86_opcode_codes_distinct` five-pair sample; and the 2778-case
+`test_x86_opcode_host.c` contract host is the sole runtime oracle (the
+compile-time asserts pin every token through the `../x86/x86_sim.h` it
+includes, and run time re-parses that header so an added, renamed, or dropped
+token is caught, not only a changed value: 72 lookup/value cases, the 2556
+all-pairs distinctness cases, the whole-namespace coverage walk, and the 5
+alias gates plus the count; there is no separate route host))
+now has its own mutation harness, `build/mut_x86_opcode.py`:
+105 rows over the seven-file watchlist (spec JSON + generator + generated
+header + generated Lean + hand Lean + contract host + the encoder map),
+snapshotted and restored byte-exact around every row, three detectors (the
+generator `--check` equality, all three byte renders, and the live sim-header
+scan; `lake env lean` over the generated and hand modules; and the compiled
+and exact-OK-banner-checked 2778-case contract host).
+- Catches 78: the 7 spec-file rows at the `--check` equality (schema/
+  operation and the nop/movImm/ret cells plus two alias-cell drifts), the 26
+  generator rows the expected-dict heads/tails, the schema/field guard, the
+  five consumed paths, the canonical-name derivation, both regex scanners,
+  the seen-set update, and the three render templates' joins and doc lines
+  the byte-exact re-render compares, the 8 generated-C header rows (three
+  token drift asserts, two alias asserts, count macro, guard, doc line), the
+  9 generated-Lean rows (namespace/end bookends, two ctors, two code arms,
+  two define arms, doc line), the 12 hand-Lean rows (import/namespace
+  bookends, the two def renames, three pair/ctor drifts, the refines goal,
+  and the distinctness arm the elaboration rejects), the 10 host rows (the
+  sim-header include, two table rows, the `sim_define_value` call, the walk
+  prefix and gate, two alias gates, the count pin, and the OK-banner text
+  the exact pin rejects), and the 6 encoder-map rows (the two table blobs
+  and the nop/ret entries in both directions).
+- Equivalences 27: the twelve failure-path generator messages and seven
+  dormant equality-guard repaints the green run never exercises, the two
+  no-consumer hand theorem renames and one doc repaint the chain
+  re-discharges, and the host's dormant duplicate-check guard, three
+  FAIL-path message repaints, and doc line the pinned-OK run cannot observe.
+- Run: four consecutive byte-identical green shakes, `TOTAL 105
+  mutations, 0 failures, 27 equivalences survived (78 catches, 27
+  equivalent survivors)` / `ALL AS EXPECTED` rc 0 (~15 s each), tree
+  restored each time (no new `git status` entries beyond the pre-existing
+  dirty set), census 141 -> 142 untracked harnesses, 0 core dumps;
+  `make check` stayed 210 `: OK`.
+
 ### Step 0267 — x86 register-dispatch mutation coverage
 
 The x86 sixteen-cell register-number contract (every register-lane helper and
