@@ -16053,6 +16053,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0294 — arm64 render/emission pipeline
+
+- Scope: the arm64 proof-artifact generator's render/emission pipeline
+  in `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` --- the
+  loader/emission helpers (`label`, `blr_target_reg`, `written_gpr`,
+  `mov_immediate`, `mov_source_gpr`, `helper_calls_by_addr`,
+  `program_kind`, `default_program_symbol`, `c_comment`) and the two
+  program emitters `render_program`/`render_program_compact`
+  (stack/return-case defines, rodata and map emission, the compact-step
+  table plus PC/loop runner, the linked-exit tail, the helper
+  define/switch). Step 0292 pinned the encode() ladder the OP arms
+  call and Step 0290 the parser/AUX selection layer; no row mutated the
+  pipeline itself.
+- Semantics: one harness `build/mut_arm64_render_pipeline.py`
+  (untracked, census 167 -> 168), 22 rows, one in-process detector (a
+  battery over fixture `NativeInsn`s --- no objdump --- in a fresh
+  `python -B -c` interpreter with the module `__pycache__` purged
+  around every battery), one-file watchlist (the arm64 generator)
+  restored byte-exact around every row.
+- Result: 19 catches (label/c-comment formats, the tc tag and
+  default-symbol flips, the `blr` mnemonic/regex flips, the
+  written-gpr width-gate and pattern flips, the mov-immediate `#`
+  prefix and mov-source x-only gates, the helper last-ident fallback
+  and copy-guard and last-fill flips, the CALL next-address and RET
+  macro repaints, the xdp SEC repaint, and the compact RET PC,
+  JCC-eval, helper-dispatch line flips), 3 equivalence greens
+  (call-target/indirect-call message repaints with no pinned
+  observer), four byte-identical green shakes
+  (`7205ec807779f42c59ba7f986a889121`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence, README
+  and archive steps, implementation pair.
+
 ## Step 0293 — x86 encode() mnemonic dispatch
 
 - Scope: the `encode()` case ladder in

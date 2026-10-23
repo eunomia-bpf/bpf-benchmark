@@ -5653,6 +5653,39 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0294 — arm64 render/emission pipeline
+
+The arm64 mirror beyond the encode() ladder: the generator's
+render/emission pipeline -- loader/emission helpers (`label`,
+`blr_target_reg`, `written_gpr`, `mov_immediate`, `mov_source_gpr`,
+`helper_calls_by_addr`, `program_kind`, `default_program_symbol`,
+`c_comment`) -- emitted calls; Step 0292 pinned the encode() ladder the
+OP arms call, and Step 0290 the parser/AUX selection layer, but no row
+mutated the pipeline itself. `build/mut_arm64_render_pipeline.py`
+(untracked, harness census 167 -> 168) closes the gap with 22 rows over
+a one-file watchlist (the arm64 generator, byte-exact restore each row)
+and one in-process detector: a battery over fixture `NativeInsn`s in a
+fresh `python -B -c` interpreter with the module `__pycache__` purged
+around every battery, all in-process (no objdump). The battery pins the
+mode-kind tag map (tc/cgroup-skb/xdp) and default program symbols,
+comment/label/c-literal formats, the `blr`-target/written/mov-ext
+extractors over their w/x/z/`str` counterexamples, the
+`helper_calls_by_addr` dataflow (load id -> blr, copy-through, kill
+plus last-ident fallback, `str` preserves flow, unknown reg empty), and
+full-text emission pins for `render_program` (stack define,
+return-case case-addr, rodata cell, CALL next-address, RET macro,
+RUN_OP3 MOV line, prelude carry, SEC + fn name) and
+`render_program_compact` (dict/guard/rodata/TC/RET-row/runner PC/JCC
+eval/helper dispatch/ret PC), plus map `BPF_MAP_TYPE_ARRAY` +
+sanitized-ident emission, the linked-exit writeback tail, and the
+compact helper define/switch/call lines. Nineteen guard/constant flips
+must break the battery and three declared equivalences (the
+call-target and indirect-call message repaints) must stay green: 19
+caught, 3 equivalence; four byte-identical green shakes (`TOTAL 22
+mutations, 0 failures, 2 equivalence rows`, all md5
+`7205ec807779f42c59ba7f986a889121`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0293 — x86 encode() mnemonic dispatch
 
 The x86 mirror of Step 0292: the encode() case ladder in the x86
