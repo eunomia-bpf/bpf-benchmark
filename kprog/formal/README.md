@@ -5687,6 +5687,53 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0299 - x86 write-one/CLI wiring
+
+The write-one/CLI assembly layer pinned end to end: `write_one` (the
+name-driven proof-object parse, the `.bpf.c` output name, the
+`source_dir == STAGE2_PROGRAMS` prelude/kind gates, and the
+`render_program` fields `kind`/`exit_addr`/`source_prelude`/
+`rodata16`), `proof_kind_for_source` (the `bench.kind` identity with
+the `source` parameter kept only as a call-site contract), and
+`main()` (`args.output_dir.mkdir(parents=True, exist_ok=True)`, the
+`--micro-programs` override or the `stage2`-stem conditional pick of
+`STAGE2_PROGRAMS` vs `MICRO_PROGRAMS`, `only = set(args.only or [])`,
+the `--only` subset filter, the `written.append(write_one(...))`
+accumulator, the printed per-file paths, and the
+`generated N proof sources` summary with `return 0`). Step 0297 pinned
+the parse layer the proof-object parse calls but no row touched this
+assembly layer, and the 0293/0295 batteries called `render_program`
+directly without going through `write_one`/`main()`.
+`build/mut_x86_stage2_wiring.py` (untracked, harness census
+172 -> 173) closes the gap with 8 rows over a one-file watchlist (the
+x86 generator, byte-exact restore each row) and one in-process
+detector: a battery with FAUX substitutes in a fresh `python -B -c`
+interpreter with the module `__pycache__` purged around every battery
+(`subprocess.run` stub returning canned objdump `-h`/`-s`/`-t`/`-dr`
+text for the proof objects, a `yaml.safe_load` router for the
+in-memory configs, tempdirs for `--output-dir`, and three toy sources
+self-scaffolded into `kprog/test`/`micro/programs` and unlinked at
+exit). The battery drives unit `write_one` calls for the stage2 pair
+(`toy_a` with the SEC banner, rewritten include, prelude comment in
+the body, and the `cgroup-skb`-normalized kind; `toyb` without a SEC
+anchor --- empty prelude), the micro singleton (`toyc` rendered from
+`micro/programs` with no prelude and kind from the bench row), unit
+`source_prelude` probes (banner capture, no-SEC empty, un-SEC'd
+include rewritten unconditionally), `load_benches` over the in-memory
+stage2/micro fixtures, and two end-to-end `main()` calls (stage2 pair
+into a two-layer-deep outdir pinned for both toy files, the toyz
+exclusion, the banner, the rewritten include, and the clean toyb; the
+micro singleton into a deep outdir pinned for file existence, kind,
+and clean text), with the FAUX objdump text carrying 3 sub-function 
+targets and the exit top border behind `parse_native_linked_program`.
+All 8 single-guard/literal flips must break the battery (no
+equivalence rows): outdir_parents, outdir_omit, stage2_pick,
+only_filter, wb_append, main_rc1, micro_kind_xdp, prelude_norewrite;
+8 caught; three byte-identical green shakes (`TOTAL 8 mutations, 0
+failures, 0 equivalence rows`, all md5
+`7ef071a7d5f4c29f5002b0e9d822f267`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0298 - x86 branch-ladder emission
 
 The plain branch/call/return emission ladder pinned:

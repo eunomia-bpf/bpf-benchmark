@@ -16092,6 +16092,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0299 - x86 write-one/CLI wiring
+
+- Scope: the write-one/CLI assembly layer of the x86 generator
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` --- `write_one`
+  (name-driven `parse_proof_object_program`, the `{name}.bpf.c`
+  output name, the `source_dir == STAGE2_PROGRAMS` gates for the
+  prelude and the kind, the `render_program` fields, `return output`),
+  `proof_kind_for_source` (the `bench.kind` identity), and `main()`
+  (the `--output-dir` mkdir with parents, the `--micro-programs`
+  override or the stage2-stem conditional source-dir pick,
+  `only = set(args.only or [])` with the `--only` subset filter, the
+  `write_one` accumulator, the printed paths, the
+  `generated N proof sources` summary, `return 0`); Steps 0293/0295
+  pinned renders via direct `render_program` calls and Step 0297 the
+  parse layer; no row mutated this assembly layer.
+- Semantics: one harness `build/mut_x86_stage2_wiring.py` (untracked,
+  census 172 -> 173), 8 rows, one detector (a battery whose
+  `subprocess.run` stub returns canned objdump text for the proof
+  objects and whose `yaml.safe_load` router serves in-memory stage2/
+  micro configs in a fresh `python -B -c` interpreter with the module
+  `__pycache__` purged around every battery; three toy sources
+  self-scaffolded into `kprog/test`/`micro/programs` and unlinked at
+  exit), one-file watchlist (the x86 generator) restored byte-exact
+  around every row.
+- Result: 8 catches, no equivalence rows (mkdir-parents arg drop,
+  mkdir line omission, stage2-stem pick swap, --only filter drop,
+  written.append drop, return-0 flip, micro-kind constant repaint,
+  include-rewrite drop); three byte-identical green shakes
+  (`7ef071a7d5f4c29f5002b0e9d822f267`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence, README
+  and archive steps, implementation pair.
+
 ## Step 0298 - x86 branch-ladder emission
 
 - Scope: mutation battery for the plain branch/call/return emission
