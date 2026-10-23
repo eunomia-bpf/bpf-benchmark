@@ -16092,6 +16092,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0308 - arm64 append_insn/compact_step emission
+
+- Scope: the two emission layers that turn one `NativeInsn` into
+  per-arm artifacts --- `append_insn` (the full renderer's
+  emitted-C lines: JCC/JMP/CBZ/CBNZ/TBZ/TBNZ macro choices and
+  argument orders, the BPF_CALL helper macro, the unsupported
+  call-target guard, RUN_OP3 with its width/aux/imm tail, the
+  `/* 0x.. */` comment line) and `compact_step` (the compact
+  renderer's `CompactStep` records: branch kinds, cbz src/width,
+  tbz immediate, the OP slot order, plus the alu aux repaints in
+  reg- and imm-arm forms); Step 0294 pinned renderer full-text
+  pins over a mixed fixture and Step 0307 pinned the per-arm
+  `Encoded` picks, but the emission layer itself had no rows.
+- Semantics: one harness `build/mut_arm64_emit_ops.py` (untracked,
+  census 181 -> 182), 34 rows, one detector (an in-process battery
+  encoding one fixture `NativeInsn` per arm through both
+  `append_insn` and `compact_step` and pinning the exact emitted
+  lines/records), one-file watchlist (the ARM64 generator, restored
+  byte-exact around every row); also covers
+  `compact_helper_defines` (define index/name/blank-line tail) and
+  `append_compact_helper_switch` (define bytes, case line, default
+  arm, do/while close).
+- Fix: two first-draft survivors (RUN_OP3 src/src2 slot repaint
+  and the alu imm-arm aux repaint) were fixed by strengthening
+  the battery to exact REP-pins (full RUN_OP3 line equality and
+  an alu-imm fixture pinning the imm-arm aux string) rather than
+  dropping the rows; the helper switch text was pinned as full
+  joined bytes (two blank-line/formatting repaints caught only
+  then).
+- Result: 34 catches, no equivalence rows; three byte-identical
+  green shakes (`8b005b5bea0f3847cde1dd0f5e8f1cd8`), golden
+  `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation
+  pair.
+
 ## Step 0307 - arm64 encode tier-2 per-arm picks
 
 - Scope: the per-arm `Encoded` picks inside the ARM64

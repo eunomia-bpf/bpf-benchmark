@@ -5687,6 +5687,31 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0308 - arm64 append_insn/compact_step emission
+
+The ARM64 emission layer pinned as data: Step 0294's
+`mut_arm64_render_pipeline.py` pinned the two renderers' full-text
+lines over a mixed fixture, and Step 0307's
+`mut_arm64_encode_ops.py` pinned the per-arm `Encoded` picks, but
+`append_insn`'s per-arm emitted lines and `compact_step`'s per-arm
+`CompactStep` records were still unrowed as a surface.
+`build/mut_arm64_emit_ops.py` (untracked, harness census
+181 -> 182) rows both layers with 34 single-anchor flips: the
+ emitted-line pins (`ARM64_SIM_A64_JCC/JMP/CBZ/CBNZ/TBZ/TBNZ/CALL/
+RET` macro choices, argument orders, the `ARM64_SIM_BPF_CALL_`
+helper macro forms, the `ARM64_SIM_RUN_OP3(...)` rep with its
+width/aux/imm tail, the `/* 0x.. */` comment line, and the
+unsupported-call-target raise) and the record pins (`CompactStep`
+kinds, the cbz src/width pick, the tbz immediate operand, the OP
+slot order (dst, src, src2, src3), the alu aux repaints in both
+reg- and imm-arm forms, and the `ARM64_SIM_C_HELPER_` define index,
+name, blank-line tail, and the `ARM64_SIM_C_CALL_HELPER` switch
+block bytes): 34 rows = 34 catches and no equivalence rows; three
+byte-identical green shakes
+(`TOTAL 34 mutations, 0 failures, 0 equivalence rows`, all md5
+`8b005b5bea0f3847cde1dd0f5e8f1cd8`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0307 - arm64 encode tier-2 per-arm picks
 
 The ARM64 encoder's per-arm `Encoded` picks inside `encode()` pinned
