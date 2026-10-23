@@ -16053,6 +16053,40 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0290 — x86 encoder parser-to-AUX selection
+
+- Scope: the proof-artifact encoder's selection surface
+  (`kprog/x86/micro-prog/generate_micro_sim_proofs.py`): the
+  `objdump -Mintel` line parser `parse_asm_text` (address/fields filters,
+  `lock `-prefix strip, `#`-comment strip, `R_X86_64_*` relocation-symbol
+  attachment), the bracket-protected `split_operands`, the register-triple
+  lookup `reg_info`, the `operand_width` PTR-width arm and default, the
+  `parse_mem_terms` term parse (base pick, overflow-to-index pick,
+  `{1:0,2:1,4:2,8:3}` scale map, `-`->`+-` negative-displacement rewrite,
+  displacement accumulation), the `mem_aux` width-keyed
+  `X86_MEM_AUX_FULL`/`X86_MEM_AUX` pick plus the `X86_REG_AUX_SRC_SHIFT`
+  OR, the `mem_disp`/`branch_target` hex parses with the no-match zero, and
+  the `enc` opcode resolution (unknown token exits 1). The consumed tables
+  (CC_AUX, helper idents) were already pinned by Steps 0134/
+  `mut_x86_cc_decode.py` and `mut_arm64_helper_idents.py`; no row mutated
+  the selection functions.
+- Semantics: one harness `build/mut_x86_encoder_selection.py` (untracked,
+  census 163 -> 164), 12 rows, one in-process detector (a pinned fixture
+  battery run as `python -B -c` importing the mutated encoder module from
+  `kprog/x86/micro-prog`, with the module `__pycache__` purged around every
+  battery: a same-size flip like `+=` -> `-=` preserves the file size, so
+  a stale bytecode cache could serve mutated bytecode even after the
+  byte-exact restore --- observed live), one-file watchlist (the encoder)
+  restored byte-exact around every row.
+- Result: 11 catches (fields filter, lock strip, comment-strip syntax
+  break, bracket-depth arm, register lowercasing, PTR-width case arm,
+  negative-displacement rewrite, scale map swap, displacement sign,
+  AUX shift OR-to-AND, branch-target no-match fallback), one equivalence
+  green (duplicated comment-strip repaint), four byte-identical green
+  shakes (`a5fcc91c786fce53c4b73aee84fc1a8a`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence, README and
+  archive steps, implementation pair.
+
 ## Step 0289 — x86 stack-region frame-base resolution chain
 
 - Scope: the simulator header's own stack-region resolution chain

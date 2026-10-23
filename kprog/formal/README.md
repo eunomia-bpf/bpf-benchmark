@@ -5653,6 +5653,55 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0290 — x86 encoder parser-to-AUX selection
+
+The open-items audit left one uncovered family in the encoder: the
+proof-artifact generator `kprog/x86/micro-prog/generate_micro_sim_proofs.py`
+parses the `objdump -Mintel` listing and selects the AUX payload every
+emitted step carries, and while its consumed tables are pinned (Step 0134's
+`mut_x86_cc_decode.py` for CC_AUX, `mut_arm64_helper_idents.py` for the
+helper idents) and the simulator-side index/AUX consumers are covered
+(`mut_x86_mem_index.py`, `mut_x86_mem_aux.py`), nothing mutated the
+selection functions themselves: the objdump-line parser `parse_asm_text`
+(address/fields filters, the `lock `-prefix strip, the `#`-comment strip,
+the `R_X86_64_*` relocation-symbol attachment to the previous instruction),
+the bracket-protected `split_operands`, the register-triple lookup
+`reg_info`, the `operand_width` PTR-width arm and default, the
+`parse_mem_terms` term parse (base pick, overflow-to-index pick, the
+`{1:0,2:1,4:2,8:3}` scale map, the `-`->`+-` negative-displacement rewrite,
+integer-displacement accumulation), the `mem_aux` width-keyed
+`X86_MEM_AUX_FULL`/`X86_MEM_AUX` pick with its `X86_REG_AUX_SRC_SHIFT` OR,
+the `mem_disp`/`branch_target` hex parses with the no-match zero, and the
+`enc` opcode resolution whose unknown token exits 1.
+`build/mut_x86_encoder_selection.py` (untracked, harness census 163 -> 164)
+closes the gap with 12 rows over a one-file watchlist (the encoder,
+byte-exact restore each row) and one in-process detector: a pinned fixture
+battery run as `python -B -c` against the mutated encoder module, importing
+it from `kprog/x86/micro-prog` with the module's `__pycache__` purged around
+every battery (a same-size flip like `+=` -> `-=` preserves the file's size,
+so a stale bytecode cache could otherwise serve the mutated bytecode even
+after the byte-exact restore --- observed live during bring-up). The battery
+pins a five-instruction intel-object parse (mov/lea/lock-prefix subl/call,
+a relocation line attaching to the previous call, a trailing-comment line,
+a label-only and a no-colon skip), the bracket-protected operand split with
+a nested comma, the register triple and width pins (PTR case, register
+width, default 64), the `enc` resolved `X86_OP_MOV_REG` tuple + dataclass
+shape + unknown-token `SystemExit`, and the term-parse pins (base+disp,
+negative-disp rewrite, `[rax*4]` scale 2, `[rsp+rax*8]` scale 3, unknown
+scale 0, displacement accumulation, the `mem_aux` index/scale/shift string
+forms, `mem_disp`, branch targets 0x500/0x1f2 plus the junk-zero, and the
+`bpf_` helper-symbol test). Eleven leaves must break the battery (the
+fields filter, the lock strip, the comment strip's induced syntax break,
+the bracket-depth arm, the register-name lowercasing, the PTR-width case
+arm, the negative-displacement rewrite, the scale map swap, the
+displacement accumulation sign, the AUX shift OR-to-AND repaint, and the
+branch-target no-match fallback) and one declared equivalence (a duplicated
+comment-strip repaint the `#` arm discards anyway) must stay green: 11
+caught, 1 equivalence; four byte-identical green shakes (`TOTAL 12
+mutations, 0 failures, 1 equivalence rows`, md5
+`a5fcc91c786fce53c4b73aee84fc1a8a`); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
 ### Step 0289 — x86 stack-region frame-base resolution chain
 
 The open-items audit left one uncovered piece inside the "mapping from the
