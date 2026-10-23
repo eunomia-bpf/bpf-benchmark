@@ -16002,6 +16002,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0281 — x86 stack-index map contract
+
+- Scope: the frame-offset-to-arena-index map: `x86_stack_index_spec.json`
+  pins the `capacity` index base, unit step, `wrapping64` accumulation,
+  and 32-bit mask; `generate_x86_stack_index_spec.py --check`
+  byte-re-renders `generated/x86_stack_index.h`
+  (`KPROG_X86_STACK_INDEX`) and `KProgFormal/GeneratedX86StackIndex.lean`;
+- refinement: the hand `KProgFormal/X86StackIndex.lean` records the
+  affine `capacity - base + delta` statement, frame-base-at-zero,
+  top-at-capacity, the mod-2^32 wrap, aliases, and an example;
+- harness: `build/mut_x86_stack_index.py` (untracked,
+  census 154 -> 155), 19 rows over the five-file watchlist, three
+  detectors (`--check`; two `lake env lean` elaborations; compiled
+  pinned-OK-banner oracle 690 cases);
+- result: 13 catches (9 generator byte-render rows, 3 Lean
+  elaboration rows, 1 compiled-host drift) and 6 documented
+  equivalences (green-run failure-path message repaints, spec spacing,
+  and theorem renames with no internal references);
+- verification: four byte-identical green shakes
+  (`/tmp/run0281_{1..4}.txt`, all md5
+  `359c9b8ed37a4a16a8f755662b35ed74`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0279 — x86 shift-result semantics contract
 
 - Scope: the five shift/rotate result semantics: `x86_shift_result_spec.json`

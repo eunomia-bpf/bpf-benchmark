@@ -5471,6 +5471,29 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0281 — x86 stack-index map contract
+
+The stack-index contract fixes the frame-offset-to-arena-index map:
+`x86_stack_index_spec.json` pins the `capacity` index base, unit
+step, `wrapping64` accumulation, and 32-bit mask;
+`generate_x86_stack_index_spec.py --check` byte-re-renders
+`generated/x86_stack_index.h` (the `KPROG_X86_STACK_INDEX` macro) and
+`KProgFormal/GeneratedX86StackIndex.lean` (the
+`(capacity + off).truncate 32` map). The hand
+`KProgFormal/X86StackIndex.lean` records the affine
+`capacity - base + delta` statement, frame-base-at-zero,
+top-at-capacity, the mod-2^32 wrap, aliases, and an example.
+`build/mut_x86_stack_index.py` (untracked, census 154 -> 155) plants
+19 rows over the five-file watchlist: `--check`, two `lake env lean`
+elaborations, and the compiled pinned-OK-banner oracle (`x86 stack
+index host cross-check: OK (690 cases)`). 13 catches (9 generator
+byte-render rows, 3 Lean elaboration rows, 1 compiled-host drift) and
+6 documented equivalences (green-run failure-path message repaints,
+spec spacing, and theorem renames with no internal references). Four
+byte-identical green shakes (`/tmp/run0281_{1..4}.txt`, all md5
+`359c9b8ed37a4a16a8f755662b35ed74`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0279 — x86 shift-result semantics contract
 
 The shift-result contract pins the five shift/rotate result
