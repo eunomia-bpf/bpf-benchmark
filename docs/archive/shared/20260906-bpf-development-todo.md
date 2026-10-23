@@ -16053,6 +16053,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0287 — x86/arm64 route-host oracle contract
+
+- Scope: the twelve `Makefile` hosts no earlier mut harness drove (arm64
+  stack-arena/mem-index/pair_mem/reg-dispatch/reg-presence/vreg/
+  width-effective route hosts; x86 cmp-mem/mov-load/reg-presence/store/
+  memory-bit oracles), module-level families already covered, so the risk
+  is drift in each host's own independent-model code.
+- Semantics: one merged harness `build/mut_route_hosts.py` (untracked,
+  census 160 -> 161), 12 rows, one detector (recompile mutated host, pinned
+  OK banner must disappear), one single-occurrence model-code anchor flip
+  per row (bias offset, absent-width fallback, index-value witness,
+  access-arm select, dispatch witness, writable polarity, acc-arm lane,
+  sign predicate, source arm, sentinel, width fallback, bt index mask);
+  restored byte-exact around every row.
+- Result: 12/12 caught (all four shakes byte-identical:
+  `e1d7477d4f04266f635ebad15d0ce3c3`), golden `make check` rc 0 / 210
+  `cross-check: OK` banners; committed with paper sentence, README and
+  archive steps, implementation pair.
+
+
 ## Step 0286 — x86 memory-source ALU handler contract
 
 - Scope: the memory-source arithmetic composition: the hand-written

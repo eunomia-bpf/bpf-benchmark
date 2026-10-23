@@ -5653,6 +5653,29 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0287 — simulator route/oracle host oracle coverage
+
+The audit of `Makefile`'s 210 host probes against the 160 mutation harnesses
+found exactly twelve hosts no earlier harness drove: the arm64 stack-arena,
+mem-index, pair_mem, reg-dispatch, reg-presence, vreg, and width-effective
+route hosts and the x86 cmp-mem, mov-load, reg-presence, store, and
+memory-bit oracles. Every family module behind them is already watched
+(rename-bystander coverage), so the new risk these hosts carried was drift
+in their own independent-model code — the side that would have to notice a
+routed-body regression. `build/mut_route_hosts.py` (untracked, harness
+census 160 -> 161) gives each host one row: one single-occurrence anchor
+flip in that host's own model (ref_index bias offset +3, absent-width
+fallback 64->32, model_index_value witness +1, pair_mem access-arm
+inversion, reg-dispatch witness +1, writable polarity flip, vreg acc-arm
+lane boundary 2->3, model sign-predicate inversion, ABI-source arm
+repaint, sentinel 0xff->0xfe, store width fallback 64->32, and the BT
+oracle index mask 0xffffffff->0xfffffffe), then recompiles the mutated
+host with the pinned include path and requires the pinned
+`cross-check: OK` banner to disappear. All 12 rows caught; four
+byte-identical green shakes (`TOTAL 12 mutations, 0 failures`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
+
 ### Step 0286 — x86 memory-source ALU handler contract
 
 The memory-source arithmetic composition is hand-written once:
