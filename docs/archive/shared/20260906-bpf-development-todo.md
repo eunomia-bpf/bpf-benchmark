@@ -16092,6 +16092,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0304 - arm64 bench-loader and naming helpers
+
+- Scope: the ARM64 generator (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`)
+  small helpers --- `rodata_ident_map` (enumerate order over the fixed
+  `__arm64_rodata_` prefix), `c_ident` (sanitize regex, underscore collapse +
+  strip, digit-lead prefix rename), and `load_benches` (the YAML schema
+  flowing `Bench(name, symbol, kind)` through `default_program_symbol`'s
+  stage2/cgroup/tc ladder and `program_kind`'s cgroup/tc/xdp pick). The x86
+  program-wide scan saturated after Step 0303; the same two-tier scan over
+  the ARM64 generator surfaced these three as the only thin-anchored names.
+- Semantics: one harness `build/mut_arm64_small_helpers.py` (untracked,
+  census 177 -> 178), 6 rows, one detector (an in-process battery in a
+  fresh `python -B -c` interpreter pinning the rodata map over two-symbol
+  and empty fixtures, four c_ident idents, and an end-to-end 4-entry temp
+  YAML for names/kinds/symbols), one-file watchlist (the ARM64 generator)
+  restored byte-exact around every row.
+- Result: 6 catches, no equivalence rows (the rodata prefix repaint, the
+  enumerate index shift, the digit-lead rename repaint, the underscore
+  collapse repaint, the tag-ladder symbol repaint, and the tc-kind
+  repaint); the `ci_san` regex-flip candidate survived (underscore
+  erasure is behaviorally identical through the collapse+strip pipeline)
+  and was dropped per the equivalence rule; three byte-identical green
+  shakes (`9ee1a77e509a0d3b0eb62ff6f0229971`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence, README
+  and archive steps, implementation pair.
+
 ## Step 0303 - x86 per-step append delegation
 
 - Scope: the three-line glue `append_step` in

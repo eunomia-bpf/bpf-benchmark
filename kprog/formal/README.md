@@ -5687,6 +5687,34 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0304 - arm64 bench-loader and naming helpers
+
+The arm64 generator's three small helpers pinned: `rodata_ident_map` (the
+`enumerate(rodata16)` order rendered through the fixed `__arm64_rodata_` prefix),
+`c_ident` (the two-pass `re.sub` sanitization with underscore collapse + strip and
+the digit-lead `prefix_{ident}` rename), and `load_benches` (the YAML config
+schema flowing `Bench(name, symbol, kind)` through `default_program_symbol`'s
+stage2/cgroup/tc tag ladder and `program_kind`'s cgroup/tc/xdp kind pick). The
+x86 program-wide scan had saturated (both anchor tiers empty after Step 0303), so
+the same two-tier scan ran over the ARM64 generator (md5
+`cbe4f3f3d4c94344b8ea76e88a20e7c9`): `load_benches`, `rodata_ident_map`, and
+`c_ident` surfaced as the only thin-anchored names. `build/mut_arm64_small_helpers.py`
+(untracked, harness census 177 -> 178) closes them with 6 rows over the one-file
+watchlist (the ARM64 generator, byte-exact restore each row) and one in-process
+detector: a battery in a fresh `python -B -c` interpreter pinning the
+rodata-ident map over a two-symbol fixture (exact dict, empty dict), the
+c_ident idents (`ro_0x10_2_x_3`, digit-lead `ro_123_7`, blank `ro__9`, plain
+`main_loop_0`), and an end-to-end `load_benches` over a 4-entry temp YAML
+(names, `[xdp, cgroup_skb, tc, xdp]` kinds, `[alpha, beta_prog, gamma_prog,
+delta_xdp]` symbols). All 6 single-anchor flips must break the battery (no
+equivalence rows): rim_prefix, rim_enum_sh, ci_digitlead, ci_collapse,
+lb_sym_tags, lb_kind_tc; 6 caught (the `ci_san` regex-flip candidate survived ---
+underscore erasure is behaviorally identical through the collapse+strip pipeline
+--- and was dropped per the equivalence rule); three byte-identical green
+shakes (`TOTAL 6 mutations, 0 failures, 0 equivalence rows`, all md5
+`9ee1a77e509a0d3b0eb62ff6f0229971`); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
 ### Step 0303 - x86 per-step append delegation
 
 The per-step append delegation pinned end to end: `append_step` --- the three-line
