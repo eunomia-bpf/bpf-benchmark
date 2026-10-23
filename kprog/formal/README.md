@@ -5471,6 +5471,48 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0271 — x86 shift-count masking contract
+
+The shift-count masking contract pins the two-mask rule every shift,
+double-shift, and rotate lane resolves through: `x86_shift_count_spec.json`
+pins `{schema_version 1, operation x86ShiftCount, non_64_mask 31,
+width_64_mask 63}`; `generate_x86_shift_count_spec.py --check` re-derives the
+expectation dict and byte-re-renders both artifacts (`generated/x86_shift_count.h`
+with the `KPROG_X86_SHIFT_COUNT(RHS, WIDTH) ((RHS) & ((WIDTH) == X86_WIDTH_64 ?
+63U : 31U))` macro and `KProgFormal/GeneratedX86ShiftCount.lean` with the
+`mask`/`count` BitVec 64 pair). The hand `KProgFormal/X86ShiftCount.lean`
+proves `x86_shift_count_refines` against the refined modulo semantics
+(`rhs.toNat % 64` at width 64, `% 32` otherwise) plus the strict bound, and
+`X86ShiftFlags.lean` rewrites through the refinement. Every consumer is
+observed: the generated `x86_shift_result.h` shift/rotate family masks through
+the macro, the generated doubleshift helper's `k = KPROG_X86_SHIFT_COUNT(...)`
+drives both oracle and simulator sides, `x86/x86_sim.h` wraps the macro in the
+`x86_shift_count` route helper for the shift-flag block and the double-shift
+immediate arm's nonzero gate, and `__x86_sh_count`/the imm-arm gate are the two
+`x86_sim_local_bpf.h` call sites. `build/mut_x86_shift_count.py` (untracked,
+census 144 -> 145) plants 56 rows over the seven-file watchlist (spec JSON +
+generator + generated header + generated Lean + hand Lean + the two sim
+headers): `--check`, a five-module `lake build` fan-in plus three `lake env
+lean` elaborations (`X86ShiftCount`, `X86ShiftResult`, `X86ShiftFlags`), and
+four compiled pinned-OK-banner oracles (`x86 doubleshift host cross-check:
+OK (32544 cases)`, `x86 memory-shift host cross-check: OK (21024 cases)` —
+its oracle masks 63/31 independently at its line 72 — `x86 shift flags route
+host cross-check: OK (6504961 cases)`, and `x86 doubleshift arm route host
+cross-check: OK (326703 cases)`). 50 catches (24 generator byte-render rows,
+13 Lean-chain rows, 9 sim-header include/return/param and local-header call
+drifts observed across the two route hosts, 4 compiled-host macro drifts) and
+6 documented equivalences (green-run failure-path message repaints, the
+no-consumer `x86_shift_count_bound` rename, a const-parameter helper repaint,
+and comment repaints). Four byte-identical green shakes
+(`/tmp/run0271_{1..4}.txt`, all md5 `bc29da1095fa18f097123210f359b153`) and
+the golden `make check` gate (rc 0, 210 `cross-check: OK` banners, 0 error
+lines, `0 core dumps` after the fork-abort host cleanup) pin the family.
+Genuinely-surviving repaints stay visible: the `--check` stale-message text
+and the spec-parse error message are green-run failure paths, the bound
+theorem rename has no downstream consumer, and pure comment repaints in the
+route arm are byte drift without behavior, so they are recorded as
+equivalences rather than inflated into catches.
+
 ### Step 0270 — ABI-load provenance-tag contract
 
 The ABI-load provenance-tag contract (the two-kind entry discipline every

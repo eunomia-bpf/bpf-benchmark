@@ -16002,6 +16002,48 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0271 — x86 shift-count masking contract
+
+- Scope: the two-mask shift-count rule every shift, double-shift, and
+  rotate lane resolves through: `x86_shift_count_spec.json` pins
+  `{schema_version 1, operation x86ShiftCount, non_64_mask 31,
+  width_64_mask 63}`; `generate_x86_shift_count_spec.py --check` re-derives
+  the expectation dict and byte-re-renders `generated/x86_shift_count.h`
+  (the `KPROG_X86_SHIFT_COUNT(RHS, WIDTH) ((RHS) & ((WIDTH) == X86_WIDTH_64
+  ? 63U : 31U))` macro) and `KProgFormal/GeneratedX86ShiftCount.lean` (the
+  `mask`/`count` BitVec 64 functions);
+- consumers: the hand `KProgFormal/X86ShiftCount.lean` refines the modulo
+  semantics (`rhs.toNat % 64` at width 64, `% 32` otherwise) and proves the
+  strict bound; `X86ShiftFlags.lean` rewrites through
+  `x86_shift_count_refines`; the generated `x86_shift_result.h` family
+  masks every shift/rotate count through the macro; the generated
+  doubleshift helper's `k = KPROG_X86_SHIFT_COUNT(...)` feeds both oracle
+  and simulator sides; `x86/x86_sim.h` wraps it in the `x86_shift_count`
+  route helper; the two `x86_sim_local_bpf.h` call sites are the
+  shift-flag block's `__x86_sh_count` and the double-shift immediate arm's
+  nonzero gate;
+- harness: `build/mut_x86_shift_count.py` (untracked, census 144 -> 145),
+  56 rows over the seven-file watchlist (spec JSON + generator + generated
+  header + generated Lean + hand Lean + the two sim headers), six
+  detectors (`--check`; `lake build` GeneratedX86ShiftCount +
+  GeneratedX86ShiftResult + X86ShiftResult + X86ShiftFlags then
+  `lake env lean` of `X86ShiftCount.lean`, `X86ShiftResult.lean`,
+  `X86ShiftFlags.lean`; and four compiled pinned-OK-banner oracles:
+  doubleshift 32544, memory-shift 21024 whose oracle masks 63/31
+  independently, shift-flags route 6504961, doubleshift-arm route
+  326703);
+- result: 50 catches (24 generator byte-render rows, 13 Lean-chain rows,
+  9 sim-header include/return/param and local-header call drifts across
+  the two route hosts, 4 compiled-host macro drifts) and 6 documented
+  equivalences (green-run failure-path message repaints, the no-consumer
+  `x86_shift_count_bound` rename, a const-parameter helper repaint, and
+  comment repaints);
+- verification: four byte-identical green shakes (`/tmp/run0271_{1..4}.txt`,
+  all md5 `bc29da1095fa18f097123210f359b153`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners and 0 error lines; `0 core dumps` after
+  the fork-abort host cleanup; monitor binary probes deleted; porcelain
+  back to the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0270 — ABI-load provenance-tag contract
 
 - Scope: the two-kind entry provenance policy every simulator-side tag
