@@ -5687,6 +5687,28 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0302 - x86 chunk-for-address lookup
+
+The chunk-for-address lookup pinned end to end: `chunk_for_addr`'s linear scan over the
+chunked renderer's chunk list --- the `enumerate(chunks)` index source, the
+`any(item.insn.addr == addr for item in chunk)` membership test on the nested
+`ChunkInsn.insn.addr` field, the hit `return index`, and the miss `return None`
+sentinel (the main-render emission loops at 1405/1425 reuse the same idiom but render
+text; this is the only pinned consumer of the lookup itself). Step 0295's chunk battery
+called it (`cf.hit`/`cf.hit2`/`cf.miss`) but planted no row over its body; Step 0301's
+function-census cross-check flagged the four still-unanchored names, and
+`build/mut_x86_chunk_lookup.py` (untracked, harness census 175 -> 176) closes the last
+one with 4 rows over the one-file watchlist (the x86 generator, byte-exact restore each
+row) and one FAUX-battery detector: an in-process battery in a fresh `python -B -c`
+interpreter building `ChunkInsn`-shaped fixtures and pinning three hits, the empty-list
+miss, an internal empty chunk (the `any`/`all` distinction), double-call determinism,
+and the payload-field coupling (a decoy top-level `.addr` at 0x99 must not satisfy a
+0x42 lookup). All 4 single-anchor flips must break the battery (no equivalence rows):
+cfa_index_repaint, cfa_eq_flip, cfa_miss_sentinel, cfa_enum_shift; 4 caught; three
+byte-identical green shakes (`TOTAL 4 mutations, 0 failures, 0 equivalence rows`, all
+md5 `a5f392474e31856c0e0df5106d8acb0b`); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners.
+
 ### Step 0301 - x86 native-link blob dispatch
 
 The native-link blob dispatch boundary pinned end to end: `parse_native_link_blob`'s

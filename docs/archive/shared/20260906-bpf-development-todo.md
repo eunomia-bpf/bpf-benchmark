@@ -16092,6 +16092,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0302 - x86 chunk-for-address lookup
+
+- Scope: the single lookup helper `chunk_for_addr` in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` --- the
+  `enumerate(chunks)` index source, the
+  `any(item.insn.addr == addr for item in chunk)` membership test on
+  the nested `ChunkInsn.insn.addr` field, the hit `return index`, and
+  the miss `return None` sentinel. Step 0295's chunk battery called
+  it but planted no row; the step-0301 function-census cross-check
+  flagged the last unanchored names and this closes the final one.
+- Semantics: one harness `build/mut_x86_chunk_lookup.py`
+  (untracked, census 175 -> 176), 4 rows, one detector (an in-process
+  battery in a fresh `python -B -c` interpreter over
+  `ChunkInsn`-shaped fixtures: three hits, the empty-list miss, an
+  internal empty chunk distinguishing `any` from `all`, double-call
+  determinism, and the decoy top-level `.addr` payload-field
+  coupling), one-file watchlist (the x86 generator) restored
+  byte-exact around every row.
+- Result: 4 catches, no equivalence rows (the hit-index repaint, the
+  `any`->`all` flip, the miss-sentinel repaint, and the
+  enumerate-shift); three byte-identical green shakes
+  (`a5f392474e31856c0e0df5106d8acb0b`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0301 - x86 native-link blob dispatch
 
 - Scope: the native-link blob dispatch boundary in
