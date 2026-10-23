@@ -5653,6 +5653,30 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0283 — x86 INC/DEC flag-body contract
+
+The register INC/DEC contract is hand-written:
+`KProgFormal/X86IncDec.lean` states INC as `ADC(value, 1, false)` and
+DEC as `SBB(value, 1, false)`, pins the add-arm/sub-arm flag bodies
+(incoming carry preserved, ZF/SF/OF regenerated) plus NEG
+(`SBB(0, a, false)`), and proves the result, narrowed step, and
+branch-PC refinements whose theorem names are consumed downstream by
+`X86UnaryWriteback.lean` (the lane handlers) and
+`X86CmpOpHandler.lean`. `build/mut_x86_incdec.py` (untracked, census
+156 -> 157) plants 19 rows over the two-file watchlist
+(`X86IncDec.lean` + `X86UnaryWriteback.lean`): a paired lean detector
+(`lake build KProgFormal.X86UnaryWriteback` olean refresh plus
+`lake env lean` over both modules) and the compiled pinned-OK-banner
+oracle `x86 alu flag arm host cross-check: OK (259 cases)`. 10 catches
+(generated/spec result repaints, CF-pin repaint, DEC ZF repaint,
+generated flag-body operand drift, downstream lane-handler composition
+edits) and 9 documented equivalences (full alpha renames of
+definition/theorem names with zero references outside the watched
+pair). Four byte-identical green shakes (`/tmp/run0283_{1..4}.txt`,
+all md5 `7f87a0b336873af8ae6a2190e9ebd354`) and the golden `make
+check` gate (rc 0, 210 `cross-check: OK` banners, cores cleaned) pin
+the family.
+
 ### Step 0282 — x86 XCHG width-keyed selector contract
 
 The XCHG contract fixes the width-keyed arm selection:

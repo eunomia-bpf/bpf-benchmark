@@ -16053,6 +16053,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0283 — x86 INC/DEC flag-body contract
+
+- Scope: the register INC/DEC flag-body contract: the hand-written
+  `KProgFormal/X86IncDec.lean` states INC as `ADC(value, 1, false)`,
+  DEC as `SBB(value, 1, false)`, pins the add-arm/sub-arm flag bodies
+  (incoming carry preserved, ZF/SF/OF regenerated) plus NEG
+  (`SBB(0, a, false)`), and proves the result, narrowed step, and
+  branch-PC refinements;
+- refinement: consumed downstream by
+  `KProgFormal/X86UnaryWriteback.lean` (the lane handlers) and
+  `KProgFormal/X86CmpOpHandler.lean` via the theorem names;
+- harness: `build/mut_x86_incdec.py` (untracked, census 156 -> 157),
+  19 rows over the two-file watchlist (`X86IncDec.lean` +
+  `X86UnaryWriteback.lean`), two detectors (paired `lake build`
+  olean refresh + two `lake env lean` elaborations; the compiled
+  pinned-OK-banner flag-arm host, 259 cases);
+- result: 10 catches (generated/spec result repaints, CF-pin repaint,
+  DEC ZF repaint, generated flag-body operand drift, downstream
+  lane-handler composition edits) and 9 documented equivalences (full
+  alpha renames with zero references outside the watched pair);
+- verification: four byte-identical green shakes
+  (`/tmp/run0283_{1..4}.txt`, all md5
+  `7f87a0b336873af8ae6a2190e9ebd354`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0282 — x86 XCHG width-keyed selector contract
 
 - Scope: the width-keyed arm selection: `x86_xchg_spec.json` pins the
