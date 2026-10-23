@@ -16053,6 +16053,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0282 — x86 XCHG width-keyed selector contract
+
+- Scope: the width-keyed arm selection: `x86_xchg_spec.json` pins the
+  selector order, the 8-bit width code, opcode `0x19`, the full-width
+  code, and the two arms; `generate_x86_xchg_spec.py --check`
+  re-derives the live `X86_OP_XCHG` arm from the simulator header and
+  byte-re-renders `generated/x86_xchg.h` (selector + five
+  `_Static_assert`s) and `KProgFormal/GeneratedX86Xchg.lean`;
+- refinement: the hand `KProgFormal/X86XchgHandler.lean` proves the
+  selector, the pointer-swap cell effect (swap, scalarize,
+  involution), and the subword width-window writeback;
+- harness: `build/mut_x86_xchg.py` (untracked, census 155 -> 156),
+  22 rows over the six-file watchlist, four detectors (`--check`; two
+  `lake env lean` elaborations; two compiled pinned-OK-banner oracles:
+  host 260, route 62725 over the real simulator `XCHG` arm);
+- result: 18 catches (10 generator byte-render/arm-reroute rows, 4
+  Lean elaboration rows, 1 compiled-host static-assert drift, 3
+  route-host selector/cell drifts) and 4 documented equivalences
+  (green-run failure-path message repaints and spec spacing);
+- verification: four byte-identical green shakes
+  (`/tmp/run0282_{1..4}.txt`, all md5
+  `43a5f1b28f44876ad879f58b3b5d0c2b`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0280 — x86 stack-arena storage-model contract
 
 - Scope: the shared stack-storage model over the byte/word union arena:

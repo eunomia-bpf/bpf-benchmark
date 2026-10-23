@@ -5653,6 +5653,31 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0282 — x86 XCHG width-keyed selector contract
+
+The XCHG contract fixes the width-keyed arm selection:
+`x86_xchg_spec.json` pins the selector order, the 8-bit width code,
+opcode `0x19`, the full-width code, and the two arms;
+`generate_x86_xchg_spec.py --check` re-derives the live `X86_OP_XCHG`
+arm from the simulator header and byte-re-renders
+`generated/x86_xchg.h` (the `KPROG_X86_XCHG_ARM` selector plus five
+`_Static_assert`s) and `KProgFormal/GeneratedX86Xchg.lean` (the `Arm`
+table, `armOf`/`armOfCode`, effects, width classes). The hand
+`KProgFormal/X86XchgHandler.lean` proves the selector, the
+pointer-swap cell effect (swap, scalarize, involution), and the
+subword width-window writeback. `build/mut_x86_xchg.py` (untracked,
+census 155 -> 156) plants 22 rows over the six-file watchlist:
+`--check`, two `lake env lean` elaborations, and the two compiled
+pinned-OK-banner oracles (`x86 xchg host cross-check: OK (260 cases)`
+and `x86 xchg route host cross-check: OK (62725 cases)`). 18 catches
+(10 generator byte-render/arm-reroute rows, 4 Lean elaboration rows,
+1 compiled-host static-assert drift, 3 route-host selector/cell
+drifts) and 4 documented equivalences (green-run failure-path message
+repaints and spec spacing). Four byte-identical green shakes
+(`/tmp/run0282_{1..4}.txt`, all md5
+`43a5f1b28f44876ad879f58b3b5d0c2b`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0280 — x86 stack-arena storage-model contract
 
 The stack-arena contract fixes the arithmetic the stack helpers use to
