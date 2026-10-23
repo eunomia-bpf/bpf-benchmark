@@ -16092,6 +16092,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0301 - x86 native-link blob dispatch
+
+- Scope: the native-link blob dispatch boundary in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` ---
+  `parse_native_link_blob`'s missing-proof-object gate and raise
+  (the `if not proof_obj.is_file():` guard, the
+  `missing proof object for {name}: {proof_obj}` message, and the
+  `f"{name}.proof.o"` name formatting), the objdump feed it launches
+  (`["objdump", "-dr", "-Mintel", str(proof_obj)]`), the relocation
+  arm (`replace(insn, reloc_target=symbols.get(insn.reloc_symbol))` ---
+  symtab-named symbols get their addresses, ghost relocs keep
+  `None`), and `parse_proof_object_program`'s one-line pass-through.
+- Semantics: one harness `build/mut_x86_blob_dispatch.py`
+  (untracked, census 174 -> 175), 6 rows, one detector (a FAUX-objdump
+  battery in a fresh `python -B -c` interpreter stubbing
+  `subprocess.run` argv-keyed on `-h`/`-s`/`-t`/`-dr` over one toy
+  proof object), one-file watchlist (the x86 generator) restored
+  byte-exact around every row.
+- Result: 6 catches, no equivalence rows (the inverted is_file gate,
+  the raise repaint, the `{name}.{name}` name repaint, the `-dr`
+  flag drop, the reloc-target None repaint, and the dispatcher
+  returning the empty split); three byte-identical green shakes
+  (`5df78bfd42518b596fa96b13e70010af`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0300 - x86 operand-classifier wrappers
 
 - Scope: the operand-classifier wrapper quartet in

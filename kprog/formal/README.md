@@ -5687,6 +5687,32 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0301 - x86 native-link blob dispatch
+
+The native-link blob dispatch boundary pinned end to end: `parse_native_link_blob`'s
+missing-proof-object gate and raise (the `if not proof_obj.is_file():` guard and the
+`missing proof object for {name}: {proof_obj}` message, the `f"{name}.proof.o"` name
+formatting the gate resolves against), the objdump feed it launches (`["objdump", "-dr",
+"-Mintel", str(proof_obj)]` --- the `-dr` flags the FAUX router keys on, the
+`str(proof_obj)` target the run pin checks), the relocation arm
+(`replace(insn, reloc_target=symbols.get(insn.reloc_symbol))` --- a symbol the symtab
+names gets the symtab address, a ghost reloc keeps `None`), and the one-line
+`parse_proof_object_program` pass-through whose return reaches every renderer consumer.
+`build/mut_x86_blob_dispatch.py` (untracked, harness census 174 -> 175) closes the
+gap with 6 rows over a one-file watchlist (the x86 generator, byte-exact restore each
+row) and one FAUX-objdump detector: a battery in a fresh `python -B -c` interpreter
+stubbing `subprocess.run` (argv-keyed on `-h`/`-s`/`-t`/`-dr` over one toy proof
+object with text symbols, rodata-local symbols, a rep movs entry, and one call
+relocation) pinning the raise message and name formatting, blob-level rodata/size/
+call-reloc pins, the program-level split (`entry` length, `native_link_sub_20`, the
+`exit_addr` off both the disasm and section table), and the dispatcher's propagation
+of the missing-proof raise. All 6 single-anchor flips must break the battery (no
+equivalence rows): blob_isfile_inv, blob_raise_msg, blob_name_fmt, blob_dr_flag,
+blob_reloc_none, ppp_dispatch; 6 caught; three byte-identical green shakes
+(`TOTAL 6 mutations, 0 failures, 0 equivalence rows`, all md5
+`5df78bfd42518b596fa96b13e70010af`); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners.
+
 ### Step 0300 - x86 operand-classifier wrappers
 
 The operand-classifier wrapper quartet pinned:
