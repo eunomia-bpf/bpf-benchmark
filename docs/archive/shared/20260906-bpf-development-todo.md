@@ -16002,6 +16002,40 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0273 — whole-program control-flow trace contract
+
+- Scope: the sequential composition the emitted branch code threads
+  through: `control_flow_trace_spec.json` pins `{schema_version 1,
+  operation controlFlowTrace, composer sequential, fallthrough_step 1}`;
+  `generate_control_flow_trace_spec.py --check` byte-re-renders
+  `generated/control_flow_trace.h` (`KPROG_CONTROL_FLOW_SEQUENTIAL_STEP
+  1U` + the `KPROG_CONTROL_FLOW_EDGE_NEXT` conditional macro) and
+  `KProgFormal/GeneratedControlFlowTrace.lean` (`fallthroughStep`,
+  `emittedStep` from `GeneratedX86BranchEmit.nextPc`, `walk`,
+  `walkPolicy`);
+- refinement: the hand `KProgFormal/ControlFlowTrace.lean` proves
+  `control_flow_trace_{step,walk,walk_policy}_refines` and
+  `control_flow_trace_walk_shape_irrelevant` against the independent
+  `archEdge`/`archWalk` branchPc walk, for every direction shape and
+  every per-edge policy;
+- harness: `build/mut_control_flow_trace.py` (untracked,
+  census 146 -> 147), 37 rows over the five-file watchlist, four
+  detectors (`--check`; `lake build` + `lake env lean
+  ControlFlowTrace.lean`; two compiled pinned-OK-banner oracles: host
+  845 over `KPROG_CONTROL_FLOW_EDGE_NEXT`, route 3108 over the direction
+  macro against both shape oracles);
+- result: 31 catches (19 generator byte-render rows, 9 Lean elaboration
+  rows, 2 compiled-host macro drifts, 1 route-host step drift) and 6
+  documented equivalences (green-run failure-path message repaints, spec
+  spacing, the internally-unreferenced
+  `walk_policy`/`shape_irrelevant` theorem renames, and a doc-comment
+  repaint);
+- verification: four byte-identical green shakes
+  (`/tmp/run0273_{1..4}.txt`, all md5
+  `08496835a03e16c5a6556e15d9235f06`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0272 — x86 pointer-add transition contract
 
 - Scope: the shared pointer sum + provenance copy the LEA,
