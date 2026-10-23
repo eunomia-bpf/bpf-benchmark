@@ -5653,6 +5653,40 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0296 - x86 chunked renderer
+
+The chunked sub-renderer pinned end to end: the self-call-forced
+multi-chunk path inside the x86 generator (`render_chunked_program` and
+its helpers `flatten_chunk_insns`, `chunk_for_addr`,
+`append_chunk_transfer`, `append_chunk_call`, the chunk-level `ret` arm
+of `append_chunk_branch_or_ret`, and `render_chunk_function`) emitted
+calls but no row mutated it; Step 0295 pinned the non-chunked pipeline.
+`build/mut_x86_chunked_render.py` (untracked, harness census
+169 -> 170) closes the gap with 25 rows over a one-file watchlist (the
+x86 generator, byte-exact restore each row) and one in-process
+detector: a battery over fixture `NativeInsn`s in a fresh
+`python -B -c` interpreter with the module `__pycache__` purged around
+every battery, all in-process (no objdump). The battery pins
+`flatten_chunk_insns` (sequence stitching, fall-through next-addrs, the
+none tail, the subroutine tag), `chunk_for_addr` (hit/hit/miss),
+`append_chunk_transfer` (in-chunk `goto x86_l_7;` versus off-chunk
+`return 153ULL;`), `append_chunk_call`'s four lines (rsp push,
+`X86_SIM_L_STACK_WRITE` return-address write, depth increment, target
+goto), the chunk-level `ret` emission line-for-line (depth-zero
+PC_DONE guard, depth decrement, stack read, pointer pop, return), a
+self-call-forced three-instruction full render with 18 text pins
+(state-struct define, chunk function, depth inc, ret read, entry
+loop, dispatch call, PC_DONE loop test, XDP abi kind, `xdp_abi` bind,
+RAX write, license, prelude carry, case-12 transfer, PC_DONE default,
+1027U iteration cap, state bind, pc init, tag stamp), a tc-kind
+sibling, an 802-instruction program whose chunk boundaries emit the
+`return 1922ULL;`/`return 3842ULL;` last-next tails, the else-done arm
+text, and the external-jump ValueError. All 24 single-guard/constant
+flips must break the battery (no equivalence rows): 25 caught; four
+byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
+equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0295 - x86 render/emission pipeline
 
 The x86 mirror of the arm64 render/emission step: the generator's

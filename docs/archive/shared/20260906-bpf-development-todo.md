@@ -16053,6 +16053,45 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0296 - x86 chunked renderer
+
+- Scope: the self-call-forced multi-chunk sub-renderer inside
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` ---
+  `flatten_chunk_insns` (main/subfunction sequence stitching with
+  fall-through next-addrs and subroutine tags), `chunk_for_addr` (the
+  chunk radius lookup), `append_chunk_transfer` (in-chunk goto vs
+  off-chunk `return c_u64(target)`), `append_chunk_call` (rsp push,
+  return-address stack write, depth increment, target transfer), the
+  chunk-level `ret` arm of `append_chunk_branch_or_ret` (depth-zero
+  PC_DONE guard, depth decrement, stack read, pointer pop, return),
+  and the emitters `render_chunk_function`/`render_chunked_program`
+  (case labels with PC_DONE default, the last-next
+  `return c_u64(last_next)` tail on chunk boundaries, state-struct
+  define, abi bind/kind pick, pc init and iteration cap, else-done
+  dispatch arm, address-range chunk dispatch, RAX write on
+  exhaustion, license); Steps 0295/0294 pinned the non-chunked render
+  pipelines; no row mutated the chunked sub-renderer.
+- Semantics: one harness `build/mut_x86_chunked_render.py`
+  (untracked, census 169 -> 170), 25 rows, one in-process detector (a
+  battery over fixture `NativeInsn`s --- no objdump --- in a fresh
+  `python -B -c` interpreter with the module `__pycache__` purged
+  around every battery), one-file watchlist (the x86 generator)
+  restored byte-exact around every row.
+- Result: 25 catches, no equivalence rows (transfer goto repaint,
+  off-chunk return target shift, call push slack doubling, call
+  return-address write shift, call depth flip, ret depth flip, ret
+  stack-read rsp repaint, ret pop flip, ret return-plus-one, ret
+  depth-zero PC_DONE repaint, loop PC_DONE constant, state bind
+  repaint, pc-init shift, iteration-cap zeroing, else-done literal,
+  RAX-to-RCX repaint, tag stamp repaint, xdp_abi define repaint,
+  state-struct define repaint, switch-default PC_DONE repaint,
+  case-label repaint, chunk dispatch name repaint, dropped last-next
+  return, flat-append next_addr wipe, subfunction-sequence extension
+  drop); four byte-identical green shakes
+  (`f52a1e72b096e113050a91308809d596`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence, README
+  and archive steps, implementation pair.
+
 ## Step 0295 - x86 render/emission pipeline
 
 - Scope: the x86 proof-artifact generator's render/emission pipeline in
