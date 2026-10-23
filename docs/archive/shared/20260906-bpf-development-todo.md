@@ -16053,6 +16053,34 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0292 — arm64 encode() mnemonic dispatch
+
+- Scope: the `encode()` case ladder in
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` (the
+  mnemonic-driven dispatch frying each parsed `NativeInsn` into the
+  `Encoded` artifact --- opcode constant, register cells, width, AUX
+  string, immediate). The Step 0291 watchlist pinned the selection
+  helpers it calls; the per-family harnesses pin the ALU/SHIFT/BITFIELD/
+  COND tables it reads; no row mutated the ladder arms themselves (the
+  per-family spec harnesses mutate the spec JSON/generators/hosts, never
+  the encoder's case ladder).
+- Semantics: one harness `build/mut_arm64_encode_dispatch.py` (untracked,
+  census 165 -> 166), 17 rows, one in-process detector (a 42-pin battery
+  of `encode()` fixture calls over hand-built `NativeInsn`s --- no
+  objdump --- in a fresh `python -B -c` interpreter with the module
+  `__pycache__` purged around every battery), one-file watchlist (the
+  arm64 encoder) restored byte-exact around every row.
+- Result: 16 catches (the mov/ALU/SHIFT/CMP-TST/ADDS/SUBS/CCMP/CMN/ANDS
+  immediate forks, the movk LSL guard polarity, the bics wzr+xzr
+  zero-set arm, the ldrb/ldrh width table, the store base/data cell
+  swap, the stlxr status-width pick, the adrp helper-sentinel guard, the
+  unsupported-instruction raise), one equivalence green
+  (unsupported-instruction message repaint with no pinned observer),
+  four byte-identical green shakes
+  (`cbefd02bf15e5db95106ad0e1db895de`), golden `make check` rc 0 / 210
+  `cross-check: OK` banners; committed with paper sentence, README and
+  archive steps, implementation pair.
+
 ## Step 0291 — arm64 encoder parse-to-AUX selection
 
 - Scope: the arm64 proof-artifact encoder's selection surface

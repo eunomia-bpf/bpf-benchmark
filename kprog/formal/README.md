@@ -5653,6 +5653,43 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0292 — arm64 encode() mnemonic dispatch
+
+The encode() case ladder in the arm64 proof-artifact encoder
+(`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`) turns each
+parsed `NativeInsn` into the `Encoded` artifact the renderer emits
+(opcode constant, register cells, width, AUX string, immediate); the
+Step 0291 watchlist pinned the selection helpers it calls and the
+per-family harnesses pin the ALU/SHIFT/BITFIELD/COND tables it reads,
+but no row mutated the dispatch arms themselves (the per-family spec
+harnesses mutate the spec JSON/generators/hosts, never the ladder).
+`build/mut_arm64_encode_dispatch.py` (untracked, harness census 165 ->
+166) closes the gap with 17 rows over a one-file watchlist (the arm64
+encoder, byte-exact restore each row) and one in-process detector: a
+42-pin battery of `encode()` fixture calls over hand-built `NativeInsn`s
+in a fresh `python -B -c` interpreter with the module `__pycache__`
+purged around every battery, all in-process (no objdump). The battery
+pins the nop/mov-imm/mov-reg arms, the MOVK shift AUX, the ALU and SHIFT
+imm-vs-reg forks, the CMP/TST imm fork with its `ARM64_REG_NONE` source
+repaint and register modifier parse, the bics-wzr TST-BIC arm with both
+wzr and xzr zero pins and destination repaint, the SUBS/ADDS imm forks,
+the CCMP condition/nfz AUX imm fork, the CSEL/CSET condition AUX, the
+ANDS imm fork with its ror modifier, the load/store width table
+(ldrb/ldrh vs ldr), the str base/data cell ordering, the POST/STP-PRE/
+stlxr-status register forms, LDRSW, the CMN imm fork, the four FMOV
+forms, MVN/CNEG, MADD/UMULL, the ADRP rodata/GOT/helper-rejection arms,
+and the unsupported-instruction ValueError raise. Sixteen arms must
+break the battery (the mov/ALU/SHIFT/CMP-TST/ADDS/SUBS/CCMP/CMN/ANDS
+immediate forks, the movk LSL guard polarity, the bics zero-set arm, the
+ldrb/ldrh width table, the store base/data cell swap, the stlxr
+status-width pick, the adrp helper-sentinel guard, and the
+unsupported-instruction raise) and one declared equivalence (the
+unsupported-instruction message repaint with no pinned observer) must
+stay green: 16 caught, 1 equivalence; four byte-identical green shakes
+(`TOTAL 17 mutations, 0 failures, 1 equivalence rows`, all md5
+`cbefd02bf15e5db95106ad0e1db895de`); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners.
+
 ### Step 0291 — arm64 encoder parse-to-AUX selection
 
 The arm64 mirror of Step 0290: the proof-artifact generator
