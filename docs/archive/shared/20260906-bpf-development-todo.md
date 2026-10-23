@@ -16096,7 +16096,7 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   call and Step 0290 the parser/AUX selection layer; no row mutated the
   pipeline itself.
 - Semantics: one harness `build/mut_arm64_render_pipeline.py`
-  (untracked, census 167 -> 168), 22 rows, one in-process detector (a
+  (untracked, census 167 -> 168), 21 rows, one in-process detector (a
   battery over fixture `NativeInsn`s --- no objdump --- in a fresh
   `python -B -c` interpreter with the module `__pycache__` purged
   around every battery), one-file watchlist (the arm64 generator)
@@ -16107,10 +16107,10 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   prefix and mov-source x-only gates, the helper last-ident fallback
   and copy-guard and last-fill flips, the CALL next-address and RET
   macro repaints, the xdp SEC repaint, and the compact RET PC,
-  JCC-eval, helper-dispatch line flips), 3 equivalence greens
+  JCC-eval, helper-dispatch line flips), 2 equivalence greens
   (call-target/indirect-call message repaints with no pinned
   observer), four byte-identical green shakes
-  (`7205ec807779f42c59ba7f986a889121`), golden `make check` rc 0 /
+  (`c4fd541d49d861dbf65b5a48df6c0e72`), golden `make check` rc 0 /
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 

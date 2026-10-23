@@ -5689,7 +5689,7 @@ render/emission pipeline -- loader/emission helpers (`label`,
 `c_comment`) -- emitted calls; Step 0292 pinned the encode() ladder the
 OP arms call, and Step 0290 the parser/AUX selection layer, but no row
 mutated the pipeline itself. `build/mut_arm64_render_pipeline.py`
-(untracked, harness census 167 -> 168) closes the gap with 22 rows over
+(untracked, harness census 167 -> 168) closes the gap with 21 rows over
 a one-file watchlist (the arm64 generator, byte-exact restore each row)
 and one in-process detector: a battery over fixture `NativeInsn`s in a
 fresh `python -B -c` interpreter with the module `__pycache__` purged
@@ -5706,11 +5706,11 @@ RUN_OP3 MOV line, prelude carry, SEC + fn name) and
 eval/helper dispatch/ret PC), plus map `BPF_MAP_TYPE_ARRAY` +
 sanitized-ident emission, the linked-exit writeback tail, and the
 compact helper define/switch/call lines. Nineteen guard/constant flips
-must break the battery and three declared equivalences (the
+must break the battery and two declared equivalences (the
 call-target and indirect-call message repaints) must stay green: 19
-caught, 3 equivalence; four byte-identical green shakes (`TOTAL 22
+caught, 2 equivalence; four byte-identical green shakes (`TOTAL 21
 mutations, 0 failures, 2 equivalence rows`, all md5
-`7205ec807779f42c59ba7f986a889121`); golden gate `make check` rc 0
+`c4fd541d49d861dbf65b5a48df6c0e72`); golden gate `make check` rc 0
 with 210 `cross-check: OK` banners.
 
 ### Step 0293 — x86 encode() mnemonic dispatch
