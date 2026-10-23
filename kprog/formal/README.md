@@ -5653,6 +5653,37 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0293 — x86 encode() mnemonic dispatch
+
+The x86 mirror of Step 0292: the encode() case ladder in the x86
+proof-artifact encoder (`kprog/x86/micro-prog/generate_micro_sim_proofs.py`)
+turns each parsed `NativeInsn` into the `EncodedInsn` artifact the
+renderer emits; the Step 0290 watchlist pinned the parser/AUX selection
+helpers it calls and the per-family harnesses pin the opcode-contract/
+CC tables it reads, but no row mutated the dispatch arms themselves.
+`build/mut_x86_encode_dispatch.py` (untracked, harness census 166 ->
+167) closes the gap with 15 rows over a one-file watchlist (the x86
+encoder, byte-exact restore each row) and one in-process detector: a
+28-pin battery of `encode()` fixture calls over hand-built `NativeInsn`s
+in a fresh `python -B -c` interpreter with the module `__pycache__`
+purged around every battery, all in-process (no objdump). The battery
+pins the nop/ret arms, JMP/JCC branch targets, PUSH/POP cells,
+plain-vs-register CALL, the MOV imm/reg/load/store arms with cell
+orderings, the helper-ident load arm, the ALU imm/reg forks, CMP
+mem-imm, TEST reg width, CMOV reg/mem arms with the CC AUX, the
+high-byte lane AUX (mov bh/mov bh,cl supported with lane AUX;
+`or bh, 1` rejected unsupported), DEC/INC-mem/NEG/NOT, SETCC reg/mem,
+the scalar-rodata rejection, and the unknown-opcode SystemExit raise.
+Fourteen arms must break the battery (the ret/nop arm swaps, the JMP
+arm, the MOV immediate/register/load forks, the helper-ident guard,
+the scalar-rodata guard, the high_supported disjunction, the SETCC
+width repaint, the CMOV memory-arm guard, the PUSH/POP arms, and the
+register-CALL arm) and one declared equivalence (the unknown-opcode
+message repaint with no pinned observer) must stay green: 14 caught,
+1 equivalence; four byte-identical green shakes (`TOTAL 15 mutations,
+0 failures, 1 equivalence rows`, all md5 `2af7c44747a5d96ebd526b65d2db4af6`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0292 — arm64 encode() mnemonic dispatch
 
 The encode() case ladder in the arm64 proof-artifact encoder

@@ -16053,6 +16053,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0293 — x86 encode() mnemonic dispatch
+
+- Scope: the `encode()` case ladder in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` (the
+  mnemonic-driven dispatch frying each parsed `NativeInsn` into the
+  `EncodedInsn` artifact --- opcode contract constant, register cells,
+  width, AUX string, immediate). The Step 0290 watchlist pinned the
+  parser/AUX selection helpers it calls; the per-family harnesses pin
+  the opcode-contract/CC tables it reads; no row mutated the ladder
+  arms themselves.
+- Semantics: one harness `build/mut_x86_encode_dispatch.py` (untracked,
+  census 166 -> 167), 15 rows, one in-process detector (a 28-pin battery
+  of `encode()` fixture calls over hand-built `NativeInsn`s --- no
+  objdump --- in a fresh `python -B -c` interpreter with the module
+  `__pycache__` purged around every battery), one-file watchlist (the
+  x86 encoder) restored byte-exact around every row.
+- Result: 14 catches (the ret/nop arm swaps, the JMP arm, the MOV
+  immediate/register/load forks, the helper-ident guard, the
+  scalar-rodata guard, the high_supported disjunction, the SETCC width
+  repaint, the CMOV memory-arm guard, the PUSH/POP arms, the
+  register-CALL arm), one equivalence green (unknown-opcode message
+  repaint with no pinned observer), four byte-identical green shakes
+  (`2af7c44747a5d96ebd526b65d2db4af6`), golden `make check` rc 0 / 210
+  `cross-check: OK` banners; committed with paper sentence, README and
+  archive steps, implementation pair.
+
 ## Step 0292 — arm64 encode() mnemonic dispatch
 
 - Scope: the `encode()` case ladder in
