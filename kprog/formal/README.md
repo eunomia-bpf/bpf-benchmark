@@ -5653,6 +5653,36 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0289 — x86 stack-region frame-base resolution chain
+
+The open-items audit left one uncovered piece inside the "mapping from the
+simulator's stack region to the abstract frame base": the simulator header's
+own resolution chain. Step 0119's `mut_x86_stack_index.py` pins the generated
+`KPROG_X86_STACK_INDEX` contract and `mut_x86_stack_arm.py` /
+`mut_x86_stack_write_lanes.py` pin the arena routing and the write-lane
+region markers, but nothing mutated the header's use of the map:
+`X86_SIM_L_STACK_INDEX(OFF) = KPROG_X86_STACK_INDEX(OFF, X86_SIM_STACK_BYTES)`
+(the index binding), the `X86_SIM_L_STACK_PTR(OFF)` resolver body (the byte
+arena `__x86_stack_mem.b[...]` pick and its sign-extended offset), and the
+provenance stamps at the consuming arms (`X86_SIM_TAG_STACK` on the routed
+LEA stack arm and on the routed `X86_OP_MOV_REG` stack arm).
+`build/mut_x86_stack_region.py` (untracked, harness census 162 -> 163) closes
+the gap with 8 rows over a one-file watchlist (`kprog/x86/x86_sim_local_bpf.h`,
+byte-exact restore each row) and two detectors
+(`det_lea` = rebuild and run `test_x86_lea_route_host`, whose independent
+model re-derives the stack-base address; `det_mov` = same for
+`test_x86_mov_route_host` over the routed MOV stack arm): five resolver rows
+(byte-vs-word arena pick, one-bit index shift, +1 stack-offset drift,
+add-inverted index binding, LEA-arm tag repaint) all caught by `det_lea`, two
+routed-MOV rows (a `X86_RBP`-pinned source-lane read and a tag repaint) all
+caught by `det_mov`, and one equivalence row (the declared stack panel's
+inline `(X86_SIM_STACK_BYTES + 7U) / 8U` word count must stay the exact twin
+of the generated `KPROG_X86_STACK_WORDS(CAPACITY)` spelling) that must stay
+green. All 7 mutations caught, 1 equivalence row green; four byte-identical
+green shakes (`TOTAL 8 mutations, 0 failures, 1 equivalence rows`, md5
+`7165f21e3283acbec2ebd8500c5af7cd`); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
 ### Step 0288 — x86 register-form SETCC spec chain
 
 The spec/generator/artifact chain audit after Step 0287 found exactly one

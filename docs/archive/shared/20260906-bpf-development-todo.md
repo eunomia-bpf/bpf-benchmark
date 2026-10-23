@@ -16053,6 +16053,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0289 — x86 stack-region frame-base resolution chain
+
+- Scope: the simulator header's own stack-region resolution chain
+  (`kprog/x86/x86_sim_local_bpf.h`): the index binding
+  `X86_SIM_L_STACK_INDEX(OFF) = KPROG_X86_STACK_INDEX(OFF,
+  X86_SIM_STACK_BYTES)`, the `X86_SIM_L_STACK_PTR` resolver body (byte arena
+  `__x86_stack_mem.b[...]` over the sign-extended offset), the routed-LEA
+  stack arm's `X86_SIM_TAG_STACK` stamp, and the routed `X86_OP_MOV_REG`
+  dispatcher's stack arm (source-lane read + tag). The generated index
+  contract itself is Step 0119's; the arena routing and write lanes are
+  Steps 0110/0112's.
+- Semantics: one merged harness `build/mut_x86_stack_region.py` (untracked,
+  census 162 -> 163), 8 rows, two detectors (`det_lea` = rebuild + run
+  `test_x86_lea_route_host`; `det_mov` = same for `test_x86_mov_route_host`;
+  each host's independent model re-derives the stack-base address and the
+  provenance, so any resolver drift or tag drift breaks the host's OK
+  banner), one-file watchlist (`x86_sim_local_bpf.h`) restored byte-exact
+  around every row.
+- Result: 7/7 mutations caught (five resolver rows by `det_lea`: arena pick,
+  index shift, offset drift, add-into-subtract index binding, LEA tag; two
+  routed-MOV rows by `det_mov`: RBP-pinned source read, tag repaint), one
+  equivalence row green (declared panel's inline word-count formula must stay
+  the twin of `KPROG_X86_STACK_WORDS`), four byte-identical green shakes
+  (`7165f21e3283acbec2ebd8500c5af7cd`), golden `make check` rc 0 / 210
+  `cross-check: OK` banners; committed with paper sentence, README and
+  archive steps, implementation pair.
+
 ## Step 0288 — x86 register-form SETCC spec chain
 
 - Scope: the register-form SETCC contract's artifact chain
