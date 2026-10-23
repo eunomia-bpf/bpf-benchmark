@@ -16002,6 +16002,34 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0276 — x86 memory-offset accumulation contract
+
+- Scope: the effective-address sum the simulator resolves through:
+  `x86_mem_offset_spec.json` pins `{base disp, indexed
+  disp_plus_index_scaled, scale shift_log2, accumulate wrapping64}`;
+  `generate_x86_mem_offset_spec.py --check` byte-re-renders
+  `generated/x86_mem_offset.h` (the `KPROG_X86_MEM_OFFSET` statement
+  expression) and `KProgFormal/GeneratedX86MemOffset.lean` (`value` /
+  `valueSpec`);
+- refinement: the hand `KProgFormal/X86MemOffset.lean` proves the
+  generated conditional equals the case table
+  (`x86_mem_offset_refines`), the case dispatch, that the plain arm
+  ignores scale/index, and concrete indexed/wrap examples;
+- harness: `build/mut_x86_mem_offset.py` (untracked,
+  census 149 -> 150), 24 rows over the six-file watchlist, three
+  detectors (`--check`; `lake build` + two `lake env lean`; one
+  compiled pinned-OK-banner oracle: route 2305 over the real
+  `X86_SIM_L_MEM_OFFSET` call);
+- result: 19 catches (13 generator byte-render rows, 4 Lean
+  elaboration rows, 2 route-host shift/call drifts) and 5 documented
+  equivalences (green-run failure-path message repaints, spec spacing,
+  a theorem rename, and a doc-comment repaint);
+- verification: four byte-identical green shakes
+  (`/tmp/run0276_{1..4}.txt`, all md5
+  `2f4b2cceec5ec8e16bff1eb7f66f1f07`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0275 — x86 memory-index presence contract
 
 - Scope: the addressing-mode index selector the offset contract

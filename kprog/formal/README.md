@@ -5573,6 +5573,33 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0276 — x86 memory-offset accumulation contract
+
+The memory-offset accumulation contract pins the effective-address sum
+the simulator resolves through: `x86_mem_offset_spec.json` pins
+`{base disp, indexed disp_plus_index_scaled, scale shift_log2,
+accumulate wrapping64}`; `generate_x86_mem_offset_spec.py --check`
+byte-re-renders `generated/x86_mem_offset.h` (the
+`KPROG_X86_MEM_OFFSET(AUX, DISP, INDEX_VALUE, HAS_INDEX)` statement
+expression — single-evaluation inputs, the index read skipped when
+`HAS_INDEX` is false, the `<< scale` contribution cast back to `__s64`)
+and `KProgFormal/GeneratedX86MemOffset.lean` (the `value` conditional
+over `disp + (index <<< scale)` and the independent `valueSpec` case
+table). The hand `KProgFormal/X86MemOffset.lean` proves the generated
+conditional equals the case table, the case dispatch, that the plain
+arm ignores scale/index, and concrete indexed/wrap examples.
+`build/mut_x86_mem_offset.py` (untracked, census 149 -> 150) plants 24
+rows over the six-file watchlist: `--check`, `lake build` + two `lake
+env lean` elaborations, and the compiled pinned-OK-banner oracle
+(`x86 mem offset route host cross-check: OK (2305 cases)` over the real
+`X86_SIM_L_MEM_OFFSET` call). 19 catches (13 generator byte-render
+rows, 4 Lean elaboration rows, 2 route-host shift/call drifts) and 5
+documented equivalences (green-run failure-path message repaints, spec
+spacing, a theorem rename, and a doc-comment repaint). Four
+byte-identical green shakes (`/tmp/run0276_{1..4}.txt`, all md5
+`2f4b2cceec5ec8e16bff1eb7f66f1f07`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0274 — x86 DIV resolved-width case dispatch
 
 The DIV case-dispatch contract pins the four quotient/remainder bodies
