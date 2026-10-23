@@ -16002,6 +16002,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0279 — x86 shift-result semantics contract
+
+- Scope: the five shift/rotate result semantics: `x86_shift_result_spec.json`
+  pins the operation set `{shl, shr, sar, rol, ror}`, the `x86ShiftCount`
+  count contract, the `narrow` operand rule, and `unsigned_sign_fill` SAR;
+  `generate_x86_shift_result_spec.py --check` byte-re-renders
+  `generated/x86_shift_result.h` and `KProgFormal/GeneratedX86ShiftResult.lean`
+  (five `kprog_x86_*_result` inlinings, five `BitVec` functions);
+- refinement: the hand `KProgFormal/X86ShiftResult.lean` proves each against
+  an independent per-width statement with concrete rotate/width examples;
+- harness: `build/mut_x86_shift_result.py` (untracked, census 152 -> 153),
+  25 rows over the five-file watchlist, four detectors (`--check`; two
+  `lake env lean` elaborations; two compiled pinned-OK-banner oracles:
+  ror host 20320, memory-shift host 21024);
+- result: 20 catches (15 generator byte-render rows, 3 Lean elaboration
+  rows, 1 compiled-host ror drift, 1 memory-shift host drift) and 5
+  documented equivalences (green-run failure-path message repaints, spec
+  spacing, a theorem rename outside the family chain, doc repaint).
+  Shift semantic drift in the generated Lean is caught by the byte
+  re-render, not the elaboration (the Lean modules survive the drift),
+  which is why the split is gen-heavy;
+- verification: four byte-identical green shakes
+  (`/tmp/run0279_{1..4}.txt`, all md5
+  `e93288fdbcbe63a163f2a08110147086`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0278 — x86 SETCC_MEM memory-store contract
 
 - Scope: one opcode (`0x3e`), one constant byte width, the AUX
