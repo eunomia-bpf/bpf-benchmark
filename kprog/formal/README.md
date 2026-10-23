@@ -5653,6 +5653,33 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0295 - x86 render/emission pipeline
+
+The x86 mirror of the arm64 render/emission step: the generator's
+render/emission pipeline -- loaders and emitters (`source_prelude`,
+`program_kind`, `load_benches`, `annotated_fixed_count_ops`,
+`render_program`) -- emitted calls; Step 0293 pinned the encode() ladder
+and Step 0290 the parser/AUX layer, but no row mutated the pipeline
+itself. `build/mut_x86_render_pipeline.py` (untracked, harness census
+168 -> 169) closes the gap with 23 rows over a one-file watchlist (the
+x86 generator, byte-exact restore each row) and one in-process detector:
+a battery over fixture `NativeInsn`s in a fresh `python -B -c`
+interpreter with the module `__pycache__` purged around every battery,
+all in-process (no objdump). The battery pins the include rewrite plus
+no-SEC empty case, the `c_u64`/`c_ptr_u64` literal shapes, the tag map
+over tc/cgroup-skb/xdp plus a YAML fixture driving `load_benches`, the
+rep/memcpy fixed-count dataflow (count capture, xor-zero reset, and
+overwrite kill), and full-text emission of `render_program` with a
+`memcpy` subfunction, a return-dispatch switch, rodata, stack defines,
+`X86_SIM_L_EXEC_CMP_MEM` direct step macros, and an xdp-control
+variant, plus the external-branch and unresolved-call rejection paths.
+Twenty-one guard/constant flips must break the battery and two declared
+equivalences (the unsupported-branch and call-message repaints) must
+stay green: 21 caught, 2 equivalence; four byte-identical green shakes
+(`TOTAL 23 mutations, 0 failures, 2 equivalence rows`, all md5
+`d63bb12f8d6536466fdf138e6d733a9e`); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners.
+
 ### Step 0294 — arm64 render/emission pipeline
 
 The arm64 mirror beyond the encode() ladder: the generator's

@@ -16053,6 +16053,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0295 - x86 render/emission pipeline
+
+- Scope: the x86 proof-artifact generator's render/emission pipeline in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` --- the loaders
+  (`source_prelude`, `program_kind`, `load_benches`), the
+  fixed-count annotation `annotated_fixed_count_ops` (rep/memcpy data
+  flow), and the program emitter `render_program` (stack defines,
+  rodata cells, the kind-keyed SEC/ctx pick, entry function, the
+  emitted branch/call/return flow, return-dispatch switch, and
+  license); Step 0293 pinned the encode() ladder and Step 0290 the
+  parser/AUX layer; no row mutated the pipeline itself.
+- Semantics: one harness `build/mut_x86_render_pipeline.py`
+  (untracked, census 168 -> 169), 23 rows, one in-process detector (a
+  battery over fixture `NativeInsn`s --- no objdump --- in a fresh
+  `python -B -c` interpreter with the module `__pycache__` purged
+  around every battery), one-file watchlist (the x86 generator)
+  restored byte-exact around every row.
+- Result: 21 catches (prelude SEC match and include rewrite, c-comment
+  repaint, `c_u64` suffix, tc tag and `load_benches` wrapper, rep/
+  memcpy count capture, xor-zero reset, overwrite kill, stack/deep
+  define repaints, tc-section pick, xdp ctx-type repaint, entry
+  function signature, CALL next-address return, return-dispatch case
+  labels, main ret_statement macro, exit fallthrough comment, rodata
+  cell lo/hi order), 2 equivalence greens (unsupported-branch and
+  call-message repaints with no pinned observer), four byte-identical
+  green shakes (`d63bb12f8d6536466fdf138e6d733a9e`), golden
+  `make check` rc 0 / 210 `cross-check: OK` banners; committed with
+  paper sentence, README and archive steps, implementation pair.
+
 ## Step 0294 — arm64 render/emission pipeline
 
 - Scope: the arm64 proof-artifact generator's render/emission pipeline
