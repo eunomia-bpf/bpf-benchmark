@@ -16002,6 +16002,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0278 — x86 SETCC_MEM memory-store contract
+
+- Scope: one opcode (`0x3e`), one constant byte width, the AUX
+  source-shift condition byte, and the two destination-driven tables:
+  `x86_setcc_mem_spec.json` pins the opcode/condition/width/register
+  rows and the base/arm rows; `generate_x86_setcc_mem_spec.py --check`
+  byte-re-renders `generated/x86_setcc_mem.h` (the `_CONDITION`
+  extract, `_BASE`/`_ARM`, three `_Static_assert`s) and
+  `KProgFormal/GeneratedX86SetccMem.lean` (`conditionCode`,
+  `condOf`/`evalRaw`, register-number tests, `Base`/`arm`, `.w8`);
+- refinement: the hand `KProgFormal/X86SetccMemHandler.lean` proves
+  the condition composition, base and arm refinements, the null-base
+  facts, and the raw-aux composes/sound lemmas;
+- harness: `build/mut_x86_setcc_mem.py` (untracked,
+  census 151 -> 152), 33 rows over the six-file watchlist, four
+  detectors (`--check`; `lake build` + two `lake env lean`; two
+  compiled pinned-OK-banner oracles: handler host 1053191, route host
+  8958727 over the real simulator `SETCC_MEM` block);
+- result: 29 catches (17 generator byte-render rows, 8 Lean
+  elaboration rows, 1 compiled-host condition drift, 3 route-host
+  condition/base drifts) and 4 documented equivalences
+  (green-run failure-path message repaints, spec spacing, and a
+  doc-comment repaint);
+- verification: four byte-identical green shakes
+  (`/tmp/run0278_{1..4}.txt`, all md5
+  `ec37c1831ab6ae306e3fc1f39a48ca00`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0277 — x86 push/pop handler-composition contract
 
 - Scope: one composition, two opcodes: `x86_pushpop_spec.json` pins

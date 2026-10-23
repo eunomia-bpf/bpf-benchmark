@@ -5602,6 +5602,34 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0278 — x86 SETCC_MEM memory-store contract
+
+The SETCC_MEM contract pins one opcode (`0x3e`), one constant byte
+width, the AUX source-shift condition byte, and the two
+destination-driven tables: `x86_setcc_mem_spec.json` pins the
+opcode/condition/width/register rows and the base/arm rows;
+`generate_x86_setcc_mem_spec.py --check` byte-re-renders
+`generated/x86_setcc_mem.h` (the `KPROG_X86_SETCC_MEM_CONDITION`
+extract, the `_BASE`/`_ARM` statement expressions, three
+`_Static_assert`s) and `KProgFormal/GeneratedX86SetccMem.lean`
+(`conditionCode`, `condOf`/`evalRaw` composed with the generated
+register-form table, the register-number tests, `Base`/`arm`, `.w8`).
+The hand `KProgFormal/X86SetccMemHandler.lean` proves the condition
+composition, base and arm refinements, the null-base facts, and the
+raw-aux composes/sound lemmas. `build/mut_x86_setcc_mem.py` (untracked,
+census 151 -> 152) plants 33 rows over the six-file watchlist:
+`--check`, `lake build` + two `lake env lean` elaborations, and the two
+compiled pinned-OK-banner oracles (`x86 setcc_mem handler host
+cross-check: OK (1053191 cases)` and `x86 setcc_mem route host
+cross-check: OK (8958727 cases)` over the real simulator `SETCC_MEM`
+block). 29 catches (17 generator byte-render rows, 8 Lean elaboration
+rows, 1 compiled-host condition drift, 3 route-host condition/base
+drifts) and 4 documented equivalences (green-run failure-path message
+repaints, spec spacing, and a doc-comment repaint). Four byte-identical
+green shakes (`/tmp/run0278_{1..4}.txt`, all md5
+`ec37c1831ab6ae306e3fc1f39a48ca00`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0276 — x86 memory-offset accumulation contract
 
 The memory-offset accumulation contract pins the effective-address sum
