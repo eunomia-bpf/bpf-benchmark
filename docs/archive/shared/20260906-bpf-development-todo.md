@@ -16092,6 +16092,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0303 - x86 per-step append delegation
+
+- Scope: the three-line glue `append_step` in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` --- the
+  `encode(insn, rodata_idents or {})` wiring (kept observably live
+  through an xmm0 `[rip+...]` load whose emitted line must name the
+  caller's rodata ident), the comment line
+  `f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */"`, and the
+  `append_encoded_step(lines, encoded, indent, step_macro)`
+  delegation with its `"X86_SIM_RUN_OP"` default. Step 0297 pinned
+  `append_encoded_step` and `c_comment` separately; nothing rowed
+  `append_step` itself.
+- Semantics: one harness `build/mut_x86_append_step.py`
+  (untracked, census 176 -> 177), 4 rows, one detector (an
+  in-process battery in a fresh `python -B -c` interpreter calling
+  `append_step` directly over ret/mov/movaps fixtures, pinning exact
+  two-line outputs, indents, the MOV_REG exec route, the rodata
+  pass-through, and accumulation), one-file watchlist (the x86
+  generator) restored byte-exact around every row.
+- Result: 4 catches, no equivalence rows (the rodata-table drop, the
+  comment address repaint, the delivered-indent repaint, and the
+  default-macro repaint); three byte-identical green shakes
+  (`bc7cb4a64c92a1766178e1e2fd3287f5`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0302 - x86 chunk-for-address lookup
 
 - Scope: the single lookup helper `chunk_for_addr` in

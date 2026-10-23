@@ -5687,6 +5687,30 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0303 - x86 per-step append delegation
+
+The per-step append delegation pinned end to end: `append_step` --- the three-line
+glue every render loop reaches one instruction through (the `encode(insn,
+rodata_idents or {})` wiring that keeps the rodata-ident table observably live (an
+xmm0 `[rip+...]` load must re-render with the caller's ident symbol), the comment
+line `f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */"` carrying the real
+address and raw text, and the `append_encoded_step(lines, encoded, indent,
+step_macro)` delegation with its `"X86_SIM_RUN_OP"` default macro). Step 0297's
+branch-ladder battery pinned `append_encoded_step` and `c_comment` separately but no
+row ever mutated `append_step`'s own glue; the step-0302 scan flagged it as the last
+thin-anchored name and `build/mut_x86_append_step.py` (untracked, harness census
+176 -> 177) closes it with 4 rows over the one-file watchlist (the x86 generator,
+byte-exact restore each row) and one in-process detector: a battery in a fresh
+`python -B -c` interpreter calling `append_step` directly over ret/mov/movaps
+fixtures, pinning exact 2-line output pairs (comment + RUN_OP), default and
+custom indents, the `X86_SIM_L_EXEC_MOV_REG` route for reg-reg movs, the
+rodata-ident pass-through (`((__u64)(long)ro_rb_x)` in the emitted line), and
+append-mode accumulation. All 4 single-anchor flips must break the battery (no
+equivalence rows): as_encode_drop, as_comment_addr, as_delegate, as_macro_default;
+4 caught; three byte-identical green shakes (`TOTAL 4 mutations, 0 failures,
+0 equivalence rows`, all md5 `bc7cb4a64c92a1766178e1e2fd3287f5`); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0302 - x86 chunk-for-address lookup
 
 The chunk-for-address lookup pinned end to end: `chunk_for_addr`'s linear scan over the
