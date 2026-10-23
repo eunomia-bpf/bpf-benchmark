@@ -16092,6 +16092,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0300 - x86 operand-classifier wrappers
+
+- Scope: the operand-classifier wrapper quartet in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` --- `mem_base_reg`
+  (the `parse_mem_terms(operand)[0]` base pick), `parse_mem_terms`'s
+  bracket arm (the lazy `\[(.*?)\]` reader, the no-bracket
+  `X86_REG_NONE, X86_REG_NONE, 0, 0` sentinel, and the first-vs-second
+  register base/index overflow assignment), `has_direct_branch_target`
+  (the two-hex-arm `re.match` over the stripped operand), and
+  `canonical_reg` (the `reg_info`-to-`info[0]` wrapper); the interior
+  terms rows (neg rewrite, scale map, disp add) stay in
+  `mut_x86_encoder_selection.py`; no row had mutated the four
+  wrappers.
+- Semantics: one harness `build/mut_x86_operand_wrappers.py`
+  (untracked, census 173 -> 174), 7 rows, one detector (a unit
+  battery in a fresh `python -B -c` interpreter over the four
+  wrappers with real `reg_info` tables), one-file watchlist (the x86
+  generator) restored byte-exact around every row.
+- Result: 7 catches, no equivalence rows (the `[0]`-to-`[3]` base
+  pick, the `[...]`-to-`<...>` bracket arm, the no-bracket sentinel
+  disp 0-to-1, the overflow-to-index collapse, the bare-hex arm drop,
+  the strip drop, and the `info[0]`-to-`info[1]` pick); three
+  byte-identical green shakes (`735900ff058c5832e4a26c9eeac8eec4`),
+  golden `make check` rc 0 / 210 `cross-check: OK` banners;
+  committed with paper sentence, README and archive steps,
+  implementation pair.
+
 ## Step 0299 - x86 write-one/CLI wiring
 
 - Scope: the write-one/CLI assembly layer of the x86 generator

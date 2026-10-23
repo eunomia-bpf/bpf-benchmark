@@ -5687,6 +5687,41 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0300 - x86 operand-classifier wrappers
+
+The operand-classifier wrapper quartet pinned:
+`mem_base_reg` (`parse_mem_terms(operand)[0]` --- the base pick over
+the four-tuple), `parse_mem_terms`'s bracket arm (the
+`re.search(r"\[(.*?)\]", operand)` lazy-bracket reader the whole
+mem-operand duct starts from, with the no-bracket
+`X86_REG_NONE, X86_REG_NONE, 0, 0` sentinel return and the
+first-vs-second register base/index overflow assignment), 
+`has_direct_branch_target` (the
+`re.match(r"(0x[0-9a-fA-F]+|[0-9a-fA-F]+)", operand.strip())` head ---
+two hex arms over the stripped operand), and `canonical_reg` (the
+`reg_info(reg)` wrapper returning `info[0]`). The interior terms rows
+(negative-displacement rewrite, scale map, displacement add) stay in
+Step 0300's separate `mut_x86_encoder_selection.py` harness; no row
+had mutated the four wrappers or the bracket/no-bracket/overflow/
+strip arms they wrap. `build/mut_x86_operand_wrappers.py` (untracked,
+harness census 173 -> 174) closes the gap with 7 rows over a one-file
+watchlist (the x86 generator, byte-exact restore each row) and one
+in-process detector: a unit battery in a fresh `python -B -c`
+interpreter pinning `mem_base_reg` (base-only, base-plus-disp,
+numeric-only `X86_REG_NONE`, bracketless sentinel),
+`parse_mem_terms` (the full `[rbx+rsi*4+0x10]` tuple, space-stripped
+`[rbx + rsi * 8]` scale-3 pick, `[rbx-8]` negative displacement,
+bracketless sentinel tuple, `[rax+rbx]` overflow-to-index,
+`[0x10+rax]` numeric-with-base), `has_direct_branch_target` (`0x`-hex,
+bare hex, `<label`-operand false, register name false, leading-space
+hex after the strip), and `canonical_reg` (lowercase, uppercase, and
+the unknown-name `None`). All 7 single-anchor flips must break the
+battery (no equivalence rows): mbr_pick, pmt_bracket_arm,
+pmt_none_ret, pmt_overflow, hdb_regex, hdb_strip, cr_pick; 7 caught;
+three byte-identical green shakes (`TOTAL 7 mutations, 0 failures, 0
+equivalence rows`, all md5 `735900ff058c5832e4a26c9eeac8eec4`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0299 - x86 write-one/CLI wiring
 
 The write-one/CLI assembly layer pinned end to end: `write_one` (the
