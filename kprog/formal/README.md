@@ -5687,6 +5687,28 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0305 - arm64 module tables
+
+The ARM64 generator's two module-level tables pinned as data: `WIDTH_CONST` (the
+byte-size to `ARM64_WIDTH_*` name map `width_const()` indexes) and `GPR_WRITE_OPS`
+(the 59-entry mnemonic set gating `written_gpr`'s destination scan, whose
+membership content is the load/store/ALU/atomic `x*-written` contract). Step 0304's
+class scan confirmed the five dataclasses are annotation-only (no methods to row),
+leaving the module tables as the last unrowed module-scope surface.
+`build/mut_arm64_module_tables.py` (untracked, harness census 178 -> 179) closes
+the pair with 5 rows over the one-file watchlist (the ARM64 generator, byte-exact
+restore each row) and one in-process detector: a battery in a fresh `python -B -c`
+interpreter pinning the exact `WIDTH_CONST` dict, `width_const(4)`/`(8)` name picks,
+`len(GPR_WRITE_OPS) == 59`, ten present-probe mnemonics (`add`, `ldr`, `stlxr`,
+`cset`, `fmov`, `umull`, `ubfx`, `rev16`, `sxtw`, `csel`), seven absent-probes
+(`str`, `stur`, `ldar`, `br`, `b`, `blr`, `cmp`), and the `written_gpr`
+membership-gate ride-along (`add x0,x1` -> `0`, `mov w8,#1` -> `8`,
+`str x0,[sp]` -> `None`). All 5 single-anchor flips must break the battery (no
+equivalence rows): wc_val, wc_key, gwo_drop, gwo_add, gwo_len; 5 caught; three
+byte-identical green shakes (`TOTAL 5 mutations, 0 failures, 0 equivalence rows`,
+all md5 `d1bd6cecd06f10e845c6fa3218297cd1`); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners.
+
 ### Step 0304 - arm64 bench-loader and naming helpers
 
 The arm64 generator's three small helpers pinned: `rodata_ident_map` (the

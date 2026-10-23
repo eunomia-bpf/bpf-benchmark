@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0305 - arm64 module tables
+
+- Scope: the ARM64 generator's two module-level tables as data:
+  `WIDTH_CONST` (the byte-size-to-`ARM64_WIDTH_*` map `width_const`
+  indexes) and `GPR_WRITE_OPS` (the 59-entry mnemonic set gating
+  `written_gpr`'s destination scan). The post-0304 class scan showed
+  all five dataclasses annotation-only, leaving the module tables as
+  the last unrowed module-scope surface.
+- Semantics: one harness `build/mut_arm64_module_tables.py`
+  (untracked, census 178 -> 179), 5 rows, one detector (an in-process
+  battery in a fresh `python -B -c` interpreter pinning the exact
+  `WIDTH_CONST` dict, the `width_const` name picks, the 59-entry set
+  length, ten present-probes and seven absent-probes, and the
+  `written_gpr` membership-gate ride-along), one-file watchlist (the
+  ARM64 generator) restored byte-exact around every row.
+- Result: 5 catches, no equivalence rows (the width-name repaint,
+  the width-key drop, the mnemonics drop, the stranger-mnemonic
+  `str` injection, and the `casp` injection); three byte-identical
+  green shakes (`d1bd6cecd06f10e845c6fa3218297cd1`), golden
+  `make check` rc 0 / 210 `cross-check: OK` banners; committed with
+  paper sentence, README and archive steps, implementation pair.
+
 ## Step 0304 - arm64 bench-loader and naming helpers
 
 - Scope: the ARM64 generator (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`)
