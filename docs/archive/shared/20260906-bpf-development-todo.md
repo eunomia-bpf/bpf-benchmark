@@ -16092,6 +16092,40 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0297 - x86 native-link parse coverage
+
+- Scope: the native-link objdump-feed parse path in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` ---
+  `parse_asm_text` (the `-dr` line reader with relocations and
+  comments), `section_size`/`rodata_bytes`/`load_rodata16` (the
+  `-h`/`-s` rodata doubleword map keyed by symtab rodata symbols),
+  `text_symbol_addrs` (the `-t` `.text` symbol table),
+  `rodata_ident_map` (the `__x86_rodata_{n}` idents),
+  `parse_native_link_blob` (reloc targets resolved through those
+  symbols), `normalize_native_link_entry_returns` (the entry-final
+  `jmp blob_len`->`ret` repaint with the `; native-link entry RET`
+  marker), and `parse_native_linked_program` (entry/sub split at
+  non-helper `call` targets plus the external-branch-aware `max`
+  exit); no row mutated this parse layer so far.
+- Semantics: one harness `build/mut_x86_native_link_parse.py`
+  (untracked, census 170 -> 171), 22 rows, one in-process detector (a
+  battery driving the parse layer through FAUX objdump text in a
+  fresh `python -B -c` interpreter with the module `__pycache__`
+  purged around every battery), one-file watchlist (the x86
+  generator) restored byte-exact around every row.
+- Result: 22 catches, no equivalence rows (asm fields-lt-3 gate, the
+  comment strip, the byte-pair nibble stride, four rodata-column
+  guards (offset bound, size pick, column shift, name column), the
+  rodata offset radix, section-size hex base and cache gate, three
+  symtab-column flips (hex base, gate, name column), the rodata ident
+  start index, three normalize-entry flips (RET marker repaint,
+  mnemonic spacing, blob-len compare), and four split flips (entry
+  end index, external-branch exit max, sub key, entry/sub range
+  bounds); four byte-identical green shakes
+  (`e1976c6998b37654716aa7199725e4f4`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence, README
+  and archive steps, implementation pair.
+
 ## Step 0295 - x86 render/emission pipeline
 
 - Scope: the x86 proof-artifact generator's render/emission pipeline in

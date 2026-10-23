@@ -5687,6 +5687,40 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0297 - x86 native-link parse coverage
+
+The native-link objdump-feed parse path pinned: `parse_asm_text` (the
+objdump `-dr` line reader with relocations and comments),
+`section_size`/`rodata_bytes`/`load_rodata16` (the `-h`/`-s` rodata
+doubleword map keyed by symtab rodata symbols), `text_symbol_addrs`
+(the `-t` `.text` symbol table), `rodata_ident_map` (the generated
+`__x86_rodata_{n}` idents), `parse_native_link_blob` (relocation
+targets resolved through those symbols),
+`normalize_native_link_entry_returns` (the entry-final
+`jmp blob_len` repaint into `ret` with the `; native-link entry RET`
+marker), and `parse_native_linked_program` (entry/sub split at
+non-helper `call` targets plus the external-branch-aware
+`max` exit). `build/mut_x86_native_link_parse.py` (untracked, harness
+census 170 -> 171) closes the gap with 22 rows over a one-file
+watchlist (the x86 generator, byte-exact restore each row) and one
+in-process detector: a battery driving the parse layer through FAUX
+objdump text in a fresh `python -B -c` interpreter with the module
+`__pycache__` purged around every battery, all in-process (no real
+objdump). The battery pins `parse_asm_text` over two fixture disasms
+(ten-insn locked-`rep movs%` entry ending in a `.text` call with a
+`R_X86_64_PLT32` fixup, an inline comment, a `<directived>` label
+pseudo-line, plus a two-sub 0x35 blob whose entry ends in an external
+`jmp`), `load_rodata16` over a two-symbol fixture (base and octal-safe
+offset layers), `rodata_ident_map`, `text_symbol_addrs`,
+`section_size`, the blob's `reloc_target` wiring, and one hand-built
+normalize-entry probe (the painted `; native-link entry RET` marker
+pinned byte-for-byte), plus the entry/sub split for both
+fixtures. All 22 single-guard/literal flips must break the battery (no
+equivalence rows): 22 caught; four byte-identical green shakes
+(`TOTAL 22 mutations, 0 failures, 0 equivalence rows`, all md5
+`e1976c6998b37654716aa7199725e4f4`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0295 - x86 render/emission pipeline
 
 The x86 mirror of the arm64 render/emission step: the generator's
