@@ -16002,6 +16002,37 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0277 — x86 push/pop handler-composition contract
+
+- Scope: one composition, two opcodes: `x86_pushpop_spec.json` pins
+  the opcode rows (PUSH `0x12` pre-decrement/hardcoded-64, POP `0x13`
+  post-increment/flags-or-64), the step/width/flags define rows, and
+  the eight-byte stack step; `generate_x86_pushpop_spec.py --check`
+  byte-re-renders `generated/x86_pushpop.h` (the `_Static_assert`
+  opcode pins and the three selector macros) and
+  `KProgFormal/GeneratedX86PushPop.lean` (the enums, tables,
+  `flagsWidth`/`resolveWidth`, `stackStep`);
+- refinement: the hand `KProgFormal/X86PushPopHandler.lean` proves
+  both tables equal independent statements
+  (`x86_push_pop_{step_direction,width_source}_refines`), pins the two
+  facts independent, and derives the width/addr/rsp/frame round trips
+  and examples;
+- harness: `build/mut_x86_pushpop.py` (untracked,
+  census 150 -> 151), 35 rows over the six-file watchlist, four
+  detectors (`--check`; `lake build` + two `lake env lean`; two
+  compiled pinned-OK-banner oracles: handler host 463, route host
+  31504 over the real `X86_SIM_L_EXEC_PUSH_POP_STEP` composition);
+- result: 29 catches (16 generator byte-render rows, 6 Lean
+  elaboration rows, 2 compiled-host macro drifts, 5 route-host
+  selector/sim drifts) and 6 documented equivalences (green-run
+  failure-path message repaints, spec spacing, theorem renames with no
+  internal references, and a doc-comment repaint);
+- verification: four byte-identical green shakes
+  (`/tmp/run0277_{1..4}.txt`, all md5
+  `7efd5de0fee0501628fe5ed7ba067de9`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0276 — x86 memory-offset accumulation contract
 
 - Scope: the effective-address sum the simulator resolves through:
