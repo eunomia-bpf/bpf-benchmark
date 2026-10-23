@@ -5513,6 +5513,41 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0272 — x86 pointer-add transition contract
+
+The pointer-add transition contract pins the shared pointer sum +
+provenance copy that the LEA, MOV-load-pointer, and arm64 ALU lanes
+resolve through: `ptr_add_spec.json` pins the one-line contract
+`{schema_version 1, operation ptrAdd64, bits {op add, lhs src, rhs rhs},
+tag {op copy, source src}}`; `generate_ptr_add_spec.py --check` re-derives
+the field set/operation/bits-expression guards and byte-re-renders both
+artifacts (`KProgFormal/GeneratedPtrAdd.lean` with the generic
+`{α : Type} [Add α] bits : src + rhs` and `tag : src`, and
+`generated/ptr_add.h` with the `KPROG_PTR_ADD64_BITS(SRC_PTR, RHS)
+((__u8 *)(SRC_PTR) + (RHS))` / `KPROG_PTR_ADD64_TAG(SRC_TAG) (SRC_TAG)`
+macro pair). The consumers are four call sites: the LEA lane's TAG +
+BITS pair in `x86/x86_sim_local_bpf.h`, the ALU pointer arm's BITS +
+TAG pair in `arm64/arm64_sim_local_bpf.h`, and the hand
+`X86LeaHandler.lean` / `X86MovHandler.lean` refinements whose spec
+states spell the explicit sum. `build/mut_ptr_add.py` (untracked,
+census 145 -> 146) plants 44 rows over the eight-file watchlist (spec
+JSON + generator + generated header + generated Lean + hand LEA/MOV
+Lean + the two sim headers): `--check`, a five-module `lake build`
+fan-in plus two `lake env lean` elaborations, and four compiled
+pinned-OK-banner oracles (`x86 LEA host cross-check: OK (61440 cases)`,
+`x86 MOV host cross-check: OK (100448 cases)`, `x86 lea route host
+cross-check: OK (32641 cases)`, and `arm64 alu operand select route
+host cross-check: OK (21688 cases)`). 37 catches (20 generator
+byte-render rows, 8 consumer-leak Lean elaborations, 7 sim-header
+call-site drifts across the two route hosts, 2 compiled-host macro
+drifts) and 7 documented equivalences (green-run failure-path message
+repaints, a free-variable tag repaint, a no-op count-0 row, and
+comment repaints that keep the line continuation intact). Four
+byte-identical green shakes (`/tmp/run0272_{1..4}.txt`, all md5
+`a64d478bd3da804dd8b32afde872cb8a`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, 0 error lines, cores cleaned)
+pin the family.
+
 ### Step 0270 — ABI-load provenance-tag contract
 
 The ABI-load provenance-tag contract (the two-kind entry discipline every

@@ -16002,6 +16002,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0272 — x86 pointer-add transition contract
+
+- Scope: the shared pointer sum + provenance copy the LEA,
+  MOV-load-pointer, and arm64 ALU lanes resolve through:
+  `ptr_add_spec.json` pins `{schema_version 1, operation ptrAdd64,
+  bits {op add, lhs src, rhs rhs}, tag {op copy, source src}}`;
+  `generate_ptr_add_spec.py --check` re-derives the field
+  set/operation/bits-expression guards and byte-re-renders both
+  artifacts (`generated/ptr_add.h` macro pair and the generic
+  `KProgFormal/GeneratedPtrAdd.lean` bits/tag functions);
+- consumers: the LEA lane TAG + BITS pair in `x86/x86_sim_local_bpf.h`,
+  the ALU pointer arm BITS + TAG pair in `arm64/arm64_sim_local_bpf.h`,
+  and the hand `X86LeaHandler.lean` / `X86MovHandler.lean` refinements
+  whose spec states spell the explicit sum;
+- harness: `build/mut_ptr_add.py` (untracked, census 145 -> 146),
+  44 rows over the eight-file watchlist, six detectors (`--check`;
+  five-module `lake build` + two `lake env lean` elaborations; four
+  compiled pinned-OK-banner oracles: x86 LEA 61440, x86 MOV 100448,
+  x86 lea route 32641, arm64 alu operand select route 21688);
+- result: 37 catches (20 generator byte-render rows, 8 consumer-leak
+  Lean elaborations, 7 sim-header call-site drifts across the two route
+  hosts, 2 compiled-host macro drifts) and 7 documented equivalences
+  (green-run failure-path message repaints, a free-variable tag
+  repaint, a no-op count-0 row, and comment repaints that keep the
+  line continuation intact);
+- verification: four byte-identical green shakes
+  (`/tmp/run0272_{1..4}.txt`, all md5
+  `a64d478bd3da804dd8b32afde872cb8a`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners and 0 error lines; cores cleaned;
+  porcelain back to the 13-line pre-existing dirty set before both
+  pushes.
+
 ## Step 0271 — x86 shift-count masking contract
 
 - Scope: the two-mask shift-count rule every shift, double-shift, and
