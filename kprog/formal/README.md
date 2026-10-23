@@ -5687,6 +5687,38 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0298 - x86 branch-ladder emission
+
+The plain branch/call/return emission ladder pinned:
+`append_branch_or_ret`'s four arms (`jcc` with the `CC_AUX` condition
+map, `jmp`, `ret`, and the `call` arm's helper/reg-indirect/full-target
+priority order), the exit-target rewrite that repaints `je`/`jmp` into
+`ret` for return targets (both the guarded
+`if (X86_SIM_L_EVAL_CC(...))` shape and the bare shape), the subroutine
+twins `X86_SIM_X86_SUB_JCC`/`X86_SIM_X86_SUB_JMP`/`X86_SIM_X86_SUB_RET`
+under `render_x86_subroutine`, and the step-statement layer
+`direct_step_statement`/`append_encoded_step` (AUX table versus DIRECT
+table versus caller `step_macro`, with the `RUN_OP` fallback shape).
+`build/mut_x86_branch_ladder.py` (untracked, harness census 171 -> 172)
+closes the gap with 11 rows over a one-file watchlist (the x86
+generator, byte-exact restore each row) and one detector: a battery
+driving the ladder through FAUX `NativeInsn` fixtures in a fresh
+`python -B -c` interpreter with the module `__pycache__` purged around
+every battery (no real objdump, no chunked path --- the chunked
+renderer keeps its own Step 0296 harness). The battery pins the entry
+flow (`X86_SIM_X86_JCC`/`JMP`/`RET`/`CALL` rows plus the fallthrough
+exit), both exit-target rewrite shapes announced line-by-line, the
+helper-call step (`X86_SIM_L_EXEC_CALL_MEMCPY(64ULL);`), the
+reg-indirect `X86_SIM_BPF_CALL_REG(X86_RAX);` row, the subroutine
+header plus `SUB_JCC`/`SUB_JMP`/`SUB_RET` twins and the
+external-branch `ValueError`, and the statement layer exact strings
+(AUX lane-aux `mov bh` pick, plain DIRECT picks, the three `RUN_OP`
+fallback shapes). All 11 single-guard/literal flips must break the
+battery (no equivalence rows): 11 caught; three byte-identical green
+shakes (`TOTAL 11 mutations, 0 failures, 0 equivalence rows`, all md5
+`72517c50b2389a94a2ac2fa1c293c403`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0297 - x86 native-link parse coverage
 
 The native-link objdump-feed parse path pinned: `parse_asm_text` (the

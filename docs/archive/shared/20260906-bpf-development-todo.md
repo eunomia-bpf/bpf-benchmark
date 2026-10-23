@@ -16092,6 +16092,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0298 - x86 branch-ladder emission
+
+- Scope: mutation battery for the plain branch/call/return emission
+  ladder of the x86 simulator generator --- the `jcc`/`jmp`/`ret`/`call`
+  arms of `append_branch_or_ret`, the exit-target `je`/`jmp`-into-`ret`
+  rewrite (guarded `X86_SIM_L_EVAL_CC` shape and bare shape), the
+  subroutine twins `SUB_JCC`/`SUB_JMP`/`SUB_RET` under
+  `render_x86_subroutine`, and the step-statement layer
+  `direct_step_statement`/`append_encoded_step` (AUX table, DIRECT
+  table, caller `step_macro`, `RUN_OP` fallback); the chunked renderer
+  keeps its own Step 0296 harness.
+- Semantics: one harness `build/mut_x86_branch_ladder.py` (untracked,
+  census 171 -> 172), 11 rows, one detector (a battery driving the
+  ladder through FAUX `NativeInsn` fixtures in a fresh `python -B -c`
+  interpreter with the module `__pycache__` purged around every
+  battery), one-file watchlist (the x86 generator) restored byte-exact
+  around every row.
+- Result: 11 catches, no equivalence rows (the `SUB_JCC` and `SUB_JMP`
+  twin macro picks, both exit-target rewrite indents, the helper-set
+  disjunction, the reg-indirect operand gate, the RUN_OP fallback macro
+  repaint, the subroutine header repaint, the ret-arm statement
+  indent, and the AUX/DIRECT table picks); three byte-identical green
+  shakes (`72517c50b2389a94a2ac2fa1c293c403`), golden `make check` rc 0
+  / 210 `cross-check: OK` banners; committed with paper sentence, README
+  and archive steps, implementation pair.
+
 ## Step 0297 - x86 native-link parse coverage
 
 - Scope: the native-link objdump-feed parse path in
