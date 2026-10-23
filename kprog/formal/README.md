@@ -5546,6 +5546,40 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0274 — x86 DIV resolved-width case dispatch
+
+The DIV case-dispatch contract pins the four quotient/remainder bodies
+the `X86_OP_DIV` arm selects between on the resolved operand width:
+`x86_div_spec.json` pins the arms table (b8 byte packed, b16 word, b32
+dword, b64 qword with the high_half gate) with width codes 1/2/4/8,
+write counts 1/2/2/2, `dividend_high` none/rdx/rdx/rdx, and exactly one
+`high_gate` on the default qword arm; `generate_x86_div_spec.py
+--check` re-derives the arms/column invariants, re-derives the *live*
+arm region from the simulator header (selector routed, each non-default
+define routed, default arm, width write, high-half read), and
+byte-re-renders `generated/x86_div.h` (the `KPROG_X86_DIV_ARM(WIDTH)`
+ternary ladder plus the opcode/count/distinct/width/absent
+`_Static_assert` drift checks) and `KProgFormal/GeneratedX86Div.lean`
+(the `Arm` enum, per-column `*OfArm` tables, total `armOf` ladder, and
+`armOfCode` lookup). The hand `KProgFormal/X86DivHandler.lean` proves
+`x86_div_arm_refines` (the generated selector equals the independent
+`x86DivArmSpec` width-code ladder), `x86_div_names_refine`,
+`x86_div_arm_over_widths`, and the `armOfCode` roundtrip/ddup facts.
+`build/mut_x86_div.py` (untracked, census 147 -> 148) plants 39 rows
+over the six-file watchlist (spec JSON + generator + generated header +
+generated Lean + hand Lean + `x86_sim_local_bpf.h`): `--check`,
+`lake build` + two `lake env lean` elaborations, and the two compiled
+pinned-OK-banner oracles (`x86 div host cross-check: OK (260 cases)` and
+`x86 div route host cross-check: OK (48515 cases)`). 33 catches (23
+generator byte-render and arm-region rows, 5 Lean elaboration rows, 1
+compiled-host selector drift, 4 route-host case-body drifts) and 6
+documented equivalences (green-run failure-path message repaints,
+doc-comment repaints, spec spacing, and a theorem rename with no
+internal references). Four byte-identical green shakes
+(`/tmp/run0274_{1..4}.txt`, all md5
+`9d0829df3dfae2e69bfa9587f83a1878`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0272 — x86 pointer-add transition contract
 
 The pointer-add transition contract pins the shared pointer sum +

@@ -16002,6 +16002,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0274 — x86 DIV resolved-width case dispatch
+
+- Scope: the four quotient/remainder bodies the `X86_OP_DIV` arm
+  selects between on the resolved width: `x86_div_spec.json` pins the
+  arms table (b8/b16/b32/b64, width codes 1/2/4/8, write counts
+  1/2/2/2, `dividend_high` none/rdx/rdx/rdx, one `high_gate` on the
+  default qword arm); `generate_x86_div_spec.py --check` re-derives the
+  invariants, re-derives the live arm region from `x86_sim_local_bpf.h`
+  (selector + each non-default define + default arm + width write +
+  high-half read), and byte-re-renders `generated/x86_div.h` (selector
+  ladder + static asserts) and `KProgFormal/GeneratedX86Div.lean`
+  (`Arm` enum, `*OfArm` tables, total `armOf`, `armOfCode`);
+- refinement: the hand `KProgFormal/X86DivHandler.lean` proves the
+  generated selector equals the independent `x86DivArmSpec` ladder
+  (`x86_div_arm_refines`), the generated case-name table equals the
+  literal order (`x86_div_names_refine`), every resolved width reaches
+  its case (`x86_div_arm_over_widths`), and the code lookup roundtrips;
+- harness: `build/mut_x86_div.py` (untracked, census 147 -> 148),
+  39 rows over the six-file watchlist, four detectors (`--check`; `lake
+  build` + two `lake env lean`; two compiled pinned-OK-banner oracles:
+  host 260, route 48515);
+- result: 33 catches (23 generator byte-render and arm-region rows,
+  5 Lean elaboration rows, 1 compiled-host selector drift, 4 route-host
+  case-body drifts) and 6 documented equivalences (green-run
+  failure-path message repaints, doc-comment repaints, spec spacing,
+  and a theorem rename with no internal references);
+- verification: four byte-identical green shakes
+  (`/tmp/run0274_{1..4}.txt`, all md5
+  `9d0829df3dfae2e69bfa9587f83a1878`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0273 — whole-program control-flow trace contract
 
 - Scope: the sequential composition the emitted branch code threads
