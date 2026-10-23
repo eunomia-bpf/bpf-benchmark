@@ -16092,6 +16092,44 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0307 - arm64 encode tier-2 per-arm picks
+
+- Scope: the per-arm `Encoded` picks inside the ARM64
+  `encode()` ladder --- Step 0292's dispatch harness rows the
+  fork *guards* (the starts-with checks and mode picks), but the
+  per-arm bodies building each `Encoded` artifact were still
+  unrowed: the mul/umull/umulh/udiv singleton-map pick, the
+  umaddl/smaddl fixed `ARM64_WIDTH_64` return pair, the
+  `adds`/`orn` reg-form picks, `extr`'s fourth-operand immediate,
+  the `ARM64_AUX_BITFIELD` operand order, the
+  rev/rev16/sxtb/sxth/sxtw singleton-map picks, the q0/d0
+  `ldr`/`str` early-return picks, `ldrsb`/`ldrsh` picks, the `ldp`
+  register-slot order, the cinv/csinv/csinc/csneg
+  CONDITION-register picks, and the `cnt`/`uaddlv` no-operand
+  picks.
+- Semantics: one harness `build/mut_arm64_encode_ops.py`
+  (untracked, census 180 -> 181), 26 rows, one detector (an
+  in-process battery in a fresh `python -B -c` interpreter:
+  encode one fixture `NativeInsn` per arm and pin the exact
+  `Encoded` fields --- `op`, `dst`/`src`/`src2` slot order,
+  `width`, `aux`, `imm`), one-file watchlist (the ARM64
+  generator) restored byte-exact around every row.
+- Fix: the `ldp` slot swap survived the first battery draft
+  (the draft pinned only opcode and width); the standing
+  survivor rule strengthened the battery with three exact slot
+  pins (`ldp.dst`/`ldp.src`/`ldp.base`) instead of dropping
+  the row.
+- Result: 26 catches, no equivalence rows (four singleton-map
+  repaints, the umaddl/smaddl op and width flips, the adds/orn
+  reg picks, the extr immediate operand repaint, the BITFIELD aux
+  operand-order swap, two rev/sxt map repaints, four q0/d0
+  load/store pick swaps, two ldrsb/ldrsh repaints, the ldp slot
+  order, four CONDITION-pick repaints, and the cnt/uaddlv pair);
+  three byte-identical green shakes
+  (`8fa2d1a24f2107615531d023a12de63f`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0306 - arm64 main-layer wiring
 
 - Scope: the ARM64 generator's main-layer wiring ---

@@ -5687,6 +5687,36 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0307 - arm64 encode tier-2 per-arm picks
+
+The ARM64 encoder's per-arm `Encoded` picks inside `encode()` pinned
+as data: Step 0292's `mut_arm64_encode_dispatch.py` rows the fork
+*guards* (imm-vs-reg starts-with checks, mode picks, the wzero
+bics destination repaint), but the per-arm bodies that build each
+`Encoded` were still unrowed. `build/mut_arm64_encode_ops.py`
+(untracked, harness census 180 -> 181) follows the same in-process
+battery convention: one fixture `NativeInsn` per arm, exact
+`Encoded` field pins (`op`, `dst`/`src`/`src2` slot order, `width`,
+`aux`, `imm`), and 26 single-anchor repaints that must each lose the
+battery. Rows: the mul/umull/umulh/udiv singleton-map picks (4),
+the umaddl/smaddl fixed-width pair return (3: `ARM64_OP_MADD`
+repaint and the `ARM64_WIDTH_64` -> `ARM64_WIDTH_32` return flip),
+the `adds`/`orn` reg-form picks (2), `extr`'s fourth-operand
+immediate repaint (1), the `ARM64_AUX_BITFIELD(lsb, width)` operand
+order swap (1), the rev/rev16/sxtb/sxth/sxtw singleton-map picks
+(2), the q0/d0 `ldr`/`str` early-return picks (4), the
+`ldrsb`/`ldrsh` picks (2), the `ldp` register-slot order swap (1),
+the cinv/csinv/csinc/csneg CONDITION-register picks (4), and the
+`cnt`/`uaddlv` no-operand picks (2). One row survived the first
+battery draft (the `ldp` slot swap — the draft pinned only the
+opcode and width) and was admitted after the standing survivor rule
+strengthened the battery with three exact slot pins
+(`ldp.dst`/`ldp.src`/`ldp.base`), not dropped: 26 rows = 26 catches
+and no equivalence rows; three byte-identical green shakes
+(`TOTAL 26 mutations, 0 failures, 0 equivalence rows`, all md5
+`8fa2d1a24f2107615531d023a12de63f`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0306 - arm64 main-layer wiring
 
 The ARM64 generator's main-layer wiring pinned end to end: `generate_one` (the
