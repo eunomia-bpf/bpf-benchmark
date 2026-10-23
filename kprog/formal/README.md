@@ -5653,6 +5653,33 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0288 — x86 register-form SETCC spec chain
+
+The spec/generator/artifact chain audit after Step 0287 found exactly one
+contract artifact no harness mutates: the register-form SETCC spec JSON
+(`x86_setcc_spec.json`) plus its generator (`generate_x86_setcc_spec.py`)
+and the rendered `generated/x86_setcc.h` / `KProgFormal/GeneratedX86Setcc.lean`
+pair. `mut_x86_setcc.py` mutates the hand module and the host; `mut_x86_cond.py`
+runs the generator's `--check` as a shared detector but never rolls a row
+against this spec. `build/mut_x86_setcc_chain.py` (untracked, harness census
+161 -> 162) closes the gap with 12 rows over a six-file watchlist (spec,
+generator, generated header, generated Lean, hand
+`X86SetccHandler.lean`; the `test_x86_setcc_host.c` source is snapshotted as
+a detector input): four spec-value flips (condition code, boolean
+expression, lane name, schema stamp) — each must trip the generator's
+pinned-EXPECTED validation inside `--check`; three generator repaints and
+two generated-artifact repaints (a condition code 4->43, a lane define
+rename, the no-match sentinel 0xffff->0xfffe, the C lane-table repaint, and
+the header sentinel assert) — each must stale the byte re-render; three
+lean-chain rows over the generated `condOf` table, the generated lane
+table, and the hand proof's `cases cond <;> rfl` line — each must fail
+`lake build KProgFormal.X86CmovHandler` (the chain that pulls
+GeneratedX86Setcc through both setcc handlers and the cmov consumer).
+All 12 rows caught; four byte-identical green shakes (`TOTAL 12
+mutations, 0 failures, 0 equivalence rows`, md5 `8b4d37f391b5af404694db2476809bbd`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
+
 ### Step 0287 — simulator route/oracle host oracle coverage
 
 The audit of `Makefile`'s 210 host probes against the 160 mutation harnesses

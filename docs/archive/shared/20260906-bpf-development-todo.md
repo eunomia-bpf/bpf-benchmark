@@ -16053,6 +16053,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0288 — x86 register-form SETCC spec chain
+
+- Scope: the register-form SETCC contract's artifact chain
+  (`x86_setcc_spec.json` -> `generate_x86_setcc_spec.py` ->
+  `generated/x86_setcc.h` + `KProgFormal/GeneratedX86Setcc.lean` ->
+  hand `X86SetccHandler.lean`), the one chain `mut_x86_setcc.py`
+  (hand module + hosts) and `mut_x86_cond.py` (cond side) both leave
+  unmutated.
+- Semantics: one merged harness `build/mut_x86_setcc_chain.py` (untracked,
+  census 161 -> 162), 12 rows, two detectors (the generator's `--check`:
+  spec pinned against the generator's EXPECTED dict plus byte re-render of
+  the C/Lean pair; the lean chain `lake build KProgFormal.X86CmovHandler` +
+  `lake env lean` over the hand module), six-file watchlist, restored
+  byte-exact around every row.
+- Result: 12/12 caught (four spec flips by expectation validation, five
+  generated-side repaints by byte staleness, three Lean rows by lake build),
+  four byte-identical green shakes (`8b4d37f391b5af404694db2476809bbd`),
+  golden `make check` rc 0 / 210 `cross-check: OK` banners; committed with
+  paper sentence, README and archive steps, implementation pair.
+
+
 ## Step 0287 — x86/arm64 route-host oracle contract
 
 - Scope: the twelve `Makefile` hosts no earlier mut harness drove (arm64
