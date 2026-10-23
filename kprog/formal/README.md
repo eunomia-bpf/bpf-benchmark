@@ -5471,6 +5471,33 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0275 — x86 memory-index presence contract
+
+The memory-index presence contract pins the addressing-mode index
+selector the offset contract consumes: `x86_mem_index_spec.json` pins
+the two arms (present at every non-sentinel index byte, absent at the
+`0xff` sentinel) at `index_byte_bits 8`; `generate_x86_mem_index_spec.py
+--check` re-derives the arm order/codes/flags and byte-re-renders
+`generated/x86_mem_index.h` (the `KPROG_X86_MEM_INDEX_PRESENT`/`_ARM`
+macros) and `KProgFormal/GeneratedX86MemIndex.lean` (the `Arm` enum,
+`indexSentinel`, `absent`, and the `arm`/`present` selectors). The hand
+`KProgFormal/X86MemIndex.lean` proves the selector equals the
+independent `decide (indexByte != 0xff)` comparison and that the two
+presence cases match the offset contract's `hasIndex` arms.
+`build/mut_x86_mem_index.py` (untracked, census 148 -> 149) plants 35
+rows over the six-file watchlist: `--check`, `lake build` + two `lake
+env lean` elaborations, and the two compiled pinned-OK-banner oracles
+(`x86 mem index host cross-check: OK (512 cases)` and
+`x86 mem index route host cross-check: OK (957 cases)` — the latter
+over the real `X86_SIM_L_MEM_OFFSET` bridge). 28 catches (19 generator
+byte-render rows, 6 Lean elaboration rows, 1 compiled-host macro drift,
+2 route-host selector/bridge drifts) and 7 documented equivalences
+(green-run failure-path message repaints, spec spacing, theorem renames
+with no internal references, and a doc-comment repaint). Four
+byte-identical green shakes (`/tmp/run0275_{1..4}.txt`, all md5
+`ef3656feeb417af1b4a156afa459fd9d`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0273 — whole-program control-flow trace contract
 
 The control-flow trace contract pins the sequential composition the

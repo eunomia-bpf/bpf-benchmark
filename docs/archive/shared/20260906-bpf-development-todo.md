@@ -16002,6 +16002,37 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0275 — x86 memory-index presence contract
+
+- Scope: the addressing-mode index selector the offset contract
+  consumes: `x86_mem_index_spec.json` pins the two arms (present at
+  non-sentinel bytes, absent at the 0xff sentinel) with
+  `index_byte_bits 8`; `generate_x86_mem_index_spec.py --check`
+  byte-re-renders `generated/x86_mem_index.h`
+  (`KPROG_X86_MEM_INDEX_PRESENT`/`_ARM`) and
+  `KProgFormal/GeneratedX86MemIndex.lean` (`Arm`, `indexSentinel`,
+  `absent`, `arm`, `present`);
+- refinement: the hand `KProgFormal/X86MemIndex.lean` proves the
+  selector equals the independent sentinel comparison
+  (`x86_mem_index_{arm,present}_refines`), the sentinel facts, the
+  `absent_complement`, `consumes_has_index` against the offset
+  contract, `case_dispatch`, and concrete examples;
+- harness: `build/mut_x86_mem_index.py` (untracked,
+  census 148 -> 149), 35 rows over the six-file watchlist, four
+  detectors (`--check`; `lake build` + two `lake env lean`; two
+  compiled pinned-OK-banner oracles: host 512 over the generated
+  header, route 957 over the real `X86_SIM_L_MEM_OFFSET` bridge);
+- result: 28 catches (19 generator byte-render rows, 6 Lean
+  elaboration rows, 1 compiled-host macro drift, 2 route-host
+  selector/bridge drifts) and 7 documented equivalences (green-run
+  failure-path message repaints, spec spacing, theorem renames with no
+  internal references, and a doc-comment repaint);
+- verification: four byte-identical green shakes
+  (`/tmp/run0275_{1..4}.txt`, all md5
+  `ef3656feeb417af1b4a156afa459fd9d`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0274 — x86 DIV resolved-width case dispatch
 
 - Scope: the four quotient/remainder bodies the `X86_OP_DIV` arm
