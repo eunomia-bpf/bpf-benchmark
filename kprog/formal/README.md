@@ -5653,6 +5653,29 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0285 — shared arm64/x86 next-PC contract
+
+The architectural branch-next-PC model is hand-written once:
+`KProgFormal/Arm64ControlFlow.lean` defines `branchPc (take) (fallthrough)
+(target) := if take then target else fallthrough`, which all 39 reference
+sites across 16 x86 and arm64 branch families compose (both BranchEmit
+pairs, the trace walker, and every flag module's `*_branch_refines`), and
+proves `arm64_conditional_branch_refines` (`generatedArm64Cond` selects
+the same next PC as `arm64CondSpec`). `build/mut_arm64_control_flow.py`
+(untracked, census 158 -> 159) plants 9 rows over a 16-module watchlist:
+a paired lean detector (full-library `lake build` olean refresh plus
+`lake env lean` over `Arm64ControlFlow.lean`, `ControlFlowTrace.lean`,
+`Arm64Branch.lean`, and `X86ControlFlow.lean`) and the compiled
+pinned-OK-banner oracle `arm64 condition host cross-check: OK (240
+cases)`. 5 catches (inverted next-PC select caught by the trace walker,
+type repaint, proof-RW drop, binder rename, import drop) and 4
+documented equivalences (the 16-file consistent `branchPc` alpha rename
+across all 39 sites, the zero-external-ref theorem rename, a
+doc-comment repaint, and a blank-line repaint). Four byte-identical
+green shakes (`/tmp/run0285_{1..4}.txt`, all md5
+`6679b51dc0483e18df9a441a682d40dc`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0284 — x86 ADD/SUB result identity contract
 
 The thin arithmetic-identity modules are hand-written:

@@ -16053,6 +16053,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0285 — shared arm64/x86 next-PC contract
+
+- Scope: the architectural branch-next-PC model: the hand-written
+  `KProgFormal/Arm64ControlFlow.lean` defines `branchPc (take)
+  (fallthrough) (target) := if take then target else fallthrough`,
+  composed by all 39 reference sites across 16 x86 and arm64 branch
+  families, and proves `arm64_conditional_branch_refines`
+  (`generatedArm64Cond` selects the same next PC as `arm64CondSpec`);
+- refinement: consumed by both BranchEmit pairs, the trace walker
+  (`ControlFlowTrace.lean` `archEdge` folds `branchPc`), and every flag
+  module's `*_branch_refines`;
+- harness: `build/mut_arm64_control_flow.py` (untracked, census 158 ->
+  159), 9 rows over a 16-module watchlist (the family plus every
+  `branchPc` consumer), two detectors (full-library `lake build` olean
+  refresh + four `lake env lean` elaborations; the compiled 240-case
+  arm64 condition host);
+- result: 5 catches (inverted next-PC select caught by the trace
+  walker, type repaint, proof-RW drop, binder rename, import drop) and
+  4 documented equivalences (the 16-file consistent `branchPc` alpha
+  rename across all 39 sites, the zero-external-ref theorem rename, a
+  doc-comment repaint, and a blank-line repaint);
+- verification: four byte-identical green shakes
+  (`/tmp/run0285_{1..4}.txt`, all md5
+  `6679b51dc0483e18df9a441a682d40dc`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0284 — x86 ADD/SUB result identity contract
 
 - Scope: the thin arithmetic-identity modules: the hand-written
