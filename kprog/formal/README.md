@@ -5471,6 +5471,68 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0269 — x86 specialization binding
+
+The x86 specialization-dispatch contract (every decided token the simulator
+chain, the Lean model, and the artifact encoder route through the five-column
+binding is pinned by the generated contract the three consumers share; the
+single-line spec `x86_specialization_spec.json` pins 72 `{token, dispatch,
+chain_macro, direct_call, aux_call}` rows (49 `directMacro` whose aux-0 call
+is the specialized macro, 4 `branchHandler`, 19 `genericRunOp`) plus the
+`aux_gated` list of the 6 registers (`MOV_IMM`/`MOV_REG`/`CMP_IMM`/`CMP_REG`/
+`TEST_IMM`/`TEST_REG`) whose encoder emits the aux-gated `*_AUX`/`*_STEP`
+spelling for nonzero aux; `generate_x86_specialization_spec.py` re-derives
+both expected tables, re-parses the `X86_SIM_L_EXEC` chain window in
+`kprog/x86/x86_sim_local_bpf.h` against the `KPROG_X86_*_HANDLED` family
+gates, and re-renders `generated/x86_specialization.h` (72 lookup cases +
+`KPROG_X86_SPEC_COUNT 72U`), `GeneratedX86Specialization.lean` (the `Op`
+inductive with the dispatch/chainMacro/directMacro/auxMacro projections), and
+the encoder's `x86/micro-prog/generated_x86_specialization.py` (the three
+`X86_SPECIALIZATION_*` maps) byte-for-byte on every `--check`; the hand
+module `X86Specialization.lean` restates all 72 rows as an independent
+`native_decide` table and proves the `stripSuffix`/`noInsertion` lemmas; and
+the two hosts discharge the behavioral surface at run time (the 192-case
+`test_x86_specialization_chain_host.c` chain oracle re-parses the chain
+window and walks every `else`-`if` arm against its SPEC row plus the
+whole-namespace token walk, and the 483-case
+`test_x86_specialization_host.c` differential contract host drives the real
+`X86_SIM_RUN_OP` against the hand-restated emits over both AUX words x both
+widths x two value shapes, pinning the 49 direct macros and the full
+classification table))
+now has its own mutation harness, `build/mut_x86_specialization.py`:
+178 rows over the eight-file watchlist (spec JSON + generator + generated
+header + generated Lean + hand Lean + the two hosts + the encoder map),
+snapshotted and restored byte-exact around every row, four detectors (the
+generator `--check` equality and byte renders, `lake env lean` over the
+generated and hand modules, and the two compiled, exact-OK-banner-checked
+hosts).
+- Catches 152: the 102 generator rows the expected-table heads, schema
+  guard, canonical lowering, both regex scanners, the nine consumed paths,
+  `same_body`/`strip_aux`/`strip_step`, the three Lean templates' joins and
+  doc lines, the C count/count-keyword/cases/default renders, and the
+  encoder-map rows the byte-exact re-render compares reject; the 20 Lean
+  rows (import/namespace bookends, token body, stripSuffix arms,
+  no-insertion body, spec/ctor/table drifts, the 2x refines goal, and the
+  erased-dups/length arms the elaboration rejects); the 18 chain-oracle
+  rows (SPEC table rows, the four header/session reads, the chain-window
+  bookends, the opcode walk and 0x gate, the family prefix/member scans,
+  the arm-prefix scans, and the OK-banner text the exact pin rejects); and
+  the 12 contract-host rows (the header include, the classification-table
+  rows, the 49 direct pin, the two emit call sites, the trip wire, and the
+  OK-banner text).
+- Equivalences 26: the seven failure-path generator messages, the two
+  dormant equality guards, and the paren-repair join the green run never
+  exercises; the three no-consumer hand theorem renames and one doc
+  repaint the chain re-discharges; the chain oracle's ten failure-path
+  message repaints plus the dormant family-prefix and count gates; and the
+  contract host's default trip-wire the green run cannot observe.
+- Run: four consecutive byte-identical green shakes, `TOTAL 178
+  mutations, 0 failures, 26 equivalences survived (152 catches, 26
+  equivalent survivors)` / `ALL AS EXPECTED` rc 0 (~93 s each), tree
+  restored each time (no new `git status` entries beyond the pre-existing
+  dirty set), census 142 -> 143 untracked harnesses, 0 core dumps;
+  `make check` stayed 210 `: OK`.
+
 ### Step 0268 — x86 opcode mutation coverage
 
 The x86 opcode-number contract (every token the simulator body, the Lean

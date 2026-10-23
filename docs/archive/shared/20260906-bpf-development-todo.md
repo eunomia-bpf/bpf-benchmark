@@ -16002,6 +16002,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0269 — x86 specialization binding
+
+- Scope: the x86 five-column specialization-dispatch contract the simulator
+  chain, the Lean model, and the artifact encoder share for every decided
+  token: `x86_specialization_spec.json` pins 72 `{token, dispatch,
+  chain_macro, direct_call, aux_call}` rows (49 `directMacro`, 4
+  `branchHandler`, 19 `genericRunOp`) plus the 6-name `aux_gated` list
+  (`MOV_IMM`/`MOV_REG`/`CMP_IMM`/`CMP_REG`/`TEST_IMM`/`TEST_REG`);
+  `generate_x86_specialization_spec.py` re-renders the C header, the Lean
+  twin, and the encoder's three macro maps byte-for-byte and re-parses the
+  `X86_SIM_L_EXEC` chain window against the `KPROG_X86_*_HANDLED` family
+  gates; the hand Lean module proves the `stripSuffix`/`noInsertion`
+  lemmas over an independent 72-row `native_decide` table; the 192-case
+  chain oracle walks every arm against its SPEC row, and the 483-case
+  differential contract host drives both AUX words x both widths x two
+  value shapes with the 49 direct macros and the full classification table
+  pinned.
+- Harness: `build/mut_x86_specialization.py` (untracked), 178 rows over the
+  eight-file watchlist across four detectors (`--check` byte-render, two
+  `lake env lean` elaborations, the two compiled pinned-OK-banner hosts);
+  152 catches / 26 documented equivalences, census 142 -> 143 untracked
+  harnesses; four byte-identical green shakes restored the tree exactly;
+  `make check` stayed 210 `: OK`.
+- Commit: subrepo `census` sentence in `sections/4-safety.tex`; master
+  carries README + implementation.md + archive note.
+
+
 ## Step 0268 — x86 opcode mutation coverage
 
 - Scope: the x86 opcode-number contract the simulator body, the Lean model,
