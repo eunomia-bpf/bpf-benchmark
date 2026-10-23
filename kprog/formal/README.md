@@ -5687,6 +5687,38 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0306 - arm64 main-layer wiring
+
+The ARM64 generator's main-layer wiring pinned end to end: `generate_one` (the
+`{bench.name}.bpf.c` output name, the `source_prelude(source) if source_dir ==
+STAGE2_PROGRAMS else ""` gate, the `render_program_compact if compact else
+render_program` picker, and the `linked_exit=True` ride-along) and `main()`'s
+argparse surface (the `output_dir.mkdir(parents=True, exist_ok=True)`, the
+`"stage2" in args.config.stem` conditional that flips the source dir to
+`STAGE2_PROGRAMS`, the `only` subset filter, and the `MICRO_PROGRAMS` default).
+After Step 0305 the module tables were the last module-scope surface; these nine
+wiring lines were the last unpinned decision layer in the ARM64 generator.
+`build/mut_arm64_main_wiring.py` (untracked, harness census 179 -> 180) closes
+the layer with 8 rows over the one-file watchlist (the ARM64 generator,
+byte-exact restore each row) and one in-process detector: a battery in a fresh
+`python -B -c` interpreter that (a) pins `generate_one`'s decisions through
+sentry-patched `parse_native_linked_program`/`render_program`/`source_prelude`
+with exact write-path, prelude-read, compact-route, and `linked_exit` assertions
+plus a real prelude read over the actual `STAGE2_PROGRAMS` dir, and (b) drives
+`main()` through real `sys.argv` with `load_benches`/`generate_one` replaced by
+sentinels — the `--only a` subset run, a `cfg-stage2.yaml` stem run (both benches
+must route to `STAGE2_PROGRAMS`), a plain-config default run (both must stay
+`MICRO_PROGRAMS`), a `--compact` ride-along, and a pre-created output dir. All 8
+single-anchor flips must break the battery (no equivalence rows): go_outname,
+go_preludesel, go_compact_pick, go_linked_exit, mn_dir_mkdir, mn_stage2_stem,
+mn_only_filter, mn_micro_default; 8 caught. Battery temp roots were made
+deterministic (`shutil.rmtree` + fixed `/tmp/batt0306_*` paths) after the first
+shakes surfaced `mkdtemp` path nondeterminism in the detector output; battery
+rc held 0 across all probes and three byte-identical green shakes
+(`TOTAL 8 mutations, 0 failures, 0 equivalence rows`, all md5
+`783fe8511c08f404d747c936c21dda96`); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
 ### Step 0305 - arm64 module tables
 
 The ARM64 generator's two module-level tables pinned as data: `WIDTH_CONST` (the

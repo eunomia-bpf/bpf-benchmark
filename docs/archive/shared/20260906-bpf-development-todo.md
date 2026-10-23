@@ -16092,6 +16092,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0306 - arm64 main-layer wiring
+
+- Scope: the ARM64 generator's main-layer wiring ---
+  `generate_one` (the `{bench.name}.bpf.c` output name, the
+  `source_prelude(source) if source_dir == STAGE2_PROGRAMS else ""`
+  gate, the compact/full render picker, and the `linked_exit=True`
+  ride-along) and `main()`'s argparse surface (the output-dir
+  `mkdir(parents=True, exist_ok=True)`, the config-stem
+  `"stage2"` conditional flipping the source dir to
+  `STAGE2_PROGRAMS`, the `only` subset filter, and the
+  `MICRO_PROGRAMS` default). Last unpinned decision layer after the
+  module tables.
+- Semantics: one harness `build/mut_arm64_main_wiring.py`
+  (untracked, census 179 -> 180), 8 rows, one detector (an
+  in-process battery in a fresh `python -B -c` interpreter: sentry-
+  patched `parse_native_linked_program`/`render_program`/
+  `source_prelude` driving `generate_one`'s write path, prelude
+  read, compact route, and `linked_exit`; then `main()` through real
+  `sys.argv` with sentinel `load_benches`/`generate_one` over the
+  `--only` subset, a `cfg-stage2.yaml` stem, a plain-config default,
+  and a `--compact` ride-along), one-file watchlist (the ARM64
+  generator) restored byte-exact around every row.
+- Fix: battery temp roots made deterministic (fixed
+  `/tmp/batt0306_*` paths with `shutil.rmtree` reuse) after the
+  first shakes surfaced `mkdtemp` path nondeterminism in the
+  detector output.
+- Result: 8 catches, no equivalence rows (the output-name repaint,
+  the prelude-gate inversion, the compact-route swap, the
+  `linked_exit` repaint, the mkdir `exist_ok` inversion, the
+  stage2-stem repaint, the only-filter inversion, and the
+  micro-programs default flip); three byte-identical green shakes
+  (`783fe8511c08f404d747c936c21dda96`), golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0305 - arm64 module tables
 
 - Scope: the ARM64 generator's two module-level tables as data:
