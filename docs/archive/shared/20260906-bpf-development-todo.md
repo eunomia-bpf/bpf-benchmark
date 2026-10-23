@@ -16029,6 +16029,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0280 — x86 stack-arena storage-model contract
+
+- Scope: the shared stack-storage model over the byte/word union arena:
+  `x86_stack_arena_spec.json` pins word shift 3, the 8-alignment mask,
+  ceil-8 capacity rounding, `b-q-union` aliasing, little-endian8
+  assembly; `generate_x86_stack_arena_spec.py --check` byte-re-renders
+  `generated/x86_stack_arena.h` (five `KPROG_X86_STACK_*` macros) and
+  `KProgFormal/GeneratedX86StackArena.lean` (`wordIndex`, `wordAligned`,
+  `byteAt`, `assembleByte`, `words`);
+- refinement: the hand `KProgFormal/X86StackArena.lean` proves the two
+  views address the same storage (read-eq-split, word-index/words/
+  word-aligned refinements, coverage and tightness, alignment
+  round-trip, slot range, byte split/agreement);
+- harness: `build/mut_x86_stack_arena.py` (untracked,
+  census 153 -> 154), 28 rows over the five-file watchlist, three
+  detectors (`--check`; two `lake env lean` elaborations; compiled
+  pinned-OK-banner oracle 70571 cases);
+- result: 23 catches (17 generator byte-render rows, 5 Lean
+  elaboration rows, 1 compiled-host alignment drift) and 5 documented
+  equivalences (green-run failure-path message repaints, spec spacing,
+  a theorem rename, and a doc-comment repaint);
+- verification: four byte-identical green shakes
+  (`/tmp/run0280_{1..4}.txt`, all md5
+  `b09ec15f6d54a30acec9f64c3ee37619`); golden `make check` gate rc 0
+  with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
+  the 13-line pre-existing dirty set before both pushes.
+
 ## Step 0278 — x86 SETCC_MEM memory-store contract
 
 - Scope: one opcode (`0x3e`), one constant byte width, the AUX

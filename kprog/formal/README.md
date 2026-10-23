@@ -5630,6 +5630,29 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0280 — x86 stack-arena storage-model contract
+
+The stack-arena contract fixes the arithmetic the stack helpers use to
+reach the byte/word union arena: `x86_stack_arena_spec.json` pins the
+word shift (3), the 8-alignment mask, the ceil-8 capacity rounding,
+the `b-q-union` aliasing, and little-endian8 assembly;
+`generate_x86_stack_arena_spec.py --check` byte-re-renders
+`generated/x86_stack_arena.h` (the five `KPROG_X86_STACK_*` macros)
+and `KProgFormal/GeneratedX86StackArena.lean` (`wordIndex`,
+`wordAligned`, `byteAt`, `assembleByte`, `words`). The hand
+`KProgFormal/X86StackArena.lean` proves the two views address the same
+storage. `build/mut_x86_stack_arena.py` (untracked,
+census 153 -> 154) plants 28 rows over the five-file watchlist:
+`--check`, two `lake env lean` elaborations, and the compiled
+pinned-OK-banner oracle (`x86 stack arena host cross-check: OK
+(70571 cases)`). 23 catches (17 generator byte-render rows, 5 Lean
+elaboration rows, 1 compiled-host alignment drift) and 5 documented
+equivalences (green-run failure-path message repaints, spec spacing,
+a theorem rename, and a doc-comment repaint). Four byte-identical
+green shakes (`/tmp/run0280_{1..4}.txt`, all md5
+`b09ec15f6d54a30acec9f64c3ee37619`) and the golden `make check` gate
+(rc 0, 210 `cross-check: OK` banners, cores cleaned) pin the family.
+
 ### Step 0278 — x86 SETCC_MEM memory-store contract
 
 The SETCC_MEM contract pins one opcode (`0x3e`), one constant byte
