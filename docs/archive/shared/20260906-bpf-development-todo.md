@@ -16053,6 +16053,40 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   with 210 `cross-check: OK` banners; cores cleaned; porcelain back to
   the 13-line pre-existing dirty set before both pushes.
 
+## Step 0291 — arm64 encoder parse-to-AUX selection
+
+- Scope: the arm64 proof-artifact encoder's selection surface
+  (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`): the
+  `aarch64-linux-gnu-objdump -dr` line parser `parse_flat_instructions`
+  (bytes/mnemonic regex, `//` comment strip, `R_AARCH64_*`
+  relocation-symbol attachment), the bracket-protected `split_operands`,
+  `reg_const` (xzr/wzr, sp, xN/wN 0..30 with x31 rejected), `reg_width`
+  (w = 4 else 8), `parse_imm` (#-prefixed), `parse_shifted_imm`
+  (LSL-only), `parse_modifier` (shift `{lsl,lsr,asr,ror}` and extend
+  `{uxtw,sxtw,uxth,sxth,uxtb,sxtb}` tables), `parse_mem` (PRE `!` flag
+  bit 1, POST `#imm` flag bit 2, `inner[1]` offset-vs-register pick),
+  `mem_aux` (`ARM64_AUX_MEM` string with `ARM64_MEM_PRE`/`POST` flag
+  names), and `branch_target`/`reg_or_imm`. The consumed tables
+  (cc decode, helper idents) were already pinned by
+  `mut_arm64_cc_decode.py` and `mut_arm64_helper_idents.py`; no row
+  mutated the selection functions.
+- Semantics: one harness `build/mut_arm64_encoder_selection.py`
+  (untracked, census 164 -> 165), 17 rows, one in-process detector (the
+  Step 0290 pinned fixture battery run as `python -B -c` importing the
+  mutated encoder from `kprog/arm64/micro-prog`, with the module
+  `__pycache__` purged around every battery --- applied preemptively so
+  no same-size stale-bytecode-cache observation could recur), one-file
+  watchlist (the arm64 encoder) restored byte-exact around every row.
+- Result: 16 catches (relocation attach, comment strip, 8-hex-byte width
+  filter, raw operand/mnemonic repaint, zero-register pair, x30 range
+  bound, w-width arm, `#`-prefix guard, LSL-only guard, ror shift arm,
+  sxtw extend arm, POST flag bit, index pick, PRE and POST aux flag
+  repaints, branch hex radix), one equivalence green (duplicate zero-set
+  member), four byte-identical green shakes
+  (`168dc5e466d0adcbbf4b546bef40f368`), golden `make check` rc 0 / 210
+  `cross-check: OK` banners; committed with paper sentence, README and
+  archive steps, implementation pair.
+
 ## Step 0290 — x86 encoder parser-to-AUX selection
 
 - Scope: the proof-artifact encoder's selection surface

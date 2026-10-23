@@ -5653,6 +5653,50 @@ theorem rename has no downstream consumer, and pure comment repaints in the
 route arm are byte drift without behavior, so they are recorded as
 equivalences rather than inflated into catches.
 
+### Step 0291 — arm64 encoder parse-to-AUX selection
+
+The arm64 mirror of Step 0290: the proof-artifact generator
+`kprog/arm64/micro-prog/generate_micro_sim_proofs.py` parses the
+`aarch64-linux-gnu-objdump -dr` listing and selects the AUX payload every
+emitted step carries, and its consumed tables are pinned
+(`mut_arm64_cc_decode.py`, `mut_arm64_helper_idents.py`) while the
+selection functions were not: `parse_flat_instructions` (the
+bytes/mnemonic line regex, the `//` comment strip, the `R_AARCH64_*`
+relocation-symbol attachment to the previous instruction), the
+bracket-protected `split_operands`, `reg_const` (the xzr/wzr zero pair,
+`sp`, the xN/wN 0..30 range with x31 rejected), `reg_width` (w = 4 bytes
+else 8), `parse_imm` (#-prefixed), `parse_shifted_imm` (LSL-only),
+`parse_modifier` (the shift `{lsl,lsr,asr,ror}` and extend
+`{uxtw,sxtw,uxth,sxth,uxtb,sxtb}` tables), `parse_mem` (the PRE `!` flag
+bit 1, the following `#imm` POST flag bit 2, the `inner[1]`
+offset-vs-register pick with its modifier), the `mem_aux`
+`ARM64_AUX_MEM(...)` string with its `ARM64_MEM_PRE`/`ARM64_MEM_POST` flag
+names, and `branch_target`/`reg_or_imm`.
+`build/mut_arm64_encoder_selection.py` (untracked, harness census 164 ->
+165) closes the gap with 17 rows over a one-file watchlist (the arm64
+encoder, byte-exact restore each row) and one in-process detector: the
+Step 0290 battery discipline (subprocess `python -B -c` importing the
+mutated encoder module with the module's `__pycache__` purged around
+every battery) applied preemptively, before any same-size stale-cache
+observation could recur. The battery pins a five-instruction arm64 parse
+(add shifted-index, pre-indexed str, bl with `R_AARCH64_ABS64` relocation
+attachment and symbol capture, ldr with a `//` trailing comment dropped,
+and a plain add), the bracket-protected operand split, the zero- pair,
+sp/range/x31-rejection, and register-width pins, the `#`-immediate and
+LSL-only shifted-immediate pins, the shift/extend modifier pins, and the
+memory pins (sign-extended negative offset, index+modifier, PRE/POST/
+plain `mem_aux` flag strings, hex branch targets). Sixteen leaves must
+break the battery (the relocation attach, the comment strip, the
+8-hex-byte width filter, the raw operand/mnemonic repaint, the
+zero-register pair, the x30 range bound, the w-width arm, the
+`#`-prefix guard, the LSL-only guard, the ror shift arm, the sxtw extend
+arm, the POST flag bit, the index pick, the PRE and POST aux repaints,
+and the branch hex radix) and one declared equivalence (a duplicate
+zero-set member the membership test ignores) must stay green: 16 caught,
+1 equivalence; four byte-identical green shakes (`TOTAL 17 mutations, 0
+failures, 1 equivalence rows`, all md5 `168dc5e466d0adcbbf4b546bef40f368`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0290 — x86 encoder parser-to-AUX selection
 
 The open-items audit left one uncovered family in the encoder: the
