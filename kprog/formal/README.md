@@ -5471,6 +5471,71 @@ and the OK/FAILED message repaints.
 
 The popcount contract pins the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand: `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (the pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply shifted right by 56), and the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`) — proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings, plus the bounded (≤64), zero, one-bit, all-bits, and alternating canonical theorems. The single-line spec pins the schema/operation metadata and the SWAR shape fields (bits 64, lanes 8, shape `swar`); the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Popcount.lean` and `generated/x86_popcount.h` byte-for-byte. The macro is consumed in `x86_sim.h`'s `x86_popcount64` (the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch applies it), by the dispatch-singleton route host, and by a dedicated contract host sweeping both a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle, with an additive split-consistency check. `build/mut_x86_popcount.py` (untracked) runs 45 rows over the six files with three detectors (`gen` byte-exact check; `lean_chain` = `lake build KProgFormal.X86Popcount` olean refresh then `lake env lean` over the hand module itself — popcount has no downstream handler Lean consumers; `host`). 35 rows catch (25 at the generator stage covering the spec fields, the byte-exact renders, header bytes, and the SWAR bit-mask arms; 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename; 2 in the contract-host sweep — the oracle walk's bit mask and the split-consistency operator) and 10 survive as documented equivalents: the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop mutations (same lane sum, so the refinement proof still closes), five consumer-free hand-theorem renames (`bounded`, `zero`, `one`, `full`, `alternating`), and the two host OK/FAIL banner repaints no consumer validates. Two consecutive green shakes reported `ALL AS EXPECTED`; all six watched files byte-identical after each run (popcount watchlist verified); `make check` stayed at 210 `: OK`.
 
+### Step 0270 — ABI-load provenance-tag contract
+
+The ABI-load provenance-tag contract (the two-kind entry discipline every
+simulator-side tag stamp resolves through; the spec
+`kprog/formal/abi_load_spec.json` pins `{schema_version 1, operation
+abiLoad64Tag, kinds [{xdp, data 0 / data_end 8}, {skb, data 208 /
+data_end 80}], unknown_tag scalar}` and `kprog/formal/generate_abi_load_spec.py`
+re-derives the schema/kind-set/order/ambiguity guards and byte-re-renders both
+artifacts — `KProgFormal/GeneratedAbiLoad.lean` (the `Kind` inductive and
+`tag {α : Type} (scalar packet packetEnd : α) : Kind -> Int -> α` offset
+trees) and `generated/abi_load.h` (the `KPROG_ABI_KIND_{XDP 0U, SKB 1U}` /
+`KPROG_ABI_{XDP,SKB}_DATA{,_END}_OFF` defines plus the statement-expression
+`KPROG_ABI_LOAD_TAG(KIND, OFFSET, SCALAR, PACKET, PACKET_END)` — on every
+`--check`; the hand `TagErasure.lean` carries `readAbi`/`abiTagSpec`, the
+`loadAbi64` arms of `stepTagSpec`/`stepArch`/`stepProof`, and the
+`step_bits_sound`/`step_tags_sound`/`run_tags_sound` theorems; both sim
+headers stamp tags only through the generated macro and `_Static_assert` the
+ABI offsets against their entry structs)
+now has its own mutation harness, `build/mut_abi_load.py`:
+85 rows over the seven-file watchlist (spec JSON + generator + generated
+header + generated Lean + hand Lean + both sim headers), snapshotted and
+restored byte-exact around every row, four detectors (the generator `--check`
+equality and byte renders, `lake build KProgFormal.GeneratedAbiLoad +
+GeneratedPtrAdd + TagErasure` then `lake env lean TagErasure.lean`, and the
+two compiled, exact-OK-banner-checked route hosts — `x86 mem dispatch route
+host cross-check: OK (62 cases)` and `arm64 mem_prepost route host
+cross-check: OK (135170 cases)`, driving the x86 ABI pointer-arm route logic
+and the arm64 imms {0, 8, -8} grid that keeps all three tag lanes live).
+- Catches 66: the 12 spec rows (schema/operation, the xdp/skb data and
+  data-end offsets, both kind names, the unknown tag, the kind-order swap,
+  and both data-offset key repaints) at the `--check` equality; the 21
+  generator rows (the three consumed path constants, the field-set /
+  operation / unknown-tag / kind-count / expected-names structural checks,
+  the `==`-ambiguity check, the Lean template head/ctors/tagdef rows, the
+  C template guard/kind/macro-head/(PACKET)/(PACKET_END)/(SCALAR)/offset
+  rows, and the backtick-quoted f-string prefix the Python import
+  rejects); the 11 generated-render rows (the two kind defines, the four
+  offset defines, the packet-arm repaint, guard + doc repaint on both
+  artifacts, and the generated-Lean `Kind`/`tag` renames + xdp arm drift
+  the byte compare rejects); the 14 TagErasure Lean rows (the
+  `stepTagSpec` loadAbi collapse, the `abiTagSpec` rename and xdp
+  packetEnd arm repaint, the `readAbi` rename, the `stepArch` loadAbi
+  collapse, the `stepProof` tag drift, the `GeneratedAbiLoad` import and
+  namespace bookends, the three soundness-theorem renames each consumed
+  inside the module, the `stepTagSpec` def rename, and the `writeTag`
+  r0-arm drift); and the 8 sim-header rows (both include repaints, the
+  x86 packet tag-arg swap the 62-case host drives to `FAIL (1)`, the
+  arm64 packet-end and scalar tag-arg repaints the 135170-case host
+  drives to `FAIL (20)` / `FAIL (26)`, and the skb-offset define drift
+  breaking both hosts' `_Static_assert`s at compile time).
+- Equivalences 19: the nine generator failure-path messages the green run
+  never exercises; the four entry-macro declaration lines (x86 XDP/SKB and
+  arm64 XDP/SKB kind constants) no watched host instantiates; the two
+  pure assert-message repaints per header the pinned runs cannot observe;
+  the two in-macro tag-arg repaints the naive restamp-everything route
+  hosts cancel; the `GeneratedAbiLoad` doc-line repaint; and the
+  `readAbi` skb scalar-vs-packetEnd swap `cases env <;> rfl` still
+  discharges.
+- Run: four consecutive byte-identical green shakes, `TOTAL 85
+  mutations, 0 failures, 19 equivalences survived (66 catches, 19
+  equivalent survivors)` / `ALL AS EXPECTED` rc 0 (~37 s each), tree
+  restored each time (no new `git status` entries beyond the pre-existing
+  dirty set), census 143 -> 144 untracked harnesses, 0 core dumps;
+  `make check` stayed 210 `: OK`.
+
 ### Step 0269 — x86 specialization binding
 
 The x86 specialization-dispatch contract (every decided token the simulator

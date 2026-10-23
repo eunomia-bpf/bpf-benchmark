@@ -16002,6 +16002,43 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   untracked harnesses, 0 core dumps; `make check` expected still
   210 `: OK` (no new oracle hosts).
 
+## Step 0270 — ABI-load provenance-tag contract
+
+- Scope: the two-kind entry provenance policy every simulator-side tag
+  stamp resolves through: `abi_load_spec.json` pins `{schema_version 1,
+  operation abiLoad64Tag, kinds [{xdp, data 0 / data_end 8}, {skb, data
+  208 / data_end 80}], unknown_tag scalar}`;
+  `generate_abi_load_spec.py --check` re-derives the
+  schema/kind-set/order/ambiguity guards and byte-re-renders
+  `KProgFormal/GeneratedAbiLoad.lean` (the `Kind` inductive + the
+  `tag (scalar packet packetEnd : α) : Kind -> Int -> α` offset trees) and
+  `generated/abi_load.h` (the `KPROG_ABI_KIND_{XDP 0U, SKB 1U}` /
+  `KPROG_ABI_{XDP,SKB}_DATA{,_END}_OFF` defines plus the
+  statement-expression `KPROG_ABI_LOAD_TAG(KIND, OFFSET, SCALAR, PACKET,
+  PACKET_END)`); the hand `TagErasure.lean` carries `readAbi`/`abiTagSpec`,
+  the `loadAbi64` arms of `stepTagSpec`/`stepArch`/`stepProof`, and the
+  `step_bits_sound`/`step_tags_sound`/`run_tags_sound` theorems over a
+  fresh `GeneratedAbiLoad`+`GeneratedPtrAdd`+`TagErasure` olean build; both
+  sim headers stamp tags only through the generated macro and
+  `_Static_assert` the ABI offsets against their entry structs; the x86
+  route host (62 cases) and the arm64 `mem_prepost` route host
+  (135170 cases, imms {0, 8, -8} keep all three tag lanes live) are the
+  compiled pinned-OK-banner oracles.
+- Harness: `build/mut_abi_load.py` (untracked), 85 rows over the
+  seven-file watchlist (spec JSON, generator, generated header, generated
+  Lean, hand Lean, both sim headers) across four detectors (`--check`, the
+  `lake build` + `lake env lean TagErasure.lean` chain, and the two route
+  hosts with their include paths part of the detector); 66 catches / 19
+  documented equivalences (failure-path message repaints, ENTRY-macro
+  declaration lines and pure assert message repaints no watched host
+  instantiates, in-macro arg cancels on the naive restamp hosts, doc
+  repaints, the `cases env <;> rfl`-insensitive `readAbi` skb scalar
+  swap), census 143 -> 144 untracked harnesses; four byte-identical green
+  shakes restored the tree exactly; `make check` stayed 210 `: OK`.
+- Commit: subrepo shows the `TagErasure` census sentence in
+  `sections/4-safety.tex`; master carries README + implementation.md +
+  archive note.
+
 ## Step 0269 — x86 specialization binding
 
 - Scope: the x86 five-column specialization-dispatch contract the simulator
