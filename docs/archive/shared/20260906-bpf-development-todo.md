@@ -16092,6 +16092,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0317 - arm64 native-link entry and rodata readers
+
+- Scope: the arm64 native-link assembly layer in
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` that 0310 only
+  covered through `parse_flat_instructions` and isolated reader arms ---
+  `parse_native_linked_program`, `source_prelude`, and the subprocess
+  launch/field-parse internals of `rodata_bytes`/`load_rodata16`.
+- Semantics: one harness `build/mut_arm64_native_entry.py` (untracked,
+  census 190 -> 191), 24 rows, one detector (in-process battery with
+  FAUX subprocess runners: canned objdump `-s`/`-t`/`-dr` texts routed
+  by arg probe, tempdir proof objects), one-file watchlist (the arm64
+  generator, restored byte-exact around every row).
+- Fix: first-draft survivors resolved by fixture strengthening, not row
+  removal --- the `idx + 2 >= len(fields)` gate needed a 4-field row
+  with in-bounds data so `>` would emit a bogus size-named key; the
+  proof-object gate needed a `b1.proof.o` directory (`is_file` False,
+  `exists` True) so the repaint passes a directory through; the message
+  pin tightened to `...for <bench>: <path>` endswith; the `\s+int\s+`
+  regex needed a source ending at `int` so the trailing `\s+` is
+  load-bearing.
+- Result: 24 catches, no equivalence rows; three byte-identical green
+  shakes (`TOTAL 24 mutations, 0 failures, 0 equivalence rows` each);
+  golden `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation pair.
+
+
 ## Step 0316 - x86 operand-scalar unit
 
 - Scope: the operand-scalar layer in

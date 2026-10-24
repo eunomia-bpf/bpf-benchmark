@@ -5687,6 +5687,37 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0317 - arm64 native-link entry and rodata readers
+
+The arm64 native-link entry glue and its two rodata readers, an
+assembly layer that 0310 covered only through `parse_flat_instructions`
+and reader arms in isolation: `build/mut_arm64_native_entry.py`
+(untracked, harness census 190 -> 191) rows 24 lines --- `rodata_bytes`'s
+objdump `-s -j .native_link_rodata` launch shape (args triple and
+`check=False`), the nonzero-returncode `b""` gate, the address-substring
+gate (`fields[0]` pick), the per-field hex/parity gate (`len(field) % 2`
+- odd fields kill their line), the fields[1:] loop start, and the
+two-byte pair walk (`range(0, len(field), 2)`);
+`load_rodata16`'s `-t` launch shape, the `.native_link_rodata`
+membership gate, the short-record gate (`idx + 2 >= len(fields)`, where
+a 4-field row with in-bounds data distinguishes `>=` from `>` through a
+bogus size-named key), the `offset`/`size` picks (`fields[0]` /
+`fields[idx + 1]`), the `size >= 16` gate, and the two 8-byte little
+endian slices; `parse_native_linked_program`'s missing-object gate (a
+`b1.proof.o` directory fails `is_file` while `exists` holds --- the
+fixture pins the gate without touching a real objdump), its message
+formatting (`...for <bench>: <path>`), the `rodata16 = load_rodata16`
+wire-in, the `-dr` launch shape, the empty-disassembly raise, and the
+single-entry `OrderedDict([(symbol, insns)])` return; and
+`source_prelude`'s `\nSEC(\"...\")\s+int\s+` regex (a source ending at `int` pins the trailing `\s+` --- dropping it shifts the match), the
+`match is None` empty arm, the `text[:match.start()]` slice direction,
+and the include rewrite; the battery drives all three reads with FAUX
+subprocess runners (canned `-s`/`-t`/`-dr` texts routed by arg probe);
+24 catches, no equivalence rows; three byte-identical green shakes
+(`TOTAL 24 mutations, 0 failures, 0 equivalence rows` each); golden
+gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
+
 ### Step 0316 - x86 operand-scalar unit
 
 The x86 operand-scalar layer pinned at unit level: Steps 0290 and

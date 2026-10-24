@@ -1963,7 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
-  The x86 operand-scalar unit (the `is_mem`/`mem_disp` one-liners,
+  The arm64 native-link entry glue and rodata readers (the
+  `parse_native_linked_program` proof-object gate and message format,
+  `-dr` launch, empty-disassembly raise, and single-entry
+  `OrderedDict` return, `source_prelude`'s trailing-`\s+` regex arm,
+  slice direction, and include rewrite, plus the
+  `rodata_bytes`/`load_rodata16` subprocess launch shapes, returncode /
+  address / parity / section-membership / short-record / bounds gates,
+  and offset-size name picks) rows 24 lines through one in-process
+  battery with FAUX subprocess runners over canned
+  objdump `-s`/`-t`/`-dr` texts and directory-as-proof-object fixtures,
+  with no equivalence rows.
+
+The x86 operand-scalar unit (the `is_mem`/`mem_disp` one-liners,
   `operand_width`'s case-sensitive `PTR` startswith arm plus the four
   `PTR_WIDTH` dict entries and the `reg_info`/`default` arms, `mem_aux`'s
   `X86_MEM_AUX_FULL`/`X86_MEM_AUX` f-string arms with index/scale fields
