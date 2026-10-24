@@ -1963,6 +1963,18 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 imm/modifier scalar tails (`split_operands`'s bracket
+  depth arms, depth-zero comma gate, part strip, tail-append gate,
+  and tuple paint; `program_kind`'s xdp fallthrough;
+  `default_program_symbol`'s stage2 gate and xdp paint; `parse_imm`'s
+  strip, `#` prefix gate, and radix-0; `parse_modifier`'s none gate
+  boundary, joined-text lowercase strip, shift radix-0, extend
+  default-0 arm, and raise arm; `parse_shifted_imm`'s index+1
+  boundary gate, shift paint, and LSL gate arm; `reg_const`'s sp
+  arm, raise arm, and `ARM64_X` paint; and `mem_aux`'s PRE/POST
+  flag arms and AUX paint) rows 27 lines through an in-process
+  battery, with no equivalence rows.
+
   The x86 scalar helper layer (`parse_int`'s hex radix gate,
   negative-sign arm, and whitespace strip; `is_int`'s fullmatch and
   grouped negative sign; `c_ptr_u64`'s long-cast paint; `reg_info`'s

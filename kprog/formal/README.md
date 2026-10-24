@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0341 - arm64 imm/modifier scalar tails
+
+The arm64 scalar-parse tails the encoder/decode batteries leave
+unrowed: the 27-row `build/mut_arm64_imm_mod_tails.py` (untracked,
+harness census 214 -> 215) rows `split_operands` (bracket depth
+arms, depth-zero comma gate, part strip, tail-append gate,
+duplicate-char append, tuple paint), `program_kind`'s xdp
+fallthrough, `default_program_symbol`'s stage2 gate and xdp paint,
+`parse_imm` (strip, `#` prefix gate, radix-0), `parse_modifier`
+(none gate boundary, joined-text lowercase strip, shift radix-0,
+extend default-0 arm, raise arm), `parse_shifted_imm` (index+1
+boundary gate, shift paint, LSL gate arm), `reg_const` (sp arm,
+raise arm, `ARM64_X` paint), and `mem_aux` (PRE/POST flag arms and
+the AUX paint) — caught through an in-process battery pinning
+bracket-nesting splits, tag->kind/symbol maps, `#`-immediate
+radix/strip separates, shifted-amount radix and boundary arms,
+modifier-raise rejects, register/sp rejects, and PRE/POST/zero
+flag paints. 27 caught, no equivalence rows; three byte-identical
+green shakes (generator md5s unchanged); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0340 - x86 scalar helper layer
 
 The scalar helper functions the render/encode batteries leave
@@ -5707,6 +5728,7 @@ rejects, the lowercase `PTR` fixture, scaled/offset mem terms, and
 space-padded branch targets. 22 caught, no equivalence rows; three
 byte-identical green shakes (generator md5s unchanged); golden
 gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 
 ### Step 0339 - x86 direct-step lowering tails
 

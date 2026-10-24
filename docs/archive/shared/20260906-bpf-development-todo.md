@@ -16092,6 +16092,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0341 - arm64 imm/modifier scalar tails
+
+- Scope: arm64 scalar-parse tails unrowed by the encoder/decode
+  batteries: `split_operands` (bracket depth arms, depth-zero comma
+  gate, part strip, tail-append gate, duplicate-char append, tuple
+  paint), `program_kind`'s xdp fallthrough, `default_program_symbol`'s
+  stage2 gate and xdp paint, `parse_imm` (strip, `#` prefix gate,
+  radix-0), `parse_modifier` (none gate boundary, joined-text
+  lowercase strip, shift radix-0, extend default-0 arm, raise arm),
+  `parse_shifted_imm` (index+1 boundary gate, shift paint, LSL gate
+  arm), `reg_const` (sp arm, raise arm, `ARM64_X` paint), and
+  `mem_aux` (PRE/POST flag arms and the AUX paint).
+- Harness: `build/mut_arm64_imm_mod_tails.py` (untracked) 27 single
+  anchors over an in-process battery pinning bracket-nesting
+  splits, tag->kind/symbol maps, `#`-immediate radix/strip
+  separates, shifted-amount radix and boundary arms,
+  modifier-raise rejects, register/sp rejects, and PRE/POST/zero
+  flag paints.
+- Result: 27 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0340 - x86 scalar helper layer
 
 - Scope: scalar helper functions unrowed by the render/encode
