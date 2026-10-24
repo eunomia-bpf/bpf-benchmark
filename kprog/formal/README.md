@@ -5687,6 +5687,31 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0335 - x86 fixed-count annotation pass
+
+The `annotated_fixed_count_ops` pass (plus `canonical_reg`) runs
+before every render path; the render-pipeline harness rows four of
+its lines, and the 16-row `build/mut_x86_count_annot.py` (untracked,
+harness census 208 -> 209) rows the rest: the rep gate and
+`values.get("X86_RCX")` pick (a `r9d` lane fixture and a no-track
+`rep` miss the tracking), the memcpy/memset call gate and
+`values.get("X86_RDX")` pick (the no-symbol `call memcpy`, a `bpf_*`
+helper, and a no-track call miss the reloc set), the two
+`count is not None` guards and `replace(insn, sim_imm=count)` emits,
+the `{"memcpy", "memset"}` set membership (a memset-only repaint
+falls to the memcpy fixture), the mov length gate and `is_int`
+set-or-pop pick (a `mov ecx, rax` register repaint kills a tracked
+count), the mov `continue` shielding tracked counts from the
+trailing first-operand pop, the xor length gate and the dst==src
+zero set versus dst!=src pop (caught with a tracked `ecx` so the
+pop empties the later `rep`), the trailing `if insn.operands` pop
+arm with its first-operand pick, and `canonical_reg`'s info[0]
+payload. Every fixture feeds one `NativeInsn` list through one pass
+and compares per-insn `(mnemonic, sim_imm)` pairs; 16 caught, no
+equivalence rows; three byte-identical green shakes (generator md5s
+unchanged); golden gate `make check` rc 0 with 210 `cross-check: OK`
+banners.
+
 ### Step 0334 - x86 branch and residual encoder arms
 
 The `encode()` arms the dispatch battery and per-arm batteries leave

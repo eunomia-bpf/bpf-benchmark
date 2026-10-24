@@ -1963,6 +1963,21 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 fixed-count annotation pass (the rep gate and its
+  `values.get("X86_RCX")` pick, the memcpy/memset call gate and
+  `values.get("X86_RDX")` pick — the no-symbol `call memcpy`, a
+  `bpf_*` helper, and a no-track call miss the reloc set — the two
+  `count is not None` guards and `replace(insn, sim_imm=count)`
+  emits, the `{"memcpy", "memset"}` set membership, the mov length
+  gate and `is_int` set-or-pop pick, the mov `continue` shielding
+  tracked counts from the trailing first-operand pop, the xor length
+  gate and the dst==src zero set versus dst!=src pop, the trailing
+  `if insn.operands` pop arm with its first-operand pick, and
+  `canonical_reg`'s info[0] payload) rows 16 more lines of
+  `annotated_fixed_count_ops` through a one-pass `(mnemonic,
+  sim_imm)` battery feeding one `NativeInsn` list, with no
+  equivalence rows.
+
   The x86 branch/residual encoder arms (the jmp arm's gate and
   `branch_target` immediate, the JCC mnemonic gate, token,
   `X86_CC_*` aux pick and target read; the SETCC memory

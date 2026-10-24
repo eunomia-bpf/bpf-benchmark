@@ -16092,6 +16092,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0335 - x86 fixed-count annotation pass
+
+- Scope: the `annotated_fixed_count_ops` pass plus `canonical_reg`
+  (runs before every render path; the render-pipeline harness rows
+  four of its lines, this battery the rest): rep gate and
+  `values.get("X86_RCX")`; memcpy/memset call gate and
+  `values.get("X86_RDX")` (no-symbol `call memcpy`, `bpf_*` helper,
+  no-track call fixtures miss the reloc set); both `count is not
+  None` guards and `replace(insn, sim_imm=count)` emits;
+  `{"memcpy", "memset"}` set membership; mov length gate and
+  `is_int` set-or-pop pick; the mov `continue` shielding tracked
+  counts from the trailing first-operand pop; xor length gate and
+  dst==src zero set versus dst!=src pop; trailing `if
+  insn.operands` pop arm and first-operand pick; `canonical_reg`'s
+  info[0] payload.
+- Harness: `build/mut_x86_count_annot.py` (untracked) 16 single
+  anchors over an in-process one-pass `(mnemonic, sim_imm)` battery.
+- Result: 16 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0334 - x86 branch and residual encoder arms
 
 - Scope: the `encode()` arms the dispatch battery and per-arm
