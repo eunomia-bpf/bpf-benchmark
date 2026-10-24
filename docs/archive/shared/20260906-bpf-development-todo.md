@@ -16092,6 +16092,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0324 - x86 helper-symbol glue and pointer casts
+
+- Scope: the x86 twin of the arm64 parser-helper battery:
+  `is_helper_symbol`'s `bpf_` prefix repaint and `and`->`or`
+  conjunction, the encode call arm and mov-load helper-ident arm
+  gates, `append_branch_or_ret`'s helper early-return gate, its
+  chunked twin's `{memcpy, memset}` gate, the `c_ptr_u64` `(long)`
+  cast, the mov-load map-pointer `&sym` imm arm, the xmm0 rodata
+  ident pick, and `proof_kind_for_source`'s `bench.kind`
+  pass-through.
+- Semantics: one harness `build/mut_x86_split_helpers.py`
+  (untracked, census 197 -> 198), 10 rows, one detector (in-process
+  battery over direct helper pins, `encode` arm pins, an
+  `append_branch_or_ret` non-default-macro flow, and a
+  threshold-forced chunked `render_program` with helper and `memcpy`
+  calls), one-file watchlist (the x86 generator, restored byte-exact
+  per row).
+- Fix: no equivalence rows among the 10 kept rows; the xmm
+  `rodata_idents.get` repick and the `write_one` stage2 kind-gate
+  repaint probed equivalent and documented instead of rowed.
+- Result: 10 catches; three byte-identical green shakes; golden
+  `make check` rc 0 / 210 `cross-check: OK` banners; committed with
+  paper sentence, README and archive steps, implementation
+  paragraph.
+
 ## Step 0323 - arm64 operand-split depth and pointer cast
 
 - Scope: the last unrowed arm64 parser helper: `split_operands`'s

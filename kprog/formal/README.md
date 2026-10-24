@@ -5687,6 +5687,26 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0324 - x86 helper-symbol glue and pointer casts
+
+The x86 twin of the arm64 parser-helper battery: the 10-row
+`build/mut_x86_split_helpers.py` (untracked, harness census
+197 -> 198) rows the `is_helper_symbol` `bpf_` prefix repaint and
+its `and`->`or` conjunction, the encode call arm and mov-load
+helper-ident arm gates, the append/branch helper early-return gate on
+a non-default step macro, the chunked twin's `{memcpy, memset}` gate
+(observed through the chunked memcpy direct-macro emission), the
+`c_ptr_u64` `(long)` cast repaint, the mov-load map-pointer `&sym`
+imm arm, the xmm0 rodata ident pick over a two-entry map, and the
+`proof_kind_for_source` `bench.kind` pass-through; one gold battery
+over direct helper pins, `encode` arm pins, an `append_branch_or_ret`
+non-default-macro flow, and a threshold-forced chunked
+`render_program` with helper and `memcpy` calls; 10 catches, no
+equivalence rows, with the xmm `rodata_idents.get` repick and the
+`write_one` stage2 kind-gate repaint probed equivalent and documented
+instead of rowed; three byte-identical green shakes; golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0323 - arm64 operand-split depth and pointer cast
 
 The last unrowed arm64 parser helper: the 7-row

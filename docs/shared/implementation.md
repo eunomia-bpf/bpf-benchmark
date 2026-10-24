@@ -1963,6 +1963,22 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 helper-symbol glue and pointer casts (the
+  `is_helper_symbol` `bpf_` prefix repaint and `and`->`or`
+  conjunction, the encode call arm and mov-load helper-ident arm
+  gates, the append/branch helper early-return gate observed on a
+  non-default step macro, the chunked twin's `{memcpy, memset}` gate,
+  the `c_ptr_u64` `(long)` cast, the mov-load map-pointer `&sym` imm
+  arm, the xmm0 rodata ident pick over a two-entry map, and the
+  `proof_kind_for_source` `bench.kind` pass-through) rows 10 lines
+  through one in-process battery over direct helper and `encode` arm
+  pins, an `append_branch_or_ret` non-default-macro flow, and a
+  threshold-forced chunked `render_program`, with no equivalence
+  rows; the xmm `rodata_idents.get` repick and the `write_one` stage2
+  kind-gate repaint are recorded as verified equivalents (the
+  membership raise already guarantees the map hit, and the gate is a
+  pure pass-through of `bench.kind`).
+
   The arm64 operand-split depth loop and pointer cast (the
   `split_operands` `[`/`]` depth arms, the top-level comma gate, the
   comma cut's `continue`, the in-loop strip and tail appends, and the
