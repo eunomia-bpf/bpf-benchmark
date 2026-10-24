@@ -1963,6 +1963,20 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 imul/store-immediate/movbe encoder arms (the three-operand
+  `imul` register form's `X86_OP_IMUL_IMM` token, dst-width flags
+  pick, immediate emit, and `is_int` guard repainted always-trip for
+  the parse_int-masked shield, the store-immediate packed
+  `imm32 | disp32<<32` immediate with the packing-order swap row and
+  the `operand_width(dst)` flags pick, masked-imm32 paint, and
+  `is_mem(dst) and is_int(src)` gate, and the `movbe` load-form
+  width pick over the nested memory width, store-form width paint,
+  arity gate, and both opcode tokens) rows 11 lines through one
+  in-process battery of direct `encode` fixture pins comparing the
+  fully-populated six-tuple `EncodedInsn` plus six must-raise gates,
+  with the `^` packing repaint verified bit-disjoint and the movbe
+  fall-through shield repaints battery-indistinguishable, documented
+  instead of rowed, and no equivalence rows.
   The x86 unary/double-shift encoder arms (the shld/shrd opcode-token
   emits plus their arity/None/`is_int` guards across both twins, the
   twin `WIDTH_CONST` flags picks and c_u64 immediate emits, the `div`

@@ -5687,6 +5687,28 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0328 - x86 imul/store-immediate/movbe encoder arms
+
+The `encode()` three-operand `imul` register form, `mov`
+store-immediate arm, and `movbe` pair: the 11-row
+`build/mut_x86_encode_movbe_imulstore.py` (untracked, harness census
+201 -> 202) rows the `X86_OP_IMUL_IMM` token, dst-width flags pick,
+immediate emit, and the always-trip repainted `is_int` guard (the
+plain shield drop is masked by the parse_int cursor raising the same
+ValueError), the store-immediate arm's packed `imm32 | disp32<<32`
+immediate (the packing-order swap row; the simpler `^` repaint is
+bit-disjoint from the `|` parts and unobservable), the
+`operand_width(dst)` flags pick, the masked-imm32 paint, and the
+`is_mem(dst) and is_int(src)` gate, and the `movbe` load-form width
+pick (dst width over the nested memory width), store-form width
+paint, arity gate, and both opcode tokens. Every fixture compares
+the fully-populated `EncodedInsn` six-tuple plus the six must-raise
+gates (imul non-int and register-None, movbe one-operand, reg-reg
+fall-through, no-mem/no-reg pairs); 11 caught, no equivalence rows;
+three byte-identical green shakes (x86 generator md5 unchanged
+`6793ca9e824336df8da78a9955c9d22c`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0327 - x86 unary/double-shift encoder arms
 
 The `encode()` shld/shrd twins, `div` arm, and unary `bswap`/`popcnt`/

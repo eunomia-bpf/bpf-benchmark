@@ -16092,6 +16092,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0328 - x86 imul/store-immediate/movbe encoder arms
+
+- Scope: the `encode()` three-operand `imul` register form, `mov`
+  store-immediate arm, and `movbe` pair: the `X86_OP_IMUL_IMM` token,
+  dst-width flags pick, immediate emit, and `is_int` guard (masked
+  plain drop; repainted always-trip), the store-immediate packed
+  `imm32 | disp32<<32` immediate, `operand_width(dst)` flags pick,
+  masked-imm32 paint, and `is_mem(dst) and is_int(src)` gate, and
+  the `movbe` load-form width pick, store-form width paint, arity
+  gate, and both opcode tokens.
+- Semantics: one harness `build/mut_x86_encode_movbe_imulstore.py`
+  (untracked, census 201 -> 202), 11 rows, one detector (in-process
+  battery over direct `encode` fixture pins comparing the
+  fully-populated `EncodedInsn` six-tuple plus six must-raise gates,
+  with `__pycache__` purged), one-file watchlist (the x86 generator,
+  restored byte-exact per row).
+- Result: 11 catches, no equivalence rows (the `^` packing repaint is
+  bit-disjoint from the `|` parts and unobservable, taken as the
+  packing-order swap row instead; movbe dispatch fall-through shield
+  repaints are battery-indistinguishable and left documented); three
+  byte-identical green shakes (x86 generator md5 unchanged
+  `6793ca9e824336df8da78a9955c9d22c`); golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation paragraph.
+
 ## Step 0327 - x86 unary/double-shift encoder arms
 
 - Scope: the `encode()` shld/shrd twins, `div` arm, and unary
