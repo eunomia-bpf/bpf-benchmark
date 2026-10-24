@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0345 - arm64 render_program collector tails
+
+The render_program collector tail the plumbing/unit/pipeline
+batteries leave unrowed: the 10-row
+`build/mut_arm64_render_tails.py` (untracked, harness census 218
+-> 219) rows the `rodata16 or {}` None-gate, the `all_insns`
+function flatten, the `all_addrs` set, the
+`helper_calls_by_addr(insns).items()` join, the `cgroup_skb` tag
+triple, the `rodata_ident_map(rodata16)` pick, the
+`enumerate(map_symbols)` ident numbering, the `\t{entry}` entry
+paint, the `ARM64_SIM_LICENSE();` tail, and the `"\\n".join` return
+-- shared anchors counted across `render_program_compact`
+(nine double-site rows, one render_program-only). Caught through an
+in-process battery pinning a two-function xdp render with rodata,
+helper blr, sub-routine banner, return-case ladder, map decls, and
+cgroup/tc variants. 10 catches, no equivalence rows; three
+byte-identical green shakes (generator md5s unchanged); golden
+gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0344 - arm64 imm/prelude/bench tails
 
 The parse_imm/parse_shifted_imm picks and the source_prelude /

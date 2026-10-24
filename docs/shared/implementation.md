@@ -1963,6 +1963,15 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 render_program collector tails (the `rodata16 or {}`
+  None-gate, the `all_insns` flatten, the `all_addrs` set, the
+  `helper_calls_by_addr(insns).items()` join, the `cgroup_skb`
+  tag triple, the `rodata_ident_map` pick, the
+  `enumerate(map_symbols)` numbering, the entry paint, the
+  license tail, and the join return; nine of the ten anchors are
+  shared with `render_program_compact`) row 10 lines through an
+  in-process battery, with no equivalence rows.
+
   The arm64 imm/prelude/bench tails (parse_imm's leading-space
   strip, parse_shifted_imm's immediate-part value pick and
   modifier-index pick, load_benches's tuple paints, source_prelude

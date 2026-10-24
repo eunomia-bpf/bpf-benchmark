@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0345 - arm64 render_program collector tails
+
+- Scope: the render_program collector tail the plumbing/unit/
+  pipeline batteries leave unrowed: the `rodata16 or {}`
+  None-gate, the `all_insns` multi-function flatten, the
+  `all_addrs` set, the `helper_calls_by_addr(insns).items()`
+  join, the `cgroup_skb` tag triple, the
+  `rodata_ident_map(rodata16)` pick, the `enumerate(map_symbols)`
+  ident numbering, the entry paint, the LICENSE tail, and the
+  join return.
+- Harness: `build/mut_arm64_render_tails.py` (untracked) 10 rows
+  (nine shared with render_program_compact) over an in-process
+  battery pinning a two-function xdp render with rodata, helper
+  blr, sub-routine banner, return-case ladder, map decls, and
+  cgroup/tc variants.
+- Result: 10 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0344 - arm64 imm/prelude/bench tails
 
 - Scope: parse_imm/parse_shifted_imm picks and the source_prelude
