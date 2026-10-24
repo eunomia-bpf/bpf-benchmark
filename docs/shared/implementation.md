@@ -1963,6 +1963,17 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 operand-split depth loop and pointer cast (the
+  `split_operands` `[`/`]` depth arms, the top-level comma gate, the
+  comma cut's `continue`, the in-loop strip and tail appends, and the
+  `c_ptr_u64` `(long)` cast repaint through the `adrp` rodata arm)
+  rows 7 lines through one in-process battery over direct
+  `split_operands` fixtures plus a gold noncompact `render_program`
+  with a rodata `adrp`, with no equivalence rows; the `depth == 0`
+  comma gate raised to `depth <= 0` is recorded as a verified
+  equivalent (the bracket scan order keeps depth nonnegative at every
+  comma).
+
   The x86 noncompact subfunction plumbing (the subfunction annotation
   coercion, the call return-address comprehension feeding the
   ret-dispatch case loop, the subroutine-local `next_addrs`, the

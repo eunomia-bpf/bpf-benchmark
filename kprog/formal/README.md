@@ -5687,6 +5687,24 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0323 - arm64 operand-split depth and pointer cast
+
+The last unrowed arm64 parser helper: the 7-row
+`build/mut_arm64_split_ptr.py` (untracked, harness census
+196 -> 197) rows `split_operands`' bracket-depth loop (the `[`
+depth increment, the `]` decrement, the top-level comma gate, the
+comma cut's `continue`, the in-loop strip append, and the
+tail-append `if cur:` guard) plus the `c_ptr_u64` `(long)` cast
+repaint observed through the `adrp` rodata arm; one gold battery
+over direct `split_operands` fixture strings (top-level commas,
+nested and two-deep brackets, whitespace strips, trailing comma
+tail) and a `render_program` gold noncompact fixture with a rodata
+`adrp`; the `depth == 0` comma gate raised to `depth <= 0` probed
+equivalent (the bracket scan order keeps depth nonnegative at every
+comma) and documented instead of rowed; 7 catches, no equivalence
+rows; three byte-identical green shakes; golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0322 - x86 noncompact subfunction plumbing
 
 The `render_program` subfunction plumbing and subroutine emission the

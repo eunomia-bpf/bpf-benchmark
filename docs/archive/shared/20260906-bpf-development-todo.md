@@ -16092,6 +16092,29 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0323 - arm64 operand-split depth and pointer cast
+
+- Scope: the last unrowed arm64 parser helper: `split_operands`'s
+  bracket-depth loop (the `[` depth increment, the `]` decrement, the
+  top-level comma gate, the comma cut's `continue`, the in-loop strip
+  append, and the tail-append `if cur:` guard) plus the `c_ptr_u64`
+  `(long)` cast repaint.
+- Semantics: one harness `build/mut_arm64_split_ptr.py` (untracked,
+  census 196 -> 197), 7 rows, one detector (in-process battery over
+  direct `split_operands` fixture strings -- top-level commas, nested
+  and two-deep brackets, whitespace strips, a trailing comma tail --
+  and a gold noncompact `render_program` fixture with a rodata `adrp`
+  exercising the `c_ptr_u64` path), one-file watchlist (the arm64
+  generator, restored byte-exact per row).
+- Fix: the `depth == 0` comma gate raised to `depth <= 0` probed
+  equivalent (the bracket scan order keeps depth nonnegative at every
+  comma) and documented instead of rowed; no equivalence rows among
+  the 7 kept rows.
+- Result: 7 catches, no equivalence rows; three byte-identical green
+  shakes; golden `make check` rc 0 / 210 `cross-check: OK` banners;
+  committed with paper sentence, README and archive steps,
+  implementation paragraph.
+
 ## Step 0322 - x86 noncompact subfunction plumbing
 
 - Scope: the `render_program` subfunction plumbing and subroutine
