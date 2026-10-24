@@ -5687,6 +5687,28 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0346 - arm64 non-compact render residual
+
+The render_program residual sites the tails battery leaves
+unrowed: the 9-row `build/mut_arm64_render_residual.py`
+(untracked, harness census 219 -> 220) rows the non-compact
+`next_by_addr` dict-comp's `index`/`index + 1` pair (the compact
+renderer's tail-driven `all_addrs` clone differs), the
+`helper_by_addr` join's addr/helper unpack (the bl-with-reloc pair
+never consumes it; the blr branch-hint fixup does), the
+`cgroup_skb/egress` section paint, the `uses_stack` gate arm
+(the no-stack tc/cgroup renders share the stack define's absence),
+the `if rodata_idents` blank-line gate (pinned on the rodata-less
+render lacking the decl block), the map-symbols filter's rodata
+and helper conjuncts, the `{ctx}ctx` entry-signature paint, and
+the case-ladder `__a64_lr = 0` zero -- four anchors widened past
+the compact twin's collisions. Caught through an in-process
+battery pinning rodata adrp, a helper bl with blr relay,
+sub-routine call, tc/irq rejects, and a rodata-less adrp program.
+9 catches, no equivalence rows; three byte-identical green shakes
+(generator sha256s unchanged); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners.
+
 ### Step 0345 - arm64 render_program collector tails
 
 The render_program collector tail the plumbing/unit/pipeline

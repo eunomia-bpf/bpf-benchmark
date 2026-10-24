@@ -1963,6 +1963,15 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 render_program residual sites (the non-compact
+  `next_by_addr` index pair the compact clone differs from, the
+  `helper_by_addr` addr/helper unpack the bl-with-reloc pair never
+  consumes, the `cgroup_skb/egress` paint, the `uses_stack` gate
+  arm, the `if rodata_idents` blank-line gate, the map-symbols
+  filter's two conjuncts, the `{ctx}ctx` entry paint, and the
+  case-ladder zero) row 9 lines through an in-process battery,
+  with no equivalence rows.
+
   The arm64 render_program collector tails (the `rodata16 or {}`
   None-gate, the `all_insns` flatten, the `all_addrs` set, the
   `helper_calls_by_addr(insns).items()` join, the `cgroup_skb`

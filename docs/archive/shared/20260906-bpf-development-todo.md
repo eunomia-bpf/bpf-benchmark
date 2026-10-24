@@ -16092,6 +16092,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0346 - arm64 non-compact render residual
+
+- Scope: the render_program residual sites the tails battery
+  leaves unrowed: the `next_by_addr` dict-comp's `index`/`index +
+  1` pair, the `helper_by_addr` join's addr/helper unpack, the
+  cgroup_skb section paint, the `uses_stack` gate arm, the
+  `if rodata_idents` blank-line gate, the map-symbols filter's
+  rodata and helper conjuncts, the entry-signature `{ctx}ctx`
+  paint, and the case-ladder `__a64_lr = 0` zero.
+- Harness: `build/mut_arm64_render_residual.py` (untracked) 9
+  single-anchor rows (four widened past the compact twin's
+  collisions) over an in-process battery pinning rodata adrp, a
+  helper bl with blr relay, sub-routine call, tc/irq rejects, and
+  a rodata-less adrp program.
+- Result: 9 catches, no equivalence rows; three byte-identical
+  shakes, generator sha256s unchanged; golden gate rc 0.
+
 ## Step 0345 - arm64 render_program collector tails
 
 - Scope: the render_program collector tail the plumbing/unit/
