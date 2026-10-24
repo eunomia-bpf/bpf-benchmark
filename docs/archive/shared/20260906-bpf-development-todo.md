@@ -16092,6 +16092,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0327 - x86 unary/double-shift encoder arms
+
+- Scope: the `encode()` shld/shrd twins, `div` arm, and unary
+  `bswap`/`popcnt`/`xchg` arms: the shld/shrd opcode-token emits and
+  their arity/None/`is_int` guards (both twins), the twin
+  `WIDTH_CONST` flags picks, the c_u64 immediate emits, the `div`
+  arm's width pick and `X86_REG_NONE` fall-through (no guards by
+  design), the `bswap` dst gate and token, the `popcnt` two-int gate
+  and dst-width flags pick, and the `xchg` dst pick.
+- Semantics: one harness `build/mut_x86_encode_unary_dbshift.py`
+  (untracked, census 200 -> 201), 16 rows, one detector (in-process
+  battery over direct `encode` fixture pins comparing the
+  fully-populated `EncodedInsn` six-tuple plus nine must-raise gates,
+  including the mixed-width `popcnt rax, bl` fixture separating the
+  dst/src width-source repaints, with `__pycache__` purged), one-file
+  watchlist (the x86 generator, restored byte-exact per row).
+- Result: 16 catches, no equivalence rows (the drop-`is_int`-shield
+  row probed masked by the parse_int fallback ValueError and
+  repainted to `or True` instead); three byte-identical green shakes
+  (x86 generator md5 unchanged
+  `6793ca9e824336df8da78a9955c9d22c`); golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation paragraph.
+
 ## Step 0326 - x86 mov-family encoder arms
 
 - Scope: the `encode()` move-family residual arms past the 0293

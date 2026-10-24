@@ -1963,6 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 unary/double-shift encoder arms (the shld/shrd opcode-token
+  emits plus their arity/None/`is_int` guards across both twins, the
+  twin `WIDTH_CONST` flags picks and c_u64 immediate emits, the `div`
+  arm's width pick and `X86_REG_NONE` fall-through with the guards
+  absent by design, the `bswap` dst gate and token, the `popcnt`
+  two-int gate and dst-width flags pick, and the `xchg` dst pick)
+  rows 16 lines through one in-process battery of direct `encode`
+  fixture pins comparing the fully-populated six-tuple `EncodedInsn`
+  plus nine must-raise gates, with the mixed-width `popcnt rax, bl`
+  fixture separating the dst/src width-source repaints; the
+  drop-`is_int`-shield repaint was probed masked by the parse_int
+  fallback and replaced with an always-trip repaint, and there are no
+  equivalence rows.
   The x86 mov-family encoder arms (the MOVZX/MOVSX register-form
   opcode pick over the `{"movsx", "movsxd"}` ternary, the load-form
   opcode pick against `X86_OP_MOV_LOAD` and its `X86_OP_MOVSX_LOAD`

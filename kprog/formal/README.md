@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0327 - x86 unary/double-shift encoder arms
+
+The `encode()` shld/shrd twins, `div` arm, and unary `bswap`/`popcnt`/
+`xchg` arms: the 16-row `build/mut_x86_encode_unary_dbshift.py`
+(untracked, harness census 200 -> 201) rows the shld/shrd opcode-token
+emits and their arity/None/`is_int` guards (both twins), the twin
+`WIDTH_CONST` flags picks and c_u64 immediate emits, the `div` arm's
+width pick and `X86_REG_NONE` fall-through (guards absent by design),
+the `bswap` dst gate and token, the `popcnt` two-int gate and
+dst-width flags pick, and the `xchg` dst pick. Every fixture compares
+the fully-populated `EncodedInsn` six-tuple plus the nine must-raise
+gates (shld arity 2/4/non-int third operand, bswap no operands,
+popcnt/src-none, xchg/src-none), with a mixed-width popcnt fixture
+(rax/bl) distinguishing the dst/src width-source repaints; the
+drop-`is_int`-shield row was probed masked (the parse_int cursor
+still raises the identical ValueError) and repainted `or True`
+instead; 16 caught, no equivalence rows; three byte-identical green
+shakes (x86 generator md5 unchanged
+`6793ca9e824336df8da78a9955c9d22c`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0326 - x86 mov-family encoder arms
 
 The `encode()` move-family residual arms past the 0293 dispatch pins:
