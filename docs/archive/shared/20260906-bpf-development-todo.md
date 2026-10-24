@@ -16092,6 +16092,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0333 - x86 default ALU lane and unary arms
+
+- Scope: the `encode()` default `ALU_AUX` lane left unrowed by the
+  per-family batteries: the unary block ({inc, dec, not, neg}
+  dispatch set, arity gate, dst-None raise shield, inc/dec-vs-
+  not/neg immediate pick, `X86_OP_ALU_IMM` register emit with
+  dst-width pick and lane aux) and the memory-unary arm (is_mem
+  conjunction, width default via the bracket-no-PTR `inc [rdi]`
+  fixture, token, base/flags/disp picks, `X86_MEM_AUX_ALU_OP`
+  paint); the generic ALU arms' is_int entry gate, len != 2 gate,
+  register-arm gate, ALU_MEM token, nested
+  `operand_width(ops[1], dst_reg[1])` pick (add eax,
+  BYTE PTR [rdi] cross-width fixture: FLAGS W32 / AUX W8), mem-reg
+  gate/width (add BYTE PTR [rdi], eax)/token/base/src, mem-imm gate
+  and width default (add DWORD PTR [rdi], 7), the
+  unsupported-memory-ALU raise and the fall-through message both
+  pinned at exact-message level.
+- Harness: `build/mut_x86_encode_alu_lane.py` (untracked) 29 single
+  anchors over an in-process six-tuple battery with byte-lane
+  (not ah), mixed-width and exact-message fixtures; six must-raise
+  gates.
+- Result: 29 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0332 - x86 bt/mulx/andn/bzhi/rep encoder arms
 
 - Scope: the `encode()` bt/mulx/andn/bzhi/rep arms left unpinned by

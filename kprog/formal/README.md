@@ -5687,6 +5687,33 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0333 - x86 default ALU lane and unary arms
+
+The `encode()` default `ALU_AUX` lane the per-family batteries leave
+unrowed: the 29-row `build/mut_x86_encode_alu_lane.py` (untracked,
+harness census 206 -> 207) rows the unary block (`inc/dec/not/neg`
+dispatch set, arity gate, dst-None raise shield, the inc/dec-vs-
+not/neg immediate pick, and the `X86_OP_ALU_IMM` register emit with
+its dst-width pick and `KPROG_X86_REG_LANE_AUX` paint) and the
+memory-unary arm's `is_mem` conjunction, width default (caught
+through the bracket-no-PTR `inc [rdi]` fixture), token, base/flags/
+disp picks and `X86_MEM_AUX_ALU_OP` paint; plus the generic ALU
+arms' `is_int` entry gate, `len != 2` gate, register-arm gate,
+`X86_OP_ALU_MEM` token, the nested `operand_width(ops[1],
+dst_reg[1])` pick (separated by `add eax, BYTE PTR [rdi]`: FLAGS
+keep the dst width W32 while the AUX carries the memory W8), the
+mem-reg arm's gate/width (separated by `add BYTE PTR [rdi], eax`)/
+token/base/src picks, the mem-imm arm's gate and width default
+(separated by `add DWORD PTR [rdi], 7`), the
+unsupported-memory-ALU raise (message-level via the exact-message
+fixture `add qword ptr [rdi], qword ptr [rsi]`), and the
+fall-through cannot-encode message (via `add rax, rb5x`). Every
+fixture compares the fully-populated `EncodedInsn` six-tuple; six
+must-raise gates; 29 caught, no equivalence rows; three
+byte-identical green shakes (x86 generator md5 unchanged
+`6793ca9e824336df8da78a9955c9d22c`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0332 - x86 bt/mulx/andn/bzhi/rep encoder arms
 
 The `encode()` bitops arms the family batteries leave unpinned:

@@ -1963,6 +1963,27 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 default `ALU_AUX` lane (the unary block's
+  `{inc, dec, not, neg}` dispatch set, arity gate, dst-None raise
+  shield, inc/dec-vs-not/neg immediate pick, and the
+  `X86_OP_ALU_IMM` register emit with its dst-width pick and
+  `KPROG_X86_REG_LANE_AUX` paint; the memory-unary arm's `is_mem`
+  conjunction, width default (reached only by bracket-no-PTR
+  `inc [rdi]`), token, base/flags/disp picks and
+  `X86_MEM_AUX_ALU_OP` paint; and the generic ALU arms' `is_int`
+  entry gate, `len != 2` gate, register-arm gate, `X86_OP_ALU_MEM`
+  token, nested `operand_width(ops[1], dst_reg[1])` pick —
+  separated by `add eax, BYTE PTR [rdi]`, the fixture whose FLAGS
+  keep the dst width W32 while the AUX carries the memory W8 — the
+  mem-reg arm's gate/width (separated by `add BYTE PTR [rdi],
+  eax`)/token/base/src picks, the mem-imm arm's gate and width
+  default (separated by `add DWORD PTR [rdi], 7`), and the
+  unsupported-memory-ALU and fall-through raises pinned at
+  exact-message level) row 29 lines through one in-process battery
+  of direct `encode` fixture pins comparing the fully-populated
+  six-tuple `EncodedInsn` plus six must-raise gates, with no
+  equivalence rows.
+
   The x86 bt/mulx/andn/bzhi/rep encoder arms (the bt arity gate and
   `X86_OP_BT_IMM`/`X86_OP_BT_MEM_IMM`/`X86_OP_BT` tokens with their
   width picks, oversized `disp<<33` packed paint and immediates,
