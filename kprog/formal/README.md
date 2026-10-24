@@ -5687,6 +5687,38 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0310 - arm64 rodata load and flat parse
+
+The arm64 native-link data loaders pinned at unit level:
+`rodata_bytes`/`load_rodata16` reading the `.native_link_rodata`
+section from the proof object and `parse_flat_instructions`
+parsing the FAUX `objdump -dr` text had no rows in any prior
+harness. `build/mut_arm64_parse_rodata.py` (untracked, harness
+census 183 -> 184) rows both surfaces with 18 single-anchor flips
+run against a FAUX-subprocess battery (the generator's object
+probes called with stubbed runners): the rodata rows pin the exact
+`-s -j` objdump argument list, the nonzero-returncode empty-blob
+error path, the decimal address-line gate, the per-field hex +
+even-length parity gate with its odd-field break, the
+little-endian 2-nibble decode, the empty-data record-map error
+path, the `-t` symbol-table section gate, the `idx + 2` missing
+size-field boundary, the `offset + 16` record-in-range boundary,
+and the little `(lo, hi)` pair order; the parse rows pin the
+`R_AARCH64_` reloc scan, the `+0x4` suffix strip, the
+interior-symbol rewrite keeping an explicit empty symbol (an empty
+reloc symbol is written, not replaced by None), the
+instruction-line regex both its lowercase mnemonic class (a
+capital-X probe mnemonic stays unparsed) and its exactly-8-nibble
+bytes column (a 7-nibble probe stays unparsed), the `//` comment
+strip (a `#` suffix survives), the asm shape, and the hex address
+decode: 18 rows = 18 catches and no equivalence rows (three
+first-draft survivors --- the record offset boundary, the mnemonic
+character class, and the bytes column width --- were painted by
+boundary fixtures, no rows dropped); three byte-identical green
+shakes (`TOTAL 18 mutations, 0 failures, 0 equivalence rows`, all
+md5 `8f1fbfe6a7ce741a4832cf8a84ffe3ba`); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0309 - x86 branch/call ladder and flat parse
 
 The x86 branch/call/return emission ladder and the FAUX-objdump

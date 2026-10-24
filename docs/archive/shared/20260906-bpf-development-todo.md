@@ -16092,6 +16092,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0310 - arm64 rodata load and flat parse
+
+- Scope: the arm64 native-link data loaders --- `rodata_bytes` and
+  `load_rodata16` reading the `.native_link_rodata` section bytes
+  and the 16-byte record symbols out of the proof object, and
+  `parse_flat_instructions` parsing the FAUX `objdump -dr` text
+  with its reloc-symbol rewrite; no prior harness row mutated
+  these surfaces (Steps 0292/0294 pinned the encode and emission
+  layers, not the loaders).
+- Semantics: one harness `build/mut_arm64_parse_rodata.py`
+  (untracked, census 183 -> 184), 18 rows, one detector (a
+  FAUX-subprocess battery run in-process with stubbed objdump
+  runners, pinning exact bytes/pairs/insns/raises), one-file
+  watchlist (the arm64 generator, restored byte-exact around every
+  row).
+- Fix: three first-draft survivors (the `offset + 16` record
+  boundary, the lowercase mnemonic class, and the `{8}` bytes
+  column) were fixed by adding boundary fixtures (an
+  out-of-bounds `offset == len(data) - 15` record, a capital-X
+  probe mnemonic, a 7-nibble bytes column) instead of dropping
+  rows.
+- Result: 18 catches, no equivalence rows; three byte-identical
+  green shakes (`8f1fbfe6a7ce741a4832cf8a84ffe3ba`), golden
+  `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation
+  pair.
+
 ## Step 0309 - x86 branch/call ladder and flat parse
 
 - Scope: the unit-level branch/call/return emission ladder and the
