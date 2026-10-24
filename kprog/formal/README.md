@@ -5687,6 +5687,31 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0334 - x86 branch and residual encoder arms
+
+The `encode()` arms the dispatch battery and per-arm batteries leave
+unrowed at encoder-line level: the 40-row
+`build/mut_x86_encode_branch_resid.py` (untracked, harness census
+207 -> 208) rows the jmp arm's gate/immediate, the JCC mnemonic
+gate/token/aux/target (`X86_CC_*` pick and the `branch_target` read,
+separated by the no-operand `jle`/`js` fixtures), the SETCC memory
+gate/token/base/disp and the `X86_REG_AUX_SRC_SHIFT(CC_AUX[op])` aux
+join, the SETCC register raise-shield/token/lane, the CMOV memory
+gate/base/flags/aux/displacement, the CMOV register gate/token/
+flags (no width-mismatch check — an accepted divergence pinned
+as-is), the mov load arm's helper-id gate/immediate, scalar-rodata
+rejection raise, `X86_OP_MOV_LOAD_MAP_PTR` token/`c_ptr_u64`
+immediate, and the plain load's nested PTR-default flags/aux/
+displacement picks (`mov rax, DWORD PTR [rdi]` separates the width;
+`[rdi+rbx*4]` separates the index/scale aux paint), and the
+movaps/movups `X86_OP_LOAD_XMM0`/`X86_OP_STORE_XMM0` gates, rodata
+rejection, tokens, aux and displacement picks. Six exact-message
+must-raise gates; 40 caught, no equivalence rows (the xmm rodata-imm
+`.get` repaint is unobservable — the gate raises first — and is not
+a row); three byte-identical green shakes (x86 generator md5
+unchanged `6793ca9e824336df8da78a9955c9d22c`); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0333 - x86 default ALU lane and unary arms
 
 The `encode()` default `ALU_AUX` lane the per-family batteries leave

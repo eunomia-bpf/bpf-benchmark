@@ -16092,6 +16092,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0334 - x86 branch and residual encoder arms
+
+- Scope: the `encode()` arms the dispatch battery and per-arm
+  batteries leave unrowed at encoder-line level: jmp gate/immediate;
+  JCC mnemonic gate, token, `X86_CC_*` aux pick and `branch_target`
+  read (no-operand `jle`/`js` fixtures separate the target's
+  else-branch); SETCC memory gate/token/base/disp and the
+  `X86_REG_AUX_SRC_SHIFT(CC_AUX[op])` aux join, SETCC register
+  raise-shield/token/lane; CMOV memory gate/base/flags/aux/disp,
+  CMOV register raise-gate/token/flags (mixed src widths accepted,
+  pinned as-is); mov load arm helper-id gate/immediate,
+  scalar-rodata rejection, `X86_OP_MOV_LOAD_MAP_PTR` token and
+  `c_ptr_u64` immediate, plain-load nested PTR-default flags/aux/
+  displacement picks (`mov rax, DWORD PTR [rdi]` separates the
+  width — uppercase PTR wins the default; `[rdi+rbx*4]` separates
+  the index/scale aux); movaps/movups LOAD_XMM0 gate/rodata raise/
+  token/aux/imm and STORE_XMM0 gate/token/aux/imm.
+- Harness: `build/mut_x86_encode_branch_resid.py` (untracked) 40
+  single anchors over an in-process six-tuple battery; six
+  exact-message must-raise gates.
+- Result: 40 catches, no equivalence rows (the xmm rodata-imm
+  `.get` repaint is unobservable — the gate raises first — and is
+  not a row); three byte-identical shakes, generator md5s
+  unchanged; golden gate rc 0.
+
 ## Step 0333 - x86 default ALU lane and unary arms
 
 - Scope: the `encode()` default `ALU_AUX` lane left unrowed by the

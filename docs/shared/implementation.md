@@ -1963,6 +1963,25 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 branch/residual encoder arms (the jmp arm's gate and
+  `branch_target` immediate, the JCC mnemonic gate, token,
+  `X86_CC_*` aux pick and target read; the SETCC memory
+  gate/token/base/disp with the `X86_REG_AUX_SRC_SHIFT(CC_AUX[op])`
+  aux join and the register raise-shield/token/lane; the CMOV memory
+  gate/base/flags/aux/displacement and register raise-gate/token/
+  flags — mixed source widths are accepted and pinned as-is; the mov
+  load arm's helper-id gate/immediate, scalar-rodata rejection,
+  `X86_OP_MOV_LOAD_MAP_PTR` token/`c_ptr_u64` immediate and
+  plain-load nested PTR-default flags/aux/displacement picks —
+  `mov rax, DWORD PTR [rdi]` separates the width (uppercase PTR wins
+  the case-sensitive startswith default), `[rdi+rbx*4]` separates the
+  index/scale paint; the movaps/movups `X86_OP_LOAD_XMM0` and
+  `X86_OP_STORE_XMM0` gates, rodata rejection, tokens, aux and
+  displacement picks) row 40 encoder lines through one in-process
+  six-tuple battery with six exact-message must-raise gates, with no
+  equivalence rows (the xmm rodata-imm repaint is unobservable —
+  the gate raises first — and is not a row).
+
   The x86 default `ALU_AUX` lane (the unary block's
   `{inc, dec, not, neg}` dispatch set, arity gate, dst-None raise
   shield, inc/dec-vs-not/neg immediate pick, and the
