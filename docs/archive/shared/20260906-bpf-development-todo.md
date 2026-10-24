@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0320 - arm64 compact renderer residuals
+
+- Scope: the `render_program_compact` internals left unpinned by
+  0313's output-pins-only battery: prelude/stack/map/step-struct /
+  step-row paint, the `ARM64_SIM_L_EXEC` call shape, and every
+  per-kind runner arm plus the guard/bound/fetch/entry paints.
+- Semantics: one harness `build/mut_arm64_render_compact_residual.py`
+  (untracked, census 193 -> 194), 32 rows, one detector (in-process
+  battery calling `render_program_compact` on a nine-insn gold program
+  with branch/cond/tbz/helper/madd coverage and stack, cgroup,
+  linked-exit, map-symbol, rodata-ident variants), one-file watchlist
+  (the arm64 generator, restored byte-exact around every row).
+- Fix: two first-draft anchor forms needed renderer-scoping because
+  the noncompact renderer repeats the same 6 lines (multi-line bans);
+  `rc.exec.args` needed an `madd` fixture (a two-source row) to see
+  the `src2`/`src3` order swap; no equivalence rows.
+- Result: 32 catches, no equivalence rows; three byte-identical green
+  shakes (`TOTAL 32 mutations, 0 failures, 0 equivalence rows` each);
+  golden `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation pair.
+
+
 ## Step 0319 - x86 flat-disassembly parser
 
 - Scope: the `parse_asm_text` internals in

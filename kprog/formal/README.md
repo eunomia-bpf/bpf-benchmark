@@ -5687,6 +5687,30 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0320 - arm64 compact renderer residuals
+
+The `render_program_compact` internals 0313's output pins
+underconstrained (most of the 154-line body was unpinned): the 32-row
+`build/mut_arm64_render_compact_residual.py` (untracked, harness
+census 193 -> 194) rows the prelude `rstrip`, the stack-enabled
+define, the map descriptor fields, the six step-struct tail fields,
+the step-row paint, the `ARM64_SIM_L_EXEC` argument order (proved on
+an `madd` fixture whose row really uses both `src2` and `src3`), the
+per-kind runner arms (the JMP assignment, the JCC conditional select,
+the CBZ zero-take and bit-test arms, the CALL `__a64_lr`/`x30`/pc
+transfer, the RET `pc`-rewind and `__a64_lr` zap, the helper delegate
+and `pc` advance), the guard-limit formula, the pc bound, the step
+fetch, and the entry-function paint; every row is anchored to make
+its mutation uniquely pin one line (renderer-scoped multi-line bans
+for the six lines the noncompact renderer duplicates); one gold
+battery with a nine-insn compact program (branch/cond/tbz/helper /
+`madd` tail) plus stack, cgroup, linked-exit, map-symbol, and
+rodata-ident variants; 32 catches, no equivalence rows; three
+byte-identical green shakes (`TOTAL 32 mutations, 0 failures, 0
+equivalence rows` each); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
+
 ### Step 0319 - x86 flat-disassembly parser
 
 The x86 twin of 0318: the remaining unrowed `parse_asm_text` arms that

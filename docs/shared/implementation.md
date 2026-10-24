@@ -1963,6 +1963,13 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 compact renderer residuals (the prelude/stack/map/
+  step-struct/step-row paints, the `ARM64_SIM_L_EXEC` call shape on a
+  two-source `madd` row, the per-kind runner arms, the guard/bound/
+  fetch/entry paints) rows 32 lines through one in-process battery
+  over a gold compact program with the structural variants, with no
+  equivalence rows.
+
   The x86 flat-disassembly parser (the `parse_asm_text` relocation
   arms, the `:` and address gates, the hex radix, the `#` comment cut,
   the `lock` prefix strip, the no-mnemonic reject, and the
