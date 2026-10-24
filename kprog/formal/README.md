@@ -5687,6 +5687,29 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0321 - arm64 noncompact render plumbing
+
+The `render_program` declaration plumbing and return-case ladder that
+0314 pinned only through cascade output: the 13-row
+`build/mut_arm64_render_plumbing.py` (untracked, harness census
+194 -> 195) rows the `bool(return_addrs)` ladder gate, the ladder
+`tail` continuation, the `case 0xN: __a64_lr = 0; goto` paint, the
+rodata `[2]`-element paint, the rodata blank separator, the rodata
+ident loop ordering, the helper-reloc exclusion composed with the
+`reloc_idents` arm, the `__arm64_reloc` prefix (`c_ident` fallback
+proved on a digit-leading map symbol), the map `struct {` decl head,
+the `.maps` section paint, the `int {name}_arm64_sim_xdp({ctx}ctx)`
+entry head, the non-main function gate, and the per-insn label line;
+one gold battery with a nine-insn xdp program (bl-return ladder,
+cbnz/tbnz, helper call, adrp map symbol, `[sp` stack, subroutine
+comment) plus tc, cgroup linked-exit, two-rodata ordering, and
+digit-symbol fixtures; 13 catches, no equivalence rows; two
+verified-equivalent probes documented instead of rows (`reloc_idents
+.get` is key-equal by construction, `or ""` is short-circuit shadow);
+three byte-identical green shakes (`TOTAL 13 mutations, 0 failures,
+0 equivalence rows` each); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
 ### Step 0320 - arm64 compact renderer residuals
 
 The `render_program_compact` internals 0313's output pins

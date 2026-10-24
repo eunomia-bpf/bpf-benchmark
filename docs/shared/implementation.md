@@ -1963,6 +1963,16 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 noncompact render plumbing (the return-case ladder
+  gate/tail/paint, the rodata paint/blank/loop-ordering, the
+  helper-reloc gate and `__arm64_reloc` prefix, the map decl head and
+  `.maps` paint, the entry head, the non-main function gate, and the
+  per-insn label line) rows 13 lines through one in-process battery
+  over a gold noncompact program with bl-return/branch/helper/adrp/
+  stack coverage plus tc, linked-exit, two-rodata and digit-symbol
+  variants, with no equivalence rows; `reloc_idents.get` and the
+  `or ""` helper-gate shadow are recorded as verified equivalents.
+
   The arm64 compact renderer residuals (the prelude/stack/map/
   step-struct/step-row paints, the `ARM64_SIM_L_EXEC` call shape on a
   two-source `madd` row, the per-kind runner arms, the guard/bound/

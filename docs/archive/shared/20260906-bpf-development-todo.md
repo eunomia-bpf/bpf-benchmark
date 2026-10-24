@@ -16092,6 +16092,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0321 - arm64 noncompact render plumbing
+
+- Scope: the `render_program` declaration plumbing and return-case
+  ladder that 0314 pinned only through cascade output: the ladder
+  gate/tail/paint, the rodata paint/blank/loop ordering, the
+  helper-reloc gate and `__arm64_reloc` prefix, the map decl head and
+  `.maps` paint, the entry-function head, the non-main fn gate, and
+  the per-insn label line.
+- Semantics: one harness `build/mut_arm64_render_plumbing.py`
+  (untracked, census 194 -> 195), 13 rows, one detector (in-process
+  battery calling `render_program` on a nine-insn xdp gold program
+  with bl-return ladder/cbnz/tbnz/helper/adrp/`[sp` coverage plus tc,
+  cgroup linked-exit, two-rodata, digit-symbol variants), one-file
+  watchlist (the arm64 generator, restored byte-exact per row).
+- Fix: two probes verified equivalent and documented instead of
+  rowed (`reloc_idents.get` is key-equal by construction since
+  `reloc_idents` is enumerated from `map_symbols`; `or ""` is a
+  short-circuit shadow behind the `if insn.reloc_symbol` gate); the
+  first-draft label pin was label-shift-collision-prone and became
+  an ordered label-sequence pin; no equivalence rows.
+- Result: 13 catches, no equivalence rows; three byte-identical
+  green shakes (`TOTAL 13 mutations, 0 failures, 0 equivalence rows`
+  each); golden `make check` rc 0 / 210 `cross-check: OK` banners;
+  committed with paper sentence, README and archive steps,
+  implementation pair.
+
 ## Step 0320 - arm64 compact renderer residuals
 
 - Scope: the `render_program_compact` internals left unpinned by
