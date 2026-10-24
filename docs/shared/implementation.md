@@ -1963,6 +1963,41 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 compact step-runner surface (the `render_program_compact`
+  emission lines in `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`
+  that Steps 0294/0308 left unrowed: the kind-define ladder and include
+  block (`#define ARM64_SIM_C_OP 1U` through `10U`,
+  `compact_helper_defines(helper_names)`,
+  `../arm64_sim_local_bpf.h`), the prelude arm
+  (`lines.append(prelude.rstrip())`), the rodata cell pair
+  (`lo, hi = rodata16[rodata_symbol]`), the sorted map-symbol loop with
+  `c_ident`-suffixed idents, the compact-step struct/table/step-row
+  (`struct arm64_sim_compact_step {`,
+  `step_ident = f"__arm64_sim_steps_{name}"`, the
+  `ARM64_SIM_C_{step.kind}` row), the guard/unroll/pc-bound/fetch lines
+  (`max(len(steps) * 8, len(steps) + 1)` guard limit,
+  `#pragma clang loop unroll(disable)`, `__a64_c_pc >= {len(steps)}U`,
+  `&{step_ident}[__a64_c_pc]`), the fnhead `section` repaint, and the
+  per-kind runner arms (JMP/CBZ/TBZ/CALL/RET/HELPER/else ladders with
+  their value/take/pc writes, `ARM64_SIM_RET();` retfall, and the
+  `if linked_exit:` tail)) are observed by one detector in
+  `build/mut_arm64_render_compact.py` (untracked, census 186 -> 187):
+  subprocess `python -B -c` importing the mutated generator module from
+  `kprog/arm64/micro-prog` with its `__pycache__` purged around every
+  battery; 33 rows = 33 catches (the usedops OP-set repaint, the
+  helper-defines repaint, the rstrip-to-lstrip prelude flip, the rodata
+  cell repaint, the reverse-sorted map repaint, the struct/table/row/
+  ident repaints, the guard-limit/unroll/bound/fetch-shift repaints, the
+  fnhead section repaint, the runner-arm repaints (OP default/OP pc,
+  JMP/CALL target pc, CBZ/TBZ value-take-pc ladders, CALL lr capture,
+  RET switch/clr/retfall, HELPER pc, else split), and the
+  `linked_exit or True` repaint flagged via the False-case
+  `return 0;` render) and no equivalence rows (first-draft survivors
+  were painted: the prelude pin by a padded prelude literal, the map
+  order pin by two adrp symbols with differing sorted vs first-appearance
+  order, the linked-exit repaint by the False-case render, and the
+  runner-arm rows by `L.index`-scoped fixtures doing partial-repaint
+  catches).
   The x86 non-chunked exit tail and subroutine unit (the lines of
   `render_program`, `render_x86_subroutine`, and `write_one` in
   `kprog/x86/micro-prog/generate_micro_sim_proofs.py` that Steps 0293

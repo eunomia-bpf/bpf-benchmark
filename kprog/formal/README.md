@@ -5687,6 +5687,40 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0313 - arm64 compact step runner unit
+
+The arm64 compact step-runner layer pinned at unit level: Steps 0294 and
+0308 reached `render_program_compact` only through individual pins,
+leaving its kind-defines/include block, prelude/rodata/map declarations,
+step struct and table, guard/pc plumbing, and most of the per-kind
+runner arms unrowed. `build/mut_arm64_render_compact.py` (untracked,
+harness census 186 -> 187) rows them with 33 single-anchor flips run
+against an in-process battery pinning the kinds block exactly (the
+`#define ARM64_SIM_C_OP 1U` through `10U` ladder over a fixture whose
+step kind requires the `cr.usedops` OP-set repaint), the
+`compact_helper_defines` output and the
+`../arm64_sim_local_bpf.h` include line, the padded prelude line pin
+(`" // pre313 "` arrives right-stripped but left-kept, so
+`rstrip` -> `lstrip` breaks the pin), the rodata cell pair
+(`lo, hi = rodata16[rodata_symbol]` over a `{34ULL, 51ULL}` fixture),
+the map declaration arm pinned in sorted-symbol order over a
+fixture whose adrp symbols (`map_zz`/`map_aa`) emit the idents
+`map_aa_0`/`map_zz_1`/`prog_2` (`c_ident` appends the enumerate
+index), the compact-step struct, table, step row, and step-ident
+repaints, the guard-limit/unroll/pc-bound/fetch-offset repaints (the
+bound and fetch painted over a 9-step fixture whose mover pins
+`__a64_c_pc + 1`), the fnhead `section` repaint, and the runner arms
+(OP default + the OP `__a64_c_pc++` repaint, the JMP/exit-target
+tail, the CBZ/TBZ value/take/pc ladder over the guard-72 fixture
+whose branch rows pin cond constants, the CALL lr capture and
+exit-target tail, the RET `if (__a64_lr)` switch plus write-back and
+clr rows and the retfall `ARM64_SIM_RET();` pointer repaint, the
+HELPER call+pc rows, the else-arm split, and the linked-exit tail pinned
+through the False case (`return 0;` no-WRRW render)): 33 rows = 33
+catches and no equivalence rows; three byte-identical green shakes (md5
+fbc86ab31f139df27a87bc2576fb6433 across each `TOTAL 33 mutations, 0 failures, 0 equivalence rows`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0312 - x86 non-chunked exit tail and subroutine unit
 
 The x86 non-chunked exit tail and subroutine layer pinned at unit level:

@@ -16092,6 +16092,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0313 - arm64 compact step runner unit
+
+- Scope: `render_program_compact`'s remaining emission surface ---
+  the kind defines/include block (`#define ARM64_SIM_C_OP 1U` ladder,
+  `compact_helper_defines` output, `../arm64_sim_local_bpf.h`), the
+  prelude/rodata/map declaration arms, the compact-step struct/table/
+  step-row/step-ident, the guard/unroll/pc-bound/fetch-offset lines,
+  the fnhead `section` repaint, and the per-kind runner arms (JMP,
+  CBZ/TBZ ladder, CALL lr/target, RET switch/clr/retfall, HELPER,
+  else-arm, OP default and pc-step) plus the linked-exit tail; Steps
+  0294/0308 reached the JCC-eval/RET-cast/HELPER-call pins and the
+  `compact_step` records but not these lines.
+- Semantics: one harness `build/mut_arm64_render_compact.py` (untracked,
+  census 186 -> 187), 33 rows, one detector (in-process battery over
+  direct `render_program_compact` outputs; 3 main/tc/out2x renders over
+  a 9-insn multi-arm fixture with guard 72, pc bound 9, stack `stur`,
+  two adrp map symbols, and a linked-exit-False pen render), one-file
+  watchlist (the arm64 generator, restored byte-exact around every row).
+- Fix: first-draft survivors painted rather than dropped (the prelude
+  arm needed a padded prelude so right-strip is observable; the map
+  order pin needed two adrp symbols whose sorted order differs from
+  first-appearance; the linked-exit pin moved to the False-case
+  `return 0;` render after the `or True` repaint left the WRRW render
+  unchanged; index-scoped ROW anchors pin runner-arm lines via
+  `L.index` offsets).
+- Result: 33 catches, no equivalence rows; three byte-identical green
+  shakes (md5 `fbc86ab31f139df27a87bc2576fb6433`), golden `make check`
+  rc 0 / 210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0312 - x86 non-chunked exit tail and subroutine unit
 
 - Scope: `render_program`'s own exit/dispatch tail (the
