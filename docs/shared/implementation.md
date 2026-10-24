@@ -1963,6 +1963,23 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 bt/mulx/andn/bzhi/rep encoder arms (the bt arity gate and
+  `X86_OP_BT_IMM`/`X86_OP_BT_MEM_IMM`/`X86_OP_BT` tokens with their
+  width picks, oversized `disp<<33` packed paint and immediates,
+  the mulx dst/src-lo/hi-aux/`WIDTH_CONST[lo[1]]` contour, the andn
+  memory nested-width/base-shift/displacement and register
+  src2-aux/width/token, the bzhi None gate/register width/count-aux
+  and memory shift-aux/displacement, and the rep movs
+  arity/shape/mem/`sim_imm` gates with both bound comparisons, the
+  ops[0] width pick and count immediate) row 37 lines through one
+  in-process battery of direct `encode` fixture pins comparing the
+  fully-populated six-tuple `EncodedInsn` — the mixed-width
+  `mulx eax, ebx, r8`, cross-width `andn eax, ebx, QWORD PTR [rdi]`,
+  bracket-no-PTR `bt [rdi], 7` (the only shape that reaches the
+  `X86_OP_BT_MEM_IMM` width default) and mixed QWORD/DWORD rep
+  fixtures separate the width-source repaints — plus nine
+  must-raise gates, with no equivalence rows.
+
   The x86 two-operand `imul` fall-through and the CMP/TEST encoder
   forms (`X86_ALU_IMUL` aux paints on the immediate and register
   forms with dst-width flags picks and the immediate emit, the

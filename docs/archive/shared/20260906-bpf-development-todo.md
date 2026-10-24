@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0332 - x86 bt/mulx/andn/bzhi/rep encoder arms
+
+- Scope: the `encode()` bt/mulx/andn/bzhi/rep arms left unpinned by
+  the 0228/0262/0277/0285 bitops family batteries (those row the
+  spec/generator-header/Lean/host chains): bt arity gate,
+  `X86_OP_BT_IMM` token/width/immediate, `X86_OP_BT_MEM_IMM` width
+  default (bracket-no-PTR fixture; PTR width wins the default
+  otherwise), oversized `disp<<33` packed paint and packed
+  immediate, `X86_OP_BT` token/width; mulx arity/None gates, dst
+  and src-lo picks, `WIDTH_CONST[lo[1]]` width and hi-register
+  aux; andn memory nested-width pick, base-shift aux, displacement,
+  token, fall-through gate, register src2-aux/width/token; bzhi
+  None gate (or-to-and via the mem-count raise), register width,
+  count-aux, memory shift-aux and displacement; rep movs
+  arity/shape/mem gates, `sim_imm` None gate, both bound
+  comparisons, ops[0] width pick, count immediate.
+- Harness: `build/mut_x86_encode_bitops.py` (untracked) 37 single
+  anchors over shipped fixture battery (in-process 6-tuple pins,
+  mixed-width and bracket-no-PTR fixtures, nine must-raise gates).
+- Result: 37 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0331 - x86 two-op imul and cmp/test encoder forms
 
 - Scope: the `encode()` two-operand `imul` fall-through and the

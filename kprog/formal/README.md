@@ -5687,6 +5687,33 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0332 - x86 bt/mulx/andn/bzhi/rep encoder arms
+
+The `encode()` bitops arms the family batteries leave unpinned:
+the 37-row `build/mut_x86_encode_bitops.py` (untracked, harness
+census 205 -> 206) rows the bt arity gate, the `X86_OP_BT_IMM`
+token/width/immediate emit, the `X86_OP_BT_MEM_IMM` width default
+(caught only through the bracket-no-PTR `bt [rdi], 7` fixture; the
+PTR width always wins the default for PTR-mem fixtures), the
+oversized `disp<<33` packed paint and the packed immediate, and
+the `X86_OP_BT` token/width pick; the mulx arity and None gates,
+dst/src-lo picks, `WIDTH_CONST[lo[1]]` width (separated by
+`mulx eax, ebx, r8`) and hi-aux paint; the andn memory arm's
+nested-width pick (separated by `andn eax, ebx, QWORD PTR [rdi]`),
+base-shift aux, displacement, token and fall-through gate plus the
+register src2-aux/width/token; the bzhi None gate (or-to-and,
+caught through the mem-count raise), register width (separated by
+`bzhi rax, rbx, cl`), count-aux, memory shift-aux and displacement;
+and the rep movs arity/movs-shape/mem gates, `sim_imm` None gate,
+both bound comparisons (`sim_imm = 0` catches the `>= 1` lower
+repaint, `sim = 2**40` the upper), the ops[0] width pick
+(separated by the mixed QWORD/DWORD rep fixture) and the count
+immediate. Every fixture compares the fully-populated
+`EncodedInsn` six-tuple; nine must-raise gates; 37 caught, no
+equivalence rows; three byte-identical green shakes (x86 generator
+md5 unchanged `6793ca9e824336df8da78a9955c9d22c`); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0331 - x86 two-op imul and cmp/test encoder forms
 
 The `encode()` two-operand `imul` fall-through and the CMP/TEST
