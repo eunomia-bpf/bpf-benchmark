@@ -16092,6 +16092,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0339 - x86 direct-step lowering tails
+
+- Scope: `direct_step_statement` / `append_encoded_step` unrowed
+  lines: the `encoded.aux != "0"` arm gate, the direct-table `None`
+  gate, `append_encoded_step`'s `X86_SIM_RUN_OP` gate, the
+  `direct is not None` condition, the direct-emit early return, and
+  the two module-level macro-table validation loops
+  (`DIRECT_STEP_MACROS` / `AUX_STEP_MACROS` key checks with their
+  import-time `SystemExit`).
+- Harness: `build/mut_x86_direct_step.py` (untracked) 7 single
+  anchors over an in-process battery pinning the lowered
+  `X86_SIM_L_EXEC_*` macro paints, the `X86_SIM_RUN_OP(...)`
+  fallback shape, the non-run-op passthrough, and the exact emit
+  lines.
+- Result: 7 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0338 - x86 native-link parse head and program split
 
 - Scope: native-link blob layer `parse_native_link_blob` unrowed

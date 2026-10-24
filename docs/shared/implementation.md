@@ -1963,6 +1963,16 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 direct-step lowering tails (`direct_step_statement`'s
+  `encoded.aux != "0"` arm gate and direct-table `None` gate,
+  `append_encoded_step`'s `X86_SIM_RUN_OP` gate, `direct is not
+  None` condition, and direct-emit early return, plus the two
+  module-level macro-table validation loops' import-time
+  `SystemExit` gates) rows 7 lines through an in-process battery
+  pinning the lowered `X86_SIM_L_EXEC_*` macro paints, the
+  `X86_SIM_RUN_OP(...)` fallback shape, the non-run-op passthrough,
+  and the exact emit lines, with no equivalence rows.
+
   The x86 native-link parse head and program split (the
   `parse_native_link_blob` missing-object gate and its exact
   `RuntimeError` message raw, the `load_rodata16` probe order, the

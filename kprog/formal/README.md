@@ -5687,6 +5687,24 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0339 - x86 direct-step lowering tails
+
+The `direct_step_statement` / `append_encoded_step` lines the
+branch-ladder battery leaves unrowed: the 7-row
+`build/mut_x86_direct_step.py` (untracked, harness census 212 ->
+213) rows the `encoded.aux != "0"` arm gate, the direct-table
+`None` gate, `append_encoded_step`'s `X86_SIM_RUN_OP` gate, the
+`direct is not None` condition, the direct-emit early return, and
+the two module-level macro-table validation loops (`DIRECT_STEP_
+MACROS` / `AUX_STEP_MACROS` keys must be defined opcodes or
+import-time `SystemExit`) — caught through an in-process battery
+pinning the lowered `X86_SIM_L_EXEC_*` macro paints (aux-0 direct,
+nonzero-aux `*_AUX` template, no-template `None`), the fallback
+`X86_SIM_RUN_OP(...)` shape, the non-run-op passthrough, and the
+exact emit lines. 7 caught, no equivalence rows; three
+byte-identical green shakes (generator md5s unchanged); golden
+gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0338 - x86 native-link parse head and program split
 
 The native-link blob layer `parse_native_link_blob` leaves unrowed:
