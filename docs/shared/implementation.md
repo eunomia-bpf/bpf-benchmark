@@ -1963,6 +1963,20 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 render head route and scalar helper unit (the `render_program`
+  head-route branch and the flatten/scalar layers it guards in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
+  threshold/self-call decision with its reloc-target and direct-target
+  self-call arms, the `entry_addr` compute and `total_insns` subfunction
+  sum, the `return_targets` seed and `next_addrs` `insns[:-1]` window,
+  the cgroup_skb section arm, `flatten_chunk_insns`' subfunction feed,
+  and the scalar helpers `is_int`/`parse_int`/`c_comment`/`canonical_reg`)
+  rows 14 lines through one in-process battery over small-flat/self-call/
+  direct-target/one-entry+sub/je-to-exit/cgroup/2050-insn-chunked fixtures
+  and no equivalence rows (the `addrs.add(exit_addr)` repaint is masked by
+  the return-target rewrite ordering and `ChunkInsn.is_subroutine` has no
+  consumer --- both recorded as findings, not rows).
+
   The arm64 noncompact render unit (the `render_program` emission lines in
   `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` that Steps 0293/0296
   reached only piecewise plus the helper and glue layers: the sorted

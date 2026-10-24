@@ -5687,6 +5687,46 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0315 - x86 render head route and scalar helper unit
+
+The x86 `render_program` head route and its scalar helper layer pinned at
+unit level: Steps 0296/0298/0305/0312 rowed the chunked body, the branch
+ladder, the exit tail, and the first-op decode, but the route decision
+itself (`total_insns >= CHUNKED_PROOF_INSN_THRESHOLD or has_self_call`)
+and the flattening/scalar layers stayed unrowed.
+`build/mut_x86_head_route.py` (untracked, harness census 188 -> 189)
+rows 14 lines --- the threshold/self-call branch over a small flat
+fixture (chunk markers absent) flipping to route a 3-insn program into
+`render_chunked_program`, the self-call reloc-target arm and its
+direct-target twin over `call <self>`/`call 0x0` fixtures (chunked
+before, flat after the repaint), the `entry_addr` compute repaint over
+the reloc self-call fixture, the `total_insns` subfunction sum
+repainted to a constant 2048 over the one-entry +
+`native_link_sub_10` fixture (flat before, chunked after), the
+`return_targets` repaint to an empty set over the `je 0x40` exit
+rewrite fixture (the guarded `X86_SIM_X86_RET();` ladder disappears),
+the `next_addrs` `insns[:-1]` window repainted to `enumerate(insns)`
+(IndexError at the last instruction), the cgroup_skb arm repainted so
+`kind == "cgroup_skb"` falls to the xdp fallback (the
+`SEC("cgroup_skb/egress")` + `X86_SIM_ENTRY_SKB(ctx);` pair swaps to
+`SEC("xdp")` + `struct xdp_md *`), the
+`extract_sub_sequences`/`flatten_chunk_insns` subfunction feed
+repainted to iterate `subfunctions` keys (AttributeError:
+`'str' object has no attribute 'addr'`), and the scalar helpers
+(`is_int`'s decimal-digit alternative dropped, `parse_int`'s hex base
+repainted to base-10 over the `0x1a` seed, the negative-arm minus
+dropped over the `mov rcx, -5` seed, `c_comment`'s `*/` spacing
+repainted, and `canonical_reg`'s `info[0]` pick repainted to the width
+entry); 14 catches and no equivalence rows (the `addrs.add(exit_addr)`
+line is masked by the return-target rewrite ordering --- a masked
+equivalence, recorded here rather than rowed; second sweep casualty:
+`ChunkInsn.is_subroutine` has no consumer, discovered while auditing
+the `(False, insns)` feed); three byte-identical green shakes (md5
+18acb1bbc90a6731cbfe53485d357e0b across each `TOTAL 14 mutations, 0
+failures, 0 equivalence rows`); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
+
 ### Step 0314 - arm64 noncompact render unit
 
 The arm64 noncompact `render_program` pinned at unit level: Steps 0296

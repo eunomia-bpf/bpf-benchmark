@@ -16092,6 +16092,39 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0315 - x86 render head route and scalar helper unit
+
+- Scope: `render_program`'s head-route decision and the flatten/scalar
+  layers it guards in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` that 0296 (chunk
+  body), 0298 (branch ladder), 0305 (exit tail), and 0312 (first-op
+  decode) left unrowed --- the threshold/self-call branch, the
+  self-call detection's reloc-target and direct-target arms, the
+  `entry_addr` compute, the `total_insns` subfunction sum, the
+  `return_targets` seed, the `next_addrs` `insns[:-1]` window, the
+  cgroup_skb section arm, `flatten_chunk_insns`' subfunction feed, and
+  the scalar helpers (`is_int` regex, `parse_int` bases and negative
+  arm, `c_comment` escaping, `canonical_reg` name pick).
+- Semantics: one harness `build/mut_x86_head_route.py` (untracked,
+  census 188 -> 189), 14 rows, one detector (in-process battery over
+  `render_program`/`annotated_fixed_count_ops` fixtures: small flat,
+  self-call, direct-target, one-entry+sub, je-to-exit, cgroup, and
+  2050-insn chunked call fixtures), one-file watchlist (the x86
+  generator, restored byte-exact around every row).
+- Fix: first-draft survivors resolved without weakening --- the
+  `addrs.add(exit_addr)` repaint survives everywhere because every
+  branch into `exit_addr` is rewritten by `return_targets` before the
+  addrs-membership raise, a masked equivalence recorded instead of a
+  forced row; auditing the `(False, insns)` feed showed
+  `ChunkInsn.is_subroutine` has no consumer (dead field, noted, not
+  rowed); one-entry+sub needed the constant-2048 repaint to cross the
+  chunk threshold because the real sum cannot.
+- Result: 14 catches, no equivalence rows; three byte-identical green
+  shakes (md5 `18acb1bbc90a6731cbfe53485d357e0b`), golden `make check`
+  rc 0 / 210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
+
 ## Step 0314 - arm64 noncompact render unit
 
 - Scope: `render_program`'s noncompact emission surface plus the
