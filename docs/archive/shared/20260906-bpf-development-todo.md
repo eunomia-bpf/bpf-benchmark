@@ -16092,6 +16092,29 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0338 - x86 native-link parse head and program split
+
+- Scope: native-link blob layer `parse_native_link_blob` unrowed
+  lines (missing-object gate + exact `RuntimeError` message raw,
+  `load_rodata16` probe order, the `objdump -dr -Mintel` command
+  shape, the symbol-relocation join arm, the
+  `section_size(proof_obj, ".text")` blob-length pick) and
+  `parse_native_linked_program`'s split flow
+  (`parse_proof_object_program` passthrough, no-insns early return,
+  off-blob exit-target scan CC/jmp arms and already-instruction
+  filter, `sub_starts` conjuncts, no-sub early return,
+  `entry_end = sub_starts[0]`, exit `max(...)`, the half-open
+  subfunction range, entry `< entry_end`, the
+  `native_link_sub_{start:x}` key paint, the entry-return
+  normalizer's gate/`ret` replacement/raw suffix/address keep).
+- Harness: `build/mut_x86_native_link_program.py` (untracked) 24
+  single anchors over an in-process fake-`objdump` battery:
+  section-table/symbol-table/rodata/disassembly fixtures across six
+  program shapes (indirect relocated call, off-blob jmp + jcc, a
+  two-subfunction split).
+- Result: 24 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0337 - x86 flat render program tail
 
 - Scope: the flat `render_program` body lines the render batteries

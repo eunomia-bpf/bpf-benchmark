@@ -5687,6 +5687,31 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0338 - x86 native-link parse head and program split
+
+The native-link blob layer `parse_native_link_blob` leaves unrowed:
+the 24-row `build/mut_x86_native_link_program.py` (untracked,
+harness census 211 -> 212) rows the missing-object gate and its
+exact `RuntimeError` message raw, the `load_rodata16` probe order,
+the `objdump -dr -Mintel` command shape, the symbol-relocation
+join arm, and the `section_size(proof_obj, ".text")` blob-length
+pick; plus `parse_native_linked_program`'s split flow: the
+`parse_proof_object_program` passthrough, the no-insns early
+return, the off-blob exit-target scan (CC-aux arm, jmp arm,
+not-already-instruction filter), the `sub_starts` comprehension
+conjuncts, the no-sub early return, the `entry_end = sub_starts[0]`
+pick, the exit `max(...)`, the half-open subfunction range, the
+entry `< entry_end` pick, the `native_link_sub_{start:x}` key
+paint, and the entry-return normalizer (jmp-to-blob-len gate, its
+`ret` replacement, the `; native-link entry RET` raw suffix, and
+the address keep) — caught through an in-process fake-`objdump`
+battery (section/symbol/rodata/disassembly fixtures, six program
+shapes including an indirect relocated call, an off-blob jmp/jcc
+pair, and a two-subfunction split). 24 caught, no equivalence
+rows; three byte-identical green shakes (generator md5s
+unchanged); golden gate `make check` rc 0 with 210 `cross-check:
+OK` banners.
+
 ### Step 0337 - x86 flat render program tail
 
 The flat `render_program` body lines the render batteries leave

@@ -1963,6 +1963,22 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 native-link parse head and program split (the
+  `parse_native_link_blob` missing-object gate and its exact
+  `RuntimeError` message raw, the `load_rodata16` probe order, the
+  `objdump -dr -Mintel` command shape, the symbol-relocation join
+  arm, and the `section_size(proof_obj, ".text")` blob-length pick;
+  `parse_native_linked_program`'s `parse_proof_object_program`
+  passthrough, no-insns early return, off-blob exit-target scan
+  arms, `sub_starts` conjuncts, no-sub early return,
+  `entry_end = sub_starts[0]`, exit `max(...)`, the half-open
+  subfunction range, the entry `< entry_end` pick, the
+  `native_link_sub_{start:x}` key paint, and the entry-return
+  normalizer's jmp-to-blob-len gate, `ret` replacement, raw
+  suffix, and address keep) rows 24 lines through an in-process
+  fake-`objdump` battery covering six program shapes, with no
+  equivalence rows.
+
   The x86 flat `render_program` tail (the `total_insns` subfunction
   sum, the `entry_addr` head pick, the chunk-gate
   `total_insns >= CHUNKED_PROOF_INSN_THRESHOLD or has_self_call`,
