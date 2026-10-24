@@ -1963,6 +1963,15 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 `parse_mem` head/body (`parse_mem`'s indexed-part
+  strip, postfix-`#` parts gate and parse_imm pick, `!` pre-index
+  flag arm and its `flags |= 1` bit, bracket fullmatch and raise
+  arm, inner split and base pick, `post if post else 0` offset,
+  inner `#` immediate arm, index-register arm's
+  `parse_modifier(inner, 2)` position, and `MemRef(...)` positional
+  tail) rows 9 lines through an in-process battery, with no
+  equivalence rows.
+
   The arm64 imm/modifier scalar tails (`split_operands`'s bracket
   depth arms, depth-zero comma gate, part strip, tail-append gate,
   and tuple paint; `program_kind`'s xdp fallthrough;

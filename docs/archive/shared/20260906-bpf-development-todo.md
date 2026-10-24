@@ -16092,6 +16092,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0342 - arm64 parse_mem head/body
+
+- Scope: `parse_mem` operand parts unrowed by the
+  encoder_selection battery: the indexed-part strip (replaced with
+  a wrong-part selector after the lowercase strip proved equivalent
+  for every case-insensitive downstream consumer), the postfix-`#`
+  parts gate and its parse_imm pick, the `!` pre-index flag arm and
+  its `flags |= 1` bit, the bracket fullmatch and its raise arm,
+  the inner split and base pick, the `post if post else 0` offset,
+  the inner `#` immediate arm, the index-register arm's
+  `parse_modifier(inner, 2)` position, and the `MemRef(...)`
+  positional tail.
+- Harness: `build/mut_arm64_parse_mem_head.py` (untracked) 9 single
+  anchors over an in-process battery pinning bracket/dereferenced
+  -flag splits, postfix/immediate offsets, inner-index scale terms,
+  both-flag `!` + `#` operands, and the unsupported-memory raise.
+- Result: 9 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0341 - arm64 imm/modifier scalar tails
 
 - Scope: arm64 scalar-parse tails unrowed by the encoder/decode

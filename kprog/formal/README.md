@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0342 - arm64 parse_mem head/body
+
+The `parse_mem` operand parts the encoder_selection battery leaves
+unrowed: the 9-row `build/mut_arm64_parse_mem_head.py` (untracked,
+harness census 215 -> 216) rows the indexed-part strip (replaced
+with a wrong-part selector after the lowercase strip proved
+equivalent for every case-insensitive downstream consumer), the
+postfix-`#` parts gate and its parse_imm pick, the `!` pre-index
+flag arm and its `flags |= 1` bit, the bracket fullmatch and its
+raise arm, the inner split and base pick, the `post if post else 0`
+offset, the inner `#` immediate arm, the index-register arm's
+`parse_modifier(inner, 2)` position, and the `MemRef(...)`
+positional tail — caught through an in-process battery pinning
+bracket/dereferenced-flag splits, postfix/immediate offsets,
+inner-index scale terms, both-flag `!` + `#` operands, and the
+unsupported-memory raise. 9 caught, no equivalence rows; three
+byte-identical green shakes (generator md5s unchanged); golden
+gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0341 - arm64 imm/modifier scalar tails
 
 The arm64 scalar-parse tails the encoder/decode batteries leave
