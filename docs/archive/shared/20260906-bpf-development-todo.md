@@ -16092,6 +16092,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0329 - x86 call memcpy/memset bound and push/pop arms
+
+- Scope: the `encode()` `reloc_symbol` memcpy/memset arms' bound
+  gate pair (`< 0` and `> MAX_MEMSET_COUNT` with raise lines, the
+  in-bound emit tags, and the `MAX_MEMSET_COUNT` fall-through
+  literals plus both `X86_OP_CALL_{MEMCPY,MEMSET}[_REG]` token
+  pairs) and the push/pop register-pick rows with their
+  `WIDTH_CONST.get` flags paints.
+- Semantics: one harness `build/mut_x86_encode_call_push.py`
+  (untracked, census 202 -> 203), 15 rows, one detector (in-process
+  battery over direct `encode` fixture pins comparing the
+  fully-populated `EncodedInsn` six-tuple plus four must-raise
+  gates, with `__pycache__` purged), one-file watchlist (the x86
+  generator, restored byte-exact per row).
+- Result: 15 catches, no equivalence rows (the `.get` default
+  repaints are unreachable — every REGS entry has width in
+  {8, 16, 32, 64} — and the width paints are rowed instead; a
+  `sim_imm == MAX` boundary fixture catches the `>=` flip and a
+  zero-length fixture the `< -1` flip); three byte-identical green
+  shakes (x86 generator md5 unchanged
+  `6793ca9e824336df8da78a9955c9d22c`); golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation paragraph.
+
 ## Step 0328 - x86 imul/store-immediate/movbe encoder arms
 
 - Scope: the `encode()` three-operand `imul` register form, `mov`

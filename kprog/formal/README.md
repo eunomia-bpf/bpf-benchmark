@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0329 - x86 call memcpy/memset bound and push/pop arms
+
+The `encode()` memcpy/memset bound gates and push/pop arms: the
+15-row `build/mut_x86_encode_call_push.py` (untracked, harness
+census 202 -> 203) rows both `reloc_symbol` arms' `X86_OP_
+CALL_MEMCPY[_REG]`/`X86_OP_CALL_MEMSET[_REG]` token pairs with the
+`MAX_MEMSET_COUNT` fall-through literal, both `< 0`/`> MAX` bound
+comparisons (the `>=` flip caught by a `sim_imm == MAX` boundary
+fixture, the `< -1` low-side flip by a zero-length in-bound
+fixture), the in-bound emit tags, and the push/pop register-pick
+rows with their `WIDTH_CONST.get` flags paints. The `.get`
+fallback-default repaints are equivalence-documented (every REGS
+entry carries width in {8, 16, 32, 64}) and rowed as the width-paint
+flips instead. Every fixture compares the fully-populated
+`EncodedInsn` six-tuple plus four must-raise gates; 15 caught, no
+equivalence rows; three byte-identical green shakes (x86 generator
+md5 unchanged `6793ca9e824336df8da78a9955c9d22c`); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0328 - x86 imul/store-immediate/movbe encoder arms
 
 The `encode()` three-operand `imul` register form, `mov`

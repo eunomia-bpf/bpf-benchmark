@@ -1963,6 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 call memcpy/memset bound and push/pop encoder arms (both
+  `reloc_symbol` arms' `< 0`/`> MAX_MEMSET_COUNT` bound comparisons
+  with their raise lines, in-bound emit tags, and `MAX_MEMSET_COUNT`
+  fall-through literals, both `X86_OP_CALL_{MEMCPY,MEMSET}[_REG]`
+  token pairs, and the push/pop register picks with their
+  `WIDTH_CONST.get` flags paints) rows 15 lines through one
+  in-process battery of direct `encode` fixture pins comparing the
+  fully-populated six-tuple `EncodedInsn` plus four must-raise
+  gates; the `.get` fallback-default repaints are unreachable (every
+  REGS entry has width in {8, 16, 32, 64}) and documented with the
+  width paints rowed instead, the `>=` bound flip caught by a
+  `sim_imm == MAX` boundary fixture and the `< -1` flip by a
+  zero-length fixture, and no equivalence rows.
   The x86 imul/store-immediate/movbe encoder arms (the three-operand
   `imul` register form's `X86_OP_IMUL_IMM` token, dst-width flags
   pick, immediate emit, and `is_int` guard repainted always-trip for
