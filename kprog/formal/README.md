@@ -5687,6 +5687,40 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0311 - x86 chunked render unit
+
+The x86 chunked render unit layer pinned at unit level: Step 0298's
+`mut_x86_branch_ladder.py` and Step 0296's `mut_x86_chunked_render.py`
+reached `render_chunk_function`/`render_chunked_program` only through
+end-to-end renders, leaving the two functions' own emission lines
+unrowed. `build/mut_x86_chunk_unit.py` (untracked, harness census
+184 -> 185) rows both functions with 28 single-anchor flips run
+against an in-process battery pinning the chunk-function header nine
+lines exactly (name/index signature, state/pc arg tail, the
+`switch (__x86_pc)` entry, per-chunk case-goto labels and the PC_DONE
+default), the chunk ret tail (`return __x86_sim_ret_addr;` plus the
+last-next `return 12ULL;` paint and the PC_DONE fallback), the
+`annotated_fixed_count_ops` flow over subfunctions (a sub-memcpy call
+loses its fixed `rdx` count when the annotation pass is dropped), the
+chunk slicing window `flat[index:index + CHUNKED_PROOF_CHUNK_INSNS]`
+(painted by an exact `__x86_pc <= 1532ULL` range boundary over a
+401-insn fixture), both call-target sets (the `flat[0]` entry seed and
+the per-subfunction first-address set, painted by an in-chunk
+subfunction call and an unresolved-target raise), the push/pop and
+`[rsp`/`[rbp` stack probes plus the `bool(subfunctions)` fallback,
+the stack/state defines and include block, the bridge maps' lo/hi
+order, the tc/cgroup_skb/xdp section-ctx-abi-kind arms with their
+skb-ctx initialization dataflow, the dispatch prefix `if`/`else if`
+and its `>=`/`<=` range comparisons, the write-back PC_DONE guard,
+and the entry signature/license/state-storage lines: 28 rows = 28
+catches and no equivalence rows (cf.sig's `{index + 1}` repaint,
+rcp.slice one-insn shrink, rcp.stack.push's push/pop pair kill, and
+rcp.range's literal/`else if` count pins were all first-draft
+survivors painted by exact-value count fixtures, no rows dropped);
+three byte-identical green shakes (md5 `f7bd80b0eccf0d295e5afe9fba52da51`
+across each `TOTAL 28 mutations, 0 failures, 0 equivalence rows`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0310 - arm64 rodata load and flat parse
 
 The arm64 native-link data loaders pinned at unit level:

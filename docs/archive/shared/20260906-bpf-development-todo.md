@@ -16092,6 +16092,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0311 - x86 chunked render unit
+
+- Scope: the two chunked-render functions themselves ---
+  `render_chunk_function` (name/index signature, state/pc arg tail,
+  the `switch (__x86_pc)` dispatch, per-chunk case-goto labels, the
+  PC_DONE default, the chunk ret tail and its last-next paint) and
+  `render_chunked_program` (the annotation pass, chunk slicing,
+  call-target sets, stack probes, stack/state defines, rodata cells,
+  tc/cgroup_skb/xdp arms, dispatch ranges, write-back guard, entry
+  tail); Steps 0296/0298 reached these only through end-to-end
+  renders.
+- Semantics: one harness `build/mut_x86_chunk_unit.py` (untracked,
+  census 184 -> 185), 28 rows, one detector (in-process battery over
+  direct `render_chunk_function`/`render_chunked_program` outputs,
+  pinning exact line blocks and per-line counts), one-file watchlist
+  (the x86 generator, restored byte-exact around every row).
+- Fix: first-draft survivors (the `{index + 1}` signature repaint,
+  the one-insn slice shrink, the push/pop pair kill, and the
+  range-literal/`else if` pins) were painted by exact-value count
+  fixtures (a 401-insn three-chunk fixture whose `__x86_pc <=
+  1532ULL` boundary moves under any slicing/min/max/range mutation,
+  push/pop-only and [rsp]/[rbp] memory fixtures, a subfunction
+  memcpy losing its annotated 64-byte count) instead of dropping
+  rows.
+- Result: 28 catches, no equivalence rows; three byte-identical
+  green shakes (md5 `f7bd80b0eccf0d295e5afe9fba52da51`), golden
+  `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation
+  pair.
+
 ## Step 0310 - arm64 rodata load and flat parse
 
 - Scope: the arm64 native-link data loaders --- `rodata_bytes` and

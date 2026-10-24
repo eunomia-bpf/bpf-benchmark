@@ -1927,6 +1927,42 @@ increment is committed and pushed immediately). Current state:
   out-of-bounds record at `offset == len(data) - 15`, a capital-X
   probe mnemonic, and a 7-nibble bytes column).
 
+  The x86 chunked render unit layer (the two chunked-render functions
+  themselves in `kprog/x86/micro-prog/generate_micro_sim_proofs.py` ---
+  `render_chunk_function`'s dispatched chunk body (name/index signature,
+  state/pc arg tail, `switch (__x86_pc)` entry, per-chunk case-goto
+  labels, the PC_DONE default, the chunk ret tail `return
+  __x86_sim_ret_addr;` and its last-next `return 12ULL;` paint) and
+  `render_chunked_program`'s prelude (the subfunction
+  `annotated_fixed_count_ops` pass, the chunk slicing window
+  `flat[index:index + CHUNKED_PROOF_CHUNK_INSNS]`, the entry `flat[0]`
+  plus per-subfunction call-target sets, push/pop + `[rsp`/`[rbp` +
+  `bool(subfunctions)` stack probes, the stack/state defines and
+  include block, the rodata cell map with lo/hi order, the
+  tc/cgroup_skb/xdp section-ctx-abi-kind arms, the `if`/`else if`
+  dispatch prefix with `>=`/`<=` range comparisons, the write-back
+  PC_DONE guard, and the entry signature/license/state-storage lines);
+  Steps 0296/0298 reached these only through end-to-end renders, and
+  no prior row mutated either function's own emission lines) are
+  observed by one detector in `build/mut_x86_chunk_unit.py` (untracked,
+  census 184 -> 185): subprocess `python -B -c` importing the mutated
+  generator module from `kprog/x86/micro-prog` with its `__pycache__`
+  purged around every battery; 28 rows = 28 catches (the signature
+  name/index and arg tail repaints, the switch pc repaint, the
+  case-goto addr shift, the subfunction annotation drop, the slice
+  shrink, both call-target seeds, the push/pop kill and the
+  rsp/rbp/subfunctions stack-probe and memory-probe flips, the stack
+  define and state-struct include repaints, the rodata lo/hi swap, the
+  cgroup section repaint, the dispatch prefix/comparison repaints, the
+  min/max bound shifts, the write-back guard repaint, and the entry
+  signature/license/state-storage repaints) and no equivalence rows
+  (the first-draft survivors --- the slice shrink, the push/pop kill,
+  the range literal pins, and the signature index shift --- were
+  painted by exact-value count fixtures: a 401-insn three-chunk
+  boundary at `__x86_pc <= 1532ULL`, push/pop-only and `[rsp]`/`[rbp]`
+  memory fixtures, a sub-memcpy losing its annotated 64-byte count,
+  and in-chunk subfunction calls raising on unresolved targets).
+
   The x86 pointer-write handler mutation-coverage contract (the two-opcode provenance contract the simulator's `X86_SIM_L_EXEC` chain consumes through the `KPROG_X86_MOV_LOAD_PTR_HANDLED` dispatcher arm --- `X86_OP_MOV_LOAD_MAP_PTR` 0x2c and `X86_OP_MOV_LOAD_HELPER_ID` 0x2d are the two opcodes whose register write installs pointer bits together with a provenance tag and no width-confined lane: the chained selector `KPROG_X86_PTR_WRITE_TAG(IS_MAP_PTR, IS_HELPER_ID)` tests the two opcode facts in that order (mapPtr tag 5, helperId tag 7, out-of-range fallthrough `KPROG_X86_PTR_WRITE_TAG_ANY 0xff`, tags pinned to the sim's `X86_SIM_TAG_*` values: scalar 0/mapPtr 5/helperId 7) and gates the helper-id arm's preliminary width-64 scalar lane write through `KPROG_X86_PTR_WRITE_IS_HELPER_ID(TAG)` before both arms perform the pointer write through `X86_SIM_L_WRITE_REG_PTR_TAG(DST, (void *)(long)(IMM), TAG)`; a tag code is not a width, so neither opcode consults the FLAGS width the shared dispatch chain computed; `x86_ptr_write_spec.json` (41 lines: schema/operation `x86PtrWrite`/selector `opcode_then_provenance_tag` + the 3-row tag table + the 2-row opcode table `movLoadMapPtr`/`movLoadHelperId` opcodes 0x2c/0x2d tags mapPtr/helperId `writes_width64` false/true) -> `generate_x86_ptr_write_spec.py` re-checks the whole exact-match expected dictionary (including the 4-row selector truth table `tt/tf/ft/ff`) and byte-for-byte re-renders `GeneratedX86PtrWrite.lean` + `generated/x86_ptr_write.h`; the generated header adds the two `0x2c`/`0x2d` static asserts, the three tag asserts, and the two selector macros; the hand Lean module `X86PtrWriteHandler.lean` restates the tag/codes/selector/width64 tables and the whole-immediate `x86PtrWriteBitsSpec` (the identity, the near-miss contrast kept against `x86StoreDispSpec`'s `(s32)((IMM) >> 32)` high-half displacement), proves the step refinement `x86_ptr_write_step_refines` plus the fields/identity/example theorems, the `X86_REG_NONE` fallthrough, the helper-id absorb lemma (`x86_ptr_write_helper_id_absorbs_scalar`), the map-pointer no-scalar-write lemma, the never-scalarizes lemma, and the tag-differs example, and the 318-case `test_x86_mov_load_map_ptr_host.c` contract host drives the generated macros exactly as the arms do against a hand-written model of the four-opcode/three-destination/four-immediate arm sweep, comparing the whole register file, the lane-write count, and the flags (16-reg file: part 1 tag codes, part 2 the four fact pairs, part 3 the helper-id test over 256 tag bytes, part 4 the 48-case arm lockstep, part 5 the seven asymmetry pins)
   The x86 chunked renderer (the self-call-forced multi-chunk sub-renderer inside `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: `flatten_chunk_insns` stitches main and subfunction sequences into `ChunkInsn` items with fall-through `next_addr`s and subroutine tags, `chunk_for_addr` finds the chunk covering a pc, `append_chunk_transfer` emits the in-chunk `goto x86_l_<addr>` or the off-chunk `return c_u64(target)`, `append_chunk_call` emits the four-line call sequence (rsp push, `X86_SIM_L_STACK_WRITE` of the return address, depth increment, target transfer), the chunk-level `ret` arm inside `append_chunk_branch_or_ret` guards depth-zero PC_DONE then decrements depth, reads the return address, pops the stack, and returns it, and `render_chunk_function`/`render_chunked_program` emit case labels with the PC_DONE default, the last-next `return c_u64(last_next)` tail on chunk boundaries, the state-struct define, the abi bind/kind pick, pc init and iteration cap, the else-done dispatch arm, the address-range chunk dispatch, the RAX write on exhaustion, and the license line; Steps 0295/0294 pinned the non-chunked render pipelines but no row mutated the chunked sub-renderer): the battery pins `flatten_chunk_insns` (lengths, fall-through `next_addr`s, the none tail, subroutine tag), `chunk_for_addr` (hit/miss), `append_chunk_transfer` (inner goto line, outer `return 153ULL;`), `append_chunk_call`'s four lines, the chunk-level `ret` emission equality (depth compare, PC_DONE return, depth decrement, stack read line, pop, return), a self-call-forced three-instruction full render with 18 text pins (state define, chunk function name, depth inc, ret read, entry loop, dispatch call, PC_DONE loop test, XDP abi kind, xdp_abi bind, RAX write, license, prelude carry, case-12 transfer, PC_DONE default, 1027U iteration cap, state storage bind, pc init, tag stamp), a tc-kind sibling, an 802-instruction program producing the multi-chunk `return 1922ULL;`/`return 3842ULL;` boundary tails, the else-done arm text, and the external-jump ValueError.
   is observed by one detector in `build/mut_x86_chunked_render.py` (untracked, census 169 -> 170): subprocess `python -B -c` importing the mutated generator module from `kprog/x86/micro-prog` with its `__pycache__` purged around every battery; 25 rows = 25 catches (the transfer goto repaint, the off-chunk return target shift, the call push slack doubling, the call return-address write shift, the call depth direction flip, the ret depth direction flip, the ret stack read rsp repaint, the ret pop direction flip, the ret return-plus-one, the depth-zero PC_DONE repaint, the loop PC_DONE constant, the state bind repaint, the pc-init shift, the iteration-cap zeroing, the else-done PC_DONE literal, the RAX-to-RCX repaint, the tag stamp repaint, the xdp_abi define repaint, the state-struct define repaint, the switch-default PC_DONE repaint, the case-label label repaint, the chunk dispatch name repaint, the dropped last-next return, the flat-append next_addr wipe, and the subfunction-sequence extension drop); four byte-identical green shakes (`f52a1e72b096e113050a91308809d596`), golden `make check` rc 0 / 210 `cross-check: OK` banners.
