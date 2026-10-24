@@ -1963,6 +1963,12 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 imm/prelude/bench tails (parse_imm's leading-space
+  strip, parse_shifted_imm's immediate-part value pick and
+  modifier-index pick, load_benches's tuple paints, source_prelude
+  's no-SEC arm and utf-8 decode fidelity) rows 9 lines through an
+  in-process battery, with no equivalence rows.
+
   The arm64 `helper_calls_by_addr` walker (the call-range
   register-table pick, last-helper fallback pick, per-addr record
   paint, no-dst gate, helper-immediate last mark, copy-arm `not

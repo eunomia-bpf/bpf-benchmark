@@ -5687,6 +5687,24 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0344 - arm64 imm/prelude/bench tails
+
+The parse_imm/parse_shifted_imm picks and the source_prelude /
+load_benches whole-def lines the earlier batteries leave unrowed:
+the 9-row `build/mut_arm64_imm_prelude_bench.py` (untracked,
+harness census 217 -> 218) rows parse_imm's leading-space strip,
+parse_shifted_imm's immediate-part value pick and modifier-index
+pick, load_benches's tuple paints (swapped symbol/kind, wrong name
+suffix, wrong benchmarks key), source_prelude's no-SEC arm (the
+SEC-without-int matcher that would accept a data anchor), and the
+utf-8 decode fidelity — caught through an in-process battery
+pinning spaced immediates, one-token `lsl #N` modifiers, whole
+Bench tuples over a temp YAML, and include-rewrite/no-SEC/no-int/
+banner prelude fixtures with non-ASCII decode. 9 caught, no
+equivalence rows; three byte-identical green shakes (generator
+md5s unchanged); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
 ### Step 0343 - arm64 helper_calls_by_addr walker
 
 The `helper_calls_by_addr` call-range walker the render_pipeline

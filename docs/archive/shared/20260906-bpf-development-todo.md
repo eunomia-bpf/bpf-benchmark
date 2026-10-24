@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0344 - arm64 imm/prelude/bench tails
+
+- Scope: parse_imm/parse_shifted_imm picks and the source_prelude
+  / load_benches whole-def lines earlier batteries leave unrowed:
+  parse_imm's leading-space strip, parse_shifted_imm's
+  immediate-part value pick and modifier-index pick, load_benches
+  's tuple paints (swapped symbol/kind, wrong name suffix, wrong
+  benchmarks key), source_prelude's no-SEC arm (the
+  SEC-without-int matcher that would accept a data anchor), and
+  the utf-8 decode fidelity.
+- Harness: `build/mut_arm64_imm_prelude_bench.py` (untracked) 9
+  single anchors over an in-process battery pinning spaced
+  immediates, one-token `lsl #N` modifiers, whole Bench tuples
+  over a temp YAML, and include-rewrite/no-SEC/no-int/banner
+  prelude fixtures with non-ASCII decode.
+- Result: 9 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0343 - arm64 helper_calls_by_addr walker
 
 - Scope: the `helper_calls_by_addr` call-range walker lines the
