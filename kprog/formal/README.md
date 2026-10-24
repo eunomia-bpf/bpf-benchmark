@@ -5687,6 +5687,29 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0318 - arm64 flat-disassembly parser
+
+The arm64 flat-disassembly parser internals, the last
+`parse_flat_instructions` arms that 0310 pinned only behaviorally:
+`build/mut_arm64_parse_flat.py` (untracked, harness census 191 -> 192)
+rows 9 lines --- the insn-line regex tail (`(.*)` to `(.*)\s$`, where a
+line whose `raw` ends mid-token no longer matches), the relocate-only
+`\S+` capture (`\S*` makes a symbol-less `R_AARCH64_JUMP26` line match
+and rewrite the previous insn with an empty symbol), the `and insns`
+orphan gate (repainted `and True` crashes on a leading relocate-only
+line), the `+0xN` suffix strip (`group(1)` to `group(0)` keeps the
+reloc-type prefix), the unmatched-line `continue` (dropped crashes on
+`nonsense line`), the `//`-comment operand cut (`//` to `;` keeps the
+comment in operands), the `asm` strip, the hex-address pick
+(`group(1)` to `group(2)` throws on the mnemonic), and the
+`NativeInsn` append; the battery feeds synthetic objdump `-dr` text
+directly (orphan-reloc-leading body, comment body, hex address, bare
+reloc, junk, empty); 9 catches, no equivalence rows; three
+byte-identical green shakes (`TOTAL 9 mutations, 0 failures, 0
+equivalence rows` each); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
+
 ### Step 0317 - arm64 native-link entry and rodata readers
 
 The arm64 native-link entry glue and its two rodata readers, an

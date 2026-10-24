@@ -1963,7 +1963,16 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
-  The arm64 native-link entry glue and rodata readers (the
+  The arm64 flat-disassembly parser (the `parse_flat_instructions`
+  insn-line regex tail, the relocate-only `\S+` capture, the `and insns`
+  orphan gate, the `+0xN` suffix strip, the unmatched-line `continue`,
+  the `//`-comment operand cut, the `asm` strip, the hex-address pick,
+  and the `NativeInsn` append) rows 9 lines through one in-process
+  battery over synthetic objdump `-dr` bodies
+  (orphan-leading, comment, hex-address, bare-reloc, junk, empty), with
+  no equivalence rows.
+
+The arm64 native-link entry glue and rodata readers (the
   `parse_native_linked_program` proof-object gate and message format,
   `-dr` launch, empty-disassembly raise, and single-entry
   `OrderedDict` return, `source_prelude`'s trailing-`\s+` regex arm,

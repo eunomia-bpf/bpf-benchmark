@@ -16092,6 +16092,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0318 - arm64 flat-disassembly parser
+
+- Scope: the `parse_flat_instructions` internals in
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` that 0310
+  pinned behaviorally but never rowed: the insn-line regex, the
+  relocate-only capture and orphan gate, the `+0xN` strip, and the
+  operand/asm/address assembly.
+- Semantics: one harness `build/mut_arm64_parse_flat.py` (untracked,
+  census 191 -> 192), 9 rows, one detector (in-process battery feeding
+  synthetic objdump `-dr` text directly: orphan-reloc-leading body,
+  comment body, hex address, bare reloc, junk, empty), one-file
+  watchlist (the arm64 generator, restored byte-exact around every
+  row).
+- Fix: two first-draft survivors resolved by fixture strengthening ---
+  the `\S+` capture needed a symbol-less `R_AARCH64_JUMP26` line so
+  `\S*` rewrote the previous insn with an empty symbol, and the
+  `and insns` orphan gate needed a leading relocate-only line so
+  `and True` crashed on `insns[-1]`.
+- Result: 9 catches, no equivalence rows; three byte-identical green
+  shakes (`TOTAL 9 mutations, 0 failures, 0 equivalence rows` each);
+  golden `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation pair.
+
+
 ## Step 0317 - arm64 native-link entry and rodata readers
 
 - Scope: the arm64 native-link assembly layer in
