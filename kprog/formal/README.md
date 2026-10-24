@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0337 - x86 flat render program tail
+
+The flat `render_program` body lines the render batteries leave
+unrowed: the 9-row `build/mut_x86_render_flat.py` (untracked,
+harness census 210 -> 211) rows the `total_insns` subfunction sum,
+the `entry_addr` head pick, the chunk-gate
+`total_insns >= CHUNKED_PROOF_INSN_THRESHOLD or has_self_call`, the
+`has_self_call` reloc-arm and direct-arm picks, the cgroup_skb
+elif's exact section paint, the rodata blank-line guard, the
+closing `X86_SIM_LICENSE()` tail, and the
+`subroutine_label_by_addr` comprehension's `if fn_insns` guard —
+caught through the flat/chunked fork itself (a direct self-call, a
+relocated self-call, the 2047/2048 threshold-boundary pair, an
+empty-subfunction raise pinned at the exact
+`unsupported unresolved call target` message). 9 caught, no
+equivalence rows; three byte-identical green shakes (generator md5s
+unchanged); golden gate `make check` rc 0 with 210 `cross-check:
+OK` banners.
+
 ### Step 0336 - x86 encode high-byte guard
 
 The `encode()` high-byte pre-guard (dispatch batteries row only the

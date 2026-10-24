@@ -1963,6 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 flat `render_program` tail (the `total_insns` subfunction
+  sum, the `entry_addr` head pick, the chunk-gate
+  `total_insns >= CHUNKED_PROOF_INSN_THRESHOLD or has_self_call`,
+  `has_self_call`'s reloc-arm and direct-arm picks, the cgroup_skb
+  elif's exact section paint, the rodata blank-line guard, the
+  closing `X86_SIM_LICENSE()` tail, and the
+  `subroutine_label_by_addr` comprehension's `if fn_insns` guard)
+  rows 9 lines through fixtures crossing the flat/chunked fork (a
+  direct self-call, a relocated self-call, the 2047/2048
+  threshold-boundary pair) and the exact
+  `unsupported unresolved call target` raise pinned on an empty
+  subfunction, with no equivalence rows.
+
   The x86 encode high-byte pre-guard (`high_regs` comprehension,
   the `reg[2] != 0` high-position pick, the armed raise gate and
   message raw, and the five arm shapes inside `high_supported`: the

@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0337 - x86 flat render program tail
+
+- Scope: the flat `render_program` body lines the render batteries
+  leave unrowed: `total_insns` subfunction sum; `entry_addr` head
+  pick; the chunk gate `total_insns >= CHUNKED_PROOF_INSN_THRESHOLD
+  or has_self_call`; `has_self_call`'s reloc-arm and direct-arm
+  picks; the cgroup_skb elif's exact section paint; the rodata
+  blank-line guard; the closing `X86_SIM_LICENSE()` tail; the
+  `subroutine_label_by_addr` comprehension's `if fn_insns` guard.
+- Harness: `build/mut_x86_render_flat.py` (untracked) 9 single
+  anchors over an in-process flat-render battery; fixtures cross
+  the flat/chunked fork (direct self-call, relocated self-call, the
+  2047/2048 threshold-boundary pair) and pin the exact
+  `unsupported unresolved call target` message on an empty
+  subfunction.
+- Result: 9 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0336 - x86 encode high-byte guard
 
 - Scope: the `encode()` high-byte pre-guard (dispatch batteries row
