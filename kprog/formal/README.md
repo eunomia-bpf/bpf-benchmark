@@ -5687,6 +5687,43 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0316 - x86 operand-scalar unit
+
+The x86 operand-scalar layer pinned at unit level: Steps 0290 and
+0298 covered `is_mem`/`mem_disp`/`operand_width`/`mem_aux`/
+`split_operands` only indirectly through their callers, but the scalar
+one-liners themselves stayed unrowed. `build/mut_x86_operand_scalars.py`
+(untracked, harness census 189 -> 190) rows 24 lines --- `is_mem`'s
+conjunction dropped and or-painted (the `a]b` open-only/close-only pins
+split the arms), `mem_disp` repainted to `parse_mem_terms(operand)[2]`
+(the scale entry), `operand_width`'s case-sensitive
+`startswith(f"{name} PTR")` arm repainted to the lowercase literal
+(uppercase fixtures fall through to the default), its
+`reg_info(stripped)` arm repainted to `parsed[2]`, the `default` arm
+repainted to a constant 64, and each of the four `PTR_WIDTH` entries
+repainted (`BYTE` 8->9, `WORD` 16->17, `DWORD` 32->33, `QWORD` 64->65);
+`mem_aux`'s `X86_MEM_AUX_FULL` f-string repainted to embed the raw
+`mem_width`, its `X86_MEM_AUX` plain arm suffixed and duplicated
+(index/scale swapped), the `src_shift` gate repainted to `src_shift > 1`,
+the value-destructure repainted to reindex all four `parse_mem_terms`
+positions, the `{WIDTH_CONST[mem_width]}` key repainted to
+`X86_WIDTH_BAD`, and the shift append repainted to `src_shift + 1`;
+`split_operands`' `enumerate(text)` start repainted to
+`enumerate(text, 1)`, the `[` open arm repainted to `]`, the `]` close
+`depth -= 1` repainted to `depth += 1`, the depth-0 comma gate repainted
+to `and True`, the part capture suffixed with `?`, the `start` advance
+repainted to `start = index`, and the tail gate repainted to
+`if not tail`; 24 catches, no equivalence rows (two sweep casualties
+recorded not rowed: `reversed(PTR_WIDTH.items())` is observably
+identical for every operand because the BYTE/WORD/DWORD/QWORD keys are
+pairwise prefix-disjoint, and is_mem's
+`"[" in operand` -> `"]" in operand and "[" in operand` repaint is
+literally equivalent for every string); three byte-identical green
+shakes (md5 70e604cc4c7d5e70a57a373adbe0c193 across each `TOTAL 24
+mutations, 0 failures, 0 equivalence rows`); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners.
+
+
 ### Step 0315 - x86 render head route and scalar helper unit
 
 The x86 `render_program` head route and its scalar helper layer pinned at

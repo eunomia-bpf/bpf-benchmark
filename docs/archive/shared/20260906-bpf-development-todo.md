@@ -16092,6 +16092,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0316 - x86 operand-scalar unit
+
+- Scope: the operand-scalar layer in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` that 0290 and
+  0298 only covered through their callers --- `is_mem`/`mem_disp`
+  one-liners, `operand_width`'s PTR table and reg-info/default arms,
+  `mem_aux`'s FULL/plain/shift f-string arms, and `split_operands`'s
+  bracket-depth scanner.
+- Semantics: one harness `build/mut_x86_operand_scalars.py` (untracked,
+  census 189 -> 190), 24 rows, one detector (in-process battery over
+  direct scalar calls with open-only/close-only/uppercase/lowercase/
+  default-arg/scale/nscale/scale0/shift/nested/tail/empty fixtures),
+  one-file watchlist (the x86 generator, restored byte-exact around
+  every row).
+- Fix: first-draft survivors resolved without weakening ---
+  `reversed(PTR_WIDTH.items())` survives every operand because the
+  BYTE/WORD/DWORD/QWORD keys are pairwise prefix-disjoint (masked
+  equivalence, recorded instead of rowed) and is_mem's conjunct
+  repaint `"[" in operand` -> `"]" in operand and "[" in operand` is
+  literally equivalent for every string; the `a]b`-style pins
+  strengthen the conjunction arms instead.
+- Result: 24 catches, no equivalence rows; three byte-identical green
+  shakes (md5 `70e604cc4c7d5e70a57a373adbe0c193`), golden `make check`
+  rc 0 / 210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
+
 ## Step 0315 - x86 render head route and scalar helper unit
 
 - Scope: `render_program`'s head-route decision and the flatten/scalar

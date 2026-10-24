@@ -1963,7 +1963,18 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
-  The x86 render head route and scalar helper unit (the `render_program`
+  The x86 operand-scalar unit (the `is_mem`/`mem_disp` one-liners,
+  `operand_width`'s case-sensitive `PTR` startswith arm plus the four
+  `PTR_WIDTH` dict entries and the `reg_info`/`default` arms, `mem_aux`'s
+  `X86_MEM_AUX_FULL`/`X86_MEM_AUX` f-string arms with index/scale fields
+  and the `src_shift` gate, and `split_operands`' bracket-depth scanner)
+  rows 24 lines through one in-process scalar battery over
+  uppercase/lowercase/default-arg/open-only/close-only/shift/nested/
+  empty fixtures and no equivalence rows (the `reversed(PTR_WIDTH.items())`
+  repaint is masked-equivalent under prefix-disjoint keys --- recorded as
+  a finding, not a row).
+
+The x86 render head route and scalar helper unit (the `render_program`
   head-route branch and the flatten/scalar layers it guards in
   `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
   threshold/self-call decision with its reloc-target and direct-target
