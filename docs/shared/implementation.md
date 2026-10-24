@@ -1963,6 +1963,17 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 mov register-store encoder arm (the `X86_OP_MOV_STORE_REG`
+  token, dst-width `operand_width(dst)` flags pick, the
+  `mem_aux(dst, src_shift=src_reg[2])` source-shift aux paint, the
+  `is_mem(dst) and src_reg` gate, and the memory-displacement
+  immediate) rows 5 lines through one in-process battery of direct
+  `encode` fixture pins comparing the fully-populated six-tuple
+  `EncodedInsn` — an `ah` source separates the
+  `X86_REG_AUX_SRC_SHIFT(8)` paint — plus two must-raise gates, with
+  the bare displacement anchor shared with the store-immediate arm
+  rowed through the raise-line-disambiguated form, and no
+  equivalence rows.
   The x86 call memcpy/memset bound and push/pop encoder arms (both
   `reloc_symbol` arms' `< 0`/`> MAX_MEMSET_COUNT` bound comparisons
   with their raise lines, in-bound emit tags, and `MAX_MEMSET_COUNT`

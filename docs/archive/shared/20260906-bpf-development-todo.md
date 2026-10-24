@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0330 - x86 mov register-store encoder arm
+
+- Scope: the `encode()` register-store arm: the `X86_OP_MOV_STORE_REG`
+  token, dst-width `operand_width(dst)` flags pick, the
+  `mem_aux(dst, src_shift=src_reg[2])` source-shift aux paint, the
+  `is_mem(dst) and src_reg` gate, and the memory-displacement
+  immediate.
+- Semantics: one harness `build/mut_x86_encode_store_reg.py`
+  (untracked, census 203 -> 204), 5 rows, one detector (in-process
+  battery over direct `encode` fixture pins comparing the
+  fully-populated `EncodedInsn` six-tuple — an `ah` source separates
+  the `X86_REG_AUX_SRC_SHIFT(8)` paint — plus two must-raise gates,
+  with `__pycache__` purged), one-file watchlist (the x86 generator,
+  restored byte-exact per row).
+- Result: 5 catches, no equivalence rows (the bare displacement
+  anchor is shared with the store-immediate arm, rowed through the
+  raise-line-disambiguated form instead); three byte-identical green
+  shakes (x86 generator md5 unchanged
+  `6793ca9e824336df8da78a9955c9d22c`); golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation paragraph.
+
 ## Step 0329 - x86 call memcpy/memset bound and push/pop arms
 
 - Scope: the `encode()` `reloc_symbol` memcpy/memset arms' bound

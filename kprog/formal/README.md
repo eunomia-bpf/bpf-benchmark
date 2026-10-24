@@ -5687,6 +5687,24 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0330 - x86 mov register-store encoder arm
+
+The `encode()` register-store arm between the 0326 mov-family and
+0328 store-immediate batteries: the 5-row
+`build/mut_x86_encode_store_reg.py` (untracked, harness census 203
+-> 204) rows the `X86_OP_MOV_STORE_REG` token, the dst-width
+`operand_width(dst)` flags pick, the
+`mem_aux(dst, src_shift=src_reg[2])` source-shift aux paint, the
+`is_mem(dst) and src_reg` gate, and the memory-displacement
+immediate (rowed through the raise-line-disambiguated anchor after
+the bare form proved shared with the store-immediate arm). Every
+fixture compares the fully-populated `EncodedInsn` six-tuple (an
+`ah` source separates the `X86_REG_AUX_SRC_SHIFT(8)` paint) plus two
+must-raise gates (non-register source, memory-mem pair); 5 caught,
+no equivalence rows; three byte-identical green shakes (x86
+generator md5 unchanged `6793ca9e824336df8da78a9955c9d22c`); golden
+gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0329 - x86 call memcpy/memset bound and push/pop arms
 
 The `encode()` memcpy/memset bound gates and push/pop arms: the
