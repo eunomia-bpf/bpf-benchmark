@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0325 - x86 encoder residual arms
+
+The `encode()` arms left unpinned by the 0293 dispatch battery and
+its per-family successors: the 12-row `build/mut_x86_encode_residual.py`
+(untracked, harness census 198 -> 199) rows the LEA rip-relative rodata
+arm and the ordinary LEA memory arm's `mem_aux` emit, the STORE_XMM0
+opcode token, the three-operand `imul` memory-immediate packed
+`disp<<32|imm` emit, the compare register-vs-memory arm gate, the ALU
+memory-register and memory-immediate arms' `X86_MEM_AUX_ALU_OP` OR and
+packed immediates, the BMI2 SHIFTX trio's `sarx` ALU-op pick and mem
+form's packed `disp|op` immediate (mask `0xffffffff` narrowed), the
+RORX reg and mem forms' count masks, and the `{"mov", "movabs"}` set
+literal. Every fixture compares the fully-populated `EncodedInsn`
+six-tuple and the battery purges `__pycache__`; stock stays green and
+every row must flip a pin (no equivalence rows): 12 caught; three
+byte-identical green shakes (x86 generator md5 unchanged
+`6793ca9e824336df8da78a9955c9d22c`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0324 - x86 helper-symbol glue and pointer casts
 
 The x86 twin of the arm64 parser-helper battery: the 10-row

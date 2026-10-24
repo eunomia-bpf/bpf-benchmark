@@ -1963,6 +1963,20 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 encoder residual arms (the LEA rip-relative rodata arm
+  and the ordinary LEA memory arm's `mem_aux` emit, the STORE_XMM0
+  opcode token, the three-operand `imul` memory-immediate packed
+  `disp<<32|imm` emit, the compare register-vs-memory arm gate, the
+  ALU memory-register and memory-immediate arms' `X86_MEM_AUX_ALU_OP`
+  OR and packed immediates, the BMI2 SHIFTX trio's `sarx` ALU-op pick
+  and mem form's packed `disp|op` immediate, the RORX reg and mem
+  forms' count masks, and the `{"mov", "movabs"}` set literal) rows
+  12 lines through one in-process battery of direct `encode` fixture
+  pins, each comparing the fully-populated six-tuple `EncodedInsn`,
+  with no equivalence rows; the alternate set reps and arity-gate
+  inversions degenerate to already-rowed arms or share multi-site
+  anchors and are documented instead of rowed.
+
   The x86 helper-symbol glue and pointer casts (the
   `is_helper_symbol` `bpf_` prefix repaint and `and`->`or`
   conjunction, the encode call arm and mov-load helper-ident arm

@@ -16092,6 +16092,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0325 - x86 encoder residual arms
+
+- Scope: the `encode()` arms left unpinned by the 0293 dispatch
+  battery and its per-family successors: the LEA rip-relative rodata
+  arm and the ordinary LEA memory arm's `mem_aux` emit, the
+  STORE_XMM0 opcode token, the three-operand `imul` memory-immediate
+  packed `disp<<32|imm` emit, the compare register-vs-memory arm
+  gate, the ALU memory-register and memory-immediate arms'
+  `X86_MEM_AUX_ALU_OP` OR and packed immediates, the BMI2 SHIFTX
+  trio's `sarx` ALU-op pick and mem form's packed `disp|op`
+  immediate (`0xffffffff` mask narrowed to `0xffff`), the RORX reg
+  and mem forms' count masks, and the `{"mov", "movabs"}` set
+  literal.
+- Semantics: one harness `build/mut_x86_encode_residual.py`
+  (untracked, census 198 -> 199), 12 rows, one detector (in-process
+  battery over direct `encode` fixture pins, each comparing the
+  fully-populated `EncodedInsn` six-tuple, with `__pycache__`
+  purged), one-file watchlist (the x86 generator, restored
+  byte-exact per row).
+- Fix: no equivalence rows among the 12 kept rows; the alternate
+  set reps (`{"movabs"}`, `{"movsx"}`) and the SHIFTX/RORX arity-gate
+  inversions degenerate to already-rowed arms or share multi-site
+  anchor text and are documented instead of rowed.
+- Result: 12 catches; three byte-identical green shakes (x86
+  generator md5 unchanged
+  `6793ca9e824336df8da78a9955c9d22c`); golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation paragraph.
+
 ## Step 0324 - x86 helper-symbol glue and pointer casts
 
 - Scope: the x86 twin of the arm64 parser-helper battery:
