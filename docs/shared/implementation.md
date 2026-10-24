@@ -1963,6 +1963,13 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 `helper_calls_by_addr` walker (the call-range
+  register-table pick, last-helper fallback pick, per-addr record
+  paint, no-dst gate, helper-immediate last mark, copy-arm `not
+  in` guard, copy-mark continue, register pop tail, and blr-target
+  pick) rows 9 lines through an in-process battery, with no
+  equivalence rows.
+
   The arm64 `parse_mem` head/body (`parse_mem`'s indexed-part
   strip, postfix-`#` parts gate and parse_imm pick, `!` pre-index
   flag arm and its `flags |= 1` bit, bracket fullmatch and raise

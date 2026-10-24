@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0343 - arm64 helper_calls_by_addr walker
+
+The `helper_calls_by_addr` call-range walker the render_pipeline
+battery leaves unrowed: the 9-row `build/mut_arm64_helper_calls.py`
+(untracked, harness census 216 -> 217) rows the register-table
+pick, the last-helper fallback pick, the per-addr record paint,
+the no-dst gate, the helper-immediate last mark (+1 shift), the
+copy-arm `not in` guard, the copy-mark continue, the register pop
+tail, and the blr-target pick — caught through an in-process
+battery pinning direct/copy/last-fallback calls, unknown-register
+misses, kill-then-chain-copy flows, a w-register blr reject, and
+the phantom-record flow a non-call write would paint. 9 caught,
+no equivalence rows (the `or`-phantom-key pickups for `dst` and
+`target` are observably inert under the blr-target/copy-src regex
+gates and were replaced with gate flips and a target-bypass pick
+instead); three byte-identical green shakes (generator md5s
+unchanged); golden gate `make check` rc 0 with 210 `cross-check:
+OK` banners.
+
 ### Step 0342 - arm64 parse_mem head/body
 
 The `parse_mem` operand parts the encoder_selection battery leaves

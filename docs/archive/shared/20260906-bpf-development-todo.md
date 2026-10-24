@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0343 - arm64 helper_calls_by_addr walker
+
+- Scope: the `helper_calls_by_addr` call-range walker lines the
+  render_pipeline battery leaves unrowed: the register-table pick,
+  the last-helper fallback pick, the per-addr record paint, the
+  no-dst gate, the helper-immediate last mark (+1 shift), the
+  copy-arm `not in` guard, the copy-mark continue, the register
+  pop tail, and the blr-target pick.
+- Harness: `build/mut_arm64_helper_calls.py` (untracked) 9 single
+  anchors over an in-process battery pinning direct/copy/
+  last-fallback calls, unknown-register misses, kill-then-
+  chain-copy flows, a w-register blr reject, and the
+  phantom-record flow a non-call write would paint.
+- Result: 9 catches, no equivalence rows (`or`-phantom-key pickups
+  for `dst`/`target` observably inert; replaced with gate flips
+  and a target-bypass pick); three byte-identical shakes,
+  generator md5s unchanged; golden gate rc 0.
+
 ## Step 0342 - arm64 parse_mem head/body
 
 - Scope: `parse_mem` operand parts unrowed by the
