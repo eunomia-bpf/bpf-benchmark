@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0340 - x86 scalar helper layer
+
+The scalar helper functions the render/encode batteries leave
+unrowed: the 22-row `build/mut_x86_scalar_helpers.py` (untracked,
+harness census 213 -> 214) rows `parse_int` (hex radix gate,
+negative-sign arm, whitespace strip), `is_int` (fullmatch vs match,
+grouped negative sign), `c_ptr_u64`'s long-cast paint, `reg_info`
+(lowercase strip, none-or-default pick), `is_mem` (two-bracket
+conjunction), `operand_width` (PTR-width scan via stripped-case
+gate, per-width return, register-width pick, default),
+`parse_mem_terms` (no-bracket gate, space/negative inner strip,
+scale-log2 map, displacement summation), `mem_aux`'s
+`X86_MEM_AUX_FULL` arm, `mem_disp`'s tuple pick, and
+`branch_target` / `has_direct_branch_target` (hex radix,
+strip-dependent match gate) — caught through an in-process battery
+pinning radix/sign/whitespace separates, unbalanced-bracket
+rejects, the lowercase `PTR` fixture, scaled/offset mem terms, and
+space-padded branch targets. 22 caught, no equivalence rows; three
+byte-identical green shakes (generator md5s unchanged); golden
+gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0339 - x86 direct-step lowering tails
 
 The `direct_step_statement` / `append_encoded_step` lines the

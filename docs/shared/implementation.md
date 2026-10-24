@@ -1963,6 +1963,18 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 scalar helper layer (`parse_int`'s hex radix gate,
+  negative-sign arm, and whitespace strip; `is_int`'s fullmatch and
+  grouped negative sign; `c_ptr_u64`'s long-cast paint; `reg_info`'s
+  lowercase strip and none-or-default pick; `is_mem`'s two-bracket
+  conjunction; `operand_width`'s PTR-width scan, per-width return,
+  register-width pick, and default; `parse_mem_terms`'s no-bracket
+  gate, inner strip, scale-log2 map, and displacement summation;
+  `mem_aux`'s `X86_MEM_AUX_FULL` arm; `mem_disp`'s tuple pick; and
+  `branch_target` / `has_direct_branch_target`'s hex radix and
+  strip-dependent match gate) rows 22 lines through an in-process
+  battery, with no equivalence rows.
+
   The x86 direct-step lowering tails (`direct_step_statement`'s
   `encoded.aux != "0"` arm gate and direct-table `None` gate,
   `append_encoded_step`'s `X86_SIM_RUN_OP` gate, `direct is not

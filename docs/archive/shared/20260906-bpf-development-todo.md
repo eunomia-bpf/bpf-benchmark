@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0340 - x86 scalar helper layer
+
+- Scope: scalar helper functions unrowed by the render/encode
+  batteries: `parse_int` (hex radix gate, negative-sign arm,
+  whitespace strip), `is_int` (fullmatch vs match, grouped negative
+  sign), `c_ptr_u64`'s long-cast paint, `reg_info` (lowercase
+  strip, none-or-default pick), `is_mem` (two-bracket
+  conjunction), `operand_width` (PTR-width scan via stripped-case
+  gate, per-width return, register-width pick, default),
+  `parse_mem_terms` (no-bracket gate, space/negative inner strip,
+  scale-log2 map, displacement summation), `mem_aux`'s
+  `X86_MEM_AUX_FULL` arm, `mem_disp`'s tuple pick, and
+  `branch_target` / `has_direct_branch_target` (hex radix,
+  strip-dependent match gate).
+- Harness: `build/mut_x86_scalar_helpers.py` (untracked) 22 single
+  anchors over an in-process battery pinning radix/sign/whitespace
+  separates, unbalanced-bracket rejects, the lowercase `PTR`
+  fixture, scaled/offset mem terms, and space-padded branch
+  targets.
+- Result: 22 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0339 - x86 direct-step lowering tails
 
 - Scope: `direct_step_statement` / `append_encoded_step` unrowed
