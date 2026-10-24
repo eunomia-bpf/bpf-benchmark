@@ -16092,6 +16092,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0322 - x86 noncompact subfunction plumbing
+
+- Scope: the `render_program` subfunction plumbing and subroutine
+  emission left open by 0312's exit-tail battery: the subfunction
+  annotation coercion, the call return-address comprehension, the
+  subroutine-local `next_addrs`, the subroutine blank tail, and the
+  subfunction render-loop gate.
+- Semantics: one harness `build/mut_x86_render_plumbing.py`
+  (untracked, census 195 -> 196), 5 rows, one detector (in-process
+  battery over a call/jne/ret/jmp-to-exit main flow plus an fn body
+  with an internal call, `SUB_JCC`, and push/pop, and a
+  no-subfunction fixture pinning the `(subfunctions or {})`
+  default), one-file watchlist (the x86 generator, restored
+  byte-exact per row).
+- Fix: `addrs.add(exit_addr)` probed equivalent (the
+  `return_targets = {exit_addr}` arm pre-empts every in-`addrs`
+  branch test in `append_branch_or_ret`) and documented instead of
+  rowed; two survivors needed main/subroutine scoping and the
+  no-subfunction fixture before they were caught; no equivalence
+  rows.
+- Result: 5 catches, no equivalence rows; three byte-identical
+  green shakes (`TOTAL 5 mutations, 0 failures, 0 equivalence rows`
+  each); golden `make check` rc 0 / 210 `cross-check: OK` banners;
+  committed with paper sentence, README and archive steps,
+  implementation pair.
+
 ## Step 0321 - arm64 noncompact render plumbing
 
 - Scope: the `render_program` declaration plumbing and return-case

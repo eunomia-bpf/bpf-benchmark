@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0322 - x86 noncompact subfunction plumbing
+
+The `render_program` subfunction plumbing and subroutine emission the
+0312 exit-tail battery left open: the 5-row
+`build/mut_x86_render_plumbing.py` (untracked, harness census
+195 -> 196) rows the subfunction `annotated_fixed_count_ops` coercion
+(`(subfunctions or {})` proved through a no-subfunction fixture), the
+call return-address comprehension feeding the ret-dispatch case loop,
+the subroutine-local `next_addrs` copy (scoped against the main
+renderer's twin), the subroutine blank-line tail before the joined
+body, and the `if subfunctions:` render loop; one gold battery with a
+call/jne/ret/jmp-to-exit main flow plus an fn body carrying an
+internal call, a `SUB_JCC`, and push/pop; `addrs.add(exit_addr)` is
+verified equivalent (the `return_targets = {exit_addr}` arm
+pre-empts every in-`addrs` branch test) and documented instead of
+rowed; 5 catches, no equivalence rows; three byte-identical green
+shakes; golden gate `make check` rc 0 with 210 `cross-check: OK`
+banners.
+
 ### Step 0321 - arm64 noncompact render plumbing
 
 The `render_program` declaration plumbing and return-case ladder that

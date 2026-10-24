@@ -1963,6 +1963,15 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 noncompact subfunction plumbing (the subfunction annotation
+  coercion, the call return-address comprehension feeding the
+  ret-dispatch case loop, the subroutine-local `next_addrs`, the
+  subroutine blank tail, and the subfunction render loop) rows 5 lines
+  through one in-process battery over a call/jne/ret/jmp-to-exit gold
+  flow plus a no-subfunction fixture, with no equivalence rows;
+  `addrs.add(exit_addr)` is recorded as a verified equivalent (the
+  `return_targets` arm pre-empts every in-`addrs` branch test).
+
   The arm64 noncompact render plumbing (the return-case ladder
   gate/tail/paint, the rodata paint/blank/loop-ordering, the
   helper-reloc gate and `__arm64_reloc` prefix, the map decl head and
