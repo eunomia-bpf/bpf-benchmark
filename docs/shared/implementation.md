@@ -1963,6 +1963,21 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 two-operand `imul` fall-through and the CMP/TEST encoder
+  forms (`X86_ALU_IMUL` aux paints on the immediate and register
+  forms with dst-width flags picks and the immediate emit, the
+  `{add, adc, sub, sbb}` mismatched-width raise set, the
+  `X86_OP_CMP_REG`/`X86_OP_TEST_REG` token pick and byte-lane aux
+  paint, the CMP reg-mem flags/nested-width-aux/displacement, the
+  CMP mem-reg gate/`operand_width(ops[0], src_reg[1])` pick/aux/
+  immediate, and the TEST mem-reg gate and token) row 16 lines
+  through one in-process battery of direct `encode` fixture pins
+  comparing the fully-populated six-tuple `EncodedInsn` — the
+  cross-width pairs `cmp eax, QWORD PTR [rdi]` and
+  `cmp DWORD PTR [rdi], bl` separate the nested-width repaints and
+  an `ah`/`cl` byte-lane pair separates the lane aux — plus two
+  must-raise gates, with no equivalence rows.
+
   The x86 mov register-store encoder arm (the `X86_OP_MOV_STORE_REG`
   token, dst-width `operand_width(dst)` flags pick, the
   `mem_aux(dst, src_shift=src_reg[2])` source-shift aux paint, the

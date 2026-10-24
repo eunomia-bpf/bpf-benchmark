@@ -16092,6 +16092,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0331 - x86 two-op imul and cmp/test encoder forms
+
+- Scope: the `encode()` two-operand `imul` fall-through and the
+  CMP/TEST reg-reg/reg-mem/mem-reg forms: `X86_ALU_IMUL` aux paints
+  on the immediate and register forms with dst-width flags picks
+  and the immediate emit, the `{add, adc, sub, sbb}`
+  mismatched-width raise set, the `X86_OP_CMP_REG`/`X86_OP_TEST_REG`
+  token pick and `c_reg_lane_aux("0", dst, src)` byte-lane paint,
+  the CMP reg-mem flags/nested-width-aux/displacement, the CMP
+  mem-reg gate/`operand_width(ops[0], src_reg[1])` pick/aux/immediate,
+  and the TEST mem-reg gate and token, unpinned by both the 0293
+  dispatch smoke battery and the CMP/TEST/BT 0227/0239 handler
+  composition batteries (spec/header/Lean/host, never generator
+  encode text).
+- Harness: `build/mut_x86_encode_alu_cmp.py` (untracked) 16 single
+  anchors over shipped fixture battery (in-process 6-tuple pins,
+  cross-width and byte-lane fixtures, arity/mismatch raises).
+- Result: 16 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0330 - x86 mov register-store encoder arm
 
 - Scope: the `encode()` register-store arm: the `X86_OP_MOV_STORE_REG`

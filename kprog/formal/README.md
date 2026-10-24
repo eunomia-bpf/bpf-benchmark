@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0331 - x86 two-op imul and cmp/test encoder forms
+
+The `encode()` two-operand `imul` fall-through and the CMP/TEST
+reg-reg/reg-mem/mem-reg arms between the 0293 dispatch smoke pins
+and the residual battery: the 16-row
+`build/mut_x86_encode_alu_cmp.py` (untracked, harness census 204
+-> 205) rows the `X86_ALU_IMUL` aux paints on the immediate and
+register forms with the dst-width flags picks and immediate emit,
+the `{add, adc, sub, sbb}` mismatched-width raise set, the
+`X86_OP_CMP_REG`/`X86_OP_TEST_REG` token pick and byte-lane aux
+paint, the CMP reg-mem flags/nested-width-aux/displacement, the CMP
+mem-reg gate/`operand_width(ops[0], src_reg[1])` pick/aux/immediate,
+and the TEST mem-reg gate and token. Cross-width fixtures
+(`cmp eax, QWORD PTR [rdi]`, `cmp DWORD PTR [rdi], bl`) separate
+the nested-width repaints, an `ah`/`cl` pair separates the lane
+aux; every fixture compares the fully-populated `EncodedInsn`
+six-tuple; two must-raise gates (imul arity-1, `sbb rax, ebx`);
+16 caught, no equivalence rows; three byte-identical green shakes
+(x86 generator md5 unchanged `6793ca9e824336df8da78a9955c9d22c`);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0330 - x86 mov register-store encoder arm
 
 The `encode()` register-store arm between the 0326 mov-family and
