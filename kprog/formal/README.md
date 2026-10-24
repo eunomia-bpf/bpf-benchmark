@@ -5687,6 +5687,41 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0309 - x86 branch/call ladder and flat parse
+
+The x86 branch/call/return emission ladder and the FAUX-objdump
+parse layer pinned at unit level: Step 0298's
+`mut_x86_branch_ladder.py` drove `append_branch_or_ret` only
+through full `render_program` outputs (and had no
+`parse_asm_text` rows), and Step 0296's `mut_x86_chunked_render.py`
+pinned the chunk machinery end-to-end, leaving the unit-level
+per-arm lines and the objdump-runner regexes unrowed.
+`build/mut_x86_branch_lads.py` (untracked, harness census
+182 -> 183) rows both layers with 31 single-anchor flips: the
+ladder pins (JCC/SUB-JCC/JMP/SUB-JMP macro choices and
+`0x{addr}, 0x{target}, x86_l_{target}` argument orders, the
+`ret_statement` default plus the guarded/bare return-target
+rewrites and a custom `ret_statement`, the helper/memorycp
+gate widening, the `X86_SIM_X86_CALL(x86_l_18, 0x19ULL);` return
+address, the `cannot compute return address` raise, and the chunk
+twin `append_chunk_branch_or_ret` --- the in-chunk/out-chunk,
+guarded/bare PC_DONE rewrites, the depth/stack-rw/return ret
+block, `append_chunk_call`'s four-line sequence, all three raises,
+and the helper/reg-call step paints) plus the parse pins (the
+reloc-symbol `+0x4` suffix strip, the `R_X86_64_` scan, the hex
+fullmatch gate keyed on a hex-letter address probe, the lowercase
+mnemonic regex keyed on `endbr64`'s digits, the lock-prefix
+strip, the `#`-comment strip, and the three-field tab minimum):
+31 rows = 31 catches and no equivalence rows (three first-draft
+survivors --- the chunk unresolved-call gate, the address
+fullmatch, and the mnemonic digits regex --- were fixed by
+strengthening the battery with exact-paint fixtures and a
+return-targets/call_targets corrective probe, no rows dropped);
+three byte-identical green shakes (`TOTAL 31 mutations, 0
+failures, 0 equivalence rows`, all md5
+`6d82f2a1ddd678ec738b0351f05e61a3`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0308 - arm64 append_insn/compact_step emission
 
 The ARM64 emission layer pinned as data: Step 0294's

@@ -16092,6 +16092,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0309 - x86 branch/call ladder and flat parse
+
+- Scope: the unit-level branch/call/return emission ladder and the
+  FAUX-objdump flat parse layer --- `append_branch_or_ret`'s per
+  arm exact lines and raises, its chunk twin
+  `append_chunk_branch_or_ret` (guarded/bare PC_DONE rewrites,
+  depth/stack-rw/return ret block, chunk-call push/write/inc/
+  transfer four-line sequence), and `parse_asm_text`'s six parser
+  behaviors (reloc suffix strip, reloc scan, hex address fullmatch,
+  lowercase mnemonic regex, lock strip, comment strip, tab
+  minimum); Step 0298 pinned the ladder only through full
+  `render_program` outputs and Step 0296 the chunk machinery
+  end-to-end, so the unit-level lines and the parse regexes had no
+  rows.
+- Semantics: one harness `build/mut_x86_branch_lads.py`
+  (untracked, census 182 -> 183), 31 rows, one detector (an
+  in-process battery encoding one fixture `NativeInsn`/`ChunkInsn`
+  per arm and pinning exact emitted-line/raise equality), one-file
+  watchlist (the x86 generator, restored byte-exact around every
+  row).
+- Fix: three first-draft survivors (the chunk unresolved-call
+  gate `item.next_addr is not None`, the address-rune fullmatch,
+  and the mnemonic digits regex) were fixed by strengthening the
+  battery with exact-paint fixtures (a hex-letter address line, an
+  `endbr64`-mnemonic pin, a call_targets-setting probe) instead of
+  dropping rows.
+- Result: 31 catches, no equivalence rows; three byte-identical
+  green shakes (`6d82f2a1ddd678ec738b0351f05e61a3`), golden
+  `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation
+  pair.
+
 ## Step 0308 - arm64 append_insn/compact_step emission
 
 - Scope: the two emission layers that turn one `NativeInsn` into
