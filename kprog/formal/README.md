@@ -5687,6 +5687,26 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0336 - x86 encode high-byte guard
+
+The `encode()` high-byte pre-guard (dispatch batteries row only the
+`high_supported = (` line): the 14-row
+`build/mut_x86_encode_high_guard.py` (untracked, harness census
+209 -> 210) rows the `high_regs` comprehension, the `reg[2] != 0`
+high-position pick, the armed raise gate and message raw, and the
+five arm shapes inside `high_supported` — the `{"mov", "movabs"}`
+2-op set with its dst-pick/`is_int`-or-register/memory-form
+disjuncts, the `{"add", "adc", "sub", "sbb"}` set, the
+`{"cmp", "test"}` set, the `{"dec", "inc", "neg", "not"}` 1-op set,
+and the setcc arm's `op.startswith("set")`/length picks — caught
+through supported high-lane fixtures (`mov/movabs ah, 9`,
+`add/adc/sub/sbb ah, 9`, `cmp/test ah, 9`, `inc/dec/neg/not ah`,
+`seta ah`), the low-byte neighbors (`add al, 9`, `add al, bl`), and
+the exact-message must-raise gates `xor ah, 9` and `imul ah`. 14
+caught, no equivalence rows; three byte-identical green shakes
+(generator md5s unchanged); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
 ### Step 0335 - x86 fixed-count annotation pass
 
 The `annotated_fixed_count_ops` pass (plus `canonical_reg`) runs

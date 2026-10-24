@@ -1963,6 +1963,18 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 encode high-byte pre-guard (`high_regs` comprehension,
+  the `reg[2] != 0` high-position pick, the armed raise gate and
+  message raw, and the five arm shapes inside `high_supported`: the
+  `{"mov", "movabs"}`/`{"add", "adc", "sub", "sbb"}`/`{"cmp",
+  "test"}`/`{"dec", "inc", "neg", "not"}` sets and the setcc arm's
+  `op.startswith("set")`/length picks) rows 14 lines through
+  supported high-lane fixtures (`mov/movabs ah, 9`,
+  `add/adc/sub/sbb ah, 9`, `cmp/test ah, 9`, `inc/dec/neg/not ah`,
+  `seta ah`), low-byte neighbors (`add al, 9`, `add al, bl`), and
+  the exact-message must-raise gates `xor ah, 9` and `imul ah`, with
+  no equivalence rows.
+
   The x86 fixed-count annotation pass (the rep gate and its
   `values.get("X86_RCX")` pick, the memcpy/memset call gate and
   `values.get("X86_RDX")` pick — the no-symbol `call memcpy`, a

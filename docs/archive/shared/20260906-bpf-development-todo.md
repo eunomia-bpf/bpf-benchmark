@@ -16092,6 +16092,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0336 - x86 encode high-byte guard
+
+- Scope: the `encode()` high-byte pre-guard (dispatch batteries row
+  only the `high_supported = (` line, this battery the rest):
+  `high_regs` comprehension; `reg[2] != 0` high-position pick; the
+  armed `if high_positions and not high_supported` raise gate and
+  its message raw; the five arm shapes inside `high_supported` —
+  `{"mov", "movabs"}` 2-op set with dst-pick/`is_int`-or-register/
+  memory-form disjuncts, `{"add", "adc", "sub", "sbb"}` set,
+  `{"cmp", "test"}` set, `{"dec", "inc", "neg", "not"}` 1-op set,
+  setcc arm's `op.startswith("set")`/length picks.
+- Harness: `build/mut_x86_encode_high_guard.py` (untracked) 14
+  single anchors over an in-process six-tuple battery; supported
+  high-lane fixtures (`mov/movabs ah, 9`, `add/adc/sub/sbb ah, 9`,
+  `cmp/test ah, 9`, `inc/dec/neg/not ah`, `seta ah`), low-byte
+  neighbors (`add al, 9`, `add al, bl`), and the exact-message
+  must-raise gates `xor ah, 9` and `imul ah`.
+- Result: 14 catches, no equivalence rows; three byte-identical
+  shakes, generator md5s unchanged; golden gate rc 0.
+
 ## Step 0335 - x86 fixed-count annotation pass
 
 - Scope: the `annotated_fixed_count_ops` pass plus `canonical_reg`
