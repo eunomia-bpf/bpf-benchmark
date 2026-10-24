@@ -16092,6 +16092,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0312 - x86 non-chunked exit tail and subroutine unit
+
+- Scope: `render_program`'s own exit/dispatch tail (the
+  `x86_l_{exit_addr}` fallthrough block, the return-dispatch banner and
+  its case labels, `return_addrs` order, both stack probes,
+  `rodata16 = rodata16 or {}`), `render_x86_subroutine`'s unit surface
+  (label map feed, step macro/SUB_RET statement, the
+  `annotated_fixed_count_ops` address set driving the in-bounds sub-jcc
+  paint), and `write_one`'s no-native-insns error; Steps 0293/0311
+  reached the pipeline and chunked twins but not these lines.
+- Semantics: one harness `build/mut_x86_render_sub.py` (untracked,
+  census 185 -> 186), 15 rows, one detector (in-process battery with a
+  stubbed parser for the write_one error path), one-file watchlist (the
+  x86 generator, restored byte-exact around every row).
+- Fix: three first-draft survivors were painted rather than dropped
+  (the exit-label check needed a non-overlapping exit address because
+  0xc collided with the last-insn label; `sorted(...)` needed a
+  same-slot unsorted-int fixture; the push/pop probe needed a
+  subfunction-free fixture because `bool(subfunctions)` masks the
+  mnemonic arm).
+- Result: 15 catches, no equivalence rows; three byte-identical green
+  shakes (md5 `74e7420e4e2a7f1aca89e5126c8ba355`), golden `make check`
+  rc 0 / 210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0311 - x86 chunked render unit
 
 - Scope: the two chunked-render functions themselves ---

@@ -5687,6 +5687,43 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0312 - x86 non-chunked exit tail and subroutine unit
+
+The x86 non-chunked exit tail and subroutine layer pinned at unit level:
+Steps 0293/0311 had pinned the render pipeline and the chunked twins, but
+`render_program`'s own tail (exit fallthrough block, return dispatch),
+`render_x86_subroutine`'s unit surface, and `write_one`'s error paths
+stayed unrowed. `build/mut_x86_render_sub.py` (untracked, harness census
+185 -> 186) rows them with 15 single-anchor flips run against an
+in-process battery pinning the exit fallthrough triple (`x86_l_{exit}:`
+label with a non-overlapping 0x40 exit address, the
+`/* native-link entry fallthrough exit */` comment, the
+`\tX86_SIM_X86_RET();` statement), the return-dispatch banner
+(`x86_sim_ret_dispatch:` + `switch (__x86_sim_ret_addr)`) and its
+`case 0x{addr:x}ULL: goto x86_l_{addr:x};` labels pinned in SORTED order
+over a fixture whose return-address set iterates unsorted under
+`list(...)` (main call next at 0x12 inserted before fn call next at 0xa,
+both hashing to the same small-int slot), the
+`subroutine_label_by_addr` first-address map pinned through the
+`X86_SIM_X86_CALL(x86_l_30, ` transfer paint, the `call_functions` kwarg
+and the `next_addrs.get` feed, the push/pop mnemonic probe (push-only
+fixture with no subfunctions) and the `[rsp`/`[rbp` memory probe, the
+sorted-vs-list dispatch order again via `return_addrs = sorted({`,
+`render_x86_subroutine`'s head/label/ret/annotation pins (sub-jcc
+in-bounds `X86_SIM_X86_SUB_JCC(X86_CC_AE, 0x30, 0x32, x86_l_32);` paint
+driven through the subfunction `annotated_fixed_count_ops` address set,
+the sub `X86_SIM_X86_SUB_RETX(x86_sim_ret_dispatch);` statement, the
+`X86_SIM_RUN_OP` step macro), and `write_one`'s no-native-insns
+`ValueError` pinned through a stubbed parser: 15 rows = 15 catches and
+no equivalence rows (survivor fixes: the exit label check moved to a
+non-overlapping exit address 0x40 after the 0xc fixture collided with
+the last-insn label; the sorted pin needed a same-slot unsorted fixture;
+the push/pop probe needed a subfunction-free fixture because
+`bool(subfunctions)` masks the mnemonic arm); three byte-identical green
+shakes (md5 `74e7420e4e2a7f1aca89e5126c8ba355` across each `TOTAL 15
+mutations, 0 failures, 0 equivalence rows`); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0311 - x86 chunked render unit
 
 The x86 chunked render unit layer pinned at unit level: Step 0298's
