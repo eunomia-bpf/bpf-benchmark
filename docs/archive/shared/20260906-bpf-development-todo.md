@@ -16092,6 +16092,45 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0314 - arm64 noncompact render unit
+
+- Scope: `render_program`'s noncompact emission surface plus the
+  helper and glue layers in
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` that 0296/0313
+  left unrowed --- the sorted `return_addrs` and its backward-call
+  fixture, the xdp/tc section-context pair, the include/prelude arm,
+  the two-symbol `rodata_idents` loop, the `next_by_addr` feed into
+  `append_insn`, the label arm, the subroutine comment and `*/`
+  escaping, the helper-arm `ARM64_SIM_A64_RET();`, the linked-exit X7
+  write-back and the `return 0;` tail; the `compact_step` re-pin at
+  unit level (JCC cond, JMP/CALL targets, CBZ/TBZ kinds and
+  immediates, CALL target/helper/raise ladder, RET, OP record);
+  `is_helper_symbol`'s `.values()` probe, `c_ident` suffixes, the
+  `helper_defines`/helper-switch head/case/default ladder; and the
+  `generate_one`/`main` glue (`program_kind`,
+  `default_program_symbol`, the in-process `generate_one` write loop,
+  and the `main()` `--only` filter plus `generated N proof sources`
+  banner caught through a nested subprocess run of the generator).
+- Semantics: one harness `build/mut_arm64_render_unit.py` (untracked,
+  census 187 -> 188), 40 rows, one detector (in-process battery over
+  direct `render_program`/`compact_step` outputs plus a nested
+  `python -B generate_micro_sim_proofs.py --only simple` subprocess
+  for the main-glue rows), one-file watchlist (the arm64 generator,
+  restored byte-exact around every row).
+- Fix: first-draft survivors painted rather than dropped (the
+  rodataitems pin needed two symbols whose sorted order differs from
+  first-appearance; the returnaddrs pin needed a backward-call ladder
+  fixture because `sorted` on an already-sorted single source is an
+  equivalence; the cs.jmp anchor is scoped to the three-line plain-b
+  arm because the compact render shares the two-line prefix; the
+  main-glue rows were unobservable in-process until the battery grew a
+  nested subprocess pin).
+- Result: 40 catches, no equivalence rows; three byte-identical green
+  shakes (md5 `7c388f6b8af9de928224a79c68f506ee`), golden `make check`
+  rc 0 / 210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation pair.
+
+
 ## Step 0313 - arm64 compact step runner unit
 
 - Scope: `render_program_compact`'s remaining emission surface ---

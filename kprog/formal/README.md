@@ -5687,6 +5687,36 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0314 - arm64 noncompact render unit
+
+The arm64 noncompact `render_program` pinned at unit level: Steps 0296
+and 0313 rowed the chunked and compact siblings but `render_program`
+itself only carried pipeline-level rows (Step 0293) and scattered pins.
+`build/mut_arm64_render_unit.py` (untracked, harness census 187 -> 188)
+rows 40 lines --- the render_program surface (the sorted
+`return_addrs` over a backward-call fixture feeding `RETURN_CASES`
+steps 0x8/0x1c, the xdp/tc section-context pair, the include/prelude
+arm padded so `rstrip` -> `lstrip` breaks the pin, the two-symbol
+`rodata_idents` order pin, the `next_by_addr` feed into
+`append_insn`, the label arm, the subroutine comment and its `*/`
+escaping, the helper-arm `ARM64_SIM_A64_RET();`, the linked-exit X7
+write-back and the `return 0;` tail), the `compact_step` per-kind arms
+re-pinned at unit level (JCC cond, the JMP/CALL targets, CBZ/TBZ kind
+and immediate repaints, the CALL target/helper/raise ladder, RET, and
+the OP record), the helper surface (`is_helper_symbol` via
+`HELPER_IDENTS.values()` over integer keys, `c_ident` suffix and
+`helper_defines` idents, the helper-switch `switch (ID)`/case/default
+ladder), and the `generate_one`/`main` glue (`program_kind`/
+`default_program_symbol`, the in-process `generate_one` write loop
+over the real corpus assets, and the `main()` surface pinned through a
+nested subprocess run of the generator: the `--only` write filter and
+the `generated 1 proof sources` banner). 40 rows = 40 catches and no
+equivalence rows; three byte-identical green shakes (md5
+7c388f6b8af9de928224a79c68f506ee across each `TOTAL 40 mutations, 0
+failures, 0 equivalence rows`); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
+
 ### Step 0313 - arm64 compact step runner unit
 
 The arm64 compact step-runner layer pinned at unit level: Steps 0294 and

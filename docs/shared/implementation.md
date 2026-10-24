@@ -1963,6 +1963,44 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 noncompact render unit (the `render_program` emission lines in
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` that Steps 0293/0296
+  reached only piecewise plus the helper and glue layers: the sorted
+  `return_addrs = sorted(next_by_addr[...] if insn.mnemonic == "bl")` over a
+  backward-call fixture whose `RETURN_CASES` steps land at 0x8/0x1c, the
+  xdp/tc `section, ctx, entry` pair, the include/prelude arm
+  (`lines.append(prelude.rstrip())` padded so lstrip is observable), the
+  two-symbol `rodata_idents` loop, `append_insn`'s
+  `next_by_addr.get(insn.addr)` feed, the label arm, the subroutine comment
+  and its `*/` escaping, the helper-arm `ARM64_SIM_A64_RET();`, the
+  linked-exit X7 write-back and the `return 0;` else tail; the
+  `compact_step` per-kind arms re-pinned at unit level (JCC cond mapping,
+  the JMP target ladder, CALL target/helper/raise triple, CBZ/TBZ kind and
+  immediate repaints, RET dispatch, the OP record); the helper surface
+  (`is_helper_symbol`'s `HELPER_IDENTS.values()` probe over integer keys,
+  `c_ident` suffix shaping, the `helper_defines` define/blank arms and the
+  helper-switch `switch (ID)` head, per-helper case, and default arm); and
+  the `generate_one`/`main` glue (`program_kind`/`default_program_symbol`
+  tag mapping, the in-process `generate_one` write loop over the real
+  corpus assets, and `main()`'s `--only` filter plus
+  `generated N proof sources` banner are observed by one detector in
+  `build/mut_arm64_render_unit.py` (untracked, census 187 -> 188):
+  subprocess `python -B -c` importing the mutated generator module from
+  `kprog/arm64/micro-prog` with its `__pycache__` purged around every
+  battery plus a nested `python -B generate_micro_sim_proofs.py --only
+  simple` subprocess for the main-glue rows; 40 rows = 40 catches (the
+  next-by-address and label shifts, the reverse-sorted return-addrs
+  repaint, both section repaints, the prelude rstrip flip, the two-symbol
+  rodata order flip, the subcomment and escaping repaints, the helper-arm
+  `ARM64_SIM_A64_RET();` repaint, the linked X7/return-0 rows, the compact per-kind repaints,
+  the helper `.values()` probe flip, the `c_ident`/define/switch-ladder
+  repaints, and the `--only`-filter plus banner repaints through the
+  nested subprocess) and no equivalence rows (first-draft survivors were
+  painted rather than dropped: the rodata items pin by a two-symbol
+  out-of-order fixture, the return-address pin by the backward-call
+  ladder, the cs.jmp anchor by scoping to the three-line plain-b arm, and
+  the main-glue rows by the nested subprocess pin).
+
   The arm64 compact step-runner surface (the `render_program_compact`
   emission lines in `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`
   that Steps 0294/0308 left unrowed: the kind-define ladder and include
