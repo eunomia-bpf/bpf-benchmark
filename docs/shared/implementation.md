@@ -1963,6 +1963,17 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 mov-family encoder arms (the MOVZX/MOVSX register-form
+  opcode pick over the `{"movsx", "movsxd"}` ternary, the load-form
+  opcode pick against `X86_OP_MOV_LOAD` and its `X86_OP_MOVSX_LOAD`
+  twin, the movsxd 32-bit default-load width pick, the load aux
+  FULL-form emit, the register-form source-width aux emit, the `cdqe`
+  arity gate and six-tuple emit, and the
+  `{"movzx", "movsx", "movsxd"}` dispatch set literal) rows 10 lines
+  through one in-process battery of direct `encode` fixture pins
+  comparing the fully-populated six-tuple `EncodedInsn` plus two
+  must-raise gates, with no equivalence rows.
+
   The x86 encoder residual arms (the LEA rip-relative rodata arm
   and the ordinary LEA memory arm's `mem_aux` emit, the STORE_XMM0
   opcode token, the three-operand `imul` memory-immediate packed

@@ -16092,6 +16092,29 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0326 - x86 mov-family encoder arms
+
+- Scope: the `encode()` move-family residual arms past the 0293
+  dispatch pins: the MOVZX/MOVSX register-form opcode pick (the
+  `{"movsx", "movsxd"}` ternary), the load-form opcode pick against
+  `X86_OP_MOV_LOAD` and its `X86_OP_MOVSX_LOAD` twin, the movsxd
+  32-bit default-load width pick over a PTR-less memory operand, the
+  load aux FULL-form emit, the register-form source-width aux emit,
+  the `cdqe` arity gate, the `cdqe` RAX/RAX/W64/W32 six-tuple emit
+  and aux, and the `{"movzx", "movsx", "movsxd"}` dispatch set
+  literal.
+- Semantics: one harness `build/mut_x86_encode_movx.py` (untracked,
+  census 199 -> 200), 10 rows, one detector (in-process battery over
+  direct `encode` fixture pins comparing the fully-populated
+  `EncodedInsn` six-tuple plus two must-raise gates, with
+  `__pycache__` purged), one-file watchlist (the x86 generator,
+  restored byte-exact per row).
+- Result: 10 catches, no equivalence rows; three byte-identical green
+  shakes (x86 generator md5 unchanged
+  `6793ca9e824336df8da78a9955c9d22c`); golden `make check` rc 0 /
+  210 `cross-check: OK` banners; committed with paper sentence,
+  README and archive steps, implementation paragraph.
+
 ## Step 0325 - x86 encoder residual arms
 
 - Scope: the `encode()` arms left unpinned by the 0293 dispatch

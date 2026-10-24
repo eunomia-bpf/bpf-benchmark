@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0326 - x86 mov-family encoder arms
+
+The `encode()` move-family residual arms past the 0293 dispatch pins:
+the 10-row `build/mut_x86_encode_movx.py` (untracked, harness census
+199 -> 200) rows the MOVZX/MOVSX register-form opcode pick (the
+`{"movsx", "movsxd"}` ternary against `X86_OP_MOVZX_REG`), the
+load-form opcode pick against `X86_OP_MOV_LOAD` and its
+`X86_OP_MOVSX_LOAD` twin, the movsxd 32-bit default-load width pick
+over a PTR-less memory operand, the load aux
+`mem_aux(ops[1], mem_width)` FULL-form emit, the register-form
+source-width aux emit, the `cdqe` arity gate, the `cdqe` RAX/RAX/
+W64/W32 six-tuple emit and aux, and the
+`{"movzx", "movsx", "movsxd"}` dispatch set literal. Every fixture
+compares the fully-populated `EncodedInsn` six-tuple plus the two
+must-raise gates (cdqe-with-operands, unknown-mnemonic fall-off) and
+the battery purges `__pycache__`; stock stays green and every row
+must flip a pin (no equivalence rows): 10 caught; three byte-identical
+green shakes (x86 generator md5 unchanged
+`6793ca9e824336df8da78a9955c9d22c`); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners.
+
 ### Step 0325 - x86 encoder residual arms
 
 The `encode()` arms left unpinned by the 0293 dispatch battery and
