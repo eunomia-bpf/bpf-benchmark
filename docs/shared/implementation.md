@@ -1963,6 +1963,14 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 flat-disassembly parser (the `parse_asm_text` relocation
+  arms, the `:` and address gates, the hex radix, the `#` comment cut,
+  the `lock` prefix strip, the no-mnemonic reject, and the
+  mnemonic/operand split) rows 11 lines through one in-process battery
+  over synthetic objdump `-dr` bodies, with no equivalence rows; the
+  `<` asm gate is observed redundant at the anchored mnemonic match
+  and recorded as an equivalence finding, not a recount.
+
   The arm64 flat-disassembly parser (the `parse_flat_instructions`
   insn-line regex tail, the relocate-only `\S+` capture, the `and insns`
   orphan gate, the `+0xN` suffix strip, the unmatched-line `continue`,

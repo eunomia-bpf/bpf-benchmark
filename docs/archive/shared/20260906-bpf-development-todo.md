@@ -16092,6 +16092,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0319 - x86 flat-disassembly parser
+
+- Scope: the `parse_asm_text` internals in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` left unrowed by
+  0297's whole-fixture pins: the relocation arms, the `:` and address
+  gates, the hex radix, the `#` cut, the `lock` strip, the
+  no-mnemonic reject, and the mnemonic/operand split.
+- Semantics: one harness `build/mut_x86_parse_asm.py` (untracked,
+  census 192 -> 193), 11 rows, one detector (in-process battery
+  feeding synthetic objdump `-dr` text directly), one-file watchlist
+  (the x86 generator, restored byte-exact around every row).
+- Fix: no survivors at the first sweep; the would-be `<` asm-gate row
+  was observed equivalent (every line it rejects also fails the
+  anchored mnemonic match) and recorded as an equivalence finding
+  instead of an extra catch.
+- Result: 11 catches, no equivalence rows; three byte-identical green
+  shakes (`TOTAL 11 mutations, 0 failures, 0 equivalence rows` each);
+  golden `make check` rc 0 / 210 `cross-check: OK` banners; committed
+  with paper sentence, README and archive steps, implementation pair.
+
+
 ## Step 0318 - arm64 flat-disassembly parser
 
 - Scope: the `parse_flat_instructions` internals in

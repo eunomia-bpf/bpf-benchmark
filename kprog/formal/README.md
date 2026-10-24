@@ -5687,6 +5687,34 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0319 - x86 flat-disassembly parser
+
+The x86 twin of 0318: the remaining unrowed `parse_asm_text` arms that
+0297 pinned only through the two whole-fixture splits. The 11-row
+`build/mut_x86_parse_asm.py` (untracked, harness census 192 -> 193)
+rows the relocation arms (the `\S+` capture with a symbol-less
+`R_X86_64_64` line staying unmatched, the `and insns` orphan gate with
+a leading unprefixed relocate line crashing `insns[-1]`, the `+0xN`
+suffix strip keeping the reloc-type prefix under `group(0)`, the
+repaint replacing the captured symbol), the `:` column gate (the
+or-`True` repaint crashes on the no-colon junk line), the address
+fullmatch (testing the raw prefix instead crashes the same way), the
+hex radix (base-8 rejects `8`), the `#`-comment operand cut (dropping
+the split keeps the comment in operands and raw), the `lock` prefix
+strip (`LOCK` keeps the prefix), the no-mnemonic reject (an
+operand-only `%eax` body crashes the append under `pass`), and the
+mnemonic/operand split (`\s*` to `\s+` rejects bare mnemonics);
+the battery feeds synthetic objdump `-dr` text directly (reloc-fixture
+entry body, label-with-bytes reject, bare reloc, orphan reloc,
+no-colon junk, bad-addr junk, hex address, branch-operand call,
+no-mnemonic operand body); 11 catches, no equivalence rows; the `<`
+asm gate observed redundant (every line it rejects also fails the
+anchored mnemonic match) and documented instead of recounted; three
+byte-identical green shakes (`TOTAL 11 mutations, 0 failures, 0
+equivalence rows` each); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners.
+
+
 ### Step 0318 - arm64 flat-disassembly parser
 
 The arm64 flat-disassembly parser internals, the last
