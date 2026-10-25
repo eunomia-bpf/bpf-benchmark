@@ -5687,6 +5687,30 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0352 - x86 enc resolver + driver tail
+
+The `enc()` opcode-contract resolver cell and the `write_one`/
+`main()` driver tail: the 19-row untracked
+`build/mut_x86_enc_driver.py` rows the L417-427 and L1576-1614
+regions of
+`kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the
+`X86_OPCODE_NAME.get(op, op)` canonical fallback, the
+`X86_OPCODE.get(name)` define pick, the `define is None` reject
+guard, the `EncodedInsn(define, ...)` payload order, the
+signature-default flags/dst paints, the output/source path joins,
+the render_program kind/exit/prelude/rodata fan-out, the write_one
+return identity, the only-filter default, the written-list
+declaration, bench loop, per-path print loop, generated-N summary
+text, and the STAGE2_PROGRAMS prelude gate the stage2-wiring
+battery leaves unrowed. In-process battery pins the direct `enc()`
+six-tuple outputs and unknown-token SystemExit, a stubbed
+`parse_proof_object_program` write_one fixture, and end-to-end
+`main()` runs over the only-filter and generated-1 summary banner
+(count==1 anchors, every repaint live-probed). Run `TOTAL 19
+mutations, 0 failures, 0 equivalence rows` (census 225 -> 226);
+goldengate `make check` rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0351 - x86 encode region
 
 The `encode()` data-path sites the dispatch/residual batteries leave

@@ -1963,6 +1963,25 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 `enc()` opcode-contract resolver cell plus the
+  `write_one`/`main()` driver tail (the `enc()` body L417-427 and
+  the driver region L1576-1614 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the
+  `X86_OPCODE_NAME.get(op, op)` canonical fallback, the
+  `X86_OPCODE.get(name)` define pick, the `define is None` reject
+  guard, the `EncodedInsn(define, ...)` payload order, the
+  signature-default flags/dst paints, the output/source path joins,
+  the render_program kind/exit/prelude/rodata fan-out, the
+  write_one return identity, the only-filter default, the
+  written-list declaration, bench loop, per-path print loop,
+  generated-N summary text, and the STAGE2_PROGRAMS prelude gate
+  that the stage2-wiring battery leaves unrowed) rows 19 lines
+  through an in-process battery pinning the direct `enc()` six-tuple
+  outputs and unknown-token SystemExit, a stubbed
+  `parse_proof_object_program` write_one fixture, and end-to-end
+  `main()` runs over the only-filter and generated-1 summary banner;
+  no equivalence rows and every anchor count==1.
+
   The x86 `encode()` data-path region (the `encode()` region of
   `kprog/x86/micro-prog/generate_micro_sim_proofs.py` L466-918 —
   the ret/nop arm tokens, the mov-imm lane-aux payload and immediate

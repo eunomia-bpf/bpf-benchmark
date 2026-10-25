@@ -16092,6 +16092,38 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0352 - x86 enc resolver + driver tail
+
+- Scope: the `enc()` opcode-contract resolver cell (L417-427 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
+  `X86_OPCODE_NAME.get(op, op)` canonical fallback, the
+  `X86_OPCODE.get(name)` define pick, the `define is None` reject
+  guard, the `EncodedInsn(define, ...)` payload order, and the
+  signature-default flags/dst paints) plus the `write_one`/`main()`
+  driver tail (L1576-1614: output/source path joins, the
+  render_program argument fan-out kind/exit/prelude/rodata, the
+  write_one return identity, the only-filter default set, the
+  written-list declaration and bench loop, the per-path print loop,
+  the generated-N summary text, and the STAGE2_PROGRAMS prelude
+  gate the stage2-wiring battery leaves unrowed).
+- Harness: 19-row untracked `build/mut_x86_enc_driver.py`
+  (census 225 -> 226): 19 catches, 0 equivalence rows; every anchor
+  count==1; in-process battery pins the direct `enc()` six-tuple
+  outputs and unknown-token SystemExit, plus a stubbed
+  `parse_proof_object_program` write_one fixture and end-to-end
+  `main()` runs (only-filter, generated-1 summary banner).
+- Result: `TOTAL 19 mutations, 0 failures, 0 equivalence rows`;
+  serial sweep re-run this session (224 batteries in-glob; the
+  x86-region battery residue from an interrupted earlier sweep was
+  restored from git and the mid-session "failures" re-run clean one
+  at a time: `mut_x86_stage2_wiring`, `mut_x86_native_link_parse`,
+  `mut_x86_native_link_program`, `mut_x86_operand_scalars` green,
+  remaining anchor-fail batteries are arm-artifact drift rows
+  outside this increment, traced to disk-full truncation, all later
+  confirmed green before the gate); golden gate `make check` rc 0
+  with 210 `cross-check: OK` banners, final arm64 decode host 1410
+  cases after a clean `.lake` olean rebuild.
+
 ## Step 0351 - x86 encode region
 
 - Scope: the `encode()` data-path region the dispatch and residual
