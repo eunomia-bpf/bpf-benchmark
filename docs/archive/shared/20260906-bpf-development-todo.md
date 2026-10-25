@@ -16092,6 +16092,34 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0350 - arm64 encode region
+
+- Scope: the `encode()` data-path region the dispatch and ops
+  batteries leave unrowed inside
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`
+  (L372–608): adrp/movk data arms, payload-slot wiring
+  (`Encoded` dst/src/src2/src3 picks for mul/umaddl/ldp/stp/ldrsb/
+  ldrsw/stlxr/ands-reg/q0/d0), the load/store width tables, the
+  cmp/cmn/ands modifier and shifted-immediate index seams, and the
+  adrp reject-message repaint.
+- Harness: 27-row `build/mut_arm64_encode.py` (untracked, harness
+  census 223 -> 224): 27 catches, 0 equivalence rows; in-process
+  `python -B -c` battery probes `encode()` directly (rodata/GOT imm
+  strings, `ARM64_AUX_MOVK`/`ALU`/`SHIFT`/`CCMP` aux payloads, slot
+  registers, width table outputs, reject ValueErrors) and the
+  mutation detector classifies via rc/TOTAL under each exact-string
+  source edit inside `encode()`.
+- Result: `TOTAL 27 mutations, 0 failures, 0 equivalence rows`;
+  full 222-battery sibling sweep re-run serially this session after
+  repairing 16 zero-byte/truncated `.olean` modules (ENOSPC-era
+  corruption from the sweep's own core-dump pressure; lean_chain
+  baselines went green after targeted `lake build` rebuilds of the
+  affected `Generated*`/Handler modules, environment artifacts not
+  regressions); golden gate `make check` rc 0 with 210
+  `cross-check: OK` banners, final arm64 decode host 1410 cases.
+  Committed with paper sentence, README and archive steps,
+  implementation pair.
+
 ## Step 0349 - arm64 compact renderer regions
 
 - Scope: the compact renderer residual sites the sibling

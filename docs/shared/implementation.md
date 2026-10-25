@@ -1963,6 +1963,18 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 `encode()` data-path region (the `encode()` region of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` L372–608 —
+  the adrp/movk data arms, the payload-slot wiring for the
+  mul/umaddl/ldp/stp/ldrsb/ldrsw/stlxr/ands-reg/q0/d0 arms, the
+  load/store width tables, and the cmp/cmn/ands modifier and
+  shifted-immediate index seams that `mut_arm64_encode_dispatch`
+  and `mut_arm64_encode_ops` leave unrowed) rows 27 lines through
+  an in-process battery with no equivalence rows; the adrp
+  reject-message repaint is an ordinary catch row because the
+  battery pins the `ValueError` text shape, which 0292-style
+  message-blind batteries could class as equivalent.
+
   The arm64 compact renderer regions (the `render_program_compact`
   region of
   `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` L733–1005 —

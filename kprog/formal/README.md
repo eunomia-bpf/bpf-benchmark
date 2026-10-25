@@ -5687,6 +5687,28 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0350 - arm64 encode region
+
+The `encode()` data-path sites the dispatch/ops batteries leave
+unrowed: the 27-row `build/mut_arm64_encode.py` rows the L372–608
+region of
+`kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — the
+adrp/movk data arms, payload-slot wiring for
+mul/umaddl/ldp/stp/ldrsb/ldrsw/stlxr/ands-reg/q0/d0, the load/store
+width tables, the cmp/cmn/ands modifier and shifted-immediate index
+seams, and the adrp reject-message bracket repaint. In-process
+`python -B -c` battery probes `encode()` directly (rodata/GOT imm
+strings, `ARM64_AUX_*` payloads, slot registers, widths, reject
+`ValueError`s including the message shape); mutation detector
+classifies rc/TOTAL after each exact-string source edit (count==1
+anchors). Run `TOTAL 27 mutations, 0 failures, 0 equivalence rows`
+(untracked, census 223 -> 224); 222-battery sibling sweep re-run
+serially after repairing 16 zero-byte/truncated `.olean` modules
+(ENOSPC-era corruption; `lean_chain` baselines went green after
+targeted `lake build` rebuilds — environment artifacts, not
+regressions); golden gate `make check` rc 0 with 210 `cross-check:
+OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0349 - arm64 compact renderer regions
 
 The compact renderer residual sites the sibling batteries leave
