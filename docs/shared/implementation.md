@@ -1963,6 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 compact renderer regions (the `render_program_compact`
+  region of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` L733–1005 —
+  the `compact_step` op/cbz/tbz arms and their pc increments, the
+  guard/pc bounds, the dispatch-head test order, the jcc-taken
+  swap, the call/ret lr handling, the OP-arm advance `++` -> `+= 2`,
+  and the `append_compact_helper_switch` `UNPAINTED` default arm)
+  row 13 lines through an in-process battery, with no equivalence
+  rows (a throwaway /tmp meta-battery over the detector's three
+  conditions observed 1/3; the two unpinned condition rows are
+  observationally indistinguishable on the pristine tree and add
+  no coverage over the 13 real rows + baseline pins).
+
   The AArch64 stack-arm route anchor (the pre-existing
   anchor-count drift `build/mut_arm64_stack_arm.py` has carried
   since commit `a23a35a63` -- the typed-store width contract

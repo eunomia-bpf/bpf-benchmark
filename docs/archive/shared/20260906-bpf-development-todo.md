@@ -16092,6 +16092,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0349 - arm64 compact renderer regions
+
+- Scope: the compact renderer residual sites the sibling
+  batteries leave unrowed inside
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`
+  (`render_program_compact` and its helpers, L733–1005).
+- Harness: 13-row `build/mut_arm64_render_compact.py`
+  (untracked, harness census 222 -> 223): the `compact_step`
+  op/cbz/tbz arms and their pc increments, the guard/pc bounds,
+  dispatch-head test order, jcc-taken swap, call/ret lr handling,
+  OP-arm advance `++` -> `+= 2`, and the
+  `append_compact_helper_switch` `UNPAINTED` default arm; anchors
+  are source literals from the generator's own line rows,
+  `count == 1` each, four detector families.
+- Result: `TOTAL 13 mutations, 0 failures, 0 equivalence rows`;
+  full 221-battery sibling sweep re-run serially this session;
+  golden gate `make check` rc 0 with 210 `cross-check: OK`
+  banners, final arm64 decode host 1410 cases.
+
 ## Step 0348 - arm64 stack-arm route anchor recount
 
 - Scope: the pre-existing anchor-count drift the Step 0121-era

@@ -5687,6 +5687,26 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0349 - arm64 compact renderer regions
+
+The compact renderer residual sites the sibling batteries leave
+unrowed: the 13-row `build/mut_arm64_render_compact.py` rows the
+`render_program_compact` region of
+`kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — the
+`compact_step` op/cbz/tbz arms and their pc increments, the
+guard/pc bounds (`{max(len(steps) * 8, len(steps) + 1)}U` /
+`if (__a64_c_pc >= {len(steps)}U)`), the dispatch-head test order,
+the jcc-taken swap, call/ret lr handling, the OP-arm advance
+`__a64_c_pc++` -> `+= 2`, and the `append_compact_helper_switch`
+`UNPAINTED` default arm. Source-literal anchors on the generator
+line rows (count == 1 each), four detector families; run `TOTAL 13
+mutations, 0 failures, 0 equivalence rows` (untracked, census 222
+-> 223). A throwaway /tmp meta-battery over the detector's three
+conditions observed 1/3; the two unpinned condition rows are
+observationally indistinguishable on the pristine tree and add no
+coverage over the 13 real rows + baseline pins, so the harness is
+accepted without them.
+
 ### Step 0348 - arm64 stack-arm route anchor recount
 
 repaired rather than re-rowed: `build/mut_arm64_stack_arm.py`
