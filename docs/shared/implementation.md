@@ -1963,6 +1963,21 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The AArch64 stack-arm route anchor (the pre-existing
+  anchor-count drift `build/mut_arm64_stack_arm.py` has carried
+  since commit `a23a35a63` -- the typed-store width contract
+  replaced the third `KPROG_ARM64_APPLY_WIDTH(` call site, the
+  `__a64_sta_value` typed store, inside
+  `kprog/arm64/arm64_sim_local_bpf.h`, leaving two, in the
+  `ARM64_SIM_L_WRITE_REG_WIDTH` body and the
+  `ARM64_SIM_L_STACK_WRITE_TAG` helper; Step 0256 recorded the
+  counterpart as out of scope) is repaired in place: the
+  `route`-detector `local_assemble_drift` row now expects 2 and
+  repaints `KPROG_ARM64_APPLY_WIDTHX(`; run `TOTAL 48
+  mutations, 0 failures` / `ALL AS EXPECTED` (census 221 -> 222,
+  untracked), full serial sweep of all 221 batteries green this
+  session, golden gate rc 0 / 210 `cross-check: OK` banners.
+
   The x86 chunked flatten seam (the `flatten_chunk_insns` residual
   sites the chunked/unit batteries leave unrowed inside
   `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the seed

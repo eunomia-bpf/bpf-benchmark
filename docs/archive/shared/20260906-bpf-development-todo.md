@@ -16092,6 +16092,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0348 - arm64 stack-arm route anchor recount
+
+- Scope: the pre-existing anchor-count drift the Step 0121-era
+  `build/mut_arm64_stack_arm.py` (untracked, harness census
+  221 -> 222) route row carries since commit `a23a35a63` (the
+  typed-store width contract replaced the third
+  `KPROG_ARM64_APPLY_WIDTH(` call site -- the `__a64_sta_value`
+  typed store -- inside `kprog/arm64/arm64_sim_local_bpf.h`;
+  Step 0256 recorded the counterpart as out of scope).
+- Harness: the `route`-detector `local_assemble_drift` row now
+  expects the two remaining call sites (the
+  `ARM64_SIM_L_WRITE_REG_WIDTH` body and the
+  `ARM64_SIM_L_STACK_WRITE_TAG` helper) and repaints
+  `KPROG_ARM64_APPLY_WIDTHX(`, still observable through the same
+  routed binary.
+- Result: final run `TOTAL 48 mutations, 0 failures` /
+  `ALL AS EXPECTED`; full serial re-sweep of all 221 batteries
+  green this session; golden gate `make check` rc 0 with 210
+  `cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ## Step 0347 - x86 chunked flatten seam
 
 - Scope: the flatten_chunk_insns residual sites the chunked/unit

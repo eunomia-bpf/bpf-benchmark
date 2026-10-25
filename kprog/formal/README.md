@@ -5687,6 +5687,23 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0348 - arm64 stack-arm route anchor recount
+
+repaired rather than re-rowed: `build/mut_arm64_stack_arm.py`
+(untracked, harness census 221 -> 222) had a pre-existing
+anchor-count drift from commit `a23a35a63` (the typed-store width
+contract replaced the third `KPROG_ARM64_APPLY_WIDTH(` call site
+-- the `__a64_sta_value` typed store -- inside
+`kprog/arm64/arm64_sim_local_bpf.h`; Step 0256 recorded the
+counterpart as out of scope). The `route`-detector
+`local_assemble_drift` row now expects the two remaining call
+sites (the `ARM64_SIM_L_WRITE_REG_WIDTH` body and the
+`ARM64_SIM_L_STACK_WRITE_TAG` helper) and repaints
+`KPROG_ARM64_APPLY_WIDTHX(`, still observable through the same
+routed binary. Final run: `TOTAL 48 mutations, 0 failures` /
+`ALL AS EXPECTED`; golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0347 - x86 chunked flatten seam
 
 The flatten seam residual sites the chunked/unit batteries leave
