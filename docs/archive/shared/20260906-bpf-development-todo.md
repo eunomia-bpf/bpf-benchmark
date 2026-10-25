@@ -16092,6 +16092,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0347 - x86 chunked flatten seam
+
+- Scope: the flatten_chunk_insns residual sites the chunked/unit
+  batteries leave unrowed: the seed entry `(False, insns)`, the
+  `next_addr` `index + 1 < len(fn_insns) else None` tail pick, the
+  `flat = flatten_chunk_insns(insns, subfunctions)` call-site
+  argument, and the `max_steps = max(len(flat) * 4, len(flat) +
+  1024)` loop bound.
+- Harness: `build/mut_x86_chunk_flatten.py` (untracked) 4
+  single-anchor rows over an in-process battery pinning exact
+  flatten order and subroutine markers, the 8196U iterative
+  upper bound, the 1125U additive-range bound (101-insn chunked
+  run: 4 * 101 < 101 + 1024), and the same-chunk call push return
+  address; flipped entry markers catch the seed, rcp-pins catch
+  the rest.
+- Result: 4 catches, no equivalence rows (`is_subroutine` is
+  consumed by the battery, not yet by the renderer); generator
+  sha256 unchanged; golden gate rc 0 / 210 `cross-check: OK`
+  banners.
+
 ## Step 0346 - arm64 non-compact render residual
 
 - Scope: the render_program residual sites the tails battery

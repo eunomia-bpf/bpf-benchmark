@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0347 - x86 chunked flatten seam
+
+The flatten seam residual sites the chunked/unit batteries leave
+unrowed: the 4-row `build/mut_x86_chunk_flatten.py`
+(untracked, harness census 220 -> 221) rows the
+`flatten_chunk_insns` seed entry `(False, insns)`, the `next_addr`
+`index + 1 < len(fn_insns) else None` tail pick, the
+`flat = flatten_chunk_insns(insns, subfunctions)` call-site
+argument, and the `max_steps = max(len(flat) * 4, len(flat) +
+1024)` loop bound. Caught through an in-process battery pinning
+exact flatten order and subroutine markers (the entry-marker pin
+catches the seed flip), the 8196U iterative upper bound, the
+1125U additive-range bound (a 101-insn chunked render: 4 * 101 <
+101 + 1024, so the additive term dominates and a repaint of the
+1024 constant shifts the emitted cap), and the same-chunk call
+push return-address plus depth/`goto` join. 4 catches, no
+equivalence rows; generator sha256 unchanged; golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners.
+
 ### Step 0346 - arm64 non-compact render residual
 
 The render_program residual sites the tails battery leaves

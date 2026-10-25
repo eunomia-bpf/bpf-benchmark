@@ -1963,6 +1963,17 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 chunked flatten seam (the `flatten_chunk_insns` residual
+  sites the chunked/unit batteries leave unrowed inside
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the seed
+  entry `(False, insns)`, the `next_addr` `index + 1 < len(fn_insns)
+  else None` tail pick, the `flat = flatten_chunk_insns(insns,
+  subfunctions)` call-site argument, and the `max_steps =
+  max(len(flat) * 4, len(flat) + 1024)` loop bound) row 4 lines
+  through an in-process battery, with no equivalence rows (the
+  entry-marker pins observe the subroutine tag; `is_subroutine`
+  remains write-only inside the renderer itself).
+
   The arm64 render_program residual sites (the non-compact
   `next_by_addr` index pair the compact clone differs from, the
   `helper_by_addr` addr/helper unpack the bl-with-reloc pair never
