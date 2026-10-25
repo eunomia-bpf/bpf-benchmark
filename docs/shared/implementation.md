@@ -1963,6 +1963,17 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 `encode()` data-path region (the `encode()` region of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` L466-918 —
+  the ret/nop arm tokens, the mov-imm lane-aux payload and immediate
+  emit, the setcc/cmov startswith gates, the lea/movaps/movx arity
+  and operand-pick raises, the movx else-raise and load token, the
+  imul mem-imm gate and width pick, and the cmp/test width-mismatch
+  raise that the dispatch and residual batteries leave unrowed)
+  rows 20 lines through an in-process battery with no equivalence
+  rows; every anchor is count==1 and every repaint was live-probed
+  to an observable delta before rowing.
+
   The arm64 `encode()` data-path region (the `encode()` region of
   `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` L372–608 —
   the adrp/movk data arms, the payload-slot wiring for the

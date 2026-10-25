@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0351 - x86 encode region
+
+The `encode()` data-path sites the dispatch/residual batteries leave
+unrowed: the 20-row `build/mut_x86_encode.py` rows the L466-918
+region of
+`kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the ret/nop
+arm tokens, the mov-imm lane-aux payload and immediate emit, the
+setcc/cmov startswith gates, the lea/movaps/movx arity and
+operand-pick raises, the movx else-raise and load token, the imul
+mem-imm gate and width pick, and the cmp/test width-mismatch raise.
+In-process `python -B -c` battery probes `encode()` directly (the
+six-tuple op/dst/src/flags/aux/imm outputs, raise message shapes,
+rc=1 unknown-opcode baselines); mutation detector classifies
+rc/TOTAL after each exact-string source edit (count==1 anchors,
+every repaint live-probed to an observable delta before rowing).
+Run `TOTAL 20 mutations, 0 failures, 0 equivalence rows` (untracked,
+census 224 -> 225); 222-battery sibling sweep re-run serially (218
+in-glob + 4 outside-glob; 0 failures, 0 retries); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0350 - arm64 encode region
 
 The `encode()` data-path sites the dispatch/ops batteries leave

@@ -16092,6 +16092,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0351 - x86 encode region
+
+- Scope: the `encode()` data-path region the dispatch and residual
+  batteries leave unrowed inside
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py`
+  (L466-918): the ret/nop arm tokens, the mov-imm lane-aux payload
+  and immediate emit, the setcc/cmov startswith gates, the
+  lea/movaps/movx arity and operand-pick raises, the movx
+  else-raise and load token, the imul mem-imm gate and width pick,
+  and the cmp/test width-mismatch raise.
+- Harness: 20-row `build/mut_x86_encode.py` (untracked, harness
+  census 224 -> 225): 20 catches, 0 equivalence rows; every anchor
+  count==1 and every repaint live-probed to an observable delta
+  (raise-message change, six-tuple change, or rc=1) before rowing;
+  the bzhi mem-width repaint is probed unobservable (the inner PTR
+  width never beats the outer) and the bt/setcc/jcc/cmp sites are
+  sibling-owned, so they stay unrowed.
+- Result: `TOTAL 20 mutations, 0 failures, 0 equivalence rows`;
+  full 222-battery sibling sweep re-run serially this session (218
+  in-glob + 4 outside-glob batteries; 0 failures, 0 retries); golden
+  gate `make check` rc 0 with 210 `cross-check: OK` banners, final
+  arm64 decode host 1410 cases. Committed with paper sentence,
+  README and archive steps, implementation pair.
+
 ## Step 0350 - arm64 encode region
 
 - Scope: the `encode()` data-path region the dispatch and ops
