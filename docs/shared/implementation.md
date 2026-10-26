@@ -1993,6 +1993,27 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0396 rows the arm64 render_program_compact head: 23
+rows in `mut_arm64_compact_head0396.py` (untracked) repaint
+`render_program_compact`'s uses-stack scan repaint, the
+steps fan-out repaint, the helper-set pick and kind-gate
+repaints, the used-ops sort repaint, the ten
+ARM64_SIM_C_* kind-define repaints, the stack define gate,
+the helper-defines extend repaint, the helper-switch call
+repaint, the rodata emit loop repaint, the step-table
+f-string repaints, the step-table struct name repaint, the
+step emit loop and payload repaints, the guard-limit
+repaint, and the pc-gate repaint — the tiles the
+compact-render battery leaves unrowed beside its
+table-layout and interpreter-loop lanes. The battery runs
+render_program_compact end to end and pins the xdp render
+(entry macro, SEC clause, local header include, pc init,
+guard limit, step table), the tc render with prelude and
+rodata, the helper define, and the stack-define absence on
+stack-free programs (count==1 anchors; 23 catches, no
+equivalence rows), census 269 -> 270, and stays untracked
+in `kprog/formal/build/`.
+
 Step 0395 rows the arm64 compact_step signature and branch
 tiles: 12 rows in `mut_arm64_compact_sig0395.py` (untracked)
 repaint `compact_step`'s signature repaints (all_addrs,

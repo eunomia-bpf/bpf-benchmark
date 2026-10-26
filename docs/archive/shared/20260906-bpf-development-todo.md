@@ -16111,6 +16111,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0396 - arm64 compact render head
+
+- Scope: the arm64 render_program_compact head region the
+  compact-render batteries leave unrowed: the uses-stack
+  scan repaint, the steps fan-out repaint, the helper-set
+  pick and kind-gate repaints, the used-ops sort repaint,
+  the ten ARM64_SIM_C_* kind-define repaints, the stack
+  define gate, the helper-defines extend repaint, the
+  helper-switch call repaint, the rodata emit loop repaint,
+  the step-table f-string repaints, the step-table struct
+  name repaint, the step emit loop and payload repaints, the
+  guard-limit repaint, and the pc-gate repaint.
+- Harness: untracked `build/mut_arm64_compact_head0396.py`
+  (template 0395) runs render_program_compact end to end and
+  pins the xdp render (entry macro, SEC clause, local header
+  include, pc init, guard limit, step table), the tc render
+  with prelude and rodata, the helper define, and the
+  stack-define absence on stack-free programs.
+- Result: 23/23 rows caught (three clean rerun shakes). Census
+  269 -> 270.
+
 ## Step 0395 - arm64 compact_step signature tiles
 
 - Scope: the arm64 compact_step region the compact

@@ -5707,6 +5707,29 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0396 - arm64 compact render head
+
+The arm64 render_program_compact head region the
+compact-render batteries leave unrowed: the 23-row
+untracked `build/mut_arm64_compact_head0396.py` rows the
+uses-stack scan repaint, the steps fan-out repaint, the
+helper-set pick and kind-gate repaints, the used-ops sort
+repaint, the ten ARM64_SIM_C_* kind-define repaints, the
+stack define gate, the helper-defines extend repaint, the
+helper-switch call repaint, the rodata emit loop repaint,
+the step-table f-string repaints, the step-table struct
+name repaint, the step emit loop and payload repaints, the
+guard-limit repaint, and the pc-gate repaint. The battery
+runs render_program_compact end to end and pins the xdp
+render (entry macro, SEC clause, local header include, pc
+init, guard limit, step table), the tc render with prelude
+and rodata, the helper define, and the stack-define absence
+on stack-free programs (count==1 anchors; 23 catches). Run
+`23/23 rows caught` with 3 clean rerun shakes (census
+269 -> 270); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0395 - arm64 compact_step signature tiles
 
 The arm64 compact_step region the compact batteries leave
