@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0357 - direct-step and arm64 prelude
+
+- Scope: the x86 direct-step emit cell and the arm64 else-gate arms
+  the earlier batteries row only partially: `append_encoded_step`'s
+  RUN_OP gate L1029, direct-emit line L1032, and macro fallback
+  L1034-1038, `normalize_native_link_entry_returns`' ret-tag paint
+  L265, the arm64 `mov_source_gpr` register-pick return L649,
+  `source_prelude`'s SEC scanner L250 and no-SEC arm L251-252.
+- Harness: untracked `build/mut_x86_arm_annot0357.py` pins the
+  pump-arm triple (AUX-direct, DIRECT-eq, MEMOP override) and the
+  unknown-op macro fallback, the jmp-to-entry ret repaint in both
+  hit and miss flows, the helper-gpr carry flow feeding a helper
+  blr, and the prelude parse with its include rewrite.
+- Result: 7/7 rows caught (the `amsg.pick` repaint makes
+  `mov_source_gpr` return the full register, the `asp.*` repaints
+  break the SEC-with-int matcher and the no-SEC arm). Census 230 ->
+  231.
+
 ## Step 0356 - count-annotator and fixture helpers
 
 - Scope: the x86 generator helper arms the earlier batteries row only

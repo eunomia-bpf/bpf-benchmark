@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0357 - direct-step and arm64 prelude
+
+The x86 direct-step emit cell and the arm64 else-gate arms the
+earlier batteries row only partially: the 7-row untracked
+`build/mut_x86_arm_annot0357.py` rows the x86
+`append_encoded_step` RUN_OP gate L1029, direct-emit line L1032,
+and macro fallback L1034-1038, the
+`normalize_native_link_entry_returns` ret-tag paint L265, and the
+arm64 `mov_source_gpr` register-pick return L649, `source_prelude`
+SEC scanner L250, no-SEC arm L251-252. In-process battery pins the
+pump-arm triple (AUX-direct, DIRECT-eq, MEMOP override) and the
+unknown-op macro fallback, the jmp-to-entry ret repaint in both
+hit and miss flows, the helper-gpr carry flow feeding a helper blr,
+and the prelude parse with its include rewrite (count==1 anchors;
+7 catches, no equivalence rows). Run `7/7 rows caught` with 3 clean
+rerun shakes (census 230 -> 231); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0356 - count-annotator and fixture helpers
 
 The x86 generator helper arms the earlier batteries row only

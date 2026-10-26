@@ -1963,6 +1963,23 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 direct-step cell and the arm64 else-gates (the
+  `append_encoded_step` RUN_OP gate L1029, direct-emit line L1032, and
+  macro fallback L1034-1038, the
+  `normalize_native_link_entry_returns` ret-tag paint L265 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py`, and the arm64
+  `mov_source_gpr` register-pick return L649, `source_prelude` SEC
+  scanner L250, no-SEC arm L251-252 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — arms the
+  direct-step, native-link, native-entry, parse-side, prelude, and
+  helper-calls batteries leave unrowed beside their picks) rows 7
+  lines through an in-process battery pinning the pump-arm triple
+  (AUX-direct, DIRECT-eq, MEMOP override) and the unknown-op macro
+  fallback, the jmp-to-entry ret repaint in both hit and miss flows,
+  the helper-gpr carry flow feeding a helper blr, and the prelude
+  parse with its include rewrite; no equivalence rows and every anchor
+  count==1.
+
   The x86 count-annotator and fixture helpers (the `text_symbol_addrs`
   six-field `.text` gate L220, the `section_size` missing-section raise
   L168, the `is_int` fullmatch regex L328, the `is_mem` bracket gate
