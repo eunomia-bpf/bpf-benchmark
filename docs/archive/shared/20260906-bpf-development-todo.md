@@ -16111,6 +16111,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0391 - x86 render_program + ret dispatch
+
+- Scope: the x86 non-chunked program-render region the
+  chunked and driver batteries leave unrowed:
+  `render_program`'s signature defaults repaints (subfunctions,
+  kind, exit_addr, prelude, rodata), the call filter repaint,
+  the exit-addr addrs repaint, the subroutine-label map
+  repaints, the return-addrs pick, the TC declare repaint, the
+  per-insn label pick and emit repaints, the branch-or-ret
+  kwargs repaints (ret_statement, return_targets), the
+  exit-block repaints (label, fallthrough text, ret tile), the
+  subfunctions branch repaint and render call repaints, the
+  ret-dispatch repaints (label, switch head, per-case emit,
+  addr iteration), and the terminal bracket and license tail
+  repaint.
+- Harness: untracked `build/mut_x86_render_retdisp0391.py`
+  (template 0390) pins the xdp render (entry declare, mov
+  tile, CALL tile, exit label and fallthrough exit block,
+  subroutine banner, SUB_RET tile), the ret-dispatch switch
+  and case tiles, the no-stack/no-exit negatives, and the
+  tc/prelude/rodata variants.
+- Result: 25/25 rows caught (three clean rerun shakes). Census
+  264 -> 265.
+
 ## Step 0390 - x86 chunked-program render residual
 
 - Scope: the x86 chunked-program region the chunk-render

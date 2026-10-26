@@ -1993,6 +1993,28 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0391 rows the x86 non-chunked program-render region: 25
+rows in `mut_x86_render_retdisp0391.py` (untracked) repaint
+`render_program`'s signature defaults repaints (subfunctions,
+kind, exit_addr, prelude, rodata), the call filter repaint,
+the exit-addr addrs repaint, the subroutine-label map
+repaints, the return-addrs pick, the TC declare repaint, the
+per-insn label pick and emit repaints, the branch-or-ret
+kwargs repaints (ret_statement, return_targets), the
+exit-block repaints (label, fallthrough text, ret tile), the
+subfunctions branch repaint and render call repaints, the
+ret-dispatch repaints (label, switch head, per-case emit,
+addr iteration), and the terminal bracket and license tail
+repaint — the lanes the chunked-render and enc-driver
+batteries leave unrowed beside their tiles. The battery pins
+the xdp render (entry declare, mov tile, CALL tile, exit
+label and fallthrough exit block, subroutine banner, SUB_RET
+tile), the ret-dispatch switch and case tiles, the
+no-stack/no-exit negatives, and the tc/prelude/rodata
+variants (count==1 anchors; 25 catches, no equivalence rows),
+census 264 -> 265, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0390 rows the x86 chunked-program render residual: 44
 rows in `mut_x86_chunked_resid0390.py` (untracked) repaint
 `render_chunk_function`'s current-chunk set repaint, the
