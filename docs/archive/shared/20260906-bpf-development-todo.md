@@ -16111,6 +16111,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0402 - x86 tail cells
+
+- Scope: the x86 generator tail cells the residual
+  batteries leave unrowed: proof_kind_for_source
+  underscore sink and kind return repaints,
+  render_x86_subroutine rodata-idents default signature,
+  call-functions keyword, and SUB_RET macro repaints,
+  self-call gate has-self-call, reloc-none,
+  branch-target-line, and for-item repaints, write_one
+  kind/exit-addr/rodata16 keyword repaints, and main
+  def, __main__ guard, and SystemExit repaints.
+- Harness: untracked `build/mut_x86_tail_cells0402.py`
+  (template 0401) pins the SUB_RET tile inside an
+  end-to-end render_program output, the
+  proof_kind_for_source kind identity, and a --help
+  subprocess over the generator entry (usage banner
+  gates the __main__ guard), beside the stubbed
+  write_one pair.
+- Result: 15/15 rows caught (three clean rerun shakes).
+  Census 275 -> 276.
+
 ## Step 0401 - x86 render residual
 
 - Scope: the x86 render residual the render body,

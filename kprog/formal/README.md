@@ -5707,6 +5707,28 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0402 - x86 tail cells
+
+The x86 generator tail cells the residual batteries
+leave unrowed: the 15-row untracked
+`build/mut_x86_tail_cells0402.py` rows the
+proof_kind_for_source underscore sink and kind return
+repaints, render_x86_subroutine's rodata-idents default
+signature, call-functions keyword, and SUB_RET macro
+repaints, the self-call gate's has-self-call,
+reloc-none, branch-target-line, and for-item repaints,
+write_one's kind/exit-addr/rodata16 keyword repaints,
+and main's def, __main__ guard, and SystemExit
+repaints. The battery pins the SUB_RET tile inside an
+end-to-end render_program output, the
+proof_kind_for_source kind identity, and a --help
+subprocess over the generator entry (usage banner gates
+the __main__ guard), beside the stubbed write_one pair
+(count==1 anchors; 15 catches). Run `15/15 rows
+caught` with 3 clean rerun shakes (census 275 -> 276);
+golden gate `make check` rc 0 with 210 `cross-check:
+OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0401 - x86 render residual
 
 The x86 render residual the render body, chunked, and

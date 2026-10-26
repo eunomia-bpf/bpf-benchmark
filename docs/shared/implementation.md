@@ -1993,6 +1993,24 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0402 rows the x86 generator tail cells: 15 rows in
+`mut_x86_tail_cells0402.py` (untracked) repaint
+proof_kind_for_source's underscore sink and kind return,
+render_x86_subroutine's rodata-idents default signature,
+call-functions keyword, and SUB_RET macro, the
+self-call gate's has-self-call, reloc-none,
+branch-target-line, and for-item tiles, write_one's
+kind/exit-addr/rodata16 keywords, and main's def,
+__main__ guard, and SystemExit — the tail cells the
+residual batteries leave unrowed. The battery pins the
+SUB_RET tile inside an end-to-end render_program
+output, the proof_kind_for_source kind identity, and a
+--help subprocess over the generator entry (usage
+banner gates the __main__ guard), beside the stubbed
+write_one pair (count==1 anchors; 15 catches, no
+equivalence rows), census 275 -> 276, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0401 rows the x86 render residual: 24 rows in
 `mut_x86_render_resid0401.py` (untracked) repaint the
 chunk loop break, render_program's ret-statement default,
