@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0378 - x86 bitop shift tail arms
+
+The x86 `encode()` bitop/shift tail arms the cmp/test and
+body-mid batteries leave unrowed beside their cells: the
+26-row untracked `build/mut_x86_arm_annot0378.py` rows the
+mulx/andn/rep/bzhi picks and token pairs L767-820, the
+bswap/popcnt/xchg/movbe tokens L828-856, the shiftx/rorx
+op-set picks, ALU chooser tokens, and REG/MEM token pairs
+L857-893, the div token L894, and the shld/shrd imm tokens
+L903-908. In-process battery pins the mulx/andn/bzhi register
+and memory tokens with SRC_SHIFT aux tiles, the rep movs
+success/bound/variable-length paths, the movbe load/store
+pair, the shiftx ALU tokens with packed mem immediates, the
+rorx reg/mem pair, the xchg/div/bt register forms, and the
+shld/shrd imm tokens (count==1 anchors; 26 catches). Run
+`26/26 rows caught` with 3 clean rerun shakes (census
+251 -> 252); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0377 - x86 cmp/test and ALU arms
 
 The x86 `encode()` cmp/test and ALU arms the dispatch and

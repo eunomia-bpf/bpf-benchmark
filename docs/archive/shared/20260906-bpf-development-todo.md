@@ -16092,6 +16092,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0378 - x86 bitop shift tail arms
+
+- Scope: the x86 `encode()` bitop/shift tail arms the cmp/test
+  and body-mid batteries leave unrowed beside their cells: the
+  mulx/andn/rep/bzhi picks and token pairs L767-820, the
+  bswap/popcnt/xchg/movbe tokens L828-856, the shiftx/rorx
+  op-set picks, ALU chooser tokens, and REG/MEM token pairs
+  L857-893, the div token L894, and the shld/shrd imm tokens
+  L903-908.
+- Harness: untracked `build/mut_x86_arm_annot0378.py` (template
+  0370) pins the mulx/andn/bzhi register and memory tokens with
+  SRC_SHIFT aux tiles, the rep movs success/bound/
+  variable-length paths, the movbe load/store pair, the shiftx
+  ALU tokens with packed mem immediates, the rorx reg/mem
+  pair, the xchg/div/bt register forms, and the shld/shrd imm
+  tokens.
+- Result: 26/26 rows caught (three clean rerun shakes). Census
+  251 -> 252.
+
 ## Step 0377 - x86 cmp/test and ALU arms
 
 - Scope: the x86 `encode()` cmp/test and ALU arms the dispatch

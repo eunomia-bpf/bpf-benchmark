@@ -1976,6 +1976,22 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0378 rows the x86 bitop/shift tail arms: 26 rows in
+`mut_x86_arm_annot0378.py` (untracked) repaint the
+mulx/andn/rep/bzhi picks and token pairs L767-820, the
+bswap/popcnt/xchg/movbe tokens L828-856, the shiftx/rorx op-set
+picks, ALU chooser tokens, and REG/MEM token pairs L857-893,
+the div token L894, and the shld/shrd imm tokens L903-908 —
+the bitop/shift tail arms the cmp/test and body-mid batteries
+leave unrowed beside their cells. The battery pins the
+mulx/andn/bzhi register and memory tokens with SRC_SHIFT aux
+tiles, the rep movs success/bound/variable-length paths, the
+movbe load/store pair, the shiftx ALU tokens with packed mem
+immediates, the rorx reg/mem pair, the xchg/div/bt register
+forms, and the shld/shrd imm tokens (count==1 anchors; 26
+catches, no equivalence rows), census 251 -> 252, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0377 rows the x86 cmp/test and ALU arms: 24 rows in
 `mut_x86_arm_annot0377.py` (untracked) repaint the cmp/test
 width default L632, imm/reg token picks L634/643, the imm lane
