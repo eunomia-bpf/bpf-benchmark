@@ -1963,6 +1963,17 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 `append_insn` emit arms (the JCC emit f-string L694, the
+  JMP emit f-string L698, the helper-call emit L712, the A64_CALL
+  emit f-string L717, and the RUN_OP3 footer f-string L728 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — the
+  whole-emit lane the render-unit and emit-ops batteries leave
+  unrowed beside their gate picks) rows 5 lines through an in-process
+  battery pinning the JCC/JMP branch emits with their labels, the
+  helper-call blr emit, the in-address call lane with the next-addr
+  return, and the RUN_OP3 fallback over a reg-reg mov; no equivalence
+  rows and every anchor count==1.
+
   The rodata-map, step-plumb, and compact-JCC arms (the x86
   `rodata_ident_map` enumeration return L435, the `append_step`
   encode/comment/passthrough cell L1022-1024 of

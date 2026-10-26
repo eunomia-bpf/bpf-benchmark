@@ -5687,6 +5687,21 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0360 - arm64 append-insn emits
+
+The arm64 `append_insn` emit arms the render-unit and emit-ops
+batteries leave unrowed: the 5-row untracked
+`build/mut_x86_arm_annot0360.py` rows the JCC emit f-string L694,
+the JMP emit f-string L698, the helper-call emit L712, the A64_CALL
+emit f-string L717, and the RUN_OP3 footer f-string L728. In-process
+battery pins the JCC/JMP branch emits with their labels, the
+helper-call blr emit, the in-address call lane with the next-addr
+return, and the RUN_OP3 fallback over a reg-reg mov (count==1
+anchors; 5 catches, no equivalence rows). Run `5/5 rows caught` with
+3 clean rerun shakes (census 233 -> 234); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners, final arm64 decode host
+1410 cases.
+
 ### Step 0359 - rodata-map and compact JCC
 
 The rodata-map, step-plumb, and compact-JCC arms the earlier

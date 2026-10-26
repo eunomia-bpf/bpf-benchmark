@@ -16092,6 +16092,21 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0360 - arm64 append-insn emits
+
+- Scope: the arm64 `append_insn` emit arms the render-unit and
+  emit-ops batteries leave unrowed: the JCC emit f-string L694, the
+  JMP emit f-string L698, the helper-call emit L712, the A64_CALL
+  emit f-string L717, and the RUN_OP3 footer f-string L728.
+- Harness: untracked `build/mut_x86_arm_annot0360.py` pins the
+  JCC/JMP branch emits with their labels, the helper-call blr emit,
+  the in-address call lane with the next-addr return, and the RUN_OP3
+  fallback over a reg-reg mov.
+- Result: 5/5 rows caught (the JCC/JMP/RUN_OP3 repaints rename the
+  emitted macros, the helper repaint renames the BPF_CALL symbol,
+  the call repaint substitutes the return address). Census 233 ->
+  234.
+
 ## Step 0359 - rodata-map and compact JCC
 
 - Scope: the rodata-map, step-plumb, and compact-JCC arms the earlier
