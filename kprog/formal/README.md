@@ -5687,6 +5687,26 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0385 - x86 write-one driver residual
+
+The write-one driver residual the enc-driver battery leaves
+unrowed: the 14-row untracked `build/mut_x86_write_one0385.py`
+rows `write_one`'s head repaint, the bench-name pick, the
+parse-proof-object payload tuple, the empty-insns raise, the
+stage2-else kind pick, and the `render_program` write-text call,
+plus the driver tail's `print(path)` tile and the argparse
+constructor/options paint (micro-programs, output-dir,
+proof-object-dir, config, only) and the parse-args call.
+In-process battery pins the load-benches fixture (name/kind),
+the written-path identity, the tc section/entry template, the
+MOV_IMM payload inside the rendered source, the empty-insns
+ValueError message, and the end-to-end main() run under a temp
+argv (return code, printed path, generated-N summary) (count==1
+anchors; 14 catches). Run `14/14 rows caught` with 3 clean rerun
+shakes (census 258 -> 259); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0384 - x86 program render dispatch + native ret-dispatch
 
 The program renderer's dispatch head and the native

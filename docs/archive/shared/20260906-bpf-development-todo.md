@@ -16092,6 +16092,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0385 - x86 write-one driver residual
+
+- Scope: the write-one driver residual the enc-driver battery
+  leaves unrowed: `write_one`'s head repaint, the bench-name
+  pick, the parse-proof-object payload tuple, the empty-insns
+  raise, the stage2-else kind pick, and the `render_program`
+  write-text call, plus the driver tail's `print(path)` tile and
+  the argparse constructor/options paint (micro-programs,
+  output-dir, proof-object-dir, config, only) and the parse-args
+  call.
+- Harness: untracked `build/mut_x86_write_one0385.py` (template
+  0384) pins the load-benches fixture (name/kind), the
+  written-path identity, the tc section/entry template, the
+  MOV_IMM payload inside the rendered source, the empty-insns
+  ValueError message, and the end-to-end main() run under a
+  temp argv (return code, printed path, generated-N summary).
+- Result: 14/14 rows caught (three clean rerun shakes). Census
+  258 -> 259.
+
 ## Step 0384 - x86 program render dispatch + native ret-dispatch
 
 - Scope: the program renderer's dispatch head and the native

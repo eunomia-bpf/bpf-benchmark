@@ -1976,6 +1976,23 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0385 rows the x86 write-one driver residual: 14 rows in
+`mut_x86_write_one0385.py` (untracked) repaint `write_one`'s
+head repaint, the bench-name pick, the parse-proof-object
+payload tuple, the empty-insns raise, the stage2-else kind pick,
+and the `render_program` write-text call, plus the driver tail's
+`print(path)` tile and the argparse constructor/options paint
+(micro-programs, output-dir, proof-object-dir, config, only) and
+the parse-args call — the write-one lane the enc-driver battery
+leaves unrowed beside its enc() tiles. The battery pins the
+load-benches fixture (name/kind), the written-path identity, the
+tc section/entry template, the MOV_IMM payload inside the
+rendered source, the empty-insns ValueError message, and the
+end-to-end main() run under a temp argv (return code, printed
+path, generated-N summary) (count==1 anchors; 14 catches, no
+equivalence rows), census 258 -> 259, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0384 rows the x86 program render dispatch + native
 ret-dispatch: 35 rows in `mut_x86_program_render0384.py`
 (untracked) repaint `render_program`'s head repaint, the
