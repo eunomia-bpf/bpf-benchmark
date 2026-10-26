@@ -5707,6 +5707,29 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0397 - arm64 interp loop arms
+
+The arm64 compact interpreter-loop region the compact-render
+batteries leave unrowed: the 36-row untracked
+`build/mut_arm64_interp_loop0397.py` rows the ten step-field
+load repaints, the OP kind-arm repaint, the op-switch
+repaint, the loop-variable repaint, the case-head and
+EXEC-fan-out repaints, the break repaint, the
+JMP/JCC/CBZ/TBZ/CALL/RET/HELPER arm-head repaints, the JCC
+eval repaint, the CBZ read/take repaints, the TBZ
+shift/take repaints, the CALL lr/x30 repaints, the RET
+lr-gate/pc/lr0/continue/RET repaints, the HELPER call
+repaint, the else-arm and unsupported-opcode repaints, and
+the linked-exit and return repaints. The battery runs
+render_program_compact end to end over a mixed-branch
+fixture (ALU add, b, b.eq, cbz, tbz, ret) and pins the load
+fan-out, the OP switch case/EXEC tiles, the arm heads, the
+linked W and RET tiles, and the return tile (count==1
+anchors; 36 catches). Run `36/36 rows caught` with 3 clean
+rerun shakes (census 270 -> 271); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners, final arm64 decode
+host 1410 cases.
+
 ### Step 0396 - arm64 compact render head
 
 The arm64 render_program_compact head region the

@@ -1993,6 +1993,26 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0397 rows the arm64 compact interpreter loop: 36
+rows in `mut_arm64_interp_loop0397.py` (untracked) repaint
+`render_program_compact`'s ten step-field load repaints,
+the OP kind-arm repaint, the op-switch repaint, the
+loop-variable repaint, the case-head and EXEC-fan-out
+repaints, the break repaint, the JMP/JCC/CBZ/TBZ/CALL/RET/
+HELPER arm-head repaints, the JCC eval repaint, the CBZ
+read/take repaints, the TBZ shift/take repaints, the CALL
+lr/x30 repaints, the RET lr-gate/pc/lr0/continue/RET
+repaints, the HELPER call repaint, the else-arm and
+unsupported-opcode repaints, and the linked-exit and return
+repaints — the tiles the compact-render battery leaves
+unrowed beside its table-layout and render-head lanes. The
+battery runs render_program_compact end to end over a
+mixed-branch fixture (ALU add, b, b.eq, cbz, tbz, ret) and
+pins the load fan-out, the OP switch case/EXEC tiles, the
+arm heads, the linked W and RET tiles, and the return tile
+(count==1 anchors; 36 catches, no equivalence rows), census
+270 -> 271, and stays untracked in `kprog/formal/build/`.
+
 Step 0396 rows the arm64 render_program_compact head: 23
 rows in `mut_arm64_compact_head0396.py` (untracked) repaint
 `render_program_compact`'s uses-stack scan repaint, the

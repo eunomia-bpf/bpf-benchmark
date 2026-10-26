@@ -16111,6 +16111,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0397 - arm64 interp loop arms
+
+- Scope: the arm64 render_program_compact interpreter loop
+  the compact-render batteries leave unrowed: the ten
+  step-field load repaints, the OP kind-arm repaint, the
+  op-switch repaint, the loop-variable repaint, the
+  case-head and EXEC-fan-out repaints, the break repaint,
+  the JMP/JCC/CBZ/TBZ/CALL/RET/HELPER arm-head repaints,
+  the JCC eval repaint, the CBZ read/take repaints, the TBZ
+  shift/take repaints, the CALL lr/x30 repaints, the RET
+  lr-gate/pc/lr0/continue/RET repaints, the HELPER call
+  repaint, the else-arm and unsupported-opcode repaints, and
+  the linked-exit and return repaints.
+- Harness: untracked `build/mut_arm64_interp_loop0397.py`
+  (template 0396) runs render_program_compact end to end
+  over a mixed-branch fixture (ALU add, b, b.eq, cbz, tbz,
+  ret) and pins the load fan-out, the OP switch case/EXEC
+  tiles, the arm heads, the linked W and RET tiles, and the
+  return tile.
+- Result: 36/36 rows caught (three clean rerun shakes).
+  Census 270 -> 271.
+
 ## Step 0396 - arm64 compact render head
 
 - Scope: the arm64 render_program_compact head region the
