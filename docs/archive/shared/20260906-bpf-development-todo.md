@@ -16092,6 +16092,21 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0358 - branch-harvest paints
+
+- Scope: the x86 `append_branch_or_ret` free arms the branch batteries
+  leave unrowed: the implicit `return_targets` empty-set default L1051,
+  the JCC branch-macro emit f-string L1064-1066, and the
+  `X86_SIM_X86_CALL` function-target emit f-string L1109-1113.
+- Harness: untracked `build/mut_x86_branch_harvest0358.py` pins the
+  return-target jcc/jmp ret-statement flows, the in-address JCC and
+  JMP macro emits with their `x86_l_` labels, the external-target
+  raises, the memcpy-helper and register-indirect call steps, the
+  function-target call lane, and the bare ret arm.
+- Result: 3/3 rows caught (the `rtset` repaint makes address sets
+  implicit return targets, the `bmacro` repaint corrupts the JCC emit,
+  the `callfnemit` repaint renames the CALL macro). Census 231 -> 232.
+
 ## Step 0357 - direct-step and arm64 prelude
 
 - Scope: the x86 direct-step emit cell and the arm64 else-gate arms

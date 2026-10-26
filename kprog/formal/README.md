@@ -5687,6 +5687,22 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0358 - branch-harvest paints
+
+The x86 `append_branch_or_ret` free arms the branch batteries leave
+unrowed: the 3-row untracked `build/mut_x86_branch_harvest0358.py`
+rows the implicit `return_targets` empty-set default L1051, the JCC
+branch-macro emit f-string L1064-1066, and the `X86_SIM_X86_CALL`
+function-target emit f-string L1109-1113. In-process battery pins
+the return-target jcc/jmp ret-statement flows, the in-address JCC
+and JMP macro emits with their `x86_l_` labels, the
+external-target raises, the memcpy-helper and register-indirect
+call steps, the function-target call lane, and the bare ret arm
+(count==1 anchors; 3 catches, no equivalence rows). Run `3/3 rows
+caught` with 3 clean rerun shakes (census 231 -> 232); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0357 - direct-step and arm64 prelude
 
 The x86 direct-step emit cell and the arm64 else-gate arms the

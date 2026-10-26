@@ -1963,6 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 branch-harvest arms (the `append_branch_or_ret` implicit
+  `return_targets` empty-set default L1051, the JCC branch-macro emit
+  f-string L1064-1066, and the `X86_SIM_X86_CALL` function-target emit
+  f-string L1109-1113 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — arms the
+  branch-ladder and call batteries leave unrowed beside their
+  macro-gate and eval-CC picks) rows 3 lines through an in-process
+  battery pinning the return-target jcc/jmp ret-statement flows, the
+  in-address JCC and JMP macro emits with their `x86_l_` labels, the
+  external-target raises, the memcpy-helper and register-indirect
+  call steps, the function-target call lane, and the bare ret arm; no
+  equivalence rows and every anchor count==1.
+
   The x86 direct-step cell and the arm64 else-gates (the
   `append_encoded_step` RUN_OP gate L1029, direct-emit line L1032, and
   macro fallback L1034-1038, the
