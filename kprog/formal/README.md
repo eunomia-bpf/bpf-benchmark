@@ -5707,6 +5707,32 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0388 - x86 chunk-plumbing helpers
+
+The x86 chunk-plumbing region the chunk-render batteries leave
+unrowed: the 27-row untracked
+`build/mut_x86_chunk_plumbing0388.py` rows
+`render_x86_subroutine`'s head repaint, the call-functions dict
+pick, the addrs repaint, the banner payload, the per-insn label
+emit, the branch-or-ret call repaint, the step-macro name tile,
+the SUB_RET payload, and the join tail, plus
+`flatten_chunk_insns`'s head repaint, the out and sequences
+inits, the subfunction extend, the iteration repaint, the
+next-addr pick, and the ChunkInsn append, plus
+`chunk_for_addr`'s head repaint, the any-scan repaint, and the
+index/None returns, plus `append_chunk_transfer`'s head
+repaint, the in-chunk gate, and the goto/return tiles, plus
+`append_chunk_call`'s head repaint, the rsp tile, the
+stack-write payload, the depth tile, and the transfer call.
+In-process battery pins the subroutine banner/labels/JMP/RET
+tiles, the flatten output order, subroutine flags, and next
+addrs, the chunk-for-addr hit/miss, the transfer
+goto/return/indent outputs, the call rsp/stack-write/depth/
+transfer outputs, and a RUN_OP bswap render (count==1 anchors;
+27 catches). Run `27/27 rows caught` with 3 clean rerun shakes
+(census 261 -> 262); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0387 - arm64 render_program_compact region
 
 The arm64 compact program-render region the compact-step

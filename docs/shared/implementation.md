@@ -1993,6 +1993,30 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0388 rows the x86 chunk-plumbing region: 27 rows in
+`mut_x86_chunk_plumbing0388.py` (untracked) repaint
+`render_x86_subroutine`'s head repaint, the call-functions dict
+pick, the addrs repaint, the banner payload, the per-insn label
+emit, the branch-or-ret call repaint, the step-macro name tile,
+the SUB_RET payload, and the join tail, plus
+`flatten_chunk_insns`'s head repaint, the out and sequences
+inits, the subfunction extend, the iteration repaint, the
+next-addr pick, and the ChunkInsn append, plus
+`chunk_for_addr`'s head repaint, the any-scan repaint, and the
+index/None returns, plus `append_chunk_transfer`'s head repaint,
+the in-chunk gate, and the goto/return tiles, plus
+`append_chunk_call`'s head repaint, the rsp tile, the
+stack-write payload, the depth tile, and the transfer call —
+the chunk-plumbing lanes the chunk-render batteries leave
+unrowed beside their dispatcher tiles. The battery pins the
+subroutine banner/labels/JMP/RET tiles, the flatten output
+order, subroutine flags, and next addrs, the chunk-for-addr
+hit/miss, the transfer goto/return/indent outputs, the call
+rsp/stack-write/depth/transfer outputs, and a RUN_OP bswap
+render (count==1 anchors; 27 catches, no equivalence rows),
+census 261 -> 262, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0387 rows the arm64 compact program-render region: 18 rows
 in `mut_arm64_compact_render0387.py` (untracked) repaint
 `render_program_compact`'s head repaint, the uses-stack scan
