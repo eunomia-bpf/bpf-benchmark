@@ -2005,6 +2005,33 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0421 rows the arm64 render_program
+region: 89 rows in
+`mut_arm64_render_program0421.py` (untracked)
+repaint render_program()'s prelude/rodata16/
+linked_exit defaults, the all_insns/all_addrs
+comprehensions and the next_by_addr/
+helper_by_addr tables, return_addrs and the
+uses_stack gate, the kind table's xdp/tc/
+cgroup_skb rows and the kind lookup, the
+lines init, the ENABLE_STACK and RETURN_CASES
+defines with their hex goto loop, the
+include/prelude/blank rows, the rodata ident
+map and the static const emission, the
+map_symbols reloc filter (rodata/helper
+exclusions, sorting), c_ident's prefix lane,
+the per-map struct block, the SEC/entry
+header emission, the per-function subroutine
+loop (comment gate, labels, append_insn
+binds), and the linked_exit tail versus the
+return-0 arm, through C-output shape pins
+over xdp/tc/cgroup_skb fixtures with maps,
+rodata, helper calls, multi-block functions,
+and linked exits (count==1 anchors; 89
+catches, no equivalence rows), census 292 ->
+293, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0420 rows the arm64 encode() op-arm
 continuation: 189 rows in
 `mut_arm64_encode_cont0420.py` (untracked)

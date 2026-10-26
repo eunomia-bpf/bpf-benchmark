@@ -5721,6 +5721,28 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0421 - arm64 render-program recon sweep
+
+The arm64 render_program region: the 89-row
+untracked `build/mut_arm64_render_program0421.py`
+repaints render_program()'s defaulted
+prelude/rodata16/linked_exit params, the
+all_insns/all_addrs comprehensions, the
+next_by_addr and helper_by_addr tables,
+return_addrs and the uses_stack gate, the
+kind table, the lines init, the ENABLE_STACK
+and RETURN_CASES defines with their goto
+loop, the include/prelude/blank rows, the
+rodata ident map and static const emission,
+the map_symbols reloc filter, c_ident's
+prefix lane, the per-map struct block, the
+SEC/entry header, the per-function loop, and
+the linked_exit/return-0 arms. Run
+`89/89 rows caught` with 3 clean rerun shakes
+(census 292 -> 293); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0420 - arm64 encode op-arm continuation recon sweep
 
 The arm64 encode() op-arm continuation:
