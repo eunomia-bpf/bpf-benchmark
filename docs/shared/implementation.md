@@ -1976,6 +1976,19 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The x86 memory-term arms (the `parse_mem_terms` bracket regex
+  L363, its dash-to-`+-` negate trick L366, the else-index register
+  pick L384-385, the `mem_aux` FULL-width emit L396, and the plain
+  `mem_aux` emit L398 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the
+  memory-decode lane the operand-wrappers and scalar-helpers
+  batteries leave unrowed beside their picks) rows 5 lines through
+  an in-process battery pinning the greedy two-bracket scan, the
+  scale/index/disp quadruple over a scaled-negated operand, the
+  register-only and no-bracket baselines, the else-index pick, the
+  FULL-width aux string, the plain aux string, and the SRC_SHIFT
+  wrap; no equivalence rows and every anchor count==1.
+
   The arm64 compact-render arms (the compact step-table fan-out head
   and tail L914-916, the guard-loop limit and pc check L928-931, the
   step fetch L933, the per-op L_EXEC emit L954, and the `uses_stack`

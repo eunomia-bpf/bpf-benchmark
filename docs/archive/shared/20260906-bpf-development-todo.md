@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0364 - x86 memory terms
+
+- Scope: the x86 memory-term parse free arms the operand-wrappers
+  and scalar-helpers batteries leave unrowed: the
+  `parse_mem_terms` bracket regex L363, its dash-to-`+-` negate
+  trick L366, the else-index register pick L384-385, the
+  `mem_aux` FULL-width emit L396, and the plain `mem_aux` emit
+  L398.
+- Harness: untracked `build/mut_x86_arm_annot0364.py` pins the
+  greedy two-bracket scan, the scale/index/disp quadruple over a
+  scaled-negated operand, the register-only and no-bracket
+  baselines, the else-index pick, the FULL-width aux string, the
+  plain aux string, and the SRC_SHIFT wrap.
+- Result: 5/5 rows caught (the greedy repaint captures both
+  bracket groups, the dash repaint flips the negative displacement,
+  the else repaint breaks the second-register index, and the aux
+  repaints rename the emitted macro). Census 237 -> 238.
+
 ## Step 0363 - arm64 compact step table
 
 - Scope: the arm64 compact-render free arms the render-unit and

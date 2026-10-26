@@ -5687,6 +5687,22 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0364 - x86 memory terms
+
+The x86 memory-term parse free arms the operand-wrappers and
+scalar-helpers batteries leave unrowed: the 5-row untracked
+`build/mut_x86_arm_annot0364.py` rows the `parse_mem_terms` bracket
+regex L363, its dash-to-`+-` negate trick L366, the else-index
+register pick L384-385, the `mem_aux` FULL-width emit L396, and the
+plain `mem_aux` emit L398. In-process battery pins the greedy
+two-bracket scan, the scale/index/disp quadruple over a
+scaled-negated operand, the register-only and no-bracket baselines,
+the else-index pick, the FULL-width aux string, the plain aux
+string, and the SRC_SHIFT wrap (count==1 anchors; 5 catches, no
+equivalence rows). Run `5/5 rows caught` with 3 clean rerun shakes
+(census 237 -> 238); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0363 - arm64 compact step table
 
 The arm64 compact-render free arms the render-unit and
