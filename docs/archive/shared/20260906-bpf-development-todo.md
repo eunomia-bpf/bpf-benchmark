@@ -16092,6 +16092,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0362 - arm64 helper switch
+
+- Scope: the arm64 helper-define and compact-switch free arms the
+  emit-ops and render-unit batteries leave unrowed: the
+  `compact_helper_defines` index numeration L784, the switch `case`
+  emit line pair L798-799, and the switch `default`
+  L_UNSUPPORTED_OPCODE arm L802.
+- Harness: untracked `build/mut_x86_arm_annot0362.py` pins the
+  two-helper define numeration with its trailing blank and the
+  empty-set baseline, the C_CALL_HELPER header/switch shape, the
+  case-line helper call with its break, the default arm, and the
+  do-while trailer.
+- Result: 4/4 rows caught (the index repaint shifts every helper id,
+  the case repaint renames the C_HELPER symbol, the break repaint
+  renames the BPF_CALL symbol, the default repaint renames the
+  unsupported arm). Census 235 -> 236.
+
 ## Step 0361 - x86 parse-text splits
 
 - Scope: the x86 parse-text free arms the head-route and

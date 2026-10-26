@@ -1963,6 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The arm64 helper-define and compact-switch arms (the
+  `compact_helper_defines` index numeration L784, the switch `case`
+  emit line pair L798-799, and the switch `default`
+  L_UNSUPPORTED_OPCODE arm L802 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — the
+  helper-dispatch lane the emit-ops and render-unit batteries leave
+  unrowed beside their picks) rows 4 lines through an in-process
+  battery pinning the two-helper define numeration with its trailing
+  blank and the empty-set baseline, the C_CALL_HELPER header/switch
+  shape, the case-line helper call with its break, the default arm,
+  and the do-while trailer; no equivalence rows and every anchor
+  count==1.
+
   The x86 parse-text arms (the `parse_int` negative-recursion tail
   L322-323, the `split_operands` zero-depth comma gate L122, and the
   `parse_asm_text` relocation scan regex L134 of

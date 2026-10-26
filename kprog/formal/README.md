@@ -5687,6 +5687,21 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0362 - arm64 helper switch
+
+The arm64 helper-define and compact-switch free arms the emit-ops
+and render-unit batteries leave unrowed: the 4-row untracked
+`build/mut_x86_arm_annot0362.py` rows the `compact_helper_defines`
+index numeration L784, the switch `case` emit line pair L798-799,
+and the switch `default` L_UNSUPPORTED_OPCODE arm L802. In-process
+battery pins the two-helper define numeration with its trailing
+blank and the empty-set baseline, the C_CALL_HELPER header/switch
+shape, the case-line helper call with its break, the default arm,
+and the do-while trailer (count==1 anchors; 4 catches, no
+equivalence rows). Run `4/4 rows caught` with 3 clean rerun shakes
+(census 235 -> 236); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0361 - x86 parse-text splits
 
 The x86 parse-text free arms the head-route and operand-wrappers
