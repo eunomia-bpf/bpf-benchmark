@@ -16179,6 +16179,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0418 - arm64 parse-lane recon sweep
+
+- Scope: split_operands (parts/cur/depth init
+  and accumulate, bracket gates, comma split,
+  strip join, tail flush, tuple return),
+  parse_modifier (out-of-range gate, token
+  join, shift-regex gate and MOD/int return,
+  extend-regex gate and default-zero return,
+  raise), parse_mem (text strip/lower, post
+  init and parse_imm bind, flags post set, #
+  lookahead, ! endswith and strip, bracket
+  fullmatch, raise, inner split_operands,
+  base reg_const pick, offset pick, idx/mod
+  inits, len gate, imm-offset and reg/mod
+  binds, MemRef return), mem_aux (flag
+  ladder, ARM64_AUX_MEM format), reg_or_imm
+  (# gate).
+- Harness: untracked
+  `build/mut_arm64_parse_lane0418.py` pins
+  shapes: nested brackets, strips, empties;
+  plain/post/pre/immediate/hex offsets,
+  post-wins, pre+post, base/index/extend
+  modifiers, both unsupported raises.
+- Result: 44/44 rows caught (three clean rerun
+  shakes). Unrowable: the '|= 2' post-flag
+  line (indistinguishable from '= 2' in the
+  single post branch) and the guard retiles.
+  Census 289 -> 290.
+
 ## Step 0417 - arm64 helper-track/append recon sweep
 
 - Scope: written_gpr (GPR_WRITE_OPS gate,

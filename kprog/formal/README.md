@@ -5707,6 +5707,20 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0418 - arm64 parse-lane recon sweep
+
+The arm64 parse-lane region: the 44-row
+untracked `build/mut_arm64_parse_lane0418.py`
+repaints split_operands' accumulator,
+parse_modifier's regex gates and returns,
+parse_mem's post/pre/immediate ladder plus
+its MemRef return, mem_aux's flag ladder and
+format, and reg_or_imm's `#` gate. Run
+`44/44 rows caught` with 3 clean rerun shakes
+(census 289 -> 290); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0417 - arm64 helper-track/append recon sweep
 
 The arm64 helper-tracking and append_insn
