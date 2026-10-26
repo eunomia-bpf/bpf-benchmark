@@ -16141,6 +16141,44 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 45/45 rows caught (three clean rerun shakes).
   Census 277 -> 278.
 
+## Step 0410 - x86 ALU arm tail and driver
+
+- Scope: the encode() arm tail and the driver
+  region the earlier batteries leave unrowed:
+  the encode() head (mnemonic/operands reads,
+  high-register position setup and unsupported
+  gate, nop/dat16/ret/jmp arm tokens), the ALU-arm
+  fan-out (ALU_AUX gate, inc/dec/not/neg unary
+  lanes incl. the mem-unary and its imm pick,
+  reg-reg/reg-mem/mem-reg/mem-imm lanes with aux
+  packages, the add-family width-mismatch raiser,
+  and length/unsupported-form raises), the imul
+  3-op membranes, the bt/mulx/andn/rep-movs/bzhi/
+  bswap/popcnt/xchg/movbe/shlx-shrx-sarx/rorx/div/
+  shld/shrd arms with package payloads and
+  None/arity/unsupported raises, the
+  unsupported-mnemonic tail raise, and the driver
+  region (is_helper_symbol, rodata_ident_map,
+  program_kind over load_benches, source_prelude,
+  the render_x86_subroutine header and jump tiles,
+  direct_step_statement with its direct-step and
+  aux-gated template picks, the
+  DIRECT_STEP_MACROS/AUX_STEP_MACROS validation
+  loop, canonical_reg, and
+  annotated_fixed_count_ops).
+- Harness: untracked `build/mut_x86_alu_arm_tail0410.py`
+  (template 0405) arms direct encode() calls over
+  reg/mem/imm/reloc fixtures, EncodedInsn-template
+  pins for the direct-step tiles and their None
+  fallbacks, config-driven program_kind pins over
+  a synthetic benches yaml (xdp, tc, cgroup-skb,
+  cgroup_skb, empty tag rows), a synthetic
+  source-prelude fixture with and without a SEC
+  header, and render_x86_subroutine over add/ret
+  and jmp fixtures.
+- Result: 115/115 rows caught (three clean rerun
+  shakes). Census 281 -> 282.
+
 ## Step 0409 - x86 parse internals
 
 - Scope: the parse-internals cells the parse-side

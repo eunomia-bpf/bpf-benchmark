@@ -5707,6 +5707,49 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0410 - x86 ALU arm tail and driver
+
+The encode() arm tail and the driver region the
+earlier batteries leave unrowed: the 115-row
+untracked `build/mut_x86_alu_arm_tail0410.py` rows
+the encode() head (the mnemonic/operands reads, the
+high-register position setup and its unsupported
+gate, and the nop/dat16/ret/jmp arm tokens), the
+ALU-arm fan-out (the ALU_AUX gate, the inc/dec/
+not/neg unary lanes including the mem-unary and
+its imm pick, the reg-reg, reg-mem, mem-reg, and
+mem-imm lanes with their aux packages, the
+computed-width mem-unary and mem-imm lines, the
+add-family width-mismatch raiser, and the length
+and unsupported-form raises), the imul 3-op
+membranes, the bt/mulx/andn/rep-movs/bzhi/bswap/
+popcnt/xchg/movbe/shlx-shrx-sarx/rorx/div/shld/
+shrd arms with their package payloads and None/
+arity/unsupported raises, the unsupported-mnemonic
+tail raise, and the driver region
+(is_helper_symbol, rodata_ident_map, the
+config-driven program_kind arms over
+load_benches, source_prelude, the
+render_x86_subroutine header and jump tiles,
+direct_step_statement with its direct-step and
+aux-gated template picks, the
+DIRECT_STEP_MACROS/AUX_STEP_MACROS validation
+loop, canonical_reg, and
+annotated_fixed_count_ops). The battery arms
+direct encode() calls over reg/mem/imm/reloc
+fixtures, EncodedInsn-template pins for the
+direct-step tiles and their None fallbacks,
+config-driven program_kind pins over a synthetic
+benches yaml (xdp, tc, cgroup-skb, cgroup_skb,
+and empty tag rows), a synthetic source-prelude
+fixture with and without a SEC header, and
+render_x86_subroutine over two-insn add/ret and
+jmp fixtures (count==1 anchors; 115 catches). Run
+`115/115 rows caught` with 3 clean rerun shakes
+(census 281 -> 282); golden gate `make check` rc
+0 with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases.
+
 ### Step 0409 - x86 parse internals
 
 The parse-internals cells the parse-side battery
