@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0370 - x86 normalize/scalar tail
+
+The entry-return normalize arms and the scalar/text interrogation
+helpers the native-link and encoder-selection batteries leave
+unrowed beside their picks: the 10-row untracked
+`build/mut_x86_arm_annot0370.py` rows the normalize jmp pick
+L258, the ret tag tile L265-267, the empty-operand tile L268-269,
+the passthrough else append L270-271, the `is_helper_symbol`
+prefix pick L319, the `parse_int` hex/decimal fork L324, the
+`is_int` signed fullmatch L328, the `c_ptr_u64` cast shape L336,
+and the `is_mem` bracket gates L344. In-process battery pins the
+normalize output triple (ret rewrite with tag raw and empty
+operands, passthrough identity, off-blob jmp kept), the helper
+prefix truth table, the hex/decimal/negative parses, the
+signed-int accept/reject row set, the pointer-cast shape, and the
+memory-operand truth table (count==1 anchors; 10 catches, no
+equivalence rows). Run `10/10 rows caught` with 3 clean rerun
+shakes (census 243 -> 244); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0369 - x86 native-link program tail
 
 The `parse_native_linked_program` segmentation arms the

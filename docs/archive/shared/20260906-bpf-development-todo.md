@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0370 - x86 normalize/scalar tail
+
+- Scope: the entry-return normalize arms and the scalar/text
+  interroga­tion helpers the native-link and
+  encoder-selection batteries leave unrowed beside their picks:
+  the normalize jmp pick L258, the ret tag tile L265-267, the
+  empty-operand tile L268-269, and the passthrough else append
+  L270-271; `is_helper_symbol`'s prefix pick L319,
+  `parse_int`'s hex/decimal fork L324, `is_int`'s signed
+  fullmatch L328, `c_ptr_u64`'s cast shape L336, and
+  `is_mem`'s bracket gates L344.
+- Harness: untracked `build/mut_x86_arm_annot0370.py` pins the
+  normalize output triple (ret rewrite with tag raw and empty
+  operands, passthrough identity, off-blob jmp kept), the helper
+  prefix truth table, the hex/decimal/negative parses, the
+  signed-int accept/reject row set, the pointer-cast shape, and
+  the memory-operand truth table.
+- Result: 10/10 rows caught (the jmp pick and the tag repaints
+  break the ret triple, the prefix/fork/cast/bracket repaints flip
+  their truth tables, and the decimal fork churns on `0x2a`).
+  Census 243 -> 244.
+
 ## Step 0369 - x86 native-link program tail
 
 - Scope: the `parse_native_linked_program` segmentation arms the

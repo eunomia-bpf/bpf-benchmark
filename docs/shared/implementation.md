@@ -1976,6 +1976,23 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The x86 normalize/scalar tail (the entry-return normalize jmp
+  pick L258, ret tag tile L265-267, empty-operand tile L268-269,
+  and passthrough else append L270-271 of
+  `normalize_native_link_entry_returns`, plus the
+  `is_helper_symbol` prefix pick L319, the `parse_int`
+  hex/decimal fork L324, the `is_int` signed fullmatch L328, the
+  `c_ptr_u64` cast shape L336, and the `is_mem` bracket gates
+  L344 of `kprog/x86/micro-prog/generate_micro_sim_proofs.py` —
+  the tail lane the native-link and encoder-selection batteries
+  leave unrowed beside their picks) rows 10 lines through an
+  in-process battery pinning the normalize output triple (ret
+  rewrite with tag raw and empty operands, passthrough identity,
+  off-blob jmp kept), the helper prefix truth table, the
+  hex/decimal/negative parses, the signed-int accept/reject row
+  set, the pointer-cast shape, and the memory-operand truth
+  table; no equivalence rows and every anchor count==1.
+
   The x86 native-link program tail (the
   `parse_native_linked_program` address set L285, exit fan-out
   head L287, conditional-jmp guard L290, operand guard L291, the
