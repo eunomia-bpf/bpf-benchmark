@@ -1993,6 +1993,28 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0386 rows the arm64 compact region: 22 rows in
+`mut_arm64_compact_step0386.py` (untracked) repaint
+`compact_step`'s head repaint, the addr-to-index dict pick, the
+CompactStep return-type repaint, the JCC/JMP repaints plus the
+COND condition pick, the cbz/cbnz branch-target operand pick and
+kind ternary, the cbz src-reg operand pick, the tbz/tbnz
+branch-target and kind-ternary repaints plus the parse-imm
+payload and src-reg operand pick, the bl/blr opcode gates, the
+helper-symbol gate and helper-name payloads for both bl and blr,
+the external-target check, the CALL target arithmetic, the blr
+no-helper raise, the RET repaint, and the OP-tail encode payload
+repaint, plus `compact_helper_defines`'s head repaint, the
+enumerate base and #define payload, and the `if lines:` gate —
+the compact lanes the compact-switch battery leaves unrowed
+beside its step-matrix tiles. The battery pins the
+JCC/JMP/CBZ/CBNZ/TBZ/TBNZ/CALL/HELPER/RET/OP arm outputs (kind,
+reg src, imm payload, helper name, target index), the blr/bl
+raise messages, and the helper-defines list and helper-switch
+banner lines (count==1 anchors; 22 catches, no equivalence
+rows), census 259 -> 260, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0384 rows the x86 program render dispatch + native
 ret-dispatch: 35 rows in `mut_x86_program_render0384.py`
 (untracked) repaint `render_program`'s head repaint, the

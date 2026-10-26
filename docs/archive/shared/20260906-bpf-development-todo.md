@@ -16111,6 +16111,29 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0386 - arm64 compact step + helper defines
+
+- Scope: the arm64 compact region the compact-switch battery
+  leaves unrowed: `compact_step`'s head repaint, the
+  addr-to-index dict pick, the CompactStep return-type repaint,
+  the JCC/JMP repaints plus the COND condition pick, the
+  cbz/cbnz branch-target operand pick and kind ternary, the cbz
+  src-reg operand pick, the tbz/tbnz branch-target and
+  kind-ternary repaints plus the parse-imm payload and src-reg
+  operand pick, the bl/blr opcode gates, the helper-symbol gate
+  and helper-name payloads for both bl and blr, the
+  external-target check, the CALL target arithmetic, the blr
+  no-helper raise, the RET repaint, the OP-tail encode payload
+  repaint, plus `compact_helper_defines`'s head repaint, the
+  enumerate base and #define payload, and the `if lines:` gate.
+- Harness: untracked `build/mut_arm64_compact_step0386.py`
+  (template 0385) pins the JCC/JMP/CBZ/CBNZ/TBZ/TBNZ/CALL/
+  HELPER/RET/OP arm outputs (kind, reg src, imm payload, helper
+  name, target index), the blr/bl raise messages, and the
+  helper-defines list and helper-switch banner lines.
+- Result: 22/22 rows caught (three clean rerun shakes). Census
+  259 -> 260.
+
 ## Step 0384 - x86 program render dispatch + native ret-dispatch
 
 - Scope: the program renderer's dispatch head and the native

@@ -5707,6 +5707,31 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0386 - arm64 compact step + helper defines
+
+The arm64 compact region the compact-switch battery leaves
+unrowed: the 22-row untracked
+`build/mut_arm64_compact_step0386.py` rows `compact_step`'s
+head repaint, the addr-to-index dict pick, the CompactStep
+return-type repaint, the JCC/JMP repaints plus the COND
+condition pick, the cbz/cbnz branch-target operand pick and
+kind ternary, the cbz src-reg operand pick, the tbz/tbnz
+branch-target and kind-ternary repaints plus the parse-imm
+payload and src-reg operand pick, the bl/blr opcode gates, the
+helper-symbol gate and helper-name payloads for both bl and
+blr, the external-target check, the CALL target arithmetic,
+the blr no-helper raise, the RET repaint, the OP-tail encode
+payload repaint, plus `compact_helper_defines`'s head repaint,
+the enumerate base and #define payload, and the `if lines:`
+gate. In-process battery pins the
+JCC/JMP/CBZ/CBNZ/TBZ/TBNZ/CALL/HELPER/RET/OP arm outputs
+(kind, reg src, imm payload, helper name, target index), the
+blr/bl raise messages, and the helper-defines list and
+helper-switch banner lines (count==1 anchors; 22 catches). Run
+`22/22 rows caught` with 3 clean rerun shakes (census 259 ->
+260); golden gate `make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0384 - x86 program render dispatch + native ret-dispatch
 
 The program renderer's dispatch head and the native
