@@ -5707,6 +5707,25 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0417 - arm64 helper-track/append recon sweep
+
+The arm64 helper-tracking and append_insn
+region: the 24-row untracked
+`build/mut_arm64_helper_track_append0417.py`
+repaints written_gpr's gate/pick ladder,
+mov_immediate's `#` gate and parse_imm
+return, mov_source_gpr's pick and slice,
+helper_calls_by_addr's lookup ladder (the
+last_helper_imms fallback pinned by the
+#5-then-#99 reassign fixture, the pop
+fallback as a `del` repaint), and
+append_insn's branch/call/ret arm emits plus
+the RUN_OP3 tail and label format. Run `24/24
+rows caught` with 3 clean rerun shakes
+(census 288 -> 289); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0416 - arm64 compact-render emit recon sweep
 
 The arm64 compact-render emit region: the

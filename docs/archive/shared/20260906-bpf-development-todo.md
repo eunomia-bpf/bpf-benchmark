@@ -16179,6 +16179,34 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0417 - arm64 helper-track/append recon sweep
+
+- Scope: written_gpr (GPR_WRITE_OPS gate,
+  operands gate, dst pick, [wx] fullmatch and
+  slice), mov_immediate (# gate, parse_imm
+  return), mov_source_gpr (src pick, fullmatch,
+  slice), helper_calls_by_addr (blr_target_reg
+  pick, HELPER_IDENTS reg_imms lookup,
+  last_helper_imms fallback, helpers store,
+  mov_immediate store + membership copy,
+  mov_source_gpr copy stores, pop fallback,
+  return), and append_insn (b.** JCC, b JMP,
+  cbz/cbnz, tbz/tbnz, bl helper-symbol call,
+  bl target ValueError, ARM64_SIM_A64_CALL,
+  blr helper-call, ret, RUN_OP3 tail, label).
+- Harness: untracked
+  `build/mut_arm64_helper_track_append0417.py`
+  arms direct helper_calls_by_addr track
+  fixtures (direct slot, reg copy, stale-slot
+  drop, non-helper imm, popped reg, ldr-loaded
+  reg, xzr write, recopy, #5-then-#99
+  reassign) and append_insn arm fixtures.
+- Result: 24/24 rows caught (three clean rerun
+  shakes). Unrowable: def headers, the
+  dict-init annotation lines, guard-only
+  forks, and the try/except frame lines.
+  Census 288 -> 289.
+
 ## Step 0416 - arm64 compact-render emit recon sweep
 
 - Scope: the arm64 render_program_compact

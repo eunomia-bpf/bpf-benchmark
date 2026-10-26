@@ -1993,6 +1993,23 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0417 rows the arm64 helper-tracking and
+append_insn region: 24 rows in
+`mut_arm64_helper_track_append0417.py`
+(untracked) repaint written_gpr's gate/pick
+ladder, mov_immediate's `#` gate and
+parse_imm return, mov_source_gpr's pick and
+slice, helper_calls_by_addr's lookup ladder
+(the last_helper_imms fallback pinned by the
+#5-then-#99 reassign fixture, the pop
+fallback as a `del` repaint), and
+append_insn's branch/call/ret arm emits plus
+the RUN_OP3 tail and label format, through
+direct helper-track and append fixtures
+(count==1 anchors; 24 catches, no equivalence
+rows), census 288 -> 289, and stays untracked
+in `kprog/formal/build/`.
+
 Step 0416 rows the arm64 compact-render emit
 region: 21 rows in
 `mut_arm64_compact_render_emits0416.py`
