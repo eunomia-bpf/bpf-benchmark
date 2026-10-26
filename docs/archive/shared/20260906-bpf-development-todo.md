@@ -16141,6 +16141,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 45/45 rows caught (three clean rerun shakes).
   Census 277 -> 278.
 
+## Step 0405 - x86 register table and enc defaults
+
+- Scope: the region the parse-side battery leaves
+  unrowed: PTR_WIDTH width entries, the REGS builder
+  loop (names iterate, RAX/RBX/RCX/RDX/RSP/RBP subname
+  repaints, width-ladder 64/32/16/8 rungs and endswith
+  gates, both shift arms, REGS[name] store),
+  WIDTH_CONST width key entries, and enc() dst/flags
+  signature defaults.
+- Harness: untracked `build/mut_x86_reg_table0405.py`
+  (template 0404) pins REGS/PTR_WIDTH/WIDTH_CONST
+  identities over the subname palette (eax, ax, al,
+  bl, cl/ch, dl/dh, spl, bp, r8b, bpl, dil), a
+  Bench/NativeInsn/EncodedInsn field pin, the
+  import-attr check, and enc() default-arg reads;
+  docstring/import/comment repaints recorded as
+  output-invariant (no execution semantics).
+- Result: 27/27 rows caught (three clean rerun shakes).
+  Census 278 -> 279.
+
 ## Step 0403 - x86 branch-or-ret and config plumbing
 
 - Scope: the x86 step-lowering, branch-or-ret, and

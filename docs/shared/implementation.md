@@ -1993,6 +1993,26 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0405 rows the x86 register-table and enc-signature
+region: 27 rows in `mut_x86_reg_table0405.py`
+(untracked) repaint the PTR_WIDTH width entries, the
+REGS builder loop (names iterate, the RAX/RBX/RCX/RDX/
+RSP/RBP subname repaints, the width-ladder 64/32/16/8
+rungs and their endswith gates, both shift arms, and
+the REGS[name] store), the WIDTH_CONST width key
+entries, and enc()'s dst/flags signature defaults —
+the cells the parse-side battery leaves unrowed. The
+battery pins REGS/PTR_WIDTH/WIDTH_CONST identities
+over the subname palette (eax, ax, al, bl, cl/ch,
+dl/dh, spl, bp, r8b, bpl, dil), a Bench/NativeInsn/
+EncodedInsn field pin, the import-attr check, and
+enc() default-arg reads, with the stale docstring,
+import, and comment repaints recorded as
+output-invariant (they carry no execution semantics;
+count==1 anchors; 27 catches, no equivalence rows),
+census 278 -> 279, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0404 rows the x86 parse-side region: 45 rows in
 `mut_x86_parse_side0404.py` (untracked) repaint the
 module head through the mem/branch helpers — the

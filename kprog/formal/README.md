@@ -5707,6 +5707,28 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0405 - x86 register table and enc defaults
+
+The region the parse-side battery leaves unrowed: the
+27-row untracked `build/mut_x86_reg_table0405.py`
+rows the PTR_WIDTH width entries, the REGS builder
+loop (names iterate, the RAX/RBX/RCX/RDX/RSP/RBP
+subname repaints, the width-ladder 64/32/16/8 rungs
+and their endswith gates, both shift arms, and the
+REGS[name] store), the WIDTH_CONST width key entries,
+and enc()'s dst/flags signature defaults. The battery
+pins REGS/PTR_WIDTH/WIDTH_CONST identities over the
+subname palette (eax, ax, al, bl, cl/ch, dl/dh, spl,
+bp, r8b, bpl, dil), a Bench/NativeInsn/EncodedInsn
+field pin, the import-attr check, and enc()
+default-arg reads, with the stale docstring, import,
+and comment repaints recorded as output-invariant
+(they carry no execution semantics; count==1 anchors;
+27 catches). Run `27/27 rows caught` with 3 clean
+rerun shakes (census 278 -> 279); golden gate `make
+check` rc 0 with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases.
+
 ### Step 0404 - x86 parse-side region
 
 The module head through the mem/branch helpers the
