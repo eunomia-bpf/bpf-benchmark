@@ -1976,6 +1976,24 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0382 rows the x86 subroutine walker + chunk flatten: 15
+rows in `mut_x86_subroutine0382.py` (untracked) repaint
+`render_x86_subroutine`'s head repaint and count-annotate tail,
+the native-subroutine banner and `x86_l_` label emits, the
+`append_branch_or_ret` subroutine flag, the RUN_OP step-macro
+and SUB_RET ret-statement repaints, the addrs-set scan, the
+next-addrs map pick, plus `flatten_chunk_insns`'s head repaint,
+the main-sequences init, the subfunction extend, the next-addr
+payload, the chunked-loop tail, and `chunk_for_addr`'s head
+repaint and in-chunk hit arm — the walker region the
+chunk-branch battery leaves unrowed beside its walker gates.
+The battery pins the subroutine banner/label/MOV_IMM/CALL/
+SUB_RET/SUB_JCC emits, the external-target raise, the
+register-call lane, the flatten sequence payload, and the addr
+hits/miss (count==1 anchors; 15 catches, no equivalence rows),
+census 255 -> 256, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0381 rows the chunked branch-or-ret + call stack: 21 rows
 in `mut_x86_chunk_branch0381.py` (untracked) repaint
 `append_chunk_branch_or_ret`'s head repaint, the jcc gate with

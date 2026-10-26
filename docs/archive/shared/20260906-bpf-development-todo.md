@@ -16092,6 +16092,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0382 - x86 subroutine walker + chunk flatten
+
+- Scope: the subroutine body walker and its chunk-item
+  flatten: `render_x86_subroutine`'s head repaint and
+  count-annotate tail, the native-subroutine banner and
+  `x86_l_` label emits, the `append_branch_or_ret` subroutine
+  flag, the RUN_OP step-macro and SUB_RET ret-statement
+  repaints, the addrs-set scan and next-addrs map pick, plus
+  `flatten_chunk_insns`'s head repaint, the main-sequences
+  init, the subfunction extend, the next-addr payload, the
+  chunked-loop tail, and `chunk_for_addr`'s head repaint and
+  in-chunk hit arm.
+- Harness: untracked `build/mut_x86_subroutine0382.py`
+  (template 0381) pins the subroutine banner/label/MOV_IMM/
+  CALL/SUB_RET/SUB_JCC emits, the external-target raise, the
+  register-call lane, the flatten sequence payload, and the
+  addr hits/miss.
+- Result: 15/15 rows caught (three clean rerun shakes). Census
+  255 -> 256.
+
 ## Step 0381 - x86 chunked branch-or-ret + call stack
 
 - Scope: the chunked x86 renderer's branch/ret/call walker and

@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0382 - x86 subroutine walker + chunk flatten
+
+The subroutine body walker and its chunk-item flatten: the
+15-row untracked `build/mut_x86_subroutine0382.py` rows
+`render_x86_subroutine`'s head repaint and count-annotate tail,
+the native-subroutine banner and `x86_l_` label emits, the
+`append_branch_or_ret` subroutine flag, the RUN_OP step-macro
+and SUB_RET ret-statement repaints, the addrs-set scan, the
+next-addrs map pick, plus `flatten_chunk_insns`'s head repaint,
+the main-sequences init, the subfunction extend, the next-addr
+payload, the chunked-loop tail, and `chunk_for_addr`'s head
+repaint and in-chunk hit arm. In-process battery pins the
+subroutine banner/label/MOV_IMM/CALL/SUB_RET/SUB_JCC emits, the
+external-target raise, the register-call lane, the flatten
+sequence payload, and the addr hits/miss (count==1 anchors; 15
+catches). Run `15/15 rows caught` with 3 clean rerun shakes
+(census 255 -> 256); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0381 - x86 chunked branch-or-ret + call stack
 
 The chunked x86 renderer's branch/ret/call walker and its stack
