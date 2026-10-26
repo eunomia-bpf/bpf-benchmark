@@ -5687,6 +5687,29 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0355 - parse-flats and map arms
+
+The parse-side arm64 generator helpers the earlier batteries row
+only partially: the 7-row untracked `build/mut_parse_flat0355.py`
+rows the arm64 `split_operands` tail-part flush pick L161-162, the
+`parse_flat_instructions` relocation scan regex L169, the
+`load_rodata16` `.native_link_rodata` index pick L132, the
+`rodata_bytes` objdump-reject empty return L108-109, the
+`program_kind` xdp fall-through L219, the `default_program_symbol`
+`_xdp` suffix pick L228, and the `mem_aux` ARM64_AUX_MEM f-string
+L353 of `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` —
+arms the split-pointer, parse-flat, native-entry, parse-rodata,
+small-helpers, and encoder-selection batteries leave unrowed beside
+their siblings. In-process battery pins the operand tuple split,
+the objdump-reject empty return, the kind/suffix paints, a
+fixture-driven rodata16 symbol-table read (`subprocess`-stubbed
+line with a `rodata_bytes` override), the relocation annotator over
+a bl-with-reloc flat disassembly line, and the AUX_MEM paint
+(count==1 anchors; 7 catches, no equivalence rows). Run `7/7 rows
+caught` with 3 clean rerun shakes (census 228 -> 229); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0354 - generator micro-helper residual
 
 The walker-side arm64 generator helpers the render pipeline battery

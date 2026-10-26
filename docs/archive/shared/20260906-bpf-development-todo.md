@@ -16092,6 +16092,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0355 - parse-flats and map arms
+
+- Scope: the parse-side arm64 generator helpers the earlier
+  batteries row only partially in
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`
+  (`split_operands` L161-162: the tail-part flush pick after the
+  comma arm the split-pointer battery owns;
+  `parse_flat_instructions` L169: the relocation scan regex the
+  parse-flat battery rows only through its stripped symbol
+  repaint; `load_rodata16` L132: the `.native_link_rodata` index
+  pick the native-entry battery leaves beside its bound/size
+  pairs; `rodata_bytes` L108-109: the objdump-reject empty return
+  the parse-rodata battery does not own; `program_kind` L219: the
+  xdp fall-through beside the cgroup/tc arms;
+  `default_program_symbol` L228: the `_xdp` suffix pick beside its
+  stage2/`_prog` siblings; `mem_aux` L353: the ARM64_AUX_MEM
+  f-string beside the PRE/POST flag arms).
+- Harness: 7-row untracked `build/mut_parse_flat0355.py`
+  (census 228 -> 229): 7 catches, 0 equivalence rows; anchors
+  count==1; in-process battery pins the operand tuple split, the
+  objdump-reject empty return, the kind/suffix paints, a
+  fixture-driven rodata16 symbol-table read (`subprocess`-stubbed
+  symbol-table line with a rodata_bytes override), the relocation
+  annotator over a bl-with-reloc flat disassembly line, and the
+  AUX_MEM paint.
+- Result: `7/7 rows caught`, 3 clean rerun shakes green; golden
+  gate `make check` rc 0 with 210 `cross-check: OK` banners, final
+  arm64 decode host 1410 cases.
+
 ## Step 0354 - generator micro-helper residual
 
 - Scope: the walker-side arm64 generator helpers the render

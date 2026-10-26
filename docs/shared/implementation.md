@@ -1963,6 +1963,24 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The parse-side arm64 generator helpers (the `split_operands`
+  tail-part flush pick L161-162, the `parse_flat_instructions`
+  relocation scan regex L169, the `load_rodata16`
+  `.native_link_rodata` index pick L132, the `rodata_bytes`
+  objdump-reject empty return L108-109, the `program_kind` xdp
+  fall-through L219, the `default_program_symbol` `_xdp` suffix
+  pick L228, and the `mem_aux` ARM64_AUX_MEM f-string L353 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — arms the
+  split-pointer, parse-flat, native-entry, parse-rodata,
+  small-helpers, and encoder-selection batteries leave unrowed
+  beside their siblings) rows 7 lines through an in-process battery
+  pinning the operand tuple split, the objdump-reject empty
+  return, the kind/suffix paints, a fixture-driven rodata16
+  symbol-table read (`subprocess`-stubbed line with a
+  `rodata_bytes` override), the relocation annotator over a
+  bl-with-reloc flat disassembly line, and the AUX_MEM paint; no
+  equivalence rows and every anchor count==1.
+
   The walker-side arm64 generator helpers plus the x86 reg_info
   residual (the `written_gpr` GPR_WRITE_OPS gate, `[wx]` dst
   pattern pick, and empty-operands None gate L620-628, the
