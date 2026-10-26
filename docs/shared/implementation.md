@@ -1993,6 +1993,26 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0401 rows the x86 render residual: 24 rows in
+`mut_x86_render_resid0401.py` (untracked) repaint the
+chunk loop break, render_program's ret-statement default,
+annotated-fanout, total-insns, entry-addr,
+has-direct-branch-target gate, chunk-threshold gate, xdp
+declare pick, sim-header path, append_branch_or_ret's
+call-functions keyword, write_one's output-path,
+prelude-gate, render-kwarg, and return, and main's
+mkdir, source-dir pick, only set, written declaration,
+bench loop, only filter, written append, path loop,
+generated summary, and rc-0 return — the residual tiles
+the render body, chunk driver, and enc-driver batteries
+leave unrowed. The battery pins the xdp/tc/cgroup_skb
+declare picks, the self-call fan-out, the chunked
+boundary fixture, the stubbed write_one pair, and the
+end-to-end main run including the rc-0 return
+(count==1 anchors; 24 catches, no equivalence rows),
+census 274 -> 275, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0400 rows the x86 non-chunked render_program body:
 28 rows in `mut_x86_render_prog0400.py` (untracked)
 repaint render_program's signature defaults, self-call

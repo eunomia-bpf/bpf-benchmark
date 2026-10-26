@@ -16111,6 +16111,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0401 - x86 render residual
+
+- Scope: the x86 render residual the render body,
+  chunked, and driver batteries leave unrowed: chunk
+  loop break repaint, ret-statement default repaint,
+  annotated-fanout repaint, total-insns repaint,
+  entry-addr repaint, has-direct-branch-target gate
+  repaint, chunk-threshold gate repaint, xdp declare
+  pick repaint, sim-header path repaint, call-functions
+  keyword repaint, write_one output-path/prelude-gate/
+  render-kwarg/return repaints, and main mkdir, srcdir
+  pick, only set, written decl, bench loop, only filter,
+  written append, path loop, generated summary, and rc-0
+  return repaints.
+- Harness: untracked `build/mut_x86_render_resid0401.py`
+  (template 0400) pins the xdp/tc/cgroup_skb declare
+  picks, the self-call fan-out, the chunked boundary
+  fixture, the stubbed write_one pair, and the
+  end-to-end main run including the rc-0 return.
+- Result: 24/24 rows caught (three clean rerun shakes).
+  Census 274 -> 275.
+
 ## Step 0400 - x86 render program body
 
 - Scope: the x86 non-chunked render_program body the
