@@ -16092,6 +16092,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0365 - x86 parse-asm rows
+
+- Scope: the x86 objdump row-walk free arms the head-route battery
+  leaves unrowed beside its colon/reloc picks: the no-colon skip
+  L139, the hex-prefix fullmatch L143, the tab-field split L145,
+  the `lock` prefix consume L151, the lowercase-mnemonic match
+  L153, and the NativeInsn push with its hex address parse L156.
+- Harness: untracked `build/mut_x86_arm_annot0365.py` pins the
+  no-colon skip, the hex and non-hex prefix pair, the 2-field skip,
+  the lock-prefix mnemonic rewrite, the uppercase-mnemonic reject,
+  and the emitted record's addr/raw fidelity.
+- Result: 6/6 rows caught (the separator repaint drops the record,
+  the digit-only repaint drops hex-prefixed records, the
+  space-split repaint breaks field indexing, the lockq repaint
+  leaks the prefix, the uppercase repaint rejects all rows, and
+  the octal repaint shifts the address). Census 238 -> 239.
+
 ## Step 0364 - x86 memory terms
 
 - Scope: the x86 memory-term parse free arms the operand-wrappers

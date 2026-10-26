@@ -1976,6 +1976,18 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The x86 objdump row-walk arms (the no-colon skip L139, the
+  hex-prefix fullmatch L143, the tab-field split L145, the `lock`
+  prefix consume L151, the lowercase-mnemonic match L153, and the
+  `NativeInsn` push with its hex address parse L156 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the
+  row-walk lane the head-route battery leaves unrowed beside its
+  colon/reloc picks) rows 6 lines through an in-process battery
+  pinning the no-colon skip, the hex and non-hex prefix pair, the
+  2-field skip, the lock-prefix mnemonic rewrite, the
+  uppercase-mnemonic reject, and the emitted record's addr/raw
+  fidelity; no equivalence rows and every anchor count==1.
+
   The x86 memory-term arms (the `parse_mem_terms` bracket regex
   L363, its dash-to-`+-` negate trick L366, the else-index register
   pick L384-385, the `mem_aux` FULL-width emit L396, and the plain

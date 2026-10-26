@@ -5687,6 +5687,22 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0365 - x86 parse-asm rows
+
+The x86 objdump row-walk free arms the head-route battery leaves
+unrowed beside its colon/reloc picks: the 6-row untracked
+`build/mut_x86_arm_annot0365.py` rows the no-colon skip L139, the
+hex-prefix fullmatch L143, the tab-field split L145, the `lock`
+prefix consume L151, the lowercase-mnemonic match L153, and the
+NativeInsn push with its hex address parse L156. In-process battery
+pins the no-colon skip, the hex and non-hex prefix pair, the
+2-field skip, the lock-prefix mnemonic rewrite, the
+uppercase-mnemonic reject, and the emitted record's addr/raw
+fidelity (count==1 anchors; 6 catches, no equivalence rows). Run
+`6/6 rows caught` with 3 clean rerun shakes (census 238 -> 239);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0364 - x86 memory terms
 
 The x86 memory-term parse free arms the operand-wrappers and
