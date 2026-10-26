@@ -16111,6 +16111,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0394 - arm64 helper defines/switch
+
+- Scope: the arm64 compact-helper emission helpers the
+  compact batteries leave unrowed:
+  compact_helper_defines' enumerate-loop repaint and the
+  per-helper define repaint, plus
+  append_compact_helper_switch's signature repaint and the
+  call-helper macro head/do/switch/case-head/case-tail/
+  default/brace/while tiles it emits.
+- Harness: untracked `build/mut_arm64_helper_switch0394.py`
+  (template 0393) calls compact_helper_defines and
+  append_compact_helper_switch directly over two-helper and
+  one-helper fixtures and pins the indexed
+  ARM64_SIM_C_HELPER defines, the trailing blank, and the
+  exact backslash-continued ARM64_SIM_C_CALL_HELPER
+  do/switch/case/default/while(0) switch text.
+- Result: 12/12 rows caught (three clean rerun shakes). Census
+  267 -> 268.
+
 ## Step 0393 - arm64 append_insn branch tiles
 
 - Scope: the arm64 append_insn region the decode/branch

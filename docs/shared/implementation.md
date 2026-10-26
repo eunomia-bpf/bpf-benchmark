@@ -1993,6 +1993,23 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0394 rows the arm64 compact-helper emission helpers:
+12 rows in `mut_arm64_helper_switch0394.py` (untracked)
+repaint `compact_helper_defines`' enumerate-loop repaint and
+the per-helper define repaint, plus
+`append_compact_helper_switch`'s signature repaint and the
+call-helper macro head/do/switch/case-head/case-tail/
+default/brace/while tiles it emits — the tiles the
+compact-render batteries leave unrowed beside their
+step-table and interpreter-loop lanes. The battery calls
+compact_helper_defines and append_compact_helper_switch
+directly over two-helper and one-helper fixtures and pins
+the indexed ARM64_SIM_C_HELPER defines, the trailing blank,
+and the exact backslash-continued ARM64_SIM_C_CALL_HELPER
+do/switch/case/default/while(0) switch text (count==1
+anchors; 12 catches, no equivalence rows), census 267 -> 268,
+and stays untracked in `kprog/formal/build/`.
+
 Step 0393 rows the arm64 non-compact per-insn emit region:
 18 rows in `mut_arm64_append_insn0393.py` (untracked) repaint
 `append_insn`'s signature repaints (all_addrs, next_addr,
