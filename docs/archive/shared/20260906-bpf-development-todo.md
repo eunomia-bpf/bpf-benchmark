@@ -16092,6 +16092,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0354 - generator micro-helper residual
+
+- Scope: the walker-side arm64 generator helpers the render
+  pipeline battery only partially rows in
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`
+  (`written_gpr` L620-628: the GPR_WRITE_OPS gate, the `[wx]` dst
+  pattern pick, the empty-operands None gate; `mov_immediate`
+  L630-639: the parse_imm arm and the except-None tail;
+  `blr_target_reg` L613-620: the `target[1:]` pick; `c_ident`
+  L364-367: the charset-mask body the naming battery does not
+  own) plus the x86 `parse_mem_terms` reg_info residual picks (the
+  index-branch `parsed is not None` gate and body and the
+  base-branch parsed pick and gate L374-383) that
+  `mut_x86_operand_wrappers` leaves unrowed beside its overflow
+  pick.
+- Harness: 10-row untracked `build/mut_gen_helpers_0354.py`
+  (census 227 -> 228): 10 catches, 0 equivalence rows; anchors
+  count==1 in their own target generators; in-process battery
+  imports both generator modules side by side and pins the walker
+  flow (mov-immediate feeds a blr helper call at addr 8 through
+  `helper_calls_by_addr`), the direct helper returns including the
+  write-gate raise arm, the digit-lead `c_ident` paint
+  (`a9` -> `a9_1` baseline, `a_1` under the charset paint), and the
+  x86 mem base/index picks over eax/ecx/rax/rbx/r12/r13/rsp with a
+  -0x10 displacement.
+- Result: `10/10 rows caught`, 3 clean rerun shakes green;
+  golden gate `make check` rc 0 with 210 `cross-check: OK`
+  banners, final arm64 decode host 1410 cases.
+
 ## Step 0353 - generator helper trio + scale assign
 
 - Scope: the tiny arm64 generator helpers the encode/render

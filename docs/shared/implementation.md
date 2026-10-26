@@ -1963,6 +1963,24 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The walker-side arm64 generator helpers plus the x86 reg_info
+  residual (the `written_gpr` GPR_WRITE_OPS gate, `[wx]` dst
+  pattern pick, and empty-operands None gate L620-628, the
+  `mov_immediate` parse_imm arm and except-None tail L630-639, the
+  `blr_target_reg` `target[1:]` pick L613-620, and the `c_ident`
+  charset-mask body L364-367 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`, together
+  with the `parse_mem_terms` index-branch gate/body and
+  base-branch pick/gate L374-383 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` that the
+  operand-wrappers battery leaves unrowed beside its overflow
+  pick) rows 10 lines through an in-process battery importing both
+  generator modules side by side and pinning the
+  `helper_calls_by_addr` walker flow (mov-immediate feeds a blr
+  helper call), the direct helper returns, the digit-lead
+  `c_ident` paint, and the x86 mem base/index picks; no
+  equivalence rows and every anchor count==1.
+
   The tiny arm64 generator helpers plus the x86 scale assignment
   (the `c_u64` ULL suffix and 64-bit mask payload L260-261, the
   `width_const` table pick L301-302, and the `reg_or_imm`

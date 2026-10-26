@@ -5687,6 +5687,29 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0354 - generator micro-helper residual
+
+The walker-side arm64 generator helpers the render pipeline battery
+only partially rows, plus the x86 reg_info residual: the 10-row
+untracked `build/mut_gen_helpers_0354.py` rows the arm64
+`written_gpr` GPR_WRITE_OPS gate, `[wx]` dst pattern pick, and
+empty-operands None gate L620-628, the `mov_immediate` parse_imm
+arm and except-None tail L630-639, the `blr_target_reg`
+`target[1:]` pick L613-620, and the `c_ident` charset-mask body
+L364-367 of `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`,
+together with the x86 `parse_mem_terms` index-branch gate/body and
+base-branch pick/gate L374-383 that the operand-wrappers battery
+leaves unrowed beside its overflow pick. In-process battery imports
+both generator modules side by side and pins the
+`helper_calls_by_addr` walker flow (mov-immediate feeds a blr
+helper call at addr 8), the direct helper returns including the
+write-gate raise arm, the digit-lead `c_ident` paint, and the x86
+mem base/index picks over eax/ecx/rax/rbx/r12/r13/rsp with a -0x10
+displacement (count==1 anchors; 10 catches, no equivalence rows).
+Run `10/10 rows caught` with 3 clean rerun shakes (census 227 ->
+228); golden gate `make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0353 - generator helper trio + scale assign
 
 The tiny arm64 generator helpers the encode/render batteries row
