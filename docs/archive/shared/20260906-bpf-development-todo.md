@@ -16111,6 +16111,32 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0403 - x86 branch-or-ret and config plumbing
+
+- Scope: the x86 step-lowering, branch-or-ret, and
+  config-plumbing cells the encode and branch batteries
+  leave unrowed: append_encoded_step direct select,
+  step-macro indent, opcode, and flags payload repaints,
+  append_branch_or_ret signature defaults (indent,
+  next-addr, call-functions, ret-statement,
+  return-targets), branch/jmp macro picks,
+  case-label/jmp-tile/jmp-label f-string tiles,
+  call-functions gate, next-addr gate, return-address
+  ValueError, next-addr hex, append-step fallthrough,
+  program_kind tags/tc/xdp/cgroup-skb returns,
+  load_benches signature/yaml/bench-comp,
+  source_prelude signature/read/match/replace/
+  include-literals/return, and the dst==src zero.
+- Harness: untracked `build/mut_x86_branch_cfg0403.py`
+  (template 0402) arms append_branch_or_ret directly
+  over reloc-target insns (subroutine jcc/jmp, jcc case,
+  jmp, call tile, three ValueErrors), a real
+  source_prelude fixture over a temp .bpf.c with a SEC
+  banner, a real load_benches fixture over a temp yaml,
+  and program_kind checks.
+- Result: 35/35 rows caught (three clean rerun shakes).
+  Census 276 -> 277.
+
 ## Step 0402 - x86 tail cells
 
 - Scope: the x86 generator tail cells the residual

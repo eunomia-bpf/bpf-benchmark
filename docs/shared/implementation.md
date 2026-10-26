@@ -1993,6 +1993,31 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0403 rows the x86 step-lowering, branch-or-ret, and
+config-plumbing cells: 35 rows in
+`mut_x86_branch_cfg0403.py` (untracked) repaint
+append_encoded_step's direct select, step-macro indent,
+opcode, and flags payload; append_branch_or_ret's
+signature defaults (indent, next-addr, call-functions,
+ret-statement, return-targets), branch/jmp macro picks,
+case-label/jmp-tile/jmp-label f-string tiles,
+call-functions and next-addr gates, return-address
+ValueError, next-addr hex, and append-step fallthrough;
+program_kind's tags collection, tc branch, xdp return,
+and cgroup-skb return; load_benches' signature, yaml
+load, and bench comprehension; source_prelude's
+signature, read, match slicing, replace pick, include
+literals, and return; and the dst==src equal-arg zero —
+the cells the encode and branch batteries leave
+unrowed. The battery arms append_branch_or_ret directly
+over reloc-target insns (subroutine jcc/jmp, jcc case,
+jmp, call tiles, the three ValueErrors) plus a real
+source_prelude fixture over a temp .bpf.c with a SEC
+banner, a real load_benches fixture over a temp yaml,
+and program_kind checks (count==1 anchors; 35 catches,
+no equivalence rows), census 276 -> 277, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0402 rows the x86 generator tail cells: 15 rows in
 `mut_x86_tail_cells0402.py` (untracked) repaint
 proof_kind_for_source's underscore sink and kind return,

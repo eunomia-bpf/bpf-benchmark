@@ -5707,6 +5707,36 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0403 - x86 branch-or-ret and config plumbing
+
+The x86 step-lowering, branch-or-ret, and
+config-plumbing cells the encode and branch batteries
+leave unrowed: the 35-row untracked
+`build/mut_x86_branch_cfg0403.py` rows the
+append_encoded_step direct select, step-macro indent,
+opcode, and flags payload repaints, the
+append_branch_or_ret signature defaults (indent,
+next-addr, call-functions, ret-statement,
+return-targets), branch/jmp macro picks,
+case-label/jmp-tile/jmp-label f-string tiles,
+call-functions and next-addr gates, return-address
+ValueError, next-addr hex, and append-step fallthrough
+repaints, the program_kind tags/tc/xdp/cgroup-skb
+return repaints, the load_benches signature/yaml/
+bench-comp repaints, the source_prelude
+signature/read/match/replace/include-literals/return
+repaints, and the dst==src equal-arg zero. The battery
+arms append_branch_or_ret directly over reloc-target
+insns (subroutine jcc/jmp, jcc case, jmp, call tile,
+three ValueErrors) plus a real source_prelude fixture
+over a temp .bpf.c with a SEC banner, a real
+load_benches fixture over a temp yaml, and
+program_kind checks (count==1 anchors; 35 catches). Run
+`35/35 rows caught` with 3 clean rerun shakes (census
+276 -> 277); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0402 - x86 tail cells
 
 The x86 generator tail cells the residual batteries
