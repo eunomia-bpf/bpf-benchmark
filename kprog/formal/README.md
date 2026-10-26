@@ -5707,6 +5707,53 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0412 - x86 rodata syms blob render encode remnants
+
+The loader/parse/encode tails the parse-side and
+append batteries leave unrowed: the 50-row
+untracked `build/mut_x86_rodata_blob_render0412.py`
+rows the CONFIG/PROOF_OBJECT_DIR assigns, the
+NativeInsn/ChunkInsn dataclass field lines
+(raw/mnemonic/operands and the reloc/sim_imm
+defaults), split_operands' parts init,
+parse_asm_text's insns init with the short-line
+gate and the operands split call, section_size's
+objdump -h invocation and its section-match gate,
+rodata_bytes' objdump -s invocation and its
+cwd/PIPE/returncode-gate/bytearray/hex-field/
+extend lines, load_rodata16's out-dict with the
+absent gate, idx pick, idx+2 gate, offset/size/
+name parses, the size>=16 gate, and both
+from_bytes pieces, text_symbol_addrs' out-dict,
+parse_native_link_blob's path tile, is_file
+raise, rodata16 load, objdump -dr invocation,
+symbols load, reloc_target replace tail, and
+3-tuple return, parse_proof_object_program's
+delegate, normalize_native_link_entry_returns'
+operand/branch-target gates, the empty 4-tuple
+gate, the exit_addr max piece and its external-
+branch gate, sub_starts' sorted gate and its
+helper-symbol exclude, encode()'s push/pop width
+ternaries, the cmov header, the scalar-reloc
+map-load pick, the xmm0-store gate, the cmp/test
+width-raise gate, and the cgroup/tc config arms
+plus a write_one source-path tile. The battery
+arms real objdump parses over three synthetic
+proof objects (rodata16 / nonrodata / call-reloc
+with text symbols), direct parse_mem_terms/
+parse_asm_text/rodata_bytes/section_size/
+text_symbol_addrs/load_rodata16/
+parse_native_link_blob/parse_native_linked_
+program/normalize fixtures, encode() over
+pop/cmov/xchg/xmm-load/scalar-map-load/xmm-
+rodata-store/cmp-width-mismatch tiles, and
+write_one renders for the tc/xdp/cgroup_skb
+program kinds plus push/rsp stack-enable pins.
+Run `50/50 rows caught` with 3 clean rerun
+shakes (census 283 -> 284); golden gate
+`make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0411 - x86 parse-side helper and append tail
 
 The mem/branch helper bodies and the append-

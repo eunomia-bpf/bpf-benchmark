@@ -16179,6 +16179,49 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0412 - x86 rodata syms blob render encode remnants
+
+- Scope: the loader/parse/encode tails the
+  parse-side and append batteries leave unrowed:
+  CONFIG/PROOF_OBJECT_DIR assigns, the
+  NativeInsn/ChunkInsn dataclass field lines
+  (raw/mnemonic/operands + reloc/sim_imm
+  defaults), split_operands parts init,
+  parse_asm_text insns init + short-line gate +
+  operands split, section_size objdump -h +
+  section gate, rodata_bytes objdump -s + cwd/
+  PIPE/returncode-gate/bytearray/hex-field/extend
+  lines, load_rodata16 out-dict + absent gate +
+  idx pick + idx+2 gate + offset/size/name + the
+  size>=16 gate + both from_bytes pieces,
+  text_symbol_addrs out-dict, parse_native_link_
+  blob path tile + is_file raise + rodata16 +
+  objdump -dr + symbols + reloc_target replace +
+  3-tuple, parse_proof_object_program delegate,
+  normalize gates, empty 4-tuple, exit_addr max +
+  external gate, sub_starts sorted gate, encode()
+  push/pop width ternaries, cmov header, scalar-
+  reloc map-load pick, xmm0-store gate, cmp/test
+  width-raise gate, cgroup/tc config arms, and a
+  write_one source-path tile.
+- Harness: untracked
+  `build/mut_x86_rodata_blob_render0412.py`
+  (template 0405) arms real objdump parses over
+  three synthetic proof objects (rodata16 /
+  nonrodata / call-reloc with text symbols),
+  direct parse_mem_terms/parse_asm_text/
+  rodata_bytes/section_size/text_symbol_addrs/
+  load_rodata16/parse_native_link_blob/
+  parse_native_linked_program/normalize fixtures,
+  encode() over pop/cmov/xchg/xmm-load/scalar-map-
+  load/xmm-rodata-store/cmp-width-mismatch tiles,
+  and write_one renders for tc/xdp/cgroup_skb plus
+  push/rsp stack-enable pins.
+- Result: 50/50 rows caught (three clean rerun
+  shakes). Unrowable: frozen spec comments,
+  remaining def-line tokens, and the chunk-render
+  tail. Census 283 -> 284.
+
 ## Step 0411 - x86 parse-side helper and append tail
 
 - Scope: the mem/branch helper bodies and the
