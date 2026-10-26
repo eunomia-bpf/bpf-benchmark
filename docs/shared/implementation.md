@@ -1993,6 +1993,36 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0390 rows the x86 chunked-program render residual: 44
+rows in `mut_x86_chunked_resid0390.py` (untracked) repaint
+`render_chunk_function`'s current-chunk set repaint, the
+case-emit tile repaint, the default arm repaint, the
+branch-or-ret call repaints (call and args) and the
+last-next pick, the in-chunk gate repaint, the done and
+next-addr return paints, plus `render_chunked_program`'s
+head repaints (name, subfunctions, kind, prelude, rodata
+params), the flatten pick repaint, the chunks/slice/range
+repaints, the addrs repaint, the call-targets repaints and
+flat-add, the flat bool repaint, the stack scans, the
+mem-scan repaint, the rodata-ident repaint, the abi-pass
+repaint, the chunk loop and render-chunk-function call
+repaints, the first-addr and max-steps repaints, the main
+tail's storage/bind/init/rdi/tag/pc/iter repaints, the
+done-check and break repaints, the min/max addr repaints,
+the prefix repaints (if/else-if chain, range gate, hi line,
+chunk call), the one-done arm repaint, and the write/x-ret
+repaints — the residual lanes the chunk-render batteries
+leave unrowed beside their dispatcher tiles. The battery pins
+the chunk-0 render (switch cases, default, depth gate, stack
+read/pop/ret tiles), the full xdp/tc/cgroup renders (abi
+kinds, skb ctx maps, the PC-loop else arm, the write-out and
+ret tiles), the rodata emit, the stack/deep defines, a push
+render, the 400-insn next-addr return paint, the two-count
+done return paint, and a direct render_chunk_function tile
+pair (count==1 anchors; 44 catches, no equivalence rows),
+census 263 -> 264, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0389 rows the arm64 non-compact program-render region plus
 the driver tail: 34 rows in `mut_arm64_render_driver0389.py`
 (untracked) repaint `render_program`'s head repaint, the

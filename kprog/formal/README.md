@@ -5707,6 +5707,39 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0390 - x86 chunked-program render residual
+
+The x86 chunked-program region the chunk-render batteries
+leave unrowed: the 44-row untracked
+`build/mut_x86_chunked_resid0390.py` rows
+`render_chunk_function`'s current-chunk set repaint, the
+case-emit tile repaint, the default arm repaint, the
+branch-or-ret call repaints (call and args) and the
+last-next pick, the in-chunk gate repaint, the done and
+next-addr return paints, plus `render_chunked_program`'s
+head repaints (name, subfunctions, kind, prelude, rodata
+params), the flatten pick repaint, the chunks/slice/range
+repaints, the addrs repaint, the call-targets repaints and
+flat-add, the flat bool repaint, the stack scans, the
+mem-scan repaint, the rodata-ident repaint, the abi-pass
+repaint, the chunk loop and render-chunk-function call
+repaints, the first-addr and max-steps repaints, the main
+tail's storage/bind/init/rdi/tag/pc/iter repaints, the
+done-check and break repaints, the min/max addr repaints,
+the prefix repaints (if/else-if chain, range gate, hi line,
+chunk call), the one-done arm repaint, and the write/x-ret
+repaints. In-process battery pins the chunk-0 render
+(switch cases, default, depth gate, stack read/pop/ret
+tiles), the full xdp/tc/cgroup renders (abi kinds, skb ctx
+maps, the PC-loop else arm, the write-out and ret tiles),
+the rodata emit, the stack/deep defines, a push render, the
+400-insn next-addr return paint, the two-count done return
+paint, and a direct render_chunk_function tile pair
+(count==1 anchors; 44 catches). Run `44/44 rows caught` with
+3 clean rerun shakes (census 263 -> 264); golden gate `make
+check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0389 - arm64 render_program + driver tail
 
 The arm64 non-compact program-render region the compact
