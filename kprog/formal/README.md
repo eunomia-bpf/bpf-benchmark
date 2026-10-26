@@ -5721,6 +5721,21 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0419 - arm64 native-link/rodata parse recon sweep
+
+The arm64 native-link/rodata parse region:
+the 46-row untracked
+`build/mut_arm64_native_rodata_parse0419.py`
+repaints rodata_bytes' field guards and
+byte-pair extend, load_rodata16's -t table
+binds and slice returns, parse_flat_
+instructions' regex/loop/reloc lane, and
+the parse_native_linked_program ok path.
+Run `46/46 rows caught` with 3 clean rerun
+shakes (census 290 -> 291); golden gate
+`make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0417 - arm64 helper-track/append recon sweep
 
 The arm64 helper-tracking and append_insn

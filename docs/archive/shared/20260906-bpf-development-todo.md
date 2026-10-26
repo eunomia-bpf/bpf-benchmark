@@ -16179,6 +16179,42 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0419 - arm64 native-link/rodata parse recon sweep
+
+- Scope: rodata_bytes (objdump -s invocation,
+  returncode gate + empty return, bytearray
+  accumulator, field guards, even-length gate
+  + byte-pair extend, bytes return),
+  load_rodata16 (data pick, empty-data gate,
+  -t member pick, index bound, offset/size
+  hex binds, name pick, size/offset range
+  gate, both int.from_bytes slice returns),
+  parse_flat_instructions (insns init, insn
+  regex 8-hex gate, line loop, R_AARCH64
+  reloc search + guard, offset strip re.sub,
+  NativeInsn rewrite fields, continue falls,
+  match fallthrough, comment split, asm/
+  command binds, addr hex bind, list append),
+  parse_native_linked_program ok path
+  (symbol pick, proof.o name, is_file gate,
+  missing raise, load_rodata16 bind,
+  OrderedDict/rodata16 return via patched
+  objdump -dr/-s/-t staging), program_kind
+  ladder, default_program_symbol ladder.
+- Harness: untracked
+  `build/mut_arm64_native_rodata_parse0419.py`
+  pins shapes: empty data, objdump failure,
+  guarded lines, odd trailing field; named
+  and anonymous rodata symbol rows; a flat
+  three-insn fixture (reloc lands on the
+  trailing ldr, comment strip, guard lines);
+  the real proof-object ok path.
+- Result: 46/46 rows caught (three clean
+  rerun shakes). Unrowable: the `if not
+  insns` retiling (a len < 1 synonym), the
+  dict(rodata16) copy, the unobserved
+  check= flip. Census 290 -> 291.
+
 ## Step 0418 - arm64 parse-lane recon sweep
 
 - Scope: split_operands (parts/cur/depth init

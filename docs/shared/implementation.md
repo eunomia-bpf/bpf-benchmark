@@ -2005,6 +2005,20 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0419 rows the arm64 native-link/rodata
+parse region: 46 rows in
+`mut_arm64_native_rodata_parse0419.py`
+(untracked) repaint rodata_bytes' field
+guards and byte-pair extend, load_rodata16's
+-t table binds and slice returns,
+parse_flat_instructions' regex/loop/reloc
+lane, and the parse_native_linked_program
+ok path through a patched objdump staging,
+through shape-pinning direct calls (count==1
+anchors; 46 catches, no equivalence rows),
+census 290 -> 291, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0417 rows the arm64 helper-tracking and
 append_insn region: 24 rows in
 `mut_arm64_helper_track_append0417.py`
