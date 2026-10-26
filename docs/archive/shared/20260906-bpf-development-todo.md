@@ -16111,6 +16111,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0387 - arm64 render_program_compact region
+
+- Scope: the arm64 compact program-render region the
+  compact-step battery leaves unrowed:
+  `render_program_compact`'s head repaint, the uses-stack scan
+  repaint, the step-ident repaint, the dispatcher's JCC/CBZ/TBZ
+  shape tiles (JCC select, CBZ/CBNZ and TBZ/TBNZ kind gates,
+  the bit-test value payload, the take paints), plus the tail's
+  C-call-helper repaint, the linked-exit gate, the exit write
+  payload, the no-exit return paint, the license closer repaint,
+  and the step-table header and C-step row paints.
+- Harness: untracked `build/mut_arm64_compact_render0387.py`
+  (template 0386) renders a two-function fixture (mov-imm, b.eq,
+  blr with a known helper register, sp raw, ret, add, bl, ret)
+  under the xdp/tc/cgroup-skb kinds and a linked-exit variant,
+  pinning the def/entry/section templates, the steps array
+  identity, helper names, the STACK define, the 72U guard limit,
+  the step-line, and the linked-exit write/ret tiles.
+- Result: 18/18 rows caught (three clean rerun shakes). Census
+  260 -> 261.
+
 ## Step 0386 - arm64 compact step + helper defines
 
 - Scope: the arm64 compact region the compact-switch battery

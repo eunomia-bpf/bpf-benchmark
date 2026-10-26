@@ -1993,6 +1993,26 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0387 rows the arm64 compact program-render region: 18 rows
+in `mut_arm64_compact_render0387.py` (untracked) repaint
+`render_program_compact`'s head repaint, the uses-stack scan
+repaint, the step-ident repaint, and the dispatcher's JCC/CBZ/
+TBZ shape tiles (JCC select, CBZ/CBNZ and TBZ/TBNZ kind gates,
+the bit-test value payload, and the take paints), plus the
+tail's C-call-helper repaint, the linked-exit gate, the exit
+write payload, the no-exit return paint, the license closer
+repaint, and the step-table header and C-step row paints — the
+compact renderer lanes the compact-step battery leaves unrowed
+beside its per-step tiles. The battery renders a two-function
+fixture (mov-imm, b.eq, blr with a known helper register, sp
+raw, ret, add, bl, ret) under the xdp/tc/cgroup-skb kinds and a
+linked-exit variant, pinning the def/entry/section templates,
+the steps array identity, helper names, the STACK define, the
+72U guard limit, the step-line, and the linked-exit write/ret
+tiles (count==1 anchors; 18 catches, no equivalence rows),
+census 260 -> 261, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0386 rows the arm64 compact region: 22 rows in
 `mut_arm64_compact_step0386.py` (untracked) repaint
 `compact_step`'s head repaint, the addr-to-index dict pick, the

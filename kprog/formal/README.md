@@ -5707,6 +5707,29 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0387 - arm64 render_program_compact region
+
+The arm64 compact program-render region the compact-step
+battery leaves unrowed: the 18-row untracked
+`build/mut_arm64_compact_render0387.py` rows
+`render_program_compact`'s head repaint, the uses-stack scan
+repaint, the step-ident repaint, and the dispatcher's JCC/CBZ/
+TBZ shape tiles (JCC select, CBZ/CBNZ and TBZ/TBNZ kind gates,
+the bit-test value payload, and the take paints), plus the
+tail's C-call-helper repaint, the linked-exit gate, the exit
+write payload, the no-exit return paint, the license closer
+repaint, and the step-table header and C-step row paints.
+In-process battery renders a two-function fixture (mov-imm,
+b.eq, blr with a known helper register, sp raw, ret, add, bl,
+ret) under the xdp/tc/cgroup-skb kinds and a linked-exit
+variant, pinning the def/entry/section templates, the steps
+array identity, helper names, the STACK define, the 72U guard
+limit, the step-line, and the linked-exit write/ret tiles
+(count==1 anchors; 18 catches). Run `18/18 rows caught` with 3
+clean rerun shakes (census 260 -> 261); golden gate `make
+check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0386 - arm64 compact step + helper defines
 
 The arm64 compact region the compact-switch battery leaves
