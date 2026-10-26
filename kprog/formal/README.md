@@ -5707,6 +5707,35 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0389 - arm64 render_program + driver tail
+
+The arm64 non-compact program-render region the compact
+batteries leave unrowed, plus the generate_one/main driver
+tail: the 34-row untracked
+`build/mut_arm64_render_driver0389.py` rows
+`render_program`'s head repaint, the next-addr map repaints,
+the return-addrs pick, the RETURN_CASES define and per-case
+line paints, the rodata loop repaints, and the subroutine
+banner, plus `generate_one`'s head repaint, the
+proof-object-dir repaint, the parse pick, the source join, the
+write call, the compact-render pick, the encoding repaint, and
+the return, plus `main`'s head repaint, the parser repaint,
+the output-dir/proof-object-dir/config/only/compact argument
+paints, the parse-args pick, the output mkdir, the source-dir
+pick, the stage2 branch repaint, the only-set repaint, the
+written-list pick, the generate_one call repaint, the compact
+kwarg repaint, the written loop repaint, the per-path print,
+and the generated-N summary. In-process battery renders the
+two-function fixture (mov-imm, bl, blr with a known helper
+register, sp raw, ret, add, ret) via direct render_program
+pins under the xdp/tc kinds and linked-exit/no-exit variants,
+a generate_one run with a stubbed parse under a temp output
+dir, and end-to-end main() runs over the only-filter and the
+stage2-prelude branch (count==1 anchors; 34 catches). Run
+`34/34 rows caught` with 3 clean rerun shakes (census
+262 -> 263); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0388 - x86 chunk-plumbing helpers
 
 The x86 chunk-plumbing region the chunk-render batteries leave

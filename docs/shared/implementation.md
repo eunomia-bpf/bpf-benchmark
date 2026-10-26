@@ -1993,6 +1993,32 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0389 rows the arm64 non-compact program-render region plus
+the driver tail: 34 rows in `mut_arm64_render_driver0389.py`
+(untracked) repaint `render_program`'s head repaint, the
+next-addr map repaints, the return-addrs pick, the RETURN_CASES
+define and per-case line paints, the rodata loop repaints, and
+the subroutine banner, plus `generate_one`'s head repaint, the
+proof-object-dir repaint, the parse pick, the source join, the
+write call, the compact-render pick, the encoding repaint, and
+the return, plus `main`'s head repaint, the parser repaint, the
+output-dir/proof-object-dir/config/only/compact argument
+paints, the parse-args pick, the output mkdir, the source-dir
+pick, the stage2 branch repaint, the only-set repaint, the
+written-list pick, the generate_one call repaint, the compact
+kwarg repaint, the written loop repaint, the per-path print,
+and the generated-N summary — the lanes the compact batteries
+leave unrowed beside their compact-renderer tiles. The battery
+renders the two-function fixture (mov-imm, bl, blr with a known
+helper register, sp raw, ret, add, ret) via direct
+render_program pins under the xdp/tc kinds and linked-exit/
+no-exit variants, a generate_one run with a stubbed parse under
+a temp output dir, and end-to-end main() runs over the
+only-filter and the stage2-prelude branch (return code,
+per-path print, generated-1 summary, prelude text) (count==1
+anchors; 34 catches, no equivalence rows), census 262 -> 263,
+and stays untracked in `kprog/formal/build/`.
+
 Step 0388 rows the x86 chunk-plumbing region: 27 rows in
 `mut_x86_chunk_plumbing0388.py` (untracked) repaint
 `render_x86_subroutine`'s head repaint, the call-functions dict
