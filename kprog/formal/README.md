@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0376 - x86 encode dispatch head
+
+The x86 `encode()` dispatch head the driver and body-mid
+batteries leave unrowed beside their cells: the 16-row untracked
+`build/mut_x86_arm_annot0376.py` rows the jmp imm tile L471,
+the jcc CC-guard L472, the call helper token L477, the
+memcpy/memset reloc picks with their REG/imm tokens L478-489,
+the call register pick L491, the direct-call token L494, the
+push/pop register tiles L497/501, the setcc-mem token/aux
+tiles L507/508, and the cmov-mem token L518. In-process battery
+pins the jmp imm with and without operands, the jcc
+condition-aux tokens, the call helper/memcpy/memset/register/
+direct tokens and their imm payloads, the push/pop register
+picks, the setcc-mem aux shift, and the cmov-mem token
+(count==1 anchors; 16 catches). Run `16/16 rows caught` with 3
+clean rerun shakes (census 249 -> 250); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases.
+
 ### Step 0375 - x86 encode body-mid residual
 
 The x86 `encode()` body-mid residual the high-supported and

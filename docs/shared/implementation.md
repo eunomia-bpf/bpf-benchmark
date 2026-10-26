@@ -1976,6 +1976,22 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0376 pins the x86 `encode()` dispatch head: 16 rows in
+`mut_x86_arm_annot0376.py` (untracked) repaint the jmp imm tile
+L471, the jcc CC-guard L472, the call helper token L477, the
+memcpy/memset reloc picks with their REG/imm tokens L478-489,
+the call register pick L491, the direct-call token L494, the
+push/pop register tiles L497/501, the setcc-mem token/aux
+tiles L507/508, and the cmov-mem token L518 — the dispatch
+head the driver and body-mid batteries leave unrowed beside
+their cells. The battery pins the jmp imm with and without
+operands, the jcc condition-aux tokens, the call
+helper/memcpy/memset/register/direct tokens and their imm
+payloads, the push/pop register picks, the setcc-mem aux
+shift, and the cmov-mem token (count==1 anchors; 16 catches,
+no equivalence rows), census 249 -> 250, and stays untracked
+in `kprog/formal/build/`.
+
 Step 0375 returns to the x86 `encode()` body-mid residual: 18
 rows in `mut_x86_arm_annot0375.py` (untracked) repaint the cmov
 aux shift pick L521 and reg-cmov return L525, the mov

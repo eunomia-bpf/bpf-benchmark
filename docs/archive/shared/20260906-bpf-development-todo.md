@@ -16092,6 +16092,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0376 - x86 encode dispatch head
+
+- Scope: the x86 `encode()` dispatch head the driver and
+  body-mid batteries leave unrowed beside their cells: the jmp
+  imm tile L471, the jcc CC-guard L472, the call helper token
+  L477, the memcpy/memset reloc picks with their REG/imm tokens
+  L478-489, the call register pick L491, the direct-call token
+  L494, the push/pop register tiles L497/501, the setcc-mem
+  token/aux tiles L507/508, and the cmov-mem token L518.
+- Harness: untracked `build/mut_x86_arm_annot0376.py` (template
+  0370) pins the jmp imm with and without operands, the jcc
+  condition-aux tokens, the call helper/memcpy/memset/register/
+  direct tokens and their imm payloads, the push/pop register
+  picks, the setcc-mem aux shift, and the cmov-mem token.
+- Result: 16/16 rows caught (three clean rerun shakes). Census
+  249 -> 250.
+
 ## Step 0375 - x86 encode body-mid residual
 
 - Scope: the x86 `encode()` body-mid residual the high-supported
