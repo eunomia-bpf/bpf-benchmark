@@ -16111,6 +16111,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0393 - arm64 append_insn branch tiles
+
+- Scope: the arm64 append_insn region the decode/branch
+  batteries leave unrowed: the signature repaints (all_addrs,
+  next_addr, reloc idents), the comment tile repaint, the
+  jcc/jmp/cbz/cbnz/tbz/tbnz emit repaints, the cbz and tbz
+  macro picks, the bl helper-call emit repaint, the bl
+  call-target pick and gate repaint, the bl call emit
+  repaint, the blr helper-call emit repaint, the ret emit
+  repaint, and the run-op tail repaints (op line and
+  width/aux/imm line).
+- Harness: untracked `build/mut_arm64_append_insn0393.py`
+  (template 0389) calls append_insn directly over
+  mov/b.eq/b/cbz/cbnz/tbz/tbnz/bl/blr/ret/add fixtures and
+  pins the comment tile, the exact JCC/JMP/CBZ/CBNZ/TBZ/TBNZ
+  emits, the helper-call emits, the CALL tile with the return
+  address, the unsupported-call-target raise, the RET tile,
+  and the RUN_OP3 tail.
+- Result: 18/18 rows caught (three clean rerun shakes). Census
+  266 -> 267.
+
 ## Step 0392 - x86 chunk dispatcher tail
 
 - Scope: the append_chunk_branch_or_ret signature and tail

@@ -5707,6 +5707,28 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0393 - arm64 append_insn branch tiles
+
+The arm64 append_insn region the decode/branch batteries
+leave unrowed: the 18-row untracked
+`build/mut_arm64_append_insn0393.py` rows the signature
+repaints (all_addrs, next_addr, reloc idents), the comment
+tile repaint, the jcc/jmp/cbz/cbnz/tbz/tbnz emit repaints,
+the cbz and tbz macro picks, the bl helper-call emit
+repaint, the bl call-target pick and gate repaint, the bl
+call emit repaint, the blr helper-call emit repaint, the ret
+emit repaint, and the run-op tail repaints (op line and
+width/aux/imm line). The battery calls append_insn directly
+over mov/b.eq/b/cbz/cbnz/tbz/tbnz/bl/blr/ret/add fixtures
+and pins the comment tile, the exact JCC/JMP/CBZ/CBNZ/TBZ/
+TBNZ emits, the helper-call emits, the CALL tile with the
+return address, the unsupported-call-target raise, the RET
+tile, and the RUN_OP3 tail (count==1 anchors; 18 catches).
+Run `18/18 rows caught` with 3 clean rerun shakes (census
+266 -> 267); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0392 - x86 chunk dispatcher tail
 
 The append_chunk_branch_or_ret signature and tail tiles the

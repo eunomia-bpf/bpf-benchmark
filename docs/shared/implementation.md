@@ -1993,6 +1993,25 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0393 rows the arm64 non-compact per-insn emit region:
+18 rows in `mut_arm64_append_insn0393.py` (untracked) repaint
+`append_insn`'s signature repaints (all_addrs, next_addr,
+reloc idents), the comment tile repaint, the jcc/jmp/cbz/
+cbnz/tbz/tbnz emit repaints, the cbz and tbz macro picks,
+the bl helper-call emit repaint, the bl call-target pick and
+gate repaint, the bl call emit repaint, the blr helper-call
+emit repaint, the ret emit repaint, and the run-op tail
+repaints (op line and width/aux/imm line) — the tiles the
+decode and branch batteries leave unrowed beside their
+per-opcode decoders. The battery calls append_insn directly
+over mov/b.eq/b/cbz/cbnz/tbz/tbnz/bl/blr/ret/add fixtures
+and pins the comment tile, the exact JCC/JMP/CBZ/CBNZ/TBZ/
+TBNZ emits, the helper-call emits, the CALL tile with the
+return address, the unsupported-call-target raise, the RET
+tile, and the RUN_OP3 tail (count==1 anchors; 18 catches,
+no equivalence rows), census 266 -> 267, and stays untracked
+in `kprog/formal/build/`.
+
 Step 0392 rows the x86 chunk-dispatcher tail: 8 rows in
 `mut_x86_chunk_disptail0392.py` (untracked) repaint
 `append_chunk_branch_or_ret`'s signature repaints (addrs,
