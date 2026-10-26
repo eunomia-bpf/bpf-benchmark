@@ -2005,6 +2005,31 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0420 rows the arm64 encode() op-arm
+continuation: 189 rows in
+`mut_arm64_encode_cont0420.py` (untracked)
+repaint encode()'s mnemonic/operand binds,
+the adrp arm gates and GOT/rodata immediate
+paths, the mov/movk gates and shift retiles,
+the ALU and SHIFT arms' width/aux binds, the
+multiply ladder, the mvn/neg/cneg/orn/extr
+and BITFIELD payloads, the ldr/str q0/d0
+lanes with their parse_mem indices, the
+ldp/stp width binds, the stxr/stlxr gates,
+the cmp/tst arm, the cmn/subs/adds arms,
+bics with its zero-register gate, ands, ccmp,
+the csel family, fmov's four lanes, and the
+cnt/uaddlv returns plus the unsupported
+raise, through an in-process Encoded-shape
+battery over mixed-width ALU fixtures,
+shifted-modifier register forms, q0/d0 memory
+lanes, and the ldaxr/stur fall-through raises
+(count==1 anchors; 189 catches, no
+equivalence rows, the adrp rodata
+closing-paren line unrowable), census 291 ->
+292, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0419 rows the arm64 native-link/rodata
 parse region: 46 rows in
 `mut_arm64_native_rodata_parse0419.py`

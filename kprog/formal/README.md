@@ -5721,6 +5721,28 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0420 - arm64 encode op-arm continuation recon sweep
+
+The arm64 encode() op-arm continuation:
+the 189-row untracked
+`build/mut_arm64_encode_cont0420.py` repaints
+encode()'s mnemonic/operand binds, the adrp
+arm gates and GOT/rodata immediate paths, the
+mov/movk gates and shift retiles, the ALU and
+SHIFT arms, the multiply ladder, the
+mvn/neg/cneg/orn/extr and BITFIELD payloads,
+the ldr/str q0/d0 lanes and their parse_mem
+indices, the ldp/stp width binds, the
+stxr/stlxr gates, the cmp/tst arm, the
+cmn/subs/adds arms, bics with its
+zero-register gate, ands, ccmp, the csel
+family, fmov's four lanes, and the
+cnt/uaddlv returns plus the unsupported raise.
+Run `189/189 rows caught` with 3 clean rerun
+shakes (census 291 -> 292); golden gate `make
+check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0419 - arm64 native-link/rodata parse recon sweep
 
 The arm64 native-link/rodata parse region:

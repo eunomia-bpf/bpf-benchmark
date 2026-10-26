@@ -16179,6 +16179,42 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0420 - arm64 encode op-arm continuation recon sweep
+
+- Scope: encode()'s mnemonic/operand binds and
+  the adrp arm (no-relocation gate,
+  rodata-membership gate, ADRP_RODATA return
+  block, helper-relocation gate, GOT raw and
+  mapped imm paths, tail c_ptr_u64 call), the
+  mov/movk gates and shift retiles, the ALU and
+  SHIFT immediate/register arms with width and
+  aux binds, the multiply ladder (madd/msub/
+  mul/umull/umulh/udiv/umaddl/smaddl),
+  mvn/neg/cneg/orn/extr and the BITFIELD
+  payloads, the ldr/str q0/d0 lanes with
+  parse_mem indices and offset immediates, the
+  ldp/stp width binds, the stxr/stlxr gates,
+  the cmp/tst arm (both gates, the imm filter,
+  the modifier parse, the aux, and the
+  REG_NONE filter), the cmn/subs/adds immediate
+  and register arms, bics (the zero-register
+  gate and both aux/width tails), ands, ccmp,
+  the csel family (member and sub-gates, the
+  src2 filter, and the tail COND picks), fmov
+  (the operand unpack and all four lanes), and
+  the cnt/uaddlv returns plus the unsupported
+  raise.
+- Harness: untracked
+  `build/mut_arm64_encode_cont0420.py` pins
+  Encoded shapes over mixed-width ALU fixtures,
+  shifted-modifier register forms (subs/adds/
+  bics/ands with `lsl #3`), q0/d0 memory lanes,
+  and the ldaxr/stur fall-through raises.
+- Result: 189/189 rows caught (three clean
+  rerun shakes). Unrowable: the adrp rodata
+  closing-paren line (no independent
+  semantics). Census 291 -> 292.
+
 ## Step 0419 - arm64 native-link/rodata parse recon sweep
 
 - Scope: rodata_bytes (objdump -s invocation,
