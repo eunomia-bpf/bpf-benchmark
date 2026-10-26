@@ -16092,6 +16092,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0369 - x86 native-link program tail
+
+- Scope: the `parse_native_linked_program` segmentation arms the
+  native-link batteries leave unrowed beside their gate picks: the
+  address-set L285, the exit fan-out head L287 and its
+  conditional-jmp guard L290, the operand guard L291, the
+  off-blob-jump rejection L292 being owned, the sub pick's
+  reloc-target preference L296, the start admission L303 and the
+  entry-exclusion L304, the no-sub split L306-307, the sub-end
+  boundary L313, the empty-sub guard L314-315, and the sub-name
+  tile L316.
+- Harness: untracked `build/mut_x86_arm_annot0369.py` stubs
+  `parse_native_link_blob` and pins the entry/sub split under a
+  mid-blob call, the off-blob jump extension, a call whose
+  direct operand disagrees with its reloc target, a call landing
+  on the entry address, and a sub boundary that lands on the
+  section-size byte.
+- Result: 10/10 rows caught (the plus-one address set splits no
+  entry, the widened exit head, the and-ed jmp guard, the flipped
+  operand guard, the not-in admission, the operand-forced pick, the
+  not-in subwindow, the entry-adjacent admission, and the shifted
+  boundary each break a pinned split, and the renamed tile breaks
+  the key). Census 242 -> 243.
+
 ## Step 0368 - x86 rodata/section tail
 
 - Scope: the object-file section-reader free arms the

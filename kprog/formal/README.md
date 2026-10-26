@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0369 - x86 native-link program tail
+
+The `parse_native_linked_program` segmentation arms the
+native-link batteries leave unrowed beside their gate picks: the
+10-row untracked `build/mut_x86_arm_annot0369.py` rows the address
+set L285, the exit fan-out head L287 and its conditional-jmp guard
+L290, the operand guard L291, the sub pick's reloc-target
+preference L296, the start admission L303, the entry exclusion
+L304, the no-sub split L306-307, the sub-end boundary L313, the
+empty-sub guard L314-315, and the sub-name tile L316. In-process
+battery stubs `parse_native_link_blob` and pins the entry/sub
+split under a mid-blob call, the off-blob jump extension, a call
+whose direct operand disagrees with its reloc target, a call
+landing on the entry address, and a sub boundary landing on the
+section-size byte (count==1 anchors; 10 catches, no equivalence
+rows). Run `10/10 rows caught` with 3 clean rerun shakes (census
+242 -> 243); golden gate `make check` rc 0 with 210 `cross-check:
+OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0368 - x86 rodata/section tail
 
 The object-file section-reader free arms the native-link and

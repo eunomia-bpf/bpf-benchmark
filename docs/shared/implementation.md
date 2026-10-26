@@ -1976,6 +1976,22 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The x86 native-link program tail (the
+  `parse_native_linked_program` address set L285, exit fan-out
+  head L287, conditional-jmp guard L290, operand guard L291, the
+  sub pick's reloc-target preference L296, start admission L303,
+  entry exclusion L304, the no-sub split L306-307, the sub-end
+  boundary L313, the empty-sub guard L314-315, and the sub-name
+  tile L316 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the
+  segmentation lane the native-link batteries leave unrowed beside
+  their gate picks) rows 10 lines through an in-process battery
+  stubbing `parse_native_link_blob` and pinning the entry/sub split
+  under a mid-blob call, the off-blob jump extension, a call whose
+  direct operand disagrees with its reloc target, a call landing on
+  the entry address, and a sub boundary landing on the
+  section-size byte; no equivalence rows and every anchor count==1.
+
   The x86 rodata/section tails (the `section_size` hex return
   L167, its missing-section raise message L168, the
   `rodata_bytes` failed-objdump early return L176, the
