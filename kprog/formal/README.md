@@ -5687,6 +5687,28 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0371 - arm64 render head
+
+The arm64 render head the render batteries leave unrowed beside
+their picks: the 9-row untracked `build/mut_x86_arm_annot0371.py`
+rows the compact `uses_stack` scan pick L822, the compact
+section-entry dict xdp and tc rows L824-825, the non-compact
+`next_by_addr` value pick L1013, the `bl` return-addrs gate
+L1022 with its zz value repaint, the non-compact section-entry
+dict xdp and cgroup_skb rows L1025-1027, and the rodata emit
+block's `rodata_ident_map` reversed-input repaint L1044 — dict
+block anchors separate the compact and non-compact twins.
+In-process battery renders compact and non-compact programs from
+synthetic NativeInsns and pins the helper emit, the stack define,
+the section entry text, the return-case line, the `.maps` map,
+the rodata pair order, and single-insn tc and cgroup_skb renders
+(count==1 anchors; tc.sec/cg.sec pins added in paint round 3; the
+compact cgroup repaint is inert — waived; 9 catches, no
+equivalence rows). Run `9/9 rows caught` with 3 clean rerun
+shakes (census 244 -> 245); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0370 - x86 normalize/scalar tail
 
 The entry-return normalize arms and the scalar/text interrogation

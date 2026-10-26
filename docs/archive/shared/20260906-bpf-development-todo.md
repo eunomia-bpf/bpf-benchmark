@@ -16092,6 +16092,29 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0371 - arm64 render head
+
+- Scope: the arm64 render head the render batteries leave
+  unrowed beside their picks: the compact render head —
+  `uses_stack` scan pick (L822), the section-entry dict xdp and
+  tc rows (L824-826, whole 4-line block anchors separate them
+  from the non-compact twins) — plus the non-compact
+  `render_program` head — `next_by_addr` value pick (L1013), the
+  `bl` return-addrs gate (L1022) and its `zz` alternative value
+  pick, the xdp and cgroup_skb dict rows (L1025-1027), and the
+  rodata emit block's `rodata_ident_map` reversed-input repaint
+  (L1044).
+- Harness: untracked `build/mut_x86_arm_annot0371.py` (template
+  0370) renders compact and non-compact programs in-process from
+  synthetic `NativeInsn`s and pins the helper emit, the stack
+  define, the section entry text, the return-case line, the
+  `.maps` map, the rodata pair order, and single-insn tc and
+  cgroup_skb renders for the dict-block pins.
+- Result: 9/9 rows caught (tc.sec and cg.sec dict pins needed
+  tc/cgroup renders added to the probe in paint round 3; the
+  compact cgroup repaint is inert because no compact render uses
+  kind cgroup_skb — waived). Census 244 -> 245.
+
 ## Step 0370 - x86 normalize/scalar tail
 
 - Scope: the entry-return normalize arms and the scalar/text

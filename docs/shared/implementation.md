@@ -1976,6 +1976,29 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0370 rows the x86 normalize/scalar tail in
+`kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
+`normalize_native_link_entry_returns` lane (jmp pick L258, the
+ret-tag tile L265-267 and empty-operand tile L268-269 around a
+6-line block anchor, the passthrough else append L270-271) joins
+the scalar/text helpers the native-link and encoder-selection
+batteries left unrowed beside their picks — `is_helper_symbol`
+prefix pick L319, `parse_int` hex/decimal fork L324, `is_int`
+signed fullmatch L328, `c_ptr_u64` cast shape L336, `is_mem`
+bracket gates L344. The battery pins the normalize output triple
+(ret rewrite with tag raw and empty operands, passthrough
+identity, off-blob jmp kept), the helper prefix truth table, the
+hex/decimal/negative parses, the signed-int accept/reject row
+set, the pointer-cast shape, and the memory-operand truth table
+(count==1 anchors; 10 catches, no equivalence rows), census 243
+-> 244, and stays untracked in `kprog/formal/build/`. Step 0371
+crosses to the arm64 side: 9 rows in `mut_x86_arm_annot0371.py`
+(untracked) repaint the render head the arm64 render batteries
+leave unrowed beside their picks — compact `uses_stack` scan
+pick, xdp/tc/cgroup section-entry picks, non-compact
+`next_by_addr` value pick, `bl` return-adds gate and value pick,
+and the `rodata_ident_map` reversed-input repaint — census 244
+-> 245.
   The x86 normalize/scalar tail (the entry-return normalize jmp
   pick L258, ret tag tile L265-267, empty-operand tile L268-269,
   and passthrough else append L270-271 of
