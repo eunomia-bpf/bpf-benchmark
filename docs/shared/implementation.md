@@ -1993,6 +1993,31 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0408 rows the x86 encode-arm payload region: 40
+rows in `mut_x86_encode_arms0408.py` (untracked)
+repaint the mov-imm and mov-reg lanes (op tiles,
+lane-aux payloads, the reloc store, memory-store
+payloads), the mem/imm dst picks, the movaps/load-xmm0
+token and its reloc-ident raise, the movzx/movsx/
+movsxd tokens and the movsxd memory-width pick, the
+setcc/setcc-mem/cmove arms, the cdqe arm, the lea arm
+plus its rip-gate and rodata-aux, the cmp/test family
+(immediate-width compute, reg-reg lane aux, the
+mem-reg aux and width, and the cmp-immediate memory
+variants), the call arm (the helper token, the memcpy
+and memset register/raise/bound payloads including the
+count raisers, and the register call), and the push/
+pop flags width pick plus the rep-movs bound raisers —
+the cells the step and dispatch batteries leave
+unrowed. The battery arms direct encode() calls over
+reg-memory and rip fixtures, a rodata-ident map for
+the xmm load, helper/memcpy/memset reloc fixtures
+with sim_imm boundaries (64, 1024, 2000, negative,
+variable), and cmp/test width fixtures (count==1
+anchors; 40 catches, no equivalence rows), census
+279 -> 280, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0405 rows the x86 register-table and enc-signature
 region: 27 rows in `mut_x86_reg_table0405.py`
 (untracked) repaint the PTR_WIDTH width entries, the

@@ -5707,6 +5707,34 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0408 - x86 encode arm payloads
+
+The encode() arm payloads the step and dispatch
+batteries leave unrowed: the 40-row untracked
+`build/mut_x86_encode_arms0408.py` rows the mov-imm
+and mov-reg lanes (op tiles, lane-aux payloads, the
+reloc store, memory-store payloads), the mem/imm dst
+picks, the movaps/load-xmm0 token and its
+reloc-ident raise, the movzx/movsx/movsxd tokens and
+the movsxd memory-width pick, the setcc/setcc-mem/
+cmove arms, the cdqe arm, the lea arm plus rip-gate
+and rodata-aux, the cmp/test family (immediate-width
+compute, reg-reg lane aux, the mem-reg aux and
+width, and the cmp-immediate memory variants), the
+call arm (the helper token, the memcpy and memset
+register/raise/bound payloads including the count
+raisers, and the register call), and the push/pop
+flags width pick plus the rep-movs bound raisers.
+The battery arms direct encode() calls over
+reg-memory and rip fixtures, a rodata-ident map for
+the xmm load, helper/memcpy/memset reloc fixtures
+with sim_imm boundaries (64, 1024, 2000, negative,
+variable), and cmp/test width fixtures (count==1
+anchors; 40 catches). Run `40/40 rows caught` with 3
+clean rerun shakes (census 279 -> 280); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0405 - x86 register table and enc defaults
 
 The region the parse-side battery leaves unrowed: the

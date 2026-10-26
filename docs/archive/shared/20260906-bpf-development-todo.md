@@ -16141,6 +16141,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 45/45 rows caught (three clean rerun shakes).
   Census 277 -> 278.
 
+## Step 0408 - x86 encode arm payloads
+
+- Scope: the encode() arm payloads the step and
+  dispatch batteries leave unrowed: the mov-imm and
+  mov-reg lanes (op tiles, lane-aux payloads, the
+  reloc store, memory-store payloads), mem/imm dst
+  picks, the movaps/load-xmm0 token and its
+  reloc-ident raise, the movzx/movsx/movsxd tokens and
+  the movsxd memory-width pick, the setcc/setcc-mem/
+  cmove arms, the cdqe arm, the lea arm plus rip-gate
+  and rodata-aux, the cmp/test family (immediate-width
+  compute, reg-reg lane aux, mem-reg aux and width,
+  cmp-immediate memory variants), the call arm (helper
+  token, memcpy/memset register/raise/bound payloads
+  and count raisers, register call), and the push/pop
+  flags width pick plus rep-movs bound raisers.
+- Harness: untracked `build/mut_x86_encode_arms0408.py`
+  (template 0405) arms direct encode() calls over
+  reg-memory and rip fixtures, a rodata-ident map for
+  the xmm load, helper/memcpy/memset reloc fixtures
+  with sim_imm boundaries (64, 1024, 2000, negative,
+  variable), and cmp/test width fixtures.
+- Result: 40/40 rows caught (three clean rerun shakes).
+  Census 279 -> 280.
+
 ## Step 0405 - x86 register table and enc defaults
 
 - Scope: the region the parse-side battery leaves
