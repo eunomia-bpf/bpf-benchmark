@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0381 - x86 chunked branch-or-ret + call stack
+
+- Scope: the chunked x86 renderer's branch/ret/call walker and
+  its stack plumbing: `append_chunk_branch_or_ret` head
+  repaint, the jcc gate with its EVAL_CC return-target tile,
+  the jcc/jmp external-target raises, the jmp gate with its
+  CHUNKED_PROOF_PC_DONE return tile, the call gate repaint with
+  the helper-symbol and register-operand arms and their
+  `append_encoded_step` tails, the `call_targets`+`next_addr`
+  gate feeding `append_chunk_call`, the ret arm's call-depth
+  gate, depth decrement, stack pop, and ret-addr return, plus
+  `append_chunk_call`'s rsp push, STACK_WRITE return-addr
+  payload, depth increment, and the `append_chunk_transfer`
+  in-chunk goto / out-of-chunk return arms.
+- Harness: untracked `build/mut_x86_chunk_branch0381.py`
+  (template 0370) drives the walker over jcc/jmp (in-chunk,
+  return-target, external-raise), the ret depth chain, the
+  bpf_/memcpy/register/absolute call lanes, and the chunk
+  call/transfer emit pairs.
+- Result: 21/21 rows caught (three clean rerun shakes). Census
+  254 -> 255.
+
 ## Step 0380 - x86 direct-step + fixed-count annotator
 
 - Scope: the x86 generator head the specialization and

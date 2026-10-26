@@ -1976,6 +1976,27 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0381 rows the chunked branch-or-ret + call stack: 21 rows
+in `mut_x86_chunk_branch0381.py` (untracked) repaint
+`append_chunk_branch_or_ret`'s head repaint, the jcc gate with
+its EVAL_CC return-target tile, the jcc/jmp external-target
+raises, the jmp gate with its CHUNKED_PROOF_PC_DONE return
+tile, the call gate repaint with the helper-symbol and
+register-operand arms and their `append_encoded_step` tails,
+the `call_targets`+`next_addr` gate feeding
+`append_chunk_call`, the ret arm's call-depth gate, depth
+decrement, stack pop, and ret-addr return, plus
+`append_chunk_call`'s rsp push, STACK_WRITE return-addr
+payload, depth increment, and the `append_chunk_transfer`
+in-chunk goto / out-of-chunk return arms — the chunk walker
+the split-helpers and branch-lads batteries leave unrowed
+beside their chunk gates. The battery drives the walker over
+jcc/jmp (in-chunk, return-target, external-raise), the ret
+depth chain, the bpf_/memcpy/register/absolute call lanes, and
+the chunk call/transfer emit pairs (count==1 anchors; 21
+catches, no equivalence rows), census 254 -> 255, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0380 rows the x86 direct-step + fixed-count annotator: 11
 rows in `mut_x86_direct_step0380.py` (untracked) repaint the
 DIRECT/AUX macro-table dict inits L931-932 (their MOV_IMM entry

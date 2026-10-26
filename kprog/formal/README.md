@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0381 - x86 chunked branch-or-ret + call stack
+
+The chunked x86 renderer's branch/ret/call walker and its stack
+plumbing: the 21-row untracked `build/mut_x86_chunk_branch0381.py`
+rows `append_chunk_branch_or_ret`'s head repaint, the jcc gate with
+its EVAL_CC return-target tile, the jcc/jmp external-target raises,
+the jmp gate with its CHUNKED_PROOF_PC_DONE return tile, the call
+gate repaint with the helper-symbol and register-operand arms and
+their `append_encoded_step` tails, the `call_targets`+`next_addr`
+gate feeding `append_chunk_call`, the ret arm's call-depth gate,
+depth decrement, stack pop, and ret-addr return, plus
+`append_chunk_call`'s rsp push, STACK_WRITE return-addr payload,
+depth increment, and the `append_chunk_transfer` in-chunk goto /
+out-of-chunk return arms. In-process battery drives the walker over
+jcc/jmp (in-chunk, return-target, external-raise), the ret depth
+chain, the bpf_/memcpy/register/absolute call lanes, and the chunk
+call/transfer emit pairs (count==1 anchors; 21 catches). Run
+`21/21 rows caught` with 3 clean rerun shakes (census 254 -> 255);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0380 - x86 direct-step + fixed-count annotator
 
 The x86 generator head the specialization and count-annot
