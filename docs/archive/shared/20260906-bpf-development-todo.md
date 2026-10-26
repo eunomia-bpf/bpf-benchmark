@@ -16179,6 +16179,29 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0414 - x86 chunk-render tail recon sweep
+
+- Scope: the chunk-render tail the threshold
+  fixture unlocks: render_chunk_function's
+  call_targets and rodata_idents signature
+  tokens (they break the chunk-body
+  comprehension), the chunk-body dispatch abi
+  line, the chunk-header X86_SIM_USE_STATE_STRUCT
+  define, and the x86_sim_local_bpf.h include
+  line.
+- Harness: untracked
+  `build/mut_x86_chunk_render_tail0414.py`
+  (template 0405) arms a 3000-insn
+  render_program parse crossing
+  CHUNKED_PROOF_INSN_THRESHOLD plus a direct
+  render_chunked_program call.
+- Result: 5/5 rows caught (three clean rerun
+  shakes). Unrowable: remaining free lines
+  (docstring/imports, REGS tiles, annotation-only
+  type hints, frozen spec comments with the
+  unreachable SystemExit arm, def headers,
+  write_one source-path join). Census 285 -> 286.
+
 ## Step 0413 - x86 loader leftovers recon sweep
 
 - Scope: the loader/parse leftovers none of the

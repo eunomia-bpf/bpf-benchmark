@@ -5707,6 +5707,25 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0414 - x86 chunk-render tail recon sweep
+
+The chunk-render tail the threshold fixture
+unlocks: the 5-row untracked
+`build/mut_x86_chunk_render_tail0414.py`
+repaints render_chunk_function's call_targets
+and rodata_idents signature tokens (they break
+the chunk-body comprehension), the chunk-body
+dispatch abi line, the chunk-header
+X86_SIM_USE_STATE_STRUCT define, and the
+x86_sim_local_bpf.h include line. The battery
+arms a 3000-insn render_program parse crossing
+CHUNKED_PROOF_INSN_THRESHOLD plus a direct
+render_chunked_program call. Run `5/5 rows
+caught` with 3 clean rerun shakes (census 285
+-> 286); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode
+host 1410 cases.
+
 ### Step 0413 - x86 loader leftovers recon sweep
 
 The loader/parse leftovers none of the earlier

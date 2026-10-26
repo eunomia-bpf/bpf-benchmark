@@ -1993,6 +1993,21 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0414 rows the x86 chunk-render tail: 5 rows
+in `mut_x86_chunk_render_tail0414.py` (untracked)
+repaint render_chunk_function's call_targets and
+rodata_idents signature tokens (they break the
+chunk-body comprehension), the chunk-body
+dispatch abi line, the chunk-header
+X86_SIM_USE_STATE_STRUCT define, and the
+x86_sim_local_bpf.h include line. The battery
+arms a 3000-insn render_program parse crossing
+CHUNKED_PROOF_INSN_THRESHOLD plus a direct
+render_chunked_program call (count==1 anchors;
+5 catches, no equivalence rows), census 285 ->
+286, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0413 rows the x86 loader leftovers: 12 rows
 in `mut_x86_loader_leftovers0413.py` (untracked)
 repaint the NativeInsn mnemonic field token and
