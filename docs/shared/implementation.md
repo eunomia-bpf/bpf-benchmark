@@ -1993,6 +1993,27 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0400 rows the x86 non-chunked render_program body:
+28 rows in `mut_x86_render_prog0400.py` (untracked)
+repaint render_program's signature defaults, self-call
+gate, chunked fan-out, addrs-exit, subroutine label map,
+return-addrs fan-out, stack gates, next-addrs map,
+include, declare, label tiles, append_branch_or_ret
+argument passthroughs, exit tiles (label, comment, ret),
+subroutine render gate, ret dispatch (name, switch, case
+loop, close), closing+license tail, write_one's
+empty-parse raise and kind pick, and main's print loop —
+the tiles the chunk and driver batteries leave unrowed
+beside their chunked and plumbing lanes. The battery runs
+render_program end to end over a stack fixture with a
+subfunction and rodata plus a self-call fixture forcing
+the chunked fan-out, a stubbed write_one pair (written
+file, empty-parse ValueError), and an end-to-end main run
+pinning the printed path and the generated summary
+(count==1 anchors; 28 catches, no equivalence rows),
+census 273 -> 274, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0399 rows the x86 chunked-render driver: 32
 rows in `mut_x86_chunk_driver0399.py` (untracked) repaint
 `append_chunk_call`'s signature, `append_chunk_branch_or_

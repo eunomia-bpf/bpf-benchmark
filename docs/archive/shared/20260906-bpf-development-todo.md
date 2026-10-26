@@ -16111,6 +16111,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0400 - x86 render program body
+
+- Scope: the x86 non-chunked render_program body the
+  chunk batteries leave unrowed: signature-default
+  repaints, self-call gate repaint, chunked fan-out
+  repaint, addrs-exit repaint, subroutine label map
+  repaint, return-addrs fan-out repaint, stack gates
+  repaints, next-addrs map repaint, include repaint,
+  declare repaint, label repaints,
+  append_branch_or_ret argument repaints, exit tile
+  repaints (label, comment, ret), subroutine render gate,
+  ret-dispatch repaints (name, switch, case loop, close),
+  closing+license repaints, write_one empty-parse raise
+  and kind pick repaints, and main print-loop repaint.
+- Harness: untracked `build/mut_x86_render_prog0400.py`
+  (template 0399) runs render_program end to end over a
+  stack fixture with a subfunction and rodata plus a
+  self-call fixture forcing the chunked fan-out, a
+  stubbed write_one pair (written file, empty-parse
+  ValueError), and an end-to-end main run pinning the
+  printed path and the generated summary.
+- Result: 28/28 rows caught (three clean rerun shakes).
+  Census 273 -> 274.
+
 ## Step 0399 - x86 chunk driver tiles
 
 - Scope: the x86 chunked-render region the chunk batteries

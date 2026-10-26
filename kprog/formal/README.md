@@ -5707,6 +5707,31 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0400 - x86 render program body
+
+The x86 non-chunked render_program body the chunk
+batteries leave unrowed: the 28-row untracked
+`build/mut_x86_render_prog0400.py` rows the
+signature-default repaints, self-call gate repaint,
+chunked fan-out repaint, addrs-exit repaint, subroutine
+label map repaint, return-addrs fan-out repaint, stack
+gates repaints, next-addrs map repaint, include repaint,
+declare repaint, label repaints, append_branch_or_ret
+argument repaints, exit tile repaints (label, comment,
+ret), subroutine render gate, ret-dispatch repaints
+(name, switch, case loop, close), the closing+license
+repaints, write_one's empty-parse raise and kind pick
+repaints, and main's print-loop repaint. The battery runs
+render_program end to end over a stack fixture with a
+subfunction and rodata plus a self-call fixture forcing
+the chunked fan-out, a stubbed write_one pair (written
+file, empty-parse ValueError), and an end-to-end main run
+pinning the printed path and the generated summary
+(count==1 anchors; 28 catches). Run `28/28 rows caught`
+with 3 clean rerun shakes (census 273 -> 274); golden
+gate `make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0399 - x86 chunk driver tiles
 
 The x86 chunked-render region the chunk batteries leave
