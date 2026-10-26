@@ -5707,6 +5707,25 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0398 - arm64 render body tiles
+
+The arm64 non-compact render_program body the render
+batteries leave unrowed: the 8-row untracked
+`build/mut_arm64_render_body0398.py` rows the next-by-addr
+map repaint, the return-addrs fan-out repaint, the
+return-cases define repaint, the case-tail repaint, the
+case emit repaint, the rodata emit loop repaint, the
+rodata low-half repaint, and the native-subroutine comment
+repaint. The battery runs render_program end to end over a
+two-function xdp fixture with rodata and a bl (pinning the
+return-cases define and goto labels, the rodata constant,
+the native subroutine comment, and the linked W tile) plus
+a cgroup_skb variant pinning the SEC clause and the return
+tile (count==1 anchors; 8 catches). Run `8/8 rows caught`
+with 3 clean rerun shakes (census 271 -> 272); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0397 - arm64 interp loop arms
 
 The arm64 compact interpreter-loop region the compact-render

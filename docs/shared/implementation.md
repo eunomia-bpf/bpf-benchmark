@@ -1993,6 +1993,23 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0398 rows the arm64 non-compact render body: 8
+rows in `mut_arm64_render_body0398.py` (untracked) repaint
+`render_program`'s next-by-addr map repaint, the
+return-addrs fan-out repaint, the return-cases define
+repaint, the case-tail repaint, the case emit repaint, the
+rodata emit loop repaint, the rodata low-half repaint, and
+the native-subroutine comment repaint — the tiles the
+render batteries leave unrowed beside their plumbing and
+driver lanes. The battery runs render_program end to end
+over a two-function xdp fixture with rodata and a bl
+(pinning the return-cases define and goto labels, the
+rodata constant, the native subroutine comment, and the
+linked W tile) plus a cgroup_skb variant pinning the SEC
+clause and the return tile (count==1 anchors; 8 catches,
+no equivalence rows), census 271 -> 272, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0397 rows the arm64 compact interpreter loop: 36
 rows in `mut_arm64_interp_loop0397.py` (untracked) repaint
 `render_program_compact`'s ten step-field load repaints,

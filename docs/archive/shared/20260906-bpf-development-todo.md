@@ -16111,6 +16111,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0398 - arm64 render body tiles
+
+- Scope: the arm64 non-compact render_program body the
+  render batteries leave unrowed: the next-by-addr map
+  repaint, the return-addrs fan-out repaint, the
+  return-cases define repaint, the case-tail repaint, the
+  case emit repaint, the rodata emit loop repaint, the
+  rodata low-half repaint, and the native-subroutine
+  comment repaint.
+- Harness: untracked `build/mut_arm64_render_body0398.py`
+  (template 0397) runs render_program end to end over a
+  two-function xdp fixture with rodata and a bl (pinning
+  the return-cases define and goto labels, the rodata
+  constant, the native subroutine comment, and the linked
+  W tile) plus a cgroup_skb variant pinning the SEC clause
+  and the return tile.
+- Result: 8/8 rows caught (three clean rerun shakes). Census
+  271 -> 272.
+
 ## Step 0397 - arm64 interp loop arms
 
 - Scope: the arm64 render_program_compact interpreter loop
