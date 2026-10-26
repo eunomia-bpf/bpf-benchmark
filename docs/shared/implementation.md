@@ -1976,6 +1976,19 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The x86 operand-split arms (the `split_operands` bracket-open
+  increment L118, bracket-close decrement L120, split-append paint
+  L123, boundary-advance L124, tail strip L125, and tail-if guard
+  L126-127 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the depth
+  walk the head-route and scalar-helpers batteries leave unrowed
+  beside the depth-zero-comma gate pick) rows 6 lines through an
+  in-process battery pinning the bracket-comma retention pair, the
+  bracket-boundary split, the bracketed-comma part paint, the
+  three-operand boundary advance, the whitespace strip, and the
+  trailing-comma empty-tail drop; no equivalence rows and every
+  anchor count==1.
+
   The x86 parse-row tail arms (the `addr_text` strip L142 and the
   empty/angle-bracket asm skip L149-150 of
   `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the row

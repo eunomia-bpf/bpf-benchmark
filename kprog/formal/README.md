@@ -5687,6 +5687,23 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0367 - x86 operand split
+
+The `split_operands` depth-walk free arms the head-route and
+scalar-helpers batteries leave unrowed beside the
+depth-zero-comma gate pick: the 6-row untracked
+`build/mut_x86_arm_annot0367.py` rows the bracket-open increment
+L118, the bracket-close decrement L120, the split-append paint
+L123, the boundary-advance L124, the tail strip L125, and the
+tail-if guard L126-127. In-process battery pins the bracket-comma
+retention pair, the bracket-boundary split, the bracketed-comma
+part paint, the three-operand boundary advance, the whitespace
+strip, and the trailing-comma empty-tail drop (count==1 anchors;
+6 catches, no equivalence rows). Run `6/6 rows caught` with 3
+clean rerun shakes (census 240 -> 241); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners, final arm64 decode host
+1410 cases.
+
 ### Step 0366 - x86 parse-row tail
 
 The x86 parse-row tail free arms the head-route and parse-asm

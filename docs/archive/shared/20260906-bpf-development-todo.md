@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0367 - x86 operand split
+
+- Scope: the `split_operands` depth-walk free arms the head-route
+  and scalar-helpers batteries leave unrowed beside the
+  depth-zero-comma gate pick: the bracket-open increment L118, the
+  bracket-close decrement L120, the split-append paint L123, the
+  boundary-advance L124, the tail strip L125, and the tail-if
+  guard L126-127.
+- Harness: untracked `build/mut_x86_arm_annot0367.py` pins the
+  bracket-comma retention pair, the bracket-boundary split, the
+  bracketed-comma part paint, the three-operand boundary advance,
+  the whitespace strip, and the trailing-comma empty-tail drop.
+- Result: 6/6 rows caught (the paren repaint drops bracket-depth
+  retention, the close repaint undercounts depth, the offset
+  repaints smear the part texts, the reversed tail breaks the
+  strip, and the always-true repaint emits an empty tail).
+  Census 240 -> 241.
+
 ## Step 0366 - x86 parse-row tail
 
 - Scope: the objdump row-walk tail free arms the head-route and
