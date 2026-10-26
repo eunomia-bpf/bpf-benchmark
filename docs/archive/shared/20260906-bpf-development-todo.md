@@ -16111,6 +16111,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0399 - x86 chunk driver tiles
+
+- Scope: the x86 chunked-render region the chunk batteries
+  leave unrowed: append_chunk_call's signature repaint,
+  append_chunk_branch_or_ret's signature repaint,
+  render_chunk_function's chunk-name/signature/switch-open/
+  case-head/default/last-next/ret-last/ret-done/
+  return-next repaints, render_chunked_program's flat-chunk
+  slicing repaints, addrs-set repaint, call-targets
+  fan-out repaints, stack gates repaints, lead-in repaint,
+  first-address repaint, max-steps repaint, pc belt
+  repaints (iter guard, pc-done gate, chunk call, else
+  arm, beldone, pc-nonzero gate, RAX write, X86 ret), and
+  min/max/prefix belt repaints.
+- Harness: untracked `build/mut_x86_chunk_driver0399.py`
+  (template 0398, XENCODER) runs render_chunked_program end
+  to end over a stack fixture (push, ALU, jmp, call into a
+  subfunction, ret) plus a 386-insn boundary fixture
+  pinning the chunk function head, the case/default
+  switch, the boundary return-next tile, the belt
+  dispatch, and the stack and RAX write tiles.
+- Result: 32/32 rows caught (three clean rerun shakes).
+  Census 272 -> 273.
+
 ## Step 0398 - arm64 render body tiles
 
 - Scope: the arm64 non-compact render_program body the

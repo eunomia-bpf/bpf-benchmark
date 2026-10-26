@@ -1993,6 +1993,27 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0399 rows the x86 chunked-render driver: 32
+rows in `mut_x86_chunk_driver0399.py` (untracked) repaint
+`append_chunk_call`'s signature, `append_chunk_branch_or_
+ret`'s signature, and `render_chunk_function` and
+`render_chunked_program` — the chunk-name/signature/
+switch-open/case-head/default/last-next/ret-last/ret-done/
+return-next, flat-chunk slicing, addrs-set, call-targets
+fan-out, stack gates, lead-in, first-address, max-steps,
+pc belt (iter guard, pc-done gate, chunk call, else arm,
+beldone, pc-nonzero gate, RAX write, X86 ret), and
+min/max/prefix belt tiles the chunk-dispatcher battery
+leaves unrowed beside its branch/call/ret arm lanes. The
+battery runs render_chunked_program end to end over a
+stack fixture (push, ALU, jmp, call into a subfunction,
+ret) plus a 386-insn boundary fixture pinning the chunk
+function head, the case/default switch, the boundary
+return-next tile, the belt dispatch, and the stack and
+RAX write tiles (count==1 anchors; 32 catches, no
+equivalence rows), census 272 -> 273, and stays untracked
+in `kprog/formal/build/`.
+
 Step 0398 rows the arm64 non-compact render body: 8
 rows in `mut_arm64_render_body0398.py` (untracked) repaint
 `render_program`'s next-by-addr map repaint, the

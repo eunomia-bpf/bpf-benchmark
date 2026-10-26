@@ -5707,6 +5707,31 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0399 - x86 chunk driver tiles
+
+The x86 chunked-render region the chunk batteries leave
+unrowed: the 32-row untracked
+`build/mut_x86_chunk_driver0399.py` rows
+append_chunk_call's signature repaint,
+append_chunk_branch_or_ret's signature repaint,
+render_chunk_function's chunk-name/signature/switch-open/
+case-head/default/last-next/ret-last/ret-done/return-next
+repaints, and render_chunked_program's flat-chunk slicing,
+addrs-set, call-targets fan-out, stack gates, lead-in,
+first-address, max-steps, pc belt (iter guard, pc-done
+gate, chunk call, else arm, beldone, pc-nonzero gate, RAX
+write, X86 ret), and min/max/prefix belt repaints. The
+battery runs render_chunked_program end to end over a
+stack fixture (push, ALU, jmp, call into a subfunction,
+ret) plus a 386-insn boundary fixture pinning the chunk
+function head, the case/default switch, the boundary
+return-next tile, the belt dispatch, and the stack and
+RAX write tiles (count==1 anchors; 32 catches). Run
+`32/32 rows caught` with 3 clean rerun shakes (census
+272 -> 273); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0398 - arm64 render body tiles
 
 The arm64 non-compact render_program body the render
