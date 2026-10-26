@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0356 - count-annotator and fixture helpers
+
+- Scope: the x86 generator helper arms the earlier batteries row only
+  partially: `text_symbol_addrs`' six-field `.text` gate, `section_size`'s
+  missing-section raise, `is_int`'s fullmatch regex, `is_mem`'s bracket
+  gate, `branch_target`'s pre-pick match, `source_prelude`'s SEC
+  scanner, `annotated_fixed_count_ops`' rep/call/mov/xor mnemonic gates,
+  and `render_x86_subroutine`'s banner/label/ret-macro lines.
+- Harness: untracked `build/mut_x86_annot0356.py` pins the
+  fixture-driven symbol/section reads and the missing-section message,
+  the minus and bracket gates, the hex pre-pick, the prelude parse with
+  its include rewrite, the rep/call/mov/xor gates and self-zeroing xor
+  over a mov-fed stream, the subroutine painting, and the macro emit.
+- Result: 13/13 rows caught (the `bt.match` repaint makes the hex
+  pre-pick match the empty tail, `ss.missing` repaints the raise
+  message text, `sp.match` breaks only the SEC-with-int matcher).
+  Census 229 -> 230.
+
 ## Step 0355 - parse-flats and map arms
 
 - Scope: the parse-side arm64 generator helpers the earlier

@@ -1963,6 +1963,24 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 count-annotator and fixture helpers (the `text_symbol_addrs`
+  six-field `.text` gate L220, the `section_size` missing-section raise
+  L168, the `is_int` fullmatch regex L328, the `is_mem` bracket gate
+  L344, the `branch_target` pre-pick match L409, the `source_prelude`
+  SEC scanner L1139, the `annotated_fixed_count_ops` rep/call/mov/xor
+  mnemonic gates L985/L989/L995/L1003, and the `render_x86_subroutine`
+  banner/label/ret-macro lines L1164/L1166/L1171 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — arms the
+  native-link-parse, blob-dispatch, head-route, scalar-helpers,
+  count-annot, and render-sub batteries leave unrowed beside their
+  picks and tails) rows 13 lines through an in-process battery pinning
+  the fixture-driven symbol/section reads and the missing-section
+  message, the minus and bracket gates, the hex pre-pick, the prelude
+  parse with its include rewrite, the rep/call/mov/xor gates and
+  self-zeroing xor over a mov-fed stream, the subroutine
+  banner/label/ret painting, and the macro emit; no equivalence rows
+  and every anchor count==1.
+
   The parse-side arm64 generator helpers (the `split_operands`
   tail-part flush pick L161-162, the `parse_flat_instructions`
   relocation scan regex L169, the `load_rodata16`

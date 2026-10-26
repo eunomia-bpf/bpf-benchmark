@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0356 - count-annotator and fixture helpers
+
+The x86 generator helper arms the earlier batteries row only
+partially: the 13-row untracked `build/mut_x86_annot0356.py` rows
+the `text_symbol_addrs` six-field `.text` gate L220, the
+`section_size` missing-section raise L168, the `is_int` fullmatch
+regex L328, the `is_mem` bracket gate L344, the `branch_target`
+pre-pick match L409, the `source_prelude` SEC scanner L1139, the
+`annotated_fixed_count_ops` rep/call/mov/xor mnemonic gates
+L985/L989/L995/L1003, and the `render_x86_subroutine`
+banner/label/ret-macro lines L1164/L1166/L1171. In-process battery
+pins the fixture-driven symbol/section reads and the
+missing-section message, the minus and bracket gates, the hex
+pre-pick, the prelude parse with its include rewrite, the
+rep/call/mov/xor gates and self-zeroing xor over a mov-fed stream,
+the subroutine painting, and the macro emit (count==1 anchors;
+13 catches, no equivalence rows). Run `13/13 rows caught` with 3
+clean rerun shakes (census 229 -> 230); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners, final arm64 decode host
+1410 cases.
+
 ### Step 0355 - parse-flats and map arms
 
 The parse-side arm64 generator helpers the earlier batteries row
