@@ -2005,6 +2005,28 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0423 rows the arm64 generator
+plumbing: 91 rows in
+`mut_arm64_plumbing0423.py` (untracked)
+repaint load_benches()'s yaml load and
+Bench pipeline, source_prelude()'s SEC
+search and native_helpers include rewrite,
+the c_u64/c_ptr_u64 formatters,
+parse_imm()/parse_shifted_imm()'s gates,
+reg_const()'s gates and register regex,
+reg_width()/width_const(),
+parse_modifier()'s shift and extend regexes,
+compact_helper_defines()'s enumeration,
+generate_one()'s paths, compact selector and
+render kwargs, and main()'s argparse flags,
+stage2 source-dir switch, only-filter,
+written loop and result prints, through
+module-API, CLI-stdout, and generated-file
+pins including a stage2-config CLI flow
+(count==1 anchors; 91 catches, no
+equivalence rows), census 294 -> 295, and
+stays untracked in `kprog/formal/build/`.
+
 Step 0422 rows the arm64 compact_step
 interpreter-lowering region: 61 rows in
 `mut_arm64_compact_step0422.py` (untracked)

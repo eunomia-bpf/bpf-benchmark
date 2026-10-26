@@ -16179,6 +16179,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0423 - arm64 plumbing recon sweep
+
+- Scope: load_benches(), source_prelude(),
+  c_u64/c_ptr_u64, parse_imm(),
+  parse_shifted_imm(), reg_const(),
+  reg_width(), width_const(),
+  parse_modifier(), compact_helper_defines(),
+  generate_one(), and main()'s flags,
+  stage2 source-dir switch, only filter,
+  and prints.
+- Harness: untracked
+  `build/mut_arm64_plumbing0423.py` pins
+  module API, CLI stdout, and generated
+  files, including a stage2-config CLI flow.
+- Result: 91/91 rows caught (three clean
+  rerun shakes). Census 294 -> 295.
+
 ## Step 0422 - arm64 compact-step recon sweep
 
 - Scope: compact_step()'s params/annotation,

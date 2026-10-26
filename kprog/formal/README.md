@@ -5721,6 +5721,22 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0423 - arm64 plumbing recon sweep
+
+The arm64 generator plumbing: the 91-row
+untracked `build/mut_arm64_plumbing0423.py`
+repaints load_benches(), source_prelude(),
+c_u64/c_ptr_u64, parse_imm(),
+parse_shifted_imm(), reg_const(),
+reg_width(), width_const(), parse_modifier(),
+compact_helper_defines(), generate_one(),
+and main() flags, stage2 switch, only
+filter, and prints. Run `91/91 rows caught`
+with 3 clean rerun shakes (census 294 ->
+295); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode
+host 1410 cases.
+
 ### Step 0422 - arm64 compact-step recon sweep
 
 The arm64 compact_step + helper-switch
