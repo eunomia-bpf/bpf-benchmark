@@ -1963,6 +1963,17 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The x86 parse-text arms (the `parse_int` negative-recursion tail
+  L322-323, the `split_operands` zero-depth comma gate L122, and the
+  `parse_asm_text` relocation scan regex L134 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the
+  objdump-line lane the head-route and operand-wrappers batteries
+  leave unrowed beside their int-hex and bracket picks) rows 3 lines
+  through an in-process battery pinning the negative and plain/hex
+  parse_int reads, the bracketed-operand and bracket-comma splits,
+  and the objdump-line relocation capture with its plain no-reloc
+  baseline; no equivalence rows and every anchor count==1.
+
   The arm64 `append_insn` emit arms (the JCC emit f-string L694, the
   JMP emit f-string L698, the helper-call emit L712, the A64_CALL
   emit f-string L717, and the RUN_OP3 footer f-string L728 of

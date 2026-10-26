@@ -16092,6 +16092,21 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0361 - x86 parse-text splits
+
+- Scope: the x86 parse-text free arms the head-route and
+  operand-wrappers batteries leave unrowed: the `parse_int`
+  negative-recursion tail L322-323, the `split_operands` zero-depth
+  comma gate L122, and the `parse_asm_text` relocation scan regex
+  L134.
+- Harness: untracked `build/mut_x86_arm_annot0361.py` pins the
+  negative and plain/hex parse_int reads, the bracketed-operand and
+  bracket-comma splits, and the objdump-line relocation capture with
+  its plain no-reloc baseline.
+- Result: 3/3 rows caught (the negation repaint drops the minus, the
+  depth repaint stops bracketed splits, the regex repaint breaks the
+  R_X86_64 prefix). Census 234 -> 235.
+
 ## Step 0360 - arm64 append-insn emits
 
 - Scope: the arm64 `append_insn` emit arms the render-unit and

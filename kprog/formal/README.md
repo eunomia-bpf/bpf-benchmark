@@ -5687,6 +5687,21 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0361 - x86 parse-text splits
+
+The x86 parse-text free arms the head-route and operand-wrappers
+batteries leave unrowed: the 3-row untracked
+`build/mut_x86_arm_annot0361.py` rows the `parse_int`
+negative-recursion tail L322-323, the `split_operands` zero-depth
+comma gate L122, and the `parse_asm_text` relocation scan regex
+L134. In-process battery pins the negative and plain/hex parse_int
+reads, the bracketed-operand and bracket-comma splits, and the
+objdump-line relocation capture with its plain no-reloc baseline
+(count==1 anchors; 3 catches, no equivalence rows). Run
+`3/3 rows caught` with 3 clean rerun shakes (census 234 -> 235);
+golden gate `make check` rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases.
+
 ### Step 0360 - arm64 append-insn emits
 
 The arm64 `append_insn` emit arms the render-unit and emit-ops
