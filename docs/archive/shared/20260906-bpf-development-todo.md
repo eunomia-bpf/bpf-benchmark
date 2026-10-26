@@ -16092,6 +16092,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0374 - arm64 helper sub-decoders
+
+- Scope: the arm64 helper sub-decoder head the render/helper
+  batteries leave unrowed beside their picks: blr_target_reg
+  early return L619, written_gpr GPR write gate L623, operand
+  head L627, empty-gate L625, and dst strip L629, mov_immediate
+  operand pick L639, mov_source_gpr strip L649, the
+  helper_calls_by_addr reg_imms dict-init repaint L654, and the
+  arm64 `rodata_ident_map` reversed-enumerate repaint L361 (the
+  mov mnemonic guards n=2 and the `parse_imm` ValueError except
+  repaint is inert — waived).
+- Harness: untracked `build/mut_x86_arm_annot0374.py` (template
+  0370) pins the blr x-strip, the written_gpr x/w accepts and
+  str/mov rejects, the mov_immediate #imm parse, the
+  mov_source_gpr x/w strips, the direct-blr and register-copy
+  helper_calls_by_addr paths, and the rodata pair map.
+- Result: 9/9 rows caught (three clean rerun shakes). Census
+  247 -> 248.
+
 ## Step 0373 - x86 encode high-supported arms
 
 - Scope: the x86 `encode()` high-supported gate arms the dispatch

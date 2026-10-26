@@ -5687,6 +5687,26 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0374 - arm64 helper sub-decoders
+
+The arm64 helper sub-decoder head the render/helper batteries
+leave unrowed beside their picks: the 9-row untracked
+`build/mut_x86_arm_annot0374.py` rows the blr_target_reg early
+return L619, the written_gpr GPR write gate L623, operand head
+L627, empty-gate L625, and dst strip L629, the mov_immediate
+operand pick L639, the mov_source_gpr strip L649, the
+helper_calls_by_addr reg_imms dict-init repaint L654, and the
+arm64 `rodata_ident_map` reversed-enumerate repaint L361. 
+In-process battery pins the blr x-strip, the written_gpr x/w
+accepts and str/mov rejects, the mov_immediate #imm parse, the
+mov_source_gpr x/w strips and immediate reject, the direct-blr
+and register-copy helper_calls_by_addr paths, and the rodata
+pair map (the `mov` mnemonic guards n=2 and the parse_imm
+except repaint are inert — waived; count==1 anchors; 9
+catches). Run `9/9 rows caught` with 3 clean rerun shakes
+(census 247 -> 248); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0373 - x86 encode high-supported arms
 
 The x86 `encode()` high-supported gate arms the dispatch and

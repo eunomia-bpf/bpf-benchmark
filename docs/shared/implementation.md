@@ -1976,6 +1976,24 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0374 crosses back to the arm64 side: 9 rows in
+`mut_x86_arm_annot0374.py` (untracked) repaint the arm64 helper
+sub-decoder head — the `blr_target_reg` early return L619, the
+`written_gpr` GPR-write gate L623, operand head L627, empty-gate
+L625, and dst strip L629, the `mov_immediate` operand pick L639,
+the `mov_source_gpr` strip L649, the `helper_calls_by_addr`
+reg_imms dict-init repaint L654, and the arm64
+`rodata_ident_map` reversed-enumerate repaint L361 — the
+sub-decoder head the render/helper batteries leave unrowed
+beside their picks. The battery pins the blr x-strip, the
+written_gpr x/w accepts and str/mov rejects, the mov_immediate
+#imm parse, the mov_source_gpr x/w strips and immediate reject,
+the direct-blr and register-copy helper_calls_by_addr paths, and
+the rodata pair map (count==1 anchors; 9 catches, no equivalence
+rows; the mov mnemonic guards n=2 and the parse_imm except
+repaint are inert — waived), census 247 -> 248, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0373 rows the x86 `encode()` high-supported gate arms in
 `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
 mov/movabs arm op-set L446, the add/adc/sub/sbb arm op-set L450,
