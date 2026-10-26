@@ -551,7 +551,7 @@ def main() -> int:
         print(f"TOTAL {len(MUTATIONS)} mutations, {failures} failures, "
               f"{survivors} equivalences survived")
         print("ALL AS EXPECTED" if failures == 0 else "MUTATION MISMATCH")
-        return failures == 0
+        return 0 if failures == 0 else 1
     finally:
         restore()
 
