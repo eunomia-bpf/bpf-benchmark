@@ -16179,6 +16179,45 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0413 - x86 loader leftovers recon sweep
+
+- Scope: the loader/parse leftovers none of the
+  earlier batteries own: the NativeInsn
+  mnemonic field token and the ChunkInsn
+  is_subroutine field token (identifier swaps
+  that break the dataclass constructors),
+  rodata_bytes' returncode-gate polarity,
+  the malformed-symbol-table idx+2 gate and its
+  out[name] pair store, load_rodata16's
+  offset+8 byte window, the objdump -dr
+  comprehension's parse_asm_text iterate and its
+  relocated-target continue-expression,
+  parse_native_link_blob's missing-proof-object
+  raise, the delegate unpack smear into
+  parse_native_linked_program, the direct-step
+  table's imm kwarg in the auxiliary arm, and
+  encode()'s imul memory-immediate source pick.
+- Harness: untracked
+  `build/mut_x86_loader_leftovers0413.py`
+  (template 0405) arms the real objdump parses
+  over the synthetic proof objects and the
+  bpf_-prefixed helper-call fixture, reg_info
+  identity pins over the R8-R15 palette,
+  module-attr pins over the imports,
+  rodata_bytes/load_rodata16/section_size pins
+  over the rodata fixture pair, the exact
+  missing-proof-object message pin,
+  parse_native_linked_program pins over the
+  helper-call fixture, and direct-step and imul
+  tiles.
+- Result: 12/12 rows caught (three clean rerun
+  shakes). Unrowable: import/docstring lines,
+  remaining REGS table-entry tiles, annotation-
+  only type hints, frozen spec comments with the
+  unreachable SystemExit arm, def headers, the
+  chunk-render tail, and the write_one source-
+  path join. Census 284 -> 285.
+
 ## Step 0412 - x86 rodata syms blob render encode remnants
 
 - Scope: the loader/parse/encode tails the

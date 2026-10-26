@@ -5707,6 +5707,39 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0413 - x86 loader leftovers recon sweep
+
+The loader/parse leftovers none of the earlier
+batteries own: the 12-row untracked
+`build/mut_x86_loader_leftovers0413.py`
+repaints the NativeInsn mnemonic field token and
+the ChunkInsn is_subroutine field token (the
+identifier swaps break the dataclass
+constructors), rodata_bytes' returncode-gate
+polarity, the malformed-symbol-table idx+2 gate
+and its out[name] pair store, load_rodata16's
+offset+8 byte window, the objdump -dr
+comprehension's parse_asm_text iterate and its
+relocated-target continue-expression,
+parse_native_link_blob's missing-proof-object
+raise, the delegate unpack smear into
+parse_native_linked_program, the direct-step
+table's imm kwarg in the auxiliary arm, and
+encode()'s imul memory-immediate source pick.
+The battery arms the real objdump parses over
+the synthetic proof objects and the bpf_-
+prefixed helper-call fixture, reg_info identity
+pins over the R8-R15 palette, module-attr pins
+over the imports, rodata_bytes/load_rodata16/
+section_size pins over the rodata fixture pair,
+the exact missing-proof-object message pin,
+parse_native_linked_program pins over the
+helper-call fixture, and direct-step and imul
+tiles. Run `12/12 rows caught` with 3 clean
+rerun shakes (census 284 -> 285); golden gate
+`make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0412 - x86 rodata syms blob render encode remnants
 
 The loader/parse/encode tails the parse-side and

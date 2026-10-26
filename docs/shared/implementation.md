@@ -1993,6 +1993,35 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0413 rows the x86 loader leftovers: 12 rows
+in `mut_x86_loader_leftovers0413.py` (untracked)
+repaint the NativeInsn mnemonic field token and
+the ChunkInsn is_subroutine field token (the
+identifier swaps break the dataclass
+constructors), rodata_bytes' returncode-gate
+polarity, the malformed-symbol-table idx+2 gate
+and its out[name] pair store, load_rodata16's
+offset+8 byte window, the objdump -dr
+comprehension's parse_asm_text iterate and its
+relocated-target continue-expression,
+parse_native_link_blob's missing-proof-object
+raise, the delegate unpack smear into
+parse_native_linked_program, the direct-step
+table's imm kwarg in the auxiliary arm, and
+encode()'s imul memory-immediate source pick.
+The battery arms the real objdump parses over
+the synthetic proof objects and the bpf_-
+prefixed helper-call fixture, reg_info identity
+pins over the R8-R15 palette, module-attr pins
+over the imports, rodata_bytes/load_rodata16/
+section_size pins over the rodata fixture pair,
+the exact missing-proof-object message pin,
+parse_native_linked_program pins over the
+helper-call fixture, and direct-step and imul
+tiles (count==1 anchors; 12 catches, no
+equivalence rows), census 284 -> 285, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0412 rows the x86 rodata-symbol, blob
 loader, and encode-remnant regions: 50 rows in
 `mut_x86_rodata_blob_render0412.py` (untracked)
