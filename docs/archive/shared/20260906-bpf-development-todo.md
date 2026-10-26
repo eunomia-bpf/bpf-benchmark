@@ -16111,6 +16111,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0395 - arm64 compact_step signature tiles
+
+- Scope: the arm64 compact_step region the compact
+  batteries leave unrowed: the signature repaints
+  (all_addrs, addr_to_index, helper_call, rodata_idents,
+  reloc_idents), the JCC CompactStep repaint, the JMP arm
+  repaint, the CBZ/CBNZ and TBZ/TBNZ kind picks, the bl
+  helper CompactStep repaint, the bl all_addrs gate repaint,
+  the bl CALL repaint, and the blr-not-taken repaint.
+- Harness: untracked `build/mut_arm64_compact_sig0395.py`
+  (template 0394) calls compact_step directly over
+  b.eq/b/cbz/cbnz/tbz/tbnz/bl/blr/ret/add fixtures and pins
+  the JCC/JMP/CBZ/CBNZ/TBZ/TBNZ kinds and indexed targets,
+  the HELPER and CALL CompactSteps, the
+  unsupported-call-target raise, the
+  unsupported-indirect-call raise, the RET kind, and the OP
+  kind.
+- Result: 12/12 rows caught (three clean rerun shakes). Census
+  268 -> 269.
+
 ## Step 0394 - arm64 helper defines/switch
 
 - Scope: the arm64 compact-helper emission helpers the

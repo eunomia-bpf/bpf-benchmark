@@ -5707,6 +5707,26 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0395 - arm64 compact_step signature tiles
+
+The arm64 compact_step region the compact batteries leave
+unrowed: the 12-row untracked
+`build/mut_arm64_compact_sig0395.py` rows the signature
+repaints (all_addrs, addr_to_index, helper_call,
+rodata_idents, reloc_idents), the JCC CompactStep repaint,
+the JMP arm repaint, the CBZ/CBNZ and TBZ/TBNZ kind picks,
+the bl helper CompactStep repaint, the bl all_addrs gate
+repaint, the bl CALL repaint, and the blr-not-taken repaint.
+The battery calls compact_step directly over b.eq/b/cbz/
+cbnz/tbz/tbnz/bl/blr/ret/add fixtures and pins the JCC/JMP/
+CBZ/CBNZ/TBZ/TBNZ kinds and indexed targets, the HELPER and
+CALL CompactSteps, the unsupported-call-target raise, the
+unsupported-indirect-call raise, the RET kind, and the OP
+kind (count==1 anchors; 12 catches). Run `12/12 rows
+caught` with 3 clean rerun shakes (census 268 -> 269);
+golden gate `make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0394 - arm64 helper defines/switch
 
 The arm64 compact-helper emission helpers the compact

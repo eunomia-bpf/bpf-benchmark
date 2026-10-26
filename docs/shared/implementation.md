@@ -1993,6 +1993,24 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0395 rows the arm64 compact_step signature and branch
+tiles: 12 rows in `mut_arm64_compact_sig0395.py` (untracked)
+repaint `compact_step`'s signature repaints (all_addrs,
+addr_to_index, helper_call, rodata_idents, reloc_idents),
+the JCC CompactStep repaint, the JMP arm repaint, the CBZ/
+CBNZ and TBZ/TBNZ kind picks, the bl helper CompactStep
+repaint, the bl all_addrs gate repaint, the bl CALL repaint,
+and the blr-not-taken repaint — the tiles the compact-step
+battery leaves unrowed beside its decode payload tiles. The
+battery calls compact_step directly over b.eq/b/cbz/cbnz/
+tbz/tbnz/bl/blr/ret/add fixtures and pins the JCC/JMP/CBZ/
+CBNZ/TBZ/TBNZ kinds and indexed targets, the HELPER and
+CALL CompactSteps, the unsupported-call-target raise, the
+unsupported-indirect-call raise, the RET kind, and the OP
+kind (count==1 anchors; 12 catches, no equivalence rows),
+census 268 -> 269, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0394 rows the arm64 compact-helper emission helpers:
 12 rows in `mut_arm64_helper_switch0394.py` (untracked)
 repaint `compact_helper_defines`' enumerate-loop repaint and
