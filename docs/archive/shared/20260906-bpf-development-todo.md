@@ -16179,6 +16179,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0422 - arm64 compact-step recon sweep
+
+- Scope: compact_step()'s params/annotation,
+  the mnemonic bind, the b./b gates and
+  branch_target picks, the JCC/JMP/CBZ/CBNZ/
+  TBZ/TBNZ kinds and src/width/imm/target
+  binds, the bl helper gate and C_HELPER
+  naming, the internal-call gate and raise,
+  the blr bind and indirect raise, the RET
+  step, the encode passthrough, and
+  append_compact_helper_switch()'s skeleton
+  lines, sorted helper loop, default line,
+  and while(0) tail.
+- Harness: untracked
+  `build/mut_arm64_compact_step0422.py` pins
+  compact-step rows and helper-switch text
+  over branch/call/helper/op fixtures.
+- Result: 61/61 rows caught (three clean
+  rerun shakes). Census 293 -> 294.
+
 ## Step 0421 - arm64 render-program recon sweep
 
 - Scope: render_program()'s default params,

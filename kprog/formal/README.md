@@ -5721,6 +5721,27 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0422 - arm64 compact-step recon sweep
+
+The arm64 compact_step + helper-switch
+region: the 61-row untracked
+`build/mut_arm64_compact_step0422.py`
+repaints compact_step()'s params and return
+annotation, the mnemonic bind, the b./b
+gates, the JCC/JMP/CBZ/CBNZ/TBZ/TBNZ kinds
+and their src/width/imm/target binds, the bl
+helper gate and C_HELPER naming, the
+internal-call gate and raise, the blr bind
+and indirect raise, the RET step, the encode
+passthrough, and the append_compact_helper_
+switch define/do/switch skeleton with its
+sorted helper loop, default line, and
+while(0) tail. Run `61/61 rows caught` with 3
+clean rerun shakes (census 293 -> 294);
+golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode
+host 1410 cases.
+
 ### Step 0421 - arm64 render-program recon sweep
 
 The arm64 render_program region: the 89-row

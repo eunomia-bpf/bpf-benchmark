@@ -2005,6 +2005,31 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0422 rows the arm64 compact_step
+interpreter-lowering region: 61 rows in
+`mut_arm64_compact_step0422.py` (untracked)
+repaint compact_step()'s parameter names and
+return annotation, the mnemonic bind, the b.
+and b gates with their branch_target operand
+picks, the JCC/JMP/CBZ/CBNZ/TBZ/TBNZ step
+kinds and their src/width/imm/target binds,
+the bl arm's helper-symbol gate and
+C_HELPER naming, the internal-call target
+gate and unsupported raise, the blr
+helper-by-addr bind and its indirect-call
+raise, the RET step, the encode() passthrough
+with its OP row columns, and
+append_compact_helper_switch()'s define/do/
+switch skeleton, the sorted helper loop with
+its case/BPF_CALL emission, the
+default-unsupported line, the closing braces
+and while(0) terminator, and the trailing
+blank, through compact-step row and helper-
+switch pins over branch/call/helper/op
+fixtures (count==1 anchors; 61 catches, no
+equivalence rows), census 293 -> 294, and
+stays untracked in `kprog/formal/build/`.
+
 Step 0421 rows the arm64 render_program
 region: 89 rows in
 `mut_arm64_render_program0421.py` (untracked)
