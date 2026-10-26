@@ -1976,6 +1976,21 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0373 rows the x86 `encode()` high-supported gate arms in
+`kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
+mov/movabs arm op-set L446, the add/adc/sub/sbb arm op-set L450,
+the cmp/test arm op-set L453, the dec/inc/neg/not arm op-set
+L456, the setcc CC_AUX membership and `startswith("set")` picks
+L458 (two paints on one line), and the unsupported high-byte
+raise message tile L463 — the gate arms the dispatch and encoder
+batteries leave unrowed beside their picks. The battery drives
+`encode()` on high-byte register operands (ah/bh/ch) across the
+arms and pins the op tokens (MOV_REG, MOV_IMM, MOV_STORE_REG,
+ALU_IMM, ALU_REG, CMP_IMM, CMP_REG, TEST_IMM, SETCC), the gate
+raise for mem+high-reg on add/adc/cmp, and the message tile text
+(count==1 anchors; 7 catches, no equivalence rows), census
+246 -> 247, and stays untracked in `kprog/formal/build/`.
+
 Step 0372 rows the x86 memory-operand head in
 `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
 `parse_mem_terms` defaults (base L367, index L368, disp L370),

@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0373 - x86 encode high-supported arms
+
+- Scope: the x86 `encode()` high-supported gate arms the dispatch
+  and encoder batteries leave unrowed beside their picks: the
+  mov/movabs arm op-set L446, the add/adc/sub/sbb arm op-set L450,
+  the cmp/test arm op-set L453, the dec/inc/neg/not arm op-set
+  L456, the setcc CC_AUX membership and `startswith("set")` picks
+  L458 (two paints on one line), and the unsupported high-byte
+  raise message tile L463.
+- Harness: untracked `build/mut_x86_arm_annot0373.py` (template
+  0370) drives `encode()` on high-byte register operands (ah/bh/
+  ch) across the arms and pins the op tokens (MOV_REG, MOV_IMM,
+  MOV_STORE_REG, ALU_IMM, ALU_REG, CMP_IMM, CMP_REG, TEST_IMM,
+  SETCC), the gate raise for mem+high-reg on add/adc/cmp, and the
+  message tile text.
+- Result: 7/7 rows caught (three clean rerun shakes). Census
+  246 -> 247.
+
 ## Step 0372 - x86 mem-terms head
 
 - Scope: the x86 memory-operand head the mem-terms battery

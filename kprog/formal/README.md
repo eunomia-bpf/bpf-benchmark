@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0373 - x86 encode high-supported arms
+
+The x86 `encode()` high-supported gate arms the dispatch and
+encoder batteries leave unrowed beside their picks: the 7-row
+untracked `build/mut_x86_arm_annot0373.py` rows the mov/movabs
+arm op-set L446, the add/adc/sub/sbb arm op-set L450, the
+cmp/test arm op-set L453, the dec/inc/neg/not arm op-set L456,
+the setcc CC_AUX membership and `startswith("set")` picks L458
+(two paints on one line), and the unsupported high-byte raise
+message tile L463. In-process battery drives `encode()` on
+high-byte register operands (ah/bh/ch) across the arms and pins
+the op tokens (MOV_REG, MOV_IMM, MOV_STORE_REG, ALU_IMM, ALU_REG,
+CMP_IMM, CMP_REG, TEST_IMM, SETCC), the gate raise for
+mem+high-reg on add/adc/cmp, and the message tile text (count==1
+anchors; 7 catches). Run `7/7 rows caught` with 3 clean rerun
+shakes (census 246 -> 247); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners, final arm64 decode host
+1410 cases.
+
 ### Step 0372 - x86 mem-terms head
 
 The x86 memory-operand head the mem-terms battery leaves unrowed
