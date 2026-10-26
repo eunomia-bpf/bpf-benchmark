@@ -5707,6 +5707,29 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0392 - x86 chunk dispatcher tail
+
+The append_chunk_branch_or_ret signature and tail tiles the
+chunk-branch battery leaves unrowed: the 8-row untracked
+`build/mut_x86_chunk_disptail0392.py` rows the
+addrs/call/return/rodata signature repaints, the insn pick
+repaint, the indent pick repaint, the nested and plain
+chunk-transfer call repaints, the stack-read payload
+repaints (ret-addr local and rsp pointer), the ret-addr
+return repaint, and the run-op tail repaint. The battery
+calls append_chunk_branch_or_ret directly over
+mov/jmp/je/call/ret fixtures and pins the comment/run tiles,
+the jcc tower and nested goto, the jcc-to-return done
+return, the external-branch and external-jump raises, the
+plain goto, the jmp-to-return done return, the call
+stack-write/depth/return tiles, the ret tower (depth gate,
+done return, depth decrement, stack read, rsp pop, ret-addr
+return), and the full stack-read line (count==1 anchors; 8
+catches). Run `8/8 rows caught` with 3 clean rerun shakes
+(census 265 -> 266); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0391 - x86 render_program + ret dispatch
 
 The x86 non-chunked program-render region the chunked and

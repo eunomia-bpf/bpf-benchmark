@@ -16111,6 +16111,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0392 - x86 chunk dispatcher tail
+
+- Scope: the append_chunk_branch_or_ret signature and tail
+  tiles the chunk-branch battery leaves unrowed: the
+  addrs/call/return/rodata signature repaints, the insn pick
+  repaint, the indent pick repaint, the nested and plain
+  chunk-transfer call repaints, the stack-read payload
+  repaints (ret-addr local and rsp pointer), the ret-addr
+  return repaint, and the run-op tail repaint.
+- Harness: untracked `build/mut_x86_chunk_disptail0392.py`
+  (template 0391) calls append_chunk_branch_or_ret directly
+  over mov/jmp/je/call/ret fixtures and pins the comment/run
+  tiles, the jcc tower and nested goto, the jcc-to-return
+  done return, the external-branch and external-jump raises,
+  the plain goto, the jmp-to-return done return, the call
+  stack-write/depth/return tiles, the ret tower (depth gate,
+  done return, depth decrement, stack read, rsp pop, ret-addr
+  return), and the full stack-read line.
+- Result: 8/8 rows caught (three clean rerun shakes). Census
+  265 -> 266.
+
 ## Step 0391 - x86 render_program + ret dispatch
 
 - Scope: the x86 non-chunked program-render region the

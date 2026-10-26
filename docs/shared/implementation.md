@@ -1993,6 +1993,27 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0392 rows the x86 chunk-dispatcher tail: 8 rows in
+`mut_x86_chunk_disptail0392.py` (untracked) repaint
+`append_chunk_branch_or_ret`'s signature repaints (addrs,
+call targets, return targets, rodata idents), the insn pick
+repaint, the indent pick repaint, the nested and plain
+chunk-transfer call repaints, the stack-read payload
+repaints (ret-addr local and rsp pointer), the ret-addr
+return repaint, and the run-op tail repaint — the tiles the
+chunk-branch battery leaves unrowed beside its jcc tower and
+call/ret arms. The battery calls append_chunk_branch_or_ret
+directly over mov/jmp/je/call/ret fixtures and pins the
+comment/run tiles, the jcc tower and nested goto, the
+jcc-to-return done return, the external-branch and
+external-jump raises, the plain goto, the jmp-to-return done
+return, the call stack-write/depth/return tiles, the ret
+tower (depth gate, done return, depth decrement, stack
+read, rsp pop, ret-addr return), and the full stack-read
+line (count==1 anchors; 8 catches, no equivalence rows),
+census 265 -> 266, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0391 rows the x86 non-chunked program-render region: 25
 rows in `mut_x86_render_retdisp0391.py` (untracked) repaint
 `render_program`'s signature defaults repaints (subfunctions,
