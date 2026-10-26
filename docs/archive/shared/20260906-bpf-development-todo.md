@@ -16179,6 +16179,25 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0424 - arm64 compact-render sweep
+
+- Scope: render_program_compact()
+  signature defaults, all_insns/all_addrs/
+  addr_to_index folds, helper_by_addr,
+  uses_stack, the kind table,
+  rodata/map/reloc plumbing, compact_step
+  fold, helper_names, used_ops, step struct
+  and row emission, entry pc/guard block,
+  OP dispatch, the JMP/JCC/CBZ/CBNZ/TBZ/
+  TBNZ/CALL/RET/HELPER else chains, and the
+  linked_exit versus return-0 tail.
+- Harness: untracked
+  `build/mut_arm64_compact_render0424.py`
+  pins module API plus a full-output
+  identity oracle over eleven fixtures.
+- Result: 181/181 rows caught (three clean
+  rerun shakes). Census 295 -> 296.
+
 ## Step 0423 - arm64 plumbing recon sweep
 
 - Scope: load_benches(), source_prelude(),

@@ -5721,6 +5721,23 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0424 - arm64 compact-render sweep
+
+The arm64 compact render body: the 181-row
+untracked `build/mut_arm64_compact_
+render0424.py` repaints render_program_
+compact()'s signature, folds, kind table,
+rodata/map plumbing, step struct and row
+emission, entry pc/guard block, OP dispatch,
+the JMP through HELPER else chains, and the
+linked_exit versus return-0 tail. Run `181/
+181 rows caught` with 3 clean rerun shakes
+(census 295 -> 296); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners,
+final arm64 decode host 1410 cases; a
+full-output identity oracle over eleven
+fixtures pins every emitted line.
+
 ### Step 0423 - arm64 plumbing recon sweep
 
 The arm64 generator plumbing: the 91-row

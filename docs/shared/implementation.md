@@ -2005,6 +2005,35 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0424 rows the arm64 compact
+render body: 181 rows in
+`mut_arm64_compact_render0424.py`
+(untracked) repaint render_program_compact
+()'s signature defaults and rodata16
+fallback, the all_insns/all_addrs/
+addr_to_index folds, helper_by_addr,
+uses_stack detection, the xdp/tc/cgroup_skb
+kind table, rodata ident map, map_symbols
+relocation filter, reloc_idents
+enumeration, compact_step fold, helper_names
+prefix strip and HELPER gate, used_ops
+sort, lines seeding, stack define, all ten
+ARM64_SIM_C_* defines, include emission,
+helper switch append, prelude/rodata/blank
+emission, the map struct block, step_ident
+naming, step struct fields, step-row format,
+entry block pc/guard emission and unroll
+pragma, every pc field binding, the OP
+dispatch switch and case emission, the
+JMP/JCC/CBZ/TBZ/CALL/RET/HELPER else chains
+with pc updates and guard continues, and the
+linked_exit tail versus return 0, through
+module-API pins plus a full-output identity
+oracle over eleven fixtures (count==1
+anchors with widened windows; 181 catches,
+no equivalence rows), census 295 -> 296, and
+stays untracked in `kprog/formal/build/`.
+
 Step 0423 rows the arm64 generator
 plumbing: 91 rows in
 `mut_arm64_plumbing0423.py` (untracked)
