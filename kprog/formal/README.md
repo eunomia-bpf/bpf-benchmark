@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0377 - x86 cmp/test and ALU arms
+
+The x86 `encode()` cmp/test and ALU arms the dispatch and
+body-mid batteries leave unrowed beside their cells: the 24-row
+untracked `build/mut_x86_arm_annot0377.py` rows the cmp/test
+width default L632, imm/reg token picks L634/643, the imm lane
+pick L636, the cmp-mem gate L646 with its REG_MEM token and
+TEST_MEM_REG arm L658/659, the CMP/TEST_MEM_IMM token L665,
+the unsupported-memory raises L671/744, the imul three-arg gate
+and token pair L693/698/705, the ALU width-mismatch gate L717
+and ALU_REG/ALU_MEM/ALU_MEM_REG/ALU_MEM_IMM tokens
+L721/725/732/738, the unary inc/dec imm pick L689, and the bt
+arm gate/token pair L747/753/758. In-process battery pins the
+cmp/test token truth table with mem/reg/imm operand forms, the
+alu unary/reg/mem tokens with ALU_OP aux tiles, the imul and
+bt tokens, and the two unsupported-form raise messages
+(count==1 anchors; 24 catches). Run `24/24 rows caught` with 3
+clean rerun shakes (census 250 -> 251); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases.
+
 ### Step 0376 - x86 encode dispatch head
 
 The x86 `encode()` dispatch head the driver and body-mid
