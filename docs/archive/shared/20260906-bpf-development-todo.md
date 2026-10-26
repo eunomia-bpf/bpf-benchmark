@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0372 - x86 mem-terms head
+
+- Scope: the x86 memory-operand head the mem-terms battery
+  leaves unrowed beside its bracket/dash/index picks:
+  `parse_mem_terms` defaults (base L367, index L368, disp L370),
+  the star gate L372, the scale split pick L373, the scale parse
+  L377, the reg_info call sites L374 and L380, the return
+  quadruple L389, the `mem_aux` src_shift emit L400, the
+  `branch_target` hex-or-decimal regex left arm L409, and the
+  `rodata_ident_map` reversed-enumerate repaint L435.
+- Harness: untracked `build/mut_x86_arm_annot0372.py` (template
+  0370) pins the `parse_mem_terms` truth tables (rr16, only-base,
+  scale, negative displacement through the dash flip,
+  non-bracket input), the `mem_aux` FULL/plain/src_shift shapes,
+  the `branch_target` hex/decimal/space parses (decimal text is
+  read hex, short circuit makes gray code pointless), the rodata
+  pair map reverse, and the x86 helper-symbol truth table.
+- Result: 12/12 rows caught (three clean rerun shakes). Census
+  245 -> 246. Note: `mem_disp` pick [3]->[2] is inert under the
+  balanced-truth-table probe (writes the wrong field but returns
+  the same text) — waived.
+
 ## Step 0371 - arm64 render head
 
 - Scope: the arm64 render head the render batteries leave

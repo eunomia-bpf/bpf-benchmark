@@ -5687,6 +5687,27 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0372 - x86 mem-terms head
+
+The x86 memory-operand head the mem-terms battery leaves unrowed
+beside its bracket/dash/index picks: the 12-row untracked
+`build/mut_x86_arm_annot0372.py` rows the `parse_mem_terms`
+defaults (base L367, index L368, disp L370), the star gate L372,
+the scale split pick L373, the scale parse L377, the reg_info
+call sites L374 and L380, the return quadruple L389, the
+`mem_aux` src_shift emit L400, the `branch_target` hex-or-decimal
+regex left arm L409, and the `rodata_ident_map` reversed-enumerate
+repaint L435. In-process battery pins the `parse_mem_terms` truth
+tables (rr16, only-base, scale, negative displacement through the
+dash flip, non-bracket input), the `mem_aux` FULL/plain/src_shift
+shapes, the `branch_target` hex/decimal/space parses, the rodata
+pair map reverse, and the x86 helper-symbol truth table (the
+`mem_disp` [3]->[2] pick is inert under the balanced truth table —
+waived; count==1 anchors; 12 catches). Run `12/12 rows caught`
+with 3 clean rerun shakes (census 245 -> 246); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases.
+
 ### Step 0371 - arm64 render head
 
 The arm64 render head the render batteries leave unrowed beside

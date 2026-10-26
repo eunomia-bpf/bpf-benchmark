@@ -1976,6 +1976,25 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0372 rows the x86 memory-operand head in
+`kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
+`parse_mem_terms` defaults (base L367, index L368, disp L370),
+the star gate L372, the scale split pick L373, the scale parse
+L377, the `reg_info` call sites L374 and L380, the return
+quadruple L389, the `mem_aux` src_shift emit L400, the
+`branch_target` hex-or-decimal regex left arm L409, and the
+`rodata_ident_map` reversed-enumerate repaint L435 — the
+memory-operand head the mem-terms battery leaves unrowed beside
+its bracket/dash/index picks. The battery pins the parse truth
+tables (two-register-plus-16, only base, scale-4 displacement
+0x8, negative displacement through the dash flip, non-bracket
+input), the FULL/plain/src_shift shapes, the decimal-text-is-hex
+parse, the rodata reverse, and the x86 helper-symbol truth table
+(count==1 anchors; 12 catches, no equivalence rows; the
+`mem_disp` [3]->[2] pick is inert under the balanced truth table
+— waived), census 245 -> 246, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0370 rows the x86 normalize/scalar tail in
 `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
 `normalize_native_link_entry_returns` lane (jmp pick L258, the
