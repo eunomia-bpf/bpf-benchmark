@@ -1976,6 +1976,23 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0383 rows the x86 chunked case-switch head: 17 rows in
+`mut_x86_chunk_render0383.py` (untracked) repaint
+`render_chunk_function`'s head repaint, the function header
+name/args repaints, the switch repaint, the case-label emit
+repaint, the PC_DONE default repaint, the label emit repaint,
+and the closing extend repaint, plus `render_chunked_program`'s
+head repaint, the skb ctx/abi kind/state storage/bind repaints,
+the addrs-set scan, the chunk-emitter dispatch, the first-addr
+init paint, and the rdi abi/tag payload tile — the switch/head
+lane the chunked-render and chunk-unit batteries leave unrowed
+beside their fan-outs. The battery pins the chunk-case switch
+rows, the entry template rows (pc init, iter loop, break, chunk
+dispatch, RAX write, RET, LICENSE), and the chunked program
+end-to-end (count==1 anchors; 17 catches, no equivalence rows),
+census 256 -> 257, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0382 rows the x86 subroutine walker + chunk flatten: 15
 rows in `mut_x86_subroutine0382.py` (untracked) repaint
 `render_x86_subroutine`'s head repaint and count-annotate tail,

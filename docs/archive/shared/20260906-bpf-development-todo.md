@@ -16092,6 +16092,24 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0383 - x86 chunked case-switch head
+
+- Scope: the chunked program's switch-case head and the
+  entry-dispatch lane: `render_chunk_function`'s head repaint,
+  the function header name/args repaints, the switch repaint,
+  the case-label emit repaint, the PC_DONE default repaint, the
+  label emit repaint, and the closing extend repaint, plus
+  `render_chunked_program`'s head repaint, the skb ctx/abi
+  kind/state storage/bind repaints, the addrs-set scan, the
+  chunk-emitter dispatch, the first-addr init paint, and the
+  rdi abi/tag payload tile.
+- Harness: untracked `build/mut_x86_chunk_render0383.py`
+  (template 0382) pins the chunk-case switch rows, the entry
+  template rows (pc init, iter loop, break, chunk dispatch, RAX
+  write, RET, LICENSE), and the chunked program end-to-end.
+- Result: 17/17 rows caught (three clean rerun shakes). Census
+  256 -> 257.
+
 ## Step 0382 - x86 subroutine walker + chunk flatten
 
 - Scope: the subroutine body walker and its chunk-item

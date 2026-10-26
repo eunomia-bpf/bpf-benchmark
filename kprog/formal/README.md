@@ -5687,6 +5687,24 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0383 - x86 chunked case-switch head
+
+The chunked program's switch-case head and the entry-dispatch
+lane: the 17-row untracked `build/mut_x86_chunk_render0383.py`
+rows `render_chunk_function`'s head repaint, the function header
+name/args repaints, the switch repaint, the case-label emit
+repaint, the PC_DONE default repaint, the label emit repaint,
+and the closing extend repaint, plus `render_chunked_program`'s
+head repaint, the skb ctx/abi kind/state storage/bind repaints,
+the addrs-set scan, the chunk-emitter dispatch, the first-addr
+init paint, and the rdi abi/tag payload tile. In-process battery
+pins the chunk-case switch rows, the entry template rows (pc
+init, iter loop, break, chunk dispatch, RAX write, RET,
+LICENSE), and the chunked program end-to-end (count==1 anchors;
+17 catches). Run `17/17 rows caught` with 3 clean rerun shakes
+(census 256 -> 257); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0382 - x86 subroutine walker + chunk flatten
 
 The subroutine body walker and its chunk-item flatten: the
