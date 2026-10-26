@@ -16179,6 +16179,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0425 - arm64 render-program sweep
+
+- Scope: render_program() signature
+  defaults, all_insns/all_addrs folds,
+  next_by_addr and helper_by_addr,
+  return_addrs and uses_stack, the
+  xdp/tc/cgroup_skb kind table, stack and
+  RETURN_CASES emission, include and prelude
+  gates, rodata/map/reloc plumbing, the map
+  struct block, section extends, native
+  subroutine comments, per-insn labels and
+  append_insn, the linked_exit versus
+  return-0 tail, license and closing
+  extends, and the trailing join.
+- Harness: untracked
+  `build/mut_arm64_render_program0425.py`
+  pins module API plus a full-output
+  identity oracle over ten fixtures.
+- Result: 88/88 rows caught (three clean
+  rerun shakes). Census 296 -> 297.
+
 ## Step 0424 - arm64 compact-render sweep
 
 - Scope: render_program_compact()

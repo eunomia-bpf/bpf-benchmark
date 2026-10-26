@@ -2005,6 +2005,38 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0425 rows the arm64 plain
+render body: 88 rows in
+`mut_arm64_render_program0425.py`
+(untracked) repaint render_program()'s
+signature defaults (rodata16, linked_exit),
+the rodata16 fallback, the all_insns and
+all_addrs folds, next_by_addr and
+helper_by_addr comprehensions, return_addrs
+sort with the mnemonic gate, uses_stack
+detection, the xdp/tc/cgroup_skb kind
+table with section, ctx, and entry tuples,
+lines seeding and the stack define, the
+RETURN_CASES define with its case loop and
+trailing-backslash flip, the include extend,
+prelude gate and rstrip, rodata_ident_map,
+rodata row emission, the map_symbols sorted
+filter, reloc_idents c_ident enumeration,
+the map struct block, the section and
+entry-name extends, the native-subroutine
+comment, per-insn label append and the
+append_insn call, the linked_exit tail
+versus return 0, the license and closing
+extends, and the trailing join, through
+module-API pins plus a full-output identity
+oracle over ten fixtures (nop, stack ldr,
+bl with a nested function, tc, cgroup_skb,
+prelude, rodata and map, linked_exit,
+helper-via-blr, and double-bl return cases;
+count==1 anchors with widened windows),
+census 296 -> 297, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0424 rows the arm64 compact
 render body: 181 rows in
 `mut_arm64_compact_render0424.py`

@@ -5721,6 +5721,26 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0425 - arm64 render-program sweep
+
+The arm64 plain render body: the 88-row
+untracked `build/mut_arm64_render_
+program0425.py` repaints render_program()'s
+signature defaults, address folds, kind
+table, stack and RETURN_CASES defines, the
+include and prelude emission, rodata and
+map relocation plumbing, the map struct
+block, section extends, native-subroutine
+comments, per-insn labels, the append_insn
+call, the linked_exit versus return-0 tail,
+and the closing extends. Run `88/88 rows
+caught` with 3 clean rerun shakes (census
+296 -> 297); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases; a
+full-output identity oracle over ten
+fixtures pins every emitted line.
+
 ### Step 0424 - arm64 compact-render sweep
 
 The arm64 compact render body: the 181-row
