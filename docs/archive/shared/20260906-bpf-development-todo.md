@@ -16111,6 +16111,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 14/14 rows caught (three clean rerun shakes). Census
   258 -> 259.
 
+## Step 0404 - x86 parse-side region
+
+- Scope: the module head through the mem/branch
+  helpers: generated-contract imports (yaml, alu/cc/
+  opcode/lane), path and limit constants (REPO_ROOT,
+  MICRO_PROGRAMS, STAGE2_PROGRAMS, OUT_DIR,
+  MAX_REP_MOVS_COUNT, MAX_MEMSET_COUNT,
+  CHUNKED_PROOF_INSN_THRESHOLD, CHUNKED_PROOF_CHUNK_INSNS,
+  CHUNKED_PROOF_PC_DONE), table containers (PTR_WIDTH,
+  REGS, WIDTH_CONST), the Bench/NativeInsn/EncodedInsn/
+  ChunkInsn dataclass declarations, and helper defs
+  split_operands, parse_asm_text, section_size,
+  rodata_bytes, load_rodata16, text_symbol_addrs,
+  parse_native_link_blob, parse_proof_object_program,
+  normalize_native_link_entry_returns,
+  parse_native_linked_program, parse_int, is_int, c_u64,
+  c_ptr_u64, reg_info, is_mem, operand_width,
+  mem_base_reg, parse_mem_terms, mem_aux, mem_disp,
+  branch_target, has_direct_branch_target.
+- Harness: untracked `build/mut_x86_parse_side0404.py`
+  (template 0403) drives a real .proof.o fixture (section
+  size, rodata bytes, rodata16 map, text symbol addrs,
+  blob and linked-program parses, proof-object parse)
+  plus direct helper calls, split/asm-text fixtures, a
+  Bench construction, the constant identities, a
+  render_chunked_program output pin, and a WIDTH_CONST
+  check.
+- Result: 45/45 rows caught (three clean rerun shakes).
+  Census 277 -> 278.
+
 ## Step 0403 - x86 branch-or-ret and config plumbing
 
 - Scope: the x86 step-lowering, branch-or-ret, and
