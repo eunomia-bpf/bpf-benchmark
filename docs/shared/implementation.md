@@ -1976,6 +1976,25 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0375 returns to the x86 `encode()` body-mid residual: 18
+rows in `mut_x86_arm_annot0375.py` (untracked) repaint the cmov
+aux shift pick L521 and reg-cmov return L525, the mov
+MOV_LOAD_HELPER_ID token/imm tile L546/547, the scalar-rodata
+raise tile L550, the MOV_LOAD_MAP_PTR token L551, the
+MOV_LOAD token L553, the MOV_STORE_IMM token/imm tile
+L560/563, the MOV_STORE_REG token/src tile L565/566, the
+load-xmm arm token pair L579/581 and store-xmm token L584, the
+MOVZX_REG pick L596, the movzx-mem MOV_LOAD token L602, the
+cdqe rax/rax tile L610, and the lea rodata/mem return tokens
+L620/623 — the body-mid residual the high-supported and
+mem-terms batteries leave unrowed beside their arms. The
+battery pins the cmov aux shift and reg token, the mov
+helper/map/load/store tokens with their imm payloads, the xmm
+load/store tokens with the rodata ident, the movzx reg/mem
+tokens, the cdqe rax/rax tile, and the lea rodata/mem tokens
+(count==1 anchors; 18 catches, no equivalence rows), census
+248 -> 249, and stays untracked in `kprog/formal/build/`.
+
 Step 0374 crosses back to the arm64 side: 9 rows in
 `mut_x86_arm_annot0374.py` (untracked) repaint the arm64 helper
 sub-decoder head — the `blr_target_reg` early return L619, the

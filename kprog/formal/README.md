@@ -5687,6 +5687,28 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0375 - x86 encode body-mid residual
+
+The x86 `encode()` body-mid residual the high-supported and
+mem-terms batteries leave unrowed beside their arms: the 18-row
+untracked `build/mut_x86_arm_annot0375.py` rows the cmov aux
+shift pick L521 and reg-cmov return L525, the mov
+MOV_LOAD_HELPER_ID token/imm tile L546/547, the scalar-rodata
+raise tile L550, the MOV_LOAD_MAP_PTR token L551, the
+MOV_LOAD token L553, the MOV_STORE_IMM token/imm tile
+L560/563, the MOV_STORE_REG token/src tile L565/566, the
+load-xmm arm token pair L579/581 and store-xmm token L584, the
+MOVZX_REG pick L596, the movzx-mem MOV_LOAD token L602, the
+cdqe rax/rax tile L610, and the lea rodata/mem return tokens
+L620/623. In-process battery pins the cmov aux shift and reg
+token, the mov helper/map/load/store tokens with their imm
+payloads, the xmm load/store tokens with the rodata ident, the
+movzx reg/mem tokens, the cdqe rax/rax tile, and the lea
+rodata/mem tokens (count==1 anchors; 18 catches). Run
+`18/18 rows caught` with 3 clean rerun shakes (census 248 ->
+249); golden gate `make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0374 - arm64 helper sub-decoders
 
 The arm64 helper sub-decoder head the render/helper batteries

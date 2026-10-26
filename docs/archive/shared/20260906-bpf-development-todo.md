@@ -16092,6 +16092,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0375 - x86 encode body-mid residual
+
+- Scope: the x86 `encode()` body-mid residual the high-supported
+  and mem-terms batteries leave unrowed beside their arms: the
+  cmov aux shift pick L521 and reg-cmov return L525, the mov
+  MOV_LOAD_HELPER_ID token/imm tile L546/547, the scalar-rodata
+  raise tile L550, the MOV_LOAD_MAP_PTR token L551, the
+  MOV_LOAD token L553, the MOV_STORE_IMM token/imm tile
+  L560/563, the MOV_STORE_REG token/src tile L565/566, the
+  load-xmm arm token pair L579/581 and store-xmm token L584, the
+  MOVZX_REG pick L596, the movzx-mem MOV_LOAD token L602, the
+  cdqe rax/rax tile L610, and the lea rodata/mem return tokens
+  L620/623.
+- Harness: untracked `build/mut_x86_arm_annot0375.py` (template
+  0370) pins the cmov aux shift and reg token, the mov
+  helper/map/load/store tokens with their imm payloads, the xmm
+  load/store tokens with the rodata ident, the movzx reg/mem
+  tokens, the cdqe rax/rax tile, and the lea rodata/mem tokens.
+- Result: 18/18 rows caught (three clean rerun shakes). Census
+  248 -> 249.
+
 ## Step 0374 - arm64 helper sub-decoders
 
 - Scope: the arm64 helper sub-decoder head the render/helper
