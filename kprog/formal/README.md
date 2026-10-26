@@ -5687,6 +5687,29 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0384 - x86 program render dispatch + native ret-dispatch
+
+The program renderer's dispatch head and the native
+ret-dispatch tail: the 35-row untracked
+`build/mut_x86_program_render0384.py` rows `render_program`'s
+head repaint, the subfunctions/kind/exit-addr/prelude/rodata
+signature paints, the chunked-program fan-out gate repaint, the
+self-call mnemonic gate repaint, the include header payload,
+the subroutine label/count maps, the addrs/return-addrs/next-map
+scans, the stack-gate paints, the label and declare emits, the
+branch-or-ret payload repainting, the native-link exit lane
+(addrs/label/comment/ret-statement), the ret-dispatch
+head/switch/case/loop paint, and the closing extend repaint,
+plus the chunked-program tail rows (chunk call repaint, pc-else
+arm, PC_DONE repaint, done check, RAX width write, X86_RET
+tile). In-process battery pins the xdp/entry template, the
+call/jmp/ret macros, the subfunction banner and SUB_RET
+dispatch cases, the exit lane, the self-call chunk fan-out, the
+chunked tail rows, and the license closers (count==1 anchors;
+35 catches). Run `35/35 rows caught` with 3 clean rerun shakes
+(census 257 -> 258); golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode host 1410 cases.
+
 ### Step 0383 - x86 chunked case-switch head
 
 The chunked program's switch-case head and the entry-dispatch

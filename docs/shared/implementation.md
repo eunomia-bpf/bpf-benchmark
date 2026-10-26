@@ -1976,6 +1976,27 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0384 rows the x86 program render dispatch + native
+ret-dispatch: 35 rows in `mut_x86_program_render0384.py`
+(untracked) repaint `render_program`'s head repaint, the
+subfunctions/kind/exit-addr/prelude/rodata signature paints, the
+chunked-program fan-out gate repaint, the self-call mnemonic
+gate repaint, the include header payload, the subroutine
+label/count maps, the addrs/return-addrs/next-map scans, the
+stack-gate paints, the label and declare emits, the
+branch-or-ret payload repainting, the native-link exit lane
+(addrs/label/comment/ret-statement), the ret-dispatch
+head/switch/case/loop paint, and the closing extend repaint,
+plus the chunked-program tail rows (chunk call repaint, pc-else
+arm, PC_DONE repaint, done check, RAX width write, X86_RET
+tile) — the dispatch/tail lane the chunked-head battery leaves
+unrowed beside its switch/head tiles. The battery pins the
+xdp/entry template, the call/jmp/ret macros, the subfunction
+banner and SUB_RET dispatch cases, the exit lane, the self-call
+chunk fan-out, the chunked tail rows, and the license closers
+(count==1 anchors; 35 catches, no equivalence rows), census
+257 -> 258, and stays untracked in `kprog/formal/build/`.
+
 Step 0383 rows the x86 chunked case-switch head: 17 rows in
 `mut_x86_chunk_render0383.py` (untracked) repaint
 `render_chunk_function`'s head repaint, the function header

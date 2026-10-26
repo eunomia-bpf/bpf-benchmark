@@ -16092,6 +16092,28 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0384 - x86 program render dispatch + native ret-dispatch
+
+- Scope: the program renderer's dispatch head and the native
+  ret-dispatch tail: `render_program`'s head repaint, the
+  subfunctions/kind/exit-addr/prelude/rodata signature paints,
+  the chunked-program fan-out gate repaint, the self-call
+  mnemonic gate repaint, the include header payload, the
+  subroutine label/count maps, the addrs/return-addrs/next-map
+  scans, the stack-gate paints, the label and declare emits, the
+  branch-or-ret payload repainting, the native-link exit lane,
+  the ret-dispatch head/switch/case/loop paint, and the closing
+  extend repaint, plus the chunked-program tail rows (chunk call
+  repaint, pc-else arm, PC_DONE repaint, done check, RAX width
+  write, X86_RET tile).
+- Harness: untracked `build/mut_x86_program_render0384.py`
+  (template 0383) pins the xdp/entry template, the call/jmp/ret
+  macros, the subfunction banner and SUB_RET dispatch cases, the
+  exit lane, the self-call chunk fan-out, the chunked tail rows,
+  and the license closers.
+- Result: 35/35 rows caught (three clean rerun shakes). Census
+  257 -> 258.
+
 ## Step 0383 - x86 chunked case-switch head
 
 - Scope: the chunked program's switch-case head and the
