@@ -1976,6 +1976,19 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The arm64 compact-render arms (the compact step-table fan-out head
+  and tail L914-916, the guard-loop limit and pc check L928-931, the
+  step fetch L933, the per-op L_EXEC emit L954, and the `uses_stack`
+  scan L822 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — the
+  step-table lane the render-unit and render-pipeline batteries
+  leave unrowed beside their picks) rows 7 lines through an
+  in-process battery pinning the MOV_REG and JCC step rows with
+  their COND_EQ target, the guard limit 24 and pc check 3
+  arithmetic, the step fetch ident, the L_EXEC dispatch, the xdp
+  section lane, and the ENABLE_STACK presence/absence pair; no
+  equivalence rows and every anchor count==1.
+
   The x86 parse-text arms (the `parse_int` negative-recursion tail
   L322-323, the `split_operands` zero-depth comma gate L122, and the
   `parse_asm_text` relocation scan regex L134 of

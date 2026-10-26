@@ -5687,6 +5687,22 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0363 - arm64 compact step table
+
+The arm64 compact-render free arms the render-unit and
+render-pipeline batteries leave unrowed: the 7-row untracked
+`build/mut_x86_arm_annot0363.py` rows the compact step-table
+fan-out head and tail L914-916, the guard-loop limit and pc check
+L928-931, the step fetch L933, the per-op L_EXEC emit L954, and the
+`uses_stack` scan L822. In-process battery pins the MOV_REG and JCC
+step rows with their COND_EQ target, the guard limit 24 and pc
+check 3 arithmetic, the step fetch ident, the L_EXEC dispatch, the
+xdp section lane, and the ENABLE_STACK presence/absence pair
+(count==1 anchors; 7 catches, no equivalence rows). Run `7/7 rows
+caught` with 3 clean rerun shakes (census 236 -> 237); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0362 - arm64 helper switch
 
 The arm64 helper-define and compact-switch free arms the emit-ops

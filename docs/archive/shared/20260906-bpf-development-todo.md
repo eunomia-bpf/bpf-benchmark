@@ -16092,6 +16092,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0363 - arm64 compact step table
+
+- Scope: the arm64 compact-render free arms the render-unit and
+  render-pipeline batteries leave unrowed: the compact step-table
+  fan-out head and tail L914-916, the guard-loop limit and pc check
+  L928-931, the step fetch L933, the per-op L_EXEC emit L954, and
+  the `uses_stack` scan L822.
+- Harness: untracked `build/mut_x86_arm_annot0363.py` pins the
+  MOV_REG and JCC step rows with their COND_EQ target, the guard
+  limit 24 and pc check 3 arithmetic, the step fetch ident, the
+  L_EXEC dispatch, the xdp section lane, and the ENABLE_STACK
+  presence/absence pair.
+- Result: 7/7 rows caught (step-kind or target repaints flip the
+  emitted rows, limit/pc repaints flip the guard arithmetic, the
+  fetch and exec repaints flip the dispatch, and the stack repaint
+  drops the ENABLE_STACK define). Census 236 -> 237.
+
 ## Step 0362 - arm64 helper switch
 
 - Scope: the arm64 helper-define and compact-switch free arms the
