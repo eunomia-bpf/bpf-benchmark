@@ -1976,6 +1976,15 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The x86 parse-row tail arms (the `addr_text` strip L142 and the
+  empty/angle-bracket asm skip L149-150 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the row
+  tail lane the head-route and parse-asm batteries leave unrowed
+  beside their push picks) rows 2 lines through an in-process
+  battery pinning the padded-prefix address parse, the
+  comment-only field skip, and the angle-bracket field skip; no
+  equivalence rows and every anchor count==1.
+
   The x86 objdump row-walk arms (the no-colon skip L139, the
   hex-prefix fullmatch L143, the tab-field split L145, the `lock`
   prefix consume L151, the lowercase-mnemonic match L153, and the

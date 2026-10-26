@@ -16092,6 +16092,19 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0366 - x86 parse-row tail
+
+- Scope: the objdump row-walk tail free arms the head-route and
+  parse-asm batteries leave unrowed beside their push picks: the
+  `addr_text` strip L142, and the empty/angle-bracket asm skip
+  L149-150.
+- Harness: untracked `build/mut_x86_arm_annot0366.py` pins the
+  padded-prefix address parse, the comment-only field skip, and
+  the angle-bracket field skip.
+- Result: 2/2 rows caught (the strip repaint shifts the address
+  parse to the padded prefix and the gate repaint crashes the
+  comment-only/angle-bracket skips). Census 239 -> 240.
+
 ## Step 0365 - x86 parse-asm rows
 
 - Scope: the x86 objdump row-walk free arms the head-route battery

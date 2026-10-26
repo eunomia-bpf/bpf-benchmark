@@ -5687,6 +5687,19 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0366 - x86 parse-row tail
+
+The x86 parse-row tail free arms the head-route and parse-asm
+batteries leave unrowed beside their push picks: the 2-row
+untracked `build/mut_x86_arm_annot0366.py` rows the `addr_text`
+strip L142 and the empty/angle-bracket asm skip L149-150.
+In-process battery pins the padded-prefix address parse, the
+comment-only field skip, and the angle-bracket field skip
+(count==1 anchors; 2 catches, no equivalence rows). Run `2/2 rows
+caught` with 3 clean rerun shakes (census 239 -> 240); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0365 - x86 parse-asm rows
 
 The x86 objdump row-walk free arms the head-route battery leaves
