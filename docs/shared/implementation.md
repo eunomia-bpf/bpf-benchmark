@@ -1993,6 +1993,27 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0409 rows the x86 parse-internals cell region: 14
+rows in `mut_x86_parse_internals0409.py` (untracked)
+repaint split_operands' parts start, depth-counter
+zero and its +1/-1 updates, the enumerate loop
+variable, and the parts-tuple return; parse_asm_text's
+insn-list store, the splitlines iterate, the
+reloc-attach gate and its re.sub/replace payloads,
+the addr colon split, the '#' comment cut, and the
+lock prefix cut; and text_symbol_addrs' symbol store —
+the cells the parse-side battery leaves unrowed. The
+battery pins split_operands bracket-nesting/empty/
+one-operand checks, a five-insn asm-text fixture with
+a reloc strip, comment cut, lock-prefix strip,
+skipped and bare-mnemonic lines, and a data16 operand
+pin, with the objdump-rodata-dependent tiles
+(rodata_bytes, load_rodata16 internals) recorded as
+unobservable SKIP because .native_link_rodata is empty
+in every current .proof.o fixture (count==1 anchors;
+14 catches, no equivalence rows), census 280 -> 281,
+and stays untracked in `kprog/formal/build/`.
+
 Step 0408 rows the x86 encode-arm payload region: 40
 rows in `mut_x86_encode_arms0408.py` (untracked)
 repaint the mov-imm and mov-reg lanes (op tiles,

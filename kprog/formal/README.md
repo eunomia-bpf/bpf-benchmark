@@ -5707,6 +5707,32 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0409 - x86 parse internals
+
+The parse-internals cells the parse-side battery
+leaves unrowed: the 14-row untracked
+`build/mut_x86_parse_internals0409.py` rows
+split_operands' parts start, depth-counter zero and
+its +1/-1 updates, the enumerate loop variable, and
+the parts-tuple return; parse_asm_text's insn-list
+store, the splitlines iterate, the reloc-attach gate
+and its re.sub/replace payloads, the addr colon
+split, the '#' comment cut, and the lock prefix
+cut; and text_symbol_addrs' symbol store. The
+battery pins split_operands bracket-nesting/empty/
+one-operand checks, a five-insn asm-text fixture
+with a reloc strip, comment cut, lock-prefix strip,
+skipped and bare-mnemonic lines, and a data16
+operand pin, with the objdump-rodata-dependent
+tiles (rodata_bytes, load_rodata16 internals)
+recorded as unobservable SKIP because
+.native_link_rodata is empty in every current
+.proof.o fixture (count==1 anchors; 14 catches).
+Run `14/14 rows caught` with 3 clean rerun shakes
+(census 280 -> 281); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0408 - x86 encode arm payloads
 
 The encode() arm payloads the step and dispatch

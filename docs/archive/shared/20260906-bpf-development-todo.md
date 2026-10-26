@@ -16141,6 +16141,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 45/45 rows caught (three clean rerun shakes).
   Census 277 -> 278.
 
+## Step 0409 - x86 parse internals
+
+- Scope: the parse-internals cells the parse-side
+  battery leaves unrowed: split_operands' parts
+  start, depth-counter zero and its +1/-1 updates,
+  the enumerate loop variable, and the parts-tuple
+  return; parse_asm_text's insn-list store, the
+  splitlines iterate, the reloc-attach gate and its
+  re.sub/replace payloads, the addr colon split, the
+  '#' comment cut, and the lock prefix cut;
+  text_symbol_addrs' symbol store.
+- Harness: untracked `build/mut_x86_parse_internals0409.py`
+  (template 0405) pins split_operands
+  bracket-nesting/empty/one-operand checks, a
+  five-insn asm-text fixture with a reloc strip,
+  comment cut, lock-prefix strip, skipped and
+  bare-mnemonic lines, and a data16 operand pin;
+  objdump-rodata-dependent tiles (rodata_bytes,
+  load_rodata16 internals) recorded as unobservable
+  SKIP (.native_link_rodata empty in every current
+  .proof.o fixture).
+- Result: 14/14 rows caught (three clean rerun shakes).
+  Census 280 -> 281.
+
 ## Step 0408 - x86 encode arm payloads
 
 - Scope: the encode() arm payloads the step and
