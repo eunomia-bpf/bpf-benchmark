@@ -1963,6 +1963,19 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The rodata-map, step-plumb, and compact-JCC arms (the x86
+  `rodata_ident_map` enumeration return L435, the `append_step`
+  encode/comment/passthrough cell L1022-1024 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py`, and the arm64
+  `compact_step` JCC CompactStep return L742-743 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py` — arms the
+  render-pipeline and emit-ops batteries leave unrowed beside their
+  sibling gates) rows 3 lines through an in-process battery pinning
+  the rodata enumeration and empty-map cases, the bare-comment step
+  emit, the mem-imm and cmp step emissions with the MEMOP override,
+  and the JCC branch step with its COND pick and the off-blob
+  KeyError arm; no equivalence rows and every anchor count==1.
+
   The x86 branch-harvest arms (the `append_branch_or_ret` implicit
   `return_targets` empty-set default L1051, the JCC branch-macro emit
   f-string L1064-1066, and the `X86_SIM_X86_CALL` function-target emit

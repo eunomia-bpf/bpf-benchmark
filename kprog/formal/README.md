@@ -5687,6 +5687,22 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0359 - rodata-map and compact JCC
+
+The rodata-map, step-plumb, and compact-JCC arms the earlier
+batteries leave unrowed: the 3-row untracked
+`build/mut_x86_arm_annot0359.py` rows the x86 `rodata_ident_map`
+enumeration return L435, the x86 `append_step`
+encode/comment/passthrough cell L1022-1024, and the arm64
+`compact_step` JCC CompactStep return L742-743. In-process battery
+pins the rodata enumeration and empty-map cases, the bare-comment
+step emit, the mem-imm and cmp step emissions with the MEMOP
+override, and the JCC branch step with its COND pick and the
+off-blob KeyError arm (count==1 anchors; 3 catches, no equivalence
+rows). Run `3/3 rows caught` with 3 clean rerun shakes (census 232
+-> 233); golden gate `make check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases.
+
 ### Step 0358 - branch-harvest paints
 
 The x86 `append_branch_or_ret` free arms the branch batteries leave

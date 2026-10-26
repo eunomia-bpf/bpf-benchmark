@@ -16092,6 +16092,22 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0359 - rodata-map and compact JCC
+
+- Scope: the rodata-map, step-plumb, and compact-JCC arms the earlier
+  batteries leave unrowed: the x86 `rodata_ident_map` enumeration
+  return L435, the x86 `append_step` encode/comment/passthrough cell
+  L1022-1024, and the arm64 `compact_step` JCC CompactStep return
+  L742-743.
+- Harness: untracked `build/mut_x86_arm_annot0359.py` pins the
+  rodata enumeration and empty-map cases, the bare-comment step emit,
+  the mem-imm and cmp step emissions with the MEMOP override, and the
+  JCC branch step with its COND pick and the off-blob KeyError arm.
+- Result: 3/3 rows caught (the `rim.indexify` repaint renames the
+  rodata idents, the `ast.stepmacro` repaint drops the MEMOP
+  override, the `ct.jcc` repaint renames the JCC kind). Census 232 ->
+  233.
+
 ## Step 0358 - branch-harvest paints
 
 - Scope: the x86 `append_branch_or_ret` free arms the branch batteries
