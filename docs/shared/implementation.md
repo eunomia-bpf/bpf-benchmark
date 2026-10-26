@@ -1993,6 +1993,58 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0411 rows the x86 parse-side helper and
+append tail region: 68 rows in
+`mut_x86_parse_append_tail0411.py` (untracked)
+repaint parse_native_linked_program's sub_starts
+subfunction loop (the entry split, the fn_insns
+slice, the subfunction table store, and the
+4-tuple return), parse_int/is_int derive tiles,
+the c_u64 mask return, reg_info's REGS lookup and
+its strip, operand_width's PTR_WIDTH ladder and
+reg fallthrough with its default, mem_base_reg's
+term pick, parse_mem_terms' bracket pieces (the
+EMPTY tuple return, the scale_log2 init and its
+scale table, the parsed base/index binds, the
+is_int disp accumulate), mem_aux's width/shift
+gates and its FULL/X86_MEM_AUX bases, mem_disp's
+disp pick, branch_target/has_direct_branch_target
+regex hex-match arms, enc()'s opcode-table reads
+plus its EncodedInsn return, the high_supported
+composition tile, the jcc/call/push arm tokens
+and their width-flag ternaries, the setcc arm,
+the mov-lane payload lines (reloc imm, mem
+load/store aux and disp, cmp-test aux), the push
+width ternary, the render_program fmt kwargs,
+canonical_reg's info pick, the
+annotated_fixed_count_ops count-table reads and
+its rep/call store arms plus the values store
+and out.append, the
+append_encoded_step/append_branch_or_ret
+signature defaults (the subroutine flag, the
+step macro, the indent) and the jcc/jmp
+return-target appends, ret_statement's SUB_RET
+pack, and render_x86_subroutine's rodata_idents
+default — the cells the parse-side and encode
+batteries leave unrowed. The battery arms the
+real build/native-link parses over
+bpf_local_call_fanout_dispatch and simple,
+direct parse_mem_terms/mem_aux/branch_target/
+operand_width fixtures, annotated_fixed_count_ops
+over a mov-rcx/rep/call-memcpy/xor/stosb/
+call-memset sequence, append_branch_or_ret over
+jcc/jmp/call-helper/call-reg/call-sym/ret/push/
+pass-through fixtures with return_targets,
+next_addr, and unresolved-target raises, an
+append_encoded_step signature-default pin set, a
+c_comment tile, render_x86_subroutine over the
+3-insn SUB_JCC and 2-insn jmp fixtures, a Bench
+proof_kind_for_source fallback pin, and the
+write_one missing-proof-object raise path
+(count==1 anchors; 68 catches, no equivalence
+rows), census 282 -> 283, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0410 rows the x86 encode-arm tail and driver
 region: 115 rows in `mut_x86_alu_arm_tail0410.py`
 (untracked) repaint the encode() head (the mnemonic/

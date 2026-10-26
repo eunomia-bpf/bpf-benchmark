@@ -16179,6 +16179,54 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0411 - x86 parse-side helper and append tail
+
+- Scope: the mem/branch helper bodies and the
+  append-render tail the parse-side and encode
+  batteries leave unrowed: parse_native_linked_
+  program's sub_starts subfunction loop (entry
+  split, fn_insns slice, table store, 4-tuple
+  return), parse_int/is_int tiles, c_u64 mask,
+  reg_info REGS lookup + strip, operand_width
+  PTR_WIDTH ladder + default, mem_base_reg term
+  pick, parse_mem_terms bracket pieces (EMPTY
+  return, scale_log2 init + scale table, base/index
+  binds, is_int disp), mem_aux width/shift gates
+  and FULL/X86_MEM_AUX bases, mem_disp pick,
+  branch_target/has_direct_branch_target hex-match
+  arms, enc() opcode-table reads + EncodedInsn
+  return, high_supported tile, jcc/call/push arm
+  tokens + width ternaries, setcc arm, mov-lane
+  payloads (reloc imm, mem load/store aux/disp,
+  cmp-test aux), push width ternary, render_program
+  fmt kwargs, canonical_reg info pick,
+  annotated_fixed_count_ops count-table reads +
+  rep/call store arms + values store + out.append,
+  append_encoded_step/append_branch_or_ret
+  signature defaults (subroutine, step_macro,
+  indent), jcc/jmp return-target appends,
+  ret_statement SUB_RET pack, and
+  render_x86_subroutine rodata_idents default.
+- Harness: untracked `build/mut_x86_parse_append_tail0411.py`
+  (template 0405) arms the real build/native-link
+  parses over bpf_local_call_fanout_dispatch and
+  simple, direct parse_mem_terms/mem_aux/
+  branch_target/operand_width fixtures,
+  annotated_fixed_count_ops over the
+  mov-rcx/rep/call-memcpy/xor/stosb/call-memset
+  sequence, append_branch_or_ret over
+  jcc/jmp/call-helper/call-reg/call-sym/ret/push/
+  pass-through fixtures with return_targets/
+  next_addr/unresolved raises, signature-default
+  pins, c_comment, render_x86_subroutine over the
+  3-insn SUB_JCC and 2-insn jmp fixtures, a Bench
+  proof_kind_for_source fallback pin, and the
+  write_one missing-proof-object raise path.
+- Result: 68/68 rows caught (three clean rerun
+  shakes). Unrowable: frozen spec comments,
+  unknown-opcode SystemExit repaint, remaining
+  def-line tokens. Census 282 -> 283.
+
 ## Step 0409 - x86 parse internals
 
 - Scope: the parse-internals cells the parse-side
