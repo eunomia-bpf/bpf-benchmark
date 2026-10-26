@@ -16092,6 +16092,29 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0379 - arm64 append_insn + helper-calls walk
+
+- Scope: the arm64 generator tail the render and else batteries
+  leave unrowed beside their gate picks: `helper_calls_by_addr`'s
+  copy-propagation tail (the mov-source gate L676, the register
+  copy L677, the helper-ident track L678, and the stale-value
+  pop though its repaint is value-inert — waived), the dict
+  return (identity-inert — waived), and `append_insn`'s head
+  banner L690, the jcc COND split L694, the tbz imm-operand pick
+  L708, the bl helper-symbol emit L712, the unsupported-call
+  raise gate L715, the next-addr call tile L717, the blr helper
+  emit L721, plus compact_step's bl helper tile L765 and RET
+  kind L775.
+- Harness: untracked `build/mut_x86_arm_annot0379.py` (template
+  0370) pins the jcc/jmp/cbz/cbnz/tbz/tbnz branch emits, the bl
+  helper/call/raise paths with the next-addr tile, the blr
+  helper emit, the ret lane, the RUN_OP3 fallback, the
+  helper_calls_by_addr copy chain (imm-then-copy reg_imms carry
+  to blr; helper-ident fallback through last_helper_imms after a
+  stale overwrite), and the compact bl/ret steps.
+- Result: 12/12 rows caught (three clean rerun shakes). Census
+  252 -> 253.
+
 ## Step 0378 - x86 bitop shift tail arms
 
 - Scope: the x86 `encode()` bitop/shift tail arms the cmp/test

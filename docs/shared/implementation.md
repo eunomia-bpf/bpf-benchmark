@@ -1976,6 +1976,26 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0379 rows the arm64 append_insn + helper-calls walk: 12
+rows in `mut_x86_arm_annot0379.py` (untracked) repaint the
+`helper_calls_by_addr` copy-propagation tail (the mov-source
+gate L676, the register copy L677, the helper-ident track L678;
+the stale-value pop and the dict return repaint value-inert —
+waived) and `append_insn`'s head banner L690, the jcc COND
+split L694, the tbz imm-operand pick L708, the bl helper-symbol
+emit L712, the unsupported-call raise gate L715, the next-addr
+call tile L717, the blr helper emit L721, plus compact_step's
+bl helper tile L765 and RET kind L775 — the append_insn region
+the arm64 render batteries leave unrowed beside their gate
+picks. The battery pins the jcc/jmp/cbz/cbnz/tbz/tbnz branch
+emits, the bl helper/call/raise paths with the next-addr tile,
+the blr helper emit, the ret lane, the RUN_OP3 fallback, the
+helper_calls_by_addr copy chain (imm-then-copy reg_imms carry
+to blr; helper-ident fallback through last_helper_imms after a
+stale overwrite), and the compact bl/ret steps (count==1
+anchors; 12 catches, no equivalence rows), census 252 -> 253,
+and stays untracked in `kprog/formal/build/`.
+
 Step 0378 rows the x86 bitop/shift tail arms: 26 rows in
 `mut_x86_arm_annot0378.py` (untracked) repaint the
 mulx/andn/rep/bzhi picks and token pairs L767-820, the

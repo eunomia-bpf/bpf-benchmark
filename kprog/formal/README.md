@@ -5687,6 +5687,29 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0379 - arm64 append_insn + helper-calls walk
+
+The arm64 generator tail the render and else batteries leave
+unrowed beside their gate picks: the 12-row untracked
+`build/mut_x86_arm_annot0379.py` rows the `helper_calls_by_addr`
+copy-propagation tail (the mov-source gate L676, the register
+copy L677, the helper-ident track L678; the stale-value pop and
+the dict return repaint value-inert — waived) and `append_insn`'s
+head banner L690, the jcc COND split L694, the tbz imm-operand
+pick L708, the bl helper-symbol emit L712, the unsupported-call
+raise gate L715, the next-addr call tile L717, the blr helper
+emit L721, plus compact_step's bl helper tile L765 and RET kind
+L775. In-process battery pins the jcc/jmp/cbz/cbnz/tbz/tbnz
+branch emits, the bl helper/call/raise paths with the next-addr
+tile, the blr helper emit, the ret lane, the RUN_OP3 fallback,
+the helper_calls_by_addr copy chain (imm-then-copy reg_imms
+carry to blr; helper-ident fallback through last_helper_imms
+after a stale overwrite), and the compact bl/ret steps
+(count==1 anchors; 12 catches). Run `12/12 rows caught` with 3
+clean rerun shakes (census 252 -> 253); golden gate `make check`
+rc 0 with 210 `cross-check: OK` banners, final arm64 decode host
+1410 cases.
+
 ### Step 0378 - x86 bitop shift tail arms
 
 The x86 `encode()` bitop/shift tail arms the cmp/test and
