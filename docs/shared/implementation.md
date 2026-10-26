@@ -1993,6 +1993,33 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0415 rows the arm64 encode() op-arm region:
+43 rows in `mut_arm64_encode_op_arms0415.py`
+(untracked) repaint the NOP return, the ADRP GOT
+pick, the MOV imm/reg lane payloads, the MOVK
+non-LSL raise, the ALU imm/reg payload lines,
+the SHIFT imm/reg payloads, the MADD/MSUB pick,
+the mul-family op table (mul, umull, umulh,
+udiv), the SMADDL width line, the CNEG payload,
+the ORN REG payload, the EXTR payload, the
+BITFIELD aux package, the rev-family op table,
+the LOAD_D0 slot pick, the generic LOAD
+payload, the LDRSH payload, the STORE_Q0 slot
+pick, the generic STORE payload, the CMP/TST
+op-const picks, the CMN IMM/REG payloads, the
+SUBS/ADDS IMM/REG payloads, the bics wzr
+TST_BIC payload, the BICS REG payload, the
+ANDS IMM/REG payloads, the CCMP op-const pick,
+the CSETM payload, the CSEL/CINC op-const pick,
+the CINV payload, the CSINV/CSINC/CSNEG
+payloads, the FMOV d-from-x payload, the CNT
+pick, and the UADDLV pick. The battery arms
+direct encode() calls with one pin per arm plus
+the adrp/movk raise-message tiles and the
+label helper (count==1 anchors; 43 catches, no
+equivalence rows), census 286 -> 287, and stays
+untracked in `kprog/formal/build/`.
+
 Step 0414 rows the x86 chunk-render tail: 5 rows
 in `mut_x86_chunk_render_tail0414.py` (untracked)
 repaint render_chunk_function's call_targets and

@@ -16179,6 +16179,41 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0415 - arm64 encode op-arm recon sweep
+
+- Scope: the arm64 encode() op-arm region:
+  the NOP return, the ADRP GOT pick, the MOV
+  imm/reg lane payloads, the MOVK non-LSL raise,
+  the ALU imm/reg payload lines, the SHIFT
+  imm/reg payloads, the MADD/MSUB pick, the
+  mul-family op table (mul, umull, umulh, udiv),
+  the SMADDL width line, the CNEG payload, the
+  ORN REG payload, the EXTR payload, the
+  BITFIELD aux package, the rev-family op
+  table, the LOAD_D0 slot pick, the generic LOAD
+  payload, the LDRSH payload, the STORE_Q0 slot
+  pick, the generic STORE payload, the CMP/TST
+  op-const picks, the CMN IMM/REG payloads, the
+  SUBS/ADDS IMM/REG payloads, the bics wzr
+  TST_BIC payload, the BICS REG payload, the
+  ANDS IMM/REG payloads, the CCMP op-const
+  pick, the CSETM payload, the CSEL/CINC
+  op-const pick, the CINV payload, the
+  CSINV/CSINC/CSNEG payloads, the FMOV
+  d-from-x payload, the CNT pick, and the
+  UADDLV pick.
+- Harness: untracked
+  `build/mut_arm64_encode_op_arms0415.py`
+  (template 0405, cwd ARM64) arms direct
+  encode() calls with one pin per arm plus the
+  adrp/movk raise-message tiles and the label
+  helper.
+- Result: 43/43 rows caught (three clean rerun
+  shakes). Unrowable: def/signature lines,
+  annotation-only lines, the docstring/import
+  region, and the remaining unrowed lanes.
+  Census 286 -> 287.
+
 ## Step 0414 - x86 chunk-render tail recon sweep
 
 - Scope: the chunk-render tail the threshold

@@ -5707,6 +5707,36 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0415 - arm64 encode op-arm recon sweep
+
+The arm64 encode() op-arm region: the 43-row
+untracked `build/mut_arm64_encode_op_arms0415.py`
+repaints the NOP return, the ADRP GOT pick, the
+MOV imm/reg lane payloads, the MOVK non-LSL
+raise, the ALU imm/reg payload lines, the SHIFT
+imm/reg payloads, the MADD/MSUB pick, the
+mul-family op table (mul, umull, umulh, udiv),
+the SMADDL width line, the CNEG payload, the
+ORN REG payload, the EXTR payload, the BITFIELD
+aux package, the rev-family op table, the
+LOAD_D0 slot pick, the generic LOAD payload, the
+LDRSH payload, the STORE_Q0 slot pick, the
+generic STORE payload, the CMP/TST op-const
+picks, the CMN IMM/REG payloads, the SUBS/ADDS
+IMM/REG payloads, the bics wzr TST_BIC payload,
+the BICS REG payload, the ANDS IMM/REG payloads,
+the CCMP op-const pick, the CSETM payload, the
+CSEL/CINC op-const pick, the CINV payload, the
+CSINV/CSINC/CSNEG payloads, the FMOV d-from-x
+payload, the CNT pick, and the UADDLV pick. The
+battery arms direct encode() calls with one pin
+per arm plus the adrp/movk raise-message tiles
+and the label helper. Run `43/43 rows caught`
+with 3 clean rerun shakes (census 286 -> 287);
+golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64 decode
+host 1410 cases.
+
 ### Step 0414 - x86 chunk-render tail recon sweep
 
 The chunk-render tail the threshold fixture
