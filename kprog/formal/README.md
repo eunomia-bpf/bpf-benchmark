@@ -5721,6 +5721,28 @@ format, and reg_or_imm's `#` gate. Run
 rc 0 with 210 `cross-check: OK` banners,
 final arm64 decode host 1410 cases.
 
+### Step 0426 - x86 chunked-render sweep
+
+The x86 chunked render body: the 145-row
+untracked `build/mut_x86_chunked_render0426
+.py` repaints render_chunk_function()'s
+current_chunk set, chunk header, pc switch,
+case and label rows, the branch/ret tail
+call, and the DONE returns, plus
+render_chunked_program()'s subfunction
+folds, kind triples, flat/chunk slicing,
+target sets, stack detection and defines,
+the include extend, prelude and rodata
+emission, the dispatch loop, min/max addr
+bounds, the DONE else arm, the write gate,
+license, and the closing join. Run `145/145
+rows caught` with 3 clean rerun shakes
+(census 297 -> 298); golden gate `make
+check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410 cases;
+a full-output identity oracle over five
+chunked fixtures pins every emitted line.
+
 ### Step 0425 - arm64 render-program sweep
 
 The arm64 plain render body: the 88-row

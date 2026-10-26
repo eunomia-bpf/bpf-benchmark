@@ -2005,6 +2005,35 @@ gate, through shape-pinning direct calls
 rows), census 289 -> 290, and stays untracked
 in `kprog/formal/build/`.
 
+Step 0426 rows the x86 chunked
+render body: 145 rows in
+`mut_x86_chunked_render0426.py`
+(untracked) repaint render_chunk_function
+()'s current_chunk set, the static-noinline
+chunk header, the pc switch seed, case and
+label emission, the append_chunk_branch_or
+_ret call, the DONE and next-chunk returns,
+and the closing extends, plus
+render_chunked_program()'s subfunction
+folds, the tc/cgroup_skb/xdp kind triples
+with section, ctx and abi defines and init
+lines, the flat/chunk slicing, addrs and
+return/call target sets, stack and stack
+memory detection with the two stack
+defines, the state-struct include extend,
+the prelude gate, rodata row emission, the
+chunk dispatch loop, the min/max addr range
+rows, the DONE else arm, the final write
+gate and return, the license extend, and
+the trailing join, through structural pins
+plus a full-output identity oracle over
+five chunked fixtures (nop, helper call,
+tc stack, cgroup_skb rodata, and a deep
+[rsp] body; threshold patched to 8; count==1
+anchors with widened windows),
+census 297 -> 298, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0425 rows the arm64 plain
 render body: 88 rows in
 `mut_arm64_render_program0425.py`

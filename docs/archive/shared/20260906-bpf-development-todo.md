@@ -16179,6 +16179,30 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0426 - x86 chunked-render sweep
+
+- Scope: render_chunk_function() current
+  chunk set, chunk header, pc switch seed,
+  case and label rows, the
+  append_chunk_branch_or_ret call, DONE and
+  last-next returns, closing extends; plus
+  render_chunked_program() subfunction
+  folds, tc/cgroup_skb/xdp kind triples,
+  flat/chunk slicing, addrs and return/call
+  target sets, stack detection and defines,
+  include extend, prelude gate, rodata
+  emission, chunk dispatch loop, min/max
+  addr rows, the DONE else arm, final write
+  gate and return, license extend, and the
+  trailing join.
+- Harness: untracked
+  `build/mut_x86_chunked_render0426.py`
+  pins structural chunker shapes plus a
+  full-output identity oracle over five
+  chunked fixtures (threshold patched to 8).
+- Result: 145/145 rows caught (three clean
+  rerun shakes). Census 297 -> 298.
+
 ## Step 0425 - arm64 render-program sweep
 
 - Scope: render_program() signature
