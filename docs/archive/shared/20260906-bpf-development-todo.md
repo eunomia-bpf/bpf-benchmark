@@ -16092,6 +16092,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0368 - x86 rodata/section tail
+
+- Scope: the object-file section-reader free arms the
+  native-link and scalar-helpers batteries leave unrowed beside
+  their gate picks: the `section_size` hex return L167, its
+  missing-section raise message L168, the `rodata_bytes` failed-
+  objdump early return L176, the address-text hex gate L180, the
+  byte-pair extend step L185, the full-bytes return L186, and the
+  `load_rodata16` no-data empty map L190-192.
+- Harness: untracked `build/mut_x86_arm_annot0368.py` compiles a
+  16-byte `.native_link_rodata` fixture and pins the hex size
+  parse, the raise message text, the failed-objdump empty map, the
+  address-gate rejection, the byte-pair little-endian assembly,
+  the returned bytes identity, and the symbol-pair tap.
+- Result: 7/7 rows caught (the decimal repaint churns on the hex
+  size text, the message repaint fails the text pin, the raise
+  repaint rejects the missing-rodata object, the suffix repaint
+  drops the data lines, the stride repaints corrupt the bytes, and
+  the None repaint breaks the dict contract). Census 241 -> 242.
+
 ## Step 0367 - x86 operand split
 
 - Scope: the `split_operands` depth-walk free arms the head-route

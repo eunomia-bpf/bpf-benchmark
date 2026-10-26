@@ -1976,6 +1976,22 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+  The x86 rodata/section tails (the `section_size` hex return
+  L167, its missing-section raise message L168, the
+  `rodata_bytes` failed-objdump early return L176, the
+  address-text hex gate L180, the byte-pair extend step L185, the
+  full-bytes return L186, and the `load_rodata16` no-data empty
+  map L190-192 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` — the
+  section-reader lane the native-link and scalar-helpers batteries
+  leave unrowed beside their gate picks) rows 7 lines through an
+  in-process battery compiling a 16-byte `.native_link_rodata`
+  fixture and pinning the hex size parse, the raise message text,
+  the failed-objdump empty map, the address-gate rejection, the
+  byte-pair little-endian assembly, the returned bytes identity,
+  and the symbol-pair tap; no equivalence rows and every anchor
+  count==1.
+
   The x86 operand-split arms (the `split_operands` bracket-open
   increment L118, bracket-close decrement L120, split-append paint
   L123, boundary-advance L124, tail strip L125, and tail-if guard

@@ -5687,6 +5687,25 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0368 - x86 rodata/section tail
+
+The object-file section-reader free arms the native-link and
+scalar-helpers batteries leave unrowed beside their gate picks:
+the 7-row untracked `build/mut_x86_arm_annot0368.py` rows the
+`section_size` hex return L167, its missing-section raise message
+L168, the `rodata_bytes` failed-objdump early return L176, the
+address-text hex gate L180, the byte-pair extend step L185, the
+full-bytes return L186, and the `load_rodata16` no-data empty map
+L190-192. In-process battery compiles a 16-byte
+`.native_link_rodata` fixture and pins the hex size parse, the
+raise message text, the failed-objdump empty map, the address-gate
+rejection, the byte-pair little-endian assembly, the returned
+bytes identity, and the symbol-pair tap (count==1 anchors; 7
+catches, no equivalence rows). Run `7/7 rows caught` with 3 clean
+rerun shakes (census 241 -> 242); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners, final arm64 decode host 1410
+cases.
+
 ### Step 0367 - x86 operand split
 
 The `split_operands` depth-walk free arms the head-route and
