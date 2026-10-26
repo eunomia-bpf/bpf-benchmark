@@ -16092,6 +16092,35 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0353 - generator helper trio + scale assign
+
+- Scope: the tiny arm64 generator helpers the encode/render
+  batteries row only at call sites inside
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`
+  (`c_u64` L260-261: the ULL suffix and the 64-bit mask payload;
+  `width_const` L301-302: the `WIDTH_CONST[width]` table pick;
+  `reg_or_imm` L356-357: the `#`-immediate strip gate) plus the x86
+  `parse_mem_terms` residual scale assignment (L377 `scale =
+  parse_int(scale_text)` in
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py`), which
+  `mut_x86_scalar_helpers` leaves unrowed next to its scale-map
+  claim.
+- Harness: 5-row untracked `build/mut_gen_helpers_0353.py`
+  (census 226 -> 227): 5 catches, 0 equivalence rows; anchors
+  count==1 in their own target generators; in-process battery
+  imports both generator modules side by side and pins the direct
+  helper outputs (positive/negative/hex `c_u64` payloads, the
+  `ARM64_WIDTH_*` table picks, the `#` gate booleans) and the x86
+  mem scale picks (4->log2 1, 8->log2 3, `*1` -> 0, no-scale case).
+- Result: `5/5 rows caught`, 3 clean rerun shakes green; 224
+  in-glob batteries sweep-rerun this session in two halves (223 old
+  + 1 new: every battery individually green — the four transient
+  rc=1 rows in the first serial pass were stale repaints left by
+  the interrupted sweep wrapper's kill, re-verified clean after
+  restore plus a repainted-file triage); golden gate `make check`
+  rc 0 with 210 `cross-check: OK` banners, final arm64 decode host
+  1410 cases, run twice this session.
+
 ## Step 0352 - x86 enc resolver + driver tail
 
 - Scope: the `enc()` opcode-contract resolver cell (L417-427 of

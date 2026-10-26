@@ -1963,6 +1963,20 @@ increment is committed and pushed immediately). Current state:
   memory fixtures, a sub-memcpy losing its annotated 64-byte count,
   and in-chunk subfunction calls raising on unresolved targets).
 
+  The tiny arm64 generator helpers plus the x86 scale assignment
+  (the `c_u64` ULL suffix and 64-bit mask payload L260-261, the
+  `width_const` table pick L301-302, and the `reg_or_imm`
+  `#`-immediate gate L356-357 of
+  `kprog/arm64/micro-prog/generate_micro_sim_proofs.py`, together
+  with the `parse_mem_terms` residual `scale =
+  parse_int(scale_text)` L377 of
+  `kprog/x86/micro-prog/generate_micro_sim_proofs.py` that the
+  scalar-helpers battery leaves unrowed beside its scale-map
+  claim) rows 5 lines through an in-process battery importing both
+  generator modules side by side and pinning the direct helper
+  outputs and the mem scale picks; no equivalence rows and every
+  anchor count==1.
+
   The x86 `enc()` opcode-contract resolver cell plus the
   `write_one`/`main()` driver tail (the `enc()` body L417-427 and
   the driver region L1576-1614 of

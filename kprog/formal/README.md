@@ -5687,6 +5687,26 @@ byte-identical green shakes (`TOTAL 25 mutations, 0 failures, 0
 equivalence rows`, all md5 `f52a1e72b096e113050a91308809d596`);
 golden gate `make check` rc 0 with 210 `cross-check: OK` banners.
 
+### Step 0353 - generator helper trio + scale assign
+
+The tiny arm64 generator helpers the encode/render batteries row
+only at call sites, plus the x86 scale residual: the 5-row untracked
+`build/mut_gen_helpers_0353.py` rows the arm64 `c_u64` ULL suffix
+and 64-bit mask payload L260-261, the `width_const` table pick
+L301-302, and the `reg_or_imm` `#`-immediate gate L356-357 of
+`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`, together
+with the x86 `parse_mem_terms` residual
+`scale = parse_int(scale_text)` L377 that the scalar-helpers
+battery leaves unrowed beside its scale-map claim. In-process
+battery imports both generator modules side by side and pins the
+direct helper outputs (positive/negative/hex `c_u64` payloads, the
+`ARM64_WIDTH_*` table picks, the `#` gate booleans) and the x86 mem
+scale picks 4->log2 1, 8->log2 3, `*1` -> 0, and the no-scale case
+(count==1 anchors; 5 catches, no equivalence rows). Run `5/5 rows
+caught` with 3 clean rerun shakes (census 226 -> 227); golden gate
+`make check` rc 0 with 210 `cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0352 - x86 enc resolver + driver tail
 
 The `enc()` opcode-contract resolver cell and the `write_one`/
