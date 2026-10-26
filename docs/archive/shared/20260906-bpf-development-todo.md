@@ -16092,6 +16092,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   210 `cross-check: OK` banners; committed with paper sentence, README
   and archive steps, implementation pair.
 
+## Step 0380 - x86 direct-step + fixed-count annotator
+
+- Scope: the x86 generator head the specialization and
+  count-annot batteries leave unrowed beside their mnemonic
+  gates: the DIRECT/AUX macro-table dict inits L931-932 (their
+  MOV_IMM entry deletions), the `direct_step_statement` aux gate
+  L951, the AUX `.get` pick L952, the aux-format dst field L956,
+  the DIRECT `.get` None-return gate L963-964, the
+  direct-format dst/src field tiles L967-968, and
+  `annotated_fixed_count_ops`'s values dict init L981, the
+  `annotated = insn` default L984, and the xor src canonical
+  pick L1005.
+- Harness: untracked `build/mut_x86_direct_step0380.py`
+  (template 0370) pins the table inits, the direct/aux template
+  outputs (MOV_IMM and MOV_REG with their field orders), the
+  aux-miss fall-through to the DIRECT template, and the
+  fixed-count rep/call annotation truth table (rcx/rdx counts,
+  absent registers, xor-diff pops, xor-self zeros).
+- Result: 11/11 rows caught (three clean rerun shakes). Census
+  253 -> 254.
+
 ## Step 0379 - arm64 append_insn + helper-calls walk
 
 - Scope: the arm64 generator tail the render and else batteries

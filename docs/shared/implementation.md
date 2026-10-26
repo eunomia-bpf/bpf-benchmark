@@ -1976,6 +1976,25 @@ increment is committed and pushed immediately). Current state:
   and the do-while trailer; no equivalence rows and every anchor
   count==1.
 
+Step 0380 rows the x86 direct-step + fixed-count annotator: 11
+rows in `mut_x86_direct_step0380.py` (untracked) repaint the
+DIRECT/AUX macro-table dict inits L931-932 (their MOV_IMM entry
+deletions), the `direct_step_statement` aux gate L951, the AUX
+`.get` pick L952, the aux-format dst field L956, the DIRECT
+`.get` None-return gate L963-964, the direct-format dst/src
+field tiles L967-968, and `annotated_fixed_count_ops`'s values
+dict init L981, the `annotated = insn` default L984, and the
+xor src canonical pick L1005 — the direct-step head the
+specialization contract and count-annot batteries leave unrowed
+beside their mnemonic gates. The battery pins the table inits,
+the direct/aux template outputs (MOV_IMM and MOV_REG with their
+field orders), the aux-miss fall-through to the DIRECT
+template, and the fixed-count rep/call annotation truth table
+(rcx/rdx counts, absent registers, xor-diff pops, xor-self
+zeros) (count==1 anchors; 11 catches, no equivalence rows),
+census 253 -> 254, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0379 rows the arm64 append_insn + helper-calls walk: 12
 rows in `mut_x86_arm_annot0379.py` (untracked) repaint the
 `helper_calls_by_addr` copy-propagation tail (the mov-source
