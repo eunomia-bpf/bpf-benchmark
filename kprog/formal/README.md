@@ -5707,6 +5707,35 @@ shakes (census 258 -> 259); golden gate `make check` rc 0 with
 210 `cross-check: OK` banners, final arm64 decode host 1410
 cases.
 
+### Step 0416 - arm64 compact-render emit recon sweep
+
+The arm64 compact-render emit region: the
+21-row untracked
+`build/mut_arm64_compact_render_emits0416.py`
+repaints the rodata16 dict-typed signature
+line, the linked_exit default, the
+addr_to_index dict-comp key, the
+__arm64_reloc c_ident prefix, the map_symbols
+enumerate, the helper_names dict init, the
+rodata16 lo/hi unpack, the six __u8 struct
+kind/op/dst/src/src2/src3 emit lines, the
+helper-step macro emit, the `#pragma clang
+loop unroll(disable)` emit, the guard for-loop
+emit, the case-arm break emit, the
+__a64_c_kind/__a64_c_op field reads, the
+switch default arm, and the
+ARM64_SIM_L_UNSUPPORTED_OPCODE() emit. The
+battery arms an xdp render_program_compact
+fixture (stack use, rodata16 blob, numeric
+map-symbol relocation, cbz/tbz/tbnz branches,
+an inner bl call, a helper blr call, a csel OP
+step, linked-exit glue) plus a tc default-call
+fixture and a prelude fixture. Run `21/21 rows
+caught` with 3 clean rerun shakes (census
+287 -> 288); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases.
+
 ### Step 0415 - arm64 encode op-arm recon sweep
 
 The arm64 encode() op-arm region: the 43-row

@@ -16179,6 +16179,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 115/115 rows caught (three clean rerun
   shakes). Census 281 -> 282.
 
+## Step 0416 - arm64 compact-render emit recon sweep
+
+- Scope: the arm64 render_program_compact
+  emit region: the rodata16 dict-typed
+  signature line, the linked_exit default, the
+  addr_to_index dict-comp key, the
+  __arm64_reloc c_ident prefix, the
+  map_symbols enumerate, the helper_names dict
+  init, the rodata16 lo/hi unpack, the six
+  __u8 struct kind/op/dst/src/src2/src3 emit
+  lines, the helper-step macro emit, the
+  #pragma clang loop unroll(disable) emit, the
+  guard for-loop emit, the case-arm break
+  emit, the __a64_c_kind/__a64_c_op field
+  reads, the switch default arm, and the
+  ARM64_SIM_L_UNSUPPORTED_OPCODE() emit.
+- Harness: untracked
+  `build/mut_arm64_compact_render_emits0416.py`
+  arms an xdp render_program_compact fixture
+  (stack use, rodata16 blob, numeric
+  map-symbol relocation, cbz/tbz/tbnz, inner
+  bl call, helper blr call, csel OP step,
+  linked-exit glue) plus a tc default-call
+  fixture and a prelude fixture.
+- Result: 21/21 rows caught (three clean rerun
+  shakes). Unrowable: the kind-typed signature
+  line (default inert to a render-text probe)
+  and everything outside the region. Census
+  287 -> 288.
+
 ## Step 0415 - arm64 encode op-arm recon sweep
 
 - Scope: the arm64 encode() op-arm region:

@@ -1993,6 +1993,32 @@ path, generated-N summary) (count==1 anchors; 14 catches, no
 equivalence rows), census 258 -> 259, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0416 rows the arm64 compact-render emit
+region: 21 rows in
+`mut_arm64_compact_render_emits0416.py`
+(untracked) repaint the rodata16 dict-typed
+signature line, the linked_exit default, the
+addr_to_index dict-comp key, the
+__arm64_reloc c_ident prefix, the map_symbols
+enumerate, the helper_names dict init, the
+rodata16 lo/hi unpack, the six __u8 struct
+kind/op/dst/src/src2/src3 emit lines, the
+helper-step macro emit, the `#pragma clang
+loop unroll(disable)` emit, the guard for-loop
+emit, the case-arm break emit, the
+__a64_c_kind/__a64_c_op field reads, the
+switch default arm, and the
+ARM64_SIM_L_UNSUPPORTED_OPCODE() emit. The
+battery arms an xdp render_program_compact
+fixture (stack use, rodata16 blob, numeric
+map-symbol relocation, cbz/tbz/tbnz branches,
+an inner bl call, a helper blr call, a csel OP
+step, linked-exit glue) plus a tc default-call
+fixture and a prelude fixture (count==1
+anchors; 21 catches, no equivalence rows),
+census 287 -> 288, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0415 rows the arm64 encode() op-arm region:
 43 rows in `mut_arm64_encode_op_arms0415.py`
 (untracked) repaint the NOP return, the ADRP GOT
