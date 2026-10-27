@@ -2034,6 +2034,24 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0435 rows the x86 CLI tail
+1575-1618: 35 rows in
+`mut_x86_clitail0435.py` (untracked)
+repaint write_one's name bind, the parse
+call and its no-insns raise, the
+output/source binds, both stage2 gates,
+the render_program write with its four
+keyword arguments and return, plus
+main's parser, the five argument binds,
+the mkdir, the stage2 config-stem
+source-dir switch, the only filter and
+write loop, the print loop, the count
+banner, and the module SystemExit,
+through end-to-end CLI subprocess pins
+over real proof objects and a
+stage2-stem config. Census 306 -> 307,
+stays untracked in `kprog/formal/build/`.
+
 Step 0434 rows the x86 driver region
 1126-1195: 52 rows in
 `mut_x86_driver0434.py` (untracked)

@@ -16203,6 +16203,18 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0435 - x86 CLI tail sweep
+
+- Scope: CLI tail L1575-1618 - write_one
+  and main.
+- Harness: `kprog/formal/build/mut_x86_clitail0435.py`
+  paints one pattern per free line and
+  pins end-to-end CLI subprocess runs
+  over real proof objects plus a
+  stage2-stem config.
+- Result: 35/35 rows caught (three clean
+  rerun shakes). Census 306 -> 307.
+
 ## Step 0434 - x86 driver region sweep
 
 - Scope: driver region L1126-1195 -

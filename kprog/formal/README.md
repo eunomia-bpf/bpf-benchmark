@@ -5743,6 +5743,21 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0435 - x86 CLI tail sweep
+
+The x86 CLI tail: the 35-row untracked
+`build/mut_x86_clitail0435.py` repaints
+write_one's parse/raise/gates/render
+write and main's parser, argument binds,
+mkdir, stage2 config-stem switch, only
+filter, write and print loops, count
+banner, and module exit. Run `35/35 rows
+caught` with 3 clean rerun shakes
+(census 306 -> 307); golden gate `make
+check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410
+cases.
+
 ### Step 0434 - x86 driver region sweep
 
 The x86 driver region: the 52-row
