@@ -2034,6 +2034,39 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0431 rows the x86 encode mid
+627-775: 146 rows in
+`mut_x86_encode0431.py` (untracked)
+repaint the cmp/test len raise and width
+bind, cmp/test imm and reg with the
+width-mismatch raise, the cmp mem arms,
+test mem reg, cmp/test mem imm with
+displacement packing, the unsupported
+memory-form and cannot-encode raises, the
+inc/dec/not/neg len raise, unary mem arm,
+dst raise, one and zero imm select, the
+imul 3-op gate with its mem-imm arm and
+raises, the imul imm arm, the generic ALU
+len raise, imm and reg arms with the
+mismatch raise, ALU mem, mem-reg, and
+mem-imm arms with their ALU-op auxes, the
+unsupported ALU memory-form and
+cannot-encode raises, the bt len raise,
+bt imm, mem-imm, and reg arms with the
+dst-src raise, the mulx len and all-regs
+raises and emit, the andn mem arm with
+SRC SHIFT aux, the andn raise and emit,
+the rep movs malformed, variable-length,
+and bound raises with the REP_MOVS emit,
+the bzhi len and dst raises, reg and mem
+arms, the cannot-encode raise, the bswap
+bind, raise, and emit, and the popcnt and
+xchg binds with their raises and emits,
+through direct EncodedInsn equality pins
+over 47 fixtures. Census 302 -> 303,
+harness stays untracked in
+`kprog/formal/build/`.
+
 Step 0430 rows the x86 encode head
 438-626: 180 rows in
 `mut_x86_encode0430.py` (untracked)

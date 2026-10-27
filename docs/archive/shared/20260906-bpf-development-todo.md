@@ -16203,6 +16203,21 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0431 - x86 encode mid sweep
+
+- Scope: encode() L627-775 - cmp/test
+  family with all imm/reg/mem arms and
+  raises, ALU unary (inc/dec/not/neg),
+  imul 3-operand, generic ALU family, bt,
+  mulx, andn, rep movs with its bound
+  raises, bzhi, bswap, popcnt, and xchg.
+- Harness: untracked
+  `build/mut_x86_encode0431.py` pins
+  direct EncodedInsn equality over 47
+  fixtures covering every arm and raise.
+- Result: 146/146 rows caught (three
+  clean rerun shakes). Census 302 -> 303.
+
 ## Step 0430 - x86 encode head sweep
 
 - Scope: encode() L438-626 - op/ops

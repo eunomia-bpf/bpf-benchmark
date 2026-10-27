@@ -5743,6 +5743,33 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0431 - x86 encode mid sweep
+
+The x86 encode mid: the 146-row
+untracked `build/mut_x86_encode0431.py`
+repaints the cmp/test family (len raise,
+width bind, imm/reg/mem arms,
+width-mismatch and unsupported-memory
+raises), inc/dec/not/neg unary (mem arm,
+dst raise, the 1/0 imm select), the imul
+3-operand gate with mem-imm arm and
+raises, the generic ALU family (len
+raise, imm/reg/mem/mem-reg/mem-imm arms,
+mismatch and unsupported raises), bt
+(imm/mem-imm/reg arms, dst-src raise),
+mulx and andn (len/all-regs raises, mem
+arm with SRC SHIFT aux, emits), rep movs
+(malformed, variable-length, and bound
+raises, REP_MOVS emit), bzhi (raises, reg
+and mem arms), bswap, and popcnt/xchg.
+Run `146/146 rows caught` with 3 clean
+rerun shakes (census 302 -> 303); golden
+gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases; direct
+EncodedInsn equality pins over 47
+fixtures.
+
 ### Step 0430 - x86 encode head sweep
 
 The x86 encode head: the 180-row
