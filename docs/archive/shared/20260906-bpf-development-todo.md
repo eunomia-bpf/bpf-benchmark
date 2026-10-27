@@ -16203,6 +16203,26 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0429 - x86 branch-or-ret sweep
+
+- Scope: append_branch_or_ret() jcc, jmp,
+  call, and ret arms (macro selects,
+  reloc-or-operand ternaries, done
+  returns, addrs raises, encoded steps,
+  call-functions gate and no-next_addr
+  raise, unresolved raise), ret emission,
+  fallthrough step, and program_kind()'s
+  tag ladder with the xdp default.
+- Harness: untracked
+  `build/mut_x86_branch0429.py` pins
+  structural shapes plus a full-output
+  identity oracle over twelve direct-call
+  fixtures. The unreachable return after
+  the unresolved call raise stays
+  unpainted.
+- Result: 84/84 rows caught (three clean
+  rerun shakes). Census 300 -> 301.
+
 ## Step 0428 - x86 chunk branch-or-ret sweep
 
 - Scope: append_chunk_transfer() goto

@@ -5743,6 +5743,27 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0429 - x86 branch-or-ret sweep
+
+The x86 plain branch-or-ret tail: the
+84-row untracked `build/mut_x86_branch0429
+.py` repaints append_branch_or_ret()'s
+jcc/jmp/call/ret arms (macro selects,
+reloc ternaries, done returns, raises,
+encoded helper and register-call steps,
+the call-functions gate with its
+no-next_addr raise), plus program_kind()'s
+tag ladder and xdp default, and the
+fallthrough step. Run `84/84 rows caught`
+with 3 clean rerun shakes (census 300 ->
+301); golden gate `make check` rc 0 with
+210 `cross-check: OK` banners, final arm64
+decode host 1410 cases; a full-output
+identity oracle over twelve direct-call
+fixtures pins every emitted line. The
+unreachable return after the unresolved
+call raise stays unpainted.
+
 ### Step 0428 - x86 chunk branch-or-ret sweep
 
 The x86 chunked branch-or-ret tail: the

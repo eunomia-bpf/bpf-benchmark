@@ -2034,6 +2034,38 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0429 rows the x86 branch-or-ret
+plain tail: 84 rows in
+`mut_x86_branch0429.py` (untracked)
+repaint append_branch_or_ret()'s branch
+and jump macro selects, the return-target
+init, the jcc gate, comment,
+reloc-or-operand ternary, return-target
+done arm with the custom ret statement,
+in-addrs JCC emission with its raise, the
+jmp gate, comment, ternary, done arm, JMP
+emission and raise, the helper-symbol and
+register-call encoded steps, the
+call-functions gate with return-address
+compute and its no-next_addr raise, the
+unresolved call raise, the ret arm
+emission, and the fallthrough append_step,
+plus program_kind()'s cgroup-skb tag
+check with its cgroup_skb return, the tc
+tag check with its return, and the xdp
+default, through structural pins plus a
+full-output identity oracle over twelve
+direct-call fixtures (jcc and jmp plain,
+subroutine-flavored, and reloc-carrying;
+return-target jcc with default and custom
+ret statements; memcpy helper call; call
+rax; call-function with next_addr; ret;
+and nop fallthrough). The unreachable
+return after the unresolved call raise
+stays unpainted, census 300 -> 301, and
+the harness stays untracked in
+`kprog/formal/build/`.
+
 Step 0428 rows the x86 chunk
 branch-or-ret tail: 84 rows in
 `mut_x86_chunk_branch_or_ret0428.py`
