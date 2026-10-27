@@ -5743,6 +5743,22 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0434 - x86 driver region sweep
+
+The x86 driver region: the 52-row
+untracked `build/mut_x86_driver0434.py`
+repaints program_kind's tag returns,
+load_benches, source_prelude's
+regex/strip/rewrite, and the
+proof_kind_for_source pass-through plus
+render_x86_subroutine's annotation,
+comprehensions, comment, label loop, and
+blank join. Run `52/52 rows caught` with
+3 clean rerun shakes (census 305 -> 306);
+golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0433 - x86 step-statements sweep
 
 The x86 step-statements region: the

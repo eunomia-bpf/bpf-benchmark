@@ -2034,6 +2034,25 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0434 rows the x86 driver region
+1126-1195: 52 rows in
+`mut_x86_driver0434.py` (untracked)
+repaint program_kind's cgroup and tc
+returns plus the xdp default,
+load_benches' read and Bench
+comprehension, source_prelude's read,
+regex, none default, strip, and include
+rewrite, proof_kind_for_source's discard
+and kind return, render_x86_subroutine's
+annotation, addr/next-addr comprehensions,
+comment, per-insn label loop with the
+SUB_RET statement, and the blank join,
+through config/source/render fixtures
+plus flatten_chunk_insns and
+chunk_for_addr value pins. Census 305 ->
+306, stays untracked in
+`kprog/formal/build/`.
+
 Step 0433 rows the x86 step-statements
 region 915-1034: 83 rows in
 `mut_x86_steps0433.py` (untracked)

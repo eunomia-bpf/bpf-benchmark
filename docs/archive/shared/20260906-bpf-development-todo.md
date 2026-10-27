@@ -16203,6 +16203,20 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0434 - x86 driver region sweep
+
+- Scope: driver region L1126-1195 -
+  program_kind, load_benches,
+  source_prelude, proof_kind_for_source,
+  render_x86_subroutine.
+- Harness: `kprog/formal/build/mut_x86_driver0434.py`
+  paints one pattern per free line and
+  pins config/source/render fixtures plus
+  flatten_chunk_insns/chunk_for_addr
+  value lanes.
+- Result: 52/52 rows caught (three clean
+  rerun shakes). Census 305 -> 306.
+
 ## Step 0433 - x86 step-statements sweep
 
 - Scope: step-statement region L915-1034 -
