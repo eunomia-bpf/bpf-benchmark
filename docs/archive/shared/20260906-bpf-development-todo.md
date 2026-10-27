@@ -16203,6 +16203,36 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0446 - x86 BT btmem index arm
+
+- Scope: the sim-local BT memory-index
+  arm (`X86_SIM_L_EXEC_BT_MEM_IMM` body)
+  in x86_sim_local_bpf.h — the CF
+  bit-test's index and base argument
+  pins, the `X86_SIM_L_EXEC_BT_STEP`
+  alias gate's index-source bit, the
+  memory read's `x86_store_imm_disp`
+  displacement apply, and the
+  `X86_SIM_L_EXEC` dispatcher arm — plus
+  the Makefile compile+run recipe pair
+  for `test_x86_bt_route_host` and the
+  Makefile bt route host's direct mem
+  call and dispatch line.
+- Harness: untracked
+  `build/mut_x86_btmem_route.py` with
+  three detectors (battery-local oracle
+  `build/btmem_index_route_host.c` over
+  29700 modeled cases on the 4 disp x 5
+  FLAGS x 5 AUX x 3 base x 3 dst
+  lattice, the tracked bt route host
+  over 534606 cases, and the Makefile
+  recipe extraction+run).
+- Result: 8/8 catchable rows caught, 4
+  equivalent decorations survive, three
+  identical rerun shakes (md5
+  13975fb62f3b3ab9f5eeceb0a7e3aede).
+  Census 317 -> 318.
+
 ## Step 0445 - x86 CMOV step composition
 
 - Scope: the sim-local CMOV step body

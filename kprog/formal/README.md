@@ -5769,6 +5769,38 @@ mutation. 35/35 caught; 3 equivalent
 decorations survive; three identical
 rerun shakes. Census 316 -> 317.
 
+### Step 0446 - x86 BT btmem index arm
+
+The x86
+`X86_SIM_L_EXEC_BT_MEM_IMM` memory-index
+arm in x86_sim_local_bpf.h - the CF
+bit-test argument trio, the alias gate
+regrowing the three-argument BT step
+call, the memory read's displacement
+apply, and the dispatcher arm - plus the
+Makefile bt route host CC pair: the
+12-row untracked
+`build/mut_x86_btmem_route.py` repaints
+the index arg toward the constant
+low word, the base arg toward the
+base-register read, the alias toward the
+register index source, the displacement
+apply toward a raw probe, the dispatcher
+arm toward the BT_IMM call, both Makefile
+recipe repaints, the bt route host's mem
+call and dispatch line, and three
+equivalent identity/message repaints;
+three detectors drive every mutation -
+the battery-local oracle
+(`build/btmem_index_route_host.c`, 29,700
+modeled cases over 4 displacements x 5
+FLAGS widths x 5 AUX widths x 3 base x 3
+dst registers), the tracked bt route host
+(534,606 cases), and the Makefile recipe
+pair itself. 8/8 catchable rows caught;
+4 equivalent decorations survive; three
+identical rerun shakes. Census 317 -> 318.
+
 ### Step 0444 - arm64 multiply-family route sweep
 
 The arm64 multiply-family route arm: the

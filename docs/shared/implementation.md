@@ -2066,6 +2066,39 @@ cmov host CC arms. Reruns byte-identical
 census 316 -> 317; the x86 CMOV step
 composition is closed.
 
+Step 0446 covers the x86 BT BT_MEM_IMM
+memory-index arm: 12 rows in
+`mut_x86_btmem_route.py` (untracked) drive
+three detectors — a battery-local route
+host (`build/btmem_index_route_host.c`,
+29700 cases) over the real
+`X86_SIM_L_EXEC_BT_MEM_IMM` body in
+x86_sim_local_bpf.h (4 displacements x
+5 FLAGS width codes x 5 AUX width codes
+x 3 base x 3 dst registers, whole
+regfile/tags/flags against an independent
+model), the Makefile bt route host
+(534606 cases), and the Makefile's own
+compile+run recipe pair for
+test_x86_bt_route_host extraction.
+Repainted: the CF bit-test's index arg
+toward the constant low word and its
+base arg toward the base-register read,
+the alias gate's index-source bit toward
+the register arm, the memory read's
+displacement apply toward a raw probe,
+the dispatcher arm toward the BT_IMM
+call, the two Makefile recipe repaints
+(compile-line source rename, run-line
+binary rename), the bt route host's mem
+call and dispatch line, plus three
+equivalent identity/message repaints.
+Reruns byte-identical (md5
+13975fb62f3b3ab9f5eeceb0a7e3aede); 8/8
+catchable rows caught, 4 equivalences
+survive; census 317 -> 318; the x86 BT
+memory-index arm is closed.
+
 Step 0444 covers the arm64 multiply-family
 route arm: 64 rows in
 `mut_arm64_mul_route.py` (untracked)
@@ -4548,6 +4581,30 @@ The x86 render head route and scalar helper unit (the `render_program`
   The x86 popcount contract (the 64-bit population count the simulator's POPCNT handler applies to the narrowed source operand — `kprog_x86_popcount_value` and `GeneratedX86Popcount.value` are the standard SWAR reduction (pairwise `v1`/`v2`/`v3` masking steps, then the byte-gather multiply `* 0x0101...0101` shifted right by 56; the operand is evaluated once and no flags written at this layer); the hand module (`X86Popcount.lean`) states the independent claim as eight byte lanes (`laneByte` extracts `x >>> 8*i` masked to `0xff`, `bytePop` walks the eight bits explicitly with no shared SWAR constant) whose per-lane counts sum via `setWidth 64` (`x86PopcountSpec`), proving `x86_popcount_refines` by `bv_decide` over the two unrelated encodings plus the ≤64 bound and the zero/one-bit/all-bits/alternating canonical theorems) consumed in `x86_sim.h`'s `x86_popcount64` (applied by the `KPROG_X86_DISP_POPCNT_HANDLED` arm of the local-BPF dispatch), by the dispatch-singleton route host, and by a dedicated contract host sweeping a boundary vector set and a 20000-iteration LCG sweep against a one-bit-at-a-time oracle with an additive split-consistency check; the 45-row mutation census catches 35 mutations (25 at the generator stage covering the spec fields, byte-exact renders, header bytes, and SWAR bit-mask arms, 8 through the Lean chain — the `laneByte`/`bytePop` helpers, the per-lane sum, and the `x86_popcount_refines` rename, 2 in the contract-host oracle sweep) with 10 documented equivalences (the two failure-path-only generator message repaints, the bytePop lane-0-swap and lane-7-drop same-sum mutations, five consumer-free hand-theorem renames, two host banner repaints).
   The x86 BZHI handler-composition contract (the two `X86_OP_BZHI`/`X86_OP_BZHI_MEM` simulator bodies sharing one composed step — resolve one width `FLAGS ? FLAGS : 64` through `KPROG_X86_BZHI_WRITE_WIDTH` and use it for *both* the value read and the destination write (no second AUX memory width, unlike `ANDN_MEM`), select the value source from a per-opcode register/memory table through `KPROG_X86_BZHI_VALUE_SOURCE`, select the bit count from a per-opcode register/AUX-shift table through `KPROG_X86_BZHI_COUNT_SOURCE` with the count byte-masked (`KPROG_X86_BZHI_COUNT_MASK 0xff`), clear every bit at or above the count, and derive the flags by hand — `OF=SF=0` outright, `ZF` the real zero test of the cleared value, `CF` the comparison of the byte-masked count against the resolved width — with `GeneratedX86Bitops.bzhi` the shared per-width consumer from the 0236 bitops contract; the hand module restates the tables independently and proves the refinements plus the differ/masks-to-byte/clears-SF-OF/count-vs-width laws); the single-line spec pins the two opcode rows (define/code/value/count), the 64-bit width default, and the 0xff count mask; the generator re-checks the whole expected dictionary exact and renders the Lean module and C header byte-for-byte; consumed by the real `X86_SIM_L_EXEC_BZHI*` bodies in `x86_sim_local_bpf.h` through the `KPROG_X86_BZHI_*` selectors — no direct Lean downstream consumer (the handler module rewrites with `x86_bzhi_refines_width` from its own import of `X86Bitops`) — and by two dedicated hosts; the 90-row mutation census catches 58 mutations (37 at the generator stage covering the spec fields, the render constants, byte-exact renders, header bytes, and generated-Lean arms, 21 through the Lean chain — both source tables, the width chain, the value/count read arms, the mask spec, the result/flags/step composition, 0 in the two host sweeps) with 32 documented equivalences (the ten failure-path-only generator message repaints, 19 self-proof renames of unconsumed hand theorems, and the three banners across the contract and route hosts).
   The x86 BT handler-composition contract (the three `X86_OP_BT`/`X86_OP_BT_IMM`/`X86_OP_BT_MEM_IMM` simulator bodies sharing one composed step — resolve one width `FLAGS ? FLAGS : 64` through `KPROG_X86_BT_WRITE_WIDTH`, select the tested base from a per-opcode register/memory table through `KPROG_X86_BT_BASE_SOURCE`, select the bit index from a per-opcode register/raw-immediate/32-bit-widened-immediate table through `KPROG_X86_BT_INDEX_SOURCE` (the memory form reads its index at 32 bits, not the raw 64-bit field), test the indexed bit of the narrowed base, and write only `CF` — riding `GeneratedX86Bitops.bt` as the shared per-width consumer from the 0236 bitops contract; the hand module restates all four tables and proves the refinements plus the base-source split, index-source-differ, imm32-drops-high-bits, dst-preserving and only-CF laws and three canonical examples); the spec pins three opcode rows (define/code/base/index) plus the width default; the generator re-checks the whole expected dictionary exact and renders `GeneratedX86Bt.lean` and `generated/x86_bt.h` byte-for-byte; consumed by the three real bodies in `x86_sim_local_bpf.h` through the `KPROG_X86_BT_*` selectors — no direct Lean downstream consumer (the handler module rewrites with `x86_bt_refines_width` from its own import of `X86Bitops`) — and by two dedicated hosts; the 75-row mutation census catches 46 mutations (35 at the generator stage covering the spec fields, the render constants, byte-exact renders, header bytes, and generated-Lean arms, 11 through the Lean chain — both independent source tables, the imm32 widening arm, and the step refinements, 0 in the two host sweeps) with 29 documented equivalences (the nine failure-path-only generator message repaints and `INDEX_ORDER` permutation, 16 self-proof-renames of unconsumed hand theorems, and the three banners across the contract and route hosts).
+  Step 0446 bodies the sim-local
+  `X86_SIM_L_EXEC_BT_MEM_IMM` composition
+  arm: the 12-row untracked
+  `build/mut_x86_btmem_route.py` repaints
+  the CF line's index arg toward the
+  constant low word and the base arg
+  toward the base-register read, the
+  alias gate's index-source bit toward
+  the register arm, the memory read's
+  displacement apply toward a raw probe,
+  the dispatcher arm toward the BT_IMM
+  call, both Makefile recipe repaints,
+  the Makefile bt route host's mem call
+  and dispatch line, and three
+  equivalent identity/message repaints,
+  driven through a battery-local oracle
+  (29700 modeled cases over the
+  disp/FLAGS/AUX/base/dst lattice), the
+  tracked bt route host (534606 cases),
+  and the Makefile recipe extraction;
+  8/8 catchable rows caught, 4
+  equivalences survive, three byte-identical
+  rerun shakes, census 317 -> 318.
+
   The x86 signed-value contract (the two width-parameterised signed operations the IMUL handlers rely on — `kprog_x86_sign_extend_value`/`GeneratedX86Signed.signExtend` widen the narrowed operand from the access width's sign bit, the generated complement-and-subtract form `((v & mask) ^ sign) - sign` with the 64-bit width the identity, and `kprog_x86_abs_width_value`/`GeneratedX86Signed.absWidth` compute the width-domain magnitude (narrow, negate when the width's sign bit is set, re-narrow); the hand module restates the extension independently via `BitVec.signExtend` over `setWidth` (`x86SignExtendSpec`), mirrors the magnitude with `mask`/`signMask` (`x86AbsWidthSpec`), and proves both refinements by case-bash `bv_decide` plus the idempotent-magnitude, magnitude-bounded-by-the-sign-mask, two canonical examples, and the cross-contract `x86_abs_width_agrees_imul` agreement with the independently generated `GeneratedX86ImulFlags.signedAbs`); the single-line spec pins the schema/operation metadata and the four width rows (mask/sign/bits); the generator re-checks the whole expected dictionary exact plus the per-row bit-count check and renders the Lean module and C header byte-for-byte) consumed in `x86_sim.h`'s `x86_sign_extend64`/`x86_abs_width64` wrappers, the IMUL-reg-imm/mem-imul/mov-load/movx Lean handlers rewriting with `x86_sign_extend_refines`, the route dispatch host, and a dedicated contract host sweeping both helpers over a boundary vector set plus a 20000-iteration LCG sweep against oracle re-implementations; the 48-row mutation census catches 37 mutations (29 at the generator stage covering the spec fields, byte-exact renders, header bytes, and the sign-extension/abs arms, 6 through the Lean chain — both independent spec defs, the w8 sign-extension arm, the w8 abs condition flip, and the `x86_sign_extend_refines` rename, 2 in the contract-host oracle sweep) with 11 documented equivalences (the three failure-path-only generator message repaints, seven consumer-free hand-theorem renames, two host banner repaints).
   The x86 bswap/movbe contract (the shared byte-reversal kernel behind the `BSWAP`, `MOVBE_LOAD`, and `MOVBE_STORE` handlers — `kprog_x86_bswap_value(value, width)` and `GeneratedX86Bswap.value` reverse the access width's byte order and clear the bytes above it: w8 masked identity, w16 two-lane swap, w32 half-reversal of the swapped word (`swapped >> 32`), w64 eight-lane reversal, with a closed width set so there is no unsupported arm; the generated Lean module replaces the w16 fold with a `narrow`-masked two-lane assembly and the w32 arm as `r >>> 32` over an eight-lane build; the hand module restates the reversal independently as `x86BswapSpec` (per-byte `lane8` extractions re-assembled in reverse) and proves `x86_bswap_refines` by `bv_decide`, the involution `x86_bswap_involutive`, the w32 high-word clearing, and three canonical byte-order examples); the single-line spec pins the schema/operation metadata and the four width rows (name/bytes/code 1/1, 2/2, 4/4, 8/8); the generator re-checks the whole expected dictionary exact plus the per-row byte-count and code-list checks and renders the Lean module and C header byte-for-byte) consumed in `x86_sim.h`'s byte-reversal step, in `X86MovbeHandler.lean` (`x86_bswap_refines` rewrites; `exact x86_bswap_involutive value width` closes the movbe-elimination proof), and by two dedicated hosts — the contract host sweeps the macro against a byte-array reversal oracle, the route host drives the real BSWAP/MOVBE simulator bodies; the 54-row mutation census catches 43 mutations (37 at the generator stage across the five generated/hand files, 5 through the Lean chain — the `lane8` helper, the `x86BswapSpec` w64 arm, and the `refines`/`involutive` renames the movbe handler consumes, 1 in the contract-host oracle sweep, 0 in the route-host sweep) with 11 documented equivalences (three failure-path-only generator message repaints, four consumer-free hand-theorem renames, four host banner/stderr repaints).
   The x86 not contract (the one-opcode unary complement kernel — the result arm is the bytewise `KPROG_X86_NOT_RESULT(VALUE)` = `~(VALUE)` expression and the flag arm is the identity preservation `KPROG_X86_PRESERVE_FLAGS()` = `do{(void)0;}while(0)` of CF/ZF/SF/OF that the ALU flag-dispatch step calls in the NOT arm; the generated Lean module carries the `Flags` structure, the `BitVec.not`-based result, and the pass-through `flags` builder; the hand module adds the width-aware `x86NotWidthResultSpec` (narrow to the write width, then complement over the width mask) and proves the result/flag/branch refinements); the single-line spec pins the schema/operation metadata, the `bit_not`/`value` result row, and the `preserve` row listing the four flag inputs; the generator re-checks the whole expected dictionary exactly and renders the Lean module and C header byte-for-byte) consumed inside `X86_SIM_L_EXEC_ALU_FLAG_STEP` (arm NOT) by the ALU flag dispatcher, by `test_x86_mem_unary_handler_host.c` via `KPROG_X86_NOT_RESULT` — no dedicated host — and on the Lean side via `GeneratedX86AluResult` (ALU op `.not`) and `X86UnaryWriteback` (whose `x86_not_lane_handler_refines` rewrites with `x86_not_flags_refine` and `x86_not_narrowed_result_refines`, making those theorem renames catches while the consumer-free `x86_not_branch_refines` rename is an equivalence); the 52-row mutation census catches 49 mutations (44 at the generator stage covering the spec fields, byte-exact renders, header bytes, and generated-Lean arms, 5 through the Lean chain — `lake build` olean refresh in front of a downstream `X86UnaryWriteback` compile) with 3 documented equivalences (the two failure-path-only generator message repaints and the consumer-free `x86_not_branch_refines` rename).
