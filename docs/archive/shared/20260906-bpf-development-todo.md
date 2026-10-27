@@ -16203,6 +16203,27 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0428 - x86 chunk branch-or-ret sweep
+
+- Scope: append_chunk_transfer() goto
+  else return split; append_chunk_call()
+  push, stack write, depth bump, tail
+  transfer; append_chunk_branch_or_ret()
+  jcc gate and comment, reloc ternaries,
+  return-target and addrs arms, raises,
+  eval block, jmp arms, helper and
+  register-call encoded steps, chunk-call
+  next_addr gate, ret depth mechanics and
+  return, fallthrough step.
+- Harness: untracked
+  `build/mut_x86_chunk_branch_or_ret0428
+  .py` pins structural shapes plus a
+  full-output identity oracle over seven
+  chunked fixtures including reloc-carrying
+  jcc/jmp.
+- Result: 84/84 rows caught (three clean
+  rerun shakes). Census 299 -> 300.
+
 ## Step 0427 - x86 plain-render sweep
 
 - Scope: render_program() signature

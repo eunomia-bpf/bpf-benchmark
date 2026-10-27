@@ -2034,6 +2034,39 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0428 rows the x86 chunk
+branch-or-ret tail: 84 rows in
+`mut_x86_chunk_branch_or_ret0428.py`
+(untracked) repaint
+append_chunk_transfer()'s goto else
+return split, append_chunk_call()'s rsp
+push, stack write, depth bump, and its
+tail transfer, and
+append_chunk_branch_or_ret()'s jcc gate
+and comment, the reloc-or-operand
+ternaries for jcc, jmp, and call, the
+jcc return-target done arm, the unknown
+addrs raise, the eval block with its
+transfer, the jmp return done arm, the
+jmp transfer, the helper-symbol encoded
+step, the register-call encoded step,
+the call-targets chunk-call arm with
+next_addr gate, the unresolved call
+raise, the ret comment, the depth-zero
+done, the depth decrement, the stack
+read and rsp pop, the return-address
+return, and the fallthrough append_step,
+through structural pins plus a
+full-output identity oracle over seven
+chunked fixtures (jcc in-chunk and
+jcc-to-exit, jmp exit and jmp
+cross-chunk, a subfunction
+chunk-crossing call, a memcpy helper
+call, ret with stack pop, call rax, and
+jcc/jmp carrying reloc targets), census
+299 -> 300, and stays untracked in
+`kprog/formal/build/`.
+
 Step 0427 rows the x86 plain
 render body: 124 rows in
 `mut_x86_plain_render0427.py`
