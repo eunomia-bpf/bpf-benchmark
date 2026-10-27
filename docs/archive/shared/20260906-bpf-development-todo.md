@@ -16203,6 +16203,22 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0442 - arm64 module-close sweep
+
+- Scope: arm64 generator L824-1141 -
+  the compact step-table and guard
+  loop, render_program's emit loops,
+  generate_one, main, and the
+  parse/load/prelude helpers.
+- Harness: `kprog/formal/build/mut_arm64_tail0442.py`
+  paints one pattern per free line, pins
+  map-symbol/filter lanes and the
+  main/steering flow with monkeypatched
+  Bench and temp-dir fixtures.
+- Result: 306/306 rows caught (three
+  clean rerun shakes). Census 313 -> 314;
+  arm64 sweep L1-L1141 closed.
+
 ## Step 0441 - arm64 renderer-tail sweep
 
 - Scope: arm64 generator L490-823 - the

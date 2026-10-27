@@ -5743,6 +5743,21 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0442 - arm64 module-close sweep
+
+The arm64 module close: the 306-row
+untracked `build/mut_arm64_tail0442.py`
+repaints both renders' map-symbol and
+blank-lane emissions, generate_one,
+main's stage2/only steering, and the
+parse/load/prelude shape helpers. Run
+`306/306 rows caught` with 3 clean rerun
+shakes (census 313 -> 314); golden gate
+`make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases. The arm64 line
+sweep L1-L1141 is closed.
+
 ### Step 0441 - arm64 renderer-tail sweep
 
 The arm64 renderer tail: the 300-row

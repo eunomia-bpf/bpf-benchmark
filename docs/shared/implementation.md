@@ -2034,6 +2034,22 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0442 covers the arm64 module
+close: 306 rows in
+`mut_arm64_tail0442.py` (untracked)
+repaint map-symbol comprehensions and
+the map/step-struct blank lanes in both
+renders, generate_one's write-render
+-and-prelude paths, main's default
+micro-program, stage2 steering, and
+--only filters, plus
+parse_native_linked_program, load_rodat
+a16, parse_flat_instructions, rodata_bytes,
+and source_prelude shapes, through
+monkeypatched Bench and temp-dir
+fixtures. Census 313 -> 314; the arm64
+line sweep L1-L1141 is closed.
+
 Step 0441 covers the arm64 renderer
 tail: 300 rows in
 `mut_arm64_render_tail0441.py`
