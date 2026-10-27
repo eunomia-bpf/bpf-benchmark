@@ -2034,6 +2034,37 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0430 rows the x86 encode head
+438-626: 180 rows in
+`mut_x86_encode0430.py` (untracked)
+repaint encode()'s op/ops binds, the
+high_regs/high_positions filters with the
+five high_supported conjuncts
+(mov/movabs, add/adc/sub/sbb, cmp/test,
+dec/inc/neg/not, setcc) and their
+unsupported raise, nop/data16/cs, ret,
+jmp and jcc emissions with operandless
+zeros, the call helper arm with
+X86_SIM_HELPER naming, the memcpy and
+memset none counts, bound raises, and
+bounded calls, register call, fallback
+call, push/pop binds with their none
+ternaries and width defaults, setcc gate
+with mem arm and raise, cmov len guards,
+mem arm, and raise, the mov/movabs len
+raise, imm/reg/load/store arms, rodata
+raise, helper and map reloc arms, movaps
+len raise and xmm0 rodata-missing raise,
+rodata ident load, mem load, store,
+movzx/movsx/movsxd len and dst raises,
+reg and mem arms, cdqe raise and shape,
+and lea raises, rip-rodata aux, and mem
+emit, through direct EncodedInsn equality
+pins over 24 fixtures (three empty-ops
+none-arm fixtures included). Census 301 ->
+302, harness stays untracked in
+`kprog/formal/build/`.
+
 Step 0429 rows the x86 branch-or-ret
 plain tail: 84 rows in
 `mut_x86_branch0429.py` (untracked)

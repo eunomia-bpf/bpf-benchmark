@@ -16203,6 +16203,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0430 - x86 encode head sweep
+
+- Scope: encode() L438-626 - op/ops
+  binds, high-reg filters and raise,
+  nop/data16/cs/ret/jmp/jcc/call (helper,
+  memcpy, memset, register, fallback),
+  push/pop, setcc, cmov, mov family with
+  rodata/helper/map relocs, movaps XMM0,
+  movzx/movsx/movsxd, cdqe, and lea.
+- Harness: untracked
+  `build/mut_x86_encode0430.py` pins
+  direct EncodedInsn equality over 24
+  fixtures; empty-ops fixtures cover the
+  push/pop/cmov none ternaries.
+- Result: 180/180 rows caught (three
+  clean rerun shakes). Census 301 -> 302.
+
 ## Step 0429 - x86 branch-or-ret sweep
 
 - Scope: append_branch_or_ret() jcc, jmp,

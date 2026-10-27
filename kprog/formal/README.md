@@ -5743,6 +5743,30 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0430 - x86 encode head sweep
+
+The x86 encode head: the 180-row
+untracked `build/mut_x86_encode0430.py`
+repaints encode()'s binds, the
+high-register unsupported raise with its
+five supported conjuncts, nop/ret/jmp/jcc,
+the call helper/memcpy/memset/register and
+fallback arms with their bound raises,
+push/pop and setcc/cmov shapes with none
+and mem paths, the mov imm/reg/load/
+store arms with rodata/helper/map relocs,
+the movaps xmm0 load/store with
+rodata-missing raise, the movzx/movsx/
+movsxd reg and mem arms, cdqe, and lea
+rip/mem. Run `180/180 rows caught` with 3
+clean rerun shakes (census 301 -> 302);
+golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases; direct
+EncodedInsn equality pins over 24
+fixtures (three empty-ops none-arm
+fixtures included).
+
 ### Step 0429 - x86 branch-or-ret sweep
 
 The x86 plain branch-or-ret tail: the
