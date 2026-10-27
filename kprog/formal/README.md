@@ -5930,6 +5930,51 @@ banners, final arm64 decode
 host 1410 cases. Census
 320 -> 321.
 
+### Step 0450 - arm64 fmov route arms
+
+The arm64 fmov family got a
+`mut_arm64_fmov_route.py` battery
+(untracked, `kprog/formal/build/`)
+over the sim-local FMOV route
+arm and its generated
+value/dest headers: 46 rows, 39
+catchable, 7 equivalences
+survived. Detectors run the two
+fmov spec `--check` generators,
+the Lean chain
+(`GeneratedArm64Fmov`/
+`GeneratedArm64FmovDest` then
+`Arm64Fmov`/`Arm64FmovDest`),
+the two tracked fmov host
+oracles, and a battery-local
+route host over the real
+`arm64_sim_local_bpf.h` body;
+99{,}856 modeled cases: 1{,}536
+scenes (2 value paths via FLT
+and RET x op FMOV+RET x dst
+x2/x3/sp x src x1/x4/x5/sp x
+width 8/16/32/64 x 8 aux words)
+x 64 comparisons plus 16
+selector cases over the op x
+dst x src x width lattice, one
+flavor matching every sim register, tag, and SP
+write against a standalone model. 39 catchable rows caught
+with three clean rerun shakes
+(md5 identical each run:
+655c93c5978a2e90d485d1d75444ac83); 7 equivalences survived
+(comment repaints and generator
+stale-gate rows). The
+out-of-range direction probe
+now also reads the routing bit
+the dest header leaves behind
+after the unsupported hook, so
+a default-arm repaint becomes
+visible. Golden gate `make
+check` rc 0 with 212
+`cross-check: OK` banners,
+final arm64 decode host 1410
+cases. Census 321 -> 322.
+
 ### Step 0447 - arm64 flag-family route arms
 
 The arm64

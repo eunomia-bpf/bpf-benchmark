@@ -2164,6 +2164,33 @@ three comment rows; census 320 -> 321;
 the arm64 pair-move route arms are
 closed.
 
+Step 0450 covers the arm64 fmov route
+arms: 46 rows in `mut_arm64_fmov_route.py`
+(untracked) drive four detectors — the two
+fmov spec `--check` runs, the Lean chain
+(`GeneratedArm64Fmov`/`GeneratedArm64FmovDest`
+then `Arm64Fmov`/`Arm64FmovDest`), the two
+tracked fmov host oracles, and a
+battery-local route host
+(`build/fmov_route_host.c`, 99{,}856
+modeled cases: 1{,}536 scenes x 64
+comparisons plus 16 selector cases over
+the op x dst x src x width x direction x
+lane lattice) over the real
+`KPROG_ARM64_DISP_FMOV_HANDLED` body —
+one flavor matching every sim register, tag, and SP write against a
+standalone model. 39 catchable rows
+caught with three clean rerun shakes
+(byte-identical, md5
+655c93c5978a2e90d485d1d75444ac83); 7
+equivalences survive (comment repaints
+and generator stale-gate/message rows);
+the out-of-range direction probe now
+also reads the routing bit the dest
+header leaves behind after the
+unsupported hook; census 321 -> 322; the
+arm64 fmov route arms are closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

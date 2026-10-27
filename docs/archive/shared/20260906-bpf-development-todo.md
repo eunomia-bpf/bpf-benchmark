@@ -16265,6 +16265,64 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   df12c8a0aa709c958a876b9459382dd5).
   Census 320 -> 321.
 
+## Step 0450 - arm64 fmov route arms
+
+- Scope: the sim-local fmov route
+  arm of `ARM64_SIM_L_EXEC` in
+  arm64_sim_local_bpf.h — the
+  `KPROG_ARM64_DISP_FMOV_HANDLED`
+  gate whose body is the
+  generated `KPROG_ARM64_FMOV_VALUE`
+  selection committed to `__a64_v0`
+  or the width-narrowed destination
+  register via the generated
+  `KPROG_ARM64_FMOV_DEST_VECTOR`
+  routing bit, the two call sites
+  of the counted
+  `ARM64_SIM_L_UNSUPPORTED_OPCODE`
+  hook (the AUX word is the raw
+  direction code, so an
+  out-of-range auxiliary fires the
+  hook once per value and routing
+  switch argument while both
+  switch arms fall through to
+  zero), the `ARM64_SIM_L_READ_REG(SRC)`
+  value lane, the vector-commit
+  lane `__a64_v0 = result` versus
+  the register lane
+  `ARM64_SIM_L_WRITE_REG_WIDTH(DST, ...)`.
+- Harness: untracked
+  `build/mut_arm64_fmov_route.py`
+  with four detectors (the two
+  fmov spec `--check` runs, the
+  GeneratedArm64Fmov plus
+  GeneratedArm64FmovDest lake build
+  then the two hand modules, the
+  tracked `test_arm64_fmov_host.c`
+  and `test_arm64_fmov_dest_host.c`
+  oracles, and the battery-local
+  route host
+  `build/fmov_route_host.c`) over
+  99856 modeled cases: 1536 scenes
+  x 64 checks plus 16 selector
+  cases on the op x dst x src x
+  width x direction x lane
+  lattice; the route host keeps
+  the out-of-range direction
+  routing bit checked (zero
+  through the unsupported hook in
+  both value and routing
+  arguments) so a default-arm
+  repaint becomes visible.
+- Result: 39/39 catchable rows
+  caught, 7 equivalent decorations
+  survive (the four generator
+  stale-gate/message rows and
+  three comment repaints), three
+  identical rerun shakes (md5
+  655c93c5978a2e90d485d1d75444ac83).
+  Census 321 -> 322.
+
 ## Step 0448 - arm64 value-family route arms
 
 - Scope: the sim-local value-family
