@@ -16203,6 +16203,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0443 - arm64 CCMP condition/fallback decode
+
+- Scope: the CCMP decode contract -
+  arm64_ccmp_decode_spec.json, its
+  generator, the generated C header and
+  Lean module, the hand-written Lean
+  sublattice, the host oracle, and the
+  arm64 sim CCMP arm's selector route.
+- Harness: `kprog/formal/build/mut_arm64_ccmp_decode.py`
+  repaints the spec lanes, generator
+  render/check filters, generated C and
+  Lean decls, Lean tactic bodies, host
+  grid and route checks, and the sim
+  alias/flow lines through the byte-exact
+  `--check`, the lake chain, the oracle
+  build/run, and a battery-local route
+  oracle that drives the real CCMP arm
+  over taken and fallback paths.
+- Result: 59/59 rows caught, 12
+  equivalences survived (three clean
+  rerun shakes). Census 314 -> 315;
+  golden gate rc 0, 211 `cross-check: OK`
+  banners, final arm64 decode host 1410
+  cases.
+
 ## Step 0442 - arm64 module-close sweep
 
 - Scope: arm64 generator L824-1141 -

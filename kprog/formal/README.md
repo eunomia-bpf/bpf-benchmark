@@ -5743,6 +5743,26 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0443 - arm64 CCMP decode sweep
+
+The arm64 CCMP decode: the 59-row
+untracked `build/mut_arm64_ccmp_decode.py`
+repaints the CCMP decode contract files -
+spec, generator, generated C header and
+Lean, the hand Lean sublattice, and the
+host oracle - through the byte-exact
+`--check`, the `lake env lean` chain, and
+the exhaustive-256-grid oracle; a fourth
+route detector drives the real CCMP arm of
+`arm64_sim_local_bpf.h` over the taken and
+untaken paths, where the fallback NZCV
+byte is observable. Run `59/59 rows
+caught` with 3 clean rerun shakes (census
+314 -> 315); golden gate `make check` rc 0
+with 211 `cross-check: OK` banners, final
+arm64 decode host 1410 cases. The CCMP
+condition/fallback byte lanes are closed.
+
 ### Step 0442 - arm64 module-close sweep
 
 The arm64 module close: the 306-row

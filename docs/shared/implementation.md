@@ -2034,6 +2034,20 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0443 covers the arm64 CCMP
+decode: 59 rows in
+`mut_arm64_ccmp_decode.py` (untracked)
+repaint the spec JSON, generator, generated
+C header and Lean module, the hand Lean
+sublattice, and the host oracle through
+their gates, plus a fourth route detector
+that drives the real CCMP arm of
+arm64_sim_local_bpf.h over the taken and
+untaken paths where the fallback NZCV
+byte lands in flags. Census 314 -> 315;
+the CCMP condition/fallback byte lanes are
+closed.
+
 Step 0442 covers the arm64 module
 close: 306 rows in
 `mut_arm64_tail0442.py` (untracked)

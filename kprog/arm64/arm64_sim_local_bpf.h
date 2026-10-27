@@ -14,6 +14,7 @@
 #include "../formal/generated/arm64_flag_handler.h"
 #include "../formal/generated/arm64_logic_flag_handler.h"
 #include "../formal/generated/arm64_ccmp_handler.h"
+#include "../formal/generated/arm64_ccmp_decode.h"
 #include "../formal/generated/arm64_mod.h"
 #include "../formal/generated/arm64_alu_operand.h"
 #include "../formal/generated/arm64_alu_operand_select.h"
@@ -384,7 +385,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_MEM_FLAGS(AUX) KPROG_ARM64_AUX_B3(AUX)
 #define ARM64_SIM_L_BITFIELD_LSB(AUX) KPROG_ARM64_AUX_B1(AUX)
 #define ARM64_SIM_L_BITFIELD_WIDTH(AUX) KPROG_ARM64_AUX_B2(AUX)
-#define ARM64_SIM_L_CCMP_NZCV(AUX) KPROG_ARM64_AUX_B1(AUX)
+#define ARM64_SIM_L_CCMP_NZCV(AUX) KPROG_ARM64_CCMP_NZCV(AUX)
+#define ARM64_SIM_L_CCMP_COND(AUX) KPROG_ARM64_CCMP_COND(AUX)
 
 /* The width a body operates at when its decoded width field is absent (the
  * code 0): the same resolution the Lean `effective` def and the C contract
@@ -1214,8 +1216,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST);      \
 			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),\
 				ARM64_SIM_L_READ_REG(SRC));                 \
-			__u8 __a64_l_cond = (AUX) & 0xffU;                 \
-			__u8 __a64_l_nzcv = ARM64_SIM_L_CCMP_NZCV(AUX);   \
+			__u8 __a64_l_cond = ARM64_SIM_L_CCMP_COND(AUX); \
+			__u8 __a64_l_nzcv = ARM64_SIM_L_CCMP_NZCV(AUX); \
 			KPROG_ARM64_EXEC_CCMP(__a64_l_cond, __a64_l_nzcv,\
 				__a64_n, __a64_z, __a64_c, __a64_v,         \
 				__a64_l_lhs, __a64_l_rhs, __a64_l_width,    \
