@@ -2034,6 +2034,26 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0437 rows the x86
+constants-and-helpers region: 66 rows in
+`mut_x86_const_helpers0437.py`
+(untracked) repaint the header constant
+tiles and dataclass fields (caught
+through future-annotations field-type
+strings), the REGS build loop,
+parse_int/is_int/c_u64/c_ptr_u64,
+reg_info/is_mem/operand_width,
+mem_base_reg/parse_mem_terms/mem_aux/
+mem_disp, branch_target and
+has_direct_branch_target's match arms,
+enc's opcode lookup with its
+SystemExit gate, is_helper_symbol, and
+rodata_ident_map, through direct value
+pins over the frozen module surface
+with real objdump free. Census 308 ->
+309, stays untracked in
+`kprog/formal/build/`.
+
 Step 0436 rows the x86 parse-loader
 region: 60 rows in
 `mut_x86_parse_loaders0436.py`

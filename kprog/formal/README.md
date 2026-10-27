@@ -5743,6 +5743,21 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0437 - x86 constants-helpers sweep
+
+The x86 header constants, dataclass
+fields, and small arithmetic/mem helper
+region: the 66-row untracked
+`build/mut_x86_const_helpers0437.py`
+repaints the module tiles, the REGS
+loop, and the parse/operand/mem/branch/
+enc helper set. Run `66/66 rows caught`
+with 3 clean rerun shakes (census
+308 -> 309); golden gate `make check`
+rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host
+1410 cases.
+
 ### Step 0436 - x86 parse-loader sweep
 
 The x86 parse-loader region: the

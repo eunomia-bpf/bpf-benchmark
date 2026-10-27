@@ -16203,6 +16203,20 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0437 - x86 constants-helpers sweep
+
+- Scope: header constants L20-110 plus
+  the small-helper region L324-385
+  (parse_int through rodata_ident_map).
+- Harness: `kprog/formal/build/mut_x86_const_helpers0437.py`
+  paints one pattern per free line and
+  pins direct value checks over the
+  frozen module surface (dataclass
+  field-type strings caught through
+  future-annotations).
+- Result: 66/66 rows caught (three clean
+  rerun shakes). Census 308 -> 309.
+
 ## Step 0436 - x86 parse-loader sweep
 
 - Scope: parse-loader region L113-319 -
