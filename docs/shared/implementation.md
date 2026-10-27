@@ -2034,6 +2034,35 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0427 rows the x86 plain
+render body: 124 rows in
+`mut_x86_plain_render0427.py`
+(untracked) repaint render_program()'s
+signature defaults, the
+annotated_fixed_count_ops folds, total and
+entry-address bands, the self-call
+detector, the chunked threshold gate and
+delegation, the xdp/tc/cgroup_skb kind
+triples, target and return sets, subroutine
+label maps, return-address collection, the
+stack and stack-memory ladders,
+next-addrs map, rodata fallback and ident
+mapping, the sim-header constant, lines
+seeding, the stack define nest, include and
+prelude gates, rodata row emission, the
+section, entry, and open-brace extends, the
+per-insn label loop with the
+append_branch_or_ret call, exit-label
+fallthrough emission, the subroutine
+render and ret-dispatch extends, and the
+closing license and join, through
+structural pins plus a full-output identity
+oracle over seven fixtures (nop exit, tc
+stack rodata, cgroup_skb subroutine, jcc
+exit, prelude, self-call chunked trigger,
+and empty insns), census 298 -> 299, and
+stays untracked in `kprog/formal/build/`.
+
 Step 0425 rows the arm64 plain
 render body: 88 rows in
 `mut_arm64_render_program0425.py`

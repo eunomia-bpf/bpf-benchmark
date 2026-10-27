@@ -16203,6 +16203,31 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0427 - x86 plain-render sweep
+
+- Scope: render_program() signature
+  defaults, annotated_fixed_count_ops
+  folds, total/entry bands, self-call
+  detector and chunked threshold gate, kind
+  triples, addrs/return/label maps and
+  return addrs, stack and stack-memory
+  ladders, next_addrs map, rodata fallback
+  and ident mapping, sim-header constant,
+  lines seeding and stack defines, include
+  and prelude gates, rodata rows, section/
+  entry/brace extends, per-insn labels with
+  append_branch_or_ret, exit fallthrough,
+  subroutine render, ret-dispatch extends,
+  license and closing join.
+- Harness: untracked
+  `build/mut_x86_plain_render0427.py` pins
+  structural shapes plus a full-output
+  identity oracle over seven fixtures
+  including the self-call chunked trigger
+  and an empty-insns program.
+- Result: 124/124 rows caught (three clean
+  rerun shakes). Census 298 -> 299.
+
 ## Step 0425 - arm64 render-program sweep
 
 - Scope: render_program() signature

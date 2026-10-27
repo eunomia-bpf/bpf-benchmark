@@ -5743,6 +5743,28 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0427 - x86 plain-render sweep
+
+The x86 plain render body: the 124-row
+untracked `build/mut_x86_plain_render0427
+.py` repaints render_program()'s signature
+defaults, annotator folds, the self-call
+detector and chunked threshold gate, kind
+triples, target sets and label maps, stack
+ladders and rodata plumbing, the stack
+define nest and include/prelude gates,
+rodata emission, the per-insn label loop
+with the append_branch_or_ret call, the
+exit-label fallthrough, the subroutine
+render and ret-dispatch extends, and the
+closing license and join. Run `124/124 rows
+caught` with 3 clean rerun shakes (census
+298 -> 299); golden gate `make check` rc 0
+with 210 `cross-check: OK` banners, final
+arm64 decode host 1410 cases; a
+full-output identity oracle over seven
+fixtures pins every emitted line.
+
 ### Step 0425 - arm64 render-program sweep
 
 The arm64 plain render body: the 88-row
