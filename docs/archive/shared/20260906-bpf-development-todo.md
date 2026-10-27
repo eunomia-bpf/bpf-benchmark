@@ -16203,6 +16203,68 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0449 - arm64 pair-move route arms
+
+- Scope: the sim-local pair-move
+  (LDP/STP) route arms of
+  `ARM64_SIM_L_EXEC` in
+  arm64_sim_local_bpf.h — both
+  dispatcher entries
+  (`KPROG_ARM64_DISP_LDP_HANDLED`,
+  `KPROG_ARM64_DISP_STP_HANDLED`) and
+  the direct `ARM64_SIM_L_LDP`/
+  `ARM64_SIM_L_STP` aliases share one
+  step whose arms come from the
+  generated `arm64_pair_mem.h` chain
+  (kind value 2 exec/alias arm
+  selector via
+  `KPROG_ARM64_PAIR_MEM_INDEX`, the
+  access alias pair, the binary slot
+  count and its high-slot stride) and
+  the generated
+  `arm64_pair_load_tag.h` route macro
+  (outer width-64 gate then the
+  per-slot tag-preservation arms),
+  plus the pre/post writeback delta
+  walk, the two pair host CC arms, and
+  the unsupported hook (the pair
+  load's PROBE-less paint).
+- Harness: untracked
+  `build/mut_arm64_pair_route.py` with
+  four detectors (the two pair spec
+  `--check` runs, the
+  GeneratedArm64PairMem plus
+  GeneratedArm64PairLoadTag lake build
+  then the two hand modules, and the
+  battery-local route host
+  `build/pair_route_host.c`) over
+  165895 modeled cases: 2592 scenes x
+  64 checks plus 7 selector cases on
+  the op x via x base x flags x width
+  x index x imm lattice; the tracked
+  pair-mem host oracle
+  (`test_arm64_pair_mem_host.c`) is
+  the fourth detector; the route
+  host keeps `model_base_off(aux,
+  index, imm) + extra` un-folded
+  because `KPROG_ARM64_MEM_OFFSET`
+  zeroes the immediate when the
+  PREPOST bits are set).
+- Result: 32/32 catchable rows caught,
+  8 equivalent decorations survive
+  (the per-slot route-mask paint pair
+  `lgh_route_mask_low_repaint`/
+  `lgh_route_mask_high_repaint` among
+  them: the flipped arm merely swaps
+  between `PTR_TAG(dst, value, SCALAR)`
+  and `WRITE_REG_WIDTH(dst, value, 64)`
+  writes with identical register, tag
+  and memory state at the only width
+  the outer gate opens), three
+  identical rerun shakes (md5
+  df12c8a0aa709c958a876b9459382dd5).
+  Census 320 -> 321.
+
 ## Step 0448 - arm64 value-family route arms
 
 - Scope: the sim-local value-family

@@ -2107,6 +2107,63 @@ equivalences survive; census 319 ->
 320; the arm64 value-family route arms
 are closed.
 
+Step 0449 covers the arm64 pair-move
+route arms: 40 rows in
+`mut_arm64_pair_route.py` (untracked)
+drive four detectors — the two pair
+spec `--check` runs, the
+GeneratedArm64PairMem plus
+GeneratedArm64PairLoadTag lake build
+then the two hand modules, the tracked
+pair-mem host oracle
+(`test_arm64_pair_mem_host.c`), and a
+battery-local route host
+(`build/pair_route_host.c`) that restates
+the shared `ARM64_SIM_L_PAIR_MEM_STEP`
+body over 165895 cases (2592 scenes x 64
+checks plus 7 selector cases: op x
+directory/exec via x x2-scalar/x3-ABI/sp
+base x pre/post flag set x all four
+width codes x index-class x imm grid;
+the route host keeps
+`model_base_off(aux, index, imm) +
+extra` un-folded because
+`KPROG_ARM64_MEM_OFFSET` zeroes the
+immediate when the PREPOST bits are
+set). Repainted: the dispatcher gates
+(LDP/STP repaints), both dispatch-lane
+argument swaps, the alias src/op swaps,
+the `ARM64_OP_LDP` define drift (0x21 to
+0x20, rides the unsupported hook); the
+spec fields (operation, both codes,
+STP access, slot count and stride,
+schema, load-tag code and
+preserve-rule); the generated header
+rows (both opcode asserts, slot stride,
+high-slot stride, slot count, both
+access aliases, index chain); both
+`arm64_pair_load_tag.h` per-slot route
+masks; the Lean rows (arm index, access,
+load-tag code, slot plan, route-spec
+rename); the host-oracle rows (access
+compare, low-slot value paint). Reruns
+byte-identical (md5
+df12c8a0aa709c958a876b9459382dd5); 32
+catchable rows caught, 8 equivalences
+survive — the two per-slot route-mask
+repaints (`lgh_route_mask_low_repaint`,
+`lgh_route_mask_high_repaint`),
+flipping the per-slot `!=` maps between
+`PTR_TAG(dst, value, SCALAR)` and
+`WRITE_REG_WIDTH(dst, value, 64)` writes
+with identical register/tag/memory state
+at the only width (64) the outer gate
+opens; two generator stale-gate/message
+rows ride the unchanged spec checks;
+three comment rows; census 320 -> 321;
+the arm64 pair-move route arms are
+closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

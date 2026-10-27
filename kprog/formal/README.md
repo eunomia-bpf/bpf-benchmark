@@ -5826,6 +5826,110 @@ catchable rows caught;
 survive; three identical rerun
 shakes. Census 319 -> 320.
 
+### Step 0449 - arm64 pair-move route arms
+
+The arm64 pair-move route
+arms of `ARM64_SIM_L_EXEC`
+in arm64_sim_local_bpf.h -
+both dispatcher entries
+(`KPROG_ARM64_DISP_LDP_HANDLED`,
+`KPROG_ARM64_DISP_STP_HANDLED`)
+and the direct
+`ARM64_SIM_L_LDP`/
+`ARM64_SIM_L_STP` aliases
+share one step whose arms
+are the generated
+`arm64_pair_mem.h` chain
+(dispatcher arm index,
+access alias pair, slot
+count and high-slot stride)
+and the generated
+`arm64_pair_load_tag.h`
+route macro (outer
+tag-preservation gate then
+the per-slot arms). The
+40-row untracked
+`build/mut_arm64_pair_route.py`
+drives four detectors - the
+two pair spec `--check`
+runs, the
+GeneratedArm64PairMem plus
+GeneratedArm64PairLoadTag
+lake build with the two
+hand modules, the tracked
+pair-mem host oracle, and
+the battery-local route
+host (`build/pair_route_host.c`)
+that replays the shared
+`ARM64_SIM_L_PAIR_MEM_STEP`
+body over 2592 scenes x 64
+checks plus 7 selector
+cases = 165895 cases: op x
+via x base (x2 scalar, x3
+ABI, sp) x flags x width x
+index x imm. The route host
+restates the memory-offset
+invariant locally:
+`model_base_off(aux, index,
+imm) + extra` at every
+access (the
+`KPROG_ARM64_MEM_OFFSET`
+suppress gate zeroes the
+immediate when the PREPOST
+bits are set, so the folded
+`imm + extra` form is wrong
+and is not used).
+Repainted: dispatcher
+gates and lanes (LDP/STP
+gate repaint, dispatch-lane
+arg swaps, alias
+src/op swaps, the
+`ARM64_OP_LDP` define
+drift); spec JSON fields
+(operation, codes, access,
+slot count/stride, schema,
+load-tag code and
+preserve-rule); generated
+header rows (both opcode
+static asserts, slot
+stride, high-slot stride,
+slot count, both access
+aliases, index chain);
+`arm64_pair_load_tag.h`
+per-slot route masks; the
+Lean rows (arm index,
+access, load-tag code,
+slot plan, route-spec
+rename); host-oracle rows
+(access compare, low-slot
+value paint); and the three
+comment-equivalent rows.
+32 catchable rows caught;
+8 equivalences survive -
+the two per-slot route-mask
+repaints
+(`lgh_route_mask_low_repaint`,
+`lgh_route_mask_high_repaint`):
+the `PTR_TAG(dst, value,
+SCALAR)` write they toggle
+maps to the identical
+register file, tag and
+memory state as
+`WRITE_REG_WIDTH(dst,
+value, 64)` at the only
+width (64) the outer gate
+opens; two generator
+stale-gate/message rows ride
+the unchanged spec checks;
+three comment rows. Three
+identical rerun shakes (md5
+df12c8a0aa709c958a876b9459382dd5).
+Golden gate `make check` rc 0
+with 212 `cross-check: OK`
+banners, final arm64 decode
+host 1410 cases. Census
+320 -> 321.
+
 ### Step 0447 - arm64 flag-family route arms
 
 The arm64
