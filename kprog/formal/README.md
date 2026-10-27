@@ -5743,6 +5743,20 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0441 - arm64 renderer-tail sweep
+
+The arm64 renderer tail: the 300-row
+untracked `build/mut_arm64_render_tail0441.py`
+repaints the tracker helpers,
+append_insn/compact_step arms, the
+compact- and flat-render lanes, and the
+decode-shaped helpers. Run `300/300 rows
+caught` with 3 clean rerun shakes
+(census 312 -> 313); golden gate
+`make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0440 - arm64 encode-core sweep
 
 The arm64 encode core: the 80-row

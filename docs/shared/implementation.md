@@ -2034,6 +2034,25 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0441 covers the arm64 renderer
+tail: 300 rows in
+`mut_arm64_render_tail0441.py`
+(untracked) repaint the blr/written/mov
+GPR-tracking helpers, helper_calls_by_
+addr's direct/last-imm/copy/bump paths,
+append_insn's branch/edge arms,
+compact_step's node kinds,
+compact_helper_defines and
+append_compact_helper_switch,
+render_program_compact's entry/guard/
+stack/op-switch/exit lanes,
+render_program's labels/return-cases/
+map-symbol lanes, and
+branch_target/c_comment/label shapes,
+through synthetic NativeInsn fixtures.
+Census 312 -> 313, stays untracked in
+`kprog/formal/build/`.
+
 Step 0440 covers the arm64 encode
 core: 80 rows in
 `mut_arm64_encode_core0440.py`

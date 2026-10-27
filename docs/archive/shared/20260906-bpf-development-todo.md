@@ -16203,6 +16203,18 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0441 - arm64 renderer-tail sweep
+
+- Scope: arm64 generator L490-823 - the
+  store/flag-ALU arms through the
+  compact renderer's step table.
+- Harness: `kprog/formal/build/mut_arm64_render_tail0441.py`
+  paints one pattern per free line, pins
+  append/compact/render shapes with
+  synthetic NativeInsn fixtures.
+- Result: 300/300 rows caught (three
+  clean rerun shakes). Census 312 -> 313.
+
 ## Step 0440 - arm64 encode-core sweep
 
 - Scope: arm64 generator L410-489 - the
