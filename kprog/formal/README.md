@@ -5743,6 +5743,21 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0438 - x86 render-tail sweep
+
+The x86 renderer tail: the 7-row
+untracked `build/mut_x86_rendertail0438.py`
+repaints the chunked proof's exit gate
+and block close plus the flat
+renderer's license tail and
+render_program signature. Run `7/7 rows
+caught` with 3 clean rerun shakes
+(census 309 -> 310); the x86 frozen-line
+census is complete at this point. Golden
+gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0437 - x86 constants-helpers sweep
 
 The x86 header constants, dataclass

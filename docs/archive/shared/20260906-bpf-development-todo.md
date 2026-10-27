@@ -16203,6 +16203,19 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0438 - x86 render-tail sweep
+
+- Scope: L1316-1318 (chunked proof tail
+  exit) plus L1443-1446 (flat render
+  license tail and render_program
+  signature).
+- Harness: `kprog/formal/build/mut_x86_rendertail0438.py`
+  paints one pattern per free line and
+  pins render_chunked_program and
+  render_program markup tails.
+- Result: 7/7 rows caught (three clean
+  rerun shakes). Census 309 -> 310.
+
 ## Step 0437 - x86 constants-helpers sweep
 
 - Scope: header constants L20-110 plus

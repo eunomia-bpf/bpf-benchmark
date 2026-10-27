@@ -2034,6 +2034,21 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0438 closes the x86
+mutation census: 7 rows in
+`mut_x86_rendertail0438.py`
+(untracked) repaint the chunked-proof
+tail exit lines (PC_DONE vs
+c_u64(last_next)), the chunked block
+close and return, the flat renderer's
+license/close block and return, and the
+render_program signature, through
+direct render pins calling
+render_chunked_program and
+render_program with synthetic NativeInsn
+fixtures. Census 309 -> 310, stays
+untracked in `kprog/formal/build/`.
+
 Step 0437 rows the x86
 constants-and-helpers region: 66 rows in
 `mut_x86_const_helpers0437.py`
