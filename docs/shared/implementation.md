@@ -2034,6 +2034,38 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0436 rows the x86 parse-loader
+region: 60 rows in
+`mut_x86_parse_loaders0436.py`
+(untracked) repaint split_operands' init,
+depth toggles, comma-append, and tail
+gate, parse_asm_text's reloc guard,
+replace, colon/hex/fields/comment/empty
+gates, lock prefix, mnemonic regex, and
+append, section_size's invoke and gate,
+rodata_bytes' invoke, returncode gate,
+init, regex gates, field break, and byte
+extend, load_rodata16's rodata gate,
+idx/idx+2/size gates, offset/size/name
+parses, and both from_bytes pieces,
+text_symbol_addrs' init, invoke, text
+gate, and symbol store,
+parse_native_link_blob's path tile,
+is_file raise, invokes, and the
+reloc-replace comprehension,
+parse_proof_object_program's delegate,
+normalize_native_link_entry_returns'
+gates and both arms, and
+parse_native_linked_program's blob and
+normalize calls, gates, and both
+4-tuple returns, through direct parser
+pins plus staged synthetic ELF proof
+objects (real cc assembled rodata,
+call-reloc subfunction programs, and a
+stubbed-objdump short-symbol-row gate
+probe). Census 307 -> 308, stays
+untracked in `kprog/formal/build/`.
+
 Step 0435 rows the x86 CLI tail
 1575-1618: 35 rows in
 `mut_x86_clitail0435.py` (untracked)

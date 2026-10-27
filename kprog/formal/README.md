@@ -5743,6 +5743,24 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0436 - x86 parse-loader sweep
+
+The x86 parse-loader region: the
+60-row untracked
+`build/mut_x86_parse_loaders0436.py`
+repaints split_operands, parse_asm_text,
+section_size, rodata_bytes,
+load_rodata16, text_symbol_addrs,
+parse_native_link_blob,
+parse_proof_object_program,
+normalize_native_link_entry_returns, and
+parse_native_linked_program's gates and
+returns. Run `60/60 rows caught` with 3
+clean rerun shakes (census 307 -> 308);
+golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0435 - x86 CLI tail sweep
 
 The x86 CLI tail: the 35-row untracked

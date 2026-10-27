@@ -16203,6 +16203,19 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0436 - x86 parse-loader sweep
+
+- Scope: parse-loader region L113-319 -
+  split_operands through
+  parse_native_linked_program.
+- Harness: `kprog/formal/build/mut_x86_parse_loaders0436.py`
+  paints one pattern per free line and
+  pins direct parser fixtures plus
+  staged synthetic ELF proof objects and
+  a stubbed-objdump gate probe.
+- Result: 60/60 rows caught (three clean
+  rerun shakes). Census 307 -> 308.
+
 ## Step 0435 - x86 CLI tail sweep
 
 - Scope: CLI tail L1575-1618 - write_one
