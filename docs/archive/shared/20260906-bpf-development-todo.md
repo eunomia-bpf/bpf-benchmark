@@ -16203,6 +16203,37 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0447 - arm64 flag-family route arms
+
+- Scope: the sim-local flag-family
+  route arms of `ARM64_SIM_L_EXEC` in
+  arm64_sim_local_bpf.h — SUBS/ADDS
+  (rhs through `FLAG_RHS`, the
+  `ARITH_FAMILY_SUB/ADD` constants, the
+  lhs pins, the writeback store), CMN-imm
+  (the bare `(IMM)` rhs), CMN-reg/CMP/
+  TST/TST-BIC-reg (their `MOD_VALUE` rhs
+  lanes), BICS-reg (its SRC2 rhs triplet
+  and lhs pin), ANDS, all nine gate
+  repaints, the unsupported hook, and
+  the writeback-drop rows.
+- Harness: untracked
+  `build/mut_arm64_flag_route.py` with
+  three detectors (the three flag-family
+  spec `--check` runs, the three-flag
+  Lean chain, and the battery-local
+  route host `build/flag_route_host.c`
+  over 2089 modeled cases on the
+  4-width x 7-seed x 5-immediate lattice
+  with compare-preserve sentinel,
+  narrow-sentinel, and unsupported-hook
+  scenes).
+- Result: 34/34 catchable rows caught,
+  2 equivalent decorations survive,
+  three identical rerun shakes (md5
+  99090c86c4308930cdcc7b5039ea11c8).
+  Census 318 -> 319.
+
 ## Step 0446 - x86 BT btmem index arm
 
 - Scope: the sim-local BT memory-index

@@ -5769,6 +5769,45 @@ mutation. 35/35 caught; 3 equivalent
 decorations survive; three identical
 rerun shakes. Census 316 -> 317.
 
+### Step 0447 - arm64 flag-family route arms
+
+The arm64
+flag-family route arms of
+`ARM64_SIM_L_EXEC` in
+arm64_sim_local_bpf.h - the SUBS/ADDS
+writeback arms with their
+`FLAG_RHS` rhs and family
+constants, the CMN-imm bare-
+`(IMM)` rhs, the CMN-reg/CMP/
+TST/TST-BIC MOD_VALUE rhs
+lanes, the BICS-reg SRC2 rhs
+and lhs pin, ANDS, both arith
+and logic family constants, all
+nine gate repaints, the
+unsupported hook, four
+writeback-drop rows, and two
+equivalent decorations: the
+36-row untracked
+`build/mut_arm64_flag_route.py`
+drives every mutation through
+three detectors - the three
+flag-family spec `--check`
+runs, the three-flag Lean
+chain (the Generated flag
+handler/operand/logic modules
+then the three hand modules),
+and the battery-local route
+host (`build/flag_route_host.c`,
+2,089 modeled cases over 4
+widths x 7 seed rows x 5
+salient immediates with
+compare-preserve sentinel and
+narrow-sentinel scenes). 34/34
+catchable rows caught;
+2 equivalent decorations
+survive; three identical rerun
+shakes. Census 318 -> 319.
+
 ### Step 0446 - x86 BT btmem index arm
 
 The x86

@@ -2066,6 +2066,36 @@ cmov host CC arms. Reruns byte-identical
 census 316 -> 317; the x86 CMOV step
 composition is closed.
 
+Step 0447 covers the arm64 flag-family
+route arms: 36 rows in
+`mut_arm64_flag_route.py` (untracked)
+drive three detectors — the three
+flag-family spec `--check` runs, the
+three-flag Lean chain, and a
+battery-local route host
+(`build/flag_route_host.c`,
+2089 cases) over the real flag arms of
+`ARM64_SIM_L_EXEC` in
+arm64_sim_local_bpf.h (4 widths x 7
+seed rows x 5 salient immediates with
+compare-preserve sentinel and
+narrow-sentinel scenes). Repainted:
+SUBS/ADDS rhs `FLAG_RHS` and family
+swap, lhs pin swap, writeback drops;
+CMN-imm `(__u64)(IMM)` rhs zeroed;
+CMN-reg/CMP/TST/TST-BIC rhs lane swaps
+inside whole-arm blocks; BICS SRC2 rhs
+and lhs pin swap; ANDS writeback drop;
+all nine gate repaints; the unsupported
+hook; family-constant and logic-spec
+contract rows through `gen`. Reruns
+byte-identical (md5
+99090c86c4308930cdcc7b5039ea11c8);
+34/34 catchable rows caught, 2
+equivalences survive; census 318 ->
+319; the arm64 flag-family route arms
+are closed.
+
 Step 0446 covers the x86 BT BT_MEM_IMM
 memory-index arm: 12 rows in
 `mut_x86_btmem_route.py` (untracked) drive
@@ -4604,6 +4634,29 @@ The x86 render head route and scalar helper unit (the `render_program`
   8/8 catchable rows caught, 4
   equivalences survive, three byte-identical
   rerun shakes, census 317 -> 318.
+
+  Step 0447
+  bodies the sim-local flag-family
+  route arms: the 36-row untracked
+  `build/mut_arm64_flag_route.py` repaints
+  the SUBS/ADDS writeback arms (rhs
+  `FLAG_RHS` lanes, family constants,
+  lhs pin, writeback store), the CMN-imm
+  bare-immediate rhs, the CMN-reg/CMP/
+  TST/TST-BIC MOD_VALUE rhs lanes, the
+  BICS-reg SRC2 rhs and lhs pin, ANDS
+  writeback, all nine gate repaints, and
+  the unsupported hook, driven through
+  the three flag-family spec checks, the
+  three-flag Lean chain, and a
+  battery-local route host (2089 modeled
+  cases over the 4-width x 7-seed x
+  5-immediate lattice with
+  compare-preserve sentinel and
+  narrow-sentinel scenes); 34/34
+  catchable rows caught, 2 equivalences
+  survive, three byte-identical rerun
+  shakes, census 318 -> 319.
 
   The x86 signed-value contract (the two width-parameterised signed operations the IMUL handlers rely on — `kprog_x86_sign_extend_value`/`GeneratedX86Signed.signExtend` widen the narrowed operand from the access width's sign bit, the generated complement-and-subtract form `((v & mask) ^ sign) - sign` with the 64-bit width the identity, and `kprog_x86_abs_width_value`/`GeneratedX86Signed.absWidth` compute the width-domain magnitude (narrow, negate when the width's sign bit is set, re-narrow); the hand module restates the extension independently via `BitVec.signExtend` over `setWidth` (`x86SignExtendSpec`), mirrors the magnitude with `mask`/`signMask` (`x86AbsWidthSpec`), and proves both refinements by case-bash `bv_decide` plus the idempotent-magnitude, magnitude-bounded-by-the-sign-mask, two canonical examples, and the cross-contract `x86_abs_width_agrees_imul` agreement with the independently generated `GeneratedX86ImulFlags.signedAbs`); the single-line spec pins the schema/operation metadata and the four width rows (mask/sign/bits); the generator re-checks the whole expected dictionary exact plus the per-row bit-count check and renders the Lean module and C header byte-for-byte) consumed in `x86_sim.h`'s `x86_sign_extend64`/`x86_abs_width64` wrappers, the IMUL-reg-imm/mem-imul/mov-load/movx Lean handlers rewriting with `x86_sign_extend_refines`, the route dispatch host, and a dedicated contract host sweeping both helpers over a boundary vector set plus a 20000-iteration LCG sweep against oracle re-implementations; the 48-row mutation census catches 37 mutations (29 at the generator stage covering the spec fields, byte-exact renders, header bytes, and the sign-extension/abs arms, 6 through the Lean chain — both independent spec defs, the w8 sign-extension arm, the w8 abs condition flip, and the `x86_sign_extend_refines` rename, 2 in the contract-host oracle sweep) with 11 documented equivalences (the three failure-path-only generator message repaints, seven consumer-free hand-theorem renames, two host banner repaints).
   The x86 bswap/movbe contract (the shared byte-reversal kernel behind the `BSWAP`, `MOVBE_LOAD`, and `MOVBE_STORE` handlers — `kprog_x86_bswap_value(value, width)` and `GeneratedX86Bswap.value` reverse the access width's byte order and clear the bytes above it: w8 masked identity, w16 two-lane swap, w32 half-reversal of the swapped word (`swapped >> 32`), w64 eight-lane reversal, with a closed width set so there is no unsupported arm; the generated Lean module replaces the w16 fold with a `narrow`-masked two-lane assembly and the w32 arm as `r >>> 32` over an eight-lane build; the hand module restates the reversal independently as `x86BswapSpec` (per-byte `lane8` extractions re-assembled in reverse) and proves `x86_bswap_refines` by `bv_decide`, the involution `x86_bswap_involutive`, the w32 high-word clearing, and three canonical byte-order examples); the single-line spec pins the schema/operation metadata and the four width rows (name/bytes/code 1/1, 2/2, 4/4, 8/8); the generator re-checks the whole expected dictionary exact plus the per-row byte-count and code-list checks and renders the Lean module and C header byte-for-byte) consumed in `x86_sim.h`'s byte-reversal step, in `X86MovbeHandler.lean` (`x86_bswap_refines` rewrites; `exact x86_bswap_involutive value width` closes the movbe-elimination proof), and by two dedicated hosts — the contract host sweeps the macro against a byte-array reversal oracle, the route host drives the real BSWAP/MOVBE simulator bodies; the 54-row mutation census catches 43 mutations (37 at the generator stage across the five generated/hand files, 5 through the Lean chain — the `lane8` helper, the `x86BswapSpec` w64 arm, and the `refines`/`involutive` renames the movbe handler consumes, 1 in the contract-host oracle sweep, 0 in the route-host sweep) with 11 documented equivalences (three failure-path-only generator message repaints, four consumer-free hand-theorem renames, four host banner/stderr repaints).
