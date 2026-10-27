@@ -2066,6 +2066,47 @@ cmov host CC arms. Reruns byte-identical
 census 316 -> 317; the x86 CMOV step
 composition is closed.
 
+Step 0448 covers the arm64 value-family
+route arms: 46 rows in
+`mut_arm64_value_route.py` (untracked)
+drive three detectors — the six
+value-family spec `--check` runs, the
+six-module Lean chain (the Generated
+Unary/Cneg/Extrev/Bitfield/Orn/Shift
+modules then the six hand modules), and
+a battery-local route host
+(`build/value_route_host.c`,
+3078 cases) over the real value arms of
+`ARM64_SIM_L_EXEC` in
+arm64_sim_local_bpf.h (4 widths x 8
+seed rows x 4 shift amounts x kind
+loop, plus MOD-applied ORN, BFXIL
+preserve and narrow-sentinel scenes).
+Repainted: SHIFT IMM_RHS amount lane,
+whole-AUX kind, SRC lane and writeback
+drop; UNARY/CNEG/EXTREV `(SRC)` lane
+swaps, EXTREV SRC2/SRC and `(IMM)`
+zeroing, CNEG taken-lane zeroing,
+BITFIELD SRC/DST lane swap and
+LSB/WIDTH byte-lane swap, its own
+writeback drop; ORN lhs pin,
+`MOD_VALUE` rhs lane swap and
+shift-lane zeroing with its writeback
+drop; all six gate repaints; the
+unsupported hook (MVN folded into NEG
+by the `ARM64_OP_MVN` define repaint in
+arm64_sim.h); the generated C header
+repaints ride the route host (lake
+never recompiles on a .h change) while
+hand-module repaints ride the Lean
+chain; and the six spec JSON repaints
+ride `gen`. Reruns byte-identical (md5
+ee57d973cbb314844eb5a3f459b2f3cc);
+44/44 catchable rows caught, 2
+equivalences survive; census 319 ->
+320; the arm64 value-family route arms
+are closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
@@ -4657,6 +4698,42 @@ The x86 render head route and scalar helper unit (the `render_program`
   catchable rows caught, 2 equivalences
   survive, three byte-identical rerun
   shakes, census 318 -> 319.
+
+
+  Step 0448
+  bodies the sim-local value-family
+  route arms: the 46-row untracked
+  `build/mut_arm64_value_route.py`
+  repaints the SHIFT-OP arm (the
+  `IMM_RHS` amount lane, the whole-`AUX`
+  shift kind, the SRC value lane, the
+  writeback store), the UNARY and CNEG
+  arms (the `(SRC)` lane swap, the CNEG
+  taken lane gated on `EVAL_COND`,
+  writeback drops), the EXTREV arm (the
+  SRC/SRC2 value swap and the bare
+  `(IMM)` shift lane), the BITFIELD arm
+  (the SRC/DST pre-read value lanes, the
+  LSB/WIDTH byte-lane pair, its own
+  writeback store), and the ORN arm (the
+  lhs pin, the `MOD_VALUE` rhs lane, the
+  shift-lane zeroing inside `MOD_VALUE`,
+  the writeback drop), plus all six gate
+  repaints, the unsupported hook (the
+  `ARM64_OP_MVN` define repaint in
+  arm64_sim.h folding MVN into NEG), and
+  two equivalent decorations, driven
+  through the six value-family spec
+  checks, the six-module Lean chain, and
+  a battery-local route host (3078
+  modeled cases over the 4-width x
+  8-seed x 4-amount lattice with
+  MOD-applied ORN, BFXIL-preserve
+  sentinel and narrow-sentinel scenes);
+  44/44 catchable rows caught, 2
+  equivalences survive, three
+  byte-identical rerun shakes, census
+  319 -> 320.
 
   The x86 signed-value contract (the two width-parameterised signed operations the IMUL handlers rely on — `kprog_x86_sign_extend_value`/`GeneratedX86Signed.signExtend` widen the narrowed operand from the access width's sign bit, the generated complement-and-subtract form `((v & mask) ^ sign) - sign` with the 64-bit width the identity, and `kprog_x86_abs_width_value`/`GeneratedX86Signed.absWidth` compute the width-domain magnitude (narrow, negate when the width's sign bit is set, re-narrow); the hand module restates the extension independently via `BitVec.signExtend` over `setWidth` (`x86SignExtendSpec`), mirrors the magnitude with `mask`/`signMask` (`x86AbsWidthSpec`), and proves both refinements by case-bash `bv_decide` plus the idempotent-magnitude, magnitude-bounded-by-the-sign-mask, two canonical examples, and the cross-contract `x86_abs_width_agrees_imul` agreement with the independently generated `GeneratedX86ImulFlags.signedAbs`); the single-line spec pins the schema/operation metadata and the four width rows (mask/sign/bits); the generator re-checks the whole expected dictionary exact plus the per-row bit-count check and renders the Lean module and C header byte-for-byte) consumed in `x86_sim.h`'s `x86_sign_extend64`/`x86_abs_width64` wrappers, the IMUL-reg-imm/mem-imul/mov-load/movx Lean handlers rewriting with `x86_sign_extend_refines`, the route dispatch host, and a dedicated contract host sweeping both helpers over a boundary vector set plus a 20000-iteration LCG sweep against oracle re-implementations; the 48-row mutation census catches 37 mutations (29 at the generator stage covering the spec fields, byte-exact renders, header bytes, and the sign-extension/abs arms, 6 through the Lean chain — both independent spec defs, the w8 sign-extension arm, the w8 abs condition flip, and the `x86_sign_extend_refines` rename, 2 in the contract-host oracle sweep) with 11 documented equivalences (the three failure-path-only generator message repaints, seven consumer-free hand-theorem renames, two host banner repaints).
   The x86 bswap/movbe contract (the shared byte-reversal kernel behind the `BSWAP`, `MOVBE_LOAD`, and `MOVBE_STORE` handlers — `kprog_x86_bswap_value(value, width)` and `GeneratedX86Bswap.value` reverse the access width's byte order and clear the bytes above it: w8 masked identity, w16 two-lane swap, w32 half-reversal of the swapped word (`swapped >> 32`), w64 eight-lane reversal, with a closed width set so there is no unsupported arm; the generated Lean module replaces the w16 fold with a `narrow`-masked two-lane assembly and the w32 arm as `r >>> 32` over an eight-lane build; the hand module restates the reversal independently as `x86BswapSpec` (per-byte `lane8` extractions re-assembled in reverse) and proves `x86_bswap_refines` by `bv_decide`, the involution `x86_bswap_involutive`, the w32 high-word clearing, and three canonical byte-order examples); the single-line spec pins the schema/operation metadata and the four width rows (name/bytes/code 1/1, 2/2, 4/4, 8/8); the generator re-checks the whole expected dictionary exact plus the per-row byte-count and code-list checks and renders the Lean module and C header byte-for-byte) consumed in `x86_sim.h`'s byte-reversal step, in `X86MovbeHandler.lean` (`x86_bswap_refines` rewrites; `exact x86_bswap_involutive value width` closes the movbe-elimination proof), and by two dedicated hosts — the contract host sweeps the macro against a byte-array reversal oracle, the route host drives the real BSWAP/MOVBE simulator bodies; the 54-row mutation census catches 43 mutations (37 at the generator stage across the five generated/hand files, 5 through the Lean chain — the `lane8` helper, the `x86BswapSpec` w64 arm, and the `refines`/`involutive` renames the movbe handler consumes, 1 in the contract-host oracle sweep, 0 in the route-host sweep) with 11 documented equivalences (three failure-path-only generator message repaints, four consumer-free hand-theorem renames, four host banner/stderr repaints).

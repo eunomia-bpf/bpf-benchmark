@@ -5769,6 +5769,63 @@ mutation. 35/35 caught; 3 equivalent
 decorations survive; three identical
 rerun shakes. Census 316 -> 317.
 
+### Step 0448 - arm64 value-family route arms
+
+The arm64
+value-family route arms of
+`ARM64_SIM_L_EXEC` in
+arm64_sim_local_bpf.h - the
+SHIFT_OP arm's
+`IMM_RHS` amount lane,
+whole-`AUX` kind and SRC
+value lanes plus its
+writeback store, the UNARY
+and CNEG arms' `(SRC)` lane
+and writeback drops, the
+CNEG taken lane fed by
+`EVAL_COND`, the EXTREV arm's
+SRC/SRC2 swap and `(IMM)`
+shift lane, the BITFIELD
+arm's SRC/DST value lanes and
+LSB/WIDTH byte-lane pair with
+its own writeback store, the
+ORN arm's lhs pin,
+`MOD_VALUE` rhs lane and
+MOD-shift lane pair, all six
+gate repaints, the unsupported
+hook (a repainted
+`ARM64_OP_MVN` dispatch that
+folds MVN into NEG), and two
+equivalent decorations: the
+46-row untracked
+`build/mut_arm64_value_route.py`
+drives every mutation through
+three detectors - the six
+value-family spec `--check`
+runs, the six-module Lean chain
+(the Generated
+ARM64Unary/Cneg/Extrev/
+Bitfield/Orn/Shift modules
+then the six hand modules), and
+the battery-local route host
+(`build/value_route_host.c`,
+3,078 modeled cases over 4
+widths x 8 seed rows x 4 shift
+amounts with MOD-applied ORN,
+BFXIL-preserve sentinel and
+narrow-sentinel scenes). The
+generated C header repaints
+are caught by the route host -
+lake never recompiles on a .h
+change - while the hand-module
+repaints are caught by the Lean
+chain; the generator `--check`
+catches the JSON lanes. 44/44
+catchable rows caught;
+2 equivalent decorations
+survive; three identical rerun
+shakes. Census 319 -> 320.
+
 ### Step 0447 - arm64 flag-family route arms
 
 The arm64

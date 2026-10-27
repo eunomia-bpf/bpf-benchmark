@@ -16203,6 +16203,51 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0448 - arm64 value-family route arms
+
+- Scope: the sim-local value-family
+  route arms of `ARM64_SIM_L_EXEC` in
+  arm64_sim_local_bpf.h — the SHIFT_OP
+  arm (`IMM_RHS` amount lane, the
+  whole-`AUX` kind, the SRC value lane,
+  the writeback store), the UNARY and
+  CNEG arms (`(SRC)` lane swaps, the
+  CNEG taken lane fed by `EVAL_COND`,
+  writeback drops), the EXTREV arm (the
+  SRC/SRC2 value swap and the bare
+  `(IMM)` shift lane), the BITFIELD arm
+  (the SRC/DST pre-read value lanes, the
+  LSB/WIDTH byte-lane pair, its own
+  writeback store), and the ORN arm (the
+  lhs pin, the `MOD_VALUE` rhs lane, the
+  shift-lane zeroing inside
+  `MOD_VALUE`), plus all six gate
+  repaints, the unsupported hook (the
+  `ARM64_OP_MVN` define repaint in
+  arm64_sim.h folding MVN into NEG), and
+  two equivalent decorations.
+- Harness: untracked
+  `build/mut_arm64_value_route.py` with
+  three detectors (the six value-family
+  spec `--check` runs, the six-module
+  Lean chain — Generated
+  Unary/Cneg/Extrev/Bitfield/Orn/Shift
+  then the six hand modules — and the
+  battery-local route host
+  `build/value_route_host.c` over 3078
+  modeled cases on the 4-width x 8-seed
+  x 4-amount lattice with MOD-applied
+  ORN, BFXIL-preserve sentinel,
+  narrow-sentinel, and unsupported-hook
+  scenes). Generated C header repaints
+  are routed to the route host (lake
+  never recompiles on a .h change).
+- Result: 44/44 catchable rows caught,
+  2 equivalent decorations survive,
+  three identical rerun shakes (md5
+  ee57d973cbb314844eb5a3f459b2f3cc).
+  Census 319 -> 320.
+
 ## Step 0447 - arm64 flag-family route arms
 
 - Scope: the sim-local flag-family
