@@ -2034,6 +2034,33 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0432 rows the x86 encode tail
+776-913: 134 rows in
+`mut_x86_encode0432.py` (untracked)
+repaint the andn mem and reg arms with
+the len raise, bzhi reg and mem arms,
+the bswap bind with its none and normal
+emits, the popcnt and xchg binds with
+their dst raises and emits (empty-op
+fixtures drive the reg-info false
+ternaries), the movbe len raise, load,
+store, and dst raise, the
+shlx/shrx/sarx len raise, ALU select
+map, reg arm, mem arm with packed imm
+and count-shift aux, and dst raise, the
+rorx len and dst-int raises, reg arm,
+mem arm with packed imm, src raise, the
+div bind with none ternaries, width
+default, and the empty REG NONE emit,
+the shld/shrd len and dst-int raises
+with reg arms, and the final
+unsupported-mnemonic raise, through
+direct EncodedInsn equality pins over 63
+fixtures. This completes the encode()
+region 438-916. Census 303 -> 304,
+harness stays untracked in
+`kprog/formal/build/`.
+
 Step 0431 rows the x86 encode mid
 627-775: 146 rows in
 `mut_x86_encode0431.py` (untracked)

@@ -16203,6 +16203,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0432 - x86 encode tail sweep
+
+- Scope: encode() L776-913 - andn, bzhi,
+  bswap, popcnt, xchg, movbe,
+  shlx/shrx/sarx, rorx, div, shld, shrd,
+  and the final unsupported-mnemonic
+  raise. Completes the encode() region
+  438-916.
+- Harness: untracked
+  `build/mut_x86_encode0432.py` pins
+  direct EncodedInsn equality over 63
+  fixtures; popcnt/xchg empty-operand
+  fixtures drive the reg-info false
+  ternaries.
+- Result: 134/134 rows caught (three
+  clean rerun shakes). Census 303 -> 304.
+
 ## Step 0431 - x86 encode mid sweep
 
 - Scope: encode() L627-775 - cmp/test

@@ -5743,6 +5743,34 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0432 - x86 encode tail sweep
+
+The x86 encode tail: the 134-row
+untracked `build/mut_x86_encode0432.py`
+repaints andn (mem/reg arms, len raise),
+bzhi reg/mem arms, bswap (bind, none and
+normal emits), popcnt and xchg (binds,
+dst raises, emits, empty-op fixtures
+driving the reg-info false ternaries),
+movbe (len raise, load, store, dst
+raise), shlx/shrx/sarx (len raise, ALU
+select map, reg and mem arms with packed
+imm and count-shift aux, dst raise),
+rorx (len and dst-int raises, reg and
+mem arms with packed imm, src raise),
+div (bind, none ternaries, width
+default, empty REG NONE emit),
+shld/shrd (len and dst-int raises, reg
+arms), and the final unsupported
+mnemonic raise. Run `134/134 rows
+caught` with 3 clean rerun shakes
+(census 303 -> 304); golden gate `make
+check` rc 0 with 210 `cross-check: OK`
+banners, final arm64 decode host 1410
+cases; direct EncodedInsn equality pins
+over 63 fixtures. This completes the
+encode() region 438-916.
+
 ### Step 0431 - x86 encode mid sweep
 
 The x86 encode mid: the 146-row
