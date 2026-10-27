@@ -16203,6 +16203,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0444 - arm64 multiply-family route arm
+
+- Scope: the multiply-family contract -
+  arm64_mul_spec.json, its generator, the
+  generated C header and Lean module, the
+  hand-written Lean sublattice, the host
+  oracle, and the arm64 sim MUL arm's
+  operand reads/writeback route.
+- Harness: `kprog/formal/build/mut_arm64_mul_route.py`
+  repaints the spec lanes, generator
+  render/check filters, generated C and
+  Lean decls, Lean tactic bodies, host
+  oracle arms, and the sim alias/exec-arm
+  lines through the byte-exact `--check`,
+  the lake chain, the oracle build/run, and
+  a battery-local route oracle that drives
+  the real MUL arm over all eight opcodes,
+  the divide-by-zero scene, the unsupported
+  default, and the 32-bit writeback
+  trailers.
+- Result: 64/64 rows as expected, 7
+  equivalences survived (three clean
+  rerun shakes, md5 0f0123ba27f96f0b2ed1bcb
+  93a61f066). Census 315 -> 316; golden
+  gate rc 0, 211 `cross-check: OK` banners,
+  final arm64 decode host 1410 cases.
+
 ## Step 0443 - arm64 CCMP condition/fallback decode
 
 - Scope: the CCMP decode contract -

@@ -5743,6 +5743,30 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0444 - arm64 multiply-family route sweep
+
+The arm64 multiply-family route arm: the
+64-row untracked
+`build/mut_arm64_mul_route.py` repaints
+the multiply contract files - spec,
+generator, generated C header and Lean,
+the hand Lean sublattice, and the host
+oracle - through the byte-exact `--check`,
+the `lake env lean` chain, and the oracle
+build/run; a fourth route detector drives
+the real `ARM64_SIM_L_MUL_VALUE` arm of
+`arm64_sim_local_bpf.h` over all eight
+opcodes, the divide-by-zero scene, the
+unsupported default, and the 32-bit
+writeback trailer, against an independent
+architectural oracle. Run `64/64 rows as
+expected` with 7 equivalences survived and
+3 clean rerun shakes (census 315 -> 316);
+golden gate `make check` rc 0 with 211
+`cross-check: OK` banners, final arm64
+decode host 1410 cases. The arm64
+multiply-family route arm is closed.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row

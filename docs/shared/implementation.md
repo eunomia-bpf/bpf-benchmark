@@ -2034,6 +2034,24 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+
+Step 0444 covers the arm64 multiply-family
+route arm: 64 rows in
+`mut_arm64_mul_route.py` (untracked)
+repaint the spec JSON, generator, generated
+C header and Lean module, the hand Lean
+sublattice, and the host oracle through
+their gates, plus a fourth route detector
+that drives the real MUL arm
+(`ARM64_SIM_L_MUL_VALUE`) of
+arm64_sim_local_bpf.h, re-reading all three
+operands through `ARM64_SIM_L_READ_REG`
+once, writing back at width, threading NZCV
+untouched, and reaching the unsupported
+hook outside the family. Census 315 -> 316;
+the arm64 multiply-family route arm is
+closed.
+
 Step 0443 covers the arm64 CCMP
 decode: 59 rows in
 `mut_arm64_ccmp_decode.py` (untracked)
