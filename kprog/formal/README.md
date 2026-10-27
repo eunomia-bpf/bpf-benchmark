@@ -5743,6 +5743,32 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0445 - x86 CMOV step composition
+
+The x86
+`X86_SIM_L_EXEC_CMOV_STEP` body in
+x86_sim_local_bpf.h and its two alias
+gates, two dispatcher arms, the four GPR
+write case bodies and the tag case body:
+the 38-row untracked
+`build/mut_x86_cmov_route.py` repaints
+the condition source and both stuck
+polarities, the writeback arm under
+widening and inversion, the memory
+value's displacement and dropped-register
+arms, the tag source's always-arms, the
+alias and dispatcher rewires, six write
+case bodies, the tag case body, the cmov
+spec/generator/header triple, the Lean
+X86CmovHandler chain, and the Makefile
+cmov host's CC arms; a battery-local
+route host (`build/cmov_step_route_host.c`,
+9,585,135 modeled cases) plus the
+write-width route host drive every
+mutation. 35/35 caught; 3 equivalent
+decorations survive; three identical
+rerun shakes. Census 316 -> 317.
+
 ### Step 0444 - arm64 multiply-family route sweep
 
 The arm64 multiply-family route arm: the

@@ -2035,6 +2035,37 @@ census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
 
+Step 0445 covers the x86 CMOV step
+composition: 38 rows in
+`mut_x86_cmov_route.py` (untracked) drive
+five detectors — the cmov spec --
+--check gate, the Lean
+X86CmovHandler chain, the Makefile cmov
+host, a battery-local route host
+(`build/cmov_step_route_host.c`,
+9,585,135 cases) over the real
+`X86_SIM_L_EXEC_CMOV_STEP` body in
+x86_sim_local_bpf.h (three gates x 19
+condition words x 5 widths x 256 dst/src
+pairs x 2 flag nibbles; the memory form
+over stack/ABI/normal arms, both width
+fallbacks, three displacements, index and
+scale), and the Makefile write-width
+route host. Repainted: the step's
+condition source and both stuck
+polarities, the writeback arm under
+widening and inversion, the memory
+value's displacement-stack and dropped
+register arms, the tag source's both
+always-arms, the two alias gates and
+both dispatcher arms; six GPR write
+case bodies; the tag case body; the cmov
+spec/generator/header triple; and three
+cmov host CC arms. Reruns byte-identical
+(md5 3a270115083a3eaef75059696831e102);
+census 316 -> 317; the x86 CMOV step
+composition is closed.
+
 Step 0444 covers the arm64 multiply-family
 route arm: 64 rows in
 `mut_arm64_mul_route.py` (untracked)

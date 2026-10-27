@@ -16203,6 +16203,33 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0445 - x86 CMOV step composition
+
+- Scope: the sim-local CMOV step body
+  (`X86_SIM_L_EXEC_CMOV_STEP`) in
+  x86_sim_local_bpf.h — condition word vs
+  source-shift byte, the condition scope,
+  both writeback arms, the tag source,
+  the register/memory read pair, the two
+  alias gates, both dispatcher arms, the
+  four GPR write case bodies and the tag
+  case body — plus the cmov spec JSON,
+  its generator, the generated C header,
+  the Lean X86CmovHandler chain, and the
+  Makefile cmov host's CC oracle arms.
+- Harness: untracked
+  `build/mut_x86_cmov_route.py` with five
+  detectors (spec --check, lean chain,
+  Makefile cmov host, battery-local
+  route host `build/cmov_step_route_host.c`
+  over 9,585,135 modeled cases, Makefile
+  write-width route host).
+- Result: 35/35 rows caught, 3 equivalent
+  decorations survive, three identical
+  rerun shakes (md5
+  3a270115083a3eaef75059696831e102).
+  Census 316 -> 317.
+
 ## Step 0444 - arm64 multiply-family route arm
 
 - Scope: the multiply-family contract -
