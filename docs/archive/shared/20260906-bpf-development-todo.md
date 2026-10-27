@@ -16203,6 +16203,20 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0439 - arm64 parse-encode sweep
+
+- Scope: arm64 generator L330-409 -
+  mem_aux through the encode dispatch
+  ladder's later ALU arms.
+- Harness: `kprog/formal/build/mut_arm64_parse_encode0439.py`
+  paints one pattern per free line and
+  pins encode results with synthetic
+  NativeInsn fixtures (NativeInsn
+  arg order addr,mnemonic,operands,raw,
+  reloc_symbol).
+- Result: 65/65 rows caught (three clean
+  rerun shakes). Census 310 -> 311.
+
 ## Step 0438 - x86 render-tail sweep
 
 - Scope: L1316-1318 (chunked proof tail

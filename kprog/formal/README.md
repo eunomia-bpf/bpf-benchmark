@@ -5743,6 +5743,20 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0439 - arm64 parse-encode sweep
+
+The arm64 parse/encode region: the
+65-row untracked
+`build/mut_arm64_parse_encode0439.py`
+repaints mem_aux, reg_or_imm,
+rodata_ident_map, c_ident, and the
+encode dispatch ladder. Run `65/65 rows
+caught` with 3 clean rerun shakes
+(census 310 -> 311); golden gate
+`make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0438 - x86 render-tail sweep
 
 The x86 renderer tail: the 7-row

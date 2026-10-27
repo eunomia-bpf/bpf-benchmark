@@ -2034,6 +2034,30 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0439 opens the arm64
+mutation census: 65 rows in
+`mut_arm64_parse_encode0439.py`
+(untracked) repaint mem_aux's flag
+arms and ARM64_AUX_MEM tail, reg_or_imm,
+rodata_ident_map, c_ident's normal and
+digit gates, and encode's dispatch
+ladder - adrp with its rodata/GOT/helper
+gates, mov, movk's shift gate, the ALU
+and SHIFT immediate/reg arms, the
+madd/mul/umaddl/mvn/cneg/orn/extr/
+BITFIELD/rev/sx-family arms, every
+load and store arm (ldr/ldrb/ldrsb/
+ldp/str/stp/stlxr), cmp/tst/cmn/subs/
+adds/bics/ands/ccmp, the csel family,
+fmov's four lanes, cnt/uaddlv, and the
+final unsupported-instruction raise -
+through direct value pins with
+synthetic NativeInsn fixtures run from
+the arm64 micro-prog cwd against the
+generated_arm64_decode tables. Census
+310 -> 311, stays untracked in
+`kprog/formal/build/`.
+
 Step 0438 closes the x86
 mutation census: 7 rows in
 `mut_x86_rendertail0438.py`
