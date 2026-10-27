@@ -16203,6 +16203,23 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0433 - x86 step-statements sweep
+
+- Scope: step-statement region L915-1034 -
+  c_comment, DIRECT/AUX_STEP_MACROS tables
+  and key guards, direct_step_statement,
+  canonical_reg, annotated_fixed_count_ops
+  (rep RCX and call memcpy/memset RDX
+  annotation with mov/xor/generic tracker
+  lanes), append_step, and
+  append_encoded_step.
+- Harness: `kprog/formal/build/mut_x86_steps0433.py`
+  paints one pattern per free line and
+  pins step shapes plus register-tracking
+  behavior over step fixtures.
+- Result: 83/83 rows caught (three clean
+  rerun shakes). Census 304 -> 305.
+
 ## Step 0432 - x86 encode tail sweep
 
 - Scope: encode() L776-913 - andn, bzhi,

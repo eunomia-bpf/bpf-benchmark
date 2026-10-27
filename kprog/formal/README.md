@@ -5743,6 +5743,27 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0433 - x86 step-statements sweep
+
+The x86 step-statements region: the
+83-row untracked
+`build/mut_x86_steps0433.py` repaints
+c_comment's replace, the
+DIRECT/AUX_STEP_MACROS copies with both
+key guards, direct_step_statement's aux
+gate, template lookups and format
+blocks, canonical_reg, and
+annotated_fixed_count_ops' rep/call
+count annotations with the mov/xor/generic
+tracker lanes, append_step's encode and
+comment, and append_encoded_step's
+direct line and generic RUN_OP tail.
+Run `83/83 rows caught` with 3 clean
+rerun shakes (census 304 -> 305);
+golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0432 - x86 encode tail sweep
 
 The x86 encode tail: the 134-row

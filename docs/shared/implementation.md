@@ -2034,6 +2034,30 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0433 rows the x86 step-statements
+region 915-1034: 83 rows in
+`mut_x86_steps0433.py` (untracked)
+repaint c_comment's replace, the
+DIRECT/AUX_STEP_MACROS table copies, both
+table key guards with their raises,
+direct_step_statement's aux gate, AUX and
+DIRECT template lookups, the None
+fallback, and both template.format
+blocks, canonical_reg's lookup ternary,
+annotated_fixed_count_ops' rep RCX-count
+and call memcpy/memset RDX-count
+annotations with the mov int bind and
+pop lanes, the xor self-zero and
+non-self pop lanes, and the generic
+clobber invalidation, append_step's
+encode and comment emission, and
+append_encoded_step's RUN_OP gate, the
+direct short-circuit line, and the
+generic RUN_OP tail, through direct
+shape pins over step and register-
+tracking fixtures. Census 304 -> 305,
+stays untracked in `kprog/formal/build/`.
+
 Step 0432 rows the x86 encode tail
 776-913: 134 rows in
 `mut_x86_encode0432.py` (untracked)
