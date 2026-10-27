@@ -16203,6 +16203,18 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
 - Result: 145/145 rows caught (three clean
   rerun shakes). Census 297 -> 298.
 
+## Step 0440 - arm64 encode-core sweep
+
+- Scope: arm64 generator L410-489 - the
+  ALU/SHIFT arms through the load/store
+  family.
+- Harness: `kprog/formal/build/mut_arm64_encode_core0440.py`
+  paints one pattern per free line, pins
+  encode results with synthetic
+  NativeInsn fixtures.
+- Result: 80/80 rows caught (three clean
+  rerun shakes). Census 311 -> 312.
+
 ## Step 0439 - arm64 parse-encode sweep
 
 - Scope: arm64 generator L330-409 -

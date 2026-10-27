@@ -5743,6 +5743,18 @@ banners, final arm64 decode host 1410 cases;
 a full-output identity oracle over five
 chunked fixtures pins every emitted line.
 
+### Step 0440 - arm64 encode-core sweep
+
+The arm64 encode core: the 80-row
+untracked `build/mut_arm64_encode_core0440.py`
+repaints the ALU/SHIFT/multiply/bitfield/
+extend arms and the full load/store
+family. Run `80/80 rows caught` with 3
+clean rerun shakes (census 311 -> 312);
+golden gate `make check` rc 0 with 210
+`cross-check: OK` banners, final arm64
+decode host 1410 cases.
+
 ### Step 0439 - arm64 parse-encode sweep
 
 The arm64 parse/encode region: the

@@ -2034,6 +2034,22 @@ anchors with widened windows),
 census 297 -> 298, and stays untracked in
 `kprog/formal/build/`.
 
+Step 0440 covers the arm64 encode
+core: 80 rows in
+`mut_arm64_encode_core0440.py`
+(untracked) repaint the ALU immediate
+and register arms, the SHIFT arms,
+madd/msub, the mul/umull/umulh/udiv
+group, umaddl, smaddl, mvn/neg, cneg,
+orn, extr, BITFIELD, the
+rev/extend-family arm, the ldr q0/d0
+scalar arms, the wide load arm with its
+width ternary, ldrs*b/h/w, ldp, and
+the store family through stlxr, through
+direct value pins with synthetic
+NativeInsn fixtures. Census 311 -> 312,
+stays untracked in `kprog/formal/build/`.
+
 Step 0439 opens the arm64
 mutation census: 65 rows in
 `mut_arm64_parse_encode0439.py`
