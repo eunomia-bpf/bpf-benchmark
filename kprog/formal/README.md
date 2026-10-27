@@ -5920,6 +5920,13 @@ golden gate `make check` rc 0 with 211
 `cross-check: OK` banners, final arm64
 decode host 1410 cases. The arm64
 multiply-family route arm is closed.
+Spark found at the 0448 re-shake: the
+gate recipe never ran the battery-local
+route host, so 0448 pins
+`build/mul_route_host.c` into the
+recipe (route host 150 cases in the
+gate, 212 banners); the battery re-ran
+`ALL AS EXPECTED`.
 
 ### Step 0443 - arm64 CCMP decode sweep
 

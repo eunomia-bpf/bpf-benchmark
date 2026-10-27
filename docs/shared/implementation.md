@@ -2186,6 +2186,13 @@ untouched, and reaching the unsupported
 hook outside the family. Census 315 -> 316;
 the arm64 multiply-family route arm is
 closed.
+Spark found at the 0448 re-shake of this
+battery: the gate recipe never ran the
+route host, so 0448 pins
+`build/mul_route_host.c` into the
+`make check` recipe (212 banners, final
+arm64 decode host 1410 cases); this
+battery re-ran `ALL AS EXPECTED`.
 
 Step 0443 covers the arm64 CCMP
 decode: 59 rows in

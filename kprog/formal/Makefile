@@ -591,6 +591,8 @@ check:
 	lake env lean KProgFormal/Arm64Mul.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mul_host.c -o build/test_arm64_mul_host
 	./build/test_arm64_mul_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/mul_route_host.c -o build/mut_mulroute
+	./build/mut_mulroute
 	lake env lean KProgFormal/GeneratedArm64Extrev.lean
 	lake env lean KProgFormal/Arm64Extrev.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_extrev_host.c -o build/test_arm64_extrev_host

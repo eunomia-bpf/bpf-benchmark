@@ -16362,6 +16362,12 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   93a61f066). Census 315 -> 316; golden
   gate rc 0, 211 `cross-check: OK` banners,
   final arm64 decode host 1410 cases.
+  Spark found at the 0448 re-shake: the
+  gate recipe never ran the route host,
+  so 0448 pins `build/mul_route_host.c`
+  into `make check` (route host now 150
+  cases in the gate; this battery
+  re-ran `ALL AS EXPECTED`).
 
 ## Step 0443 - arm64 CCMP condition/fallback decode
 
