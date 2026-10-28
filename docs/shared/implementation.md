@@ -2248,6 +2248,33 @@ green comment repaints); census 323 ->
 324; the arm64 ldrsx route arm is
 closed.
 
+Step 0453 covers the arm64 reduction
+route arm: 17 rows in
+`mut_arm64_reduction_route.py`
+(untracked) drive one battery-local
+route host over the real
+`arm64_sim_local_bpf.h` body — 11223
+modeled scenes over the exec lane plus
+the inline direct lane (the two member
+reductions CNT/UADDLV over 64 LCG
+values alternating lanes, the eight
+boundary vectors x both lanes, the
+reserved non-member sentinel ARM64_OP_RET
+over both lanes, and the generated
+per-byte popcount/sum selector lanes),
+one flavor matching every v0 word and
+hi word, register, tag, SP, and the
+unsupported-hook call counts against a
+standalone model; 14 catchable rows
+caught with three clean rerun shakes
+(byte-identical, md5
+5dc2408c8bc86b2d66cf77bd5af02a76); 2
+equivalences survive (the SXTB
+gate-widening probe and one green
+comment repaint); census 324 -> 325;
+the arm64 reduction route arm is
+closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

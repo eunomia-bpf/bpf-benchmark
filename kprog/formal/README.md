@@ -6062,6 +6062,48 @@ green comment repaints). Golden gate
 OK` banners, final arm64 decode host
 1410 cases. Census 323 -> 324.
 
+### Step 0453 - arm64 reduction route arms
+
+Step 0453 closes the sim-local REDUCTION
+exec arm (`KPROG_ARM64_REDUCTION_HANDLED`,
+opcodes CNT 0x24 / UADDLV 0x25), the last
+LOCAL exec dispatcher family without a
+route battery. A battery-local route host
+(`build/reduction_route_host.c`)
+replays the arm through both lanes — the
+real `ARM64_SIM_L_EXEC` dispatcher ticket
+and the direct
+`ARM64_SIM_L_REDUCTION_VALUE((OP),
+__a64_v0)` commitment — over 11223 modeled
+scenes: 64 LCG values x both members x
+alternating lanes, the eight boundary
+vectors x both members x both lanes, and
+the reserved non-member sentinel
+`ARM64_OP_RET` (0xff, the lone opcode with
+no dispatcher arm at all in the chain)
+over both lanes, plus the generated
+selector's per-byte popcount lanes and the
+wrapper default's unsupported-hook probe.
+The model is an independent per-byte
+bit-walk (no `__builtin_popcountll`) and
+an 8-lane sum; every v0 word, hi word,
+register, tag, SP, and the two
+unsupported-hook counters are compared
+per scene. 17 rows in
+`mut_arm64_reduction_route.py` (untracked):
+14 catchable rows caught with three clean
+rerun shakes (byte-identical, md5
+5dc2408c8bc86b2d66cf77bd5af02a76); 2
+equivalences survived (the SXTB
+gate-widening probe — the REDUCTION arm
+sits last in the exec chain so the widened
+gate is only reachable behind a sibling
+gate misspell — and one green comment
+repaint). Golden gate `make check` rc 0
+with 212 `cross-check: OK` banners, final
+arm64 decode host 1410 cases. Census
+324 -> 325.
+
 ### Step 0447 - arm64 flag-family route arms
 
 The arm64
