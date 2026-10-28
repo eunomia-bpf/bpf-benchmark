@@ -6011,6 +6011,57 @@ check` rc 0 with 212 `cross-check: OK`
 banners, final arm64 decode host 1410
 cases. Census 322 -> 323.
 
+### Step 0452 - arm64 ldrsx route arms
+
+The arm64 sign-load family got the
+`mut_arm64_ldrsx_route.py` battery
+(untracked, `kprog/formal/build/`)
+over the sim-local LDRSX route arm and
+its two generated selector headers: 21
+rows, 15 catchable, 6 equivalences
+survived. Detector is one battery-local
+route host over the real
+`arm64_sim_local_bpf.h` body: 2315529
+modeled cases (exec lane plus the
+inline direct lane: 3 sign-load ops
+with their derived SXTB/SXTW/SXTH
+selector queries x dst x3/xzr/sp/x2 x
+base x2/x3/x4/x5/sp x PRE, POST,
+PRE|POST and plain x idx none/x1 x imm
+0/8/-8 x mod/tag suffix lanes, one
+flavor matching every sim register,
+tag, SP, and byte/tag memory write
+against a standalone model) plus the
+load-width and derived-sign-opcode
+selector lanes (SXOP mapping, load/SX
+distinctness, pairwise distinctness)
+over `generated/arm64_ldrsx.h` and
+`generated/arm64_ldrsx_op.h`. Rows
+cover the dispatcher gate misspell and
+repaint to the STLXR handler, both
+writeback drops (PRE and POST), the
+load base/index swap, the SXOP constant
+pin, the EXTREV value-vs-width and
+writeback-dst repaints, the
+three-opcode-arm EXTREV wrapper paint,
+the load-width wheel repaints, the
+default-arm width paint and the STLXR
+gate-widening probe, the opcode and
+sign-code static asserts, the coverage
+assert repaint, and the sign-opcode
+selector repaint. 15 catchable rows
+caught with three clean rerun shakes
+(byte-identical, md5
+64201e72264348bd9ae808ba8180b13d); 6
+equivalences survived (two load-width
+wheel repaints the SXOP masking folds
+away, the default-arm width paint, the
+STLXR gate-widening probe, and two
+green comment repaints). Golden gate
+`make check` rc 0 with 212 `cross-check:
+OK` banners, final arm64 decode host
+1410 cases. Census 323 -> 324.
+
 ### Step 0447 - arm64 flag-family route arms
 
 The arm64

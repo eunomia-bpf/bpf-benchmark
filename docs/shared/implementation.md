@@ -2217,6 +2217,37 @@ repaint, and two green comment
 repaints); census 322 -> 323; the
 arm64 stlxr route arm is closed.
 
+Step 0452 covers the arm64 ldrsx route
+arm: 21 rows in
+`mut_arm64_ldrsx_route.py` (untracked)
+drive one battery-local route host over
+the real `arm64_sim_local_bpf.h` body —
+2315529 modeled cases over the exec
+lane plus the inline direct lane (3
+sign-load ops with their derived
+SXTB/SXTW/SXTH selector queries, dst
+x3/xzr/sp/x2 x base x2(ABI@1024)/x3/
+x4(RELOC@3072)/x5(SP@-64)/sp x PRE,
+POST, PRE|POST and plain x idx none/x1
+x imm 0/8/-8 x mod 0/0x100 tag lanes,
+register/tag/SP/memory compare per
+scene) plus the load-width and
+derived-sign-opcode selector lanes over
+the generated headers, one flavor
+matching every sim register, tag, SP,
+and byte/tag memory write against a
+standalone model; 15 catchable rows
+caught with three clean rerun shakes
+(byte-identical, md5
+64201e72264348bd9ae808ba8180b13d); 6
+equivalences survive (two load-width
+wheel repaints the SXOP masking folds
+away, the default-arm width paint, the
+STLXR gate-widening probe, and two
+green comment repaints); census 323 ->
+324; the arm64 ldrsx route arm is
+closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
