@@ -2191,6 +2191,32 @@ header leaves behind after the
 unsupported hook; census 321 -> 322; the
 arm64 fmov route arms are closed.
 
+Step 0451 covers the arm64 stlxr route
+arm: 20 rows in `mut_arm64_stlxr_route.py`
+(untracked) drive one battery-local
+route host over the real
+`arm64_sim_local_bpf.h` body — 343055
+modeled cases over the exec lane (3 ops
+including the RET and LDRSW
+out-of-family bytes, dst x2/x3/xzr/sp x
+src x1/x4/xzr/sp x base x2/x5/x7/sp x
+width 8/16/32/64 x 5 aux words, 56
+check comparisons per scene) plus
+selector lanes over the generated STLXR
+value and wrapper macros, one flavor
+matching every sim register, tag, SP,
+and byte/tag memory write against a
+standalone model; 15 catchable rows
+caught with three clean rerun shakes
+(byte-identical, md5
+6cd79e9242f27a61414e2c75f463fe12); 5
+equivalences survive (two width
+repaints that fold to the same
+narrowing, the aux prepost-byte
+repaint, and two green comment
+repaints); census 322 -> 323; the
+arm64 stlxr route arm is closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

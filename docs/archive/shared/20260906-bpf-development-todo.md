@@ -16323,6 +16323,51 @@ objdump→AUX selection; compiler/native bytes; multi-step control-flow traces;
   655c93c5978a2e90d485d1d75444ac83).
   Census 321 -> 322.
 
+## Step 0451 - arm64 stlxr route arms
+
+- Scope: the sim-local STLXR route
+  arm of `ARM64_SIM_L_EXEC` in
+  arm64_sim_local_bpf.h — the
+  `KPROG_ARM64_STLXR_HANDLED` gate,
+  the `ARM64_SIM_L_MEM_WRITE` store
+  (base SRC2, zero offset, the
+  `__a64_l_width` width lane, the
+  `READ_REG(SRC)` payload and its
+  tag), the status write
+  `WRITE_REG_WIDTH(DST, VALUE,
+  ARM64_WIDTH_32)`, the three-arg
+  `ARM64_SIM_L_STLXR_VALUE` wrapper,
+  and the generated value header's
+  guard/coverage asserts, value
+  switch, and comment — over
+  `arm64_sim_local_bpf.h`,
+  `arm64_sim.h`, and
+  `generated/arm64_stlxr.h`.
+- Battery: `mut_arm64_stlxr_route.py`
+  (untracked), 20 rows, single
+  route detector that rebuilds and
+  reruns a battery-local route host
+  over the real body: 343055 modeled
+  cases (exec lane 3 ops x dst
+  x2/x3/xzr/sp x src x1/x4/xzr/sp x
+  base x2/x5/x7/sp x width
+  8/16/32/64 x 5 aux words x 56
+  check comparisons, selector lanes
+  over the value/wrapper macros),
+  one flavor matching every sim
+  register, tag, SP, and byte/tag
+  memory write against a standalone
+  model.
+- Result: 15/15 catchable rows
+  caught, 5 equivalences survive
+  (two width repaints that fold to
+  the same narrowing, the aux
+  prepost-byte repaint, and two
+  green comment repaints), three
+  identical rerun shakes (md5
+  6cd79e9242f27a61414e2c75f463fe12).
+  Census 322 -> 323.
+
 ## Step 0448 - arm64 value-family route arms
 
 - Scope: the sim-local value-family

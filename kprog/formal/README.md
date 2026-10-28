@@ -5975,6 +5975,42 @@ check` rc 0 with 212
 final arm64 decode host 1410
 cases. Census 321 -> 322.
 
+### Step 0451 - arm64 stlxr route arms
+
+The arm64 stlxr family got the
+`mut_arm64_stlxr_route.py` battery
+(untracked, `kprog/formal/build/`)
+over the sim-local STLXR route arm and
+its generated value header: 20 rows,
+15 catchable, 5 equivalences survived.
+Detector is one battery-local route
+host over the real
+`arm64_sim_local_bpf.h` body: 343055
+modeled cases (exec lane 3 ops x dst
+x2/x3/xzr/sp x src x1/x4/xzr/sp x base
+x2/x5/x7/sp x width 8/16/32/64 x 5 aux
+words x 56 check comparisons, selector
+lanes over the value/wrapper macros,
+and 16 direct wrapper cases), one
+flavor matching every sim register,
+tag, SP, and byte/tag memory write
+against a standalone model. 15
+catchable rows caught with three clean
+rerun shakes (md5 identical each run:
+6cd79e9242f27a61414e2c75f463fe12); 5
+equivalences survived (two width
+repaints that fold to the same
+narrowing, the aux prepost-byte
+repaint, and two green comment
+repaints). The exec op lane covers the
+RET and LDRSW out-of-family bytes so
+the unsupported-hook delta and a
+would-be family-gate widening both
+stay observable. Golden gate `make
+check` rc 0 with 212 `cross-check: OK`
+banners, final arm64 decode host 1410
+cases. Census 322 -> 323.
+
 ### Step 0447 - arm64 flag-family route arms
 
 The arm64
