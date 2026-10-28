@@ -2275,6 +2275,39 @@ comment repaint); census 324 -> 325;
 the arm64 reduction route arm is
 closed.
 
+Step 0454 covers the arm64 BPF
+helper-call body family: 29 rows in
+`mut_arm64_helper_route.py` (untracked)
+drive one battery-local route host over
+the real `arm64_sim_local_bpf.h` bodies
+— 1801 modeled cases over 21 scenes
+(map lookup/percpu-alias/update/delete
+with stack-arena ARG lanes, 37 direct
+static-zero body drives across 5
+scenes, the task pointer-tag shape,
+the two ktime natives, the 7-name
+probe chain plus the
+copy_from_user/copy_from_user_task
+aliases, the 5-lane perf, skb-store,
+l3/l4 csum shapes, the 4- and 5-lane
+skb-load shapes, and the sk_fullsock
+pointer-return shape), one flavor
+matching every captured stub lane, X0
+value, provenance tag, register, tag,
+SP, and NZCV against an independent
+model with numeric-literal tags (the
+stubs, plants, and model never share
+the header TAG symbols); 27 catchable
+rows caught with three clean rerun
+shakes (byte-identical, md5
+1de5665a57151db45b38069f56f7c7aa);
+2 equivalences survive (the jiffies
+zero-width wheel repaint folds away
+on the 0 value and one TAG_PACKET
+repaint no helper scene observes);
+census 325 -> 326; the arm64
+helper-call body family is closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

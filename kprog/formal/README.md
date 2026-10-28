@@ -6104,6 +6104,56 @@ with 212 `cross-check: OK` banners, final
 arm64 decode host 1410 cases. Census
 324 -> 325.
 
+### Step 0454 - arm64 BPF helper-call route arms
+
+Step 0454 covers the arm64 BPF
+helper-call body family — the 61
+`ARM64_SIM_BPF_CALL_*` macros in
+`arm64_sim_local_bpf.h` (map
+lookup/percpu-alias/update/delete,
+the 37 static-zero bodies, the task
+pointer-tag shape, the two ktime
+natives, the 7-name probe chain plus
+the copy_from_user aliases, the 5-lane
+perf and skb-store shapes, the 4- and
+5-lane skb-load shapes, the l3/l4 csum
+shapes, and the sk_fullsock
+pointer-return shape). 29 rows in
+`mut_arm64_helper_route.py` (untracked)
+drive one battery-local route host
+(`build/helper_route_host.c`, 1801
+cases) over the real bodies — capture
+stubs record every native lane value,
+an independent model re-derives each
+scene's expectation, and the TAG-define
+repaints ride on numeric-literal tags
+(plants and model never share the
+header symbols). Repainted: the lookup
+MAP_VALUE tag and X1 ARG lane, the
+percpu alias retarget, the update X3
+lane/width-64/native name, the delete
+X1 ARG lane and native name, two
+static-zero value repaints (smp
+narrow, jiffies wide), the ktime ns
+native and width-64, the probe kernel
+native and X0 ARG lane, the
+probe_read_str native, the
+copy_from_user X0 lane, the
+copy_from_user_task alias retarget,
+the perf X3/X4 lanes, the skb-store
+and both skb-load X2 lanes, the
+relative X4 lane, the sk_fullsock tag
+and native, the task tag, and the
+TAG_STACK/TAG_MAP_VALUE defines. 27/29
+caught; 2 equivalences survive (the
+jiffies zero-width wheel repaint folds
+away on the 0 value, one TAG_PACKET
+repaint no helper scene observes).
+Golden gate `make check` rc 0 with 212
+`cross-check: OK` banners, final arm64
+decode host 1410 cases. Census 325 ->
+326.
+
 ### Step 0447 - arm64 flag-family route arms
 
 The arm64
