@@ -2349,6 +2349,46 @@ census 326 -> 327; the arm64 A64
 control-flow and entry/exit glue body
 family is closed.
 
+Step 0456 covers the x86 control-flow
+body family: 65 rows in
+`build/mut_x86_route.py` (untracked)
+drive one battery-local route host
+(`build/x86_route_host.c`, 6509
+modeled cases over 10 scenes) over the
+real `x86_sim_local_bpf.h` bodies —
+the RET/SKB-cb writeback and CALL/
+SUB_RET return ladder with a distinct
+0xA80 return address plus rsp
+pre-decrement/post-increment pins
+regfile-wide, the JMP/JCC
+taken/fallthrough pairs across
+forward and backward gates, the
+SUB_JMP/SUB_JCC subroutine twins on
+both cond edges with RUN_OP_SUB dst
+paint, the XDP and SKB ENTRY glue
+(kind byte, data/data_end lane
+copies, skb-ctx null, rdi TAG_ABI
+provenance), the SP ramp, run-op
+forwarding, helper dispatch, and
+regfile-glue scenes; every scene
+compares all 16 cells plus tags
+against an independent model. 42
+catchable rows caught including two
+construct-broken compile checks (the
+do-line spacing and undefined-label
+repaints) and the arg drops; 23
+equivalences survive (FOR_EACH_GPR
+row swaps that body-for-body
+permute, zero-paint dead cells, the
+reg-tag initializer repaint with no
+default-tag scene, and narrow
+stack-lane repaints no scene
+drives); three clean rerun shakes
+are byte-identical (md5
+7b7536548126903d61ac07ba24846800);
+census 327 -> 328; the x86
+control-flow body family is closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

@@ -6314,6 +6314,58 @@ Golden gate `make check` rc 0 with
 arm64 decode host 1410 cases. Census
 326 -> 327.
 
+### Step 0456 - x86 control-flow body battery
+
+Step 0456 covers the x86 control-flow
+body family in
+`x86_sim_local_bpf.h` — the
+`X86_SIM_X86_RET/SUB_RET/CALL/JMP/
+JCC_IMPL/JCC_BACKWARD/SUB_JMP/
+SUB_JCC` bodies, the ENTRY_XDP/
+ENTRY_SKB glue (kind byte,
+data/data_end lanes, skb-ctx null,
+rdi TAG_ABI provenance), and the
+RUN_OP/RUN_OP_SUB forwarding plus
+DECLARE/READ/WRITE/REG_TAG/STACK
+lanes the route host drives. 65 rows
+in `build/mut_x86_route.py`
+(untracked) drive one battery-local
+route host (`build/x86_route_host.c`,
+6509 cases) over the real bodies
+across 10 scenes: the CALL/SUB_RET
+return ladder with a distinct 0xA80
+return address and rsp
+pre-decrement/post-increment pins
+regfile-wide, marks-tape JMP/JCC
+taken/fallthrough pairs across
+forward and backward gates, the
+SUB_JMP/SUB_JCC twins on both cond
+edges with RUN_OP_SUB dst paint, XDP/
+SKB ENTRY glue with data/data_end
+field asserts in both scenes, the SP
+ramp, run-op forwarding, helper
+dispatch, and regfile-glue; every
+scene compares all 16 cells plus tags
+against an independent model. 42/65
+caught (two construct-broken compile
+checks: the do-line spacing and the
+undefined-label repaint; plus every
+polarity, lane, arg-order, and
+single-side label-renaming repaint);
+23 equivalences survive (FOR_EACH_GPR
+row swaps that body-for-body permute,
+dead-cell zero paints, the reg-tag
+initializer repaint with no
+default-tag scene, and narrow
+stack-lane repaints no scene drives).
+Three clean rerun shakes
+byte-identical (md5
+7b7536548126903d61ac07ba24846800).
+Golden gate `make check` rc 0 with
+212 `cross-check: OK` banners, final
+arm64 decode host 1410 cases. Census
+327 -> 328.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row
