@@ -2308,6 +2308,47 @@ repaint no helper scene observes);
 census 325 -> 326; the arm64
 helper-call body family is closed.
 
+Step 0455 covers the arm64 A64
+control-flow ladder plus the
+entry/exit glue bodies: 70 rows in
+`mut_arm64_a64_route.py` (untracked)
+drive one battery-local route host
+(`build/a64_route_host.c`, 3890
+modeled cases over 11 scenes) over the
+real `arm64_sim_local_bpf.h` bodies —
+jcc/jmp/call/ret ladders with
+marks-tape order checks, cbz/cbnz and
+tbz/tbnz taken/fallthrough pairs, the
+RETURN_CASES mapped-return ladder plus
+the lr=0x99 default arm through the
+counted unsupported hook, the XDP and
+SKB ENTRY glue (kind byte,
+data/data_end lane copies with both
+orders, x0 ABI provenance), the SP
+exit ramp, and a regfile-glue scene
+driving READ_REG_PTR/REG_TAG on SP
+and the WRITE_REG_PTR_TAG/
+WRITE_REG_MAP_PTR writers; every
+scene compares all 31 cells plus tags
+against an independent model. 50
+catchable rows caught including three
+construct-broken compile checks
+(RETURN_CASES guard inversion,
+CONCAT arg swap, FOR_EACH_GPR row
+drop) and the single-side fallthrough
+label renames; 20 equivalences survive
+(the backward-gate arg swap pairs
+body-for-body, the whole-rule
+fallthrough renames, sign/mask
+re-paren rows, zero-paint dead cells,
+and one REMAINING do-line spacing
+repaint); three clean rerun shakes are
+byte-identical (md5
+1de5665a57151db45b38069f56f7c7aa);
+census 326 -> 327; the arm64 A64
+control-flow and entry/exit glue body
+family is closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

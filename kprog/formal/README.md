@@ -6256,6 +6256,64 @@ recipe (route host 150 cases in the
 gate, 212 banners); the battery re-ran
 `ALL AS EXPECTED`.
 
+### Step 0455 - arm64 A64 control-flow and entry/exit glue bodies
+
+Step 0455 covers the arm64 A64
+control-flow ladder plus the
+entry/exit glue bodies in
+`arm64_sim_local_bpf.h` — the
+`ARM64_SIM_A64_JMP/JCC_IMPL/
+JCC_BACKWARD/CBZ_IMPL/CBNZ/TBZ_IMPL/
+TBNZ/CALL/A64_RET` bodies, the
+`ARM64_SIM_RET()` skb writeback, the
+`ARM64_SIM_RETURN_CASES` default
+guard, the CONCAT/CONCAT2 fallthrough
+glue, `RUN_OP/RUN_OP3` forwarding,
+`EVAL_COND` threading, the
+`ENTRY_XDP/ENTRY_SKB` glue, the
+DECLARE_REG/STATE/STACK substrate
+with `FOR_EACH_GPR` ordering, and the
+READ_REG/READ_REG_PTR/REG_TAG and
+WRITE_REG_WIDTH/64/32/PTR/PTR_TAG/
+MAP_PTR fan-out. 70 rows in
+`mut_arm64_a64_route.py` (untracked)
+drive one battery-local route host
+(`build/a64_route_host.c`, 3890
+cases) over the real bodies across 11
+scenes: marks-tape jcc/jmp/call/ret
+ladders with order-exact mark checks
+([3,2,1] through the call leaf), cbz
+and tbz taken/fallthrough pairs, the
+RETURN_CASES mapped-return ladder plus
+an lr=0x99 default arm through a
+counted unsupported hook, XDP/SKB
+ENTRY glue (kind byte, data/data_end
+copies validated in both orders, x0
+ABI provenance), the SP exit ramp,
+and a regfile-glue scene driving
+READ_REG_PTR/REG_TAG on SP plus the
+WRITE_REG_PTR_TAG/WRITE_REG_MAP_PTR
+writers; every scene compares all 31
+cells plus tags against an independent
+model. 50/70 caught (three
+construct-broken compile checks: the
+RETURN_CASES guard inversion, the
+CONCAT arg swap, the FOR_EACH_GPR row
+drop; plus every polarity, lane, kind,
+reg, and single-side label-renaming
+repaint); 20 equivalences survive
+(body-paired backward-gate arg swaps,
+whole-rule fallthrough renames,
+sign/mask re-paren rows, dead-cell
+zero paints, one comment and one
+do-line spacing repaint). Three clean
+rerun shakes byte-identical (md5
+1de5665a57151db45b38069f56f7c7aa).
+Golden gate `make check` rc 0 with
+212 `cross-check: OK` banners, final
+arm64 decode host 1410 cases. Census
+326 -> 327.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row
