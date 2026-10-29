@@ -6365,6 +6365,46 @@ Golden gate `make check` rc 0 with
 212 `cross-check: OK` banners, final
 arm64 decode host 1410 cases. Census
 327 -> 328.
+### Step 0457 - x86 route host scene battery
+
+Step 0457 extends the x86 route host
+scene family over the
+`x86_sim_local_bpf.h` body
+coverage closed in Step 0456,
+adding five scenes to the
+battery-local route host
+(`build/x86_route_host.c`, now
+16 scenes, 7056 modeled cases): the
+ABI pointer-load lane (slab cells of
+0x2000000000000000|off over the 7
+ABI-relevant offsets, driven through
+the read-helper lane and the
+ABI-ptr-carry arm), the public
+MEM_OFFSET bridge (3 register values
+x 4 scales x 3 displacements plus 4
+no-index sentinel rows with a
+poisoned index register), the
+barrier-var placement family (4 lanes
+on heap and stack anchors over
+MOV_STORE_IMM, MOV_LOAD, ALU_MEM
+IMM, and the LEA stack arm), the
+state-struct member fanout (16 GPR
+cells plus the cf/zf/sf/of, xmm0
+lo/hi, ret_addr, and call_depth
+tails), and the include-guard
+lifecycle (a second whole-header
+include inside the scene, where only
+the guard pair compiles). The
+65-row battery of 0456 holds
+unchanged (42/65 caught; 23
+equivalences survive) over the same
+header, with three clean rerun shakes
+byte-identical (md5
+7b7536548126903d61ac07ba24846800).
+Golden gate `make check` rc 0 with
+212 `cross-check: OK` banners, final
+arm64 decode host 1410 cases. Census
+328 -> 329.
 
 ### Step 0443 - arm64 CCMP decode sweep
 

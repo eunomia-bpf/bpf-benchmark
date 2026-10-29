@@ -2389,6 +2389,28 @@ are byte-identical (md5
 census 327 -> 328; the x86
 control-flow body family is closed.
 
+Step 0457 extends the x86 route host
+scene family closed by Step 0456 with
+five new scenes on the battery-local
+route host (`build/x86_route_host.c`,
+now 16 scenes, 7056 modeled cases):
+the ABI pointer-load lane over the
+7 ABI offsets through the
+read-helper and ABI-ptr-carry arms,
+the public MEM_OFFSET bridge with
+present and absent index bytes, the
+barrier-var placement family over
+the real exec bodies, the
+state-struct member fanout, and the
+include-guard lifecycle; the 65-row
+battery of 0456 holds unchanged
+(42/65 caught, 23 equivalences
+survive) with three clean rerun
+shakes byte-identical (md5
+7b7536548126903d61ac07ba24846800);
+census 328 -> 329; the x86 route
+host scene family is closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
