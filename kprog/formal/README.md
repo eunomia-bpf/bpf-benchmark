@@ -6459,6 +6459,51 @@ rc 0 with 212 `cross-check: OK`
 banners, final arm64 decode host
 1410 cases. Census 329 -> 330.
 
+### Step 0459 - arm64 route host scene battery
+
+Step 0459 extends the arm64 route
+host scene family over the
+`arm64_sim_local_bpf.h` body
+coverage closed in Step 0458,
+adding three scenes to the
+shared host
+(`build/a64_route_host.c`, now
+4470 modeled cases): the
+include-guard lifecycle (a second
+whole-header include inside the
+scene, where only the guard pair
+compiles), the
+DECLARE_STATE scalar-tail
+plant/readback glue (the
+v0/v0_hi vector-register pair,
+the NZCV byte, and the lr
+tail), and the four DQ
+vector-lane transfers (the
+LOAD_D0 / STORE_D0 one-lane and
+LOAD_Q0 / STORE_Q0 two-lane
+forms over the MEM value path,
+checked against a hand buffer
+image). The 24-row 0458 mstack
+battery holds unchanged (21/24
+caught; 3 equivalences survive:
+the stack_read byte-ladder
+redundant-cast, the
+store_q0_stack lane-stride, and
+the helper_arg_ptr source-
+polarity repaints, each
+undriven or binary-identical; 0
+failures), and the 0455 A64
+control-flow battery (70 rows, 0
+failures, 19 equivalences)
+re-ran ALL AS EXPECTED, with
+three clean rerun shakes
+byte-identical (md5
+b1f925d7deecda084f8f7c34b911be73).
+Golden gate `make check` rc 0
+with 212 `cross-check: OK`
+banners, final arm64 decode host
+1410 cases. Census 330 -> 331.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row

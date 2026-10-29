@@ -2463,6 +2463,42 @@ EXPECTED; census 329 -> 330; the
 arm64 memory/stack BODY family is
 closed.
 
+Step 0459 extends the arm64 route
+host scene family closed by Step
+0458 with three new scenes on the
+shared host `build/a64_route_
+host.c` (4470 modeled cases):
+the include-guard lifecycle (a
+second whole-header include
+inside the scene, where only
+the guard pair compiles), the
+DECLARE_STATE scalar-tail
+plant/readback glue (the
+v0/v0_hi vector-register pair,
+the NZCV byte, and the lr
+tail), and the four DQ
+vector-lane transfers (the
+LOAD_D0 / STORE_D0 one-lane and
+LOAD_Q0 / STORE_Q0 two-lane
+forms over the MEM value path,
+checked against a hand buffer
+image). The 24-row 0458 mstack
+battery holds unchanged (21/24
+caught, 3 equivalences survive,
+0 failures); the 0455 A64
+control-flow battery (70 rows,
+0 failures, 19 equivalences)
+re-ran ALL AS EXPECTED; three
+clean rerun shakes are
+byte-identical (md5
+b1f925d7deecda084f8f7c34b911be73);
+golden gate `make check` rc 0
+with 212 `cross-check: OK`
+banners, final arm64 decode
+host 1410 cases; census 330 ->
+331; the arm64 route-host scene
+family is closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
