@@ -6405,6 +6405,59 @@ Golden gate `make check` rc 0 with
 212 `cross-check: OK` banners, final
 arm64 decode host 1410 cases. Census
 328 -> 329.
+### Step 0458 - arm64 memory/stack BODY family battery
+
+Step 0458 closes the arm64
+memory/stack BODY family over the
+`arm64_sim_local_bpf.h` bodies
+(census 329 -> 330): the 24-row
+battery `build/mut_arm64_mstack_
+route.py` (untracked) repaints the
+memory/stack bodies - STACK_READ's
+word-arm index and byte-ladder
+call, the STACK_ARM dispatch
+polarity, STACK_WRITE_TAG's word-
+store value and read-tag source
+polarity, MEM_BASE_OFF's index-
+value polarity, STORE_Q0_STACK's
+lane stride, the mem-read / mem-
+read_tag / mem-write / prepost
+base-source polarities, the mem-
+write stack-arm offset, the
+MEM_PREPOST pre/post delta swap,
+the prepost gpr writeback sign,
+the mem-read_tag abi offset and
+map-ptr tag, the mem-write
+normal-arm offset, the stack-
+write clear-tag tag value, the
+prepost gate polarity, the prepost
+sp increment sign,
+HELPER_ARG_PTR's source polarity,
+the stack-write lane-1/lane-7 gate
+literals, and the mem-write store-
+addr width - all driven by the
+shared host `build/a64_route_host.c`
+(now 4328 modeled cases; two new
+catcher cases in
+`scene_stack_lanes` close the clear-
+tag and lane-7-gate rows that
+first survived). 21 rows are
+caught; 3 equivalences survive (the
+stack_read byte-ladder redundant-
+cast, the store_q0_stack lane-
+stride, and the helper_arg_ptr
+source-polarity repaints, each
+undriven or binary-identical); 0
+failures. Three clean rerun shakes
+byte-identical (md5
+da35ca26f13cd84b8ee819b107c111ad);
+the 0455 A64 control-flow battery
+(70 rows, 0 failures, 19
+equivalences) re-ran ALL AS
+EXPECTED. Golden gate `make check`
+rc 0 with 212 `cross-check: OK`
+banners, final arm64 decode host
+1410 cases. Census 329 -> 330.
 
 ### Step 0443 - arm64 CCMP decode sweep
 
