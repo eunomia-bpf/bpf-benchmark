@@ -6664,16 +6664,40 @@ the 0454 arm64 helper-route battery
 equivalences) and the 0455 arm64
 control-flow battery (9 rows, 0
 failures, 4 equivalences) re-ran ALL
-AS EXPECTED. The extended host is
-also wired into the golden gate
-itself (`Makefile`, after the
-arm64 helper arg-ptr route host),
-so its 4045 cases are enforced by
-`make check` rather than only by
-the untracked battery: the gate
-now prints 213 `cross-check: OK`
-banners (was 212) and rc 0. Census
-333 -> 334.
+AS EXPECTED. Census 333 -> 334.
+
+The 0448 spark generalizes: a
+sweep of the seven battery-local
+route hosts showed only
+`build/mul_route_host.c` and
+`build/x86_route_host.c` (the
+latter newly) were in the gate,
+so the other six route hosts
+guarded nothing outside their own
+untracked batteries. All seven
+are now pinned into the recipe
+near their own family's contract
+host (`a64_route_host`,
+`reduction_route_host`,
+`stlxr_route_host`, `ldrsx_route_host`
+arm64; `cmov_step_route_host`,
+`x86_route_host`, and the 0462
+`helper_route_host` x86/arm64),
+adding 12,270,513 modeled cases
+that `make check` previously
+never ran: a64 4470, arm64
+reduction 11223, arm64 stlxr
+343055, arm64 ldrsx 2315529, x86
+cmov step 9585135, x86 route 7056,
+arm64 helper 4045. The gate now
+prints 219 `cross-check: OK`
+banners (was 212) and rc 0. These
+hosts live in the gitignored
+build/ directory, so a missing one
+fails the gate loudly at a named
+Makefile line (`cc1: fatal error:
+... No such file or directory`),
+not silently.
 
 ### Step 0443 - arm64 CCMP decode sweep
 

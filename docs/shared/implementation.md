@@ -2655,17 +2655,32 @@ the 0454 arm64 helper-route battery
 equivalences) and the 0455 arm64
 control-flow battery (9 rows, 0
 failures, 4 equivalences) re-ran
-ALL AS EXPECTED. The extended host
-is also wired into the golden gate
-itself (`Makefile`, after the arm64
-helper arg-ptr route host), so its
-4,045 cases are enforced by
-`make check` rather than only by
-the untracked battery: the gate now
-prints 213 `cross-check: OK` banners
-(was 212) and rc 0; census 333 -> 334;
+ALL AS EXPECTED; census 333 -> 334;
 the arm64 BPF helper-call BODY
-family is closed.
+family is closed. The 0448 spark
+then generalizes: a sweep of the
+seven battery-local route hosts
+showed only `build/mul_route_host.c`
+was in the gate, so the others
+guarded nothing outside their own
+untracked batteries. All seven are
+now pinned into the recipe near
+their own family's contract host
+(`a64_route_host`, `reduction_route_host`,
+`stlxr_route_host`, `ldrsx_route_host`
+arm64; `cmov_step_route_host`,
+`x86_route_host`, and the 0462
+`helper_route_host`), adding
+12,270,513 modeled cases `make check`
+never ran (a64 4470, arm64 reduction
+11223, arm64 stlxr 343055, arm64
+ldrsx 2315529, x86 cmov step 9585135,
+x86 route 7056, arm64 helper 4045).
+The gate prints 219 `cross-check: OK`
+banners (was 212) at rc 0; these
+hosts live in the gitignored build/
+directory, so a missing one fails the
+gate loudly at a named Makefile line.
 
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in

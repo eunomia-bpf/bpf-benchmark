@@ -304,6 +304,8 @@ check:
 	./build/test_x86_helper_dispatch_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_helper_dispatch_route_host.c -o build/test_x86_helper_dispatch_route_host
 	./build/test_x86_helper_dispatch_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/x86_route_host.c -o build/x86_route_host
+	./build/x86_route_host
 	lake env lean KProgFormal/GeneratedX86Xchg.lean
 	lake env lean KProgFormal/X86XchgHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_xchg_host.c -o build/test_x86_xchg_host
@@ -452,6 +454,8 @@ check:
 	lake env lean KProgFormal/X86CmovHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_cmov_host.c -o build/test_x86_cmov_host
 	./build/test_x86_cmov_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/cmov_step_route_host.c -o build/cmov_step_route_host
+	./build/cmov_step_route_host
 	lake env lean KProgFormal/GeneratedX86Movbe.lean
 	lake env lean KProgFormal/X86MovbeHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_movbe_host.c -o build/test_x86_movbe_host
@@ -613,6 +617,8 @@ check:
 	lake env lean KProgFormal/Arm64BranchEmit.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_branch_emit_host.c -o build/test_arm64_branch_emit_host
 	./build/test_arm64_branch_emit_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/a64_route_host.c -o build/a64_route_host
+	./build/a64_route_host
 	lake env lean KProgFormal/GeneratedControlFlowTrace.lean
 	lake env lean KProgFormal/ControlFlowTrace.lean
 	$(CC) -Wall -Wextra -O2 -I. test_control_flow_trace_host.c -o build/test_control_flow_trace_host
@@ -631,6 +637,8 @@ check:
 	lake env lean KProgFormal/Arm64Reduction.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_reduction_host.c -o build/test_arm64_reduction_host
 	./build/test_arm64_reduction_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/reduction_route_host.c -o build/reduction_route_host
+	./build/reduction_route_host
 	lake env lean KProgFormal/GeneratedArm64Unary.lean
 	lake env lean KProgFormal/Arm64Unary.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_unary_host.c -o build/test_arm64_unary_host
@@ -651,6 +659,8 @@ check:
 	lake env lean KProgFormal/Arm64Stlxr.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
 	./build/test_arm64_stlxr_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/stlxr_route_host.c -o build/stlxr_route_host
+	./build/stlxr_route_host
 	lake env lean KProgFormal/GeneratedArm64Mov.lean
 	lake env lean KProgFormal/Arm64Mov.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mov_host.c -o build/test_arm64_mov_host
@@ -659,6 +669,8 @@ check:
 	lake env lean KProgFormal/Arm64LdrSx.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_ldrsx_host.c -o build/test_arm64_ldrsx_host
 	./build/test_arm64_ldrsx_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/ldrsx_route_host.c -o build/ldrsx_route_host
+	./build/ldrsx_route_host
 	lake env lean KProgFormal/GeneratedArm64LdrsxOp.lean
 	lake env lean KProgFormal/Arm64LdrsxOp.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_ldrsx_op_host.c -o build/test_arm64_ldrsx_op_host
