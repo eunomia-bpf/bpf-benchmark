@@ -7,6 +7,18 @@ the x86-64 and AArch64 native simulators. Run it with:
 make check
 ```
 
+What the gate currently covers, measured from one full `make check` run:
+220 passing `cross-check: OK` oracle banners summing to 123,165,714 modeled
+cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
+header and one `Generated*.lean` module (138/138/138); 294 Lean modules
+compiling transitively from the gate's roots and proving 1,941 theorems with
+no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions. Two
+consecutive full runs produce byte-identical output (same md5), so the gate is
+deterministic. The 330 `build/mut_*.py` batteries are the evidence that each
+banner can fail, and are untracked by design; the seven route hosts those
+batteries drive are pinned into the recipe so their cases are enforced by the
+gate itself rather than only by the batteries.
+
 `KProgFormal.TagErasure` models a bounded fragment drawn from the simulators:
 a 64-bit move, a pointer-shaped 64-bit add, an x86-shaped scalarizing integer
 multiply-immediate, and a 64-bit load of the packet or packet-end pointer from
