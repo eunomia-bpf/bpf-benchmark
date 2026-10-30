@@ -2594,6 +2594,71 @@ EXPECTED; census 332 -> 333; the
 x86 BPF helper-call BODY family is
 closed.
 
+Step 0462 closes the arm64
+BPF helper-call BODY family over
+the `arm64_sim_local_bpf.h` bodies:
+66 rows in
+`build/mut_arm64_helper_body.py`
+(untracked) drive the EXISTING
+host `build/helper_route_host.c`,
+extended in place with
+`scene_zero64` / `scene_prand` /
+`scene_alias` (17 scene functions,
+61 drive sites, 4045
+modeled cases, up from 1801; no
+new catcher host), over the 34
+helper bodies Step 0454 never
+drives - the 30 static-zero 64-bit
+bodies (get_current_pid_tgid,
+get_current_comm, get_func_arg,
+get_func_ret, get_func_arg_cnt,
+get_retval, get_attach_cookie,
+ima_inode_hash, seq_write,
+trace_printk, redirect,
+clone_redirect, skb_set_tunnel_key,
+csum_diff, skb_under_cgroup,
+skb_change_proto, skb_change_type,
+skb_change_tail, skb_pull_data,
+skb_change_head, xdp_adjust_head,
+xdp_adjust_tail, get_socket_cookie,
+skb_adjust_room, fib_lookup,
+redirect_neigh, get_netns_cookie,
+current_task_under_cgroup,
+get_stackid, get_stack), the one
+32-bit zero body (get_prandom_u32),
+and the three one-line alias bodies
+(get_current_task_btf and
+task_pt_regs forwarding to
+get_current_task, ima_file_hash to
+ima_inode_hash). Each body gets a
+width repaint (W64 vs W32,
+value-neutral on a zero body) and a
+constant repaint (0 -> 1), and each
+alias gets a retarget. 34 rows are
+caught (all run failures: the
+constant repaint moves the X0
+commit the host pins, and each
+alias retarget moves it to a body
+with a different observable
+commit); 32 equivalences survive
+(the 31 width repaints mask to the
+same zero under either width, plus
+the one get_current_task ->
+task_pt_regs retarget, whose
+forward targets commit the same
+0/SCALAR pair); 0 failures. Three
+clean rerun shakes are
+byte-identical (md5
+c3881d8672e6314bb33a2717a65de362);
+the 0454 arm64 helper-route battery
+(29 rows, 0 failures, 2
+equivalences) and the 0455 arm64
+control-flow battery (9 rows, 0
+failures, 4 equivalences) re-ran
+ALL AS EXPECTED; census 333 -> 334;
+the arm64 BPF helper-call BODY
+family is closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)

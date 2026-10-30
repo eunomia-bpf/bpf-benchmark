@@ -6601,6 +6601,71 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0462 - arm64 BPF helper-call BODY battery
+
+Step 0462 closes the arm64
+BPF helper-call BODY family over
+the `arm64_sim_local_bpf.h` bodies
+(census 333 -> 334): the 66-row
+battery `build/mut_arm64_helper_
+body.py` (untracked) repaints the
+34 BPF helper bodies that Step
+0454's route host never drives -
+the 30 static-zero 64-bit bodies
+(get_current_pid_tgid,
+get_current_comm, get_func_arg,
+get_func_ret, get_func_arg_cnt,
+get_retval, get_attach_cookie,
+ima_inode_hash, seq_write,
+trace_printk, redirect,
+clone_redirect, skb_set_tunnel_key,
+csum_diff, skb_under_cgroup,
+skb_change_proto, skb_change_type,
+skb_change_tail, skb_pull_data,
+skb_change_head, xdp_adjust_head,
+xdp_adjust_tail, get_socket_cookie,
+skb_adjust_room, fib_lookup,
+redirect_neigh, get_netns_cookie,
+current_task_under_cgroup,
+get_stackid, get_stack), the one
+32-bit zero body (get_prandom_u32),
+and the three one-line alias bodies
+(get_current_task_btf and
+task_pt_regs forwarding to
+get_current_task, ima_file_hash to
+ima_inode_hash) - all driven by the
+EXISTING host `build/helper_route_
+host.c`, extended in place with
+`scene_zero64` / `scene_prand` /
+`scene_alias` (17 scene functions,
+61 drive sites, 4045
+modeled cases, up from 1801; no new
+catcher host). Each body gets a
+width repaint (W64 vs W32, value-
+neutral on a zero body) and a
+constant repaint (0 -> 1), and each
+alias gets a retarget. 34 rows are
+caught (all run failures: the
+constant repaint moves the X0 commit
+the host pins, and each alias
+retarget moves it to a body with a
+different observable commit); 32
+equivalences survive (the 31 width
+repaints mask to the same zero under
+either width, plus the one
+get_current_task -> task_pt_regs
+retarget, whose forward targets
+commit the same 0/SCALAR pair); 0
+failures. Three clean rerun shakes
+byte-identical (md5
+c3881d8672e6314bb33a2717a65de362);
+the 0454 arm64 helper-route battery
+(29 rows, 0 failures, 2
+equivalences) and the 0455 arm64
+control-flow battery (9 rows, 0
+failures, 4 equivalences) re-ran ALL
+AS EXPECTED. Census 333 -> 334.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row
