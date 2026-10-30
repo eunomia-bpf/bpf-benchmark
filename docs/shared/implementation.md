@@ -2676,8 +2676,15 @@ never ran (a64 4470, arm64 reduction
 11223, arm64 stlxr 343055, arm64
 ldrsx 2315529, x86 cmov step 9585135,
 x86 route 7056, arm64 helper 4045).
-The gate prints 219 `cross-check: OK`
-banners (was 212) at rc 0; these
+The same sweep found one tracked root
+host whose only gate was an untracked
+battery: `test_imul_flags_host.c`
+(the generated `KPROG_X86_SET_IMUL_FLAGS`
+oracle, 15 fixed vectors plus a
+20000-case sweep) is now in the recipe
+after the x86 imul route host. The gate
+prints 220 `cross-check: OK` banners
+(was 212) at rc 0; the battery-local
 hosts live in the gitignored build/
 directory, so a missing one fails the
 gate loudly at a named Makefile line.

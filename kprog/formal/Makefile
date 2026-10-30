@@ -179,6 +179,8 @@ check:
 	./build/test_x86_movx_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_imul_route_host.c -o build/test_x86_imul_route_host
 	./build/test_x86_imul_route_host
+	$(CC) -Wall -Wextra -O2 -I. test_imul_flags_host.c -o build/test_imul_flags_host
+	./build/test_imul_flags_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_lea_route_host.c -o build/test_x86_lea_route_host
 	./build/test_x86_lea_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mov_route_host.c -o build/test_x86_mov_route_host

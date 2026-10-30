@@ -6689,12 +6689,20 @@ never ran: a64 4470, arm64
 reduction 11223, arm64 stlxr
 343055, arm64 ldrsx 2315529, x86
 cmov step 9585135, x86 route 7056,
-arm64 helper 4045. The gate now
-prints 219 `cross-check: OK`
-banners (was 212) and rc 0. These
-hosts live in the gitignored
-build/ directory, so a missing one
-fails the gate loudly at a named
+arm64 helper 4045. The same sweep
+found one tracked root host whose
+only gate was an untracked battery:
+`test_imul_flags_host.c` (the
+generated `KPROG_X86_SET_IMUL_FLAGS`
+oracle, 15 fixed vectors plus a
+20000-case sweep) is now in the
+recipe after the x86 imul route
+host. The gate prints 220
+`cross-check: OK` banners (was 212)
+and rc 0. The battery-local hosts
+live in the gitignored build/
+directory, so a missing one fails
+the gate loudly at a named
 Makefile line (`cc1: fatal error:
 ... No such file or directory`),
 not silently.
