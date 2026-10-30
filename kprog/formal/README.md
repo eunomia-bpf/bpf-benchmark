@@ -6555,6 +6555,52 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 331 -> 332.
 
+### Step 0461 - x86 BPF helper-call BODY battery
+
+Step 0461 closes the x86
+BPF helper-call BODY family over
+the `x86_sim_local_bpf.h` bodies
+(census 332 -> 333): the 25-row
+battery `build/mut_x86_helper_
+route.py` (untracked) repaints the
+BPF helper-call bodies - the
+bpf_map_lookup_elem map, key,
+return-value, and result-write
+forms, the bpf_map_update_elem
+map, key, value, and flags-lane
+reads plus the return-value write
+width, the bpf_map_delete_elem
+map/key registers and the
+return-width, the uid/pid/smp/
+ktime value constants and widths,
+the X86_SIM_BPF_CALL_ID
+dispatch switch's update/ktime
+arm swaps, the delete case-label
+repaint, the default-arm value
+and width, and the X86_SIM_
+BPF_CALL_REG form (READ_REG
+vs READ_REG_PTR, plus a const-7
+ktime route) - all driven by the
+EXISTING host
+`build/x86_route_host.c` (16
+scenes, 7056 modeled cases; no
+catcher cases added). 19 rows are
+caught (12 run failures plus 7
+build failures: 2 key-register
+paren drops, 1 int-conversion, 1
+flags pointer, 2 orphaned stubs,
+and 1 duplicate case); 6
+equivalences survive (each
+undriven or value-neutral in the
+shared host's 7056 modeled
+cases); 0 failures. Three clean
+rerun shakes byte-identical (md5
+afcbb04ec894cecb165f0a2d7ca40974);
+the 0456 x86 control-flow battery
+(65 rows, 0 failures, 23
+equivalences) re-ran ALL AS
+EXPECTED. Census 332 -> 333.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row

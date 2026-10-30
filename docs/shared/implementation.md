@@ -2549,6 +2549,51 @@ EXPECTED; census 331 -> 332; the
 x86 memory/stack BODY family is
 closed.
 
+Step 0461 closes the x86
+BPF helper-call BODY family over
+the `x86_sim_local_bpf.h` bodies:
+25 rows in
+`build/mut_x86_helper_route.py`
+(untracked) drive the EXISTING
+host `build/x86_route_host.c`
+(16 scenes, 7056 modeled cases;
+no catcher cases added) over the
+BPF helper-call bodies — the
+bpf_map_lookup_elem map, key,
+return-value, and result-write
+forms, the bpf_map_update_elem
+map, key, value, and flags-lane
+reads plus the return-value write
+width, the bpf_map_delete_elem
+map/key registers and the
+return-width, the uid/pid/smp/
+ktime value constants and widths,
+the X86_SIM_BPF_CALL_ID
+dispatch switch's update/ktime
+arm swaps, the delete case-label
+repaint, the default-arm value
+and width, and the
+X86_SIM_BPF_CALL_REG form
+(READ_REG vs READ_REG_PTR, plus
+a const-7 ktime route). 19 rows
+are caught (12 run failures plus
+7 build failures: 2 key-register
+paren drops, 1 int-conversion, 1
+flags pointer, 2 orphaned stubs,
+and 1 duplicate case); 6
+equivalences survive (each
+undriven or value-neutral in the
+shared host's 7056 modeled cases);
+0 failures. Three clean rerun
+shakes are byte-identical (md5
+afcbb04ec894cecb165f0a2d7ca40974);
+the 0456 x86 control-flow battery
+(65 rows, 0 failures, 23
+equivalences) re-ran ALL AS
+EXPECTED; census 332 -> 333; the
+x86 BPF helper-call BODY family is
+closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
