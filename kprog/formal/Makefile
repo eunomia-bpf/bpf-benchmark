@@ -761,6 +761,8 @@ check:
 	./build/test_arm64_helper_arg_ptr_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_helper_arg_ptr_route_host.c -o build/test_arm64_helper_arg_ptr_route_host
 	./build/test_arm64_helper_arg_ptr_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/helper_route_host.c -o build/helper_route_host
+	./build/helper_route_host
 	lake env lean KProgFormal/GeneratedArm64MemBaseSrc.lean
 	lake env lean KProgFormal/Arm64MemBaseSrcShape.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_base_src_host.c -o build/test_arm64_mem_base_src_host

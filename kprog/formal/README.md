@@ -6664,7 +6664,16 @@ the 0454 arm64 helper-route battery
 equivalences) and the 0455 arm64
 control-flow battery (9 rows, 0
 failures, 4 equivalences) re-ran ALL
-AS EXPECTED. Census 333 -> 334.
+AS EXPECTED. The extended host is
+also wired into the golden gate
+itself (`Makefile`, after the
+arm64 helper arg-ptr route host),
+so its 4045 cases are enforced by
+`make check` rather than only by
+the untracked battery: the gate
+now prints 213 `cross-check: OK`
+banners (was 212) and rc 0. Census
+333 -> 334.
 
 ### Step 0443 - arm64 CCMP decode sweep
 
