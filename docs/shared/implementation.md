@@ -2499,6 +2499,56 @@ host 1410 cases; census 330 ->
 331; the arm64 route-host scene
 family is closed.
 
+Step 0460 closes the x86
+memory/stack BODY family over the
+`x86_sim_local_bpf.h` bodies:
+29 rows in
+`build/mut_x86_mstack_route.py`
+(untracked) drive the EXISTING
+host `build/x86_route_host.c`
+(16 scenes, 7056 modeled cases;
+no catcher cases added) over the
+memory/stack bodies — the
+STACK_WRITE word-store value and
+the narrow-mask / lane-1 / lane-7
+gate literals, the STACK_READ word-
+arm index and the lane-1/lane-8
+assemble, the MOV_LOAD write-width,
+tag polarity, and stack-read-case
+width, the plain load address and
+the pointer-load address, the
+ordinary store address, the store-
+arm (RSP) gate, the store
+displacement, and the source-shift
+gate, the mem-read RSP gate and tag
+source, and the read-mem stack-
+case width, the MEM_OFFSET read-
+register arm and cast, the push
+pre-decrement, pop post-increment,
+and push-step sign, the LEA stack-
+base offset, the barrier-var asm,
+the MOVBE RSP arm, the XMM0 RSP
+arm, the exec-store stack-case
+value, and the HELPER_ARG_PTR
+source register. 11 rows are
+caught (10 run failures plus the
+STR lane-1 lane-8 repaint, which
+pushes `__x86_stack_mem.b[8]` out
+of the 8-byte arena and fails the
+host build under `-Werror -O2`);
+18 equivalences survive (each
+undriven or value-neutral in the
+shared host's 7056 modeled cases);
+0 failures. Three clean rerun
+shakes are byte-identical (md5
+4591d83b54a932d632750c8fe1ccf622);
+the 0456 x86 control-flow battery
+(65 rows, 0 failures, 23
+equivalences) re-ran ALL AS
+EXPECTED; census 331 -> 332; the
+x86 memory/stack BODY family is
+closed.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
