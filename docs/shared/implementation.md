@@ -2852,6 +2852,31 @@ complement. The arm64 pair is the `kernel_rejit` runtime of
 `aws_arm64_micro_20260606_001225_821028` against that run's
 own `kernel` runtime; x86-64 spans the two committed runs.
 
+The load-overhead paragraph was also wrong against its own
+data, and in a way that overstated the result in the
+paper's favour. It claimed 0.99x kernel-side load and a
+1.4--2.4x end-to-end compile increase that stays
+sub-millisecond. Recomputed from the two May-14 x86-64 KVM
+runs (`x86_kvm_micro_20260514_031744_210343`,
+`x86_kvm_micro_20260514_181806_133778`, one sample each,
+INNER_REPEAT=10): `object_load_ns` geomean rejit/stock is
+0.9952x and 0.9978x, i.e. 1.00x rounded, not 0.99x;
+per-program userspace time (`bpfopt_ms`) has median 3 ms
+and p90 69 ms in the first run and 81 ms and 862 ms in the
+second, so end-to-end compile time (stock `compile_ns` +
+`bpfopt_ms`) rises from a stock median of 1.1 ms to 5.4 ms
+and 99 ms; and 0 of 62 programs land under 1 ms end to end.
+The 1.4--2.4x claim holds for 7 of the 62, and the real
+spread is 1.05x to 63781x, driven entirely by
+`branch_flip_dense` (4404 instructions, 260 sites,
+96.8 s in the `lea` pass). `bpfopt_ms` is wall time
+around the `posix_spawn` of the `bpfopt` binary in
+`bpfopt/shim/shim_execute_plan.h:475`, so it covers the
+whole userspace optimizer, not just site selection, and it
+is not a kernel-side cost at all.
+The paragraph now reports the measured medians and p90 and
+names the outlier instead of the unsubstantiated range.
+
 One more prerequisite was broken, and it would have failed
 the build rather than a reference check: the two figure
 wrappers the evaluation section inputs named PDFs that no
