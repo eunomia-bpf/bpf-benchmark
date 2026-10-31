@@ -2823,6 +2823,19 @@ the two the orphaned related-work file cites
 the *compiled* related-work section resolve as well, so no
 current PDF renders a `[?]`.
 
+The evaluation section's two headline geomeans also reproduce
+from their committed source data, independently of the
+plotting script: taking the median `exec_ns` over the three
+samples per benchmark and the ratio stock/kinsn, the x86-64
+pair (`x86_kvm_micro_20260519_114214_364050` over
+`..._20260526_210351_224315`) gives 1.216x over all 29
+matched cases and 1.242x over 27, while the arm64 dataset
+(`aws_arm64_micro_20260606_001225_821028`) gives 1.208x over
+29 and 1.222x over 27. Excluding exactly `simple` and
+`simple_packet` reproduces the paper's 1.242x and 1.222x to
+three decimals, so the reported figures are the 27-case
+population and the 29-case population is 1.216/1.208.
+
 One more prerequisite was broken, and it would have failed
 the build rather than a reference check: the two figure
 wrappers the evaluation section inputs named PDFs that no
