@@ -6719,6 +6719,31 @@ Makefile line (`cc1: fatal error:
 ... No such file or directory`),
 not silently.
 
+The stranded-header hazard that blocked the gate is
+reproducible rather than mysterious: a battery
+repaints a simulator header, then runs a detector,
+then restores. A `finally` block covers an
+exception but not SIGTERM/SIGINT/SIGHUP, so a
+battery killed mid-mutation leaves the repainted
+body in the header and the next run measures that
+mutant as its baseline. Measured directly on
+`mut_arm64_helper_body.py`: killing it with SIGTERM
+left `b7ce6a66d` (`ARM64_X0, 1` in
+`bpf_trace_printk`) in the otherwise clean header,
+and re-running would have reported a false
+baseline. `mut_arm64_helper_body.py` now converts
+those three signals into `KeyboardInterrupt` so its
+guard restores, and the same SIGTERM test now
+leaves the header byte-identical (`1de5665a5`) with
+an empty `git status`. The other 329 batteries have
+the `finally` guard but no signal handler (316
+carry `finally:` at all, none uses `atexit`), so
+the same interruption can strand any of them; this
+is the most likely origin of the currently dirty
+`x86_sim_local_bpf.h` line: that edit is verbatim a
+row of `build/mut_x86_route.py`, i.e. an unrestored
+mutation, not a hand edit.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row
