@@ -2736,6 +2736,27 @@ wrong tree as well. Regenerating the 13 through
 next to the object) and pointing the stage-2 proof dir at
 `stage2_program_root` would close both.
 
+The paper currently compiles without an evaluation section,
+although its abstract claims empirical answers. `main.tex`
+inputs eight sections — abstract, introduction,
+background, design, safety, evaluation plan, related
+work, conclusion — and `sections/7-evaluation.tex` is not
+among them, so the four RQs it defines (microbenchmark
+signal, production applications, family-selection policy,
+native-in-kernel upper bound) never reach the PDF. What
+compiles is `5-evaluation-plan.tex`, a claim ledger of
+promised measurements rather than results. The abstract now
+says the evaluation answers native performance and
+specialization success empirically, which only holds once
+`7-evaluation.tex` is input. It is also the newest section
+file in the tree (2026-10-06) while the included
+conclusion is the oldest (2026-09-24), so the paper is
+mid-reorganisation; the fix is to add
+`\input{sections/7-evaluation}` ahead of the conclusion and
+reconcile the duplicate section files
+(`7-`/`9-conclusion`, `6-`/`8-related-work`,
+`3-characterization` vs `3-design`).
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
