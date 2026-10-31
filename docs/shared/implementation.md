@@ -2683,7 +2683,7 @@ battery: `test_imul_flags_host.c`
 oracle, 15 fixed vectors plus a
 20000-case sweep) is now in the recipe
 after the x86 imul route host. The gate
-prints 220 `cross-check: OK` banners
+prints 226 `cross-check: OK` banners
 (was 212) at rc 0; the battery-local
 hosts live in the gitignored build/
 directory, so a missing one fails the

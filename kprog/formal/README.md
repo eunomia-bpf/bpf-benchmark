@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-220 passing `cross-check: OK` oracle banners summing to 123,165,714 modeled
+226 passing `cross-check: OK` oracle banners summing to 123,466,335 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
 compiling transitively from the gate's roots and proving 1,941 theorems with
@@ -20,14 +20,14 @@ enumerations or concrete examples, never a compositional or arithmetic
 obligation. Two
 consecutive full runs produce byte-identical output (same md5), so the gate is
 deterministic. The 330 `build/mut_*.py` batteries are the evidence that each
-banner can fail, and are untracked by design; the seven route hosts those
+banner can fail, and are untracked by design; the thirteen route hosts those
 batteries drive are pinned into the recipe so their cases are enforced by the
 gate itself rather than only by the batteries.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,165,714 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 220 banners are all distinct oracles — 219 report a plain
+123,466,335 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 226 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.

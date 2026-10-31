@@ -308,6 +308,10 @@ check:
 	./build/test_x86_helper_dispatch_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/x86_route_host.c -o build/x86_route_host
 	./build/x86_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/btmem_index_route_host.c -o build/btmem_index_route_host
+	./build/btmem_index_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/value_route_host.c -o build/value_route_host
+	./build/value_route_host
 	lake env lean KProgFormal/GeneratedX86Xchg.lean
 	lake env lean KProgFormal/X86XchgHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_xchg_host.c -o build/test_x86_xchg_host
@@ -819,6 +823,14 @@ check:
 	./build/test_arm64_pair_mem_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_pair_mem_route_host.c -o build/test_arm64_pair_mem_route_host
 	./build/test_arm64_pair_mem_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/pair_route_host.c -o build/pair_route_host
+	./build/pair_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/fmov_route_host.c -o build/fmov_route_host
+	./build/fmov_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/ccmp_decode_route_host.c -o build/ccmp_decode_route_host
+	./build/ccmp_decode_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/flag_route_host.c -o build/flag_route_host
+	./build/flag_route_host
 	lake env lean KProgFormal/GeneratedArm64MemPrepost.lean
 	lake env lean KProgFormal/Arm64MemPrepost.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_prepost_host.c -o build/test_arm64_mem_prepost_host
