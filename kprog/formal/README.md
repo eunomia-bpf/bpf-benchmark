@@ -65,6 +65,19 @@ No current oracle drives those offsets: the route hosts cap their sweeps at
 `off + width <= ARM64_SIM_STACK_BYTES`, which is exactly why the gate stays
 green over a defect that is present in the code.
 
+"All 294 modules are checked" is a chain of three facts, each verified rather
+than assumed. First, every `import KProgFormal.X` names a module that exists
+(0 dangling imports). Second, the gate's 268 explicit `lake env lean`
+invocations reach all 294 modules — the other 26 are `Generated*` modules
+pulled in through their imports — and no module is unreachable from those
+roots. Third, `lake build` runs before the elaborations and compiles the whole
+library: `lake env lean` alone does *not* recompile an imported module (it
+needs a prior olean and reports a missing-object error otherwise), so without
+that build step a break inside a transitively-reached module would be
+invisible. Planting `theorem planted_bad : (1 : Nat) = 2 := by rfl` in
+`GeneratedArm64Mod` — one of the 26 — is caught by `lake build` as
+`Build failed: KProgFormal.GeneratedArm64Mod`.
+
 The 138/138/138 pairing is verified as a bijection in both directions rather
 than inferred from equal counts: every `*_spec.json` has a same-named
 `generated/*.h` with nothing left over on either side (both set differences
