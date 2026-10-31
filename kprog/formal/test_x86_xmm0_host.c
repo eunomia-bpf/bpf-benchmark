@@ -758,14 +758,22 @@ static unsigned part4(void)
 		__u64 a1 = (__u64)(uintptr_t)KPROG_X86_XMM0_BASE_PTR(
 			1, KPROG_X86_XMM0_BASE_FORM(0U), 0x8000ULL, 0x1111ULL);
 
-		if (a0 != 0x8000ULL)
-			return 0; /* the load's X86_REG_NONE operand is the raw artifact */
-		if (a1 != 0ULL)
-			return 0; /* the store's is the null pointer */
-		if (KPROG_X86_XMM0_ADDS_DISP(1, KPROG_X86_XMM0_BASE_FORM(1U)) != 0U)
-			return 0; /* load: offset discarded */
-		if (KPROG_X86_XMM0_ADDS_DISP(1, KPROG_X86_XMM0_BASE_FORM(0U)) != 1U)
-			return 0; /* store: offset added */
+		if (a0 != 0x8000ULL) {
+			mismatches++; /* the load's X86_REG_NONE operand is the raw artifact */
+			return 0;
+		}
+		if (a1 != 0ULL) {
+			mismatches++; /* the store's is the null pointer */
+			return 0;
+		}
+		if (KPROG_X86_XMM0_ADDS_DISP(1, KPROG_X86_XMM0_BASE_FORM(1U)) != 0U) {
+			mismatches++; /* load: offset discarded */
+			return 0;
+		}
+		if (KPROG_X86_XMM0_ADDS_DISP(1, KPROG_X86_XMM0_BASE_FORM(0U)) != 1U) {
+			mismatches++; /* store: offset added */
+			return 0;
+		}
 		cases++;
 	}
 
