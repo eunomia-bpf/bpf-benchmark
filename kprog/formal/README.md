@@ -78,6 +78,16 @@ invisible. Planting `theorem planted_bad : (1 : Nat) = 2 := by rfl` in
 `GeneratedArm64Mod` — one of the 26 — is caught by `lake build` as
 `Build failed: KProgFormal.GeneratedArm64Mod`.
 
+The route hosts' "independent model" is independent in the sense that matters.
+44 model/oracle functions in those hosts call a generated `KPROG_*` macro, which
+looks circular, but each such macro is bound to a literal elsewhere: sweeping
+for macros used *only* inside a model leaves just `KPROG_ARM64_AUX_B1` and
+`AUX_B2`, and those are checked by `test_arm64_aux_route_host.c` against
+hand-written lane models (`f1(aux) = (aux >> 8) & 0xff`, `f2` likewise) plus
+the `arm64_aux_b{1,2,3}_roundtrip` Lean lemmas. Sabotaging `AUX_B1`'s mask from
+`0xff` to `0x7f` makes that host report 91,228 mismatches, so the lane is
+genuinely pinned rather than assumed.
+
 The 138/138/138 pairing is verified as a bijection in both directions rather
 than inferred from equal counts: every `*_spec.json` has a same-named
 `generated/*.h` with nothing left over on either side (both set differences
