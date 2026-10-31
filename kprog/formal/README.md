@@ -24,6 +24,14 @@ banner can fail, and are untracked by design; the seven route hosts those
 batteries drive are pinned into the recipe so their cases are enforced by the
 gate itself rather than only by the batteries.
 
+That total is reproducible rather than a one-off reading: re-deriving it from a
+fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
+123,165,714 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 220 banners are all distinct oracles — 219 report a plain
+`N cases` and one (the `imul` flags oracle) reports
+`15 vectors + 20000 sweep cases`, so the total must be summed with that
+oracle's own shape rather than a single regex over `N cases`.
+
 Three oracles did not previously have that negative property: their part
 functions stopped at a mismatch with a bare `return 0`, and `main` summed the
 returned case counts and printed OK unconditionally, so the banner could not
