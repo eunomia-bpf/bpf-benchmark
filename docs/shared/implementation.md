@@ -2736,6 +2736,22 @@ wrong tree as well. Regenerating the 13 through
 next to the object) and pointing the stage-2 proof dir at
 `stage2_program_root` would close both.
 
+The metadata that does exist is sound, so the stage-2 gap is
+about missing files rather than corrupt ones. All 58
+`compile.json` files — 29 under
+`kprog/test/build-x86/x86_sim_proofs/` and 29 under
+`.../build-arm64/arm64_sim_proofs/` — parse, carry the
+full key set (`arch`, `name`, `source`, `object`,
+`compile_ns`, `compile_s`, `command`), name an `object`
+that exists, and use a stem matching both the `.bpf.o`
+beside them and their own `name` field; each records the
+arch of its own tree (29 `x86`, 29 `arm64`) and a
+positive compile time. `micro/driver.py` reads
+`compile_ns` into the sample phase breakdown and copies
+`arch`/`source` into the result, so a mislabelled arch
+would have shown up as a wrong-architecture result rather
+than an error — worth confirming rather than assuming.
+
 The paper currently compiles without an evaluation section,
 although its abstract claims empirical answers. `main.tex`
 inputs eight sections — abstract, introduction,
