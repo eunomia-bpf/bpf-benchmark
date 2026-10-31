@@ -32,6 +32,15 @@ a stale note. The 220 banners are all distinct oracles — 219 report a plain
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
+The per-step `census N -> N+1` counter is a running tally of harness
+increments, not a count of the files on disk, and the two have drifted: 330
+`build/mut_*.py` files exist, the counter's last value is 334, and 193 steps
+record an explicit `+1`. The drift is narrative, not coverage — 35 harnesses
+are never named in any step entry, but 30 of them drive a tracked `test_*.c`
+host that `make check` runs, so their contracts are gated even though their
+provenance was never written down. The census should be read as "how many
+harness increments the log has recorded", not as a file total.
+
 The 138/138/138 pairing is verified as a bijection in both directions rather
 than inferred from equal counts: every `*_spec.json` has a same-named
 `generated/*.h` with nothing left over on either side (both set differences
