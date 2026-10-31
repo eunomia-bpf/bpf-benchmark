@@ -213,7 +213,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	} else {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_ANDN, dst_reg, src1_reg, flags,
-				       aux_reg, 0U);
+				       aux_reg, 0ULL);
 		else
 			X86_SIM_L_EXEC_ANDN(dst_reg, src1_reg, aux_reg, flags);
 	}

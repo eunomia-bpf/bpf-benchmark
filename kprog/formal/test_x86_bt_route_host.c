@@ -251,7 +251,7 @@ static void check_step(unsigned op, unsigned flags, unsigned aux_width,
 	if (op == 0U) {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_BT, base_reg, index_reg, flags, 0U,
-				      0U);
+				      0ULL);
 		else
 			X86_SIM_L_EXEC_BT(base_reg, index_reg, flags);
 	} else if (op == 1U) {

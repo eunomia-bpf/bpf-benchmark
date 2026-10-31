@@ -222,7 +222,7 @@ static void check_step(unsigned op, unsigned flags, unsigned dst_shift,
 	} else if (op == 1U) {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_CMP_REG, dst_reg, src_reg, flags,
-				      aux, 0U);
+				      aux, 0ULL);
 		else
 			X86_SIM_L_EXEC_CMP_REG_OP_AUX(X86_OP_CMP_REG, dst_reg,
 						      src_reg, flags, aux);
@@ -236,7 +236,7 @@ static void check_step(unsigned op, unsigned flags, unsigned dst_shift,
 	} else {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_TEST_REG, dst_reg, src_reg, flags,
-				      aux, 0U);
+				      aux, 0ULL);
 		else
 			X86_SIM_L_EXEC_CMP_REG_OP_AUX(X86_OP_TEST_REG, dst_reg,
 						      src_reg, flags, aux);

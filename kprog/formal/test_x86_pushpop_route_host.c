@@ -197,13 +197,13 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 	if (!op_is_pop) {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_PUSH, X86_REG_NONE, src, 0U, 0U,
-				       0U);
+				       0ULL);
 		else
 			X86_SIM_L_EXEC_PUSH(src);
 	} else {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_POP, dst, X86_REG_NONE, flags,
-				       0U, 0U);
+				       0U, 0ULL);
 		else
 			X86_SIM_L_EXEC_POP(dst, flags);
 	}

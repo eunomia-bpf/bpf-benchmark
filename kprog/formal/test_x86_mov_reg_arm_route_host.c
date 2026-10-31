@@ -214,7 +214,7 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 	}
 
 	/* ---- run the real routed arm ---- */
-	X86_SIM_L_EXEC(X86_OP_MOV_REG, dst, src, flags, aux, 0U);
+	X86_SIM_L_EXEC(X86_OP_MOV_REG, dst, src, flags, aux, 0ULL);
 
 	COMPARE_ALL();
 

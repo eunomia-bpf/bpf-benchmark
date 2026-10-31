@@ -56,16 +56,6 @@ static unsigned resolve_width(unsigned flags)
 	return flags ? flags : X86_WIDTH_64;
 }
 
-static unsigned width_bits(unsigned width)
-{
-	switch (width) {
-	case X86_WIDTH_8: return 8U;
-	case X86_WIDTH_16: return 16U;
-	case X86_WIDTH_32: return 32U;
-	default: return 64U;
-	}
-}
-
 static __u64 width_mask(unsigned width)
 {
 	switch (width) {
@@ -194,7 +184,7 @@ static void check_popcnt(unsigned dst, unsigned src, unsigned flags,
 	model_popcnt(dst, src, flags);
 
 	/* ---- run the real routed arm ---- */
-	X86_SIM_L_EXEC(X86_OP_POPCNT, dst, src, flags, 0U, 0U);
+	X86_SIM_L_EXEC(X86_OP_POPCNT, dst, src, flags, 0U, 0ULL);
 
 	COMPARE_ALL();
 

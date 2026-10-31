@@ -263,7 +263,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	} else {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_BZHI, dst_reg, src_reg, flags,
-				       count_reg, 0U);
+				       count_reg, 0ULL);
 		else
 			X86_SIM_L_EXEC_BZHI(dst_reg, src_reg, count_reg, flags);
 	}

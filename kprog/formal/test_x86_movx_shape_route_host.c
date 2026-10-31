@@ -209,7 +209,7 @@ static void check_movx(unsigned op, unsigned dst, unsigned src, unsigned flags,
 	model_movx(op, dst, src, flags, aux);
 
 	/* ---- run the real routed arm ---- */
-	X86_SIM_L_EXEC(op, dst, src, flags, aux, 0U);
+	X86_SIM_L_EXEC(op, dst, src, flags, aux, 0ULL);
 
 	COMPARE_ALL();
 

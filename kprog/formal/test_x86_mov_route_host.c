@@ -370,7 +370,7 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 
 	/* ---- the real routed arm ---- */
 	if (aux == 0U)
-		X86_SIM_L_EXEC(X86_OP_MOV_REG, dst, src, flags, aux, 0U);
+		X86_SIM_L_EXEC(X86_OP_MOV_REG, dst, src, flags, aux, 0ULL);
 	else
 		X86_SIM_L_EXEC_MOV_REG_AUX(dst, src, flags, aux);
 

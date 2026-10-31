@@ -313,7 +313,7 @@ static void check_bswap(unsigned dst, unsigned flags, unsigned aux,
 	mtag[dst] = X86_SIM_TAG_SCALAR;
 
 	/* ---- the real routed arm ---- */
-	X86_SIM_L_EXEC(X86_OP_BSWAP, dst, 0U, flags, aux, 0U);
+	X86_SIM_L_EXEC(X86_OP_BSWAP, dst, 0U, flags, aux, 0ULL);
 
 	COMPARE_ALL();
 	COMPARE_MEMORY();

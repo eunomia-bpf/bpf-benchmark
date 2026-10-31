@@ -1876,7 +1876,7 @@ static void check_callreg(const char *what, __u64 id)
 					    X86_SIM_TAG_SCALAR);
 		CAPTURE_ALL(&seed);
 		X86_SIM_L_EXEC(X86_OP_CALL_REG, X86_REG_NONE, X86_RAX, 0U,
-			       0U, 0U);
+			       0U, 0ULL);
 		CAPTURE_ALL(&a);
 	}
 
@@ -1900,7 +1900,7 @@ static void check_nop(void)
 		PLANT_HEAP_BASE(X86_RBX);
 		CAPTURE_ALL(&seed);
 		X86_SIM_L_EXEC(X86_OP_NOP, X86_RDX, X86_RCX, X86_WIDTH_64, 0U,
-			       0U);
+			       0ULL);
 		CAPTURE_ALL(&a);
 	}
 
@@ -1923,7 +1923,7 @@ static void check_nonmember(void)
 		PLANT_HEAP_BASE(X86_RBX);
 		CAPTURE_ALL(&seed);
 		X86_SIM_L_EXEC(X86_OP_RET, X86_RDX, X86_RAX, X86_WIDTH_64, 0U,
-			       0U);
+			       0ULL);
 		CAPTURE_ALL(&a);
 	}
 

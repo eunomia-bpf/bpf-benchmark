@@ -214,7 +214,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned src_reg,
 			       imm);
 	else
 		X86_SIM_L_EXEC(X86_OP_BZHI, dst_reg, src_reg, flags, count_reg,
-			       0U);
+			       0ULL);
 
 	/* ---- compare the whole register file ---- */
 	for (i = 0; i < 16U; i++) {
