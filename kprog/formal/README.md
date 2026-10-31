@@ -46,6 +46,14 @@ sabotaged `KPROG_X86_XMM0_BASE_FORM` polarity reports `FAIL (4)` at exit 1,
 and every early return in all three hosts is now metered (0 unmetered of 15,
 26, and 26).
 
+The arm64 helper family is now covered by construction rather than by count:
+`build/helper_route_host.c` drives exactly the 61 `ARM64_SIM_BPF_CALL_bpf_*`
+bodies the header defines, with no body left undriven and no drive naming an
+absent body, which is what lets the 0462 battery's per-body repaints turn the
+host red.
+That host is also in the gate, so the coverage and the host cannot drift apart
+silently.
+
 Fixing those oracles also surfaced a coupling worth recording: the batteries
 anchor on host source text, so bracing the returns broke two
 `build/mut_x86_xmm0.py` rows (`host_p4_pin1_slice`, `host_p4_pin6_regs`) with
