@@ -2764,6 +2764,19 @@ must add the macro to `helpers/commands.tex` alongside
 (`7-`/`9-conclusion`, `6-`/`8-related-work`,
 `3-characterization` vs `3-design`) in the same change.
 
+What `\lang` should expand to is recoverable from the
+tree, so the reorganisation does not have to invent it:
+`7-evaluation.tex` opens with "This section evaluates
+\lang, the hardware-idiom instantiation of \tool", and
+`docs/paper/rebuttal/02b-author-response-draft-2026-09-02.md`
+states the naming directly — BPF-Ext is the extension
+mechanism and Kinsn is the client supplying seven
+hardware-idiom operations. So the missing macro is
+`\newcommand{\lang}{\textsc{Kinsn}\xspace}`, matching the
+`\textsc{...}\xspace` form the other three use. The
+definition is a naming decision, so it is recorded here
+rather than added unilaterally.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
