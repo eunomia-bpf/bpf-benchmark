@@ -2752,6 +2752,24 @@ positive compile time. `micro/driver.py` reads
 would have shown up as a wrong-architecture result rather
 than an error — worth confirming rather than assuming.
 
+The cause is in the configs themselves, not only the runner
+override: `micro_pure_jit.yaml` and `micro_stage2.yaml`
+both set `paths.proof_dir` to
+`kprog/test/build-x86/x86_sim_proofs`, though only the
+pure-JIT proofs live there — the stage-2 proofs sit one
+level up beside their objects in `kprog/test/build-x86/`.
+The two suites are otherwise clean and disjoint, so this
+path is the sole conflict: 29 benchmarks in
+`micro_pure_jit.yaml` and 13 in `micro_stage2.yaml`, no
+shared name between them, and in both configs every entry
+carries the four required fields (`base_name`,
+`input_generator`, `expected_result`, `tags`) with no
+duplicate names, so the stage-2 failure is a wrong path
+rather than a malformed suite. Fixing `proof_dir` in
+`micro_stage2.yaml` (and regenerating the 13 metadata
+files) is sufficient; the runner override then agrees with
+the config instead of fighting it.
+
 The paper currently compiles without an evaluation section,
 although its abstract claims empirical answers. `main.tex`
 inputs eight sections — abstract, introduction,
