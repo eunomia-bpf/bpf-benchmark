@@ -2689,6 +2689,30 @@ hosts live in the gitignored build/
 directory, so a missing one fails the
 gate loudly at a named Makefile line.
 
+An open memory-safety gap in both simulators is
+recorded here rather than left implicit, because
+it bounds what the refinement results mean. A
+stack access may resolve near the end of the frame
+arena without any check that the whole window
+fits: an 8-byte access at the last byte touches
+memory past the array. x86-64 reaches it through
+the byte-ladder arm's `b[index + 7]` (the lane
+predicate is a runtime value, so the compiler
+cannot bound `index`); AArch64 through
+`KPROG_ARM64_LOAD_BYTES`. AddressSanitizer
+reproduces both on the untouched baseline: x86-64
+at `off = -1` (index 63 of 64), AArch64 at
+`off = 57` (index 153 of 160; offset 56 is the
+last in-bounds one). This is a window-bound
+obligation, not a defect in which bytes an access
+picks — the per-body contracts constrain the
+in-window bytes and the arm choice and are
+unaffected, and the route hosts bound their sweeps
+at `off + width <= STACK_BYTES`, which is why the
+gate stays green over it. Closing it is an arena
+guard in the simulator's trusted body, not
+something the refinement layer can supply.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
