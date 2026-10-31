@@ -37,6 +37,15 @@ sabotages now report `FAIL (3)`, `FAIL (4)`, and `FAIL (1)` with exit status 1,
 while the pristine tree keeps its exact case counts (4675, 283, 318) and the
 gate stays at 220 banners.
 
+A follow-up audit found four more unmetered returns in
+`test_x86_xmm0_host.c`'s pin 2: they carry trailing comments after
+`return 0;`, which the brace-wrapping pass skipped. A mismatch there aborted
+the part and only shortened the case count, so a distinct pin-2 failure would
+still have printed OK. All four now increment the counter like the rest; a
+sabotaged `KPROG_X86_XMM0_BASE_FORM` polarity reports `FAIL (4)` at exit 1,
+and every early return in all three hosts is now metered (0 unmetered of 15,
+26, and 26).
+
 Fixing those oracles also surfaced a coupling worth recording: the batteries
 anchor on host source text, so bracing the returns broke two
 `build/mut_x86_xmm0.py` rows (`host_p4_pin1_slice`, `host_p4_pin6_regs`) with
