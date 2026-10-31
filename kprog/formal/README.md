@@ -12,7 +12,12 @@ What the gate currently covers, measured from one full `make check` run:
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
 compiling transitively from the gate's roots and proving 1,941 theorems with
-no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions. Two
+no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 473 of
+those (24%) are discharged by `native_decide`, i.e. by compiled evaluation, so
+they rest on the compiler as well as the kernel — 20 of the 599
+refinement-named theorems, each a finite-table equality, and the rest finite
+enumerations or concrete examples, never a compositional or arithmetic
+obligation. Two
 consecutive full runs produce byte-identical output (same md5), so the gate is
 deterministic. The 330 `build/mut_*.py` batteries are the evidence that each
 banner can fail, and are untracked by design; the seven route hosts those
