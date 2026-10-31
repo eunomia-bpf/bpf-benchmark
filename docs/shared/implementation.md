@@ -2713,6 +2713,29 @@ gate stays green over it. Closing it is an arena
 guard in the simulator's trusted body, not
 something the refinement layer can supply.
 
+An artifact gap breaks the stage-2 suite under the
+`native_proof` runtime. `micro/config/micro_stage2.yaml`
+lists 13 benchmarks, and all 13 have `.bpf.o` under
+`kprog/test/build-x86/`, but none of them has a
+`.compile.json` — neither there nor under
+`x86_sim_proofs/`. `micro/driver.py` requires both paths
+for `native_proof` (it appends `proof_object_path` and
+`proof_compile_metadata_path` to `required_paths` and
+calls `require_existing_paths`), so every one of the 13
+fails at startup with "missing native_proof artifact
+paths". The 29 pure-JIT benchmarks are unaffected: all 29
+have both files under `x86_sim_proofs/`. The second cause
+is independent of the first — `runner/suites/micro.py`
+sets `BPFREJIT_MICRO_PROOF_DIR` to `sim_proof_root(...)`
+unconditionally, even for a stage-2 suite, while it
+correctly switches `program_dir` to `stage2_program_root`;
+the stage-2 proofs live beside the objects in
+`kprog/test/build-x86/`, so the override points at the
+wrong tree as well. Regenerating the 13 through
+`kprog/run_micro_sim_batch.py` (which writes the metadata
+next to the object) and pointing the stage-2 proof dir at
+`stage2_program_root` would close both.
+
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
 `mut_arm64_flag_route.py` (untracked)
