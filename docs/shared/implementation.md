@@ -2852,6 +2852,26 @@ complement. The arm64 pair is the `kernel_rejit` runtime of
 `aws_arm64_micro_20260606_001225_821028` against that run's
 own `kernel` runtime; x86-64 spans the two committed runs.
 
+The Katran application figures were aggregated differently
+from the paper's stated convention. Section~7 opens with
+"each experiment uses three measured runs and reports the
+median", but the 1.073x conservative-policy throughput is
+the ratio of per-arm sample means
+(`data/corpus/aws_arm64_corpus_20260605_080836_924256`:
+baseline 831670/847516/851683 pps, post
+902658/915235/897122). The median convention the paper
+declares gives 1.065063x, and the paired coverage-max run
+(`..._094729_221231`) gives 0.984357x, not the printed
+0.995x. Both reproduce exactly from the committed
+per-sample pktgen output; the BPF-cost ratios (0.941x for
+conservative) are already ratios of summed counters and are
+unaffected. `7-evaluation.tex` and its two orphaned tables
+and the case-study plot script now carry the median
+figures. The same convention shift moves tuned Cilium from
+1.114x (printed) to 1.118935x, which the audit already
+recorded; that is a different artifact
+(`..._004607_636479`) and was not changed here.
+
 The load-overhead paragraph was also wrong against its own
 data, and in a way that overstated the result in the
 paper's favour. It claimed 0.99x kernel-side load and a
