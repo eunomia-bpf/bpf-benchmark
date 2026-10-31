@@ -87,6 +87,15 @@ plus a `default` that zeroes the return register, and
 `build/x86_route_host.c` exercises ids 0-8, so the named arms and the
 out-of-range default are both live.
 
+The 32 equivalences the 0462 battery marks are a checked fact rather than an
+assumption. `ARM64_SIM_L_WRITE_REG_WIDTH` narrows through
+`KPROG_ARM64_APPLY_WIDTH`, then picks a write arm via
+`KPROG_ARM64_WRITE_ARM`; both arms store the value and set
+`ARM64_SIM_TAG_SCALAR`, and the register write differs only by a `(__u32)`
+cast. For the zero value these bodies commit, `(__u32)0 == 0` and both arms
+write the same tag, so repainting `ARM64_WIDTH_64` to `ARM64_WIDTH_32` leaves
+the observed register word and tag unchanged.
+
 Fixing those oracles also surfaced a coupling worth recording: the batteries
 anchor on host source text, so bracing the returns broke two
 `build/mut_x86_xmm0.py` rows (`host_p4_pin1_slice`, `host_p4_pin6_regs`) with
