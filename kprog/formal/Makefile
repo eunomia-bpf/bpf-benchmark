@@ -145,7 +145,7 @@ check:
 	lake env lean KProgFormal/Arm64ControlFlow.lean
 	lake env lean KProgFormal/Arm64Cond.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_cond_host.c -o build/test_arm64_cond_host
-	./build/test_arm64_cond_host
+	ulimit -c 0; ./build/test_arm64_cond_host
 	lake env lean KProgFormal/X86ControlFlow.lean
 	lake env lean KProgFormal/GeneratedX86BranchEmit.lean
 	lake env lean KProgFormal/X86BranchEmit.lean
@@ -537,7 +537,7 @@ check:
 	./build/test_arm64_flags_host
 	lake env lean KProgFormal/Arm64AluResult.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_result_host.c -o build/test_arm64_alu_result_host
-	./build/test_arm64_alu_result_host
+	ulimit -c 0; ./build/test_arm64_alu_result_host
 	lake env lean KProgFormal/GeneratedArm64AluHandler.lean
 	lake env lean KProgFormal/Arm64AluHandler.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
@@ -600,21 +600,21 @@ check:
 	lake env lean KProgFormal/GeneratedArm64Mul.lean
 	lake env lean KProgFormal/Arm64Mul.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mul_host.c -o build/test_arm64_mul_host
-	./build/test_arm64_mul_host
+	ulimit -c 0; ./build/test_arm64_mul_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/mul_route_host.c -o build/mut_mulroute
 	./build/mut_mulroute
 	lake env lean KProgFormal/GeneratedArm64Extrev.lean
 	lake env lean KProgFormal/Arm64Extrev.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_extrev_host.c -o build/test_arm64_extrev_host
-	./build/test_arm64_extrev_host
+	ulimit -c 0; ./build/test_arm64_extrev_host
 	lake env lean KProgFormal/GeneratedArm64Csel.lean
 	lake env lean KProgFormal/Arm64Csel.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_csel_host.c -o build/test_arm64_csel_host
-	./build/test_arm64_csel_host
+	ulimit -c 0; ./build/test_arm64_csel_host
 	lake env lean KProgFormal/GeneratedArm64CselPtr.lean
 	lake env lean KProgFormal/Arm64CselPtr.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_csel_ptr_host.c -o build/test_arm64_csel_ptr_host
-	./build/test_arm64_csel_ptr_host
+	ulimit -c 0; ./build/test_arm64_csel_ptr_host
 	lake env lean KProgFormal/GeneratedArm64Branch.lean
 	lake env lean KProgFormal/Arm64Branch.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_branch_host.c -o build/test_arm64_branch_host
@@ -634,63 +634,63 @@ check:
 	lake env lean KProgFormal/GeneratedArm64Movk.lean
 	lake env lean KProgFormal/Arm64Movk.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_movk_host.c -o build/test_arm64_movk_host
-	./build/test_arm64_movk_host
+	ulimit -c 0; ./build/test_arm64_movk_host
 	lake env lean KProgFormal/GeneratedArm64Shift.lean
 	lake env lean KProgFormal/Arm64Shift.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_shift_host.c -o build/test_arm64_shift_host
-	./build/test_arm64_shift_host
+	ulimit -c 0; ./build/test_arm64_shift_host
 	lake env lean KProgFormal/GeneratedArm64Reduction.lean
 	lake env lean KProgFormal/Arm64Reduction.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_reduction_host.c -o build/test_arm64_reduction_host
-	./build/test_arm64_reduction_host
+	ulimit -c 0; ./build/test_arm64_reduction_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/reduction_route_host.c -o build/reduction_route_host
 	./build/reduction_route_host
 	lake env lean KProgFormal/GeneratedArm64Unary.lean
 	lake env lean KProgFormal/Arm64Unary.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_unary_host.c -o build/test_arm64_unary_host
-	./build/test_arm64_unary_host
+	ulimit -c 0; ./build/test_arm64_unary_host
 	lake env lean KProgFormal/GeneratedArm64Cneg.lean
 	lake env lean KProgFormal/Arm64Cneg.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_cneg_host.c -o build/test_arm64_cneg_host
-	./build/test_arm64_cneg_host
+	ulimit -c 0; ./build/test_arm64_cneg_host
 	lake env lean KProgFormal/GeneratedArm64Orn.lean
 	lake env lean KProgFormal/Arm64Orn.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_orn_host.c -o build/test_arm64_orn_host
-	./build/test_arm64_orn_host
+	ulimit -c 0; ./build/test_arm64_orn_host
 	lake env lean KProgFormal/GeneratedArm64Adrp.lean
 	lake env lean KProgFormal/Arm64Adrp.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_adrp_host.c -o build/test_arm64_adrp_host
-	./build/test_arm64_adrp_host
+	ulimit -c 0; ./build/test_arm64_adrp_host
 	lake env lean KProgFormal/GeneratedArm64Stlxr.lean
 	lake env lean KProgFormal/Arm64Stlxr.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
-	./build/test_arm64_stlxr_host
+	ulimit -c 0; ./build/test_arm64_stlxr_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/stlxr_route_host.c -o build/stlxr_route_host
 	./build/stlxr_route_host
 	lake env lean KProgFormal/GeneratedArm64Mov.lean
 	lake env lean KProgFormal/Arm64Mov.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mov_host.c -o build/test_arm64_mov_host
-	./build/test_arm64_mov_host
+	ulimit -c 0; ./build/test_arm64_mov_host
 	lake env lean KProgFormal/GeneratedArm64LdrSx.lean
 	lake env lean KProgFormal/Arm64LdrSx.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_ldrsx_host.c -o build/test_arm64_ldrsx_host
-	./build/test_arm64_ldrsx_host
+	ulimit -c 0; ./build/test_arm64_ldrsx_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/ldrsx_route_host.c -o build/ldrsx_route_host
 	./build/ldrsx_route_host
 	lake env lean KProgFormal/GeneratedArm64LdrsxOp.lean
 	lake env lean KProgFormal/Arm64LdrsxOp.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_ldrsx_op_host.c -o build/test_arm64_ldrsx_op_host
-	./build/test_arm64_ldrsx_op_host
+	ulimit -c 0; ./build/test_arm64_ldrsx_op_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_ldrsx_op_route_host.c -o build/test_arm64_ldrsx_op_route_host
 	./build/test_arm64_ldrsx_op_route_host
 	lake env lean KProgFormal/GeneratedArm64LoadTag.lean
 	lake env lean KProgFormal/Arm64LoadTag.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_load_tag_host.c -o build/test_arm64_load_tag_host
-	./build/test_arm64_load_tag_host
+	ulimit -c 0; ./build/test_arm64_load_tag_host
 	lake env lean KProgFormal/GeneratedArm64PairLoadTag.lean
 	lake env lean KProgFormal/Arm64PairLoadTag.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_pair_load_tag_host.c -o build/test_arm64_pair_load_tag_host
-	./build/test_arm64_pair_load_tag_host
+	ulimit -c 0; ./build/test_arm64_pair_load_tag_host
 	lake env lean KProgFormal/GeneratedArm64MemOffset.lean
 	lake env lean KProgFormal/Arm64MemOffset.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_offset_host.c -o build/test_arm64_mem_offset_host
@@ -716,11 +716,11 @@ check:
 	./build/test_arm64_reg_dispatch_route_host
 	lake env lean KProgFormal/Arm64Fmov.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_fmov_host.c -o build/test_arm64_fmov_host
-	./build/test_arm64_fmov_host
+	ulimit -c 0; ./build/test_arm64_fmov_host
 	lake env lean KProgFormal/GeneratedArm64FmovDest.lean
 	lake env lean KProgFormal/Arm64FmovDest.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_fmov_dest_host.c -o build/test_arm64_fmov_dest_host
-	./build/test_arm64_fmov_dest_host
+	ulimit -c 0; ./build/test_arm64_fmov_dest_host
 	lake env lean KProgFormal/GeneratedArm64LoadBytes.lean
 	lake env lean KProgFormal/Arm64LoadBytes.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_load_bytes_host.c -o build/test_arm64_load_bytes_host
@@ -734,7 +734,7 @@ check:
 	lake env lean KProgFormal/GeneratedArm64ByteLane.lean
 	lake env lean KProgFormal/Arm64ByteLane.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_byte_lane_host.c -o build/test_arm64_byte_lane_host
-	./build/test_arm64_byte_lane_host
+	ulimit -c 0; ./build/test_arm64_byte_lane_host
 	lake env lean KProgFormal/GeneratedArm64MemDispatch.lean
 	lake env lean KProgFormal/Arm64MemDispatch.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_dispatch_host.c -o build/test_arm64_mem_dispatch_host
