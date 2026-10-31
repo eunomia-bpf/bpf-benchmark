@@ -2836,6 +2836,22 @@ matched cases and 1.242x over 27, while the arm64 dataset
 three decimals, so the reported figures are the 27-case
 population and the 29-case population is 1.216/1.208.
 
+The code-size figures use a *different* population from the
+speedups, which the text did not previously say. Reproducing
+`jited_prog_len` as a geomean of kinsn/stock over all 29
+matched cases gives exactly the paper's 0.772x (x86-64) and
+0.879x (arm64); over the 27-case population the same
+computation gives 0.760x and 0.871x. So the speedups
+(1.242/1.222) are 27-case and the code-size reductions
+(0.772/0.879) are 29-case, both exact against their data.
+`xlated_prog_len` over the same pairs gives 0.819x (29-case)
+and 0.807x (27-case) on x86-64 and 0.884x / 0.876x on arm64,
+so `jited_prog_len` is the field the paper means by
+"generated kernel JIT code" and 22.8%/12.1% is its exact
+complement. The arm64 pair is the `kernel_rejit` runtime of
+`aws_arm64_micro_20260606_001225_821028` against that run's
+own `kernel` runtime; x86-64 spans the two committed runs.
+
 One more prerequisite was broken, and it would have failed
 the build rather than a reference check: the two figure
 wrappers the evaluation section inputs named PDFs that no
