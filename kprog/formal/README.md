@@ -58,6 +58,13 @@ contracts (which constrain those in-window bytes and the arm choice, with every
 oracle driving in-range indices) are unaffected. The gap is an arena guard
 belonging to the simulator's trusted body.
 
+The threshold is exact and reproducible: on AArch64's 160-byte arena with bias
+96, an 8-byte access at offset 56 (index 152) is the last in-bounds one, and
+offset 57 is the first that overruns — ASan reports it against `__a64_stack`.
+No current oracle drives those offsets: the route hosts cap their sweeps at
+`off + width <= ARM64_SIM_STACK_BYTES`, which is exactly why the gate stays
+green over a defect that is present in the code.
+
 The 138/138/138 pairing is verified as a bijection in both directions rather
 than inferred from equal counts: every `*_spec.json` has a same-named
 `generated/*.h` with nothing left over on either side (both set differences
