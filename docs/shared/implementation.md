@@ -2798,6 +2798,18 @@ must add the macro to `helpers/commands.tex` alongside
 (`7-`/`9-conclusion`, `6-`/`8-related-work`,
 `3-characterization` vs `3-design`) in the same change.
 
+The dependency order the reorganisation has to respect: the
+orphaned `7-evaluation.tex` references only `sec:design` and
+its own figures (`fig:eval-kinsn-micro` once and
+`fig:app_policy_probes` three times, both defined in files
+it inputs itself), so it can be restored independently of
+the other orphans. `3-characterization.tex` is the constrained one: it
+references `sec:eval` twice and `sec:background` once, so it
+must come *after* the evaluation section, not before it. Any
+evaluation prose that cites `sec:characterization` would break
+until that section is also restored, which is why an earlier
+edit of mine cited `sec:design` instead.
+
 What `\lang` should expand to is recoverable from the
 tree, so the reorganisation does not have to invent it:
 `7-evaluation.tex` opens with "This section evaluates
