@@ -2852,6 +2852,22 @@ complement. The arm64 pair is the `kernel_rejit` runtime of
 `aws_arm64_micro_20260606_001225_821028` against that run's
 own `kernel` runtime; x86-64 spans the two committed runs.
 
+The golden gate was also leaving garbage on disk. Twenty-two of
+the arm64 host tests verify an unsupported arm by forking a
+child that calls `abort()`, and with `ulimit -c unlimited`
+each child wrote a core file: one `make check` added about
+240 per test, and the tree had accumulated 21313 cores
+totalling 7.0 GB under `kprog/formal/`. Each such line now
+runs as `ulimit -c 0; ./build/<test>`, so the gate is
+byte-neutral on disk; the accumulated cores were removed.
+Gate on the committed x86 header: rc 0, 226 `cross-check: OK`
+banners, zero new cores. The working tree's x86 header is
+still the other agent's uncommitted `STACK_BYTE(..., 1)` edit,
+so a gate over the dirty tree stops at the x86 stack arm
+route host (1208 cases) with 45 arena-byte mismatches; against
+the committed header the same gate passes, which pins the
+failure to that edit rather than to anything in this line.
+
 The Katran application figures were aggregated differently
 from the paper's stated convention. Section~7 opens with
 "each experiment uses three measured runs and reports the
