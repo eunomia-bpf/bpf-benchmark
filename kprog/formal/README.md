@@ -71,6 +71,14 @@ host red.
 That host is also in the gate, so the coverage and the host cannot drift apart
 silently.
 
+The x86 helper surface closes the same way by a different mechanism: the seven
+`X86_SIM_BPF_CALL_bpf_*` bodies are reached through the `X86_SIM_BPF_CALL_ID`
+dispatch switch rather than driven by name, and all seven bodies are named by
+one of its case arms, so no body is unreachable. The switch is seven named arms
+plus a `default` that zeroes the return register, and
+`build/x86_route_host.c` exercises ids 0-8, so the named arms and the
+out-of-range default are both live.
+
 Fixing those oracles also surfaced a coupling worth recording: the batteries
 anchor on host source text, so bracing the returns broke two
 `build/mut_x86_xmm0.py` rows (`host_p4_pin1_slice`, `host_p4_pin6_regs`) with
