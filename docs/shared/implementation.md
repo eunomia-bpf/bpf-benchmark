@@ -2810,6 +2810,19 @@ evaluation prose that cites `sec:characterization` would break
 until that section is also restored, which is why an earlier
 edit of mine cited `sec:design` instead.
 
+The bibliography is clean across both compiled and orphaned
+sections, so restoring the evaluation and characterization
+files will not surface unresolved citations: `reference.bib` —
+the only file `main.tex` loads via `\bibliography{reference}` —
+holds 61 entries with no duplicate keys, and all 27 distinct
+keys cited anywhere in `sections/` or `figures/` resolve,
+including the three the evaluation section cites
+(`mao2024merlin`, `xu2021synthesizing`, `zhu2025epso`) and
+the two the orphaned related-work file cites
+(`brunella2020hxdp`, `lu2024moat`). The five citations in
+the *compiled* related-work section resolve as well, so no
+current PDF renders a `[?]`.
+
 What `\lang` should expand to is recoverable from the
 tree, so the reorganisation does not have to invent it:
 `7-evaluation.tex` opens with "This section evaluates
