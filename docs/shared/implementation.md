@@ -2915,7 +2915,10 @@ around the `posix_spawn` of the `bpfopt` binary in
 whole userspace optimizer, not just site selection, and it
 is not a kernel-side cost at all.
 The paragraph now reports the measured medians and p90 and
-names the outlier instead of the unsubstantiated range.
+names the outlier instead of the unsubstantiated range, and
+says the two runs are single-sample rather than the
+three-run median protocol the section declares, since the
+numbers it reports are per-program percentiles of one run.
 
 One more prerequisite was broken, and it would have failed
 the build rather than a reference check: the two figure
