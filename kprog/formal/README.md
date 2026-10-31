@@ -6911,6 +6911,35 @@ is the most likely origin of the currently dirty
 row of `build/mut_x86_route.py`, i.e. an unrestored
 mutation, not a hand edit.
 
+That diagnosis is now confirmed rather than likely.
+The dirty line is byte-identical to the `rep` half
+of the row `equiv stack-write byte0 lane repaint
+(no narrow-write scene)` (`build/mut_x86_route.py`
+lines 415-419), including the padding before the
+continuation backslash, and that battery has no
+signal handler and no `try/finally` around
+`mutate`/`detect_route` - only a `restore()` before
+each row and one after the loop - so a signal
+between `mutate` and `restore` leaves exactly this
+line. Running `make check` over the dirty tree
+reproduces the consequence: the x86 stack arm route
+host fails with 45 arena-byte mismatches at
+`index 61-63` (`got 0 want <value>`), precisely the
+narrow-write scene the row's own name says is absent.
+Against the committed header the same gate is rc 0
+with 226 `cross-check: OK` banners and zero new core
+files, so the failure belongs to the stranded
+mutation and nothing in this step.
+
+Step 0462 gate recipe fix: 22 arm64 host tests
+verify an unsupported arm by forking a child that
+calls `abort()`. With `ulimit -c unlimited` every
+child wrote a core, about 240 per test per run -
+21313 files and 7.0 GB had accumulated under
+`build/`'s parent before this was noticed. Each
+line is now `ulimit -c 0; ./build/<test>`, so a
+gate run adds nothing; the backlog was deleted.
+
 ### Step 0443 - arm64 CCMP decode sweep
 
 The arm64 CCMP decode: the 59-row
