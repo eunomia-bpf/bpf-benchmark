@@ -88,6 +88,21 @@ the `arm64_aux_b{1,2,3}_roundtrip` Lean lemmas. Sabotaging `AUX_B1`'s mask from
 `0xff` to `0x7f` makes that host report 91,228 mismatches, so the lane is
 genuinely pinned rather than assumed.
 
+Macro reachability was audited the same way, and "no host names it" is not the
+right test. Of 181 `*_SIM_L_*` macros, 174 are reached from a host either
+directly or through another macro's body; the 7 that are not split into three
+kinds. `ARM64_SIM_L_SET_{ADD,SUB,LOGIC}_FLAGS` are genuinely dead — the
+simulator routes through `KPROG_ARM64_EXEC_*` instead — and are pre-existing, so
+they are left alone rather than deleted in passing. `X86_SIM_L_HELPER_ARG_PTR`
+looked dead only because the traverser only followed `*_SIM_L_*` bodies: it is
+called from `X86_SIM_BPF_CALL_bpf_map_lookup_elem`, which the
+`X86_SIM_BPF_CALL_ID` dispatch reaches and the route host drives, so it is live.
+`ARM64_SIM_L_STORE_Q0_STACK` looks dead too, but
+`generate_arm64_helper_arg_ptr_spec.py` uses its `#define` line as the
+`HELPER_PTR_END` slicing boundary for the helper-argument-pointer text, so
+deleting it would break that generator's `--check`. An "unused" macro here may
+be a live generator anchor.
+
 The 138/138/138 pairing is verified as a bijection in both directions rather
 than inferred from equal counts: every `*_spec.json` has a same-named
 `generated/*.h` with nothing left over on either side (both set differences
