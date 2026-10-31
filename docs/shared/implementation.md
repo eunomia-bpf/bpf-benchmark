@@ -2823,6 +2823,24 @@ the two the orphaned related-work file cites
 the *compiled* related-work section resolve as well, so no
 current PDF renders a `[?]`.
 
+One more prerequisite is broken, and it would fail the build
+rather than a reference check: the two figure wrappers the
+evaluation section inputs still name PDFs that no longer
+exist. `figures/sec-6-kinsn-micro-rq1.tex` includes
+`figures/sec-6-x86-kinsn-micro-best-raw-27-20260608.pdf` and
+`figures/sec-6-arm64-kinsn-micro-rejit-27-20260608.pdf`;
+both are absent, because commit `33b180b` ("Update legacy
+artifact references to KOperation") renamed the PDFs to
+`sec-6-{x86,arm64}-koperation-micro-*-20260608.pdf`, and the
+later `c91eb7f` ("Rename kernel instruction prototype
+references to kinsn") renamed the `.tex` wrappers back to
+`kinsn` without renaming the PDFs alongside them. So the
+wrappers and the graphics disagree on the name. Either
+rename the two PDFs back or point the two `\includegraphics`
+lines at the `koperation` filenames; the third include
+(`sec-6-rq3-cilium-katran.pdf`) resolves, so only these two
+are affected.
+
 What `\lang` should expand to is recoverable from the
 tree, so the reorganisation does not have to invent it:
 `7-evaluation.tex` opens with "This section evaluates
