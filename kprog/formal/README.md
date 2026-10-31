@@ -32,6 +32,15 @@ a stale note. The 220 banners are all distinct oracles — 219 report a plain
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
+The 138/138/138 pairing is verified as a bijection in both directions rather
+than inferred from equal counts: every `*_spec.json` has a same-named
+`generated/*.h` with nothing left over on either side (both set differences
+empty), and every spec likewise has a `Generated<Name>.lean` once the
+generator's CamelCase splitting is normalized — `arm64_ldrsx`,
+`x86_callmem`, `x86_cmpop`, `x86_doubleshift`, `x86_doubleshift_arm`, and
+`x86_pushpop` differ from a naive capitalisation only in how an acronym is
+split (`LdrSx`, `CallMem`, ...).
+
 Three oracles did not previously have that negative property: their part
 functions stopped at a mismatch with a bare `return 0`, and `main` summed the
 returned case counts and printed OK unconditionally, so the banner could not
