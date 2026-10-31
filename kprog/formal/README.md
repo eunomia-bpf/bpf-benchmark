@@ -41,6 +41,19 @@ host that `make check` runs, so their contracts are gated even though their
 provenance was never written down. The census should be read as "how many
 harness increments the log has recorded", not as a file total.
 
+An open memory-safety defect in the simulator is recorded here rather than
+left implicit. `X86_SIM_L_STACK_READ` / `_STACK_WRITE` use a little-endian byte
+ladder for every non-word-aligned access, whose last rung is
+`__x86_stack_mem.b[index + 7]`; the lane predicate gating each rung is a
+runtime value, so the compiler cannot bound `index`. Any access resolving to
+an index in the final seven bytes of the 64-byte arena reads or writes past
+the array. AddressSanitizer reproduces it on the untouched baseline — a 64-bit
+read at `off = -1` (index 63) reports `stack-buffer-overflow`, and the write
+does the same. The per-body contracts are unaffected (they constrain the
+in-window bytes and the arm choice, and oracles drive in-range indices), so no
+proved statement is wrong; the gap is an arena guard belonging to the
+simulator's trusted body.
+
 The 138/138/138 pairing is verified as a bijection in both directions rather
 than inferred from equal counts: every `*_spec.json` has a same-named
 `generated/*.h` with nothing left over on either side (both set differences
