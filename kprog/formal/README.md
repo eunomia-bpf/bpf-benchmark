@@ -23,6 +23,13 @@ deterministic. The 330 `build/mut_*.py` batteries are the evidence that each
 banner can fail, and are untracked by design; the thirteen route hosts those
 batteries drive are pinned into the recipe so their cases are enforced by the
 gate itself rather than only by the batteries.
+The remaining unbuilt sources under `build/` are scratch, not coverage: 41 are
+ad-hoc probes (`nb*.c`, `onebar*.c`, which even suppress `-Warray-bounds`),
+and the two large ones are stale copies — `dbg_host.c` is
+`btmem_index_route_host.c` plus a debug `fprintf`, and `wprobe.c` is
+byte-identical to the gated `test_x86_write_width_arm_route_host.c`. Both
+duplicates emit the same banner and case count as the gated host, so adding
+them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
