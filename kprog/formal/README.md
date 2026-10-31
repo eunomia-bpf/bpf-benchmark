@@ -37,6 +37,18 @@ sabotages now report `FAIL (3)`, `FAIL (4)`, and `FAIL (1)` with exit status 1,
 while the pristine tree keeps its exact case counts (4675, 283, 318) and the
 gate stays at 220 banners.
 
+Fixing those oracles also surfaced a coupling worth recording: the batteries
+anchor on host source text, so bracing the returns broke two
+`build/mut_x86_xmm0.py` rows (`host_p4_pin1_slice`, `host_p4_pin6_regs`) with
+`BROKEN ANCHOR` until their anchors were updated to the braced form; the
+battery is back to `ALL AS EXPECTED` (50 mutations). `build/mut_x86_ptr_write.py`
+(121 mutations) and, on a pristine x86 header, `build/mut_x86_movbe.py` (114)
+also run clean. On the current tree the movbe battery reports 2 failures, both
+in its *route* host's banner rows; that host fails only because of the
+unrestored `x86_sim_local_bpf.h` mutation described above — with `HEAD`'s
+header it prints `OK (71 cases)` and the battery is green, so the two failures
+are the stranded line's, not the battery's.
+
 `KProgFormal.TagErasure` models a bounded fragment drawn from the simulators:
 a 64-bit move, a pointer-shaped 64-bit add, an x86-shaped scalarizing integer
 multiply-immediate, and a 64-bit load of the packet or packet-end pointer from
