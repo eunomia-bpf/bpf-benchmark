@@ -309,6 +309,11 @@ static __s64 oracle_mem_offset(__u32 aux, __s64 disp, __u64 index_value)
 	return off;
 }
 
+/* Mismatches a part detects. Each part stops at its first mismatch, so the
+ * case count it returns cannot double as the failure tally; without this the
+ * banner in main would print OK on a corrupted contract. */
+static unsigned mismatches;
+
 /* ------------------------------------------------------------------ */
 /* Part 1: the generated width contract vs. the oracle.                */
 /* ------------------------------------------------------------------ */
@@ -328,11 +333,17 @@ static unsigned part1(void)
 		if (got != want) {
 			fprintf(stderr, "width mismatch flags=%u got=%u want=%u\n",
 				flags, got, want);
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		if (got == KPROG_X86_MOVBE_WIDTH_ABSENT) {
 			fprintf(stderr, "absent width flags=%u\n", flags);
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		cases++;
 	}
@@ -368,7 +379,10 @@ static unsigned part2(void)
 						"dispatch mismatch rsp=%u abi=%u "
 						"w64=%u got=%u want=%u\n",
 						r, a, w, got, want);
-					return 0;
+					{
+						mismatches++;
+						return 0;
+					}
 				}
 				cases++;
 			}
@@ -394,7 +408,10 @@ static unsigned part3(void)
 		if (got != want) {
 			fprintf(stderr, "arm mismatch rsp=%d got=%u want=%u\n",
 				rsp, got, want);
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		cases++;
 	}
@@ -587,7 +604,10 @@ static unsigned part4(void)
 									want.src_code, want.width,
 									(unsigned long long)want.value,
 									(unsigned long long)want.dst, want.dst_tag);
-								return 0;
+								{
+									mismatches++;
+									return 0;
+								}
 							}
 							cases++;
 							}
@@ -740,7 +760,10 @@ static unsigned part5(void)
 									want.arm, want.width,
 									(unsigned long long)want.value,
 									(unsigned long long)want.addr);
-								return 0;
+								{
+									mismatches++;
+									return 0;
+								}
 							}
 							cases++;
 						}
@@ -767,10 +790,16 @@ static unsigned part6(void)
 		__u64 imm = 0x8000001000000008ULL;
 
 		if (KPROG_X86_MOVBE_DISP(imm) != (__s64)imm)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		if (KPROG_X86_MOVBE_DISP(imm) ==
 		    (__s64)(__s32)(imm >> 32))
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -779,7 +808,10 @@ static unsigned part6(void)
 	 * byte would widen it to 0xffffffffffffff80. */
 	{
 		if (kprog_x86_bswap_value(0x80ULL, X86_WIDTH_8) != 0x80ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -797,9 +829,15 @@ static unsigned part6(void)
 		e = contract_step_load(0U, 2U, 0U, X86_WIDTH_64,
 				       0x0000000000000010ULL, 0U);
 		if (e.src_code != KPROG_X86_MEM_SRC_ABI_PTR_LOAD)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		if (oracle_regs[0].tag != X86_SIM_TAG_SCALAR)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -813,7 +851,10 @@ static unsigned part6(void)
 		e = contract_step_load(0U, 2U, 0U, X86_WIDTH_32,
 				       0x0000000000000010ULL, 0U);
 		if (e.src_code != KPROG_X86_MEM_SRC_NORMAL_LOAD)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -831,7 +872,10 @@ static unsigned part6(void)
 			if (kprog_x86_bswap_value(
 				    kprog_x86_bswap_value(v, widths[wi]),
 				    widths[wi]) != (v & oracle_mask(widths[wi])))
-				return 0;
+				{
+					mismatches++;
+					return 0;
+				}
 			cases++;
 		}
 	}
@@ -845,9 +889,15 @@ static unsigned part6(void)
 
 		if ((kprog_x86_bswap_value(0xffffffffffffffffULL, X86_WIDTH_16) &
 		     0xffffffffffff0000ULL) != 0)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		if (KPROG_X86_WIDTH_BITS(X86_WIDTH_16) / 8U != 2U)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases = cases_before + 1U;
 	}
 
@@ -873,6 +923,11 @@ int main(void)
 	oracle_restore_pristine();
 	total += part6();
 
+	if (mismatches) {
+		printf("x86 movbe handler host cross-check: FAIL (%u)\n",
+		       mismatches);
+		return 1;
+	}
 	printf("x86 movbe handler host cross-check: OK (%u cases)\n", total);
 	return 0;
 }

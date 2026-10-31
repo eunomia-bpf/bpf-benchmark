@@ -243,6 +243,11 @@ static struct ptr_write_effect model_step(unsigned dst, unsigned op, __u64 imm)
 	return r;
 }
 
+/* Mismatches a part detects. Each part stops at its first mismatch, so the
+ * case count it returns cannot double as the failure tally; without this the
+ * banner in main would print OK on a corrupted contract. */
+static unsigned mismatches;
+
 /* ------------------------------------------------------------------ */
 /* Part 1: the generated tag table vs. the oracle.                     */
 /* ------------------------------------------------------------------ */
@@ -252,17 +257,29 @@ static unsigned part1(void)
 	unsigned cases = 0U;
 
 	if (KPROG_X86_PTR_WRITE_TAG_SCALAR != 0U)
-		return 0U;
+		{
+			mismatches++;
+			return 0U;
+		}
 	if (KPROG_X86_PTR_WRITE_TAG_MAP_PTR != 5U)
-		return 0U;
+		{
+			mismatches++;
+			return 0U;
+		}
 	if (KPROG_X86_PTR_WRITE_TAG_HELPER_ID != 7U)
-		return 0U;
+		{
+			mismatches++;
+			return 0U;
+		}
 	cases++;
 
 	if (KPROG_X86_PTR_WRITE_TAG_MAP_PTR != X86_SIM_TAG_MAP_PTR ||
 	    KPROG_X86_PTR_WRITE_TAG_HELPER_ID != X86_SIM_TAG_HELPER_ID ||
 	    KPROG_X86_PTR_WRITE_TAG_SCALAR != X86_SIM_TAG_SCALAR)
-		return 0U;
+		{
+			mismatches++;
+			return 0U;
+		}
 	cases++;
 
 	/* The fallthrough code names no real tag: it is distinct from every
@@ -271,9 +288,15 @@ static unsigned part1(void)
 	if (KPROG_X86_PTR_WRITE_TAG_ANY == KPROG_X86_PTR_WRITE_TAG_MAP_PTR ||
 	    KPROG_X86_PTR_WRITE_TAG_ANY == KPROG_X86_PTR_WRITE_TAG_HELPER_ID ||
 	    KPROG_X86_PTR_WRITE_TAG_ANY == KPROG_X86_PTR_WRITE_TAG_SCALAR)
-		return 0U;
+		{
+			mismatches++;
+			return 0U;
+		}
 	if (KPROG_X86_PTR_WRITE_TAG_MAP_PTR == KPROG_X86_PTR_WRITE_TAG_HELPER_ID)
-		return 0U;
+		{
+			mismatches++;
+			return 0U;
+		}
 	cases++;
 
 	return cases;
@@ -306,7 +329,10 @@ static unsigned part2(void)
 				fprintf(stderr,
 					"tag selector mismatch map=%u helper=%u "
 					"got=%u want=%u\n", mp, hp, got, want);
-				return 0U;
+				{
+					mismatches++;
+					return 0U;
+				}
 			}
 			cases++;
 		}
@@ -331,7 +357,10 @@ static unsigned part3(void)
 			fprintf(stderr,
 				"helper-id test mismatch tag=%u got=%u want=%u\n",
 				code, got, want);
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		}
 		cases++;
 	}
@@ -405,7 +434,10 @@ static unsigned part4(void)
 						(unsigned long long)want.dst,
 						want.dst_tag,
 						(unsigned long long)want.lane_writes);
-					return 0U;
+					{
+						mismatches++;
+						return 0U;
+					}
 				}
 				cases++;
 			}
@@ -431,13 +463,25 @@ static unsigned part5(void)
 		e = contract_step(2U, X86_OP_MOV_LOAD_MAP_PTR,
 				  0x0123456789abcdefULL);
 		if (e.lane_writes != 0ULL)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (e.tag != X86_SIM_TAG_MAP_PTR)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (oracle_reg_value(2U) != 0x0123456789abcdefULL)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (oracle_regs[2].tag != X86_SIM_TAG_MAP_PTR)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		cases++;
 	}
 
@@ -453,13 +497,25 @@ static unsigned part5(void)
 		e = contract_step(2U, X86_OP_MOV_LOAD_HELPER_ID,
 				  0x0123456789abcdefULL);
 		if (e.lane_writes != 1ULL)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (e.tag != X86_SIM_TAG_HELPER_ID)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (oracle_reg_value(2U) != 0x0123456789abcdefULL)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (oracle_regs[2].tag != X86_SIM_TAG_HELPER_ID)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		cases++;
 
 		memcpy(bare, oracle_regs, sizeof(bare));
@@ -467,7 +523,10 @@ static unsigned part5(void)
 		arm_ptr_tag(2U, 0x0123456789abcdefULL, X86_SIM_TAG_HELPER_ID);
 		for (i = 0U; i < ORACLE_REGS; i++) {
 			if (memcmp(&bare[i], &oracle_regs[i], sizeof(bare[i])))
-				return 0U;
+				{
+					mismatches++;
+					return 0U;
+				}
 		}
 		cases++;
 	}
@@ -481,7 +540,10 @@ static unsigned part5(void)
 		contract_step(2U, X86_OP_MOV_LOAD_MAP_PTR, 0x20ULL);
 		contract_step(2U, X86_OP_MOV_LOAD_HELPER_ID, 0x30ULL);
 		if (memcmp(&before, &oracle_flags, sizeof(before)))
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		cases++;
 	}
 
@@ -493,9 +555,15 @@ static unsigned part5(void)
 		e = contract_step(X86_REG_NONE, X86_OP_MOV_LOAD_HELPER_ID,
 				  0x40ULL);
 		if (e.lane_writes != 0ULL)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (memcmp(pristine_regs, oracle_regs, sizeof(pristine_regs)))
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		cases++;
 	}
 
@@ -512,12 +580,21 @@ static unsigned part5(void)
 		contract_step(5U, X86_OP_MOV_LOAD_HELPER_ID, 0x50ULL);
 		tag_b = oracle_regs[5].tag;
 		if (oracle_reg_value(5U) != 0x50ULL)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (tag_a == tag_b)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (tag_a != X86_SIM_TAG_MAP_PTR ||
 		    tag_b != X86_SIM_TAG_HELPER_ID)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		cases++;
 	}
 
@@ -528,9 +605,15 @@ static unsigned part5(void)
 		__u8 tag = KPROG_X86_PTR_WRITE_TAG(0U, 0U);
 
 		if (tag != KPROG_X86_PTR_WRITE_TAG_ANY)
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(tag))
-			return 0U;
+			{
+				mismatches++;
+				return 0U;
+			}
 		cases++;
 	}
 
@@ -553,6 +636,11 @@ int main(void)
 	oracle_restore_pristine();
 	total += part5();
 
+	if (mismatches) {
+		printf("x86 mov_load_map_ptr/helper_id handler host cross-check: FAIL (%u)\n",
+		       mismatches);
+		return 1;
+	}
 	printf("x86 mov_load_map_ptr/helper_id handler host cross-check: OK (%u cases)\n",
 	       total);
 	return 0;

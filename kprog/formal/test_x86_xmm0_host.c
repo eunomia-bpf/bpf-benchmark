@@ -143,6 +143,12 @@ static void oracle_reset(void)
 	oracle_xmm0_hi = 0xfedcba9876543210ULL;
 }
 
+/* Mismatches a part detects. Each part stops at its first mismatch, so the
+ * case count it returns cannot double as the failure tally; without this the
+ * banner in main would print OK on a corrupted contract. */
+static unsigned mismatches;
+
+
 /* The reduction an effective address is folded through so the model stays
  * inside the memory array; the reduction leaves room for the widest (8-byte)
  * load. Both paths share this convention; it is not part of the contract
@@ -278,12 +284,18 @@ static unsigned part1(void)
 		if (KPROG_X86_XMM0_BASE_FORM(op_is_load) != want_base) {
 			fprintf(stderr, "base form mismatch op=%#x got=%u want=%u\n",
 				opcodes[oi], got_base, want_base);
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		/* The two opcodes must not share one base form. */
 		if (!op_is_load && got_base == KPROG_X86_XMM0_BASE_ABS_IMM) {
 			fprintf(stderr, "store took the load's base form\n");
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		cases++;
 	}
@@ -296,7 +308,10 @@ static unsigned part1(void)
 		if (got != want) {
 			fprintf(stderr, "arm mismatch rsp=%d got=%u want=%u\n",
 				rsp, got, want);
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		cases++;
 	}
@@ -309,13 +324,19 @@ static unsigned part1(void)
 		if (got != want) {
 			fprintf(stderr, "lane offset mismatch lane=%u got=%u want=%u\n",
 				li, got, want);
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		/* Consecutive lanes, one lane width apart. */
 		if (got != li * KPROG_X86_XMM0_LANE_BYTES) {
 			fprintf(stderr, "lane %u not at %u * lane width\n", li,
 				li);
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		}
 		cases++;
 	}
@@ -326,7 +347,10 @@ static unsigned part1(void)
 	    KPROG_X86_XMM0_LANE_BYTES != 8U ||
 	    KPROG_X86_XMM0_LANE_BYTES != KPROG_X86_WIDTH_BITS(X86_WIDTH_64) / 8U) {
 		fprintf(stderr, "lane geometry mismatch\n");
-		return 0;
+		{
+			mismatches++;
+			return 0;
+		}
 	}
 	cases++;
 
@@ -352,7 +376,10 @@ static unsigned part1(void)
 						"adds-disp mismatch form=%u none=%d "
 						"got=%u want=%u\n",
 						forms[fi], base_is_none, got, want);
-					return 0;
+					{
+						mismatches++;
+						return 0;
+					}
 				}
 				cases++;
 			}
@@ -531,7 +558,10 @@ static unsigned part2(void)
 								(unsigned long long)want.addr,
 								(unsigned long long)want.lo,
 								(unsigned long long)want.hi);
-							return 0;
+							{
+								mismatches++;
+								return 0;
+							}
 						}
 						cases++;
 					}
@@ -685,7 +715,10 @@ static unsigned part3(void)
 							(unsigned long long)got.addr,
 							want.arm,
 							(unsigned long long)want.addr);
-						return 0;
+						{
+							mismatches++;
+							return 0;
+						}
 					}
 					cases++;
 				}
@@ -709,7 +742,10 @@ static unsigned part4(void)
 		__u64 imm = 0x8000001000000008ULL;
 
 		if ((__s64)imm == (__s64)(__s32)(imm >> 32))
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -742,10 +778,16 @@ static unsigned part4(void)
 			0, KPROG_X86_XMM0_BASE_FORM(0U), 0x8000ULL, 0x1111ULL);
 
 		if (p0 != 0x1111ULL || p1 != 0x1111ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		if (!KPROG_X86_XMM0_ADDS_DISP(0, KPROG_X86_XMM0_BASE_FORM(1U)) ||
 		    !KPROG_X86_XMM0_ADDS_DISP(0, KPROG_X86_XMM0_BASE_FORM(0U)))
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -763,10 +805,16 @@ static unsigned part4(void)
 			oracle_mem[i] = (__u8)(0x11U * (i + 1U));
 		e = contract_step_load(1U, X86_REG_NONE, X86_MEM_AUX(X86_REG_NONE, 0U), 0ULL, 0U);
 		if (e.addr != 0ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		if (e.lo != 0x8877665544332211ULL ||
 		    e.hi != 0x10ffeeddccbbaa99ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -781,12 +829,18 @@ static unsigned part4(void)
 		oracle_xmm0_hi = 0x0807060504030201ULL;
 		e = contract_step_store(X86_REG_NONE, X86_MEM_AUX(X86_REG_NONE, 0U), 0x4000ULL, 0U);
 		if (e.addr != 0x4000ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		if (oracle_mem[oracle_slot(0x4000ULL) + 0] != 0x11U ||
 		    oracle_mem[oracle_slot(0x4000ULL) + 7] != 0x88U ||
 		    oracle_mem[oracle_slot(0x4000ULL) + 8] != 0x01U ||
 		    oracle_mem[oracle_slot(0x4000ULL) + 15] != 0x08U)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -798,12 +852,18 @@ static unsigned part4(void)
 		oracle_restore_pristine();
 		le = contract_step_load(1U, 3U, X86_MEM_AUX(X86_REG_NONE, 0U), 0x20ULL, 0U);
 		if (memcmp(oracle_regs, pristine_regs, sizeof(oracle_regs)))
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		(void)le;
 		oracle_restore_pristine();
 		se = contract_step_store(3U, X86_MEM_AUX(X86_REG_NONE, 0U), 0x20ULL, 0U);
 		if (memcmp(oracle_regs, pristine_regs, sizeof(oracle_regs)))
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		(void)se;
 		cases++;
 	}
@@ -822,7 +882,10 @@ static unsigned part4(void)
 			oracle_mem[oracle_slot(0x6008ULL) + i] = (__u8)(0x40U + i);
 		le = contract_step_load(1U, X86_REG_NONE, X86_MEM_AUX(X86_REG_NONE, 0U), 0x6008ULL, 0U);
 		if (le.lo != 0x4746454443424140ULL || le.hi == 0ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 
 		oracle_restore_pristine();
 		oracle_xmm0_lo = 0xaabbccddeeff0011ULL;
@@ -831,7 +894,10 @@ static unsigned part4(void)
 		for (i = 0; i < ORACLE_BYTES; i++)
 			changed += oracle_mem[i] != pristine_mem[i];
 		if (changed != 16U)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		(void)se;
 		cases++;
 	}
@@ -848,13 +914,19 @@ static unsigned part4(void)
 		oracle_xmm0_hi = 0xfedcba9876543210ULL;
 		se = contract_step_store(X86_RSP, X86_MEM_AUX(X86_REG_NONE, 0U), 0x10ULL, 0U);
 		if (se.addr != oracle_reg_value(X86_RSP) + 0x10ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		oracle_xmm0_lo = 0ULL;
 		oracle_xmm0_hi = 0ULL;
 		le = contract_step_load(1U, X86_RSP, X86_MEM_AUX(X86_REG_NONE, 0U), 0x10ULL, 0U);
 		if (le.lo != 0x0123456789abcdefULL ||
 		    le.hi != 0xfedcba9876543210ULL)
-			return 0;
+			{
+				mismatches++;
+				return 0;
+			}
 		cases++;
 	}
 
@@ -877,6 +949,11 @@ int main(void)
 	total += part4();
 	oracle_restore_pristine();
 
+	if (mismatches) {
+		printf("x86 xmm0 handler host cross-check: FAIL (%u)\n",
+		       mismatches);
+		return 1;
+	}
 	printf("x86 xmm0 handler host cross-check: OK (%u cases)\n", total);
 	return 0;
 }

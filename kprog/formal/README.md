@@ -24,6 +24,19 @@ banner can fail, and are untracked by design; the seven route hosts those
 batteries drive are pinned into the recipe so their cases are enforced by the
 gate itself rather than only by the batteries.
 
+Three oracles did not previously have that negative property: their part
+functions stopped at a mismatch with a bare `return 0`, and `main` summed the
+returned case counts and printed OK unconditionally, so the banner could not
+turn red at all. This was not theoretical — sabotaging `kprog_x86_bswap_value`'s
+8-bit arm to sign-extend, the exact bug `test_x86_movbe_host.c`'s pin forbids,
+printed `MISMATCH ...` and then `OK (16 cases)` with exit status 0.
+`test_x86_movbe_host.c` (16 sites), `test_x86_xmm0_host.c` (22), and
+`test_x86_mov_load_map_ptr_host.c` (26) now record each detected mismatch in a
+`mismatches` counter and `main` fails when it is nonzero; the same three
+sabotages now report `FAIL (3)`, `FAIL (4)`, and `FAIL (1)` with exit status 1,
+while the pristine tree keeps its exact case counts (4675, 283, 318) and the
+gate stays at 220 banners.
+
 `KProgFormal.TagErasure` models a bounded fragment drawn from the simulators:
 a 64-bit move, a pointer-shaped 64-bit add, an x86-shaped scalarizing integer
 multiply-immediate, and a 64-bit load of the packet or packet-end pointer from
