@@ -40,6 +40,7 @@ typedef unsigned long long __u64;
 #define ARM64_COND_AL 14U
 
 #include "generated/arm64_cond.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

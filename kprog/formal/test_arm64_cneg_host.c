@@ -31,6 +31,7 @@ typedef unsigned long long __u64;
 #define ARM64_OP_CNEG 0x41U
 
 #include "generated/arm64_cneg.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

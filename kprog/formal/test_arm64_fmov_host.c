@@ -24,6 +24,7 @@ typedef unsigned long long __u64;
 #define ARM64_FMOV_W_FROM_S 3U
 
 #include "generated/arm64_fmov.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

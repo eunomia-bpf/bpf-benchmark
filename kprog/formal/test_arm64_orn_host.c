@@ -47,6 +47,7 @@ typedef long long __s64;
 #include "generated/arm64_width.h"
 #include "generated/arm64_mod.h"
 #include "generated/arm64_orn.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

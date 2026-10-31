@@ -24,6 +24,7 @@ typedef unsigned long long __u64;
 #define ARM64_OP_SXTH 0x15U
 
 #include "generated/arm64_ldrsx_op.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

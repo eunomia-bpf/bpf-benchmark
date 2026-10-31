@@ -20,6 +20,7 @@ typedef unsigned int __u32;
 typedef unsigned long long __u64;
 
 #include "generated/arm64_movk.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

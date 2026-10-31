@@ -6931,14 +6931,20 @@ with 226 `cross-check: OK` banners and zero new core
 files, so the failure belongs to the stranded
 mutation and nothing in this step.
 
-Step 0462 gate recipe fix: 22 arm64 host tests
-verify an unsupported arm by forking a child that
-calls `abort()`. With `ulimit -c unlimited` every
-child wrote a core, about 240 per test per run -
-21313 files and 7.0 GB had accumulated under
-`build/`'s parent before this was noticed. Each
-line is now `ulimit -c 0; ./build/<test>`, so a
-gate run adds nothing; the backlog was deleted.
+Core-dump fix: 22 arm64 host tests verify an
+unsupported arm by forking a child that calls
+`abort()`. With `ulimit -c unlimited` every child
+wrote a core, about 240 per test per run - 21313
+files and 7.0 GB had accumulated under
+`kprog/formal/` before this was noticed. Each of
+the 22 tests now includes the tracked header
+`test_core_dumps.h`, whose constructor sets
+`RLIMIT_CORE` to zero; the limit is inherited by
+every forked child, so the fix covers `make check`,
+a battery's own host build, and an interactive run,
+where a per-recipe `ulimit -c 0` prefix would only
+cover the first. The backlog was deleted; a full
+gate and a 0455 battery run now each add zero cores.
 
 ### Step 0443 - arm64 CCMP decode sweep
 

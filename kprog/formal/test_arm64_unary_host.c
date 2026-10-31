@@ -29,6 +29,7 @@ typedef unsigned long long __u64;
 #define ARM64_OP_NEG 0x10U
 
 #include "generated/arm64_unary.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

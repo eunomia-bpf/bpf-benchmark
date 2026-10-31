@@ -24,6 +24,7 @@ typedef unsigned long long __u64;
 #define ARM64_OP_UADDLV 0x25U
 
 #include "generated/arm64_reduction.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

@@ -23,6 +23,7 @@ typedef unsigned long long __u64;
 #define ARM64_SIM_TAG_RODATA_ADDR 8U
 
 #include "generated/arm64_adrp.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

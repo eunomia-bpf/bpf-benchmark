@@ -23,6 +23,7 @@ typedef unsigned long long __u64;
 #define ARM64_OP_FMOV 0x23U
 
 #include "generated/arm64_fmov_dest.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

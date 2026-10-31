@@ -34,6 +34,7 @@ typedef signed long long __s64;
 #define ARM64_SHIFT_ROR 3U
 
 #include "generated/arm64_shift.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdlib.h>

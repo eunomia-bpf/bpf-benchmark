@@ -42,6 +42,7 @@ typedef signed long long __s64;
 #define ARM64_OP_SMADDL 64U
 
 #include "generated/arm64_mul.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

@@ -2858,8 +2858,12 @@ child that calls `abort()`, and with `ulimit -c unlimited`
 each child wrote a core file: one `make check` added about
 240 per test, and the tree had accumulated 21313 cores
 totalling 7.0 GB under `kprog/formal/`. Each such line now
-runs as `ulimit -c 0; ./build/<test>`, so the gate is
-byte-neutral on disk; the accumulated cores were removed.
+links `test_core_dumps.h`, whose constructor sets
+`RLIMIT_CORE` to zero, so the limit applies to the test and
+to every child it forks and the fix holds for `make check`,
+for a battery's own host build, and for an interactive run
+alike; the accumulated cores were removed and a full gate
+and a 0455 battery run now each add none.
 Gate on the committed x86 header: rc 0, 226 `cross-check: OK`
 banners, zero new cores. The working tree's x86 header is
 still the other agent's uncommitted `STACK_BYTE(..., 1)` edit,

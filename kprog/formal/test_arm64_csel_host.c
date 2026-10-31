@@ -41,6 +41,7 @@ typedef signed long long __s64;
 #define ARM64_OP_CSNEG 69U
 
 #include "generated/arm64_csel.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>

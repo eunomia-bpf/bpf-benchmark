@@ -31,6 +31,7 @@ typedef unsigned long long __u64;
 #define ARM64_OP_CSNEG 0x45U
 
 #include "generated/arm64_csel_ptr.h"
+#include "test_core_dumps.h"
 
 #include <signal.h>
 #include <stdio.h>
