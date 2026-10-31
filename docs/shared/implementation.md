@@ -2751,11 +2751,18 @@ specialization success empirically, which only holds once
 `7-evaluation.tex` is input. It is also the newest section
 file in the tree (2026-10-06) while the included
 conclusion is the oldest (2026-09-24), so the paper is
-mid-reorganisation; the fix is to add
-`\input{sections/7-evaluation}` ahead of the conclusion and
-reconcile the duplicate section files
+mid-reorganisation. The fix has a prerequisite: `\lang` is
+used 95 times across the orphaned sections (31 of them in
+`7-evaluation.tex`) but is defined nowhere —
+`helpers/commands.tex` defines `\tool`, `\simulator`, and
+`\checked` only, and none of the eight compiled sections
+mentions `\lang`, which is why the current build succeeds.
+Inputting `7-evaluation.tex` before defining `\lang` would
+fail with "Undefined control sequence", so the reorganisation
+must add the macro to `helpers/commands.tex` alongside
+`\tool` and reconcile the duplicate section files
 (`7-`/`9-conclusion`, `6-`/`8-related-work`,
-`3-characterization` vs `3-design`).
+`3-characterization` vs `3-design`) in the same change.
 
 Step 0447 covers the arm64 flag-family
 route arms: 36 rows in
