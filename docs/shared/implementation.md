@@ -2852,6 +2852,19 @@ complement. The arm64 pair is the `kernel_rejit` runtime of
 `aws_arm64_micro_20260606_001225_821028` against that run's
 own `kernel` runtime; x86-64 spans the two committed runs.
 
+The characterization gap that the evaluation's 42% recovery
+figure divides by also reproduces exactly. The paper's
+1.57x x86 userspace-native speedup is the geomean of
+kernel/native `exec_ns` over the 27 non-control benchmarks
+in `data/micro/x86_kvm_micro_20260526_210952_650695`, and
+the 1.55x in-kernel figure is the same computation against
+the `native_kernel` runtime (1.574808x and 1.545042x
+unrounded, a 1.93% spread against the printed "about 2%").
+Recovering 42% of that gap from the 1.242x microbenchmark
+speedup follows: (1.241736-1)/(1.574808-1) = 42.06%, which
+rounds to the printed 42; the paper's own rounded-input
+arithmetic gives 42.46%.
+
 The golden gate was also leaving garbage on disk. Twenty-two of
 the arm64 host tests verify an unsupported arm by forking a
 child that calls `abort()`, and with `ulimit -c unlimited`
