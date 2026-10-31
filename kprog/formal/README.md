@@ -41,6 +41,14 @@ generator's CamelCase splitting is normalized — `arm64_ldrsx`,
 `x86_pushpop` differ from a naive capitalisation only in how an acronym is
 split (`LdrSx`, `CallMem`, ...).
 
+The generated headers also bind the hand-written decode at compile time:
+1,049 `_Static_assert`s tie the simulator's `X86_OP_*` / `ARM64_*` constants to
+the generated tables, so drift breaks the build before any oracle runs. Tested
+rather than assumed — changing `X86_OP_NOP` from `0x00U` to `0x09U` in
+`x86_sim.h` fails the build with two independent assertions
+(`x86_opcode.h:12`, `x86_dispatch_singleton.h:21`), so two generated tables
+observe the same drift separately.
+
 Three oracles did not previously have that negative property: their part
 functions stopped at a mismatch with a bare `return 0`, and `main` summed the
 returned case counts and printed OK unconditionally, so the banner could not
