@@ -24,6 +24,12 @@ arithmetic each uses so it can be machine-checked:
 for the enabled 160-byte arena it is 20, and for the 1-byte disabled arena it is
 1, so the word view always covers the byte view exactly.
 
+A stack access reads or writes a *window* of `WIDTH` bytes starting at its
+index, so the arena must hold `INDEX + WIDTH` bytes, not merely `INDEX`. The
+contract also fixes that bound: an access fits when its end index is at most
+the capacity, the C `INDEX + BYTES <= CAPACITY`, and a protocol that reaches
+the arena without checking it over-runs the final `BYTES - 1` bytes.
+
 The generated C macros evaluate no memory: they are pure index/bit
 computations. `KProgFormal/Arm64StackArena.lean` restates each independently
 and proves the two views address the same storage.
@@ -39,6 +45,7 @@ EXPECTED = {
     "word_mask": "0x7",
     "capacity_round": "ceil8",
     "arena_alias": "b-q-union",
+    "window_guard": "index_plus_bytes_le_capacity",
 }
 
 ROOT = Path(__file__).resolve().parent
@@ -72,6 +79,18 @@ def wordAligned (index : BitVec 32) : Bool := (index &&& {mask}) == 0
 multiple of {1 << shift}, the C `((CAPACITY + {mask}U) / {1 << shift}U)`. -/
 def words (capacity : BitVec 32) : BitVec 32 :=
   (capacity + {mask}) / {1 << shift}
+
+/-- The first index past a `WIDTH`-byte access starting at `index`, the C
+`(__u64)(INDEX) + (__u64)(WIDTH)`. Stated as a `Nat` sum because the C
+comparison is widened to 64 bits, so an access near the top of the 32-bit
+index space is measured exactly rather than wrapping. -/
+def windowEnd (index width : BitVec 32) : Nat := index.toNat + width.toNat
+
+/-- An access of `WIDTH` bytes at `index` stays inside an arena of `capacity`
+bytes: its end index is at most the capacity, the C
+`(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
+def windowFits (index width capacity : BitVec 32) : Bool :=
+  decide (windowEnd index width ≤ capacity.toNat)
 end KProgFormal.GeneratedArm64StackArena
 '''
 
@@ -89,6 +108,15 @@ def render_c(spec: dict) -> str:
 \t(((__u32)(CAPACITY) + {mask}U) / {1 << shift}U)
 #define KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY) \\
 \t(((__u32)(CAPACITY) + {mask}U) / {1 << shift}U)
+/*
+ * An access of BYTES bytes at INDEX fits an arena of CAPACITY bytes when the
+ * first index past its window is at most CAPACITY. A caller that reaches the
+ * arena without this guard over-runs the final BYTES - 1 bytes.
+ */
+#define KPROG_ARM64_STACK_WINDOW_END(INDEX, BYTES) \\
+\t(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
+#define KPROG_ARM64_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \\
+\t((KPROG_ARM64_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
 #endif
 '''
 

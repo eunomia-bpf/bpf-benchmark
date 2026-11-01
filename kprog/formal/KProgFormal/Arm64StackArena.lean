@@ -4,7 +4,7 @@ import Std.Tactic.BVDecide
 
 namespace KProgFormal
 
-open GeneratedArm64StackArena (wordIndex wordAligned words)
+open GeneratedArm64StackArena (wordIndex wordAligned words windowEnd windowFits)
 open GeneratedArm64ByteLane (ByteLane)
 
 /-- Independent statement of the word-arena slot: the byte index divided by the
@@ -101,5 +101,86 @@ theorem arm64_stack_arena_roundtrip_example :
     arm64StackArenaWordAlignedSpec 160 = true ∧
       arm64StackArenaWordIndexSpec 160 * 8 = 160 := by
   refine ⟨?_, ?_⟩ <;> native_decide
+
+/-- Independent statement of the access window's end: the first index past a
+`width`-byte access, stated as a subtraction from the 64-bit top rather than a
+sum. -/
+def arm64StackArenaWindowEndSpec (index width : BitVec 32) : Nat :=
+  2 ^ 32 - (2 ^ 32 - index.toNat - width.toNat)
+
+/-- Independent statement of the fit test: the window start is inside the arena
+and the bytes remaining from it cover the width, `index <= capacity` and
+`capacity - index >= width`. Both conjuncts are needed because `Nat`
+subtraction truncates, so the remainder alone would accept an index past the
+arena. -/
+def arm64StackArenaWindowFitsSpec (index width capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat ∧ width.toNat ≤ capacity.toNat - index.toNat)
+
+/-- The generated window end equals the independent restatement on every window
+whose end stays inside the index space. -/
+theorem arm64_stack_arena_window_end_refines (index width : BitVec 32)
+    (hnoWrap : index.toNat + width.toNat ≤ 2 ^ 32) :
+    windowEnd index width = arm64StackArenaWindowEndSpec index width := by
+  simp only [windowEnd, arm64StackArenaWindowEndSpec]
+  omega
+
+/-- The generated fit test agrees with the independent subtraction form. -/
+theorem arm64_stack_arena_window_fits_refines (index width capacity : BitVec 32) :
+    windowFits index width capacity =
+      arm64StackArenaWindowFitsSpec index width capacity := by
+  simp only [windowFits, arm64StackArenaWindowFitsSpec, windowEnd,
+    decide_eq_decide]
+  omega
+
+/-- The fit test is the byte-arena bound: when it holds and the width is
+nonzero, the last byte the window touches, `index + width - 1`, is inside the
+arena, `index + width - 1 < capacity`. -/
+theorem arm64_stack_arena_window_last_byte_inside (index width capacity : BitVec 32)
+    (hwidth : 0 < width) (hfit : windowFits index width capacity = true) :
+    index.toNat + width.toNat - 1 < capacity.toNat := by
+  simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
+  have hw : 0 < width.toNat := hwidth
+  simp only [BitVec.toNat_eq] at hw
+  omega
+
+/-- A window that starts inside the arena but runs past it is exactly what the
+guard rejects: an 8-byte access at the arena's final byte does not fit an arena
+of at least eight bytes. -/
+theorem arm64_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32)
+    (hcap : 8 ≤ capacity) :
+    windowFits (capacity - 1) 8 capacity = false := by
+  simp only [windowFits, windowEnd, decide_eq_false_iff_not]
+  have hcapN : 8 ≤ capacity.toNat := hcap
+  have hnz : capacity.toNat ≠ 0 := by omega
+  have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
+  have h2 : (2 : Nat) ^ 32 % 2 ^ 32 = 0 := Nat.mod_self _
+  have hcaplt : capacity.toNat < 2 ^ 32 := by
+    have : 8 ≤ capacity.toNat := hcap
+    omega
+  have hsub : (capacity - 1).toNat = capacity.toNat - 1 := by
+    have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
+    rw [BitVec.toNat_sub, h1]
+    have hlt : capacity.toNat - 1 < 2 ^ 32 := by omega
+    generalize hX : capacity.toNat - 1 = X at hlt
+    have hexp : 2 ^ 32 - 1 + capacity.toNat = X + 2 ^ 32 := by omega
+    rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
+  have h8 : BitVec.toNat (8 : BitVec 32) = 8 := rfl
+  rw [hsub, h8]
+  omega
+
+/-- The subtraction restatement is equivalent to the sum form, so the two ways
+of stating the bound cannot drift. -/
+theorem arm64_stack_arena_window_end_spec_eq_sum (index width : BitVec 32)
+    (hnoWrap : index.toNat + width.toNat ≤ 2 ^ 32) :
+    arm64StackArenaWindowEndSpec index width = index.toNat + width.toNat := by
+  simp only [arm64StackArenaWindowEndSpec]
+  omega
+
+/-- The threshold this gap was reported at, machine-checked: on the enabled
+160-byte arena an 8-byte access at index 152 fits and one at 153 does not,
+i.e. frame offset 56 (`152 - 96`) fits and 57 does not. -/
+theorem arm64_stack_arena_window_threshold :
+    windowFits 152 8 160 = true ∧ windowFits 153 8 160 = false := by
+  refine ⟨?_, ?_⟩ <;> (simp only [windowFits, windowEnd]; native_decide)
 
 end KProgFormal

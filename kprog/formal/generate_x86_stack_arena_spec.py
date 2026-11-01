@@ -20,6 +20,8 @@ arithmetic each uses so it can be machine-checked:
     byte, little-endian.
 
 `KPROG_X86_STACK_WORDS` states the number of word slots the byte arena needs.
+A stack access touches a *window* of `WIDTH` bytes from its index, so it fits
+only when `INDEX + WIDTH <= CAPACITY`; the contract fixes that bound as well.
 
 The generated C macros evaluate no memory: they are pure index/bit
 computations. `KProgFormal/X86StackArena.lean` restates each independently and
@@ -36,6 +38,7 @@ EXPECTED = {
     "capacity_round": "ceil8",
     "arena_alias": "b-q-union",
     "assemble": "little_endian8",
+    "window_guard": "index_plus_bytes_le_capacity",
 }
 
 ROOT = Path(__file__).resolve().parent
@@ -78,6 +81,18 @@ def assembleByte (byte : BitVec 8) (k : Nat) : BitVec 64 :=
 multiple of {1 << shift}, the C `((CAPACITY + {mask}U) / {1 << shift}U)`. -/
 def words (capacity : BitVec 32) : BitVec 32 :=
   (capacity + {mask}) / {1 << shift}
+
+/-- The first index past a `WIDTH`-byte access starting at `index`, the C
+`(__u64)(INDEX) + (__u64)(WIDTH)`. Stated as a `Nat` sum because the C
+comparison is widened to 64 bits, so an access near the top of the 32-bit
+index space is measured exactly rather than wrapping. -/
+def windowEnd (index width : BitVec 32) : Nat := index.toNat + width.toNat
+
+/-- An access of `WIDTH` bytes at `index` stays inside an arena of `capacity`
+bytes: its end index is at most the capacity, the C
+`(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
+def windowFits (index width capacity : BitVec 32) : Bool :=
+  decide (windowEnd index width ≤ capacity.toNat)
 end KProgFormal.GeneratedX86StackArena
 '''
 
@@ -97,6 +112,15 @@ def render_c(spec: dict) -> str:
 \t(((__u32)(CAPACITY) + {mask}U) / {1 << shift}U)
 #define KPROG_X86_STACK_ASSEMBLE(BYTE, K) \\
 \t(((__u64)((__u8)(BYTE))) << (8U * (__u32)(K)))
+/*
+ * An access of BYTES bytes at INDEX fits an arena of CAPACITY bytes when the
+ * first index past its window is at most CAPACITY. A caller that reaches the
+ * arena without this guard over-runs the final BYTES - 1 bytes.
+ */
+#define KPROG_X86_STACK_WINDOW_END(INDEX, BYTES) \\
+\t(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
+#define KPROG_X86_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \\
+\t((KPROG_X86_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
 #endif
 '''
 

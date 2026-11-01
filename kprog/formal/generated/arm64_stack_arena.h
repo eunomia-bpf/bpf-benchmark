@@ -8,4 +8,13 @@
 	(((__u32)(CAPACITY) + 7U) / 8U)
 #define KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY) \
 	(((__u32)(CAPACITY) + 7U) / 8U)
+/*
+ * An access of BYTES bytes at INDEX fits an arena of CAPACITY bytes when the
+ * first index past its window is at most CAPACITY. A caller that reaches the
+ * arena without this guard over-runs the final BYTES - 1 bytes.
+ */
+#define KPROG_ARM64_STACK_WINDOW_END(INDEX, BYTES) \
+	(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
+#define KPROG_ARM64_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \
+	((KPROG_ARM64_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
 #endif

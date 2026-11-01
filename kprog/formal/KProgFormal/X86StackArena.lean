@@ -2,7 +2,7 @@ import KProgFormal.GeneratedX86StackArena
 
 namespace KProgFormal
 
-open GeneratedX86StackArena (wordIndex wordAligned byteAt assembleByte words)
+open GeneratedX86StackArena (wordIndex wordAligned byteAt assembleByte words windowEnd windowFits)
 
 /-- Independent statement of the word-arena slot: a byte index divided by 8,
 i.e. the integer quotient rounded down, the C `INDEX >> 3`. Stated with
@@ -128,5 +128,74 @@ theorem x86_stack_arena_example :
       wordIndex 0 = 0 ∧ wordIndex 56 = 7 ∧
       wordAligned 56 = true ∧ wordAligned 60 = false := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
+
+/-- Independent statement of the access window's end: the first index past a
+`width`-byte access, stated as a subtraction from the 64-bit top rather than a
+sum. -/
+def x86StackArenaWindowEndSpec (index width : BitVec 32) : Nat :=
+  2 ^ 32 - (2 ^ 32 - index.toNat - width.toNat)
+
+/-- Independent statement of the fit test: the window start is inside the arena
+and the bytes remaining from it cover the width. Both conjuncts are needed
+because `Nat` subtraction truncates, so the remainder alone would accept an
+index past the arena. -/
+def x86StackArenaWindowFitsSpec (index width capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat ∧ width.toNat ≤ capacity.toNat - index.toNat)
+
+/-- The generated window end equals the independent restatement on every window
+whose end stays inside the index space. -/
+theorem x86_stack_arena_window_end_refines (index width : BitVec 32)
+    (hnoWrap : index.toNat + width.toNat ≤ 2 ^ 32) :
+    windowEnd index width = x86StackArenaWindowEndSpec index width := by
+  simp only [windowEnd, x86StackArenaWindowEndSpec]
+  omega
+
+/-- The generated fit test agrees with the independent subtraction form. -/
+theorem x86_stack_arena_window_fits_refines (index width capacity : BitVec 32) :
+    windowFits index width capacity =
+      x86StackArenaWindowFitsSpec index width capacity := by
+  simp only [windowFits, x86StackArenaWindowFitsSpec, windowEnd,
+    decide_eq_decide]
+  omega
+
+/-- The fit test is the byte-arena bound: when it holds and the width is
+nonzero, the last byte the window touches, `index + width - 1`, is inside the
+arena, `index + width - 1 < capacity`. -/
+theorem x86_stack_arena_window_last_byte_inside (index width capacity : BitVec 32)
+    (hwidth : 0 < width) (hfit : windowFits index width capacity = true) :
+    index.toNat + width.toNat - 1 < capacity.toNat := by
+  simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
+  have hw : 0 < width.toNat := hwidth
+  simp only [BitVec.toNat_eq] at hw
+  omega
+
+/-- A window that starts inside the arena but runs past it is exactly what the
+guard rejects: an 8-byte access at the arena's final byte does not fit an arena
+of at least eight bytes. -/
+theorem x86_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32)
+    (hcap : 8 ≤ capacity) :
+    windowFits (capacity - 1) 8 capacity = false := by
+  simp only [windowFits, windowEnd, decide_eq_false_iff_not]
+  have hcapN : 8 ≤ capacity.toNat := hcap
+  have hnz : capacity.toNat ≠ 0 := by omega
+  have hcaplt : capacity.toNat < 2 ^ 32 := by omega
+  have hsub : (capacity - 1).toNat = capacity.toNat - 1 := by
+    have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
+    rw [BitVec.toNat_sub, h1]
+    have hlt : capacity.toNat - 1 < 2 ^ 32 := by omega
+    generalize hX : capacity.toNat - 1 = X at hlt
+    have hexp : 2 ^ 32 - 1 + capacity.toNat = X + 2 ^ 32 := by omega
+    rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
+  have h8 : BitVec.toNat (8 : BitVec 32) = 8 := rfl
+  rw [hsub, h8]
+  omega
+
+/-- The threshold on both arena sizes the simulator uses, machine-checked: the
+default 64-byte frame fits an 8-byte access at index 56 and not at 57, and the
+128-byte deep frame fits one at 120 and not at 121. -/
+theorem x86_stack_arena_window_threshold :
+    windowFits 56 8 64 = true ∧ windowFits 57 8 64 = false ∧
+      windowFits 120 8 128 = true ∧ windowFits 121 8 128 = false := by
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> (simp only [windowFits, windowEnd]; native_decide)
 
 end KProgFormal

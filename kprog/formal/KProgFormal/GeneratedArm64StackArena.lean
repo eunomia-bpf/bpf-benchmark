@@ -13,4 +13,16 @@ def wordAligned (index : BitVec 32) : Bool := (index &&& 7) == 0
 multiple of 8, the C `((CAPACITY + 7U) / 8U)`. -/
 def words (capacity : BitVec 32) : BitVec 32 :=
   (capacity + 7) / 8
+
+/-- The first index past a `WIDTH`-byte access starting at `index`, the C
+`(__u64)(INDEX) + (__u64)(WIDTH)`. Stated as a `Nat` sum because the C
+comparison is widened to 64 bits, so an access near the top of the 32-bit
+index space is measured exactly rather than wrapping. -/
+def windowEnd (index width : BitVec 32) : Nat := index.toNat + width.toNat
+
+/-- An access of `WIDTH` bytes at `index` stays inside an arena of `capacity`
+bytes: its end index is at most the capacity, the C
+`(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
+def windowFits (index width capacity : BitVec 32) : Bool :=
+  decide (windowEnd index width ≤ capacity.toNat)
 end KProgFormal.GeneratedArm64StackArena
