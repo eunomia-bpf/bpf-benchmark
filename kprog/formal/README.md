@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 412, and 310 steps
+`build/mut_*.py` files exist, the counter's last value is 413, and 311 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0542 - the third arena, and a
+counter that was one too high
+
+The x86 header defines *three* stack sizes,
+not two: 64 and 128 when the stack is
+enabled, and 1 when it is disabled. The
+threshold theorem pinned only the enabled
+pair, so the smallest real arena had no
+machine-checked boundary at all -- and it is
+the one where the rounding and the last-byte
+subtraction are most likely to go wrong.
+Recorded: no 8-byte window fits a one-byte
+arena, a one-byte window at index 0 does, and
+the one-past-end pointer is still a valid
+arena address.
+
+Counting the new statement exposed a defect
+in the checker. It matched lines beginning
+with `theorem`, so a docstring wrapped
+mid-sentence -- "...the trace / theorem rests
+on" -- counted as a declaration. The published
+theorem count had therefore been **one too
+high**, and writing my own prose on the same
+pattern pushed it two past the truth. The
+checker now requires the match to reach a
+`:=`, which prose never does; the count is
+2,060 with the new theorem included and no
+false positives, and planting such a docstring
+line no longer moves it.
+
+Worth recording as a class: every count in
+the paper is recomputed by a script, and a
+script that miscounts is worse than no script,
+because it converts a guess into apparent
+evidence. Gate: rc 0, **248** banners.
+Census 412 -> 413.
 
 ### Step 0541 - the two files say the same
 thing in different words

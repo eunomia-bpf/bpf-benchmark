@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0542 pins the disabled arena's boundary and
+fixes a counter that was one too high (census
+412 -> 413). The x86 header defines three stack
+sizes, not two -- 64 and 128 enabled, 1 when
+disabled -- and the threshold theorem pinned only
+the enabled pair, leaving the smallest real arena
+with no machine-checked boundary, though it is
+where the rounding and last-byte subtraction are
+most likely to go wrong. Recorded: no 8-byte
+window fits a one-byte arena, a one-byte window
+at index 0 does, and the one-past-end pointer is
+still valid. Counting it exposed a checker defect:
+it matched lines beginning with theorem, so a
+docstring wrapped mid-sentence counted as a
+declaration, making the published count one too
+high. The checker now requires a :=. Every count
+in the paper is recomputed by a script, and a
+script that miscounts is worse than none, because
+it converts a guess into apparent evidence. Gate:
+rc 0, 248 banners, 2,060 theorems.
+
 Step 0541 settles whether the two stack-arena
 files' differently-worded capacity restrictions
 are the same (census 411 -> 412). AArch64
