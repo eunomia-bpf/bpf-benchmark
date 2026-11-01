@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 386, and 267 steps
+`build/mut_*.py` files exist, the counter's last value is 387, and 268 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -135,6 +135,19 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+Whether the compiled side is actually guarded is measurable, and `mutate_contracts.py`
+measures it: find the first meaningful literal in each generator's emitted-C
+string, bump it, regenerate, and see what fires. Over 31 generators the result
+is **24 rejected by the generator itself**, 3 caught by a host, 2 stopped by a
+static assertion, 2 whose header exports no macro to call, and **none
+surviving**. Three quarters of the C surface never even reaches a build.
+
+Getting that number honest took four passes. Each of these first looked like a
+contract whose mutation nothing caught, and each was inert: a docstring, a
+static-assert message, a Python format-padding width, and a generator
+diagnostic prefix. The harness now excludes all four, which is what makes the
+zero mean something.
 
 A refinement proof covers the Lean formula, not the C one. Both are rendered
 from one specification, but as *separate string literals* in the same
@@ -7314,6 +7327,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0516 - the C surface is
+mutation-tested, and mostly guarded at
+generation time
+
+Step 0515 showed the proofs stop at the
+language boundary, so the compiled side
+rests on oracles. Whether that is enough
+is measurable (census 386 -> 387):
+`mutate_contracts.py` finds the first
+meaningful literal in each generator's
+emitted-C string, bumps it, regenerates,
+and records what fires. Over 31 generators:
+
+| outcome | count |
+|---|---|
+| rejected by the generator | 24 |
+| caught by a host | 3 |
+| stopped by a static assertion | 2 |
+| header exports no macro to call | 2 |
+| **survived** | **0** |
+
+Three quarters of the C surface never
+reaches a build: the generator's own
+validation refuses the change. That is a
+stronger property than the earlier steps
+established, and it is now measured on
+every gate rather than argued.
+
+Getting the number honest took four passes,
+each discarding a false survivor -- a
+docstring, a static-assert message, a
+Python format-padding width, and a generator
+diagnostic prefix. All four are inert; all
+four initially looked like a mutation
+nothing caught. Gate: rc 0, **234** banners.
+Census 386 -> 387.
 
 ### Step 0515 - a refinement proof
 covers the Lean formula, not the C one
