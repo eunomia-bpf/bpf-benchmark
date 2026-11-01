@@ -314,6 +314,41 @@ static void check_shifts(void)
 			}
 }
 
+/*
+ * Sign extension, exhaustively.
+ *
+ * AArch64 states its extension generically (extend the low nb bits) and its C
+ * inlines the mask-flip-subtract idiom; x86-64 states each width as its own
+ * arm with the constants written out. Two spellings of one function, and the
+ * fault mode is a signedness slip that still round-trips for positive inputs,
+ * which is exactly what sampling misses. Both paths are small enough to run
+ * every input: all 65,536 sixteen-bit patterns through the byte and halfword
+ * extensions, and a stride across the 32-bit space.
+ */
+static void check_sign_extend(void)
+{
+	unsigned long long v;
+
+	for (v = 0; v < 0x10000ULL; v++) {
+		cmp_u64("sxtb",
+			KPROG_ARM64_EXTREV_VALUE(ARM64_OP_SXTB, v, 0, 0,
+						 ARM64_WIDTH_64,
+						 unreachable_cond()),
+			kprog_x86_sign_extend_value(v, X86_WIDTH_8));
+		cmp_u64("sxth",
+			KPROG_ARM64_EXTREV_VALUE(ARM64_OP_SXTH, v, 0, 0,
+						 ARM64_WIDTH_64,
+						 unreachable_cond()),
+			kprog_x86_sign_extend_value(v, X86_WIDTH_16));
+	}
+	for (v = 0; v < 0x100000000ULL; v += 0x10001ULL)
+		cmp_u64("sxtw",
+			KPROG_ARM64_EXTREV_VALUE(ARM64_OP_SXTW, v, 0, 0,
+						 ARM64_WIDTH_64,
+						 unreachable_cond()),
+			kprog_x86_sign_extend_value(v, X86_WIDTH_32));
+}
+
 int main(void)
 {
 	check_widths();
@@ -321,6 +356,7 @@ int main(void)
 	check_flags();
 	check_conditions();
 	check_shifts();
+	check_sign_extend();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",

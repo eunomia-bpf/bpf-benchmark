@@ -864,6 +864,7 @@ check:
 	lake env lean KProgFormal/CrossIsaFlags.lean
 	lake env lean KProgFormal/CrossIsaCond.lean
 	lake env lean KProgFormal/CrossIsaShift.lean
+	lake env lean KProgFormal/CrossIsaSignExtend.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_arena_host.c -o build/test_arm64_stack_arena_host
 	./build/test_arm64_stack_arena_host
 	lake env lean KProgFormal/GeneratedArm64StackIndex.lean
