@@ -6914,7 +6914,27 @@ capacity.
 
 Both numbers are measured from the
 committed headers, not derived on
-paper. Gate: rc 0, 226 `cross-check:
+paper. The paper's AArch64
+helper-argument paragraph cited a
+14-case and a 786-case oracle and a
+36-mutation binding battery; all
+three re-measured against the tree
+and all three match, and the
+paragraph now says the x86-64 helper
+is deliberately different rather than
+leaving the asymmetry implicit.
+
+That check also found a rendering
+defect outside the harness: three
+spans in `4-safety.tex` used Markdown
+emphasis (`*window*`, `*strictly*`,
+`*not*`), which LaTeX typesets as
+literal asterisks -- two of them
+introduced by this session's Steps
+0463 and 0466. All three now use
+`\emph`, and a sweep of every
+section finds no remaining Markdown
+emphasis. Gate: rc 0, 226 `cross-check:
 OK` banners. Census 339 -> 340.
 
 ### Step 0467 - harness claims re-measured
