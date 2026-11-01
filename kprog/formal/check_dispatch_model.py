@@ -55,7 +55,7 @@ A64_UNMODELLED = {
     "extrev": "model-only: test_arm64_extrev_host.c",
     "orn": "model-only: test_arm64_orn_host.c",
     "reduction": "model-only: test_arm64_reduction_host.c",
-    "stlxr": "model-only: test_arm64_stlxr_host.c",
+    "stlxr": "test_arm64_stlxr_route_host.c (live)",
     "unary": "test_arm64_unary_route_host.c (live)",
 }
 
@@ -129,7 +129,7 @@ def main(argv):
 
     print("check_dispatch_model: AArch64 chain branches on %d families, the "
           "model names %d, and the %d unmodelled ones are the recorded set "
-          "(7 with a live route host, 5 model-only)"
+          "(8 with a live route host, 4 model-only)"
           % (len(a64), len(model), len(unmodelled)))
     return 0
 
