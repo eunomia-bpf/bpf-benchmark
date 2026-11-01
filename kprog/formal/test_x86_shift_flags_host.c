@@ -27,6 +27,7 @@ typedef long long __s64;
 #define __always_inline inline
 #include "../x86/x86_sim.h"
 #include "generated/x86_shift_flags.h"
+#include "../x86/x86_sim_local_bpf.h"
 
 
 #include <stdio.h>
@@ -111,6 +112,47 @@ static struct flags drive_macro(__u32 alu, __u64 value, __u64 rhs,
 	__u64 cf = old.cf, zf = old.zf, sf = old.sf, of = old.of;
 
 	KPROG_X86_SET_SHIFT_FLAGS(cf, zf, sf, of, a, count, r, bits, sign, alu);
+
+	/*
+	 * The contract alone is not enough. The simulator derives the width,
+	 * mask, count and sign bit itself before calling the contract, so a
+	 * fault in *that* derivation is invisible to the call above -- which
+	 * is how a shifted sign bit survived 90,112 cases here. Drive the
+	 * simulator's own composition as well, and require both to agree with
+	 * the same independent model.
+	 */
+	{
+		__u64 sim_cf, sim_zf, sim_sf, sim_of;
+
+		X86_SIM_L_DECLARE_STATE();
+		/* Seed the simulator's flags to the same old values the contract
+		 * call above received, so the comparison is like for like: some
+		 * arms (ROL) deliberately leave ZF/SF untouched. */
+		__x86_cf = old.cf != 0;
+		__x86_zf = old.zf != 0;
+		__x86_sf = old.sf != 0;
+		__x86_of = old.of != 0;
+		X86_SIM_L_SET_SHIFT_FLAGS(value, rhs, result, alu, width);
+		sim_cf = __x86_cf;
+		sim_zf = __x86_zf;
+		sim_sf = __x86_sf;
+		sim_of = __x86_of;
+		if ((sim_cf != 0) != (cf != 0) || (sim_zf != 0) != (zf != 0) ||
+		    (sim_sf != 0) != (sf != 0) || (sim_of != 0) != (of != 0)) {
+			printf("COMPOSITION MISMATCH alu=%u value=%#llx rhs=%#llx "
+			       "w=%u: sim cf%llu zf%llu sf%llu of%llu, contract "
+			       "cf%llu zf%llu sf%llu of%llu\n",
+			       alu, (unsigned long long)value,
+			       (unsigned long long)rhs, width,
+			       (unsigned long long)sim_cf,
+			       (unsigned long long)sim_zf,
+			       (unsigned long long)sim_sf,
+			       (unsigned long long)sim_of,
+			       (unsigned long long)cf, (unsigned long long)zf,
+			       (unsigned long long)sf, (unsigned long long)of);
+			failures++;
+		}
+	}
 
 	return (struct flags){ cf != 0, zf != 0, sf != 0, of != 0 };
 }
