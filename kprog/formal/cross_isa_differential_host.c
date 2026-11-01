@@ -260,12 +260,67 @@ static void check_conditions(void)
 	}
 }
 
+/*
+ * The shifts, at the two widths AArch64 actually encodes.
+ *
+ * Both ISAs mask the shift amount, but by different rules: AArch64 takes it
+ * modulo 32 at 32-bit width and modulo 64 at 64-bit width, while x86-64 takes
+ * it modulo 64 at 64 bits and modulo 32 otherwise (it has no 8- or 16-bit
+ * shift). At W and X the rules coincide, so the same value shifted the same
+ * way gives the same result. `CrossIsaShift.lean` proves the correspondence
+ * and that it holds exactly on the encoded widths; this pins it in the C.
+ *
+ * The narrower widths are deliberately excluded: there the contracts really
+ * do differ (an amount of 32 shifts by 0 on AArch64 and by 32 on x86-64), and
+ * AArch64 never encodes them, so including them would report a difference
+ * that no program can reach.
+ */
+static void check_shifts(void)
+{
+	static const unsigned long long values[] = {
+		0ULL, 1ULL, 0xffULL, 0x80ULL, 0x80000000ULL, 0xffffffffULL,
+		0x100000001ULL, 0x123456789abcdefULL, ~0ULL,
+		0x8000000000000000ULL, 0xdeadbeefcafeULL,
+	};
+	static const unsigned long long amounts[] = {
+		0ULL, 1ULL, 7ULL, 8ULL, 15ULL, 16ULL, 31ULL, 32ULL, 33ULL,
+		63ULL, 64ULL, 65ULL, 127ULL,
+	};
+	static const struct { unsigned a64; unsigned x86; const char *name; } wids[] = {
+		{ ARM64_WIDTH_32, X86_WIDTH_32, "shift w32" },
+		{ ARM64_WIDTH_64, X86_WIDTH_64, "shift w64" },
+	};
+	unsigned vi, ai, wi;
+
+	for (vi = 0; vi < sizeof(values) / sizeof(values[0]); vi++)
+		for (ai = 0; ai < sizeof(amounts) / sizeof(amounts[0]); ai++)
+			for (wi = 0; wi < sizeof(wids) / sizeof(wids[0]); wi++) {
+				unsigned long long v = values[vi];
+				unsigned long long m = amounts[ai];
+				unsigned long long mask;
+				mask = KPROG_ARM64_WIDTH_MASK(wids[wi].a64);
+				cmp_u64("lsl", KPROG_ARM64_SHIFT_VALUE(ARM64_SHIFT_LSL, v, m,
+						wids[wi].a64, unreachable_cond()) & mask,
+					kprog_x86_shl_result(v, m, wids[wi].x86) & mask);
+				cmp_u64("lsr", KPROG_ARM64_SHIFT_VALUE(ARM64_SHIFT_LSR, v, m,
+						wids[wi].a64, unreachable_cond()) & mask,
+					kprog_x86_shr_result(v, m, wids[wi].x86) & mask);
+				cmp_u64("asr", KPROG_ARM64_SHIFT_VALUE(ARM64_SHIFT_ASR, v, m,
+						wids[wi].a64, unreachable_cond()) & mask,
+					kprog_x86_sar_result(v, m, wids[wi].x86) & mask);
+				cmp_u64("ror", KPROG_ARM64_SHIFT_VALUE(ARM64_SHIFT_ROR, v, m,
+						wids[wi].a64, unreachable_cond()) & mask,
+					kprog_x86_ror_result(v, m, wids[wi].x86) & mask);
+			}
+}
+
 int main(void)
 {
 	check_widths();
 	check_stack_bounds();
 	check_flags();
 	check_conditions();
+	check_shifts();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",
