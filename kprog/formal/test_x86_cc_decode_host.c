@@ -24,26 +24,27 @@
  *   /tmp/t_cc_decode
  */
 
-/* The `X86_CC_*` decodes the generated condition contract asserts against, and
- * the encoder's suffix codes, restated as literals so this model is
- * independent of the generated tables. The generated `_Static_assert`s in
- * `generated/x86_cond.h` pin the first block to the shared contract and those
- * in `generated/x86_cc_decode.h` pin the suffix codes. */
-#define X86_CC_O 0U
-#define X86_CC_NO 1U
-#define X86_CC_B 2U
-#define X86_CC_AE 3U
-#define X86_CC_E 4U
-#define X86_CC_NE 5U
-#define X86_CC_BE 6U
-#define X86_CC_A 7U
-#define X86_CC_S 8U
-#define X86_CC_NS 9U
-#define X86_CC_L 12U
-#define X86_CC_GE 13U
-#define X86_CC_LE 14U
-#define X86_CC_G 15U
+/* The `X86_CC_*` codes come from the simulator header itself, not from a local
+ * restatement. Restating them made this oracle independent of the generated
+ * tables, which was the intent, but it also made it blind to the one thing it
+ * should notice: whether the *simulator* still agrees with the generated
+ * contract. Drifting `X86_CC_A` in `../x86/x86_sim.h` left the oracle green
+ * under the literal block. Including the real header binds the two, and the
+ * generated `_Static_assert`s in `generated/x86_cond.h` and
+ * `generated/x86_cc_decode.h` then check the simulator's values against the
+ * shared spec rather than against a copy of themselves. */
+typedef unsigned char __u8;
+typedef unsigned short __u16;
+typedef unsigned int __u32;
+typedef unsigned long long __u64;
+typedef signed long long __s64;
+typedef signed char __s8;
+typedef signed short __s16;
+typedef signed int __s32;
 
+#define __always_inline inline
+
+#include "../x86/x86_sim.h"
 #include "generated/x86_cond.h"
 #include "generated/x86_cc_decode.h"
 

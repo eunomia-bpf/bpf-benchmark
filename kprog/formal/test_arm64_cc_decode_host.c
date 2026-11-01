@@ -20,26 +20,27 @@
  *   /tmp/t_arm_cc
  */
 
-/* The `ARM64_COND_*` decodes the generated contract asserts against, restated
- * as literals so this model is independent of the generated header. The
- * generated `_Static_assert`s in `generated/arm64_cc_decode.h` pin this block
- * to the shared condition contract's values. */
-#define ARM64_COND_EQ 0U
-#define ARM64_COND_NE 1U
-#define ARM64_COND_CS 2U
-#define ARM64_COND_CC 3U
-#define ARM64_COND_MI 4U
-#define ARM64_COND_PL 5U
-#define ARM64_COND_VS 6U
-#define ARM64_COND_VC 7U
-#define ARM64_COND_HI 8U
-#define ARM64_COND_LS 9U
-#define ARM64_COND_GE 10U
-#define ARM64_COND_LT 11U
-#define ARM64_COND_GT 12U
-#define ARM64_COND_LE 13U
-#define ARM64_COND_AL 14U
+/* The `ARM64_COND_*` codes come from the simulator header itself, not from a
+ * local restatement. Restating them made this model independent of the
+ * generated header, which was the intent, but it also made it blind to the one
+ * thing it should notice: whether the *simulator* still agrees with the
+ * generated contract. Drifting `ARM64_COND_EQ` in `../arm64/arm64_sim.h` left
+ * the oracle green under the literal block. Including the real header binds the
+ * two, and the generated `_Static_assert`s in `generated/arm64_cc_decode.h`
+ * then check the simulator's values against the shared spec rather than
+ * against a copy of themselves. */
+typedef unsigned char __u8;
+typedef unsigned short __u16;
+typedef unsigned int __u32;
+typedef unsigned long long __u64;
+typedef signed char __s8;
+typedef signed short __s16;
+typedef signed int __s32;
+typedef signed long long __s64;
 
+#define __always_inline inline
+
+#include "../arm64/arm64_sim.h"
 #include "generated/arm64_cc_decode.h"
 
 #include <stdio.h>
