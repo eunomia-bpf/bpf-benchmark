@@ -27,8 +27,10 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 # kprog/formal -> kprog -> repo
-ENCODER = (ROOT.parent / "x86" / "native_lab" / "native_link" / "src"
-           / "x86.rs")
+_SRC = ROOT.parent / "x86" / "native_lab" / "native_link" / "src"
+ENCODER = _SRC / "x86.rs"
+# The AArch64 branch encodings live in the same crate's main.rs.
+ENCODER_A64 = _SRC / "main.rs"
 SIM_H = ROOT.parent / "x86" / "x86_sim.h"
 
 # Short-form conditional jump opcodes are 0x70 + condition code.
@@ -51,6 +53,59 @@ BASE = {"8": 0x70, "32": 0x80}
 
 CC = re.compile(r'#define\s+X86_CC_([A-Z]+)\s+(\d+)U')
 
+
+
+# AArch64 conditional branches are built from a literal whose low four bits
+# are the condition code. The buffer-index name states which check the branch
+# belongs to, so the expected code is a property of the site, not of the
+# number: bounds and limit branches are "greater or equal" (CS), a module
+# existence test is equality (EQ), and the invalid-argument test is "higher"
+# (HI). Written out so a changed constant is reported against the check it
+# implements.
+A64_COND = {"eq": 0, "ne": 1, "cs": 2, "cc": 3, "mi": 4, "pl": 5, "vs": 6,
+            "vc": 7, "hi": 8, "ls": 9, "ge": 10, "lt": 11, "gt": 12,
+            "le": 13, "al": 14}
+
+A64_SITE = re.compile(
+    r'words\[(\w+)\]\s*=\s*a64_patch_b_cond\(0x([0-9a-f_]+),')
+
+# site-name prefix -> the condition the check requires
+A64_INTENT = (
+    ("null", "cs"),      # same cmp X9, max_entries: X9 >= max is out of range
+    ("bounds", "cs"),
+    ("limit", "cs"),
+    ("eexist", "eq"),
+    ("invalid", "hi"),
+)
+
+
+def a64_check():
+    """Check each AArch64 B.cond site's encoded condition against its check.
+
+    Returns (problems, site_count).
+    """
+    out = []
+    seen = 0
+    for m in A64_SITE.finditer(ENCODER_A64.read_text(errors="ignore")):
+        site, raw = m.group(1), int(m.group(2).replace("_", ""), 16)
+        seen += 1
+        base = raw & ~0xf
+        if base != 0x5400_0000:
+            out.append("%s: 0x%08x is not a B.cond encoding" % (site, raw))
+            continue
+        cond = raw & 0xf
+        want = None
+        for prefix, name in A64_INTENT:
+            if site.startswith(prefix):
+                want = name
+                break
+        if want is None:
+            out.append("%s: no stated intent for this site" % site)
+            continue
+        if cond != A64_COND[want]:
+            out.append("%s: encodes condition %d, but the check requires "
+                       "%s (%d)" % (site, cond, want.upper(), A64_COND[want]))
+    return out, seen
 
 def main(argv):
     ap = argparse.ArgumentParser()
@@ -134,9 +189,23 @@ def main(argv):
             print("  " + p)
         return 1
 
+    # ---- AArch64 B.cond ------------------------------------------------
+    # The AArch64 encoder builds conditional branches from a literal word
+    # whose low four bits are the condition code, so the same argument
+    # applies: the constant is only a number, and a wrong one branches on the
+    # wrong condition. The site's buffer-index name states the intent.
+    a64, a64_seen = a64_check()
+    if a64:
+        print("check_jcc_opcodes: %d problem(s) in the AArch64 B.cond sites"
+              % len(a64))
+        for p in a64:
+            print("  " + p)
+        return 1
+
     print("check_jcc_opcodes: %d conditional-jump site(s) all encode "
           "their condition code (%d by mnemonic comment, %d by binding "
-          "name)" % (len(sites), commented, named))
+          "name), and %d AArch64 B.cond site(s) match their named check"
+          % (len(sites), commented, named, a64_seen))
     return 0
 
 
