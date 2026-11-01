@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0490 relates a cross-ISA difference (census 361
+-> 362). AArch64 sets C after a subtraction to
+not-borrow (lhs >= rhs, so CMP then B.HS means no
+borrow); x86-64 sets CF to borrow (lhs < rhs, so
+JB means borrow). Both are correct and each is
+proved against its own statement, but nothing
+related them, so a reader saw >= against < with
+no way to distinguish an architectural difference
+from a mistake. `CrossIsaFlags.lean` proves they
+are exact complements on the same narrowed
+operands at all four widths, with witnesses in
+both directions (1-2 borrows, 2-1 does not). This
+is a third kind of cross-ISA result alongside
+"agree" and "pinned at the C layer": the two
+genuinely differ and what is proved is the exact
+relation. 1994 theorems. Gate: rc 0, 229
+banners.
+
 Step 0489 checks the cross-ISA theorems at the C
 layer (census 360 -> 361). The Lean theorems
 prove the generated Lean contracts agree, but each

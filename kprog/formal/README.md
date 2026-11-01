@@ -11,7 +11,7 @@ What the gate currently covers, measured from one full `make check` run:
 229 passing `cross-check: OK` oracle banners summing to 123,463,937 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
-compiling transitively from the gate's roots and proving 1,990 theorems with
+compiling transitively from the gate's roots and proving 1,994 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -91,6 +91,17 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+Not every cross-ISA difference is a drift, and the carry flag is the case that
+shows the difference between the two kinds. AArch64 sets `C` after a
+subtraction to *not-borrow* (unsigned `lhs >= rhs`, so `CMP` then `B.HS` means
+"no borrow"); x86-64 sets `CF` to *borrow* (`lhs < rhs`, so `JB` means
+"borrow"). Each is proved against its own independent statement, but nothing
+related them, so a reader comparing the specs saw `>=` against `<` with no way
+to tell an architectural difference from a mistake in one of them.
+`CrossIsaFlags.lean` proves they are exact complements on the same narrowed
+operands at every width, with witnesses in both directions (`1 - 2` borrows,
+`2 - 1` does not), so the disagreement is polarity and not value.
 
 The cross-ISA theorems say nothing about the C, so that is checked separately.
 `CrossIsaWidth.lean` and `CrossIsaStackArena.lean` prove the generated *Lean*
@@ -7005,6 +7016,44 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0490 - the carry flags are
+proved complementary, not just different
+
+Step 0490 relates a cross-ISA
+difference that was previously only
+visible as a difference (census 361 ->
+362). AArch64 sets `C` after a
+subtraction to *not-borrow* (unsigned
+`lhs >= rhs`, so `CMP` then `B.HS`
+means "no borrow"); x86-64 sets `CF` to
+*borrow* (`lhs < rhs`, so `JB` means
+"borrow"). Both are architecturally
+correct and each is proved against its
+own independent statement -- but nothing
+related them, so a reader comparing the
+specs saw `>=` against `<` and could not
+tell an architectural difference from a
+mistake in one of them.
+
+`CrossIsaFlags.lean` proves they are
+exact complements on the same narrowed
+operands, at all four widths. Two
+witnesses confirm the difference is real
+rather than technical: `1 - 2` borrows
+so AArch64's C is false and x86-64's CF
+is true, and `2 - 1` is the other way
+round, so the complement holds in both
+directions.
+
+This is the third kind of cross-ISA
+result, alongside "agree" (widths, tags,
+stack arithmetic) and "pinned at the C
+layer" (the differential oracle): here
+the two genuinely differ, and what is
+proved is the exact relation between
+them. Gate: rc 0, 229 banners, 1,994
+theorems. Census 361 -> 362.
 
 ### Step 0489 - the cross-ISA theorems
 are checked at the C layer too
