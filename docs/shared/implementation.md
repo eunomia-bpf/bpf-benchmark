@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0498 relates the two ALU dispatch tables (census
+369 -> 370). Both execute arithmetic-logic through
+one generated table, numbered differently and
+covering different sets (six arms against sixteen),
+so this is the first correspondence recovered by a
+mapping rather than read off matching codes. Five
+operations map one-to-one (add, sub, and, orr/or,
+eor/xor), and add/sub also prove the adc/sbb routing
+transparent. The sixth is the interesting one:
+AArch64's BIC complements the right operand, x86-64's
+ANDN the left, so they agree only on exchanged
+arguments -- dropping the exchange breaks the
+theorem. Both names mean "and with a complement",
+which is why a translator pairs them wrongly.
+Breaking BIC's complement fails the oracle on 264
+cases. 2028 theorems. Gate: rc 0, 229 banners,
+124,465,468 cases.
+
 Step 0497 relates the address offsets (census 368 ->
 369). Both compute base plus an optional scaled
 index with 64-bit wrapping, but AArch64 has no

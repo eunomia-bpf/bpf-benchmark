@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 124,464,460 modeled
+229 passing `cross-check: OK` oracle banners summing to 124,465,468 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 299 Lean modules
-compiling transitively from the gate's roots and proving 2,019 theorems with
+header and one `Generated*.lean` module (138/138/138); 300 Lean modules
+compiling transitively from the gate's roots and proving 2,028 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,464,460 again, so the rollup is a measurement of the committed tree and not
+124,465,468 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -135,6 +135,16 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+The ALU tables are the first place where the shared vocabulary has to be
+*recovered* rather than read off. Both ISAs dispatch arithmetic-logic through
+one generated table, but the tables are numbered differently and cover
+different sets (six arms against sixteen), so the correspondence is a mapping.
+Five operations map one-to-one under a renaming. The sixth does not: AArch64's
+`BIC` complements the right operand and x86-64's `ANDN` complements the left,
+so they agree only on exchanged arguments, and dropping the exchange breaks the
+theorem. Both names mean "and with a complement", which is exactly why a
+translator pairs them wrongly.
 
 The address offset is the case where "the same function" is the wrong frame
 entirely. Both ISAs compute base plus an optional scaled index with 64-bit
@@ -7083,6 +7093,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0498 - the shared ALU vocabulary
+must be recovered by a mapping, and one
+pair needs its operands exchanged
+
+Step 0498 relates the two ALU dispatch
+tables (census 369 -> 370). Both
+architectures execute arithmetic-logic
+through one generated table, but the
+tables are numbered differently and cover
+different sets -- six arms against
+sixteen -- so this is the first
+correspondence that has to be *recovered*
+rather than read off matching codes.
+
+Five operations map one-to-one under a
+renaming: add, sub, and, orr/or, eor/xor.
+The add and sub cases also prove the
+routing transparent, since x86-64 sends
+them through the carry-aware adc/sbb with
+a clear carry.
+
+The sixth is the one worth the step.
+AArch64's `BIC` complements the *right*
+operand; x86-64's `ANDN` complements the
+*left*. They agree only on exchanged
+arguments -- dropping the exchange breaks
+the theorem. Both names mean "and with a
+complement", which makes this precisely
+the pair a translator pairs wrongly, so
+`CrossIsaAlu.lean` states both forms
+separately, proves the exchange gives
+agreement, and pins a concrete case where
+the unexchanged pairing differs.
+
+The compiled tables are checked over the
+same mapping; breaking BIC's complement
+fails the oracle on 264 cases. Gate: rc
+0, **229** banners, 124,465,468 cases
+(oracle 1,001,903). Census 369 -> 370.
 
 ### Step 0497 - the address offsets share
 a core, and the rest is what the other
