@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0504 takes the most consequential of the 48
+simulator-called but model-only contracts (census 374
+-> 375): arm64_flags, reached through ADDS/SUBS via
+EXEC_ARITH_WRITEBACK, which picks the family,
+computes the result and sets all four flags. A wrong
+flag is invisible at the instruction that caused it and
+wrong at the next branch, so the new host compares the
+destination and all four flags against an independent
+model of ADD/SUB and N/Z/C/V. Its first draft was
+wrong twice: the overflow model omitted ADD's
+operand-agreement complement (fixed against the
+definition, not the macro), and the operand table used
+distinct registers so lhs == rhs was never generated --
+the only case separating a subtract carry of "lhs >=
+rhs" from "lhs > rhs", a planted fault of which
+survived. Equal-operand immediates take the run from
+432 to 1,152 cases; the planted fault now fails 24.
+Gate: rc 0, 231 banners, 124,470,732 cases.
+
 Step 0503 separates two claims that were being
 conflated (census 373 -> 374). Classifying all 214
 hosts by whether they include the simulator header
