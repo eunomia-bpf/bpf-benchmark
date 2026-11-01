@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 397, and 286 steps
+`build/mut_*.py` files exist, the counter's last value is 398, and 287 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -158,6 +158,14 @@ four. The oracle drives all five kinds at both widths, recomputing the modifier
 from its definition, and asserts a non-identity kind was exercised so the run
 is not vacuous. An off-by-one in shift-left fails 78 cases; dropping the
 complement fails 595.
+
+x86 gets the same question asked, and the answer differs. Its chain branches
+on 53 `HANDLED` predicates and the generated model names every one -- the
+apparent mismatch is a `disp_` prefix difference in ten family names, and after
+normalising the sets coincide. So x86 needed no work at all, which is worth
+establishing rather than assuming, since the AArch64 side needed twelve route
+hosts. The checker now measures both and fails when either gains a predicate
+the model does not name.
 
 With that, `check_dispatch_model` reports **12 live / 0 model-only**: every
 family the C chain routes is now driven by an oracle that includes the
@@ -7426,6 +7434,32 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0527 - the same question asked
+of x86, where the answer is empty
+
+Step 0526 closed the AArch64 dispatch gap
+(12 live / 0 model-only). x86 had never
+been measured -- the question simply had
+not been asked of it (census 397 -> 398).
+
+Asked now: the x86 chain branches on 53
+`HANDLED` predicates and the generated
+dispatch model names every one of them.
+What looked like a mismatch was a `disp_`
+prefix difference in ten family names;
+normalising it makes the sets coincide, and
+the two Lean-only entries are non-family
+artifacts.
+
+So x86 needed no work -- worth establishing
+rather than assuming, since the AArch64 side
+needed twelve route hosts. The checker now
+reports both architectures and fails when
+either gains a predicate the model does not
+name, verified by planting one on each side.
+Gate: rc 0, **241** banners. Census 397 ->
+398.
 
 ### Step 0526 - complemented OR completes
 the sweep: twelve families, zero
