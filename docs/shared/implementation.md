@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0512 tests a contract that no proof relates to its
+definition (census 382 -> 383). The multiply header
+and its Lean module come from one specification in
+one pass, so they cannot drift from each other -- but
+they can both be wrong the same way, and nothing
+relates either to the architectural definition. The
+family hides that shape: UMULH computes the high half
+of a 128-bit product by shift-and-add, where a term in
+the wrong position still yields a plausible number and
+re-reading the formula reproduces the mistake. The
+independent oracle is C's 128-bit integer type,
+available to an x86 host but not to the BPF-target
+simulator; test_arm64_mul_wide_host.c checks all eight
+opcodes over boundary operands, 27,648 cases. Two
+planted faults -- mid1 shifted by 16 instead of 32, and
+the carry shifted by 24 instead of 32 -- fail 1,008 and
+1,872 cases. Gate: rc 0, 233 banners, 124,498,572
+cases.
+
 Step 0511 records a cross-architecture difference rather
 than removing it (census 381 -> 382). Both encoders
 answer "given a native map name, which lookup site is
