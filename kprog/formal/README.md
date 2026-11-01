@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-242 passing `cross-check: OK` oracle banners summing to 124,531,197 modeled
+243 passing `cross-check: OK` oracle banners summing to 124,531,678 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,531,197 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 242 banners are all distinct oracles — 241 report a plain
+124,531,678 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 243 banners are all distinct oracles — 242 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 399, and 290 steps
+`build/mut_*.py` files exist, the counter's last value is 400, and 292 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -158,6 +158,17 @@ four. The oracle drives all five kinds at both widths, recomputing the modifier
 from its definition, and asserts a non-identity kind was exercised so the run
 is not vacuous. An off-by-one in shift-left fails 78 cases; dropping the
 complement fails 595.
+
+The same region defines three more emitters -- CBZ, CBNZ, TBZ, TBNZ -- and
+none of them was executed by any host either. They differ from the
+condition-code emitters in *where the predicate comes from*: not NZCV but the
+register itself, zero-ness for the first pair and a single bit for the second.
+That gives two independent things able to go wrong, both silent -- the test could
+select the wrong predicate, or the emitter could invert it. Driving all four
+through the real macros: masking the tested bit index to 62 instead of 63 fails
+36 cases, and dropping the inversion on the CBZ backward arm fails 160. The x86
+simulator has no counterpart for these, so there was not even a sibling oracle
+to notice the absence.
 
 A different surface had the same asymmetry. Branch *emission* is the code that
 writes the control edge, not the dispatch that selects an arm: the forward shape
@@ -7448,6 +7459,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0529 - the three other AArch64
+branch emitters, with no x86 twin to
+notice their absence
+
+Step 0528 executed the condition-code
+emitter. The same region defines three
+more -- CBZ_IMPL, TBZ_IMPL and the
+wrappers selecting their kind through the
+generated branch-test contract -- and none
+of them was executed by any host
+(census 399 -> 400). The x86 simulator has
+no counterpart at all, so unlike the JCC
+case there was not even a sibling oracle to
+reveal the absence.
+
+They differ from the condition-code emitters
+in where the predicate comes from: not NZCV
+but the register itself, zero-ness for
+CBZ/CBNZ and a single bit for TBZ/TBNZ. Two
+independent things can therefore go wrong,
+both silent: the test could select the
+wrong predicate, or the emitter could invert
+it.
+
+The host drives all four through the real
+macros over ten operands, four bit indices
+and both edge directions, observing the
+arrival address through `goto` labels.
+Verified by planting both shapes -- masking
+the tested bit index to 62 instead of 63
+fails 36 cases, and dropping the inversion
+on the CBZ backward arm fails 160. Gate:
+rc 0, **243** banners, 124,531,678 cases.
+Census 399 -> 400.
 
 ### Step 0528 - the AArch64 branch
 emitter was never executed, though the

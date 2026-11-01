@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0529 executes the three remaining AArch64 branch
+emitters (census 399 -> 400). Step 0528 covered the
+condition-code emitter; the same region defines
+CBZ_IMPL, TBZ_IMPL and their wrappers, and none was
+executed by any host. Unlike the JCC case there was
+not even an x86 sibling to reveal the absence. They
+differ in where the predicate comes from -- not NZCV
+but the register, zero-ness for CBZ/CBNZ and a
+single bit for TBZ/TBNZ -- so two independent things
+can go wrong, both silent: a wrong predicate or an
+inverted arm. The host drives all four over ten
+operands, four bit indices and both edge directions.
+Verified: masking the bit index to 62 instead of 63
+fails 36 cases, dropping the CBZ backward inversion
+fails 160. Gate: rc 0, 243 banners, 124,531,678
+cases.
+
 Step 0528 moves to a different surface (census 398 ->
 399). Dispatch selects an arm; emission writes the
 control edge. Step 0499 proved the two branch shapes
