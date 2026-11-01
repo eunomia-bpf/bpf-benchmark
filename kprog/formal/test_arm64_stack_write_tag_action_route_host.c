@@ -359,6 +359,34 @@ int main(void)
 		failures += (int)stack_guard_hits;
 	}
 
+	/* The other direction: a window that does not fit must reach the guard.
+	 * The sweeps above stay in range, so without these rows a simulator
+	 * whose guard was weakened to always-true passes all of them. Each case
+	 * requires exactly one hit. */
+	{
+		unsigned before = stack_guard_hits;
+
+		cases++;
+		(void)ARM64_SIM_L_STACK_READ(64, ARM64_WIDTH_64);
+		if (stack_guard_hits != before + 1U) {
+			printf("MISMATCH read-past-end: guard fired %u "
+			       "time(s), want 1\n",
+			       stack_guard_hits - before);
+			failures++;
+		}
+		before = stack_guard_hits;
+		cases++;
+		ARM64_SIM_L_STACK_WRITE(64, ARM64_WIDTH_64,
+					 0x1122334455667788ULL);
+		if (stack_guard_hits != before + 1U) {
+			printf("MISMATCH write-past-end: guard fired %u "
+			       "time(s), want 1\n",
+			       stack_guard_hits - before);
+			failures++;
+		}
+		stack_guard_hits = 0;
+	}
+
 	if (failures) {
 		printf("arm64 stack write tag action route host cross-check: "
 		       "FAIL (%d)\n", failures);

@@ -214,6 +214,33 @@ int main(void)
 		failures += (int)stack_guard_hits;
 	}
 
+	/* The other direction: a stack-tagged pointer whose biased index runs
+	 * past the arena must reach the guard. The planted rows above stay in
+	 * range, so without this a simulator whose pointer guard was weakened to
+	 * always-true passes every one of them -- the counter is incremented
+	 * nowhere. Exactly one hit is required here. */
+	{
+		static const __s64 past_ptrs[] = { 64 + 8, 64 + 96, 4096 };
+		unsigned k;
+
+		for (k = 0; k < sizeof(past_ptrs) / sizeof(past_ptrs[0]); k++) {
+			unsigned before = stack_guard_hits;
+
+			plant(ARM64_X1, (void *)(long)past_ptrs[k],
+			      ARM64_SIM_TAG_STACK);
+			cases++;
+			(void)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1);
+			if (stack_guard_hits != before + 1U) {
+				printf("MISMATCH helper-arg-past-end ptr=%lld: "
+				       "guard fired %u time(s), want 1\n",
+				       (long long)past_ptrs[k],
+				       stack_guard_hits - before);
+				failures++;
+			}
+		}
+		stack_guard_hits = 0;
+	}
+
 	if (failures) {
 		printf("arm64 helper arg ptr route host cross-check: "
 		       "FAIL (%d)\n", failures);
