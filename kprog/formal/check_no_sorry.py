@@ -7,8 +7,11 @@ that only builds proves the tree compiles, not that it is complete: planting
 The README's "no `sorry`, no `axiom`" is therefore a property of the current
 tree rather than something the gate enforces. This script enforces it.
 
-Three placeholders are rejected: `sorry`, `admit`, and `axiom` declarations.
-`native_decide`, `bv_decide`, and `omega` are proofs and are allowed.
+The README's claim is stronger than "no sorry": it says no `sorry`, no `axiom`,
+and no `opaque`/`unsafe`/`partial` definitions. Each of those is checked here,
+because each is a way to make a theorem true-by-assertion rather than by proof
+and `lake build` treats every one of them as ordinary. `native_decide`,
+`bv_decide`, and `omega` are proofs and are allowed.
 """
 import argparse
 import pathlib
@@ -21,7 +24,10 @@ MODULES = ROOT / "KProgFormal"
 # A whole-word `sorry`/`admit` outside a line comment, and any `axiom`
 # declaration. `sorryAx` and identifiers containing the word do not count.
 PLACEHOLDER = re.compile(r"(?<![\w'])(sorry|admit)(?![\w'])")
-AXIOM = re.compile(r"^\s*axiom\s+\w", re.M)
+# A declaration keyword in command position: `axiom foo`, `opaque foo`,
+# `unsafe def foo`, `partial def foo`. Indented forms are commands inside a
+# section or namespace, so leading whitespace is allowed.
+DECL = re.compile(r"^\s*(axiom|opaque|unsafe|partial)\s", re.M)
 
 
 def strip_comments(text: str) -> str:
@@ -35,9 +41,10 @@ def scan(path: pathlib.Path) -> list[str]:
     for m in PLACEHOLDER.finditer(body):
         line = body[: m.start()].count("\n") + 1
         found.append(f"{path.relative_to(ROOT)}:{line}: {m.group(1)}")
-    for m in AXIOM.finditer(body):
+    for m in DECL.finditer(body):
         line = body[: m.start()].count("\n") + 1
-        found.append(f"{path.relative_to(ROOT)}:{line}: axiom declaration")
+        found.append(
+            f"{path.relative_to(ROOT)}:{line}: {m.group(1)} declaration")
     return found
 
 
@@ -56,7 +63,8 @@ def main() -> None:
             for p in problems:
                 print(f"placeholder in proof tree: {p}", file=sys.stderr)
             raise SystemExit(1)
-        print(f"no sorry/admit/axiom in {len(list(MODULES.glob('*.lean')))} modules")
+        print(f"no sorry/admit/axiom/opaque/unsafe/partial in "
+              f"{len(list(MODULES.glob('*.lean')))} modules")
     else:
         for p in problems:
             print(p)
