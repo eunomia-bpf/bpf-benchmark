@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-226 passing `cross-check: OK` oracle banners summing to 123,463,285 modeled
+226 passing `cross-check: OK` oracle banners summing to 123,463,515 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
 compiling transitively from the gate's roots and proving 1,970 theorems with
@@ -35,7 +35,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,463,285 again, so the rollup is a measurement of the committed tree and not
+123,463,515 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 226 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -89,6 +89,17 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+Each of those guards is mutation-tested, which is the difference between a
+bound and a *checked* bound. When the pointer guard was added no host drove it,
+so two sabotages of `KPROG_*_STACK_POINTER_FITS` passed the whole gate: raising
+the capacity by one, and dropping the `(__s64)` cast that rejects a negative
+index. Both arena hosts now check the generated bound against an independent
+restatement over every grid capacity/index pair plus the one-past-end, negative,
+and large-capacity rows. The signed index matters — it is what the simulator
+passes, and a capacity near `2^32` is where the signed cast changes the answer,
+so an unsigned grid alone leaves the cast unpinned. Both sabotages now fail on
+both architectures.
 
 The three bounds are not independent, and the module now proves how they
 relate rather than leaving it to inspection. A stack *write* that fits its
@@ -6872,6 +6883,50 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0472 - the stack pointer bound
+becomes mutation-tested
+
+Step 0472 gates the pointer bound
+Step 0465 added (census 343 -> 344).
+No contract, proof, or simulator
+change: the code was guarded, but no
+host drove the guard, so the guard
+itself was unverified by mutation.
+
+Two sabotages of
+`KPROG_*_STACK_POINTER_FITS` passed
+the entire gate before this step:
+raising the capacity by one, and
+dropping the `(__s64)` cast that
+rejects a negative index. The second
+is the interesting one -- the guard
+is a single widened comparison, and
+without the cast a negative offset
+becomes a large unsigned value that a
+large capacity admits.
+
+Both arena hosts now check the
+generated bound against an independent
+restatement over every grid
+capacity/index pair plus the
+one-past-end, negative, and
+large-capacity rows. The index is
+signed because that is what the
+simulator passes, and the large
+capacity (`2^32 - 1`) is included
+because it is the only case where the
+signed cast changes the answer -- at
+small capacities both casts reject, so
+an unsigned grid leaves the cast
+unpinned. Both sabotages now fail on
+both architectures (arm64 3 and 2
+mismatches, x86 4 and 1). The two
+arena batteries re-ran ALL AS
+EXPECTED. Gate: rc 0, 226
+`cross-check: OK` banners,
+123,463,515 modeled cases (+230 is
+this coverage). Census 343 -> 344.
 
 ### Step 0471 - the figures reach every
 live copy

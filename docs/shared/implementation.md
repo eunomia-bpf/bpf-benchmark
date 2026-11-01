@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0472 makes the stack pointer bound
+mutation-tested (census 343 -> 344; no
+contract, proof, or simulator change). Step 0465
+guarded the pointer path but no host drove the
+guard, so two sabotages of
+`KPROG_*_STACK_POINTER_FITS` passed the whole
+gate: raising the capacity by one, and dropping
+the `(__s64)` cast that rejects a negative
+index. Both arena hosts now check the generated
+bound against an independent restatement over
+every grid pair plus one-past-end, negative, and
+large-capacity rows. The signed index matters
+because that is what the simulator passes, and a
+capacity near 2^32 is the only case where the
+cast changes the answer -- at small capacities
+both casts reject. Both sabotages now fail on
+both architectures. Gate: rc 0, 226 banners,
+123,463,515 cases.
+
 Step 0471 follows the disproved figures through
 every remaining live copy in the tree (census
 342 -> 343). Three more carried them: the two
