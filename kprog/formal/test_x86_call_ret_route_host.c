@@ -26,8 +26,12 @@
  *     dispatch label;
  *   - the round trip is exact for addresses whose bytes are all distinct, so a
  *     width or endianness slip shows;
+ *   - RET returns the low word of the accumulator and copies the ABI control
+ *     block into the skb context when one is installed;
  *   - SUB_JMP and SUB_JCC select the same targets as JMP and JCC, which is
- *     what makes them aliases rather than variants.
+ *     what makes them aliases rather than variants -- driven in *both* the
+ *     taken and the not-taken direction, since a conditional degraded to an
+ *     unconditional jump passes a taken-only test.
  *
  * Build and run:
  *   cd kprog/formal &&
@@ -71,7 +75,9 @@ static unsigned long cases;
 #define DECL_STATE()                                                       \
 	X86_SIM_L_DECLARE_STATE();                                         \
 	X86_SIM_L_DECLARE_STACK();                                         \
-	(void)__x86_stack_mem
+	struct x86_sim_xdp_abi __x86_sim_abi = { 0 };                      \
+	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;       \
+	(void)__x86_sim_skb_ctx
 
 /* Where the callee "lands". */
 static int hit_target;
@@ -124,6 +130,66 @@ dispatched:
 dispatch:
 	X86_SIM_X86_SUB_RET(dispatched);
 	return;
+}
+
+
+#define SUB_TARGET 0xABCDULL
+
+/* X86_SIM_X86_RET returns from the calling function, so it needs its own. */
+/* X86_SIM_X86_RET ends in a `return` from the calling function, so the
+ * driving scope has to be inside the probe: it declares the state, plants rax
+ * and the ABI cb words, and the returned value is the function's result. */
+static __u32 probe_ret_value(__u64 rax_value, struct __sk_buff *ctx,
+			      __u32 cb0, __u32 cb1)
+{
+	DECL_STATE();
+
+	__x86_rax.ptr = (void *)(long)rax_value;
+	__x86_sim_skb_ctx = ctx;
+	__x86_sim_abi.cb[0] = cb0;
+	__x86_sim_abi.cb[1] = cb1;
+	X86_SIM_X86_RET();
+	return 0;
+}
+
+/* SUB_JMP: an unconditional subroutine jump. */
+static __u64 probe_sub_jmp(void)
+{
+	__u64 got;
+	DECL_STATE();
+	goto dispatch;
+
+arrived:
+	got = SUB_TARGET;
+	return got;
+
+dispatch:
+	X86_SIM_X86_SUB_JMP(0, 0, arrived);
+	got = 0;
+	return got;
+}
+
+/* SUB_JCC: a conditional subroutine jump. */
+static __u64 probe_sub_jcc(unsigned cc, __u64 current, __u64 target,
+			    int zf, int zf_unused)
+{
+	__u64 got;
+	DECL_STATE();
+	(void)zf_unused;
+	__x86_cf = 1;
+	__x86_zf = (__u8)zf;
+	__x86_sf = 0;
+	__x86_of = 0;
+	goto dispatch;
+
+arrived:
+	got = target;
+	return got;
+
+dispatch:
+	X86_SIM_X86_SUB_JCC(cc, current, target, arrived);
+	got = current;
+	return got;
 }
 
 int main(void)
@@ -204,6 +270,82 @@ int main(void)
 			printf("round trip: return address is %#llx\n",
 			       (unsigned long long)got_ret);
 			failures++;
+		}
+	}
+
+	/* X86_SIM_X86_RET returns the low word of rax -- the program's return
+	 * value -- so a truncation or a wrong register shows here. It also
+	 * copies the ABI cb words into the skb context when one is present;
+	 * that path is exercised by installing a context whose cb words start
+	 * at sentinels. */
+	{
+		static struct __sk_buff skb;
+		__u32 got;
+
+		skb.cb[0] = 0;
+		skb.cb[1] = 0;
+		cases++;
+		got = probe_ret_value(0xDEADBEEFCAFEF00DULL, &skb,
+				      0x11223344, 0x55667788);
+
+		if (got != 0xCAFEF00DUL) {
+			printf("RET: returned %#x, want %#x (low word of rax)\n",
+			       got, 0xCAFEF00DU);
+			failures++;
+		}
+		if (skb.cb[0] != 0x11223344 || skb.cb[1] != 0x55667788) {
+			printf("RET: skb cb words are %#x %#x\n", skb.cb[0],
+			       skb.cb[1]);
+			failures++;
+		}
+	}
+
+	/* SUB_JMP and SUB_JCC are aliases of JMP and JCC -- the same target
+	 * selection with a subroutine-flavoured name. Driving them confirms
+	 * the aliasing rather than assuming it from the definition. */
+	{
+		__u64 got;
+		int taken;
+
+		DECL_STATE();
+		cases++;
+		got = probe_sub_jmp();
+		if (got != SUB_TARGET) {
+			printf("SUB_JMP: arrived at %#llx, want %#llx\n",
+			       (unsigned long long)got,
+			       (unsigned long long)SUB_TARGET);
+			failures++;
+		}
+
+		for (taken = 0; taken < 2; taken++) {
+			int n = taken, z = 0, c = 1, v = 0;
+
+			DECL_STATE();
+			__x86_cf = (__u8)c;
+			__x86_zf = (__u8)z;
+			__x86_sf = (__u8)n;
+			__x86_of = (__u8)v;
+			cases++;
+			/* CC 0x5 is NE. With zf = 1 the condition fails and
+			 * control must fall through; with zf = 0 it holds and
+			 * control must reach the target. Driving only the true
+			 * case would pass with SUB_JCC degraded to an
+			 * unconditional jump, so both are needed. */
+			got = probe_sub_jcc(0x5U, 100, 200, /*zf=*/1, 0);
+			if (got != 100) {
+				printf("SUB_JCC: NE with zf=1 arrived at %#llx, "
+				       "want the fall-through 100\n",
+				       (unsigned long long)got);
+				failures++;
+			}
+
+			got = probe_sub_jcc(0x5U, 100, 200, /*zf=*/0, 1);
+			if (got != 200) {
+				printf("SUB_JCC: NE with zf=0 arrived at %#llx, "
+				       "want the target 200\n",
+				       (unsigned long long)got);
+				failures++;
+			}
 		}
 	}
 
