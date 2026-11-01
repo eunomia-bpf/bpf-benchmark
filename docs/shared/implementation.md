@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0514 generalises 0513's finding (census 384 ->
+385). Three oracles recomputed what the simulator
+computes and then called the generated contract with
+that value: the shift-flags and register-lane-aux
+oracles had the same shape as the imul one. Measured:
+shifting the sign bit inside the simulator survived all
+90,112 shift-flag cases. That host now drives the
+simulator's own composition and compares; doing so
+needed identical flag seeding on both paths, since some
+arms deliberately leave ZF/SF untouched -- without it
+the comparison reported 24 spurious mismatches, the
+same "my model was wrong" pattern as 0504/0505.
+check_oracle_composition.py generalises the search: it
+reads the simulator sources, collects contract macros
+reached from inside each SIM_L_* body, and reports
+hosts calling them without calling any SIM_L_* macro.
+Four match, each recorded with the reason it is
+acceptable and which host covers its composition; a new
+one fails the gate. Gate: rc 0, 234 banners.
+
 Step 0513 extends the 128-bit oracle to the x86
 multiply-overflow flags (census 383 -> 384). They decide
 CF/OF from magnitudes, not by multiplying, with LIMIT
