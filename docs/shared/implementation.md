@@ -2612,6 +2612,28 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0464 closes the third unguarded stack path
+in the arm64 simulator (census 335 -> 336).
+`__a64_stack_tag[]` is a slot array -- one byte
+per word slot, `TAG_SLOTS(CAPACITY)` entries --
+so a tag access at a byte index at or past the
+capacity resolves to slot TAG_SLOTS, one past the
+array; ASan reports that read on the previous
+baseline. `arm64_stack_arena_spec.json` gained
+`tag_slot_guard: word_index_lt_tag_slots`, the
+generator emits `KPROG_ARM64_STACK_TAG_SLOT_FITS`,
+and `Arm64StackArena.lean` proves the guard
+refines an independent slot statement, that the
+largest tag slot is the word holding the arena's
+final byte, and that the tag guard equals the
+window guard at a one-byte width, so the tag
+array reuses the proved window bound.
+`ARM64_SIM_L_STACK_READ_TAG` tests it before
+indexing and falls back to SCALAR on a miss (the
+hook returns, so the fallback is what actually
+prevents the read). Gate: rc 0, 226 banners,
+123,468,293 cases, 1958 theorems.
+
 Step 0463 closes the stack access-window
 memory-safety gap both simulators
 carried, through the generated-contract

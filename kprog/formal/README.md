@@ -8,12 +8,12 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-226 passing `cross-check: OK` oracle banners summing to 123,468,087 modeled
-cases (the 1,752-case growth over the previous rollup is the stack access-window
-coverage the arena hosts gained); 138 `*_spec.json` contracts, each rendered into exactly one generated C
+226 passing `cross-check: OK` oracle banners summing to 123,468,293 modeled
+cases (the 1,958-case growth over the previous rollup is the stack access-window
+and tag-slot coverage the arena hosts gained); 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
-compiling transitively from the gate's roots and proving 1,952 theorems with
-no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 481 of
+compiling transitively from the gate's roots and proving 1,958 theorems with
+no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 482 of
 those (25%) are discharged by `native_decide`, i.e. by compiled evaluation, so
 they rest on the compiler as well as the kernel — 20 of the 599
 refinement-named theorems, each a finite-table equality, and the rest finite
@@ -36,7 +36,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,468,087 again, so the rollup is a measurement of the committed tree and not
+123,468,293 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 226 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -74,6 +74,18 @@ access at the arena's final byte does not fit, and the concrete thresholds:
 152/8/160 fits and 153/8/160 does not on AArch64; 56/8/64 fits and 57/8/64
 does not on the default x86-64 frame, with the 128-byte deep frame at
 120/121.
+
+The tag array is a third, separate stack path and needed its own bound. A tag
+access is a *slot* index into `__a64_stack_tag[]`, which holds one byte per
+word slot, so a byte index at or past the capacity reaches slot `TAG_SLOTS`,
+one past the array — ASan reproduces that read too. The arena spec gained
+`tag_slot_guard`, the generator emits
+`KPROG_ARM64_STACK_TAG_SLOT_FITS`, and the hand module proves it refines an
+independent slot statement, that the largest tag slot is the word holding the
+arena's final byte, and that the tag guard equals the window guard at a
+one-byte width — so the tag array does not carry a second, independent
+inequality. `ARM64_SIM_L_STACK_READ_TAG` tests it before indexing and falls
+back to the scalar tag on a miss.
 
 Both simulators route their stack paths through it. `ARM64_SIM_L_STACK_READ`
 and `ARM64_SIM_L_STACK_WRITE_TAG` test `ARM64_SIM_L_STACK_WINDOW_OK` first,
@@ -6806,6 +6818,73 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0464 - stack tag-array bound (arm64)
+
+Step 0464 closes the third unguarded
+stack path in the arm64 simulator
+(census 335 -> 336). Step 0463
+bounded the byte window and the
+word view, but `__a64_stack_tag[]`
+is a *slot* array: one byte per word
+slot, `TAG_SLOTS(CAPACITY)` entries.
+A tag access at a byte index at or
+past the capacity resolves to slot
+`TAG_SLOTS`, one past the array, and
+ASan reports the read against
+`__a64_stack_tag` on the previous
+baseline -- the same defect class as
+0463, on a different array.
+
+The fix goes through the same
+generated-contract path rather than a
+hand check. `arm64_stack_arena_spec.
+json` gained `tag_slot_guard:
+word_index_lt_tag_slots`, so the
+generator emits `KPROG_ARM64_STACK_
+TAG_SLOT_FITS`. `Arm64StackArena.lean`
+restates it independently as "the
+slot is below the array length" and
+proves the generated form equal to
+it, proves the largest tag slot is
+the word holding the arena's final
+byte (`words - 1 = (capacity - 1)
+>>> 3`, via the round-up floor
+identity), and proves the tag guard
+equals the window guard at a one-byte
+width -- so the tag array is tied to
+the already-proved window bound
+rather than carrying a second
+inequality of its own. Five new
+theorems, no `sorry`.
+
+`ARM64_SIM_L_STACK_READ_TAG` now
+tests the bound before indexing,
+reports an out-of-range slot through
+the unsupported-access hook, and
+falls back to `ARM64_SIM_TAG_SCALAR`
+without touching the array. The
+fallback matters for the same reason
+it did in 0463: the hook returns.
+Under ASan, the last slot (index 159,
+slot 19) is clean and index 160
+reports and returns SCALAR with no
+out-of-bounds read. `test_arm64_
+stack_arena_host` gained slot
+coverage (71352 -> 71558 cases); its
+independent restatement is the slot
+bound, not `index < capacity`, which
+would be wrong because indices alias
+into one slot (index 1 is slot 0 of
+the 1-byte arena). Sabotaging the
+generated guard (`slots` to `slots +
+1`) turns the banner red at 32
+mismatches. Seven stack batteries
+re-ran clean, two with anchors this
+change moved. Gate: rc 0, 226
+`cross-check: OK` banners, 123,468,293
+modeled cases (+206 is this coverage),
+1958 theorems. Census 335 -> 336.
 
 ### Step 0463 - stack access-window bound (both ISAs)
 
