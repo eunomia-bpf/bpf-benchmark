@@ -18,20 +18,20 @@ _Static_assert(X86_CC_LE == 14U, "x86 condition code drift");
 _Static_assert(X86_CC_G == 15U, "x86 condition code drift");
 
 #define KPROG_X86_EVAL_CC(CC, CF, ZF, SF, OF)                               \
-	((CC) == X86_CC_O ? OF : \
-	 (CC) == X86_CC_NO ? (!OF) : \
-	 (CC) == X86_CC_B ? CF : \
-	 (CC) == X86_CC_AE ? (!CF) : \
-	 (CC) == X86_CC_E ? ZF : \
-	 (CC) == X86_CC_NE ? (!ZF) : \
-	 (CC) == X86_CC_BE ? (CF || ZF) : \
-	 (CC) == X86_CC_A ? ((!CF) && (!ZF)) : \
-	 (CC) == X86_CC_S ? SF : \
-	 (CC) == X86_CC_NS ? (!SF) : \
-	 (CC) == X86_CC_L ? (SF != OF) : \
-	 (CC) == X86_CC_GE ? (SF == OF) : \
-	 (CC) == X86_CC_LE ? (ZF || (SF != OF)) : \
-	 (CC) == X86_CC_G ? ((!ZF) && (SF == OF)) : \
+	((CC) == X86_CC_O ? (OF) : \
+	 (CC) == X86_CC_NO ? (!(OF)) : \
+	 (CC) == X86_CC_B ? (CF) : \
+	 (CC) == X86_CC_AE ? (!(CF)) : \
+	 (CC) == X86_CC_E ? (ZF) : \
+	 (CC) == X86_CC_NE ? (!(ZF)) : \
+	 (CC) == X86_CC_BE ? ((CF) || (ZF)) : \
+	 (CC) == X86_CC_A ? ((!(CF)) && (!(ZF))) : \
+	 (CC) == X86_CC_S ? (SF) : \
+	 (CC) == X86_CC_NS ? (!(SF)) : \
+	 (CC) == X86_CC_L ? ((SF) != (OF)) : \
+	 (CC) == X86_CC_GE ? ((SF) == (OF)) : \
+	 (CC) == X86_CC_LE ? ((ZF) || ((SF) != (OF))) : \
+	 (CC) == X86_CC_G ? ((!(ZF)) && ((SF) == (OF))) : \
 	 0)
 
 #endif

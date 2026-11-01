@@ -2,6 +2,7 @@
 
 check:
 	install -d build
+	python3 check_macro_hygiene.py
 	python3 generate_ptr_add_spec.py --check
 	python3 generate_abi_load_spec.py --check
 	python3 generate_arm64_width_spec.py --check

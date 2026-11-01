@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0492 finds the 0491 defect is a class
+(census 363 -> 364). The two condition evaluators
+had it too: KPROG_ARM64_EVAL_COND(T_GT, p || q, ...)
+evaluated (p || q == V) as p || (q == V), giving
+GT = 1 where the answer is 0, and the mirror case
+gave 0 where the answer is 1. Both now emit (N);
+Leans unchanged. check_macro_hygiene.py scans all
+138 generated headers for a parameter used as the
+bare operand of a binary operator and runs on every
+gate; it is verified against the pre-fix text, so
+the check is known to fire rather than assumed to.
+General lesson: a generator rendering one spec into
+two languages can be right in the language with the
+proofs and wrong in the one without. Gate: rc 0,
+229 banners.
+
 Step 0491 extends the differential oracle to the flags
 (census 362 -> 363) and fixes a latent bug it exposed.
 The five x86 flag generators emitted C operands

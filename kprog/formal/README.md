@@ -92,6 +92,17 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
 
+The same defect sat in the two condition evaluators, which is how it got
+found: a parameter used as an operand of `==` or `&&` takes whatever binds
+tighter from the caller. `KPROG_ARM64_EVAL_COND(ARM64_COND_GT, p || q, ...)`
+evaluated `(p || q == V)` as `p || (q == V)`, giving `GT = 1` where the answer
+is `0`, and the mirror case gave `0` where the answer is `1`. Both evaluators
+now emit `(N)`; their Lean output is unchanged.
+
+`check_macro_hygiene.py` now checks all 138 generated headers on every gate run
+and is itself verified against the pre-fix text, so the class cannot return
+quietly.
+
 The five x86 flag generators emitted their C operands unparenthesized, so a
 compound argument silently changed the parse. `KPROG_X86_SET_SUB_FLAGS(..., a & mask,
 b, ...)` expanded `(A < B)` to `(a & mask < b)`, which C parses as `a & (mask < b)`
@@ -7025,6 +7036,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0492 - the same defect was in
+the condition evaluators, and is now
+checked mechanically
+
+Step 0491 fixed five flag generators;
+this finds the class (census 363 -> 364).
+The two condition evaluators had it
+too: a parameter used as an operand of
+`==` or `&&` takes whatever binds
+tighter from the caller.
+`KPROG_ARM64_EVAL_COND(ARM64_COND_GT,
+p || q, 0, 0, 0, 0)` evaluated
+`(p || q == V)` as `p || (q == V)`,
+returning `GT = 1` where the answer is
+`0`; the mirror case returned `0` where
+the answer is `1`. Both now emit `(N)`;
+Lean output unchanged.
+
+`check_macro_hygiene.py` scans all 138
+generated headers for a parameter used
+as the bare operand of a binary
+operator and runs on every gate. It is
+verified against the pre-fix text:
+fed the old `(A < B)` form it reports
+both operands and exits 1, so the check
+is known to fire rather than assumed to.
+
+The general lesson, recorded because it
+is the recurring shape here: a generator
+that renders one specification into two
+languages can be right in the language
+with the proofs and wrong in the one
+without. Lean's `Nat`/`Bool` API has no
+precedence surprises, C's does. Gate:
+rc 0, **229** banners, 138 headers
+clean. Census 363 -> 364.
 
 ### Step 0491 - the generated flag
 macros were a hygiene trap

@@ -63,7 +63,7 @@ def load_spec() -> list[dict[str, Any]]:
 def render_expr(expr: dict[str, Any], language: str) -> str:
     op = expr["op"]
     if op == "flag":
-        return expr["name"] if language == "lean" else expr["name"].upper()
+        return expr["name"] if language == "lean" else f"({expr['name'].upper()})"
     if op == "not":
         return f"(!{render_expr(expr['arg'], language)})"
     if op in {"and", "or"}:

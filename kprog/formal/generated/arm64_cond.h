@@ -19,20 +19,20 @@ _Static_assert(ARM64_COND_LE == 13U, "AArch64 condition code drift");
 _Static_assert(ARM64_COND_AL == 14U, "AArch64 condition code drift");
 
 #define KPROG_ARM64_EVAL_COND(COND, N, Z, C, V, UNSUPPORTED)                \
-	((COND) == ARM64_COND_EQ ? Z : \
-	 (COND) == ARM64_COND_NE ? (!Z) : \
-	 (COND) == ARM64_COND_CS ? C : \
-	 (COND) == ARM64_COND_CC ? (!C) : \
-	 (COND) == ARM64_COND_MI ? N : \
-	 (COND) == ARM64_COND_PL ? (!N) : \
-	 (COND) == ARM64_COND_VS ? V : \
-	 (COND) == ARM64_COND_VC ? (!V) : \
-	 (COND) == ARM64_COND_HI ? (C && (!Z)) : \
-	 (COND) == ARM64_COND_LS ? ((!C) || Z) : \
-	 (COND) == ARM64_COND_GE ? (N == V) : \
-	 (COND) == ARM64_COND_LT ? (N != V) : \
-	 (COND) == ARM64_COND_GT ? ((!Z) && (N == V)) : \
-	 (COND) == ARM64_COND_LE ? (Z || (N != V)) : \
+	((COND) == ARM64_COND_EQ ? (Z) : \
+	 (COND) == ARM64_COND_NE ? (!(Z)) : \
+	 (COND) == ARM64_COND_CS ? (C) : \
+	 (COND) == ARM64_COND_CC ? (!(C)) : \
+	 (COND) == ARM64_COND_MI ? (N) : \
+	 (COND) == ARM64_COND_PL ? (!(N)) : \
+	 (COND) == ARM64_COND_VS ? (V) : \
+	 (COND) == ARM64_COND_VC ? (!(V)) : \
+	 (COND) == ARM64_COND_HI ? ((C) && (!(Z))) : \
+	 (COND) == ARM64_COND_LS ? ((!(C)) || (Z)) : \
+	 (COND) == ARM64_COND_GE ? ((N) == (V)) : \
+	 (COND) == ARM64_COND_LT ? ((N) != (V)) : \
+	 (COND) == ARM64_COND_GT ? ((!(Z)) && ((N) == (V))) : \
+	 (COND) == ARM64_COND_LE ? ((Z) || ((N) != (V))) : \
 	 (COND) == ARM64_COND_AL ? 1 : \
 	 ({ UNSUPPORTED; 0; }))
 
