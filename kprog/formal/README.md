@@ -11,7 +11,7 @@ What the gate currently covers, measured from one full `make check` run:
 227 passing `cross-check: OK` oracle banners summing to 123,463,541 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
-compiling transitively from the gate's roots and proving 1,980 theorems with
+compiling transitively from the gate's roots and proving 1,982 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -91,6 +91,16 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+A theorem's hypothesis can be stronger than it needs to be, and that is a
+coverage hole in disguise. `arm64_stack_arena_window_implies_tag_slot`
+required `capacity % 8 = 0` -- true of the enabled 160-byte arena, false of the
+1-byte arena the arm64 header declares in its `#else` branch, so the theorem
+did not cover an arena the simulator actually defines. The precondition is
+unnecessary: `index + width <= capacity` gives `index < capacity`, and
+`capacity <= words capacity * 8` always, so the slot is below the count. The
+general form needs only that the slot count's `+7` does not wrap. Both forms
+are present now, with a witness at capacity 1.
 
 The two ISAs agree on the width vocabulary, and that now has a theorem rather
 than an eyeball comparison. `arm64_width_spec.json` and `x86_width_spec.json`
@@ -6931,6 +6941,36 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0483 - a theorem covered only one
+of the two arenas it describes
+
+Step 0483 widens a hypothesis that was
+stronger than needed (census 354 ->
+355). `arm64_stack_arena_window_implies
+_tag_slot` -- the theorem that lets a
+checked write cover both the arena and
+the tag array with one test -- required
+`capacity % 8 = 0`. The enabled
+160-byte arena satisfies that; the
+1-byte arena the arm64 header declares
+in its `#else` branch does not. So the
+theorem did not cover an arena the
+simulator actually defines.
+
+The precondition turns out to be
+unnecessary. `index + width <=
+capacity` gives `index < capacity`,
+and `capacity <= words capacity * 8`
+always, so `index / 8` is below the
+slot count. The general form needs
+only that the slot count's `+7` does
+not wrap, which every arena in the
+tree satisfies. Both forms are present,
+the general one plus a witness at
+capacity 1 -- the case the strict form
+missed. Gate: rc 0, 227 banners,
+1,982 theorems. Census 354 -> 355.
 
 ### Step 0482 - the tag vocabularies are
 pinned across the ISAs

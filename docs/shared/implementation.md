@@ -2612,6 +2612,20 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0483 widens an over-strong hypothesis (census
+354 -> 355). `arm64_stack_arena_window_implies_tag_slot`
+required `capacity % 8 = 0`: true of the enabled
+160-byte arena, false of the 1-byte arena the arm64
+header declares in its `#else` branch, so the
+theorem did not cover an arena the simulator
+defines. The precondition is unnecessary --
+`index + width <= capacity` gives `index <
+capacity`, and `capacity <= words capacity * 8`
+always -- so the general form needs only that the
+slot count's `+7` does not wrap. Both forms are
+present, with a witness at capacity 1. 1,982
+theorems. Gate: rc 0, 227 banners.
+
 Step 0482 pins the provenance-tag vocabulary
 across the ISAs (census 353 -> 354). Both
 simulators define a tag per register as
