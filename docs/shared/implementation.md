@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0476 completes Step 0475's enforcement
+(census 347 -> 348). The README claims no
+`sorry`, no `axiom`, and no `opaque`/`unsafe`/
+`partial` definitions, but `check_no_sorry.py`
+covered only the first three keywords. Planting
+`opaque planted_opaque : Nat := 5` in a
+generated module built cleanly and passed the
+check -- the claim's second half was unenforced
+for exactly the reason the first half had been,
+one step earlier.
+
+The scan now rejects a declaration keyword in
+command position for all four (axiom, opaque,
+unsafe, partial), allowing indented forms since
+those are commands inside a section or namespace.
+Each of the four is verified to fail the gate; no
+module uses any of them today, so nothing
+false-positives. Gate: rc 0, 226 banners.
+
 Step 0475 enforces the paper's "no sorry, no axiom"
 claim instead of merely being true (census 346
 -> 347). `lake build` reports a `sorry` as a

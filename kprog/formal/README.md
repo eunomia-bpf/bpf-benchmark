@@ -13,8 +13,8 @@ cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
 compiling transitively from the gate's roots and proving 1,970 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
-the first two enforced by `check_no_sorry.py`, which fails the gate on a
-`sorry`, an `admit`, or an `axiom` declaration; 485 of
+all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
+an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
 those (25%) are discharged by `native_decide`, i.e. by compiled evaluation, so
 they rest on the compiler as well as the kernel — 20 of the 599
 refinement-named theorems, each a finite-table equality, and the rest finite
