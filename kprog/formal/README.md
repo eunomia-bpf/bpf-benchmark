@@ -8,16 +8,19 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-226 passing `cross-check: OK` oracle banners summing to 123,466,335 modeled
-cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
+226 passing `cross-check: OK` oracle banners summing to 123,468,087 modeled
+cases (the 1,752-case growth over the previous rollup is the stack access-window
+coverage the arena hosts gained); 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
-compiling transitively from the gate's roots and proving 1,941 theorems with
-no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 473 of
-those (24%) are discharged by `native_decide`, i.e. by compiled evaluation, so
+compiling transitively from the gate's roots and proving 1,952 theorems with
+no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 481 of
+those (25%) are discharged by `native_decide`, i.e. by compiled evaluation, so
 they rest on the compiler as well as the kernel — 20 of the 599
 refinement-named theorems, each a finite-table equality, and the rest finite
 enumerations or concrete examples, never a compositional or arithmetic
-obligation. Two
+obligation. The new access-window theorems are `bv_decide`/`omega`
+obligations over `Nat`, not `native_decide`, so the share moved by only the two
+concrete threshold examples per ISA. Two
 consecutive full runs produce byte-identical output (same md5), so the gate is
 deterministic. The 330 `build/mut_*.py` batteries are the evidence that each
 banner can fail, and are untracked by design; the thirteen route hosts those
@@ -33,7 +36,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,466,335 again, so the rollup is a measurement of the committed tree and not
+123,468,087 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 226 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -48,29 +51,53 @@ host that `make check` runs, so their contracts are gated even though their
 provenance was never written down. The census should be read as "how many
 harness increments the log has recorded", not as a file total.
 
-An open memory-safety gap in both simulators is recorded here rather than left
-implicit. A stack access may resolve to an index near the end of the frame
-arena without any check that the whole access window fits: a 64-bit access at
-the arena's last byte needs eight bytes, so it touches memory past the array.
-On x86-64 the byte-ladder arm performs that window lane by lane through
-`b[index + 7]`, and the lane predicate is a runtime value so the compiler
-cannot bound `index`; on AArch64 the access goes through
-`KPROG_ARM64_LOAD_BYTES`, which walks the same eight bytes.
-AddressSanitizer reproduces both on the untouched baseline — a 64-bit read at
-the final byte reports `stack-buffer-overflow` in either simulator, and the
-matching write does the same.
-This is a window-bound obligation, not a defect in which bytes an access picks:
-a correctly bounded access reads exactly its window, and the per-body
-contracts (which constrain those in-window bytes and the arm choice, with every
-oracle driving in-range indices) are unaffected. The gap is an arena guard
-belonging to the simulator's trusted body.
+The stack-window memory-safety gap in both simulators is now closed rather
+than recorded as open. A stack access resolves to an index near the end of the
+frame arena without any check that the whole access window fits: a 64-bit
+access at the arena's last byte needs eight bytes, so it touches memory past
+the array. On x86-64 the byte-ladder arm performed that window lane by lane
+through `b[index + 7]`, and the lane predicate is a runtime value so the
+compiler could not bound `index`; on AArch64 the access went through
+`KPROG_ARM64_LOAD_BYTES`, which walks the same eight bytes. AddressSanitizer
+reproduced both on the previous baseline: a 64-bit read at the final byte
+reported `stack-buffer-overflow` in either simulator.
 
-The threshold is exact and reproducible: on AArch64's 160-byte arena with bias
-96, an 8-byte access at offset 56 (index 152) is the last in-bounds one, and
-offset 57 is the first that overruns — ASan reports it against `__a64_stack`.
-No current oracle drives those offsets: the route hosts cap their sweeps at
-`off + width <= ARM64_SIM_STACK_BYTES`, which is exactly why the gate stays
-green over a defect that is present in the code.
+The bound is now part of the generated arena contract, not a hand-written
+check. `arm64_stack_arena_spec.json` and `x86_stack_arena_spec.json` gained
+`window_guard: index_plus_bytes_le_capacity`, so both generators emit
+`KPROG_{ARM64,X86}_STACK_WINDOW_END` and `KPROG_*_STACK_WINDOW_FITS`, with
+the comparison widened to 64 bits so an access near the top of the index space
+is measured instead of wrapping. `Arm64StackArena.lean` and
+`X86StackArena.lean` restate the bound independently and prove it refines the
+generated form, that a fitting window's last byte is inside the arena, that an
+access at the arena's final byte does not fit, and the concrete thresholds:
+152/8/160 fits and 153/8/160 does not on AArch64; 56/8/64 fits and 57/8/64
+does not on the default x86-64 frame, with the 128-byte deep frame at
+120/121.
+
+Both simulators route their stack paths through it. `ARM64_SIM_L_STACK_READ`
+and `ARM64_SIM_L_STACK_WRITE_TAG` test `ARM64_SIM_L_STACK_WINDOW_OK` first,
+report an unfitting window through the existing
+`arm64_sim_unsupported_opcode` hook, and take a zero value without touching
+the arena — the hook returns, so reporting alone would still have let the
+access run. `X86_SIM_L_STACK_READ` and `X86_SIM_L_STACK_WRITE` test the same
+bound and trap. ASan confirms the result: an 8-byte read at index 153 on
+AArch64 and at index 63 on x86-64 now report through the guard with no
+out-of-bounds access, while the last fitting access is untouched.
+
+The threshold this closes is exact: on AArch64's 160-byte arena with bias 96,
+an 8-byte access at offset 56 (index 152) is the last in-bounds one, and
+offset 57 is the first that overran. The route hosts cap their sweeps at
+`off + width <= ARM64_SIM_STACK_BYTES`, which is why the gate stayed green
+over the defect; the arena hosts now drive the window test directly at every
+grid capacity, index, and width plus those boundary rows, and sabotaging the
+generated comparison (`capacity` to `capacity + 1`) turns both banners red
+(15 and 17 mismatches). One host was driving windows outside the arena while
+claiming the opposite: `test_x86_mem_dispatch_route_host.c` swept
+displacements `{0, -8, -32, 32, 56}` against a 64-byte arena, so three of the
+five put the read at or past the end; its sweep is now `{-8, -16, -32, -64}`,
+and its indexed case uses displacement -16 so the scaled index still fits at
+every width.
 
 "All 294 modules are checked" is a chain of three facts, each verified rather
 than assumed. First, every `import KProgFormal.X` names a module that exists
@@ -6779,6 +6806,97 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0463 - stack access-window bound (both ISAs)
+
+Step 0463 closes the stack-window
+memory-safety gap the harness README
+had recorded as open, and does it
+through the generated-contract path
+rather than a hand check (census
+334 -> 335). Both arena specs gain
+`window_guard:
+index_plus_bytes_le_capacity`, so
+`generate_{arm64,x86}_stack_arena_
+spec.py` emit `KPROG_*_STACK_
+WINDOW_END` and `KPROG_*_STACK_
+WINDOW_FITS`; the comparison is
+widened to 64 bits so an access near
+the top of the 32-bit index space is
+measured rather than wrapping (a
+32-bit sum there falsely accepts the
+window, which `bv_decide` found).
+The hand modules restate the bound
+as `index <= capacity && capacity -
+index >= width` and prove the
+generated form equal to it, that a
+fitting window's last byte is inside
+the arena, that an access at the
+arena's final byte does not fit, and
+the concrete thresholds: 152/8/160
+fits and 153/8/160 does not on
+AArch64, 56/8/64 and 57/8/64 on the
+default x86-64 frame, 120/8/128 and
+121/8/128 on the deep frame.
+
+Both simulators now route their
+stack paths through it. `ARM64_SIM_L_
+STACK_READ` and `ARM64_SIM_L_
+STACK_WRITE_TAG` test `ARM64_SIM_L_
+STACK_WINDOW_OK` first, report an
+unfitting window through the existing
+`arm64_sim_unsupported_opcode` hook,
+and take a zero value without
+touching the arena; that last part
+is load-bearing, because the hook
+returns, so reporting alone still ran
+the access (ASan caught exactly
+that on the first attempt).
+`X86_SIM_L_STACK_READ` and
+`X86_SIM_L_STACK_WRITE` test the
+same bound and trap. Under ASan the
+previously over-running reads now
+report through the guard with no
+out-of-bounds access and the last
+fitting access is unchanged.
+
+The arena hosts gained the coverage
+the gap needed: `test_arm64_stack_
+arena_host` (70558 -> 71352 cases)
+and `test_x86_stack_arena_host`
+(70571 -> 71533) drive the window
+test at every grid capacity, index,
+and width, plus the boundary rows;
+sabotaging the generated comparison
+(adding 1 to the capacity argument)
+turns both banners red (15 and 17
+mismatches), so the new rows are
+gated rather than decorative. One
+host had been driving windows outside
+the arena while asserting the
+opposite: `test_x86_mem_dispatch_
+route_host.c` swept displacements
+{0, -8, -32, 32, 56} against the
+64-byte arena, so three of five put
+the read at or past the end; the
+sweep is now {-8, -16, -32, -64} and
+the indexed case uses -16 so the
+scaled index still fits at every
+width. Eleven stack batteries re-ran
+clean, including `mut_arm64_stack_
+arena` (62 rows) and `mut_x86_stack_
+arena` (28 rows); the two whose
+anchors the change moved are updated
+to the new text, and the arena
+battery's exact-case-count banner is
+read as a shape, since pinning the
+number made its baseline fail
+whenever the host grew coverage it
+already gates. Gate: rc 0, 226
+`cross-check: OK` banners,
+123,468,087 modeled cases (the
++1,752 is this coverage), 1952
+theorems. Census 334 -> 335.
 
 ### Step 0462 - arm64 BPF helper-call BODY battery
 

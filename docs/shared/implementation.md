@@ -2594,6 +2594,50 @@ EXPECTED; census 332 -> 333; the
 x86 BPF helper-call BODY family is
 closed.
 
+Step 0463 closes the stack access-window
+memory-safety gap both simulators
+carried, through the generated-contract
+path rather than a hand-written check
+(census 334 -> 335). `arm64_stack_
+arena_spec.json` and `x86_stack_arena_
+spec.json` gain `window_guard:
+index_plus_bytes_le_capacity`, and both
+generators emit `KPROG_*_STACK_WINDOW_
+END` / `KPROG_*_STACK_WINDOW_FITS`. The
+comparison is widened to 64 bits: with
+the natural 32-bit sum, `bv_decide`
+produced a real counterexample near
+2^32 where a maximal capacity falsely
+accepts the window. `Arm64StackArena.
+lean` and `X86StackArena.lean` restate
+the bound as `index <= capacity &&
+capacity - index >= width` and prove
+the generated form equal to it, that a
+fitting window's last byte lies inside
+the arena, that an access at the
+arena's final byte does not fit, and
+the concrete thresholds (152/8/160 and
+153/8/160; 56/8/64 and 57/8/64;
+120/8/128 and 121/8/128).
+
+Both simulators route through it.
+`ARM64_SIM_L_STACK_READ` and
+`ARM64_SIM_L_STACK_WRITE_TAG` test the
+bound first, report through the
+existing unsupported-opcode hook, and
+take a zero value without touching the
+arena. That skip is required, not
+belt-and-braces: the hook returns, so
+the first version reported the
+unfitting window and then performed
+the access anyway, which ASan caught.
+`X86_SIM_L_STACK_READ` and
+`X86_SIM_L_STACK_WRITE` test the same
+bound and trap. Eleven stack batteries
+re-ran clean after the change. Gate:
+rc 0, 226 banners, 123,468,087 cases,
+1952 theorems.
+
 Step 0462 closes the arm64
 BPF helper-call BODY family over
 the `arm64_sim_local_bpf.h` bodies:
