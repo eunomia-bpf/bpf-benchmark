@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-238 passing `cross-check: OK` oracle banners summing to 124,527,554 modeled
+239 passing `cross-check: OK` oracle banners summing to 124,527,615 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,052 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,527,554 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 238 banners are all distinct oracles — 237 report a plain
+124,527,615 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 239 banners are all distinct oracles — 238 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 394, and 281 steps
+`build/mut_*.py` files exist, the counter's last value is 395, and 282 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -148,6 +148,19 @@ contract whose mutation nothing caught, and each was inert: a docstring, a
 static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
+
+Address generation gets one, and it is where a value-only oracle is least
+useful. The arm copies its immediate into the destination as a pointer; the
+only thing the opcode decides is which *kind* of pointer it is. A dispatcher
+with the two arms swapped leaves the address byte-identical and labels it as a
+different pointer class -- invisible to any address comparison, and changing
+later behaviour rather than this instruction's result. The oracle checks the
+address *and* the tag, with the tag values written from the simulator's
+vocabulary rather than read back from the contract, and asserts the two arms
+select different tags so the check cannot pass with both arms identical.
+Planting each half: swapping the tags fails 60 of 61 cases with identical
+addresses, adding 8 to the address fails 60 with correct tags. Count moves from
+9 live / 3 model-only to 10 / 2.
 
 The vector reductions get one, and they defeat the obvious oracle in two ways:
 the dispatcher writes the SIMD register rather than a GPR, so comparing the
@@ -7387,6 +7400,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0524 - address generation: the
+tag is the whole contract, and only the
+tag check finds it
+
+Fifth of the remaining model-only
+families (census 394 -> 395). ADRP copies
+its immediate into the destination as a
+pointer, and the only thing the opcode
+decides is which *kind* of pointer it is.
+A dispatcher with the two arms swapped
+leaves the address byte-identical and
+labels it as a different pointer class:
+invisible to any address comparison, and a
+change to later behaviour rather than to
+this instruction's result.
+
+`test_arm64_adrp_route_host.c` therefore
+checks two independent facts -- the address
+equals the immediate, and the tag is the one
+the opcode names -- with the expected tags
+written from the simulator's vocabulary
+rather than read back from the contract. It
+also asserts the two arms select *different*
+tags, so the check cannot pass with both
+arms identical.
+
+Verified by planting each half separately:
+swapping the tags fails 60 of 61 cases with
+identical addresses, and adding 8 to the
+address fails 60 with the tags correct. The
+dispatch-model count moves from 9 live / 3
+model-only to 10 / 2. Gate: rc 0, **239**
+banners, 124,527,615 cases. Census 394 ->
+395.
 
 ### Step 0523 - the vector reductions
 defeat the obvious oracle twice over
