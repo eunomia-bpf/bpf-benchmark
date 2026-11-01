@@ -45,6 +45,33 @@ theorem arm64_stack_arena_words_refines (capacity : BitVec 32)
   simp only [words, arm64StackArenaWordsSpec]
   bv_decide
 
+/-- The capacity bound above is exactly tight: the equality holds at the bound
+and fails one past it. Measuring the whole neighbourhood shows it fails for
+every capacity from `2^32 - 7` up to `2^32 - 1` and then holds again at `0`,
+because the rounding wraps there -- so the bound is not merely conservative, it
+marks precisely the last capacity that does not wrap.
+
+Stating only the implication leaves a reader unable to tell whether the bound is
+load-bearing or convenient, which is the failure mode Step 0525 found in a
+different family. -/
+theorem arm64_stack_arena_words_bound_is_tight :
+    arm64StackArenaWordsSpec (BitVec.ofNat 32 (2 ^ 32 - 8)) =
+        words (BitVec.ofNat 32 (2 ^ 32 - 8)) ∧
+      arm64StackArenaWordsSpec (BitVec.ofNat 32 (2 ^ 32 - 7)) ≠
+        words (BitVec.ofNat 32 (2 ^ 32 - 7)) := by
+  refine ⟨?_, ?_⟩ <;> native_decide
+
+/-- The bound is not an artefact of the specification either: the generated
+definition and the independent one disagree at the same point, so the failure
+past the bound is in the rounding (`capacity + 7` wrapping) rather than in one
+side of the equality. -/
+theorem arm64_stack_arena_words_wraps_past_bound :
+    words (BitVec.ofNat 32 (2 ^ 32 - 1)) =
+      BitVec.ofNat 32 0 ∧
+      arm64StackArenaWordsSpec (BitVec.ofNat 32 (2 ^ 32 - 1)) =
+        BitVec.ofNat 32 536870912 := by
+  refine ⟨?_, ?_⟩ <;> native_decide
+
 /-- The two views cover the same storage: on a word-aligned index the byte the
 word arena addresses is the byte the byte arena addresses, `q[i]` and `b[8i]`
 coincide, so the 64-bit fast path skips no byte. -/
