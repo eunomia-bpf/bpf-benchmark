@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0532 fixes a gap in Step 0531's own host (census
+402 -> 403): its docstring named five emission macros
+as covered and its body called two. RET, SUB_JMP and
+SUB_JCC were named and never invoked -- the
+claim-outruns-code pattern this sequence keeps
+finding elsewhere, found in my own work. All three
+now run. RET returns the low word of the
+accumulator and copies the ABI control block into
+the skb context; SUB_JMP transfers control; SUB_JCC
+is driven in both directions, because the first
+version used only a condition that happened to hold
+and therefore passed with SUB_JCC degraded to an
+unconditional jump -- a taken-only test cannot see
+the difference. Two setup errors recorded: a probe
+declaring its own state shadowed the caller's
+register, and a return-terminated macro needs its
+driving scope inside the probe. Gate: rc 0, 245
+banners.
+
 Step 0531 executes the x86 call and subroutine-return
 emission (census 401 -> 402). The second
 architecture's surface is larger -- a real call/return

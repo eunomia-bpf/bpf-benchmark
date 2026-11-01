@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 402, and 295 steps
+`build/mut_*.py` files exist, the counter's last value is 403, and 297 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -158,6 +158,14 @@ four. The oracle drives all five kinds at both widths, recomputing the modifier
 from its definition, and asserts a non-identity kind was exercised so the run
 is not vacuous. An off-by-one in shift-left fails 78 cases; dropping the
 complement fails 595.
+
+That host's first version repeated the very gap this sequence keeps finding:
+its docstring listed five macros as covered -- call, return, subroutine return,
+subroutine jump and subroutine conditional jump -- and the body called two. The
+other three now run, and driving the conditional one in *both* directions
+mattered: the first version used only a condition that happened to hold and so
+passed with the conditional degraded to an unconditional jump. Adding the
+falsifying case makes that fault fail.
 
 The second architecture's surface is larger and had the same history. It models
 a real call/return pair through the stack where the first uses a link register,
@@ -7487,6 +7495,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0532 - the host I had just
+written repeated the gap it was
+documenting
+
+Step 0531's x86 call/return host has a
+docstring naming five emission macros as
+covered -- CALL, RET, SUB_RET, SUB_JMP and
+SUB_JCC -- and a body that calls two. Three
+were named and never invoked (census 402 ->
+403): the claim-outruns-code pattern this
+sequence keeps finding in other people's
+comments, this time in mine.
+
+All three now run. `RET` returns the low
+word of the accumulator and copies the ABI
+control block into the skb context, both
+checked; `SUB_JMP` transfers control; and
+`SUB_JCC` is driven in *both* directions.
+
+That last one mattered more than expected.
+The first version used only a condition
+that happened to hold, so it passed with
+`SUB_JCC` degraded to an unconditional jump
+-- a taken-only test cannot see the
+difference. Adding the falsifying case, the
+same condition with the zero flag set so
+control must fall through, makes that fault
+fail.
+
+Two setup errors of my own are recorded in
+the host: a probe that declared its own
+state shadowed the register the caller had
+set, and a macro ending in `return` needs
+its driving scope inside the probe rather
+than around it. Gate: rc 0, **245** banners.
+Census 402 -> 403.
 
 ### Step 0531 - the x86 call/return
 pair, where stack discipline is the
