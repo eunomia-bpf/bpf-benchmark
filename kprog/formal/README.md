@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 123,466,465 modeled
+229 passing `cross-check: OK` oracle banners summing to 123,467,609 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 295 Lean modules
-compiling transitively from the gate's roots and proving 1,998 theorems with
+header and one `Generated*.lean` module (138/138/138); 296 Lean modules
+compiling transitively from the gate's roots and proving 2,002 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,466,465 again, so the rollup is a measurement of the committed tree and not
+123,467,609 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -7049,6 +7049,51 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0494 - the shift-amount rules
+agree exactly where AArch64 encodes
+them, and provably differ where it does
+not
+
+Step 0494 is the third kind of cross-ISA
+result, after "the same" and "deliberately
+different" (census 365 -> 366). AArch64
+takes a shift amount modulo 32 at 32-bit
+width and modulo 64 at 64-bit width;
+x86-64 takes it modulo 64 at 64 bits and
+modulo 32 otherwise, because it has no
+8- or 16-bit shift -- it shifts at 32
+bits and truncates. At the two widths
+AArch64 encodes (W and X) the rules
+coincide exactly.
+
+At 8 and 16 they do not, and the
+divergence is real rather than
+representational: with `v = 1` and an
+amount of 32, AArch64 masks to `0` and
+shifts by nothing, x86-64 masks to `32`
+and shifts out of the window, giving `0`
+against `1`. Measured over 11 values, 13
+amounts and four operations, the reachable
+widths agree on all 1,144 pairs.
+
+That pair is unreachable from AArch64,
+which never encodes a narrow shift, so the
+disagreement is a property of the two
+contracts rather than of any program
+either simulator runs. Proving it is what
+keeps the distinction explicit: a change
+that starts emitting narrow shifts would
+turn a proved agreement into a live
+difference, and these theorems break.
+Flipping the AArch64 mask breaks three of
+them; the differential oracle catches it
+on 131 cases, and now excludes the
+narrow widths deliberately -- including
+them would report a difference no program
+can reach. Gate: rc 0, **229** banners,
+123,467,609 cases (oracle 4,044). Census
+365 -> 366.
 
 ### Step 0493 - the two condition
 vocabularies decide alike, and the

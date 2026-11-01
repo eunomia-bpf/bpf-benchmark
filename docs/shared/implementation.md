@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0494 relates the shift-amount rules (census 365
+-> 366). AArch64 masks modulo 32 at w32 and
+modulo 64 at w64; x86-64 masks modulo 64 at w64
+and modulo 32 otherwise, having no 8- or 16-bit
+shift. At the widths AArch64 encodes the rules
+coincide; at w8/w16 they do not, and the
+divergence is real: v=1 with amount 32 gives 0 on
+AArch64 and 1 on x86-64. That pair is unreachable
+from AArch64, so it is a property of the contracts
+rather than of any program. Proving it keeps the
+distinction explicit -- narrow-shift emission would
+turn the agreement into a live difference. Flipping
+the mask breaks three theorems and fails the oracle
+on 131 cases. 2002 theorems. Gate: rc 0, 229
+banners, 123,467,609 cases.
+
 Step 0493 relates the two condition vocabularies
 (census 364 -> 365). Step 0490 proved the one flag
 differing in meaning; the branches built on those
