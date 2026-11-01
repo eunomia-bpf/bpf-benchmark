@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 123,463,937 modeled
+229 passing `cross-check: OK` oracle banners summing to 123,466,241 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
 compiling transitively from the gate's roots and proving 1,994 theorems with
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,463,937 again, so the rollup is a measurement of the committed tree and not
+123,466,241 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -91,6 +91,15 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+The five x86 flag generators emitted their C operands unparenthesized, so a
+compound argument silently changed the parse. `KPROG_X86_SET_SUB_FLAGS(..., a & mask,
+b, ...)` expanded `(A < B)` to `(a & mask < b)`, which C parses as `a & (mask < b)`
+-- carry computed from the wrong comparison, `0` where the answer is `1`. The
+simulator happened to pass only plain variables at every call site, so nothing
+was wrong today, but the generated contract was a trap for the next caller.
+All five now emit `(A)`; the Lean output is byte-identical, since the fix
+touches only the C path.
 
 Not every cross-ISA difference is a drift, and the carry flag is the case that
 shows the difference between the two kinds. AArch64 sets `C` after a
@@ -7016,6 +7025,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0491 - the generated flag
+macros were a hygiene trap
+
+Step 0491 extends the differential
+oracle to the flags (census 362 -> 363)
+and fixes a latent bug the extension
+exposed. The five x86 flag generators
+emitted their C operands
+unparenthesized, so
+`KPROG_X86_SET_SUB_FLAGS(..., a & mask,
+b, ...)` expanded `(A < B)` to
+`(a & mask < b)`, which C parses as
+`a & (mask < b)` -- the carry computed
+from the wrong comparison, `0` where
+the answer is `1`. The simulator passes
+only plain variables at every call site,
+so nothing was wrong today, but the
+generated contract was a trap for the
+next caller. All five now emit `(A)`;
+the Lean output is byte-identical
+because the fix touches only the C path.
+
+The oracle now also cross-checks the
+flags both ways: the carry is
+*complementary* and zero, sign and
+overflow *agree*, over 144 operand
+pairs at four widths. Planting `>=` ->
+`>` in AArch64's subtract carry -- a
+one-character change that still looks
+right -- fails it on 88 cases. Gate:
+rc 0, **229** banners, 123,466,241
+cases; the extended oracle runs 2,676.
+Census 362 -> 363.
 
 ### Step 0490 - the carry flags are
 proved complementary, not just different

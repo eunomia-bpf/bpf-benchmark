@@ -34,7 +34,7 @@ def load():
  return d
 def render(e,lean):
  op=e["op"]
- if op=="input":return e["name"] if lean else e["name"].upper()
+ if op=="input":return e["name"] if lean else f"({e['name'].upper()})"
  if op=="zero":return "0"
  if op=="carry":return "carry" if lean else "(!!(CARRY))"
  if op=="carry_word":return "(if carry then 1 else 0)" if lean else "(!!(CARRY))"

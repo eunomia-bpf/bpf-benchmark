@@ -19,7 +19,7 @@ def load():
  for e in d["expressions"].values():validate(e)
  return d["expressions"]
 def render(e,lean):
- if e["op"]=="input":return e["name"] if lean else e["name"].upper()
+ if e["op"]=="input":return e["name"] if lean else f"({e['name'].upper()})"
  if e["op"]=="borrow":return "(if borrow then 1 else 0)" if lean else "(!!(BORROW))"
  op="-"
  return f"({render(e['lhs'],lean)} {op} {render(e['rhs'],lean)})"

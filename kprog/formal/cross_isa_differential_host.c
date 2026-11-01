@@ -148,10 +148,59 @@ static void check_stack_bounds(void)
 			KPROG_X86_STACK_WORDS(capacities[c]));
 }
 
+/*
+ * The one flag the two architectures define in opposite polarities.
+ *
+ * AArch64's subtract carry is not-borrow (`lhs >= rhs`), x86-64's is borrow
+ * (`lhs < rhs`); `CrossIsaFlags.lean` proves the two complements. This pins
+ * the same relation at the layer that compiles, and pins the three flags that
+ * *should* agree (zero, sign, overflow) alongside it -- a drift in any of them
+ * would be a real bug rather than an architectural difference.
+ */
+static void check_flags(void)
+{
+	static const unsigned long long values[] = {
+		0ULL, 1ULL, 2ULL, 0xffULL, 0x80ULL, 0x100ULL,
+		0x7fffffffULL, 0x80000000ULL, 0xffffffffULL,
+		0x123456789abcdefULL, ~0ULL, 0x8000000000000000ULL,
+	};
+	static const unsigned wids[] = { 1U, 2U, 4U, 8U };
+	unsigned i, j, w;
+
+	for (i = 0; i < sizeof(values) / sizeof(values[0]); i++) {
+		for (j = 0; j < sizeof(values) / sizeof(values[0]); j++) {
+			for (w = 0; w < sizeof(wids) / sizeof(wids[0]); w++) {
+				unsigned a_n, a_z, a_c, a_v;
+				unsigned x_cf, x_zf, x_sf, x_of;
+				unsigned long long a, b, sign;
+
+				a = values[i];
+				b = values[j];
+
+				KPROG_ARM64_SET_SUB_FLAGS(a_n, a_z, a_c, a_v, a, b, wids[w]);
+				sign = KPROG_X86_WIDTH_SIGN_MASK(wids[w]);
+				KPROG_X86_SET_SUB_FLAGS(x_cf, x_zf, x_sf, x_of,
+							a & KPROG_X86_WIDTH_MASK(wids[w]),
+							b & KPROG_X86_WIDTH_MASK(wids[w]),
+							(a - b) & KPROG_X86_WIDTH_MASK(wids[w]),
+							sign);
+
+				/* carry is deliberately opposite */
+				cmp_int("carry complements", a_c, !x_cf);
+				/* these three are not */
+				cmp_int("zero agrees", !!a_z, !!x_zf);
+				cmp_int("sign agrees", !!a_n, !!x_sf);
+				cmp_int("overflow agrees", !!a_v, !!x_of);
+			}
+		}
+	}
+}
+
 int main(void)
 {
 	check_widths();
 	check_stack_bounds();
+	check_flags();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",

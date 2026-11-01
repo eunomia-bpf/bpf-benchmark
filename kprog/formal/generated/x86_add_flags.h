@@ -3,9 +3,9 @@
 #define KPROG_FORMAL_GENERATED_X86_ADD_FLAGS_H
 #define KPROG_X86_SET_ADD_FLAGS(C_CF,C_ZF,C_SF,C_OF,A,B,R,SIGN)             \
 	do { \
-		(C_CF) = (R < A); \
-		(C_ZF) = (R == 0); \
-		(C_SF) = ((R & SIGN) != 0); \
-		(C_OF) = (((~(A ^ B)) & ((A ^ R) & SIGN)) != 0); \
+		(C_CF) = ((R) < (A)); \
+		(C_ZF) = ((R) == 0); \
+		(C_SF) = (((R) & (SIGN)) != 0); \
+		(C_OF) = (((~((A) ^ (B))) & (((A) ^ (R)) & (SIGN))) != 0); \
 	} while (0)
 #endif

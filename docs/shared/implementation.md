@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0491 extends the differential oracle to the flags
+(census 362 -> 363) and fixes a latent bug it exposed.
+The five x86 flag generators emitted C operands
+unparenthesized, so KPROG_X86_SET_SUB_FLAGS(..., a &
+mask, b, ...) expanded (A < B) to (a & mask < b),
+which C parses as a & (mask < b): carry from the
+wrong comparison, 0 where the answer is 1. The
+simulator passes only plain variables, so nothing
+was wrong today, but the contract was a trap. All
+five now emit (A); Lean output byte-identical. The
+oracle checks the flags both ways -- carry
+complementary, zero/sign/overflow agreeing -- over
+144 pairs at four widths; planting >= -> > in the
+AArch64 carry fails it on 88 cases. Gate: rc 0, 229
+banners, 123,466,241 cases.
+
 Step 0490 relates a cross-ISA difference (census 361
 -> 362). AArch64 sets C after a subtraction to
 not-borrow (lhs >= rhs, so CMP then B.HS means no

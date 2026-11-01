@@ -23,7 +23,7 @@ def load():
  return d["flags"]
 def render(e,lean):
  op=e["op"]
- if op=="input": return e["name"] if lean else e["name"].upper()
+ if op=="input": return e["name"] if lean else f"({e['name'].upper()})"
  if op=="nonzero": return f"({render(e['arg'],lean)} != 0)"
  l=render(e["lhs"],lean); r=render(e["rhs"],lean)
  if lean: fn={"ult":"BitVec.ult","eq":None,"and":"BitVec.and","xor":"BitVec.xor"}[op]; return f"({l} == {r})" if op=="eq" else f"({fn} {l} {r})"

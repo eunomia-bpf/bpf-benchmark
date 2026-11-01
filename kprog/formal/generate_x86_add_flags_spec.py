@@ -25,7 +25,7 @@ def load():
  return d["flags"]
 def render(e,lean):
  op=e["op"]
- if op=="input": return e["name"] if lean else e["name"].upper()
+ if op=="input": return e["name"] if lean else f"({e['name'].upper()})"
  if op=="zero": return "0"
  if op=="nonzero": return f"({render(e['arg'],lean)} != 0)"
  if op=="not": return f"(BitVec.not {render(e['arg'],lean)})" if lean else f"(~{render(e['arg'],lean)})"
