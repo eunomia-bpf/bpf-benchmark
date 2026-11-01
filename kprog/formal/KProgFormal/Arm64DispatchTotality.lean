@@ -22,6 +22,16 @@ The interesting property is that the third set is small, non-empty and
 enumerated. If a new opcode were added to the decoder and routed by nothing,
 it would join that set silently; making the set explicit is what turns that
 into a reviewable fact rather than an accident.
+
+Scope, stated because it is narrower than "the dispatch chain": this module
+speaks about the opcodes the *generated* dispatch tables name. The C chain in
+`arm64_sim_local_bpf.h` branches on 35 `HANDLED` predicates while those tables
+name 25, so twelve families -- ADRP, CNEG, CSEL, EXTREV, LDRSX, MOV, MUL, ORN,
+REDUCTION, SHIFT, STLXR, UNARY -- are routed by the code and absent here. Their
+coverage is carried by route hosts rather than by these theorems, and
+`check_dispatch_model.py` records which of them have one that drives the
+dispatcher. Read this module as "the modelled subset is complete and
+exclusive", not as "the chain is".
 -/
 
 namespace KProgFormal.DispatchTotality

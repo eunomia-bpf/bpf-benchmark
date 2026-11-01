@@ -149,6 +149,21 @@ static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
 
+The coverage theorems from 0517/0518 are stated over the *generated* dispatch
+tables, and the C chain branches on its own list of `HANDLED` predicates, so
+nothing tied the two together. Measured: the AArch64 chain branches on **35**
+families and the model names **25**. Twelve -- ADRP, CNEG, CSEL, EXTREV,
+LDRSX, MOV, MUL, ORN, REDUCTION, SHIFT, STLXR, UNARY -- are routed by the code
+and absent from the model.
+
+`check_dispatch_model.py` records that set and fails when a new predicate
+appears without a counterpart, or when a recorded gap has since been modelled.
+Writing the entries honestly took a correction: the first version claimed each
+of the twelve had a route host and only five do. The other seven have
+model-side hosts only -- the same gap 0503 closed for MUL, now enumerated for
+the rest. The totality module's docstring states its scope as the modelled
+subset.
+
 A refinement proof covers the Lean formula, not the C one. Both are rendered
 from one specification, but as *separate string literals* in the same
 generator, and the proof is stated over the Lean literal. Measured: changing
@@ -7327,6 +7342,44 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0519 - the dispatcher and the
+model of it were never compared
+
+Steps 0517/0518 prove coverage over the
+*generated* dispatch tables (census 389 ->
+390). The C chain branches on its own list
+of `HANDLED` predicates, and nothing tied
+the two lists together -- so the theorem
+described a subset while reading as a claim
+about the chain.
+
+Measured: the AArch64 chain branches on
+**35** families, the model names **25**.
+Twelve are routed by the code and absent
+from the model.
+
+`check_dispatch_model.py` records that set
+rather than concealing it, and fails on a
+new predicate with no counterpart or a
+recorded gap that has since been modelled.
+
+Writing the entries honestly took a
+correction worth keeping: the first version
+claimed each of the twelve had a route
+host, and only five do -- CSEL, MUL, MOV,
+SHIFT and LDRSX are driven through the
+dispatcher; ADRP, CNEG, EXTREV, ORN,
+REDUCTION, STLXR and UNARY have model-side
+hosts only. That is the gap 0503 closed for
+MUL, now enumerated for the rest instead of
+being assumed absent.
+
+The totality module's docstring now states
+its scope: the modelled subset is complete
+and exclusive, which is not the same as the
+chain being so. Gate: rc 0, **234**
+banners. Census 389 -> 390.
 
 ### Step 0518 - x86 dispatch coverage,
 where the unrouted set is a category
