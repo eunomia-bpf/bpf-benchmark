@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0533 executes all 61 AArch64 helper-call bodies
+(census 403 -> 404), the largest unexecuted surface:
+no host in the tree mentioned any of them, and this is
+where the model meets the real kernel interface.
+Running them needs one non-obvious step: bpf_helpers.h
+declares each helper as a static const function
+*pointer* initialised to the helper id rather than an
+address, so a direct call jumps to address 5 (measured:
+SIGSEGV at 0x5). Renaming the eighteen forwarding
+pointers before including the simulator header and
+defining them under the original names makes the bodies
+run. All 61 are checked for being callable and writing
+x0; the eighteen forwarding arms for reaching their
+target the expected number of times, counted per call
+site since three macros share a target. The first
+version asserted one per name and reported two
+failures that were the tree being right. Verified by
+planting both shapes. Gate: rc 0, 246 banners,
+124,531,779 cases.
+
 Step 0532 fixes a gap in Step 0531's own host (census
 402 -> 403): its docstring named five emission macros
 as covered and its body called two. RET, SUB_JMP and

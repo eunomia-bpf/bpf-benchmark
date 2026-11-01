@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-245 passing `cross-check: OK` oracle banners summing to 124,531,696 modeled
+246 passing `cross-check: OK` oracle banners summing to 124,531,779 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,531,696 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 245 banners are all distinct oracles — 244 report a plain
+124,531,779 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 246 banners are all distinct oracles — 245 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 403, and 297 steps
+`build/mut_*.py` files exist, the counter's last value is 404, and 299 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -166,6 +166,17 @@ other three now run, and driving the conditional one in *both* directions
 mattered: the first version used only a condition that happened to hold and so
 passed with the conditional degraded to an unconditional jump. Adding the
 falsifying case makes that fault fail.
+
+The helper-call bodies are the largest unexecuted surface of all: 61 macros,
+one per helper the simulator recognises, and no host in the tree mentioned any
+of them. Running them takes one non-obvious step, because the toolchain's helper
+header declares each as a `static ... const` function pointer initialised to the
+helper *id* rather than an address -- so a call jumps to address 5 and faults,
+measured. Renaming the eighteen forwarding pointers before including the
+simulator header, and defining them under their original names, makes the bodies
+run. All 61 are then checked for being callable and for writing `x0`, and the
+eighteen forwarding arms for reaching their target the expected number of times
+-- a count per *call site*, since three macros share a target.
 
 The second architecture's surface is larger and had the same history. It models
 a real call/return pair through the stack where the first uses a link register,
@@ -7495,6 +7506,49 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0533 - all 61 helper-call
+bodies execute, the largest unexecuted
+surface
+
+Steps 0528-0532 walked the emission
+surface. The helper-call bodies are larger
+still: 61 macros, one per helper the
+simulator recognises, and not one of them
+was executed by any host (census 403 ->
+404). It is also where the model meets the
+real kernel interface.
+
+Running them takes one step that is not
+obvious from the headers. The toolchain's
+helper header declares each helper as a
+`static ... const` function *pointer*
+initialised to the helper's id -- a small
+integer, not an address -- so calling one
+jumps to address 5. Measured: without a
+rename the first call is a SIGSEGV at
+`0x5`. Renaming the eighteen forwarding
+pointers before including the simulator
+header, and defining them under the original
+names, makes the bodies run.
+
+All 61 are then checked for being callable
+and for writing `x0`; the eighteen
+forwarding arms must reach their target the
+expected number of times. That count is per
+*call site*, because three macros share a
+target -- one alias of another macro, and
+two that both drive the user probe. The
+first version asserted one call per name and
+reported two failures that were the tree
+being right.
+
+Verified by planting both shapes: writing
+`x1` instead of `x0` fails, and redirecting
+a forward to the wrong helper fails with
+both counts wrong. Gate: rc 0, **246**
+banners, 124,531,779 cases. Census 403 ->
+404.
 
 ### Step 0532 - the host I had just
 written repeated the gap it was
