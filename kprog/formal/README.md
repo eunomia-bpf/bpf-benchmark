@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-236 passing `cross-check: OK` oracle banners summing to 124,527,333 modeled
+237 passing `cross-check: OK` oracle banners summing to 124,527,533 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,052 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,527,333 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 236 banners are all distinct oracles — 235 report a plain
+124,527,533 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 237 banners are all distinct oracles — 236 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 392, and 278 steps
+`build/mut_*.py` files exist, the counter's last value is 393, and 279 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -148,6 +148,16 @@ contract whose mutation nothing caught, and each was inert: a docstring, a
 static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
+
+STLXR gets one as well, and it is the only remaining family with *two*
+observable effects: the dispatcher stores the source to memory and then writes
+a status word to the destination, so a misroute can corrupt the atomic-success
+signal while leaving memory correct, or the reverse. The oracle checks all
+three things separately -- the memory word, the status in the low 32 bits (the
+dispatcher writes it at a fixed 32-bit width whatever the access width), and
+that the source register is unchanged. Planting each effect alone: a non-zero
+status fails all 200 cases, dropping the store fails 155 as a MEMORY mismatch.
+The count moves from 7 live / 5 model-only to 8 / 4.
 
 CNEG gets one too, and it is worth more than most: the dispatcher does not
 take a boolean, it evaluates the condition code against the live NZCV flags and
@@ -7367,6 +7377,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0522 - the store-exclusive arm,
+the only remaining family with two
+observable effects
+
+Third of the remaining model-only
+families (census 392 -> 393). STLXR is
+the only one with two effects: the
+dispatcher stores the source to memory
+*and* writes a status word to the
+destination. A misroute can therefore
+corrupt the atomic-success signal while
+leaving memory correct, or the reverse --
+and a model-side oracle comparing one
+effect would miss half of it.
+
+`test_arm64_stlxr_route_host.c` checks the
+three things independently: the memory
+word written, the status the destination
+receives (in the low 32 bits, since the
+dispatcher writes it at a fixed 32-bit
+width regardless of the access width), and
+that the source register is unchanged.
+
+Verified by planting each effect alone:
+making the status non-zero fails all 200
+cases; dropping the store fails 155 as a
+MEMORY mismatch, so neither effect is
+riding on the other's check. The
+dispatch-model count moves from 7 live /
+5 model-only to 8 / 4. Gate: rc 0, **237**
+banners, 124,527,533 cases. Census 392 ->
+393.
 
 ### Step 0521 - the condition-gated
 negation, where the flag chain meets the
