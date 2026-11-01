@@ -283,4 +283,16 @@ theorem x86_stack_arena_window_threshold :
       windowFits 120 8 128 = true ∧ windowFits 121 8 128 = false := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> (simp only [windowFits, windowEnd]; native_decide)
 
+/-- The third configuration the header defines, recorded because the threshold
+result above covers only the two enabled sizes: with the stack disabled the
+arena is one byte, so no 8-byte window fits anywhere, yet a one-byte window at
+index 0 does, and the one-past-end pointer at index 1 is still a valid arena
+address. Without this the smallest real arena has no machine-checked boundary at
+all, and it is the one where the rounding and the last-byte subtraction are most
+likely to misbehave. -/
+theorem x86_stack_arena_disabled_arena_boundary :
+    windowFits 0 8 1 = false ∧ windowFits 0 1 1 = true ∧
+      pointerFits 1 1 = true := by
+  refine ⟨?_, ?_, ?_⟩ <;> native_decide
+
 end KProgFormal

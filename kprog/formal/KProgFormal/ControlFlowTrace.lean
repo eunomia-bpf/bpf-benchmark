@@ -70,7 +70,7 @@ theorem control_flow_trace_walk_shape_irrelevant (pc : Nat) (steps : List (Bool 
 
 /-- A trace walk splits over path concatenation: walking a path and then its
 continuation is walking the concatenation. The induction principle the trace
-theorem rests on. -/
+result rests on. -/
 theorem control_flow_trace_walk_append (s : Shape) (pc : Nat)
     (a b : List (Bool × Nat)) :
     walk s pc (a ++ b) = walk s (walk s pc a) b := by

@@ -29,6 +29,13 @@ import sys
 THEOREM = re.compile(r'^theorem (\w+)[\s\S]*?(?=^theorem |^def |^end |\Z)',
                      re.M)
 
+# A docstring line can itself begin with `theorem` when prose wraps mid-sentence,
+# and the pattern above matches at any line start, so the raw count can exceed
+# the number of declarations. A real declaration always reaches a `:=` before
+# the next top-level declaration; prose never does. Rejecting the prose keeps
+# the published count honest -- it had drifted by one before this check existed.
+PROOF = ":="
+
 
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
@@ -39,6 +46,8 @@ def scan_tree(root):
     for path in mods:
         src = open(path, errors="ignore").read()
         for m in THEOREM.finditer(src):
+            if PROOF not in m.group(0):
+                continue
             theorems += 1
             if "native_decide" in m.group(0):
                 native_decide += 1
