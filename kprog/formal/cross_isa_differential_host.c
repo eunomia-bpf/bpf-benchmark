@@ -488,6 +488,73 @@ static void check_alu_tables(void)
 		}
 }
 
+/*
+ * The control-flow chain, end to end, in the compiled contracts.
+ *
+ * Everything else here compares one contract at a time. The branch path is
+ * different: the property that matters is that two *chains* compose to the
+ * same place. Each ISA evaluates its own conditions from its own flags and
+ * selects its own emitted shape; the endpoints must agree even though the
+ * intermediate flag set does not (AArch64's carry is x86-64's borrow
+ * inverted). A chain that composed differently on one side would diverge here
+ * while every per-ISA contract still held.
+ */
+static void check_branch_chain(void)
+{
+	static const struct {
+		unsigned a64;
+		unsigned x86;
+		const char *name;
+	} conds[] = {
+		{ ARM64_COND_EQ, X86_CC_E, "eq/e" },
+		{ ARM64_COND_NE, X86_CC_NE, "ne/ne" },
+		{ ARM64_COND_CS, X86_CC_AE, "cs/ae" },
+		{ ARM64_COND_CC, X86_CC_B, "cc/b" },
+		{ ARM64_COND_MI, X86_CC_S, "mi/s" },
+		{ ARM64_COND_PL, X86_CC_NS, "pl/ns" },
+		{ ARM64_COND_VS, X86_CC_O, "vs/o" },
+		{ ARM64_COND_VC, X86_CC_NO, "vc/no" },
+		{ ARM64_COND_HI, X86_CC_A, "hi/a" },
+		{ ARM64_COND_LS, X86_CC_BE, "ls/be" },
+		{ ARM64_COND_GE, X86_CC_GE, "ge/ge" },
+		{ ARM64_COND_LT, X86_CC_L, "lt/l" },
+		{ ARM64_COND_GT, X86_CC_G, "gt/g" },
+		{ ARM64_COND_LE, X86_CC_LE, "le/le" },
+	};
+	static const unsigned long long sites[][2] = {
+		{ 0, 0 }, { 100, 50 }, { 50, 100 }, { 100, 100 }, { 4096, 8 },
+	};
+	unsigned mask, i, j, sign, zero, carry, overflow, backward;
+	unsigned long long current, target, a64_taken, x86_taken;
+
+	for (mask = 0; mask < 16U; mask++)
+		for (i = 0; i < sizeof(conds) / sizeof(conds[0]); i++)
+			for (j = 0; j < sizeof(sites) / sizeof(sites[0]); j++) {
+				sign = (mask >> 0) & 1U;
+				zero = (mask >> 1) & 1U;
+				carry = (mask >> 2) & 1U;
+				overflow = (mask >> 3) & 1U;
+				current = sites[j][0];
+				target = sites[j][1];
+
+				/* each ISA evaluates its own condition from its own flags */
+				a64_taken = !!KPROG_ARM64_EVAL_COND(conds[i].a64, sign, zero,
+								    carry, overflow,
+								    unreachable_cond());
+				x86_taken = !!KPROG_X86_EVAL_CC(conds[i].x86, !carry, zero,
+								 sign, overflow);
+
+				/* and both select the same edge direction */
+				backward = KPROG_ARM64_BRANCH_BACKWARD(current, target);
+				cmp_int("branch shape", backward,
+					(unsigned)KPROG_X86_BRANCH_BACKWARD(current, target));
+
+				/* crucially the *chain* agrees: taken-ness matches on every
+				 * condition, flag combination and site */
+				cmp_int(conds[i].name, a64_taken, x86_taken);
+			}
+}
+
 int main(void)
 {
 	check_widths();
@@ -499,6 +566,7 @@ int main(void)
 	check_byte_reversal();
 	check_mem_offset();
 	check_alu_tables();
+	check_branch_chain();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",
