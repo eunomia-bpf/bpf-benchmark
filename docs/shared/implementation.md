@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0515 measures the boundary of the proofs (census
+385 -> 386). A generator renders one specification
+into a C header and a Lean module; the Lean carries a
+refinement theorem, but the C formula is a separate
+string literal and the proof is stated over the Lean
+one. Measured: changing mid1 >> 32 to >> 16 in the
+multiply generator's C string leaves the Lean build
+green, since the Lean literal still says >>> 32; the
+extrev generator's C << 56 becomes << 55 with its proof
+passing. So the C needs its own oracle.
+check_dual_emit_coverage.py records which host covers
+each of the seven dual-emitted generators, confirming
+coverage by mutating the C string alone; one is caught
+earlier by a static assertion in x86_sim.h. A new
+dual-emitted generator with no recorded coverage fails
+the gate. The script's first draft mis-read Lean's <<<
+as a C shift and produced a false finding. Gate: rc 0,
+234 banners.
+
 Step 0514 generalises 0513's finding (census 384 ->
 385). Three oracles recomputed what the simulator
 computes and then called the generated contract with
