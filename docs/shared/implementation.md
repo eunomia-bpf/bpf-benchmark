@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0508 closes the jcc checker's own stated blind
+spot (census 378 -> 379). Step 0507 checked the four
+mnemonic-commented emissions; there are seven, and the
+three uncommented ones sit in the tail-call lowering
+path where jbe/jae/je decide the callee-saved mask,
+the tail-call count and the null program check. All
+three were correct, but nothing knew that. The binding
+name supplies the intent the comment would otherwise
+carry: `let jbe_out = ...rel32(..., 0x86)` states the
+condition. The checker now takes intent from the
+comment when present and from a `j<cond>_out` binding
+otherwise, and handles the near form, where rel32 adds
+0x80 rather than 0x70. Measured: 7 sites, 4 by
+comment, 3 by binding, all correct; each of the three
+previously-unchecked sites was planted with a wrong
+opcode and reported. Gate: rc 0, 232 banners.
+
 Step 0507 joins two languages (census 377 -> 378). The
 x86 encoder is Rust and emits conditional jumps as
 raw opcodes beside a mnemonic comment; the C simulator
