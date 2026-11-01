@@ -2612,6 +2612,40 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0471 follows the disproved figures through
+every remaining live copy in the tree (census
+342 -> 343). Three more carried them: the two
+application tables in `docs/paper` (orphaned by
+`main.tex` in both trees, but contradictory
+figures left in the tree are the drift this line
+tracks), and two prose sources with much wider
+reach -- the grant proposal analysis, which
+summarises the paper's claims for proposal
+writing, and the live grant `overview.tex`, whose
+"Preliminary results" paragraph is the sentence
+that motivates the proposal's tasks. All now use
+the median figures the evaluation section
+declares (1.065x / 0.984x / 0.995x-0.998x).
+
+Three copies were checked and deliberately left
+alone, each for a stated reason rather than by
+oversight. `kinsn/docs/evaluation.md` reports
+1.073x and 0.995x as mean-over-mean ratios of the
+same raw runs -- self-consistent in a document
+that declares no median convention, verified by
+recomputing both conventions from the committed
+per-sample data. `kinsn/paper/atc26/inputs/` is
+an explicitly frozen camera-ready snapshot pinned
+to a commit. And the `eurosys27-kinsn.drawio`
+difference is the `EInsn`/`Kinsn` naming each
+paper's macro uses, not stale content.
+
+The grant `main.pdf` is tracked, and the local
+toolchain rewrites it with a different
+compression (76 KB to 32 KB) for a one-number
+change, so the binary was restored and only the
+source committed.
+
 Step 0470 applies the verified evaluation figures
 to the second paper submodule (census 341 -> 342).
 Every correction in Steps 0462/0468 went into
