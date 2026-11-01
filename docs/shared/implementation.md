@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0517 proves the dispatcher property that was
+missing (census 387 -> 388). The existing theorem
+says no opcode is gated by two arms -- at most one --
+and nothing said at least one, which matters because an
+opcode with no arm falls through to the unsupported
+hook: a silent behavioural hole rather than a compile
+error. Arm64DispatchTotality partitions the generated
+opcode space into family-routed, singleton-routed and
+unrouted, proves the routed lists duplicate-free and
+mutually disjoint, and makes the unrouted set
+disjoint, non-empty and *enumerated* rather than
+discovered, so an unrouted new opcode shows up as a
+diff. Getting that set right took measurement: a scan
+of the HANDLED macros suggested three opcodes, but
+evaluating the generated tables showed RET is a routed
+singleton and only ADD_IMM/SUB_IMM are reserved. One
+added element breaks four of eight theorems. Gate:
+rc 0, 234 banners, 2,042 theorems.
+
 Step 0516 measures whether the compiled surface is
 actually guarded (census 386 -> 387).
 mutate_contracts.py finds the first meaningful
