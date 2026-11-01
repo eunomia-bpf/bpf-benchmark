@@ -2612,6 +2612,20 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0501 inverts the coverage question (census 371 ->
+372): instead of which contracts have a host, which
+contracts does the *simulator* never call? The answer
+pointed at the two condition-decode oracles, which
+restated their ISA's X86_CC_*/ARM64_COND_* codes as
+local literals. That kept the model independent of the
+generated tables but made it blind to whether the
+simulator still agreed: drifting X86_CC_A in
+x86_sim.h, or ARM64_COND_EQ in arm64_sim.h, left both
+green. Both now include the simulator header, so drift
+fails at compile time through the generated
+_Static_asserts -- stronger than the runtime compare
+they had. Gate: rc 0, 229 banners.
+
 Step 0499 compares a control-flow *chain* rather
 than a contract (census 370 -> 371). Each ISA proves
 its own path in isolation, so on either ISA flags in
