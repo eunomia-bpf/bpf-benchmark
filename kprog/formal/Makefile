@@ -157,6 +157,8 @@ check:
 	lake env lean KProgFormal/X86LogicFlags.lean
 	lake env lean KProgFormal/GeneratedX86Width.lean
 	lake env lean KProgFormal/X86Width.lean
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf width_fallback_host.c -o build/width_fallback_host
+	./build/width_fallback_host
 	lake env lean KProgFormal/X86Immediate.lean
 	lake env lean KProgFormal/X86SubFlags.lean
 	lake env lean KProgFormal/X86AddFlags.lean

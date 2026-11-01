@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-227 passing `cross-check: OK` oracle banners summing to 123,463,541 modeled
+228 passing `cross-check: OK` oracle banners summing to 123,463,565 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
 compiling transitively from the gate's roots and proving 1,983 theorems with
@@ -37,8 +37,8 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,463,541 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 227 banners are all distinct oracles — 225 report a plain
+123,463,565 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 228 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
@@ -887,8 +887,16 @@ counterexample: writing `0xaa` into the high byte of `0x1122334455667788`
 produces `0x112233445566aa88`. This primitive theorem alone does not bind
 artifact metadata to a handler; the named integrated handlers below add that
 composition, while unlisted handlers remain separate obligations. The C
-compatibility convention that width zero aliases 64 and behavior for other
-invalid numeric widths remain outside the typed Lean model.
+compatibility convention that width zero aliases 64 remains outside the
+typed Lean model, and so does the wider form of it: the generated mask is a
+chained ternary whose final arm is the 64-bit mask, so *every* code that is
+not one of the four widths resolves to 64 bits -- the absent code 0, the
+opcodes that reuse the field (`X86_OP_XCHG` is 25, `X86_OP_BZHI` is 30),
+and any future drift. The Lean `mask` is a total function over the four
+constructors and has no notion of an invalid code, so the fallback is
+outside the model rather than proved; `width_fallback_host.c` pins the C
+behaviour instead, 24 cases, and changing the chain's final arm makes it
+fail with 9 mismatches.
 Register operand reads now have the matching generated lane contract. Lean
 proves that low/high byte observations and low 16/32/64-bit observations agree
 with an independent fixed-width extraction specification, including a
@@ -6951,6 +6959,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0485 - the width fallback is
+pinned rather than left implicit
+
+Step 0485 turns a documented gap into a
+tested one (census 356 -> 357). The
+README said "behavior for other invalid
+numeric widths remain outside the typed
+Lean model", which understates what the
+C actually does. `KPROG_X86_WIDTH_MASK`
+is a chained ternary whose final arm is
+the 64-bit mask, so *every* code that is
+not one of the four widths resolves to
+64 bits: the absent code 0, the opcodes
+that reuse the field (`X86_OP_XCHG` is
+25, `X86_OP_BZHI` is 30), and any future
+drift. The Lean `mask` is total over
+the four constructors and has no notion
+of an invalid code, so the fallback is
+outside the model rather than proved.
+
+`width_fallback_host.c` pins the C
+behaviour -- the four valid codes to
+their own masks, and a representative
+set of eleven invalid codes to 64 bits,
+24 assertions. Changing the chain's
+final arm to the 16-bit mask makes it
+fail with 9 mismatches. The README
+paragraph now states the wider form
+rather than only the absent-code case.
+Gate: rc 0, **228** banners,
+123,463,565 modeled cases. Census 356
+-> 357.
 
 ### Step 0484 - a needed hypothesis was
 mis-describing which arenas it covers

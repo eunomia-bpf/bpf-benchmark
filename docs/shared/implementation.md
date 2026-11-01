@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0485 pins the width fallback (census 356
+-> 357). The README said "behavior for other
+invalid numeric widths remain outside the typed
+Lean model", understating what the C does:
+`KPROG_X86_WIDTH_MASK` is a chained ternary whose
+final arm is the 64-bit mask, so every code that
+is not one of the four widths resolves to 64 bits
+-- the absent code 0, the opcodes that reuse the
+field (XCHG 25, BZHI 30), and any future drift.
+The Lean `mask` is total over the four
+constructors, so the fallback is outside the
+model rather than proved. `width_fallback_host.c`
+pins the C behaviour in 24 assertions; changing
+the final arm makes it fail with 9 mismatches.
+Gate: rc 0, 228 banners, 123,463,565 cases.
+
 Step 0484 corrects a docstring that overstated a
 hypothesis's scope (census 355 -> 356).
 `arm64_stack_arena_tag_guard_is_window_guard`
