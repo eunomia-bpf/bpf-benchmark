@@ -113,6 +113,36 @@ theorem arm64_extrev_extr_w64_refines (src src2 shift : BitVec 64) :
       arm64ExtrevExtrSpec src src2 shift 64 := by
   simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
 
+/-- The EXTR refinements above carry a hypothesis that the operands are already
+narrowed to the destination width, which the dispatcher does not discharge: it
+passes raw 64-bit registers. The hypothesis is stronger than needed. Because
+both the generated arm and the independent statement are narrowed to the
+destination width at the end -- which is exactly what the C register write
+does -- the refinement holds without it. Stated for the three widths that
+carry the hypothesis; the 64-bit case already needed none.
+
+This is worth recording rather than silently tightening the old theorem: the
+raw-operand form really does differ from the narrowed one *before* the final
+narrowing (`0xffffffffffffffff` against `0x1ffffffff` at `w32`), so the
+hypothesis was doing work at the wrong point in the pipeline. -/
+theorem arm64_extrev_extr_w8_refines_raw (src src2 shift : BitVec 64) :
+    narrow (value .extr src src2 shift .w8) .w8 =
+      narrow (arm64ExtrevExtrSpec src src2 shift 8) .w8 := by
+  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+
+/-- The 16-bit case of `arm64_extrev_extr_w8_refines_raw`. -/
+theorem arm64_extrev_extr_w16_refines_raw (src src2 shift : BitVec 64) :
+    narrow (value .extr src src2 shift .w16) .w16 =
+      narrow (arm64ExtrevExtrSpec src src2 shift 16) .w16 := by
+  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+
+/-- The 32-bit case of `arm64_extrev_extr_w8_refines_raw`, which is the width
+the dispatcher reaches most often. -/
+theorem arm64_extrev_extr_w32_refines_raw (src src2 shift : BitVec 64) :
+    narrow (value .extr src src2 shift .w32) .w32 =
+      narrow (arm64ExtrevExtrSpec src src2 shift 32) .w32 := by
+  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+
 /-- The generated SXTB arm agrees with the independent 8-bit sign extension. -/
 theorem arm64_extrev_sxtb_refines (v : BitVec 64) :
     signExtend v 8 = arm64ExtrevSignExtSpec v 8 := by

@@ -52,7 +52,7 @@ A64_UNMODELLED = {
     # dispatcher, which is the same gap Step 0503 closed for MUL.
     "adrp": "test_arm64_adrp_route_host.c (live)",
     "cneg": "test_arm64_cneg_route_host.c (live)",
-    "extrev": "model-only: test_arm64_extrev_host.c",
+    "extrev": "test_arm64_extrev_route_host.c (live)",
     "orn": "model-only: test_arm64_orn_host.c",
     "reduction": "test_arm64_reduction_route_host.c (live)",
     "stlxr": "test_arm64_stlxr_route_host.c (live)",
@@ -129,7 +129,7 @@ def main(argv):
 
     print("check_dispatch_model: AArch64 chain branches on %d families, the "
           "model names %d, and the %d unmodelled ones are the recorded set "
-          "(10 with a live route host, 2 model-only)"
+          "(11 with a live route host, 1 model-only)"
           % (len(a64), len(model), len(unmodelled)))
     return 0
 
