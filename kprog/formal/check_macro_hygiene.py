@@ -60,7 +60,12 @@ def offenders(paths):
             name, ps = params_of(first)
             if not ps:
                 continue
-            body = macro[macro.index("\n") + 1:] if "\n" in macro else ""
+            # A macro written on one line has its body on the same line as the
+            # parameter list. Taking only what follows the first newline left
+            # every single-line macro unchecked -- 323 of them, 621 parameters --
+            # while the summary still reported all headers as clean.
+            head, _, rest = macro.partition("\n")
+            body = rest if rest else head[head.index(")") + 1:]
             for p in ps:
                 if p in SKIP:
                     continue
@@ -81,7 +86,12 @@ def offenders(paths):
 def main(argv):
     # Patterns are relative to this script, so the check works from any cwd.
     here = os.path.dirname(os.path.abspath(__file__))
-    patterns = [os.path.join(here, p) for p in (argv[1:] or ["generated/*.h"])]
+    # The default covers every header the simulators compile, not just the
+    # generated ones: the defect this check exists for was found in a
+    # hand-written condition evaluator, so restricting the scan to generated/
+    # left the population that produced the bug unexamined.
+    defaults = ["generated/*.h", "../x86/*.h", "../arm64/*.h"]
+    patterns = [os.path.join(here, p) for p in (argv[1:] or defaults)]
     paths = []
     for pat in patterns:
         paths.extend(glob.glob(pat))
@@ -94,8 +104,12 @@ def main(argv):
         for path, name, p, ctx in bad:
             print("  %s: %s [%s]: ...%s..." % (path, name, p, ctx))
         return 1
-    print("check_macro_hygiene: all %d headers parenthesize their parameters"
-          % len(paths))
+    # Named separately from the contract count: `generated/*.h` is one per
+    # contract, and the rest are the hand-written simulator headers.
+    gen = [q for q in paths if os.sep + "generated" + os.sep in q]
+    print("check_macro_hygiene: all %d headers parenthesize their parameters "
+          "(%d generated, %d hand-written)"
+          % (len(paths), len(gen), len(paths) - len(gen)))
     return 0
 
 
