@@ -10,8 +10,8 @@ make check
 What the gate currently covers, measured from one full `make check` run:
 226 passing `cross-check: OK` oracle banners summing to 123,463,531 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 294 Lean modules
-compiling transitively from the gate's roots and proving 1,970 theorems with
+header and one `Generated*.lean` module (138/138/138); 295 Lean modules
+compiling transitively from the gate's roots and proving 1,980 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -91,6 +91,18 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+The two ISAs agree on the width vocabulary, and that now has a theorem rather
+than an eyeball comparison. `arm64_width_spec.json` and `x86_width_spec.json`
+are separate inputs to separate generators, each rendering its own C header and
+Lean module; nothing forced the two to agree, so a drifted mask or bit count on
+one side would make the simulators disagree about what an 8-bit write means
+while every per-ISA theorem kept holding. `CrossIsaWidth.lean` states the
+agreement across all ten generated definitions (`code`, `mask`, `signMask`,
+`bits`, `narrow`, `zero`, `sign`, `absentCode`, `defaultCode`, `effective`).
+Planting a 16-bit bit-count of 17 on the x86 side fails `bits_agrees` and
+`sign_agrees`, so the module is a real gate on spec drift rather than a
+restatement.
 
 The dispatch ladder's depth costs nothing, which was measured rather than
 assumed. `X86_SIM_L_EXEC` is a 56-arm `else if` chain and `ARM64_SIM_L_EXEC` a
@@ -6919,6 +6931,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0481 - the two ISAs' width
+contracts are proved equal
+
+Step 0481 closes a cross-ISA gap
+(census 352 -> 353). Each ISA has
+its own width contract: separate spec
+JSON, separate generator, separate C
+header and Lean module. A drift in one
+-- a mask one bit wide, a bit count
+off by one -- would make the simulators
+disagree about what an 8-bit write
+means while every per-ISA theorem kept
+holding, because nothing compared them.
+
+`CrossIsaWidth.lean` states the
+agreement over all ten generated
+definitions (`code`, `mask`, `signMask`,
+`bits`, `narrow`, `zero`, `sign`,
+`absentCode`, `defaultCode`,
+`effective`) through a constructor map
+between the two `Width` types. It is
+purely a comparison; it does not
+duplicate either contract. Verified by
+planting a 16-bit bit-count of 17 on
+the x86 side, which fails `bits_agrees`
+and `sign_agrees` -- so it gates spec
+drift rather than restating.
+
+Wired into the recipe after both
+per-ISA width modules, so both
+contracts are built before it runs.
+Gate: rc 0, 226 banners, 295 modules,
+1,980 theorems, still no placeholder
+across all six forms. Census 352 -> 353.
 
 ### Step 0480 - the dispatch ladder's
 depth costs nothing

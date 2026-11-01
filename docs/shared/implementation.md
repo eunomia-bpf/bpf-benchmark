@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0481 closes a cross-ISA gap (census 352 ->
+353). Each ISA has its own width contract --
+separate spec JSON, generator, C header and Lean
+module -- and nothing compared them, so a drifted
+mask or bit count on one side would make the two
+simulators disagree about what an 8-bit write
+means while every per-ISA theorem kept holding.
+`CrossIsaWidth.lean` proves the agreement over
+all ten generated definitions through a
+constructor map between the two `Width` types,
+without duplicating either contract. Verified by
+planting a 16-bit bit-count of 17 on the x86
+side, which fails `bits_agrees` and
+`sign_agrees`. Wired into the recipe after both
+per-ISA width modules. 295 modules, 1,980
+theorems, no placeholder. Gate: rc 0, 226
+banners.
+
 Step 0480 measures what the dispatch ladder costs
 (census 351 -> 352; documentation and measurement
 only). `X86_SIM_L_EXEC` is a 56-arm `else if`
