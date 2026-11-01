@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-235 passing `cross-check: OK` oracle banners summing to 124,500,933 modeled
+236 passing `cross-check: OK` oracle banners summing to 124,527,333 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,052 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,500,933 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 235 banners are all distinct oracles — 234 report a plain
+124,527,333 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 236 banners are all distinct oracles — 235 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 391, and 276 steps
+`build/mut_*.py` files exist, the counter's last value is 392, and 277 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -148,6 +148,17 @@ contract whose mutation nothing caught, and each was inert: a docstring, a
 static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
+
+CNEG gets one too, and it is worth more than most: the dispatcher does not
+take a boolean, it evaluates the condition code against the live NZCV flags and
+passes the result in. So this arm is where the flag-to-condition chain proved in
+Steps 0490/0493 meets the arithmetic, and a wrong route is silent twice over --
+negate and not-negate cost the same, and nothing writes a flag. The oracle
+drives all 15 condition codes x 16 flag combinations x both widths, evaluating
+the condition independently from the architecture: 26,400 cases. Both halves of
+the composition were planted -- inverting GE fails 1,360, dropping the negation
+fails 10,880. The dispatch-model count moves from 6 live / 6 model-only to
+7 / 5.
 
 One of the seven model-only families now has a live oracle. UNARY (MVN, NEG)
 is worth driving through the dispatcher because its two opcodes are each
@@ -7356,6 +7367,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0521 - the condition-gated
+negation, where the flag chain meets the
+arithmetic
+
+Second of the six remaining model-only
+families (census 391 -> 392). CNEG is
+worth more than most: the dispatcher does
+not take a boolean, it evaluates the
+condition code in `AUX` against the live
+NZCV flags and passes the result in. So
+this arm is where the flag-to-condition
+chain proved in Steps 0490 and 0493 meets
+the arithmetic -- and a wrong route is
+silent twice over, since negate and
+not-negate cost the same and nothing writes
+a flag.
+
+`test_arm64_cneg_route_host.c` drives it
+through `ARM64_SIM_L_EXEC` over all 15
+condition codes, all 16 flag combinations,
+both widths and 11 operands, with the
+condition evaluated independently from the
+architecture rather than from the generated
+table: 26,400 cases.
+
+Verified by planting both halves of the
+composition -- inverting GE in the condition
+contract fails 1,360 cases, dropping the
+negation in the CNEG contract fails 10,880.
+The dispatch-model count moves from 6 live
+/ 6 model-only to 7 / 5. Gate: rc 0,
+**236** banners, 124,527,333 cases.
+Census 391 -> 392.
 
 ### Step 0520 - the unary arm gets a
 live oracle, and one expectation was
