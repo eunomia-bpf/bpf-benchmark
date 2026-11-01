@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 385, and 265 steps
+`build/mut_*.py` files exist, the counter's last value is 386, and 266 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -135,6 +135,21 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+A refinement proof covers the Lean formula, not the C one. Both are rendered
+from one specification, but as *separate string literals* in the same
+generator, and the proof is stated over the Lean literal. Measured: changing
+`mid1 >> 32` to `>> 16` in the arm64 multiply generator's C string leaves
+`lake env lean KProgFormal/Arm64Mul.lean` green, because the Lean literal still
+says `>>> 32`; the AArch64 extract/reverse/extend generator's C `<< 56` can
+become `<< 55` with its proof passing too. That is the boundary of what the
+proofs cover, and it is narrower than "the generator is correct".
+
+So the C needs its own oracle. Seven generators dual-write shift arithmetic,
+and `check_dual_emit_coverage.py` records for each the host that covers its C
+output -- with the coverage confirmed by mutating the C string alone, since
+that is the only way to know. A new dual-emitted generator with no recorded
+coverage fails the gate.
 
 Four times an oracle has been green while a fault in the simulator's own
 argument derivation went unnoticed: the imul-flags oracle (0513), the
@@ -7299,6 +7314,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0515 - a refinement proof
+covers the Lean formula, not the C one
+
+Step 0515 measures the boundary of the
+proofs (census 385 -> 386). A generator
+renders one specification into a C header
+and a Lean module; the Lean carries a
+refinement theorem, so a mistake *there* is
+caught at build time. But the C formula is
+a separate string literal in the same
+generator, and the proof is stated over the
+Lean one.
+
+Measured rather than assumed: changing
+`mid1 >> 32` to `>> 16` in the multiply
+generator's C string leaves
+`lake env lean KProgFormal/Arm64Mul.lean`
+green, because the Lean literal still says
+`>>> 32`. The extract/reverse/extend
+generator's C `<< 56` becomes `<< 55` with
+its proof passing too.
+
+So the C needs its own oracle, and
+`check_dual_emit_coverage.py` records which
+host covers each of the seven dual-emitted
+generators -- confirming coverage by
+mutating the C string alone, since nothing
+else establishes it. One of the seven is
+caught even earlier, by a static assertion
+in `x86_sim.h`. A new dual-emitted
+generator with no recorded coverage fails
+the gate.
+
+The script's own first draft mis-read
+Lean's `<<<` as a C shift and produced a
+false finding; the lookbehind now
+distinguishes two- from three-character
+shifts. Gate: rc 0, **234** banners.
+Census 385 -> 386.
 
 ### Step 0514 - four oracles tested a
 contract but not the simulator's path to
