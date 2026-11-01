@@ -56,7 +56,7 @@ A64_UNMODELLED = {
     "orn": "model-only: test_arm64_orn_host.c",
     "reduction": "model-only: test_arm64_reduction_host.c",
     "stlxr": "model-only: test_arm64_stlxr_host.c",
-    "unary": "model-only: test_arm64_unary_host.c",
+    "unary": "test_arm64_unary_route_host.c (live)",
 }
 
 HANDLED = re.compile(r'KPROG_([A-Z0-9]+)_([A-Z0-9_]*?HANDLED)\(OP\)')
@@ -129,7 +129,7 @@ def main(argv):
 
     print("check_dispatch_model: AArch64 chain branches on %d families, the "
           "model names %d, and the %d unmodelled ones are the recorded set "
-          "(5 with a live route host, 7 model-only)"
+          "(6 with a live route host, 6 model-only)"
           % (len(a64), len(model), len(unmodelled)))
     return 0
 

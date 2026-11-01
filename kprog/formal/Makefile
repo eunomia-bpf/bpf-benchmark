@@ -676,6 +676,8 @@ check:
 	lake env lean KProgFormal/Arm64Unary.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_unary_host.c -o build/test_arm64_unary_host
 	./build/test_arm64_unary_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_unary_route_host.c -o build/test_arm64_unary_route_host
+	./build/test_arm64_unary_route_host
 	lake env lean KProgFormal/GeneratedArm64Cneg.lean
 	lake env lean KProgFormal/Arm64Cneg.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_cneg_host.c -o build/test_arm64_cneg_host
