@@ -15,7 +15,10 @@ stale figure.
 This script extracts every claim it can from a section, reads the counts out of
 a `make check` log, and reports any claim with no matching banner. It cannot
 tell *which* banner a claim means, only that the number exists in the gate --
-which is enough to catch a stale figure, since a stale one matches nothing.
+which is enough to catch a stale figure, since a stale one matches nothing. The
+section's two gate-wide figures, the banner count and the modeled-case sum, are
+re-derived exactly rather than matched by existence, because both are stated
+once and countable from the log.
 
 Three prose shapes are deliberately not claims. A number inside `\\texttt{...}`
 is quoted program output, describing what a run printed at the time; the MOVBE
@@ -36,11 +39,14 @@ NUM = r"\d[\d{},\\]*"
 # A `\texttt{...}` argument may contain one level of braces (`\texttt{a\{b\}}`).
 TEXTTT = re.compile(r"\\texttt\{(?:[^{}]|\{[^{}]*\})*\}")
 
-# Cases a banner actually prints: the plain total, the helper-augmented total,
-# and the vectors-plus-sweep total (printed as parts, claimed as a sum).
-BANNER = [re.compile(r"OK \(([\d,]+) cases\)"),
-          re.compile(r"OK \(([\d,]+) cases, [\d,]+ helpers\)"),
-          re.compile(r"OK \((\d+) vectors \+ (\d+) sweep cases\)")]
+# A banner prints its case count three ways: the plain total, the plain total
+# beside a helper count, and the vectors-plus-sweep total as its two parts.
+# `summed` says whether the banner's modeled-case total is the sum of the
+# numbers it prints -- the helper count is a different unit, so it is a legal
+# claim but not part of the modeled-case sum.
+BANNER = [(re.compile(r"OK \(([\d,]+) cases\)"), False),
+          (re.compile(r"OK \(([\d,]+) cases, [\d,]+ helpers\)"), False),
+          (re.compile(r"OK \((\d+) vectors \+ (\d+) sweep cases\)"), True)]
 
 # An `N-case` adjective states an oracle's total only when the phrase around it
 # names an oracle or a host. A bare grid names arithmetic instead: "the routed
@@ -68,24 +74,41 @@ PLUS = re.compile(r"^\s+plus\s+(?:a\s+|an\s+)?([\d,]{1,3}(?:,\d{3})+|\d+)")
 # "plus a 20,000-case sweep" names one input family, not the oracle's total.
 COMPONENT = re.compile(r"(?i)plus\s+(?:a\s+|an\s+)?$")
 
+# The section's two aggregate claims about the gate as a whole. Both are
+# re-derivable from the same log, so quoting them in two places is a drift risk.
+AGGREGATES = [(re.compile(r"(?P<n>%s) independent oracle banners" % NUM),
+               "banners"),
+              (re.compile(r"summing to (?P<n>%s) modeled cases" % NUM),
+               "modeled cases")]
 
-def log_counts(path: pathlib.Path) -> set[int]:
-    """Every case count a banner prints, including a sum's parts."""
+
+def masked(path: pathlib.Path) -> str:
+    """The section with quoted program output blanked out."""
+    return TEXTTT.sub(lambda m: "X" * len(m.group(0)), path.read_text())
+
+
+def read_log(path: pathlib.Path) -> tuple[set[int], int, int]:
+    """Return ({case count a banner prints}, banner count, modeled-case sum).
+
+    A banner's numbers are legal claims individually and summed: a section may
+    quote either part of `15 vectors + 20000 sweep cases` or the 20015 it totals.
+    """
     text = path.read_text(errors="replace")
     counts: set[int] = set()
-    for rx in BANNER:
+    banners = modeled = 0
+    for rx, summed in BANNER:
         for match in rx.finditer(text):
             parts = [int(x.replace(",", "")) for x in match.groups()]
             counts.update(parts)
             if len(parts) > 1:
                 counts.add(sum(parts))
-    return counts
+            banners += 1
+            modeled += sum(parts) if summed else parts[0]
+    return counts, banners, modeled
 
 
-def paper_counts(path: pathlib.Path) -> dict[int, int]:
+def paper_counts(text: str) -> dict[int, int]:
     """Return {claimed count: how many times it appears}."""
-    # Quoted program output is not a claim about the current gate.
-    text = TEXTTT.sub(lambda m: "X" * len(m.group(0)), path.read_text())
     seen: dict[int, int] = {}
     for index, rx in enumerate(CLAIMS):
         gated = index in (1, 2)
@@ -115,16 +138,27 @@ def main() -> None:
                         help="exit 1 when a claim matches no banner")
     args = parser.parse_args()
 
-    claimed = paper_counts(pathlib.Path(args.section))
-    measured = log_counts(pathlib.Path(args.log))
-    stale = sorted(c for c in claimed if c not in measured)
+    text = masked(pathlib.Path(args.section))
+    claimed = paper_counts(text)
+    measured, banners, modeled = read_log(pathlib.Path(args.log))
+    problems = [f"claim {c:,} appears {claimed[c]}x but no banner reports it"
+                for c in sorted(c for c in claimed if c not in measured)]
 
-    for c in stale:
-        print(f"claim {c:,} appears {claimed[c]}x but no banner reports it")
-    if args.check and stale:
+    totals = {"banners": banners, "modeled cases": modeled}
+    for rx, what in AGGREGATES:
+        for match in rx.finditer(text):
+            value = int(re.sub(r"[{},\\]", "", match.group("n")))
+            if value != totals[what]:
+                problems.append(f"claim {value:,} {what}; the log has "
+                                f"{totals[what]:,}")
+
+    for line in problems:
+        print(line)
+    if args.check and problems:
         raise SystemExit(1)
-    if not stale:
-        print(f"all {len(claimed)} claimed case counts appear in the gate log")
+    if not problems:
+        print(f"all {len(claimed)} claimed case counts, and both gate totals, "
+              "match the log")
 
 
 if __name__ == "__main__":
