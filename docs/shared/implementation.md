@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0523 closes a fourth model-only family (census
+393 -> 394). The vector reductions break two
+assumptions an oracle would naturally make: the
+dispatcher writes the SIMD register v0 rather than a
+GPR, so comparing the destination observes nothing;
+and the result is assembled lane by lane, so a fault
+can move one byte while the rest stays correct.
+test_arm64_reduction_route_host.c compares v0 against
+a lane-by-lane recomputation over operands whose
+bytes are all distinct. Verified by planting each lane
+fault: moving one CNT lane from bit 32 to 40 fails 7
+of 21 cases, shifting one UADDLV contribution by a
+bit fails 6 -- both one byte or word off in an
+otherwise correct value. Count 8 live / 4 model-only
+-> 9 / 3. Gate: rc 0, 238 banners, 124,527,554
+cases.
+
 Step 0522 closes a third model-only family (census
 392 -> 393). STLXR is the only remaining one with two
 observable effects: the dispatcher stores the source
