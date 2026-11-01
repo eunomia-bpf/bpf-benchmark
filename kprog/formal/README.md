@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-226 passing `cross-check: OK` oracle banners summing to 123,463,531 modeled
+227 passing `cross-check: OK` oracle banners summing to 123,463,541 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
 compiling transitively from the gate's roots and proving 1,980 theorems with
@@ -37,8 +37,8 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,463,531 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 226 banners are all distinct oracles — 225 report a plain
+123,463,541 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 227 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
@@ -6931,6 +6931,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0482 - the tag vocabularies are
+pinned across the ISAs
+
+Step 0482 applies Step 0481's shape to
+the provenance tags (census 353 -> 354).
+Both simulators define a tag per
+register, as independent hand-written
+`#define`s: neither header includes the
+other, and no generated contract binds
+them. Seven names are shared and carry
+the same code on both sides; a drift in
+either header would silently change what
+a tag means on one ISA while every
+per-ISA theorem kept holding.
+
+The vocabularies are deliberately not
+identical, and the oracle states the
+difference rather than assuming
+uniformity: codes 0--6 are the shared
+seven (`SCALAR`, `ABI`, `PACKET`,
+`PACKET_END`, `STACK`, `MAP_PTR`,
+`MAP_VALUE`), code 7 is `RELOC_ADDR` on
+arm64 and `HELPER_ID` on x86, and code
+8 is `RODATA_ADDR` on arm64 only. The
+collision is safe because no table is
+indexed by tag across the two simulators
+and no comparison mixes their constants;
+all three ISA-specific tags are live
+(78, 27 and 17 uses).
+
+`cross_isa_tag_host.c` includes both
+headers and pins the seven shared codes
+plus the code-7 divergence, 10 cases.
+Renumbering `ARM64_SIM_TAG_PACKET` to 9
+makes it fail. This is the first oracle
+to include both simulator headers at
+once. Gate: rc 0, **227** banners,
+123,463,541 modeled cases. Census 353
+-> 354.
 
 ### Step 0481 - the two ISAs' width
 contracts are proved equal

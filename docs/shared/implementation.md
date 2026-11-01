@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0482 pins the provenance-tag vocabulary
+across the ISAs (census 353 -> 354). Both
+simulators define a tag per register as
+independent hand-written #defines -- neither header
+includes the other and no generated contract binds
+them -- so a drift in either would silently change
+what a tag means on one ISA while every per-ISA
+theorem kept holding. Seven names are shared and
+agree (codes 0-6); code 7 is RELOC_ADDR on arm64
+and HELPER_ID on x86, and code 8 is RODATA_ADDR on
+arm64 only. The collision is safe because no table
+is indexed by tag across the simulators and no
+comparison mixes their constants; all three
+ISA-specific tags are live (78, 27, 17 uses).
+`cross_isa_tag_host.c` includes both headers and
+pins the seven shared codes plus the code-7
+divergence, 10 cases; renumbering
+ARM64_SIM_TAG_PACKET to 9 makes it fail. First
+oracle to include both simulator headers. Gate:
+rc 0, 227 banners, 123,463,541 cases.
+
 Step 0481 closes a cross-ISA gap (census 352 ->
 353). Each ISA has its own width contract --
 separate spec JSON, generator, C header and Lean
