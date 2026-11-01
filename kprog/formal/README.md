@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-234 passing `cross-check: OK` oracle banners summing to 124,500,620 modeled
+235 passing `cross-check: OK` oracle banners summing to 124,500,933 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,052 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,500,620 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 234 banners are all distinct oracles — 233 report a plain
+124,500,933 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 235 banners are all distinct oracles — 234 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 390, and 275 steps
+`build/mut_*.py` files exist, the counter's last value is 391, and 276 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -148,6 +148,20 @@ contract whose mutation nothing caught, and each was inert: a docstring, a
 static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
+
+One of the seven model-only families now has a live oracle. UNARY (MVN, NEG)
+is worth driving through the dispatcher because its two opcodes are each
+other's plausible neighbour -- both take one source, both write at the access
+width, neither writes NZCV -- so sending NEG down the MVN arm yields a
+full-width complement instead of a negation: a wrong value with no flag to give
+it away. `test_arm64_unary_route_host.c` drives both at both widths, and the
+`check_dispatch_model` count moves from 5 live / 7 model-only to 6 / 6.
+
+Its first expectation was wrong against the tree: I required a narrow write to
+preserve the destination's high half and got 156 failures. `arm64_write_arm.h`
+states the value is masked to the access width before the body is chosen, so
+the narrow and full bodies are observationally equal and the high half is not
+preserved. The oracle now expects what the simulator does.
 
 The coverage theorems from 0517/0518 are stated over the *generated* dispatch
 tables, and the C chain branches on its own list of `HANDLED` predicates, so
@@ -7342,6 +7356,48 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0520 - the unary arm gets a
+live oracle, and one expectation was
+wrong
+
+Step 0519 listed seven families with only
+model-side hosts. This closes one (census
+390 -> 391). UNARY (MVN, NEG) is worth
+driving through the dispatcher because the
+two opcodes are each other's plausible
+neighbour: both take one source, both write
+at the access width, neither writes NZCV.
+Sending NEG down the MVN arm therefore
+yields a full-width complement instead of a
+negation -- a wrong value with no flag to
+give it away.
+
+`test_arm64_unary_route_host.c` drives both
+opcodes at both widths through
+`ARM64_SIM_L_EXEC`, expected value computed
+from the architectural definition. The
+dispatch-model count moves from 5 live / 7
+model-only to 6 / 6.
+
+One expectation was wrong against the tree.
+I first required a narrow write to preserve
+the destination's high half, and got 156
+failures. `arm64_write_arm.h` states the
+value is masked to the access width before
+the body is chosen, so the narrow and full
+bodies are observationally equal and the
+high half is *not* preserved. The oracle now
+expects what the simulator does -- the
+difference between a finding and a mistake
+in the model, which by now is a familiar
+distinction.
+
+Verified: swapping the opcode in the
+dispatcher fails 312 cases; corrupting the
+source by one fails 312. Gate: rc 0, **235**
+banners, 124,500,933 cases. Census 390 ->
+391.
 
 ### Step 0519 - the dispatcher and the
 model of it were never compared
