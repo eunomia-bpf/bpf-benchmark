@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0507 joins two languages (census 377 -> 378). The
+x86 encoder is Rust and emits conditional jumps as
+raw opcodes beside a mnemonic comment; the C simulator
+decides conditions from the X86_CC_* table. Nothing
+connects them and an opcode is only a number, so an
+off-by-one compiles, runs, and branches on the wrong
+condition. x86's encoding rule supplies the link:
+short conditional jump opcodes are 0x70 + condition
+code, and X86_CC_* are those codes. check_jcc_opcodes.py
+requires every mnemonic-commented site to satisfy it
+and runs on every gate. Measured: 4 sites (ja, jae, je,
+jne), all correct; pressed in both directions by
+planting a wrong opcode and by drifting X86_CC_NE. The
+script states its own limit: an uncommented 0x7x
+constant is invisible to it. Gate: rc 0, 232 banners.
+
 Step 0506 covers a contract that is stated rather than
 reached (census 376 -> 377). The arm64 helper-ident
 spec gives each of 61 BPF helpers the kernel id the
