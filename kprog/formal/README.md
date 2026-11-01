@@ -136,6 +136,15 @@ Planting a 16-bit bit-count of 17 on the x86 side fails `bits_agrees` and
 `sign_agrees`, so the module is a real gate on spec drift rather than a
 restatement.
 
+The chain selects exactly one arm per opcode, and that is proved rather than
+inspected. An `else if` ladder silently picks the first matching arm, so two
+overlapping family predicates would make dispatch order-dependent. Both ISAs
+prove non-duplication of the combined generated opcode list
+(`x86_dispatch_chain_codes_nodup`, and the arm64 pair), and the x86 statement
+is non-vacuous: 43 singleton plus 24 family codes give 67, and the deduplicated
+list is also 67. A hand parse of the 53 predicates confirms zero overlapping
+pairs over 67 named opcodes, which is what the theorem says.
+
 The dispatch ladder's depth costs nothing, which was measured rather than
 assumed. `X86_SIM_L_EXEC` is a 56-arm `else if` chain and `ARM64_SIM_L_EXEC` a
 34-arm one, so an opcode near the end (`X86_OP_XCHG`, arm 49) walks 49
@@ -6971,6 +6980,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0487 - dispatch exclusivity is
+proved, and the proof is non-vacuous
+
+Step 0487 verifies a property a
+reviewer would ask about and that was
+only implicitly covered (census 358 ->
+359). The opcode dispatch is an
+`else if` ladder, so two overlapping
+family predicates would make dispatch
+order-dependent -- whichever arm came
+first would silently win. Nothing in
+the chain structure prevents that.
+
+It is already proved, in both
+directions that matter. Each family
+predicate has a refinement theorem
+against an independent restatement, and
+`x86_dispatch_chain_codes_nodup` (plus
+the arm64 pair) proves the combined
+generated opcode list has no
+duplicates, so the chain selects
+exactly one arm per opcode. The
+statement is non-vacuous: 43 singleton
+plus 24 family codes give 67, and the
+deduplicated list is also 67, so it
+ranges over 67 real opcodes rather than
+an empty or degenerate list. A hand
+parse of the 53 predicates independently
+finds zero overlapping pairs over those
+67 opcodes.
+
+No code change; the deliverable is the
+verification and its record. Gate:
+rc 0, 228 banners. Census 358 -> 359.
 
 ### Step 0486 - the two stack contracts
 are proved to agree

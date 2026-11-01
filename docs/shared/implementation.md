@@ -2612,6 +2612,20 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0487 verifies dispatch exclusivity (census 358
+-> 359; no code change). The opcode dispatch is an
+else-if ladder, so overlapping family predicates
+would make dispatch order-dependent. Each family
+predicate already has a refinement theorem, and
+`x86_dispatch_chain_codes_nodup` plus the arm64
+pair prove the combined generated opcode list has
+no duplicates, so the chain selects exactly one
+arm per opcode. The statement is non-vacuous: 43
+singleton plus 24 family codes give 67 and the
+deduplicated list is also 67; a hand parse of the
+53 predicates independently finds zero overlaps
+over those 67. Gate: rc 0, 228 banners.
+
 Step 0486 completes the cross-ISA series (census
 357 -> 358). Twelve theorems in the two stack-arena
 modules share a concept name once the ISA prefix
