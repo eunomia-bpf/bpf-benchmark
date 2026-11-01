@@ -8,6 +8,7 @@ check:
 	python3 check_jcc_opcodes.py
 	python3 check_lookup_ambiguity.py
 	python3 check_oracle_composition.py
+	python3 check_dual_emit_coverage.py
 	python3 generate_ptr_add_spec.py --check
 	python3 generate_abi_load_spec.py --check
 	python3 generate_arm64_width_spec.py --check
