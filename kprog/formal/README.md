@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-232 passing `cross-check: OK` oracle banners summing to 124,470,924 modeled
+233 passing `cross-check: OK` oracle banners summing to 124,498,572 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 301 Lean modules
 compiling transitively from the gate's roots and proving 2,034 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,470,924 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 232 banners are all distinct oracles — 231 report a plain
+124,498,572 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 233 banners are all distinct oracles — 232 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 382, and 260 steps
+`build/mut_*.py` files exist, the counter's last value is 383, and 261 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -135,6 +135,18 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+Dual emission protects against drift, not against a shared error. The multiply
+header and its Lean module are rendered from one specification in one pass, so
+they cannot disagree -- but both can be wrong the same way, and nothing related
+either to the architectural definition. The family is shaped to hide that:
+`UMULH` computes the high half of a 128-bit product with a shift-and-add
+decomposition, and a term in the wrong position still yields a plausible
+number. `test_arm64_mul_wide_host.c` uses C's own 128-bit integer type as the
+oracle -- availableto the host, not to the BPF-target simulator -- and checks
+all eight opcodes over boundary operands, 27,648 cases. Moving a term's shift
+from 32 to 16 fails 1,008; changing the carry's shift from 32 to 24 fails
+1,872. Both produce numbers that look like products.
 
 The encoder's jump opcodes are a cross-*language* link. The x86 encoder is
 Rust and writes conditional jumps as raw opcodes beside a comment naming the
@@ -7252,6 +7264,44 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0512 - dual emission protects
+against drift, not against a shared
+error
+
+Step 0512 tests a contract that no proof
+relates to its definition (census 382 ->
+383). The multiply header and its Lean
+module are rendered from one specification
+in one pass, so they cannot drift from each
+other -- but they can both be wrong the
+same way, and nothing in the tree relates
+either to the architectural definition.
+
+The family is shaped to hide exactly that.
+`UMULH` computes the high half of a
+128-bit product with a shift-and-add
+decomposition; a term placed in the wrong
+position still yields a plausible number,
+and re-reading the same formula would
+reproduce the same mistake.
+
+The independent oracle is C's 128-bit
+integer type -- available to an x86 host,
+not to the BPF-target simulator.
+`test_arm64_mul_wide_host.c` checks all
+eight opcodes against it over boundary
+operands: zero, one, the 32-bit split,
+all-ones, and values whose halves differ.
+27,648 cases.
+
+Verified by planting two faults of the
+shape a shared error takes: moving the
+mid1 term from a 32-bit to a 16-bit shift
+fails 1,008 cases; changing the carry's
+shift from 32 to 24 fails 1,872. Gate:
+rc 0, **233** banners, 124,498,572 cases.
+Census 382 -> 383.
 
 ### Step 0511 - the two architectures
 resolve ambiguous map names differently,
