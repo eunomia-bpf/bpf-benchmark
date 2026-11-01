@@ -1,1 +1,1 @@
-{"schema_version":1,"operation":"arm64StackArena","word_shift":3,"word_mask":"0x7","capacity_round":"ceil8","arena_alias":"b-q-union","window_guard":"index_plus_bytes_le_capacity","tag_slot_guard":"word_index_lt_tag_slots"}
+{"schema_version":1,"operation":"arm64StackArena","word_shift":3,"word_mask":"0x7","capacity_round":"ceil8","arena_alias":"b-q-union","window_guard":"index_plus_bytes_le_capacity","tag_slot_guard":"word_index_lt_tag_slots","pointer_guard":"index_le_capacity"}

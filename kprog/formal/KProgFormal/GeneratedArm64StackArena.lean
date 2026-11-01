@@ -30,4 +30,10 @@ def windowFits (index width capacity : BitVec 32) : Bool :=
 below the count, the C `WORD_INDEX < TAG_SLOTS`. -/
 def tagSlotFits (index slots : BitVec 32) : Bool :=
   decide (wordIndex index < slots)
+
+/-- An arena pointer index is well defined: `&b[index]` names an arena address
+for `index <= CAPACITY`, including the one-past-end index. Conservative over a
+window of any width, which needs `index + width <= CAPACITY`. -/
+def pointerFits (index capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat)
 end KProgFormal.GeneratedArm64StackArena

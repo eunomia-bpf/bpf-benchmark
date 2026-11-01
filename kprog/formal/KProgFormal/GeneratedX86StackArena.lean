@@ -34,4 +34,10 @@ bytes: its end index is at most the capacity, the C
 `(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
 def windowFits (index width capacity : BitVec 32) : Bool :=
   decide (windowEnd index width ≤ capacity.toNat)
+
+/-- An arena pointer index is well defined: `&b[index]` names an arena address
+for `index <= CAPACITY`, including the one-past-end index. Conservative over a
+window of any width, which needs `index + width <= CAPACITY`. -/
+def pointerFits (index capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat)
 end KProgFormal.GeneratedX86StackArena

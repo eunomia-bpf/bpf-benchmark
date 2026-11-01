@@ -24,4 +24,13 @@
  */
 #define KPROG_ARM64_STACK_TAG_SLOT_FITS(INDEX, SLOTS) \
 	((KPROG_ARM64_STACK_WORD_INDEX(INDEX) < (__u32)(SLOTS)) ? 1 : 0)
+/*
+ * An arena pointer is well defined up to and including the one-past-end index,
+ * the C `INDEX <= CAPACITY`. A pointer past that is not an arena address. The comparison widens the index
+to a signed 64-bit value and then reads it unsigned, so a negative index
+becomes a huge value and fails the same single test -- no branch that the
+compiler could fold away for one call site's type.
+ */
+#define KPROG_ARM64_STACK_POINTER_FITS(INDEX, CAPACITY) \
+	(((__u64)(__s64)(INDEX)) <= ((__u64)(__s64)(__u32)(CAPACITY)) ? 1 : 0)
 #endif

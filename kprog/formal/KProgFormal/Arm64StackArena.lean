@@ -5,7 +5,7 @@ import Std.Tactic.BVDecide
 namespace KProgFormal
 
 open GeneratedArm64StackArena (wordIndex wordAligned words windowEnd windowFits
-  tagSlotFits)
+  tagSlotFits pointerFits)
 open GeneratedArm64ByteLane (ByteLane)
 
 /-- Independent statement of the word-arena slot: the byte index divided by the
@@ -289,6 +289,58 @@ theorem arm64_stack_arena_tag_guard_is_window_guard (index capacity : BitVec 32)
   rw [hq]
   have := Nat.div_add_mod capacity.toNat 8
   omega
+
+/-- Independent statement of the pointer bound: `&b[index]` names an arena
+address when the index is at most the capacity, stated through the bytes left
+from the index rather than the generated comparison, `capacity - index >= 0`
+together with `index <= capacity` to make `Nat` truncation harmless. -/
+def arm64StackArenaPointerFitsSpec (index capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat ∧ 0 ≤ capacity.toNat - index.toNat)
+
+/-- The generated pointer bound agrees with the independent statement. -/
+theorem arm64_stack_arena_pointer_fits_refines (index capacity : BitVec 32) :
+    pointerFits index capacity =
+      arm64StackArenaPointerFitsSpec index capacity := by
+  simp only [pointerFits, arm64StackArenaPointerFitsSpec, decide_eq_decide]
+  omega
+
+/-- The pointer bound is exactly the one-past-end rule: the final arena index
+is addressable and the next one is not. The no-wrap side condition is what the
+simulator's arenas satisfy (160 and 128 bytes); without it `capacity + 1`
+wraps to index 0, which is addressable again. -/
+theorem arm64_stack_arena_pointer_one_past_end (capacity : BitVec 32)
+    (hnoWrap : capacity.toNat + 1 < 2 ^ 32) :
+    pointerFits capacity capacity = true ∧
+      pointerFits (capacity + 1) capacity = false := by
+  constructor
+  · simp only [pointerFits]
+    exact decide_eq_true (by simp)
+  · simp only [pointerFits]
+    have h1 : (1 : BitVec 32).toNat = 1 := by decide
+    rw [BitVec.toNat_add, h1]
+    rw [Nat.mod_eq_of_lt hnoWrap]
+    simp only [decide_eq_false_iff_not]
+    omega
+
+/-- The pointer bound is weaker than the window bound for any nonempty window,
+so a pointer that passes it can still be dereferenced out of range; this is why
+the pointer helper and the access helper carry separate bounds. -/
+theorem arm64_stack_arena_pointer_weaker_than_window (index capacity width : BitVec 32)
+    (hwidth : 0 < width) (hfit : windowFits index width capacity = true) :
+    pointerFits index capacity = true := by
+  simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
+  simp only [pointerFits, decide_eq_true_eq]
+  have hw : 0 < width.toNat := hwidth
+  simp only [BitVec.toNat_eq] at hw
+  omega
+
+/-- The pointer threshold this closes, machine-checked: on the enabled
+160-byte arena the one-past-end index 160 is still a valid pointer and 161 is
+not, so a stack-pointer register holding frame offset 64 forms the last
+addressable pointer and offset 65 the first one past it. -/
+theorem arm64_stack_arena_pointer_threshold :
+    pointerFits 160 160 = true ∧ pointerFits 161 160 = false := by
+  refine ⟨?_, ?_⟩ <;> (simp only [pointerFits]; native_decide)
 
 /-- The tag-array boundary this closes: on the enabled 160-byte arena the tag
 array has 20 slots, so byte index 159 (slot 19) is addressable and index 160

@@ -22,6 +22,9 @@ arithmetic each uses so it can be machine-checked:
 `KPROG_X86_STACK_WORDS` states the number of word slots the byte arena needs.
 A stack access touches a *window* of `WIDTH` bytes from its index, so it fits
 only when `INDEX + WIDTH <= CAPACITY`; the contract fixes that bound as well.
+The stack *pointer* helper is one index weaker: `&b[index]` is well defined up
+to and including the one-past-end index `CAPACITY`, so its bound is
+`INDEX <= CAPACITY` and nothing more.
 
 The generated C macros evaluate no memory: they are pure index/bit
 computations. `KProgFormal/X86StackArena.lean` restates each independently and
@@ -39,6 +42,7 @@ EXPECTED = {
     "arena_alias": "b-q-union",
     "assemble": "little_endian8",
     "window_guard": "index_plus_bytes_le_capacity",
+    "pointer_guard": "index_le_capacity",
 }
 
 ROOT = Path(__file__).resolve().parent
@@ -93,6 +97,12 @@ bytes: its end index is at most the capacity, the C
 `(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
 def windowFits (index width capacity : BitVec 32) : Bool :=
   decide (windowEnd index width ≤ capacity.toNat)
+
+/-- An arena pointer index is well defined: `&b[index]` names an arena address
+for `index <= CAPACITY`, including the one-past-end index. Conservative over a
+window of any width, which needs `index + width <= CAPACITY`. -/
+def pointerFits (index capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat)
 end KProgFormal.GeneratedX86StackArena
 '''
 
@@ -121,6 +131,15 @@ def render_c(spec: dict) -> str:
 \t(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
 #define KPROG_X86_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \\
 \t((KPROG_X86_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
+/*
+ * An arena pointer is well defined up to and including the one-past-end index,
+ * the C `INDEX <= CAPACITY`. A pointer past that is not an arena address. The comparison widens the index
+to a signed 64-bit value and then reads it unsigned, so a negative index
+becomes a huge value and fails the same single test -- no branch that the
+compiler could fold away for one call site's type.
+ */
+#define KPROG_X86_STACK_POINTER_FITS(INDEX, CAPACITY) \\
+\t(((__u64)(__s64)(INDEX)) <= ((__u64)(__s64)(__u32)(CAPACITY)) ? 1 : 0)
 #endif
 '''
 

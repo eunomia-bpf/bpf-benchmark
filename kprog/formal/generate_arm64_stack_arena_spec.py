@@ -37,6 +37,12 @@ is below the slot count, the C `WORD_INDEX < TAG_SLOTS`, and a tag access
 without it runs off the end of the tag array just as the byte ladder runs off
 the end of the arena.
 
+The stack *pointer* helper hands out an address inside the arena, and its
+bound is one index weaker than a window's: `&b[index]` is well defined up to
+and including the one-past-end index `CAPACITY`, so the contract fixes
+`INDEX <= CAPACITY` and nothing more. A pointer formed past that is not an
+arena address at all, and dereferencing it escapes the array.
+
 The generated C macros evaluate no memory: they are pure index/bit
 computations. `KProgFormal/Arm64StackArena.lean` restates each independently
 and proves the two views address the same storage.
@@ -54,6 +60,7 @@ EXPECTED = {
     "arena_alias": "b-q-union",
     "window_guard": "index_plus_bytes_le_capacity",
     "tag_slot_guard": "word_index_lt_tag_slots",
+    "pointer_guard": "index_le_capacity",
 }
 
 ROOT = Path(__file__).resolve().parent
@@ -104,6 +111,12 @@ def windowFits (index width capacity : BitVec 32) : Bool :=
 below the count, the C `WORD_INDEX < TAG_SLOTS`. -/
 def tagSlotFits (index slots : BitVec 32) : Bool :=
   decide (wordIndex index < slots)
+
+/-- An arena pointer index is well defined: `&b[index]` names an arena address
+for `index <= CAPACITY`, including the one-past-end index. Conservative over a
+window of any width, which needs `index + width <= CAPACITY`. -/
+def pointerFits (index capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat)
 end KProgFormal.GeneratedArm64StackArena
 '''
 
@@ -137,6 +150,15 @@ def render_c(spec: dict) -> str:
  */
 #define KPROG_ARM64_STACK_TAG_SLOT_FITS(INDEX, SLOTS) \\
 \t((KPROG_ARM64_STACK_WORD_INDEX(INDEX) < (__u32)(SLOTS)) ? 1 : 0)
+/*
+ * An arena pointer is well defined up to and including the one-past-end index,
+ * the C `INDEX <= CAPACITY`. A pointer past that is not an arena address. The comparison widens the index
+to a signed 64-bit value and then reads it unsigned, so a negative index
+becomes a huge value and fails the same single test -- no branch that the
+compiler could fold away for one call site's type.
+ */
+#define KPROG_ARM64_STACK_POINTER_FITS(INDEX, CAPACITY) \\
+\t(((__u64)(__s64)(INDEX)) <= ((__u64)(__s64)(__u32)(CAPACITY)) ? 1 : 0)
 #endif
 '''
 

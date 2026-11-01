@@ -2,7 +2,8 @@ import KProgFormal.GeneratedX86StackArena
 
 namespace KProgFormal
 
-open GeneratedX86StackArena (wordIndex wordAligned byteAt assembleByte words windowEnd windowFits)
+open GeneratedX86StackArena (wordIndex wordAligned byteAt assembleByte words windowEnd windowFits
+  pointerFits)
 
 /-- Independent statement of the word-arena slot: a byte index divided by 8,
 i.e. the integer quotient rounded down, the C `INDEX >> 3`. Stated with
@@ -188,6 +189,44 @@ theorem x86_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32)
     rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
   have h8 : BitVec.toNat (8 : BitVec 32) = 8 := rfl
   rw [hsub, h8]
+  omega
+
+/-- Independent statement of the pointer bound: `&b[index]` names an arena
+address when the index is at most the capacity. -/
+def x86StackArenaPointerFitsSpec (index capacity : BitVec 32) : Bool :=
+  decide (index.toNat ≤ capacity.toNat)
+
+/-- The generated pointer bound agrees with the independent statement. -/
+theorem x86_stack_arena_pointer_fits_refines (index capacity : BitVec 32) :
+    pointerFits index capacity = x86StackArenaPointerFitsSpec index capacity :=
+  rfl
+
+/-- The pointer bound is the one-past-end rule: the final arena index is
+addressable and the next one is not, for a capacity whose successor does not
+wrap. -/
+theorem x86_stack_arena_pointer_one_past_end (capacity : BitVec 32)
+    (hnoWrap : capacity.toNat + 1 < 2 ^ 32) :
+    pointerFits capacity capacity = true ∧
+      pointerFits (capacity + 1) capacity = false := by
+  constructor
+  · simp only [pointerFits]
+    exact decide_eq_true (by simp)
+  · simp only [pointerFits]
+    have h1 : (1 : BitVec 32).toNat = 1 := by decide
+    rw [BitVec.toNat_add, h1, Nat.mod_eq_of_lt hnoWrap]
+    simp only [decide_eq_false_iff_not]
+    omega
+
+/-- The pointer bound is weaker than the window bound for any nonempty window,
+so a stack pointer that passes it can still be dereferenced out of range and
+needs its own check. -/
+theorem x86_stack_arena_pointer_weaker_than_window (index capacity width : BitVec 32)
+    (hwidth : 0 < width) (hfit : windowFits index width capacity = true) :
+    pointerFits index capacity = true := by
+  simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
+  simp only [pointerFits, decide_eq_true_eq]
+  have hw : 0 < width.toNat := hwidth
+  simp only [BitVec.toNat_eq] at hw
   omega
 
 /-- The threshold on both arena sizes the simulator uses, machine-checked: the
