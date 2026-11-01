@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0495 relates the sign extensions (census 366 ->
+367). AArch64 states the extension generically and
+inlines mask-flip-subtract; x86-64 writes each width
+out with its own constants. Two spellings of one
+function, unrelated. A signedness slip in either still
+yields a plausible value and round-trips for positive
+inputs, so sampling would see nothing.
+CrossIsaSignExtend.lean proves agreement at all three
+widths with the 0x7f/0x80 boundary pinned, and notes
+the 64-bit case has no AArch64 counterpart (SXTX is
+not in the family). The C check is exhaustive: every
+16-bit pattern through both byte and halfword paths
+plus a 32-bit stride, 200,652 cases in 0.1s. Breaking
+the byte mask fails 32,768. 2007 theorems. Gate: rc
+0, 229 banners, 123,664,217 cases.
+
 Step 0494 relates the shift-amount rules (census 365
 -> 366). AArch64 masks modulo 32 at w32 and
 modulo 64 at w64; x86-64 masks modulo 64 at w64

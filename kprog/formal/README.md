@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 123,467,609 modeled
+229 passing `cross-check: OK` oracle banners summing to 123,664,217 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 296 Lean modules
-compiling transitively from the gate's roots and proving 2,002 theorems with
+header and one `Generated*.lean` module (138/138/138); 297 Lean modules
+compiling transitively from the gate's roots and proving 2,007 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,467,609 again, so the rollup is a measurement of the committed tree and not
+123,664,217 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -7049,6 +7049,45 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0495 - the two sign-extension
+contracts agree, and the check is
+exhaustive rather than sampled
+
+Step 0495 relates the sign extensions
+(census 366 -> 367). Both architectures
+extend a narrow value into a 64-bit
+register with entirely different code:
+AArch64 states it generically ("extend
+the low nb bits") and its C inlines the
+mask-flip-subtract idiom, while x86-64
+states each width as its own arm with the
+constants written out. Two spellings of
+one function, and nothing related them.
+
+That is exactly the shape a signedness
+fault takes. An extension that masks
+before flipping the sign bit, or flips the
+wrong one, still produces a plausible
+register value and still round-trips for
+positive inputs -- sampling would see
+nothing wrong. `CrossIsaSignExtend.lean`
+proves the two agree at all three widths
+AArch64 parameterises and x86-64 names,
+pins the `0x7f`/`0x80` boundary on both
+sides, and records that the 64-bit case
+has no AArch64 counterpart because `SXTX`
+is not in the extend family.
+
+The C check is exhaustive because the
+paths are small enough that it costs
+nothing: every 16-bit pattern through both
+the byte and halfword extensions, plus a
+stride across the 32-bit space -- 200,652
+cases in 0.1s. Breaking the byte mask
+fails it on 32,768 cases. Gate: rc 0,
+**229** banners, 123,664,217 cases (oracle
+200,652). Census 366 -> 367.
 
 ### Step 0494 - the shift-amount rules
 agree exactly where AArch64 encodes
