@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 409, and 307 steps
+`build/mut_*.py` files exist, the counter's last value is 410, and 308 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,47 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0539 - the other answer to 0538's
+question: a hypothesis the proof never
+used
+
+0538 asked whether the stack arena's
+capacity bound was load-bearing and found it
+exactly tight. Asking the same of the
+*last-byte window* theorems gives the
+opposite answer on both architectures: they
+carried `8 <= capacity`, and the conclusion
+holds for every capacity.
+
+The case the hypothesis excluded is a zero
+arena, where `capacity - 1` wraps to the top
+of the range -- and the window fails there
+too, for the same reason as everywhere else:
+the last byte plus eight is past the end
+either way. The hypothesis was doing no
+work; the proof used it only to learn that
+capacity is nonzero, which the zero case now
+decides directly. Dropping it widens the
+theorem to its true domain.
+
+The pair is worth having together: the same
+question, asked of two statements in one
+file, gave opposite answers, which is exactly
+why it has to be asked of each rather than
+assumed once.
+
+Also recorded that the guard's boundary is
+exact rather than merely sound -- at capacity
+160 an 8-byte window at 152 fits and one at
+153 does not, so `capacity - 1` is precisely
+the first failing index. Without that, a
+guard that rejected far too much would still
+satisfy the looser statement. Theorem counts
+move with the new statement (2,057 ->
+**2,058**; 485 -> **486** `native_decide`).
+Gate: rc 0, **248** banners. Census 409 ->
+410.
 
 ### Step 0538 - the stack-arena capacity
 bound is exactly tight

@@ -2612,6 +2612,29 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0539 asks 0538's question about the
+last-byte window theorems and gets the other
+answer (census 409 -> 410). Both arms carried
+8 <= capacity; the conclusion holds for every
+capacity. The excluded case is a zero arena,
+where capacity - 1 wraps -- and the window
+fails there too, since the last byte plus
+eight is past the end either way. The
+hypothesis only established that capacity is
+nonzero, which the zero case now decides
+directly, so dropping it widens the theorem to
+its true domain. The same question asked of
+two statements in one file gave opposite
+answers, which is why it must be asked of each
+rather than assumed once. Also recorded that
+the guard's boundary is exact rather than
+merely sound: at capacity 160 an 8-byte window
+at 152 fits and one at 153 does not, so
+capacity - 1 is precisely the first failing
+index; without that a guard rejecting far too
+much would still satisfy the looser statement.
+Gate: rc 0, 248 banners, 2,058 theorems.
+
 Step 0538 shows the stack-arena capacity bound
 is exactly tight, not merely sufficient (census
 408 -> 409). The rounding equality (capacity +
