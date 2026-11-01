@@ -6873,6 +6873,45 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0470 - the evaluation figures
+reach the paper that compiles them
+
+Every correction of Steps 0462 and
+0468 went into
+`kprog-simulator-in-ebpf/sections/
+7-evaluation.tex`. But `docs/paper`
+is a second submodule whose
+`main.tex` includes its own
+`sections/7-evaluation.tex`, and that
+copy still carried the disproved
+claims: Katran policy throughputs as
+ratios of per-arm means (1.073x /
+0.995x) where the section declares
+medians (1.065x / 0.984x), and a
+load-overhead sentence of 0.99x with
+a 1.4--2.4x compile increase staying
+sub-millisecond, where the measured
+figures are 0.995x/0.998x and a
+median of 5.4 ms / 99 ms with a
+96.8 s tail. Correcting one copy is
+not correcting the paper.
+
+The fork direction was established
+rather than assumed: diffing the
+kprog history against the pre-sync
+`docs/paper` HEAD shows the
+divergence growing monotonically with
+each correction (16 lines at the
+oldest local commit, 2 at the newest,
+0 once synced), so `kprog` is the
+copy that received the fixes and the
+sync moves in the right direction.
+The synced `docs/paper` builds with
+zero errors, and planting a bad
+`$x^2.` in the section proves the
+compiler reads this tree -- it halts.
+Census 341 -> 342.
+
 ### Step 0468 - the two helper-argument
 pointer contracts differ on purpose
 
