@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0540 runs the same question over the tag-slot
+identity's two side conditions and finds they are
+not the same kind (census 410 -> 411). The +7 is
+the rounding, exactly tight: holds at 2^32-8,
+fails from 2^32-7 upward. The 0 < capacity
+condition is also load-bearing, for an unrelated
+reason: at a zero arena the left side is 2^32-1
+and the right 2^29-1 because the subtraction
+wraps. Both are needed, making this the contrast
+case to 0539 in the same file, where a capacity
+restriction on a neighbouring theorem was
+removable. Three outcomes now on record for the
+same question -- tight, unused, and
+needed-with-a-different-reason -- with no way to
+tell them apart without measuring the
+neighbourhood. Gate: rc 0, 248 banners, 2,059
+theorems.
+
 Step 0539 asks 0538's question about the
 last-byte window theorems and gets the other
 answer (census 409 -> 410). Both arms carried

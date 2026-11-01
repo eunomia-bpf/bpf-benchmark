@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 410, and 308 steps
+`build/mut_*.py` files exist, the counter's last value is 411, and 309 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,38 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0540 - and here both hypotheses
+earn their place
+
+The tag-slot identity carries two side
+conditions, and running the question of
+0538/0539 over them shows they are not the
+same kind. The `+7` is the rounding -- the
+same shape as the capacity bound in
+`words_refines` -- and it is exactly tight:
+holds at `2^32 - 8`, fails from `2^32 - 7`
+upward. The `0 < capacity` condition is
+*also* load-bearing, for an unrelated
+reason: at a zero arena the left side is
+`2^32 - 1` and the right `2^29 - 1`, because
+the subtraction wraps.
+
+So both are needed -- which makes this the
+contrast case to 0539 in the same file,
+where a capacity restriction on a neighbouring
+theorem was removable. Three outcomes now on
+record for the same question (tight, unused,
+needed-with-a-different-reason), and no way
+to tell them apart without measuring the
+neighbourhood.
+
+The three claims are `native_decide` on
+concrete values and they bite: moving the
+non-equality onto the tight point fails the
+build. Theorem counts move (2,058 -> **2,059**;
+486 -> **487** `native_decide`). Gate: rc 0,
+**248** banners. Census 410 -> 411.
 
 ### Step 0539 - the other answer to 0538's
 question: a hypothesis the proof never
