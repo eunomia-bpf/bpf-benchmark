@@ -162,20 +162,18 @@ theorem arm64_extrev_sxtw_refines (v : BitVec 64) :
   by_cases h : v &&& 0x80000000 = 0 <;> bv_decide
 
 /-- The family-level refinement: each generated arm equals the corresponding
-independent statement. The four EXTR conjuncts are at the narrowed result and
-carry the two operand-narrowing hypotheses; the REV and REV16 conjuncts cover
-the word and doubleword arms the shared C macro selects; the SXT conjuncts are
-the three sign extensions. -/
-theorem arm64_extrev_family_refines (src src2 shift : BitVec 64)
-    (h8 : narrow src .w8 = src ∧ narrow src2 .w8 = src2)
-    (h16 : narrow src .w16 = src ∧ narrow src2 .w16 = src2)
-    (h32 : narrow src .w32 = src ∧ narrow src2 .w32 = src2) :
+independent statement. The EXTR conjuncts are at the narrowed result and take
+*raw* operands -- the earlier form carried two operand-narrowing hypotheses,
+which the dispatcher does not discharge, so they are replaced by the raw forms
+proved above. The REV and REV16 conjuncts cover the word and doubleword arms
+the shared C macro selects; the SXT conjuncts are the three sign extensions. -/
+theorem arm64_extrev_family_refines_raw (src src2 shift : BitVec 64) :
     narrow (value .extr src src2 shift .w8) .w8 =
-        arm64ExtrevExtrSpec src src2 shift 8 ∧
+        narrow (arm64ExtrevExtrSpec src src2 shift 8) .w8 ∧
     narrow (value .extr src src2 shift .w16) .w16 =
-        arm64ExtrevExtrSpec src src2 shift 16 ∧
+        narrow (arm64ExtrevExtrSpec src src2 shift 16) .w16 ∧
     narrow (value .extr src src2 shift .w32) .w32 =
-        arm64ExtrevExtrSpec src src2 shift 32 ∧
+        narrow (arm64ExtrevExtrSpec src src2 shift 32) .w32 ∧
     narrow (value .extr src src2 shift .w64) .w64 =
         arm64ExtrevExtrSpec src src2 shift 64 ∧
     rev src .w32 = arm64ExtrevRev32Spec src ∧
@@ -185,9 +183,9 @@ theorem arm64_extrev_family_refines (src src2 shift : BitVec 64)
     signExtend src 8 = arm64ExtrevSignExtSpec src 8 ∧
     signExtend src 16 = arm64ExtrevSignExtSpec src 16 ∧
     signExtend src 32 = arm64ExtrevSignExtSpec src 32 := by
-  exact ⟨arm64_extrev_extr_w8_refines src src2 shift h8.1 h8.2,
-    arm64_extrev_extr_w16_refines src src2 shift h16.1 h16.2,
-    arm64_extrev_extr_w32_refines src src2 shift h32.1 h32.2,
+  exact ⟨arm64_extrev_extr_w8_refines_raw src src2 shift,
+    arm64_extrev_extr_w16_refines_raw src src2 shift,
+    arm64_extrev_extr_w32_refines_raw src src2 shift,
     arm64_extrev_extr_w64_refines src src2 shift,
     arm64_extrev_rev_w32_refines src,
     arm64_extrev_rev_w64_refines src,
