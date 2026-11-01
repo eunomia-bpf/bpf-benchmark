@@ -31,7 +31,11 @@ typedef unsigned int __u32;
 typedef unsigned long long __u64;
 typedef signed long long __s64;
 
-#define ARM64_SP 31U
+/* Encoding 31 is XZR and 32 is SP in this simulator; the model must use
+ * the same values, or base 31 is modelled as a stack access the
+ * simulator actually performs against zero. */
+#define ARM64_XZR 31U
+#define ARM64_SP 32U
 #define ARM64_REG_NONE 0xffU
 #define ARM64_WIDTH_8 1U
 #define ARM64_WIDTH_64 8U
@@ -56,7 +60,11 @@ typedef signed long long __s64;
 #include <stdio.h>
 #include <string.h>
 
+/* 31 is XZR and 32 is SP, so the base sweep must reach one past the
+ * register file: driving only 0..31 leaves the stack-base path untested
+ * (and, before the SP value was corrected, tested the wrong register). */
 #define ORACLE_REGS 32U
+#define ORACLE_BASES (ORACLE_REGS + 1U)
 #define MEM_WORDS 512U
 
 struct oracle_reg {
@@ -92,8 +100,10 @@ static unsigned word_index(__s64 addr)
 static __u64 model_read(unsigned base, __s64 off, unsigned width)
 {
 	int is_sp = base == ARM64_SP;
-	__u8 tag = is_sp ? ARM64_SIM_TAG_STACK : regs[base].tag;
-	__u64 base_val = is_sp ? (__u64)sp : regs[base].value;
+	int is_xzr = base == ARM64_XZR;
+	__u8 tag = is_sp ? ARM64_SIM_TAG_STACK
+		 : is_xzr ? ARM64_SIM_TAG_SCALAR : regs[base].tag;
+	__u64 base_val = is_sp ? (__u64)sp : is_xzr ? 0ULL : regs[base].value;
 
 	if (is_sp || tag == ARM64_SIM_TAG_STACK)
 		return stack[word_index(sp + off)];
@@ -105,8 +115,10 @@ static void model_write(unsigned base, __s64 off, unsigned width, __u64 value,
 			__u8 tag_arg)
 {
 	int is_sp = base == ARM64_SP;
-	__u8 tag = is_sp ? ARM64_SIM_TAG_STACK : regs[base].tag;
-	__u64 base_val = is_sp ? (__u64)sp : regs[base].value;
+	int is_xzr = base == ARM64_XZR;
+	__u8 tag = is_sp ? ARM64_SIM_TAG_STACK
+		 : is_xzr ? ARM64_SIM_TAG_SCALAR : regs[base].tag;
+	__u64 base_val = is_sp ? (__u64)sp : is_xzr ? 0ULL : regs[base].value;
 
 	if (width != ARM64_WIDTH_64) {
 		fprintf(stderr, "model_write width %u unsupported\n", width);
@@ -126,13 +138,10 @@ static void model_write(unsigned base, __s64 off, unsigned width, __u64 value,
 
 static void model_writeback(unsigned base, __s64 imm)
 {
-	if (base == ARM64_SP) {
+	if (base == ARM64_SP)
 		sp += imm;
-	} else {
-		__u64 nb = regs[base].value + (__u64)imm;
-
-		regs[base].value = nb;
-	}
+	else if (base != ARM64_XZR) /* XZR discards the writeback */
+		regs[base].value += (__u64)imm;
 }
 
 /* ------------------------------------------------------------------ */
@@ -429,7 +438,7 @@ static unsigned part2(void)
 	unsigned oi, bi, fi, xi, pi;
 
 	for (oi = 0; oi < 4U; oi++)
-		for (bi = 0; bi < ORACLE_REGS; bi++)
+		for (bi = 0; bi < ORACLE_BASES; bi++)
 			for (fi = 0; fi < 3U; fi++)
 				for (xi = 0; xi < 4U; xi++)
 					for (pi = 0; pi < 6U; pi++) {
