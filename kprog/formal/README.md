@@ -6873,6 +6873,43 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0471 - the figures reach every
+live copy
+
+Step 0471 follows the disproved
+figures through every remaining live
+copy in the tree (census 342 -> 343).
+Two further sources beyond the
+compiling paper carried them: the
+grant proposal analysis, which
+summarises the paper's numbers for
+proposal writing, and the live grant
+`overview.tex`, where the "preliminary
+results" sentence is what motivates
+the proposal's tasks. Both now use
+the median figures the evaluation
+section declares. The two orphaned
+application tables in `docs/paper`
+were synchronised too -- they are
+included by neither tree, but
+contradictory figures sitting in the
+tree are the drift this line tracks.
+
+Three copies were checked and left
+alone for stated reasons rather than
+by oversight. `kinsn/docs/evaluation.md`
+reports the mean-over-mean ratio,
+which is self-consistent in a document
+declaring no median convention --
+verified by recomputing both
+conventions from the committed
+per-sample data. `kinsn/paper/atc26/
+inputs/` is a frozen camera-ready
+snapshot pinned to a commit. The
+`drawio` difference is the `EInsn` /
+`Kinsn` naming each paper's macro
+uses. Census 342 -> 343.
+
 ### Step 0470 - the evaluation figures
 reach the paper that compiles them
 
