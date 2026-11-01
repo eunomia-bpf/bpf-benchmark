@@ -127,10 +127,34 @@ def main(argv):
             print("  " + p)
         return 1
 
+    # ---- x86: the same measurement, reported rather than assumed ----------
+    x86 = c_predicates(SIM["x86"])
+    x86_model = set()
+    for m in re.finditer(r'def x86(?:Disp)?([A-Za-z0-9]+)Ops',
+                         (ROOT / "KProgFormal" / "X86DispatchFamily.lean")
+                         .read_text(errors="ignore")):
+        x86_model.add(m.group(1).lower())
+    for m in re.finditer(r'def x86(?:Disp)?([A-Za-z0-9]+)Ops',
+                         (ROOT / "KProgFormal" / "X86DispatchSingleton.lean")
+                         .read_text(errors="ignore")):
+        x86_model.add(m.group(1).lower())
+    x86_model_n = {norm(m) for m in x86_model}
+    x86_unmodelled = sorted(f for isa, f in x86
+                            if isa == "x86" and norm(f) not in x86_model_n)
+    if x86_unmodelled:
+        problems.append("x86: the C chain branches on %s, which the dispatch "
+                        "model does not name"
+                        % ", ".join(repr(f) for f in x86_unmodelled))
+        print("check_dispatch_model: %d finding(s)" % len(problems))
+        for p in problems:
+            print("  " + p)
+        return 1
+
     print("check_dispatch_model: AArch64 chain branches on %d families, the "
           "model names %d, and the %d unmodelled ones are the recorded set "
-          "(12 with a live route host, 0 model-only)"
-          % (len(a64), len(model), len(unmodelled)))
+          "(12 with a live route host, 0 model-only); x86 branches on %d and "
+          "the model names all of them"
+          % (len(a64), len(model), len(unmodelled), len(x86)))
     return 0
 
 
