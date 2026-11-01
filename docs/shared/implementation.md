@@ -2612,6 +2612,28 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0467 re-measures the harness README's own
+claims against the committed tree (census
+338 -> 339; no contract, proof, or simulator
+change). One claim was wrong: the
+`_Static_assert` count read 1,049 but the tree
+has 1,051 -- and had 1,051 at the commit that
+wrote it, so it was stale on arrival, not
+drifted. Everything else held exactly: the
+138/138/138 spec-to-header-to-Lean pairing is a
+bijection in both directions, 268 `lake env
+lean` invocations cover 294 modules with the 26
+unreached all `Generated*` and all imported,
+planting a false theorem in a transitively
+reached module still fails `lake build`, both
+cited sabotages reproduce (`X86_OP_NOP` to
+0x09U fails on two tables, `AUX_B1` to 0x7fU
+gives 91,228 mismatches), two gate runs are
+byte-identical, and there are 0
+sorry/axiom/opaque/unsafe across 1970
+theorems. Gate: rc 0, 226 banners,
+123,463,285 cases.
+
 Step 0466 proves how the three stack bounds
 relate (census 337 -> 338; proof-only, no
 simulator change). A stack write that fits its

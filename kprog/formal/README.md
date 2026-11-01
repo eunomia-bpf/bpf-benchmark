@@ -186,12 +186,26 @@ generator's CamelCase splitting is normalized — `arm64_ldrsx`,
 split (`LdrSx`, `CallMem`, ...).
 
 The generated headers also bind the hand-written decode at compile time:
-1,049 `_Static_assert`s tie the simulator's `X86_OP_*` / `ARM64_*` constants to
+1,051 `_Static_assert`s tie the simulator's `X86_OP_*` / `ARM64_*` constants to
 the generated tables, so drift breaks the build before any oracle runs. Tested
 rather than assumed — changing `X86_OP_NOP` from `0x00U` to `0x09U` in
 `x86_sim.h` fails the build with two independent assertions
 (`x86_opcode.h:12`, `x86_dispatch_singleton.h:21`), so two generated tables
 observe the same drift separately.
+
+Each of those numbers was re-measured against the committed tree rather than
+carried forward, and one was wrong: the `_Static_assert` count was recorded as
+1,049 but the tree had 1,051 even at the commit that wrote it, so it was stale
+on arrival rather than drifted. The rest hold exactly — 138 specs pairing with
+138 generated headers and 138 `Generated*.lean` modules as a bijection in both
+directions (no leftovers either way), 268 explicit `lake env lean` invocations
+over 294 modules with the 26 unreached all `Generated*` and all imported, 0
+`sorry`/`axiom`/`opaque`/`unsafe`, 330 batteries, and two consecutive gate runs
+producing byte-identical output (`5f8f11c88142ea18eea5b9c0a6acaca2`). The two
+sabotages this section cites were also re-run: `X86_OP_NOP` to `0x09U` fails on
+`x86_opcode.h:12` and `x86_dispatch_singleton.h:21`, and masking `AUX_B1` to
+`0x7fU` reports 91,228 mismatches in the aux route host — both exactly as
+stated.
 
 Three oracles did not previously have that negative property: their part
 functions stopped at a mismatch with a bare `return 0`, and `main` summed the
@@ -6845,6 +6859,59 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0467 - harness claims re-measured
+
+Step 0467 re-measures the harness
+README's own factual claims against
+the committed tree, rather than
+carrying them forward (census 338 ->
+339). No contract, proof, or
+simulator change; the deliverable is
+the audit and the one correction it
+found.
+
+Every claim in the "what the gate
+covers" section was re-derived from
+the tree. One was wrong: the
+`_Static_assert` count was recorded
+as 1,049 but the tree has 1,051 --
+and 1,051 at the very commit that
+wrote 1,049, so the figure was stale
+on arrival rather than drifted since.
+It now reads 1,051.
+
+The rest hold exactly. The
+138/138/138 claim is a bijection in
+both directions, not a count match:
+no spec lacks a header or a
+`Generated*.lean` module, and no
+header or module lacks a spec. The
+"all 294 modules are checked" chain
+is 268 explicit `lake env lean`
+invocations over 294 modules, with the
+26 unreached all `Generated*` and all
+imported somewhere -- and the
+third link of that chain still holds:
+planting `theorem planted_bad_0467 :
+(1 : Nat) = 2 := by rfl` in
+`GeneratedArm64Mod` fails `lake
+build` at that module. Both cited
+sabotages reproduce exactly:
+`X86_OP_NOP` to `0x09U` fails on
+`x86_opcode.h:12` and
+`x86_dispatch_singleton.h:21`, and
+masking `AUX_B1` to `0x7fU` reports
+91,228 mismatches. Two consecutive
+gate runs are byte-identical
+(`5f8f11c88142ea18eea5b9c0a6acaca2`),
+which is the determinism claim
+verified rather than asserted. Zero
+`sorry`/`axiom`/`opaque`/`unsafe`
+across 1,970 theorems. Gate: rc 0,
+226 `cross-check: OK` banners,
+123,463,285 modeled cases. Census
+338 -> 339.
 
 ### Step 0466 - stack bound relationships
 
