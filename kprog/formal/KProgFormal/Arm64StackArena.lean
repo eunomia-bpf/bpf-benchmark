@@ -365,6 +365,42 @@ theorem arm64_stack_arena_pointer_threshold :
     pointerFits 160 160 = true ∧ pointerFits 161 160 = false := by
   refine ⟨?_, ?_⟩ <;> (simp only [pointerFits]; native_decide)
 
+/-- The window bound implies the tag-slot bound for *every* capacity, with no
+whole-word precondition. The earlier form of this theorem required
+`capacity % 8 = 0`, which the enabled 160-byte arena satisfies but the disabled
+1-byte arena does not -- so the theorem did not cover the arm64 header's own
+`#else` branch. The precondition is unnecessary: `index + width <= capacity`
+gives `index < capacity`, and `capacity <= words capacity * 8` always, so the
+slot `index / 8` is below the slot count. The only side condition is that the
+slot count's `+7` does not wrap, which every arena in the tree satisfies. -/
+theorem arm64_stack_arena_window_implies_tag_slot_any_capacity
+    (index width capacity : BitVec 32)
+    (hwidth : 0 < width) (hnoWrap : capacity.toNat + 7 < 2 ^ 32)
+    (hfit : windowFits index width capacity = true) :
+    tagSlotFits index (words capacity) = true := by
+  simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
+  have h7 : (7 : BitVec 32).toNat = 7 := by decide
+  have h8 : (8 : BitVec 32).toNat = 8 := by decide
+  have hidx : index.toNat < capacity.toNat := by
+    have hw : 0 < width.toNat := hwidth
+    omega
+  have hsum : (capacity + 7).toNat = capacity.toNat + 7 := by
+    rw [BitVec.toNat_add, h7, Nat.mod_eq_of_lt (by omega)]
+  have hdiv : ((capacity + 7) / 8).toNat = (capacity.toNat + 7) / 8 := by
+    rw [BitVec.toNat_udiv, hsum, h8]
+  have hshr : (index >>> 3).toNat = index.toNat / 8 := by
+    rw [BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow]
+  simp only [tagSlotFits, wordIndex, words, decide_eq_true_eq, BitVec.lt_def]
+  rw [hshr, hdiv]
+  omega
+
+/-- The general form covers the disabled 1-byte arena, which the whole-word
+form did not: at capacity 1 the window and the tag slot still agree. -/
+theorem arm64_stack_arena_window_implies_tag_slot_at_1 :
+    windowFits 0 1 1 = true ∧ tagSlotFits 0 (words 1) = true := by
+  refine ⟨?_, ?_⟩ <;> (simp only [windowFits, windowEnd, tagSlotFits,
+    wordIndex, words]; native_decide)
+
 /-- The window bound implies the tag-slot bound, so a checked write covers
 both arrays with one test. The write path with a nonempty width that fits the
 arena always lands in a tag slot the tag array holds: `index + width <=
