@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0496 relates the byte reversals (census 367 ->
+368). REV is a shift-and-mask disjunction over the
+destination width; BSWAP picks the width then
+reverses, clearing above. They agree at the two
+widths AArch64 encodes. Agreement alone was not
+enough: a byte-reversal fault is quiet -- swapping
+two of eight terms is still a permutation that
+changes plausibly on most inputs -- so
+CrossIsaRev.lean also pins the involution (reversal
+is an order-two permutation on the width-truncated
+value), which a transposition breaks. The compiled
+check runs a pseudo-random stream rather than round
+numbers and tests both properties: 1,000,652 cases
+in 0.1s; displacing one byte position fails 398,436
+of them. 2013 theorems. Gate: rc 0, 229 banners,
+124,464,217 cases.
+
 Step 0495 relates the sign extensions (census 366 ->
 367). AArch64 states the extension generically and
 inlines mask-flip-subtract; x86-64 writes each width

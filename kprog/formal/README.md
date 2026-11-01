@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 123,664,217 modeled
+229 passing `cross-check: OK` oracle banners summing to 124,464,217 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 297 Lean modules
-compiling transitively from the gate's roots and proving 2,007 theorems with
+header and one `Generated*.lean` module (138/138/138); 298 Lean modules
+compiling transitively from the gate's roots and proving 2,013 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,664,217 again, so the rollup is a measurement of the committed tree and not
+124,464,217 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -135,6 +135,16 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+Byte reversal is the case where the *property* carries the weight. `REV` and
+`BSWAP` agree at the two widths AArch64 encodes, but agreement alone would not
+distinguish a correct reversal from a transposed one: a permutation with two
+terms swapped still agrees with itself, and still changes plausibly on most
+inputs. So the theorem set also pins the involution -- reversal is an order-two
+permutation on the width-truncated value -- which a transposition breaks.
+Displacing one byte position in the x86 side fails the compiled check on
+398,436 of a million pseudo-random cases; picking round numbers would have
+agreed on nearly all of them.
 
 Sign extension is where sampling would not have been enough. Both
 architectures extend a narrow value into a 64-bit register with entirely
@@ -7061,6 +7071,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0496 - agreement is not enough:
+the reversal theorems pin the
+involution too
+
+Step 0496 relates the byte reversals
+(census 367 -> 368). `REV` and `BSWAP`
+do the same thing by different means --
+a shift-and-mask disjunction over the
+destination width against a width-first
+reversal that clears above -- and agree at
+the two widths AArch64 encodes.
+
+Agreement alone would not have been
+enough, and this is the step's point. A
+byte-reversal fault is quiet: swap two of
+the eight terms and it is still a
+permutation, still agrees with itself, and
+still changes plausibly on most inputs. So
+`CrossIsaRev.lean` also pins the property
+that gives the operation meaning --
+reversal is an order-two permutation on
+the width-truncated value. A transposition
+breaks the involution while leaving many
+inputs coincidentally correct.
+
+The compiled check therefore runs a
+pseudo-random stream rather than round
+numbers and tests both properties:
+1,000,652 cases in 0.1s. Displacing one
+byte position fails it on 398,436 of them
+-- round numbers would have agreed on
+nearly all. Gate: rc 0, **229** banners,
+124,464,217 cases (oracle 1,000,652).
+Census 367 -> 368.
 
 ### Step 0495 - the two sign-extension
 contracts agree, and the check is
