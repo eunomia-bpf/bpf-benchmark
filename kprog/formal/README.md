@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 378, and 254 steps
+`build/mut_*.py` files exist, the counter's last value is 379, and 256 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -144,10 +144,14 @@ hand-written constant compiles, runs, and branches on the wrong condition. What
 makes them comparable is x86's own encoding rule -- short conditional jump
 opcodes are `0x70 + condition code`, and the `X86_CC_*` values *are* those
 codes -- so `check_jcc_opcodes.py` requires every commented site to satisfy
-`opcode == 0x70 + X86_CC_<suffix>`. Measured: 4 sites (ja, jae, je, jne), all
-correct, verified by planting a fault in each direction. It covers only the
-sites the encoder comments with a mnemonic; an uncommented `0x7x` constant is
-invisible to it, which the script states.
+`opcode == 0x70 + X86_CC_<suffix>`. Measured: 7 sites, all
+correct -- 4 identified by mnemonic comment and 3 by a `j<cond>_out` binding
+name, which is the only statement of intent for an uncommented emission
+(`let jbe_out = ...rel32(..., 0x86)`). The near form is covered too: rel32 adds
+`0x80` to the condition code where rel8 adds `0x70`. The three binding-named
+sites are in the tail-call lowering path. Verified by planting a wrong opcode at
+each of them. An emission with neither a comment nor a `j<cond>_out` binding is
+still only range-checked, which the script says.
 
 The helper-id table is a different kind of gap, because it is only *stated*
 rather than reached. `arm64_helper_idents_spec.json` gives each of 61 BPF
@@ -7206,6 +7210,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0508 - closing the jcc
+checker's own stated blind spot
+
+Step 0507 checked four commented
+conditional-jump emissions and said
+plainly that an uncommented opcode was
+invisible to it. There are seven (census
+378 -> 379), and the three uncommented
+ones sit in the tail-call lowering path,
+where jbe/jae/je decide the callee-saved
+mask, the tail-call count and the null
+program check. All three were correct --
+but nothing knew that either.
+
+The binding name supplies the missing
+intent: `let jbe_out = ...rel32(..., 0x86)`
+states the condition without a trailing
+comment. The checker takes intent from the
+comment when present and from a
+`j<cond>_out` binding otherwise, and says
+which route each site used.
+
+The near form is now handled properly too:
+rel32 adds `0x80` to the condition code
+where rel8 adds `0x70`, so the base is
+per-form rather than assumed.
+
+Measured: 7 sites -- 4 by comment, 3 by
+binding -- all correct. Verified by
+planting a wrong opcode at each of the
+three previously-unchecked sites. An
+emission with neither a comment nor a
+`j<cond>_out` binding is still only
+range-checked, which the script states.
+Gate: rc 0, **232** banners. Census 378 ->
+379.
 
 ### Step 0507 - the encoder's jump
 opcodes had no link to the condition
