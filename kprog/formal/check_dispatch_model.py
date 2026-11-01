@@ -25,6 +25,7 @@ Usage: check_dispatch_model.py [--check]
 """
 
 import argparse
+import glob
 import pathlib
 import re
 import sys
@@ -148,6 +149,28 @@ def main(argv):
         print("check_dispatch_model: %d finding(s)" % len(problems))
         for p in problems:
             print("  " + p)
+        return 1
+
+    # ---- entry contexts: is each ABI kind exercised? ---------------------
+    ctx = []
+    for isa, want in (("arm64", ("XDP", "SKB")), ("x86", ("XDP", "SKB"))):
+        seen = set()
+        for f in glob.glob(str(ROOT / "test_*host.c")) + \
+                glob.glob(str(ROOT / "cross_*host.c")):
+            src = open(f, errors="ignore").read()
+            if not re.search(r'\b%s_' % isa, src):
+                continue
+            for kind in want:
+                if "KPROG_ABI_KIND_%s" % kind in src:
+                    seen.add(kind)
+        missing = [k for k in want if k not in seen]
+        if missing:
+            ctx.append("%s: no host exercises the %s entry context"
+                       % (isa, ", ".join(missing)))
+    if ctx:
+        print("check_dispatch_model: %d finding(s)" % len(ctx))
+        for c in ctx:
+            print("  " + c)
         return 1
 
     print("check_dispatch_model: AArch64 chain branches on %d families, the "
