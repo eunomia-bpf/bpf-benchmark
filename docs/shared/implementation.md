@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0543 closes two holes in the no-sorry check
+(census 413 -> 414). The check exists because
+lake build reports a placeholder as a warning and
+exits 0, so a passing build proves compilation,
+not completeness. First hole: `exact sorryAx _
+true` proves any proposition -- `1 = 2` builds
+with zero errors -- and the pattern's lookahead,
+written to spare names like mySorry, also spared
+the axiom itself. Second hole: the comment
+stripper was non-greedy and closed at the first
+`-/`, the inner one, so the remainder of a nested
+outer comment was scanned as code -- a false
+positive or a missed placeholder depending on
+contents -- and it also pooled newlines, so
+reported line numbers were wrong. Both fixed, and
+both found by planting rather than by reading:
+sorryAx, sorry, admit, opaque, axiom and partial
+each report at the right line, a comment
+containing "sorry" does not, and mySorry is not
+confused with either. Gate: rc 0, 248 banners.
+
 Step 0542 pins the disabled arena's boundary and
 fixes a counter that was one too high (census
 412 -> 413). The x86 header defines three stack

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 413, and 311 steps
+`build/mut_*.py` files exist, the counter's last value is 414, and 312 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0543 - two ways through the
+no-sorry check
+
+0542 found a counter that miscounted. The
+same question asked of the check with the
+highest stakes -- the one that is supposed to
+guarantee every theorem is proved rather than
+asserted -- found two ways through it.
+
+The first: `exact sorryAx _ true` proves any
+proposition. `theorem p : (1 : Nat) = 2 := by
+exact sorryAx _ true` builds with **zero
+errors** and one warning, and the pattern's
+lookahead, written to spare names like
+`mySorry`, also spared the axiom itself. It is
+matched explicitly now.
+
+The second: the stripper was `/-(.*?)-/`,
+which closes at the *first* `-/` -- the inner
+one -- so the remainder of a nested outer
+comment was scanned as code. That is a false
+positive or a missed placeholder depending on
+what the comment holds. It now tracks depth,
+and keeps newlines so reported line numbers
+are source line numbers; they had been pooled
+at the top of the file.
+
+Both were found by planting, not by reading:
+sorryAx, sorry, admit, opaque, axiom and
+partial each report at the right line, a
+comment containing "sorry" does not, and
+`mySorry` is not confused with either. Gate:
+rc 0, **248** banners. Census 413 -> 414.
 
 ### Step 0542 - the third arena, and a
 counter that was one too high
