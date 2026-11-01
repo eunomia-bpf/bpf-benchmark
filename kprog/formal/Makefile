@@ -887,6 +887,7 @@ check:
 	lake env lean KProgFormal/CrossIsaAlu.lean
 	lake env lean KProgFormal/CrossIsaBranch.lean
 	lake env lean KProgFormal/Arm64DispatchTotality.lean
+	lake env lean KProgFormal/X86DispatchTotality.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_arena_host.c -o build/test_arm64_stack_arena_host
 	./build/test_arm64_stack_arena_host
 	lake env lean KProgFormal/GeneratedArm64StackIndex.lean

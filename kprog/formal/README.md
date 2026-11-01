@@ -10,12 +10,12 @@ make check
 What the gate currently covers, measured from one full `make check` run:
 234 passing `cross-check: OK` oracle banners summing to 124,500,620 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 305 Lean modules
-compiling transitively from the gate's roots and proving 2,042 theorems with
+header and one `Generated*.lean` module (138/138/138); 306 Lean modules
+compiling transitively from the gate's roots and proving 2,052 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 483 of
-those (24%) are discharged by `native_decide`, i.e. by compiled evaluation, so
+those (23%) are discharged by `native_decide`, i.e. by compiled evaluation, so
 they rest on the compiler as well as the kernel — 20 of the 599
 refinement-named theorems, each a finite-table equality, and the rest finite
 enumerations or concrete examples, never a compositional or arithmetic
