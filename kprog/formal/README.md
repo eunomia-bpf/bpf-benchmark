@@ -92,6 +92,15 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
 
+The dispatch ladder's depth costs nothing, which was measured rather than
+assumed. `X86_SIM_L_EXEC` is a 56-arm `else if` chain and `ARM64_SIM_L_EXEC` a
+34-arm one, so an opcode near the end (`X86_OP_XCHG`, arm 49) walks 49
+predicates per emulated instruction. It does not matter: at `-O2` the compiler
+reduces the chain to one indirect `jmp *` and two `cmp`s, and in a
+loop-carried benchmark `XCHG` at arm 49 runs at 0.31 ns/op, identical to
+`NOP` at arm 1. A flat jump table, not a linear scan -- so reordering the arms,
+which the generated tables would make easy, would buy nothing.
+
 A guard can be *watched* without being *exercised*, and that distinction cost
 five hosts in all. The arm64 route hosts counted guard hits and failed if any
 fired, but every offset they swept was in range — so a simulator whose guard

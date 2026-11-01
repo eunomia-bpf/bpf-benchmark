@@ -2612,6 +2612,21 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0480 measures what the dispatch ladder costs
+(census 351 -> 352; documentation and measurement
+only). `X86_SIM_L_EXEC` is a 56-arm `else if`
+chain and `ARM64_SIM_L_EXEC` a 34-arm one, so an
+opcode near the end walks most predicates per
+emulated instruction. Measured: at -O2 the
+compiler reduces the chain to one indirect `jmp *`
+and two `cmp`s, and in a loop-carried benchmark
+`X86_OP_XCHG` at arm 49 runs at 0.31 ns/op,
+identical to `X86_OP_NOP` at arm 1. It is a flat
+jump table, not a linear scan, so reordering the
+arms would buy nothing. Recorded because "does the
+long chain cost anything" is a natural question and
+the answer was assumed rather than known.
+
 Step 0479 documents why the x86 dispatch chain
 has no final `else` (census 350 -> 351). An
 opcode matching no predicate is a silent no-op;
