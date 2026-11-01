@@ -16,8 +16,8 @@ Scope: how to organize the 2026 proposal (eBPF runtime optimization) from the gr
 
 ### 2.1 Kinsn (`docs/paper/`, arXiv:2606.24213) — most mature, full paper
 - "Kinsn: Safely Extending the eBPF Compilation Pipeline with Native Operations." Complete: characterization → mechanism → seven hardware-idiom operations → Lean 4 proofs → implementation → four-RQ evaluation with real numbers on both architectures.
-- Key numbers: eBPF-vs-native gap 1.57× geomean (up to 2×) over the pure-bytecode microbenchmarks; Kinsn micro geomean **1.242× (x86-64) / 1.222× (ARM64)**, recovering **42% of the gap**; native code size −22.8%/−12.1%; **Cilium 1.074× and Katran 1.073×** end-to-end (1.114× for Cilium under a tuned policy); no measurable kernel-side load-time overhead (0.99×).
-- RQ3 is a policy-sensitivity counterexample: coverage maximization hurts (Katran 21→62 applied sites drops throughput to 0.995×) → "profitability, not coverage" is the open problem.
+- Key numbers: eBPF-vs-native gap 1.57× geomean (up to 2×) over the pure-bytecode microbenchmarks; Kinsn micro geomean **1.242× (x86-64) / 1.222× (ARM64)**, recovering **42% of the gap**; native code size −22.8%/−12.1%; **Cilium 1.074× and Katran 1.065×** end-to-end (1.119× for Cilium under a tuned policy); no measurable kernel-side load-time overhead (0.995×/0.998×, i.e. 1.00×). These are the median-of-three figures the evaluation section declares.
+- RQ3 is a policy-sensitivity counterexample: coverage maximization hurts (Katran 21→62 applied sites drops throughput to 0.984×) → "profitability, not coverage" is the open problem.
 - RQ4 is a design-space upper bound: whole-program native replacement reaches **2.358× on Cilium** at the cost of a larger TCB; hardware idioms alone recover only **5.4%** of that ceiling on the real datapath (vs 42% on microbenchmarks) because real datapaths live in helpers, maps, and tail calls. **The 5.4%-vs-42% contrast is the strongest motivation sentence available for the grant.**
 
 ### 2.2 BpfReJIT (`docs/speculative-optimization/`) — architecture complete, claims honestly limited
@@ -50,7 +50,7 @@ lifecycle axis:      before load (LLVM) → at load (Kinsn / BpfReJIT load-time)
 
 For a maintainer committee, the three highest-value points are:
 1. **The TCB argument, stated explicitly**: the verifier is never modified; every candidate re-passes stock verification; Kinsn' only per-operation TCB addition is the native emit, discharged by Lean 4 proofs.
-2. **The work is de-risked**: EPASS won in 2025 with "prototype + one strong number + GitHub link + fund the hardening." We are in an even stronger position: an arXiv paper with dual-architecture numbers, plus a public benchmark. **The ask funds the exposed open problem (profitability policy), not building from scratch.** Including the negative results (Katran 0.995× under coverage-max; the branch-layout rerun regression) signals maturity and leads directly into the Tasks.
+2. **The work is de-risked**: EPASS won in 2025 with "prototype + one strong number + GitHub link + fund the hardening." We are in an even stronger position: an arXiv paper with dual-architecture numbers, plus a public benchmark. **The ask funds the exposed open problem (profitability policy), not building from scratch.** Including the negative results (Katran 0.984× under coverage-max; the branch-layout rerun regression) signals maturity and leads directly into the Tasks.
 3. **Ecosystem give-back**: benchmark suite release, kernel RFC for the Kinsn interface, and the two required blog posts written into the milestones.
 
 ## 4. Recommended format (and the current state of both drafts)
