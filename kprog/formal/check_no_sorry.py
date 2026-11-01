@@ -22,8 +22,12 @@ ROOT = pathlib.Path(__file__).resolve().parent
 MODULES = ROOT / "KProgFormal"
 
 # A whole-word `sorry`/`admit` outside a line comment, and any `axiom`
-# declaration. `sorryAx` and identifiers containing the word do not count.
-PLACEHOLDER = re.compile(r"(?<![\w'])(sorry|admit)(?![\w'])")
+# declaration. Identifier *suffixes* such as `mySorry` do not count, but the
+# axiom itself does: `exact sorryAx _ true` proves any proposition, builds with
+# only a warning, and was previously let through by the negative lookahead here,
+# which is the one form of assertion the check most needed to catch.
+PLACEHOLDER = re.compile(
+    r"(?<![\w'])(?P<kw>sorry|admit)(?!\w)|(?<![\w'])sorryAx(?![\w'])")
 # A declaration keyword in command position: `axiom foo`, `opaque foo`,
 # `unsafe def foo`, `partial def foo`. Indented forms are commands inside a
 # section or namespace, so leading whitespace is allowed.
@@ -31,8 +35,42 @@ DECL = re.compile(r"^\s*(axiom|opaque|unsafe|partial)\s", re.M)
 
 
 def strip_comments(text: str) -> str:
-    text = re.sub(r"/-.*?-/", "", text, flags=re.S)
-    return "\n".join(line.split("--")[0] for line in text.split("\n"))
+    """Blank out block and line comments, respecting nesting.
+
+    Lean's block comments nest, so the non-greedy `/-(.*?)-/` this used to
+    apply closes at the *first* `-/`, which is the inner one, and everything
+    the outer comment still covers is then scanned as code: either a false
+    positive or a missed placeholder, depending on what the comment contains.
+    Nesting is not decorative in this tree, so track depth.
+
+    Comment characters become spaces and their newlines are kept, so a
+    reported line number is the line number in the source.
+    """
+    out = []
+    depth = 0
+    i = 0
+    n = len(text)
+    while i < n:
+        two = text[i:i + 2]
+        if depth == 0 and two == "--":
+            j = text.find("\n", i)
+            i = n if j < 0 else j
+            continue
+        if two == "/-":
+            depth += 1
+            i += 2
+            continue
+        if depth and two == "-/":
+            depth -= 1
+            i += 2
+            continue
+        c = text[i]
+        if depth:
+            out.append("\n" if c == "\n" else " ")
+        else:
+            out.append(c)
+        i += 1
+    return "".join(out)
 
 
 def scan(path: pathlib.Path) -> list[str]:
@@ -40,7 +78,9 @@ def scan(path: pathlib.Path) -> list[str]:
     found = []
     for m in PLACEHOLDER.finditer(body):
         line = body[: m.start()].count("\n") + 1
-        found.append(f"{path.relative_to(ROOT)}:{line}: {m.group(1)}")
+        # Either alternative may match; report whichever did.
+        found.append(
+            f"{path.relative_to(ROOT)}:{line}: {m.groupdict()['kw'] or 'sorryAx'}")
     for m in DECL.finditer(body):
         line = body[: m.start()].count("\n") + 1
         found.append(
