@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 124,467,708 modeled
+230 passing `cross-check: OK` oracle banners summing to 124,469,580 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 301 Lean modules
 compiling transitively from the gate's roots and proving 2,034 theorems with
@@ -37,8 +37,8 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,467,708 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 229 banners are all distinct oracles — 225 report a plain
+124,469,580 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 230 banners are all distinct oracles — 229 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
@@ -135,6 +135,19 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+Classifying all 214 hosts by whether they include the simulator header separates
+89 that drive the real dispatcher from 125 that compare a hand model against a
+generated contract. Those are different claims, and the second does not imply
+the first: a contract can be proved, modelled, and still never exercised through
+the code that runs it. Fifty-five of the 138 contracts appeared only on the
+model-only side, and the AArch64 multiply arm was the one arithmetic family in
+that position -- proved in Lean, modelled in a host, and never driven through
+`ARM64_SIM_L_EXEC`. `test_arm64_mul_route_host.c` closes that: MADD/MSUB/MUL
+over distinct operands at both widths, expected value computed from the
+architecture rather than from the contract, and a non-member opcode required to
+reach the unsupported arm. Flipping MSUB's operand order fails it on 432 of
+1,296 cases.
 
 Two arm64 memory-model hosts had a subtler version of the same problem. Both
 defined `ARM64_SP` as 31, but in this simulator 31 is `XZR` and 32 is `SP`;
@@ -7132,6 +7145,47 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0503 - the multiply arm was
+proved and modelled but never driven
+
+Step 0503 separates two claims that were
+being conflated (census 373 -> 374).
+Classifying all 214 hosts by whether they
+include the simulator header gives 89 that
+drive the real dispatcher and 125 that
+compare a hand model against a generated
+contract. The second does not imply the
+first: a contract can be proved, modelled,
+and still never exercised through the code
+that runs it.
+
+Fifty-five of the 138 contracts appeared
+only on the model-only side. The AArch64
+multiply arm was the one *arithmetic*
+family in that position -- proved in Lean,
+modelled in a host, and never driven
+through `ARM64_SIM_L_EXEC`. So the
+dispatcher could stop routing to it, read
+the wrong source, or write the destination
+at the wrong width, and every existing
+check would stay green.
+
+`test_arm64_mul_route_host.c` closes it:
+MADD/MSUB/MUL over distinct, non-zero
+operand triples at both widths, so a
+swapped source, a wrong addend position
+or a truncated write each produce a
+different value; the expected value is
+computed from the architectural
+definition rather than by calling the
+contract, so the check is not circular;
+and a non-member opcode must reach the
+unsupported arm, so the counter is not
+vacuously zero. Flipping MSUB's operand
+order fails it on 432 of 1,296 cases.
+Gate: rc 0, **230** banners (one new),
+124,469,580 cases. Census 373 -> 374.
 
 ### Step 0502 - two arm64 memory models
 had the wrong stack-pointer value
