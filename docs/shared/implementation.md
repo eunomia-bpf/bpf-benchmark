@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0525 closes a sixth model-only family (census
+395 -> 396), the largest at six opcodes over 26
+shifts and masks. Writing the oracle also found
+something in the proofs: EXTR's refinement theorems
+carry a hypothesis that the operands are already
+narrowed to the destination width, which the
+dispatcher does not discharge since it passes raw
+registers. The forms genuinely differ before the
+final narrowing (0xffffffffffffffff against
+0x1ffffffff at w32), so the hypothesis was doing work
+at the wrong point -- and it is unnecessary, because
+both sides are narrowed at the end, which is what the
+C register write does. Added
+arm64_extrev_extr_{w8,w16,w32}_refines_raw; the
+64-bit case already needed none. One planted fault
+per opcode family: EXTR shift +1 fails 175, SXTB mask
+narrowed 80, SXTW 80, SXTH sign bit 280. Count 10
+live / 2 model-only -> 11 / 1. Gate: rc 0, 240
+banners, 2055 theorems.
+
 Step 0524 closes a fifth model-only family (census
 394 -> 395), and ADRP is where a value-only oracle
 is least useful: the arm copies its immediate as a
