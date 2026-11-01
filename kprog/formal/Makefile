@@ -5,6 +5,7 @@ check:
 	python3 check_macro_hygiene.py
 	python3 check_lean_claims.py
 	python3 check_helper_idents.py
+	python3 check_jcc_opcodes.py
 	python3 generate_ptr_add_spec.py --check
 	python3 generate_abi_load_spec.py --check
 	python3 generate_arm64_width_spec.py --check
