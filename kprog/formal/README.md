@@ -6920,6 +6920,33 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0480 - the dispatch ladder's
+depth costs nothing
+
+Step 0480 measures what the dispatch
+chain costs rather than assuming
+(census 351 -> 352).
+`X86_SIM_L_EXEC` is a 56-arm `else if`
+chain and `ARM64_SIM_L_EXEC` a 34-arm
+one, so `X86_OP_XCHG` at arm 49 walks
+49 predicates per emulated instruction,
+and the obvious follow-up question is
+what that costs.
+
+Nothing measurable. At `-O2` the chain
+compiles to one indirect `jmp *` and
+two `cmp`s -- a flat jump table, not a
+linear scan -- and in a loop-carried
+benchmark `XCHG` at arm 49 runs at
+0.31 ns/op against `NOP` at arm 1 at
+the same 0.31. So reordering the arms,
+which the generated tables make easy,
+would buy nothing, and the ladder's
+length is a readability question rather
+than a performance one. Recorded because
+the answer was assumed. Gate: rc 0, 226
+banners. Census 351 -> 352.
+
 ### Step 0479 - the x86 dispatch chain's
 missing else is documented
 
