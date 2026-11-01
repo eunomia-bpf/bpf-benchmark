@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 416, and 314 steps
+`build/mut_*.py` files exist, the counter's last value is 417, and 315 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,50 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0546 - the paper-count check
+read one of four forms
+
+`check_paper_counts.py` matched only the
+wrapped `\(N\)-case` form, and the section
+uses that at 52 sites against 178 for the
+unwrapped `N-case C oracle` form. Nothing
+read the commonest form, so the report was
+clean over ten stale occurrences across
+seven distinct figures: 62 -> 58 (the mem
+dispatch grid lost a displacement at
+574e67b6b), 2904 -> 2913, 9216 -> 9504 (x3,
+the vreg and D0/Q0 grids gained the SP base
+row), 70558 -> 71664, 70571 -> 71657 (x2),
+71,352 -> 71,664, and 2,754,329 ->
+2,754,300. Each was attributed from its own
+host's banner plus that host's source, never
+from the paper.
+
+The checker now reads all four forms --
+wrapped, unwrapped, the `N- and M-case`
+ellipsis, and the 44 `N [grid] cases` sites --
+under three exclusions that keep claims true
+rather than merely numerous: a number in
+`\texttt{}` is quoted output, a number after
+"plus" is one input family, and an `-case`
+adjective on a bare grid states arithmetic
+(1,470 = 2x5x7x3x7, where that host's banner
+says 48,515) unless the phrase also names a
+host or oracle. A `N cases plus M` claim is
+checked as a sum. It also re-derives the two
+gate-wide figures exactly -- 248 banners,
+124,531,802 modeled cases -- so those cannot
+drift either; the section's other
+restatement of the banner count is dropped
+rather than duplicated. Mutation-tested per
+class: stale total, stale grid total, stale
+ellipsis, stale summand, stale banner count
+and stale case sum each redden; the divide
+grid and the `\texttt{}` line stay unclaimed.
+Drops a dead `import sys`. Gate rc 0, 248
+banners; 154 claims and both totals match.
+Census 416 -> 417.
 
 ### Step 0545 -- what the coverage check
 actually establishes

@@ -2612,6 +2612,36 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0546 widens the paper case-count checker
+(census 416 -> 417). It had matched only the
+wrapped `\(N\)-case` form -- 52 sites -- while the
+section states counts at 178 unwrapped `N-case`
+sites, 44 `N cases` sites, and one ellipsis form.
+Ten occurrences across seven distinct figures had
+drifted under its clean report: 62 -> 58 (mem
+dispatch lost a `stack_disps` row at 574e67b6b),
+2904 -> 2913, 9216 -> 9504 three times (the vreg
+and D0/Q0 grids gained the SP base row at
+21e68ee6a, so `4 x 32 x 3 x 4 x 6` is now
+`4 x 33 x 3 x 4 x 6`), 70558 -> 71664,
+70571 -> 71657 twice, 71,352 -> 71,664, and
+2,754,329 -> 2,754,300. Each was traced from its
+own host's banner and source, not from the paper.
+Three exclusions keep the claims true: a number in
+`\texttt{}` is quoted output, a number after
+"plus" is one input family rather than a total,
+and an `-case` adjective on a bare grid is
+arithmetic -- 1,470 = 2x5x7x3x7 against that
+host's 48,515, which compares 33 cells per divide
+-- unless the phrase also names a host or oracle.
+`N cases plus M` is checked as a sum, and the two
+gate-wide figures (248 banners, 124,531,802
+modeled cases) are re-derived exactly, so the
+section's second restatement of the banner count
+is dropped rather than carried. Mutation-tested
+per class; 154 claims and both totals now match.
+Gate: rc 0, 248 banners.
+
 Step 0545 states what the dual-emit coverage
 check establishes (census 415 -> 416). Its
 summary claimed each generator's C output "was
