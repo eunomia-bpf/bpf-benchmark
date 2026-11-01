@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0524 closes a fifth model-only family (census
+394 -> 395), and ADRP is where a value-only oracle
+is least useful: the arm copies its immediate as a
+pointer and the opcode decides only which *kind* of
+pointer it is. Swapping the two arms leaves the
+address byte-identical and labels it as a different
+pointer class -- invisible to any address comparison
+and changing later behaviour rather than this
+instruction's result. The oracle checks address and
+tag independently, writes the expected tags from the
+simulator's vocabulary, and asserts the two arms
+select different tags so it cannot pass with both
+identical. Verified by planting each half: swapped
+tags fail 60 of 61 with identical addresses, an
+address offset of 8 fails 60 with tags correct. Count
+9 live / 3 model-only -> 10 / 2. Gate: rc 0, 239
+banners, 124,527,615 cases.
+
 Step 0523 closes a fourth model-only family (census
 393 -> 394). The vector reductions break two
 assumptions an oracle would naturally make: the
