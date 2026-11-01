@@ -269,10 +269,19 @@ theorem arm64_stack_arena_last_tag_slot_is_last_word (capacity : BitVec 32)
   omega
 
 /-- The tag guard and the window guard at a one-byte width agree on an arena
-whose capacity is a whole number of words (both the enabled 160-byte and the
-disabled 1-byte arena are). This ties the tag array's bound to the proved
-window bound instead of leaving a second, independent inequality in the
-simulator: a slot is addressable exactly when one byte at that index fits. -/
+whose capacity is a whole number of words. This ties the tag array's bound to
+the proved window bound instead of leaving a second, independent inequality in
+the simulator: a slot is addressable exactly when one byte at that index fits.
+
+The whole-word condition is *load-bearing here*, unlike in the implication from
+a fitting window to an in-range slot. At capacity 1 -- the disabled arena the
+header declares, which is not a whole number of words -- slot 0 is addressable
+(`tagSlotFits 1 (words 1)` is true) while a one-byte window at index 1 does
+not fit (`windowFits 1 1 1` is false), because one slot holds eight bytes of
+addressable slots but the arena holds one byte. So the two guards coincide
+exactly when the arena's capacity rounds to its own byte count, and an
+earlier version of this docstring wrongly claimed the 1-byte arena satisfied
+that. -/
 theorem arm64_stack_arena_tag_guard_is_window_guard (index capacity : BitVec 32)
     (hm : capacity.toNat % 8 = 0) :
     tagSlotFits index (words capacity) = windowFits index 1 capacity := by
@@ -428,6 +437,15 @@ theorem arm64_stack_arena_window_implies_tag_slot (index width capacity : BitVec
   have hq : (capacity.toNat + 7) / 8 = capacity.toNat / 8 := by omega
   rw [hq]
   omega
+
+/-- The whole-word condition in the tag/window-guard equivalence is necessary,
+witnessed at the disabled arena the header declares: at capacity 1 the tag slot
+is addressable but a one-byte window at index 1 does not fit, so the two guards
+genuinely differ and the theorem cannot be stated without its hypothesis. -/
+theorem arm64_stack_arena_tag_guard_window_guard_need_whole_word :
+    tagSlotFits 1 (words 1) = true ∧ windowFits 1 1 1 = false := by
+  refine ⟨?_, ?_⟩ <;> (simp only [tagSlotFits, windowFits, windowEnd,
+    wordIndex, words]; native_decide)
 
 /-- The tag-array boundary this closes: on the enabled 160-byte arena the tag
 array has 20 slots, so byte index 159 (slot 19) is addressable and index 160
