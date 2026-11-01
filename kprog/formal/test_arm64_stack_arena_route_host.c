@@ -288,6 +288,47 @@ int main(void)
 		failures += (int)stack_guard_hits;
 	}
 
+	/* The other direction: a window that does not fit must actually reach
+	 * the guard. The sweeps above stay in range, so without these rows a
+	 * simulator whose guard was weakened to always-true passes every one of
+	 * them -- the guard is watched but never exercised. Each case drives one
+	 * access whose window runs past the arena and requires exactly one hit. */
+	{
+		struct {
+			const char *what;
+			long off;
+			__u32 width;
+			int is_write;
+		} past[] = {
+			{ "read-past-end", 64, ARM64_WIDTH_64, 0 },
+			{ "read-past-end-32", 64, ARM64_WIDTH_32, 0 },
+			{ "write-past-end", 64, ARM64_WIDTH_64, 1 },
+		};
+		unsigned k;
+
+		for (k = 0; k < sizeof(past) / sizeof(past[0]); k++) {
+			unsigned before = stack_guard_hits;
+
+			zero_arena();
+			cases++;
+			if (past[k].is_write)
+				ARM64_SIM_L_STACK_WRITE(past[k].off,
+							 past[k].width,
+							 0x1122334455667788ULL);
+			else
+				(void)ARM64_SIM_L_STACK_READ(past[k].off,
+							     past[k].width);
+			if (stack_guard_hits != before + 1U) {
+				printf("MISMATCH %s: guard fired %u time(s), "
+				       "want 1\n", past[k].what,
+				       stack_guard_hits - before);
+				failures++;
+			}
+		}
+		/* Reset so the in-range tally below is unaffected. */
+		stack_guard_hits = 0;
+	}
+
 	if (failures) {
 		printf("arm64 stack arena route host cross-check: FAIL (%d)\n",
 		       failures);
