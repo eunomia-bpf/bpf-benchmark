@@ -11,7 +11,7 @@ What the gate currently covers, measured from one full `make check` run:
 228 passing `cross-check: OK` oracle banners summing to 123,463,565 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
-compiling transitively from the gate's roots and proving 1,983 theorems with
+compiling transitively from the gate's roots and proving 1,990 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -91,6 +91,18 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+The two stack contracts are also proved to agree, and that one needed care
+because they are *not* identical. Twelve theorems in the two stack-arena
+modules share a concept name once the ISA prefix is stripped
+(`stack_arena_window_fits_refines`, `stack_arena_pointer_one_past_end`, and so
+on), but the sharing was structural rather than proved: nothing showed the two
+generated contracts compute the same arithmetic. They differ — x86 carries
+`byteAt`/`assembleByte` for its byte ladder, arm64 carries `tagSlotFits` for
+the tag array x86 lacks — so `CrossIsaStackArena.lean` proves exactly the six
+definitions both sides share (`wordIndex`, `wordAligned`, `words`,
+`windowEnd`, `windowFits`, `pointerFits`). Changing the x86 `wordIndex` shift
+from 3 to 2 fails it.
 
 The converse also holds: a hypothesis that *is* needed can still be
 mis-described. `arm64_stack_arena_tag_guard_is_window_guard` claimed its
@@ -6959,6 +6971,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0486 - the two stack contracts
+are proved to agree
+
+Step 0486 completes the cross-ISA
+series (census 357 -> 358). Twelve
+theorems in the two stack-arena
+modules share a concept name once the
+ISA prefix is stripped, but the sharing
+was structural rather than proved:
+nothing showed the two generated
+contracts compute the same arithmetic.
+
+They are *not* textually identical,
+which is what made this worth doing.
+x86 carries `byteAt`/`assembleByte` for
+its little-endian byte ladder; arm64
+carries `tagSlotFits` for the tag array
+x86 does not have. So
+`CrossIsaStackArena.lean` proves
+exactly the six definitions both sides
+share -- `wordIndex`, `wordAligned`,
+`words`, `windowEnd`, `windowFits`,
+`pointerFits` -- and nothing more.
+Changing the x86 `wordIndex` shift from
+3 to 2 fails `wordIndex_agrees`, so it
+gates spec drift.
+
+With this, every vocabulary the two
+simulators share has a cross-ISA
+agreement theorem: widths (Step 0481),
+tags (Step 0482), and the stack arena's
+arithmetic (here). Gate: rc 0, 228
+banners, 1,990 theorems. Census 357 ->
+358.
 
 ### Step 0485 - the width fallback is
 pinned rather than left implicit

@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0486 completes the cross-ISA series (census
+357 -> 358). Twelve theorems in the two stack-arena
+modules share a concept name once the ISA prefix
+is stripped, but the sharing was structural, not
+proved. The contracts are not textually identical
+-- x86 carries byteAt/assembleByte for its byte
+ladder, arm64 carries tagSlotFits for the tag
+array x86 lacks -- so `CrossIsaStackArena.lean`
+proves exactly the six definitions both share:
+wordIndex, wordAligned, words, windowEnd,
+windowFits, pointerFits. Changing the x86
+wordIndex shift from 3 to 2 fails it. With this,
+every vocabulary the two simulators share has a
+cross-ISA agreement theorem: widths, tags, and the
+stack arena arithmetic. 1990 theorems. Gate:
+rc 0, 228 banners.
+
 Step 0485 pins the width fallback (census 356
 -> 357). The README said "behavior for other
 invalid numeric widths remain outside the typed
