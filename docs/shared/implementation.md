@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0518 gives x86 the same coverage statement
+(census 388 -> 389), and the two differ in kind. The
+AArch64 reserved codes are unused filler; the x86 five
+are JCC, JMP, CALL, CALL_HELPER and RET -- the
+control-transfer opcodes, carried by the emitted code
+rather than the modelling chain, which is why the chain
+has no final else. So "unrouted" is an architectural
+category on x86, not leftovers.
+X86DispatchTotality proves both routed lists
+duplicate-free and mutually disjoint, the unrouted set
+disjoint from routed in both directions, non-empty,
+characterised exactly, and its five codes distinct.
+Verified both ways: dropping RET breaks four theorems,
+adding an already-routed code breaks six. Gate: rc 0,
+234 banners, 2,052 theorems.
+
 Step 0517 proves the dispatcher property that was
 missing (census 387 -> 388). The existing theorem
 says no opcode is gated by two arms -- at most one --
