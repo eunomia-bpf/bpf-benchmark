@@ -107,6 +107,47 @@ def a64_check():
                        "%s (%d)" % (site, cond, want.upper(), A64_COND[want]))
     return out, seen
 
+
+# The two architectures lower bpf_tail_call independently, each in its own
+# module, with its own spelling of the kernel's limit. The same program lowered
+# either way must behave the same, so the three decisions that matter -- the
+# limit, the comparison, and the increment -- have to agree. Nothing in the
+# tree compares them, and both are constants written twice.
+TC_X86_LIMIT = re.compile(r'const MAX_TAIL_CALL_CNT: \w+ = (\d+);')
+# x86 compares against the count then branches with jae (unsigned >=).
+TC_X86_CMP = re.compile(r'cmp qword \[rax\], 33')
+TC_X86_BRANCH = re.compile(r'append_x86_jcc_rel32\(&mut bytes, 0x83\)')
+TC_X86_INC = re.compile(r'add qword ptr \[rax\], 1')
+# AArch64 compares against the limit then branches with CS (unsigned >=).
+TC_A64_INC = re.compile(r'a64_add_imm64\(X12, X12, 1\)')
+
+
+def tail_call_check():
+    """The two architectures' bpf_tail_call lowerings must agree."""
+    out = []
+    x86_src = ENCODER.read_text(errors="ignore")
+    a64_src = ENCODER_A64.read_text(errors="ignore")
+
+    limits = {int(m) for m in TC_X86_LIMIT.findall(x86_src)}
+    limits |= {int(m) for m in TC_X86_LIMIT.findall(a64_src)}
+    if len(limits) != 1:
+        out.append("tail-call limit is stated %d different ways: %s"
+                   % (len(limits), sorted(limits)))
+    else:
+        limit = limits.pop()
+        if not TC_X86_CMP.search(x86_src):
+            out.append("x86 no longer compares the tail-call count against %d"
+                       % limit)
+        if not TC_X86_BRANCH.search(x86_src):
+            out.append("x86's tail-call limit branch is no longer an "
+                       "unsigned-greater-or-equal (jae)")
+        if not TC_X86_INC.search(x86_src):
+            out.append("x86 no longer increments the tail-call count by one")
+        if not TC_A64_INC.search(a64_src):
+            out.append("AArch64 no longer increments the tail-call count "
+                       "by one")
+    return out
+
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
@@ -202,9 +243,19 @@ def main(argv):
             print("  " + p)
         return 1
 
+    # ---- the two architectures must lower tail calls alike -------------
+    tc = tail_call_check()
+    if tc:
+        print("check_jcc_opcodes: %d problem(s) in the tail-call lowering"
+              % len(tc))
+        for p in tc:
+            print("  " + p)
+        return 1
+
     print("check_jcc_opcodes: %d conditional-jump site(s) all encode "
           "their condition code (%d by mnemonic comment, %d by binding "
-          "name), and %d AArch64 B.cond site(s) match their named check"
+          "name), %d AArch64 B.cond site(s) match their named check, and "
+          "the two tail-call lowerings agree"
           % (len(sites), commented, named, a64_seen))
     return 0
 
