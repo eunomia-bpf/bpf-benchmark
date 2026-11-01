@@ -577,6 +577,17 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
  */
 #define ARM64_SIM_L_STACK_WINDOW_REPORT() ARM64_SIM_L_UNSUPPORTED_OPCODE()
 
+/*
+ * The tag-array guard. `__a64_stack_tag[]` has one byte per word slot, so a
+ * tag access is a slot index into an array of TAG_SLOTS entries rather than a
+ * byte window; a byte index at or past the capacity reaches slot TAG_SLOTS,
+ * one past the array. `KPROG_ARM64_STACK_TAG_SLOT_FITS` is the generated,
+ * proved bound (Arm64StackArena.lean).
+ */
+#define ARM64_SIM_L_STACK_TAG_SLOT_OK(INDEX)                                \
+	KPROG_ARM64_STACK_TAG_SLOT_FITS(                                  \
+		(INDEX), KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES))
+
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
 	({                                                                 \
 		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
@@ -609,10 +620,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			KPROG_ARM64_STACK_READ_TAG_SOURCE(                \
 				__a64_srt_width == ARM64_WIDTH_64,        \
 				KPROG_ARM64_STACK_WORD_ALIGNED(__a64_srt_index));\
-		(__a64_srt_source ==                                      \
-		 KPROG_ARM64_STACK_READ_TAG_SOURCE_STACK_TAG_ARRAY)       \
-			? __a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index)]\
-			: ARM64_SIM_TAG_SCALAR;                           \
+		__u8 __a64_srt_tag = ARM64_SIM_TAG_SCALAR;                \
+		if (__a64_srt_source ==                                   \
+		    KPROG_ARM64_STACK_READ_TAG_SOURCE_STACK_TAG_ARRAY) {  \
+			if (ARM64_SIM_L_STACK_TAG_SLOT_OK(__a64_srt_index)) \
+				__a64_srt_tag =                           \
+					__a64_stack_tag[                  \
+						KPROG_ARM64_STACK_WORD_INDEX(\
+							__a64_srt_index)];\
+			else                                               \
+				ARM64_SIM_L_STACK_WINDOW_REPORT();        \
+		}                                                          \
+		__a64_srt_tag;                                             \
 	})
 
 #define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)                  \

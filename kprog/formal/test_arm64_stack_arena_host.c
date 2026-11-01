@@ -213,6 +213,36 @@ static void check_window(const char *what, __u32 index, __u32 width,
 	}
 }
 
+
+/* The tag-array contract: a tag access addresses one slot of
+ * TAG_SLOTS(capacity) entries, so a slot is addressable iff the byte index is
+ * inside the arena. Restated independently as "the slot is below the array
+ * length" and checked against the generated guard, plus the direct property
+ * that an admitted slot indexes inside the array. The `index < capacity`
+ * restatement would be wrong: indices alias into the same slot (index 1 is
+ * slot 0 of the 1-byte arena), and only the slot bound decides the gate. */
+static void check_tag_slot(const char *what, __u32 index, __u32 capacity)
+{
+	__u32 slots = KPROG_ARM64_STACK_TAG_SLOTS(capacity);
+	int fits = KPROG_ARM64_STACK_TAG_SLOT_FITS(index, slots);
+	int indep = (index / 8U) < slots;
+	__u32 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
+
+	cases++;
+	if (fits != indep) {
+		printf("MISMATCH %s tag slot: index=%u capacity=%u slots=%u "
+		       "slot=%u got=%d indep=%d\n", what, index, capacity, slots,
+		       slot, fits, indep);
+		failures++;
+	}
+	cases++;
+	if (fits && slot >= slots) {
+		printf("MISMATCH %s tag slot admitted past the array: index=%u "
+		       "slot=%u slots=%u\n", what, index, slot, slots);
+		failures++;
+	}
+}
+
 int main(void)
 {
 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 20U, 160U };
@@ -250,6 +280,14 @@ int main(void)
 	check_window("edge", 56U, 8U, 64U);
 	check_window("edge", 57U, 8U, 64U);
 	check_window("edge", 4294967295U, 8U, 4294967295U);
+	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
+		for (j = 0; j < sizeof(indices) / sizeof(indices[0]); j++)
+			check_tag_slot("grid", indices[j], capacities[i]);
+	check_tag_slot("edge", 159U, 160U);
+	check_tag_slot("edge", 160U, 160U);
+	check_tag_slot("edge", 161U, 160U);
+	check_tag_slot("edge", 0U, 1U);
+	check_tag_slot("edge", 1U, 1U);
 	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
 		check_arena_roundtrip("arena", capacities[i]);
 
