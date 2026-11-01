@@ -2612,6 +2612,36 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0469 fixes two paper defects found by
+actually compiling it (census 340 -> 341). No
+TeX toolchain existed in this workspace, so every
+prior paper step was verified by structural scans
+only; a static `tectonic` binary was fetched and
+`main.tex` compiled for the first time.
+
+It did not compile. `sections/4-safety.tex:1347`
+carried an unescaped `__` inside `\texttt`
+(`\texttt{__x86\_stack\_mem.b[8]}`); TeX reads
+the pair as subscript in text mode and halts with
+"Missing $ inserted". The line dates from Step
+0460 and no structural scan could see it, because
+the escapes are balanced in the file -- the defect
+is what TeX does with them.
+
+The compile also exposed the worst typography: a
+275-character run of `/`-joined `\texttt` spans
+with no legal break, overflowing a column by
+800pt, and 23 other spans of 45-126 characters
+doing the same. A `\brk` macro (a discretionary
+break) now marks the separators inside those
+spans; the worst overflow drops 800pt to 167pt
+and the overfull count 13,558 to 13,355. The
+remaining overfull boxes are inherent to this
+two-column style with dense identifiers. The
+diff is break points plus exactly one content
+change, verified by stripping `\brk` from both
+sides and comparing.
+
 Step 0468 documents why the two
 helper-argument-pointer contracts differ (census
 339 -> 340; documentation only). The AArch64
