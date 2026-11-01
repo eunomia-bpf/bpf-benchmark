@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0538 shows the stack-arena capacity bound
+is exactly tight, not merely sufficient (census
+408 -> 409). The rounding equality (capacity +
+7) / 8 was proved under a bound capacity <=
+2^32 - 8, and like every implication that
+leaves a reader unable to tell whether the
+bound is load-bearing -- the question 0525 had
+to answer by measurement. Measuring the
+neighbourhood: holds at 2^32 - 8, fails for
+every capacity from 2^32 - 7 through 2^32 - 1,
+holds again at 0 where the rounding wraps. The
+bound marks precisely the last non-wrapping
+capacity, and the theorem now says so with the
+wrap case pinned separately. Both are
+native_decide on concrete values and both bite.
+Theorem counts move with the statements (2,055
+-> 2,057; 483 -> 485 native_decide; share
+rounds to 23%). Gate: rc 0, 248 banners.
+
 Step 0537 fixes the residue of 0525 (census 407 ->
 408). That step showed EXTR's refinement theorems
 carried an operand-narrowing hypothesis the dispatcher

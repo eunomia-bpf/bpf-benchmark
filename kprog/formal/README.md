@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 408, and 306 steps
+`build/mut_*.py` files exist, the counter's last value is 409, and 307 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0538 - the stack-arena capacity
+bound is exactly tight
+
+`arm64_stack_arena_words_refines` proves
+the rounding equality `(capacity + 7) / 8`
+against the independent specification,
+under a bound `capacity <= 2^32 - 8`. Like
+every implication in the proof, it leaves a
+reader unable to tell whether the bound is
+load-bearing or merely convenient -- exactly
+the question Step 0525 had to answer by
+measurement for a different family.
+
+Measuring the neighbourhood answers it: the
+equality holds at `2^32 - 8`, fails for
+*every* capacity from `2^32 - 7` through
+`2^32 - 1`, and holds again at `0`, where
+the rounding wraps. So the bound is not
+conservative by accident -- it marks
+precisely the last capacity that does not
+wrap. The theorem now says that, and the
+wrap case is pinned separately with its two
+concrete values, so the reason for the
+failure is recorded rather than merely its
+existence.
+
+Both are `native_decide` on concrete
+values: cheap, and they bite -- moving the
+non-equality to a capacity where it does
+hold fails the build. Theorem counts move
+with the two statements (2,055 -> **2,057**;
+483 -> **485** `native_decide`; the share
+rounds to 23%). Gate: rc 0, **248**
+banners. Census 408 -> 409.
 
 ### Step 0537 - the residue of 0525:
 the family theorem still carried the
