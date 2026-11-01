@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0521 closes a second model-only family (census
+391 -> 392). CNEG is worth more than most: the
+dispatcher does not take a boolean but evaluates the
+condition code in AUX against the live NZCV flags, so
+this arm is where the flag-to-condition chain of Steps
+0490/0493 meets the arithmetic -- and a wrong route is
+silent twice over, since negate and not-negate cost the
+same and nothing writes a flag.
+test_arm64_cneg_route_host.c drives it through
+ARM64_SIM_L_EXEC over all 15 condition codes x 16 flag
+combinations x both widths x 11 operands, evaluating
+the condition independently from the architecture:
+26,400 cases. Verified by planting both halves --
+inverting GE fails 1,360, dropping the negation fails
+10,880. Dispatch-model count 6 live / 6 model-only ->
+7 / 5. Gate: rc 0, 236 banners, 124,527,333 cases.
+
 Step 0520 closes one of the seven model-only families
 (census 390 -> 391). UNARY (MVN, NEG) is worth a
 live oracle because the two opcodes are each other's
