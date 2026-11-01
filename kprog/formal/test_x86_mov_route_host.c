@@ -448,6 +448,14 @@ int main(void)
 		0x0000000000000007ULL, MAPPED_BASE,
 		0x000000000000aa00ULL, 0x00007f00000000ffULL,
 	};
+	/* Additional source values for the stack-pointer arm: when the source
+	 * lane is RSP the body biases the raw value by the capacity and the
+	 * pointer bound admits [0, capacity], so these keep the arena index in
+	 * range. The four values above all bias out of a 64-byte arena, which
+	 * left that arm with no rows. */
+	static const __u64 stack_src_values[2] = {
+		(__u64)(long)-64LL, (__u64)(long)-8LL,
+	};
 	static const __u64 dst_values[2] = {
 		0xdeadbeefdeadbeefULL, 0x1122334455667788ULL,
 	};
@@ -474,13 +482,47 @@ int main(void)
 		for (f = 0; f < 5U; f++)
 			for (a = 0; a < 2U; a++)
 				for (sv = 0; sv < 4U; sv++)
-					for (dv = 0; dv < 2U; dv++)
+					for (dv = 0; dv < 2U; dv++) {
+						/* When the source lane is the stack
+						 * pointer the body rebinds the address
+						 * through the arena, and the arena
+						 * index is the raw source bits biased
+						 * by the capacity. The pointer bound
+						 * admits [0, capacity], so the
+						 * sources whose biased index lands
+						 * outside are skipped on that lane
+						 * only; the other lanes keep all
+						 * four. */
+						if (resolve_width(flag_codes[f]) ==
+						    X86_WIDTH_64) {
+							__s64 si = (__s64)(long)
+								   src_values[sv] +
+								   (__s64)X86_SIM_STACK_BYTES;
+							if (si < 0 || si >
+							    (__s64)X86_SIM_STACK_BYTES)
+								continue;
+						}
 						check_mov_reg(
 							pairs[p][0],
 							pairs[p][1],
 							flag_codes[f],
 							lane_aux[a],
 							src_values[sv],
+							dst_values[dv]);
+					}
+
+	/* The stack-pointer arm over its own in-range source values. */
+	for (f = 0; f < 5U; f++)
+		for (a = 0; a < 2U; a++)
+			for (p = 0; p < 6U; p++)
+				for (sv = 0; sv < 2U; sv++)
+					for (dv = 0; dv < 2U; dv++)
+						check_mov_reg(
+							pairs[p][0],
+							pairs[p][1],
+							flag_codes[f],
+							lane_aux[a],
+							stack_src_values[sv],
 							dst_values[dv]);
 
 	if (failures != 0) {

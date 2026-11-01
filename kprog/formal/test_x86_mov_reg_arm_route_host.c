@@ -285,13 +285,32 @@ int main(void)
 		for (a = 0; a < 4U; a++)
 			for (p = 0; p < 6U; p++)
 				for (sv = 0; sv < 5U; sv++)
-					for (dv = 0; dv < 4U; dv++)
+					for (dv = 0; dv < 4U; dv++) {
+						/* The stack-pointer arm rebinds the
+						 * address through the arena, whose
+						 * index is the raw source bits
+						 * biased by the capacity; the
+						 * pointer bound admits
+						 * [0, capacity], so a source that
+						 * lands outside is skipped on that
+						 * arm only. */
+						if (resolve_width(flag_codes[f]) ==
+						    X86_WIDTH_64 &&
+						    pairs[p][1] == X86_RSP) {
+							__s64 si = (__s64)(long)
+								   src_values[sv] +
+								   (__s64)X86_SIM_STACK_BYTES;
+							if (si < 0 || si >
+							    (__s64)X86_SIM_STACK_BYTES)
+								continue;
+						}
 						check_mov_reg(pairs[p][0],
 							      pairs[p][1],
 							      flag_codes[f],
 							      aux_codes[a],
 							      dst_values[dv],
 							      src_values[sv]);
+					}
 
 	if (failures != 0) {
 		printf("x86 mov_reg arm route host cross-check: FAIL (%d)\n",

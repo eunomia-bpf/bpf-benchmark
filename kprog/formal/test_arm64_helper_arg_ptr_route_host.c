@@ -35,6 +35,16 @@ typedef signed int __s32;
 
 #include <stdio.h>
 
+/* The simulator header's unsupported-access hook, reached when a stack
+ * pointer resolves outside the arena; every swept pointer stays in range, so
+ * a hit is a failure the banner reports. */
+static unsigned stack_guard_hits;
+static void arm64_sim_unsupported_opcode(void)
+{
+	stack_guard_hits++;
+}
+
+
 ARM64_SIM_L_DECLARE_STATE();
 ARM64_SIM_L_DECLARE_STACK();
 
@@ -134,10 +144,15 @@ static void check_selector(void)
 
 int main(void)
 {
-	/* The stack-tagged pointer values keep the biased arena index in
-	 * bounds: `ARM64_SIM_STACK_BIAS + ptr` in [0, ARM64_SIM_STACK_BYTES). */
+	/* The stack-tagged pointer values keep the biased arena index a valid
+	 * arena pointer: the biased index `BIAS + ptr` in
+	 * [0, STACK_BYTES], one-past-end included, which for the 96 bias and
+	 * 160-byte arena means `ptr` in [0, 64]. The previous set was written
+	 * as `96 + k`, reading the bias as already included; four of its seven
+	 * entries then biased past the arena (indices 184..248), so those
+	 * formed addresses outside the frame all along. */
 	static const __s64 stack_ptrs[] = {
-		96 - 96, 96 - 64, 96 - 32, 96 - 8, 96, 96 + 32, 96 + 56,
+		0, 8, 16, 32, 48, 56, 64,
 	};
 	/* Raw pointer values a non-stack-tagged register may carry: none is
 	 * array-indexed, so each must pass through unchanged. */
@@ -191,6 +206,12 @@ int main(void)
 		plant(ARM64_SP, (void *)(long)stack_ptrs[p],
 		      ARM64_SIM_TAG_STACK);
 		drive(ARM64_SP);
+	}
+
+	if (stack_guard_hits) {
+		printf("MISMATCH stack pointer guard fired %u time(s)\n",
+		       stack_guard_hits);
+		failures += (int)stack_guard_hits;
 	}
 
 	if (failures) {

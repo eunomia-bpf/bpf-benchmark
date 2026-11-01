@@ -690,8 +690,24 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                          \
 	ARM64_SIM_L_STACK_WRITE_TAG((OFF), (WIDTH), (VALUE), ARM64_SIM_TAG_SCALAR)
 
+/*
+ * The pointer guard. `&b[index]` is well defined up to the one-past-end index
+ * CAPACITY and no further, so a stack-pointer register resolved past that is
+ * not an arena address; a helper receiving it would dereference outside the
+ * array. A pointer needs only the one-past-end bound, not a window's, because
+ * it carries no access width.
+ */
+#define ARM64_SIM_L_STACK_PTR_OK(INDEX)                                     \
+	KPROG_ARM64_STACK_POINTER_FITS((__s64)(INDEX), ARM64_SIM_STACK_BYTES)
+
 #define ARM64_SIM_L_STACK_PTR(OFF)                                         \
-	((void *)&__a64_stack.b[KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS)])
+	({                                                                 \
+		__s64 __a64_sp_ptr_index =                                 \
+			KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS);\
+		if (!ARM64_SIM_L_STACK_PTR_OK(__a64_sp_ptr_index))         \
+			ARM64_SIM_L_UNSUPPORTED_OPCODE();                 \
+		(void *)&__a64_stack.b[__a64_sp_ptr_index];                \
+	})
 
 #define ARM64_SIM_L_HELPER_ARG_PTR(REG)                                   \
 	({                                                                 \

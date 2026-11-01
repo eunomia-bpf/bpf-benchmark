@@ -94,7 +94,11 @@ static __u8 exp_stack[X86_SIM_STACK_BYTES];
  * lane value participates in the pointer add), `INDEX_REG` the byte-lane
  * the AUX index byte names. */
 #define SRC_REG X86_RCX
-#define RSP_PLANT ((void *)(long)-64LL)
+/* The stack lane's planted offset. The arena index is `RSP_PLANT + disp +
+ * scaled index + capacity`, and the pointer bound admits indices in
+ * [0, capacity], so the plant must leave room for the displacements the sweep
+ * drives: at 0 the in-arena rows are `disp + ix` in [-capacity, 0]. */
+#define RSP_PLANT ((void *)(long)0LL)
 #define GENERAL_BASE 0x00005a0000000000ULL
 #define GENERAL_BASE_TAG X86_SIM_TAG_MAP_VALUE
 #define INDEX_REG X86_RDI
@@ -230,6 +234,18 @@ static unsigned long stack_arena_base;
 			}                                                 \
 			if (__pl_i == INDEX_REG) {                        \
 				__pl_value = INDEX_VALUE;                 \
+			}                                                  \
+			/* The AUX word's low byte is an index register.
+			 * `X86_LEA_AUX_RODATA` is the byte 1, which the
+			 * decoder reads as index register 1 (RCX); a pattern
+			 * pointer there makes the biased arena index
+			 * enormous, which the pointer bound rejects. Plant
+			 * that lane with a small scalar so the index stays
+			 * inside the arena, as the specialization host does
+			 * for its own index lane. */                        \
+			if (__pl_i == (unsigned)KPROG_X86_MEM_AUX_INDEX(  \
+					   X86_LEA_AUX_RODATA)) {             \
+				__pl_value = 0;                           \
 				__pl_tag = X86_SIM_TAG_SCALAR;            \
 			}                                                 \
 			X86_SIM_L_WRITE_REG_PTR_TAG(__pl_i,           \
@@ -360,6 +376,8 @@ static const char *route_ctx;
 static void check_lea(unsigned src_root, unsigned width_code, unsigned mode,
 		      __u64 imm, unsigned dst, unsigned fv)
 {
+
+
 	unsigned aux;
 	unsigned src;
 	/* The whole immediate artifact field is the addressing displacement /
@@ -437,6 +455,10 @@ static void check_selectors(void)
 int main(void)
 {
 	static const unsigned src_roots[3] = { 0U, 1U, 2U };
+	/* Displacements the stack arm can resolve: with RSP planted at 0 the
+	 * index is `disp + scaled index`, so these keep the window inside the
+	 * frame at every mode (scale 0 and 8) and every width. */
+	static const __u64 stack_imms[1] = { (__u64)(long)-64LL };
 	static const unsigned width_codes[5] = {
 		0U, X86_WIDTH_8, X86_WIDTH_16, X86_WIDTH_32, X86_WIDTH_64,
 	};
@@ -464,7 +486,28 @@ int main(void)
 			for (m = 0; m < 4U; m++)
 				for (d = 0; d < 2U; d++)
 					for (f = 0; f < 2U; f++)
-						for (i = 0; i < 4U; i++)
+						for (i = 0; i < 4U; i++) {
+							/* The stack arm's arena index
+							 * is `disp + scaled index +
+							 * capacity`; only the whole
+							 * in-range displacement set is
+							 * driven on it below, so skip
+							 * the artifacts that resolve
+							 * outside a 64-byte frame. */
+							if (src_roots[s] == 1U &&
+							    resolve_width(width_codes[w])
+								    == X86_WIDTH_64) {
+								long soff = (long)
+									imm_artifacts[i];
+								if (modes[m] == 2U)
+									soff += (long)INDEX_VALUE;
+								else if (modes[m] == 3U)
+									soff += (long)INDEX_VALUE << 3;
+								if (soff < -(long)X86_SIM_STACK_BYTES ||
+								    soff + (long)X86_SIM_STACK_BYTES >
+								    (long)X86_SIM_STACK_BYTES)
+									continue;
+							}
 							check_lea(
 								src_roots[s],
 								width_codes[w],
@@ -472,10 +515,26 @@ int main(void)
 								imm_artifacts[i],
 								dst_regs[d],
 								f);
+						}
 
-	if (cases != 32641UL) {
+	/* The stack-pointer arm over its own in-range displacement set. The arena
+	 * index is `RSP_PLANT + disp + scaled index + capacity`, and the pointer
+	 * bound admits [0, capacity]; the primary sweep's displacements (2^31
+	 * and an upper-half artifact) resolve outside a 64-byte arena at every
+	 * mode, so they leave that arm with no rows. These displacements keep
+	 * the whole window inside the frame at every mode and width. */
+	for (w = 0; w < 5U; w++)
+		for (m = 0; m < 4U; m++)
+			for (d = 0; d < 2U; d++)
+				for (f = 0; f < 2U; f++)
+					for (i = 0; i < sizeof(stack_imms) /
+							    sizeof(stack_imms[0]); i++)
+						check_lea(1U, width_codes[w], modes[m],
+							  stack_imms[i], dst_regs[d], f);
+
+	if (cases != 32369UL) {
 		printf("x86 lea route host cross-check: case-count drift "
-		       "(got %lu want %lu)\n", cases, 32641UL);
+		       "(got %lu want %lu)\n", cases, 32369UL);
 		return 1;
 	}
 	if (failures == 0)

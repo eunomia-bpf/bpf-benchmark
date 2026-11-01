@@ -597,8 +597,23 @@ struct x86_sim_state {
 		__x86_str_value;                                          \
 	})
 
+/*
+ * The pointer guard. `&b[index]` is well defined up to the one-past-end index
+ * CAPACITY and no further, so a stack-pointer register resolved past that is
+ * not an arena address. A pointer needs only the one-past-end bound, not a
+ * window's, because it carries no access width.
+ */
+#define X86_SIM_L_STACK_PTR_OK(INDEX)                                      \
+	KPROG_X86_STACK_POINTER_FITS((__s64)(INDEX), X86_SIM_STACK_BYTES)
+
 #define X86_SIM_L_STACK_PTR(OFF)                                           \
-	((void *)&__x86_stack_mem.b[X86_SIM_L_STACK_INDEX((__s64)(long)(OFF))])
+	({                                                                 \
+		__s64 __x86_sp_ptr_index =                                  \
+			(__s64)(long)(OFF) + (__s64)X86_SIM_STACK_BYTES;   \
+		if (!X86_SIM_L_STACK_PTR_OK(__x86_sp_ptr_index))           \
+			__builtin_trap();                                  \
+		(void *)&__x86_stack_mem.b[X86_SIM_L_STACK_INDEX((OFF))];  \
+	})
 
 #define X86_SIM_L_HELPER_ARG_PTR(REG)                                      \
 	X86_SIM_L_READ_REG_PTR(REG)

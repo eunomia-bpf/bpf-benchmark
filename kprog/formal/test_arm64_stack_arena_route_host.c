@@ -262,9 +262,13 @@ int main(void)
 	}
 
 	/* The stack pointer helper addresses the byte arena at the biased
-	 * index: its distance from the arena base is `bias + off`. */
+	 * index: its distance from the arena base is `bias + off`. The pointer
+	 * bound admits indices in [0, STACK_BYTES], so the offset runs from
+	 * `-bias` to `STACK_BYTES - bias` -- the previous upper limit of
+	 * `+bias` reached index 192 against a 160-byte arena. */
 	for (off = -(long)ARM64_SIM_STACK_BIAS;
-	     off <= (long)ARM64_SIM_STACK_BIAS; off++) {
+	     off <= (long)ARM64_SIM_STACK_BYTES -
+		    (long)ARM64_SIM_STACK_BIAS; off++) {
 		unsigned char *base = &__a64_stack.b[0];
 		long delta = (unsigned char *)ARM64_SIM_L_STACK_PTR(off) - base;
 

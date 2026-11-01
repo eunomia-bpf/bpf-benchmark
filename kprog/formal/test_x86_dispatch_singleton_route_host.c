@@ -1810,7 +1810,17 @@ static void check_arm(const char *what, unsigned op, unsigned dst,
 		PLANT_HEAP_BASE(X86_RBX);
 		PLANT_HEAP_BASE(X86_RDI);
 		PLANT_HEAP_BASE(X86_RSI);
+		/* The AUX word carries an index register in its low byte. The
+		 * `lea` rows use AUX = X86_LEA_AUX_RODATA (1) as a gate byte,
+		 * which the decoder reads as index register 1 (RCX); a pattern
+		 * pointer there makes the biased arena index enormous, which the
+		 * pointer bound now rejects. Plant that lane with a small scalar
+		 * so the index stays inside the arena, as the specialization host
+		 * does for its own index lane. */
 		PLANT_STACK_RSP();
+		if (op == X86_OP_LEA)
+			X86_SIM_L_WRITE_REG_WIDTH(
+				KPROG_X86_MEM_AUX_INDEX(aux), 0, X86_WIDTH_64);
 		stack_arena_base =
 			(unsigned long)(void *)&__x86_stack_mem.b[0];
 		CAPTURE_ALL(&seed);
