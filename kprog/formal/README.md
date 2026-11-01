@@ -136,6 +136,22 @@ to tell an architectural difference from a mistake in one of them.
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
 
+The helper-id table is a different kind of gap, because it is only *stated*
+rather than reached. `arm64_helper_idents_spec.json` gives each of 61 BPF
+helpers the kernel id the encoder renumbers against, and the generated header's
+assertions pin those ids to the spec -- so a wrong id produces a
+self-consistent header, passes every oracle, and renumbers a program onto the
+wrong helper at runtime. The simulator never consults the table (it dispatches
+by *name* at compile time), which is precisely why nothing had cross-checked it.
+
+The independent source was already in the tree: the vendored libbpf ships
+`bpf_helper_defs.h` with one entry per helper. `check_helper_idents.py` parses
+it and compares. Measured: all 61 ids match the kernel enum exactly, and the
+name set matches what the simulator forwards to, in both directions. The check
+reports three classes separately -- an id disagreeing with the kernel, a name
+the kernel does not define, and a name-set mismatch either way -- and is
+verified by planting each.
+
 The conditional-select family is another. `arm64_csel` names eight opcodes,
 and the dispatcher reaches them at one arm that evaluates the condition, picks
 the pointer-tag or scalar path and writes the destination -- with no host that
@@ -7177,6 +7193,41 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0506 - the helper-id table was
+stated but never checked against the
+kernel
+
+Step 0506 covers a contract that is
+*stated* rather than reached (census 376
+-> 377). `arm64_helper_idents_spec.json`
+gives each of 61 BPF helpers the kernel id
+the encoder renumbers against. The ids are
+hand-maintained, and the generated
+header's assertions only pin them to the
+spec -- so a wrong id yields a
+self-consistent header, green oracles, and
+a program renumbered onto the wrong helper
+at runtime. The simulator dispatches by
+*name* at compile time and never reads the
+table, which is why nothing had checked it.
+
+The independent source was already in the
+tree: the vendored libbpf ships
+`bpf_helper_defs.h` with one entry per
+helper. `check_helper_idents.py` parses
+it, compares, and runs on every gate.
+
+Measured, not assumed: all 61 ids match
+the kernel enum exactly, and the name set
+matches what the simulator forwards to in
+both directions. The checker separates
+three fault classes -- an id that
+disagrees with the kernel, a name the
+kernel does not define, and a name-set
+mismatch either way -- and each was
+planted to confirm it reports. Gate: rc 0,
+**232** banners. Census 376 -> 377.
 
 ### Step 0505 - the conditional-select
 family had no live oracle, and writing
