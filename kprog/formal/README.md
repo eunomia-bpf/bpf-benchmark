@@ -136,6 +136,19 @@ to tell an architectural difference from a mistake in one of them.
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
 
+The encoder's jump opcodes are a cross-*language* link. The x86 encoder is
+Rust and writes conditional jumps as raw opcodes beside a comment naming the
+mnemonic; the C simulator decides conditions from the `X86_CC_*` table. Neither
+side reads the other and the opcode is only a number, so an off-by-one in a
+hand-written constant compiles, runs, and branches on the wrong condition. What
+makes them comparable is x86's own encoding rule -- short conditional jump
+opcodes are `0x70 + condition code`, and the `X86_CC_*` values *are* those
+codes -- so `check_jcc_opcodes.py` requires every commented site to satisfy
+`opcode == 0x70 + X86_CC_<suffix>`. Measured: 4 sites (ja, jae, je, jne), all
+correct, verified by planting a fault in each direction. It covers only the
+sites the encoder comments with a mnemonic; an uncommented `0x7x` constant is
+invisible to it, which the script states.
+
 The helper-id table is a different kind of gap, because it is only *stated*
 rather than reached. `arm64_helper_idents_spec.json` gives each of 61 BPF
 helpers the kernel id the encoder renumbers against, and the generated header's
@@ -7193,6 +7206,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0507 - the encoder's jump
+opcodes had no link to the condition
+contract
+
+Step 0507 joins two languages (census 377
+-> 378). The x86 encoder is Rust and
+emits conditional jumps as raw opcodes
+beside a comment naming the mnemonic; the
+C simulator decides conditions from the
+`X86_CC_*` table. Nothing connects them,
+and an opcode is only a number -- an
+off-by-one compiles, runs, and branches on
+the wrong condition.
+
+x86's encoding rule supplies the link:
+short conditional jump opcodes are
+`0x70 + condition code`, and the
+`X86_CC_*` values are those codes.
+`check_jcc_opcodes.py` requires every
+mnemonic-commented site to satisfy that,
+and runs on every gate.
+
+Measured: 4 sites (ja, jae, je, jne), all
+correct. Pressed in both directions --
+changing jne's opcode to `0x74` reports
+the site; drifting `X86_CC_NE` to 6
+reports it too. The script also states its
+own limit: an uncommented `0x7x` constant
+is invisible to it, so the check is as wide
+as the encoder's commenting, not wider.
+Gate: rc 0, **232** banners. Census 377 ->
+378.
 
 ### Step 0506 - the helper-id table was
 stated but never checked against the
