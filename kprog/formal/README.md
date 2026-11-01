@@ -136,6 +136,16 @@ to tell an architectural difference from a mistake in one of them.
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
 
+Two oracles restated their ISA's condition codes as local literals, so that the
+model stayed independent of the generated tables. That was right about the
+generated side and wrong about the other: it made them blind to whether the
+*simulator* still agreed with the contract. Drifting `X86_CC_A` in
+`x86_sim.h`, or `ARM64_COND_EQ` in `arm64_sim.h`, left both green. Both now
+include the simulator header, so the drift fails at compile time through the
+generated `_Static_assert`s -- stronger than the runtime comparison they had.
+Found by looking for contracts the simulator never calls, which is the
+complement of the usual coverage question.
+
 Everything above compares one contract at a time. The control-flow path is a
 different kind of claim: the property that matters is that two *chains*
 compose to the same place, not that two contracts match. Each ISA proves its
@@ -7107,6 +7117,35 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0501 - two condition-decode
+oracles could not see the simulator drift
+
+Step 0501 turns the coverage question
+around (census 371 -> 372). Rather than
+ask which contracts have a host, it asks
+which contracts the *simulator* never
+calls -- and the answer pointed at the
+two condition-decode oracles, which
+restated their ISA's `X86_CC_*` /
+`ARM64_COND_*` codes as local literals.
+
+That was the right instinct about the
+generated tables and the wrong one about
+the other side: it made the oracles blind
+to whether the *simulator* still agreed
+with the contract. Measured, not assumed:
+drifting `X86_CC_A` in `x86_sim.h`, or
+`ARM64_COND_EQ` in `arm64_sim.h`, left
+both oracles green.
+
+Both now include the simulator header, so
+the drift fails at *compile time* through
+the generated `_Static_assert`s -- a
+stronger check than the runtime comparison
+they had, and one that no longer depends
+on the literals happening to match. Gate:
+rc 0, **229** banners. Census 371 -> 372.
 
 ### Step 0499 - the two control-flow
 chains compose to the same next PC
