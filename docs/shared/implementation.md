@@ -2612,6 +2612,36 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0475 enforces the paper's "no sorry, no axiom"
+claim instead of merely being true (census 346
+-> 347). `lake build` reports a `sorry` as a
+warning and exits 0, so planting
+`theorem t : (1 : Nat) = 1 := by sorry` in a
+generated module builds cleanly and the gate
+passed -- the claim was a property of the current
+tree, not something the recipe held. That is the
+same watched-not-exercised shape as Steps
+0473/0474, one level up: the fact was true and
+nothing could falsify it.
+
+`check_no_sorry.py` strips block and line
+comments, then rejects `sorry`, `admit`, and
+`axiom` declarations across all 294 modules;
+`native_decide`, `bv_decide`, and `omega` are
+proofs and pass, and prose uses of the word
+"admit" inside doc comments are stripped rather
+than matched. It runs right after `lake build`; a
+planted `sorry` now fails the gate with rc 2.
+Gate: rc 0, 226 banners.
+
+Also verified while auditing the proof tree, all
+holding: every generated definition is referenced
+by a theorem-bearing importer (138/138), no
+`*_refines` theorem has identical sides (0 of
+560), and no hand `*Spec` restatement is defined
+in terms of the generated definition it refines
+(0 of 138).
+
 Step 0474 exercises the remaining arm64 guard
 counters (census 345 -> 346). Four more hosts
 counted guard hits while sweeping only in-range
