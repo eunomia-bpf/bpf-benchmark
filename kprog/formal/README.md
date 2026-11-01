@@ -10,12 +10,12 @@ make check
 What the gate currently covers, measured from one full `make check` run:
 234 passing `cross-check: OK` oracle banners summing to 124,500,620 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 301 Lean modules
-compiling transitively from the gate's roots and proving 2,034 theorems with
+header and one `Generated*.lean` module (138/138/138); 305 Lean modules
+compiling transitively from the gate's roots and proving 2,042 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
-an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
-those (25%) are discharged by `native_decide`, i.e. by compiled evaluation, so
+an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 483 of
+those (24%) are discharged by `native_decide`, i.e. by compiled evaluation, so
 they rest on the compiler as well as the kernel — 20 of the 599
 refinement-named theorems, each a finite-table equality, and the rest finite
 enumerations or concrete examples, never a compositional or arithmetic
@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 387, and 269 steps
+`build/mut_*.py` files exist, the counter's last value is 388, and 270 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7327,6 +7327,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0517 - the dispatcher's
+exclusivity was proved; its coverage was
+not
+
+Step 0517 proves the half that was missing
+(census 387 -> 388). The existing theorem
+says no opcode is gated by two arms -- "at
+most one". Nothing said "at least one", and
+the difference matters, because an opcode
+with no arm falls through the chain to the
+unsupported hook: a silent behavioural hole
+rather than a compile error.
+
+`Arm64DispatchTotality` partitions the
+opcodes the two generated tables name into
+family-routed, singleton-routed and
+unrouted, and proves the routed lists are
+duplicate-free and mutually disjoint; the
+unrouted set is disjoint from both,
+non-empty, and *enumerated* rather than
+discovered, so adding an opcode without
+routing it shows up as a diff; and
+membership is characterised exactly.
+
+Getting the unrouted set right took
+measurement. A first scan of the `HANDLED`
+macros suggested three opcodes; evaluating
+the generated tables showed `RET` is a
+routed singleton, and only `ADD_IMM` and
+`SUB_IMM` are reserved. The scan was wrong,
+not the tree.
+
+Adding one element to the unrouted list
+breaks four of the eight theorems. Gate:
+rc 0, **234** banners, 2,042 theorems.
+Census 387 -> 388.
 
 ### Step 0516 - the C surface is
 mutation-tested, and mostly guarded at
