@@ -2612,6 +2612,21 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0527 asks the same dispatch question of x86
+(census 397 -> 398), which had never been measured.
+The x86 chain branches on 53 HANDLED predicates
+and the generated model names every one; what
+looked like a mismatch was a disp_ prefix
+difference in ten family names, and the two
+Lean-only entries are non-family artifacts. So
+x86 needed no work -- worth establishing rather
+than assuming, since AArch64 needed twelve route
+hosts. check_dispatch_model now reports both
+architectures and fails when either gains a
+predicate the model does not name, verified by
+planting one on each side. Gate: rc 0, 241
+banners.
+
 Step 0526 closes the last of the twelve model-only
 families (census 396 -> 397). ORN is the one
 whose second source is modified before use: the
