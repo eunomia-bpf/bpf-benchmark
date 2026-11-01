@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0473 exercises the arm64 window guard rather
+than watching it (census 344 -> 345). Both
+arm64 route hosts counted guard hits and failed
+if any fired, but every offset they swept was in
+range, so a simulator whose window guard was
+weakened to always-true passed all 2.75M and
+3.84M of their cases. Each now drives accesses
+whose window runs past the arena and requires
+exactly one hit; the sabotage that previously
+passed both hosts now fails them (3 and 4
+mismatches). The x86 hosts already caught it,
+since their sweeps include out-of-range offsets,
+so only the arm64 pair needed this. With the
+guard disabled the compiler itself reports
+`-Warray-bounds: array subscript 160 is above
+array bounds of __u8[160]`, corroborating that
+the guard is what prevents the overrun. Gate:
+rc 0, 226 banners, 123,463,522 cases.
+
 Step 0472 makes the stack pointer bound
 mutation-tested (census 343 -> 344; no
 contract, proof, or simulator change). Step 0465
