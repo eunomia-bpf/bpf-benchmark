@@ -10,6 +10,7 @@ check:
 	python3 check_oracle_composition.py
 	python3 check_dual_emit_coverage.py
 	python3 mutate_contracts.py --check
+	python3 check_dispatch_model.py
 	python3 generate_ptr_add_spec.py --check
 	python3 generate_abi_load_spec.py --check
 	python3 generate_arm64_width_spec.py --check
