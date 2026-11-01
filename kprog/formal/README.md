@@ -6911,6 +6911,39 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0478 - the paper's case counts
+are checked the same way
+
+Step 0478 applies Step 0477's lesson
+to the paper (census 349 -> 350).
+Sweeping all 46 parenthesised case
+counts in `4-safety.tex` against the
+current gate log found seven stale:
+the `_Static_assert` count (1,049 ->
+1,051, the same drift fixed in this
+README) and six oracle counts moved
+by this session's own work -- the
+arm64 stack-arm, write-lanes,
+read-tag-source and helper-argument
+hosts gained exercised-guard rows
+(167,478 -> 167,480; 3,843,511 ->
+3,843,515; 60,142 -> 60,144; 786 ->
+789) and the x86 mov_reg-arm routed
+oracle reads 72,866 not 79,202.
+
+`check_paper_counts.py` now extracts
+every claim, reads the counts from a
+`make check` log, and reports any
+claim no banner reports. It cannot
+tell *which* banner a claim means,
+only that the number exists -- which
+is enough for staleness, since a stale
+figure matches nothing, and it avoids a
+fragile host-name mapping. Verified
+both ways: a claim rewritten to an
+older count fails, the current section
+passes all 46. Census 349 -> 350.
+
 ### Step 0477 - the README's counts
 become re-derivable
 

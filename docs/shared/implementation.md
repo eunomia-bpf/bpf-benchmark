@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0478 checks the paper's case counts the same
+way (census 349 -> 350). Sweeping all 46
+parenthesised case counts in `4-safety.tex`
+against the current gate log found seven stale:
+the `_Static_assert` count (1,049 -> 1,051, the
+same drift already fixed in the harness README)
+and six oracle counts moved by this session's own
+coverage rows -- arm64 stack-arm 167,478 ->
+167,480, write-lanes 3,843,511 -> 3,843,515,
+read-tag-source 60,142 -> 60,144,
+helper-argument 786 -> 789, and x86 mov_reg-arm
+routed 79,202 -> 72,866. `check_paper_counts.py`
+now extracts each claim and reports any that no
+gate banner reports; it checks existence rather
+than identity, which catches staleness without a
+fragile host-name map, and is verified both ways.
+
 Step 0477 fixes a bookkeeping regression and makes
 it self-detecting (census 348 -> 349). Steps
 0473 to 0476 were recorded in this log but never
