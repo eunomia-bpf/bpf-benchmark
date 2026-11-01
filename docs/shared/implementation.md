@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0509 extends the branch-condition check to the
+AArch64 encoder (census 379 -> 380). The same
+crate emits AArch64 conditional branches from a
+literal whose low four bits are the condition code,
+and nothing checked those. Six sites, all in
+tail-call and map-update lowering, where the branch
+decides out-of-bounds, missing module, or invalid
+argument. The buffer-index name states which check
+the branch belongs to, so the expected condition is a
+property of the site: bounds/limit/null are
+greater-or-equal, module existence is equality,
+invalid is higher. One name -- null_branch -- did not
+say enough; reading its context showed it follows the
+same comparison as the bounds branches, worth noting
+because a checker keyed on names inherits their
+imprecision. Measured: 6 sites all correct; two
+planted faults reported, one against the check it
+implements and one as not being a conditional branch
+at all. Gate: rc 0, 232 banners.
+
 Step 0508 closes the jcc checker's own stated blind
 spot (census 378 -> 379). Step 0507 checked the four
 mnemonic-commented emissions; there are seven, and the
