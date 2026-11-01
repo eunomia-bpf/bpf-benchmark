@@ -698,6 +698,8 @@ check:
 	./build/test_arm64_call_ret_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_call_ret_route_host.c -o build/test_x86_call_ret_route_host
 	./build/test_x86_call_ret_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
+	./build/test_arm64_helper_call_host
 	lake env lean KProgFormal/GeneratedArm64Cneg.lean
 	lake env lean KProgFormal/Arm64Cneg.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_cneg_host.c -o build/test_arm64_cneg_host
