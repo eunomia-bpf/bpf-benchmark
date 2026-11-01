@@ -2612,6 +2612,21 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0468 documents why the two
+helper-argument-pointer contracts differ (census
+339 -> 340; documentation only). The AArch64
+helper rebases a stack-tagged register into the
+arena; the x86-64 helper passes the register's
+pointer through. Both are right: AArch64
+stack-tagged registers hold frame offsets (a
+register holding -8 hands the callee arena byte
+88, bias 96 plus the offset), while x86-64's
+stack-pointer write already stores a real arena
+address (delta 56, capacity 64 plus the offset),
+so rebasing again would double-apply the bias.
+Both numbers measured from the committed
+headers. Gate: rc 0, 226 banners.
+
 Step 0467 re-measures the harness README's own
 claims against the committed tree (census
 338 -> 339; no contract, proof, or simulator

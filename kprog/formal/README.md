@@ -176,6 +176,19 @@ called from `X86_SIM_BPF_CALL_bpf_map_lookup_elem`, which the
 deleting it would break that generator's `--check`. An "unused" macro here may
 be a live generator anchor.
 
+`X86_SIM_L_HELPER_ARG_PTR` and `ARM64_SIM_L_HELPER_ARG_PTR` look like they
+should be the same contract and are deliberately not, because the two register
+files hold different things under the stack tag. On AArch64 a stack-tagged
+register carries a *frame offset* (`sp` is an abstract offset in this model),
+so the helper rebases it into the arena through `ARM64_SIM_L_STACK_PTR` before
+the call — a register holding `-8` hands the callee arena byte `88`. On x86-64
+the stack-pointer write already stores a *real arena address* (`mov %rsp, %rax`
+rebases into the arena and stamps the tag), so the same register holds a
+pointer with an arena delta of 56 and the helper passes it through unchanged;
+rebasing again would double-apply the capacity bias. Both are correct for their
+own register model, and a change that "unified" them would move one ISA's
+helper arguments by the capacity.
+
 The 138/138/138 pairing is verified as a bijection in both directions rather
 than inferred from equal counts: every `*_spec.json` has a same-named
 `generated/*.h` with nothing left over on either side (both set differences
@@ -6859,6 +6872,50 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0468 - the two helper-argument
+pointer contracts differ on purpose
+
+Step 0468 documents an
+ISA asymmetry that had no written
+rationale (census 339 -> 340). No
+contract, proof, or simulator change;
+the deliverable is the measurement
+that shows the asymmetry is required
+rather than an oversight.
+
+`X86_SIM_L_HELPER_ARG_PTR` and
+`ARM64_SIM_L_HELPER_ARG_PTR` look
+like they should be one contract. The
+AArch64 helper rebases a stack-tagged
+register into the arena before the
+call; the x86-64 helper is the
+identity on the register's pointer.
+That is correct for both, because the
+two register files hold different
+things under the stack tag, and the
+difference is measurable: with a
+register holding frame offset `-8`,
+the AArch64 helper hands the callee
+arena byte `88` (bias 96 plus the
+offset), while on x86-64
+`mov %rsp, %rax` already stored a
+real arena address, so the tagged
+register holds a pointer with an arena
+delta of `56` (capacity 64 plus the
+offset) and passing it through is the
+right action. Rebasing the x86 value
+again would double-apply the capacity
+bias; dropping the AArch64 rebase
+would hand the callee a bare offset.
+A change that "unified" the two would
+move one ISA's helper arguments by the
+capacity.
+
+Both numbers are measured from the
+committed headers, not derived on
+paper. Gate: rc 0, 226 `cross-check:
+OK` banners. Census 339 -> 340.
 
 ### Step 0467 - harness claims re-measured
 
