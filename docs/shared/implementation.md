@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0503 separates two claims that were being
+conflated (census 373 -> 374). Classifying all 214
+hosts by whether they include the simulator header
+gives 89 driving the real dispatcher and 125 comparing
+a hand model against a generated contract; the second
+does not imply the first. Fifty-five of 138 contracts
+appeared only on the model-only side, and the AArch64
+multiply arm was the one arithmetic family there --
+proved in Lean, modelled, never driven through
+ARM64_SIM_L_EXEC, so the dispatcher could misroute or
+misread and every check stayed green.
+test_arm64_mul_route_host.c drives MADD/MSUB/MUL over
+distinct operands at both widths with the expected
+value computed from the architecture (not the
+contract), plus a non-member opcode required to reach
+the unsupported arm. Flipping MSUB's operand order
+fails 432 of 1,296. Gate: rc 0, 230 banners,
+124,469,580 cases.
+
 Step 0502 fixes a defect found by the same search
 (census 372 -> 373). Two arm64 memory-model hosts
 defined ARM64_SP as 31, but 31 is XZR and 32 is SP in
