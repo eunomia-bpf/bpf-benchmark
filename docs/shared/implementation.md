@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0506 covers a contract that is stated rather than
+reached (census 376 -> 377). The arm64 helper-ident
+spec gives each of 61 BPF helpers the kernel id the
+encoder renumbers against; the ids are hand-maintained
+and the generated assertions only pin them to the spec,
+so a wrong id gives a self-consistent header, green
+oracles, and a program renumbered onto the wrong helper
+at runtime. The simulator dispatches by name at compile
+time and never reads the table, which is why nothing
+had checked it. The independent source was already in
+the tree: the vendored libbpf ships bpf_helper_defs.h
+with one entry per helper. check_helper_idents.py
+parses it, compares, and runs on every gate. Measured:
+all 61 ids match the kernel enum and the name set
+matches what the simulator forwards to in both
+directions. Three fault classes are reported
+separately and each was planted. Gate: rc 0, 232
+banners.
+
 Step 0505 continues the simulator-called but never-driven
 sweep (census 375 -> 376). arm64_csel names eight
 opcodes and the dispatcher reaches them at one arm
