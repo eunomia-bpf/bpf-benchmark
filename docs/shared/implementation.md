@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0510 is the first cross-architecture check rather
+than a cross-language one (census 380 -> 381).
+bpf_tail_call is lowered separately for x86 and
+AArch64, in separate modules, each with its own
+spelling of the kernel's limit (u8 and u32). The same
+program lowered either way must behave the same, so
+the limit, the comparison and the increment have to
+agree -- and nothing compared them. The check now
+requires one statement of the limit across both, an
+unsigned-greater-or-equal branch on each side (jae /
+CS), and an increment by one on each, with the limit
+cross-checked against the vendored kernel header
+(MAX_TAIL_CALL_CNT 33). Measured: all agree; three
+planted divergences each reported by name. A related
+measurement kept because it looked like a discrepancy
+and is not: the encoder reserves 512 bytes of stack,
+the kernel's MAX_BPF_STACK is 512, and the simulators
+model 64/128 and 160 -- the arena is a model size and
+an access past it is reported, not silently wrong.
+Gate: rc 0, 232 banners.
+
 Step 0509 extends the branch-condition check to the
 AArch64 encoder (census 379 -> 380). The same
 crate emits AArch64 conditional branches from a
