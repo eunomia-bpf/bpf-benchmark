@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0534 executes the x86 helper-call bodies (census
+404 -> 405), the mirror of 0533. The x86 surface is
+much smaller -- seven macros -- and none had been
+executed, for the same reason: the toolchain declares
+each helper as a constant pointer holding the helper id
+rather than an address. What differs is instructive: on
+AArch64 eighteen of sixty-one forward to a real call;
+on x86 only the clock does, and the three get_* helpers
+write a constant zero, which is what they return in the
+model's kernel. The first version asserted a forward
+for all four and reported three failures that were the
+tree being right -- the third consecutive host where the
+model was wrong first. Each helper is checked for the
+state its body intends, and the map helpers for both
+the returned pointer and its map-value tag. Verified in
+both directions. Gate: rc 0, 247 banners, 124,531,787
+cases.
+
 Step 0533 executes all 61 AArch64 helper-call bodies
 (census 403 -> 404), the largest unexecuted surface:
 no host in the tree mentioned any of them, and this is

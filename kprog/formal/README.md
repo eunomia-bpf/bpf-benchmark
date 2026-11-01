@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-246 passing `cross-check: OK` oracle banners summing to 124,531,779 modeled
+247 passing `cross-check: OK` oracle banners summing to 124,531,787 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,531,779 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 246 banners are all distinct oracles — 245 report a plain
+124,531,787 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 247 banners are all distinct oracles — 246 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 404, and 299 steps
+`build/mut_*.py` files exist, the counter's last value is 405, and 301 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -166,6 +166,16 @@ other three now run, and driving the conditional one in *both* directions
 mattered: the first version used only a condition that happened to hold and so
 passed with the conditional degraded to an unconditional jump. Adding the
 falsifying case makes that fault fail.
+
+The second architecture's helper surface is much smaller -- seven macros -- and
+none of those was executed either, for the same reason. What differs is
+instructive: on the first architecture eighteen of sixty-one forward to a real
+toolchain call, while here only one of seven does; the three `get_*` helpers
+write a constant zero, which is what they return in the model's kernel. My first
+version asserted a forward for all four and reported three failures that were
+the tree being right. The map helpers are checked for both the returned pointer
+and its map-value tag, a correct address with the wrong tag being as wrong as a
+wrong address.
 
 The helper-call bodies are the largest unexecuted surface of all: 61 macros,
 one per helper the simulator recognises, and no host in the tree mentioned any
@@ -7506,6 +7516,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0534 - the x86 helper surface,
+where only one of seven forwards
+
+Step 0533 executed all 61 AArch64 helper
+macros (census 404 -> 405). The x86 surface
+is much smaller -- seven -- and none of
+those was executed either, for the same
+reason: the toolchain declares each helper
+as a constant pointer holding the helper's
+id rather than an address.
+
+What differs is instructive. On AArch64,
+eighteen of the sixty-one forward to a real
+toolchain call. On x86 only one does: the
+clock. The three `get_*` helpers write a
+constant zero, which is what they return in
+the model's kernel. My first version
+asserted a forward for all four and reported
+three failures that were the tree being
+right -- the third consecutive host where the
+model, not the code, was wrong first.
+
+Each helper is checked for the state its
+body intends: a forwarded value for the
+clock, the constant zero for the three
+`get_*`, and for the three map helpers both
+the returned pointer and its map-value tag.
+
+Verified by planting both shapes: changing a
+constant zero to seven fails, and retagging
+the lookup result as scalar fails. Gate:
+rc 0, **247** banners, 124,531,787 cases.
+Census 404 -> 405.
 
 ### Step 0533 - all 61 helper-call
 bodies execute, the largest unexecuted
