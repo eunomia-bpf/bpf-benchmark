@@ -6911,6 +6911,46 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0479 - the x86 dispatch chain's
+missing else is documented
+
+Step 0479 records a design decision
+that was only discoverable from two
+test files (census 350 -> 351).
+`X86_SIM_L_EXEC` has no final `else`,
+so an opcode that matches no dispatch
+predicate is a silent no-op. Driving
+`X86_OP_JCC`, `X86_OP_RET`, and
+`X86_OP_CALL` through the chain
+confirms it: the state comes back
+untouched.
+
+That looks like a fail-fast
+violation -- the repo requires an
+unsupported capability to exit 1, and
+the AArch64 chain does have an
+unsupported hook -- but it is
+deliberate and pinned: both dispatch
+route hosts drive `X86_OP_RET`, which
+has no arm, and require the whole
+state to be byte-identical to its seed,
+and their comments say so. Adding an
+`else` arm, which is the obvious
+"fix", invalidates both hosts; that
+was verified by adding one and
+reverting.
+
+It is also not a fail-fast violation
+in substance: the encoder raises
+`unsupported mnemonic` before emitting
+an opcode it cannot lower, so only a
+decoded-but-unarmed opcode reaches the
+chain, and by the hosts' definition
+that is a no-op. The rationale now
+sits at the chain rather than only in
+the tests. Gate: rc 0, 226 banners.
+Census 350 -> 351.
+
 ### Step 0478 - the paper's case counts
 are checked the same way
 

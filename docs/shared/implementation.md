@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0479 documents why the x86 dispatch chain
+has no final `else` (census 350 -> 351). An
+opcode matching no predicate is a silent no-op;
+driving JCC, RET, and CALL through the chain
+confirms the state returns untouched. That reads
+as a fail-fast violation -- the AArch64 chain has
+an unsupported hook and the repo requires an
+unsupported capability to exit 1 -- but it is
+deliberate and pinned: both dispatch route hosts
+drive `X86_OP_RET` and require the state to be
+byte-identical to its seed. Adding an `else` arm,
+the obvious fix, invalidates both hosts; verified
+by adding one and reverting. It is also not a
+fail-fast violation in substance, since the
+encoder raises `unsupported mnemonic` before
+emitting an opcode it cannot lower. The rationale,
+previously only inside the two test files, now
+sits at the chain. Gate: rc 0, 226 banners.
+
 Step 0478 checks the paper's case counts the same
 way (census 349 -> 350). Sweeping all 46
 parenthesised case counts in `4-safety.tex`
