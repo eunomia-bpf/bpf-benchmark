@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0519 compares the dispatcher with the model of
+it (census 389 -> 390). The coverage theorems of
+0517/0518 are stated over the generated dispatch
+tables, while the C chain branches on its own
+HANDLED predicates, and nothing tied the two
+lists together. Measured: the AArch64 chain
+branches on 35 families, the model names 25, so
+twelve are routed by the code and absent from the
+model. check_dispatch_model.py records that set
+and fails on a new predicate with no counterpart
+or a recorded gap that has since been modelled.
+Writing the entries honestly took a correction:
+the first version claimed all twelve had route
+hosts and only five do -- CSEL, MUL, MOV, SHIFT,
+LDRSX are driven through the dispatcher, the rest
+have model-side hosts only. The totality
+docstring now states its scope as the modelled
+subset. Gate: rc 0, 234 banners.
+
 Step 0518 gives x86 the same coverage statement
 (census 388 -> 389), and the two differ in kind. The
 AArch64 reserved codes are unused filler; the x86 five
