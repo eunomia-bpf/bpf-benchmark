@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0474 exercises the remaining arm64 guard
+counters (census 345 -> 346). Four more hosts
+counted guard hits while sweeping only in-range
+offsets, so a weakened guard passed all of them:
+the stack-arm, read-tag-source, and
+write-tag-action hosts (1.67e5, 6.01e4, 9.08e6
+cases) against the window guard, and the
+helper-argument-pointer host against the pointer
+guard. Each now drives an access or pointer past
+the arena and requires exactly one hit. The
+separation is verified per host -- each fails
+its own sabotage and passes the other's -- so the
+rows exercise the guard the host actually covers.
+That is six arm64 hosts in total across Steps
+0473 and 0474. The x86 hosts never had the gap:
+they trap rather than counting, so a disabled
+guard is a signal, and both catch the sabotage.
+Gate: rc 0, 226 banners, 123,463,531 cases.
+
 Step 0473 exercises the arm64 window guard rather
 than watching it (census 344 -> 345). Both
 arm64 route hosts counted guard hits and failed

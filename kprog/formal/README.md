@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-226 passing `cross-check: OK` oracle banners summing to 123,463,522 modeled
+226 passing `cross-check: OK` oracle banners summing to 123,463,531 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
 compiling transitively from the gate's roots and proving 1,970 theorems with
@@ -35,7 +35,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,463,522 again, so the rollup is a measurement of the committed tree and not
+123,463,531 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 226 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -91,6 +91,20 @@ in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
 
 A guard can be *watched* without being *exercised*, and that distinction cost
+five hosts in all. The arm64 route hosts counted guard hits and failed if any
+fired, but every offset they swept was in range — so a simulator whose guard
+was weakened to always-true passed them: the arena and write-lanes hosts
+(2.75M and 3.84M cases) first, then the stack-arm, read-tag-source, and
+write-tag-action hosts (1.67e5, 6.01e4, 9.08e6) and the
+helper-argument-pointer host, each against the guard it is about. All six now
+drive an access or pointer whose index runs past the arena and require exactly
+one hit. The separation is verified per host: each fails its own sabotage and
+passes the other's, so the rows exercise the guard the host actually covers.
+The x86 hosts never had this gap — they trap rather than counting, so a
+disabled guard is a signal rather than an uncounted event — and both catch the
+sabotage, which is what a counter-based host has to be taught to do.
+
+This distinction cost
 two more holes. The arm64 route hosts counted guard hits and failed if any
 fired, but every offset they swept was in range — so a simulator whose window
 guard was weakened to always-true passed all 2.75M and 3.84M of their cases.
