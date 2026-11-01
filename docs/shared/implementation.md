@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0537 fixes the residue of 0525 (census 407 ->
+408). That step showed EXTR's refinement theorems
+carried an operand-narrowing hypothesis the dispatcher
+never discharges, and proved it unnecessary, adding
+raw-operand variants. The *family* theorem composing
+those refinements still carried the same three
+hypotheses, so the composed statement -- the one cited
+as the whole contract -- still displayed a
+precondition no caller satisfies. It now composes the
+raw variants and carries none: statement and code
+agree, raw registers in and narrowed result out. No
+host or theorem referenced the old name, so the rename
+is a clean cutover. This is the second-order form of
+the recurring pattern -- the first fix addressed the
+leaf, and the composition of leaves needed the same
+correction separately. Gate: rc 0, 248 banners.
+
 Step 0536 asks x86 the same entry-context question
 (census 406 -> 407) and gets the opposite answer: its
 memory-load oracle already drives the composition

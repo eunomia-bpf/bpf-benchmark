@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 407, and 304 steps
+`build/mut_*.py` files exist, the counter's last value is 408, and 306 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -166,6 +166,14 @@ other three now run, and driving the conditional one in *both* directions
 mattered: the first version used only a condition that happened to hold and so
 passed with the conditional degraded to an unconditional jump. Adding the
 falsifying case makes that fault fail.
+
+Step 0525's finding had a residue: the *family* theorem that composes the
+per-opcode refinements still carried the three operand-narrowing hypotheses that
+step had shown to be unnecessary. So the composed statement still displayed a
+precondition no caller satisfies, even though each individual refinement had
+been fixed. It now composes the raw variants and carries none -- statement and
+code agree, raw registers in and narrowed result out. No host or theorem
+referenced the old name, so the rename was a clean cutover.
 
 The same question asked of the second architecture gives the opposite answer,
 and it is worth recording rather than assuming either way: its memory-load oracle
@@ -7542,6 +7550,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0537 - the residue of 0525:
+the family theorem still carried the
+hypotheses
+
+Step 0525 showed that EXTR's refinement
+theorems carried an operand-narrowing
+hypothesis the dispatcher never discharges,
+and proved the hypothesis unnecessary,
+adding raw-operand variants for the three
+narrow widths (census 407 -> 408).
+
+The *family* theorem that composes those
+refinements still carried the same three
+hypotheses, so a reader of the composed
+statement -- the one that is actually cited
+as the whole contract -- saw a precondition
+no caller satisfies. Each individual
+refinement had been fixed; the thing built
+out of them had not.
+
+It now composes the raw variants and carries
+no hypothesis, so statement and code agree:
+raw registers in, narrowed result out. No
+host or other theorem referenced the old
+name, so the rename is a clean cutover
+rather than an alias.
+
+This is the second-order version of the
+sequence's recurring pattern: the first fix
+addressed the leaf, and the composition of
+the leaves needed the same correction
+separately. Gate: rc 0, **248** banners.
+Census 407 -> 408.
 
 ### Step 0536 - the same question to
 x86, where the answer is the opposite,
