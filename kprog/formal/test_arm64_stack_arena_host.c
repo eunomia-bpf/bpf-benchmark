@@ -186,6 +186,33 @@ static void check_arena_roundtrip(const char *what, __u32 capacity)
 	}
 }
 
+
+/* The window contract: an access of `width` bytes at `index` fits an arena of
+ * `capacity` bytes iff the first index past its window is at most the capacity.
+ * Restated independently as `index <= capacity && capacity - index >= width`,
+ * the form the hand module proves equivalent to the generated comparison. */
+static void check_window(const char *what, __u32 index, __u32 width,
+			 __u32 capacity)
+{
+	int fits = KPROG_ARM64_STACK_WINDOW_FITS(index, width, capacity);
+	int indep = index <= capacity && capacity - index >= width;
+	__u64 end = KPROG_ARM64_STACK_WINDOW_END(index, width);
+
+	cases++;
+	if ((__u64)index + (__u64)width != end) {
+		printf("MISMATCH %s window end: index=%u width=%u got=%llu\n",
+		       what, index, width, (unsigned long long)end);
+		failures++;
+	}
+	cases++;
+	if (fits != indep) {
+		printf("MISMATCH %s window: index=%u width=%u capacity=%u "
+		       "got=%d indep=%d\n", what, index, width, capacity, fits,
+		       indep);
+		failures++;
+	}
+}
+
 int main(void)
 {
 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 20U, 160U };
@@ -209,6 +236,20 @@ int main(void)
 		check_words("grid", capacities[i]);
 	for (i = 0; i < sizeof(values) / sizeof(values[0]); i++)
 		check_word_roundtrip("grid", values[i]);
+	/* Every capacity, index, and width in the grid, plus the boundary
+	 * rows the window gap was reported at. */
+	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
+		for (j = 0; j < sizeof(indices) / sizeof(indices[0]); j++) {
+			unsigned w;
+
+			for (w = 1; w <= 8; w *= 2)
+				check_window("grid", indices[j], w, capacities[i]);
+		}
+	check_window("edge", 152U, 8U, 160U);
+	check_window("edge", 153U, 8U, 160U);
+	check_window("edge", 56U, 8U, 64U);
+	check_window("edge", 57U, 8U, 64U);
+	check_window("edge", 4294967295U, 8U, 4294967295U);
 	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
 		check_arena_roundtrip("arena", capacities[i]);
 

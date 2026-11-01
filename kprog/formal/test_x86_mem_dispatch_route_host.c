@@ -401,9 +401,13 @@ int main(void)
 	static const __u8 widths[] = { X86_WIDTH_8, X86_WIDTH_16,
 				       X86_WIDTH_32, X86_WIDTH_64 };
 	static const __u8 scales[] = { 0, 1, 2, 3 };
-	/* Displacements keep the modeled stack index (disp + capacity) in
-	 * range for a width-64 read. */
-	static const __s64 stack_disps[] = { 0, -8, -32, 32, 56 };
+	/* Displacements keep the whole read window inside the arena: the stack
+	 * index is `capacity + disp`, and a width-64 read needs eight bytes
+	 * from it, so `disp <= -8` is required and `-8` is the last offset
+	 * whose window still fits. The previous set ({0, -8, -32, 32, 56}) put
+	 * the index at or past the arena's end for three of its five entries,
+	 * so those cases compared against bytes outside the arena. */
+	static const __s64 stack_disps[] = { -8, -16, -32, -64 };
 	unsigned i, j;
 
 	ptr_cell = heap;
@@ -416,8 +420,14 @@ int main(void)
 		for (j = 0; j < sizeof(stack_disps) / sizeof(stack_disps[0]); j++)
 			check_one("stack", X86_RSP, X86_SIM_TAG_SCALAR, 0ULL, w,
 				  stack_disps[j], X86_REG_NONE, 0ULL, 0, 0);
+		/* The indexed form's effective offset is `disp + (index_value
+		 * << scale)`, here `0 + (4 << 1) = 8`, so the read starts at
+		 * stack index `capacity + 8` and needs `capacity + 16` bytes:
+		 * in range only for a width-8 read. Use displacement -16 so
+		 * the window stays inside the arena at every width, and keep
+		 * the scaled-index arithmetic itself under test. */
 		check_one("stack+idx", X86_RSP, X86_SIM_TAG_SCALAR, 0ULL, w,
-			  0, X86_RAX, 4ULL, 1, 0);
+			  -16, X86_RAX, 4ULL, 1, 0);
 
 		/* Ordinary load, scalar base, with each scale; the EA stays in
 		 * the 64-byte heap for every width. */

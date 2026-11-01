@@ -476,9 +476,29 @@ struct x86_sim_state {
 #define X86_SIM_L_STACK_INDEX(OFF)                                         \
 	KPROG_X86_STACK_INDEX(OFF, X86_SIM_STACK_BYTES)
 
+/*
+ * The window guard. A stack access touches WIDTH bytes from its index, so the
+ * arena must hold INDEX + WIDTH of them; the byte ladder below indexes
+ * b[INDEX + k] directly, and without this check an access at the arena's final
+ * byte reads b[CAPACITY .. CAPACITY + WIDTH - 2], past the array.
+ * `KPROG_X86_STACK_WINDOW_FITS` is the generated, proved bound
+ * (X86StackArena.lean); a window that does not fit is an unsupported access,
+ * so it reaches the same trap as an unsupported opcode rather than reading out
+ * of bounds.
+ */
+#define X86_SIM_L_STACK_WINDOW_GUARD(INDEX, WIDTH)                          \
+	do {                                                               \
+		if (!KPROG_X86_STACK_WINDOW_FITS(                          \
+			    (INDEX), (WIDTH), X86_SIM_STACK_BYTES))       \
+			__builtin_trap();                                  \
+	} while (0)
+
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \
 		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
+		X86_SIM_L_STACK_WINDOW_GUARD(                             \
+			__x86_stw_index,                                   \
+			X86_SIM_L_EFFECTIVE_WIDTH(WIDTH));                 \
 		if (KPROG_X86_STACK_ARM(                                  \
 			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
 				    X86_WIDTH_64,                         \
@@ -529,6 +549,9 @@ struct x86_sim_state {
 	({                                                                 \
 		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		__u64 __x86_str_value;                                   \
+		X86_SIM_L_STACK_WINDOW_GUARD(                             \
+			__x86_str_index,                                   \
+			X86_SIM_L_EFFECTIVE_WIDTH(WIDTH));                 \
 		if (KPROG_X86_STACK_ARM(                                  \
 			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
 				    X86_WIDTH_64,                         \

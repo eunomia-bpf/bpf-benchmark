@@ -38,6 +38,18 @@ typedef signed int __s32;
 
 #include <stdio.h>
 
+/* The simulator header's unsupported-access hook. The stack macros route a
+ * window that does not fit the arena here; every sweep in this host stays
+ * inside the arena, so reaching it means the guard fired when it should not
+ * have. Count it and fail the banner rather than exiting, so a hit is reported
+ * by the case count instead of by a signal. */
+static unsigned stack_guard_hits;
+static void arm64_sim_unsupported_opcode(void)
+{
+	stack_guard_hits++;
+}
+
+
 ARM64_SIM_L_DECLARE_STACK();
 
 static int failures;
@@ -299,6 +311,14 @@ int main(void)
 				}
 			}
 		}
+	}
+
+	/* A guard hit inside an in-range sweep is a failure even though the
+	 * host itself could continue. */
+	if (stack_guard_hits) {
+		printf("MISMATCH stack window guard fired %u time(s)\n",
+		       stack_guard_hits);
+		failures += (int)stack_guard_hits;
 	}
 
 	if (failures) {

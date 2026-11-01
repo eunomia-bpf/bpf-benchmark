@@ -557,12 +557,36 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_STACK_INDEX(OFF)                                       \
 	KPROG_ARM64_STACK_INDEX(OFF, ARM64_SIM_STACK_BIAS)
 
+/*
+ * The window guard. A stack access touches WIDTH bytes from its index, so the
+ * arena must hold INDEX + WIDTH of them; the per-access lanes below index
+ * b[INDEX + k] directly, and without this check an access at the arena's final
+ * byte reads b[CAPACITY .. CAPACITY + WIDTH - 2], past the array.
+ * `KPROG_ARM64_STACK_WINDOW_FITS` is the generated, proved bound
+ * (Arm64StackArena.lean); a window that does not fit is an unsupported
+ * access, so it reaches the same failure hook as an unsupported opcode rather
+ * than reading out of bounds.
+ */
+#define ARM64_SIM_L_STACK_WINDOW_OK(INDEX, WIDTH)                           \
+	KPROG_ARM64_STACK_WINDOW_FITS((INDEX), (WIDTH), ARM64_SIM_STACK_BYTES)
+
+/*
+ * Report an unfitting window through the unsupported-access hook. The hook
+ * returns, so the caller must still skip the access: every use below tests
+ * WINDOW_OK first and takes a zero value on the failing path.
+ */
+#define ARM64_SIM_L_STACK_WINDOW_REPORT() ARM64_SIM_L_UNSUPPORTED_OPCODE()
+
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
 	({                                                                 \
 		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
-		if (KPROG_ARM64_STACK_ARM(                                \
+		if (!ARM64_SIM_L_STACK_WINDOW_OK(__a64_str_index,         \
+						 __a64_str_width)) {       \
+			ARM64_SIM_L_STACK_WINDOW_REPORT();                \
+			__a64_str_value = 0;                               \
+		} else if (KPROG_ARM64_STACK_ARM(                         \
 			    __a64_str_width ==                            \
 				    ARM64_WIDTH_64,                       \
 			    KPROG_ARM64_STACK_WORD_ALIGNED(               \
@@ -599,7 +623,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
 			__a64_stw_width == ARM64_WIDTH_64,                \
 			KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index));  \
-		if (__a64_stw_action ==                                     \
+		if (!ARM64_SIM_L_STACK_WINDOW_OK(__a64_stw_index,         \
+						 __a64_stw_width)) {       \
+			ARM64_SIM_L_STACK_WINDOW_REPORT();                \
+		} else if (__a64_stw_action ==                              \
 		    KPROG_ARM64_STACK_WRITE_TAG_ACTION_WRITE_WORD_AND_TAG) {\
 			__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = __a64_stw_value;\
 			__a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = (TAG);\
