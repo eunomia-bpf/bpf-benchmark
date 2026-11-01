@@ -445,6 +445,21 @@ theorem arm64_stack_arena_window_implies_tag_slot_any_capacity
   rw [hshr, hdiv]
   omega
 
+/-- The `+7` in `last_tag_slot_is_last_word` is the rounding, and like the
+capacity bound in `words_refines` it is exactly tight rather than merely
+sufficient: the identity holds at `2^32 - 8` and fails from `2^32 - 7` upward.
+The theorem's *other* hypothesis, `0 < capacity`, is also load-bearing -- at a
+zero arena the left side is `2^32 - 1` and the right `2^29 - 1` -- so this is a
+case where both side conditions earn their place, in contrast to the last-byte
+window theorem. Stated so a reader can see which is which. -/
+theorem arm64_stack_arena_tag_slot_bounds_are_tight :
+    words (BitVec.ofNat 32 (2 ^ 32 - 8)) - 1 =
+        (BitVec.ofNat 32 (2 ^ 32 - 8) - 1) >>> 3 ∧
+      words (BitVec.ofNat 32 (2 ^ 32 - 7)) - 1 ≠
+        (BitVec.ofNat 32 (2 ^ 32 - 7) - 1) >>> 3 ∧
+      words (0 : BitVec 32) - 1 ≠ ((0 : BitVec 32) - 1) >>> 3 := by
+  refine ⟨?_, ?_, ?_⟩ <;> native_decide
+
 /-- The general form covers the disabled 1-byte arena, which the whole-word
 form did not: at capacity 1 the window and the tag slot still agree. -/
 theorem arm64_stack_arena_window_implies_tag_slot_at_1 :
