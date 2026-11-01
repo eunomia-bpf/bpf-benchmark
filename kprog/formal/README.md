@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-233 passing `cross-check: OK` oracle banners summing to 124,498,572 modeled
+234 passing `cross-check: OK` oracle banners summing to 124,500,620 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 301 Lean modules
 compiling transitively from the gate's roots and proving 2,034 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,498,572 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 233 banners are all distinct oracles — 232 report a plain
+124,500,620 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 234 banners are all distinct oracles — 233 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 383, and 262 steps
+`build/mut_*.py` files exist, the counter's last value is 384, and 263 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -135,6 +135,24 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+The same wide-arithmetic oracle applies to the x86 multiply-overflow flags,
+which decide CF/OF from magnitudes rather than by multiplying: `A_ABS != 0 &&
+B_ABS > LIMIT / A_ABS`, with LIMIT chosen by whether the product is negative.
+Two independent chances to be wrong, and both yield plausible answers -- the
+division test rounds down, so a boundary error shows only in a case landing
+exactly there; and the sign selection is separate from the magnitudes, so it is
+wrong only for some inputs. The oracle tests the exact product against the
+width's signed range using 128-bit arithmetic.
+
+Its first form had a gap worth recording: it included only `x86_sim.h`,
+recomputed the limit itself, and called the generated macro with that value --
+so it tested the contract but never the simulator's own sign selection, and
+planting `xor` to `or` in the simulator left it green. Driving the simulator's
+own composition makes that fault fail 40 cases. The operand table also needed
+the most-negative value against `-1`: that is the one pair whose product is
+exactly the negative bound, so the two candidate limits disagree there and
+nowhere else in the table.
 
 Dual emission protects against drift, not against a shared error. The multiply
 header and its Lean module are rendered from one specification in one pass, so
@@ -7264,6 +7282,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0513 - an oracle that tested
+the contract but not the simulator's own
+composition
+
+Step 0513 extends the 128-bit oracle to the
+x86 multiply-overflow flags (census 383 ->
+384). They decide CF/OF from magnitudes
+rather than by multiplying -- `A_ABS != 0 &&
+B_ABS > LIMIT / A_ABS`, with LIMIT chosen by
+the product's sign -- so there are two
+independent chances to be wrong: the
+division rounds down, and the sign
+selection is a separate expression.
+
+The oracle's first form included only
+`x86_sim.h`, recomputed the limit itself,
+and passed it to the generated macro. So it
+tested the contract and never the
+simulator's own sign selection: planting
+`xor` to `or` in the simulator left it
+green. Driving `X86_SIM_L_SET_IMUL_FLAGS`
+-- the composition the simulator actually
+performs -- makes that fault fail 40 cases.
+
+The operand table needed widening too. The
+most-negative value against `-1` is the one
+pair whose product is exactly the negative
+bound, so it is the only place the two
+candidate limits disagree; without it a
+sign-selection fault was invisible even to
+the corrected oracle.
+
+Verified: the boundary test fails 216
+cases, the sign selection 40. Gate: rc 0,
+**234** banners, 124,500,620 cases. Census
+383 -> 384.
 
 ### Step 0512 - dual emission protects
 against drift, not against a shared
