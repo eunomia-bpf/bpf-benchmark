@@ -1905,6 +1905,24 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_POP(DST, FLAGS)                                       \
 	X86_SIM_L_EXEC_PUSH_POP_STEP(1U, (DST), X86_REG_NONE, (FLAGS))
 
+/*
+ * The opcode dispatch chain.
+ *
+ * The chain has no final `else`, deliberately. The AMD64 simulator mirrors the
+ * AArch64 one in every other respect, but not here: a non-member opcode is a
+ * no-op by definition, and the two dispatch route hosts pin that as an
+ * observable property -- they drive `X86_OP_RET`, which has no arm, and
+ * require the whole state to come back byte-identical to its seed
+ * (`test_x86_dispatch_{family,singleton}_route_host.c`). Non-membership is
+ * therefore observable as an unchanged state rather than through a counter,
+ * because the x86 chain carries no unsupported-opcode hook.
+ *
+ * This differs from the repo's fail-fast rule only in appearance. Unsupported
+ * *input* still fails: the encoder raises before emitting an opcode it cannot
+ * lower, so an unknown mnemonic never reaches this chain. An opcode that is
+ * decoded but has no arm is a no-op because the two hosts above define it to
+ * be one. Adding an `else` arm here would silently invalidate both hosts.
+ */
 #define X86_SIM_L_EXEC(OP, DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
