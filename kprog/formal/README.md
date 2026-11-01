@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-230 passing `cross-check: OK` oracle banners summing to 124,469,580 modeled
+231 passing `cross-check: OK` oracle banners summing to 124,470,732 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 301 Lean modules
 compiling transitively from the gate's roots and proving 2,034 theorems with
@@ -37,8 +37,8 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,469,580 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 230 banners are all distinct oracles — 229 report a plain
+124,470,732 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 231 banners are all distinct oracles — 230 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
@@ -135,6 +135,23 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+The same classification says 48 contracts the simulator calls appear only on the
+model-only side. The flag contract is the most consequential of them: ADDS and
+SUBS reach it through `EXEC_ARITH_WRITEBACK`, which picks the family, computes
+the result and sets all four flags, and nothing verified that routing. A wrong
+flag is worse than a wrong value -- it is invisible at the instruction that
+caused it and wrong at the next branch -- so `test_arm64_flag_route_host.c`
+compares the destination and all four flags against an independent model of
+ADD/SUB and N/Z/C/V.
+
+Two mistakes in that oracle's first draft are worth keeping. The overflow model
+omitted ADD's operand-agreement complement, which the contract has; it was
+corrected against the definition rather than against the macro. And the operand
+table used distinct registers, so `lhs == rhs` was never generated -- the only
+case separating a subtract carry of `lhs >= rhs` from `lhs > rhs`. With
+equal-operand immediates added the run goes from 432 to 1,152 cases, and a
+planted `>=` to `>` fault fails on 24 of them, where it previously survived.
 
 Classifying all 214 hosts by whether they include the simulator header separates
 89 that drive the real dispatcher from 125 that compare a hand model against a
@@ -7145,6 +7162,45 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0504 - the flag contract was
+reached only through a model, and the
+first oracle missed the case that matters
+
+Step 0504 takes the most consequential
+of the 48 simulator-called but
+model-only contracts (census 374 -> 375):
+`arm64_flags`, reached through ADDS/SUBS
+via `EXEC_ARITH_WRITEBACK`, which picks
+the family, computes the result and sets
+all four flags.
+
+A wrong flag is worse than a wrong value:
+invisible at the instruction that caused
+it, wrong at the next branch.
+`test_arm64_flag_route_host.c` therefore
+compares the destination *and* all four
+flags against an independent architectural
+model of ADD/SUB and of N/Z/C/V, computed
+here rather than by calling the macros.
+
+The oracle's first draft was wrong twice,
+and both are the lesson. The overflow
+model omitted ADD's operand-agreement
+complement, which the contract has --
+fixed against the definition, not against
+the macro. And the operand table used
+distinct registers, so `lhs == rhs` was
+never generated; that is the *only* case
+separating a subtract carry of "lhs greater
+or equal rhs" from "lhs strictly greater".
+A planted fault of exactly that shape
+survived. Adding equal-operand immediates
+took the run from 432 to 1,152 cases and
+made the planted fault fail on 24 of them.
+
+Gate: rc 0, **231** banners, 124,470,732
+cases. Census 374 -> 375.
 
 ### Step 0503 - the multiply arm was
 proved and modelled but never driven
