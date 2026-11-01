@@ -6911,6 +6911,55 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0477 - the README's counts
+become re-derivable
+
+Step 0477 fixes a bookkeeping
+regression and makes it
+self-detecting (census 348 -> 349).
+Steps 0473 to 0476 were recorded in
+the shared implementation log but
+never added to the harness README,
+which is this directory's own record;
+all four are now present.
+
+Auditing every figure in the claims
+block against the tree found three
+more drifted: the census counter's
+last value was 348 (stated 334), the
+recipe pins fourteen route hosts
+(stated thirteen), and 198 steps carry
+an explicit census transition (stated
+193). The unnamed-harness pair had
+moved to 46 and 37 from 35 and 30 --
+partly real drift, partly because the
+four restored entries named batteries
+that had been anonymous.
+
+Checking by hand is what allowed
+those to drift, so
+`check_readme_counts.py` now
+recomputes each figure from the tree
+-- census transitions, route hosts,
+batteries on disk, unnamed harnesses,
+and how many of those drive a host the
+gate runs -- and diffs it against the
+README's wording, including spelled-out
+numerals like "fourteen". It reports by
+default because several figures move
+every step, and `--check` exits 1 on a
+disagreement. Verified both ways: a
+stale census makes it fail, the real
+README passes. Everything else in the
+block was re-verified and held: 41
+scratch probes, `wprobe.c` byte-identical
+to the gated write-width host,
+`dbg_host.c` differing from
+`btmem_index_route_host.c` by exactly
+one debug `fprintf`, and the
+123,463,531 case total. Gate: rc 0, 226
+banners. Census 348 -> 349.
+
 ### Step 0476 - the whole placeholder
 claim is enforced
 

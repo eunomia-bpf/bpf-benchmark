@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0477 fixes a bookkeeping regression and makes
+it self-detecting (census 348 -> 349). Steps
+0473 to 0476 were recorded in this log but never
+added to the harness README, which is that
+directory's own record; all four are now present.
+Auditing every figure in the README's claims
+block found three more drifted -- census last
+value 348 (stated 334), route hosts fourteen
+(stated thirteen), and 198 steps with a census
+transition (stated 193) -- and the unnamed-harness
+pair at 46/37 from 35/30. `check_readme_counts.py`
+now recomputes each from the tree and diffs
+against the README, handling spelled-out
+numerals; it reports by default and `--check`
+exits 1 on drift, verified both ways. Everything
+else held: 41 scratch probes, `wprobe.c`
+byte-identical to the gated host, `dbg_host.c`
+differing by one debug fprintf, and the
+123,463,531 total. Gate: rc 0, 226 banners.
+
 Step 0476 completes Step 0475's enforcement
 (census 347 -> 348). The README claims no
 `sorry`, no `axiom`, and no `opaque`/`unsafe`/
