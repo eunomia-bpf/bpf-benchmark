@@ -171,25 +171,33 @@ theorem x86_stack_arena_window_last_byte_inside (index width capacity : BitVec 3
   omega
 
 /-- A window that starts inside the arena but runs past it is exactly what the
-guard rejects: an 8-byte access at the arena's final byte does not fit an arena
-of at least eight bytes. -/
-theorem x86_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32)
-    (hcap : 8 ≤ capacity) :
+guard rejects: an 8-byte access at the arena's final byte does not fit. No
+capacity restriction is needed, for the same reason as on AArch64: the case the
+earlier `8 <= capacity` hypothesis excluded, a zero arena where `capacity - 1`
+wraps, also fails. -/
+theorem x86_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32) :
     windowFits (capacity - 1) 8 capacity = false := by
   simp only [windowFits, windowEnd, decide_eq_false_iff_not]
-  have hcapN : 8 ≤ capacity.toNat := hcap
-  have hnz : capacity.toNat ≠ 0 := by omega
-  have hcaplt : capacity.toNat < 2 ^ 32 := by omega
-  have hsub : (capacity - 1).toNat = capacity.toNat - 1 := by
-    have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
-    rw [BitVec.toNat_sub, h1]
-    have hlt : capacity.toNat - 1 < 2 ^ 32 := by omega
-    generalize hX : capacity.toNat - 1 = X at hlt
-    have hexp : 2 ^ 32 - 1 + capacity.toNat = X + 2 ^ 32 := by omega
-    rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
   have h8 : BitVec.toNat (8 : BitVec 32) = 8 := rfl
-  rw [hsub, h8]
-  omega
+  rw [h8]
+  by_cases hz : capacity = 0
+  · subst hz
+    decide
+  · have hpos : 0 < capacity.toNat := by
+      rcases Nat.eq_zero_or_pos capacity.toNat with h0 | hp
+      · exact absurd (BitVec.eq_of_toNat_eq (by rw [h0]; rfl)) hz
+      · exact hp
+    have hsub : (capacity - 1).toNat = capacity.toNat - 1 := by
+      have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
+      rw [BitVec.toNat_sub, h1]
+      have hlt : capacity.toNat - 1 < 2 ^ 32 := by
+        have : capacity.toNat < 2 ^ 32 := capacity.isLt
+        omega
+      generalize hX : capacity.toNat - 1 = X at hlt
+      have hexp : 2 ^ 32 - 1 + capacity.toNat = X + 2 ^ 32 := by omega
+      rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
+    rw [hsub]
+    omega
 
 /-- Independent statement of the pointer bound: `&b[index]` names an arena
 address when the index is at most the capacity. -/

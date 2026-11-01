@@ -172,29 +172,35 @@ theorem arm64_stack_arena_window_last_byte_inside (index width capacity : BitVec
   omega
 
 /-- A window that starts inside the arena but runs past it is exactly what the
-guard rejects: an 8-byte access at the arena's final byte does not fit an arena
-of at least eight bytes. -/
-theorem arm64_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32)
-    (hcap : 8 ≤ capacity) :
+guard rejects: an 8-byte access at the arena's final byte does not fit. No
+capacity restriction is needed -- the earlier statement carried `8 <= capacity`,
+which the proof below does not use, and the case it excluded (a zero arena,
+where `capacity - 1` wraps to the top of the range) also fails, for the same
+reason: the last byte plus eight is past the end either way. -/
+theorem arm64_stack_arena_window_at_last_byte_does_not_fit (capacity : BitVec 32) :
     windowFits (capacity - 1) 8 capacity = false := by
   simp only [windowFits, windowEnd, decide_eq_false_iff_not]
-  have hcapN : 8 ≤ capacity.toNat := hcap
-  have hnz : capacity.toNat ≠ 0 := by omega
-  have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
-  have h2 : (2 : Nat) ^ 32 % 2 ^ 32 = 0 := Nat.mod_self _
-  have hcaplt : capacity.toNat < 2 ^ 32 := by
-    have : 8 ≤ capacity.toNat := hcap
-    omega
-  have hsub : (capacity - 1).toNat = capacity.toNat - 1 := by
-    have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
-    rw [BitVec.toNat_sub, h1]
-    have hlt : capacity.toNat - 1 < 2 ^ 32 := by omega
-    generalize hX : capacity.toNat - 1 = X at hlt
-    have hexp : 2 ^ 32 - 1 + capacity.toNat = X + 2 ^ 32 := by omega
-    rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
   have h8 : BitVec.toNat (8 : BitVec 32) = 8 := rfl
-  rw [hsub, h8]
-  omega
+  rw [h8]
+  by_cases hz : capacity = 0
+  · subst hz
+    decide
+  · have hpos : 0 < capacity.toNat := by
+      rcases Nat.eq_zero_or_pos capacity.toNat with h0 | hp
+      · exact absurd (BitVec.eq_of_toNat_eq (by rw [h0]; rfl)) hz
+      · exact hp
+    have hsub : (capacity - 1).toNat = capacity.toNat - 1 := by
+      rw [BitVec.toNat_sub]
+      have h1 : BitVec.toNat (1 : BitVec 32) = 1 := rfl
+      rw [h1]
+      have hlt : capacity.toNat - 1 < 2 ^ 32 := by
+        have : capacity.toNat < 2 ^ 32 := capacity.isLt
+        omega
+      generalize hX : capacity.toNat - 1 = X at hlt
+      have hexp : 2 ^ 32 - 1 + capacity.toNat = X + 2 ^ 32 := by omega
+      rw [hexp, Nat.add_mod_right, Nat.mod_eq_of_lt hlt]
+    rw [hsub]
+    omega
 
 /-- The subtraction restatement is equivalent to the sum form, so the two ways
 of stating the bound cannot drift. -/
@@ -325,6 +331,15 @@ theorem arm64_stack_arena_tag_guard_is_window_guard (index capacity : BitVec 32)
   rw [hq]
   have := Nat.div_add_mod capacity.toNat 8
   omega
+
+/-- The guard's boundary is exact, not merely sound in one direction: at
+capacity 160 an 8-byte window that starts at 152 fits and one that starts at
+153 does not, so `capacity - 1` is precisely the first starting index that
+fails. Without this the looser theorem would still hold for a guard that
+rejected far too much. -/
+theorem arm64_stack_arena_window_boundary_is_exact :
+    windowFits 152 8 160 = true ∧ windowFits 153 8 160 = false := by
+  refine ⟨?_, ?_⟩ <;> native_decide
 
 /-- Independent statement of the pointer bound: `&b[index]` names an arena
 address when the index is at most the capacity, stated through the bytes left
