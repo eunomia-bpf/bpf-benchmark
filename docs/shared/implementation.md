@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0530 executes the AArch64 call and return
+emission (census 400 -> 401), the rest of the
+surface after Steps 0528/0529. CALL performs two
+writes that must agree: it sets the modelled link
+register and the architectural x30 from one value,
+while RET dispatches on the former and a callee
+returns through the latter -- so a call setting one
+and not the other passes any single-register check
+and returns to the wrong place. The host checks both
+registers receive the address and agree, that control
+transfers, and that RET dispatches on the link
+register, reaching the unsupported hook for an
+uninstalled target so the dispatch is not vacuous.
+The return macro ends in a return from the calling
+function, so the observation is read from a
+file-scope global. Verified by planting both faults.
+Gate: rc 0, 244 banners, 124,531,687 cases.
+
 Step 0529 executes the three remaining AArch64 branch
 emitters (census 399 -> 400). Step 0528 covered the
 condition-code emitter; the same region defines

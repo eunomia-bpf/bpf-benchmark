@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-243 passing `cross-check: OK` oracle banners summing to 124,531,678 modeled
+244 passing `cross-check: OK` oracle banners summing to 124,531,687 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,531,678 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 243 banners are all distinct oracles — 242 report a plain
+124,531,687 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 244 banners are all distinct oracles — 243 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 400, and 292 steps
+`build/mut_*.py` files exist, the counter's last value is 401, and 293 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -158,6 +158,19 @@ four. The oracle drives all five kinds at both widths, recomputing the modifier
 from its definition, and asserts a non-identity kind was exercised so the run
 is not vacuous. An off-by-one in shift-left fails 78 cases; dropping the
 complement fails 595.
+
+Call and return are the rest of the emission surface, and had the same history.
+They are worth more than symmetry because CALL performs *two* writes that must
+agree: it sets the modelled link register and the architectural `x30` from the
+same value, and return dispatches on the former while the address a callee would
+actually return through is the latter. A call that set one and not the other
+passes any single-register check and returns to the wrong place at run time. The
+host checks both registers agree, that control transfers, and that return
+dispatches on the link register -- taking an installed arm and reaching the
+unsupported hook otherwise, so it is not vacuous. Both planted faults are
+caught. Writing it needed one detail worth recording: the return macro ends in a
+`return` from the *calling function*, so the result is read from a file-scope
+global afterwards.
 
 The same region defines three more emitters -- CBZ, CBNZ, TBZ, TBNZ -- and
 none of them was executed by any host either. They differ from the
@@ -7459,6 +7472,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0530 - call and return, where
+two writes must agree
+
+Steps 0528/0529 executed the five branch
+emitters. CALL and RET are the rest of the
+emission surface and had the same history
+(census 400 -> 401).
+
+They are worth more than symmetry. CALL
+performs *two* writes that must agree: it
+sets the modelled link register `__a64_lr`
+and the architectural `x30` from the same
+value, while RET dispatches on the former
+and a callee would return through the
+latter. A call that set one and not the
+other passes any single-register check and
+returns to the wrong place at run time.
+
+The host checks that both registers receive
+the address and agree, that control actually
+transfers, and that RET dispatches on the
+link register -- taking an installed arm for
+an installed target and reaching the
+unsupported hook otherwise, so the dispatch
+is not vacuous.
+
+One detail worth recording: the return macro
+ends in a `return` from the *calling
+function*, so the observation is read from a
+file-scope global rather than a local.
+
+Verified by planting both faults -- setting
+`__a64_lr` without `x30` fails, and removing
+the transfer of control fails. Gate: rc 0,
+**244** banners, 124,531,687 cases. Census
+400 -> 401.
 
 ### Step 0529 - the three other AArch64
 branch emitters, with no x86 twin to
