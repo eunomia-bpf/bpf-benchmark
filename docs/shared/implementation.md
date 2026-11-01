@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0489 checks the cross-ISA theorems at the C
+layer (census 360 -> 361). The Lean theorems
+prove the generated Lean contracts agree, but each
+ISA ships its own generated C header, so a
+generator could emit C that disagrees where the
+Lean does not, and the hand-written C could drift
+from its Lean. `cross_isa_differential_host.c`
+compiles both simulators into one translation
+unit and compares the compiled macros on shared
+inputs: width masks, bit counts and sign masks
+over boundary values, and stack window, pointer,
+slot and alignment bounds over a capacity grid
+including both arenas' real sizes. 372 cases, all
+agreeing. Adding one to the x86 window capacity in
+its generated header -- a drift the Lean theorem
+still proves correct -- makes it fail with 9
+differences. Gate: rc 0, 229 banners,
+123,463,937 cases.
+
 Step 0488 extends the non-vacuity check from
 dispatch to the whole table-shape family (census
 359 -> 360). 426 theorems close by a bare

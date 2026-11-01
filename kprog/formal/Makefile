@@ -532,6 +532,8 @@ check:
 	lake env lean KProgFormal/CrossIsaWidth.lean
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf cross_isa_tag_host.c -o build/cross_isa_tag_host
 	./build/cross_isa_tag_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf cross_isa_differential_host.c -o build/cross_isa_differential_host
+	./build/cross_isa_differential_host
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_width_host.c -o build/test_arm64_width_host
 	./build/test_arm64_width_host
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_width_effective_host.c -o build/test_arm64_width_effective_host

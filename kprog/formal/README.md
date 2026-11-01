@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-228 passing `cross-check: OK` oracle banners summing to 123,463,565 modeled
+229 passing `cross-check: OK` oracle banners summing to 123,463,937 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
 compiling transitively from the gate's roots and proving 1,990 theorems with
@@ -37,8 +37,8 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,463,565 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 228 banners are all distinct oracles — 225 report a plain
+123,463,937 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
@@ -91,6 +91,19 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+The cross-ISA theorems say nothing about the C, so that is checked separately.
+`CrossIsaWidth.lean` and `CrossIsaStackArena.lean` prove the generated *Lean*
+contracts agree, but each ISA ships its own generated C header, and a
+translation of one spec could emit C that disagrees where the Lean does not --
+or the hand-written C could drift from its own Lean. `cross_isa_differential_host.c`
+compiles both simulators into one translation unit (they coexist, since every
+decode is ISA-prefixed) and compares the compiled macros on shared inputs: the
+four width masks, bit counts and sign masks over boundary values, and the stack
+window/pointer/slot bounds over a capacity grid that includes both arenas' real
+sizes. 372 cases. Adding one to the x86 window capacity in its *generated
+header* -- a drift the Lean still proves correct -- makes it fail with 9
+differences, so it covers exactly the layer the theorems cannot.
 
 The two stack contracts are also proved to agree, and that one needed care
 because they are *not* identical. Twelve theorems in the two stack-arena
@@ -6992,6 +7005,45 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0489 - the cross-ISA theorems
+are checked at the C layer too
+
+Step 0489 closes the gap between what
+the cross-ISA theorems prove and what
+the simulators actually compile (census
+360 -> 361). `CrossIsaWidth.lean` and
+`CrossIsaStackArena.lean` prove the
+generated *Lean* contracts agree. Each
+ISA ships its own generated C header
+though, so the proofs say nothing about
+the C: a generator could emit C that
+disagrees where the Lean does not, and
+the hand-written C could drift from its
+own Lean.
+
+`cross_isa_differential_host.c`
+compiles both simulators into one
+translation unit -- they coexist, since
+every decode is ISA-prefixed -- and
+compares the compiled macros on shared
+inputs: the four width masks, bit counts
+and sign masks over boundary values, and
+the stack window, pointer, slot and
+alignment bounds over a capacity grid
+including both arenas' real sizes (64,
+128, 160) and the one-past-end indices.
+372 cases, all agreeing.
+
+The coverage is the point. Adding one
+to the x86 window capacity *in its
+generated header* -- a drift the Lean
+cross-ISA theorem still proves correct,
+because it compares Lean against Lean --
+makes this oracle fail with 9
+differences. Gate: rc 0, **229** banners,
+123,463,937 modeled cases. Census 360
+-> 361.
 
 ### Step 0488 - the table-shape
 theorems are not vacuous
