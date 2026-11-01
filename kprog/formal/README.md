@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-231 passing `cross-check: OK` oracle banners summing to 124,470,732 modeled
+232 passing `cross-check: OK` oracle banners summing to 124,470,924 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 301 Lean modules
 compiling transitively from the gate's roots and proving 2,034 theorems with
@@ -37,8 +37,8 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,470,732 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 231 banners are all distinct oracles — 230 report a plain
+124,470,924 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 232 banners are all distinct oracles — 231 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
@@ -135,6 +135,21 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+The conditional-select family is another. `arm64_csel` names eight opcodes,
+and the dispatcher reaches them at one arm that evaluates the condition, picks
+the pointer-tag or scalar path and writes the destination -- with no host that
+included the simulator header driving any of them, so perturbing one arm of the
+contract left every oracle green. `test_arm64_csel_route_host.c` drives all
+eight through the dispatcher at both widths, with the condition both
+always-taken and flag-dependent so each opcode's two arms are covered.
+
+Writing that model exposed something about the contract: `CINC` and `CINV`
+take `src` on *both* paths and ignore `src2`, which is right for the
+one-operand forms but means an operand pair chosen for the two-operand shape
+will not distinguish them. The first model assumed the two-operand form for all
+eight and produced 24 spurious failures; the fix was to read the generated arms
+rather than the instruction-set pseudocode.
 
 The same classification says 48 contracts the simulator calls appear only on the
 model-only side. The flag contract is the most consequential of them: ADDS and
@@ -7162,6 +7177,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0505 - the conditional-select
+family had no live oracle, and writing
+one corrected the model twice
+
+Step 0505 continues the simulator-called
+but never-driven sweep (census 375 ->
+376). `arm64_csel` names eight opcodes --
+CSEL, CINC, CSET, CINV, CSINV, CSINC,
+CSETM, CSNEG -- and the dispatcher
+reaches them at one arm that evaluates
+the condition, picks the pointer-tag or
+scalar path, then writes the destination.
+No host including the simulator header
+drove any of them: perturbing the CSINC
+arm left every existing oracle green.
+
+The new host drives all eight through
+`ARM64_SIM_L_EXEC` at both widths, with
+the condition both always-taken and
+flag-dependent so each opcode's two arms
+are each reached, and with the expected
+value computed from the instruction
+definitions rather than from the macro.
+
+Writing it corrected the model twice, and
+what it exposed is about the contract.
+`CINC` and `CINV` take `src` on *both*
+paths and ignore `src2` -- right for the
+one-operand forms, but it means an operand
+pair chosen for the two-operand shape
+cannot distinguish them. The first model
+assumed the two-operand form for all eight
+and produced 24 spurious failures; the fix
+was to read the generated arms instead of
+the instruction-set pseudocode. A `+1` to
+`+2` change in the CINC arm now fails on
+12 of 192 cases, and a `-1` in CSNEG on
+12. Gate: rc 0, **232** banners,
+124,470,924 cases. Census 375 -> 376.
 
 ### Step 0504 - the flag contract was
 reached only through a model, and the
