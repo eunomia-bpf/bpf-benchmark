@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0541 settles whether the two stack-arena
+files' differently-worded capacity restrictions
+are the same (census 411 -> 412). AArch64
+states a numeric bound capacity <= 2^32 - 8;
+x86 states the no-wrap predicate capacity <=
+capacity + 7. A reader comparing them cannot
+tell whether that is wording or divergence, and
+the two files describe the same arena. They are
+the same restriction and both exactly tight: the
+equality holds at 2^32-8 and fails from 2^32-7
+upward, which is precisely where the predicate
+stops holding. The statement records both
+failures together, so the correspondence is
+proved rather than asserted, and it closes the
+coverage gap left by 0538 and 0540, which
+recorded boundary-tightness on AArch64 only.
+Gate: rc 0, 248 banners, 2,060 theorems.
+
 Step 0540 runs the same question over the tag-slot
 identity's two side conditions and finds they are
 not the same kind (census 410 -> 411). The +7 is

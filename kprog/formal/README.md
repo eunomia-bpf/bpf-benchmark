@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 411, and 309 steps
+`build/mut_*.py` files exist, the counter's last value is 412, and 310 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0541 - the two files say the same
+thing in different words
+
+The AArch64 and x86 stack-arena files
+state the same capacity restriction in
+different words: a numeric bound
+`capacity <= 2^32 - 8` on one side, the
+no-wrap predicate `capacity <= capacity + 7`
+on the other. A reader comparing them
+cannot tell whether that is a wording
+difference or a real divergence -- and the
+two files are supposed to describe the same
+arena, so the question is worth settling
+rather than assuming.
+
+They are the same restriction. Both are
+exactly tight: the equality holds at
+`2^32 - 8` and fails from `2^32 - 7` upward,
+which is precisely where the no-wrap
+predicate stops holding. The new statement
+records the equality failure and the
+predicate failure *together*, so the
+correspondence is proved rather than
+asserted -- a reader who suspects drift can
+check one theorem instead of comparing two
+phrasings by eye.
+
+This also closes the coverage gap left by
+0538 and 0540, which recorded
+boundary-tightness on AArch64 only.
+Theorem counts move (2,059 -> **2,060**;
+487 -> **488** `native_decide`). Gate: rc 0,
+**248** banners. Census 411 -> 412.
 
 ### Step 0540 - and here both hypotheses
 earn their place
