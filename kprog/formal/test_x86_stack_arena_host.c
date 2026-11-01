@@ -34,6 +34,7 @@
 typedef unsigned char __u8;
 typedef unsigned int __u32;
 typedef unsigned long long __u64;
+typedef signed long long __s64;
 
 #include "generated/x86_stack_arena.h"
 
@@ -210,6 +211,25 @@ static void check_window(const char *what, __u32 index, __u32 width,
 	}
 }
 
+
+/* The pointer bound: &b[index] names an arena address iff the index is at
+ * most the capacity, one-past-end included. The index is signed because the
+ * simulator passes the body's `__s64` offset; a capacity near the top of the
+ * index space is where the signed cast changes the answer. */
+static void check_pointer(const char *what, __s64 index, __u32 capacity)
+{
+	int fits = KPROG_X86_STACK_POINTER_FITS(index, capacity);
+	int indep = index >= 0 && (__u64)index <= capacity;
+
+	cases++;
+	if (fits != indep) {
+		printf("MISMATCH %s pointer: index=%lld capacity=%u "
+		       "got=%d indep=%d\n", what, (long long)index, capacity,
+		       fits, indep);
+		failures++;
+	}
+}
+
 int main(void)
 {
 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 64U, 128U };
@@ -246,6 +266,14 @@ int main(void)
 	check_window("edge", 56U, 8U, 64U);
 	check_window("edge", 57U, 8U, 64U);
 	check_window("edge", 4294967295U, 8U, 4294967295U);
+	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
+		for (j = 0; j < sizeof(indices) / sizeof(indices[0]); j++)
+			check_pointer("grid", (__s64)indices[j], capacities[i]);
+	check_pointer("edge", 63, 64U);
+	check_pointer("edge", 64, 64U);
+	check_pointer("edge", 65, 64U);
+	check_pointer("neg", -1, 64U);
+	check_pointer("neg", -1, 4294967295U);
 	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
 		check_arena_roundtrip("arena", capacities[i]);
 

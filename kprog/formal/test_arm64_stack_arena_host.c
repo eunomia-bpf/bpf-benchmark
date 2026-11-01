@@ -34,6 +34,7 @@
 typedef unsigned char __u8;
 typedef unsigned int __u32;
 typedef unsigned long long __u64;
+typedef signed long long __s64;
 
 #include "generated/arm64_stack_arena.h"
 #include "generated/arm64_byte_lane.h"
@@ -243,6 +244,30 @@ static void check_tag_slot(const char *what, __u32 index, __u32 capacity)
 	}
 }
 
+
+/* The pointer bound: &b[index] names an arena address iff the index is at
+ * most the capacity, one-past-end included. Restated independently as
+ * `index <= capacity` and checked against the generated guard, plus the
+ * one-past-end rule that distinguishes it from the window bound.
+ *
+ * The index is signed, because the simulator passes the body's `__s64`
+ * offset: a negative offset is not an arena address, and the guard's
+ * `(__s64)` cast is what rejects it. An unsigned grid alone never exercises
+ * that cast, so the negative rows are what pin it. */
+static void check_pointer(const char *what, __s64 index, __u32 capacity)
+{
+	int fits = KPROG_ARM64_STACK_POINTER_FITS(index, capacity);
+	int indep = index >= 0 && (__u64)index <= capacity;
+
+	cases++;
+	if (fits != indep) {
+		printf("MISMATCH %s pointer: index=%lld capacity=%u "
+		       "got=%d indep=%d\n", what, (long long)index, capacity,
+		       fits, indep);
+		failures++;
+	}
+}
+
 int main(void)
 {
 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 20U, 160U };
@@ -280,6 +305,22 @@ int main(void)
 	check_window("edge", 56U, 8U, 64U);
 	check_window("edge", 57U, 8U, 64U);
 	check_window("edge", 4294967295U, 8U, 4294967295U);
+	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
+		for (j = 0; j < sizeof(indices) / sizeof(indices[0]); j++)
+			check_pointer("grid", (__s64)indices[j], capacities[i]);
+	/* The one-past-end index is a valid pointer and the next is not. */
+	check_pointer("edge", 159, 160U);
+	check_pointer("edge", 160, 160U);
+	check_pointer("edge", 161, 160U);
+	/* Negative offsets are not arena addresses; these pin the signed cast. */
+	check_pointer("neg", -1, 160U);
+	check_pointer("neg", -96, 160U);
+	check_pointer("neg", -2147483648LL, 160U);
+	/* A capacity near the top of the index space is where the signed cast
+	 * earns its place: an unsigned cast turns -1 into 4294967295, which such
+	 * a capacity would admit, while the signed value stays negative. */
+	check_pointer("neg", -1, 4294967295U);
+	check_pointer("neg", -96, 4294967295U);
 	for (i = 0; i < sizeof(capacities) / sizeof(capacities[0]); i++)
 		for (j = 0; j < sizeof(indices) / sizeof(indices[0]); j++)
 			check_tag_slot("grid", indices[j], capacities[i]);
