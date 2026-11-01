@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 366, and 231 steps
+`build/mut_*.py` files exist, the counter's last value is 367, and 233 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -135,6 +135,18 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+Sign extension is where sampling would not have been enough. Both
+architectures extend a narrow value into a 64-bit register with entirely
+different code: AArch64 states it generically and inlines the
+mask-flip-subtract idiom, x86-64 writes each width out with its own constants.
+A signedness slip in either still yields a plausible register value and still
+round-trips for positive inputs, so only boundary values show it. The two
+contracts agree at all three widths AArch64 parameterises, with `0x7f`/`0x80`
+pinned on both sides, and the C check runs every 16-bit pattern through both
+the byte and halfword paths plus a stride across the 32-bit space -- 200,652
+cases in a tenth of a second, which is cheap enough that exhaustiveness beat
+choosing a sample. Breaking the byte mask fails it on 32,768 cases.
 
 The cross-ISA theorems say nothing about the C, so that is checked separately.
 `CrossIsaWidth.lean` and `CrossIsaStackArena.lean` prove the generated *Lean*
