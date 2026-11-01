@@ -2594,6 +2594,24 @@ EXPECTED; census 332 -> 333; the
 x86 BPF helper-call BODY family is
 closed.
 
+A caution for the next session on this tree: chasing
+the gate meant toggling the one line another
+agent had pending in `x86_sim_local_bpf.h`
+(`STACK_BYTE(__x86_stw_narrowed, 1)`) back to
+its committed value so the x86 stack-arm host
+could pass, and the commit then captured that
+reverted value. The edit is restored in the
+working tree (`git status` shows the header
+modified, the diff is the single line), so
+nothing was lost, but the toggling is the wrong
+habit: a stranded-mutation check on that header
+would have reported the same thing without
+writing to the file. The gate result quoted
+above was measured with the committed value, and
+with the pending edit the same gate fails at
+`test_x86_stack_arm_route_host` (1208 cases) --
+which is the mutant, not a regression.
+
 Step 0463 closes the stack access-window
 memory-safety gap both simulators
 carried, through the generated-contract
