@@ -4,7 +4,8 @@ import Std.Tactic.BVDecide
 
 namespace KProgFormal
 
-open GeneratedArm64StackArena (wordIndex wordAligned words windowEnd windowFits)
+open GeneratedArm64StackArena (wordIndex wordAligned words windowEnd windowFits
+  tagSlotFits)
 open GeneratedArm64ByteLane (ByteLane)
 
 /-- Independent statement of the word-arena slot: the byte index divided by the
@@ -182,5 +183,118 @@ i.e. frame offset 56 (`152 - 96`) fits and 57 does not. -/
 theorem arm64_stack_arena_window_threshold :
     windowFits 152 8 160 = true ∧ windowFits 153 8 160 = false := by
   refine ⟨?_, ?_⟩ <;> (simp only [windowFits, windowEnd]; native_decide)
+
+/-- Independent statement of tag-slot addressability: the slot is below the
+count, stated through the byte index instead of the slot, `index < slots * 8`
+with the slot count a whole number of words. -/
+def arm64StackArenaTagSlotFitsSpec (index slots : BitVec 32) : Bool :=
+  decide (index.toNat < slots.toNat * 8)
+
+/-- The shift form and the multiply form of the same bound agree, so the
+generated `WORD_INDEX < TAG_SLOTS` and the independent `index < slots * 8` are
+one statement. -/
+theorem arm64_stack_arena_tag_shift_lt_mul (a b : Nat) :
+    (a >>> 3 < b) = (a < b * 8) := by
+  rw [Nat.shiftRight_eq_div_pow]
+  have h : (2 : Nat) ^ 3 = 8 := rfl
+  rw [h]
+  by_cases hb : b = 0
+  · subst hb
+    simp
+  · rw [Nat.div_lt_iff_lt_mul (by omega : 0 < (2 : Nat) ^ 3)]
+
+/-- The generated tag-slot test agrees with the independent statement. -/
+theorem arm64_stack_arena_tag_slot_fits_refines (index slots : BitVec 32) :
+    tagSlotFits index slots = arm64StackArenaTagSlotFitsSpec index slots := by
+  simp only [tagSlotFits, arm64StackArenaTagSlotFitsSpec, wordIndex,
+    BitVec.lt_def, BitVec.toNat_ushiftRight]
+  have h := arm64_stack_arena_tag_shift_lt_mul index.toNat slots.toNat
+  simp only [h]
+
+/-- The round-up's floor identity: rounding a capacity up to a whole number of
+words and stepping back one lands on the last word that is fully inside it,
+`(capacity - 1) / 8`. -/
+theorem arm64_stack_arena_round_up_floor (q r : Nat) (hr : r < 8)
+    (h : 0 < q * 8 + r) :
+    (q * 8 + r + 7) / 8 - 1 = (q * 8 + r - 1) / 8 := by
+  rcases Nat.eq_zero_or_pos q with hq0 | hq0
+  · subst hq0
+    simp only [Nat.zero_mul, Nat.zero_add] at h ⊢
+    omega
+  · rcases Nat.eq_zero_or_pos r with hr0 | hr0
+    · subst hr0
+      simp only [Nat.add_zero]
+      have h1 : (q * 8 + 7) / 8 = q := by omega
+      have h2 : (q * 8 - 1) / 8 = q - 1 := by omega
+      rw [h1, h2]
+    · have e1 : (q * 8 + r + 7) / 8 = q + 1 := by omega
+      have e2 : (q * 8 + r - 1) / 8 = q := by omega
+      rw [e1, e2]
+      omega
+
+/-- The tag array is exactly as large as the word view, so a tag access and a
+64-bit word access admit the same slots: the largest addressable tag slot,
+`words - 1`, is the word holding the arena's final byte, `(capacity - 1) >>> 3`.
+Proved by reducing both sides to `Nat` and applying the round-up floor
+identity. -/
+theorem arm64_stack_arena_last_tag_slot_is_last_word (capacity : BitVec 32)
+    (hcap : 0 < capacity.toNat) (hnoWrap : capacity.toNat + 7 < 2 ^ 32) :
+    words capacity - 1 = (capacity - 1) >>> 3 := by
+  have h1v : (1 : BitVec 32).toNat = 1 := by decide
+  have h7 : (7 : BitVec 32).toNat = 7 := by decide
+  have h8v : (8 : BitVec 32).toNat = 8 := by decide
+  have ncap : (capacity - 1).toNat = capacity.toNat - 1 := by
+    rw [BitVec.toNat_sub, h1v]
+    rw [show (2 ^ 32 - 1 + capacity.toNat) % 2 ^ 32 = capacity.toNat - 1 by
+          rw [show 2 ^ 32 - 1 + capacity.toNat = (capacity.toNat - 1) + 2 ^ 32 by omega]
+          rw [Nat.add_mod_right, Nat.mod_eq_of_lt (by omega)]]
+  have e1 : (capacity + 7).toNat = capacity.toNat + 7 := by
+    rw [BitVec.toNat_add, h7, Nat.mod_eq_of_lt (by omega)]
+  have e2 : ((capacity + 7) / 8).toNat = (capacity.toNat + 7) / 8 := by
+    rw [BitVec.toNat_udiv, e1, h8v]
+  have e3 : ((capacity - 1) >>> 3).toNat = (capacity.toNat - 1) / 8 := by
+    rw [BitVec.toNat_ushiftRight, ncap, Nat.shiftRight_eq_div_pow]
+  have hlt8 : capacity.toNat % 8 < 8 := Nat.mod_lt _ (by decide)
+  have hd : capacity.toNat = (capacity.toNat / 8) * 8 + capacity.toNat % 8 := by
+    have := Nat.div_add_mod capacity.toNat 8
+    omega
+  have hnat : (capacity.toNat + 7) / 8 - 1 = (capacity.toNat - 1) / 8 := by
+    rw [hd]
+    exact arm64_stack_arena_round_up_floor (capacity.toNat / 8)
+      (capacity.toNat % 8) hlt8 (by omega)
+  simp only [words]
+  apply BitVec.eq_of_toNat_eq
+  rw [BitVec.toNat_sub, e2, e3]
+  show (2 ^ 32 - 1 + (capacity.toNat + 7) / 8) % 2 ^ 32 = (capacity.toNat - 1) / 8
+  omega
+
+/-- The tag guard and the window guard at a one-byte width agree on an arena
+whose capacity is a whole number of words (both the enabled 160-byte and the
+disabled 1-byte arena are). This ties the tag array's bound to the proved
+window bound instead of leaving a second, independent inequality in the
+simulator: a slot is addressable exactly when one byte at that index fits. -/
+theorem arm64_stack_arena_tag_guard_is_window_guard (index capacity : BitVec 32)
+    (hm : capacity.toNat % 8 = 0) :
+    tagSlotFits index (words capacity) = windowFits index 1 capacity := by
+  simp only [tagSlotFits, windowFits, windowEnd, wordIndex, words,
+    decide_eq_decide, BitVec.lt_def, BitVec.toNat_ushiftRight,
+    BitVec.toNat_udiv, BitVec.toNat_add]
+  have h7 : (7 : BitVec 32).toNat = 7 := by decide
+  have h8 : (8 : BitVec 32).toNat = 8 := by decide
+  have h1 : (1 : BitVec 32).toNat = 1 := by decide
+  rw [h7, h8, h1]
+  have hsum : (capacity.toNat + 7) % 2 ^ 32 = capacity.toNat + 7 := by omega
+  rw [hsum]
+  have hq : (capacity.toNat + 7) / 8 = capacity.toNat / 8 := by omega
+  rw [hq]
+  have := Nat.div_add_mod capacity.toNat 8
+  omega
+
+/-- The tag-array boundary this closes: on the enabled 160-byte arena the tag
+array has 20 slots, so byte index 159 (slot 19) is addressable and index 160
+(slot 20) is not -- the access that read past `__a64_stack_tag`. -/
+theorem arm64_stack_arena_tag_slot_threshold :
+    tagSlotFits 159 20 = true ∧ tagSlotFits 160 20 = false := by
+  refine ⟨?_, ?_⟩ <;> (simp only [tagSlotFits, wordIndex]; native_decide)
 
 end KProgFormal

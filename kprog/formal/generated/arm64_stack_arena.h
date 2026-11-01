@@ -17,4 +17,11 @@
 	(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
 #define KPROG_ARM64_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \
 	((KPROG_ARM64_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
+/*
+ * A tag access addresses one slot of `KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY)`
+ * entries. A slot at or past the count -- which a byte index at or past
+ * CAPACITY reaches -- is outside the tag array.
+ */
+#define KPROG_ARM64_STACK_TAG_SLOT_FITS(INDEX, SLOTS) \
+	((KPROG_ARM64_STACK_WORD_INDEX(INDEX) < (__u32)(SLOTS)) ? 1 : 0)
 #endif

@@ -30,6 +30,13 @@ contract also fixes that bound: an access fits when its end index is at most
 the capacity, the C `INDEX + BYTES <= CAPACITY`, and a protocol that reaches
 the arena without checking it over-runs the final `BYTES - 1` bytes.
 
+The tag array `__a64_stack_tag[]` holds one byte per word slot, so a tag
+access is a *slot* index into an array of `TAG_SLOTS(CAPACITY)` entries, not a
+byte window. The contract fixes that bound too: a slot is addressable when it
+is below the slot count, the C `WORD_INDEX < TAG_SLOTS`, and a tag access
+without it runs off the end of the tag array just as the byte ladder runs off
+the end of the arena.
+
 The generated C macros evaluate no memory: they are pure index/bit
 computations. `KProgFormal/Arm64StackArena.lean` restates each independently
 and proves the two views address the same storage.
@@ -46,6 +53,7 @@ EXPECTED = {
     "capacity_round": "ceil8",
     "arena_alias": "b-q-union",
     "window_guard": "index_plus_bytes_le_capacity",
+    "tag_slot_guard": "word_index_lt_tag_slots",
 }
 
 ROOT = Path(__file__).resolve().parent
@@ -91,6 +99,11 @@ bytes: its end index is at most the capacity, the C
 `(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
 def windowFits (index width capacity : BitVec 32) : Bool :=
   decide (windowEnd index width ≤ capacity.toNat)
+
+/-- A word slot is addressable in a tag array of `slots` entries: the slot is
+below the count, the C `WORD_INDEX < TAG_SLOTS`. -/
+def tagSlotFits (index slots : BitVec 32) : Bool :=
+  decide (wordIndex index < slots)
 end KProgFormal.GeneratedArm64StackArena
 '''
 
@@ -117,6 +130,13 @@ def render_c(spec: dict) -> str:
 \t(((__u64)(__u32)(INDEX)) + ((__u64)(__u32)(BYTES)))
 #define KPROG_ARM64_STACK_WINDOW_FITS(INDEX, BYTES, CAPACITY) \\
 \t((KPROG_ARM64_STACK_WINDOW_END((INDEX), (BYTES)) <= (__u64)(__u32)(CAPACITY)) ? 1 : 0)
+/*
+ * A tag access addresses one slot of `KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY)`
+ * entries. A slot at or past the count -- which a byte index at or past
+ * CAPACITY reaches -- is outside the tag array.
+ */
+#define KPROG_ARM64_STACK_TAG_SLOT_FITS(INDEX, SLOTS) \\
+\t((KPROG_ARM64_STACK_WORD_INDEX(INDEX) < (__u32)(SLOTS)) ? 1 : 0)
 #endif
 '''
 

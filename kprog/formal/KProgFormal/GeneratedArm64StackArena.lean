@@ -25,4 +25,9 @@ bytes: its end index is at most the capacity, the C
 `(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
 def windowFits (index width capacity : BitVec 32) : Bool :=
   decide (windowEnd index width ≤ capacity.toNat)
+
+/-- A word slot is addressable in a tag array of `slots` entries: the slot is
+below the count, the C `WORD_INDEX < TAG_SLOTS`. -/
+def tagSlotFits (index slots : BitVec 32) : Bool :=
+  decide (wordIndex index < slots)
 end KProgFormal.GeneratedArm64StackArena
