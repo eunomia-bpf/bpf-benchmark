@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0528 moves to a different surface (census 398 ->
+399). Dispatch selects an arm; emission writes the
+control edge. Step 0499 proved the two branch shapes
+compose to the same next PC and the arm64 shape host
+compares the contract against an ordering oracle, but
+neither executes the emitter -- while x86 has had a
+route host driving its emitter since before this
+sequence. The asymmetry matters because the backward
+shape is an inverted conditional jump over a local
+fall-through label; a body that failed to invert would
+compile and terminate and simply take the wrong edge.
+The new host drives the real macro over 15 conditions
+x 16 flag states x 5 addresses, observing which arm
+fired via goto labels; dropping the inversion fails
+960 of 1201. Its one deliberate limit is a proved
+irrelevance: <= to < passes, because at equality both
+shapes select the same PC
+(arm64_branch_emit_shape_irrelevant). Gate: rc 0,
+242 banners, 124,531,197 cases.
+
 Step 0527 asks the same dispatch question of x86
 (census 397 -> 398), which had never been measured.
 The x86 chain branches on 53 HANDLED predicates

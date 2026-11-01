@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-241 passing `cross-check: OK` oracle banners summing to 124,529,996 modeled
+242 passing `cross-check: OK` oracle banners summing to 124,531,197 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,529,996 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 241 banners are all distinct oracles — 240 report a plain
+124,531,197 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 242 banners are all distinct oracles — 241 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 398, and 288 steps
+`build/mut_*.py` files exist, the counter's last value is 399, and 290 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -158,6 +158,20 @@ four. The oracle drives all five kinds at both widths, recomputing the modifier
 from its definition, and asserts a non-identity kind was exercised so the run
 is not vacuous. An off-by-one in shift-left fails 78 cases; dropping the
 complement fails 595.
+
+A different surface had the same asymmetry. Branch *emission* is the code that
+writes the control edge, not the dispatch that selects an arm: the forward shape
+is a conditional jump, the backward shape an inverted conditional jump over a
+local fall-through label. The x86 side has had a route host executing its
+emitter since before this sequence; `ARM64_SIM_A64_JCC` was executed by nothing,
+and the arm64 shape host compares only the contract. The new host drives the
+real macro over all 15 conditions, 16 flag states and forward/equal/backward
+addresses, observing which arm fires through `goto` labels. Dropping the
+inversion on the backward arm fails 960 of 1,201 cases.
+
+Its one deliberate limit is a *proved* irrelevance: changing `target <= current`
+to `<` passes, because at equality both shapes select the same next PC -- which
+is `arm64_branch_emit_shape_irrelevant` from Step 0499.
 
 x86 gets the same question asked, and the answer differs. Its chain branches
 on 53 `HANDLED` predicates and the generated model names every one -- the
@@ -7434,6 +7448,44 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0528 - the AArch64 branch
+emitter was never executed, though the
+x86 one was
+
+Step 0528 moves to a different surface
+(census 398 -> 399). Dispatch selects an
+arm; *emission* writes the control edge.
+0499 proved the two shapes compose to the
+same next PC and the arm64 shape host
+compares the contract against an ordering
+oracle -- but neither executes the emitter.
+The x86 side has had a route host driving
+its emitter since before this sequence;
+`ARM64_SIM_A64_JCC` was driven by nothing.
+
+The asymmetry matters because the arms are
+not symmetric code: the backward shape is
+an *inverted* conditional jump over a local
+fall-through label. A body that failed to
+invert, or that took the fall-through on the
+wrong predicate, would compile and terminate
+-- it would just take the wrong edge.
+
+The new host drives the real macro over all
+15 conditions, 16 flag states and
+forward/equal/backward addresses, observing
+which arm fired through `goto` labels.
+Dropping the inversion fails 960 of 1,201
+cases.
+
+Its one deliberate limit is a *proved*
+irrelevance: changing `target <= current`
+to `<` passes, because at equality both
+shapes select the same next PC -- exactly
+`arm64_branch_emit_shape_irrelevant` from
+Step 0499. Gate: rc 0, **242** banners,
+124,531,197 cases. Census 398 -> 399.
 
 ### Step 0527 - the same question asked
 of x86, where the answer is empty
