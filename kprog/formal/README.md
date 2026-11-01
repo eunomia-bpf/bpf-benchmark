@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 381, and 259 steps
+`build/mut_*.py` files exist, the counter's last value is 382, and 260 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -164,6 +164,20 @@ invalid-argument test is "higher". Measured: all six encode the condition their
 check requires. Planting bounds-as-equality is reported against the check it
 implements; replacing the word with a plain unconditional `B` is reported as
 not being a `B.cond` encoding.
+
+One cross-architecture difference is *deliberate* and was previously unrecorded.
+Both encoders answer "given a native map name, which link-plan lookup site is
+this?", and both account for the kernel storing at most `BPF_OBJ_NAME_LEN - 1`
+bytes of a name. They answer it with different structures: x86 runs an exact
+pass then a separate truncated pass that *errors* when two sites truncate-match
+the same name, while AArch64 folds both comparisons into one predicate used with
+`find`, so the first of several matching sites wins. For a name matching more
+than one site, one architecture reports an error and the other picks silently.
+Neither is wrong, but a program can lower on one and fail on the other, and
+nothing said so. `check_lookup_ambiguity.py` measures the divergence rather
+than picking a winner, and fails if the two converge without someone deciding
+they should -- convergence would mean one side changed. It also pins both
+truncation lengths to the kernel's own limit.
 
 The two architectures also lower `bpf_tail_call` independently, in separate
 modules, each with its own spelling of the kernel's limit -- `u8` on one side,
@@ -7238,6 +7252,44 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0511 - the two architectures
+resolve ambiguous map names differently,
+and nothing said so
+
+Step 0511 records a cross-architecture
+difference rather than removing it (census
+381 -> 382). Both encoders answer "given
+a native map name, which lookup site is
+this?", and both truncate at
+`BPF_OBJ_NAME_LEN - 1` because the kernel
+stores at most that much.
+
+They answer it with different structures.
+x86 runs an exact pass, then a separate
+truncated pass that *errors* when two
+sites truncate-match the same name -- in
+both the lookup and the update path.
+AArch64 folds exact and truncated matching
+into one predicate used with `find`, so
+the first of several matching sites wins.
+
+For a name matching more than one site,
+one architecture reports an error and the
+other picks silently. Neither is wrong,
+but a program can lower on one and fail on
+the other, and nothing said so.
+
+`check_lookup_ambiguity.py` measures the
+divergence instead of picking a winner,
+and fails if the two converge without
+someone deciding they should -- convergence
+means one side changed, which is equally
+worth a look. It also pins both truncation
+lengths to the kernel's limit. Verified by
+removing x86's lookup-path error, which is
+reported by path name. Gate: rc 0, **232**
+banners. Census 381 -> 382.
 
 ### Step 0510 - the two architectures
 lower tail calls independently and
