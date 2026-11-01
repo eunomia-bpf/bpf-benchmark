@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0520 closes one of the seven model-only families
+(census 390 -> 391). UNARY (MVN, NEG) is worth a
+live oracle because the two opcodes are each other's
+plausible neighbour: both take one source, both write
+at the access width, neither writes NZCV, so sending
+NEG down the MVN arm yields a full-width complement
+instead of a negation -- a wrong value with no flag.
+test_arm64_unary_route_host.c drives both opcodes at
+both widths through ARM64_SIM_L_EXEC; the dispatch
+model count moves from 5 live / 7 model-only to
+6 / 6. One expectation was wrong against the tree: I
+first required a narrow write to preserve the
+destination high half and got 156 failures, but
+arm64_write_arm.h states the value is masked before
+the body is chosen, so the bodies are observationally
+equal and the high half is not preserved. Verified:
+opcode swap fails 312, source corruption fails 312.
+Gate: rc 0, 235 banners, 124,500,933 cases.
+
 Step 0519 compares the dispatcher with the model of
 it (census 389 -> 390). The coverage theorems of
 0517/0518 are stated over the generated dispatch
