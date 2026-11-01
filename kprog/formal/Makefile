@@ -141,6 +141,7 @@ check:
 	python3 generate_x86_dispatch_family_spec.py --check
 	python3 generate_x86_dispatch_singleton_spec.py --check
 	lake build
+	python3 check_no_sorry.py --check
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
 	lake env lean KProgFormal/Arm64Cond.lean
