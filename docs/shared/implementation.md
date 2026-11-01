@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0526 closes the last of the twelve model-only
+families (census 396 -> 397). ORN is the one
+whose second source is modified before use: the
+dispatcher applies the AUX-encoded shift or
+rotate-extend modifier and passes the modified
+value in, so a model oracle feeding the contract
+an unmodified operand exercises only modifier
+kind 0. The oracle drives all five kinds at both
+widths, recomputing the modifier from its
+definition, and asserts a non-identity kind was
+exercised. Verified: an off-by-one in shift-left
+fails 78 cases, dropping the complement fails
+595. check_dispatch_model now reports 12 live /
+0 model-only -- every family the C chain routes
+is driven by an oracle including the simulator
+header, and the check fails if a new one appears
+without. Gate: rc 0, 241 banners, 124,529,996
+cases.
+
 Step 0525 closes a sixth model-only family (census
 395 -> 396), the largest at six opcodes over 26
 shifts and masks. Writing the oracle also found
