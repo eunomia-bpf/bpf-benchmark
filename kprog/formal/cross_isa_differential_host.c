@@ -390,6 +390,48 @@ static void check_byte_reversal(void)
 	}
 }
 
+/*
+ * The memory-offset core, which is the part both ISAs compute.
+ *
+ * AArch64 has no scale and x86-64 has no pre/post-indexing, so the contracts
+ * differ in what they parameterise -- but the shared term is
+ * base + (index <<< scale), and at unit scale with writeback off AArch64's
+ * offset reduces to x86-64's. This checks that reduction in C over values
+ * chosen to exercise the wrap, since both accumulate with 64-bit two's
+ * complement and a signed/unsigned slip there would agree on small inputs.
+ */
+static void check_mem_offset(void)
+{
+	static const unsigned long long values[] = {
+		0ULL, 1ULL, 7ULL, 0x1000ULL, 0x7fffffffffffffffULL,
+		0x8000000000000000ULL, 0xffffffffffffffffULL,
+		0xfffffffffffffffeULL, 0xdeadbeefcafeULL,
+	};
+	unsigned i, j;
+
+	for (i = 0; i < sizeof(values) / sizeof(values[0]); i++)
+		for (j = 0; j < sizeof(values) / sizeof(values[0]); j++) {
+			unsigned long long imm = values[i];
+			unsigned long long idx = values[j];
+			unsigned long long a64, x86;
+
+			/* has_index = true, unit scale, no writeback */
+			a64 = KPROG_ARM64_MEM_OFFSET(0, 1, imm, idx);
+			x86 = KPROG_X86_MEM_OFFSET(0 /* scale log2 */, imm, idx, 1);
+			cmp_u64("offset indexed", a64, x86);
+
+			/* has_index = false: the displacement alone */
+			a64 = KPROG_ARM64_MEM_OFFSET(0, 0, imm, idx);
+			x86 = KPROG_X86_MEM_OFFSET(0, imm, idx, 0);
+			cmp_u64("offset plain", a64, x86);
+
+			/* and the wrap itself, stated on both sides */
+			cmp_u64("offset wraps",
+				KPROG_X86_MEM_OFFSET(0, imm, idx, 1),
+				imm + idx);
+		}
+}
+
 int main(void)
 {
 	check_widths();
@@ -399,6 +441,7 @@ int main(void)
 	check_shifts();
 	check_sign_extend();
 	check_byte_reversal();
+	check_mem_offset();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",
