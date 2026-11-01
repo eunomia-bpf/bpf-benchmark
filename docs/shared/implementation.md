@@ -2612,6 +2612,21 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0536 asks x86 the same entry-context question
+(census 406 -> 407) and gets the opposite answer: its
+memory-load oracle already drives the composition
+under both ABI kinds at all four offsets, so its
+second context was genuinely covered. Verified rather
+than believed, since Step 0532 showed a docstring can
+outrun its code: an offset fault is rejected by a
+_Static_assert at compile time, and mis-tagging the
+data offset is caught at run time. check_dispatch_model
+now covers entry contexts too -- every ABI kind must
+appear in some host per architecture -- verified
+against the pre-0535 state by removing the new arm64
+host and watching it report exactly that gap. Gate:
+rc 0, 248 banners.
+
 Step 0535 exercises the SKB entry context (census 405
 -> 406). Every host declares simulator state by
 hand and every one hard-codes the XDP ABI kind, so

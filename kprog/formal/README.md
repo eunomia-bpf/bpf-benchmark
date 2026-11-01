@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 406, and 303 steps
+`build/mut_*.py` files exist, the counter's last value is 407, and 304 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -166,6 +166,16 @@ other three now run, and driving the conditional one in *both* directions
 mattered: the first version used only a condition that happened to hold and so
 passed with the conditional degraded to an unconditional jump. Adding the
 falsifying case makes that fault fail.
+
+The same question asked of the second architecture gives the opposite answer,
+and it is worth recording rather than assuming either way: its memory-load oracle
+already drives the composition under both ABI kinds at all four offsets, so its
+second context was genuinely covered. Verified before believing the docstring --
+planting an offset fault is rejected by a static assertion at compile time, and
+mis-tagging the data offset is caught at run time. The coverage check now
+includes entry contexts: for each architecture every ABI kind must appear in
+some host, verified against the pre-0535 state by removing the new host and
+watching it report exactly the gap that step closed.
 
 The *entry contexts* are a surface nobody had looked at: every host declares
 its own simulator state by hand and every one hard-codes the XDP ABI kind, so the
@@ -7532,6 +7542,35 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0536 - the same question to
+x86, where the answer is the opposite,
+and the check now covers contexts
+
+Step 0535 found the AArch64 SKB entry
+declared by no host (census 406 -> 407). The
+same question to x86 gives the opposite
+answer: its memory-load oracle already
+drives the composition under both ABI kinds
+at all four offsets, so the second context
+was genuinely covered.
+
+That was verified rather than believed. Step
+0532 showed a docstring can outrun its code,
+and here the docstring's claim was true:
+planting an offset fault is rejected by a
+`_Static_assert` at compile time, and
+mis-tagging the data offset is caught at run
+time by that host.
+
+`check_dispatch_model` now covers entry
+contexts as well as dispatch families -- for
+each architecture, every ABI kind must
+appear in some host. Verified against the
+pre-0535 state: removing the new AArch64 host
+makes it report exactly the gap that step
+closed. Gate: rc 0, **248** banners. Census
+406 -> 407.
 
 ### Step 0535 - the SKB entry context,
 which no host had ever declared
