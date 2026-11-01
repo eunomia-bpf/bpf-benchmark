@@ -34,12 +34,20 @@ SIM_H = ROOT.parent / "x86" / "x86_sim.h"
 # Short-form conditional jump opcodes are 0x70 + condition code.
 JCC_BASE = 0x70
 
-# A commented jcc emission, in either of the two forms the encoder uses:
-#   append_x86_jcc_rel8(&mut body, 0x75); // jne ...
-#   bytes.extend_from_slice(&[0x73, len]); // jae ...
+# Every conditional-jump emission, commented or not. The two forms differ only
+# in the opcode base: the short form is 0x70 + condition code and the near form
+# is 0x80 + condition code.
+# Both spellings the encoder uses, and the name it binds the site to -- that
+# binding is often the only statement of which condition was intended:
+#   let jbe_out = append_x86_jcc_rel32(&mut bytes, 0x86);
+#   append_x86_jcc_rel8(&mut body, 0x75); // jne skip ref update
 SITE = re.compile(
-    r'(?:append_x86_jcc_rel(?:8|32)\([^;]*?0x([0-9a-f]{2})[^;]*;'
-    r'|\[0x([0-9a-f]{2}),[^\]]*\];)\s*//\s*(j[a-z]+)')
+    r'(?:let\s+(?P<bind>\w+)\s*=\s*)?append_x86_jcc_rel(8|32)\('
+    r'[^;]*?0x([0-9a-f]{2})[^;]*;'
+    r'(?:\s*//\s*([a-z]+))?')
+
+# The base each form adds to the condition code.
+BASE = {"8": 0x70, "32": 0x80}
 
 CC = re.compile(r'#define\s+X86_CC_([A-Z]+)\s+(\d+)U')
 
@@ -65,34 +73,70 @@ def main(argv):
         print("check_jcc_opcodes: found no commented jcc sites in %s" % ENCODER)
         return 1
 
+    # condition code -> mnemonic, from the contract itself
+    by_code = {value: name.lower() for name, value in codes.items()}
+
+    by_code = {value: name.lower() for name, value in codes.items()}
+
     problems = []
-    seen_any = 0
-    for high, low, mnemonic in sites:
-        opcode = int(high or low, 16)
-        suffix = mnemonic[1:]
-        if suffix not in codes:
-            problems.append("%s: no X86_CC_%s in the contract"
-                            % (mnemonic, suffix.upper()))
-            continue
-        want = JCC_BASE + codes[suffix]
-        seen_any += 1
-        if opcode != want:
-            problems.append("%s: encoder writes 0x%02x, but 0x70 + "
-                            "X86_CC_%s(%d) is 0x%02x"
-                            % (mnemonic, opcode, suffix.upper(),
-                               codes[suffix], want))
+    sites = []
+    commented = 0
+    named = 0
+    for m in SITE.finditer(ENCODER.read_text(errors="ignore")):
+        bind, form, ophex, mnemonic = (m.group("bind"), m.group(2),
+                                        m.group(3), m.group(4))
+        opcode = int(ophex, 16)
+        base = BASE[form]
+        width = "rel8" if form == "8" else "rel32"
+        code = opcode - base
+
+        # The site must name a condition, either in its comment or in the
+        # identifier it binds. A binding like `jbe_out` is the only statement
+        # of intent for an uncommented emission.
+        intent = mnemonic
+        if intent is None and bind:
+            bm = re.match(r'j([a-z]+?)_?out$', bind)
+            if bm:
+                intent = "j" + bm.group(1)
+        if intent:
+            suffix = intent[1:]
+            if suffix not in codes:
+                problems.append("%s: no X86_CC_%s in the contract"
+                                % (intent, suffix.upper()))
+                continue
+            if codes[suffix] != code:
+                problems.append(
+                    "%s at %s: opcode 0x%02x implies condition code %d, "
+                    "but X86_CC_%s is %d"
+                    % (intent, width, opcode, code, suffix.upper(),
+                       codes[suffix]))
+                continue
+            if mnemonic:
+                commented += 1
+            else:
+                named += 1
+        else:
+            if code not in by_code:
+                problems.append(
+                    "%s opcode 0x%02x implies condition code %d, which is "
+                    "not in the contract" % (width, opcode, code))
+                continue
+        sites.append((opcode, code))
+
+    if not sites and not problems:
+        print("check_jcc_opcodes: found no conditional-jump sites in %s"
+              % ENCODER)
+        return 1
 
     if problems:
-        print("check_jcc_opcodes: %d problem(s) over %d site(s)"
-              % (len(problems), len(sites)))
+        print("check_jcc_opcodes: %d problem(s)" % len(problems))
         for p in problems:
             print("  " + p)
         return 1
 
-    names = sorted({m for _, _, m in sites})
-    print("check_jcc_opcodes: %d commented jcc site(s) (%s) all encode "
-          "0x70 + their condition code"
-          % (seen_any, ", ".join(names)))
+    print("check_jcc_opcodes: %d conditional-jump site(s) all encode "
+          "their condition code (%d by mnemonic comment, %d by binding "
+          "name)" % (len(sites), commented, named))
     return 0
 
 
