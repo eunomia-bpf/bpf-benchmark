@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0499 compares a control-flow *chain* rather
+than a contract (census 370 -> 371). Each ISA proves
+its own path in isolation, so on either ISA flags in
+means the correct next PC out, but nothing showed the
+two chains agree. The chains are not the same shape
+internally: AArch64 evaluates (N Z C V), x86-64
+(CF ZF SF OF) with C the complement of CF, so an
+intermediate step differs while endpoints should not
+-- a chain composing differently on one side would
+diverge while every per-ISA theorem held.
+CrossIsaBranch.lean composes the whole path from
+four architectural flag facts through each ISA's
+condition evaluation and shape selection to one next
+PC, so the 0490/0493 correspondence survives
+emission. Dropping the carry polarity breaks it. The
+compiled check runs 16 flag combos x 14 conditions x
+5 sites; shape disagreement at target == current
+fails 448 cases, an inverted condition arm fails 96.
+2034 theorems. Gate: rc 0, 229 banners,
+124,467,708 cases.
+
 Step 0498 relates the two ALU dispatch tables (census
 369 -> 370). Both execute arithmetic-logic through
 one generated table, numbered differently and

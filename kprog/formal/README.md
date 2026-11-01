@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 124,465,468 modeled
+229 passing `cross-check: OK` oracle banners summing to 124,467,708 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 300 Lean modules
-compiling transitively from the gate's roots and proving 2,028 theorems with
+header and one `Generated*.lean` module (138/138/138); 301 Lean modules
+compiling transitively from the gate's roots and proving 2,034 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,465,468 again, so the rollup is a measurement of the committed tree and not
+124,467,708 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -135,6 +135,20 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+Everything above compares one contract at a time. The control-flow path is a
+different kind of claim: the property that matters is that two *chains*
+compose to the same place, not that two contracts match. Each ISA proves its
+own chain in isolation, so on either ISA flags in means the correct next PC
+out -- but the chains are not the same shape internally. AArch64 evaluates
+`(N Z C V)`, x86-64 `(CF ZF SF OF)` with C the complement of CF, so an
+intermediate step differs while the endpoints should not. A chain that
+composed differently on one side would diverge while every per-ISA theorem
+still held, which is precisely the failure per-ISA work cannot see.
+`CrossIsaBranch.lean` composes the whole path -- same four architectural flag
+facts, through each ISA's own condition evaluation and shape selection, to one
+next program counter -- so the flag correspondence of Steps 0490/0493 is shown
+to survive emission rather than stopping at the predicate.
 
 The ALU tables are the first place where the shared vocabulary has to be
 *recovered* rather than read off. Both ISAs dispatch arithmetic-logic through
@@ -7093,6 +7107,51 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0499 - the two control-flow
+chains compose to the same next PC
+
+Twelve steps compared one contract at a
+time; this one compares a *chain* (census
+370 -> 371). Each ISA already proves its
+own path in isolation -- a condition
+evaluation refines to the architectural
+predicate, the emitted shape selects the
+architectural next PC -- so on either ISA
+flags in means the correct next PC out.
+Nothing showed the two chains agree with
+each other.
+
+The risk is specific: the chains are not
+the same shape internally. AArch64
+evaluates `(N Z C V)` and x86-64
+`(CF ZF SF OF)` where C is the complement
+of CF, so an intermediate step differs
+while the endpoints should not. A chain
+that composed differently on one side
+would produce a divergent next PC while
+every per-ISA theorem continued to hold --
+exactly what per-ISA work cannot see.
+
+`CrossIsaBranch.lean` closes the path:
+same four architectural flag facts,
+through each ISA's own condition
+evaluation and shape selection, to one
+next program counter. The correspondence
+is what Steps 0490 and 0493 established;
+what is new is that it composes through
+emission rather than stopping at the
+predicate. Dropping the carry polarity
+breaks the theorem.
+
+The compiled check runs the same
+composition over 16 flag combinations, 14
+conditions and 5 branch sites. Making the
+shape selectors disagree at `target ==
+current` fails it on 448 cases; inverting
+one condition arm fails it on 96. Gate:
+rc 0, **229** banners, 124,467,708 cases
+(oracle 1,004,143). Census 370 -> 371.
 
 ### Step 0498 - the shared ALU vocabulary
 must be recovered by a mapping, and one
