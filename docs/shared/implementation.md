@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0516 measures whether the compiled surface is
+actually guarded (census 386 -> 387).
+mutate_contracts.py finds the first meaningful
+literal in each generator's emitted-C string, bumps
+it, regenerates, and records what fires. Over 31
+generators: 24 rejected by the generator itself, 3
+caught by a host, 2 stopped by a static assertion, 2
+whose header exports no macro, 0 survived. Three
+quarters of the C surface never reaches a build --
+stronger than the earlier steps established, and now
+measured on every gate rather than argued. Getting
+the number honest took four passes, each discarding a
+false survivor: a docstring, a static-assert message,
+a Python format-padding width, and a generator
+diagnostic prefix -- all inert, all initially looking
+like an unnoticed mutation. Gate: rc 0, 234 banners.
+
 Step 0515 measures the boundary of the proofs (census
 385 -> 386). A generator renders one specification
 into a C header and a Lean module; the Lean carries a
