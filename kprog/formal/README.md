@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 379, and 255 steps
+`build/mut_*.py` files exist, the counter's last value is 380, and 256 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -152,6 +152,18 @@ name, which is the only statement of intent for an uncommented emission
 sites are in the tail-call lowering path. Verified by planting a wrong opcode at
 each of them. An emission with neither a comment nor a `j<cond>_out` binding is
 still only range-checked, which the script says.
+
+The same crate also emits AArch64 conditional branches, built from a literal
+whose low four bits are the condition code, and those had no check either. Six
+sites, all in tail-call and map-update lowering, where the branch decides
+whether an index is out of bounds, whether a map module is missing, or whether
+an argument is invalid. Here the buffer-index name states which check the
+branch belongs to, so the expected condition is a property of the *site*:
+bounds/limit/null are "greater or equal", module existence is equality, and the
+invalid-argument test is "higher". Measured: all six encode the condition their
+check requires. Planting bounds-as-equality is reported against the check it
+implements; replacing the word with a plain unconditional `B` is reported as
+not being a `B.cond` encoding.
 
 The helper-id table is a different kind of gap, because it is only *stated*
 rather than reached. `arm64_helper_idents_spec.json` gives each of 61 BPF
@@ -7210,6 +7222,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0509 - the same crate emits
+AArch64 conditional branches, also
+unchecked
+
+Steps 0507/0508 covered the x86 encoder's
+conditional jumps. The same crate also
+emits AArch64 conditional branches from a
+literal word whose low four bits are the
+condition code, and nothing checked those
+(census 379 -> 380).
+
+Six sites, all in tail-call and map-update
+lowering, where the branch decides whether
+an index is out of bounds, whether a map
+module is missing, or whether an argument
+is invalid. The buffer-index name states
+which check the branch belongs to, so here
+the expected condition is a property of the
+*site*: bounds/limit/null are "greater or
+equal", module existence is equality, and
+the invalid-argument test is "higher".
+
+One name did not say enough.
+`null_branch` follows the same
+`cmp X9, max_entries` as the bounds
+branches, so it is a bounds check too --
+visible from the surrounding code, not from
+its name, which is worth recording because
+a checker keyed on names inherits their
+imprecision.
+
+Measured: 6 sites, all encode the
+condition their check requires. Verified
+by planting two faults -- bounds as
+equality, reported against the check it
+implements; and a plain unconditional `B`
+in place of the `B.cond`, reported as not
+being a conditional branch at all. Gate:
+rc 0, **232** banners. Census 379 -> 380.
 
 ### Step 0508 - closing the jcc
 checker's own stated blind spot
