@@ -67,6 +67,21 @@ theorem x86_stack_arena_word_aligned_refines (index : BitVec 32) :
   unfold wordAligned x86StackArenaWordAlignedSpec
   bv_decide
 
+/-- The AArch64 and x86 statements of the same capacity restriction are
+worded differently -- a numeric bound `capacity <= 2^32 - 8` there, the no-wrap
+predicate `capacity <= capacity + 7` here -- and they are the same restriction,
+so a reader comparing the two files is not looking at a divergence. It is also
+exactly tight: the equality holds at `2^32 - 8` and fails from `2^32 - 7`
+upward, because the rounding wraps. -/
+theorem x86_stack_arena_words_bound_is_tight :
+    x86StackArenaWordsSpec (BitVec.ofNat 32 (2 ^ 32 - 8)) =
+        words (BitVec.ofNat 32 (2 ^ 32 - 8)) ∧
+      x86StackArenaWordsSpec (BitVec.ofNat 32 (2 ^ 32 - 7)) ≠
+        words (BitVec.ofNat 32 (2 ^ 32 - 7)) ∧
+      ¬ BitVec.ule (BitVec.ofNat 32 (2 ^ 32 - 7))
+          (BitVec.ofNat 32 (2 ^ 32 - 7) + 7) := by
+  refine ⟨?_, ?_, ?_⟩ <;> native_decide
+
 /-- Word slots cover the whole byte arena: the capacity never exceeds the
 byte count of the rounded-up word array. -/
 theorem x86_stack_arena_words_cover_capacity (capacity : BitVec 32)
