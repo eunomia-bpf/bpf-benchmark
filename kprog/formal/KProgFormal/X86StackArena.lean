@@ -217,17 +217,40 @@ theorem x86_stack_arena_pointer_one_past_end (capacity : BitVec 32)
     simp only [decide_eq_false_iff_not]
     omega
 
-/-- The pointer bound is weaker than the window bound for any nonempty window,
-so a stack pointer that passes it can still be dereferenced out of range and
-needs its own check. -/
+/-- The pointer bound is weaker than the window bound: a window that fits
+names a valid arena pointer, for any width -- no nonempty-width condition is
+needed, since `index + width <= capacity` already gives `index <= capacity`. -/
 theorem x86_stack_arena_pointer_weaker_than_window (index capacity width : BitVec 32)
-    (hwidth : 0 < width) (hfit : windowFits index width capacity = true) :
+    (hfit : windowFits index width capacity = true) :
     pointerFits index capacity = true := by
   simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
   simp only [pointerFits, decide_eq_true_eq]
-  have hw : 0 < width.toNat := hwidth
-  simp only [BitVec.toNat_eq] at hw
   omega
+
+/-- The weakness is strict, which is why the stack-pointer helper needs its
+own check: the one-past-end index is a valid pointer but not the start of any
+nonempty window, so a pointer that passes the pointer bound can still be
+dereferenced out of the arena. -/
+theorem x86_stack_arena_pointer_weaker_than_window_strict (capacity : BitVec 32)
+    (hnoWrap : capacity.toNat + 1 < 2 ^ 32) :
+    pointerFits capacity capacity = true ∧
+      windowFits capacity 1 capacity = false := by
+  constructor
+  · simp only [pointerFits]
+    exact decide_eq_true (by simp)
+  · simp only [windowFits, windowEnd]
+    have hv : (1 : BitVec 32).toNat = 1 := by decide
+    have hcapLt : capacity.toNat < 2 ^ 32 := by omega
+    show decide (capacity.toNat + 1 ≤ capacity.toNat) = false
+    rw [decide_eq_false_iff_not]
+    omega
+
+/-- Concrete witness of the strictness on the default frame: index 64 is a
+valid pointer and not the start of a one-byte window, so a stack-pointer
+register can be dereferenced one byte past the frame. -/
+theorem x86_stack_arena_pointer_strict_at_default_frame :
+    pointerFits 64 64 = true ∧ windowFits 64 1 64 = false := by
+  refine ⟨?_, ?_⟩ <;> (simp only [pointerFits, windowFits, windowEnd]; native_decide)
 
 /-- The threshold on both arena sizes the simulator uses, machine-checked: the
 default 64-byte frame fits an 8-byte access at index 56 and not at 57, and the

@@ -322,17 +322,40 @@ theorem arm64_stack_arena_pointer_one_past_end (capacity : BitVec 32)
     simp only [decide_eq_false_iff_not]
     omega
 
-/-- The pointer bound is weaker than the window bound for any nonempty window,
-so a pointer that passes it can still be dereferenced out of range; this is why
-the pointer helper and the access helper carry separate bounds. -/
+/-- The pointer bound is weaker than the window bound: a window that fits
+names a valid arena pointer, for any width -- no nonempty-width condition is
+needed, since `index + width <= capacity` already gives `index <= capacity`. -/
 theorem arm64_stack_arena_pointer_weaker_than_window (index capacity width : BitVec 32)
-    (hwidth : 0 < width) (hfit : windowFits index width capacity = true) :
+    (hfit : windowFits index width capacity = true) :
     pointerFits index capacity = true := by
   simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
   simp only [pointerFits, decide_eq_true_eq]
-  have hw : 0 < width.toNat := hwidth
-  simp only [BitVec.toNat_eq] at hw
   omega
+
+/-- The weakness is strict, which is why the pointer helper needs its own
+check: the one-past-end index is a valid pointer but not the start of any
+nonempty window, so a pointer that passes the pointer bound can still be
+dereferenced out of the arena. -/
+theorem arm64_stack_arena_pointer_weaker_than_window_strict (capacity : BitVec 32)
+    (hnoWrap : capacity.toNat + 1 < 2 ^ 32) :
+    pointerFits capacity capacity = true ∧
+      windowFits capacity 1 capacity = false := by
+  constructor
+  · simp only [pointerFits]
+    exact decide_eq_true (by simp)
+  · simp only [windowFits, windowEnd]
+    have hv : (1 : BitVec 32).toNat = 1 := by decide
+    have hcapLt : capacity.toNat < 2 ^ 32 := by omega
+    show decide (capacity.toNat + 1 ≤ capacity.toNat) = false
+    rw [decide_eq_false_iff_not]
+    omega
+
+/-- Concrete witness of the strictness at the enabled arena: index 160 is a
+valid pointer and not the start of a one-byte window, so a stack-pointer
+register holding frame offset 64 can be dereferenced one byte past the frame. -/
+theorem arm64_stack_arena_pointer_strict_at_arena_size :
+    pointerFits 160 160 = true ∧ windowFits 160 1 160 = false := by
+  refine ⟨?_, ?_⟩ <;> (simp only [pointerFits, windowFits, windowEnd]; native_decide)
 
 /-- The pointer threshold this closes, machine-checked: on the enabled
 160-byte arena the one-past-end index 160 is still a valid pointer and 161 is
@@ -341,6 +364,34 @@ addressable pointer and offset 65 the first one past it. -/
 theorem arm64_stack_arena_pointer_threshold :
     pointerFits 160 160 = true ∧ pointerFits 161 160 = false := by
   refine ⟨?_, ?_⟩ <;> (simp only [pointerFits]; native_decide)
+
+/-- The window bound implies the tag-slot bound, so a checked write covers
+both arrays with one test. The write path with a nonempty width that fits the
+arena always lands in a tag slot the tag array holds: `index + width <=
+capacity` gives `index < capacity`, and the last slot of an arena whose
+capacity is a whole number of words is the last tag slot. This is why
+`ARM64_SIM_L_STACK_WRITE_TAG` carries only the window guard while the tag
+*read* needs the slot guard: a read has no width, so it can name the
+one-past-end index, which is the slot past the array. -/
+theorem arm64_stack_arena_window_implies_tag_slot (index width capacity : BitVec 32)
+    (hm : capacity.toNat % 8 = 0) (hwidth : 0 < width)
+    (hfit : windowFits index width capacity = true) :
+    tagSlotFits index (words capacity) = true := by
+  simp only [windowFits, windowEnd, decide_eq_true_eq] at hfit
+  have h7 : (7 : BitVec 32).toNat = 7 := by decide
+  have h8 : (8 : BitVec 32).toNat = 8 := by decide
+  have hsum : (capacity + 7).toNat = capacity.toNat + 7 := by
+    rw [BitVec.toNat_add, h7, Nat.mod_eq_of_lt (by omega)]
+  have hdiv : ((capacity + 7) / 8).toNat = (capacity.toNat + 7) / 8 := by
+    rw [BitVec.toNat_udiv, hsum, h8]
+  have hshr : (index >>> 3).toNat = index.toNat / 8 := by
+    rw [BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow]
+  simp only [tagSlotFits, wordIndex, words, decide_eq_true_eq, BitVec.lt_def]
+  rw [hshr, hdiv]
+  have hw : 0 < width.toNat := hwidth
+  have hq : (capacity.toNat + 7) / 8 = capacity.toNat / 8 := by omega
+  rw [hq]
+  omega
 
 /-- The tag-array boundary this closes: on the enabled 160-byte arena the tag
 array has 20 slots, so byte index 159 (slot 19) is addressable and index 160
