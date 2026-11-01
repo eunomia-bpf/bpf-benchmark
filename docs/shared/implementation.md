@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0502 fixes a defect found by the same search
+(census 372 -> 373). Two arm64 memory-model hosts
+defined ARM64_SP as 31, but 31 is XZR and 32 is SP in
+this simulator; the simulator reads 31 as zero. The
+models treated a register the simulator reads as zero
+as though it were the stack pointer. Second and more
+interesting consequence: the base sweep ran bi < 32, so
+with SP == 32 the actual stack base was never driven
+-- the hosts believed they tested the stack path
+because 31 was labelled SP. Correcting the value and
+sweeping one past the register file takes them from
+9,216 to 9,504 cases. The step also records the
+bound: contract_step and model_step share the transfer
+body and helpers, so they compare two labellings of
+one model, not an independent reimplementation. Gate:
+rc 0, 229 banners.
+
 Step 0501 inverts the coverage question (census 371 ->
 372): instead of which contracts have a host, which
 contracts does the *simulator* never call? The answer
