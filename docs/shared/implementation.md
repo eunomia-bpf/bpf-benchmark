@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0513 extends the 128-bit oracle to the x86
+multiply-overflow flags (census 383 -> 384). They decide
+CF/OF from magnitudes, not by multiplying, with LIMIT
+chosen by the product's sign -- two independent chances
+to be wrong, since the division rounds down and the sign
+selection is separate. The oracle's first form included
+only x86_sim.h, recomputed the limit itself and passed
+it to the macro, so it tested the contract but never the
+simulator's sign selection: planting xor -> or in the
+simulator left it green. Driving
+X86_SIM_L_SET_IMUL_FLAGS makes that fault fail 40
+cases. The operand table also needed the most-negative
+value against -1, the one pair whose product is exactly
+the negative bound and the only place the two candidate
+limits disagree. Verified: boundary test fails 216, sign
+selection 40. Gate: rc 0, 234 banners, 124,500,620
+cases.
+
 Step 0512 tests a contract that no proof relates to its
 definition (census 382 -> 383). The multiply header
 and its Lean module come from one specification in
