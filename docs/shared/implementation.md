@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0535 exercises the SKB entry context (census 405
+-> 406). Every host declares simulator state by
+hand and every one hard-codes the XDP ABI kind, so
+the SKB entry appeared in no host. It is not a
+synonym: packet pointers sit at offsets 208 and 80
+rather than 0 and 8, and abi_load branches on kind
+and offset together, so reading an SKB context
+through the XDP arm labels packet pointers as
+scalars -- addresses right, provenance wrong. The
+host drives both contexts, checks each field's tag
+and the kind, and asserts the two disagree at each
+other's offsets. Writing it exercised the Step 0500
+composition checker: calling the contract directly
+was flagged, so the host drives the memory-read
+composition instead. Verified at both layers --
+offset via _Static_assert at compile time, kind at
+run time. Gate: rc 0, 248 banners, 124,531,802
+cases.
+
 Step 0534 executes the x86 helper-call bodies (census
 404 -> 405), the mirror of 0533. The x86 surface is
 much smaller -- seven macros -- and none had been

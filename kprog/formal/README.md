@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-247 passing `cross-check: OK` oracle banners summing to 124,531,787 modeled
+248 passing `cross-check: OK` oracle banners summing to 124,531,802 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,531,787 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 247 banners are all distinct oracles — 246 report a plain
+124,531,802 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 248 banners are all distinct oracles — 247 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 405, and 301 steps
+`build/mut_*.py` files exist, the counter's last value is 406, and 303 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -166,6 +166,22 @@ other three now run, and driving the conditional one in *both* directions
 mattered: the first version used only a condition that happened to hold and so
 passed with the conditional degraded to an unconditional jump. Adding the
 falsifying case makes that fault fail.
+
+The *entry contexts* are a surface nobody had looked at: every host declares
+its own simulator state by hand and every one hard-codes the XDP ABI kind, so the
+SKB entry appeared in no host at all. It is not a synonym for XDP -- the packet
+pointers sit at offsets 208 and 80 rather than 0 and 8 -- and the `abi_load`
+contract branches on the kind and the offset together, so reading an SKB context
+through the XDP arm labels packet pointers as scalars: every address right, only
+the provenance wrong, which is what the tag exists to catch. The host drives
+both contexts, checks each field's tag, and asserts that the two disagree at
+each other's offsets.
+
+Writing it also exercised the composition checker from Step 0500: calling the
+`abi_load` contract directly was flagged as testing a contract without the
+simulator's path to it, so the host now drives the memory-read composition and
+runs the tag selection as well. A check written 35 steps earlier caught a gap in
+a host written afterwards.
 
 The second architecture's helper surface is much smaller -- seven macros -- and
 none of those was executed either, for the same reason. What differs is
@@ -7516,6 +7532,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0535 - the SKB entry context,
+which no host had ever declared
+
+Step 0535 looks at a surface nobody had
+examined (census 405 -> 406). Every host in
+the tree declares simulator state by hand,
+and every one hard-codes the XDP ABI kind;
+the SKB entry appeared in no host at all.
+
+It is not a synonym for XDP. The packet
+pointers sit at offsets 208 and 80 rather
+than 0 and 8, and the `abi_load` contract
+branches on the ABI kind and the offset
+together -- so reading an SKB context
+through the XDP arm labels packet pointers as
+scalars. Every address is right and only the
+provenance is wrong, which is precisely what
+the tag exists to catch.
+
+The host drives both contexts, checks each
+field's provenance tag and the ABI kind, and
+asserts that the two contexts disagree at
+each other's offsets -- which is what makes
+the pairing observable.
+
+Writing it exercised a check from Step 0500:
+calling the `abi_load` contract directly was
+flagged as testing a contract without the
+simulator's path to it, so the host now
+drives the memory-read composition. A checker
+written thirty-five steps earlier caught a gap
+in a host written afterwards.
+
+Verified at both layers: changing the SKB
+data offset is rejected by a `_Static_assert`
+at compile time, and declaring the SKB entry
+with the XDP kind is caught at run time. Gate:
+rc 0, **248** banners, 124,531,802 cases.
+Census 405 -> 406.
 
 ### Step 0534 - the x86 helper surface,
 where only one of seven forwards
