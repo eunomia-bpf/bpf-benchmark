@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-239 passing `cross-check: OK` oracle banners summing to 124,527,615 modeled
+240 passing `cross-check: OK` oracle banners summing to 124,529,295 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
-compiling transitively from the gate's roots and proving 2,052 theorems with
+compiling transitively from the gate's roots and proving 2,055 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 483 of
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,527,615 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 239 banners are all distinct oracles — 238 report a plain
+124,529,295 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 240 banners are all distinct oracles — 239 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 395, and 283 steps
+`build/mut_*.py` files exist, the counter's last value is 396, and 284 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -148,6 +148,18 @@ contract whose mutation nothing caught, and each was inert: a docstring, a
 static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
+
+Extract/reverse/extend gets one, the largest of the set at six opcodes over 26
+shifts and masks -- and it found something in the *proofs*. EXTR's refinement
+theorems carry a hypothesis that the operands are already narrowed to the
+destination width, which the dispatcher does not discharge since it passes raw
+registers. The two forms really do differ before the final narrowing
+(`0xffffffffffffffff` against `0x1ffffffff` at `w32`), so the hypothesis was
+doing work at the wrong point -- and it is unnecessary, because both sides are
+narrowed at the end, which is exactly what the C register write does. Three
+raw-operand theorems now carry that. One planted fault per opcode family: EXTR's
+shift off by one fails 175 cases, SXTB's mask narrowed fails 80, SXTW's 80, and
+SXTH's sign bit moved 280.
 
 Address generation gets one, and it is where a value-only oracle is least
 useful. The arm copies its immediate into the destination as a pointer; the
@@ -7400,6 +7412,49 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0525 - extract/reverse/extend,
+and a proof hypothesis the oracle showed
+was unnecessary
+
+Sixth of the model-only families (census
+395 -> 396), and the largest: six opcodes
+over 26 shifts and masks. Step 0496 related
+its REV opcode to x86 at the contract layer,
+but nothing drove the dispatcher to it, and
+EXTR, REV16 and the three sign extensions
+had no live oracle at all.
+
+Writing one also found something in the
+*proofs*. EXTR's refinement theorems carry
+a hypothesis that the operands are already
+narrowed to the destination width, which the
+dispatcher does not discharge -- it passes
+raw registers. The forms genuinely differ
+before the final narrowing
+(`0xffffffffffffffff` against `0x1ffffffff`
+at `w32`), so the hypothesis was doing work
+at the wrong point. It is also unnecessary:
+both sides are narrowed to the destination
+width at the end, which is what the C
+register write does, so the refinement holds
+without it. Three raw-operand theorems now
+carry that; the 64-bit case already needed
+none.
+
+That is a stronger statement than the tree
+had, and an oracle found it rather than a
+reading of the proof.
+
+Verified on the C side by planting one
+fault per opcode family: EXTR's shift off by
+one fails 175 cases, SXTB's mask narrowed
+fails 80, SXTW's likewise 80, SXTH's sign
+bit moved 280. The dispatch-model count
+moves from 10 live / 2 model-only to
+11 / 1. Gate: rc 0, **240** banners, 2,055
+theorems, 124,529,295 cases. Census 395 ->
+396.
 
 ### Step 0524 - address generation: the
 tag is the whole contract, and only the
