@@ -527,6 +527,7 @@ check:
 	./build/test_x86_cmov_route_host
 	lake env lean KProgFormal/GeneratedArm64Width.lean
 	lake env lean KProgFormal/Arm64Width.lean
+	lake env lean KProgFormal/CrossIsaWidth.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_width_host.c -o build/test_arm64_width_host
 	./build/test_arm64_width_host
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_width_effective_host.c -o build/test_arm64_width_effective_host
