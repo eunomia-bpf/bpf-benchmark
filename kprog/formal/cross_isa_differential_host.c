@@ -349,6 +349,47 @@ static void check_sign_extend(void)
 			kprog_x86_sign_extend_value(v, X86_WIDTH_32));
 }
 
+/*
+ * Byte reversal, where both sides do the same thing by different means.
+ *
+ * AArch64's REV is a shift-and-mask disjunction over the destination width;
+ * x86-64's BSWAP picks the width and then reverses over it, clearing above.
+ * A byte-reversal fault is quiet -- swap two of the eight terms and most
+ * inputs still change plausibly -- so this runs a pseudo-random stream rather
+ * than round numbers, and checks the involution as well as the agreement: an
+ * order-two permutation is what distinguishes a correct reversal from one that
+ * merely produces some permutation.
+ */
+static void check_byte_reversal(void)
+{
+	unsigned long long x = 0x243f6a8885a308d3ULL;
+	unsigned long long i, v, a, b;
+
+	for (i = 0; i < 200000ULL; i++) {
+		x = x * 6364136223846793005ULL + 1442695040888963407ULL;
+		v = x;
+
+		a = KPROG_ARM64_EXTREV_VALUE(ARM64_OP_REV, v, 0, 0,
+					     ARM64_WIDTH_64, unreachable_cond());
+		b = kprog_x86_bswap_value(v, X86_WIDTH_64);
+		cmp_u64("rev w64", a, b);
+		/* the involution, on the AArch64 contract directly */
+		cmp_u64("rev tw64", KPROG_ARM64_EXTREV_VALUE(ARM64_OP_REV, a, 0, 0,
+							      ARM64_WIDTH_64,
+							      unreachable_cond()),
+			v);
+
+		a = KPROG_ARM64_EXTREV_VALUE(ARM64_OP_REV, v, 0, 0,
+					     ARM64_WIDTH_32, unreachable_cond());
+		b = kprog_x86_bswap_value(v, X86_WIDTH_32);
+		cmp_u64("rev w32", a, b);
+		cmp_u64("rev tw32", KPROG_ARM64_EXTREV_VALUE(ARM64_OP_REV, a, 0, 0,
+							      ARM64_WIDTH_32,
+							      unreachable_cond()),
+			v & 0xffffffffULL);
+	}
+}
+
 int main(void)
 {
 	check_widths();
@@ -357,6 +398,7 @@ int main(void)
 	check_conditions();
 	check_shifts();
 	check_sign_extend();
+	check_byte_reversal();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",
