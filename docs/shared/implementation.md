@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0531 executes the x86 call and subroutine-return
+emission (census 401 -> 402). The second
+architecture's surface is larger -- a real call/return
+pair through the stack where the first uses a link
+register -- and none of its five emission macros was
+executed. Stack discipline is the property: CALL
+decrements the pointer and stores the address, the
+return reads it back and increments, and a pair that
+disagreed corrupts the pointer while any address-only
+check still passes. The host checks the decrement, the
+stored word, the read back, the restore, control
+transfer and the round trip. Two details recorded: the
+arena indexes at offset + capacity, so an outside
+frame trips __builtin_trap (SIGILL, no output); and
+the aligned slot is q[wordIndex(index(off))], not
+q[index(off)], which reads the wrong word. Verified in
+both directions. Gate: rc 0, 245 banners,
+124,531,696 cases.
+
 Step 0530 executes the AArch64 call and return
 emission (census 400 -> 401), the rest of the
 surface after Steps 0528/0529. CALL performs two

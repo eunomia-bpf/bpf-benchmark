@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-244 passing `cross-check: OK` oracle banners summing to 124,531,687 modeled
+245 passing `cross-check: OK` oracle banners summing to 124,531,696 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,531,687 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 244 banners are all distinct oracles — 243 report a plain
+124,531,696 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 245 banners are all distinct oracles — 244 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 401, and 293 steps
+`build/mut_*.py` files exist, the counter's last value is 402, and 295 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -158,6 +158,21 @@ four. The oracle drives all five kinds at both widths, recomputing the modifier
 from its definition, and asserts a non-identity kind was exercised so the run
 is not vacuous. An off-by-one in shift-left fails 78 cases; dropping the
 complement fails 595.
+
+The second architecture's surface is larger and had the same history. It models
+a real call/return pair through the stack where the first uses a link register,
+so CALL decrements the stack pointer and stores the return address, and the
+subroutine return reads it back and increments -- a pair that disagreed would
+corrupt the pointer and return through a stale word while any address-only check
+still passed. The host checks the decrement, the stored word, the read back, the
+restore, control transfer and the round trip.
+
+Two details cost time and are recorded: the modelled arena indexes at
+offset + capacity, so a frame pointer outside it trips the window guard --
+which is a `__builtin_trap`, so a wrong address shows as SIGILL with no output;
+and the aligned 64-bit slot is `q[wordIndex(index(off))]`, not `q[index(off)]`,
+the latter reading the wrong word and producing plausible failures against a
+correct simulator.
 
 Call and return are the rest of the emission surface, and had the same history.
 They are worth more than symmetry because CALL performs *two* writes that must
@@ -7472,6 +7487,49 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0531 - the x86 call/return
+pair, where stack discipline is the
+property
+
+Steps 0529/0530 executed the AArch64
+emission surface (census 401 -> 402). The
+x86 surface is larger -- it models a real
+call/return pair through the stack where
+AArch64 uses a link register -- and none of
+its five emission macros was executed
+either.
+
+The pair is worth more than the AArch64 one
+because it moves the stack pointer. CALL
+decrements it by eight and writes the return
+address at the new top; the subroutine
+return reads that word and increments by
+eight. A pair that disagreed would corrupt
+the pointer and return through a stale word,
+while any check inspecting only the address
+still passed.
+
+The host checks the decrement, the stored
+word, the read back, the restore, control
+transfer, and the round trip as a pair.
+
+Two details cost real time and are recorded
+in the host. The modelled arena indexes at
+offset + capacity, so a frame pointer outside
+it trips the window guard -- and that guard
+is `__builtin_trap`, so a wrong address shows
+as SIGILL with no output rather than a
+failure line. And the aligned 64-bit slot is
+`q[wordIndex(index(off))]`, not `q[index(off)]`;
+using the latter read the wrong word and
+produced plausible failures against a correct
+simulator.
+
+Verified by planting each direction:
+decrementing by 16 fails, incrementing by 16
+fails. Gate: rc 0, **245** banners,
+124,531,696 cases. Census 401 -> 402.
 
 ### Step 0530 - call and return, where
 two writes must agree
