@@ -196,11 +196,76 @@ static void check_flags(void)
 	}
 }
 
+/*
+ * The branches, at the layer that compiles.
+ *
+ * `CrossIsaCond.lean` proves the two evaluators agree under the flag
+ * correspondence (N Z C V) = (SF ZF (!CF) OF), with the mapping CS->AE,
+ * CC->B, MI->S, HI->A, LS->BE. This pins the same table in the generated C,
+ * which is where an inverted entry would actually miscompile.
+ */
+static int unreachable_cond(void)
+{
+	printf("condition evaluator fell through to its default arm\n");
+	failures++;
+	return 0;
+}
+
+static void check_conditions(void)
+{
+	/* one arm64 condition, its x86 counterpart, and a name for the pair */
+	static const struct {
+		unsigned a64;
+		unsigned x86;
+		const char *name;
+	} pairs[] = {
+		{ ARM64_COND_EQ, X86_CC_E,   "eq/e" },
+		{ ARM64_COND_NE, X86_CC_NE,  "ne/ne" },
+		{ ARM64_COND_CS, X86_CC_AE,  "cs/ae" },
+		{ ARM64_COND_CC, X86_CC_B,   "cc/b" },
+		{ ARM64_COND_MI, X86_CC_S,   "mi/s" },
+		{ ARM64_COND_PL, X86_CC_NS,  "pl/ns" },
+		{ ARM64_COND_VS, X86_CC_O,   "vs/o" },
+		{ ARM64_COND_VC, X86_CC_NO,  "vc/no" },
+		{ ARM64_COND_HI, X86_CC_A,   "hi/a" },
+		{ ARM64_COND_LS, X86_CC_BE,  "ls/be" },
+		{ ARM64_COND_GE, X86_CC_GE,  "ge/ge" },
+		{ ARM64_COND_LT, X86_CC_L,   "lt/l" },
+		{ ARM64_COND_GT, X86_CC_G,   "gt/g" },
+		{ ARM64_COND_LE, X86_CC_LE,  "le/le" },
+	};
+	unsigned mask, i, cf, zf, sf, of, a_n, a_z, a_c, a_v;
+
+	/* The evaluator's default arm is a statement expression that calls
+	 * UNSUPPORTED; pass a real function so it is not a no-op statement. */
+
+	/* every combination of the four flags */
+	for (mask = 0; mask < 16U; mask++) {
+		cf = (mask >> 0) & 1U;
+		zf = (mask >> 1) & 1U;
+		sf = (mask >> 2) & 1U;
+		of = (mask >> 3) & 1U;
+		a_n = sf;
+		a_z = zf;
+		a_c = !cf;	/* the polarity relation 0490 proved */
+		a_v = of;
+
+		for (i = 0; i < sizeof(pairs) / sizeof(pairs[0]); i++) {
+			cmp_int(pairs[i].name,
+				!!KPROG_ARM64_EVAL_COND(pairs[i].a64, a_n, a_z,
+							 a_c, a_v,
+							 unreachable_cond()),
+				!!KPROG_X86_EVAL_CC(pairs[i].x86, cf, zf, sf, of));
+		}
+	}
+}
+
 int main(void)
 {
 	check_widths();
 	check_stack_bounds();
 	check_flags();
+	check_conditions();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",

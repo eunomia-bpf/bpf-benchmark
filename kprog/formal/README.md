@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 123,466,241 modeled
+229 passing `cross-check: OK` oracle banners summing to 123,466,465 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
-compiling transitively from the gate's roots and proving 1,994 theorems with
+compiling transitively from the gate's roots and proving 1,998 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,466,241 again, so the rollup is a measurement of the committed tree and not
+123,466,465 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -111,6 +111,19 @@ simulator happened to pass only plain variables at every call site, so nothing
 was wrong today, but the generated contract was a trap for the next caller.
 All five now emit `(A)`; the Lean output is byte-identical, since the fix
 touches only the C path.
+
+Step 0490 proved the one flag that differs in meaning, which raises the
+question the branches depend on: do the two condition vocabularies decide the
+same way? Under the correspondence `(N Z C V) = (SF ZF (!CF) OF)` they do, on
+all 14 comparable conditions, and the mapping is not the one the names suggest
+--- `CS` maps to `AE`, not `B`; `CC` to `B`; `MI` to `S`; `HI` to `A`; `LS` to
+`BE`. Inverting any one is the classic condition-inversion bug and it
+typechecks, so the mapping is a function with an agreement theorem rather than
+a hand-written table, and injectivity is proved so no two AArch64 conditions
+collapse onto one x86 condition. `AL` is separated out: it is unconditional,
+so it is a lowering question rather than a flag one. Inverting `CS` breaks
+three theorems, and the differential oracle catches it at the C layer on 16
+cases.
 
 Not every cross-ISA difference is a drift, and the carry flag is the case that
 shows the difference between the two kinds. AArch64 sets `C` after a
@@ -7036,6 +7049,47 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0493 - the two condition
+vocabularies decide alike, and the
+mapping is not the obvious one
+
+Step 0490 proved the one flag that
+differs in meaning (census 364 -> 365).
+The branches built on those flags were
+still unrelated. Under the
+correspondence `(N Z C V) = (SF ZF (!CF)
+OF)` the two evaluators agree on all 14
+comparable conditions -- and the mapping
+is not what the names suggest. `CS` maps
+to `AE`, not `B`: AArch64's carry-set
+condition follows a compare that
+*borrowed*, so its x86 counterpart is
+`AE` (no borrow), while `CC` takes `B`.
+`MI` maps to `S`, `HI` to `A`, `LS` to
+`BE`.
+
+Inverting any one is the classic
+condition-inversion bug, and it
+typechecks. So the mapping is a
+function, the agreement is a theorem
+over it, and injectivity is proved so
+two distinct AArch64 conditions never
+collapse onto one x86 condition. `AL` is
+separated out: it is unconditional, so
+it is a lowering question rather than a
+flag one.
+
+The differential oracle pins the same
+table in the generated C, over all 16
+flag combinations. Its default arm calls
+a function rather than being a no-op
+statement, so a fallthrough is a counted
+failure. Inverting `CS` breaks three
+theorems and fails the oracle on 16
+cases. 1,998 theorems. Gate: rc 0, 229
+banners, 123,466,465 cases (oracle
+2,900). Census 364 -> 365.
 
 ### Step 0492 - the same defect was in
 the condition evaluators, and is now

@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0493 relates the two condition vocabularies
+(census 364 -> 365). Step 0490 proved the one flag
+differing in meaning; the branches built on those
+flags were unrelated. Under (N Z C V) = (SF ZF (!CF)
+OF) the two evaluators agree on all 14 comparable
+conditions, and the mapping is not what the names
+suggest: CS maps to AE, not B (AArch64's carry-set
+condition follows a compare that borrowed, so its
+counterpart is AE), CC to B, MI to S, HI to A, LS
+to BE. Inverting one is the classic
+condition-inversion bug and typechecks, so the
+mapping is a function with an agreement theorem and
+injectivity, and AL is separated out as a lowering
+question. The differential oracle pins the table in
+C over all 16 flag combinations, with a counted
+failure on fallthrough. Inverting CS breaks three
+theorems and fails 16 oracle cases. 1998 theorems.
+Gate: rc 0, 229 banners, 123,466,465 cases.
+
 Step 0492 finds the 0491 defect is a class
 (census 363 -> 364). The two condition evaluators
 had it too: KPROG_ARM64_EVAL_COND(T_GT, p || q, ...)
