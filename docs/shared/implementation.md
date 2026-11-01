@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0545 states what the dual-emit coverage
+check establishes (census 415 -> 416). Its
+summary claimed each generator's C output "was
+confirmed by mutating the C string only", but the
+check verified none of it: COVERED's value is the
+evidence and only the key was tested, so a note
+naming a nonexistent host passed unchanged.
+Adding a reachability test produced a finding --
+and the finding was wrong.
+test_x86_bswap_route_host.c names neither the
+header nor its symbol outside a comment, yet
+mutating the generated << 24 to << 23 fails it
+with 48 mismatches: it drives BSWAP through the
+dispatcher. Coverage is behavioural, so the
+unsound branch was dropped and symbols are
+credited only outside comments. The summary now
+states exactly what is verified and that the
+mutation is not re-derived -- 0532's lesson
+again. Gate: rc 0, 248 banners.
+
 Step 0544 finds the macro-hygiene check was not
 reading one-line macros (census 414 -> 415).
 Planting the exact defect the check exists for --

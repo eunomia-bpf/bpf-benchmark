@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 415, and 313 steps
+`build/mut_*.py` files exist, the counter's last value is 416, and 314 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,38 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0545 -- what the coverage check
+actually establishes
+
+The summary claimed each dual-emitted
+generator's C output "was confirmed by mutating
+the C string only". The check verified **none of
+that**: `COVERED`'s *value* is the evidence and
+only its key was tested. A note naming a host
+file that does not exist passed unchanged.
+
+Adding a reachability test then produced a
+finding -- and **the finding was wrong**.
+`test_x86_bswap_route_host.c` names neither
+`x86_bswap.h` nor `kprog_x86_bswap_value`
+outside a comment, so statically it did not
+cover the contract. Mutating the generated
+`<< 24` to `<< 23` fails it with **48
+mismatches**: it drives BSWAP through the
+dispatcher. Coverage is behavioural and cannot
+be decided by reading a host's text, so the
+unsound branch was dropped and a symbol name is
+credited only outside comments.
+
+What remains is stated exactly -- a host
+references each generator's header or symbols,
+each recording names host files that exist, and
+**the mutation that established a recording is
+not re-derived here**. Fourth step on the same
+lesson as 0532: a claim must not outrun what
+re-verifies it. Gate: rc 0, **248** banners.
+Census 415 -> 416.
 
 ### Step 0544 - the macro check was not
 reading one-line macros
