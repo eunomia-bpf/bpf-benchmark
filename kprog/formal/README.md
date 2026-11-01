@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 384, and 263 steps
+`build/mut_*.py` files exist, the counter's last value is 385, and 264 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -135,6 +135,23 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+Four times an oracle has been green while a fault in the simulator's own
+argument derivation went unnoticed: the imul-flags oracle (0513), the
+shift-flags oracle, and the register-lane-aux oracle each recomputed what the
+simulator computes and then called the generated contract with that value. The
+contract was tested; the composition was not. Measured on the shift-flags
+oracle: shifting the sign bit by one inside the simulator survived all 90,112
+cases. It now drives the simulator's composition too and compares, which makes
+the fault fail -- and that needed the flags seeded identically on both paths,
+since some arms (ROL) deliberately leave ZF/SF untouched.
+
+`check_oracle_composition.py` generalises the search: it reads the simulator
+sources, collects the contract macros reached from inside each `SIM_L_*` body,
+and reports every host calling one without calling any `SIM_L_*` macro itself.
+Four hosts match; each is recorded with the reason it is acceptable and which
+host does cover its composition, so a new one fails the gate with that
+instruction rather than being re-audited by hand.
 
 The same wide-arithmetic oracle applies to the x86 multiply-overflow flags,
 which decide CF/OF from magnitudes rather than by multiplying: `A_ABS != 0 &&
@@ -7282,6 +7299,44 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0514 - four oracles tested a
+contract but not the simulator's path to
+it, so the class is now checked
+
+Step 0513 found one oracle recomputing
+what the simulator computes. It was not
+alone (census 384 -> 385): the shift-flags
+oracle and the register-lane-aux oracle
+had the same shape. Measured on the
+shift-flags one, shifting the sign bit by
+one *inside* the simulator survived all
+90,112 cases.
+
+That host now drives the simulator's own
+composition as well and compares the two.
+Doing so needed the flags seeded
+identically on both paths, because some
+arms deliberately leave ZF/SF untouched --
+without it the comparison reported 24
+spurious mismatches, which is the same
+"my model was wrong" pattern as Steps
+0504 and 0505.
+
+`check_oracle_composition.py` generalises
+the search rather than leaving three more
+to be found by hand: it reads the simulator
+sources, collects the contract macros
+reached from inside each `SIM_L_*` body,
+and reports every host calling one of them
+without calling any `SIM_L_*` macro itself.
+Four hosts match; each is recorded with the
+reason it is acceptable and which host does
+cover its composition. A new one fails the
+gate with that instruction.
+
+Gate: rc 0, **234** banners. Census 384 ->
+385.
 
 ### Step 0513 - an oracle that tested
 the contract but not the simulator's own
