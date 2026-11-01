@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 380, and 257 steps
+`build/mut_*.py` files exist, the counter's last value is 381, and 258 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -164,6 +164,22 @@ invalid-argument test is "higher". Measured: all six encode the condition their
 check requires. Planting bounds-as-equality is reported against the check it
 implements; replacing the word with a plain unconditional `B` is reported as
 not being a `B.cond` encoding.
+
+The two architectures also lower `bpf_tail_call` independently, in separate
+modules, each with its own spelling of the kernel's limit -- `u8` on one side,
+`u32` on the other. The same program lowered either way must behave the same, so
+the limit, the comparison and the increment have to agree, and nothing compared
+them. The check now requires one statement of the limit across both modules, an
+unsigned-greater-or-equal branch on each side, and an increment by exactly one,
+with the limit cross-checked against the vendored kernel header (`33`).
+Verified by planting three divergences -- a moved limit, a `jae`-to-`ja`
+branch, and a dropped increment -- each reported by name.
+
+One measurement kept because it looked like a discrepancy and is not: the
+encoder reserves 512 bytes for its own frame, the kernel's `MAX_BPF_STACK` is
+also 512, and the simulators model much smaller arenas (64/128 and 160). The
+arena is a model size, and an access past it is reported through the
+unsupported hook rather than being silently wrong.
 
 The helper-id table is a different kind of gap, because it is only *stated*
 rather than reached. `arm64_helper_idents_spec.json` gives each of 61 BPF
@@ -7222,6 +7238,50 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0510 - the two architectures
+lower tail calls independently and
+nothing compared them
+
+Step 0510 is the first cross-*architecture*
+check rather than a cross-language one
+(census 380 -> 381). `bpf_tail_call` is
+lowered separately for x86 and AArch64, in
+separate modules, each with its own
+spelling of the kernel's limit -- `u8` on
+one side, `u32` on the other. The same
+program lowered either way must behave the
+same, so the limit, the comparison and the
+increment have to agree. Nothing compared
+them.
+
+The check now requires one statement of
+the limit across both modules, an
+unsigned-greater-or-equal branch on each
+side (x86 `jae`, AArch64 `CS`), and an
+increment by exactly one on each side,
+with the limit cross-checked against the
+vendored kernel header where
+`MAX_TAIL_CALL_CNT` is 33.
+
+Measured: both sides state 33, both branch
+on unsigned greater-or-equal, both
+increment by one. Verified by planting
+three divergences -- AArch64's limit moved
+to 34, x86's branch changed from `jae` to
+`ja`, AArch64's increment reduced to zero
+-- each reported by name.
+
+A related measurement that looked like a
+discrepancy and is not: the encoder
+reserves 512 bytes of stack for its own
+frame, the kernel's `MAX_BPF_STACK` is
+also 512, and the simulators model 64/128
+and 160. The arena is a model size, not
+the architectural one, and an access past
+it is reported rather than silently wrong.
+Gate: rc 0, **232** banners. Census 380 ->
+381.
 
 ### Step 0509 - the same crate emits
 AArch64 conditional branches, also
