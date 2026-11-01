@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0466 proves how the three stack bounds
+relate (census 337 -> 338; proof-only, no
+simulator change). A stack write that fits its
+window always lands in a tag slot the tag array
+holds, so `ARM64_SIM_L_STACK_WRITE_TAG` needs
+only the window guard while the tag read -- no
+width, so it can name the one-past-end index --
+needs the slot guard. A fitting window names a
+valid pointer at any width (the nonempty-width
+hypothesis `pointer_weaker_than_window` carried
+was unused, and its docstring described the
+converse). The weakness is strict: the
+one-past-end index is a valid pointer that
+starts no nonempty window, with concrete
+witnesses at both arena sizes, which is why the
+pointer helper keeps its own check. Eight new
+theorems. Gate: rc 0, 226 banners, 123,463,285
+cases, 1970 theorems.
+
 Step 0465 closes the fourth and last unguarded
 stack path (census 336 -> 337).
 `ARM64_SIM_L_STACK_PTR` and `X86_SIM_L_STACK_PTR`

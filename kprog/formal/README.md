@@ -11,8 +11,8 @@ What the gate currently covers, measured from one full `make check` run:
 226 passing `cross-check: OK` oracle banners summing to 123,463,285 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
-compiling transitively from the gate's roots and proving 1,965 theorems with
-no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 483 of
+compiling transitively from the gate's roots and proving 1,970 theorems with
+no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 485 of
 those (25%) are discharged by `native_decide`, i.e. by compiled evaluation, so
 they rest on the compiler as well as the kernel — 20 of the 599
 refinement-named theorems, each a finite-table equality, and the rest finite
@@ -89,6 +89,18 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+The three bounds are not independent, and the module now proves how they
+relate rather than leaving it to inspection. A stack *write* that fits its
+window always lands in a tag slot the tag array holds — `index + width <=
+capacity` gives `index < capacity`, and the last slot of an arena whose
+capacity is a whole number of words is the last tag slot — so
+`ARM64_SIM_L_STACK_WRITE_TAG` carries only the window guard, while the tag
+*read* needs the slot guard because it carries no width and can name the
+one-past-end index. A fitting window likewise names a valid arena pointer at
+any width, and the weakness is strict: the one-past-end index is a valid
+pointer but starts no nonempty window, which is exactly why the pointer helper
+keeps a check of its own.
 
 The tag array is a third, separate stack path and needed its own bound. A tag
 access is a *slot* index into `__a64_stack_tag[]`, which holds one byte per
@@ -6833,6 +6845,61 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0466 - stack bound relationships
+
+Step 0466 proves how the three
+stack bounds relate, instead of
+leaving the relationship to
+inspection (census 337 -> 338). No
+simulator code changes; this is a
+proof-only step over the existing
+contracts.
+
+Three results. First, a stack
+*write* that fits its window always
+lands in a tag slot the tag array
+holds: `index + width <= capacity`
+gives `index < capacity`, and the
+last slot of an arena whose capacity
+is a whole number of words is the
+last tag slot. That is why
+`ARM64_SIM_L_STACK_WRITE_TAG` carries
+only the window guard, while the tag
+*read* needs the slot guard -- a read
+carries no width, so it can name the
+one-past-end index, which is the slot
+past the array.
+
+Second, `pointer_weaker_than_window`
+was stated with a nonempty-width
+hypothesis that the proof never used,
+and its docstring described the
+converse of what it proved. A fitting
+window names a valid arena pointer at
+*any* width, since `index + width <=
+capacity` already gives `index <=
+capacity`; the hypothesis is gone and
+the statement says what it means.
+
+Third, the weakness is *strict*:
+the one-past-end index is a valid
+pointer but starts no nonempty
+window (`pointerFits capacity capacity
+= true ∧ windowFits capacity 1 capacity
+= false`, for a capacity whose
+successor does not wrap), with
+concrete witnesses at the 160-byte and
+64-byte framings. That strictness is
+the reason the pointer helper keeps a
+check separate from the window guard
+rather than relying on it. Eight new
+theorems, no `sorry`, no warnings.
+Gate: rc 0, 226 `cross-check: OK`
+banners, 123,463,285 modeled cases
+(unchanged -- the theorems live in
+already-compiled modules), 1970
+theorems. Census 337 -> 338.
 
 ### Step 0465 - stack pointer bound (both ISAs)
 
