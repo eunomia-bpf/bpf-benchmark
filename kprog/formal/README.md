@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-240 passing `cross-check: OK` oracle banners summing to 124,529,295 modeled
+241 passing `cross-check: OK` oracle banners summing to 124,529,996 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,055 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,529,295 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 240 banners are all distinct oracles — 239 report a plain
+124,529,996 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 241 banners are all distinct oracles — 240 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 396, and 284 steps
+`build/mut_*.py` files exist, the counter's last value is 397, and 285 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -148,6 +148,20 @@ contract whose mutation nothing caught, and each was inert: a docstring, a
 static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
+
+Complemented OR is the last of the twelve, and the one whose *second source
+is modified before use*: the dispatcher applies the AUX-encoded shift or
+rotate-extend modifier to the second source and passes the modified value in.
+A model oracle feeding the contract an unmodified operand therefore exercises
+only modifier kind 0 -- the identity -- and cannot see a fault in the other
+four. The oracle drives all five kinds at both widths, recomputing the modifier
+from its definition, and asserts a non-identity kind was exercised so the run
+is not vacuous. An off-by-one in shift-left fails 78 cases; dropping the
+complement fails 595.
+
+With that, `check_dispatch_model` reports **12 live / 0 model-only**: every
+family the C chain routes is now driven by an oracle that includes the
+simulator header.
 
 Extract/reverse/extend gets one, the largest of the set at six opcodes over 26
 shifts and masks -- and it found something in the *proofs*. EXTR's refinement
@@ -7412,6 +7426,42 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0526 - complemented OR completes
+the sweep: twelve families, zero
+model-only
+
+The last of the twelve (census 396 -> 397).
+ORN is the family whose *second source is
+modified before use*: the dispatcher applies
+the AUX-encoded shift or rotate-extend
+modifier and passes the modified value in.
+A model oracle feeding the contract an
+unmodified operand therefore exercises only
+modifier kind 0 and cannot see a fault in the
+other four.
+
+The oracle drives all five kinds at both
+widths and shift amounts either side of the
+wrap point, recomputing the modifier from
+its definition so a wrong second source is
+caught before the OR is considered, and
+asserts a non-identity kind was exercised so
+the run is not vacuous.
+
+Verified by planting each half: an off-by-one
+in shift-left fails 78 cases, dropping the
+complement fails 595.
+
+With this the dispatch-model check reports
+**12 live / 0 model-only** -- every family
+the C chain routes is driven by an oracle
+that includes the simulator header. What
+began as a recorded gap in Step 0519 is now
+empty, and the check that measures it fails
+if any new family appears without one. Gate:
+rc 0, **241** banners, 124,529,996 cases.
+Census 396 -> 397.
 
 ### Step 0525 - extract/reverse/extend,
 and a proof hypothesis the oracle showed
