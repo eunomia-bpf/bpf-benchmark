@@ -8,7 +8,7 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-237 passing `cross-check: OK` oracle banners summing to 124,527,533 modeled
+238 passing `cross-check: OK` oracle banners summing to 124,527,554 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
 compiling transitively from the gate's roots and proving 2,052 theorems with
@@ -37,15 +37,15 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,527,533 again, so the rollup is a measurement of the committed tree and not
-a stale note. The 237 banners are all distinct oracles — 236 report a plain
+124,527,554 again, so the rollup is a measurement of the committed tree and not
+a stale note. The 238 banners are all distinct oracles — 237 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
 oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 393, and 280 steps
+`build/mut_*.py` files exist, the counter's last value is 394, and 281 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -148,6 +148,16 @@ contract whose mutation nothing caught, and each was inert: a docstring, a
 static-assert message, a Python format-padding width, and a generator
 diagnostic prefix. The harness now excludes all four, which is what makes the
 zero mean something.
+
+The vector reductions get one, and they defeat the obvious oracle in two ways:
+the dispatcher writes the SIMD register rather than a GPR, so comparing the
+destination observes nothing, and the result is assembled lane by lane, so a
+fault can move a single byte while the rest of the value stays correct. The
+oracle therefore compares the SIMD register against a lane-by-lane
+recomputation, over operands whose bytes are all distinct. Planting each lane
+fault separately: moving one CNT lane from bit 32 to 40 fails 7 of 21 cases,
+and shifting one UADDLV contribution by a single bit fails 6. Count moves from
+8 live / 4 model-only to 9 / 3.
 
 STLXR gets one as well, and it is the only remaining family with *two*
 observable effects: the dispatcher stores the source to memory and then writes
@@ -7377,6 +7387,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0523 - the vector reductions
+defeat the obvious oracle twice over
+
+Fourth of the remaining model-only
+families (census 393 -> 394). REDUCTION
+breaks two assumptions an oracle would
+naturally make: the dispatcher writes the
+SIMD register `v0`, not a GPR destination,
+so comparing the destination observes
+nothing at all; and the result is assembled
+lane by lane, so a fault can move a single
+byte while the rest of the value stays
+correct.
+
+`test_arm64_reduction_route_host.c` drives
+CNT and UADDLV through the dispatcher and
+compares `v0` against a lane-by-lane
+recomputation written here, over operands
+whose bytes are all distinct -- which is
+what makes a single misplaced lane visible.
+
+Verified by planting each lane fault
+separately: moving one CNT lane from bit 32
+to bit 40 fails 7 of 21 cases, and shifting
+one UADDLV contribution by a single bit
+fails 6. Both differ in one byte or one
+word of an otherwise correct value, exactly
+the class a model-side comparison would
+miss. The dispatch-model count moves from
+8 live / 4 model-only to 9 / 3. Gate: rc 0,
+**238** banners, 124,527,554 cases. Census
+393 -> 394.
 
 ### Step 0522 - the store-exclusive arm,
 the only remaining family with two
