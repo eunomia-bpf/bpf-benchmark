@@ -136,6 +136,21 @@ to tell an architectural difference from a mistake in one of them.
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
 
+Two arm64 memory-model hosts had a subtler version of the same problem. Both
+defined `ARM64_SP` as 31, but in this simulator 31 is `XZR` and 32 is `SP`;
+the simulator reads 31 as zero. So the models treated a register the simulator
+reads as zero as though it were the stack pointer -- and because the base sweep
+ran `bi < 32`, the actual stack base (32) was never driven at all. The value is
+corrected, XZR now reads zero with no writeback, and the sweep runs one past
+the register file: 9,216 cases to 9,504.
+
+What these hosts can show is bounded, and worth stating: `contract_step` and
+`model_step` share the same transfer body and read/write helpers, so they
+compare two *labellings* of one model rather than an independent
+reimplementation, and a semantic error inside that shared model stays invisible
+to both. What the change buys is that the stack-base path and the XZR discard
+are now exercised rather than assumed.
+
 Two oracles restated their ISA's condition codes as local literals, so that the
 model stayed independent of the generated tables. That was right about the
 generated side and wrong about the other: it made them blind to whether the
@@ -7117,6 +7132,43 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0502 - two arm64 memory models
+had the wrong stack-pointer value
+
+Step 0502 fixes a defect found by the
+same search (census 372 -> 373). Both
+arm64 memory-model hosts defined
+`ARM64_SP` as 31, but in this simulator
+31 is `XZR` and 32 is `SP` -- the
+simulator tests `REG == ARM64_SP` with
+`SP == 32`, and reads 31 as zero. So the
+models treated a register the simulator
+reads as zero as though it were the stack
+pointer.
+
+There was a second consequence, and it is
+the more interesting one. The base sweep
+ran `bi < 32`, so with `SP == 32` the
+actual stack base was **never driven at
+all** -- the hosts believed they were
+testing the stack path because 31 was
+labelled SP. Correcting the value and
+running the sweep one past the register
+file takes them from 9,216 cases to 9,504.
+
+What these hosts can show is bounded, and
+the step records it rather than implying
+more: `contract_step` and `model_step`
+share `run_halves` and the read/write
+helpers, so they compare two *labellings*
+of one model, not an independent
+reimplementation. A semantic error inside
+that shared model is invisible to both.
+What changed is that the stack-base path
+and the XZR discard are now exercised
+rather than assumed. Gate: rc 0, **229**
+banners. Census 372 -> 373.
 
 ### Step 0501 - two condition-decode
 oracles could not see the simulator drift
