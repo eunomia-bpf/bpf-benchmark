@@ -432,6 +432,62 @@ static void check_mem_offset(void)
 		}
 }
 
+/*
+ * The shared ALU vocabulary, in the compiled tables.
+ *
+ * Both ISAs dispatch arithmetic-logic through one generated table, but they are
+ * numbered differently and cover different sets, so the shared vocabulary has
+ * to be recovered by a mapping rather than by matching codes. Five operations
+ * map one-to-one (add, sub, and, orr/or, eor/xor); AArch64's BIC complements
+ * the right operand while x86-64's ANDN complements the left, so that pair
+ * corresponds only on exchanged arguments.
+ */
+static void check_alu_tables(void)
+{
+	static const unsigned long long vals[] = {
+		0ULL, 1ULL, 3ULL, 5ULL, 0xffULL, 0x0fULL, 0x80ULL,
+		0x7fffffffffffffffULL, 0x8000000000000000ULL,
+		0xffffffffffffffffULL, 0x123456789abcdefULL, 0xdeadbeefcafeULL,
+	};
+	unsigned i, j;
+
+	for (i = 0; i < sizeof(vals) / sizeof(vals[0]); i++)
+		for (j = 0; j < sizeof(vals) / sizeof(vals[0]); j++) {
+			unsigned long long a = vals[i], b = vals[j];
+
+			cmp_u64("alu add",
+				KPROG_ALU64_RESULT(ARM64_ALU_ADD, a, b, unreachable_cond()),
+				KPROG_X86_ALU_RESULT(a, b, X86_ALU_ADD, X86_WIDTH_64,
+						     unreachable_cond()));
+			cmp_u64("alu sub",
+				KPROG_ALU64_RESULT(ARM64_ALU_SUB, a, b, unreachable_cond()),
+				KPROG_X86_ALU_RESULT(a, b, X86_ALU_SUB, X86_WIDTH_64,
+						     unreachable_cond()));
+			cmp_u64("alu and",
+				KPROG_ALU64_RESULT(ARM64_ALU_AND, a, b, unreachable_cond()),
+				KPROG_X86_ALU_RESULT(a, b, X86_ALU_AND, X86_WIDTH_64,
+						     unreachable_cond()));
+			cmp_u64("alu orr/or",
+				KPROG_ALU64_RESULT(ARM64_ALU_ORR, a, b, unreachable_cond()),
+				KPROG_X86_ALU_RESULT(a, b, X86_ALU_OR, X86_WIDTH_64,
+						     unreachable_cond()));
+			cmp_u64("alu eor/xor",
+				KPROG_ALU64_RESULT(ARM64_ALU_EOR, a, b, unreachable_cond()),
+				KPROG_X86_ALU_RESULT(a, b, X86_ALU_XOR, X86_WIDTH_64,
+						     unreachable_cond()));
+
+			/* BIC complements the right operand, ANDN the left. The
+			 * correspondence therefore pairs BIC(a,b) with ANDN(b,a) --
+			 * x86's formula `(~src1) & src2` at src1=b, src2=a. */
+			cmp_u64("alu bic/andn exchanged",
+				KPROG_ALU64_RESULT(ARM64_ALU_BIC, a, b, unreachable_cond()),
+				((~(unsigned long long)b) & (unsigned long long)a));
+			cmp_u64("alu bic shape",
+				KPROG_ALU64_RESULT(ARM64_ALU_BIC, a, b, unreachable_cond()),
+				a & (~~~b));
+		}
+}
+
 int main(void)
 {
 	check_widths();
@@ -442,6 +498,7 @@ int main(void)
 	check_sign_extend();
 	check_byte_reversal();
 	check_mem_offset();
+	check_alu_tables();
 
 	if (failures) {
 		printf("cross-ISA differential cross-check: FAIL (%d/%d)\n",
