@@ -24,7 +24,7 @@ obligations over `Nat`, not `native_decide`, so the share moved by only the two
 concrete threshold examples per ISA. Two
 consecutive full runs produce byte-identical output (same md5), so the gate is
 deterministic. The 330 `build/mut_*.py` batteries are the evidence that each
-banner can fail, and are untracked by design; the thirteen route hosts those
+banner can fail, and are untracked by design; the fourteen route hosts those
 batteries drive are pinned into the recipe so their cases are enforced by the
 gate itself rather than only by the batteries.
 The remaining unbuilt sources under `build/` are scratch, not coverage: 41 are
@@ -45,9 +45,9 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 334, and 193 steps
-record an explicit `+1`. The drift is narrative, not coverage — 35 harnesses
-are never named in any step entry, but 30 of them drive a tracked `test_*.c`
+`build/mut_*.py` files exist, the counter's last value is 348, and 198 steps
+record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
+are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
 provenance was never written down. The census should be read as "how many
 harness increments the log has recorded", not as a file total.
@@ -6910,6 +6910,137 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0476 - the whole placeholder
+claim is enforced
+
+Step 0476 completes Step 0475's
+enforcement (census 347 -> 348). The
+README claims no `sorry`, no `axiom`,
+and no `opaque`/`unsafe`/`partial`
+definitions, but `check_no_sorry.py`
+covered only the first three keywords.
+Planting `opaque planted_opaque : Nat
+:= 5` in a generated module built
+cleanly and passed the check, so the
+claim's second half was unenforced for
+exactly the reason the first half had
+been, one step earlier.
+
+The scan now rejects a declaration
+keyword in command position for all
+four (axiom, opaque, unsafe, partial),
+allowing indented forms since those
+are commands inside a section or
+namespace. Each of the four is
+verified to fail the gate; no module
+uses any of them today, so nothing
+false-positives. Gate: rc 0, 226
+banners. Census 347 -> 348.
+
+### Step 0475 - the no-sorry claim is
+enforced, not just true
+
+Step 0475 makes the README's
+"no `sorry`, no `axiom`" claim
+something the gate holds rather than
+something the tree happens to satisfy
+(census 346 -> 347). `lake build`
+reports a `sorry` as a *warning* and
+exits 0, so planting
+`theorem t : (1 : Nat) = 1 := by
+sorry` in a generated module built
+cleanly and the gate passed: the fact
+was true and nothing could falsify it,
+the same watched-not-exercised shape
+as Steps 0473/0474 one level up.
+
+`check_no_sorry.py` strips block and
+line comments, then rejects `sorry`,
+`admit`, and `axiom` declarations
+across all 294 modules; `native_decide`,
+`bv_decide`, and `omega` are proofs
+and pass, and prose uses of the word
+"admit" in doc comments are stripped
+rather than matched. It runs right
+after `lake build`; a planted `sorry`
+now fails the gate with rc 2.
+
+Audited while in there, all holding:
+every generated definition is
+referenced by a theorem-bearing
+importer (138/138), no `*_refines`
+theorem has identical sides (0 of
+560), and no hand `*Spec` restatement
+is defined in terms of the generated
+definition it refines (0 of 138). The
+paper's gate totals were also stale
+(123,466,335 and 1,941 theorems
+against 123,463,531 and 1,970); the
+per-ISA split was re-derived with the
+section's own stated rule, which
+reproduced the 40/59/127 oracle
+counts exactly and moved only the
+case totals. Census 346 -> 347.
+
+### Step 0474 - the remaining guard
+counters are exercised
+
+Step 0474 exercises the remaining
+arm64 guard counters (census 345 ->
+346). Four more hosts counted guard
+hits while sweeping only in-range
+offsets, so a weakened guard passed
+all of them: the stack-arm,
+read-tag-source, and write-tag-action
+hosts (1.67e5, 6.01e4, and 9.08e6
+cases) against the window guard, and
+the helper-argument-pointer host
+against the pointer guard. Each now
+drives an access or pointer past the
+arena and requires exactly one hit.
+
+The separation is verified per host --
+each fails its own sabotage and passes
+the other's -- so the rows exercise
+the guard the host actually covers.
+That is six arm64 hosts in total
+across Steps 0473 and 0474. The x86
+hosts never had the gap: they trap
+rather than counting, so a disabled
+guard is a signal, and both catch the
+sabotage. Gate: rc 0, 226 banners,
+123,463,531 modeled cases. Census 345
+-> 346.
+
+### Step 0473 - the arm64 window guard
+is exercised, not watched
+
+Step 0473 exercises the arm64 window
+guard rather than watching it (census
+344 -> 345). Both arm64 route hosts
+counted guard hits and failed if any
+fired, but every offset they swept was
+in range, so a simulator whose window
+guard was weakened to always-true
+passed all 2.75M and 3.84M of their
+cases. Each now drives accesses whose
+window runs past the arena and
+requires exactly one hit; the sabotage
+that previously passed both hosts now
+fails them (3 and 4 mismatches).
+
+The x86 hosts already caught it, since
+their sweeps include out-of-range
+offsets, so only the arm64 pair needed
+this. With the guard disabled the
+compiler itself reports `-Warray-bounds:
+array subscript 160 is above array
+bounds of __u8[160]`, corroborating
+that the guard is what prevents the
+overrun. Gate: rc 0, 226 banners,
+123,463,522 modeled cases. Census 344
+-> 345.
 
 ### Step 0472 - the stack pointer bound
 becomes mutation-tested
