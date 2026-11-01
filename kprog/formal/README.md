@@ -136,6 +136,18 @@ Planting a 16-bit bit-count of 17 on the x86 side fails `bits_agrees` and
 `sign_agrees`, so the module is a real gate on spec drift rather than a
 restatement.
 
+The table-shape theorems are not vacuous, which is worth stating because most
+are discharged by `rfl` or `decide` and a vacuous one would look identical.
+Nineteen `*_codes_length` theorems assert `codes.length = count`; every one
+compares against a generated count constant, and no generated count is zero
+(the 31 of them run from 2 to 72), so each ranges over a real table. The
+equality-style exactness theorems (`x86_cc_decode_suffixes_exact` and
+friends) assert two independently defined lists are equal, so they cannot be
+trivially satisfied unless both are empty -- measured at 36 mnemonics against
+12 suffixes, and 17 against 15 on the arm64 side. `x86_helper_dispatch_full_range`
+pairs its `List.range` sweep with four explicit `none` checks, so it has
+content even if the count were zero.
+
 The chain selects exactly one arm per opcode, and that is proved rather than
 inspected. An `else if` ladder silently picks the first matching arm, so two
 overlapping family predicates would make dispatch order-dependent. Both ISAs
@@ -6980,6 +6992,38 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0488 - the table-shape
+theorems are not vacuous
+
+Step 0488 extends the non-vacuity check
+from dispatch to the whole table-shape
+family (census 359 -> 360). 426
+theorems are closed by a bare `decide`,
+and 42 are parameter-free assertions
+about a list or table; a vacuous one
+would be indistinguishable from a real
+one, since both close by the same
+tactic.
+
+Three families were checked and all
+have content. Nineteen
+`*_codes_length` theorems assert
+`codes.length = count` against a
+generated count constant, and no
+generated count is zero -- the 31 run
+from 2 to 72. The exactness theorems
+assert two independently defined lists
+equal, so both must be non-empty:
+measured at 36 mnemonics against 12
+suffixes and 17 against 15 on arm64.
+`x86_helper_dispatch_full_range` pairs
+its `List.range` sweep with four
+explicit `none` checks, so it has
+content even at count 0. No code
+change; the deliverable is the audit.
+Gate: rc 0, 228 banners. Census 359 ->
+360.
 
 ### Step 0487 - dispatch exclusivity is
 proved, and the proof is non-vacuous

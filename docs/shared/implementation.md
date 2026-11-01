@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0488 extends the non-vacuity check from
+dispatch to the whole table-shape family (census
+359 -> 360). 426 theorems close by a bare
+`decide`, and 42 are parameter-free assertions
+about a list or table; a vacuous one looks
+identical to a real one. Three families were
+checked and all have content: nineteen
+`*_codes_length` theorems compare against a
+generated count constant and no generated count
+is zero (the 31 run from 2 to 72); the
+exactness theorems assert two independently
+defined lists equal, measured non-empty at 36 vs
+12 and 17 vs 15; and
+`x86_helper_dispatch_full_range` pairs its
+`List.range` sweep with four explicit `none`
+checks. No code change. Gate: rc 0, 228
+banners.
+
 Step 0487 verifies dispatch exclusivity (census 358
 -> 359; no code change). The opcode dispatch is an
 else-if ladder, so overlapping family predicates
