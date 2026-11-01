@@ -2612,6 +2612,26 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0511 records a cross-architecture difference rather
+than removing it (census 381 -> 382). Both encoders
+answer "given a native map name, which lookup site is
+this?" and both truncate at BPF_OBJ_NAME_LEN - 1. They
+answer it with different structures: x86 runs an exact
+pass then a separate truncated pass that errors when
+two sites truncate-match the same name (in both lookup
+and update paths), while AArch64 folds exact and
+truncated matching into one predicate used with find,
+so the first of several wins. For an ambiguous name
+one architecture errors and the other picks silently --
+neither wrong, but a program can lower on one and fail
+on the other, and nothing said so.
+check_lookup_ambiguity.py measures the divergence
+instead of picking a winner and fails if the two
+converge without a deliberate change; it also pins both
+truncation lengths to the kernel limit. Verified by
+removing x86's lookup-path error, reported by path
+name. Gate: rc 0, 232 banners.
+
 Step 0510 is the first cross-architecture check rather
 than a cross-language one (census 380 -> 381).
 bpf_tail_call is lowered separately for x86 and
