@@ -2612,6 +2612,29 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0465 closes the fourth and last unguarded
+stack path (census 336 -> 337).
+`ARM64_SIM_L_STACK_PTR` and `X86_SIM_L_STACK_PTR`
+hand out `&b[index]` for a stack-pointer register,
+and an 8-byte write through a pointer at index 168
+of the 160-byte arena escapes the array (ASan
+reports the write). The bound is weaker than an
+access's: `&b[index]` is valid up to the
+one-past-end index, so the specs gain
+`pointer_guard: index_le_capacity` and the
+generated comparison is a single 64-bit test, so a
+negative index fails it. The hand modules prove
+the refinement, the one-past-end rule, and that
+the pointer bound is strictly weaker than the
+window bound -- which is why the helpers carry
+separate checks. Both test the *biased* arena
+index; testing the raw offset let every negative
+offset through. Five hosts were driving pointers
+outside the arena and are corrected, and two of
+them left the decoder's index lane (RCX) holding a
+pattern pointer. Gate: rc 0, 226 banners,
+123,463,285 cases, 1965 theorems.
+
 Step 0464 closes the third unguarded stack path
 in the arm64 simulator (census 335 -> 336).
 `__a64_stack_tag[]` is a slot array -- one byte

@@ -8,12 +8,11 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-226 passing `cross-check: OK` oracle banners summing to 123,468,293 modeled
-cases (the 1,958-case growth over the previous rollup is the stack access-window
-and tag-slot coverage the arena hosts gained); 138 `*_spec.json` contracts, each rendered into exactly one generated C
+226 passing `cross-check: OK` oracle banners summing to 123,463,285 modeled
+cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 294 Lean modules
-compiling transitively from the gate's roots and proving 1,958 theorems with
-no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 482 of
+compiling transitively from the gate's roots and proving 1,965 theorems with
+no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions; 483 of
 those (25%) are discharged by `native_decide`, i.e. by compiled evaluation, so
 they rest on the compiler as well as the kernel — 20 of the 599
 refinement-named theorems, each a finite-table equality, and the rest finite
@@ -36,7 +35,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-123,468,293 again, so the rollup is a measurement of the committed tree and not
+123,463,285 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 226 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -74,6 +73,22 @@ access at the arena's final byte does not fit, and the concrete thresholds:
 152/8/160 fits and 153/8/160 does not on AArch64; 56/8/64 fits and 57/8/64
 does not on the default x86-64 frame, with the 128-byte deep frame at
 120/121.
+
+A fourth stack path carries pointers rather than accesses, and needed the
+weaker of the two bounds. `ARM64_SIM_L_STACK_PTR` / `X86_SIM_L_STACK_PTR`
+hand out `&b[index]` for a stack-pointer register, and an 8-byte write through
+a pointer at index 168 of the 160-byte arena escapes the array — ASan
+reproduces it. The bound is not the window's: `&b[index]` is well defined up
+to and including the one-past-end index, so the contract fixes
+`INDEX <= CAPACITY` and nothing more, which the hand modules prove strictly
+weaker than the window bound for a nonempty window. That asymmetry is why the
+two helpers carry separate checks, and the generated comparison is a single
+test on the 64-bit index so a negative index fails it rather than folding a
+branch away. Several hosts had been driving pointers outside the arena, which
+the bound then rejected — the arm64 helper-argument sweep ran to index 248 of a
+160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
+in-range row at all on the stack arm; those sweeps now carry their own in-range
+sets, which is why the gate's case total moved.
 
 The tag array is a third, separate stack path and needed its own bound. A tag
 access is a *slot* index into `__a64_stack_tag[]`, which holds one byte per
@@ -6818,6 +6833,89 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0465 - stack pointer bound (both ISAs)
+
+Step 0465 closes the fourth and last
+unguarded stack path (census 336 ->
+337). Steps 0463 and 0464 bounded
+every *access* -- the byte window,
+the word view, the tag slot -- but
+`ARM64_SIM_L_STACK_PTR` and
+`X86_SIM_L_STACK_PTR` also hand out
+`&b[index]` for a stack-pointer
+register, and an 8-byte write through
+a pointer at index 168 of the
+160-byte arena escapes the array.
+ASan reports it as a
+`WRITE of size 8` against
+`__a64_stack` on the previous
+baseline.
+
+The bound is deliberately weaker
+than an access's. `&b[index]` is
+well defined up to and including the
+one-past-end index, so the contract
+fixes `INDEX <= CAPACITY`; a window
+needs `INDEX + WIDTH <= CAPACITY`.
+Both arena specs gained
+`pointer_guard: index_le_capacity`
+and the generators emit a single
+comparison widened to 64 bits, so a
+negative index fails the same test
+rather than letting the compiler fold
+a branch away for one call site's
+type (which `-Wtype-limits` caught on
+the first attempt). The hand modules
+prove the guard refines an
+independent statement, the
+one-past-end rule on a capacity whose
+successor does not wrap, and that the
+pointer bound is strictly weaker than
+the window bound for any nonempty
+window -- which is why the two
+helpers carry separate checks rather
+than sharing one.
+
+Both helpers test it on the *biased*
+index: the arena index is the offset
+plus the capacity, so testing the raw
+offset let every negative offset
+through (ASan found that too, at index
+`2285946441` -- a 32-bit truncation of
+a negative 64-bit sum).
+
+Five hosts had been driving pointers
+outside the arena, which the bound
+rejects. The arm64 helper-argument
+sweep ran to index 248 of a 160-byte
+arena and its arena sweep to 192 --
+both now stop at the one-past-end
+index. The x86 lea and mov sweeps had
+*no* in-range row at all on the stack
+arm (their displacements and sources
+all resolve outside a 64-byte frame),
+so that arm is driven by its own
+in-range displacements and sources;
+without that the arm would have been
+silently untested, and
+`mut_x86_stack_region`'s
+`sim_site3_pin_rbp` and
+`sim_site3_tag_repaint` rows caught
+exactly that by surviving. Two hosts
+also left the decoder's index lane
+(RCX) holding a pattern pointer, which
+the lea `AUX=X86_LEA_AUX_RODATA` byte
+1 selects as index register 1; both
+now plant it, as the specialization
+host already did. Fourteen batteries
+re-ran clean, two with anchors this
+change moved. Gate: rc 0, 226
+`cross-check: OK` banners,
+123,463,285 modeled cases (the total
+*fell*, because the corrected sweeps
+drive fewer out-of-range rows),
+1965 theorems. Census 336 -> 337.
 
 ### Step 0464 - stack tag-array bound (arm64)
 
