@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0522 closes a third model-only family (census
+392 -> 393). STLXR is the only remaining one with two
+observable effects: the dispatcher stores the source
+to memory and writes a status word to the destination,
+so a misroute can corrupt the atomic-success signal
+while leaving memory correct, or the reverse.
+test_arm64_stlxr_route_host.c checks the memory word,
+the status in the low 32 bits (written at a fixed
+32-bit width whatever the access width), and that the
+source register is unchanged. Verified by planting
+each effect alone: a non-zero status fails all 200
+cases, dropping the store fails 155 as a MEMORY
+mismatch, so neither rides on the other. Count 7 live
+/ 5 model-only -> 8 / 4. Gate: rc 0, 237 banners,
+124,527,533 cases.
+
 Step 0521 closes a second model-only family (census
 391 -> 392). CNEG is worth more than most: the
 dispatcher does not take a boolean but evaluates the
