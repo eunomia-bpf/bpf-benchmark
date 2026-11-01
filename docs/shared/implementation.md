@@ -2612,6 +2612,38 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0470 applies the verified evaluation figures
+to the second paper submodule (census 341 -> 342).
+Every correction in Steps 0462/0468 went into
+`docs/kprog-simulator-in-ebpf/sections/7-evaluation.tex`,
+but `docs/paper` — the submodule whose `main.tex`
+actually includes `sections/7-evaluation` — carries
+its own copy of that file, and its copy still had
+the claims disproved against the committed result
+data: the Katran policy throughputs as ratios of
+per-arm means (1.073x / 0.995x) where the section
+declares medians (1.065x / 0.984x), and the
+load-overhead sentence (0.99x kernel-side, a
+1.4-2.4x compile increase staying sub-millisecond)
+where the measured figures are 0.995x/0.998x and a
+median of 5.4 ms / 99 ms with a 96.8 s tail.
+
+The two copies were confirmed to be a fork rather
+than two independently edited files: comparing the
+kprog history against the pre-sync `docs/paper`
+HEAD shows the divergence growing monotonically as
+corrections were made (16 differing lines at the
+oldest local commit, 2 at the newest, 0 once
+synced), so `kprog` is the fork that received the
+fixes. With a toolchain present the synced
+`docs/paper` builds with zero errors, and planting
+a bad `$x^2.` proves the compiler is actually
+reading this tree (it halts on the planted error).
+The `docs/paper` checkout was detached from
+`3cfe369`, so the commit was pushed as
+`HEAD:main`, a fast-forward from a descendant of
+that same commit -- no history rewritten.
+
 Step 0469 fixes two paper defects found by
 actually compiling it (census 340 -> 341). No
 TeX toolchain existed in this workspace, so every
