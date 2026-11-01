@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 388, and 271 steps
+`build/mut_*.py` files exist, the counter's last value is 389, and 272 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7327,6 +7327,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0518 - x86 dispatch coverage,
+where the unrouted set is a category
+rather than residue
+
+Step 0517 gave AArch64 a coverage statement
+to sit beside its exclusivity; x86 had only
+exclusivity (census 388 -> 389). The mirror
+turned out to differ in kind.
+
+AArch64's two reserved codes are unused
+filler. The x86 five are JCC, JMP, CALL,
+CALL_HELPER and RET -- the control-transfer
+opcodes, which the emitted code carries
+directly rather than through the modelling
+chain, and which is exactly why the chain
+has no final `else`. So "unrouted" is an
+architectural category on x86, not leftovers,
+and the module records it as such.
+
+Proved: both routed lists duplicate-free
+and mutually disjoint; the unrouted set
+disjoint from routed in *both* directions;
+non-empty; characterised exactly by
+membership; and its five codes distinct.
+Adding a control opcode without routing it
+breaks a theorem rather than passing
+quietly.
+
+Verified in both directions: dropping RET
+from the list breaks four theorems, and
+adding an already-routed code breaks six.
+Gate: rc 0, **234** banners, 2,052
+theorems. Census 388 -> 389.
 
 ### Step 0517 - the dispatcher's
 exclusivity was proved; its coverage was
