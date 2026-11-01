@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 414, and 312 steps
+`build/mut_*.py` files exist, the counter's last value is 415, and 313 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -99,9 +99,9 @@ evaluated `(p || q == V)` as `p || (q == V)`, giving `GT = 1` where the answer
 is `0`, and the mirror case gave `0` where the answer is `1`. Both evaluators
 now emit `(N)`; their Lean output is unchanged.
 
-`check_macro_hygiene.py` now checks all 138 generated headers on every gate run
-and is itself verified against the pre-fix text, so the class cannot return
-quietly.
+`check_macro_hygiene.py` checks all 142 headers the simulators compile -- 138
+generated and the 4 hand-written x86/AArch64 ones -- on every gate run, and is
+itself verified against the pre-fix text, so the class cannot return quietly.
 
 The five x86 flag generators emitted their C operands unparenthesized, so a
 compound argument silently changed the parse. `KPROG_X86_SET_SUB_FLAGS(..., a & mask,
@@ -7550,6 +7550,42 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0544 - the macro check was not
+reading one-line macros
+
+Planting an unparenthesized parameter -- the
+exact shape this check exists to catch -- found
+nothing. `#define PLANTED_BAD(A, B) ((A) + B)`
+passed, because the body was taken as
+"everything after the first newline": a macro
+written on the *same line* as its parameter
+list had an empty body and nothing to check.
+That is 323 parameterised macros and **621
+parameters** in the generated headers alone.
+The tree is clean there -- but the summary had
+been reporting "all headers parenthesize their
+parameters" on evidence covering only the
+multi-line subset.
+
+The default scan was narrower than the defect
+too. The docstring records the original bug in
+hand-written condition evaluators, yet the gate
+globbed `generated/*.h` only, so the population
+that produced it went unexamined on every run.
+The default now includes the simulator headers,
+and the summary names the two populations
+separately (138 generated, 4 hand-written) so
+the header count is not mistaken for the
+contract count.
+
+Third consecutive step where the finding was
+about the *measuring*, not the measured:
+0542's counter lied by one, 0543's guard let a
+false theorem through, and here a check
+reported a clean result over a fraction of the
+code it claimed to cover. Gate: rc 0, **248**
+banners. Census 414 -> 415.
 
 ### Step 0543 - two ways through the
 no-sorry check

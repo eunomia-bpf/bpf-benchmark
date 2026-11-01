@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0544 finds the macro-hygiene check was not
+reading one-line macros (census 414 -> 415).
+Planting the exact defect the check exists for --
+an unparenthesized parameter -- passed, because
+the body was taken as "everything after the first
+newline", leaving any macro written on the same
+line as its parameters with an empty body: 323
+macros and 621 parameters in the generated
+headers alone. The tree is clean, but the summary
+had reported all headers clean on evidence
+covering only the multi-line subset. The default
+scan was also narrower than the defect: the
+original bug was in hand-written condition
+evaluators, yet the gate globbed generated/*.h
+only. The default now covers the simulator
+headers too, and the summary names both
+populations (138 generated, 4 hand-written) so
+header count is not mistaken for contract count.
+Third consecutive step about the measuring rather
+than the measured. Gate: rc 0, 248 banners.
+
 Step 0543 closes two holes in the no-sorry check
 (census 413 -> 414). The check exists because
 lake build reports a placeholder as a warning and
