@@ -21,6 +21,7 @@ Exit 1 with a list of offenders.
 """
 
 import glob
+import os
 import re
 import sys
 
@@ -78,7 +79,9 @@ def offenders(paths):
 
 
 def main(argv):
-    patterns = argv[1:] or ["generated/*.h"]
+    # Patterns are relative to this script, so the check works from any cwd.
+    here = os.path.dirname(os.path.abspath(__file__))
+    patterns = [os.path.join(here, p) for p in (argv[1:] or ["generated/*.h"])]
     paths = []
     for pat in patterns:
         paths.extend(glob.glob(pat))
