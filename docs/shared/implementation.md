@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0505 continues the simulator-called but never-driven
+sweep (census 375 -> 376). arm64_csel names eight
+opcodes and the dispatcher reaches them at one arm
+that evaluates the condition, picks the pointer-tag or
+scalar path and writes the destination; no host
+including the simulator header drove any of them, so
+perturbing the CSINC arm left every oracle green. The
+new host drives all eight at both widths, with the
+condition both always-taken and flag-dependent so each
+opcode's two arms are covered. Writing it corrected the
+model twice: CINC and CINV take src on both paths and
+ignore src2, so an operand pair chosen for the
+two-operand shape cannot distinguish them -- the first
+model assumed the two-operand form for all eight and
+produced 24 spurious failures. Read the generated arms,
+not the pseudocode. A +1 -> +2 change in CINC fails 12
+of 192; a -1 in CSNEG fails 12. Gate: rc 0, 232
+banners, 124,470,924 cases.
+
 Step 0504 takes the most consequential of the 48
 simulator-called but model-only contracts (census 374
 -> 375): arm64_flags, reached through ADDS/SUBS via
