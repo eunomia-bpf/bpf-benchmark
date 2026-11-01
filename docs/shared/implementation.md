@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0484 corrects a docstring that overstated a
+hypothesis's scope (census 355 -> 356).
+`arm64_stack_arena_tag_guard_is_window_guard`
+claimed its whole-word condition held for both
+the enabled 160-byte and the disabled 1-byte
+arena. One is not a whole number of words, and
+the equivalence genuinely fails there: at
+capacity 1 slot 0 is addressable while a
+one-byte window at index 1 is not, because a
+slot covers eight addressable indices and the
+arena covers one byte. So this hypothesis is
+load-bearing, unlike the implication widened in
+Step 0483. The counterexample is now a theorem
+and the docstring explains the difference. 1983
+theorems. Gate: rc 0, 227 banners.
+
 Step 0483 widens an over-strong hypothesis (census
 354 -> 355). `arm64_stack_arena_window_implies_tag_slot`
 required `capacity % 8 = 0`: true of the enabled

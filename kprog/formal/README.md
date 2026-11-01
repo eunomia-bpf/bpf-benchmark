@@ -11,7 +11,7 @@ What the gate currently covers, measured from one full `make check` run:
 227 passing `cross-check: OK` oracle banners summing to 123,463,541 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 295 Lean modules
-compiling transitively from the gate's roots and proving 1,982 theorems with
+compiling transitively from the gate's roots and proving 1,983 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -91,6 +91,16 @@ the bound then rejected — the arm64 helper-argument sweep ran to index 248 of 
 160-byte arena, its arena sweep to 192, and the x86 lea and mov sweeps had no
 in-range row at all on the stack arm; those sweeps now carry their own in-range
 sets, which is why the gate's case total moved.
+
+The converse also holds: a hypothesis that *is* needed can still be
+mis-described. `arm64_stack_arena_tag_guard_is_window_guard` claimed its
+whole-word condition held for "both the enabled 160-byte and the disabled
+1-byte arena". One is not a whole number of words, and the equivalence really
+does fail there: at capacity 1 slot 0 is addressable while a one-byte window
+at index 1 is not, because a slot covers eight addressable indices and the
+arena covers one byte. So the hypothesis is load-bearing here, unlike the
+implication widened in Step 0483, and the counterexample is now a theorem so
+the claim cannot drift back.
 
 A theorem's hypothesis can be stronger than it needs to be, and that is a
 coverage hole in disguise. `arm64_stack_arena_window_implies_tag_slot`
@@ -6941,6 +6951,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0484 - a needed hypothesis was
+mis-describing which arenas it covers
+
+Step 0484 corrects a docstring that
+overstated a hypothesis's scope (census
+355 -> 356).
+`arm64_stack_arena_tag_guard_is_window
+_guard` claimed its whole-word condition
+held for "both the enabled 160-byte and
+the disabled 1-byte arena". The 1-byte
+arena is not a whole number of words,
+and the equivalence genuinely fails
+there: at capacity 1 slot 0 is
+addressable (`tagSlotFits 1 (words 1)`
+is true) while a one-byte window at
+index 1 does not fit (`windowFits 1 1 1`
+is false), because a slot covers eight
+addressable indices and the arena covers
+one byte.
+
+So unlike the implication widened in
+Step 0483, this hypothesis is
+load-bearing -- dropping it makes the
+statement false, verified by `bv_decide`
+finding a counterexample at capacity
+`2^32 - 1` in the neighbouring lemma too.
+The counterexample is now a theorem so
+the claim cannot drift back, and the
+docstring says why the condition is
+necessary here but not there. Gate:
+rc 0, 227 banners, 1,983 theorems.
+Census 355 -> 356.
 
 ### Step 0483 - a theorem covered only one
 of the two arenas it describes
