@@ -622,6 +622,8 @@ check:
 	./build/test_arm64_csel_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mul_wide_host.c -o build/test_arm64_mul_wide_host
 	./build/test_arm64_mul_wide_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_imul_flags_wide_host.c -o build/test_x86_imul_flags_wide_host
+	./build/test_x86_imul_flags_wide_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/mul_route_host.c -o build/mut_mulroute
 	./build/mut_mulroute
 	lake env lean KProgFormal/GeneratedArm64Extrev.lean
