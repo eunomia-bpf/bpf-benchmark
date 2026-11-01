@@ -8,10 +8,10 @@ make check
 ```
 
 What the gate currently covers, measured from one full `make check` run:
-229 passing `cross-check: OK` oracle banners summing to 124,464,217 modeled
+229 passing `cross-check: OK` oracle banners summing to 124,464,460 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
-header and one `Generated*.lean` module (138/138/138); 298 Lean modules
-compiling transitively from the gate's roots and proving 2,013 theorems with
+header and one `Generated*.lean` module (138/138/138); 299 Lean modules
+compiling transitively from the gate's roots and proving 2,019 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 485 of
@@ -37,7 +37,7 @@ them would double-count rather than extend coverage.
 
 That total is reproducible rather than a one-off reading: re-deriving it from a
 fresh `make check` log by parsing every `cross-check: OK (...)` banner yields
-124,464,217 again, so the rollup is a measurement of the committed tree and not
+124,464,460 again, so the rollup is a measurement of the committed tree and not
 a stale note. The 229 banners are all distinct oracles — 225 report a plain
 `N cases` and one (the `imul` flags oracle) reports
 `15 vectors + 20000 sweep cases`, so the total must be summed with that
@@ -135,6 +135,18 @@ to tell an architectural difference from a mistake in one of them.
 `CrossIsaFlags.lean` proves they are exact complements on the same narrowed
 operands at every width, with witnesses in both directions (`1 - 2` borrows,
 `2 - 1` does not), so the disagreement is polarity and not value.
+
+The address offset is the case where "the same function" is the wrong frame
+entirely. Both ISAs compute base plus an optional scaled index with 64-bit
+wrapping, but AArch64 has no scale and does have pre/post-indexing, while
+x86-64 has a scale (a base-2 log in the addressing-mode byte) and no
+pre/post-indexing. The shared core is one statement -- `base + (index <<< scale)`
+-- reached by zeroing AArch64's scale and taking its non-writeback form; the
+rest of each contract is what the other ISA lacks. Stating it that way keeps the
+divergence explicit instead of hiding it behind a name: giving x86-64 a unit
+scale breaks the agreement theorem, and the module records a concrete case where
+writeback makes the two compute different things rather than the same thing
+differently.
 
 Byte reversal is the case where the *property* carries the weight. `REV` and
 `BSWAP` agree at the two widths AArch64 encodes, but agreement alone would not
@@ -7071,6 +7083,44 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0497 - the address offsets share
+a core, and the rest is what the other
+ISA lacks
+
+Step 0497 relates the load/store address
+offsets (census 368 -> 369), and the
+interesting part is that "the same
+function" is the wrong frame. Both
+compute a base contribution plus an
+optional scaled index with 64-bit
+wrapping -- but AArch64 has *no scale*
+and does have pre/post-indexing, while
+x86-64 has a scale (a base-2 logarithm
+in the addressing-mode byte) and *no*
+pre/post-indexing.
+
+So the shared core is one statement,
+base + (index <<< scale), reached by
+zeroing AArch64's scale and taking its
+non-writeback form. The rest of each
+contract is what the other ISA lacks.
+`CrossIsaMemOffset.lean` proves the
+reduction, states both case tables, and
+records the concrete case where writeback
+makes the two compute *different* things
+rather than the same thing differently --
+so the `prepost = false` restriction is
+not mistaken for a technicality. Giving
+x86-64 a unit scale breaks the theorem.
+
+The wrap is checked too: both accumulate
+with 64-bit two's complement, and a
+signed/unsigned slip there would agree on
+small inputs, so the oracle uses values
+near the boundary. Gate: rc 0, **229**
+banners, 124,464,460 cases (oracle
+1,000,895). Census 368 -> 369.
 
 ### Step 0496 - agreement is not enough:
 the reversal theorems pin the

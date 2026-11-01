@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0497 relates the address offsets (census 368 ->
+369). Both compute base plus an optional scaled
+index with 64-bit wrapping, but AArch64 has no
+scale and has pre/post-indexing while x86-64 has a
+scale (base-2 log in the aux byte) and none. The
+shared core is base + (index <<< scale), reached by
+zeroing AArch64's scale and taking its non-writeback
+form; the rest is what the other ISA lacks.
+CrossIsaMemOffset.lean proves the reduction, states
+both case tables, and records a concrete case where
+writeback makes them compute different things -- so
+the prepost=false restriction is not a technicality.
+Giving x86-64 a unit scale breaks the theorem. The
+wrap is checked with boundary values, since a
+signed/unsigned slip would agree on small inputs.
+2019 theorems. Gate: rc 0, 229 banners,
+124,464,460 cases.
+
 Step 0496 relates the byte reversals (census 367 ->
 368). REV is a shift-and-mask disjunction over the
 destination width; BSWAP picks the width then
