@@ -17,6 +17,13 @@ silently while this script reported "all claims current": it read the paper only
 Both documents are now targets, and so is the refinement-named denominator they
 share, whose definition is fixed in `refinement_named`.
 
+The safety section's non-vacuity sentence is the third target. It makes three
+claims about theorem content, and each is now measured against a class defined
+by its statement, not its name: table-length theorems, refinement equalities
+between a hand-written and a generated list, and sweeps that pin values outside
+the range they sweep. A class with no members fails loudly rather than reading
+as true prose.
+
 Usage: check_lean_claims.py [--section <tex>] [--readme <md>]
 """
 
@@ -61,6 +68,13 @@ TABLE_LENGTH = re.compile(r"(\w+)\.length = (\w+)\s*$")
 # equality after unfolding a selector (`sourceOf base = spec base`), assert a
 # conjunction, or compare a projection of a table (`table.map f`).
 LIST_PAIR = re.compile(r"^(\w+) = (\w+)\s*$")
+
+# The dispatch-sweep shapes: a conjunct that sweeps a finite range with `.all`,
+# and a conjunct that pins one value outside it. Both are read from the
+# statement, and the pair is what the paper's clause is about -- a sweep alone
+# says nothing about the values the table does not cover.
+SWEEP_RANGE = re.compile(r"^\(\(List\.(?:fin)?[Rr]ange \w+\)\.all", re.S)
+NON_MEMBER = re.compile(r"^\(.* = none\)$", re.S)
 
 
 def literal_length(src, open_at):
@@ -137,11 +151,31 @@ def statement(block, name):
 
     A rule anchored with `^` needs this rather than the declaration head:
     `theorem foo (x : Bool) : table = spec x` begins with the word `theorem`,
-    and its binders carry the colons and parentheses that the length and pair
-    shapes must not see.
+    and its binders carry the colons and parentheses that the length, pair, and
+    sweep shapes must not see.
     """
     cut = statement_cut(block, name)
     return block[:block.find(":=")][cut + 1:] if cut >= 0 else ""
+
+
+def conjuncts(prop):
+    """Split a proposition into its top-level conjuncts.
+
+    The sweep theorems are conjunctions, so membership has to be decided per
+    part. Depth tracking keeps a `∧` inside a subexpression in its parent, and
+    an empty part is dropped rather than counted as a check.
+    """
+    parts, depth, start = [], 0, 0
+    for i, char in enumerate(prop):
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        elif char == "∧" and depth == 0:
+            parts.append(prop[start:i])
+            start = i + 1
+    parts.append(prop[start:])
+    return [p.strip() for p in parts if p.strip()]
 
 
 def refinement_named(name):
@@ -199,6 +233,23 @@ def refinement_pair(block, name, own, gen_lists):
     return min(hand, table) if None not in (hand, table) else None
 
 
+def sweep_checks(block, name):
+    """How many explicit outside-the-range checks a sweep theorem carries.
+
+    The clause's third half said the dispatch sweep "pairs its range over the
+    armed ids with explicit non-membership checks", which no measurement
+    distinguished from a bare round trip: a theorem that swept the range and
+    pinned nothing outside it would have satisfied the sentence. A member is
+    therefore a conjunction with exactly one swept range and at least one
+    conjunct pinning a single value to `none`, and the figure is the smallest
+    such count -- one fewer than that and the claim fails.
+    """
+    parts = conjuncts(statement(block, name))
+    swept = [p for p in parts if SWEEP_RANGE.match(p)]
+    outside = [p for p in parts if NON_MEMBER.match(p)]
+    return len(outside) if len(swept) == 1 and outside else None
+
+
 def flat(text):
     """Collapse whitespace so a claim wrapped across source lines still matches."""
     return re.sub(r"\s+", " ", text)
@@ -243,8 +294,7 @@ def scan_tree(root):
             if imp.startswith("Generated"):
                 merged.update(own_lists[imp])
         gen_lists[stem] = merged
-    table_counts = []
-    pair_counts = []
+    counters = {"table": [], "pair": [], "sweep": []}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -273,14 +323,17 @@ def scan_tree(root):
                 binders = signature(block, m.group(1))
                 if "(" in binders and re.search(r'\bcases\b', block[cut:]):
                     quant_cases += 1
-            asserted = table_length_count(block, m.group(1), imports[stem],
-                                          gen_counts)
-            if asserted is not None:
-                table_counts.append(asserted)
+            length = table_length_count(block, m.group(1), imports[stem],
+                                        gen_counts)
+            if length is not None:
+                counters["table"].append(length)
             pair = refinement_pair(block, m.group(1), own_lists[stem],
                                    gen_lists[stem])
             if pair is not None:
-                pair_counts.append(pair)
+                counters["pair"].append(pair)
+            swept = sweep_checks(block, m.group(1))
+            if swept is not None:
+                counters["sweep"].append(swept)
         arch_mods[arch] += 1
         arch_thms[arch] += proved
 
@@ -311,19 +364,23 @@ def scan_tree(root):
         "refines": refines,
         "refines_decided": refines_decided,
         "quant_cases": quant_cases,
-        "table_length": len(table_counts),
-        # The section states the range these theorems compare against, so both
-        # ends are published. Both classes are asserted non-empty there, and an
-        # empty list -- the theorems renamed or the constants turned into
-        # expressions -- must fail loudly rather than report a vacuous range.
-        "table_min_count": min(table_counts),
-        "table_max_count": max(table_counts),
-        # The exactness clause quotes how many equalities equate two list
-        # literals and how short their shorter side gets, which is the figure
-        # that says none of them compares one list against itself or against
-        # `[]`.
-        "refine_pairs": len(pair_counts),
-        "refine_min_entries": min(pair_counts),
+        # The non-vacuity sentence's three clauses each quote a figure from
+        # one of these classes. All three are asserted non-empty there, so an
+        # empty list -- the theorems renamed, or a shape restated so the rule
+        # no longer matches -- must fail loudly rather than report a vacuous
+        # minimum.
+        "table_length": len(counters["table"]),
+        "table_min_count": min(counters["table"]),
+        "table_max_count": max(counters["table"]),
+        # How many equalities equate two list literals, and how short their
+        # shorter side gets: the figure that says none compares a table with
+        # itself or with `[]`.
+        "refine_pairs": len(counters["pair"]),
+        "refine_min_entries": min(counters["pair"]),
+        # How many sweeps pair a range with outside checks, and the fewest such
+        # checks any one of them carries.
+        "sweeps": len(counters["sweep"]),
+        "sweep_min_checks": min(counters["sweep"]),
     }
     for arch in arch_mods:
         out[arch + "_mods"] = arch_mods[arch]
@@ -368,12 +425,17 @@ CLAIMS = [
     (re.compile(r'the (\d+) table-length theorems'), ("table_length",)),
     (re.compile(r'constants run from (\d+) to (\d+)'),
      ("table_min_count", "table_max_count")),
-    # The clause's second half named "the exactness theorems" with no rule, and
-    # the five theorems that end `_exact` are not the class it describes: one is
-    # a boundary conjunction and the other four compare a projection of a table,
-    # not a list. The paper now names the class the rule finds.
+    # The clause's second half named "the exactness theorems" with no rule,
+    # and the five theorems that end `_exact` are not that class: one is a
+    # boundary conjunction and four compare a projection of a table, not a
+    # list. The paper now names the class the rule finds.
     (re.compile(r'the (\d+) refinement equalities'), ("refine_pairs",)),
     (re.compile(r'both sides hold at least (\d+)'), ("refine_min_entries",)),
+    # The third half paired a sweep with "explicit non-membership checks"
+    # without saying what made a theorem a pair rather than a bare round trip,
+    # so a sweep that pinned nothing outside its range kept it true.
+    (re.compile(r'the (\d+) dispatch sweeps'), ("sweeps",)),
+    (re.compile(r'at least (\d+) explicit'), ("sweep_min_checks",)),
 ]
 
 # The harness README states the same development from the harness side, in plain

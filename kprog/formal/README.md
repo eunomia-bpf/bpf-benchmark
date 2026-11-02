@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 434, and 332 steps
+`build/mut_*.py` files exist, the counter's last value is 435, and 333 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,33 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0564 - the dispatch-sweep clause was singular,
+and three theorems satisfied it
+
+The non-vacuity sentence's third clause was the last one nothing measured: "the
+dispatch sweep pairs its range over the armed ids with explicit non-membership
+checks". Two things were wrong with it. It was singular, and three theorems do
+the pairing -- `arm64_reg_dispatch_full_range`, `x86_reg_dispatch_full_range`,
+and `x86_helper_dispatch_full_range` -- and no rule said what made a theorem a
+pair, so a sweep that swept its range and pinned nothing outside it would have
+kept the sentence true.
+
+Membership is the statement again, read per conjunct: a top-level conjunction
+with exactly one `(List.range n).all ...` or `(List.finRange n).all ...` part
+and at least one part of the form `(... = none)`. Splitting on `∧` needs depth
+tracking, because the swept part carries its own parentheses and the pinned
+parts carry type ascriptions (`cellOf (0x1f : BitVec 8) = none`). Two theorems
+pin three outside values (the last GPR, the byte above it, the sentinel); the
+helper sweep pins four (ids 0, 8, 21, 22). The published figures are the class
+size and the smallest count, 3 and 3, so a sweep that dropped its outside checks
+fails the check instead of reading as prose.
+
+`check_lean_claims.py` gained `conjuncts` and `sweep_checks`, and the three
+per-theorem rules now append into one `counters` dict, from which all seven
+published figures for the sentence are read. The paper's clause now reads
+"each of the 3 dispatch sweeps pairs the range it sweeps over the armed ids
+with at least 3 explicit non-membership checks". Census 434 -> 435.
 
 ### Step 0563 - the exactness clause named five
 theorems and matched none

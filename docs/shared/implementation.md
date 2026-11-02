@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0564 bound the last unmeasured half of the
+non-vacuity sentence. It said the dispatch sweep
+"pairs its range over the armed ids with explicit
+non-membership checks" -- singular, and with no rule,
+so a theorem that swept a range and pinned nothing
+outside it still satisfied the prose. Three theorems
+do pair a sweep with outside checks; membership is
+per top-level conjunct, so a split on the
+conjunction needs depth tracking: the swept part
+carries parentheses, the pinned parts carry type
+ascriptions. Two pin three outside bytes and the
+helper sweep pins four ids, so the paper now quotes
+"each of the 3 dispatch sweeps ... at least 3
+explicit non-membership checks" and a sweep that lost
+its outside checks fails a check (census 434 -> 435).
+
 Step 0563 replaced a prose class the tree does not
 have. The safety section's exactness clause said "the
 exactness theorems assert two independently defined
