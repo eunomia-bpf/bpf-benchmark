@@ -387,16 +387,13 @@ theorem arm64_stack_arena_pointer_weaker_than_window (index capacity width : Bit
 check: the one-past-end index is a valid pointer but not the start of any
 nonempty window, so a pointer that passes the pointer bound can still be
 dereferenced out of the arena. -/
-theorem arm64_stack_arena_pointer_weaker_than_window_strict (capacity : BitVec 32)
-    (hnoWrap : capacity.toNat + 1 < 2 ^ 32) :
+theorem arm64_stack_arena_pointer_weaker_than_window_strict (capacity : BitVec 32) :
     pointerFits capacity capacity = true ∧
       windowFits capacity 1 capacity = false := by
   constructor
   · simp only [pointerFits]
     exact decide_eq_true (by simp)
   · simp only [windowFits, windowEnd]
-    have hv : (1 : BitVec 32).toNat = 1 := by decide
-    have hcapLt : capacity.toNat < 2 ^ 32 := by omega
     show decide (capacity.toNat + 1 ≤ capacity.toNat) = false
     rw [decide_eq_false_iff_not]
     omega

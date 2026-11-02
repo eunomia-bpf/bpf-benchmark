@@ -253,10 +253,9 @@ theorem x86_dispatch_families_disjoint (op : DispatchOp) :
         x86DispCmpMemOps,
         x86DispDoubleShiftOps]
 
-/-- A family member is dispatched exactly when the generated table names it: the
-hypothesis-taking form the C `_HANDLED` macro's truth is decided by. -/
-theorem x86_dispatch_member_handled (op : DispatchOp)
-    (h : op ∈ x86DispatchOps) :
+/-- Every opcode of the dispatch enum is handled by one of the ten family
+gates: no opcode of the generated table reaches the unsupported arm. -/
+theorem x86_dispatch_member_handled (op : DispatchOp) :
     movLoadPtrHandled op ||
     movxRegHandled op ||
     movLoadHandled op ||
@@ -291,7 +290,9 @@ theorem x86_dispatch_member_handled (op : DispatchOp)
               doubleShiftHandled]
 
 /-- An opcode outside every dispatch family is handled by no generated membership
-test, so the dispatcher reaches its unsupported arm. -/
+test, so the dispatcher reaches its unsupported arm. Since `x86DispatchOps`
+covers every constructor, the hypothesis cannot hold and this arm is vacuous:
+`x86_dispatch_member_handled` is the operative half of the contract. -/
 theorem x86_dispatch_nonmember_unhandled (op : DispatchOp)
     (h : op ∉ x86DispatchOps) :
     movLoadPtrHandled op = false ∧

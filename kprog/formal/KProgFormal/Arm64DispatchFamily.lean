@@ -152,10 +152,9 @@ theorem arm64_dispatch_families_disjoint (op : DispatchOp) :
     simp [arm64DispAluOps, arm64DispShiftOps, arm64DispSubsOps, arm64DispAddsOps,
           arm64DispCmpOps, arm64DispTstOps, arm64DispAndsOps, arm64DispCcmpOps]
 
-/-- A family member is dispatched exactly when the generated table names it: the
-hypothesis-taking form the C `_HANDLED` macro's truth is decided by. -/
-theorem arm64_dispatch_member_handled (op : DispatchOp)
-    (h : op ∈ arm64DispatchOps) :
+/-- Every opcode of the dispatch enum is handled by one of the eight family
+gates: no opcode of the generated table reaches the unsupported arm. -/
+theorem arm64_dispatch_member_handled (op : DispatchOp) :
     aluHandled op || shiftOpHandled op || subsHandled op || addsHandled op ||
     cmpHandled op || tstHandled op || andsHandled op || ccmpHandled op =
     true := by
@@ -166,7 +165,9 @@ theorem arm64_dispatch_member_handled (op : DispatchOp)
               addsHandled, cmpHandled, tstHandled, andsHandled, ccmpHandled]
 
 /-- An opcode outside every dispatch family is handled by no generated membership
-test, so the dispatcher reaches its unsupported arm. -/
+test, so the dispatcher reaches its unsupported arm. Since `arm64DispatchOps`
+covers every constructor, the hypothesis cannot hold and this arm is vacuous:
+`arm64_dispatch_member_handled` is the operative half of the contract. -/
 theorem arm64_dispatch_nonmember_unhandled (op : DispatchOp)
     (h : op ∉ arm64DispatchOps) :
     aluHandled op = false ∧ shiftOpHandled op = false ∧

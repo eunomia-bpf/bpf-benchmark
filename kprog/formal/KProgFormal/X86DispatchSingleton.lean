@@ -667,9 +667,10 @@ theorem x86_singleton_handled_iff_mem (op : SingletonOp) :
     (pushHandled op = true ↔ op ∈ x86DispPushOps) ∧
     (popHandled op = true ↔ op ∈ x86DispPopOps) := by
   cases op <;> simp_all [x86DispNopOps, x86DispCallMemcpyOps, x86DispCallMemsetOps, x86DispCallMemcpyRegOps, x86DispCallMemsetRegOps, x86DispCallRegOps, x86DispMovImmOps, x86DispMovRegOps, x86DispMovbeLoadOps, x86DispMovbeStoreOps, x86DispLoadXmm0Ops, x86DispStoreXmm0Ops, x86DispLeaOps, x86DispAluMemOps, x86DispAluMemUnaryOps, x86DispAluMemImmOps, x86DispAluMemRegOps, x86DispCmpRegMemOps, x86DispCmovOps, x86DispCmovMemOps, x86DispSetccOps, x86DispSetccMemOps, x86DispBswapOps, x86DispPopcntOps, x86DispShiftxOps, x86DispShiftxMemOps, x86DispRorxOps, x86DispRorxMemOps, x86DispBzhiOps, x86DispBzhiMemOps, x86DispBtOps, x86DispBtImmOps, x86DispBtMemImmOps, x86DispImulImmOps, x86DispImulMemImmOps, x86DispMulxOps, x86DispRepMovsOps, x86DispAndnOps, x86DispAndnMemOps, x86DispXchgOps, x86DispDivOps, x86DispPushOps, x86DispPopOps, nopHandled, callMemcpyHandled, callMemsetHandled, callMemcpyRegHandled, callMemsetRegHandled, callRegHandled, movImmHandled, movRegHandled, movbeLoadHandled, movbeStoreHandled, loadXmm0Handled, storeXmm0Handled, leaHandled, aluMemHandled, aluMemUnaryHandled, aluMemImmHandled, aluMemRegHandled, cmpRegMemHandled, cmovHandled, cmovMemHandled, setccHandled, setccMemHandled, bswapHandled, popcntHandled, shiftxHandled, shiftxMemHandled, rorxHandled, rorxMemHandled, bzhiHandled, bzhiMemHandled, btHandled, btImmHandled, btMemImmHandled, imulImmHandled, imulMemImmHandled, mulxHandled, repMovsHandled, andnHandled, andnMemHandled, xchgHandled, divHandled, pushHandled, popHandled]
-/-- The operator-side statement of the same contract: for a member opcode every generated singleton test returns true. -/
-theorem x86_singleton_member_handled (op : SingletonOp)
-    (h : op ∈ x86SingletonOps) :
+/-- The operator-side statement of the same contract: every opcode of the
+singleton enum is handled by at least one of the generated singleton gates,
+so none of them reaches the unsupported arm. -/
+theorem x86_singleton_member_handled (op : SingletonOp) :
     nopHandled op ||
     callMemcpyHandled op ||
     callMemsetHandled op ||
@@ -735,7 +736,7 @@ theorem x86_singleton_member_handled (op : SingletonOp)
               btMemImmHandled, imulImmHandled, imulMemImmHandled, mulxHandled, repMovsHandled,
               andnHandled, andnMemHandled, xchgHandled, divHandled, pushHandled, popHandled]
 
-/-- Nonmember arm, part a: conjuncts 1–15 stay unhandled (combined 43-way membership form in `x86_singleton_handled_iff_mem`). -/
+/-- Nonmember arm, part a: conjuncts 1–15 stay unhandled (combined 43-way membership form in `x86_singleton_handled_iff_mem`). Since `x86SingletonOps` covers every constructor the hypothesis cannot hold, so parts a–c are vacuous: `x86_singleton_member_handled` is the operative half of the contract. -/
 theorem x86_singleton_nonmember_unhandled_a (op : SingletonOp)
     (h : op ∉ x86SingletonOps) :
     nopHandled op = false ∧

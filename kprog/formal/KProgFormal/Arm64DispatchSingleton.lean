@@ -226,10 +226,9 @@ theorem arm64_singleton_handled_iff_mem (op : SingletonOp) :
     (fmovHandled op = true ↔ op ∈ arm64DispFmovOps) := by
   cases op <;> decide
 
-/-- A singleton member is dispatched exactly when the generated table names it:
-the hypothesis-taking form the C gate's truth is decided by. -/
-theorem arm64_singleton_member_handled (op : SingletonOp)
-    (h : op ∈ arm64SingletonOps) :
+/-- Every opcode of the singleton enum is handled by one of the sixteen
+singleton gates: no opcode of the generated table reaches the unsupported arm. -/
+theorem arm64_singleton_member_handled (op : SingletonOp) :
     nopHandled op || movkHandled op || bitfieldHandled op || cmnImmHandled op ||
     cmnRegHandled op || tstBicRegHandled op || bicsRegHandled op ||
     loadHandled op || storeHandled op || ldpHandled op || stpHandled op ||
@@ -248,7 +247,9 @@ theorem arm64_singleton_member_handled (op : SingletonOp)
               fmovHandled]
 
 /-- An opcode outside every singleton is handled by no generated singleton
-test, so the dispatcher reaches its unsupported arm. -/
+test, so the dispatcher reaches its unsupported arm. Since `arm64SingletonOps`
+covers every constructor, the hypothesis cannot hold and this arm is vacuous:
+`arm64_singleton_member_handled` is the operative half of the contract. -/
 theorem arm64_singleton_nonmember_unhandled (op : SingletonOp)
     (h : op ∉ arm64SingletonOps) :
     nopHandled op = false ∧ movkHandled op = false ∧
