@@ -2613,19 +2613,21 @@ with the pending edit the same gate fails at
 which is the mutant, not a regression.
 
 Step 0555 audited every hypothesis the tree can hold
-(census 425 -> 426). 156 propositional binders over 110
-theorems: delete each, recompile, read the exit code --
-145 load-bearing, 11 free, and the 11 are exactly step
-0554's deliberate keeps, so its cut list was complete
-and nothing changed. Two oracle bugs nearly hid that.
-`lake env lean` writes errors to stdout, so a stderr
-check calls everything free; and searching for a
-shorter theorem name lands inside a longer one -- three
-rows of `arm64_stack_arena_window_implies_tag_slot`
-were probed in the `*_any_capacity` twin, which shares
-their binder text. Re-anchored, all three are
-load-bearing. Docs only; the gate is unchanged from
-step 0554.
+(census 425 -> 426). A textual filter filed 156 of 2411
+binders as hypotheses; deleting each and recompiling
+the module -- reading the exit code, since `lake env
+lean` writes errors to stdout -- gave 145 load-bearing,
+11 free. Cross-checking the filter against the
+compiler's own sorts (every Type- and Prop-valued
+constant in all 306 module environments) found no data
+head naming a Prop, so nothing went unprobed, and only
+two false positives: the pair `m : Mnemonic` are value
+binders. Honest census 154, and the 9 free are exactly
+step 0554's deliberate keeps -- its cut list was
+complete. A shorter theorem name also matches inside a
+longer one: three rows were probed in the
+`*_any_capacity` twin and re-anchored. Docs only; the
+gate is unchanged from step 0554.
 
 Step 0554 removed six numeric hypotheses that no proof
 needed (census 424 -> 425). Textual search cannot

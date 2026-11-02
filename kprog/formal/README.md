@@ -7580,13 +7580,13 @@ EXPECTED. Census 332 -> 333.
 closed the audit step 0554 began
 
 Step 0554 cut the six hypotheses it could see. This one asked whether any it
-could not see were still there, by enumerating every proposition binder in
-the tree and deleting them one at a time. 2411 binders sit on the tree's
-2060 theorems; 156 of them are hypotheses rather than values, on 110
-theorems in 54 modules. Enumeration cannot be textual either -- the first
-pass filed `windowFits index width capacity = true` under data because that
-signature opened with `(index`. Binders are always bracketed, so the first
-depth-0 `:` after the theorem name is what divides signature from statement.
+could not see were still there, by enumerating every binder in the tree and
+deleting them one at a time. 2411 binders sit on the tree's 2060 theorems;
+the textual filter keeps 156 that look like hypotheses, on 110 theorems in
+54 modules. Enumeration cannot be textual either -- the first pass filed
+`windowFits index width capacity = true` under data because that signature
+opened with `(index`. Binders are always bracketed, so the first depth-0 `:`
+after the theorem name is what divides signature from statement.
 
 The oracle for each probe has to be the exit status. `lake env lean` writes
 errors to *stdout*, so a check on `stderr` called all 36 binders of the
@@ -7597,13 +7597,16 @@ plain search for the shorter name lands inside the longer theorem -- three
 rows had been deleted in the wrong signature. Re-anchored to
 `theorem ... (index`, all three are load-bearing.
 
-145 load-bearing, 11 free -- and the 11 are exactly what step 0554 chose to
-keep: the six Extrev narrowing fits, `hb : 1 ≤ bits`, and the two
-`words_tight` bounds, plus two `m : Mnemonic` rows that are the same artifact
-as `high : BitVec 64`, since deleting a value binder leaves an auto-bound
-implicit `m` and the statement never changed. Nothing to cut, which is the
-finding: step 0554's list was complete, so the tree is unchanged and the
-audit needs no gate re-run. Census 425 -> 426.
+Checking that filter against the compiler -- every Type-valued and
+Prop-valued constant in all 306 module environments -- left the count where
+it belonged: no data-looking head names a Prop, so nothing went unprobed,
+and only two rows were misfiled, the pair `(m : ...Mnemonic)`, value binders
+that the sweep had already covered. The honest census is 154 hypotheses:
+145 load-bearing, 9 free, and the 9 are exactly what step 0554 chose to
+keep -- the six Extrev narrowing fits, `hb : 1 ≤ bits`, the two
+`words_tight` bounds. Nothing to cut, which is the finding: step 0554's list
+was complete, so the tree is unchanged and the audit needs no gate re-run.
+Census 425 -> 426.
 
 ### Step 0554 - a hypothesis that
 closed the case it should have proved
