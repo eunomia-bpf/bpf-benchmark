@@ -305,6 +305,29 @@ def artifact_families(root):
     return {k: len(v) for k, v in fams.items()}
 
 
+def checked_generators(makefile, specs):
+    """The specs whose generator the gate re-derives with `--check`.
+
+    The section says "every generator re-derives its output on each run and
+    fails on any byte difference (all 138 pass --check)". Nothing bound that
+    figure: delete a generator's `--check` line from the Makefile and the spec
+    files on disk still number 138, so the published count holds while the
+    sentence goes false for that one contract. Comparing the invoked names
+    against the spec family is the only reading on which the parenthetical
+    carries information, and the symmetric difference is used deliberately --
+    a `--check` line whose spec no longer exists is a command the gate runs
+    against nothing, and drift in either direction is worth the same failure.
+    """
+    checked = {m.group(1) for m in
+               re.finditer(r"generate_(\w+)_spec\.py.*--check", makefile)}
+    gap = set(specs) ^ checked
+    if gap:
+        raise SystemExit(
+            "check_lean_claims: spec files and `--check` generators are not "
+            "one-to-one -- %s" % ", ".join(sorted(gap)))
+    return len(checked)
+
+
 def consumed_modules(gen, reached):
     """How many generated Lean modules a gate root imports.
 
@@ -501,7 +524,6 @@ def scan_tree(root):
         # The non-vacuity sentence's three clauses each quote a figure from
         # one of these classes. All three are asserted non-empty there, so an
         # empty list -- the theorems renamed, or a shape restated so the rule
-        # no longer matches -- must fail loudly rather than report a vacuous
         # minimum.
         "table_length": len(counters["table"]),
         "table_min_count": min(counters["table"]),
@@ -529,6 +551,11 @@ def scan_tree(root):
     out["c_direct"] = c_direct
     out["c_units"] = c_units
     out["c_indirect"] = c_reached - c_direct
+    # The third generator-side figure: how many specs the gate re-derives with
+    # `--check`. Bound to the spec family, because the published count tracks
+    # the files on disk and would not notice a dropped Makefile line.
+    out["checked"] = checked_generators(
+        makefile, family(root, "*_spec.json", "", "_spec.json"))
     out["lean_consumed"] = consumed_modules(set(gen_counts), seen)
     return out
 
@@ -590,6 +617,7 @@ CLAIMS = [
                 r'and (\d[\d,]*)'), ("specs", "headers", "gen_mods")),
     (re.compile(r'from (\d[\d,]*) shared specifications each rendered'),
      ("specs",)),
+    (re.compile(r'every one of the (\d[\d,]*) is also consumed'), ("specs",)),
     # The sentence's second half asserted consumption without measuring it: a
     # contract orphaned on one side left all three counts at 138 and made the
     # sentence false. Both figures now come from a reachability closure -- C
@@ -598,6 +626,11 @@ CLAIMS = [
     # claim is not merely unchecked but unsatisfiable.
     (re.compile(r'all (\d+) headers are'), ("c_consumed",)),
     (re.compile(r'all (\d+) modules are'), ("lean_consumed",)),
+    # "all 138 pass --check" was the last generator-side figure left unbound:
+    # the count followed the spec files on disk, so deleting a generator's
+    # `--check` line kept 138 correct while the claim went false for that one
+    # contract. It now names the invocations the gate really runs.
+    (re.compile(r'all (\d+) pass'), ("checked",)),
 ]
 
 # The harness README states the same development from the harness side, in plain
@@ -618,10 +651,15 @@ README_CLAIMS = [
     (re.compile(r'from the (\d+) `\.c` files'), ("c_units",)),
     (re.compile(r'(\d+) headers are included'), ("c_direct",)),
     (re.compile(r'the other (\d+) only'), ("c_indirect",)),
+    # The README's mutation survey states its own denominator, "Of the 138
+    # generators that exist", and it is the same set the section's `--check`
+    # parenthetical counts. Bound to one figure, the two documents cannot
+    # disagree about how many generators there are.
+    (re.compile(r'(\d[\d,]*)\*{0,2} generators that exist'), ("checked",)),
     # The README states the same three family figures and, unlike the section,
     # asserts the pairing outright ("verified as a bijection in both
-    # directions"). That sentence was describing a check that did not exist;
-    # now it names the one that does.
+    # directions"). That sentence described a check that did not exist; now it
+    # names the one that does.
     (re.compile(r'(\d[\d,]*) `\*_spec\.json` contracts'), ("specs",)),
     (re.compile(r'\((\d[\d,]*)/(\d[\d,]*)/(\d[\d,]*)\)'),
      ("specs", "headers", "gen_mods")),

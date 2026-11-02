@@ -2611,6 +2611,21 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
+Step 0567 bound the third generator-side obligation.
+The section says every generator re-derives its
+output and "all 138 pass `--check`", but that figure
+was the spec-file count: the sentence is about
+Makefile invocations, and dropping a generator's
+`--check` line left it at 138 while the claim went
+false for that contract. `checked_generators` takes
+the symmetric difference between the `--check`
+invocations and the spec family — a spec never
+re-derived and a line whose spec is gone are both
+failures — and names the orphan. 138 hold, and the
+README's separate "138 generators that exist"
+denominator is bound to the same figure (census 437
+-> 438).
+
 
 Step 0566 measured consumption, the half of the
 pairing claim no count can express. The section says

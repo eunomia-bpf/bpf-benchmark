@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 437, and 335 steps
+`build/mut_*.py` files exist, the counter's last value is 438, and 336 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -902,6 +902,16 @@ compiles — 131 headers are included by one directly, the other 7 only through 
 simulator header — and `import` from the modules the gate type-checks. All 138
 are reached on both sides, and an orphan on either raises with its name rather
 than shrinking a published figure.
+
+The third generator-side obligation is now bound as well. The section's
+"every generator re-derives its output and fails on any byte difference (all
+138 pass `--check`)" counted the spec files on disk, so deleting a generator's
+`--check` line from the Makefile kept the figure at 138 while the claim went
+false for that one contract. The checker now compares the 138 `--check`
+invocations against the spec family in both directions — an orphan in either
+set names itself and stops the run — and binds the same figure to this file's
+"Of the 138 generators that exist", so the two documents cannot disagree about
+the denominator.
 
 The generated headers also bind the hand-written decode at compile time:
 1,051 `_Static_assert`s tie the simulator's `X86_OP_*` / `ARM64_*` constants to
@@ -7585,6 +7595,33 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0567 - "all 138 pass --check" counted spec files, not the
+gate's invocations
+
+Three generator-side obligations appear in the section, and steps 0565-0566
+bound two of them. The third read "every generator re-derives its output on each
+run and fails on any byte difference (all 138 pass --check)" and was still
+measured by counting `*_spec.json` files. Those are different sets: the sentence
+is about Makefile invocations. Delete one generator's `--check` line and the
+spec files on disk stay at 138, the count stays at 138, and the sentence is
+false for that contract — the exact shape of drift the gate is supposed to make
+impossible.
+
+`checked_generators` collects the names in `generate_<name>_spec.py ... --check`
+lines and takes the symmetric difference against the spec family. Symmetric
+rather than one-directional on purpose: a spec with no `--check` line is a
+contract the gate never re-derives, and a `--check` line whose spec has been
+deleted is a command run against nothing. Either way the orphan names itself and
+the run stops.
+
+The tree holds — 138 `--check` invocations, one per spec. The same figure is
+bound to the README's mutation survey, which states its own denominator ("Of the
+**138** generators that exist") and was hand-kept independently of the
+section's; the two documents now cannot disagree about how many generators there
+are. A negative test drops `generate_abi_load_spec.py --check` from the
+Makefile: the checker reports `spec files and --check generators are not
+one-to-one -- abi_load` rather than publishing 137. Census 437 -> 438.
 
 ### Step 0566 - the pairing says a contract exists on both sides,
 not that anything uses it
