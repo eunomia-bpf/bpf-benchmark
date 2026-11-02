@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the paper's Lean-side counts against the repository itself.
+"""Check every document's Lean-side counts against the repository itself.
 
 `check_paper_counts.py` verifies the *oracle case counts*, which it can do by
 looking for a matching banner in a `make check` log. It cannot verify the other
@@ -12,9 +12,12 @@ nine behind, and the native_decide figures were stale on all three of their
 numbers. A stale figure is invisible to a reader and to every existing gate,
 which is the same failure mode the case-count checker was written for.
 
-This script recomputes each claim from the tree and reports any that disagree.
+The harness README states the same figures and was still unchecked, so it drifted
+silently while this script reported "all claims current": it read the paper only.
+Both documents are now targets, and so is the refinement-named denominator they
+share, whose definition is fixed in `refinement_named`.
 
-Usage: check_lean_claims.py [--section <tex>] [--check]
+Usage: check_lean_claims.py [--section <tex>] [--readme <md>]
 """
 
 import argparse
@@ -24,10 +27,16 @@ import pathlib
 import re
 import sys
 
-# A theorem runs from its `theorem` line to the next top-level declaration; the
-# bodies are not indented consistently enough to use indentation.
-THEOREM = re.compile(r'^theorem (\w+)[\s\S]*?(?=^theorem |^def |^end |\Z)',
-                     re.M)
+# A theorem runs from its `theorem` line through every following indented line.
+# A Lean proof script is always indented and any new top-level command starts at
+# column zero, so indentation -- not a keyword list -- is what ends a declaration.
+# The previous pattern stopped only at `theorem`, `def`, and `end`, so a theorem
+# whose body was followed by an `example ... := by native_decide` absorbed that
+# example and was miscounted as `native_decide` although its own script was
+# `bv_decide`: `arm64_ccmp_decode_cond_low_bits` inflated both the theorem and
+# the module figures by one.
+
+THEOREM = re.compile(r'^theorem (\w+)[^\n]*(?:\n[ \t].*)*', re.M)
 
 # A docstring line can itself begin with `theorem` when prose wraps mid-sentence,
 # and the pattern above matches at any line start, so the raw count can exceed
@@ -37,21 +46,77 @@ THEOREM = re.compile(r'^theorem (\w+)[\s\S]*?(?=^theorem |^def |^end |\Z)',
 PROOF = ":="
 
 
+def signature(block, name):
+    """The binders between `theorem <name>` and the statement's colon.
+
+    Splitting on the first `:` would stop at the first binder's own colon, so the
+    scan tracks bracket depth and cuts at the depth-zero colon that separates the
+    signature from the statement.
+    """
+    head = block[:block.find(":=")]
+    depth = 0
+    for i, char in enumerate(head):
+        if char in "([":
+            depth += 1
+        elif char in ")]":
+            depth -= 1
+        elif char == ":" and depth == 0:
+            return head[len("theorem " + name) + 1:i]
+    return ""
+
+
+def refinement_named(name):
+    """Whether a theorem name states a refinement.
+
+    The published denominator needs this to be spelled out: it is the substring
+    `refine` in the name, which covers both `_refines` and the `_refine` names
+    the generators emit (`arm64_reg_dispatch_names_refine`). Narrowing it to
+    `refines` drops the eight `_refine` table equalities and their eight
+    `native_decide` proofs, so the published "20 of the N" numerator -- which is
+    exactly the finite-table equalities listed in the safety section -- stops
+    being reproducible. Substring rather than word-boundary because the token is
+    always a name component joined by underscores.
+    """
+    return "refine" in name.lower()
+
+
+def flat(text):
+    """Collapse whitespace so a claim wrapped across source lines still matches."""
+    return re.sub(r"\s+", " ", text)
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     mods = glob.glob(os.path.join(root, "KProgFormal", "*.lean"))
     theorems = 0
     native_decide = 0
     native_modules = set()
+    refines = 0
+    refines_decided = 0
+    quant_cases = 0
     for path in mods:
         src = open(path, errors="ignore").read()
         for m in THEOREM.finditer(src):
-            if PROOF not in m.group(0):
+            block = m.group(0)
+            if PROOF not in block:
                 continue
             theorems += 1
-            if "native_decide" in m.group(0):
+            named = refinement_named(m.group(1))
+            refines += named
+            if "native_decide" in block:
                 native_decide += 1
+                refines_decided += named
                 native_modules.add(os.path.basename(path))
+                # The safety section claims its quantified native_decide proofs
+                # are exhaustive case analyses over a finite type, so both halves
+                # are measured: a binder in the signature and `cases` in the
+                # script. A quantified proof closed some other way (one is
+                # `refine`d and decided over `BitVec 64` binders) does not belong
+                # to that sentence and is not counted.
+                cut = block.find(":=")
+                binders = signature(block, m.group(1))
+                if "(" in binders and re.search(r'\bcases\b', block[cut:]):
+                    quant_cases += 1
 
     # The module figure the paper quotes is the transitive closure of the gate's
     # roots, not the file count: a module no proof imports is not compiled by
@@ -77,6 +142,9 @@ def scan_tree(root):
         "native_decide": native_decide,
         "native_modules": len(native_modules),
         "modules": len(seen),
+        "refines": refines,
+        "refines_decided": refines_decided,
+        "quant_cases": quant_cases,
     }
 
 
@@ -87,6 +155,21 @@ CLAIMS = [
                 r'\((\d+)\\%'), ("native_decide", "theorems", "share")),
     (re.compile(r'spread over (\d+) of the (\d[\d{},\\]*)'), ("native_modules", "modules")),
     (re.compile(r'over (\d+) Lean modules'), ("modules",)),
+    (re.compile(r'(\d+) of the (\d[\d{},\\]*) refinement-named theorems'),
+     ("refines_decided", "refines")),
+    (re.compile(r'(\d+) of those are universally quantified'), ("quant_cases",)),
+]
+
+# The harness README states the same development from the harness side, in plain
+# prose rather than LaTeX. It was the last document still hand-maintained: its
+# theorem and native_decide figures had fallen behind the tree while every check
+# stayed green, because the only reader of these numbers looked at the paper.
+README_CLAIMS = [
+    (re.compile(r'proving (\d[\d,]*) theorems'), ("theorems",)),
+    (re.compile(r'(\d[\d,]*) of those \((\d+)%'), ("native_decide", "share")),
+    (re.compile(r'(\d+) of the (\d[\d,]*) refinement-named theorems'),
+     ("refines_decided", "refines")),
+    (re.compile(r'(\d+) Lean modules'), ("modules",)),
 ]
 
 
@@ -94,22 +177,28 @@ def number(text):
     return int(re.sub(r'[{},\\]', '', text))
 
 
-def check(section_path, root):
-    text = pathlib.Path(section_path).read_text()
+def check(targets, root):
+    """Check each (path, claims) pair; a document that matches nothing is drift."""
     actual = scan_tree(root)
+    # The share is floored, never rounded: both documents say 23% for 488/2060
+    # (23.7%), and a floored share cannot overstate how much rests on the
+    # compiler. Rounding here would turn a correct 23% into a stale claim.
     actual["share"] = 100 * actual["native_decide"] // actual["theorems"]
     bad = []
-    seen_any = False
-    for pattern, names in CLAIMS:
-        for m in pattern.finditer(text):
-            seen_any = True
-            for i, name in enumerate(names, start=1):
-                claimed = number(m.group(i))
-                if claimed != actual[name]:
-                    bad.append((m.group(0).strip()[:60], name, claimed,
-                                actual[name]))
-    if not seen_any:
-        bad.append(("no Lean-side claim matched", "-", "-", "-"))
+    for path, claims in targets:
+        text = flat(pathlib.Path(path).read_text())
+        seen_any = False
+        for pattern, names in claims:
+            for m in pattern.finditer(text):
+                seen_any = True
+                for i, name in enumerate(names, start=1):
+                    claimed = number(m.group(i))
+                    if claimed != actual[name]:
+                        bad.append(("%s: %s" % (path.name, m.group(0)[:48]),
+                                    name, claimed, actual[name]))
+        if not seen_any:
+            bad.append(("%s: no Lean-side claim matched" % path.name,
+                        "-", "-", "-"))
     return bad, actual
 
 
@@ -119,10 +208,11 @@ def main(argv):
     ap.add_argument("--section", default=str(
         here.parent.parent / "docs" / "kprog-simulator-in-ebpf" / "sections"
         / "4-safety.tex"))
-    ap.add_argument("--check", action="store_true")
+    ap.add_argument("--readme", default=str(here / "README.md"))
     args = ap.parse_args(argv[1:])
 
-    bad, actual = check(args.section, here)
+    bad, actual = check([(pathlib.Path(args.section), CLAIMS),
+                         (pathlib.Path(args.readme), README_CLAIMS)], here)
     if bad:
         print("check_lean_claims: %d stale claim(s)" % len(bad))
         for text, name, claimed, real in bad:
@@ -130,9 +220,12 @@ def main(argv):
                   % (text, name, claimed, real))
         return 1
     print("check_lean_claims: %d theorems, %d native_decide over %d modules, "
-          "%d modules -- all claims current"
+          "%d modules, %d refinement-named (%d by native_decide), "
+          "%d quantified by cases -- all claims current"
           % (actual["theorems"], actual["native_decide"],
-             actual["native_modules"], actual["modules"]))
+             actual["native_modules"], actual["modules"],
+             actual["refines"], actual["refines_decided"],
+             actual["quant_cases"]))
     return 0
 
 
