@@ -2612,6 +2612,34 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0548 repairs the jump-opcode checker that
+claimed every emission (census 418 -> 419). Its
+opcode class was `0x[0-9a-f]{2}`, and because the
+encoder writes conditional opcodes in lower case
+and its three unconditional `0xEB` jumps in upper
+case, the guard had seen 7 of 10 under a banner
+naming ten; widening it then matched the helper's
+own `&[0x0F, opcode]` definition as a phantom
+eighth site. The opcode is now the call's second
+argument, split from the argument list and parsed
+as a literal, so `0xEB`, `0XEB`, `0xE_B` and `235`
+are one value, and a call cannot read past its own
+line. `tail_call_check` had read x86's compare and
+increment from the assembly comments beside the
+byte arrays, and never asked whether AArch64
+compared the limit; operands now come from the
+emitted arrays, each module must state
+`MAX_TAIL_CALL_CNT` itself, and the limit is
+compared with the vendored kernel header -- a
+cross-check the README had claimed since it was
+written while no version of the script opened it.
+A renamed constant in one module had let the check
+adopt the other's and report agreement. Dead
+`--check`, `JCC_BASE` and two shadowed locals are
+gone. Battery: 32 plants caught by their own
+message, 5 alternate spellings still accepted.
+Gate: rc 0, 248 banners, 124,531,802 cases.
+
 Step 0547 fixes how the Lean-count checker decides
 where a theorem ends (census 417 -> 418). Its
 lookahead stopped at `theorem`, `def` and `end` and

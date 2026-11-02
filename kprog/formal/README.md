@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 418, and 316 steps
+`build/mut_*.py` files exist, the counter's last value is 419, and 317 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -441,15 +441,22 @@ side reads the other and the opcode is only a number, so an off-by-one in a
 hand-written constant compiles, runs, and branches on the wrong condition. What
 makes them comparable is x86's own encoding rule -- short conditional jump
 opcodes are `0x70 + condition code`, and the `X86_CC_*` values *are* those
-codes -- so `check_jcc_opcodes.py` requires every commented site to satisfy
-`opcode == 0x70 + X86_CC_<suffix>`. Measured: 7 sites, all
-correct -- 4 identified by mnemonic comment and 3 by a `j<cond>_out` binding
-name, which is the only statement of intent for an uncommented emission
-(`let jbe_out = ...rel32(..., 0x86)`). The near form is covered too: rel32 adds
-`0x80` to the condition code where rel8 adds `0x70`. The three binding-named
-sites are in the tail-call lowering path. Verified by planting a wrong opcode at
-each of them. An emission with neither a comment nor a `j<cond>_out` binding is
-still only range-checked, which the script says.
+codes -- so `check_jcc_opcodes.py` requires every site to satisfy
+`opcode == 0x70 + X86_CC_<suffix>` (rel32 adds `0x80` where rel8 adds `0x70`).
+Measured over *every* emission the helper writes: 10, of which 7 are conditional
+and all correct -- 4 identified by mnemonic comment and 3 by a `j<cond>_out`
+binding name, which is the only statement of intent for an uncommented emission
+(`let jbe_out = ...rel32(..., 0x86)`); the other 3 are the `0xEB` unconditional
+`jmp rel8` sites, checked as jumps. Both counts were wrong before, and the fixes
+are what the pattern now does rather than what it once matched: the opcode is
+taken as the call's second argument, split from the argument list and parsed as a
+literal, so `0xEB`, `0XEB`, `0xE_B` and a decimal `235` are one value instead of
+one spelling. The case-sensitive class that hid the three upper-case jumps, and
+the `[^;]*?` that reached from a call into the helper's own `&[0x0F, opcode]`
+definition and made it a phantom site, are history. A mnemonic comment is read
+without regard to case. Verified by planting a wrong opcode at each kind of site.
+An emission with neither a comment nor a `j<cond>_out` binding is still only
+range-checked, which the script says.
 
 The same crate also emits AArch64 conditional branches, built from a literal
 whose low four bits are the condition code, and those had no check either. Six
@@ -481,11 +488,15 @@ The two architectures also lower `bpf_tail_call` independently, in separate
 modules, each with its own spelling of the kernel's limit -- `u8` on one side,
 `u32` on the other. The same program lowered either way must behave the same, so
 the limit, the comparison and the increment have to agree, and nothing compared
-them. The check now requires one statement of the limit across both modules, an
-unsigned-greater-or-equal branch on each side, and an increment by exactly one,
-with the limit cross-checked against the vendored kernel header (`33`).
-Verified by planting three divergences -- a moved limit, a `jae`-to-`ja`
-branch, and a dropped increment -- each reported by name.
+them. The check requires one statement of the limit across both modules, that it
+equals the kernel's own `MAX_TAIL_CALL_CNT` (`33`, from the vendored
+`include/linux/bpf.h`), a comparison against it on each side, an
+unsigned-greater-or-equal branch, and an increment by exactly one. The operands
+are read from the emitted byte arrays, not from the assembly comments beside them
+-- a comment is a human note about the bytes, and x86 had been able to emit a
+different immediate than its comment claimed. Verified by planting a moved limit,
+a `jae`-to-`ja` branch, a dropped comparison, a changed byte operand, and an
+increment of two, each reported by name.
 
 One measurement kept because it looked like a discrepancy and is not: the
 encoder reserves 512 bytes for its own frame, the kernel's `MAX_BPF_STACK` is
@@ -7550,6 +7561,36 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0548 - a checker that claimed every
+site saw seven of them
+
+`check_jcc_opcodes.py` asserts that every jump the x86 encoder emits agrees
+with the `X86_CC_*` contract, and its opcode class was `0x[0-9a-f]{2}`. The
+encoder spells conditional opcodes in lower case and its three unconditional
+`0xEB` jumps in upper case, so the guard had never seen those: 7 of 10, under a
+banner that named all ten. Widening the class then let `[^;]*?` run from a call
+back into the helper's own definition and report `&[0x0F, opcode]` as an eighth
+conditional site. Neither failure mode is reachable now: the opcode is the
+call's second argument, split from the argument list and parsed as a literal, so
+`0xEB`, `0XEB`, `0xE_B` and a decimal `235` are one value rather than one
+spelling, and a call cannot read past its own line. A binding like `jbe_out` is
+read as the site's stated intent where it has no comment. Measured: 10
+emissions, 7 conditional (4 by comment, 3 by binding), 3 `jmp rel8`.
+
+`tail_call_check` had taken x86's compare and increment from the assembly
+*comments* beside the byte arrays, and never asked whether AArch64 compared the
+limit at all. Operands now come from `bytes.extend_from_slice(&[...])`; an
+operand the check cannot resolve is reported, not passed. Each module must
+state the limit itself -- a renamed `MAX_TAIL_CALL_CNT` in one file let the
+check adopt the other's and still say both agreed -- and the limit is compared
+against the vendored kernel's `MAX_TAIL_CALL_CNT`, a cross-check the README had
+claimed since it was written while no version of the script had opened the
+header. The dead `--check` flag, `JCC_BASE`, and two shadowed locals are gone.
+Battery: 32 plants each caught with its own message, 5 alternate spellings still
+accepted as the same value. Gate rc 0, 248 banners, 124,531,802 cases; no Lean
+or C file changed.
+Census 418 -> 419.
 
 ### Step 0547 - a theorem's body ended
 where a keyword said it did
