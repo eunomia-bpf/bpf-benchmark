@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 438, and 336 steps
+`build/mut_*.py` files exist, the counter's last value is 439, and 337 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -914,17 +914,23 @@ set names itself and stops the run — and binds the same figure to this file's
 the denominator.
 
 The generated headers also bind the hand-written decode at compile time:
-1,051 `_Static_assert`s tie the simulator's `X86_OP_*` / `ARM64_*` constants to
-the generated tables, so drift breaks the build before any oracle runs. Tested
+1,049 `_Static_assert`s compile into them, 786 of which name a simulator
+constant (`X86_OP_*` / `ARM64_*`) and so fail the build when the decode drifts;
+the other 263 tie generated renderings to each other — a table's count against
+the literal that pins it, or one header's code against another's. Tested
 rather than assumed — changing `X86_OP_NOP` from `0x00U` to `0x09U` in
 `x86_sim.h` fails the build with two independent assertions
 (`x86_opcode.h:12`, `x86_dispatch_singleton.h:21`), so two generated tables
 observe the same drift separately.
 
 Each of those numbers was re-measured against the committed tree rather than
-carried forward, and one was wrong: the `_Static_assert` count was recorded as
-1,049 but the tree had 1,051 even at the commit that wrote it, so it was stale
-on arrival rather than drifted. The rest hold exactly — 138 specs pairing with
+carried forward. The `_Static_assert` count is the figure that keeps moving:
+an earlier pass "corrected" 1,049 upward to 1,051 by counting textual
+mentions, two of which are prose inside generated-header comments
+(`x86_movx_shape.h`, `arm64_ccmp_decode.h`), and neither figure was checked
+against anything. It is now counted by a balanced-paren scan of the generated
+headers, which also splits what the assertions tie. The rest hold exactly —
+138 specs pairing with
 138 generated headers and 138 `Generated*.lean` modules as a bijection in both
 directions (no leftovers either way), 268 explicit `lake env lean` invocations
 over 294 modules with the 26 unreached all `Generated*` and all imported, 0
@@ -7595,6 +7601,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0568 - a textual count read two comments as assertions,
+and called every pin a tie to the decode
+
+Both documents said the generated headers "carry 1,051 assertions that tie the
+hand-written decode constants to the generated tables". The figure was a textual
+count, and it was wrong in two separate ways.
+
+First, two of the 1,051 spellings are prose: `x86_movx_shape.h` and
+`arm64_ccmp_decode.h` each name the construct inside their own doc comment, so
+the compiler checks 1,049. That is the number an earlier step had recorded
+before "correcting" it upward on exactly this mistake — the correction moved the
+figure away from the truth, and nothing read either value. Second, only 786 of
+the assertions name a constant the hand-written simulator headers define. The
+other 263 compare generated renderings with each other: a table's count against
+the literal that pins it, one header's code against another's. The sentence
+characterized all of them as ties to the decode.
+
+`static_asserts` now measures both. Comments and string literals are blanked
+before scanning, because a token count in C reads prose as code. Conditions come
+from a balanced-paren walk, not a regexp — the argument is a nested C expression
+followed by a message string, and one match per directive is what the count has
+to mean. The hand-written names are collected from the sibling architecture
+roots, `#define` targets and enum members both, for the same reason step 0566
+had to leave this directory for `#include`: confining the scan finds no
+simulator constants at all. Three figures are published — total, ties, and the
+derived remainder — so the README's split cannot disagree with itself.
+
+A count of assertions is worth having only if they are real, so the empty cases
+raise: no generated headers, or no hand-written constants where the scan looks,
+both stop the run rather than publishing zero. Adding a prose mention to a copy
+of `x86_opcode.h` leaves the count at 77 while a textual count goes to 78 — the
+comment bug, reproduced. Census 438 -> 439.
 
 ### Step 0567 - "all 138 pass --check" counted spec files, not the
 gate's invocations

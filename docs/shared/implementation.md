@@ -2610,6 +2610,19 @@ writing to the file. The gate result quoted
 above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
+Step 0568 corrected and bound the compile-time
+figure. Both documents claimed the generated headers
+carry 1,051 assertions tying the hand-written decode
+to the tables. The count was textual, so it read two
+comment mentions as assertions — 1,049 is real, the
+number an earlier pass had "corrected" away — and
+only 786 of them name a simulator constant at all;
+the rest tie generated renderings to each other.
+`static_asserts` blanks comments, walks parens, reads
+the sibling simulator headers, and publishes total,
+ties and remainder; an empty scan raises (census 438
+-> 439).
+
 which is the mutant, not a regression.
 Step 0567 bound the third generator-side obligation.
 The section says every generator re-derives its

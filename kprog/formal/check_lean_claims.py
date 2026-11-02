@@ -328,6 +328,93 @@ def checked_generators(makefile, specs):
     return len(checked)
 
 
+def scrub_c(text):
+    """Blank C comments and string literals, preserving every offset.
+
+    Counting a token by textual occurrence is wrong for C: a generated header's
+    doc comment can name the very thing being counted. `_Static_assert` is
+    spelled twice that way, which is how the published figure came to be two
+    higher than the number of assertions the compiler actually checks. Blanking
+    to spaces keeps offsets stable, so a scan can still match delimiters.
+    """
+    blank = lambda m: " " * len(m.group(0))
+    text = re.sub(r"/\*.*?\*/", blank, text, flags=re.S)
+    text = re.sub(r"//[^\n]*", blank, text)
+    return re.sub(r'"(?:[^"\\]|\\.)*"', blank, text)
+
+
+def c_names(text):
+    """The macro and enum-member names a C translation unit declares."""
+    names = set(re.findall(r"#define\s+([A-Za-z_]\w*)", text))
+    for body in re.findall(r"enum\s+\w*\s*\{([^}]*)\}", text, re.S):
+        names |= set(re.findall(r"\b([A-Z][A-Z0-9_]{2,})\b", body))
+    return names
+
+
+def assert_conditions(text):
+    """Each `_Static_assert` condition, found by balanced-paren scanning.
+
+    A regexp cannot do this: the condition is a C expression whose parentheses
+    nest to any depth, and the argument ends with a message string after the
+    last comma. One match per directive is what the count has to mean.
+    """
+    out = []
+    for m in re.finditer(r"_Static_assert\s*\(", text):
+        i = m.end()
+        depth = 1
+        j = i
+        while depth:
+            if text[j] == "(":
+                depth += 1
+            elif text[j] == ")":
+                depth -= 1
+            j += 1
+        out.append(text[i:j - 1])
+    return out
+
+
+def static_asserts(root):
+    """The compile-time pins the generated headers carry, and how many of them
+    name a hand-written constant.
+
+    Both documents say the generated headers "carry 1,051 `_Static_assert`s
+    that tie the hand-written decode constants to the generated tables". The
+    figure was a textual count, and it was wrong twice over. Two of the 1,051
+    spellings sit inside a comment, so only 1,049 assertions exist -- the
+    number an earlier step had recorded before "correcting" it upward. And 263
+    of those compare two generated renderings (a table's count against a
+    literal, one header's code against another's) and name no hand-written
+    constant at all, so the sentence characterized 786 of them as though it
+    characterized all. The hand-written constants are read from the sibling
+    architecture roots for the same reason the `#include` closure is: confining
+    the scan to this directory finds none of them.
+    """
+    hand = set()
+    for here in ("", "..", "../x86", "../arm64"):
+        for path in glob.glob(os.path.join(root, here, "**", "*.h"),
+                              recursive=True):
+            if os.sep + ".lake" + os.sep in path or os.sep + "build" + os.sep \
+                    in path or os.sep + "generated" + os.sep in path:
+                continue
+            hand |= c_names(scrub_c(open(path, errors="ignore").read()))
+    if not hand:
+        raise SystemExit(
+            "check_lean_claims: no hand-written C constants found near %s -- "
+            "the simulator headers are not where the scan looks" % root)
+    gen_headers = sorted(glob.glob(os.path.join(root, "generated", "*.h")))
+    if not gen_headers:
+        raise SystemExit("check_lean_claims: no generated headers under %s"
+                         % root)
+    total = ties = 0
+    for path in gen_headers:
+        for cond in assert_conditions(scrub_c(
+                open(path, errors="ignore").read())):
+            total += 1
+            if set(re.findall(r"[A-Za-z_]\w*", cond)) & hand:
+                ties += 1
+    return total, ties
+
+
 def consumed_modules(gen, reached):
     """How many generated Lean modules a gate root imports.
 
@@ -556,6 +643,11 @@ def scan_tree(root):
     # the files on disk and would not notice a dropped Makefile line.
     out["checked"] = checked_generators(
         makefile, family(root, "*_spec.json", "", "_spec.json"))
+    # The compile-time pinning figure: how many assertions the generated
+    # headers carry, and how many of them name a hand-written constant. Both
+    # documents published a textual count that included two comment mentions,
+    # and characterized every assertion as a tie to the hand-written decode.
+    out["asserts"], out["assert_ties"] = static_asserts(root)
     out["lean_consumed"] = consumed_modules(set(gen_counts), seen)
     return out
 
@@ -631,6 +723,12 @@ CLAIMS = [
     # `--check` line kept 138 correct while the claim went false for that one
     # contract. It now names the invocations the gate really runs.
     (re.compile(r'all (\d+) pass'), ("checked",)),
+    # The compile-time sentence stated one figure and characterized all of it
+    # wrongly. The count was textual, so it read two comment mentions as
+    # assertions, and a quarter of the real ones relate two generated
+    # renderings to each other without naming a hand-written constant.
+    (re.compile(r'(\d[\d{},\\]*) \\texttt\{\\_Static'), ("asserts",)),
+    (re.compile(r'of which (\d+) name a hand-written'), ("assert_ties",)),
 ]
 
 # The harness README states the same development from the harness side, in plain
@@ -663,6 +761,12 @@ README_CLAIMS = [
     (re.compile(r'(\d[\d,]*) `\*_spec\.json` contracts'), ("specs",)),
     (re.compile(r'\((\d[\d,]*)/(\d[\d,]*)/(\d[\d,]*)\)'),
      ("specs", "headers", "gen_mods")),
+    # The README repeated the section's compile-time sentence, with the same
+    # textual count and the same over-broad characterization, so both documents
+    # now read off one measurement of each figure.
+    (re.compile(r'(\d[\d,]*) `_Static_assert'), ("asserts",)),
+    (re.compile(r'(\d+) of which name a simulator'), ("assert_ties",)),
+    (re.compile(r'the other (\d+) tie generated'), ("assert_own",)),
 ]
 
 
@@ -677,6 +781,10 @@ def check(targets, root):
     # (23.6%), and a floored share cannot overstate how much rests on the
     # compiler. Rounding here would turn a correct 23% into a stale claim.
     actual["share"] = 100 * actual["native_decide"] // actual["theorems"]
+    # The README states the split, so the second half is published as a figure
+    # too. Derived here rather than stored: it is the total minus the ties, and
+    # a stored third number could disagree with the other two.
+    actual["assert_own"] = actual["asserts"] - actual["assert_ties"]
     bad = []
     for path, claims in targets:
         text = flat(pathlib.Path(path).read_text())
