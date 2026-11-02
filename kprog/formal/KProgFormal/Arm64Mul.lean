@@ -249,7 +249,6 @@ def arm64MulValueSpec (op : Mul) (lhs rhs addend : BitVec 64) : BitVec 64 :=
       (lhs.setWidth 32).setWidth 64 * (rhs.setWidth 32).setWidth 64 + addend
   | .smaddl => arm64MulSignExt32Spec lhs * arm64MulSignExt32Spec rhs + addend
 
-set_option maxHeartbeats 1000000 in
 /-- The generated multiply contract agrees with the independent statement for all
 eight operations and all operand values. -/
 theorem arm64_mul_refines (op : Mul) (lhs rhs addend : BitVec 64) :

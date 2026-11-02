@@ -2612,6 +2612,21 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0558 audited the only configuration a keyword scan
+cannot see: a census found zero @[implemented_by],
+@[extern], unsafe, opaque, partial, or axiom
+declarations, so the four-axiom universe is complete,
+and just two set_option maxHeartbeats lines. Bisecting
+each against Lean's 200000 default split them:
+arm64_mul_refines needs 10431, so its 1000000 raise was
+dead and is deleted, while arm64_bitfield_refines needs
+239834 and times out at the default, so its 4000000 is
+load-bearing. Gate re-run green (RC=0, 248 banners,
+124531802); theorem, module, and native_decide totals
+unchanged. No new obligation is added: a minimum budget
+is machine-dependent and no checker watches these lines
+(census 428 -> 429).
+
 Step 0557 read axiom footprints off the kernel with
 Lean.collectAxioms (306 module environments, joined by
 namespace-qualified name). Tree-wide: four axioms, none

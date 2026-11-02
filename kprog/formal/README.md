@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 428, and 326 steps
+`build/mut_*.py` files exist, the counter's last value is 429, and 327 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0558 - the one configuration knob no checker
+reads
+
+`check_no_sorry.py` reads declaration keywords, so it cannot see configuration:
+a `set_option` line changes what the kernel is willing to reduce, and no checker
+in the gate reads one (searching every checker script for the word returns
+nothing). A census over the proof tree found its complete trust-adjacent
+configuration to be two `set_option maxHeartbeats` lines and nothing else:
+`@[implemented_by]`, `@[extern]`, `@[macro_inline]`, `unsafe`, `partial`,
+`opaque`, `axiom`, `elab`, `syntax`, `macro_rules`, and `#eval` each appear zero
+times. That zero is what makes step 0557's four-axiom universe complete rather
+than lucky, because `native_decide` documents its trust as "the Lean compiler
+and all definitions with an `@[implemented_by]` attribute" -- a keyword
+`check_no_sorry.py` never looks for.
+
+Whether each raised budget is needed was measured rather than assumed: rewrite
+the budget in a copy, compile it as a dot-file module, unlink it, and bisect for
+the smallest budget that builds. Lean's default is 200,000, and the two sites
+disagreed. `arm64_mul_refines` carried 1,000,000, yet compiles at the default
+and needs only 10,431 heartbeats, so the raise was worth nothing and is deleted.
+`arm64_bitfield_refines` needs 239,834, which is above the default: at 200,000
+it stops with a deterministic timeout after 21.6 s, so its 4,000,000 is
+load-bearing and stays. One site out of two was dead weight, which is why the
+budgets were measured and not merely listed.
+
+The full gate re-runs green after the deletion, and the theorem, module, and
+`native_decide` totals are unchanged -- the check that removing an option line
+deleted no proof. Two caveats travel with the number: a minimum budget is
+machine- and version-dependent, so it records why the raise exists rather than
+fixing a new floor, and nothing in the gate watches these lines, so a future
+edit can raise one silently. Promoting a heartbeat budget into a checker would
+be a new proof obligation and is left for the operator to authorize.  Census 428
+-> 429.
 
 ### Step 0557 - the trusted base no textual checker
 can see
