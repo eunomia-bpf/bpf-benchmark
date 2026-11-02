@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 427, and 325 steps
+`build/mut_*.py` files exist, the counter's last value is 428, and 326 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,53 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0557 - the trusted base no textual checker
+can see
+
+The axiom footprint of every counted declaration was read off the kernel
+with `Lean.collectAxioms`, once per module in that module's own environment
+(306 modules, 0 failures), then joined to the 2,061 counted names by
+namespace-qualified name -- 0 unknown. The join has to be by qualified name:
+the dump omits axiom-free rows, so a bare-name join reports every name it
+fails to match as axiom-free, which is the wrong answer for the right reason.
+Tree-wide the trusted base is exactly four axioms -- `propext`, `Quot.sound`,
+`Classical.choice`, `Lean.ofReduceBool` -- and none is declared here. 617
+counted declarations are axiom-free.
+
+The finding is the third group. 723 declarations (35%) depend on
+`Lean.ofReduceBool`, the axiom that admits a verdict computed by compiled
+code. 488 of them run `native_decide` in their own script -- the published
+figure, still exactly true -- but 119 run `bv_decide` and 116 run neither
+(88 `simp`, 18 `exact`, 7 `rfl`). Those 116 decide nothing themselves: they
+inherit the assumption from a lemma they cite, over 215 carrier edges to 70
+declarations, five of which carry 115 of the 215.
+
+`bv_decide` is the route no gate check looked at: 165 scripts over 52
+modules, disjoint from `native_decide`. Its cost is not uniform -- 46 of the
+165 land on `[propext]` alone -- and the outcome turns on goal shape, not
+width: `(x &&& y) = (y &&& x)` over `BitVec 64` pulls in all four axioms
+while `x + y = y + x` over the same type pulls in one. `Classical.choice`
+reaches 274 declarations, 139 of them through `bv_decide` and exactly one
+through `native_decide`; none of the 274 mentions `Classical`.
+
+Escaping evaluation is not on the menu. `decide` -- kernel reduction, no
+`ofReduceBool` -- exhausts the heartbeat budget on a `BitVec 8` identity at
+widths 8, 12 and 16 alike and then reports `sorryAx`. Where it does finish,
+and for `omega`, the footprint is `[propext, Quot.sound]`.
+
+None of this becomes a published figure. Re-deriving it needs a `lake env
+lean` run per theorem-bearing environment -- a greedy transitive-import
+cover of the 183 theorem-declaring modules is 105 environments -- so it is a
+gate obligation the measurement does not buy, and 488 stays the number.
+
+What did change is the paper's trusted-base paragraph, which exempted
+handler compositions, value and flag identities, and width-narrowing steps
+from evaluation. Composition is exempt; the rest are not. It now names
+`bv_decide` as a second evaluation route and cites the heartbeat result for
+why no kernel-only discharge exists, and it states nothing countable, so
+both claim checkers pass with no new figure wired to them.
+Census 427 -> 428.
 
 ### Step 0556 - the column-zero blind
 spot in the theorem counter

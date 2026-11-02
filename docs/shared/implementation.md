@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0557 read axiom footprints off the kernel with
+Lean.collectAxioms (306 module environments, joined by
+namespace-qualified name). Tree-wide: four axioms, none
+declared here; 617 counted declarations axiom-free. 723
+(35%) depend on Lean.ofReduceBool -- 488 run
+native_decide, the published figure, but 119 run
+bv_decide (165 scripts, 52 modules, disjoint) and 116
+run neither, inheriting it from a cited lemma over 215
+carrier edges. bv_decide admits its verdict through the
+same axiom, and kernel-only reduction is unavailable:
+decide exhausts the heartbeat budget on BitVec 8.
+Nothing new is published -- re-derivation needs 105
+lake env lean runs -- so 488 stays. The paper's
+trusted-base paragraph was corrected: width-narrowing
+and value/flag identities are not equational (census
+427 -> 428).
+
 Step 0556 found the published theorem count one short
 of the tree (census 426 -> 427). `check_lean_claims.py`
 matched `^theorem`, which under `re.M` means column
