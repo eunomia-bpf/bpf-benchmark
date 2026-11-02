@@ -2612,6 +2612,23 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0565 bound the artifact-family figures and the
+pairing claimed to verify them. Both documents
+publish 138 for the specs, the generated C headers,
+and the generated Lean modules, and the README said
+the 138/138/138 split "is verified as a bijection in
+both directions" -- which was not true: no checker
+compared the families, so equal counts could hide a
+contract rendered on one side only.
+`check_lean_claims.py` now lists all three families,
+normalizes their three spellings of one name, and
+refuses to return unless both set differences are
+empty and no two files in one family collide; five
+claims bind the prose, and the parenthetical's three
+positions are bound separately because a
+backreference form matches nothing instead of
+reporting drift (census 435 -> 436).
+
 Step 0564 bound the last unmeasured half of the
 non-vacuity sentence. It said the dispatch sweep
 "pairs its range over the armed ids with explicit

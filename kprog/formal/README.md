@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 435, and 333 steps
+`build/mut_*.py` files exist, the counter's last value is 436, and 334 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -892,6 +892,10 @@ generator's CamelCase splitting is normalized — `arm64_ldrsx`,
 `x86_callmem`, `x86_cmpop`, `x86_doubleshift`, `x86_doubleshift_arm`, and
 `x86_pushpop` differ from a naive capitalisation only in how an acronym is
 split (`LdrSx`, `CallMem`, ...).
+
+`check_lean_claims.py` now runs that comparison as part of the gate: the three
+counts and the name sets are checked together, and a contract rendered on one
+side only fails the run instead of leaving the figures correct.
 
 The generated headers also bind the hand-written decode at compile time:
 1,051 `_Static_assert`s tie the simulator's `X86_OP_*` / `ARM64_*` constants to
@@ -7575,6 +7579,35 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0565 - the artifact-family figure was published,
+and the pairing that verifies it did not exist
+
+Both documents publish 138 as the size of the generated-artifact families: the
+section opens by putting "138 specifications" beside "138 C headers", and later
+says "from 138 shared specifications"; the README states "(138/138/138)".
+Neither figure was checked by anything --
+`check_macro_hygiene.py` counts the headers it scans and `mutate_contracts.py`
+counts the specs it guards, but no checker compared the families to each other
+or bound either document's prose.
+
+The README was worse than stale: it claimed the pairing "is verified as a
+bijection in both directions rather than inferred from equal counts", and no
+such verification existed. Equal counts are compatible with a contract rendered
+only in C and a header whose spec was deleted, which is exactly the failure the
+sentence says it excludes.
+
+`check_lean_claims.py` gained `family` and `artifact_families`: it lists
+`*_spec.json`, `generated/*.h`, and `KProgFormal/Generated*.lean`, normalizes
+the names (underscores dropped, case folded, since the families spell one
+contract three ways -- `arm64_ldrsx_op`, `arm64_ldrsx_op.h`,
+`GeneratedArm64LdrsxOp.lean`), and refuses to return unless both symmetric
+differences are empty and no two files inside one family normalize together.
+Five claims now bind both documents, including the three positions of the
+parenthetical -- bound separately, because a `\1`-backreference form silently
+matches nothing when one number drifts instead of reporting it.
+
+The tree passes: 138/138/138 with empty differences. Census 435 -> 436.
 
 ### Step 0564 - the dispatch-sweep clause was singular,
 and three theorems satisfied it

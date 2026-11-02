@@ -255,8 +255,57 @@ def flat(text):
     return re.sub(r"\s+", " ", text)
 
 
+def family(root, pattern, prefix, suffix):
+    """The contract names one generated-artifact family carries.
+
+    The three families spell the same contract three ways -- `arm64_ldrsx_op`
+    in the spec, `arm64_ldrsx_op.h` in the header,
+    `GeneratedArm64LdrsxOp.lean` in the module -- so the caller compares them
+    with underscores dropped and case folded away.
+    """
+    return [os.path.basename(p)[len(prefix):-len(suffix)]
+            for p in glob.glob(os.path.join(root, pattern))]
+
+
+def artifact_families(root):
+    """The sizes of the three artifact families, with the pairing verified.
+
+    Both documents publish the figure, and both call the relationship a
+    pairing: the section says the artifacts are "paired one-to-one with
+    [their] specification ... so no specification is rendered on only one
+    side", and the README claims the 138/138/138 split "is verified as a
+    bijection in both directions rather than inferred from equal counts".
+    Neither sentence was checked by anything -- three counts were published and
+    no names were compared, so a contract rendered only in C, or a header with
+    no spec behind it, would have left all three figures correct and both
+    sentences false. Comparing names is what makes the claim a measurement.
+    """
+    fams = {
+        "spec": family(root, "*_spec.json", "", "_spec.json"),
+        "header": family(root, "generated/*.h", "", ".h"),
+        "module": family(root, "KProgFormal/Generated*.lean", "Generated",
+                         ".lean"),
+    }
+    norm = {k: {n.replace("_", "").lower() for n in v}
+            for k, v in fams.items()}
+    for kind, names in fams.items():
+        if len(names) != len(norm[kind]):
+            raise SystemExit("check_lean_claims: two %s files normalize to "
+                             "one name" % kind)
+    for other in ("header", "module"):
+        gap = norm["spec"] ^ norm[other]
+        if gap:
+            raise SystemExit(
+                "check_lean_claims: spec and %s families are not one-to-one "
+                "-- %s" % (other, ", ".join(sorted(gap))))
+    return {k: len(v) for k, v in fams.items()}
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
+    # Both documents publish the artifact-family figure, so the three families
+    # are measured here and their pairing enforced before any figure is read.
+    fams = artifact_families(root)
     mods = glob.glob(os.path.join(root, "KProgFormal", "*.lean"))
     theorems = 0
     native_decide = 0
@@ -364,6 +413,12 @@ def scan_tree(root):
         "refines": refines,
         "refines_decided": refines_decided,
         "quant_cases": quant_cases,
+        # The artifact-family figures the two documents publish: the contract
+        # count, and the two renderings of it. `artifact_families` has already
+        # refused to return unless all three families name the same contracts.
+        "specs": fams["spec"],
+        "headers": fams["header"],
+        "gen_mods": fams["module"],
         # The non-vacuity sentence's three clauses each quote a figure from
         # one of these classes. All three are asserted non-empty there, so an
         # empty list -- the theorems renamed, or a shape restated so the rule
@@ -436,6 +491,16 @@ CLAIMS = [
     # so a sweep that pinned nothing outside its range kept it true.
     (re.compile(r'the (\d+) dispatch sweeps'), ("sweeps",)),
     (re.compile(r'at least (\d+) explicit'), ("sweep_min_checks",)),
+    # The section opens by claiming the artifacts are paired one-to-one with
+    # their specifications, and states the figure three times in one sentence.
+    # All three counts were hand-kept and the pairing was asserted, never
+    # checked: a contract rendered on one side only would have left the numbers
+    # right and the sentence false. `artifact_families` compares the names.
+    (re.compile(r'(\d[\d,]*) specifications into (\d[\d,]*) C headers '
+                r'and (\d[\d,]*)'), ("specs", "headers", "gen_mods")),
+    (re.compile(r'from (\d[\d,]*) shared specifications each rendered'),
+     ("specs",)),
+    (re.compile(r'every one of the (\d[\d,]*) is also consumed'), ("specs",)),
 ]
 
 # The harness README states the same development from the harness side, in plain
@@ -448,6 +513,13 @@ README_CLAIMS = [
     (re.compile(r'(\d+) of the (\d[\d,]*) refinement-named theorems'),
      ("refines_decided", "refines")),
     (re.compile(r'(\d+) Lean modules'), ("modules",)),
+    # The README states the same three family figures and, unlike the section,
+    # asserts the pairing outright ("verified as a bijection in both
+    # directions"). That sentence was describing a check that did not exist;
+    # now it names the one that does.
+    (re.compile(r'(\d[\d,]*) `\*_spec\.json` contracts'), ("specs",)),
+    (re.compile(r'\((\d[\d,]*)/(\d[\d,]*)/(\d[\d,]*)\)'),
+     ("specs", "headers", "gen_mods")),
 ]
 
 
