@@ -2612,6 +2612,36 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0547 fixes how the Lean-count checker decides
+where a theorem ends (census 417 -> 418). Its
+lookahead stopped at `theorem`, `def` and `end` and
+at no other top-level command, so
+`arm64_ccmp_decode_cond_low_bits` -- proved `by
+unfold pack ccmpCond bv_decide` -- absorbed the
+`example ... := by native_decide` that follows it in
+`Arm64CcmpDecode.lean` and was counted as decided.
+Both published figures were one too high: 489 -> 488
+native_decide, 111 -> 110 modules. A proof script is
+always indented and every command starts at column
+zero, so a block now runs to the first unindented
+line; keyword-boundary, line-scan and indentation
+partitioners agree on every theorem in the tree, and
+0 bodies hold a blank line followed by indented text.
+The checker also read only the paper, which is how
+the harness README drifted to 2,055 theorems and 599
+refinement-named under a green report; it now takes
+both documents and a document matching nothing is
+drift. True tree: 2060 theorems, 488 native_decide
+over 110 of 306 modules, 609 refinement-named (20
+decided), 28 quantified by `cases` -- the last now a
+checked claim, measured only when the script also
+uses `cases` as the sentence asserts (Thirty-two ->
+28), excluding `x86_mov_reg_arm_matches_handler`,
+which decides by `refine` plus a lemma. Five
+mutations across the two documents each redden and
+name their file. Gate: rc 0, 248 banners,
+124,531,802 cases.
+
 Step 0546 widens the paper case-count checker
 (census 416 -> 417). It had matched only the
 wrapped `\(N\)-case` form -- 52 sites -- while the

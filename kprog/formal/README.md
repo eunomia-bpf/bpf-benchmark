@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 417, and 315 steps
+`build/mut_*.py` files exist, the counter's last value is 418, and 316 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7550,6 +7550,45 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0547 - a theorem's body ended
+where a keyword said it did
+
+`check_lean_claims.py` read only the paper, so the README's own header
+figures had drifted under a green "all claims current" (2,055 -> 2,060
+theorems, 483 -> 488 native_decide, 599 -> 609 refinement-named). Both
+documents are now targets: `check` takes `[(path, claims)]`, a document
+matching nothing is itself reported as drift, and the dead `--check` flag
+is gone -- it never gated, since the script always hard-failed.
+
+Fixing that exposed a scanner defect. `THEOREM`'s lookahead stopped at
+`theorem`, `def`, and `end` and at no other command, so
+`arm64_ccmp_decode_cond_low_bits` -- proved `by unfold pack ccmpCond
+bv_decide` in `Arm64CcmpDecode.lean` -- absorbed the `example ... := by
+native_decide` beneath it. That one `example` inflated the published
+theorem and module figures by one (489 -> 488, 111 -> 110). A Lean proof
+script is always indented and every top-level command starts at column
+zero, so the block now runs to the first unindented line. Cross-validated
+three ways -- keyword boundary, line-scan boundary, the indentation regex
+-- over every theorem in the tree: identical partitions, and 0 bodies hold
+a blank line followed by indented text, so the stricter blank-line
+handling is equivalent here.
+
+True tree: 2060 theorems, 488 native_decide over 110 of 306 modules, 609
+refinement-named (20 decided), 28 quantified by `cases`. The last figure is
+the section's "universally quantified" sentence, now a checked claim too --
+measured only when the script also uses `cases`, which is what the
+sentence asserts (Thirty-two -> 28). One quantified proof,
+`x86_mov_reg_arm_matches_handler`, splits into `native_decide` plus a lemma
+instead and is excluded; its binder types are `Arm` 12, `Source` 4,
+`X86Alu` 3, `X86Width` 3, `Bool` 3 and one each of `Action`, `Space`,
+`Field`, `Outcome`, `BitVec 32`, so the sentence now names fixed-width
+operand pairs as well as enum constructors. Mutation-tested across both
+documents: a stale theorem count, native_decide count, module count,
+quantified count and banner total each redden and name its file. Gate rc 0,
+248 banners, 124,531,802 cases (124,531,870 counting the 68 helpers); no
+Lean or C file changed, so the rollup is unchanged by construction.
+Census 417 -> 418.
 
 ### Step 0546 - the paper-count check
 read one of four forms
