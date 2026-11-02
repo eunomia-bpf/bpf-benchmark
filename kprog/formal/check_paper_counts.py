@@ -28,6 +28,16 @@ plus a 20,000-case sweep"), not the total any banner prints. And an `N-case`
 adjective on a bare grid states arithmetic -- `1,470-case divide grid` is 2 x 5
 x 7 x 3 x 7 -- so it is read only when the phrase also names a host or oracle.
 
+The section also splits the gate's cases across the simulators and states that
+the split comes from what the gate builds. That too is now measured: each
+banner is traced through its run line to the compile line that built it, and
+the include closure of that translation unit says which simulator root it
+reaches. The four buckets must partition the gate exactly, and the two tempting
+shortcuts are measured rather than asserted: the hosts that reach a simulator
+through a relative include that no -I names, and the hosts that carry an ISA in
+their file name while reaching no simulator. Both counts appear in the section,
+so a shortcut that drifted is reported rather than assumed.
+
 Usage: check_paper_counts.py --section <tex> --log <make check log> [--check]
 """
 import argparse
@@ -81,6 +91,51 @@ AGGREGATES = [(re.compile(r"(?P<n>%s) independent oracle banners" % NUM),
               (re.compile(r"summing to (?P<n>%s) modeled cases" % NUM),
                "modeled cases")]
 
+# A compile line names the source it compiled and the binary it built, which is
+# how a banner is traced back to the translation unit and the include paths
+# that produced it. The whole line is kept, not just the source: the `-I` paths
+# are part of what the unit reaches.
+COMPILE = re.compile(r"^\s*(?:cc|gcc)\b(.*?\b[\w/]+\.c\b.*?)\s+-o\s+"
+                     r"build/(\S+)", re.M)
+RUN = re.compile(r"^\./build/(\S+)$")
+INCLUDE = re.compile(r'^\s*#\s*include\s+"([^"]+)"', re.M)
+ROOTS = ("arm64", "x86")
+# Each bucket's sentence states oracles, cases, and share, so one pattern binds
+# all three: a drift in any of them would leave a sentence that still reads as
+# though it had been measured. The section wraps mid-phrase, so the words are
+# joined with `\s+`. Shares carry one decimal and are floored, as they are
+# computed here.
+PC = r"(?P<p>\d+\.\d)\\%"
+PCT = r"\(" + PC + r"\)"
+ISA = [
+    (re.compile(r"(?P<n>\d+)\s+build\s+against\s+the\s+AArch64\s+headers"
+                r"\s+and\s+carry\s+(?P<c>" + NUM + r")\s+" + PCT), "arm64"),
+    (re.compile(r"(?P<n>\d+)\s+against\s+the\s+x86-64\s+headers\s+and"
+                r"\s+carry\s+(?P<c>" + NUM + r")\s+" + PCT), "x86"),
+    (re.compile(r"(?P<n>\d+)\s+include\s+both\s+simulators\s+in\s+one"
+                r"\s+translation\s+unit\s+and\s+carry\s+(?P<c>" + NUM + r")\s+"
+                + PCT), frozenset(ROOTS)),
+    (re.compile(r"the\s+remaining\s+(?P<n>\d+)\s+\((?P<c>" + NUM + r"),\s+"
+                + PC + r"\)"), frozenset()),
+]
+
+# Reaching a simulator is what the preprocessor does, not what the compile line
+# advertises or the file is called, and both come apart. The section publishes
+# how far, so a shortcut that drifted is reported, not assumed.
+EXTRA = [
+    ("quiet", re.compile(r"(?P<n>\d+)\s+hosts?\s+reach\s+a\s+simulator"
+                         r"\s+their\s+compile\s+line\s+does\s+not\s+name")),
+    ("misnamed", re.compile(r"(?P<n>\d+)\s+hosts?\s+carry\s+an\s+ISA\s+in"
+                            r"\s+their\s+name\s+and\s+reach\s+no"
+                            r"\s+simulator")),
+]
+WHAT = {"quiet": "reach a simulator no -I names",
+        "misnamed": "carry an ISA in their name and reach none"}
+
+BUCKET = {name: (frozenset((name,)) if isinstance(name, str) else name)
+          for name, _ in [(n, 0) for _, n in ISA]}
+LABEL = {frozenset(ROOTS): "both-ISA", frozenset(): "header-only"}
+
 
 def masked(path: pathlib.Path) -> str:
     """The section with quoted program output blanked out."""
@@ -105,6 +160,87 @@ def read_log(path: pathlib.Path) -> tuple[set[int], int, int]:
             banners += 1
             modeled += sum(parts) if summed else parts[0]
     return counts, banners, modeled
+
+
+def sim_split(path: pathlib.Path) -> tuple[dict[frozenset, tuple[int, int]],
+                                           dict[str, int]]:
+    """Return ({roots an oracle reaches: (banners, cases)}, stats).
+
+    `stats["quiet"]` counts hosts reaching a simulator no `-I` flag names, and
+    `stats["misnamed"]` hosts carrying an ISA in their name that reach neither
+    simulator. Both numbers say how far the two tempting shortcuts -- the
+    compiler flags and the file name -- are from what is actually built.
+
+    A banner is attributed through the run line that printed it to the compile
+    line that built it, so the classification reads the same translation unit
+    the compiler did. An include is resolved against the unit's own directory
+    and the compile line's `-I` paths, exactly as the preprocessor would, and a
+    header reaches a simulator when its own path is under that root or some
+    header it pulls in is. Every banner must resolve: a bucket that leaves a
+    banner unattributed would silently under-report, which is the failure this
+    whole measurement exists to prevent.
+    """
+    text = path.read_text(errors="replace")
+    lines = text.splitlines()
+    built: dict[str, str] = {}
+    for flags, binary in COMPILE.findall(text):
+        built[binary] = flags
+    reached: dict[str, frozenset] = {}
+
+    def roots(unit: pathlib.Path, dirs: list[pathlib.Path]) -> frozenset:
+        key = str(unit)
+        if key in reached:
+            return reached[key]
+        seen, todo, out = {key}, [unit], set()
+        while todo:
+            head = todo.pop()
+            out |= {r for r in head.parts if r in ROOTS}
+            for name in INCLUDE.findall(head.read_text(errors="replace")):
+                for base in [head.parent, *dirs]:
+                    hit = (base / name).resolve()
+                    if hit.exists():
+                        if str(hit) not in seen:
+                            seen.add(str(hit))
+                            todo.append(hit)
+                        break
+        reached[key] = frozenset(out)
+        return reached[key]
+
+    current, missing, buckets = None, [], {}
+    stats = {"quiet": 0, "misnamed": 0}
+    for line in lines:
+        run = RUN.match(line)
+        if run:
+            current = run.group(1)
+            continue
+        for rx, summed in BANNER:
+            hit = rx.search(line)
+            if not hit:
+                continue
+            parts = [int(x.replace(",", "")) for x in hit.groups()]
+            cases = sum(parts) if summed else parts[0]
+            if current not in built:
+                missing.append(current)
+                break
+            cmd = built[current]
+            dirs = [pathlib.Path(d) for d in re.findall(r"-I(\S+)", cmd)]
+            unit = pathlib.Path(re.search(r"([\w/]+\.c)", cmd).group(1))
+            got = roots(unit, dirs)
+            # A root reached through a relative include names no `-I` flag, so
+            # the compiler's own command line understates what is built.
+            flags = re.findall(r"-I(\S+)", cmd)
+            named = {r for d in flags for r in pathlib.Path(d).parts
+                     if r in ROOTS}
+            stats["quiet"] += 1 if got - named else 0
+            host = {r for r in current.lower().split("_") if r in ROOTS}
+            stats["misnamed"] += 1 if host and not got else 0
+            n, c = buckets.get(got, (0, 0))
+            buckets[got] = (n + 1, c + cases)
+            break
+    if missing:
+        raise SystemExit("check_paper_counts: %d banner(s) with no compile "
+                         "line in the log -- %s" % (len(missing), missing[0]))
+    return buckets, stats
 
 
 def paper_counts(text: str) -> dict[int, int]:
@@ -152,13 +288,53 @@ def main() -> None:
                 problems.append(f"claim {value:,} {what}; the log has "
                                 f"{totals[what]:,}")
 
+    # The split is a partition, so it has to cover the gate exactly: a rule
+    # that silently dropped a host would shrink a bucket and still print.
+    buckets, stats = sim_split(pathlib.Path(args.log))
+    if sum(n for n, _ in buckets.values()) != banners:
+        raise SystemExit("check_paper_counts: the simulator split covers %d "
+                         "banners, the log has %d"
+                         % (sum(n for n, _ in buckets.values()), banners))
+    for what, rx in EXTRA:
+        if not rx.search(text):
+            problems.append(f"the claim about {what} hosts is absent, so it "
+                            "went unread")
+        for match in rx.finditer(text):
+            got = int(match.group("n"))
+            if got != stats[what]:
+                problems.append(f"claim {got} hosts {WHAT[what]}; the log "
+                                f"has {stats[what]}")
+    for rx, name in ISA:
+        if not rx.search(text):
+            problems.append(f"the {LABEL.get(name, name)} simulator sentence "
+                            "is absent, so its figures went unread")
+        key = BUCKET[name]
+        if key not in buckets:
+            problems.append(f"the {LABEL.get(name, name)} bucket has no "
+                            "oracle in the log")
+            continue
+        n, c = buckets[key]
+        for match in rx.finditer(text):
+            got = (int(match.group("n")),
+                   int(re.sub(r"[{},\\]", "", match.group("c"))),
+                   float(match.group("p")))
+            # Shares are floored, never rounded, and are stated to one decimal.
+            want = (n, c, (1000 * c // modeled) / 10)
+            if got != want:
+                problems.append(
+                    f"claim {got[0]} {LABEL.get(name, name)} oracles, "
+                    f"{got[1]:,} cases, {got[2]}%; the log has {want[0]}, "
+                    f"{want[1]:,}, {want[2]:.1f}%")
+
     for line in problems:
         print(line)
     if args.check and problems:
         raise SystemExit(1)
     if not problems:
-        print(f"all {len(claimed)} claimed case counts, and both gate totals, "
-              "match the log")
+        print(f"all {len(claimed)} claimed case counts, both gate totals, "
+              f"and the {len(ISA)}-way simulator split over "
+              f"{sum(n for n, _ in buckets.values())} banners match the "
+              "log")
 
 
 if __name__ == "__main__":

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 439, and 337 steps
+`build/mut_*.py` files exist, the counter's last value is 440, and 338 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,42 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0569 - a split said to be measured from the log had nine
+stale figures and a bucket missing from its own partition
+
+The section said the gate's cases were "split evenly across the two ISAs" and
+that the split was "derived from each oracle's own compile command in the gate
+log". Nothing read it, and all nine figures — three oracle counts, three case
+totals, three percentages — had drifted. They were also not a partition: the
+three buckets covered 229 of the 248 banners and 123,463,937 of the 124,531,802
+cases, while the sentence called the last one "the remaining".
+
+`sim_split` now derives it. A banner is attributed through the `./build/<bin>`
+line that ran it to the compile line that built it, and the translation unit's
+include closure — resolved against its own directory and the line's `-I` paths,
+as the preprocessor resolves them — says which simulator root it reaches.
+Closure, not flags, because the two disagree: `test_x86_cc_decode_host` and
+`test_arm64_cc_decode_host` pull a simulator in through a relative `#include`
+that no `-I` names, and `value_route_host` passes `-I../x86` while its closure
+reaches only `arm64`. Names are worse than flags: 122 hosts carry an ISA in
+their file name and reach no simulator, since an oracle can check a generated
+macro without driving the architecture behind it.
+
+The partition is what makes the measurement trustworthy. The first version kept
+the source path from the compile line and dropped the rest of it, so the `-I`
+list was empty and the split came out 47/59/140/2 — plausible, internally
+consistent, and wrong. Requiring the buckets to cover every banner and sum to
+the gate's own case total is what turned that into a failure instead of a
+sentence. The measured split is 58 AArch64 / 62 x86-64 / 3 driving both
+simulators in one unit / 125 neither, covering all 248 banners and exactly
+124,531,802 cases.
+
+Shares are floored, never rounded, and stated to one decimal, so the four add to
+99.8% and the sentence says so rather than implying they sum to 100. Each
+bucket's sentence must also be present: a reworded sentence that matched nothing
+would have passed vacuously, which is the same silent-clean-report failure this
+checker was written against. Census 439 -> 440.
 
 ### Step 0568 - a textual count read two comments as assertions,
 and called every pin a tie to the decode

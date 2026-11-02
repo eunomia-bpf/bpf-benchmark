@@ -2610,6 +2610,16 @@ writing to the file. The gate result quoted
 above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
+
+Step 0569 measured the case split the section said it
+had measured. Nine figures were stale and the buckets
+were no partition — they covered 229 of 248 banners.
+Attribution now runs banner -> run line -> compile
+line -> include closure, so flags and file names are
+shortcuts with measured error (3, 122), and the four
+buckets are required to cover every banner and sum to
+the gate total (census 439 -> 440).
+
 Step 0568 corrected and bound the compile-time
 figure. Both documents claimed the generated headers
 carry 1,051 assertions tying the hand-written decode
