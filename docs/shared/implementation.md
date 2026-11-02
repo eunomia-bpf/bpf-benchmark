@@ -2620,12 +2620,15 @@ invisible to the tool that derives the figure: 2061
 proved declarations, not 2060. The derivation was
 fixed, not the prose -- `THEOREM` now tolerates a
 leading `@[...]`, and `signature()` anchors on the name
-rather than the block start (verified identical for all
-2060 old blocks). Scope measured: exactly one
-attribute-prefixed theorem in 306 modules. Nothing else
-moves -- it closes `by decide` and its name has no
-"refine", so native_decide stays 488, share 23%,
-refines 609/20, quant-cases 28. Live claims in README
+rather than the block start (identical for all 2060 old
+blocks). Scope measured: exactly one attribute-prefixed
+theorem in 306 modules. Nothing else moves -- it closes
+`by decide`, so native_decide stays 488, share 23%,
+refines 609/20, quant-cases 28. Completeness was
+checked against the compiler: dumping every module
+environment for `thmInfo` constants and dropping the
+generated families (`eq_N`, `_ind`, `.inj`, `.injEq`)
+leaves exactly the counted set. Live claims in README
 and 4-safety.tex synced; historical entries unchanged.
 
 Step 0555 audited every hypothesis the tree can hold

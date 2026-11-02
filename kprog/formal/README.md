@@ -7609,6 +7609,13 @@ decided, and quantified-by-cases stays 28. The floored share is still 23%, now
 the figure that was true when written. A count that cannot see one declaration
 is not wrong by one -- it is wrong by however many the anchor hides, and only
 the tree gets to say.
+
+The tree was asked directly. Every module environment was dumped for its
+`thmInfo` constants and the auto-generated families (`eq_N`, `_ind`, `.inj`,
+`.injEq`, `ofNat_toCtorIdx`) removed: what remains is the checker's set, with no
+hand-written theorem left uncounted. The `PROOF` filter drops nothing now either
+-- no docstring line matches `theorem` any more, and no name contains an
+apostrophe -- so 2061 is the whole set, not the visible part of it.
 Census 426 -> 427.
 
 ### Step 0555 - the empty result that
