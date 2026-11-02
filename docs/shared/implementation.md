@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0561 removed a contradiction the correction left
+behind. One sentence says 138 shared specifications;
+the fixed sentence twelve lines below says 150 shared
+modules. Both are true and neither is wrong, but
+nothing said why, and a reader holding both numbers
+cannot tell a second bucket from a counting error. The
+reason is the rule step 0560 pinned: a module counts
+toward an architecture only when its file name starts
+with that prefix, so the shared bucket is the 138
+generated specifications plus twelve hand-written
+modules that are shared by construction -- ten
+CrossIsa*, the control-flow model that imports both
+emitters, and the tag-erasure model. The twelve come
+from the checker's own prefix test, not a hand-tally,
+and the clause adds no digit the checkers do not
+already bind, so no gate figure moved (census 431 ->
+432).
+
 Step 0560 bound the section's last hand-kept figure.
 check_lean_claims read the theorem, module, and
 native_decide counts, and check_paper_counts every

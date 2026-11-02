@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 431, and 329 steps
+`build/mut_*.py` files exist, the counter's last value is 432, and 330 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0561 - why 150 shared modules and 138 shared
+specifications are both right
+
+Correcting the split's digits left a contradiction in the same subsection. One
+sentence says the prototype has 138 shared specifications; the corrected
+sentence twelve lines below says 150 shared modules. Both are true and neither
+is wrong, but nothing said why they differ, and a reader holding the two numbers
+has no way to tell a second bucket from a counting error.
+
+The reason is the rule step 0560 pinned. A module counts toward an architecture
+only when its own file name starts with that prefix, so everything else falls in
+the shared bucket: the 138 generated specifications, plus twelve hand-written
+modules that are shared by construction -- eleven cross-ISA compositions and the
+tag-erasure model. That is the whole gap, and the sentence now says so in one
+clause, spelling the twelve out rather than leaving them to be inferred.
+
+Two details were checked before writing it. The twelve are named by the same
+prefix test the checker uses, so the count is the rule's output and not a
+hand-tally; and the added clause states no digit the checkers do not already
+bind, so no gate figure moved -- the case counts and both gate totals still
+match the log, and the paper compiles clean.  Census 431 -> 432.
 
 ### Step 0560 - the architecture split was stale, and
 nothing read it
