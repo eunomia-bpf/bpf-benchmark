@@ -2612,6 +2612,21 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0555 audited every hypothesis the tree can hold
+(census 425 -> 426). 156 propositional binders over 110
+theorems: delete each, recompile, read the exit code --
+145 load-bearing, 11 free, and the 11 are exactly step
+0554's deliberate keeps, so its cut list was complete
+and nothing changed. Two oracle bugs nearly hid that.
+`lake env lean` writes errors to stdout, so a stderr
+check calls everything free; and searching for a
+shorter theorem name lands inside a longer one -- three
+rows of `arm64_stack_arena_window_implies_tag_slot`
+were probed in the `*_any_capacity` twin, which shares
+their binder text. Re-anchored, all three are
+load-bearing. Docs only; the gate is unchanged from
+step 0554.
+
 Step 0554 removed six numeric hypotheses that no proof
 needed (census 424 -> 425). Textual search cannot
 answer this: of 46 hypotheses a proof body never

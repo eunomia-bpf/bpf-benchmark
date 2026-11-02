@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 425, and 323 steps
+`build/mut_*.py` files exist, the counter's last value is 426, and 324 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,35 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0555 - the empty result that
+closed the audit step 0554 began
+
+Step 0554 cut the six hypotheses it could see. This one asked whether any it
+could not see were still there, by enumerating every proposition binder in
+the tree and deleting them one at a time. 2411 binders sit on the tree's
+2060 theorems; 156 of them are hypotheses rather than values, on 110
+theorems in 54 modules. Enumeration cannot be textual either -- the first
+pass filed `windowFits index width capacity = true` under data because that
+signature opened with `(index`. Binders are always bracketed, so the first
+depth-0 `:` after the theorem name is what divides signature from statement.
+
+The oracle for each probe has to be the exit status. `lake env lean` writes
+errors to *stdout*, so a check on `stderr` called all 36 binders of the
+first batch free. The second trap is name sharing: `Arm64StackArena.lean`
+holds both `arm64_stack_arena_window_implies_tag_slot` and the
+`*_any_capacity` variant, whose signatures carry the same binder text, and a
+plain search for the shorter name lands inside the longer theorem -- three
+rows had been deleted in the wrong signature. Re-anchored to
+`theorem ... (index`, all three are load-bearing.
+
+145 load-bearing, 11 free -- and the 11 are exactly what step 0554 chose to
+keep: the six Extrev narrowing fits, `hb : 1 ≤ bits`, and the two
+`words_tight` bounds, plus two `m : Mnemonic` rows that are the same artifact
+as `high : BitVec 64`, since deleting a value binder leaves an auto-bound
+implicit `m` and the statement never changed. Nothing to cut, which is the
+finding: step 0554's list was complete, so the tree is unchanged and the
+audit needs no gate re-run. Census 425 -> 426.
 
 ### Step 0554 - a hypothesis that
 closed the case it should have proved
