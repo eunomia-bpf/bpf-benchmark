@@ -11,7 +11,7 @@ What the gate currently covers, measured from one full `make check` run:
 248 passing `cross-check: OK` oracle banners summing to 124,531,802 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
-compiling transitively from the gate's roots and proving 2,060 theorems with
+compiling transitively from the gate's roots and proving 2,061 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 488 of
@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 426, and 324 steps
+`build/mut_*.py` files exist, the counter's last value is 427, and 325 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7576,17 +7576,57 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0556 - the column-zero blind
+spot in the theorem counter
+
+The audit above enumerated binders with a regex, and a regex inherits every
+assumption it encodes. `check_lean_claims.py` matched `^theorem`, and under
+`re.M` that anchor means column zero -- so `@[simp] theorem arm64MulToNatMask32`
+(Arm64Mul.lean), which opens with an attribute, was invisible to the tool that
+publishes the theorem count. The tree has 2061 proved declarations; both
+documents said 2060, and the checker reported `all claims current` because it
+compared them against its own blind count.
+
+The fix belongs in the derivation, not the prose: the published figure is
+computed, so a hand-edited number would drift again the next time a theorem
+moves. `THEOREM` now tolerates a leading `@[...]`. Scope was measured first:
+exactly one attribute-prefixed theorem in 306 modules, none with the attribute
+on its own line, none `private`/`noncomputable`/`protected`, so this is the
+whole of the miss rather than its first symptom.
+
+`signature()` carried the same assumption one layer down. It sliced binders from
+the block's start using `len("theorem " + name)`, correct only when the block
+starts at `theorem`; behind an attribute it returns text offset by the
+attribute's length. Re-anchored to where the name actually occurs and compared
+with the previous implementation over every block: identical for all 2060, and
+empty for the newly visible one, which takes no binders.
+
+Nothing else moved, measured rather than assumed: the theorem closes `by
+decide`, not `native_decide`, and its name carries no "refine", so
+`native_decide` stays 488 over 110 modules, refinement-named stays 609 with 20
+decided, and quantified-by-cases stays 28. The floored share is still 23%, now
+488/2061. Live claims are synced in both documents; historical step entries keep
+the figure that was true when written. A count that cannot see one declaration
+is not wrong by one -- it is wrong by however many the anchor hides, and only
+the tree gets to say.
+Census 426 -> 427.
+
 ### Step 0555 - the empty result that
 closed the audit step 0554 began
 
 Step 0554 cut the six hypotheses it could see. This one asked whether any it
 could not see were still there, by enumerating every binder in the tree and
-deleting them one at a time. 2411 binders sit on the tree's 2060 theorems;
+deleting them one at a time. 2411 binders sit on the tree's 2061 theorems;
 the textual filter keeps 156 that look like hypotheses, on 110 theorems in
 54 modules. Enumeration cannot be textual either -- the first pass filed
 `windowFits index width capacity = true` under data because that signature
 opened with `(index`. Binders are always bracketed, so the first depth-0 `:`
 after the theorem name is what divides signature from statement.
+
+The count of theorems here reads 2061, one above what the enumerator printed:
+it shared the claim checker's column-0 `theorem` anchor and so missed
+`@[simp] theorem arm64MulToNatMask32` (step 0556). It takes no binders, so
+the 2411 and the sweep's verdicts are unaffected.
 
 The oracle for each probe has to be the exit status. `lake env lean` writes
 errors to *stdout*, so a check on `stderr` called all 36 binders of the

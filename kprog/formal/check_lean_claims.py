@@ -35,8 +35,12 @@ import sys
 # example and was miscounted as `native_decide` although its own script was
 # `bv_decide`: `arm64_ccmp_decode_cond_low_bits` inflated both the theorem and
 # the module figures by one.
-
-THEOREM = re.compile(r'^theorem (\w+)[^\n]*(?:\n[ \t].*)*', re.M)
+# An attribute sits on the same line as its theorem, so the pattern accepts a
+# leading `@[...]`: `@[simp] theorem arm64MulToNatMask32` is a proved
+# declaration like any other, and anchoring on a bare column-0 `theorem` left
+# the published count one short of the tree.
+THEOREM = re.compile(r'^(?:@\[[^\]]*\]\s*)?theorem (\w+)'
+                     r'[^\n]*(?:\n[ \t].*)*', re.M)
 
 # A docstring line can itself begin with `theorem` when prose wraps mid-sentence,
 # and the pattern above matches at any line start, so the raw count can exceed
@@ -51,17 +55,20 @@ def signature(block, name):
 
     Splitting on the first `:` would stop at the first binder's own colon, so the
     scan tracks bracket depth and cuts at the depth-zero colon that separates the
-    signature from the statement.
+    signature from the statement. The name, not the block's start, anchors
+    the scan: a leading attribute would shift every binder by its length.
     """
     head = block[:block.find(":=")]
+    start = head.index("theorem " + name) + len("theorem " + name)
     depth = 0
-    for i, char in enumerate(head):
+    for i in range(start + 1, len(head)):
+        char = head[i]
         if char in "([":
             depth += 1
         elif char in ")]":
             depth -= 1
         elif char == ":" and depth == 0:
-            return head[len("theorem " + name) + 1:i]
+            return head[start + 1:i]
     return ""
 
 
@@ -180,8 +187,8 @@ def number(text):
 def check(targets, root):
     """Check each (path, claims) pair; a document that matches nothing is drift."""
     actual = scan_tree(root)
-    # The share is floored, never rounded: both documents say 23% for 488/2060
-    # (23.7%), and a floored share cannot overstate how much rests on the
+    # The share is floored, never rounded: both documents say 23% for 488/2061
+    # (23.6%), and a floored share cannot overstate how much rests on the
     # compiler. Rounding here would turn a correct 23% into a stale claim.
     actual["share"] = 100 * actual["native_decide"] // actual["theorems"]
     bad = []

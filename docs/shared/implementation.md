@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0556 found the published theorem count one short
+of the tree (census 426 -> 427). `check_lean_claims.py`
+matched `^theorem`, which under `re.M` means column
+zero, so `@[simp] theorem arm64MulToNatMask32` was
+invisible to the tool that derives the figure: 2061
+proved declarations, not 2060. The derivation was
+fixed, not the prose -- `THEOREM` now tolerates a
+leading `@[...]`, and `signature()` anchors on the name
+rather than the block start (verified identical for all
+2060 old blocks). Scope measured: exactly one
+attribute-prefixed theorem in 306 modules. Nothing else
+moves -- it closes `by decide` and its name has no
+"refine", so native_decide stays 488, share 23%,
+refines 609/20, quant-cases 28. Live claims in README
+and 4-safety.tex synced; historical entries unchanged.
+
 Step 0555 audited every hypothesis the tree can hold
 (census 425 -> 426). A textual filter filed 156 of 2411
 binders as hypotheses; deleting each and recompiling
