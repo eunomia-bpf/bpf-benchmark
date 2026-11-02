@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 420, and 318 steps
+`build/mut_*.py` files exist, the counter's last value is 421, and 319 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -402,7 +402,12 @@ sources, collects the contract macros reached from inside each `SIM_L_*` body,
 and reports every host calling one without calling any `SIM_L_*` macro itself.
 Four hosts match; each is recorded with the reason it is acceptable and which
 host does cover its composition, so a new one fails the gate with that
-instruction rather than being re-audited by hand.
+instruction rather than being re-audited by hand. The scan covers every
+`*host.c`, not `test_*` and `cross_*` -- a third naming would have been
+invisible, as `width_fallback_host.c` already is. A missing simulator header,
+or one stating no composition, is a finding rather than a skip, and so is a
+recorded exception that no longer applies: an excuse survives only while the
+host still needs it.
 
 The same wide-arithmetic oracle applies to the x86 multiply-overflow flags,
 which decide CF/OF from magnitudes rather than by multiplying: `A_ABS != 0 &&
@@ -7566,6 +7571,35 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0550 - a scan that only looked where
+it expected hosts to be
+
+`check_oracle_composition.py` globbed `test_*host.c` and `cross_*host.c`. A
+host named any other way was invisible, and one already is:
+`width_fallback_host.c` includes `x86_sim_local_bpf.h` and calls three
+`KPROG_X86_WIDTH_*` contracts. It now scans every `*host.c`. That host is not a
+new finding -- those three contracts are not reached through a `SIM_L_*` body,
+so it stays out on its own merits -- but the class it belongs to was unscanned.
+
+Three silent-skip paths became findings. A missing simulator header was
+`continue`d: rename one and the other architecture's contracts became the whole
+composed set, with the check passing over half the tree. A header yielding no
+`SIM_L_*` definition was indistinguishable from one composing no contract, so
+emptying `x86_sim_local_bpf.h` left rc 0. And an `ACCEPTED` entry was never
+re-checked -- a host could start driving the composition itself or stop calling
+a composed contract, and its excuse kept printing as if it still applied.
+Exceptions are now measured against the findings, and a stale one fails. The
+reported count is the number of hosts measured, not the number the source
+lists.
+
+The `INCLUDES_SIM` filter was kept after measuring its cost: 110 hosts call a
+composed contract with no simulator header at all. Those are the pure
+generated-contract oracles, correct by construction and with no composition to
+drive, so dropping the filter would have raised 110 false findings. Battery:
+11 mutations caught, 3 populations accepted. Gate rc 0, 248 banners,
+124,531,802 cases; no Lean or C file changed.
+Census 420 -> 421.
 
 ### Step 0549 - a set union could not tell
 an agreeing side from an absent one

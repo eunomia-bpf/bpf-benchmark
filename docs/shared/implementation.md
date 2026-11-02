@@ -2612,6 +2612,34 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0550 widens the oracle-composition checker
+(census 420 -> 421). It globbed `test_*host.c`
+and `cross_*host.c`, so a host named any other way
+was invisible; `width_fallback_host.c` includes
+`x86_sim_local_bpf.h` and calls three
+`KPROG_X86_WIDTH_*` contracts and had never been
+looked at. It scans every `*host.c` now. That host
+is not a new finding -- those contracts are not
+reached through a `SIM_L_*` body -- but the class
+was unscanned. Three silent skips became findings:
+a missing simulator header was `continue`d, so a
+rename left the other architecture's contracts as
+the whole composed set; a header yielding no
+`SIM_L_*` definition looked identical to one
+composing no contract, so emptying
+`x86_sim_local_bpf.h` left rc 0; and an `ACCEPTED`
+entry was never re-checked, so an excuse kept
+printing after the host stopped needing it.
+Exceptions are measured against the findings and a
+stale one fails; the reported count is hosts
+measured, not entries listed. `INCLUDES_SIM` was
+kept after measuring its cost: 110 hosts call a
+composed contract with no simulator header, and
+those pure-contract oracles have no composition to
+drive. Battery: 11 mutations caught, 3 populations
+accepted. Gate: rc 0, 248 banners, 124,531,802
+cases.
+
 Step 0549 repairs the lookup-ambiguity checker
 (census 419 -> 420). It compared a set union of
 every `.bytes().take(N)` in the two encoders
