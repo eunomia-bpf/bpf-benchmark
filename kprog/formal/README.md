@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 422, and 320 steps
+`build/mut_*.py` files exist, the counter's last value is 423, and 321 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7571,6 +7571,38 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0552 - a tie drawn through
+the artifact, not the name
+
+`check_dispatch_model.py` compared a family's C spelling to its Lean spelling,
+and the two do not correspond. The chain calls the shift family `SHIFT_OP`; the
+generated table calls it `arm64DispShiftOps`. No amount of stripping `disp_` or
+underscores bridges `shift_op` to `shift`, so a family the proofs do model was
+reported absent -- and `def arm64DispatchOps`, the aggregate opcode list, was
+read as a family named `atch`. Both errors were there from the beginning: the
+entry that added this guard, `f7b8a20f0`, lists SHIFT among the twelve. What
+the script published -- 35 chain predicates, 25 modelled, twelve not -- should
+have been 35, 24, eleven.
+
+The tie is now the generator's own artifact. Each `*_dispatch_*_spec.json`
+binds a C macro to the family name the generator uses: the spec pairs
+`KPROG_ARM64_SHIFT_OP_HANDLED` with `shiftOp`, so a family counts as
+modelled only when three artifacts agree: the spec binds the macro, a
+`Generated*Dispatch*.lean` module defines `<name>Handled`, and a proof applies
+it to `op`. That is exact set membership with no name derived from a name, and
+it holds symmetrically today, which makes the reverse direction cheap: a spec
+macro the chain stopped branching on, or a generated predicate no spec binds,
+is a finding now rather than a silent drift.
+
+The recorded excuse is measured too. Each entry named its route host in prose
+no code ever opened, so a renamed file or a dropped `Makefile` line would have
+left the claim standing. An entry must now name a file that exists, that the
+recipe runs, and that calls `ARM64_SIM_L_EXEC`, over a family still unmodelled;
+the entry-context counts read gate-run hosts only. Eighteen probes, 17 caught.
+The one accepted is a single XDP host flipping to SKB, which leaves 28 driving
+XDP and asks nothing of any particular file.
+Census 422 -> 423.
 
 ### Step 0551 - a figure checked
 in one place but stated in two

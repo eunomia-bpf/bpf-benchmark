@@ -2612,6 +2612,22 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0552 redrew the dispatch guard's tie through an
+artifact instead of a name (census 422 -> 423). The
+old check matched a family's C spelling to its Lean
+spelling, which cannot work: the chain says
+`SHIFT_OP`, the table says `arm64DispShiftOps`, and
+`def arm64DispatchOps` was read as a family named
+`atch`. The published 35 / 25 / twelve was really
+35 / 24 / eleven. Each `*_dispatch_*_spec.json` binds
+a macro to a family name, so "modelled" now means the
+spec binds the macro, `Generated*Dispatch*.lean`
+defines `<name>Handled`, and a proof applies it to
+`op` -- checked both ways. The route-host excuse, once
+prose nothing opened, is measured: the file must exist,
+be run by the recipe, and call `ARM64_SIM_L_EXEC`.
+Gate unchanged: rc 0, 248 banners, 124,531,802 cases.
+
 Step 0551 checks each README figure where it
 is stated, not just the first time
 (census 421 -> 422). The battery count appears
