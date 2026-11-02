@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0562 corrected a stale figure the paper's
+non-vacuity sentence carried and gave the class a
+rule. The tree states 45 table-length theorems, not
+nineteen: nineteen had been the `*_codes_length`
+subfamily, and the `*_names_length` and
+dispatch-table theorems arrived later with nothing
+reading the number. Name matching fails both ways, so
+membership is the statement `<list>.length = <name>`
+with the name resolving to a generated Nat literal
+through that module's imports -- per module, since
+`armCount` is 2 in one spec and 4 in another. "No
+generated count is zero" was unfalsifiable, so the
+sentence now quotes the span 2 to 31 and an empty
+table fails a check. Count, range, and rule live in
+check_lean_claims, whose docstring already covers
+that section, so the gate re-runs for the checker
+(census 432 -> 433).
+
 Step 0561 removed a contradiction the correction left
 behind. One sentence says 138 shared specifications;
 the fixed sentence twelve lines below says 150 shared

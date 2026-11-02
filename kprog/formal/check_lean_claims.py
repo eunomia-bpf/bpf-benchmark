@@ -49,6 +49,11 @@ THEOREM = re.compile(r'^(?:@\[[^\]]*\]\s*)?theorem (\w+)'
 # the published count honest -- it had drifted by one before this check existed.
 PROOF = ":="
 
+# The table-length shape: a statement whose whole proposition is one list's
+# length equal to a name. Anchoring at the end of the statement keeps an
+# implication -- which only assumes a length -- out of the class.
+TABLE_LENGTH = re.compile(r"(\w+)\.length = (\w+)\s*$")
+
 
 def signature(block, name):
     """The binders between `theorem <name>` and the statement's colon.
@@ -86,6 +91,27 @@ def refinement_named(name):
     """
     return "refine" in name.lower()
 
+def table_length_count(block, imports, gen_counts):
+    """The generated count a table-length theorem asserts, else `None`.
+
+    Membership is decided by the statement, never by the name: `*_length`
+    matches 49 theorems, four of which assert no length equality at all (their
+    right-hand side is a function of a width), and renaming would silently move
+    the class either way. The name on the right must resolve to a generated
+    `def <name> : Nat := <digits>` through the module's own imports, which is
+    what makes the figure a property of the tree rather than of a string:
+    `armCount` is 2 in one generated specification and 4 in another, so the
+    resolution is per module and the value reported is the smaller of the ones
+    the module can actually see.
+    """
+    statement = block[:block.find(PROOF)].strip()
+    shape = TABLE_LENGTH.search(statement)
+    if shape is None:
+        return None
+    values = [gen_counts[imp][shape.group(2)] for imp in imports
+              if shape.group(2) in gen_counts.get(imp, ())]
+    return min(values) if values else None
+
 
 def flat(text):
     """Collapse whitespace so a claim wrapped across source lines still matches."""
@@ -109,6 +135,21 @@ def scan_tree(root):
     # sum to the published module and theorem totals.
     arch_mods = {"arm64": 0, "x86": 0, "shared": 0}
     arch_thms = {"arm64": 0, "x86": 0, "shared": 0}
+    # The section also claims its table-length theorems carry content. The
+    # rule lives in table_length_count; recording the count each theorem
+    # asserts, not just how many there are, makes the sentence's other half --
+    # no count is zero -- a measurement rather than an assertion.
+    imports, gen_counts = {}, {}
+    for path in mods:
+        stem = os.path.basename(path)[:-5]
+        src = open(path, errors="ignore").read()
+        imports[stem] = set(
+            re.findall(r'^import KProgFormal\.(\w+)', src, re.M))
+        if stem.startswith("Generated"):
+            gen_counts[stem] = {
+                m.group(1): int(m.group(2)) for m in
+                re.finditer(r"^def (\w+) : Nat := (\d+)", src, re.M)}
+    table_counts = []
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -137,6 +178,9 @@ def scan_tree(root):
                 binders = signature(block, m.group(1))
                 if "(" in binders and re.search(r'\bcases\b', block[cut:]):
                     quant_cases += 1
+            asserted = table_length_count(block, imports[stem], gen_counts)
+            if asserted is not None:
+                table_counts.append(asserted)
         arch_mods[arch] += 1
         arch_thms[arch] += proved
 
@@ -167,6 +211,13 @@ def scan_tree(root):
         "refines": refines,
         "refines_decided": refines_decided,
         "quant_cases": quant_cases,
+        "table_length": len(table_counts),
+        # The section states the range these theorems compare against, so both
+        # ends are published. The class is asserted non-empty there, and an
+        # empty list -- the theorems renamed or the constants turned into
+        # expressions -- must fail loudly rather than report a vacuous range.
+        "table_min_count": min(table_counts),
+        "table_max_count": max(table_counts),
     }
     for arch in arch_mods:
         out[arch + "_mods"] = arch_mods[arch]
@@ -201,6 +252,22 @@ CLAIMS = [
      ("x86_mods", "x86_thms")),
     (re.compile(r'(\d+) shared modules prove (\d[\d{},\\]*)'),
      ("shared_mods", "shared_thms")),
+    # The non-vacuity sentence's table-length clause states two things, and
+    # step 0488 left both to memory: how many such theorems there are, and that
+    # no count is zero. "Nineteen" was the `*_codes_length` subfamily when it
+    # was written and drifted with the `*_names_length` and dispatch-table
+    # theorems added since. Quoting the range the constants span, rather than
+    # the bare "none is zero", is what lets the checker test the second half:
+    # the claim fails the moment a generator emits an empty table.
+    # A `table-length` figure is stated as a count of theorems only here, so
+    # the pattern cannot pick up an unrelated table.
+    (re.compile(r'the (\d+) table-length theorems'), ("table_length",)),
+    # Step 0488 wrote "no generated count is zero", which no measurement could
+    # refute: zero theorems or a zero constant both kept it true. Quoting the
+    # range the constants span makes the claim testable -- it fails the moment a
+    # generator emits an empty table.
+    (re.compile(r'constants run from (\d+) to (\d+)'),
+     ("table_min_count", "table_max_count")),
 ]
 
 # The harness README states the same development from the harness side, in plain

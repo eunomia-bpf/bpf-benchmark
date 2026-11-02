@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 432, and 330 steps
+`build/mut_*.py` files exist, the counter's last value is 433, and 331 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,33 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0562 - the table-length count was nineteen, and the
+class has a rule now
+
+Step 0488's non-vacuity audit survives as one sentence in the safety section,
+and its figure had drifted: the tree states 45 table-length theorems, not
+nineteen. Nineteen had been the `*_codes_length` subfamily when the sentence was
+written; the 22 `*_names_length` theorems and four dispatch-table ones arrived
+later, and nothing read the number, so no check went red.
+
+Naming the class is the difficulty, and the obvious rule is wrong twice over:
+`*_length` matches 49 theorems, four of which assert no length equality at all
+(their right-hand side is a function of a width), while the shape picks up three
+theorems that are not named `_length`. Membership is therefore decided on the
+statement -- `<list>.length = <name>`, where the name resolves to a generated
+`def <name> : Nat := <digits>` through the module's own imports. Per-module
+resolution is not pedantry: `armCount` is 2 in one generated specification and 4
+in another, and resolving per module is what leaves out the three theorems that
+compare a hand-written list against a literal digit.
+
+The sentence's other half was weaker than it looked. "No generated count is
+zero" stayed true even if the class were empty, so the paper now quotes the
+range the constants span -- 2 to 31 -- and a generator that emits an empty table
+fails a check instead of quietly falsifying prose. Count, range, and rule all
+live in `check_lean_claims.py`, whose docstring already claims this section's
+Lean-side figures; the gate re-runs because the checker changed, not because a
+proof did. Census 432 -> 433.
 
 ### Step 0561 - why 150 shared modules and 138 shared
 specifications are both right
