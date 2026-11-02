@@ -111,10 +111,16 @@ def literal_length(src, open_at):
 
 
 def list_lengths(src):
-    """`{name: length}` for every `def <name> ... := [...]` in `src`."""
+    """`{name: length}` for every `def <name> ... := [...]` in `src`.
+
+    The literal may start on the line after the `:=`: seven spec lists in the
+    tree wrap that way, and requiring the bracket on the same line hid them
+    from every rule that reads a list length, which undercounted the
+    refinement equalities by seven.
+    """
     out = {}
-    for m in re.finditer(r"^def (\w+)[^\n]* := \[", src, re.M):
-        out[m.group(1)] = literal_length(src, src.index("[", m.end() - 3))
+    for m in re.finditer(r"^def (\w+)[^\n]* :=[ \t]*\n?[ \t]*\[", src, re.M):
+        out[m.group(1)] = literal_length(src, src.index("[", m.end() - 1))
     return out
 
 

@@ -2611,6 +2611,15 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0570 found the exactness count reading 25 where
+the tree holds 32. The rule was right and the reader
+was blind: list_lengths only saw a literal opening on
+the def line, so seven wrapped spec lists were
+invisible. Widening it moves refine_pairs alone;
+theorems, table lengths, and sweeps are unchanged,
+and the paper now says 32 (census 440 -> 441).
+
+
 Step 0569 measured the case split the section said it
 had measured. Nine figures were stale and the buckets
 were no partition — they covered 229 of 248 banners.

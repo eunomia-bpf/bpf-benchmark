@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 440, and 338 steps
+`build/mut_*.py` files exist, the counter's last value is 441, and 339 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,38 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0570 - the exactness count read 25, because seven
+spec lists wrap onto the line after the `:=`
+
+The non-vacuity sentence says the theorems that close by `rfl` or `decide` over
+a table carry content, and then enumerates three classes. The enumeration read
+25 refinement equalities, the statements that equate a hand-written list against
+the generated table it restates. The tree holds 32.
+
+The rule was right and the reader was blind. `refinement_pair` binds a bare name
+to a bare name and checks both sides are literal lists, one in the module and
+one in a generated module it imports -- which is exactly the shape the sentence
+names. But `list_lengths` only matched a `def` whose literal opened on the same
+line as the `:=`, and seven hand-written spec lists wrap onto the next line.
+Those seven theorems were invisible to the rule, so the count came out 25 and
+the sentence published it.
+
+The wraparound form is not exotic: `arm64HelperArgPtrSourceNamesSpec`,
+`x86RegDispatchNamesSpec`, `x86HelperDispatchNamesSpec`,
+`x86AluFlagArmNamesSpec`, `arm64DqMemExtraNamesSpec`, and the stack read/write
+tag name tables all break after the `:=`. The fix allows the bracket on the
+following line, and each newly visible theorem was checked by hand against its
+statement: every one is a hand list equal to a generated table, with both sides
+between 2 and 16 entries, so none of the seven is a false positive that would
+inflate a figure the paper publishes.
+
+Nothing else moved. The same tree scan gives 2,061 theorems, 45 table-length
+theorems with their 2-to-31 range, and 3 dispatch sweeps before and after the
+change; only `refine_pairs` rose, from 25 to 32. The widened rule still refuses
+an empty literal, a non-list body, and a `def` with no literal, so it cannot
+manufacture a pair: a wrapped `[]` reads 0 entries and still fails the non-empty
+clause. Census 440 -> 441.
 
 ### Step 0569 - a split said to be measured from the log had nine
 stale figures and a bucket missing from its own partition
