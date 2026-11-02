@@ -2612,6 +2612,31 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0559 measured the kernel-only escape the paper
+only asserted. Every module naming an evaluation tactic
+(117, 653 theorems) was copied, the tactic token alone
+swapped for a plain decide, and the copy compiled as a
+dot-file module so line numbers still attributed each
+error to its theorem. No statement was altered, so a
+success is exactly the paper's promise. The boundary is
+the tactic, not the shape of the statement: 480 of 488
+native_decide obligations re-discharge -- enumerations,
+examples, and quantified identities alike -- against 4
+of 165 for bv_decide. On those a bare decide cannot be
+stated at all (the cases split leaves free variables);
+Lean's own remedy, decide +revert, moves 152 to
+"maximum recursion depth" and 6 to a failed instance
+search, and closes 6, all mask/shift/flag-funnel, none
+reducing a product of two wide operands. Two artifacts
+were resolved not counted: x86_popcount_refines carries
+bv_decide (config := {timeout := 120}), whose orphaned
+block reported a DecideConfig error but fails like its
+neighbours once the block goes; and the script's glob
+matched its own probes until dot-files were excluded.
+Paired serial cost over the 66 modules both compile:
+29.7 s against 53.0 s. The paper text stayed digit-free
+so no gate figure moved (census 429 -> 430).
+
 Step 0558 audited the only configuration a keyword scan
 cannot see: a census found zero @[implemented_by],
 @[extern], unsafe, opaque, partial, or axiom

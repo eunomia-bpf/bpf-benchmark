@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 429, and 327 steps
+`build/mut_*.py` files exist, the counter's last value is 430, and 328 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0559 - the kernel-only escape, measured
+
+Step 0557 left a promise untested. The trusted-base paragraph says a deployment
+that will not trust the compiler can re-discharge the finite enumerations and
+examples by case analysis "at a proof-script cost, with no change to any
+statement". Nobody had tried it. So every module naming an evaluation tactic --
+117 of them, 653 counted theorems -- was copied, the tactic token replaced by a
+plain `decide`, the copy compiled as a dot-file module with line numbers
+preserved, and each error attributed to the theorem whose range held it. Nothing
+else in any statement moved, so a success is exactly the paper's wording and a
+failure names the reason.
+
+The answer splits by tactic, not by statement shape, which is the opposite of
+the boundary the paragraph drew. Of the 488 `native_decide` theorems, 480
+re-discharge: enumerations, examples, and quantified identities alike. Of the
+165 `bv_decide` theorems, 4 do. The mechanism is visible in the error text and
+has two stages. On 161 of the 165 a bare `decide` cannot even be stated, because
+the `cases` split leaves free variables in the goal; applying the remedy Lean
+itself proposes (`decide +revert`) turns 152 of those into "maximum recursion
+depth has been reached" -- the kernel does not merely run slowly, it gives up --
+and 6 more fail to synthesize an instance. Six close under `+revert`, and
+reading them shows why: masking, shifting, and flag-funnel identities, none
+reducing a product of two wide operands.
+
+Two artifacts were checked rather than counted. `x86_popcount_refines` carries
+`bv_decide (config := { timeout := 120 })`; a token-only swap orphaned that
+block and reported a `DecideConfig` parse error, and re-measured with the block
+removed it fails like its neighbours, so it is not a semantic outcome. The same
+script's `pathlib` glob matched its own dot-file probes at first, which counted
+661 theorems instead of 653; the plan now excludes dot-files, and the count
+agrees with the census. Cost was measured too: paired serial timings over the 66
+modules where both versions compile give 29.7 s against 53.0 s, so the promise's
+"cost" is roughly a doubling, dominated by one module.
+
+The paragraph now reports the measured boundary and no gate-bound figure moved:
+the section's 154 claimed case counts and both gate totals still match the log,
+and the paper compiles clean. The sweep is a measurement, not a checker --
+promoting it would be a new obligation for the operator to authorize.
+Census 429 -> 430.
 
 ### Step 0558 - the one configuration knob no checker
 reads
