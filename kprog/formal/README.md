@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 419, and 317 steps
+`build/mut_*.py` files exist, the counter's last value is 420, and 318 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -482,7 +482,12 @@ Neither is wrong, but a program can lower on one and fail on the other, and
 nothing said so. `check_lookup_ambiguity.py` measures the divergence rather
 than picking a winner, and fails if the two converge without someone deciding
 they should -- convergence would mean one side changed. It also pins both
-truncation lengths to the kernel's own limit.
+truncation lengths to the kernel's own limit, reading each from the file's own
+`*truncate_bpf_obj_name` helper: a set union of every `take(N)` in both files
+could not tell an agreeing side from an absent one, so a re-spelled iterator
+plus a changed length left the check printing "both sides truncate at 15".
+AArch64's absence-of-error is likewise tested without x86's message prefix,
+which its own bail does not carry.
 
 The two architectures also lower `bpf_tail_call` independently, in separate
 modules, each with its own spelling of the kernel's limit -- `u8` on one side,
@@ -7561,6 +7566,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0549 - a set union could not tell
+an agreeing side from an absent one
+
+`check_lookup_ambiguity.py` compared
+`{.bytes().take(N) in x86} | {.bytes().take(N) in main.rs}` against
+`BPF_OBJ_NAME_LEN - 1`. A union has no per-side membership, so a side that
+stops matching the pattern leaves the set and the other side's 15 satisfies the
+check alone. Planting `name.as_bytes().iter().take(16)` in x86's helper -- a
+legal Rust spelling of the same operation with a different length -- made the
+old logic report `lens=[15] want=15` and print "both sides truncate at 15"
+while x86 truncated at 16. Each file now states its own length, read from the
+`*truncate_bpf_obj_name` helper and required to be exactly one `.take(N)`; a
+file stating no helper, two, or no length inside it is named.
+`BPF_OBJ_NAME_LEN` is read as the uapi header writes it, `16U` or bare `16`,
+and must appear once -- the old pattern required the suffix, so a header
+dropping it silently stopped pinning anything.
+
+The convergence guard had the same shape of bug: AArch64's absence-of-error was
+tested with x86's pattern, which demands the literal prefix `"x86 "`. A bail
+reading `"arm64 ... truncation-matches multiple"` -- the wording AArch64 would
+actually use -- ended the divergence with the banner unchanged. It is now
+tested without the prefix. Both x86 paths are now checked by the same template
+with no `kind not in x86` guard, so a path whose name leaves the file is
+reported instead of skipped. Dead `--check` removed; the Makefile runs the
+script bare. Battery: 17 mutations -- 12 caught with their own message, and 5
+equivalent spellings accepted (one side's iterator re-spelled at the same
+length, a spaced `take`, a bare-`16` header, a comment naming the phrase). The
+decisive mutation -- a re-spelled iterator at a different length -- was run
+through both logics side by side: the old one reports no finding, the new one
+names the two lengths. Gate rc 0, 248 banners, 124,531,802 cases; no Lean or C
+file changed.
+Census 419 -> 420.
 
 ### Step 0548 - a checker that claimed every
 site saw seven of them

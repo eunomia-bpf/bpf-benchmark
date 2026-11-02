@@ -2612,6 +2612,35 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0549 repairs the lookup-ambiguity checker
+(census 419 -> 420). It compared a set union of
+every `.bytes().take(N)` in the two encoders
+against `BPF_OBJ_NAME_LEN - 1`, and a union has no
+per-side membership: a side that stops matching
+the pattern leaves the set while the other side's
+15 still satisfies the check. Planting a legal
+alternate spelling at a different length
+(`name.as_bytes().iter().take(16)`) made the old
+logic report `lens=[15] want=15` and print "both
+sides truncate at 15" while x86 truncated at 16.
+Each file now states its own length, read from its
+`*truncate_bpf_obj_name` helper and required to be
+exactly one `.take(N)`; no helper, two helpers, or
+a helper stating no length is named. The kernel's
+`BPF_OBJ_NAME_LEN` is read as the uapi header
+writes it, `16U` or bare `16`, and must appear
+once. The convergence guard had the same shape of
+bug: AArch64's absence-of-error was tested with
+x86's pattern, which demands the literal prefix
+`"x86 "`, so an `arm64`-worded bail ended the
+divergence silently; it is now tested without the
+prefix, and the two x86 paths share one template
+with no `kind not in x86` guard. Dead `--check`
+removed. Battery: 17 mutations, 12 caught by their
+own message and 5 spellings accepted, the decisive
+one run through both logics side by side. Gate:
+rc 0, 248 banners, 124,531,802 cases.
+
 Step 0548 repairs the jump-opcode checker that
 claimed every emission (census 418 -> 419). Its
 opcode class was `0x[0-9a-f]{2}`, and because the
