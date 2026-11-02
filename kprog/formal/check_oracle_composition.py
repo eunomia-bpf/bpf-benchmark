@@ -16,21 +16,18 @@ That is not hypothetical. It happened three times in this tree:
   - the register-lane-aux oracle called the accessors directly, so corrupting
     the payload the simulator passes through survived 7,629 cases.
 
-This script reports every host that (a) includes a simulator header, (b) calls at
-least one KPROG_* contract macro, and (c) never calls an X86_SIM_L_* /
+This script reports every `*host.c` that (a) includes a simulator header, (b)
+calls at least one KPROG_* contract macro, and (c) never calls an X86_SIM_L_* /
 ARM64_SIM_L_* composition macro. Category (c) is a proxy, not a proof -- a host
-can drive the simulator some other way -- so the script also prints the contract
-macros each such host calls, so the reader can judge. It fails only when a host
-matches all three *and* the contract it calls is one the simulator reaches
-through a SIM_L_* composition, which is computed by reading the simulator
-sources.
+can drive the simulator some other way -- so the script also names the contract
+macros each such host calls. It fails when a host matches all three *and* the
+contract it calls is one the simulator reaches through a SIM_L_* composition,
+which is computed by reading the simulator sources; when a simulator header is
+missing or states no composition; and when a recorded exception stops applying,
+because that reason then no longer describes the tree.
 
-Usage: check_oracle_composition.py [--check]
 """
 
-import argparse
-import glob
-import os
 import pathlib
 import re
 import sys
@@ -45,48 +42,53 @@ SIM = {
 
 INCLUDES_SIM = re.compile(r'#include\s+"[^"]*sim(_local_bpf)?\.h"')
 COMPOSITION = re.compile(r'\b(?:X86|ARM64)_SIM_L_[A-Z0-9_]+\s*\(')
-CONTRACT = re.compile(r'\bKPROG_[A-Z0-9_]+\s*\(')
+CONTRACT = re.compile(r'\b(KPROG_[A-Z0-9_]+)\s*\(')
 
 
 def sim_composed_contracts():
-    """Contract macros the simulator reaches from inside a SIM_L_* macro."""
+    """Contract macros the simulator reaches from inside a SIM_L_* macro.
+
+    Returns (contracts, problems). A header that is missing, or that states no
+    `SIM_L_*` definition at all, is a problem rather than a skip: silently
+    dropping one architecture's header leaves the other's contracts as the
+    whole set, and the check keeps passing over half of the tree.
+    """
     out = set()
-    for paths in SIM.values():
+    problems = []
+    for arch, paths in SIM.items():
+        found = 0
         for p in paths:
             if not p.exists():
+                problems.append("missing simulator header %s" % p)
                 continue
             src = p.read_text(errors="ignore")
             # Each SIM_L_ definition body, from #define to the next #define.
             for m in re.finditer(
                     r'#define\s+((?:X86|ARM64)_SIM_L_\w+)\(([^)]*)\)([\s\S]*?)'
                     r'(?=^#define|\Z)', src, re.M):
-                out |= set(re.findall(r'\b(KPROG_[A-Z0-9_]+)\s*\(', m.group(3)))
-    return out
+                found += 1
+                out |= set(CONTRACT.findall(m.group(3)))
+        if not found:
+            problems.append("%s simulator states no SIM_L_* composition"
+                            % arch)
+    return out, problems
 
 
 def main(argv):
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--check", action="store_true")
-    args = ap.parse_args(argv[1:])
+    composed, problems = sim_composed_contracts()
 
-    composed = sim_composed_contracts()
-    if not composed:
-        print("check_oracle_composition: found no SIM_L_*-composed contracts")
-        return 1
-
-    findings = []
-    for path in sorted(glob.glob(str(ROOT / "test_*host.c"))
-                       + glob.glob(str(ROOT / "cross_*host.c"))):
-        src = open(path, errors="ignore").read()
-        if not INCLUDES_SIM.search(src):
+    # Every host that links against a simulator, whatever it is named: the
+    # earlier `test_*` / `cross_*` globs would have missed a host named any
+    # other way, and width_fallback_host.c already is one.
+    findings = {}
+    for path in sorted(ROOT.glob("*host.c")):
+        src = path.read_text(errors="ignore")
+        if not INCLUDES_SIM.search(src) or COMPOSITION.search(src):
             continue
-        if COMPOSITION.search(src):
-            continue
-        called = set(re.findall(r'\b(KPROG_[A-Z0-9_]+)\s*\(', src))
         # Only a gap if the contract it tests is one the simulator composes.
-        composed_here = sorted(called & composed)
+        composed_here = sorted(set(CONTRACT.findall(src)) & composed)
         if composed_here:
-            findings.append((os.path.basename(path), composed_here))
+            findings[path.name] = composed_here
 
     # The known-acceptable exceptions, each for a stated reason. Any *new*
     # entry is the finding; these are reviewed.
@@ -112,19 +114,30 @@ def main(argv):
             "lane decoders only; EXEC bodies covered by the alu route host",
     }
 
-    unexpected = [(n, m) for n, m in findings if n not in ACCEPTED]
-    if unexpected:
-        print("check_oracle_composition: %d new oracle(s) test a composed "
-              "contract without driving the composition" % len(unexpected))
-        for name, macros in unexpected:
-            print("  %-42s %s" % (name, ", ".join(macros[:3])))
+    for name, macros in sorted(findings.items()):
+        if name not in ACCEPTED:
+            problems.append("%s calls %s without driving the composition"
+                            % (name, ", ".join(macros[:3])))
+    # An exception whose host no longer needs one is stale: it either started
+    # driving the composition or stopped calling a composed contract, and
+    # either way the reason recorded here no longer describes the tree.
+    for name in sorted(ACCEPTED):
+        if name not in findings:
+            problems.append("ACCEPTED entry %s is stale -- it no longer calls "
+                            "a composed contract without the composition"
+                            % name)
+
+    if problems:
+        print("check_oracle_composition: %d finding(s)" % len(problems))
+        for p in problems:
+            print("  " + p)
         print("Add an entry to ACCEPTED with the host that does cover the "
               "composition, or drive it here.")
         return 1
 
     print("check_oracle_composition: every oracle that calls a "
           "simulator-composed contract drives the composition, or is one of "
-          "%d reviewed exceptions" % len(ACCEPTED))
+          "%d reviewed exceptions" % len(findings))
     return 0
 
 
