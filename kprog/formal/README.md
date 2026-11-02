@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 421, and 319 steps
+`build/mut_*.py` files exist, the counter's last value is 422, and 320 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7571,6 +7571,36 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0551 - a figure checked
+in one place but stated in two
+
+`check_readme_counts.py` compared the battery count once. The README states it
+twice: "The 330 `build/mut_*.py` batteries" in the claims block and "drifted:
+330 `build/mut_*.py` files exist" in the census note below it. Only the first
+matched, so setting the second to 999 left the script reporting that the counts
+agree. It now takes several patterns per figure and checks each one, which is
+what "re-derive the README's counts" was always meant to cover.
+
+The number-word table held thirteen, fourteen and fifteen, so a correct future
+spelling -- "sixteen route hosts" -- was looked up, missed, and reported as
+"README has no figure" when the figure was plainly there. The table now spans
+one to twenty and the route-host pattern accepts any word, so drift names both
+numbers; "no figure" is reserved for a pattern that genuinely does not match.
+
+The claims block also asserts the unbuilt sources under `build/` are exactly 41
+ad-hoc probes plus two stale duplicates -- a three-part claim Step 0477
+re-verified by hand and nothing has measured since. `scratch()` derives it: the
+`.c` files the recipe never compiles, partitioned on `nb*`/`onebar*`. Both
+counts became figures, and the structural half comes with them: an unbuilt
+source that is neither kind moves the duplicate count and fails, which is the
+case the prose cannot see. `sys` was unused and is gone.
+
+Battery: 14 probes, 12 caught, 2 accepted deliberately (the baseline, and the
+route-host figure written as a bare `14`). Not in `make check` -- it is a
+review step, run bare with `--check` -- so the gate was re-run as a regression
+guard: rc 0, 248 banners, 124,531,802 cases.
+Census 421 -> 422.
 
 ### Step 0550 - a scan that only looked where
 it expected hosts to be

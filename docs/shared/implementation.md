@@ -2612,6 +2612,35 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0551 checks each README figure where it
+is stated, not just the first time
+(census 421 -> 422). The battery count appears
+twice: "The 330 `build/mut_*.py` batteries" in
+the claims block and "drifted: 330
+`build/mut_*.py` files exist" in the census
+note. `expect()` took one regex and searched
+once, so the note could drift under a green run
+-- 999 there left it reporting agreement. It
+takes `*patterns` now and checks each.
+The number-word table held only
+thirteen/fourteen/fifteen, so a correct
+"sixteen route hosts" was reported as "README
+has no figure" though the figure was there;
+the table spans one to twenty and the pattern
+accepts any word, so drift names both numbers.
+The claims block also says the unbuilt
+`build/*.c` are exactly 41 ad-hoc probes plus
+two stale duplicates -- re-verified by hand in
+Step 0477 and measured by nothing since.
+`scratch()` derives it from the sources the
+recipe never compiles, partitioned on
+`nb*`/`onebar*`, and the structural half comes
+with it: a third kind of scratch file moves
+the duplicate count and fails. Battery: 14
+probes, 12 caught, 2 accepted on purpose. Not
+in `make check`; gate re-run as a regression
+guard: rc 0, 248 banners, 124,531,802 cases.
+
 Step 0550 widens the oracle-composition checker
 (census 420 -> 421). It globbed `test_*host.c`
 and `cross_*host.c`, so a host named any other way
