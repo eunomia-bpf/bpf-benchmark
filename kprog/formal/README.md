@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 433, and 331 steps
+`build/mut_*.py` files exist, the counter's last value is 434, and 332 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,34 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0563 - the exactness clause named five
+theorems and matched none
+
+The same sentence's second clause was looser than the first, and wrong. It read
+"the exactness theorems assert two independently defined lists equal and both
+sides measure non-empty", naming a class by nothing but a theorem-name suffix.
+Four theorems end `_exact` and a fifth is called one; of those five, one is a
+boundary conjunction and four compare a projection of a table (`table.map f`),
+so no member is a pair of list literals. The clause described a class the tree
+does not have.
+
+The class that does exist is the refinement equality: a statement that is
+exactly one bare name equal to another, one side a literal list in the module
+and the other a literal list in a generated module it imports. That is
+"independently defined" spelled out, and it holds of 25 theorems -- all named
+`_refine`, none named `_exact`, and disjoint from the 45 table-length theorems.
+Loose shapes were rejected on purpose: `sourceOf base = spec base` implies such
+an equality after unfolding, and `arm64_cc_decode_conds_exact` equates two
+projections, so neither is covered by what the sentence says.
+
+Both sides are literals, so the checker counts their entries (skipping commas
+inside strings, which the name tables are full of) and publishes the shorter
+side: 2 at minimum, which is what "non-empty" now means -- a theorem equating a
+table against `[]` would fail the check. Prose moved to "the 25 refinement
+equalities ... both sides hold at least 2 entries". `check_lean_claims.py`
+gained the rule and a `statement` helper that cuts binders off before either
+shape is matched; the gate re-runs for the checker. Census 433 -> 434.
 
 ### Step 0562 - the table-length count was nineteen, and the
 class has a rule now

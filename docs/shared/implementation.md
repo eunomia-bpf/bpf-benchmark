@@ -2612,6 +2612,25 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0563 replaced a prose class the tree does not
+have. The safety section's exactness clause said "the
+exactness theorems assert two independently defined
+lists equal" and named them by nothing but the _exact
+suffix: of the five such theorems, one is a boundary
+conjunction and four compare a projection of a table,
+so no member is a pair of list literals. The class
+that does exist -- one bare name equal to another,
+each side a literal list, one in this module and one
+in a generated module it imports -- holds of 25
+theorems, all named _refine and disjoint from the 45
+table-length ones. Loose shapes were rejected
+deliberately: sourceOf base = spec base implies the
+equality only after unfolding, and an .eraseDups
+projection is not a list. Both sides are countable,
+so the checker reports the shorter one (2 at minimum)
+and equating a table against [] now fails a check
+instead of reading as prose (census 433 -> 434).
+
 Step 0562 corrected a stale figure the paper's
 non-vacuity sentence carried and gave the class a
 rule. The tree states 45 table-length theorems, not
