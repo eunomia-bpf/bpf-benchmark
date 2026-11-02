@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0553 gave the mutation guard a denominator
+(census 423 -> 424). `mutate_contracts.py` said
+"31 generator(s) tested"; 138 exist, and 107 were
+filtered away without a word. Two of the 31 were
+vacuous: both reported `no-host`, meaning no test
+calls the contract, though the bumped literal
+reached no byte of C at all -- one came from a
+Lean-rendering string, one from a `SystemExit`
+message. They now report `inert`, kept distinct
+from `no-host`, and the banner reads 29 of 138
+guarded with both skip reasons named. Measured:
+60 of the 107 do emit numbers but interpolate
+them from a spec JSON, so only a data change
+reaches them; 47 emit none. The two
+`compile-fail` rows were identifier renames, not
+arithmetic. Probes: a neutered host yields
+`SURVIVED`; hiding `KPROG_ARM64_MUL` yields
+`NO-HOST` where `inert` had stood. `--check`
+still fails only on `SURVIVED`. Gate unchanged:
+rc 0, 248 banners, 124,531,802 cases.
+
 Step 0552 redrew the dispatch guard's tie through an
 artifact instead of a name (census 422 -> 423). The
 old check matched a family's C spelling to its Lean

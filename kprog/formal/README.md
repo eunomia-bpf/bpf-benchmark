@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 423, and 321 steps
+`build/mut_*.py` files exist, the counter's last value is 424, and 322 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -138,16 +138,20 @@ operands at every width, with witnesses in both directions (`1 - 2` borrows,
 
 Whether the compiled side is actually guarded is measurable, and `mutate_contracts.py`
 measures it: find the first meaningful literal in each generator's emitted-C
-string, bump it, regenerate, and see what fires. Over 31 generators the result
-is **24 rejected by the generator itself**, 3 caught by a host, 2 stopped by a
-static assertion, 2 whose header exports no macro to call, and **none
-surviving**. Three quarters of the C surface never even reaches a build.
+string, bump it, regenerate, and see what fires. Of the **138** generators that
+exist, 29 are guarded -- **24 rejected by the generator itself**, 3 caught by a
+host, 2 stopped by the compiler -- and **none survive**. The other 109 emit no
+bump-able literal: 60 of them do write numeric constants into their headers,
+but read the values from a spec JSON and interpolate them, so only a change to
+that data reaches them, and 47 write no numeric constant at all. Stating the
+denominator is the point; an earlier version reported only the 31 it happened
+to reach, and counted two generators whose mutation changed no byte of C as
+though no host existed to call them.
 
-Getting that number honest took four passes. Each of these first looked like a
-contract whose mutation nothing caught, and each was inert: a docstring, a
-static-assert message, a Python format-padding width, and a generator
-diagnostic prefix. The harness now excludes all four, which is what makes the
-zero mean something.
+Getting the count honest took several passes. Four literals first looked like
+contracts nothing caught and were inert -- a docstring, a static-assert
+message, a Python format-padding width, and a generator diagnostic prefix --
+and the harness excludes all four, which is what makes the zero mean something.
 
 Complemented OR is the last of the twelve, and the one whose *second source
 is modified before use*: the dispatcher applies the AUX-encoded shift or
@@ -7571,6 +7575,34 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0553 - a denominator the
+guard had been hiding
+
+`mutate_contracts.py` announced "31 generator(s) tested" while 138 generators
+exist, and named none of the other 107: `run` returned `None` and `main`
+filtered it. Reading the 31 closely, two of its rows were vacuous. Both were
+labelled `no-host`, which says *no test calls this contract*, when what
+happened was that the bumped literal reached no byte of C: `x86_doubleshift`
+took `64` out of a Lean-rendering string and `x86_opcode` took `16` out of a
+`raise SystemExit` diagnostic. A generator tested by nothing was reporting as
+a contract missing a test -- the same conflation Step 0548 keeps finding, one
+layer up.
+
+Those two now report `inert`, kept apart from `no-host` because the first
+means the mutation asked nothing and the second means a real change has no
+test. The banner carries the denominator (29 of 138 guarded) and both skip
+reasons, so no generator disappears. Measured, not guessed: 60 of the 107 do
+write numeric constants into their headers, but read the values from a spec
+JSON and interpolate them, so only a data change reaches them; 47 write none.
+An interpolation-aware picker adds 0 testable generators -- that is why the
+honest move was to say so, not to chase coverage. The two `compile-fail` rows
+were identifier renames (`X86_WIDTH_64` to `X86_WIDTH_65`; gcc: "undeclared
+here"), so the docstring now says the compiler saw the change rather than
+promising "a static assertion, usually". Five probes: a neutered host turns
+`arm64_mul` into `SURVIVED` and fails `--check`; hiding `KPROG_ARM64_MUL`
+yields a distinct `NO-HOST` row where `inert` had stood. `--check` still fails
+only on `SURVIVED`. Census 423 -> 424.
 
 ### Step 0552 - a tie drawn through
 the artifact, not the name
