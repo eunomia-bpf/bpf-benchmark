@@ -2612,6 +2612,27 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0554 removed six numeric hypotheses that no proof
+needed (census 424 -> 425). Textual search cannot
+answer this: of 46 hypotheses a proof body never
+names, 29 were load-bearing, eaten by `simp_all`.
+Deleting
+each binder and recompiling is the sound test -- 115 of
+132 needed, 17 free. Four `*_member_handled` theorems
+took `h : op ∈ *Ops`; membership is total, so the bound
+always held and hid a missing gate -- the uncovered
+opcode's case closed on a hypothesis that cannot hold.
+Two `hnoWrap : capacity.toNat + 1 < 2 ^ 32` bounds
+excluded `capacity = 0xFFFFFFFF` for no reason:
+`windowEnd` is `Nat` and the C macro widens to `__u64`,
+so those theorems are now stronger. Dead `have`s went
+with them. Kept on purpose: `hb : 1 ≤ bits` and the
+Extrev narrowing fits state the C contract's domain.
+The six `*_nonmember_unhandled` twins now say their
+premise is unsatisfiable. `lake build` rc 0 at 2060
+theorems; gate unchanged, rc 0, 248 banners,
+124,531,802 cases.
+
 Step 0553 gave the mutation guard a denominator
 (census 423 -> 424). `mutate_contracts.py` said
 "31 generator(s) tested"; 138 exist, and 107 were

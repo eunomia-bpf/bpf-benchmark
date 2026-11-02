@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 424, and 322 steps
+`build/mut_*.py` files exist, the counter's last value is 425, and 323 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,46 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0554 - a hypothesis that
+closed the case it should have proved
+
+A proof that takes `(h : op ∈ arm64DispatchOps)` and never mentions `h` is
+not obviously safe to weaken: `simp_all` can consume a hypothesis silently.
+Textual search proved nothing -- of the 86 hypotheses a proof body names,
+none was droppable, while 29 of the 46 it never names were load-bearing.
+The only sound test was to delete the binder and recompile the module. 132
+rows across 44 modules look like numeric bounds; stripping identifiers shows
+51 whose only digits sit inside a name (`op ∈ arm64DispatchOps`,
+`width ≠ .w64`) and 2 type parameters (`high : BitVec 64`), leaving 79 real
+side conditions -- 7 of them written as a type-ascribed literal, like
+`(hb : (1 : BitVec 8) ≤ bits)`. Deleting all 132 binders one at a time:
+115 load-bearing, 17 free.
+
+Six were artifacts, and each had been hiding something. The four
+`*_member_handled` theorems took `h : op ∈ *Ops`, but membership is *total*
+-- `∀ op, op ∈ arm64DispatchOps` holds by `cases op <;> decide` -- so the
+bound always held and was doing the opposite of its job: with a gate
+missing from the table, the uncovered opcode's case closes on an `h` that
+cannot hold. A three-constructor enum with two gates shows it; with the
+hypothesis the theorem compiles, without it `decide` reports the
+disjunction is `false`. The two `hnoWrap : capacity.toNat + 1 < 2 ^ 32`
+bounds err the other way -- `windowEnd` is `Nat` addition and the generated
+C widens to `__u64` before adding, so no wrap exists to exclude, and the
+bound had been dropping `capacity = 0xFFFFFFFF`. Those theorems are now
+strictly stronger. The `have hv` and `have hcapLt` each bound left dead went
+with them; the four `simp_all` lists stay, as bare `simp_all` no longer closes
+any of them. Of the eleven free hypotheses left, nine are kept on purpose: the
+six Extrev narrowing fits record where the C pipeline narrows (the
+unconditional form already exists as `*_refines_raw`), and `hb : 1 ≤ bits` with
+the two `words_tight` bounds state the C contract's own domain. The last two,
+`high : BitVec 64`, are artifacts of the test itself -- deleting a data binder
+makes it implicit, so the statement never changed. That left the six paired
+`*_nonmember_unhandled` theorems arguing from `op ∉ *Ops`, now provably
+unsatisfiable, so their docstrings say the arm is vacuous and name
+`*_member_handled` as the operative half. `lake build` RC=0 at 2060 theorems;
+gate 248 banners, 124,531,802 modeled cases; twelve checks green.
+Census 424 -> 425.
 
 ### Step 0553 - a denominator the
 guard had been hiding
