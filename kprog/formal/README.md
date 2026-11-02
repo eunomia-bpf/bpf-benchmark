@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 430, and 328 steps
+`build/mut_*.py` files exist, the counter's last value is 431, and 329 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7575,6 +7575,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0560 - the architecture split was stale, and
+nothing read it
+
+The trusted-base work left the section's last hand-kept figure unexamined.
+`check_lean_claims.py` binds the theorem, module, `native_decide`,
+refinement-named, and quantified counts, and `check_paper_counts.py` binds every
+oracle case count and both gate totals -- which is why the sentence claiming
+`over 306 Lean modules` was current while the sentence twelve lines later
+splitting those modules by architecture was not. It read 69 AArch64 modules
+with 773 theorems, 85 x86-64 with 1,126, and 140 shared with 42. Those
+sum to 294 modules and 1,941 theorems, so the sentence had been true of a tree
+twelve modules and a hundred theorems smaller and no checker noticed, because
+nothing read it.
+
+Binding it meant pinning the split's rule, not just its digits. Two rules divide
+the tree honestly: strip the `Generated` prefix first, which files an
+arch-rendered specification with its architecture, or match the file name as it
+stands, which puts every generated module in the shared bucket. The paper's own
+history chooses: it called 138 generated specifications "shared" two sentences
+earlier, and the old numbers decompose under the second rule -- 69 and 85 hand-
+written arch modules plus 138 generated and 2 cross-ISA in the shared bucket.
+That rule still holds today, and its three buckets sum to exactly the published
+306 modules and 2,061 theorems, which is the property that makes the split
+checkable rather than merely plausible.
+
+So the checker now reads all six numbers, plus the bare `2,061` sitting in the
+totals sentence -- a figure quoted in one sentence and bound in another still
+drifts when only one is corrected. The extended checker reported exactly the six
+stale claims and no others, and the sentence now reads 70 and 86 modules with
+150 shared. No new component joined the gate; an existing one got wider, which
+is why the full `make check` re-runs for this step.
+
+Census 430 -> 431.
 
 ### Step 0559 - the kernel-only escape, measured
 

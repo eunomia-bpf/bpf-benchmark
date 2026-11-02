@@ -2612,6 +2612,32 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0560 bound the section's last hand-kept figure.
+check_lean_claims read the theorem, module, and
+native_decide counts, and check_paper_counts every
+oracle case count, so "over 306 Lean modules" was
+current while the architecture split twelve lines later
+was not: 69/773, 85/1,126, 140/42, summing to 294
+modules and 1,941 theorems -- a tree twelve modules
+smaller, and no checker saw it, because none read it.
+Binding it needed the split's rule, and two divide the
+tree honestly: strip the Generated prefix first, filing
+an arch-rendered spec with its architecture, or match
+the file name as it stands, putting every generated
+module in the shared bucket. The paper chooses its own
+rule -- it calls 138 generated specs "shared" two
+sentences earlier, and the old digits decompose under
+the second (69+85 hand-written arch modules, 138
+generated plus 2 cross-ISA shared). That rule still
+holds and its buckets sum to exactly the published 306
+and 2,061, which is what makes the split checkable. The
+checker now reads all six digits plus the bare 2,061 in
+the totals sentence -- a figure quoted in one sentence
+and bound in another still drifts. It reported exactly
+the six stale claims; the sentence is now 70/811,
+86/1,148, 150/102. No gate component was added, one got
+wider, so the gate re-runs (census 430 -> 431).
+
 Step 0559 measured the kernel-only escape the paper
 only asserted. Every module naming an evaluation tactic
 (117, 653 theorems) was copied, the tactic token alone

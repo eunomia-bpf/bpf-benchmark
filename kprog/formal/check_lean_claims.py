@@ -101,12 +101,25 @@ def scan_tree(root):
     refines = 0
     refines_decided = 0
     quant_cases = 0
+    # The section splits the tree by architecture. A module counts toward an
+    # architecture when its own file name starts with that prefix; everything
+    # else -- the generated specifications and the cross-ISA compositions -- is
+    # shared, the same sense of `shared` the section uses for its 138 generated
+    # specs. Splitting on the file name alone is what makes the three buckets
+    # sum to the published module and theorem totals.
+    arch_mods = {"arm64": 0, "x86": 0, "shared": 0}
+    arch_thms = {"arm64": 0, "x86": 0, "shared": 0}
     for path in mods:
         src = open(path, errors="ignore").read()
+        stem = os.path.basename(path)[:-5]
+        arch = ("arm64" if stem.startswith("Arm64") else
+                "x86" if stem.startswith("X86") else "shared")
+        proved = 0
         for m in THEOREM.finditer(src):
             block = m.group(0)
             if PROOF not in block:
                 continue
+            proved += 1
             theorems += 1
             named = refinement_named(m.group(1))
             refines += named
@@ -124,6 +137,8 @@ def scan_tree(root):
                 binders = signature(block, m.group(1))
                 if "(" in binders and re.search(r'\bcases\b', block[cut:]):
                     quant_cases += 1
+        arch_mods[arch] += 1
+        arch_thms[arch] += proved
 
     # The module figure the paper quotes is the transitive closure of the gate's
     # roots, not the file count: a module no proof imports is not compiled by
@@ -144,7 +159,7 @@ def scan_tree(root):
         seen.add(name)
         stack.extend(graph.get(name, ()))
 
-    return {
+    out = {
         "theorems": theorems,
         "native_decide": native_decide,
         "native_modules": len(native_modules),
@@ -153,6 +168,10 @@ def scan_tree(root):
         "refines_decided": refines_decided,
         "quant_cases": quant_cases,
     }
+    for arch in arch_mods:
+        out[arch + "_mods"] = arch_mods[arch]
+        out[arch + "_thms"] = arch_thms[arch]
+    return out
 
 
 # The claims, as regular expressions over the section text, each with the share
@@ -162,9 +181,26 @@ CLAIMS = [
                 r'\((\d+)\\%'), ("native_decide", "theorems", "share")),
     (re.compile(r'spread over (\d+) of the (\d[\d{},\\]*)'), ("native_modules", "modules")),
     (re.compile(r'over (\d+) Lean modules'), ("modules",)),
+    # The totals sentence restates the module figure and the theorem figure
+    # side by side. The module number was bound; the theorem number beside it
+    # was not, and a document that quotes a figure in one sentence and binds it
+    # in another still drifts when only one of the two is corrected.
+    (re.compile(r'Lean modules that prove (\d[\d{},\\]*) theorems'),
+     ("theorems",)),
     (re.compile(r'(\d+) of the (\d[\d{},\\]*) refinement-named theorems'),
      ("refines_decided", "refines")),
     (re.compile(r'(\d+) of those are universally quantified'), ("quant_cases",)),
+    # The section's per-architecture sentence was the last hand-kept figure
+    # in it, and it drifted with every module added since: the three buckets
+    # it quotes summed to 294 modules and 1,941 theorems while the tree grew
+    # past both. Binding all six numbers makes the split reproducible; they
+    # are defined in scan_tree and sum to the two totals above.
+    (re.compile(r'(\d+) AArch64 modules prove (\d[\d{},\\]*) theorems'),
+     ("arm64_mods", "arm64_thms")),
+    (re.compile(r'(\d+) x86-64 modules prove (\d[\d{},\\]*)'),
+     ("x86_mods", "x86_thms")),
+    (re.compile(r'(\d+) shared modules prove (\d[\d{},\\]*)'),
+     ("shared_mods", "shared_thms")),
 ]
 
 # The harness README states the same development from the harness side, in plain
