@@ -46,6 +46,10 @@ import sys
 # leading `@[...]`: `@[simp] theorem arm64MulToNatMask32` is a proved
 # declaration like any other, and anchoring on a bare column-0 `theorem` left
 # the published count one short of the tree.
+# The C side of the consumption claim: a header counts as consumed when a gate
+# translation unit reaches it through this directive, directly or transitively.
+INCLUDE = re.compile(r'^\s*#\s*include\s*[<"]([^">]+)[>"]', re.M)
+
 THEOREM = re.compile(r'^(?:@\[[^\]]*\]\s*)?theorem (\w+)'
                      r'[^\n]*(?:\n[ \t].*)*', re.M)
 
@@ -301,6 +305,81 @@ def artifact_families(root):
     return {k: len(v) for k, v in fams.items()}
 
 
+def consumed_modules(gen, reached):
+    """How many generated Lean modules a gate root imports.
+
+    The section's consumption claim has a Lean half -- "all 138 modules are
+    reachable through import from a Lean file the gate checks" -- and it was no
+    more checked than the C half. Reachability means imported, transitively, by
+    a module the gate runs `lake env lean` on: a generated module nothing
+    imports is type-checked by nothing, so the figure would stay at 138 while
+    the sentence went false.
+    """
+    dead = sorted(gen - reached)
+    if dead:
+        raise SystemExit(
+            "check_lean_claims: %d of %d generated modules are imported by no "
+            "gate root -- %s" % (len(dead), len(gen), ", ".join(dead)))
+    return len(gen)
+
+
+def consumed_headers(root, makefile):
+    """The C-side reachability: headers reached, directly included, gate units.
+
+    The section says every contract is consumed on both sides -- "all 138
+    headers are #include-reachable from a C file the gate compiles (some only
+    through the simulator header that includes them)". Before this function no
+    checker followed an include, so an orphan header left the figure at 138 and
+    the sentence false. The scan starts at the `.c` files the gate Makefile
+    names, not at every `.c` on disk, and follows `#include` transitively
+    because reaching a header through the header that includes it is what the
+    sentence allows. A generated basename resolves only to its canonical
+    `generated/` path, so a build-directory copy cannot stand in for the
+    artifact the gate ships. All three figures are returned because the README
+    quotes each of them: the split between direct and indirect inclusion is the
+    part a reader would otherwise have to take on trust.
+    """
+    units = sorted({m for m in re.findall(r"[\w./-]+\.c", makefile)
+                    if os.path.exists(os.path.join(root, m))})
+    sources = []
+    for here in ("", "..", "../x86", "../arm64"):
+        for ext in ("c", "h"):
+            sources += glob.glob(os.path.join(root, here, "**", "*." + ext),
+                                 recursive=True)
+    includes, by_name = {}, {}
+    for path in sources:
+        if os.sep + ".lake" + os.sep in path:
+            continue
+        includes[path] = INCLUDE.findall(open(path, errors="ignore").read())
+        by_name.setdefault(os.path.basename(path), []).append(path)
+    canonical = set(glob.glob(os.path.join(root, "generated", "*.h")))
+    for name in by_name:
+        path = os.path.join(root, "generated", name)
+        if path in canonical:
+            by_name[name] = [path]
+    # Direct inclusion is read off the same parse, before the closure runs, so
+    # the split the README quotes is a by-product rather than a second scan.
+    direct = {os.path.basename(h) for u in units
+              for h in includes.get(os.path.join(root, u), ())
+              if os.path.join(root, "generated", os.path.basename(h))
+              in canonical}
+    seen = set()
+    stack = [os.path.join(root, u) for u in units]
+    while stack:
+        for head in includes.get(stack.pop(), ()):
+            for target in by_name.get(os.path.basename(head), ()):
+                if target not in seen:
+                    seen.add(target)
+                    stack.append(target)
+    orphan = sorted(os.path.basename(p) for p in canonical - seen)
+    if orphan:
+        raise SystemExit(
+            "check_lean_claims: %d of %d generated headers reach no gate "
+            "translation unit -- %s"
+            % (len(orphan), len(canonical), ", ".join(orphan)))
+    return len(canonical), len(direct), len(units)
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -440,6 +519,17 @@ def scan_tree(root):
     for arch in arch_mods:
         out[arch + "_mods"] = arch_mods[arch]
         out[arch + "_thms"] = arch_thms[arch]
+    # The section's other half of the pairing claim: every contract is consumed
+    # on both sides. A count short of the family size raises rather than being
+    # published -- an artifact the gate cannot reach is the failure the
+    # sentence rules out, not a size change. The direct/indirect split is
+    # published too so the README's per-side figures all come from one scan.
+    c_reached, c_direct, c_units = consumed_headers(root, makefile)
+    out["c_consumed"] = c_reached
+    out["c_direct"] = c_direct
+    out["c_units"] = c_units
+    out["c_indirect"] = c_reached - c_direct
+    out["lean_consumed"] = consumed_modules(set(gen_counts), seen)
     return out
 
 
@@ -500,7 +590,14 @@ CLAIMS = [
                 r'and (\d[\d,]*)'), ("specs", "headers", "gen_mods")),
     (re.compile(r'from (\d[\d,]*) shared specifications each rendered'),
      ("specs",)),
-    (re.compile(r'every one of the (\d[\d,]*) is also consumed'), ("specs",)),
+    # The sentence's second half asserted consumption without measuring it: a
+    # contract orphaned on one side left all three counts at 138 and made the
+    # sentence false. Both figures now come from a reachability closure -- C
+    # `#include` from the translation units the gate Makefile compiles, Lean
+    # `import` from the roots it runs -- and either closure raising means the
+    # claim is not merely unchecked but unsatisfiable.
+    (re.compile(r'all (\d+) headers are'), ("c_consumed",)),
+    (re.compile(r'all (\d+) modules are'), ("lean_consumed",)),
 ]
 
 # The harness README states the same development from the harness side, in plain
@@ -513,6 +610,14 @@ README_CLAIMS = [
     (re.compile(r'(\d+) of the (\d[\d,]*) refinement-named theorems'),
      ("refines_decided", "refines")),
     (re.compile(r'(\d+) Lean modules'), ("modules",)),
+    # The reachability sentence quotes three figures of its own -- how many
+    # translation units the gate compiles, and how the reached headers split
+    # between direct and indirect inclusion. All three came out of the same
+    # scan, so leaving them hand-kept would have made the new sentence the
+    # only unbound part of the paragraph it explains.
+    (re.compile(r'from the (\d+) `\.c` files'), ("c_units",)),
+    (re.compile(r'(\d+) headers are included'), ("c_direct",)),
+    (re.compile(r'the other (\d+) only'), ("c_indirect",)),
     # The README states the same three family figures and, unlike the section,
     # asserts the pairing outright ("verified as a bijection in both
     # directions"). That sentence was describing a check that did not exist;
@@ -571,11 +676,13 @@ def main(argv):
         return 1
     print("check_lean_claims: %d theorems, %d native_decide over %d modules, "
           "%d modules, %d refinement-named (%d by native_decide), "
-          "%d quantified by cases -- all claims current"
+          "%d quantified by cases, %d/%d contracts consumed (C/Lean)"
+          " -- all claims current"
           % (actual["theorems"], actual["native_decide"],
              actual["native_modules"], actual["modules"],
              actual["refines"], actual["refines_decided"],
-             actual["quant_cases"]))
+             actual["quant_cases"], actual["c_consumed"],
+             actual["lean_consumed"]))
     return 0
 
 

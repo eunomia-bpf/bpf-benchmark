@@ -2612,6 +2612,24 @@ with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 which is the mutant, not a regression.
 
+Step 0566 measured consumption, the half of the
+pairing claim no count can express. The section says
+every contract is used on both sides; step 0565 bound
+the counts and the names, but nothing had followed an
+`#include` or an `import`, so a header no oracle
+compiled left every figure at 138 and the sentence
+false. `consumed_headers` closes `#include`
+transitively from the 248 translation units the gate
+Makefile compiles -- not every `.c` on disk --
+resolving a generated basename only to its canonical
+`generated/` path; `consumed_modules` closes `import`
+over the gate roots. Both raise naming the orphan
+rather than publishing 137. All 138 hold (131 headers
+direct, the other 7 only via the sibling simulator
+headers, so those scan roots are load-bearing), and
+the README's 248/131/7 are bound too (census 436 ->
+437).
+
 Step 0565 bound the artifact-family figures and the
 pairing claimed to verify them. Both documents
 publish 138 for the specs, the generated C headers,

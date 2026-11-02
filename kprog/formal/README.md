@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 436, and 334 steps
+`build/mut_*.py` files exist, the counter's last value is 437, and 335 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -895,7 +895,13 @@ split (`LdrSx`, `CallMem`, ...).
 
 `check_lean_claims.py` now runs that comparison as part of the gate: the three
 counts and the name sets are checked together, and a contract rendered on one
-side only fails the run instead of leaving the figures correct.
+side only fails the run instead of leaving the figures correct. Reachability is
+then followed on both sides too, because "paired" alone does not say a contract
+is used: the checker walks `#include` from the 248 `.c` files the gate Makefile
+compiles — 131 headers are included by one directly, the other 7 only through a
+simulator header — and `import` from the modules the gate type-checks. All 138
+are reached on both sides, and an orphan on either raises with its name rather
+than shrinking a published figure.
 
 The generated headers also bind the hand-written decode at compile time:
 1,051 `_Static_assert`s tie the simulator's `X86_OP_*` / `ARM64_*` constants to
@@ -7579,6 +7585,40 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0566 - the pairing says a contract exists on both sides,
+not that anything uses it
+
+The section claims every contract is "consumed on both sides" and the README
+calls the pairing verified. Step 0565 bound the three counts and compared the
+names, but neither statement is about names: a bijection says a contract exists
+on both sides, consumption says it is used, and nothing anywhere in the gate
+followed an `#include` or an `import`. A header no oracle compiled, or a
+`Generated*.lean` no proof imported, would have left every published figure at
+138 and both sentences false.
+
+`consumed_headers` parses `#include` across the C tree and closes it
+transitively from the translation units the gate Makefile actually compiles, not
+from every `.c` on disk — a file the gate never builds proves nothing — and
+resolves a generated basename only to its canonical `generated/` path, so
+`build/mutcheck/generated/arm64_dispatch_family.h` cannot stand in for the
+shipped artifact. `consumed_modules` closes `import` over the modules the gate
+runs `lake env lean` on. Both raise naming the orphan rather than publishing a
+smaller figure: 138 is the claim, so 137 is the failure the sentence rules out,
+not a size change.
+
+The tree holds — all 138 headers reachable from the 248 gate translation units,
+all 138 modules imported by a gate root. 131 headers are included by a gate `.c`
+directly; the other 7 (`arm64_aux`, `arm64_ccmp_decode`, `arm64_decode`,
+`x86_alu_decode`, `x86_alu_result`, `x86_mem_aux`, `x86_opcode`) are included
+only by `../x86/x86_sim*.h` or `../arm64/arm64_sim*.h`, so the scan's sibling
+roots are load-bearing: confined to `kprog/formal` the closure reaches 131 and
+the check would fail. The README's own figures (248, 131, 7) are bound to the
+same scan, since measuring one sentence and hand-keeping the next is the drift
+this programme exists to remove. The whole scan costs 0.03 s inside a
+five-minute gate.
+
+Census 436 -> 437.
 
 ### Step 0565 - the artifact-family figure was published,
 and the pairing that verifies it did not exist
