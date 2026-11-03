@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 530, and 428 steps
+`build/mut_*.py` files exist, the counter's last value is 531, and 429 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0660 - a renamed Lean declaration is reported, and an
+opcode is not a declaration
+
+Twenty-three Lean names appear in the section as the subject of a chain,
+handler, table, theorem or module. A rename would leave the sentence describing
+something the tree no longer has, and no figure binds a name, so nothing in the
+paper would notice.
+
+Each now has to appear in the tree. The first shape tried was too loose twice
+over: an all-caps token is a C macro, and a lowercase one is an opcode, and both
+turn up inside Lean comments or macro names, so a sentence about the opcode arm
+read as satisfied. Requiring camelCase with an internal capital separates a
+declaration from an opcode.
+
+That leaves the generated model names and the spec-side functions, all of which
+resolve. Renaming any one of them is now reported by name, which is the only
+kind of check available for a claim whose content is an identifier. Census 530
+-> 531.
 
 ### Step 0659 - the last share stated without a derivation, and why
 floored matters at 23

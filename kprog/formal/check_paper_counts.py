@@ -587,6 +587,35 @@ def harness_partitions(text: str) -> list[tuple[str, int, int]]:
     return out
 
 
+def named_lean_objects() -> list[str]:
+    """Lean names the prose presents as a chain, handler, table, theorem...
+
+    A rename leaves the sentence describing something the tree no longer
+    has, and nothing else in the paper would notice: the name is not a
+    figure, so no count binds it.
+    """
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text()).replace("\\brk", "")
+    lean = "\n".join(p.read_text(errors="ignore")
+                      for p in pathlib.Path(__file__).parent.rglob("*.lean")
+                      if ".lake" not in str(p))
+    # Only names shaped like a Lean declaration: an all-caps token is a C
+    # macro or an opcode, and appears in Lean only inside comments.
+    # camelCase only: an opcode is lowercase (sarx) or all caps (MOVBE), and
+    # both appear in Lean only inside comments or macro names.
+    pat = (r"\\texttt\{([a-z][A-Za-z0-9]*[A-Z][A-Za-z0-9_]*|"
+           r"[A-Z][a-z][A-Za-z0-9]*[A-Z][A-Za-z0-9_]*|"
+           r"[A-Z][a-z][A-Za-z0-9]*)\}"
+           r"\s+(?:chain|handler|family|table|theorem|lemma|module|predicate|"
+           r"relation|structure)")
+    out = []
+    for name in sorted(set(re.findall(pat, flat))):
+        if not re.search(r"\b" + re.escape(name) + r"\b", lean):
+            out.append(name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -904,6 +933,14 @@ def main() -> None:
             problems.append(
                 "a harness change partition sums to %d and claims %d"
                 % (s_sum, tot))
+    # A Lean name the prose presents as a chain, handler, theorem or the
+    # like has to exist in the tree. A rename would leave the sentence
+    # describing something gone, and no figure binds the name.
+    gone = named_lean_objects()
+    if gone:
+        problems.append(
+            "%d Lean names the section presents are absent from the tree: %s"
+            % (len(gone), gone))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

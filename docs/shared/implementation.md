@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0660 bound the 23 Lean names the prose presents
+as a chain, handler, table or theorem: each must
+exist in the tree. Opcodes and C macros are excluded
+by requiring camelCase, since both appear in Lean
+comments (census 530 -> 531).
+
+
 Step 0659 derived the last unbound share: 23% of the
 theorems are discharged by native_decide (488 of
 2065, floored -- rounding gives 24). Both stated
