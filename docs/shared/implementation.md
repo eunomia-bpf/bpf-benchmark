@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0633 checked the width-fallback sentence against
+its oracle: four valid codes and 8 invalid, not the
+11 the section claimed. The count now reads from the
+oracle's call list, so neither drifts (census 503 ->
+504).
+
+
 Step 0632 bound the contrast the tag sentence draws:
 widths are identical (12 Lean theorems) and tags
 diverge at code 7, so the check now fails if the

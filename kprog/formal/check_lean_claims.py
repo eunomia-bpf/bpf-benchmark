@@ -662,6 +662,22 @@ def tag_vocabularies(root):
     return len(agree), divergent, only
 
 
+def width_fallback_codes(root):
+    """`(valid, invalid)` codes the width-fallback oracle checks.
+
+    The section says the oracle distinguishes the four valid widths from a
+    stated number of invalid ones. The count is the oracle's own check()
+    calls, minus the four that name real widths.
+    """
+    root = pathlib.Path(root).resolve().parent
+    text = (root / "formal" / "width_fallback_host.c").read_text()
+    calls = [c.strip() for c in re.findall(r"check\(([^,]+),", text)]
+    calls = [c for c in calls if not c.startswith("__u32")]
+    valid = {"X86_WIDTH_8", "X86_WIDTH_16", "X86_WIDTH_32", "X86_WIDTH_64"}
+    return (sum(1 for c in calls if c in valid),
+            sum(1 for c in calls if c not in valid))
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -1566,6 +1582,14 @@ def check(targets, root):
             "check_lean_claims: the tag vocabularies are now %d shared, "
             "divergent at %r, AArch64-only %r; the section says seven, "
             "code 7 and code 8" % (shared_tags, divergent, arm_only))
+    # The width-fallback oracle's coverage, stated as a contrast between the
+    # four valid widths and the invalid codes it also checks.
+    n_valid, n_invalid = width_fallback_codes(root)
+    if (n_valid, n_invalid) != (4, 8):
+        raise SystemExit(
+            "check_lean_claims: the width-fallback oracle now checks %d valid "
+            "and %d invalid codes, and the section says 4 and 8"
+            % (n_valid, n_invalid))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 503, and 401 steps
+`build/mut_*.py` files exist, the counter's last value is 504, and 402 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0633 - the fallback oracle checks eight invalid codes,
+and the sentence said eleven
+
+The width sentence describes the one place the typed model does not reach: the
+generated mask's final arm is the sixty-four-bit mask, so a code that names no
+width still resolves to a width, and that fallback is pinned by an oracle over
+the generated macros rather than proved. The sentence counted the invalid codes
+the oracle checks as eleven.
+
+They are eight: the absent code plus seven codes that reuse the field. The
+oracle's four check calls for real widths and eight for the rest are the whole
+of it, and its banner reports twenty-four cases because each call checks a mask
+and a bit count. The sentence overstated the oracle's coverage by three, which
+would have read as a stronger pin than exists.
+
+The count is now read from the oracle's own call list and compared to the
+sentence, so neither can drift from the other. This is the first figure in this
+family the sentence got wrong since the harness paragraphs were closed, and it
+was found by following the sentence to the file it describes rather than by any
+census. Census 503 -> 504.
 
 ### Step 0632 - the sentence is a contrast, and only one half
 existed
