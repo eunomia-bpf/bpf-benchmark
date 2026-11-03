@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 475, and 373 steps
+`build/mut_*.py` files exist, the counter's last value is 476, and 374 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0605 - a second wording of the same claim was outside
+every check
+
+The harness paragraphs write their detector split two ways. The 44 claims that
+say "N rows catch (...)" are now checked, and the 13 that say "N catch (...)"
+without the word rows were not: a different phrasing of the same quantity,
+invisible to a pattern keyed on one word.
+
+Reading those 13 against their own breakdowns, seven agree exactly and five do
+not, by between one and four. There is no note explaining any of the five, and
+the differences run both ways, so a mutant counted twice in one claim and not at
+all in another would explain the signs but nothing in the text says so. That is
+a real inconsistency in how the section attributes catches to detectors.
+
+Correcting the five needs the harnesses re-run, which is a larger job than a
+prose fix, so they are recorded instead: the checker holds the list of five
+known mismatches and fails if it changes in either direction. A sixth would
+appear, and a silent edit to one of the five would be reported as well, so the
+discrepancy stays visible and is not mistaken for a clean section. Census 475 ->
+476.
 
 ### Step 0604 - the parser now reports how much of the section it
 read

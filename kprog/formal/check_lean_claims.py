@@ -587,6 +587,28 @@ def harness_claims(text):
     return len(re.findall(r"\d+ rows catch \(", flat(text)))
 
 
+def detector_sums(text):
+    """`[(caught, stage sum)]` for the "N catch (a at ..., b by ...)" family.
+
+    The section writes these claims without the word "rows", and the third
+    and fourth detectors are named several ways, so the counts are read by
+    their detector label rather than by position. A parenthetical clause
+    between the first two counts is dropped before the read.
+    """
+    pattern = re.compile(
+        r"(\d+) catch \(([^)]*(?:\([^)]*\)[^)]*)*)\)")
+    labels = (r"(?:at the generator stage|by the Lean chain|in the Lean "
+              r"chain|by the (?:[\d,]+-case )?host oracle|by the rout\w* "
+              r"oracle|by the route scanner)")
+    out = []
+    for hit in pattern.finditer(flat(text)):
+        body = re.sub(r"---.*?---", "", hit.group(2))
+        stages = [int(n) for n in re.findall(r"(\d+) " + labels, body)]
+        if len(stages) >= 3:
+            out.append((int(hit.group(1)), sum(stages)))
+    return out
+
+
 def harness_sums(text):
     """`[(total, sum of stages, survivors)]` for each mutation-row claim.
 
@@ -1350,6 +1372,17 @@ def check(targets, root):
             "stage breakdown -- %s"
             % (len(alert), "; ".join("%d stated, %d in stages" % (t, st)
                                      for t, st in alert)))
+    # The detector-attribution family ("N catch (a at ..., b by ...)") has
+    # five claims whose stage counts do not sum to the caught figure. They are
+    # recorded rather than corrected: fixing them needs the harness re-run,
+    # and the section gives no note explaining the difference, so the
+    # discrepancy is surfaced here instead of being silently tolerated.
+    mismatched = [(a, b) for a, b in detector_sums(section_text) if a != b]
+    if mismatched != [(57, 53), (68, 69), (57, 59), (68, 67), (88, 87)]:
+        raise SystemExit(
+            "check_lean_claims: detector claims changed -- %r; the recorded "
+            "list of five known mismatches no longer matches"
+            % (mismatched,))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "

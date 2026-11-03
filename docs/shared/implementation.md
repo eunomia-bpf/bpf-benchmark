@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0605 found 13 harness claims in a second wording
+('N catch (' with no 'rows') that no check covered.
+Five disagree with their own detector breakdown by
+1-4 with no note; they are recorded and any change,
+sixth mismatch or silent fix, fails (census 475 ->
+476).
+
+
 Step 0604 made the parser report its own coverage:
 harness_claims counts claims by wording, harness_sums
 counts parsed ones, and a shortfall fails. Restoring
