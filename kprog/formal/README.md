@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 502, and 400 steps
+`build/mut_*.py` files exist, the counter's last value is 503, and 401 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0632 - the sentence is a contrast, and only one half
+existed
+
+The tag sentence is a contrast: the provenance vocabularies are not identical
+where the width vocabulary is. The width half is already machine-checked, by the
+twelve theorems of the cross-ISA width module, which compare ten properties of
+the two generated contracts and would fail to build if either spec drifted.
+
+The tag half was checked last step. What was not was the contrast itself: if the
+two tag vocabularies ever came to agree everywhere, the sentence would be false
+while every width theorem still held and the tag comparison still passed, since
+it asserts a divergence rather than testing that one exists.
+
+So the check now fails when the divergence is empty, which is the statement's
+own form. Verified by making the x86 helper-id tag agree with its AArch64
+counterpart: reported as the vocabularies agreeing everywhere, with the
+section's contrast named as what breaks. Census 502 -> 503.
 
 ### Step 0631 - the tag sentence was prose about two files, and
 the two can be compared

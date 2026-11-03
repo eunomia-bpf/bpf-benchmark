@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0632 bound the contrast the tag sentence draws:
+widths are identical (12 Lean theorems) and tags
+diverge at code 7, so the check now fails if the
+divergence empties. Verified by making the two agree
+(census 502 -> 503).
+
+
 Step 0631 bound the first qualitative claim the
 checkers read: the cross-ISA tag vocabulary. Both
 headers are compared directly, and the sentence's

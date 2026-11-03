@@ -1552,6 +1552,15 @@ def check(targets, root):
     # includes the other, so nothing else compares them: seven names agree
     # across codes 0 through 6, code 7 diverges, and code 8 is AArch64's.
     shared_tags, divergent, arm_only = tag_vocabularies(root)
+    # The sentence's other half is a contrast: the width vocabulary *is*
+    # identical, and that is proved in CrossIsaWidth, so the two claims
+    # together say "identical here, divergent there". A drift that made the
+    # widths diverge would break the Lean module; a drift that made the tags
+    # agree would leave the contrast false while the module still built.
+    if not divergent:
+        raise SystemExit(
+            "check_lean_claims: the tag vocabularies now agree everywhere, "
+            "so the section's contrast with the width vocabulary is false")
     if (shared_tags, divergent, arm_only) != (7, [7], [8]):
         raise SystemExit(
             "check_lean_claims: the tag vocabularies are now %d shared, "
