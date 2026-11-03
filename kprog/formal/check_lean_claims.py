@@ -1227,6 +1227,18 @@ def check(targets, root):
             "check_lean_claims: %d kernel-only theorems draw on choice but "
             "the kernel-only class has %d"
             % (actual["ax_choice"], actual["ax_kernel"]))
+    # The section distinguishes checks the build runs from those it does not.
+    # Keeping that true costs one scan of the Makefile: a checker moved into
+    # the gate without the sentence changing, or the reverse, would make the
+    # prose describe a build that no longer exists.
+    makefile = open(os.path.join(root, "Makefile")).read()
+    in_gate = {c for c in ("check_paper_counts", "check_readme_counts")
+               if c in makefile}
+    if in_gate:
+        raise SystemExit(
+            "check_lean_claims: %s now runs in the build, but the section "
+            "says the case-count script is outside it"
+            % ", ".join(sorted(in_gate)))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "

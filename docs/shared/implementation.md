@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0598 found the case-count sentence reading as
+build coverage when its script is not a Makefile
+target: 11 checkers run in the gate, 2 do not. The
+sentence says outside the build now, and moving
+either into the gate without updating it fails
+(census 468 -> 469).
+
+
 Step 0597 paired 306 modules with 2,065 theorems that
 came from two different traversals: the count is the
 gate's reachable closure, the theorems are every

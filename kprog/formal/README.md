@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 468, and 366 steps
+`build/mut_*.py` files exist, the counter's last value is 469, and 367 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0598 - the case-count script was described as part of the
+build and is not one
+
+The case-count sentence said the section's counts are kept honest "the same way"
+as the rest, which reads as build coverage. They are checked by a second script,
+and that script is not a Makefile target: eleven checkers run in the build and
+two do not, this one and the README count check. Both pass, but neither runs
+when the gate runs.
+
+The sentence now says so, outside the build, which is the honest framing and
+also the more useful one: a reader can tell which figures the build re-derives
+and which depend on someone running a second command. That distinction matters
+more than usual here, because the case counts are exactly the figures that
+drifted ten times in the past.
+
+Keeping the distinction true costs one scan of the Makefile. Moving either
+checker into the build without changing the sentence now fails, and the test is
+the same shape as the reachability and partition checks: a property of the tree
+the prose depends on, verified where the prose is verified. Census 468 -> 469.
 
 ### Step 0597 - the module count and the theorem count came from
 different traversals
