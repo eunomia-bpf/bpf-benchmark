@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0595 found 'each of the six' naming five forms,
+one of which (admit) the sentence omitted entirely.
+The count now derives from check_no_sorry.py's
+keyword list, verified both ways: changing either the
+sentence or the scanner fails (census 465 -> 466).
+
+
 Step 0594 measured Classical.choice across the tree:
 177 theorems draw on it, 137 of which also assume the
 compiler, so the sentence's 40 was correct only for

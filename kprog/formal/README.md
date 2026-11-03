@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 465, and 363 steps
+`build/mut_*.py` files exist, the counter's last value is 466, and 364 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0595 - the sentence counted six forms and its checker
+scans five
+
+The sentence said the tree proves its theorems "with no sorry, no axiom, and no
+opaque/unsafe/partial definitions---each of the six checked by the gate". It
+names five forms, not six, and the checker it describes scans five: sorry and
+admit as one placeholder class, then the four declaration keywords. So the
+sentence both miscounted and omitted admit, which the scanner does catch.
+
+The count is now derived from the scanner rather than restated, so the two
+cannot drift: adding a keyword to check_no_sorry.py moves the published figure,
+verified by adding extern to the declaration pattern and watching the count go
+from 5 to 6. Changing the sentence alone fails, and changing the scanner alone
+fails, which is the pair the claim actually asserts.
+
+This is the arithmetic kind of defect rather than a measurement one, and it is
+the reason to bind it rather than correct it: a form added to the scan without
+the sentence would have left the paper claiming a smaller guarantee than the
+gate provides, and a sentence naming a form the scan omits would have claimed a
+larger one. Census 465 -> 466.
 
 ### Step 0594 - the choice figure held for one class and read as
 the whole tree

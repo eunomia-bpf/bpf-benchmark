@@ -858,6 +858,13 @@ def scan_tree(root):
         "ax_none": 617,
         "ax_orb": 623,
         "ax_kernel": 825,
+        # The scanned forms, counted from check_no_sorry.py rather than
+        # restated: sorry/admit is one class, then the four declaration
+        # keywords.
+        "nossorry_forms": 1 + len(
+            re.search(r'DECL = re\.compile\(r"\^\\s\*\(([^)]*)\)',
+                      open(os.path.join(root, "check_no_sorry.py")).read()
+                      ).group(1).split("|")),
         "ax_choice": 40,
         "ax_choice_all": 177,
         "ax_choice_both": 137,
@@ -1072,6 +1079,10 @@ CLAIMS = [
     # `#include` from the translation units the gate Makefile compiles, Lean
     # `import` from the roots it runs -- and either closure raising means the
     # claim is not merely unchecked but unsatisfiable.
+    # The sentence named five forms and called them six. The count is bound
+    # to the checker's own keyword list, so adding a scanned form without
+    # changing the sentence (or the reverse) is reported.
+    (re.compile(r'checks all (\d+) forms'), ("nossorry_forms",)),
     (re.compile(r'all (\d+) headers are'), ("c_consumed",)),
     (re.compile(r'all (\d+) modules are'), ("lean_consumed",)),
     # "all 138 pass --check" was the last generator-side figure left unbound:
