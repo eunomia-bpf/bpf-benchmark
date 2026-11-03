@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 474, and 372 steps
+`build/mut_*.py` files exist, the counter's last value is 475, and 373 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0604 - the parser now reports how much of the section it
+read
+
+Step 0603 widened the row-count parser after finding it silently covered half
+the claims. The lesson generalizes: a checker that parses a subset reports the
+same clean run as one that parses everything, so the count of parsed instances
+belongs beside the verdict. Without it, partial coverage is indistinguishable
+from correctness.
+
+The section now states both numbers. harness_claims counts the claims by their
+wording alone, harness_sums counts the ones the parser understood, and the
+split-first form is counted separately because it legitimately carries the
+stages without the catch clause. The gate fails if the parser accounts for fewer
+claims than the section contains.
+
+Verified by restoring the narrow parser from step 0602: it reports parsed 23 of
+44, so the rest went unread, which is the exact failure the previous step had to
+be told about by inspection. The guard costs one regex over text the checker has
+already read. Census 474 -> 475.
 
 ### Step 0603 - the invariant from the previous step saw half the
 claims and called the rest clean

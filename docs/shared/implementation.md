@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0604 made the parser report its own coverage:
+harness_claims counts claims by wording, harness_sums
+counts parsed ones, and a shortfall fails. Restoring
+the 0602 parser now reports 'parsed 23 of 44', so the
+bug from step 0603 is caught mechanically (census 474
+-> 475).
+
+
 Step 0603 fixed step 0602's own invariant, which saw
 23 of 45 harness claims and called the rest clean: a
 parenthetical after the third stage defeated the

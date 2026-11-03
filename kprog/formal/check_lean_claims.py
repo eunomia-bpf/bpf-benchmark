@@ -576,6 +576,17 @@ def axiom_sample(root, modules):
     return out
 
 
+def harness_claims(text):
+    """How many mutation-row claims the section contains, by its own wording.
+
+    A count of claims rather than of parseable ones, so the parser can be
+    held to it: a pattern that matched a third of the section reported a
+    clean run and became the bug it was written to catch, which only a
+    coverage count makes visible.
+    """
+    return len(re.findall(r"\d+ rows catch \(", flat(text)))
+
+
 def harness_sums(text):
     """`[(total, sum of stages, survivors)]` for each mutation-row claim.
 
@@ -1319,7 +1330,20 @@ def check(targets, root):
     # Every mutation-row claim's stated count must equal its own detector
     # breakdown. One said 93 while its stages added to 101.
     section_text = pathlib.Path(targets[0][0]).read_text()
-    alert = [(t, st) for t, st in harness_sums(section_text) if t != st]
+    sums = harness_sums(section_text)
+    claims = harness_claims(section_text)
+    # The section writes these claims in two forms: "N rows catch (...)",
+    # which carries the detector split, and the split-first form used where
+    # the stages describe the run rather than the caught subset. The parser
+    # must account for every claim of the first form, since a pattern that
+    # silently misses some is indistinguishable from a clean section.
+    split_first = len(re.findall(r"rows split \d+ at the generator stage",
+                                 flat(section_text)))
+    if sums and len(sums) + split_first < claims:
+        raise SystemExit(
+            "check_lean_claims: parsed %d of %d harness row claims, so the "
+            "rest went unread" % (len(sums), claims))
+    alert = [(t, st) for t, st in sums if t != st]
     if alert:
         raise SystemExit(
             "check_lean_claims: %d harness claim(s) disagree with their own "
