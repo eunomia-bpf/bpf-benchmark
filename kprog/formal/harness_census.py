@@ -37,10 +37,25 @@ def rows(path):
     """
     tree = ast.parse(open(path, errors="ignore").read())
     out = []
+    # Two `row` shapes exist. The detector one is
+    # row(name, "gen"|"lean_chain"|"host"|..., edits, equivalent=...); the
+    # path one is row(name, SOME_PATH, old, new), a different family that
+    # names a file rather than a detector. Counting the second as rows with
+    # an unknown detector classified a third of the tree by guesswork.
+    shape = next((n for n in ast.walk(tree)
+                  if isinstance(n, ast.FunctionDef) and n.name == "row"), None)
+    args = [a.arg for a in shape.args.args] if shape else []
+    if len(args) >= 4 and args[3] == "new":
+        return []
+    # A third shape, row(name, edits, equivalent=...), names no detector
+    # because the harness runs one of them; its rows still count, and the
+    # detector is the single one the harness uses.
+    detectorless = len(args) >= 2 and args[1] == "edits"
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "row":
-            det = getattr(node.args[1], "value", "?") if len(node.args) > 1 \
-                else "?"
+            det = ("host" if detectorless else
+                   getattr(node.args[1], "value", "?")
+                   if len(node.args) > 1 else "?")
             equiv = any(k.arg == "equivalent"
                         and isinstance(k.value, ast.Constant)
                         and k.value.value is True for k in node.keywords)
@@ -98,11 +113,18 @@ def partitions(path):
     found = rows(path)
 
     def norm(det):
-        # `route` is its own detector in the harnesses whose claim names a
-        # routed oracle; folding it into `host` made those claims unmatchable.
-        return ("lean" if det.startswith("lean") else
-                "gen" if det.startswith("gen") else
-                "route" if det.startswith("route") else "host")
+        # Recognise by prefix, and say so when a label fits none of them: a
+        # default bucket silently classified a third of the tree's rows as
+        # host, and the figure looked like a measurement.
+        if det.startswith("lean") or det == "chain":
+            return "lean"
+        if det.startswith("gen") or det == "movk_gen":
+            return "gen"
+        if det.startswith("route"):
+            return "route"
+        if det.startswith("host"):
+            return "host"
+        return "UNKNOWN:" + det
 
     caught = [r for r in found if not r[2]]
     return (collections.Counter(norm(d) for _, d, _ in found),
@@ -129,7 +151,7 @@ def detectors(body):
     # A count written as a word: "plus the one movk-regex catch". The harness
     # has one such row and it is caught, so it belongs to the host total the
     # claim is asserting.
-    out["host"] += len(re.findall(r"\bthe one [\w-]+ catch", body))
+    out["gen"] += len(re.findall(r"\bthe one [\w-]+ catch", body))
     return out
 
 

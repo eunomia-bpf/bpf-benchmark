@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 486, and 384 steps
+`build/mut_*.py` files exist, the counter's last value is 487, and 385 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0616 - a third of the census's rows were a different kind
+of row entirely
+
+The census recognised three row families by name alone. Two more existed: one
+whose row takes a file path where the detector family takes a detector, and one
+whose rows name no detector because the harness runs a single one. Both were
+being read as detector rows with an unknown label, which classified 5067 of
+15736 rows, a third of the tree, as host by default.
+
+The signature now decides: a row whose fourth parameter is a source fragment
+belongs to the path family and has no detector counts, and a row whose second
+parameter is the edit list belongs to a single-detector harness. That leaves 46
+rows of 11752 with an unrecognised label, and an unrecognised label is now
+reported as such rather than folded into a bucket.
+
+The two claims that test this are the auxiliary harness, which names a routed
+oracle and a host oracle separately, and the sieve that keeps the one movk-regex
+row. Both now match exactly. The measurement is the same ten claims as before,
+but it now covers three quarters again as many rows and no longer guesses at the
+label of a third of them. Census 486 -> 487.
 
 ### Step 0615 - the census guessed at labels it did not recognise,
 and guessed wrong

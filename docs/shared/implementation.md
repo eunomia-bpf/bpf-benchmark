@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0616 taught the census the two row families it
+was misreading: one names a file path, one names no
+detector. Unknown labels fell from 32% of rows to
+0.4%, and a label it cannot place is now reported
+rather than folded into host. Ten claims still match,
+none disagree (census 486 -> 487).
+
+
 Step 0615 gave the census a route bucket: folding
 routed oracles into host made claims naming both
 unmatchable, which is why the 87-catch figure looked
