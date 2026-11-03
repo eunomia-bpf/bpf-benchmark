@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0622 resolved the last unmatched row claim: the
+load-bytes harness gives 29/14/7, not 29/16/5 — right
+total, two buckets off in opposite directions. All 44
+row claims and 11 catch claims now resolve and all 55
+agree (census 492 -> 493).
+
+
 Step 0621 taught the reader the possessive generator
 spelling, which revealed a greedy branch that had
 silently cut the parse to 17 claims; bounded, all 44

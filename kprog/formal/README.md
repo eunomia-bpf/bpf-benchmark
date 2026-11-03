@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 492, and 390 steps
+`build/mut_*.py` files exist, the counter's last value is 493, and 391 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0622 - the last claim summed right and split the wrong
+rows
+
+The last row claim without a harness names a 63-mutation run over a four-width
+load contract and a byte-pointer oracle, and the harness that matches both is
+the load-bytes one: 63 rows, 50 catching, 13 surviving.
+
+Its caught rows divide 29 generator stage, 14 Lean chain and 7 host. The
+sentence said 29, 16 and 5. The caught total, the survivor count and the
+generator count were all right, and the other two were off by two each in
+opposite directions, so they summed to the right total and read as a correct
+split of the wrong rows.
+
+That is the last one. Forty-four row claims and eleven catch claims all resolve
+to a harness, and all fifty-five agree with it. Both families are compared in
+the gate, with the coverage floor at their present size, so neither a drifted
+figure nor a claim that stops resolving goes unnoticed. Census 492 -> 493.
 
 ### Step 0621 - teaching the reader one spelling broke the parse
 it was meant to extend
