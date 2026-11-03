@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0581 found the composition claim false: two
+handler refinements do end in native_decide, after
+one rewrite. The sentence now reports the split --
+165 compositions, 151 citing, 14 evaluating, 2 of
+them compositions -- with every figure bound (census
+451 -> 452).
+
+
 Step 0580 corrected what the 28 enumerations range
 over: three are Boolean triples and one takes a
 BitVec 32, which stays free while the enum is split.

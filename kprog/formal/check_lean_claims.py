@@ -77,6 +77,11 @@ LIST_PAIR = re.compile(r"^(\w+) = (\w+)\s*$")
 # and a conjunct that pins one value outside it. Both are read from the
 # statement, and the pair is what the paper's clause is about -- a sweep alone
 # says nothing about the values the table does not cover.
+# A statement that composes a step or handler: the shapes the section calls
+# compositional obligations. `*_example` names an instantiation of one.
+COMPOSES = re.compile(r"StepSpec|_step_|HandlerOf|handlerFor|compose")
+COMPOSE_EXAMPLE = re.compile(r"example")
+
 SWEEP_RANGE = re.compile(r"^\(\(List\.(?:fin)?[Rr]ange \w+\)\.all", re.S)
 
 # A table's image at every width: `List.map f [..]` equated to a literal list.
@@ -603,6 +608,7 @@ def scan_tree(root):
         for imp in imports[s]:
             seen_defs |= all_defs.get(imp, set())
         visible[s] = seen_defs
+    compose = [0, 0, 0]
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": [],
                 "tabled": [], "outside": [],
@@ -621,6 +627,18 @@ def scan_tree(root):
             theorems += 1
             named = refinement_named(m.group(1))
             refines += named
+            # Composition-shaped statements, and how their proofs close: the
+            # section states this split rather than denying evaluation.
+            stmt_only = block[:block.find(":=")]
+            if COMPOSES.search(stmt_only):
+                compose[0] += 1
+                if "native_decide" not in block[block.find(":="):]:
+                    compose[1] += 1
+                elif not COMPOSE_EXAMPLE.search(m.group(1)):
+                    bounded = bool(re.search(r"[(\[{]",
+                                             signature(block, m.group(1))))
+                    if bounded:
+                        compose[2] += 1
             if "native_decide" in block:
                 # Classify the use: a bounded enumeration (binders, split by
                 # cases), an example (no binders), a refinement-named table
@@ -776,6 +794,10 @@ def scan_tree(root):
         # The overlap that keeps the three kinds from summing to the total.
         "kinds_overlap": counters["kind"][4],
         "split_bitvec": counters["split_bv"],
+        "compose_total": compose[0],
+        "compose_cited": compose[1],
+        "compose_eval": compose[0] - compose[1],
+        "compose_comp": compose[2],
         "kinds_sum": (counters["kind"][0] + counters["kind"][1]
                       + counters["kind"][2] - counters["kind"][4]),
         "images": len(counters["image"]),
@@ -847,6 +869,15 @@ CLAIMS = [
     (re.compile(r'(\d+) concrete example values'), ("kinds_example",)),
     (re.compile(r'The (\d+) enumerations are universally quantified'),
      ("kinds_enum",)),
+    # The section claimed compositional obligations are never discharged by
+    # evaluation. Reading the statements finds 165 compositions, 151 of which
+    # cite or rewrite, and two that rewrite once and then decide a finite
+    # table -- so the sentence states the split instead of denying it.
+    (re.compile(r'of the (\d+) theorems whose statement composes'),
+     ("compose_total",)),
+    (re.compile(r', (\d+) are proved by'), ("compose_cited",)),
+    (re.compile(r'and the (\d+) that do\s+evaluate'), ("compose_eval",)),
+    (re.compile(r'except (\d+)\. Those'), ("compose_comp",)),
     # The section's per-architecture sentence was the last hand-kept figure
     # in it, and it drifted with every module added since: the three buckets
     # it quotes summed to 294 modules and 1,941 theorems while the tree grew

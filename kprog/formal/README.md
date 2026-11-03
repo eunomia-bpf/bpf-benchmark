@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 451, and 349 steps
+`build/mut_*.py` files exist, the counter's last value is 452, and 350 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0581 - two handler refinements end in evaluation, and the
+sentence said none did
+
+The paragraph claimed "compositional obligations are not discharged this way:
+each handler composition is proved by rewriting or by citing an already-proved
+refinement, so a change to its statement cannot be absorbed by evaluation
+alone". Two negations, no figure, and one counterexample.
+
+Two counterexamples, in fact. `x86_alu_handler_refines` splits over the ALU enum
+and decides each arm, and `x86_alu_aux_handler_refines` rewrites through the
+lane-aux round trip and then does the same -- both are handler refinements, and
+both end in evaluation over a finite table. The reason they survive the
+sentence's argument is that their evaluation is bounded: the enum is finite, so
+the deciding runs over constructors rather than over open data.
+
+The sentence now reports the split rather than denying it. Of 165 theorems whose
+statement composes a step or handler, 151 cite or rewrite and 14 evaluate; 12 of
+the 14 are example values that instantiate a composition, and the 2 that are
+compositions do one rewrite plus one bounded decision. That is a narrower claim
+than "not discharged this way", and it is the one the tree supports. Census 451
+-> 452.
 
 ### Step 0580 - the enumerated type was described wrongly, and the
 bit-vector binder was the reason it still held
