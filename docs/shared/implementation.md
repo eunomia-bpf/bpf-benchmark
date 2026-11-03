@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0618 resolved the last unmatched claim: the
+conditional-select harness gives 42/29/31/3, not the
+43/31/26/5 the sentence stated. All eleven claims in
+the family now match a harness and all agree (census
+488 -> 489).
+
+
 Step 0617 placed the last 46 rows: constants that
 select a file resolve by name (LEAN prefix) and the
 rest run host, verified against the harness's own

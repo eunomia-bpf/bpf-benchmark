@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 488, and 386 steps
+`build/mut_*.py` files exist, the counter's last value is 489, and 387 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0618 - the last claim without a harness had three buckets
+off by up to eight
+
+With the census reading every row correctly, the last claim without a harness
+could be resolved. The 105-catch sentence names a 337-case scanner and a routed
+oracle, and the harness that carries both is the conditional-select one: 112
+rows, 105 catching, 7 surviving.
+
+Its caught rows divide 42 generator stage, 29 Lean chain, 31 host and 3 route.
+The sentence said 43, 31, 26 and 5. The total and the survivor count were right,
+and generator stage was within one, so the sentence read as a figure taken from
+the harness; three of its four buckets were wrong, by between one and eight.
+
+That resolves the whole set: eleven claims in this family, every one now matched
+to a harness, and every one agreeing with it. The earlier steps had ten matched
+and one unmatched, which was the claim whose figures were furthest from its
+harness. Census 488 -> 489.
 
 ### Step 0617 - the last unplaced rows named a file where a
 detector belongs
