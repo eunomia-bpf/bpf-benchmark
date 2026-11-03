@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0582 measured 'most of the value and flag
+identities are closed by bv_decide'. It is a quarter:
+149 of 563 bit-vector-identity theorems, 2 by
+native_decide, 412 by citation; the sentence now
+states the class, both counts, and the remainder
+(census 452 -> 453).
+
+
 Step 0581 found the composition claim false: two
 handler refinements do end in native_decide, after
 one rewrite. The sentence now reports the split --

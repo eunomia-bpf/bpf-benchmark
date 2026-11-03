@@ -609,6 +609,7 @@ def scan_tree(root):
             seen_defs |= all_defs.get(imp, set())
         visible[s] = seen_defs
     compose = [0, 0, 0]
+    ident = [0, 0, 0]
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": [],
                 "tabled": [], "outside": [],
@@ -627,6 +628,19 @@ def scan_tree(root):
             theorems += 1
             named = refinement_named(m.group(1))
             refines += named
+            # An identity over bit-vector binders, and whether bv_decide
+            # closes it. The section said bv_decide closes most of them; the
+            # measurement says a quarter, and the rest cite, rewrite, or
+            # simplify, so the sentence states the share.
+            bsig = signature(block, m.group(1))
+            bstmt = statement(block, m.group(1)).strip()
+            if "BitVec" in bsig and re.search(r"[^<>=!]=(?!=)", bstmt):
+                ident[0] += 1
+                bbody = block[block.find(":="):]
+                if re.search(r"\bbv_decide\b", bbody):
+                    ident[1] += 1
+                elif "native_decide" in bbody:
+                    ident[2] += 1
             # Composition-shaped statements, and how their proofs close: the
             # section states this split rather than denying evaluation.
             stmt_only = block[:block.find(":=")]
@@ -794,6 +808,11 @@ def scan_tree(root):
         # The overlap that keeps the three kinds from summing to the total.
         "kinds_overlap": counters["kind"][4],
         "split_bitvec": counters["split_bv"],
+        "ident_total": ident[0],
+        "ident_bv": ident[1],
+        "ident_nd": ident[2],
+        "ident_cite": ident[0] - ident[1] - ident[2],
+        "ident_share": 100 * ident[1] // max(ident[0], 1),
         "compose_total": compose[0],
         "compose_cited": compose[1],
         "compose_eval": compose[0] - compose[1],
@@ -873,6 +892,14 @@ CLAIMS = [
     # evaluation. Reading the statements finds 165 compositions, 151 of which
     # cite or rewrite, and two that rewrite once and then decide a finite
     # table -- so the sentence states the split instead of denying it.
+    # The paragraph said bv_decide closes most value and flag identities.
+    # Measuring by statement shape gives a quarter, so the sentence states the
+    # share and the split instead of a direction.
+    (re.compile(r'Of the (\d+) theorems\s+stating an equality'),
+     ("ident_total",)),
+    (re.compile(r'binders, (\d+) are closed by'), ("ident_bv",)),
+    (re.compile(r'and (\d+) by \\texttt\{native'), ("ident_nd",)),
+    (re.compile(r'and the other (\d+) cite'), ("ident_cite",)),
     (re.compile(r'of the (\d+) theorems whose statement composes'),
      ("compose_total",)),
     (re.compile(r', (\d+) are proved by'), ("compose_cited",)),

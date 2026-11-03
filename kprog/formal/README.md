@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 452, and 350 steps
+`build/mut_*.py` files exist, the counter's last value is 453, and 351 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0582 - bv_decide is the arithmetic tactic of record, and
+only a quarter of the way identities are proved
+
+The paragraph said "the width-narrowing steps and most of the value and flag
+identities are closed by bv_decide". Nothing counted, and the direction was
+wrong: of the 563 theorems stating an equality over bit-vector binders,
+bv_decide closes 149, native_decide 2, and the other 412 cite, rewrite, or
+simplify. A quarter, not most.
+
+The population had to be stated before the share could be, and the shape is what
+makes it decidable: an equality whose binders quantify bit-vectors. That
+excludes the 165 bv_decide theorems that decide a closed table, which is why the
+class is 563 rather than the whole tree, and it excludes the inequality bounds
+that bv_decide also discharges. The sentence now gives the class, the two tactic
+counts, and the remainder.
+
+What survives from the original claim is that bv_decide is the arithmetic tactic
+of record -- 149 uses, by far the most of any single tactic on this class --
+while being the usual way to prove one for only a quarter of them. The rest are
+citations and rewrites, which is the same structure the composition paragraph
+reports, so the two paragraphs now agree about how obligations are discharged.
+Census 452 -> 453.
 
 ### Step 0581 - two handler refinements end in evaluation, and the
 sentence said none did
