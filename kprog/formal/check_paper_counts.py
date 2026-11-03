@@ -844,6 +844,46 @@ def cited_specs(text: str) -> list[str]:
     return bad
 
 
+def shake_field_gaps(
+        text: str) -> tuple[int, list[tuple[int, str, list[str]]]]:
+    """`(claims, [(rows, harness, fields the harness never names)])`.
+
+    "The N-row shake exercised every spec field." The field claim is
+    checkable where the row count identifies exactly one harness: that
+    harness must name the spec's key or one of that field's values, because
+    the shakes edit the spec's text rather than parsing it.
+    """
+    import json
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    claims = [int(n) for n in re.findall(
+        r"The (\d+)-row shake exercised every spec field", flat)]
+    totals = harness_totals()
+    here = pathlib.Path(__file__).parent
+    out = []
+    for n in claims:
+        names = [k for k, v in totals.items() if v == n]
+        if len(names) != 1:
+            continue
+        h = names[0]
+        spec = here / (h[len("mut_"):] + "_spec.json")
+        if not spec.exists():
+            continue
+        src = (here / "build" / (h + ".py")).read_text(errors="ignore")
+        gaps = []
+        for key, val in json.loads(spec.read_text()).items():
+            if key == "schema_version":
+                continue
+            vals = re.findall(r'"([^"]{4,})"', json.dumps(val))
+            if re.search(re.escape(key), src):
+                continue
+            if any(re.search(re.escape(v), src) for v in vals[:6]):
+                continue
+            gaps.append(key)
+        if gaps:
+            out.append((n, h, gaps))
+    return len(claims), out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1312,6 +1352,20 @@ def main() -> None:
     # an exact join, unlike matching a size against the set of all sizes.
     for bad in cited_specs(text):
         problems.append(bad)
+    # Fifteen sentences say a shake "exercised every spec field". Where the
+    # row count identifies one harness, that harness must name each field's
+    # key or one of its values -- the shakes edit the spec text rather than
+    # parsing it, so a field the harness never names is a field it never
+    # touched.
+    n_shakes, gaps = shake_field_gaps(text)
+    if n_shakes != 15:
+        problems.append(
+            "the section states %d shake field claims; 15 when this was "
+            "written" % n_shakes)
+    for rows, harness, fields in gaps:
+        problems.append(
+            "the %d-row shake is %s and it never names %s"
+            % (rows, harness, fields))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

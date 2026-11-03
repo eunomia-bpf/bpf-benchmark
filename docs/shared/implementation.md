@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0673 checked the 15 "every spec field" shake
+claims where the row count identifies one harness:
+all 3 name every field, by key or by value. A
+key-only test would have been wrong, since the shakes
+edit the spec text (census 543 -> 544).
+
+
 Step 0672 joined cited specs to their harnesses by
 stem, which is exact: all 138 specs have a
 mut_<stem>.py, and the 16 cited ones all resolve. The

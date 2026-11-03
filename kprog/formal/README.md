@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 543, and 441 steps
+`build/mut_*.py` files exist, the counter's last value is 544, and 442 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0673 - a field is exercised by its value, not only by its
+key
+
+Fifteen sentences say a shake exercised every field of its specification. That
+is checkable where the row count identifies one harness, because the shakes edit
+the specification's text rather than parsing it: a field the harness never names
+is a field it never touched, whatever the shake's size.
+
+Three of the fifteen row counts identify a single harness, and all three name
+every field, either by the key or by one of the field's values. The other twelve
+sizes are shared between harnesses, so the join stays open there, which is the
+same limit the size census reached.
+
+The check had to count a field as exercised by a value as well as by a key. A
+harness that edits a JSON string writes the string, not the key, so a key-only
+test would have reported fields as untouched that the harness demonstrably
+mutates. Census 543 -> 544.
 
 ### Step 0672 - a filename joins exactly where a size does not
 
