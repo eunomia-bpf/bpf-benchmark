@@ -637,6 +637,28 @@ def named_files() -> list[str]:
     return out
 
 
+def named_instructions() -> list[str]:
+    """Names the prose presents as an arm, opcode, instruction or form.
+
+    An instruction name is not a figure and not a file, so nothing else
+    binds it: a rename in the dispatcher would leave the sentence naming an
+    arm the tree no longer has. Python sources count too, because a battery
+    pins arms in the tooling as well as in the simulators.
+    """
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text()).replace("\\brk", "")
+    names = sorted(set(re.findall(
+        r"\\texttt\{([A-Z][A-Za-z0-9_]{1,18})\}\s+"
+        r"(?:arm|opcode|instruction|form)\b(?![a-z])", flat)))
+    src = "\n".join(p.read_text(errors="ignore")
+                     for p in pathlib.Path(__file__).parent.parent.rglob("*")
+                     if p.suffix in (".c", ".h", ".lean", ".py")
+                     and ".lake" not in str(p))
+    return [n for n in names
+            if not re.search(r"\b" + re.escape(n) + r"\b", src, re.I)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -996,6 +1018,13 @@ def main() -> None:
         problems.append(
             "a battery-local witness figure is no longer stated: %s"
             % sorted(witnesses - sizes))
+    # An instruction name the prose presents as an arm or opcode has to
+    # exist in the tree, in a simulator or in the tooling. No figure binds a
+    # name, so a rename would go unnoticed here.
+    for name in named_instructions():
+        problems.append(
+            "the section presents %s as an instruction and the tree has no "
+            "such name" % name)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

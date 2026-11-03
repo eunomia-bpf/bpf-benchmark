@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0664 required the 14 instruction names the prose
+presents as arms or opcodes to exist in the tree. All
+do, but only once the search included Python, where
+one of them is a tooling arm. The identifier tier now
+covers declarations, files and instructions (census
+534 -> 535).
+
+
 Step 0663 separated the 7 gate figures in "(N modeled
 cases)" from the 3 battery-local witnesses the recipe
 never runs. A non-witness figure must be a banner;

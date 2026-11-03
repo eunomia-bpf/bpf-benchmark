@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 534, and 432 steps
+`build/mut_*.py` files exist, the counter's last value is 535, and 433 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0664 - fourteen instruction names, and the one that lives
+in a battery
+
+Fourteen names appear in the section as the subject of an arm, opcode,
+instruction or form. An instruction name is not a figure and not a file, so
+nothing already bound it: a rename in the dispatcher would leave the sentence
+naming an arm the tree no longer has, and every number beside it would still be
+right.
+
+All fourteen resolve, but only after the search reached the Python sources. One
+of them is an arm of a function rather than of a simulator, because a battery
+pins its own arms and the section describes those too; a search over C and Lean
+alone would have reported a correct sentence as wrong.
+
+That is the third time this census has had to widen from the first shape tried,
+and each widening came from a test that failed on a real sentence rather than
+from reasoning about what the shape should be. The identifier tier now covers
+declarations, files and instructions. Census 534 -> 535.
 
 ### Step 0663 - seven sizes have a banner, three are witnesses, and
 the prose says which
