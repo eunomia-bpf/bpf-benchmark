@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 525, and 423 steps
+`build/mut_*.py` files exist, the counter's last value is 526, and 424 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0655 - twelve recorded constants, re-measured against live
+sweeps
+
+The checker records twelve constants rather than deriving them, because each
+needs a sweep too slow for a build target: a `#print axioms` census costs about
+three minutes, and replacing the tactic token across 165 proofs costs another.
+That is a reasonable trade, but it means a recorded number is indistinguishable
+from an assumed one unless the way to re-derive it is written down beside it.
+
+All twelve were re-measured this step against live sweeps. The axiom classes are
+617 axiom-free, 623 reaching the compiler axiom, and 825 kernel-only, which is
+the kernel and kernel-choice classes together; the choice view is 179 all, 139
+of them compiler-assuming and 40 kernel-only; the native_decide class has 483 of
+488 reaching the axiom; the bv_decide partition is 67 and 98; and the shape
+split is 58 and 103 with 2 recovered.
+
+Every relation among them holds and every one is guarded, so the constants now
+describe the tree rather than a memory of it. The comment beside the axiom block
+names `axiom_census.py` and its cost, which is what a reader needs and what the
+bv_decide pair lacked when its two figures drifted. Census 525 -> 526.
 
 ### Step 0654 - three dispatch figures described a gap the tree had
 since closed

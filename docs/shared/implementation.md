@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0655 re-measured all 12 recorded constants
+against live sweeps: the axiom classes, the choice
+view, the native_decide footprint and the bv shape
+split all match, and the comment now names the
+command and its cost (census 525 -> 526).
+
+
 Step 0654 corrected the dispatch paragraph: the chain
 has 35 families against 24 modelled, 11 absent, and
 all 11 are now driven through the dispatcher, not 5.

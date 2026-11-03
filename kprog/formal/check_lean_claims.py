@@ -1068,9 +1068,12 @@ def scan_tree(root):
         # Recorded sweep outputs: the failure mode of each group.
         "unstated_cases": 58,
         "unstated_direct": 103,
-        # Recorded #print axioms results over the 165 bv_decide proofs.
-        # The whole tree, measured with #print axioms: axiom-free, compiler-
-        # assuming, and axiomatic-but-kernel-only.
+        # Recorded #print axioms results over the whole tree: axiom-free,
+        # compiler-assuming, and axiomatic-but-kernel-only. Re-derive with
+        # `python3 axiom_census.py`, which prints these four classes and
+        # takes about three minutes -- too slow for a build target, which is
+        # why they are recorded and only their relationships are checked.
+        # ax_kernel is the kernel and kernel-choice classes together.
         "ax_none": 617,
         "ax_orb": 623,
         "ax_kernel": 825,
