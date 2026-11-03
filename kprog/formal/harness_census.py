@@ -56,7 +56,11 @@ def rows(path):
             if not isinstance(row, ast.Tuple) or len(row.elts) < 4:
                 continue
             det = getattr(row.elts[1], "value", "?")
-            last = row.elts[3]
+            # Two arities appear: (name, detector, edits, equivalent) and
+            # (name, detector, edits, False, equivalent). The flag is the
+            # last element either way, and reading a fixed index silently
+            # found no equivalences in the five-element harnesses.
+            last = row.elts[-1]
             equiv = isinstance(last, ast.Constant) and last.value is True
             out.append((getattr(row.elts[0], "value", "?"), det, equiv))
     return out

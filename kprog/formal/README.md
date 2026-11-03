@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 483, and 381 steps
+`build/mut_*.py` files exist, the counter's last value is 484, and 382 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0613 - the census read one field from the wrong index, and
+three corrections followed it
+
+The census read a harness's equivalent flag from a fixed index, four. Half the
+harnesses pad their rows to five elements with the flag last, so in those the
+reader found no equivalences at all and counted every row as catching. The
+effect was invisible in the output: a harness reported 78 rows, 78 catching, 0
+equivalents when the truth was 78, 70, 8.
+
+That silently corrupted three of the corrections made over the previous four
+steps. The reduction harness really does have 57 catching, the extract/reverse
+harness 124, and the move-wide harness 67; the paper said exactly that, and the
+steps that changed them to 59, 128 and 70 changed correct figures to match a
+broken reader. All three are restored from source, and the move-wide count is
+the one genuine error among them, 68 against the harness's 67.
+
+The lesson is the one this section keeps re-teaching: a measurement tool that
+under-reports a field reports a plausible figure, and nothing distinguishes it
+from a correct one. The arity is now read from the tuple's last element, 152
+harnesses show their equivalences, and the nine claims that resolve to a harness
+all agree with source. Census 483 -> 484.
 
 ### Step 0612 - the totals were right and four rows were on the
 wrong side of the line

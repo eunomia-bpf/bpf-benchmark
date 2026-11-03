@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0613 found the census read the equivalent flag
+from a fixed index, blind to the half of harnesses
+that pad rows to five elements. It had corrupted
+three earlier corrections: 57/124/67 were right, and
+the steps that changed them followed a broken reader.
+Restored, with movek 68->67 (census 483 -> 484).
+
+
 Step 0612 fixed a different kind of defect: the
 extrev claim's totals were right but four rows it
 called survivors are equivalent=False in the harness.
