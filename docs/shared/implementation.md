@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0625 censused the `-case` figures: 118 distinct,
+117 in a banner, 1 the documented 7x7x30 grid. The
+checker now reports how many it examined and fails on
+any figure in no banner and no grid, where before it
+only checked the forms it knew (census 495 -> 496).
+
+
 Step 0624 compared the third figure: nine claims
 state how many rows survive, and all nine equal their
 harness's equivalents. With totals and catch counts

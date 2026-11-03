@@ -266,6 +266,28 @@ def paper_counts(text: str) -> dict[int, int]:
     return seen
 
 
+def case_census(text: str, counts: set[int]) -> tuple[int, list[int]]:
+    """`(figures stated, figures with no banner)`.
+
+    Every `N-case` figure either appears in a banner of the run or is
+    arithmetic on a bare grid (`1,470-case divide grid` is 2 x 5 x 7 x 3 x 7).
+    Nothing counted how many such figures exist, so one that matched no
+    banner and no grid could sit in the prose while every claim this checker
+    knows about stayed current.
+    """
+    stated, grid = {}, set()
+    for match in re.finditer(r"(\d[\d,{}]*)-case", text):
+        value = int(re.sub(r"[{},]", "", match.group(1)))
+        stated[value] = True
+        # A figure on a bare grid is arithmetic, not a banner: the section
+        # says so of `1,470-case divide grid`, and the rule is the same one
+        # the claim scan uses.
+        if GRID.search(text[max(0, match.start() - 30):match.end() + 24]):
+            grid.add(value)
+    return len(stated), sorted(v for v in stated
+                              if v not in counts and v not in grid)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -328,6 +350,16 @@ def main() -> None:
 
     for line in problems:
         print(line)
+    # Every `N-case` figure either appears in a banner or is arithmetic on a
+    # bare grid. Counting them is what would surface a figure that matches no
+    # banner while every claim this checker knows about stays current -- the
+    # failure the four claim forms were introduced to catch, one level up.
+    stated_cases, stray_cases = case_census(text, measured)
+    if stray_cases:
+        problems.append(
+            "%d of the %d `-case` figures appear in no banner and on no "
+            "grid: %s" % (len(stray_cases), stated_cases,
+                          ", ".join(str(v) for v in stray_cases)))
     if args.check and problems:
         raise SystemExit(1)
     if not problems:

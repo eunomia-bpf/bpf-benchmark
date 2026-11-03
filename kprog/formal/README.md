@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 495, and 393 steps
+`build/mut_*.py` files exist, the counter's last value is 496, and 394 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0625 - the case-count checker never counted how many
+figures it looked at
+
+The case-count checker knows four prose forms and verifies each figure it
+recognises against a banner. What it never counted was how many `-case` figures
+the section states, so a figure in a fifth shape would be invisible: the checker
+would report that every claim it knew about matched, and the one it did not know
+about would sit in the prose.
+
+The section states 118 distinct `-case` figures. A hundred and seventeen appear
+in a banner of the run, and the one that does not is the routed divide grid,
+whose 1470 is 7 x 7 x 30 by construction and which the claim scan already
+exempts. Counting them turns a clean report into a census: the checker now says
+how many it looked at, and fails on any figure that is in neither a banner nor a
+grid.
+
+The two additions differ in kind. The banner match says the number is what the
+gate printed; the census says every number was looked at. A figure that drifted
+to another banner's value would pass the first and the second, which is why the
+per-claim extraction remains the load-bearing check and the census is the guard
+against the forms it does not know. Census 495 -> 496.
 
 ### Step 0624 - the third figure a claim states, and the one a
 reader uses to skip rows
