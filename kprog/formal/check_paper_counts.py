@@ -288,6 +288,18 @@ def case_census(text: str, counts: set[int]) -> tuple[int, list[int]]:
                               if v not in counts and v not in grid)
 
 
+def percent_census(text: str) -> set[str]:
+    """Every percentage the section states, as written.
+
+    Percentages are the one figure class split across two checkers: the ISA
+    split owns four of them and its floored-sum sentence a fifth, while
+    check_lean_claims owns the two shares it derives. Neither counts what it
+    does not own, so a new percentage could appear in a sentence neither
+    reads and both would report clean.
+    """
+    return {m.group(1) for m in re.finditer(r"(\d+(?:\.\d+)?)\\%", text)}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -360,6 +372,16 @@ def main() -> None:
             "%d of the %d `-case` figures appear in no banner and on no "
             "grid: %s" % (len(stray_cases), stated_cases,
                           ", ".join(str(v) for v in stray_cases)))
+    # Every percentage the section states. Five belong to the ISA split
+    # here and two to check_lean_claims, so neither checker's own scan says
+    # whether a seventh sentence has appeared that both would miss.
+    seen = percent_census(text)
+    known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
+    if seen != known:
+        problems.append(
+            "the section states percentages %s, and %s were accounted for; "
+            "the difference went unread"
+            % (sorted(seen), sorted(known)))
     if args.check and problems:
         raise SystemExit(1)
     if not problems:

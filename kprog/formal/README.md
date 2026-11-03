@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 500, and 398 steps
+`build/mut_*.py` files exist, the counter's last value is 501, and 399 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0630 - percentages were the one class two checkers
+split between them
+
+Percentages are the one figure class split across both checkers. The ISA split
+owns five, including the floored sum, and the theorem checker owns the two
+shares it derives. Each reads only what it owns, so a percentage introduced into
+a sentence neither reads would leave both reporting clean, and the section would
+carry a figure no check had seen.
+
+The section states seven: four in the ISA split, the floored total, and the two
+shares. That set is now named in the case-count checker, which reads every
+percentage in the text and fails when the set differs, so an eighth sentence
+with a percentage is reported rather than absorbed.
+
+It is a small census with a narrow purpose, and it is the last class that
+spanned two owners. Everything else a checker owns it also counts; this was the
+one place where ownership was divided, which is exactly where a gap hides.
+Census 500 -> 501.
 
 ### Step 0629 - the stages are numbered, and the numbering is a
 second constraint

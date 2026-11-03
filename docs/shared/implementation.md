@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0630 censused the percentages, the one class
+split between two checkers: five owned by the ISA
+split here, two by the theorem checker. The seven are
+now named, so an eighth is reported where both used
+to report clean (census 500 -> 501).
+
+
 Step 0629 checked the ordinals: the five stages name
 the sixth through tenth detectors, consecutively,
 which is a constraint independent of the step of four
