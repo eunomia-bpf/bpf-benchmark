@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 507, and 405 steps
+`build/mut_*.py` files exist, the counter's last value is 508, and 406 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0637 - sixteen modules are cited, and ten of them say
+something stronger
+
+The headers cite more than the three guards. Ten more say that a named module
+proves a generated contract equal to an independent statement, which is a
+stronger claim than naming a theorem: the module must still prove a refinement,
+not merely exist. Sixteen distinct modules are cited in all.
+
+All sixteen resolve and all sixteen state refinements. The check now reads every
+citation form, requires the module to exist and to carry one, and names the ones
+that fail, which is the same guard as for the renamed theorem but applied across
+the whole citation surface rather than to the three the previous step happened
+to find.
+
+Two censuses in a row have grown the population this way: one citation, then
+three, then sixteen. The pattern is consistent enough to state plainly: in this
+repository a sentence's subject is often wider than the example that led to it,
+and counting the class is what closes the difference. Census 507 -> 508.
 
 ### Step 0636 - one citation was checked and the class has three
 

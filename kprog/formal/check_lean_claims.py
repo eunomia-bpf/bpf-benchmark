@@ -1640,13 +1640,29 @@ def check(targets, root):
     # The simulator header cites a theorem by name, and nothing else reads
     # that citation: a rename in the Lean module would leave the comment
     # pointing at a theorem that no longer exists.
-    cites = proved_bound_citations(root)
-    if len(cites) != 3 or not all(stated for _, _, stated in cites):
+    # Every module a simulator header cites: three as "the generated, proved
+    # bound" of a guard, the rest as "which KProgFormal/X.lean proves equal
+    # to an independent statement". Sixteen distinct modules were cited when
+    # this was written, and each must still state a refinement -- a header
+    # naming a module that has stopped proving one is the same stale comment
+    # as a renamed theorem.
+    base = pathlib.Path(root).resolve().parent
+    cited = set()
+    for name in ("x86/x86_sim_local_bpf.h", "arm64/arm64_sim_local_bpf.h"):
+        text = (base / name).read_text()
+        cited |= set(re.findall(r"KProgFormal/([A-Za-z0-9_]+)\.lean", text))
+        cited |= set(re.findall(
+            r"proved bound \(([A-Za-z0-9_]+)\.lean\)", text))
+    unproved = sorted(m for m in cited
+                      if not (base / "formal" / "KProgFormal"
+                              / ("%s.lean" % m)).exists()
+                      or "_refines " not in (base / "formal" / "KProgFormal"
+                                             / ("%s.lean" % m)).read_text())
+    if len(cited) != 16 or unproved:
         raise SystemExit(
-            "check_lean_claims: the headers cite %d proved bounds and %d of "
-            "their modules state a refinement -- %r; three guards cited one "
-            "when this was written"
-            % (len(cites), sum(1 for _, _, ok in cites if ok), cites))
+            "check_lean_claims: the headers cite %d modules and %r no longer "
+            "state a refinement; sixteen were cited when this was written"
+            % (len(cited), unproved))
     if (shared_tags, divergent, arm_only) != (7, [7], [8]):
         raise SystemExit(
             "check_lean_claims: the tag vocabularies are now %d shared, "

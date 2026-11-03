@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0637 grew the citation population again: ten
+more headers say a module proves a contract equal to
+an independent statement, so 16 modules are cited,
+not 3. All resolve and all still prove a refinement;
+each is now checked and named on failure (census 507
+-> 508).
+
+
 Step 0636 censused the citation class and found
 three, not one: the two AArch64 stack guards and the
 x86 window guard each cite a proved bound. All three
