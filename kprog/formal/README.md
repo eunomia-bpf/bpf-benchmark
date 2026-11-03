@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 447, and 345 steps
+`build/mut_*.py` files exist, the counter's last value is 448, and 346 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0577 - the image class was chosen by which module a spec
+lived in, and ten theorems lived elsewhere
+
+The image class was defined by which module a spec lived in rather than by what
+the theorem says. `visible` unioned the definitions of *generated* imports, so
+the rule found the three theorems that map a generated function and missed ten
+that map a hand-written independent spec defined in their own module. Both are
+the shape the sentence describes -- a table's image over a literal family,
+pinned to a literal list, closed by `rfl` -- and the difference is provenance,
+not form.
+
+Widening `visible` to the module's own definitions plus its imports finds 14.
+That immediately falsified the figure the sentence carried: it said all four
+widths, and the families pinned run 2, 4, and 16. Two of the newly visible
+theorems pin two opcodes and one pins sixteen ALU tokens, which is what the
+class actually is -- a stack write's four-width ladder is one member, not the
+definition. The sentence now says a whole literal family and publishes the span,
+2 to 16, so the figure describes the population instead of one family inside it.
+
+Both endpoints are bound, because a range with one measured end is a range that
+can drift at the other: a test raising the low end to 3 and one raising the high
+end to 17 are each reported. Census 447 -> 448.
 
 ### Step 0576 - the image rule measured its first literal twice
 when both sides matched

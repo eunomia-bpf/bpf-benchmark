@@ -2611,6 +2611,15 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0577 found the image class was defined by
+provenance: visible unioned only generated imports,
+so ten theorems mapping a hand-written spec were
+invisible. Widening it gives 14, which falsified 'all
+four widths' -- the pinned families run 2, 4 and 16,
+so the sentence now states the span (census 447 ->
+448).
+
+
 Step 0576 fixed a vacuous equality in the image rule:
 findall plus index() measured the first occurrence
 twice, so a literal compared against itself passed

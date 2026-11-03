@@ -585,8 +585,20 @@ def scan_tree(root):
             if imp.startswith("Generated"):
                 merged.update(own_lists[imp])
         gen_lists[stem] = merged
-    visible = {s: set().union(*[gen_defs.get(i, set()) for i in imports[s]])
-               if imports[s] else set() for s in imports}
+    # A table-image theorem may pin a generated function or a hand-written
+    # independent spec, and either is a table in the sense the sentence means.
+    # Confining the lookup to generated modules hid ten theorems that state
+    # the same thing about a spec defined in their own module.
+    all_defs = {}
+    for path in mods:
+        all_defs[os.path.basename(path)[:-5]] = set(re.findall(
+            r"^def (\w+)", open(path, errors="ignore").read(), re.M))
+    visible = {}
+    for s in imports:
+        seen_defs = set(all_defs[s])
+        for imp in imports[s]:
+            seen_defs |= all_defs.get(imp, set())
+        visible[s] = seen_defs
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": []}
     for path in mods:
@@ -699,6 +711,7 @@ def scan_tree(root):
         # generated table's image at every width, pinned by a literal list.
         "images": len(counters["image"]),
         "image_min_widths": min(counters["width"]) if counters["width"] else 0,
+        "image_max_widths": max(counters["width"]) if counters["width"] else 0,
         # The nonmember arm of each dispatch contract is vacuous only because
         # its umbrella list covers every constructor, which the doc comment
         # asserted and nothing proved. Four `*_ops_total` theorems now do, and
@@ -792,9 +805,8 @@ CLAIMS = [
     # The fourth shape is bound for the same reason as the others: the
     # enumeration now names every form the rule finds.
     (re.compile(r'the (\d+) table-image theorems'), ("images",)),
-    (re.compile(r"pin a generated table's image over all (\d+) widths"),
-     ("image_min_widths",)),
-    (re.compile(r"keeps (\d+) nested gates"), ("image_min_widths",)),
+    (re.compile(r"families they pin run from (\d+) to (\d+)"),
+     ("image_min_widths", "image_max_widths")),
     (re.compile(r'until (\d+) totality theorems'), ("ops_total",)),
     (re.compile(r'all (\d+) nonmember arms derive'), ("vacuous_derived",)),
     # The section opens by claiming the artifacts are paired one-to-one with
