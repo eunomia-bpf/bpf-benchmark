@@ -864,6 +864,8 @@ def shake_field_gaps(
         names = [k for k, v in totals.items() if v == n]
         if len(names) != 1:
             continue
+        # A shake whose count matches one harness is confirmed there; the
+        # field scan only runs once the harness is known.
         h = names[0]
         spec = here / (h[len("mut_"):] + "_spec.json")
         if not spec.exists():

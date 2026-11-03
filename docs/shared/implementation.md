@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0674 joined the 15 shake claims to their
+harnesses by the module each paragraph names, which
+resolved 10 where the row count resolved 3, and found
+one wrong figure: the CMOV shake said 170 rows and
+its harness runs 162.
+
+
 Step 0673 checked the 15 "every spec field" shake
 claims where the row count identifies one harness:
 all 3 name every field, by key or by value. A

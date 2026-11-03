@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 544, and 442 steps
+`build/mut_*.py` files exist, the counter's last value is 545, and 443 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0674 - two of three mismatches were the window, and the
+third was the sentence
+
+Joining a shake to its harness by the module the paragraph names is better than
+joining on the row count, and it found a figure that was wrong. The CMOV
+paragraph pins fourteen condition-code rows, names the step wrapper and the
+write-back definitions, and said a hundred and seventy rows; its harness runs a
+hundred and sixty-two, at runtime as well as in the list.
+
+Two of the earlier mismatches were the join's fault rather than the paper's. A
+two-thousand-character window reaches into the neighbouring paragraph, so a
+bitops identifier sat beside the BZHI shake and a CMOV identifier beside the
+MOVBE one; narrowing to the paragraph the shake belongs to resolves both, and
+their stated sizes are exactly right.
+
+The lesson is the one this stretch keeps repeating: a figure that looks wrong is
+a claim about a mapping first and about the paper second. Two of three
+mismatches were my window, and only the third was the sentence. Census 544 ->
+545.
 
 ### Step 0673 - a field is exercised by its value, not only by its
 key
