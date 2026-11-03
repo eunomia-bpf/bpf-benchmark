@@ -738,6 +738,24 @@ def proved_bound_citations(root):
     return out
 
 
+def forking_oracles(root):
+    """`[(banner, forks, sweeps 256 bytes)]` for oracles that fork a child.
+
+    The section says several oracles drive all 256 opcode bytes "in forked
+    children": a per-value fork, so a value that aborts the simulator does
+    not end the run. That is a property of the C file, and the banner is
+    what the gate printed for it.
+    """
+    formal = pathlib.Path(root).resolve().parent / "formal"
+    out = []
+    for path in sorted(formal.glob("*_host.c")):
+        text = path.read_text(errors="ignore")
+        if "fork" not in text:
+            continue
+        out.append((path.name, True, "op < 256" in text or "256U" in text))
+    return out
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -1685,6 +1703,17 @@ def check(targets, root):
             "check_lean_claims: the width-fallback oracle now checks %d valid "
             "and %d invalid codes, and the section says 4 and 8"
             % (n_valid, n_invalid))
+    # The section says oracles drive opcode bytes "in forked children", a
+    # per-value fork so an aborting value does not end the run. The mechanism
+    # is in the C files, and losing it would leave the sentence claiming an
+    # isolation the oracle no longer has.
+    forkers = forking_oracles(root)
+    n_fork, n_sweep = len(forkers), sum(1 for _, _, s256 in forkers if s256)
+    if (n_fork, n_sweep) != (22, 9):
+        raise SystemExit(
+            "check_lean_claims: %d oracles fork and %d of them also sweep 256 "
+            "values; 22 and 9 when the section was written"
+            % (n_fork, n_sweep))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0643 checked a structural claim rather than a
+figure: 22 oracles fork and 9 also sweep all 256
+opcode bytes, which is the isolation the section
+describes. Both counts are now compared, so losing
+the mechanism is reported (census 513 -> 514).
+
+
 Step 0642 added the two remaining reference
 invariants: no label defined twice, and no reference
 into a section the paper does not include. Nine

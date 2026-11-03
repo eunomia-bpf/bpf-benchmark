@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 513, and 411 steps
+`build/mut_*.py` files exist, the counter's last value is 514, and 412 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0643 - a structural claim about how the oracles run, not
+what they found
+
+The section makes a structural claim about how its oracles work, not just what
+they found: several drive all 256 opcode bytes in forked children, one fork per
+value, so a value that aborts the simulator does not end the run. Thirty-one
+sentences use the phrase.
+
+The mechanism is in the C files and the claim is checkable. Twenty-two oracles
+fork, and nine of those also sweep 256 values, which is the specific combination
+the sentence describes. The example it is attached to, the AArch64 page-address
+oracle, forks per opcode and prints a 257-case banner that the gate log carries.
+
+Checking the pair means losing the mechanism is reported: renaming the fork
+calls in that oracle leaves twenty-one and eight, and the sentence still says
+its values are driven in forked children. Census 513 -> 514.
 
 ### Step 0642 - two more references that would resolve to the
 wrong thing
