@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 533, and 431 steps
+`build/mut_*.py` files exist, the counter's last value is 534, and 432 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0663 - seven sizes have a banner, three are witnesses, and
+the prose says which
+
+Ten sentences give an oracle's size in parentheses as a number of modeled cases.
+Seven are banners of the gate and three are not, and the three say why: they
+describe a battery-local host, built for one step and never wired into the
+recipe, so no run prints them.
+
+That distinction is the useful part. A figure with a banner behind it can be
+checked and seven of them are; the witness figures cannot, and saying so is
+better than silently treating them as if they had been. The check holds both
+sets: a parenthesised size outside the three witnesses must be a banner, and the
+three witnesses must still be stated where the prose calls them battery-local.
+
+Finding this took enumerating every numeral the section attaches to the word
+cases, which is a hundred and forty-one numbers, of which seven had no banner.
+Six of those were the witnesses and a quoted historical output; this is the
+seventh. Census 533 -> 534.
 
 ### Step 0662 - a stale size inside the argument tier, and what
 stays an argument

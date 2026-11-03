@@ -979,6 +979,23 @@ def main() -> None:
             problems.append(
                 "the a64 route host is stated at %d modeled cases and no "
                 "banner reports it" % n)
+    # A parenthesised "(N modeled cases" gives an oracle's size. Seven of
+    # the ten are gate banners; the other three are battery-local hosts the
+    # recipe does not run, which the sentences say by calling them
+    # battery-local. A figure that stopped being a banner is reported, so a
+    # stale size cannot hide among the witness figures.
+    flat_n = re.sub(r"\{,\}", ",", flat_text)
+    sizes = {int(n.replace(",", "")) for n in re.findall(
+        r"\(([\d,]+) modeled cases", flat_n)}
+    witnesses = {1801, 3890, 6509}
+    for v in sorted(sizes - witnesses):
+        if v not in measured:
+            problems.append(
+                "a stated modeled-case figure %d is not a banner" % v)
+    if not witnesses <= sizes:
+        problems.append(
+            "a battery-local witness figure is no longer stated: %s"
+            % sorted(witnesses - sizes))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

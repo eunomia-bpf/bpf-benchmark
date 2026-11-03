@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0663 separated the 7 gate figures in "(N modeled
+cases)" from the 3 battery-local witnesses the recipe
+never runs. A non-witness figure must be a banner;
+the witnesses must stay stated as such (census 533 ->
+534).
+
+
 Step 0662 corrected a stale figure in the qualitative
 tier: the A64 route host was stated at 4,328 modeled
 cases and prints 4,470. The form is now bound to a
