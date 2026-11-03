@@ -1420,10 +1420,10 @@ def check(targets, root):
             "-- %s" % (len(row_drift),
                        "; ".join("%s says %d, harness has %d" % d
                                  for d in row_drift)))
-    if len(rowed) < 40:
+    if len(rowed) < 43:
         raise SystemExit(
             "check_lean_claims: only %d row claims resolved to a harness, "
-            "and 40 did when this was written; a claim that matches nothing "
+            "and 43 did when this was written; a claim that matches nothing "
             "went unread" % len(rowed))
     if len(compared) < 11:
         raise SystemExit(

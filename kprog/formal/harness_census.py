@@ -154,9 +154,10 @@ def detectors(body):
     body = re.sub(r"---.*?---", "", body)
     out = collections.Counter()
     for count, name in re.findall(
-            r"(\d+) (at the generator stage|(?:by|in|through) the Lean "
-            r"chain|(?:by|through) the (?:[\d,]+-case )?host oracle|"
-            r"by the rout\w* oracle|by the route scanner)", body):
+            r"(\d+) (?:by|at|in|through) (?:the )?(generator(?:'s)?"
+            r"[\w\s-]{0,24}checks|generator stage|Lean chain|"
+            r"(?:[\d,]+-case )?host oracle|rout\w* oracle|"
+            r"route scanner)", body):
         out["gen" if "generator" in name else
             "lean" if "Lean" in name else
             "route" if "rout" in name else "host"] += int(count)

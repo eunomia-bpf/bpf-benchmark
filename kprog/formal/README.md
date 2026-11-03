@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 491, and 389 steps
+`build/mut_*.py` files exist, the counter's last value is 492, and 390 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0621 - teaching the reader one spelling broke the parse
+it was meant to extend
+
+Three of the four unresolved row claims name the generator detector as the
+generator's byte and template checks rather than at the generator stage, and the
+reader recognised only the second spelling. It read those claims as two
+detectors rather than three, so they could not be compared at all and their
+generator count silently showed zero.
+
+Teaching the reader the possessive spelling exposed a worse problem: the branch
+that matched it ran to the next comma, swallowing the clauses after it, so the
+parse count fell from forty-four claims to seventeen. Bounding the generator
+clause let all forty-four parse again and the resolved count rose to
+forty-three, one better than before.
+
+The unmatched remainder is a claim whose split matches no harness, and it is
+reported rather than bucketed. The gate's floor rises with the coverage, from
+forty to forty-three, so a claim that stops resolving is caught. Census 491 ->
+492.
 
 ### Step 0620 - forty more claims, and one dropped word kept them
 unreadable

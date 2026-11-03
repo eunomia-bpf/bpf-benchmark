@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0621 taught the reader the possessive generator
+spelling, which revealed a greedy branch that had
+silently cut the parse to 17 claims; bounded, all 44
+parse and 43 resolve, all agreeing. The gate floor
+rises to 43 (census 491 -> 492).
+
+
 Step 0620 wired the forty 'N rows catch' claims into
 the same harness comparison, after fixing a dropped
 'through the Lean chain' spelling that had made them
