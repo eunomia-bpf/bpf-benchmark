@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0585 bound the sweep's scope: 117 modules
+closing 653 theorems, which is exactly 488
+native_decide plus 165 bv_decide, and that union is
+now enforced. The README's recorded sweep arithmetic
+is self-inconsistent (152+6+6=164 of 161), noted
+rather than rewritten (census 455 -> 456).
+
+
 Step 0584 guarded the product clause: 3 of 165
 bv_decide statements contain a product, each
 multiplying by the byte width. The guard is exact,

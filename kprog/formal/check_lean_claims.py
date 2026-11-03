@@ -611,6 +611,7 @@ def scan_tree(root):
     compose = [0, 0, 0]
     ident = [0, 0, 0]
     bvshape = [0, 0, [], 0]
+    sweep = [set(), 0]
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": [],
                 "tabled": [], "outside": [],
@@ -646,6 +647,10 @@ def scan_tree(root):
             # product of two wide operands. That is exactly testable: no
             # product of two non-constant bit-vector terms in a statement the
             # tactic closes.
+            if re.search(r"\bbv_decide\b|\bnative_decide\b",
+                         block[block.find(":="):]):
+                sweep[0].add(stem)
+                sweep[1] += 1
             if "bv_decide" in block and "native_decide" not in block:
                 # One statement may carry several products; the published
                 # figure is statements, so count the theorem once.
@@ -837,6 +842,8 @@ def scan_tree(root):
         "bv_direct": bvshape[1],
         "bv_products": bvshape[2],
         "bv_products_n": bvshape[3],
+        "sweep_modules": len(sweep[0]),
+        "sweep_theorems": sweep[1],
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
@@ -932,6 +939,13 @@ CLAIMS = [
     # byte width, so the count is published and the shape is guarded.
     (re.compile(r'none of the (\d+) statements it closes that'),
      ("bv_products_n",)),
+    # The re-discharge sweep's scope: "every module that uses either tactic"
+    # was a universal with no figure. Both halves are tree-derivable, so the
+    # sentence states them and neither can drift while the sweep's result is
+    # quoted from prose.
+    (re.compile(r'all\s+(\d+) modules that use either tactic'),
+     ("sweep_modules",)),
+    (re.compile(r'closing (\d+) theorems between them'), ("sweep_theorems",)),
     (re.compile(r'\. On (\d+) of those the plain'), ("bv_cases",)),
     (re.compile(r'The other (\d+)\s+bind a bit-vector'), ("bv_direct",)),
     (re.compile(r'of the (\d+) theorems whose statement composes'),
@@ -1091,6 +1105,18 @@ def check(targets, root):
     # A product of two wide operands closed by bv_decide would falsify the
     # sentence's last clause, and would also be the interesting case for the
     # kernel-budget argument, so it raises rather than being counted.
+    # The sweep's scope is the union of the two tactic counts, and the
+    # sentence quotes 480 of one and 4 of the other as the re-discharge
+    # result. If the union stopped matching, the quoted denominators would
+    # describe a population the tree no longer has.
+    if actual["sweep_theorems"] != (actual["native_decide"]
+                                    + actual["bv_cases"]
+                                    + actual["bv_direct"]):
+        raise SystemExit(
+            "check_lean_claims: the sweep's %d theorems are not the %d "
+            "native_decide plus %d bv_decide ones"
+            % (actual["sweep_theorems"], actual["native_decide"],
+               actual["bv_cases"] + actual["bv_direct"]))
     if actual["bv_products"]:
         raise SystemExit(
             "check_lean_claims: %d bv_decide identity(ies) reduce a product "

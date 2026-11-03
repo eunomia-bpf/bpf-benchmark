@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 455, and 353 steps
+`build/mut_*.py` files exist, the counter's last value is 456, and 354 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0585 - the sweep's scope was a universal with no figure,
+and the record's arithmetic does not close
+
+The paragraph's central measurement was a sweep: every module using `bv_decide`
+or `native_decide` recompiled with the tactic token alone swapped for a plain
+`decide`. "Every module" had no figure, so the claim's scope was whatever the
+sweep happened to cover.
+
+The scope is tree-derivable, which is why it can be bound without a new
+obligation: 117 modules close 653 theorems between the two tactics, and that 653
+is exactly the 488 native_decide plus the 165 bv_decide. The invariant is now
+enforced, so the union the sweep must cover cannot quietly stop matching the two
+denominators the section quotes its results against.
+
+The recorded sweep result has an arithmetic defect worth flagging. The README's
+record says 161 of the 165 cannot state a bare `decide`, that 152 of those
+exhaust the kernel's recursion budget and 6 fail to synthesize an instance, and
+that "Six close under +revert". Those sum to 164 rather than 161, and 152 + 6
+leaves 3 unaccounted. The numbers came from a per-theorem attribution that has
+not been re-run since, so the passage is left as recorded and the discrepancy
+noted rather than silently corrected. Census 455 -> 456.
 
 ### Step 0584 - the product clause is the load-bearing one and
 nothing tested it
