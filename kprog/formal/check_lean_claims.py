@@ -576,6 +576,27 @@ def axiom_sample(root, modules):
     return out
 
 
+def harness_sums(text):
+    """`[(total, sum of stages, survivors)]` for each mutation-row claim.
+
+    A harness paragraph states its row count, splits the caught rows across
+    three detectors, and says how many survive as equivalences. The stated
+    count must equal the stage sum: one paragraph said 93 rows catch while
+    its own stages added to 101, so the number a reader would quote and the
+    breakdown beside it disagreed. The survivors are a separate class and are
+    not part of the sum.
+    """
+    pattern = re.compile(
+        r"(\d+) rows catch \((\d+) at the generator stage[,；]?[^)]*?"
+        r"(\d+) through the Lean chain[,；]?[^)]*?(\d+) by the host oracle\)")
+    out = []
+    for hit in pattern.finditer(flat(text)):
+        total = int(hit.group(1))
+        stages = sum(int(hit.group(i)) for i in (2, 3, 4))
+        out.append((total, stages))
+    return out
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -1291,6 +1312,16 @@ def check(targets, root):
             "check_lean_claims: the axiom spot check disagrees -- %r, "
             "recorded %r; re-run axiom_census.py"
             % (actual["ax_sample"], sample))
+    # Every mutation-row claim's stated count must equal its own detector
+    # breakdown. One said 93 while its stages added to 101.
+    section_text = pathlib.Path(targets[0][0]).read_text()
+    alert = [(t, st) for t, st in harness_sums(section_text) if t != st]
+    if alert:
+        raise SystemExit(
+            "check_lean_claims: %d harness claim(s) disagree with their own "
+            "stage breakdown -- %s"
+            % (len(alert), "; ".join("%d stated, %d in stages" % (t, st)
+                                     for t, st in alert)))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "

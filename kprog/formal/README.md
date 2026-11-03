@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 472, and 370 steps
+`build/mut_*.py` files exist, the counter's last value is 473, and 371 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0602 - one harness stated 93 caught rows and its own stages
+added to 101
+
+The harness paragraphs were the largest unverified arithmetic surface left: 23
+claims of the form "N rows catch (a at the generator stage, b through the Lean
+chain, c by the host oracle)". Nothing compared the stated N with the stages
+beside it, and one of the 23 said 93 while its own stages added to 101.
+
+The paragraph now says 101 rows split 46, 27 and 28, with 8 surviving as
+equivalences, which is the reading consistent with all three numbers: 101 total,
+8 documented as equivalent, 93 caught. The old form left the reader to notice
+that 93 and 101 could not both be the row count.
+
+The invariant is now checked across all 23. It parses the stated total and the
+three stage counts, ignores the survivors because they are a separate class, and
+reports any claim whose total differs from its breakdown. The other 22 all hold,
+which is evidence the format is the right thing to bind and the one mismatch was
+a real slip rather than a convention I misread. Census 472 -> 473.
 
 ### Step 0601 - an axiom was named by the tactic that usually
 reaches it

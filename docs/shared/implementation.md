@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0602 found one of 23 harness claims stating 93
+caught rows while its own detector breakdown summed
+to 101, and bound the invariant across all 23: the
+three stages must equal the stated total. Verified by
+restoring the defect (census 472 -> 473).
+
+
 Step 0601 replaced 'the axiom native_decide also
 reaches' -- true of 483 of 488 -- with both
 population counts side by side: 69 of 165 bv_decide
