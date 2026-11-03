@@ -859,6 +859,9 @@ def scan_tree(root):
         "ax_orb": 623,
         "ax_kernel": 825,
         "ax_choice": 40,
+        # The share is derived, floored like every other share here, so the
+        # sentence cannot round 2065-partitioning counts up to "a third".
+        "ax_share": 100 * 623 // 2065,
         "orb_reach": 69,
         "orb_kernel": 96,
         "ident_nd": ident[2],
@@ -1025,6 +1028,7 @@ CLAIMS = [
                 r'(\d+) reach'), ("ax_none", "ax_orb")),
     (re.compile(r'remaining (\d+) use only'), ("ax_kernel",)),
     (re.compile(r'with (\d+) of them also drawing'), ("ax_choice",)),
+    (re.compile(r'therefore covers (\d+)\\% of the'), ("ax_share",)),
     (re.compile(r'constants run from (\d+) to (\d+)'),
      ("table_min_count", "table_max_count")),
     # The clause's second half named "the exactness theorems" with no rule,
@@ -1179,6 +1183,18 @@ def check(targets, root):
             "binder, which the section says stays free -- %s"
             % (len(actual["split_bitvec"]),
                ", ".join(actual["split_bitvec"])))
+    # The four axiom figures partition the tree, so they must sum to the
+    # theorem count. They are recorded from a #print axioms sweep rather than
+    # recomputed here, which is exactly why the sum needs checking: adding a
+    # theorem would otherwise leave the published split describing a tree
+    # that no longer exists, and every figure would still match its own
+    # pattern.
+    ax_sum = actual["ax_none"] + actual["ax_orb"] + actual["ax_kernel"]
+    if ax_sum != actual["theorems"]:
+        raise SystemExit(
+            "check_lean_claims: the recorded axiom split sums to %d, the "
+            "tree has %d theorems; re-run the #print axioms sweep"
+            % (ax_sum, actual["theorems"]))
     if actual["vacuous_unstated"]:
         raise SystemExit(
             "check_lean_claims: %d vacuous arm(s) do not derive from their "

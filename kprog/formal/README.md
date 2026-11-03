@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 463, and 361 steps
+`build/mut_*.py` files exist, the counter's last value is 464, and 362 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0593 - the axiom split was four constants that nothing
+tied to the tree
+
+The four axiom figures were recorded constants with nothing tying them to the
+tree. They happen to sum to 2065, but that was arithmetic luck rather than an
+enforced property: add one theorem and every figure would still have matched its
+own pattern while the split described a tree that no longer existed. This is the
+same failure the rest of the paragraph was written to rule out, one level up.
+
+The sum is now checked against the theorem count. A one-theorem shift in the
+recorded compiler count fails by name and tells the reader to re-run the #print
+axioms sweep, which is the only thing that produces those numbers; a gate cannot
+recompute them in the time it has.
+
+The sentence's 'a third of the tree' was 30%, and like the other shares in this
+section it is now derived and floored rather than rounded: 100 times 623 over
+2065. A drift to 33% is reported. That makes every figure in the TCB paragraph
+either derived from the tree or guarded against the tree drifting away from it.
+Census 463 -> 464.
 
 ### Step 0592 - the three-way split shipped with the axiom-free
 class miscounted

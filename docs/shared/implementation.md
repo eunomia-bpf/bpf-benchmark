@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0593 enforced the axiom partition: the four
+recorded figures must sum to the theorem count, so a
+tree change that outruns the sweep fails by name. 'A
+third of the tree' was 30%, now derived and floored
+like the section's other shares (census 463 -> 464).
+
+
 Step 0592 re-measured the axiom split and corrected
 step 0591: 617 axiom-free, 623 compiler, 824
 kernel-only (40 of them on Classical.choice),
