@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0647 bound the strongest oracle claim in the
+section: 9,585,135 cases each checked against a
+condition/writeback/tag model. The oracle compares
+every register's value and tag, and only 1 of 15
+build oracles does; dropping the tag half is now
+reported (census 517 -> 518).
+
+
 Step 0646 disclosed what the composition check
 actually accepts: it flags a proxy, and four oracles
 are reviewed exceptions that each name a covering

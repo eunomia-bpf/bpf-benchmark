@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 517, and 415 steps
+`build/mut_*.py` files exist, the counter's last value is 518, and 416 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0647 - the strongest oracle claim, and the half a value
+comparison would skip
+
+One sentence makes the strongest claim of this kind in the section: 9,585,135
+modeled cases, every one checked against an independent condition, writeback and
+tag model. The figure is a banner of the run; what makes the sentence strong is
+the model, and the tag part is what a value-only comparison would skip.
+
+The oracle compares each register's value and tag in an unrolled loop and all
+four flags beside it, which is the model the sentence names. Fifteen oracles
+live in the build directory and only this one compares both halves, so the
+pairing is specific rather than incidental, and both halves are now bound: the
+banner must still print the count, and the oracle must still compare tags.
+
+Removing the tag comparison leaves the sentence describing a stronger check than
+the oracle performs, which is the failure this class produces: the figure stays
+right while the model silently narrows. Census 517 -> 518.
 
 ### Step 0646 - the check is a proxy, and four oracles are
 exceptions it accepts

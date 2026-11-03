@@ -399,6 +399,25 @@ def reviewed_exceptions() -> int:
     raise SystemExit("check_paper_counts: no ACCEPTED in the checker")
 
 
+def every_case_oracles() -> list[tuple[str, bool]]:
+    """`[(oracle, compares every register value and tag)]` in `build/`.
+
+    The section says an oracle checks "every case ... against an independent
+    condition/writeback/tag model". The tag comparison is the part that a
+    value-only oracle would skip, so it is the part worth finding: an
+    unrolled loop comparing both, and a flag comparison beside it.
+    """
+    out = []
+    for path in sorted((pathlib.Path(__file__).parent / "build")
+                       .glob("*_host.c")):
+        text = path.read_text(errors="ignore")
+        both = ("__cs_tag != mtag[" in text
+                and "__cs_got != mreg[" in text)
+        flags = ("!= cf ||" in text or "!= zf ||" in text)
+        out.append((path.name, both and flags))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -549,6 +568,19 @@ def main() -> None:
         problems.append(
             "the composition check accepts %d exceptions; the section does "
             "not say so" % n_exc)
+    # "Every case checked against an independent condition/writeback/tag
+    # model---9,585,135 modeled cases": the count is checked as a claim, and
+    # the mechanism is that the oracle compares each register's value and tag
+    # plus all four flags. A value-only comparison would leave the sentence
+    # describing a stronger check than the oracle performs.
+    whole = dict(every_case_oracles())
+    if not whole.get("cmov_step_route_host.c"):
+        problems.append(
+            "the 9,585,135-case cmov oracle no longer compares every "
+            "register's value and tag")
+    if 9585135 not in measured:
+        problems.append("the cmov step route banner no longer reports "
+                        "9,585,135 cases")
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
