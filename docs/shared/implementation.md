@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0659 derived the last unbound share: 23% of the
+theorems are discharged by native_decide (488 of
+2065, floored -- rounding gives 24). Both stated
+shares now come from counted populations (census 529
+-> 530).
+
+
 Step 0658 made the mutation-harness splits
 arithmetic: the two change-style sentences must add
 up exactly (83 and 69), and a stage split may not

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 529, and 427 steps
+`build/mut_*.py` files exist, the counter's last value is 530, and 428 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0659 - the last share stated without a derivation, and why
+floored matters at 23
+
+The section states two shares of the tree: twenty-three per cent of its theorems
+are discharged by the decision procedure, and the compiler assumption covers
+thirty per cent. The second was already derived in the checker; the first was
+the last share stated without one.
+
+Both are floored rather than rounded, which the section says it does for every
+share, and the distinction is visible at exactly this figure: 488 of 2065 is
+23.63 per cent, so floor gives 23 and round gives 24. Deriving it the same way
+as the others is what keeps one share from being rounded while its neighbours
+are floored.
+
+The pattern binds the number and the number of modules together, so a share that
+drifts is reported against the tree. Both shares now come from the counted
+populations rather than from the prose. Census 529 -> 530.
 
 ### Step 0658 - two harness splits that must reach their own total,
 and two that must not

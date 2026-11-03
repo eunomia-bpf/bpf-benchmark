@@ -1096,6 +1096,10 @@ def scan_tree(root):
         # The share is derived, floored like every other share here, so the
         # sentence cannot round 2065-partitioning counts up to "a third".
         "ax_share": 100 * 623 // 2065,
+        # The native_decide share, derived the same way. Rounding would
+        # give 24, so the floored value keeps the convention the section
+        # states for every other share.
+        "nd_share": 100 * 488 // 2065,
         # Measured over all 165 bv_decide theorems with `#print axioms`,
         # one `lake env lean` per module (the sweep `axiom_census` runs).
         "orb_reach": 67,
@@ -1265,6 +1269,7 @@ CLAIMS = [
     (re.compile(r'gives (\d+), since (\d+) of the'), ("ax_choice_all",
                                                        "ax_choice_both")),
     (re.compile(r'therefore covers (\d+)\\% of the'), ("ax_share",)),
+    (re.compile(r'\((\d+)\\%\, spread over'), ("nd_share",)),
     (re.compile(r'constants run from (\d+) to (\d+)'),
      ("table_min_count", "table_max_count")),
     # The clause's second half named "the exactness theorems" with no rule,
