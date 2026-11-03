@@ -845,6 +845,10 @@ def scan_tree(root):
         "sweep_modules": len(sweep[0]),
         "sweep_theorems": sweep[1],
         "bv_total": bvshape[0] + bvshape[1],
+        # 165 closes under bv_decide; with the token replaced by
+        # `decide +revert` two of them compile and 159 do not. This is a
+        # recorded sweep result, not a tree property.
+        "bv_revert_recovered": 2,
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
@@ -955,6 +959,10 @@ CLAIMS = [
     # recompile sweep and are recorded, not recomputed, in this checker.
     (re.compile(r'of the (\d+) obligations'), ("native_decide",)),
     (re.compile(r'\s+place, and of the (\d+)'), ("bv_total",)),
+    # The revert experiment moves the bv count by two and the native count by
+    # nothing, which is what rules out the tactic swap as the explanation.
+    (re.compile(r'Reverting recovers (\d+) of the (\d+)'),
+     ("bv_revert_recovered", "bv_total")),
     (re.compile(r'\. On (\d+) of those the plain'), ("bv_cases",)),
     (re.compile(r'The other (\d+)\s+bind a bit-vector'), ("bv_direct",)),
     (re.compile(r'of the (\d+) theorems whose statement composes'),

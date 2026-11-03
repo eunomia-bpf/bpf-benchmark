@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0587 re-ran the sweep with decide +revert: two
+bv_decide theorems recover, none of the 488 native
+ones change, so the 160-theorem gap is the tactic's
+and not the replacement's. That also shows the
+record's 8 matched neither sweep; both read 487 of
+488 (census 457 -> 458).
+
+
 Step 0586 re-ran the re-discharge sweep and found the
 record's native count wrong: 1 of 488 theorems fails
 a bare decide, not 8, while 161 of 165 bv_decide ones

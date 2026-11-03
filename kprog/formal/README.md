@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 457, and 355 steps
+`build/mut_*.py` files exist, the counter's last value is 458, and 356 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0587 - the gap survives the remedy Lean itself proposes,
+so it belongs to the tactic
+
+Step 0586 established that a bare `decide` fails on 1 of 488 native_decide
+theorems and 161 of 165 bv_decide ones. The open question was whether that gap
+is an artefact of the replacement tactic rather than of the tactic being
+replaced, so the sweep was re-run with `decide +revert`, the remedy Lean's own
+error message proposes.
+
+It moves one side only. On the bv side two theorems now compile —
+`arm64_ccmp_fallback_refines` and `arm64_bitfield_mask_refines`, both of which
+the bare tactic could not state at all — so 159 of 165 still fail. On the native
+side nothing changes: `x86_specialization_no_insertion` fails with the same
+"decide failed for proposition", the only one of 488. The gap is therefore a
+property of the tactic, not of which replacement was tried.
+
+That also settles the record's contradiction. Its 480-of-488 was read as closure
+under a reverted decision, but the reverted sweep gives 487 of 488, and the bare
+sweep gives 487 as well; the 8 it recorded matched neither. Recording both
+sweeps makes the paper's claim reproducible in direction from either side, and
+the single surviving native failure is now named rather than counted. Census 457
+-> 458.
 
 ### Step 0586 - the recorded sweep had the native side wrong, so it
 was re-run
