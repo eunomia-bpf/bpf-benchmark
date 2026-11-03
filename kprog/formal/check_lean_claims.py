@@ -270,9 +270,11 @@ def image_pairs(block, name, gen_defs):
         if not any(re.search(r"\b" + re.escape(g) + r"\b", part)
                    for g in gen_defs):
             continue
-        literals = re.findall(r"\[[^\]]*\]", part)
-        lengths = [literal_length(part, part.index(l))
-                   for l in literals]
+        # Each match carries its own offset. Seeking the text instead would
+        # measure the first occurrence twice whenever both sides are equal,
+        # which makes the equality check below vacuous.
+        lengths = [literal_length(part, m.start())
+                   for m in re.finditer(r"\[[^\]]*\]", part)]
         # A map over a literal compared to a literal of a different length is
         # not the shape the sentence describes, and `= []` would satisfy a
         # bare count while pinning nothing. Equal, non-empty sides make the

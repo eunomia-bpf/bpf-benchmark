@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0576 fixed a vacuous equality in the image rule:
+findall plus index() measured the first occurrence
+twice, so a literal compared against itself passed
+the equal-length test. finditer gives each match its
+own offset; no tree instance existed, so the figures
+are unchanged (census 446 -> 447).
+
+
 Step 0575 tightened the image rule: a right-hand []
 or an unequal-length list satisfied it while pinning
 nothing, so both sides must now be non-empty and

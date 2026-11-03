@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 446, and 344 steps
+`build/mut_*.py` files exist, the counter's last value is 447, and 345 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0576 - the image rule measured its first literal twice
+when both sides matched
+
+The image rule's equality check was vacuous for one shape. It collected the
+literals with `findall` and then measured each with `part.index(literal)`, which
+returns the first occurrence, so a conjunct comparing a literal against the same
+literal measured that literal twice: `List.map f [.a] = [.a, .b]` read as two
+lists of one entry and joined the class. The three theorems in the tree compare
+different literals, so no published figure moved and nothing would have moved if
+a future one did not.
+
+`finditer` gives each match its own offset, so the two sides are measured where
+they actually are. The equal-literal case now reads 1 against 2 and is refused,
+which is what the earlier rule intended: both sides must be the same length, and
+seeking text cannot establish that when the text is identical.
+
+The population check is what made this worth fixing rather than noting. No
+theorem in the tree has equal literals on both sides, so the count stays at 3
+with a minimum of 4 widths, and the gate's 248 banners and 124,531,802 cases are
+untouched; the rule is simply not relying on an accident of the current tree.
+Census 446 -> 447.
 
 ### Step 0575 - the image rule accepted a map compared against no
 list at all
