@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 466, and 364 steps
+`build/mut_*.py` files exist, the counter's last value is 467, and 365 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0596 - the three choice figures were one population and
+nothing said so
+
+The three choice figures are views of one population: 177 theorems draw on
+Classical.choice, 137 of those also reach Lean.ofReduceBool, and 40 sit in the
+kernel-only class. Nothing enforced 177 minus 137 equals 40, and a partial
+re-measurement is exactly the failure mode that breaks it while all three
+figures keep matching their own claim patterns.
+
+That is the same defect the axiom partition had before step 0593, one level
+down: recorded numbers that were individually plausible and jointly unchecked.
+Both identities are now enforced, and both are cheap, since neither needs a
+probe.
+
+Two bounds went with it, because a choice count can be inconsistent without
+breaking the identity. The 40 kernel-only choice theorems cannot exceed the 825
+kernel-only theorems, and the 137 cannot exceed the 623 that assume the
+compiler. Each is a one-line comparison and each would have caught a figure
+entered against the wrong class, which is the error that produced the
+40-instead-of-177 reading two steps ago. Census 466 -> 467.
 
 ### Step 0595 - the sentence counted six forms and its checker
 scans five

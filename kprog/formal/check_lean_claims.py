@@ -1205,6 +1205,22 @@ def check(targets, root):
     # that no longer exists, and every figure would still match its own
     # pattern.
     ax_sum = actual["ax_none"] + actual["ax_orb"] + actual["ax_kernel"]
+    # The choice figures are three views of one population, so they must
+    # agree: every theorem drawing on choice either also reaches the compiler
+    # axiom or sits in the kernel-only class. A partial re-measurement would
+    # leave all three matching their own patterns while the identity broke.
+    if (actual["ax_choice_all"] - actual["ax_choice_both"]
+            != actual["ax_choice"]):
+        raise SystemExit(
+            "check_lean_claims: the choice figures disagree -- %d drawing on "
+            "it, %d of them also reaching Lean.ofReduceBool, %d kernel-only"
+            % (actual["ax_choice_all"], actual["ax_choice_both"],
+               actual["ax_choice"]))
+    if actual["ax_choice"] > actual["ax_kernel"]:
+        raise SystemExit(
+            "check_lean_claims: %d kernel-only theorems draw on choice but "
+            "the kernel-only class has %d"
+            % (actual["ax_choice"], actual["ax_kernel"]))
     if ax_sum != actual["theorems"]:
         raise SystemExit(
             "check_lean_claims: the recorded axiom split sums to %d, the "

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0596 bound the three choice figures as one
+population: 177 - 137 = 40, and the class bounds 40
+<= 825 and 137 <= 623. A one-theorem drift in any of
+them now raises, where before all three matched their
+own patterns (census 466 -> 467).
+
+
 Step 0595 found 'each of the six' naming five forms,
 one of which (admit) the sentence omitted entirely.
 The count now derives from check_no_sorry.py's
