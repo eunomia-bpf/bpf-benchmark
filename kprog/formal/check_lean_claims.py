@@ -1441,6 +1441,21 @@ def check(targets, root):
             "harness -- %s" % (len(total_drift),
                                "; ".join("%s says %d, harness has %d" % d
                                          for d in total_drift)))
+    # Totals that stand beside no catch claim: the tree can only say whether
+    # some harness has that many rows. Forty of the forty-three distinct
+    # totals are a harness's present size; the other three describe stages a
+    # harness grew through, which no file records, so they are exempt.
+    sizes = {sum(parts[0].values()) for parts in tables.values()}
+    flat_section = harness_census.re.sub(r"\s+", " ",
+                                         section_text.replace("\\brk", ""))
+    stray = sorted({int(m.group(1))
+                    for m in harness_census.re.finditer(
+                        r"(\d+)-mutation harness", flat_section)}
+                   - sizes)
+    if stray != [96, 100, 108]:
+        raise SystemExit(
+            "check_lean_claims: mutation totals %r match no harness size; "
+            "96, 100 and 108 were the exempt growth stages" % (stray,))
     if len(totals) < 23:
         raise SystemExit(
             "check_lean_claims: only %d mutation totals resolved to a "

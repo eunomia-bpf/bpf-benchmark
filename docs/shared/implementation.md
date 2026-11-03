@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0626 covered the 47 standalone mutation totals:
+40 are a harness's present size, 3 describe growth
+stages no file records. A standalone total matching
+no size now raises, with the three exceptions named;
+paired totals stay exact (census 496 -> 497).
+
+
 Step 0625 censused the `-case` figures: 118 distinct,
 117 in a banner, 1 the documented 7x7x30 grid. The
 checker now reports how many it examined and fails on

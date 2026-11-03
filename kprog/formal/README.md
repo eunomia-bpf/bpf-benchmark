@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 496, and 394 steps
+`build/mut_*.py` files exist, the counter's last value is 497, and 395 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0626 - forty-seven mutation totals stood beside nothing
+to compare them to
+
+Seventy-one places in the section state how many mutations a harness runs.
+Twenty-four of them sit beside a catch claim and were compared to their harness
+in step 0623; the other forty-seven stand alone, and setting one to any number
+at all would have gone unnoticed.
+
+Thirty of the distinct totals are a harness's present size, so a total that
+matches no harness is the signal that something moved. Three do not match and
+should not: ninety-six, one hundred and eight describe a harness at earlier
+points in its growth, and no file records a harness's history, so the prose is
+the only place those stages exist.
+
+The check therefore has two halves. A total beside a catch claim is compared to
+the harness that claim resolves to, exactly. A standalone total is compared to
+the set of harness sizes, and the three legitimate exceptions are named, so a
+fourth would be reported and so would a drift in any of the three. Census 496 ->
+497.
 
 ### Step 0625 - the case-count checker never counted how many
 figures it looked at
