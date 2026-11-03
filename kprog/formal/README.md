@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 532, and 430 steps
+`build/mut_*.py` files exist, the counter's last value is 533, and 431 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0662 - a stale size inside the argument tier, and what
+stays an argument
+
+Forty-five sentences say a planted fault is numerically distinguishable, and
+forty-four of them are arguments rather than figures: the sentence explains why
+a wrong body would change an observable, and the only way to check one is to
+read the oracle's reasoning. Three sentences are different, because they record
+a fault that did survive and the measurement that closed it.
+
+One of those measurements was stale. The section said the shared AArch64 route
+host was now 4,328 modeled cases; the gate prints 4,470. The figure was written
+in step 0458, when it was right, and the oracle has grown since without the
+sentence following.
+
+The form is now bound: a sentence giving an oracle's current size must give a
+banner of that size. The ninety-thousand-case figure beside it was already
+correct, and the four thousand four hundred and seventy is the banner the host
+prints. That leaves forty-four sentences in the qualitative tier, each an
+argument that needs a reader. Census 532 -> 533.
 
 ### Step 0661 - forty-seven cited files, and why the oracles are
 not among them

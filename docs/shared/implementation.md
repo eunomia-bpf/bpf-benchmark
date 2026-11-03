@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0662 corrected a stale figure in the qualitative
+tier: the A64 route host was stated at 4,328 modeled
+cases and prints 4,470. The form is now bound to a
+banner; 44 of the 45 distinguishability sentences
+remain arguments (census 532 -> 533).
+
+
 Step 0661 required every file the section cites to
 exist: 47 names, all Lean modules, and none missing.
 Oracles and harnesses are cited by banner or by size

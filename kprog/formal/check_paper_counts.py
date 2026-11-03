@@ -967,6 +967,18 @@ def main() -> None:
     for name in named_files():
         problems.append(
             "the section cites %s, which is not in the tree" % name)
+    # "build/a64_route_host.c (now N modeled cases)" states the oracle's
+    # current banner. It drifted once -- 4328 was written in step 0458 and
+    # the oracle has since grown -- so the figure is bound to the banner of
+    # the host the sentence names.
+    flat_text = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    for fig in re.findall(
+            r"\(now ([\d{},]+) modeled cases", flat_text):
+        n = int(re.sub(r"[{},]", "", fig))
+        if n not in measured:
+            problems.append(
+                "the a64 route host is stated at %d modeled cases and no "
+                "banner reports it" % n)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
