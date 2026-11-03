@@ -786,6 +786,38 @@ def scene_counts() -> dict[str, int]:
     return out
 
 
+def harness_totals() -> dict[str, int]:
+    """`{harness: mutations}` counted the way the harness itself counts.
+
+    `len(MUTATIONS)` is the authority: the literals run to several lines per
+    entry and carry comments, so counting parentheses undercounts. Entries
+    are the top-level tuples in the assignment, which is what Python binds.
+    """
+    import ast
+    out = {}
+    for path in pathlib.Path(__file__).parent.glob("build/mut_*.py"):
+        src = path.read_text(errors="ignore")
+        try:
+            tree = ast.parse(src)
+        except SyntaxError:
+            continue
+        n = None
+        for node in tree.body:
+            if (isinstance(node, ast.Assign) and node.targets
+                    and getattr(node.targets[0], "id", "") in
+                    ("MUTATIONS", "MUT_TABLE", "ROWS")
+                    and isinstance(node.value, ast.List)):
+                n = len(node.value.elts)
+                break
+        # Some harnesses declare an empty list and register rows through a
+        # helper; there the helper's call count is the entry count.
+        if not n:
+            n = len(re.findall(r"^\s*row\(", src, re.M))
+        if n:
+            out[path.stem] = n
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1217,6 +1249,23 @@ def main() -> None:
         problems.append(
             "the scene counts are %s; sixteen and seventeen when this was "
             "written" % scenes)
+    # Thirty-one dedicated harnesses are sized in the prose. The figures are
+    # checked against the entry count of each harness's MUTATIONS list, read
+    # by the same parse Python performs, so a harness that grew or shrank is
+    # reported rather than the literal's parentheses.
+    totals = harness_totals()
+    have = set(totals.values())
+    flat_t = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    stated = {int(n) for n in re.findall(
+        r"[Aa] dedicated (\d+)-mutation harness", flat_t)}
+    if len(stated) != 31:
+        problems.append(
+            "the section sizes %d dedicated harnesses; 31 when this was "
+            "written" % len(stated))
+    for n in sorted(stated - have):
+        problems.append(
+            "a dedicated harness is stated at %d mutations and no harness "
+            "has that many entries" % n)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

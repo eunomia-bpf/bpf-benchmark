@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0670 bound the 31 dedicated-harness sizes to
+each harness's mutation list, read by Python's own
+parse. A textual count was wrong twice: multi-line
+entries, and harnesses that register rows through a
+helper (census 540 -> 541).
+
+
 Step 0669 bound the scene counts: x86 route host 16,
 helper route host 17, both exact. A scene is a named
 function, so the count is checkable outright -- a

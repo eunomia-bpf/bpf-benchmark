@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 540, and 438 steps
+`build/mut_*.py` files exist, the counter's last value is 541, and 439 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0670 - counting parentheses is not counting mutations
+
+Thirty-one sentences size a dedicated mutation harness: retargets the shared
+specification, its generator, the generated C and Lean, the hand refinement.
+Each figure is the length of that harness's mutation list, which Python binds,
+so the check reads the list with the same parse the interpreter performs rather
+than counting parentheses in the text.
+
+Counting parentheses was wrong twice. A list literal runs over several lines per
+entry and carries comments, so a textual count gave a hundred and twenty-four
+for a harness that runs a hundred and four; and some harnesses declare an empty
+list and register their rows through a helper, so the literal was empty while
+the harness ran thirty-nine. Reading the assignment and, where it is empty, the
+helper's calls gives all thirty-one.
+
+Two of the thirty-one were verified by running the harnesses outright, which is
+what showed the textual count was wrong: a hundred and four and a hundred and
+thirty-two, both exactly as the section states. The elapsed time is why they are
+counted rather than run in the gate. Census 540 -> 541.
 
 ### Step 0669 - sixteen and seventeen scenes, which no case count
 can see
