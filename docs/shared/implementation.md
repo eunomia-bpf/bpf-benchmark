@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0608 resolved two recorded mismatches against
+source and found both genuinely wrong: a 53-row
+harness whose host split is 12 not 8, and a 74-row
+one with 70 catching not 68. Both corrected from
+harness data; three remain recorded (census 478 ->
+479).
+
+
 Step 0607 gave the census a Step index, since the
 paper names contracts not scripts: 218 of 330
 harnesses cite their Step in the docstring, so a

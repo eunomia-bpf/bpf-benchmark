@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 478, and 376 steps
+`build/mut_*.py` files exist, the counter's last value is 479, and 377 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0608 - two of the recorded mismatches were simply wrong
+numbers
+
+With the census indexed by Step, the recorded mismatches could be resolved
+against source instead of guessed at. Two turned out to be genuinely wrong
+numbers.
+
+The 53-row store-exclusive harness has 49 catching rows and 4 equivalents, and
+by the detector each row names they split 26 generator stage, 15 Lean chain and
+12 host oracle. The sentence said 8 host. The 74-row move-wide harness has 70
+catching rows and 4 equivalents, split 32, 21 and 17; the sentence said 68
+catching and 18 host. Neither figure was reachable by any reading of the
+harness, so both were stale counts rather than a convention applied
+inconsistently.
+
+Both sentences now carry the harness's own numbers, and the 53-row one states
+the convention inline so the split cannot be read as a partition of the caught
+figure. Three claims remain in the recorded list, all of which agree with source
+under the all-rows reading and are kept only because resolving them needs their
+Step to be identified in the prose. Census 478 -> 479.
 
 ### Step 0607 - the census could count rows but not say whose
 rows they were
