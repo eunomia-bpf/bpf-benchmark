@@ -559,6 +559,34 @@ def header_claim_oracles(log: pathlib.Path) -> list[str]:
     return sorted(out)
 
 
+def harness_partitions(text: str) -> list[tuple[str, int, int]]:
+    """`[(form, stated total, sum of the stated stages)]` for harnesses.
+
+    Each sentence gives a harness its size and then splits the catches by
+    the stage that made them. The stages are the claim, so they have to
+    account for what the sentence says was caught, and never for more than
+    the harness holds.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    num = lambda s: int(s.replace(",", ""))
+    out = []
+    m = re.findall(
+        r"(\d+)-mutation harness[^.]{0,400}?"
+        r"(\d+) caught at the specification/generator stage, "
+        r"(\d+) by the Lean chain, and (\d+) by", flat)
+    for tot, a, b, c in m:
+        out.append(("stage", int(tot), int(a) + int(b) + int(c)))
+    m = re.findall(
+        r"(\d+)-mutation harness[^.]{0,300}?catches (\d+) changes?"
+        r" \(([\d,]+) at the specification/generator stage, "
+        r"([\d,]+) in the Lean chain, ([\d,]+) by the host oracle, "
+        r"and ([\d,]+) by the routed oracle\)", flat)
+    for tot, caught, a, b, c, d in m:
+        out.append(("change", num(caught),
+                    num(a) + num(b) + num(c) + num(d)))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -859,6 +887,23 @@ def main() -> None:
             problems.append(
                 "%s is named as including the simulator header and does not"
                 % binary)
+    # A mutation harness is stated with its size, then split by the stage
+    # that caught each change. The stages must not exceed what was caught,
+    # and the change-style sentences must add up exactly.
+    parts = harness_partitions(text)
+    if len(parts) != 4:
+        problems.append(
+            "the section states %d harness partitions; 4 when this was "
+            "written" % len(parts))
+    for form, tot, s_sum in parts:
+        if s_sum > tot:
+            problems.append(
+                "a harness partition sums to %d against a stated %d"
+                % (s_sum, tot))
+        if form == "change" and s_sum != tot:
+            problems.append(
+                "a harness change partition sums to %d and claims %d"
+                % (s_sum, tot))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

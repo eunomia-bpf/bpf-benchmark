@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0658 made the mutation-harness splits
+arithmetic: the two change-style sentences must add
+up exactly (83 and 69), and a stage split may not
+exceed its harness. Both drifts fail the check
+(census 528 -> 529).
+
+
 Step 0657 bound the 34 header-inclusion sentences to
 their 36 oracles: every named oracle includes a
 simulator header. Six were first read across a

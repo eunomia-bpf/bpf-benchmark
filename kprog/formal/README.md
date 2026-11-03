@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 528, and 426 steps
+`build/mut_*.py` files exist, the counter's last value is 529, and 427 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0658 - two harness splits that must reach their own total,
+and two that must not
+
+The section describes mutation harnesses in two forms, and both carry their own
+arithmetic. In one a harness is sized and then the catches are split by the
+stage that made them, thirty-eight at the specification and generator, fourteen
+in the Lean chain and thirteen from the host, which accounts for sixty-five of
+sixty-nine and leaves four. In the other a harness catches a stated number of
+changes, split across four stages, and there the split has to be exact.
+
+Both change-style sentences add up precisely: forty-one, thirty, seven and five
+is eighty-three, and twenty-two, thirty, thirteen and four is sixty-nine. The
+stage-style pair does not reach its total, and the four left over are the
+changes the sentence elsewhere calls genuine equivalences, so the check requires
+the stages to account for what was caught without ever exceeding what the
+harness holds.
+
+That distinction is what keeps the two forms in one census: a stage split under
+its total is a claim about which stages caught what, while a change split over
+its total would be arithmetic that cannot be true. Seventy-one harnesses are
+named across the section, so this binds the four that state a split. Census 528
+-> 529.
 
 ### Step 0657 - the header claim is in the clause, and six sentences
 were read across the break
