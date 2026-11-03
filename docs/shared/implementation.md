@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0590 completed the axiom measurement on the
+native side: 483 of 488 reach ofReduceBool, so 552
+theorems in all assume the compiler and the other 261
+are already kernel-only. The deployment claim now
+names that population and scopes its bit-vector
+clause to the 69 that assume it (census 460 -> 461).
+
+
 Step 0589 measured the axiom footprint with #print
 axioms: only 69 of the 165 bv_decide proofs reach
 Lean.ofReduceBool, and 96 close by kernel-checked

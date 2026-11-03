@@ -854,6 +854,9 @@ def scan_tree(root):
         "unstated_direct": 103,
         # Recorded #print axioms results over the 165 bv_decide proofs.
         "orb_reach": 69,
+        "orb_native": 483,
+        "orb_total": 552,
+        "orb_kernel_only": 261,
         "orb_kernel": 96,
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
@@ -946,6 +949,14 @@ CLAIMS = [
     (re.compile(r'(\d+) of the (\d+) proofs reach'),
      ("orb_reach", "bv_total")),
     (re.compile(r'the other (\d+) discharge entirely'), ("orb_kernel",)),
+    # The population the deployment claim covers is the one that assumes the
+    # compiler, and the two documents' figures are counts of that, not of the
+    # tactics' whole populations.
+    (re.compile(r'(\d+) of the (\d+) \\texttt\{native'), ("orb_native",
+                                                          "native_decide")),
+    (re.compile(r'reach \\texttt\{Lean\.ofReduceBool\}, (\d+) in all'),
+     ("orb_total",)),
+    (re.compile(r'The other (\d+) are already'), ("orb_kernel_only",)),
     (re.compile(r'Of the (\d+) theorems\s+stating an equality'),
      ("ident_total",)),
     (re.compile(r'binders, (\d+) are closed by'), ("ident_bv",)),

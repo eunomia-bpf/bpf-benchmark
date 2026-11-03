@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 460, and 358 steps
+`build/mut_*.py` files exist, the counter's last value is 461, and 359 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0590 - the deployment claim never named the population
+that has to be re-discharged
+
+The deployment sentence was the one place the paper's trust argument became
+operational: a deployment that will not trust the compiler "can re-discharge
+nearly every finite enumeration and example". It named no population, and the
+population it needs is not the tactics' totals — it is the theorems that
+actually assume the compiler.
+
+That set is the one step 0589 started measuring, now completed on both sides:
+483 of the 488 native_decide proofs and 69 of the 165 bv_decide ones reach
+Lean.ofReduceBool, 552 in all. The other 261 proofs are already kernel-only, so
+a deployment that avoids the assumption does not need to touch them — 96 of the
+bv_decide population never had it in their trust chain at all.
+
+Stating 552 as the population also fixes what the sentence promises about. Its
+last clause said the bit-vector identities "apart from a handful of small
+exceptions, have no kernel-only discharge", which is true of the 69 that assume
+the compiler and false of the 96 that do not; the sentence now says "that do
+assume it". So the re-discharge story and the enforcement story finally describe
+the same set. Census 460 -> 461.
 
 ### Step 0589 - only 69 of the 165 bv_decide proofs reach the
 axiom the paragraph named for all of them
