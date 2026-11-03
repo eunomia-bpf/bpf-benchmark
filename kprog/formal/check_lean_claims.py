@@ -593,6 +593,11 @@ def scan_tree(root):
     for path in mods:
         all_defs[os.path.basename(path)[:-5]] = set(re.findall(
             r"^def (\w+)", open(path, errors="ignore").read(), re.M))
+    # Only generated *tables* -- literal lists -- are what the sentence means
+    # by a table. Counting every generated def would take the population to
+    # 675 theorems, most of which compare a folded value rather than a table,
+    # and the enumeration is not about those.
+    generated_names = gen_lists
     visible = {}
     for s in imports:
         seen_defs = set(all_defs[s])
@@ -600,7 +605,8 @@ def scan_tree(root):
             seen_defs |= all_defs.get(imp, set())
         visible[s] = seen_defs
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
-                "width": [], "total": [], "derived": [], "unstated": []}
+                "width": [], "total": [], "derived": [], "unstated": [],
+                "tabled": [], "outside": []}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -652,6 +658,27 @@ def scan_tree(root):
                     counters["derived"].append(1)
                 else:
                     counters["unstated"].append(m.group(1))
+            # The sentence's universal is "the theorems that close by rfl or
+            # decide over a table", and the enumeration after it is the whole
+            # of that population: 77 theorems name a generated table, and 77
+            # fall in the four classes. A theorem that named one and matched
+            # none would make the enumerated list read as exhaustive when it
+            # had stopped being so, so both sides are counted here.
+            inclass = any(c for c in (
+                table_length_count(block, m.group(1), imports[stem],
+                                   gen_counts) is not None,
+                refinement_pair(block, m.group(1), own_lists[stem],
+                                gen_lists[stem]) is not None,
+                sweep_checks(block, m.group(1)) is not None,
+                image_pairs(block, m.group(1), visible[stem])[0] > 0))
+            if "native_decide" not in block and re.search(
+                    r"\brfl\b|\bdecide\b", block[block.find(":="):]):
+                stmt = block[:block.find(":=")]
+                if any(re.search(r"\b" + re.escape(g) + r"\b", stmt)
+                       for g in generated_names[stem]):
+                    counters["tabled"].append(1)
+                    if not inclass:
+                        counters["outside"].append(m.group(1))
             image = image_pairs(block, m.group(1),
                                 visible.get(stem, set()))
             if image[0]:
@@ -709,6 +736,12 @@ def scan_tree(root):
         # checks any one of them carries.
         # The fourth shape the sentence's enumeration left outside itself: a
         # generated table's image at every width, pinned by a literal list.
+        # The population the non-vacuity sentence quantifies over. Each
+        # theorem counted here names a generated table and closes by rfl or
+        # decide; every one must also fall in a counted class, so the
+        # enumeration cannot quietly describe part of its own subject.
+        "tabled": len(counters["tabled"]),
+        "tabled_outside": counters["outside"],
         "images": len(counters["image"]),
         "image_min_widths": min(counters["width"]) if counters["width"] else 0,
         "image_max_widths": max(counters["width"]) if counters["width"] else 0,
@@ -785,6 +818,8 @@ CLAIMS = [
     # not be refuted by any measurement -- zero theorems or a zero constant
     # both kept it true -- so the paper quotes the span instead, and the claim
     # fails the moment a generator emits an empty table.
+    (re.compile(r"All (\d+) theorems that close over a generated table"),
+     ("tabled",)),
     (re.compile(r'the (\d+) table-length theorems'), ("table_length",)),
     (re.compile(r'constants run from (\d+) to (\d+)'),
      ("table_min_count", "table_max_count")),
@@ -892,6 +927,15 @@ def check(targets, root):
     actual["share"] = 100 * actual["native_decide"] // actual["theorems"]
     # A nonmember arm closed without naming the absurdity is the old proof
     # shape back again: nothing published would change, so it raises here.
+    # The sentence enumerates the theorems that close over a table. A tabled
+    # theorem outside every class would leave the enumeration describing part
+    # of its own subject while reading as though it described all of it.
+    if actual["tabled_outside"]:
+        raise SystemExit(
+            "check_lean_claims: %d theorem(s) close over a generated table "
+            "and fall in no counted class -- %s"
+            % (len(actual["tabled_outside"]),
+               ", ".join(actual["tabled_outside"])))
     if actual["vacuous_unstated"]:
         raise SystemExit(
             "check_lean_claims: %d vacuous arm(s) do not derive from their "

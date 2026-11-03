@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 448, and 346 steps
+`build/mut_*.py` files exist, the counter's last value is 449, and 347 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0578 - the enumeration read as exhaustive and had never
+been checked against its own population
+
+The sentence that opens with a universal had grown an enumeration of four
+classes, and nothing said whether the enumeration covered the universal. It read
+as exhaustive prose while being a list of the shapes found so far, which is the
+same defect the earlier steps kept finding in numbers: the figure was measured,
+the scope was not.
+
+The population is measurable. A theorem belongs to it when it closes by `rfl` or
+`decide` and its statement names a generated table, taking tables to be the
+generated literal lists rather than every generated definition -- the wider
+reading gives 675 theorems, most comparing a folded value, and the sentence is
+not about those. Counting that way gives exactly 77, and all 77 fall in one of
+the four classes.
+
+That equality is now enforced rather than observed. A tabled theorem in no class
+raises, naming the theorem, and the check was exercised with a probe that
+compiles, names a generated table, closes by `rfl`, and belongs to nothing: it
+was reported by name. The paper states the population and its closure, so the
+enumeration says what it covers instead of leaving the reader to assume it
+covers everything. Census 448 -> 449.
 
 ### Step 0577 - the image class was chosen by which module a spec
 lived in, and ten theorems lived elsewhere

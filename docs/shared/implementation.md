@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0578 measured the scope the enumeration only
+implied. Tabled theorems -- closing by rfl/decide and
+naming a generated list -- number 77, all inside the
+four classes; a member outside them now raises by
+name, and the paper states the population (census 448
+-> 449).
+
+
 Step 0577 found the image class was defined by
 provenance: visible unioned only generated imports,
 so ten theorems mapping a hand-written spec were
