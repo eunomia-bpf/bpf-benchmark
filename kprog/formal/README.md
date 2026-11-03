@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 504, and 402 steps
+`build/mut_*.py` files exist, the counter's last value is 505, and 403 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0634 - why the divergence is safe, and a macro name that
+looked like a violation
+
+The tag sentence does not only say the vocabularies differ, it says why that is
+safe: no table is indexed by tag across the two simulators and no comparison
+mixes their constants. Those are structural properties of the two headers, and
+they are what make the divergence harmless rather than a latent bug.
+
+Both hold, and each fails visibly if it stops holding. Neither header names the
+other's tag macro, in either direction, and no array is indexed by a tag
+constant; the two tag arrays the headers do declare are sized by a slot count
+and indexed by a word index, which is a different thing and had to be told apart
+from the pattern the claim names.
+
+That distinction is the increment: a loose scan counted two violations, and
+reading them showed both were a macro whose name contains TAG used to size an
+array. The check now requires a tag constant as the index and nothing else, and
+the sentence's two properties are compared rather than assumed. Census 504 ->
+505.
 
 ### Step 0633 - the fallback oracle checks eight invalid codes,
 and the sentence said eleven

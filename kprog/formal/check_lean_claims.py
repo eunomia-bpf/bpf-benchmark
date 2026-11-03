@@ -678,6 +678,31 @@ def width_fallback_codes(root):
             sum(1 for c in calls if c not in valid))
 
 
+def tag_isolation(root):
+    """`(cross references one way, the other, tag-valued indices)`.
+
+    The section says the tag divergence is safe because no table is indexed
+    by tag across the two simulators and no comparison mixes their
+    constants. Both halves are structural: a header that named the other
+    ISA's tag macro would mix them, and an array indexed by a tag value
+    would be indexed by tag.
+    """
+    root = pathlib.Path(root).resolve().parent
+    arm = (root / "arm64" / "arm64_sim_local_bpf.h").read_text()
+    x86 = (root / "x86" / "x86_sim_local_bpf.h").read_text()
+    tagged = 0
+    for text in (arm, x86):
+        # A tag constant as the *index* of an array, not a macro whose
+        # name merely contains TAG used to size one: the declaration
+        # `__a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(...)]` is sized by a
+        # slot count, while `tbl[SIM_TAG_STACK]` would be indexed by tag.
+        tagged += len(re.findall(
+            r"\w+\[(?![^\]]*\()(?:[^\]]*\b)?[A-Z0-9]+_SIM_TAG_[A-Z_]+\]",
+            text))
+    return (len(re.findall(r"X86_SIM_TAG_", arm)),
+            len(re.findall(r"ARM64_SIM_TAG_", x86)), tagged)
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -1577,6 +1602,15 @@ def check(targets, root):
         raise SystemExit(
             "check_lean_claims: the tag vocabularies now agree everywhere, "
             "so the section's contrast with the width vocabulary is false")
+    # The divergence is safe only because the constants are never mixed,
+    # which the sentence states as two structural properties.
+    across_arm, across_x86, by_tag = tag_isolation(root)
+    if (across_arm, across_x86, by_tag) != (0, 0, 0):
+        raise SystemExit(
+            "check_lean_claims: the tag constants are no longer isolated -- "
+            "%d AArch64 references in the x86 header, %d the other way, "
+            "%d arrays indexed by tag; the section says none of the three"
+            % (across_arm, across_x86, by_tag))
     if (shared_tags, divergent, arm_only) != (7, [7], [8]):
         raise SystemExit(
             "check_lean_claims: the tag vocabularies are now %d shared, "

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0634 checked why the tag divergence is safe: no
+header names the other's constants, and none indexes
+an array by a tag. A loose scan first counted two
+violations, both a TAG-named macro used to size an
+array rather than index it (census 504 -> 505).
+
+
 Step 0633 checked the width-fallback sentence against
 its oracle: four valid codes and 8 invalid, not the
 11 the section claimed. The count now reads from the
