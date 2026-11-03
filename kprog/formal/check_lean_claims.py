@@ -572,7 +572,8 @@ def scan_tree(root):
         gen_lists[stem] = merged
     visible = {s: set().union(*[gen_defs.get(i, set()) for i in imports[s]])
                if imports[s] else set() for s in imports}
-    counters = {"table": [], "pair": [], "sweep": [], "image": []}
+    counters = {"table": [], "pair": [], "sweep": [], "image": [],
+                "total": []}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -612,6 +613,8 @@ def scan_tree(root):
             swept = sweep_checks(block, m.group(1))
             if swept is not None:
                 counters["sweep"].append(swept)
+            if m.group(1).endswith("_ops_total") and "cases op" in block:
+                counters["total"].append(1)
             image = image_pairs(block, m.group(1),
                                 visible.get(stem, set()))
             if image:
@@ -669,6 +672,11 @@ def scan_tree(root):
         # The fourth shape the sentence's enumeration left outside itself: a
         # generated table's image at every width, pinned by a literal list.
         "images": len(counters["image"]),
+        # The nonmember arm of each dispatch contract is vacuous only because
+        # its umbrella list covers every constructor, which the doc comment
+        # asserted and nothing proved. Four `*_ops_total` theorems now do, and
+        # the count is published so the sentence cannot outlive them.
+        "ops_total": len(counters["total"]),
         "sweeps": len(counters["sweep"]),
         "sweep_min_checks": min(counters["sweep"]),
     }
@@ -753,6 +761,7 @@ CLAIMS = [
     # The fourth shape is bound for the same reason as the others: the
     # enumeration now names every form the rule finds.
     (re.compile(r'the (\d+) table-image theorems'), ("images",)),
+    (re.compile(r'until (\d+) totality theorems'), ("ops_total",)),
     # The section opens by claiming the artifacts are paired one-to-one with
     # their specifications, and states the figure three times in one sentence.
     # All three counts were hand-kept and the pairing was asserted, never

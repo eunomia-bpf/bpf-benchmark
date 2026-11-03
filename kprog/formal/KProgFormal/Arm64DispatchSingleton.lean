@@ -272,6 +272,13 @@ theorem arm64_singleton_nonmember_unhandled (op : SingletonOp)
               loadD0Handled, storeD0Handled, loadQ0Handled, storeQ0Handled,
               fmovHandled]
 
+/-- Every constructor is a member of `arm64SingletonOps`.
+`cases op <;> decide` closes it, which is what makes the vacuity of
+the nonmember arm a theorem rather than a remark.
+--/
+theorem arm64_singleton_ops_total (op : GeneratedArm64DispatchSingleton.SingletonOp) : op ∈ arm64SingletonOps := by
+  cases op <;> decide
+
 /-- The generated code dispatch: the sixteen singleton mnemonics map onto the
 sixteen ARM64_OP_* opcode numbers the C gates compare against. -/
 theorem arm64_singleton_code_dispatch :

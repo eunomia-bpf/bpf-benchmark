@@ -180,6 +180,13 @@ theorem arm64_dispatch_nonmember_unhandled (op : DispatchOp)
               arm64DispCcmpOps, aluHandled, shiftOpHandled, subsHandled,
               addsHandled, cmpHandled, tstHandled, andsHandled, ccmpHandled]
 
+/-- Every constructor is a member of `arm64DispatchOps`.
+`cases op <;> decide` closes it, which is what makes the vacuity of
+the nonmember arm a theorem rather than a remark.
+--/
+theorem arm64_dispatch_ops_total (op : GeneratedArm64DispatchFamily.DispatchOp) : op ∈ arm64DispatchOps := by
+  cases op <;> decide
+
 /-- The generated code dispatch: the sixteen mnemonics map onto the sixteen
 ARM64_OP_* opcode numbers the C macros compare against. -/
 theorem arm64_dispatch_code_dispatch :

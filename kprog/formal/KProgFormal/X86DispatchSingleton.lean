@@ -841,6 +841,13 @@ theorem x86_singleton_code_dispatch :
     code .pop = 19 := by
   decide
 
+/-- Every constructor is a member of `x86SingletonOps`.
+`cases op <;> decide` closes it, which is what makes the vacuity of
+the nonmember arm a theorem rather than a remark.
+--/
+theorem x86_singleton_ops_total (op : GeneratedX86DispatchSingleton.SingletonOp) : op ∈ x86SingletonOps := by
+  cases op <;> decide
+
 /-- Every singleton opcode lies inside the numeric range the C opcode byte can
 address. -/
 theorem x86_singleton_code_in_range (op : SingletonOp) :

@@ -2611,6 +2611,15 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0572 turned the nonmember arms' vacuity from a
+doc comment into theorems. All four umbrellas cover
+their whole enum, and cases/decide closes each in
+well under a second; simp needed 4M heartbeats. The
+paper publishes the count, so deleting one totality
+theorem breaks both the totality claim and the 2,065
+total (census 442 -> 443).
+
+
 Step 0571 closed the enumeration under its own
 universal: three theorems pin a generated table's
 image at all four widths and belonged to no named

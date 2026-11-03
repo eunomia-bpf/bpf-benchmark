@@ -327,6 +327,13 @@ theorem x86_dispatch_nonmember_unhandled (op : DispatchOp)
               cmpMemHandled,
               doubleShiftHandled]
 
+/-- Every constructor is a member of `x86DispatchOps`.
+`cases op <;> decide` closes it, which is what makes the vacuity of
+the nonmember arm a theorem rather than a remark.
+--/
+theorem x86_dispatch_ops_total (op : GeneratedX86DispatchFamily.DispatchOp) : op ∈ x86DispatchOps := by
+  cases op <;> decide
+
 /-- The generated code dispatch: the twenty-four mnemonics map onto the
 X86_OP_* opcode numbers the C macros compare against. -/
 theorem x86_dispatch_code_dispatch :

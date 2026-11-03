@@ -11,7 +11,7 @@ What the gate currently covers, measured from one full `make check` run:
 248 passing `cross-check: OK` oracle banners summing to 124,531,802 modeled
 cases; 138 `*_spec.json` contracts, each rendered into exactly one generated C
 header and one `Generated*.lean` module (138/138/138); 306 Lean modules
-compiling transitively from the gate's roots and proving 2,061 theorems with
+compiling transitively from the gate's roots and proving 2,065 theorems with
 no `sorry`, no `axiom`, and no `opaque`/`unsafe`/`partial` definitions --
 all six enforced by `check_no_sorry.py`, which fails the gate on a `sorry`,
 an `admit`, or an `axiom`/`opaque`/`unsafe`/`partial` declaration; 488 of
@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 442, and 340 steps
+`build/mut_*.py` files exist, the counter's last value is 443, and 341 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,30 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0572 - four doc comments said the umbrella covers every
+constructor, and nothing proved it
+
+Four dispatch contracts state two arms: every member of the umbrella is handled,
+and an opcode outside it is handled by no gate. The second half is vacuous, and
+the source said so in a doc comment -- "since `x86SingletonOps` covers every
+constructor the hypothesis cannot hold". Nothing proved the premise. A
+constructor added to the generated enum without a matching list would leave the
+sentence false and every check green, because a vacuous theorem stays provable
+for the wrong reason.
+
+The premise costs one line. `cases op <;> decide` closes all four, including the
+forty-three-opcode x86 singleton umbrella, at a fraction of a second each; the
+same goal written as `simp` with the forty-five family lists spelled out needed
+4 million heartbeats and 26 seconds, so the cheap proof is also the readable
+one. Each totality theorem sits beside the umbrella it covers, and the doc
+comments that used to assert the premise now point at a theorem.
+
+Publishing the count makes the sentence survive its own claim. The paper says
+the vacuity became a consequence rather than a remark at 4 totality theorems, so
+deleting one is reported against both the totality figure and the theorem total
+-- the two are separate claims and a test that removed a single totality theorem
+moved both. Census 442 -> 443.
 
 ### Step 0571 - the enumeration left three theorems outside the
 universal it was introduced to support
