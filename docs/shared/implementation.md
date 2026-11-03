@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0617 placed the last 46 rows: constants that
+select a file resolve by name (LEAN prefix) and the
+rest run host, verified against the harness's own
+dispatch; a (label, callable) pair reads its label.
+Zero unknown labels across 11,752 rows; ten claims
+still match (census 487 -> 488).
+
+
 Step 0616 taught the census the two row families it
 was misreading: one names a file path, one names no
 detector. Unknown labels fell from 32% of rows to

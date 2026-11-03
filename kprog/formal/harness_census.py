@@ -54,8 +54,20 @@ def rows(path):
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "row":
             det = ("host" if detectorless else
-                   getattr(node.args[1], "value", "?")
-                   if len(node.args) > 1 else "?")
+                   getattr(node.args[1], "value", None)
+                   if len(node.args) > 1 and
+                   isinstance(node.args[1], ast.Constant) else
+                   # A module constant selects a file rather than naming a
+                   # detector; the harnesses that do this run the host
+                   # detector unless the constant is the Lean source.
+                   "lean" if isinstance(node.args[1], ast.Name) and
+                   node.args[1].id.startswith("LEAN") else
+                   # A (label, callable) pair names its detector in the
+                   # first element.
+                   node.args[1].elts[0].value
+                   if isinstance(node.args[1], ast.Tuple)
+                   and isinstance(node.args[1].elts[0], ast.Constant) else
+                   "host" if len(node.args) > 1 else "?")
             equiv = any(k.arg == "equivalent"
                         and isinstance(k.value, ast.Constant)
                         and k.value.value is True for k in node.keywords)

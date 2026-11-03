@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 487, and 385 steps
+`build/mut_*.py` files exist, the counter's last value is 488, and 386 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0617 - the last unplaced rows named a file where a
+detector belongs
+
+Forty-six rows still carried an unrecognised detector label after the row
+families were separated. Both files that held them name a file rather than a
+detector: one passes a module constant that selects between the host oracle and
+the Lean source, the other passes a (label, callable) pair whose label is the
+string det.
+
+The constant resolves by role, not by value: a constant whose name starts with
+LEAN selects the Lean chain and everything else runs the host detector, which
+the harness's own dispatch confirms, and the counts match its literal HOST and
+LEAN call sites, 37 and 8. The pair's first element is taken as the label, and
+for the one row it yields det, which is reported as unrecognised rather than
+bucketed.
+
+So the census now reads every one of its 11752 rows without an unknown label,
+and where a label genuinely names nothing it says so. The ten claims that
+resolve to a harness still match exactly, which is the check that would move if
+the reclassification were wrong. Census 487 -> 488.
 
 ### Step 0616 - a third of the census's rows were a different kind
 of row entirely
