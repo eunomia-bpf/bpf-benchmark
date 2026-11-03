@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0648 counted the oracles behind the eight claims
+of a register-file-plus-tags-plus-four-flags
+comparison: 30, not the 6 a macro-name search found.
+Matching the comparison itself is what makes the
+count a mechanism; both numbers are held (census 518
+-> 519).
+
+
 Step 0647 bound the strongest oracle claim in the
 section: 9,585,135 cases each checked against a
 condition/writeback/tag model. The oracle compares

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 518, and 416 steps
+`build/mut_*.py` files exist, the counter's last value is 519, and 417 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0648 - a macro name is a spelling, the comparison is the
+behaviour
+
+Eight sentences say an oracle compares the whole register file with its tags and
+all four flags, and the first attempt to count the oracles that could support
+them found six, which would have made the section claim more than the tree does.
+The count was wrong because the search looked for the macro that unrolls the
+comparison, and several oracles spell the same comparison out under their own
+loop variables.
+
+Matching the comparison rather than the macro gives thirty oracles that compare
+both halves and every flag, so the eight claims are a subset. That is the right
+shape and it is now held: the claims may not outgrow the oracles, and either
+number changing alone is reported.
+
+The general lesson is that a mechanism claim is only as good as the search for
+its mechanism. A macro name is a spelling; a comparison against the model arrays
+is the behaviour, and only the behaviour can support a sentence about what an
+oracle checked. Census 518 -> 519.
 
 ### Step 0647 - the strongest oracle claim, and the half a value
 comparison would skip

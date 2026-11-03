@@ -399,6 +399,28 @@ def reviewed_exceptions() -> int:
     raise SystemExit("check_paper_counts: no ACCEPTED in the checker")
 
 
+def full_state_oracles() -> int:
+    """How many oracles compare every register's value and tag, and all four
+    flags.
+
+    Eight sentences say an oracle "compares the whole register file with its
+    tags and all four flags". The macro that unrolls the comparison is not
+    the invariant -- the comparison is, and several oracles spell it out
+    under their own loop variables -- so this matches the two comparisons
+    and the four flag names rather than a macro name.
+    """
+    import re
+    n = 0
+    for d in ("", "build"):
+        for path in (pathlib.Path(__file__).parent / d).glob("*_host.c"):
+            t = path.read_text(errors="ignore")
+            if (re.search(r"if \(\w+ != mreg\[\w+\]\)", t)
+                    and re.search(r"if \(\w+ != mtag\[\w+\]\)", t)
+                    and all(k in t for k in ("_cf", "_zf", "_sf", "_of"))):
+                n += 1
+    return n
+
+
 def every_case_oracles() -> list[tuple[str, bool]]:
     """`[(oracle, compares every register value and tag)]` in `build/`.
 
@@ -581,6 +603,21 @@ def main() -> None:
     if 9585135 not in measured:
         problems.append("the cmov step route banner no longer reports "
                         "9,585,135 cases")
+    # Eight sentences say an oracle "compares the whole register file with
+    # its tags and all four flags". The claims must stay within the oracles
+    # that compare both halves and every flag, and the count is held so a
+    # claim added to the family is visible.
+    n_full = full_state_oracles()
+    n_claims = len(re.findall(
+        r"whole register file with its tags and all four flags", text))
+    if n_claims > n_full:
+        problems.append(
+            "%d claim(s) compare the whole register file with tags and four "
+            "flags, and %d oracle(s) do" % (n_claims, n_full))
+    if (n_claims, n_full) != (8, 30):
+        problems.append(
+            "whole-state claims are %d against %d oracles; 8 and 30 when "
+            "this was written" % (n_claims, n_full))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
