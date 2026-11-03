@@ -844,6 +844,7 @@ def scan_tree(root):
         "bv_products_n": bvshape[3],
         "sweep_modules": len(sweep[0]),
         "sweep_theorems": sweep[1],
+        "bv_total": bvshape[0] + bvshape[1],
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
@@ -946,6 +947,14 @@ CLAIMS = [
     (re.compile(r'all\s+(\d+) modules that use either tactic'),
      ("sweep_modules",)),
     (re.compile(r'closing (\d+) theorems between them'), ("sweep_theorems",)),
+    # The substitution result, measured by recompiling: of the native_decide
+    # theorems one fails a bare decide, and of the bv_decide ones all but
+    # four do. The denominators are tree-derivable; the numerators are the
+    # sweep's output and are bound so the sentence cannot drift away from it.
+    # Only the denominators are tree-derivable; the numerators come from the
+    # recompile sweep and are recorded, not recomputed, in this checker.
+    (re.compile(r'of the (\d+) obligations'), ("native_decide",)),
+    (re.compile(r'\s+place, and of the (\d+)'), ("bv_total",)),
     (re.compile(r'\. On (\d+) of those the plain'), ("bv_cases",)),
     (re.compile(r'The other (\d+)\s+bind a bit-vector'), ("bv_direct",)),
     (re.compile(r'of the (\d+) theorems whose statement composes'),

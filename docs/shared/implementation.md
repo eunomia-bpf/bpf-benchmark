@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0586 re-ran the re-discharge sweep and found the
+record's native count wrong: 1 of 488 theorems fails
+a bare decide, not 8, while 161 of 165 bv_decide ones
+fail as recorded. 474 of 476 error lines are 'cannot
+be stated'; the paper now quotes the measured
+substitution result (census 456 -> 457).
+
+
 Step 0585 bound the sweep's scope: 117 modules
 closing 653 theorems, which is exactly 488
 native_decide plus 165 bv_decide, and that union is

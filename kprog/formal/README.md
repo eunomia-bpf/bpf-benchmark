@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 456, and 354 steps
+`build/mut_*.py` files exist, the counter's last value is 457, and 355 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0586 - the recorded sweep had the native side wrong, so it
+was re-run
+
+The paragraph's headline was qualitative where a measurement was available:
+"re-discharges that way almost without exception… almost never does". The
+recorded sweep had numbers, but they were prose, and re-running the sweep showed
+the record's native side is wrong.
+
+Substituting a bare `decide` for both tactic tokens across all 117 modules and
+attributing each error line to the theorem whose range holds it gives 1 of 488
+`native_decide` theorems failing, not the recorded 8, and 161 of 165 `bv_decide`
+ones failing, which matches the record exactly. The 4 that still close are three
+StLXR obligations and one extend-shift refinement; the single native failure is
+the specialization table equality. The record's 8 counted a different question —
+closure under `decide +revert` rather than a bare swap — and the paper now
+states the bare-swap result it actually describes.
+
+The mechanism is measured the same way. Of 476 error lines from the sweep, 474
+say the goal's expected type must not contain free variables, which is the
+"cannot even be stated" claim at line granularity, and 2 are statementable goals
+the tactic fails on. The sentence's two-stage description is therefore the
+dominant behaviour rather than an illustrative anecdote. Census 456 -> 457.
 
 ### Step 0585 - the sweep's scope was a universal with no figure,
 and the record's arithmetic does not close
