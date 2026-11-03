@@ -460,6 +460,36 @@ def memory_window_oracles() -> int:
     return n
 
 
+WORD = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight".split())}
+
+
+def sweep_products(text: str) -> list[tuple[int, int]]:
+    """`[(stated cases, cases the sweep dimensions imply)]`.
+
+    Three sentences give an oracle's size and the dimensions it sweeps, in
+    two wordings: "all 256 opcodes x 4 widths x 2 tag classes", and "all 256
+    opcodes crossed with four widths and four tag-class pairs". The
+    dimensions are the claim, so their product has to be the figure; a
+    sweep described one dimension wider than it is would print a size that
+    no longer follows from the sentence.
+    """
+    num = lambda w: int(w) if w.isdigit() else WORD[w]
+    pats = (r"(\d[\d,{}]*)-case[^.]{0,90}?all (\d+) opcodes"
+            r" x (\d+) widths(?: x (\d+) tag classes)?",
+            r"(\d[\d,{}]*)-case[^.]{0,90}?all (\d+) opcodes crossed with"
+            r" (\w+) widths and (\w+) tag-class pairs")
+    out = []
+    for pat in pats:
+        for m in re.finditer(pat, text):
+            cases = int(re.sub(r"[{},]", "", m.group(1)))
+            product = num(m.group(2)) * num(m.group(3))
+            if m.group(4):
+                product *= num(m.group(4))
+            out.append((cases, product))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -653,6 +683,20 @@ def main() -> None:
         problems.append(
             "whole-window claims are %d against %d oracles; 3 and 13 when "
             "this was written" % (n_win_claims, n_win))
+    # Three sentences give an oracle's size and the dimensions it sweeps,
+    # so the product of the dimensions has to be the figure. A sweep
+    # described one dimension wider than it is would print a size that no
+    # longer follows from the sentence.
+    products = sweep_products(text)
+    if len(products) != 3:
+        problems.append(
+            "the section states %d sweep dimension products; 3 when this "
+            "was written" % len(products))
+    for cases, product in products:
+        if cases != product:
+            problems.append(
+                "a sweep claim prints %d cases and its dimensions give %d"
+                % (cases, product))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

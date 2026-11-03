@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 520, and 418 steps
+`build/mut_*.py` files exist, the counter's last value is 521, and 419 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0650 - the sentence carries its own arithmetic, and it
+multiplies out
+
+Three sentences give an oracle's size and the dimensions it sweeps, in two
+wordings: 256 opcodes by four widths by two tag classes, and 256 opcodes crossed
+with four widths and four tag-class pairs. The dimensions are the claim, so
+their product has to be the figure.
+
+All three multiply out exactly: 2048, 1024 and 4096, each with a banner of that
+size in the log. That is a different kind of check from the ones before it,
+because it needs no reading of the oracle: the sentence carries its own
+arithmetic, and a dimension stated one wider than the sweep would give a size
+that no longer follows from the text.
+
+Widening one dimension from two tag classes to three leaves the figure at 2048
+against a product of 3072 and fails the check, which is the only defect this
+sentence can have that a banner comparison would not see. Census 520 -> 521.
 
 ### Step 0649 - the widest comparison, and the constant that would
 narrow it

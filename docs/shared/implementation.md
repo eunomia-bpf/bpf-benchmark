@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0650 bound the three sentences that state a
+sweep's dimensions beside its size: 256 x 4 x 2, 256
+x 4, and 256 x 4 x 4 all multiply out to their
+banners. Changing a dimension now fails the check
+(census 520 -> 521).
+
+
 Step 0649 bound the widest comparison claim: three
 sentences say oracles compare all 4 KiB of the memory
 window and the stack slot tags. Thirteen oracles do;
