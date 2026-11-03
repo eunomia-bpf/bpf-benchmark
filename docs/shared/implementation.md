@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0631 bound the first qualitative claim the
+checkers read: the cross-ISA tag vocabulary. Both
+headers are compared directly, and the sentence's
+three claims — 7 shared, code 7 divergent, code 8
+AArch64-only — hold exactly (census 501 -> 502).
+
+
 Step 0630 censused the percentages, the one class
 split between two checkers: five owned by the ISA
 split here, two by the theorem checker. The seven are

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 501, and 399 steps
+`build/mut_*.py` files exist, the counter's last value is 502, and 400 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0631 - the tag sentence was prose about two files, and
+the two can be compared
+
+The tag vocabulary sentence is why the section's other hand-kept figures exist:
+each simulator writes its own tag constants, neither header includes the other,
+so nothing in the tree compares them and the prose was the only record of the
+relationship. The sentence is exact, which means it can be checked rather than
+believed.
+
+Checked against both headers it holds precisely: seven names agree, codes zero
+through six; code seven is a relocation address on AArch64 and a helper id on
+x86-64; code eight is AArch64's alone. That is the sentence's own three-part
+claim, and it now fails if any part changes, as it does when one x86 tag is
+renumbered.
+
+This is the first qualitative claim the checkers read, and it was chosen because
+it is the kind that reads as prose but is arithmetic over two files. The section
+has more of them; the ones worth binding are those whose subject the tree can
+compare against itself rather than against a measurement. Census 501 -> 502.
 
 ### Step 0630 - percentages were the one class two checkers
 split between them

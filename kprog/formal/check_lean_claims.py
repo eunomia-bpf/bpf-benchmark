@@ -638,6 +638,30 @@ def harness_sums(text):
     return out
 
 
+def tag_vocabularies(root):
+    """`(shared names, divergent codes, arm64-only codes)` for the two ISAs.
+
+    The section states the relationship exactly: seven names shared across
+    codes 0 through 6, code 7 meaning a relocation address on AArch64 and a
+    helper id on x86-64, and code 8 existing only on AArch64. Neither header
+    includes the other, so this is the only place the two are compared.
+    """
+    # The simulator headers sit beside the formal tree, not inside it.
+    root = pathlib.Path(root).resolve().parent
+    out = {}
+    for isa in ("arm64", "x86"):
+        text = (root / isa / ("%s_sim_local_bpf.h" % isa)).read_text()
+        out[isa] = {int(v.rstrip("U")): n
+                    for n, v in re.findall(
+                        r"^#define %s_SIM_TAG_([A-Z_]+) (\d+)U" % isa.upper(),
+                        text, re.M)}
+    shared = sorted(set(out["arm64"]) & set(out["x86"]))
+    agree = [c for c in shared if out["arm64"][c] == out["x86"][c]]
+    divergent = [c for c in shared if out["arm64"][c] != out["x86"][c]]
+    only = sorted(set(out["arm64"]) - set(out["x86"]))
+    return len(agree), divergent, only
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -1524,6 +1548,15 @@ def check(targets, root):
             "check_lean_claims: only %d harness claims resolved to a harness, "
             "and the section states 11; a claim that matches nothing went "
             "unread" % len(compared))
+    # The cross-ISA tag vocabulary is stated exactly, and neither header
+    # includes the other, so nothing else compares them: seven names agree
+    # across codes 0 through 6, code 7 diverges, and code 8 is AArch64's.
+    shared_tags, divergent, arm_only = tag_vocabularies(root)
+    if (shared_tags, divergent, arm_only) != (7, [7], [8]):
+        raise SystemExit(
+            "check_lean_claims: the tag vocabularies are now %d shared, "
+            "divergent at %r, AArch64-only %r; the section says seven, "
+            "code 7 and code 8" % (shared_tags, divergent, arm_only))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "
