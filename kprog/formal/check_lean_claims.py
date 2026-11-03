@@ -546,6 +546,36 @@ def consumed_headers(root, makefile):
     return len(canonical), len(direct), len(units)
 
 
+def axiom_sample(root, modules):
+    """`{module: {class}}` for a handful of modules, probed here.
+
+    The full axiom census costs three minutes and is not a build target, so
+    the recorded counts are spot-checked against four modules chosen to
+    cover every class: one axiom-free, one with a single propext theorem,
+    one whose theorems all assume the compiler, and one holding three
+    classes at once. Each module is one `lake env lean` invocation.
+    """
+    import axiom_census
+
+    out = {}
+    seen = axiom_census.modules(root)
+    for module in modules:
+        names, space = seen[module]
+        found = axiom_census.footprints(root, module, names, space)
+        kinds = set()
+        for axioms in found.values():
+            if not axioms:
+                kinds.add("none")
+            elif "Lean.ofReduceBool" in axioms:
+                kinds.add("compiler")
+            elif "Classical.choice" in axioms:
+                kinds.add("kernel-choice")
+            else:
+                kinds.add("kernel")
+        out[module] = kinds
+    return out
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -871,6 +901,11 @@ def scan_tree(root):
             re.search(r'DECL = re\.compile\(r"\^\\s\*\(([^)]*)\)',
                       open(os.path.join(root, "check_no_sorry.py")).read()
                       ).group(1).split("|")),
+        # Four modules spanning every class, re-probed here rather than
+        # trusted; the full census is too slow for a build target.
+        "ax_sample": axiom_sample(root, ("X86MemDispatch",
+                                         "Arm64DispatchTotality",
+                                         "CrossIsaRev", "Arm64Stlxr")),
         "ax_choice": 40,
         "ax_choice_all": 179,
         "ax_choice_both": 139,
@@ -1239,6 +1274,20 @@ def check(targets, root):
             "check_lean_claims: %s now runs in the build, but the section "
             "says the case-count script is outside it"
             % ", ".join(sorted(in_gate)))
+    # The axiom counts are recorded from axiom_census.py, which needs ~3 min
+    # and is therefore not a build target. A sample of four modules, one per
+    # class, is affordable here and would have caught all three historical
+    # errors in those figures: a mis-scored axiom-free class, a wrong class
+    # count, and dropped theorems from a namespace mismatch.
+    sample = {"X86MemDispatch": {"none"},
+              "Arm64DispatchTotality": {"none", "kernel"},
+              "CrossIsaRev": {"compiler", "kernel"},
+              "Arm64Stlxr": {"none", "kernel", "compiler"}}
+    if actual["ax_sample"] != sample:
+        raise SystemExit(
+            "check_lean_claims: the axiom spot check disagrees -- %r, "
+            "recorded %r; re-run axiom_census.py"
+            % (actual["ax_sample"], sample))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "

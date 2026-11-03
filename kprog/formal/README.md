@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 470, and 368 steps
+`build/mut_*.py` files exist, the counter's last value is 471, and 369 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0600 - the recorded axiom figures could be stale and
+still consistent
+
+Step 0599 gave the axiom figures a reproducible source, but the gate still only
+checks that the recorded counts partition the tree and agree with each other.
+Six numbers can be jointly consistent and jointly stale, and they were wrong
+three times before the census existed.
+
+The census costs three minutes, so it stays out of the build. Four modules
+spanning every class are cheap enough to re-probe inside it: one entirely
+axiom-free, one with a single propext theorem among axiom-free ones, one whose
+theorems all assume the compiler, and one that holds three classes at once.
+Together they exercise each branch of the classifier, including the namespace
+fallback the third error came from.
+
+The check is on the class set per module rather than on counts, because a set
+mismatch names the module whose classification moved and cannot be satisfied by
+two errors cancelling. It costs 3.9 seconds, and a wrong expectation fails with
+the full comparison for both sides. Census 470 -> 471.
 
 ### Step 0599 - the axiom figures had no reproducible source, and
 the first one found another error

@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0600 spot-checks the recorded axiom figures
+inside the gate: four modules covering every class
+are re-probed for 3.9 s, and the class sets must
+match what was recorded. That catches the
+stale-but-consistent case the partition checks cannot
+(census 470 -> 471).
+
+
 Step 0599 added axiom_census.py, the reproducible
 source the six axiom figures never had. It
 immediately found a third error: choice is 179 not
