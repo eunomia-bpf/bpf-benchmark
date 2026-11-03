@@ -118,6 +118,10 @@ def detectors(body):
             r"oracle|by the route scanner)", body):
         out["gen" if "generator" in name else
             "lean" if "Lean" in name else "host"] += int(count)
+    # A count written as a word: "plus the one movk-regex catch". The harness
+    # has one such row and it is caught, so it belongs to the host total the
+    # claim is asserting.
+    out["host"] += len(re.findall(r"\bthe one [\w-]+ catch", body))
     return out
 
 

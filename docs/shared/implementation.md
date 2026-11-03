@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0611 corrected the bitfield harness claim: 92
+catch and 12 surviving, not 94 and 10, with host 29
+not 31. Three figures were wrong while two agreed,
+which is why it read as checked. Eight claims now
+match source and agree (census 481 -> 482).
+
+
 Step 0610 completed the matcher: claims are resolved
 to harnesses by trying both partitions with
 normalised detector names. Six resolve uniquely and

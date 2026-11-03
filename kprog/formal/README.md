@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 481, and 379 steps
+`build/mut_*.py` files exist, the counter's last value is 482, and 380 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0611 - two of the three stage counts agreed, which is why
+the claim read as checked
+
+The bitfield harness states a 104-mutation run whose caught rows divide 33
+generator stage, 30 Lean chain and 29 host, with 12 rows marked equivalent. The
+sentence said 94 catch, 31 host and 10 surviving, so three figures were wrong
+and only two of the three stage counts were right: enough of the breakdown
+agreed that the claim looked checked.
+
+That pattern has now appeared in every wrong harness claim: the totals and most
+of the split agree, one or two entries drift, and the drift is small enough to
+read as rounding rather than error. The three that agreed gave the claim the
+appearance of a figure copied from the harness, while the two that did not were
+never compared to anything.
+
+With the correction the claim matches its harness under the caught partition,
+which brings the matched set to eight claims, all agreeing with source. Four
+claims remain unmatched for want of an identity in prose, and each of them names
+a mutation total no harness in the tree has, so they are more likely stale
+totals than unmatched-by-ambiguity. Census 481 -> 482.
 
 ### Step 0610 - the matcher compared two names for one detector and
 found nothing
