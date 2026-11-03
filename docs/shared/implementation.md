@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0591 measured #print axioms over all 2,065
+theorems: 670 depend on no axiom, 619 assume the
+compiler, 776 are kernel-only but axiomatic. So the
+blanket 'kernel-checked given a correct compiler'
+framing covers a third of the tree, and the sentence
+now gives the three-way split (census 461 -> 462).
+
+
 Step 0590 completed the axiom measurement on the
 native side: 483 of 488 reach ofReduceBool, so 552
 theorems in all assume the compiler and the other 261

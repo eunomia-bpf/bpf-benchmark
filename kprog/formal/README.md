@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 461, and 359 steps
+`build/mut_*.py` files exist, the counter's last value is 462, and 360 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0591 - the tree's axiom footprint has three classes, and
+670 theorems need none
+
+The paragraph framed the whole TCB as "kernel-checked given a correct compiler".
+Measuring #print axioms over all 2065 theorems shows the assumption covers a
+third of the tree, and the tree divides three ways rather than two.
+
+670 theorems depend on no axiom at all: proofs that close by rfl or by case
+splits into rfl reach nothing, so even propext is unnecessary
+(`x86_mem_dispatch_src_refines` is a case split into rfl over three Bools). 619
+reach Lean.ofReduceBool and so do assume the compiler. The remaining 776 use
+only propext, Quot.sound and sometimes Classical.choice — classical logic, but
+no compiled verdict.
+
+Two consequences. The framing was too pessimistic about 1,446 of the 2,065
+theorems, which need no compiler assumption and in 670 cases no axioms at all.
+And it was too coarse: "given a correct compiler" applied uniformly is a much
+weaker statement than the per-theorem footprint, which is what a reader deciding
+whether to trust the artifact actually needs. Census 461 -> 462.
 
 ### Step 0590 - the deployment claim never named the population
 that has to be re-discharged

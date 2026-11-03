@@ -853,10 +853,12 @@ def scan_tree(root):
         "unstated_cases": 58,
         "unstated_direct": 103,
         # Recorded #print axioms results over the 165 bv_decide proofs.
+        # The whole tree, measured with #print axioms: axiom-free, compiler-
+        # assuming, and axiomatic-but-kernel-only.
+        "ax_none": 670,
+        "ax_orb": 619,
+        "ax_kernel": 776,
         "orb_reach": 69,
-        "orb_native": 483,
-        "orb_total": 552,
-        "orb_kernel_only": 261,
         "orb_kernel": 96,
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
@@ -952,11 +954,6 @@ CLAIMS = [
     # The population the deployment claim covers is the one that assumes the
     # compiler, and the two documents' figures are counts of that, not of the
     # tactics' whole populations.
-    (re.compile(r'(\d+) of the (\d+) \\texttt\{native'), ("orb_native",
-                                                          "native_decide")),
-    (re.compile(r'reach \\texttt\{Lean\.ofReduceBool\}, (\d+) in all'),
-     ("orb_total",)),
-    (re.compile(r'The other (\d+) are already'), ("orb_kernel_only",)),
     (re.compile(r'Of the (\d+) theorems\s+stating an equality'),
      ("ident_total",)),
     (re.compile(r'binders, (\d+) are closed by'), ("ident_bv",)),
@@ -1020,6 +1017,12 @@ CLAIMS = [
     (re.compile(r"All (\d+) theorems that close over a generated table"),
      ("tabled",)),
     (re.compile(r'the (\d+) table-length theorems'), ("table_length",)),
+    # The tree divides three ways under #print axioms, measured over all 2065
+    # theorems: axiom-free, compiler-assuming, and axiomatic-but-kernel-only.
+    # The section states the split, so all three are bound.
+    (re.compile(r'(\d+) theorems depend on no axiom at\s+all, '
+                r'(\d+) reach'), ("ax_none", "ax_orb")),
+    (re.compile(r'remaining (\d+) use only'), ("ax_kernel",)),
     (re.compile(r'constants run from (\d+) to (\d+)'),
      ("table_min_count", "table_max_count")),
     # The clause's second half named "the exactness theorems" with no rule,
