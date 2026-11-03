@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 531, and 429 steps
+`build/mut_*.py` files exist, the counter's last value is 532, and 430 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0661 - forty-seven cited files, and why the oracles are
+not among them
+
+Forty-seven file names appear in the section, all of them Lean modules, and each
+now has to exist in the tree. A file is not a figure, so a rename would leave
+the sentence citing something gone with every number in it still correct.
+
+The oracles themselves are never cited by file name: the section names each by
+the banner it prints, which is why the case-count census covers them and no path
+appears. The harnesses are the same, named by size rather than by the script
+that runs them. So this census covers the module citations and the generated
+files, and the identifier tier is closed at the two sets that exist.
+
+Both identifier checks now run: a Lean declaration the prose presents as a chain
+or theorem, and a file the prose cites. Renaming either is reported by name.
+Census 531 -> 532.
 
 ### Step 0660 - a renamed Lean declaration is reported, and an
 opcode is not a declaration

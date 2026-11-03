@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0661 required every file the section cites to
+exist: 47 names, all Lean modules, and none missing.
+Oracles and harnesses are cited by banner or by size
+rather than by path, so the identifier tier closes at
+these two sets (census 531 -> 532).
+
+
 Step 0660 bound the 23 Lean names the prose presents
 as a chain, handler, table or theorem: each must
 exist in the tree. Opcodes and C macros are excluded

@@ -616,6 +616,27 @@ def named_lean_objects() -> list[str]:
     return out
 
 
+def named_files() -> list[str]:
+    """File names the section cites in `\texttt{}`.
+
+    A renamed or deleted file leaves the sentence pointing at nothing, and
+    a file name is not a figure, so no count binds it.
+    """
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text()).replace("\\brk", "")
+    names = sorted(set(re.findall(
+        r"\\texttt\{([A-Za-z0-9_][\w./-]*\.(?:py|c|h|lean|json|yaml))\}",
+        flat)))
+    roots = [pathlib.Path(__file__).parent.parent.parent / d
+             for d in ("kprog", "bpfopt")]
+    out = []
+    for name in names:
+        if not any(list(r.rglob(name.split("/")[-1])) for r in roots):
+            out.append(name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -941,6 +962,11 @@ def main() -> None:
         problems.append(
             "%d Lean names the section presents are absent from the tree: %s"
             % (len(gone), gone))
+    # Every file the section cites must exist. A file name is not a figure,
+    # so no count would notice a rename.
+    for name in named_files():
+        problems.append(
+            "the section cites %s, which is not in the tree" % name)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
