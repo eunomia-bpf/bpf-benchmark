@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 542, and 440 steps
+`build/mut_*.py` files exist, the counter's last value is 543, and 441 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0672 - a filename joins exactly where a size does not
+
+The naming between specifications and harnesses is exactly regular: all a
+hundred and thirty-eight specifications have a harness of the same stem, so a
+cited specification can be joined to its harness without guessing. Sixteen are
+cited by filename in the section, and each is a real specification with its
+harness present.
+
+That join is what the size-matching could not do. A size matching any harness
+proves little because many harnesses share a size, but a filename matching a
+harness stem is exact, and a cited spec with no harness would be a filename the
+tree no longer has or one whose harness was renamed.
+
+The first version of this check read the masked text, which strips every texttt
+body and with it every spec name, so it saw one filename where there are sixteen
+and reported nothing. Reading the source directly is what makes it see them all,
+and swapping a cited name for a missing one now fails. Census 542 -> 543.
 
 ### Step 0671 - every harness size must match one, which catches a
 typo and not much else

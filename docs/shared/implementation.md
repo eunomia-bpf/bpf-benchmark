@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0672 joined cited specs to their harnesses by
+stem, which is exact: all 138 specs have a
+mut_<stem>.py, and the 16 cited ones all resolve. The
+check first read masked text and saw one name (census
+542 -> 543).
+
+
 Step 0671 required every stated harness size to match
 some harness's entry count, excluding the growth
 series' past sizes. It catches a typo but not a

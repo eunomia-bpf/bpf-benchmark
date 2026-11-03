@@ -818,6 +818,32 @@ def harness_totals() -> dict[str, int]:
     return out
 
 
+def cited_specs(text: str) -> list[str]:
+    """Spec files the section cites that are missing, or have no harness.
+
+    Every one of the 138 specifications names a harness `mut_<stem>.py`, so a
+    cited spec that exists must have one, and a cited spec that does not is
+    a filename the tree no longer has.
+    """
+    # The caller passes the masked text, which strips `\texttt` content and
+    # with it every spec name; read the source directly instead.
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text()).replace("\\brk", "")
+    here = pathlib.Path(__file__).parent
+    specs = {p.name[:-len("_spec.json")]
+             for p in here.glob("*_spec.json")}
+    totals = harness_totals()
+    bad = []
+    for raw in set(re.findall(r"([\w\\]+?)\\_spec\.json", flat)):
+        name = raw.replace("\\_", "_").replace("\\", "")
+        if name not in specs:
+            bad.append("%s_spec.json is cited and absent" % name)
+        elif "mut_" + name not in totals:
+            bad.append("%s_spec.json has no mut_%s.py" % (name, name))
+    return bad
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1281,6 +1307,11 @@ def main() -> None:
         problems.append(
             "a dedicated harness is stated at %d mutations and no harness "
             "has that many entries" % n)
+    # The naming is exactly regular: all 138 specifications have a
+    # mut_<stem>.py. So a cited spec must exist and must have a harness --
+    # an exact join, unlike matching a size against the set of all sizes.
+    for bad in cited_specs(text):
+        problems.append(bad)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
