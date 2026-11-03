@@ -246,9 +246,17 @@ theorem arm64_singleton_member_handled (op : SingletonOp) :
               loadD0Handled, storeD0Handled, loadQ0Handled, storeQ0Handled,
               fmovHandled]
 
+/-- Every constructor is a member of `arm64SingletonOps`.
+`cases op <;> decide` closes it, which is what makes the vacuity of
+the nonmember arm a theorem rather than a remark.
+--/
+theorem arm64_singleton_ops_total (op : GeneratedArm64DispatchSingleton.SingletonOp) : op ∈ arm64SingletonOps := by
+  cases op <;> decide
+
 /-- An opcode outside every singleton is handled by no generated singleton
-test, so the dispatcher reaches its unsupported arm. Since `arm64SingletonOps`
-covers every constructor, the hypothesis cannot hold and this arm is vacuous:
+test, so the dispatcher reaches its unsupported arm. `arm64_singleton_ops_total`
+says `arm64SingletonOps` covers every constructor, so the hypothesis cannot
+hold. The arm is proved vacuous by `absurd`:
 `arm64_singleton_member_handled` is the operative half of the contract. -/
 theorem arm64_singleton_nonmember_unhandled (op : SingletonOp)
     (h : op ∉ arm64SingletonOps) :
@@ -259,25 +267,8 @@ theorem arm64_singleton_nonmember_unhandled (op : SingletonOp)
     storeHandled op = false ∧ ldpHandled op = false ∧
     stpHandled op = false ∧ loadD0Handled op = false ∧
     storeD0Handled op = false ∧ loadQ0Handled op = false ∧
-    storeQ0Handled op = false ∧ fmovHandled op = false := by
-  cases op <;>
-    simp_all [arm64SingletonOps, arm64DispNopOps, arm64DispMovkOps,
-              arm64DispBitfieldOps, arm64DispCmnImmOps, arm64DispCmnRegOps,
-              arm64DispTstBicRegOps, arm64DispBicsRegOps, arm64DispLoadOps,
-              arm64DispStoreOps, arm64DispLdpOps, arm64DispStpOps,
-              arm64DispLoadD0Ops, arm64DispStoreD0Ops, arm64DispLoadQ0Ops,
-              arm64DispStoreQ0Ops, arm64DispFmovOps, nopHandled, movkHandled,
-              bitfieldHandled, cmnImmHandled, cmnRegHandled, tstBicRegHandled,
-              bicsRegHandled, loadHandled, storeHandled, ldpHandled, stpHandled,
-              loadD0Handled, storeD0Handled, loadQ0Handled, storeQ0Handled,
-              fmovHandled]
-
-/-- Every constructor is a member of `arm64SingletonOps`.
-`cases op <;> decide` closes it, which is what makes the vacuity of
-the nonmember arm a theorem rather than a remark.
---/
-theorem arm64_singleton_ops_total (op : GeneratedArm64DispatchSingleton.SingletonOp) : op ∈ arm64SingletonOps := by
-  cases op <;> decide
+    storeQ0Handled op = false ∧ fmovHandled op = false :=
+  absurd (arm64_singleton_ops_total op) h
 
 /-- The generated code dispatch: the sixteen singleton mnemonics map onto the
 sixteen ARM64_OP_* opcode numbers the C gates compare against. -/

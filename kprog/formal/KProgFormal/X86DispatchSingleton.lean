@@ -736,7 +736,15 @@ theorem x86_singleton_member_handled (op : SingletonOp) :
               btMemImmHandled, imulImmHandled, imulMemImmHandled, mulxHandled, repMovsHandled,
               andnHandled, andnMemHandled, xchgHandled, divHandled, pushHandled, popHandled]
 
-/-- Nonmember arm, part a: conjuncts 1–15 stay unhandled (combined 43-way membership form in `x86_singleton_handled_iff_mem`). Since `x86SingletonOps` covers every constructor the hypothesis cannot hold, so parts a–c are vacuous: `x86_singleton_member_handled` is the operative half of the contract. -/
+/-- Every constructor is a member of `x86SingletonOps`.
+`cases op <;> decide` closes it, which is what makes the vacuity of
+the nonmember arm a theorem rather than a remark.
+--/
+theorem x86_singleton_ops_total (op : GeneratedX86DispatchSingleton.SingletonOp) : op ∈ x86SingletonOps := by
+  cases op <;> decide
+
+/-- Nonmember arm, part a: conjuncts 1–15 stay unhandled (combined 43-way membership form in `x86_singleton_handled_iff_mem`). `x86_singleton_ops_total` says `x86SingletonOps` covers every constructor, so the hypothesis cannot hold;
+parts a–c are proved vacuous by `absurd`: `x86_singleton_member_handled` is the operative half of the contract. -/
 theorem x86_singleton_nonmember_unhandled_a (op : SingletonOp)
     (h : op ∉ x86SingletonOps) :
     nopHandled op = false ∧
@@ -753,8 +761,8 @@ theorem x86_singleton_nonmember_unhandled_a (op : SingletonOp)
     storeXmm0Handled op = false ∧
     leaHandled op = false ∧
     aluMemHandled op = false ∧
-    aluMemUnaryHandled op = false := by
-  cases op <;> simp_all [x86DispNopOps, x86DispCallMemcpyOps, x86DispCallMemsetOps, x86DispCallMemcpyRegOps, x86DispCallMemsetRegOps, x86DispCallRegOps, x86DispMovImmOps, x86DispMovRegOps, x86DispMovbeLoadOps, x86DispMovbeStoreOps, x86DispLoadXmm0Ops, x86DispStoreXmm0Ops, x86DispLeaOps, x86DispAluMemOps, x86DispAluMemUnaryOps, nopHandled, callMemcpyHandled, callMemsetHandled, callMemcpyRegHandled, callMemsetRegHandled, callRegHandled, movImmHandled, movRegHandled, movbeLoadHandled, movbeStoreHandled, loadXmm0Handled, storeXmm0Handled, leaHandled, aluMemHandled, aluMemUnaryHandled, aluMemImmHandled, aluMemRegHandled, cmpRegMemHandled, cmovHandled, cmovMemHandled, setccHandled, setccMemHandled, bswapHandled, popcntHandled, shiftxHandled, shiftxMemHandled, rorxHandled, rorxMemHandled, bzhiHandled, bzhiMemHandled, btHandled, btImmHandled, btMemImmHandled, imulImmHandled, imulMemImmHandled, mulxHandled, repMovsHandled, andnHandled, andnMemHandled, xchgHandled, divHandled, pushHandled, popHandled] <;> exfalso <;> exact h (by decide)
+    aluMemUnaryHandled op = false :=
+  absurd (x86_singleton_ops_total op) h
 /-- Nonmember arm, part b: conjuncts 16–30 stay unhandled.
 (See `x86_singleton_handled_iff_mem` for the combined 43-way membership form.) -/
 theorem x86_singleton_nonmember_unhandled_b (op : SingletonOp)
@@ -773,8 +781,8 @@ theorem x86_singleton_nonmember_unhandled_b (op : SingletonOp)
     rorxHandled op = false ∧
     rorxMemHandled op = false ∧
     bzhiHandled op = false ∧
-    bzhiMemHandled op = false := by
-  cases op <;> simp_all [x86DispNopOps, x86DispCallMemcpyOps, x86DispCallMemsetOps, x86DispCallMemcpyRegOps, x86DispCallMemsetRegOps, x86DispCallRegOps, x86DispMovImmOps, x86DispMovRegOps, x86DispMovbeLoadOps, x86DispMovbeStoreOps, x86DispLoadXmm0Ops, x86DispStoreXmm0Ops, x86DispLeaOps, x86DispAluMemOps, x86DispAluMemUnaryOps, x86DispAluMemImmOps, x86DispAluMemRegOps, x86DispCmpRegMemOps, x86DispCmovOps, x86DispCmovMemOps, x86DispSetccOps, x86DispSetccMemOps, x86DispBswapOps, x86DispPopcntOps, x86DispShiftxOps, x86DispShiftxMemOps, x86DispRorxOps, x86DispRorxMemOps, x86DispBzhiOps, x86DispBzhiMemOps, x86DispBtOps, x86DispBtImmOps, x86DispBtMemImmOps, x86DispImulImmOps, x86DispImulMemImmOps, x86DispMulxOps, x86DispRepMovsOps, x86DispAndnOps, x86DispAndnMemOps, x86DispXchgOps, x86DispDivOps, x86DispPushOps, x86DispPopOps, nopHandled, callMemcpyHandled, callMemsetHandled, callMemcpyRegHandled, callMemsetRegHandled, callRegHandled, movImmHandled, movRegHandled, movbeLoadHandled, movbeStoreHandled, loadXmm0Handled, storeXmm0Handled, leaHandled, aluMemHandled, aluMemUnaryHandled, aluMemImmHandled, aluMemRegHandled, cmpRegMemHandled, cmovHandled, cmovMemHandled, setccHandled, setccMemHandled, bswapHandled, popcntHandled, shiftxHandled, shiftxMemHandled, rorxHandled, rorxMemHandled, bzhiHandled, bzhiMemHandled, btHandled, btImmHandled, btMemImmHandled, imulImmHandled, imulMemImmHandled, mulxHandled, repMovsHandled, andnHandled, andnMemHandled, xchgHandled, divHandled, pushHandled, popHandled] <;> exfalso <;> exact h (by decide)
+    bzhiMemHandled op = false :=
+  absurd (x86_singleton_ops_total op) h
 /-- Nonmember arm, part c: conjuncts 31–43 stay unhandled.
 (See `x86_singleton_handled_iff_mem` for the combined 43-way membership form.) -/
 theorem x86_singleton_nonmember_unhandled_c (op : SingletonOp)
@@ -791,8 +799,8 @@ theorem x86_singleton_nonmember_unhandled_c (op : SingletonOp)
     xchgHandled op = false ∧
     divHandled op = false ∧
     pushHandled op = false ∧
-    popHandled op = false := by
-  cases op <;> simp_all [x86DispNopOps, x86DispCallMemcpyOps, x86DispCallMemsetOps, x86DispCallMemcpyRegOps, x86DispCallMemsetRegOps, x86DispCallRegOps, x86DispMovImmOps, x86DispMovRegOps, x86DispMovbeLoadOps, x86DispMovbeStoreOps, x86DispLoadXmm0Ops, x86DispStoreXmm0Ops, x86DispLeaOps, x86DispAluMemOps, x86DispAluMemUnaryOps, x86DispAluMemImmOps, x86DispAluMemRegOps, x86DispCmpRegMemOps, x86DispCmovOps, x86DispCmovMemOps, x86DispSetccOps, x86DispSetccMemOps, x86DispBswapOps, x86DispPopcntOps, x86DispShiftxOps, x86DispShiftxMemOps, x86DispRorxOps, x86DispRorxMemOps, x86DispBzhiOps, x86DispBzhiMemOps, x86DispBtOps, x86DispBtImmOps, x86DispBtMemImmOps, x86DispImulImmOps, x86DispImulMemImmOps, x86DispMulxOps, x86DispRepMovsOps, x86DispAndnOps, x86DispAndnMemOps, x86DispXchgOps, x86DispDivOps, x86DispPushOps, x86DispPopOps, nopHandled, callMemcpyHandled, callMemsetHandled, callMemcpyRegHandled, callMemsetRegHandled, callRegHandled, movImmHandled, movRegHandled, movbeLoadHandled, movbeStoreHandled, loadXmm0Handled, storeXmm0Handled, leaHandled, aluMemHandled, aluMemUnaryHandled, aluMemImmHandled, aluMemRegHandled, cmpRegMemHandled, cmovHandled, cmovMemHandled, setccHandled, setccMemHandled, bswapHandled, popcntHandled, shiftxHandled, shiftxMemHandled, rorxHandled, rorxMemHandled, bzhiHandled, bzhiMemHandled, btHandled, btImmHandled, btMemImmHandled, imulImmHandled, imulMemImmHandled, mulxHandled, repMovsHandled, andnHandled, andnMemHandled, xchgHandled, divHandled, pushHandled, popHandled] <;> exfalso <;> exact h (by decide)
+    popHandled op = false :=
+  absurd (x86_singleton_ops_total op) h
 /-- The generated code dispatch: the forty-three singleton mnemonics map onto
 the X86_OP_* opcode numbers the C gates compare against. -/
 theorem x86_singleton_code_dispatch :
@@ -840,13 +848,6 @@ theorem x86_singleton_code_dispatch :
     code .push = 18 ∧
     code .pop = 19 := by
   decide
-
-/-- Every constructor is a member of `x86SingletonOps`.
-`cases op <;> decide` closes it, which is what makes the vacuity of
-the nonmember arm a theorem rather than a remark.
---/
-theorem x86_singleton_ops_total (op : GeneratedX86DispatchSingleton.SingletonOp) : op ∈ x86SingletonOps := by
-  cases op <;> decide
 
 /-- Every singleton opcode lies inside the numeric range the C opcode byte can
 address. -/

@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0573 made the vacuity explicit. Each nonmember
+arm closed by simp_all over the family lists, which
+works because the hypothesis is absurd but says
+nothing about why; it is now absurd(totality op) h,
+one line instead of twelve, and deleting the totality
+theorem breaks the compile (census 443 -> 444).
+
+
 Step 0572 turned the nonmember arms' vacuity from a
 doc comment into theorems. All four umbrellas cover
 their whole enum, and cases/decide closes each in

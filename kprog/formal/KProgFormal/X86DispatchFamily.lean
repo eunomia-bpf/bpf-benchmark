@@ -289,9 +289,17 @@ theorem x86_dispatch_member_handled (op : DispatchOp) :
               cmpMemHandled,
               doubleShiftHandled]
 
+/-- Every constructor is a member of `x86DispatchOps`.
+`cases op <;> decide` closes it, which is what makes the vacuity of
+the nonmember arm a theorem rather than a remark.
+--/
+theorem x86_dispatch_ops_total (op : GeneratedX86DispatchFamily.DispatchOp) : op ∈ x86DispatchOps := by
+  cases op <;> decide
+
 /-- An opcode outside every dispatch family is handled by no generated membership
-test, so the dispatcher reaches its unsupported arm. Since `x86DispatchOps`
-covers every constructor, the hypothesis cannot hold and this arm is vacuous:
+test, so the dispatcher reaches its unsupported arm. `x86_dispatch_ops_total`
+says `x86DispatchOps` covers every constructor, so the hypothesis cannot
+hold. The arm is proved vacuous by `absurd`:
 `x86_dispatch_member_handled` is the operative half of the contract. -/
 theorem x86_dispatch_nonmember_unhandled (op : DispatchOp)
     (h : op ∉ x86DispatchOps) :
@@ -304,35 +312,8 @@ theorem x86_dispatch_nonmember_unhandled (op : DispatchOp)
     cmpImmHandled op = false ∧
     cmpRegHandled op = false ∧
     cmpMemHandled op = false ∧
-    doubleShiftHandled op = false := by
-  cases op <;>
-    simp_all [x86DispatchOps, x86DispMovLoadPtrOps,
-              x86DispMovxRegOps,
-              x86DispMovLoadOps,
-              x86DispMovStoreOps,
-              x86DispAluImmOps,
-              x86DispAluRegOps,
-              x86DispCmpImmOps,
-              x86DispCmpRegOps,
-              x86DispCmpMemOps,
-              x86DispDoubleShiftOps,
-              movLoadPtrHandled,
-              movxRegHandled,
-              movLoadHandled,
-              movStoreHandled,
-              aluImmHandled,
-              aluRegHandled,
-              cmpImmHandled,
-              cmpRegHandled,
-              cmpMemHandled,
-              doubleShiftHandled]
-
-/-- Every constructor is a member of `x86DispatchOps`.
-`cases op <;> decide` closes it, which is what makes the vacuity of
-the nonmember arm a theorem rather than a remark.
---/
-theorem x86_dispatch_ops_total (op : GeneratedX86DispatchFamily.DispatchOp) : op ∈ x86DispatchOps := by
-  cases op <;> decide
+    doubleShiftHandled op = false :=
+  absurd (x86_dispatch_ops_total op) h
 
 /-- The generated code dispatch: the twenty-four mnemonics map onto the
 X86_OP_* opcode numbers the C macros compare against. -/

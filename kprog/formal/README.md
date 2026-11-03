@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 443, and 341 steps
+`build/mut_*.py` files exist, the counter's last value is 444, and 342 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0573 - the vacuous arms closed by a forty-five-list
+`simp_all`, and nothing said the hypothesis was absurd
+
+Step 0572 proved each umbrella total and left the six nonmember arms proved the
+way they were: `cases op <;> simp_all [forty-five lists]` closed them because
+the hypothesis is absurd, and the proof said nothing about why. The four
+totality theorems had already established it, so the vacuity is now stated the
+way it is true -- `absurd (x86_singleton_ops_total op) h` -- and the twelve
+lines of `simp_all` per arm collapse to one.
+
+The proofs are also load-bearing now. Delete a totality theorem and the file
+stops compiling with `unknown identifier`, where before the `simp_all` would
+have closed the arm anyway from the lists. Order changed with it: each totality
+theorem moved above the nonmember theorem that consumes it, since Lean has no
+forward references inside a module.
+
+The doc comments follow the same rule the rest of this line does. They used to
+assert the premise in prose, then name the operative half. Now they cite
+`arm64_dispatch_ops_total` and say the arm is proved vacuous by `absurd`, so a
+reader who deletes the theorem knows what breaks before the compiler says so.
+Census 443 -> 444.
 
 ### Step 0572 - four doc comments said the umbrella covers every
 constructor, and nothing proved it

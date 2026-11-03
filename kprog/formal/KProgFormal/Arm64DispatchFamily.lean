@@ -164,28 +164,25 @@ theorem arm64_dispatch_member_handled (op : DispatchOp) :
               arm64DispCcmpOps, aluHandled, shiftOpHandled, subsHandled,
               addsHandled, cmpHandled, tstHandled, andsHandled, ccmpHandled]
 
-/-- An opcode outside every dispatch family is handled by no generated membership
-test, so the dispatcher reaches its unsupported arm. Since `arm64DispatchOps`
-covers every constructor, the hypothesis cannot hold and this arm is vacuous:
-`arm64_dispatch_member_handled` is the operative half of the contract. -/
-theorem arm64_dispatch_nonmember_unhandled (op : DispatchOp)
-    (h : op ∉ arm64DispatchOps) :
-    aluHandled op = false ∧ shiftOpHandled op = false ∧
-    subsHandled op = false ∧ addsHandled op = false ∧
-    cmpHandled op = false ∧ tstHandled op = false ∧
-    andsHandled op = false ∧ ccmpHandled op = false := by
-  cases op <;>
-    simp_all [arm64DispatchOps, arm64DispAluOps, arm64DispShiftOps, arm64DispSubsOps,
-              arm64DispAddsOps, arm64DispCmpOps, arm64DispTstOps, arm64DispAndsOps,
-              arm64DispCcmpOps, aluHandled, shiftOpHandled, subsHandled,
-              addsHandled, cmpHandled, tstHandled, andsHandled, ccmpHandled]
-
 /-- Every constructor is a member of `arm64DispatchOps`.
 `cases op <;> decide` closes it, which is what makes the vacuity of
 the nonmember arm a theorem rather than a remark.
 --/
 theorem arm64_dispatch_ops_total (op : GeneratedArm64DispatchFamily.DispatchOp) : op ∈ arm64DispatchOps := by
   cases op <;> decide
+
+/-- An opcode outside every dispatch family is handled by no generated membership
+test, so the dispatcher reaches its unsupported arm. `arm64_dispatch_ops_total`
+says `arm64DispatchOps` covers every constructor, so the hypothesis cannot
+hold. The arm is proved vacuous by `absurd`:
+`arm64_dispatch_member_handled` is the operative half of the contract. -/
+theorem arm64_dispatch_nonmember_unhandled (op : DispatchOp)
+    (h : op ∉ arm64DispatchOps) :
+    aluHandled op = false ∧ shiftOpHandled op = false ∧
+    subsHandled op = false ∧ addsHandled op = false ∧
+    cmpHandled op = false ∧ tstHandled op = false ∧
+    andsHandled op = false ∧ ccmpHandled op = false :=
+  absurd (arm64_dispatch_ops_total op) h
 
 /-- The generated code dispatch: the sixteen mnemonics map onto the sixteen
 ARM64_OP_* opcode numbers the C macros compare against. -/
