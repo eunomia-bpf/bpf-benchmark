@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0639 censused the other naming directions: the
+paper names no header by file, and every header the
+checkers name resolves. It did find that three checks
+read the two simulator headers by hard-coded path,
+which now names the missing file instead of raising a
+bare traceback (census 509 -> 510).
+
+
 Step 0638 covered the paper's own citations: 53
 references across 47 distinct Lean modules, none read
 before. All resolve, and a renamed module is now

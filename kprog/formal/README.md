@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 509, and 407 steps
+`build/mut_*.py` files exist, the counter's last value is 510, and 408 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0639 - the checks have inputs whose absence they did not
+describe
+
+Censusing the naming surfaces in the other direction finds little left: the
+paper names no header by file name, only modules, and the checkers and Makefile
+name a hundred and forty-five headers of which every one resolves outside the
+system bpf headers. The prose-to-tree and tool-to-tree surfaces are both closed.
+
+What the census did turn up is a fragility of my own. Three checks read the two
+simulator headers by hard-coded path, and a rename in the simulator tree would
+surface as a bare traceback from whichever check ran first rather than as a
+statement about the gate's input. The path is now checked, and the missing file
+is named.
+
+That is a small increment, and it is the kind the census is for: not another
+claim, but the observation that the checks have inputs whose absence they do not
+describe. Census 509 -> 510.
 
 ### Step 0638 - the paper cites forty-seven Lean modules and
 nothing read the names

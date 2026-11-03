@@ -688,8 +688,17 @@ def tag_isolation(root):
     would be indexed by tag.
     """
     root = pathlib.Path(root).resolve().parent
-    arm = (root / "arm64" / "arm64_sim_local_bpf.h").read_text()
-    x86 = (root / "x86" / "x86_sim_local_bpf.h").read_text()
+    arm = (root / "arm64" / "arm64_sim_local_bpf.h")
+    x86 = (root / "x86" / "x86_sim_local_bpf.h")
+    for path in (arm, x86):
+        # These two headers are read by three checks; a rename in the
+        # simulator tree would otherwise surface as a bare traceback deep in
+        # the gate rather than as a statement about what is missing.
+        if not path.exists():
+            raise SystemExit(
+                "check_lean_claims: %s is missing, and the tag checks read "
+                "it" % path.name)
+    arm, x86 = arm.read_text(), x86.read_text()
     tagged = 0
     for text in (arm, x86):
         # A tag constant as the *index* of an array, not a macro whose
