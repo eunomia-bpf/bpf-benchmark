@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0640 checked the paper's own cross-references
+and citations over the sections main.tex includes: 9
+labels all defined, every citation in the bib. Over
+the directory instead there are ten undefined refs
+and two missing cites, all in dead section files
+(census 510 -> 511).
+
+
 Step 0639 censused the other naming directions: the
 paper names no header by file, and every header the
 checkers name resolves. It did find that three checks

@@ -310,6 +310,30 @@ def lean_citations(text: str) -> set[str]:
     return set(re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", text))
 
 
+def document_refs(paper: pathlib.Path) -> tuple[set, set, set, set]:
+    """`(undefined refs, uncited keys, live label count, bib entry count)`.
+
+    Only the sections `main.tex` includes are read: the paper keeps older
+    section files on disk, and those carry labels and citations that no
+    document resolves. Restricting to the included set is what makes the
+    result a statement about the paper rather than about the directory.
+    """
+    main = (paper / "main.tex").read_text()
+    live = [paper / m for m in re.findall(r"\\input\{(sections/[^}]+)\}",
+                                          main)]
+    labels, refs, cites = set(), set(), set()
+    for path in live:
+        text = pathlib.Path(str(path) + ".tex").read_text()
+        labels |= set(re.findall(r"\\label\{([^}]+)\}", text))
+        refs |= set(re.findall(r"\\(?:ref|cref|autoref|Cref)\{([^}]+)\}",
+                               text))
+        for group in re.findall(r"\\cite[pt]?\{([^}]+)\}", text):
+            cites |= {k.strip() for k in group.split(",")}
+    bib = paper / "reference.bib"
+    keys = set(re.findall(r"@\w+\{([^,]+),", bib.read_text()))
+    return refs - labels, cites - keys, len(labels), len(keys)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -385,6 +409,22 @@ def main() -> None:
     # Every percentage the section states. Five belong to the ISA split
     # here and two to check_lean_claims, so neither checker's own scan says
     # whether a seventh sentence has appeared that both would miss.
+    # The document's own cross-references and citations, over the sections
+    # main.tex includes. The paper keeps older section files on disk whose
+    # labels and citations nothing resolves, so the included set is what
+    # makes these statements about the paper rather than the directory.
+    undefined, uncited, n_labels, n_keys = document_refs(
+        pathlib.Path(args.section).resolve().parent.parent)
+    if undefined or uncited:
+        problems.append(
+            "the document has %d undefined reference(s) %s and %d citation(s) "
+            "absent from the bib %s"
+            % (len(undefined), sorted(undefined), len(uncited),
+               sorted(uncited)))
+    if (n_labels, n_keys) != (9, 56):
+        problems.append(
+            "the document has %d live labels and the bib %d entries; 9 and "
+            "56 when this was written" % (n_labels, n_keys))
     # The section names Lean modules; a rename in the proof tree leaves the
     # prose pointing at a file that no longer exists, and nothing else reads
     # those names.

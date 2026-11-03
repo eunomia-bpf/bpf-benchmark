@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 510, and 408 steps
+`build/mut_*.py` files exist, the counter's last value is 511, and 409 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0640 - the directory has twelve broken references and the
+paper has none
+
+The paper directory holds more sections than the paper includes. Older section
+files remain on disk with their own labels and citations, and reading the
+directory rather than the document reports ten undefined references and two
+citations absent from the bib; all of them are in files main.tex does not input.
+
+Over the included set the document is clean: nine labels, all referenced labels
+defined, five citations in the section plus the other sections' four, every one
+present among the bib's fifty-six entries. The check reads the included set, so
+it is a statement about the paper rather than about the directory, and it fails
+when a reference or a citation stops resolving.
+
+That distinction is the same one the paper's own prose makes about its dead
+sections, and it is why the numbers differ by so much between the two readings:
+twelve problems in the directory, none in the document. Census 510 -> 511.
 
 ### Step 0639 - the checks have inputs whose absence they did not
 describe
