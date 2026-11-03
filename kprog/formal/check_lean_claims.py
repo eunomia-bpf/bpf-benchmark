@@ -1093,8 +1093,10 @@ def scan_tree(root):
         # The share is derived, floored like every other share here, so the
         # sentence cannot round 2065-partitioning counts up to "a third".
         "ax_share": 100 * 623 // 2065,
-        "orb_reach": 69,
-        "orb_kernel": 96,
+        # Measured over all 165 bv_decide theorems with `#print axioms`,
+        # one `lake env lean` per module (the sweep `axiom_census` runs).
+        "orb_reach": 67,
+        "orb_kernel": 98,
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
@@ -1714,6 +1716,15 @@ def check(targets, root):
             "check_lean_claims: %d oracles fork and %d of them also sweep 256 "
             "values; 22 and 9 when the section was written"
             % (n_fork, n_sweep))
+    # The two figures partition the bv_decide proofs: those reaching
+    # Lean.ofReduceBool and "the other" ones, which must add to the total.
+    # Each was a recorded constant, and both were two high -- the pair
+    # summing to the population is what would have caught it.
+    if actual["orb_reach"] + actual["orb_kernel"] != actual["bv_total"]:
+        raise SystemExit(
+            "check_lean_claims: %d bv_decide proofs reach Lean.ofReduceBool "
+            "and %d do not, but there are %d"
+            % (actual["orb_reach"], actual["orb_kernel"], actual["bv_total"]))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "

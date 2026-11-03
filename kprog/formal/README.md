@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 522, and 420 steps
+`build/mut_*.py` files exist, the counter's last value is 523, and 421 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0652 - the axiom footprint was recorded, never measured, and
+it was two high
+
+Two figures in the section partition the 165 bv_decide proofs: the ones that
+reach Lean.ofReduceBool and "the other" ones that discharge by kernel-checked
+reflection. Both were recorded constants, and both were two high. A sweep of
+#print axioms over every one of the 165, one lake env lean per module, gives 67
+reaching the axiom and 98 that do not.
+
+The error was not in the arithmetic of the recorded pair but in its provenance.
+The two numbers were written down when the sentence was written and never
+measured afterwards, and because nothing compared them with each other, a pair
+that added to 163 against a population of 165 sat in the checker for many runs
+without complaint.
+
+The partition is now a checked identity: the two figures must add to the total,
+so a constant that drifts alone is reported with all three numbers. Reverting
+either one to its old value fails with the sentence's own claim, which is the
+form a reader would have caught and no check did. The native_decide side needed
+no correction: 488 theorems, 483 reaching the axiom, measured the same way.
+Census 522 -> 523.
 
 ### Step 0651 - the accounting of the 488 uses has to add up, and
 the overlap is why it does not reach 488

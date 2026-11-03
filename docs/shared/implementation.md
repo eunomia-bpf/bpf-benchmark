@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0652 measured the axiom footprint the paper had
+only recorded: 67 of the 165 bv_decide proofs reach
+Lean.ofReduceBool, not 69, and 98 discharge without
+it, not 96. The two are now required to add to 165
+(census 522 -> 523).
+
+
 Step 0651 bound the accounting of the 488
 decision-procedure uses: 28 + 441 + 20 - 2 = 487, one
 short of the total. Every part is read from the text
