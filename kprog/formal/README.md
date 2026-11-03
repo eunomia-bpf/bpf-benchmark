@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 497, and 395 steps
+`build/mut_*.py` files exist, the counter's last value is 498, and 396 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0627 - the three exempt totals are one chain, and 104 was
+already stated
+
+The three mutation totals that match no harness size are stages of one harness
+growing, and the section states the stage between them too: a hundred and four
+names the eighth detector, which the earlier count missed because a different
+harness happens to be that size today. So the chain is ninety-six, a hundred, a
+hundred and four, a hundred and eight, advancing by four each time.
+
+The presence of a size is too weak a test, since one of the four is another
+harness's present size and appears elsewhere in the section. The stages must
+appear in order, which distinguishes the growth chain from the coincidental
+mention.
+
+That is the only arithmetic the tree cannot supply for these figures and the
+only part it can confirm: the values record states no file keeps, but a chain
+that advances by four and appears in order would break visibly if a stage were
+renumbered or dropped. Census 497 -> 498.
 
 ### Step 0626 - forty-seven mutation totals stood beside nothing
 to compare them to

@@ -1456,6 +1456,23 @@ def check(targets, root):
         raise SystemExit(
             "check_lean_claims: mutation totals %r match no harness size; "
             "96, 100 and 108 were the exempt growth stages" % (stray,))
+    # Those three are stages of one harness growing by four mutants at each
+    # step, and the stages between them are stated too: 96, 100, 104 and 108
+    # name the sixth through ninth detectors. The arithmetic is the only
+    # thing about them the tree can confirm, so it is checked.
+    # The four stages must also appear in order, because one of the sizes
+    # (104) is a different harness's present size as well and a presence
+    # test alone cannot tell the two apart.
+    stages = [96, 100, 104, 108]
+    positions = [flat_section.find("%d-mutation harness" % t) for t in stages]
+    ordered = [t for _, t in sorted(zip(positions, stages))]
+    if -1 in positions or ordered != stages:
+        raise SystemExit(
+            "check_lean_claims: the growth stages appear at %r, so a stage "
+            "went missing or was renumbered" % (positions,))
+    if any(b - a != 4 for a, b in zip(stages, stages[1:])):
+        raise SystemExit(
+            "check_lean_claims: the growth stages no longer advance by four")
     if len(totals) < 23:
         raise SystemExit(
             "check_lean_claims: only %d mutation totals resolved to a "

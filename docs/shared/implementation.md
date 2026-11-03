@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0627 found the exempt totals form a chain
+96/100/104/108 advancing by four, with 104 stated as
+its own stage. Presence alone was too weak since 104
+is also another harness's size, so the check now
+requires the stages in order (census 497 -> 498).
+
+
 Step 0626 covered the 47 standalone mutation totals:
 40 are a harness's present size, 3 describe growth
 stages no file records. A standalone total matching
