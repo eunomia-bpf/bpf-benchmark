@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0644 censused the 22 sentences that pair an
+oracle size with an exhaustive 256-value sweep. Every
+count is a banner; the census holds the population
+and reports a sweep claim whose count no banner
+prints (census 514 -> 515).
+
+
 Step 0643 checked a structural claim rather than a
 figure: 22 oracles fork and 9 also sweep all 256
 opcode bytes, which is the isolation the section

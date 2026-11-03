@@ -351,6 +351,20 @@ def document_refs(paper: pathlib.Path) -> tuple[set, set, set, set]:
             dup, refs & (dead - labels))
 
 
+def sweep_claims(text: str, counts: set[int]) -> tuple[int, list[int]]:
+    """`(claims, case counts with no banner)` for "N-case ... all 256".
+
+    A sweep claim ties an oracle's size to what it sweeps, so both halves
+    have a source: the count in a banner and the sweep in the C file. The
+    counts were already checked as claims; pairing them with the sweep is
+    what says the number describes an exhaustive opcode sweep rather than
+    some other oracle of the same size.
+    """
+    hits = re.findall(r"(\d[\d,{}]*)-case[^.]{0,200}?all (?:\\\()?256", text)
+    vals = [int(re.sub(r"[{},]", "", h)) for h in hits]
+    return len(vals), sorted(v for v in vals if v not in counts)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -466,6 +480,18 @@ def main() -> None:
         problems.append(
             "the section cites %d Lean modules and 47 were cited when this "
             "was written" % len(cited))
+    # Sweep claims pair an oracle's size with what it sweeps. The case
+    # counts are checked as claims already; this says the number belongs to
+    # an exhaustive opcode sweep, and holds the population at twenty-two.
+    n_sweeps, stray_sweeps = sweep_claims(text, measured)
+    if stray_sweeps:
+        problems.append(
+            "%d sweep claim(s) print a case count no banner reports: %s"
+            % (len(stray_sweeps), stray_sweeps))
+    if n_sweeps != 22:
+        problems.append(
+            "the section makes %d 256-sweep claims and 22 when this was "
+            "written" % n_sweeps)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

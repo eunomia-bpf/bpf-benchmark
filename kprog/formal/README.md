@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 514, and 412 steps
+`build/mut_*.py` files exist, the counter's last value is 515, and 413 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0644 - the sentences that pair a size with a sweep
+
+Twenty-two sentences tie an oracle's size to an exhaustive opcode sweep: a case
+count, then a clause saying the oracle sweeps all 256 values. Both halves have a
+source, the count in a banner and the sweep in the C file, and the pairing is
+what says the number describes an exhaustive sweep rather than some other oracle
+of the same size.
+
+All twenty-two counts are banners of the run. The census holds that population
+and would report a sweep claim whose count no banner prints; a count that
+drifted to another oracle's value still passes, which is the same limitation the
+case-count census has, and why the per-claim extraction remains the check that
+matters.
+
+The sweep phrase was chosen the way the fork phrase was: a repeated structural
+form with a source on each side. Two hundred and three oracles sweep 256 values,
+so the sentences are not an enumeration of them; they are specific claims about
+specific oracles, and the census keeps the count of those claims from silently
+changing. Census 514 -> 515.
 
 ### Step 0643 - a structural claim about how the oracles run, not
 what they found
