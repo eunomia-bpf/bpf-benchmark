@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 505, and 403 steps
+`build/mut_*.py` files exist, the counter's last value is 506, and 404 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0635 - a header comment cites a theorem, and nothing read
+the citation
+
+The AArch64 simulator header explains its tag-array guard in a comment that
+names a theorem: the slot count is one byte per word, and the bound it tests is
+the generated, proved one in the stack-arena Lean module. A header can cite a
+theorem that has since been renamed, and nothing in the build reads a citation.
+
+Both halves hold. The slot macro is the round-up of the capacity by eight, which
+is what one byte per word means, and the refinement theorem the comment names is
+present and states exactly the generated test against an independent statement.
+Renaming the theorem makes the citation dangle, and the check reports it.
+
+This is the first citation from prose or comment into the proof tree that the
+gate follows. It is a small one, but the failure it guards is specific: a rename
+in Lean silently invalidates every comment that named the old theorem, and those
+comments are how a reader gets from the C guard to the proof of it. Census 505
+-> 506.
 
 ### Step 0634 - why the divergence is safe, and a macro name that
 looked like a violation

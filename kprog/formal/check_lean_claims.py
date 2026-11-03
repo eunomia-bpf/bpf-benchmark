@@ -703,6 +703,27 @@ def tag_isolation(root):
             len(re.findall(r"ARM64_SIM_TAG_", x86)), tagged)
 
 
+def tag_slot_bound(root):
+    """`(slots is a round-up of bytes by 8, the refining theorem exists)`.
+
+    The AArch64 tag array's guard says in the simulator header that
+    `KPROG_ARM64_STACK_TAG_SLOT_FITS` is "the generated, proved bound
+    (Arm64StackArena.lean)": one byte per word slot, and a refinement
+    theorem tying the generated test to an independent statement. A header
+    can cite a theorem that has been renamed or deleted, and nothing else
+    reads the citation.
+    """
+    base = pathlib.Path(root).resolve().parent
+    header = (base / "formal" / "generated" / "arm64_stack_arena.h").read_text()
+    lean = (base / "formal" / "KProgFormal" / "Arm64StackArena.lean").read_text()
+    slots = re.search(
+        r"#define KPROG_ARM64_STACK_TAG_SLOTS\(CAPACITY\) \\\n([^\n]*)",
+        header)
+    rounds = slots is not None and "7U) / 8U" in slots.group(1)
+    proved = "theorem arm64_stack_arena_tag_slot_fits_refines" in lean
+    return rounds, proved
+
+
 def scan_tree(root):
     """Recompute every claim from the Lean sources and the gate Makefile."""
     # Both documents publish the artifact-family figure, so the three families
@@ -1611,6 +1632,17 @@ def check(targets, root):
             "%d AArch64 references in the x86 header, %d the other way, "
             "%d arrays indexed by tag; the section says none of the three"
             % (across_arm, across_x86, by_tag))
+    # The simulator header cites a theorem by name, and nothing else reads
+    # that citation: a rename in the Lean module would leave the comment
+    # pointing at a theorem that no longer exists.
+    rounds, cited = tag_slot_bound(root)
+    if not (rounds and cited):
+        raise SystemExit(
+            "check_lean_claims: the tag-slot bound is %s as a round-up of "
+            "bytes by 8 and its refinement theorem is %s present; the "
+            "header cites it"
+            % ("still" if rounds else "no longer", "still" if cited
+               else "no longer"))
     if (shared_tags, divergent, arm_only) != (7, [7], [8]):
         raise SystemExit(
             "check_lean_claims: the tag vocabularies are now %d shared, "

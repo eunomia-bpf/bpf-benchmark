@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0635 followed a citation from the simulator
+header into the proof tree: the tag-slot guard names
+its refinement theorem, and both the citation and the
+round-up-by-8 slot formula now hold as checks. A
+renamed theorem is reported (census 505 -> 506).
+
+
 Step 0634 checked why the tag divergence is safe: no
 header names the other's constants, and none indexes
 an array by a tag. A loose scan first counted two
