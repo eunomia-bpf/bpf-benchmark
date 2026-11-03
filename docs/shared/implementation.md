@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0619 wired the census into the gate: each
+harness claim is now compared with its harness rather
+than only with itself. Both drift directions are
+caught, for 2 s of a 6-minute gate, and the
+comparison reads the tree rather than a recorded
+table (census 489 -> 490).
+
+
 Step 0618 resolved the last unmatched claim: the
 conditional-select harness gives 42/29/31/3, not the
 43/31/26/5 the sentence stated. All eleven claims in

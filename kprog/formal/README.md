@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 489, and 387 steps
+`build/mut_*.py` files exist, the counter's last value is 490, and 388 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0619 - the claims were only ever checked against
+themselves
+
+The checker required harness claims to be internally consistent and nothing
+more. Every wrong figure found in this family was internally consistent too: the
+total matched a total, or the split matched the split, or several counts agreed
+while one drifted. Consistency was the property being enforced and drift was the
+property that mattered.
+
+The gate now compares each claim with its harness through the census. A claim
+whose split matches a harness is compared to that harness's caught count; a
+claim that stops matching is reported by the coverage guard, since eleven claims
+must resolve and a drifted split resolves to none. Both directions are checked
+against a real edit: changing one stage count drops the resolution count to ten,
+and changing a caught count with the split intact is reported as a stage sum
+below the caught figure.
+
+The comparison costs two seconds in a six-minute gate, and it runs from the tree
+rather than from a recorded table, so a harness whose rows change now moves the
+sentence that describes it. That closes the loop the audit opened: the claims
+were the last figures in the section verified only against themselves.
+Census 489 -> 490.
 
 ### Step 0618 - the last claim without a harness had three buckets
 off by up to eight

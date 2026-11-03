@@ -1393,6 +1393,26 @@ def check(targets, root):
             "their caught count -- %s"
             % (len(short), "; ".join("%d catch, %d in stages" % (a, b)
                                      for a, b in short)))
+    # The harness claims state a caught count and a detector split, and the
+    # harness states both. Until now the checker only required the claim to be
+    # internally consistent, which every wrong figure in this family also was;
+    # six of eleven drifted from their harness before this was measured.
+    import harness_census
+
+    compared = harness_census.claim_matches(section_text, root)
+    drifted = [(name, paper, source) for name, paper, source in compared
+               if paper != source]
+    if drifted:
+        raise SystemExit(
+            "check_lean_claims: %d harness claim(s) disagree with their "
+            "harness -- %s"
+            % (len(drifted),
+               "; ".join("%s says %d, harness has %d" % d for d in drifted)))
+    if len(compared) < 11:
+        raise SystemExit(
+            "check_lean_claims: only %d harness claims resolved to a harness, "
+            "and the section states 11; a claim that matches nothing went "
+            "unread" % len(compared))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "
