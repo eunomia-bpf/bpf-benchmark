@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0671 required every stated harness size to match
+some harness's entry count, excluding the growth
+series' past sizes. It catches a typo but not a
+misattribution: 33 of 40 sizes are shared by several
+harnesses (census 541 -> 542).
+
+
 Step 0670 bound the 31 dedicated-harness sizes to
 each harness's mutation list, read by Python's own
 parse. A textual count was wrong twice: multi-line

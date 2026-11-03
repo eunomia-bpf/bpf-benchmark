@@ -1255,9 +1255,24 @@ def main() -> None:
     # reported rather than the literal's parentheses.
     totals = harness_totals()
     have = set(totals.values())
+    # The growth series records one harness at past sizes, so its figures
+    # are not expected among the current totals except by coincidence.
+    series_now, series_cur = harness_growth(text)
     flat_t = re.sub(r"\s+", " ", text).replace("\\brk", "")
     stated = {int(n) for n in re.findall(
         r"[Aa] dedicated (\d+)-mutation harness", flat_t)}
+    # Every harness figure, not only the dedicated ones, must match some
+    # harness's entry count -- except the growth series, whose figures are
+    # past sizes of one harness.
+    anywhere = {int(n) for n in re.findall(r"(\d+)-mutation harness", flat_t)}
+    for n in sorted(anywhere - have - set(series_now[:-1])):
+        problems.append(
+            "the section names a %d-mutation harness and no harness has "
+            "that many entries" % n)
+    for n in sorted(stated - have - set(series_now[:-1])):
+        problems.append(
+            "a harness is stated at %d mutations and no harness has that "
+            "many entries" % n)
     if len(stated) != 31:
         problems.append(
             "the section sizes %d dedicated harnesses; 31 when this was "

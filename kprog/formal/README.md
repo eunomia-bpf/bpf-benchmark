@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 541, and 439 steps
+`build/mut_*.py` files exist, the counter's last value is 542, and 440 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0671 - every harness size must match one, which catches a
+typo and not much else
+
+Every harness size the section states now has to match some harness's mutation
+count, not just the thirty-one dedicated ones. Forty of the forty-three do; the
+other three are the historical sizes of the harness that grew from ninety-six to
+a hundred and twelve, and those are excluded by name because they are past sizes
+rather than current ones.
+
+The check is weaker than it looks, and the weakness is worth stating. Many sizes
+are shared: thirty-nine, forty, forty-two and thirty-three others each belong to
+more than one harness, so a figure matching one of them does not show the
+sentence names the harness it means. Only seven sizes are unique to a single
+harness, and for those the match is evidence.
+
+So this catches a typo rather than a misattribution: a size no harness has
+cannot be right, while a size another harness happens to have passes. Reading
+the spec named in the same sentence is what would close the gap, and the specs
+are named in the prose -- that is the next step, not this one. Census 541 ->
+542.
 
 ### Step 0670 - counting parentheses is not counting mutations
 
