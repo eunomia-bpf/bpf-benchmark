@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 458, and 356 steps
+`build/mut_*.py` files exist, the counter's last value is 459, and 357 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0588 - the split predicted two failure modes and the tree
+has one
+
+The paragraph split the 165 bv_decide obligations by proof shape and predicted
+two failure modes: 61 that split by cases cannot state the goal until the split
+is reverted, and 104 that bind a bit-vector directly are stated and then give
+up. Classifying every failure by its error text against the theorem holding it,
+the tree has one mode.
+
+58 of the 61 and 103 of the 104 are "expected type must not contain free
+variables", which is the cannot-be-stated error, and not one of the 165 is
+stated and then fails to reduce. So the split predicts a distinction the tree
+does not make: the cases split is not what stops the plain tactic, and reverting
+it changes 2 of 165.
+
+That also corrects a claim inherited from the older record, that reverted goals
+then exhaust the kernel's recursion budget. On this population they do not — the
+two that revert compile, and the other 159 still cannot be stated — so the
+recursion-budget outcome belongs to a different experiment than the one the
+sentence described. The paragraph now reports the measured mode and drops the
+budget claim for this population. Census 458 -> 459.
 
 ### Step 0587 - the gap survives the remedy Lean itself proposes,
 so it belongs to the tactic

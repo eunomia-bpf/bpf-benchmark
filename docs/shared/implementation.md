@@ -2611,6 +2611,15 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0588 classified every failure by error text: 58
+of 61 and 103 of 104 cannot state the goal, and none
+of the 165 is stated then fails, so the cases-split
+prediction is wrong and reverting recovers 2. The
+recursion-budget claim belongs to a different
+experiment and is dropped for this population (census
+458 -> 459).
+
+
 Step 0587 re-ran the sweep with decide +revert: two
 bv_decide theorems recover, none of the 488 native
 ones change, so the 160-theorem gap is the tactic's
