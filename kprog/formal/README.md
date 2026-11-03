@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 462, and 360 steps
+`build/mut_*.py` files exist, the counter's last value is 463, and 361 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0592 - the three-way split shipped with the axiom-free
+class miscounted
+
+Step 0591 shipped a three-way axiom split of 670 / 619 / 776. Re-measuring the
+whole tree with a probe that distinguishes "does not depend on any axioms" from
+a parse failure gives 617 / 623 / 825. The 0591 probe had recorded the
+axiom-free class by a string test on output that also matched its error path, so
+52 theorems were misfiled, and the paper published the wrong three figures.
+
+The corrected measurement is verified rather than assumed: sixteen theorems
+sampled across both disputed classes were re-probed individually and all sixteen
+agreed with the new sweep, including four that the old one had filed as
+axiom-free and the new one also calls axiom-free, so the correction is not
+merely a different parse of the same bug. Every theorem in the tree is
+classified: 618 + 623 + 824 = 2065.
+
+The re-measurement also split the 824 properly. 784 depend on propext and
+Quot.sound alone, and 40 also draw on Classical.choice, which is a stronger
+assumption: propext and Quot.sound are definitional, while choice lets a proof
+select a witness without exhibiting one, so a reader auditing the artifact
+should see the 40. Census 462 -> 463.
 
 ### Step 0591 - the tree's axiom footprint has three classes, and
 670 theorems need none

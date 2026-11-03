@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0592 re-measured the axiom split and corrected
+step 0591: 617 axiom-free, 623 compiler, 824
+kernel-only (40 of them on Classical.choice),
+verified by 16 individual re-probes. The ClassChoice
+subset is now published because it is a stronger
+assumption (census 462 -> 463).
+
+
 Step 0591 measured #print axioms over all 2,065
 theorems: 670 depend on no axiom, 619 assume the
 compiler, 776 are kernel-only but axiomatic. So the

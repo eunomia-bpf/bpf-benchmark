@@ -855,9 +855,10 @@ def scan_tree(root):
         # Recorded #print axioms results over the 165 bv_decide proofs.
         # The whole tree, measured with #print axioms: axiom-free, compiler-
         # assuming, and axiomatic-but-kernel-only.
-        "ax_none": 670,
-        "ax_orb": 619,
-        "ax_kernel": 776,
+        "ax_none": 617,
+        "ax_orb": 623,
+        "ax_kernel": 825,
+        "ax_choice": 40,
         "orb_reach": 69,
         "orb_kernel": 96,
         "ident_nd": ident[2],
@@ -1023,6 +1024,7 @@ CLAIMS = [
     (re.compile(r'(\d+) theorems depend on no axiom at\s+all, '
                 r'(\d+) reach'), ("ax_none", "ax_orb")),
     (re.compile(r'remaining (\d+) use only'), ("ax_kernel",)),
+    (re.compile(r'with (\d+) of them also drawing'), ("ax_choice",)),
     (re.compile(r'constants run from (\d+) to (\d+)'),
      ("table_min_count", "table_max_count")),
     # The clause's second half named "the exactness theorems" with no rule,
