@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 484, and 382 steps
+`build/mut_*.py` files exist, the counter's last value is 485, and 383 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0614 - one claim had been made worse by trusting the
+broken reader
+
+With the equivalent flag read correctly, every harness claim touched by the last
+five steps was re-checked against its source. Two had come out right after
+earlier corrections, two had not, and one had been made worse by a correction
+that trusted the broken reader.
+
+The auxiliary harness is the one made worse. Its rows divide, among the caught
+ones, into 21 generator stage, 27 Lean chain, 9 host, 30 route and one
+movk-regex: 88 catch out of 92 rows, 4 surviving. Earlier steps moved the
+generator and Lean counts to 22 and 25 and the total to 87, which matched
+neither partition the broken reader could see.
+
+The store-exclusive and bitfield claims were already right after their
+corrections, and now all ten claims that resolve to a harness agree with source
+and none disagree. That is the first time the matched set has been both complete
+and consistent since the census was written. Census 484 -> 485.
 
 ### Step 0613 - the census read one field from the wrong index, and
 three corrections followed it

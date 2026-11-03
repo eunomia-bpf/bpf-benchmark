@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0614 re-checked every harness claim touched in
+the last five steps against the fixed reader. The
+auxiliary claim had been made worse by an earlier
+correction: 88 catch (21/27/9/30/+1), not 87
+(22/25/9/30/+1). Ten claims now match source, none
+disagree (census 484 -> 485).
+
+
 Step 0613 found the census read the equivalent flag
 from a fixed index, blind to the half of harnesses
 that pad rows to five elements. It had corrupted
