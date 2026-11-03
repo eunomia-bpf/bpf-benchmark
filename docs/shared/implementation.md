@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0601 replaced 'the axiom native_decide also
+reaches' -- true of 483 of 488 -- with both
+population counts side by side: 69 of 165 bv_decide
+and 483 of 488 native_decide, plus the 96 kernel-only
+(census 471 -> 472).
+
+
 Step 0600 spot-checks the recorded axiom figures
 inside the gate: four modules covering every class
 are re-probed for 3.9 s, and the class sets must

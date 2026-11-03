@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 471, and 369 steps
+`build/mut_*.py` files exist, the counter's last value is 472, and 370 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0601 - an axiom was named by the tactic that usually
+reaches it
+
+The sentence introduced Lean.ofReduceBool as "the axiom native_decide also
+reaches". That is a universal over a tactic, and it holds for 483 of the 488
+native_decide proofs: five reach only propext and Quot.sound. In a paragraph
+whose subject is exactly which proofs carry which footprint, naming an axiom by
+the tactic that usually reaches it is the loose phrasing the paragraph exists to
+replace.
+
+Both populations now appear side by side with their counts, which is also
+clearer than the parenthetical was: 69 of 165 from bv_decide, 483 of 488 from
+native_decide, and the 96 kernel-only discharge spelled out separately. The
+reader can see the asymmetry the paragraph argues about without having to hold a
+tactic name as a proxy for a footprint.
+
+Rewrapping the sentence also removed a 113-character line left by an earlier
+edit, so the paragraph fits the measure. Census 471 -> 472.
 
 ### Step 0600 - the recorded axiom figures could be stale and
 still consistent

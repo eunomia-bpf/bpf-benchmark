@@ -907,6 +907,7 @@ def scan_tree(root):
                                          "Arm64DispatchTotality",
                                          "CrossIsaRev", "Arm64Stlxr")),
         "ax_choice": 40,
+        "ax_native": 483,
         "ax_choice_all": 179,
         "ax_choice_both": 139,
         # The share is derived, floored like every other share here, so the
@@ -1002,9 +1003,7 @@ CLAIMS = [
     # The axiom footprint decides whether a closed goal is trusted like
     # native_decide's. Measured per theorem: 69 of the 165 bv_decide proofs
     # reach Lean.ofReduceBool and 96 do not, so the blanket claim was wrong.
-    (re.compile(r'(\d+) of the (\d+) proofs reach'),
-     ("orb_reach", "bv_total")),
-    (re.compile(r'the other (\d+) discharge entirely'), ("orb_kernel",)),
+    (re.compile(r'The other (\d+) discharge entirely'), ("orb_kernel",)),
     # The population the deployment claim covers is the one that assumes the
     # compiler, and the two documents' figures are counts of that, not of the
     # tactics' whole populations.
@@ -1123,6 +1122,10 @@ CLAIMS = [
     # The sentence named five forms and called them six. The count is bound
     # to the checker's own keyword list, so adding a scanned form without
     # changing the sentence (or the reverse) is reported.
+    (re.compile(r'reached by (\d+) of the (\d+)\s+\\texttt\{bv'),
+     ("orb_reach", "bv_total")),
+    (re.compile(r'and by (\d+) of the (\d+)\s+\\texttt\{native'),
+     ("ax_native", "native_decide")),
     (re.compile(r'checks all (\d+) forms'), ("nossorry_forms",)),
     (re.compile(r'all (\d+) headers are'), ("c_consumed",)),
     (re.compile(r'all (\d+) modules are'), ("lean_consumed",)),
