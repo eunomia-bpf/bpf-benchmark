@@ -552,7 +552,6 @@ def scan_tree(root):
     native_modules = set()
     refines = 0
     refines_decided = 0
-    quant_cases = 0
     # The section splits the tree by architecture. A module counts toward an
     # architecture when its own file name starts with that prefix; everything
     # else -- the generated specifications and the cross-ISA compositions -- is
@@ -607,7 +606,7 @@ def scan_tree(root):
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": [],
                 "tabled": [], "outside": [],
-                "kind": [0, 0, 0, [], 0]}
+                "kind": [0, 0, 0, [], 0], "split_bv": []}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -644,19 +643,20 @@ def scan_tree(root):
                     counters["kind"][1] += 1
                 if not (bound and split) and not named_use and bound:
                     counters["kind"][3].append(m.group(1))
+                # The sentence also says a bit-vector binder is left free
+                # rather than split, which is what keeps the split finite. A
+                # `cases` over one would make the statement's finiteness a
+                # multiple of 2^64 and the sentence false.
+                if bound and split:
+                    for var in re.findall(
+                            r"((?:\w+\s+)+):\s*BitVec", sig):
+                        if any(re.search(r"\bcases\s+" + re.escape(v) + r"\b",
+                                         block[block.find(":="):])
+                               for v in var.split()):
+                            counters["split_bv"].append(m.group(1))
                 native_decide += 1
                 refines_decided += named
                 native_modules.add(os.path.basename(path))
-                # The safety section claims its quantified native_decide proofs
-                # are exhaustive case analyses over a finite type, so both halves
-                # are measured: a binder in the signature and `cases` in the
-                # script. A quantified proof closed some other way (one is
-                # `refine`d and decided over `BitVec 64` binders) does not belong
-                # to that sentence and is not counted.
-                cut = block.find(":=")
-                binders = signature(block, m.group(1))
-                if "(" in binders and re.search(r'\bcases\b', block[cut:]):
-                    quant_cases += 1
             length = table_length_count(block, m.group(1), imports[stem],
                                         gen_counts)
             if length is not None:
@@ -735,7 +735,7 @@ def scan_tree(root):
         "modules": len(seen),
         "refines": refines,
         "refines_decided": refines_decided,
-        "quant_cases": quant_cases,
+
         # The artifact-family figures the two documents publish: the contract
         # count, and the two renderings of it. `artifact_families` has already
         # refused to return unless all three families name the same contracts.
@@ -775,6 +775,7 @@ def scan_tree(root):
         "kinds_other": counters["kind"][3],
         # The overlap that keeps the three kinds from summing to the total.
         "kinds_overlap": counters["kind"][4],
+        "split_bitvec": counters["split_bv"],
         "kinds_sum": (counters["kind"][0] + counters["kind"][1]
                       + counters["kind"][2] - counters["kind"][4]),
         "images": len(counters["image"]),
@@ -844,8 +845,8 @@ CLAIMS = [
      ("kinds_overlap",)),
     (re.compile(r'sum to (\d+) rather than'), ("kinds_sum",)),
     (re.compile(r'(\d+) concrete example values'), ("kinds_example",)),
-    (re.compile(r'(\d+) of the three kinds are universally quantified'),
-     ("quant_cases",)),
+    (re.compile(r'The (\d+) enumerations are universally quantified'),
+     ("kinds_enum",)),
     # The section's per-architecture sentence was the last hand-kept figure
     # in it, and it drifted with every module added since: the three buckets
     # it quotes summed to 294 modules and 1,941 theorems while the tree grew
@@ -995,6 +996,12 @@ def check(targets, root):
             "check_lean_claims: the out-of-partition theorem is now %r, but "
             "the section names x86_mov_reg_arm_matches_handler"
             % (actual["kinds_other"],))
+    if actual["split_bitvec"]:
+        raise SystemExit(
+            "check_lean_claims: %d enumeration(s) case-split a bit-vector "
+            "binder, which the section says stays free -- %s"
+            % (len(actual["split_bitvec"]),
+               ", ".join(actual["split_bitvec"])))
     if actual["vacuous_unstated"]:
         raise SystemExit(
             "check_lean_claims: %d vacuous arm(s) do not derive from their "
@@ -1051,12 +1058,12 @@ def main(argv):
         return 1
     print("check_lean_claims: %d theorems, %d native_decide over %d modules, "
           "%d modules, %d refinement-named (%d by native_decide), "
-          "%d quantified by cases, %d/%d contracts consumed (C/Lean)"
+          "%d bounded enumerations, %d/%d contracts consumed (C/Lean)"
           " -- all claims current"
           % (actual["theorems"], actual["native_decide"],
              actual["native_modules"], actual["modules"],
              actual["refines"], actual["refines_decided"],
-             actual["quant_cases"], actual["c_consumed"],
+             actual["kinds_enum"], actual["c_consumed"],
              actual["lean_consumed"]))
     return 0
 

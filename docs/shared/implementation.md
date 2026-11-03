@@ -2611,6 +2611,15 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0580 corrected what the 28 enumerations range
+over: three are Boolean triples and one takes a
+BitVec 32, which stays free while the enum is split.
+A cases over a bit-vector binder now raises, the
+subject of the sentence moved to the enumeration
+kind, and the duplicate quant_cases counter is gone
+(census 450 -> 451).
+
+
 Step 0579 measured the three-kind taxonomy. The
 counts are 28/441/20 and the kinds overlap by two
 bounded enumerations that are also refinement-named,

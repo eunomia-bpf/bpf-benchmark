@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 450, and 348 steps
+`build/mut_*.py` files exist, the counter's last value is 451, and 349 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,30 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0580 - the enumerated type was described wrongly, and the
+bit-vector binder was the reason it still held
+
+The sentence after the taxonomy made a second claim: the 28 enumerations hold
+"only over a finite type", enumerating arm or ALU-code constructors or "every
+fixed-width operand pair". Reading the binders, the quantified types are 12
+`Arm`, 4 `Source`, 3 `X86Alu`, 3 `X86Width`, plus single-action, space, field,
+and outcome enums -- and 3 `Bool` triples, which are neither an arm enum nor an
+operand pair. `x86_alu_aux_handler_refines` even takes a `BitVec 32`.
+
+The `BitVec` is harmless and worth saying: the split is `cases alu` over the
+enum, and the bit-vector variables stay free while `native_decide` evaluates the
+closed goal after a rewrite. So the enumeration is finite, but for a reason the
+sentence did not give -- the bit-vector operand is not what is split. The clause
+now says that, and the guard checks it: a `cases` over any bit-vector binder in
+an enumeration raises, verified by adding one.
+
+The subject of the sentence also had to move. It said "28 of the three kinds",
+and the kinds overlap by two, so 28 belongs to the enumeration kind alone rather
+than being a fraction of the three. The sentence now reads "The 28 enumerations
+are universally quantified". With it, the checker's second copy of that figure
+-- `quant_cases`, computed by the same test as the enumeration count -- became
+dead, and was removed. Census 450 -> 451.
 
 ### Step 0579 - the three kinds of `native_decide` use were a
 taxonomy, and two of them overlap
