@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 539, and 437 steps
+`build/mut_*.py` files exist, the counter's last value is 540, and 438 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0669 - sixteen and seventeen scenes, which no case count
+can see
+
+Two sentences size a route host by how many scenes it holds: the x86 host at
+sixteen and the helper host at seventeen. A scene is a named function in one
+file, so the count is not an estimate and can be checked outright rather than
+against a banner.
+
+Both are exact, and the case figures beside them were already banners: the x86
+host prints seven thousand and fifty-six cases and the helper host four thousand
+and forty-five. The scenes are the part a case count cannot see, because a host
+can lose a scene and gain cases elsewhere in the same run.
+
+One of the two sentences also records that the helper host was at eighteen
+hundred and one cases before it gained three scenes, which is the battery-local
+witness figure from the earlier census. So the sentence's present and its past
+are both accounted for, the present against a banner and the past against the
+recorded witness. Census 539 -> 540.
 
 ### Step 0668 - five historical sizes for one harness, and the
 condition that still binds them

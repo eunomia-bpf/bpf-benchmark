@@ -770,6 +770,22 @@ def harness_growth(text: str) -> tuple[list[int], int]:
     return series, len(re.findall(r"^\s*\(", block.group(1), re.M))
 
 
+def scene_counts() -> dict[str, int]:
+    """`{host: distinct scene functions}` for the hosts the prose sizes.
+
+    A sentence can state how many scenes a host has. The scenes are named
+    identifiers in one file, so the count is checkable; a host that lost a
+    scene would leave the sentence describing coverage it no longer has.
+    """
+    out = {}
+    for name in ("x86_route_host", "helper_route_host"):
+        src = pathlib.Path(__file__).parent / "build" / (name + ".c")
+        if src.exists():
+            out[name] = len(set(re.findall(r"scene_[a-z0-9_]+",
+                                           src.read_text(errors="ignore"))))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1193,6 +1209,14 @@ def main() -> None:
         problems.append(
             "the harness is stated at %d mutations and holds %d"
             % (series[-1], current))
+    # Two hosts are sized by scene count: the x86 route host at sixteen and
+    # the helper route host at seventeen. A scene is a named function in one
+    # file, so the count is checkable outright.
+    scenes = scene_counts()
+    if scenes != {"x86_route_host": 16, "helper_route_host": 17}:
+        problems.append(
+            "the scene counts are %s; sixteen and seventeen when this was "
+            "written" % scenes)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0669 bound the scene counts: x86 route host 16,
+helper route host 17, both exact. A scene is a named
+function, so the count is checkable outright -- a
+case count cannot see a scene lost while cases are
+gained elsewhere (census 539 -> 540).
+
+
 Step 0668 bound the five historical sizes of one
 harness (96, 100, 104, 108, 112) to its current 116:
 the series must ascend and the harness may not shrink
