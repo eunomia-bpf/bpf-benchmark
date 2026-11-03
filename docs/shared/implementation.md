@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0641 fixed the check it just added: it matched
+every \\input line, and two are commented-out
+appendices, so it read ten sections where the paper
+has eight. Verified that a label in the commented
+appendix now stays out of the live count (census 511
+-> 512).
+
+
 Step 0640 checked the paper's own cross-references
 and citations over the sections main.tex includes: 9
 labels all defined, every citation in the bib. Over

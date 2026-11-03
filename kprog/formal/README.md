@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 511, and 409 steps
+`build/mut_*.py` files exist, the counter's last value is 512, and 410 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0641 - the check read ten sections where the paper has
+eight
+
+The check added last step reads main.tex for the sections the paper includes,
+and it matched every input line. Two of those lines are commented out, the
+appendix twice, so the check was reading ten inputs where the paper has eight.
+
+The defect did not change any figure, because the appendix carries no label and
+includes nothing the other eight do not; but it would have, since a label in a
+commented section would have counted as live and a reference to it would have
+looked resolved. The pattern now requires the input to be uncommented, and a
+probe confirms that adding a label to the commented appendix leaves the live
+count at nine.
+
+This is the second time in two steps that the population was the defect rather
+than the check: the directory has twelve broken references and the paper none,
+and the file list has ten inputs and the paper eight. Both were found by asking
+what the reading was actually of. Census 511 -> 512.
 
 ### Step 0640 - the directory has twelve broken references and the
 paper has none

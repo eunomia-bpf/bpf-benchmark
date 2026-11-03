@@ -319,8 +319,11 @@ def document_refs(paper: pathlib.Path) -> tuple[set, set, set, set]:
     result a statement about the paper rather than about the directory.
     """
     main = (paper / "main.tex").read_text()
-    live = [paper / m for m in re.findall(r"\\input\{(sections/[^}]+)\}",
-                                          main)]
+    # A commented-out \input is not part of the paper, and the appendix is
+    # commented out twice. Matching every \input reads a section the
+    # document does not include.
+    live = [paper / m for m in re.findall(
+        r"^[^%\n]*\\input\{(sections/[^}]+)\}", main, re.M)]
     labels, refs, cites = set(), set(), set()
     for path in live:
         text = pathlib.Path(str(path) + ".tex").read_text()
