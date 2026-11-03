@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 454, and 352 steps
+`build/mut_*.py` files exist, the counter's last value is 455, and 353 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0584 - the product clause is the load-bearing one and
+nothing tested it
+
+The paragraph ended with a prohibition: no bv_decide identity "reduces a product
+of two wide operands". That is the load-bearing clause, because it is what
+separates an identity from a product on the kernel-budget boundary, and nothing
+checked it.
+
+It holds, and cheaply: 3 of the 165 bv_decide statements contain a product at
+all, and each multiplies by the byte width rather than by another operand —
+index * 8, capacity * 8, index * 2. The guard is exact, so it can be strict: any
+multiplicand pair in a statement the tactic closes is reported by theorem name.
+
+The premise is not vacuous. `a * b = a * b` closes under bv_decide in under a
+second, so the shape the clause forbids is reachable, and a probe with exactly
+that statement is caught. `a * b = b * a` does not close — the solver times out
+on commutativity — which is the concrete reason the boundary falls where the
+sentence puts it. Census 454 -> 455.
 
 ### Step 0583 - the stated mechanism explained a third of the
 obligations it was offered for

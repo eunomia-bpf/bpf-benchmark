@@ -610,7 +610,7 @@ def scan_tree(root):
         visible[s] = seen_defs
     compose = [0, 0, 0]
     ident = [0, 0, 0]
-    bvshape = [0, 0]
+    bvshape = [0, 0, [], 0]
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": [],
                 "tabled": [], "outside": [],
@@ -642,7 +642,20 @@ def scan_tree(root):
                     ident[1] += 1
                 elif "native_decide" in bbody:
                     ident[2] += 1
+            # The paragraph says none of the bv_decide identities reduces a
+            # product of two wide operands. That is exactly testable: no
+            # product of two non-constant bit-vector terms in a statement the
+            # tactic closes.
             if "bv_decide" in block and "native_decide" not in block:
+                # One statement may carry several products; the published
+                # figure is statements, so count the theorem once.
+                if re.search(r"(\w+)\s*\*\s*(\w+)",
+                             statement(block, m.group(1))):
+                    bvshape[3] += 1
+                for mul in re.finditer(r"(\w+)\s*\*\s*(\w+)",
+                                       statement(block, m.group(1))):
+                    if not any(re.fullmatch(r"\d+", g) for g in mul.groups()):
+                        bvshape[2].append(m.group(1))
                 bbody = block[block.find(":="):]
                 if re.search(r"\bcases\b", bbody):
                     bvshape[0] += 1
@@ -822,6 +835,8 @@ def scan_tree(root):
         # split). The paragraph now distinguishes them.
         "bv_cases": bvshape[0],
         "bv_direct": bvshape[1],
+        "bv_products": bvshape[2],
+        "bv_products_n": bvshape[3],
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
@@ -912,6 +927,11 @@ CLAIMS = [
     (re.compile(r'binders, (\d+) are closed by'), ("ident_bv",)),
     (re.compile(r'and (\d+) by \\texttt\{native'), ("ident_nd",)),
     (re.compile(r'and the other (\d+) cite'), ("ident_cite",)),
+    # The last clause: no bv_decide identity reduces a product of two wide
+    # operands. Three statements contain a product and each multiplies by the
+    # byte width, so the count is published and the shape is guarded.
+    (re.compile(r'none of the (\d+) statements it closes that'),
+     ("bv_products_n",)),
     (re.compile(r'\. On (\d+) of those the plain'), ("bv_cases",)),
     (re.compile(r'The other (\d+)\s+bind a bit-vector'), ("bv_direct",)),
     (re.compile(r'of the (\d+) theorems whose statement composes'),
@@ -1068,6 +1088,14 @@ def check(targets, root):
             "check_lean_claims: the out-of-partition theorem is now %r, but "
             "the section names x86_mov_reg_arm_matches_handler"
             % (actual["kinds_other"],))
+    # A product of two wide operands closed by bv_decide would falsify the
+    # sentence's last clause, and would also be the interesting case for the
+    # kernel-budget argument, so it raises rather than being counted.
+    if actual["bv_products"]:
+        raise SystemExit(
+            "check_lean_claims: %d bv_decide identity(ies) reduce a product "
+            "of two wide operands -- %s"
+            % (len(actual["bv_products"]), ", ".join(actual["bv_products"])))
     if actual["split_bitvec"]:
         raise SystemExit(
             "check_lean_claims: %d enumeration(s) case-split a bit-vector "

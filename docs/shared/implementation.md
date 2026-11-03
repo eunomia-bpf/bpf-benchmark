@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0584 guarded the product clause: 3 of 165
+bv_decide statements contain a product, each
+multiplying by the byte width. The guard is exact,
+and its premise is reachable -- a * b = a * b closes,
+a * b = b * a times out -- so the boundary is real
+(census 454 -> 455).
+
+
 Step 0583 found the stated mechanism covering a third
 of its population: 61 of 165 bv_decide proofs split
 by cases, while 104 bind a bit-vector directly and
