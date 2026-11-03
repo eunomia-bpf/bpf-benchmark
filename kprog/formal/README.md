@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 521, and 419 steps
+`build/mut_*.py` files exist, the counter's last value is 522, and 420 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0651 - the accounting of the 488 uses has to add up, and
+the overlap is why it does not reach 488
+The section accounts for the 488 uses of a decision procedure in three kinds,
+two of which overlap: 28 finite enumerations, 441 concrete example values, and
+20 of the 609 refinement-named theorems, with 2 uses counted in two kinds, which
+is why the parts sum to 487 rather than 488. One use sits in none of the three.
+Every number in that accounting is now read from the text and compared with the
+tree, and the sum is derived from the stated parts rather than from the tree, so
+the sentence has to be arithmetic as well as accurate. The overlap is the number
+a reader cannot derive, and it is what makes the other three add up.
+The parsing took four attempts, each failing on the wording rather than the
+arithmetic: the total is phrased "Its 488 uses" with the number before the noun,
+one pattern captured a bare string where groups were expected, and two numerals
+wrap across lines so a byte-level replacement silently missed. The tests were
+vacuous until the last of these was fixed, which is worth recording because a
+green test that never applied the edit looks exactly like a passing one. Census
+521 -> 522. Census 521 -> 522.
 
 ### Step 0650 - the sentence carries its own arithmetic, and it
 multiplies out

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0651 bound the accounting of the 488
+decision-procedure uses: 28 + 441 + 20 - 2 = 487, one
+short of the total. Every part is read from the text
+and the sum derived from the parts, so a drifted kind
+or a drifted sum both fail (census 521 -> 522).
+
+
 Step 0650 bound the three sentences that state a
 sweep's dimensions beside its size: 256 x 4 x 2, 256
 x 4, and 256 x 4 x 4 all multiply out to their

@@ -697,6 +697,41 @@ def main() -> None:
             problems.append(
                 "a sweep claim prints %d cases and its dimensions give %d"
                 % (cases, product))
+    # "Its 488 uses fall into three kinds, two of which overlap: the 28
+    # finite enumerations ..., 441 concrete example values ..., and 20 of the
+    # 609 refinement-named theorems. 2 of the refinement uses are themselves
+    # enumerations, which is why the three counts sum to 487 rather than
+    # 488." Every part is read from the text, compared with the tree, and
+    # the sum the sentence states is derived from the parts it states.
+    import check_lean_claims as claims
+    kinds = claims.scan_tree(str(pathlib.Path(__file__).parent))
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    def first(pat):
+        hit = re.findall(pat, flat)[0]
+        return [int(g) for g in (hit if isinstance(hit, tuple) else (hit,))]
+
+    said = (first(r"the (\d+) finite enumerations")
+            + first(r"(\d+) concrete example values")
+            + first(r"(\d+) of the (\d+) refinement-named")
+            + first(r"Its (\d+) uses fall into three kinds")
+            + first(r"(\d+) of the refinement uses are themselves")
+            + first(r"the three counts sum to (\d+) rather than (\d+)"))
+    # enum, example, table, refinement-named, total uses, overlap, sum
+    tree = (kinds["kinds_enum"], kinds["kinds_example"],
+            kinds["kinds_table"], kinds["refines"], kinds["native_decide"],
+            kinds["kinds_overlap"], kinds["kinds_sum"], kinds["native_decide"])
+    if tuple(said) != tree:
+        problems.append(
+            "the three kinds are stated as %s and the tree has %s"
+            % (tuple(said), tree))
+    if said[0] + said[1] + said[2] - said[5] != said[6]:
+        problems.append(
+            "%d + %d + %d - %d is not the stated %d"
+            % (said[0], said[1], said[2], said[5], said[6]))
+    if said[6] + 1 != said[7]:
+        problems.append(
+            "the stated kinds sum to %d and the stated total is %d"
+            % (said[6], said[7]))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
