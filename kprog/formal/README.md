@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 479, and 377 steps
+`build/mut_*.py` files exist, the counter's last value is 480, and 378 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0609 - one claim mixed figures from both partitions, and
+each number looked plausible
+
+Two more claims were wrong against their harnesses. The 61-mutation reduction
+harness has 59 catching rows and 2 equivalents, split 30, 18 and 11; the
+sentence said 57 catch, 4 surviving, and listed four equivalences that the
+harness marks as catching rows. The 87-row auxiliary harness has 87 catching
+rows, split 22, 25, 9 host, 30 route and one movk-regex: the sentence said 88
+and read the generator and Lean counts from the all-rows split while taking the
+host and route counts from the caught split.
+
+The second kind is the interesting one, because every individual figure was
+defensible in isolation: 27 and 11 each appear in the harness, just in different
+partitions. A reader adding them gets the right total for the wrong reason, and
+only the harness itself says which rows were which.
+
+The checker's relation was also wrong. It required the stage sum to equal the
+caught count, when the breakdown counts every row and the catch figure excludes
+the equivalent ones; so a correct claim looked like a mismatch whenever a
+harness had survivors. The relation is now a bound, stage sum at least the
+caught count, which is the property that actually holds and the one a stale
+figure would break. Census 479 -> 480.
 
 ### Step 0608 - two of the recorded mismatches were simply wrong
 numbers
