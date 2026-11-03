@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0653 held the shape split's four figures
+together: an unstated count cannot exceed its 61- or
+104-proof group, and the 2 proofs reverting recovers
+must come from the unstated population. Each figure
+had only ever been compared with its own sentence
+(census 523 -> 524).
+
+
 Step 0652 measured the axiom footprint the paper had
 only recorded: 67 of the 165 bv_decide proofs reach
 Lean.ofReduceBool, not 69, and 98 discharge without

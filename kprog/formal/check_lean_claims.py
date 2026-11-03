@@ -1720,6 +1720,24 @@ def check(targets, root):
     # Lean.ofReduceBool and "the other" ones, which must add to the total.
     # Each was a recorded constant, and both were two high -- the pair
     # summing to the population is what would have caught it.
+    # The shape split says how many of each group cannot state the goal, and
+    # that reverting the cases split recovers two. A recovery has to come out
+    # of the unstated population, and neither unstated count can exceed its
+    # group: the two figures are recorded, so only the relationship between
+    # them is checkable here.
+    for group, unstated in (("cases", "unstated_cases"),
+                            ("direct", "unstated_direct")):
+        total = actual["bv_" + group]
+        if actual[unstated] > total:
+            raise SystemExit(
+                "check_lean_claims: %d of the %d %s-shape proofs cannot "
+                "state the goal, which is more than the group"
+                % (actual[unstated], total, group))
+    if actual["bv_revert_recovered"] > actual["unstated_cases"]:
+        raise SystemExit(
+            "check_lean_claims: reverting recovers %d proofs from a cases "
+            "group whose unstated population is %d"
+            % (actual["bv_revert_recovered"], actual["unstated_cases"]))
     if actual["orb_reach"] + actual["orb_kernel"] != actual["bv_total"]:
         raise SystemExit(
             "check_lean_claims: %d bv_decide proofs reach Lean.ofReduceBool "

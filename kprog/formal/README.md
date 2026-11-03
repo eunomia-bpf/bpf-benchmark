@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 523, and 421 steps
+`build/mut_*.py` files exist, the counter's last value is 524, and 422 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0653 - four figures that only ever had to agree with the
+prose beside them
+
+The section splits the 165 bv_decide proofs by shape: 61 cannot have the plain
+tactic stated at all because the cases split leaves free variables, and the
+other 104 bind a bit-vector operand directly. Those two figures are exactly the
+population, and fifty-eight of the first and a hundred and three of the second
+cannot state the goal, leaving four that can and all of them reduce.
+
+Both groups were recorded constants, and the only relationship anything checked
+was each figure against its own sentence. That is the shape that hid the axiom
+pair for many runs: three numbers that must agree with each other, each compared
+only with the prose beside it.
+
+Two invariants now hold them: an unstated count cannot exceed its group, and the
+two proofs that reverting recovers must come out of the unstated population
+rather than appearing from nowhere. Either one drifted alone is reported with
+both numbers, which is what makes the four rest on arithmetic rather than on
+prose. Census 523 -> 524.
 
 ### Step 0652 - the axiom footprint was recorded, never measured, and
 it was two high
