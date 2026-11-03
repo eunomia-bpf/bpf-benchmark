@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 476, and 374 steps
+`build/mut_*.py` files exist, the counter's last value is 477, and 375 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0606 - the mismatches were a counting convention nobody
+had written down
+
+Step 0605 recorded five harness claims whose detector breakdowns did not add up
+to their caught totals, and said the difference was unexplained. It is
+explained, and the explanation is a convention the section never states: the
+breakdown counts every row by the detector that must catch it, while the catch
+figure counts the rows not marked equivalent. On the verified harness, 30 + 17 +
+12 = 59 rows and 29 + 17 + 11 = 57 catch, so both figures are right and they
+describe different partitions of the same table.
+
+harness_census.py now derives all of it from the harness source, reading each
+row's declared detector and its equivalent flag through the AST so a multi-line
+row call counts once. On the 59-row harness it prints rows=59 catch=57 equiv=2
+by row gen=30 lean_chain=17 host=12, which is exactly what the sentence says.
+
+The convention is now stated where it matters. That one sentence spells out 59
+rows, 57 catching, 2 surviving, and the detector split as a count of rows; the
+other four remain in the recorded list until each is matched to its harness,
+which needs an identity the paper does not give. Census 476 -> 477.
 
 ### Step 0605 - a second wording of the same claim was outside
 every check

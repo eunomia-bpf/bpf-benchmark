@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0606 explained step 0605's mismatches: the
+breakdown counts rows by declared detector, the catch
+figure counts non-equivalent rows, so both are right
+about different partitions. harness_census.py derives
+it from AST; one claim now states the convention
+(census 476 -> 477).
+
+
 Step 0605 found 13 harness claims in a second wording
 ('N catch (' with no 'rows') that no check covered.
 Five disagree with their own detector breakdown by

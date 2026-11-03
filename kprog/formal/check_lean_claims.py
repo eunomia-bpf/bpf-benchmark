@@ -1378,7 +1378,7 @@ def check(targets, root):
     # and the section gives no note explaining the difference, so the
     # discrepancy is surfaced here instead of being silently tolerated.
     mismatched = [(a, b) for a, b in detector_sums(section_text) if a != b]
-    if mismatched != [(57, 53), (68, 69), (57, 59), (68, 67), (88, 87)]:
+    if mismatched != [(57, 53), (68, 69), (68, 67), (88, 87)]:
         raise SystemExit(
             "check_lean_claims: detector claims changed -- %r; the recorded "
             "list of five known mismatches no longer matches"
