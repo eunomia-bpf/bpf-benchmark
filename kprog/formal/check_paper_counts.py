@@ -734,6 +734,22 @@ def enumerated_bounds(text: str) -> list[tuple[int, int, int]]:
     return out
 
 
+def row_stage_splits(text: str) -> list[tuple[int, int, int, int]]:
+    """`[(total, generator, Lean chain, host)]` for the four-stage splits.
+
+    "N rows catch (a at the generator stage; b through the Lean chain; c by
+    the host oracle; d by the routed oracle)". The fourth term carries a
+    parenthetical and is not parsed here, so the three that are must not
+    exceed the total -- a partial sum over the total is impossible however
+    the fourth is counted.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    pat = (r"(\d+) rows catch \((\d+) at the generator stage; "
+           r"(\d+) through the Lean chain; (\d+) by the host oracle")
+    return [(int(t), int(a), int(b), int(c))
+            for t, a, b, c in re.findall(pat, flat)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1126,6 +1142,20 @@ def main() -> None:
             problems.append(
                 "a mutation list states %d and its items bound it between "
                 "%d and %d" % (stated, low, high))
+    # "N rows catch (a at the generator stage; b through the Lean chain;
+    # c by the host oracle; d ...)". Twenty-four sentences state this
+    # split. The fourth term carries a parenthetical, so only the first
+    # three are compared -- they must not exceed the total.
+    splits = row_stage_splits(text)
+    if len(splits) != 24:
+        problems.append(
+            "the section states %d four-stage row splits; 24 when this was "
+            "written" % len(splits))
+    for total, gen, lean, host in splits:
+        if gen + lean + host > total:
+            problems.append(
+                "a row split gives %d+%d+%d = %d against a stated %d"
+                % (gen, lean, host, gen + lean + host, total))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

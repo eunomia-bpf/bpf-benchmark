@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 537, and 435 steps
+`build/mut_*.py` files exist, the counter's last value is 538, and 436 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0667 - twenty-four row splits, three parts read and one
+left to its parenthetical
+
+Twenty-four sentences state a row count and then split it by the stage that made
+the catch: some at the generator stage, some through the Lean chain, some by the
+host oracle, and the rest by the routed one. The three parts without
+parentheticals are numbers the check can read, and they must not exceed the
+total, which is true however the fourth is counted.
+
+All twenty-four are consistent, and several are worth noting because the parts
+reach the total exactly: sixty-five is thirty and twenty-three and twelve,
+forty-eight is sixteen and seventeen and fifteen, twenty-nine is eleven and
+eight and ten. Where a part is left over it is because the fourth stage carries
+it.
+
+The fourth term is written with a parenthetical, so it is not parsed; that is a
+deliberate limit rather than an oversight, because a parser that guessed at a
+parenthesised remainder would be checking its own guess. The three that are read
+are enough to catch a part that outgrows its total. Census 537 -> 538.
 
 ### Step 0666 - thirty-eight enumerated lists, bounded rather than
 summed

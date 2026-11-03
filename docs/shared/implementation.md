@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0667 bounded the 24 four-stage row splits: the
+generator, Lean and host parts must not exceed the
+stated total. All hold, and several reach it exactly.
+The routed term is parenthesised and left unparsed
+(census 537 -> 538).
+
+
 Step 0666 widened the binding-mutation census to the
 two-group form and bounded the 38 enumerated lists
 between their segment count and their 'and' count.
