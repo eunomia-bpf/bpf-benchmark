@@ -1480,6 +1480,20 @@ def check(targets, root):
     # present size, which is the one place the tree confirms these values
     # rather than just their shape: 112 + 4 = 116 rows in
     # mut_x86_alu_result.py.
+    # The stages are also numbered: each says which detector it gains, and
+    # the ordinals must run consecutively from the first stage. That is a
+    # second constraint independent of the step of four, so a stage whose
+    # number was edited but whose size was not is still reported.
+    ordinals = ["sixth", "seventh", "eighth", "ninth", "tenth"]
+    stated = [harness_census.re.search(
+        r"gains an? (\w+) detector",
+        flat_section[flat_section.find("%d-mutation harness" % t):][:120])
+        for t in stages]
+    named = [m.group(1) if m else None for m in stated]
+    if named != ordinals:
+        raise SystemExit(
+            "check_lean_claims: the growth stages name %r, and the chain "
+            "runs %r" % (named, ordinals))
     final = 116
     if stages[-1] + 4 != final or final not in sizes:
         raise SystemExit(

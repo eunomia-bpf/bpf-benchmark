@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 499, and 397 steps
+`build/mut_*.py` files exist, the counter's last value is 500, and 398 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0629 - the stages are numbered, and the numbering is a
+second constraint
+
+Each stage of the growth chain also says which detector it adds, and the
+ordinals run sixth through tenth across the five. That is a second constraint on
+the same figures, independent of the step of four: a stage whose size was left
+alone while its ordinal was edited breaks the sequence, and the size arithmetic
+would not notice.
+
+Both constraints are now checked, and each catches what the other cannot. The
+step of four and the endpoint of a hundred and sixteen fix the sizes; the
+ordinals fix the numbering. A uniform shift of every size still passes, but it
+would have to change five figures together and leave every ordinal saying the
+right thing.
+
+This is as far as these values can be constrained without the harness's history,
+which no file keeps. Two independent relations pinning five numbers, with the
+last pinned to a real row count, is a stronger statement than the section made
+before: it said the numbers, and it now says them in a way that fails when any
+one of them moves. Census 499 -> 500.
 
 ### Step 0628 - the chain has an end the tree can confirm
 

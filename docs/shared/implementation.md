@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0629 checked the ordinals: the five stages name
+the sixth through tenth detectors, consecutively,
+which is a constraint independent of the step of four
+and catches a stage whose number was edited alone.
+Two relations now pin five values (census 499 ->
+500).
+
+
 Step 0628 anchored the growth chain at both ends: 112
 is its last stated stage and the harness now has 116
 rows, one 4-mutant step further. Every stage is
