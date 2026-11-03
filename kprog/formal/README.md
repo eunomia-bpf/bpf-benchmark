@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 536, and 434 steps
+`build/mut_*.py` files exist, the counter's last value is 537, and 435 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0666 - thirty-eight enumerated lists, bounded rather than
+summed
+
+Forty-two sentences state a number of binding mutations and then list them.
+Three state the split in numbers, which is directly checkable, and one more
+gives two groups and a parenthetical each, where the two group sizes must add to
+the total.
+
+The other thirty-eight enumerate their items in words, and the words are
+ambiguous at exactly one place: "and" joins two items in a list, but it also
+joins two nouns inside one item, so "GE and LE polarity flips" is one change and
+"a complement drop and a narrowing drop" is two. Counting segments gives a lower
+bound and adding every and gives an upper bound, and the stated total has to
+fall between them.
+
+Thirty-seven of the thirty-eight do. The one that did not turned out to be an
+appositive rather than an error: a group of five whose parenthetical restates
+two of its members. So the enumerated form is bounded rather than summed, and
+the bounded check is what would catch a total that left the range entirely.
+Census 536 -> 537.
 
 ### Step 0665 - a part count two off its own total, in the tier that
 was called qualitative

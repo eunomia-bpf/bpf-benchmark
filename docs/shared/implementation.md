@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0666 widened the binding-mutation census to the
+two-group form and bounded the 38 enumerated lists
+between their segment count and their 'and' count.
+All fall in range; one was an appositive, not an
+error (census 536 -> 537).
+
+
 Step 0665 found a binding-mutation total two off its
 own parts: nineteen stated against 7+6+1+3 = 17. All
 three such sentences now require their parts to reach

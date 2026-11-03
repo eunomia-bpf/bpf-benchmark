@@ -684,6 +684,53 @@ def binding_mutations(text: str) -> list[tuple[int, int]]:
         if tot in WORDS:
             out.append((WORDS[tot],
                         WORDS[a] + WORDS[b] + WORDS[c] + WORDS[d]))
+    # The two-part form: "nine ... four simulator-header routing
+    # distortions (...) and five contract distortions (...)". The outer
+    # parts are numbers; what each parenthetical contains is a further
+    # level, and an appositive inside it ("two generated-C ones, a
+    # shift-to-multiply and a scale off-by-one") makes that level
+    # unreadable by pattern, so only the outer sum is checked.
+    two = (r"(\w+(?:-\w+)?) binding mutations---"
+           r"(\w+(?:-\w+)?) simulator-header routing distortions"
+           r" \([^)]*\) and (\w+(?:-\w+)?) contract distortions")
+    for tot, a, b in re.findall(two, flat):
+        if tot in WORDS and a in WORDS and b in WORDS:
+            out.append((WORDS[tot], WORDS[a] + WORDS[b]))
+    return out
+
+
+def enumerated_bounds(text: str) -> list[tuple[int, int, int]]:
+    """`[(stated, low, high)]` for mutation lists written out in words.
+
+    "and" joins two items in a list, but also two nouns inside one item:
+    "GE and LE polarity flips" is one change and "a complement drop and a
+    narrowing drop" is two. So the segment count is a lower bound and the
+    segment count plus every "and" is an upper, and the stated total has to
+    fall between them.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    pat = (r"(\w+(?:-\w+)?) binding mutations---"
+           r"((?:an? |the )(?:[^—]{0,400}?))---")
+    out = []
+    for tot, body in re.findall(pat, flat):
+        if tot not in WORDS:
+            continue
+        segs, depth, cur = [], 0, ""
+        for ch in body:
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+            if ch == "," and depth == 0:
+                segs.append(cur)
+                cur = ""
+            else:
+                cur += ch
+        segs.append(cur)
+        low = sum(WORDS.get((s.strip() or "a").split()[0], 1)
+                  for s in segs if s.strip())
+        high = low + len(re.findall(r"\band\b", body))
+        out.append((WORDS[tot], low, high))
     return out
 
 
@@ -1057,15 +1104,28 @@ def main() -> None:
     # of change. The parts must reach the total -- one said nineteen against
     # parts summing to seventeen.
     parts = binding_mutations(text)
-    if len(parts) != 3:
+    if len(parts) != 4:
         problems.append(
-            "the section states %d binding-mutation splits; 3 when this "
+            "the section states %d binding-mutation splits; 4 when this "
             "was written" % len(parts))
     for total, summed in parts:
         if total != summed:
             problems.append(
                 "a binding-mutation sentence states %d and its parts sum to "
                 "%d" % (total, summed))
+    # Mutation lists written out in words: word "and" is ambiguous, so the
+    # total is bounded by the segment count and the segment count plus
+    # every "and". A total outside that range cannot be right.
+    bounds = enumerated_bounds(text)
+    if len(bounds) != 22:
+        problems.append(
+            "the section states %d enumerated mutation lists; 22 when this "
+            "was written" % len(bounds))
+    for stated, low, high in bounds:
+        if not low <= stated <= high:
+            problems.append(
+                "a mutation list states %d and its items bound it between "
+                "%d and %d" % (stated, low, high))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
