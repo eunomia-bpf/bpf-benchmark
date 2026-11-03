@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0574 guarded the derivation itself. Reverting an
+arm to simp_all moves no published figure, so nothing
+caught it; scan_tree now reports a nonmember theorem
+whose body never says absurd and raises by name. The
+paper publishes the count of six against four (census
+444 -> 445).
+
+
 Step 0573 made the vacuity explicit. Each nonmember
 arm closed by simp_all over the family lists, which
 works because the hypothesis is absurd but says

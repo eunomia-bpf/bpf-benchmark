@@ -573,7 +573,7 @@ def scan_tree(root):
     visible = {s: set().union(*[gen_defs.get(i, set()) for i in imports[s]])
                if imports[s] else set() for s in imports}
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
-                "total": []}
+                "total": [], "derived": [], "unstated": []}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -615,6 +615,16 @@ def scan_tree(root):
                 counters["sweep"].append(swept)
             if m.group(1).endswith("_ops_total") and "cases op" in block:
                 counters["total"].append(1)
+            # A vacuous arm proves its conjuncts from a contradictory
+            # hypothesis. Closing it with `simp_all` over the family lists
+            # works and hides why, so the tree's six arms are required to
+            # derive from the totality theorem that supplies the absurdity.
+            if "nonmember" in m.group(1) and "∉" in block[:block.find(":=")]:
+                body = block[block.find(":="):]
+                if "absurd" in body:
+                    counters["derived"].append(1)
+                else:
+                    counters["unstated"].append(m.group(1))
             image = image_pairs(block, m.group(1),
                                 visible.get(stem, set()))
             if image:
@@ -677,6 +687,10 @@ def scan_tree(root):
         # asserted and nothing proved. Four `*_ops_total` theorems now do, and
         # the count is published so the sentence cannot outlive them.
         "ops_total": len(counters["total"]),
+        # A name that says "nonmember" while its proof never argues from the
+        # absurd hypothesis is a vacuous arm closed the old way.
+        "vacuous_derived": len(counters["derived"]),
+        "vacuous_unstated": counters["unstated"],
         "sweeps": len(counters["sweep"]),
         "sweep_min_checks": min(counters["sweep"]),
     }
@@ -762,6 +776,7 @@ CLAIMS = [
     # enumeration now names every form the rule finds.
     (re.compile(r'the (\d+) table-image theorems'), ("images",)),
     (re.compile(r'until (\d+) totality theorems'), ("ops_total",)),
+    (re.compile(r'all (\d+) nonmember arms derive'), ("vacuous_derived",)),
     # The section opens by claiming the artifacts are paired one-to-one with
     # their specifications, and states the figure three times in one sentence.
     # All three counts were hand-kept and the pairing was asserted, never
@@ -843,6 +858,14 @@ def check(targets, root):
     # (23.6%), and a floored share cannot overstate how much rests on the
     # compiler. Rounding here would turn a correct 23% into a stale claim.
     actual["share"] = 100 * actual["native_decide"] // actual["theorems"]
+    # A nonmember arm closed without naming the absurdity is the old proof
+    # shape back again: nothing published would change, so it raises here.
+    if actual["vacuous_unstated"]:
+        raise SystemExit(
+            "check_lean_claims: %d vacuous arm(s) do not derive from their "
+            "totality theorem -- %s"
+            % (len(actual["vacuous_unstated"]),
+               ", ".join(actual["vacuous_unstated"])))
     # The README states the split, so the second half is published as a figure
     # too. Derived here rather than stored: it is the total minus the ties, and
     # a stored third number could disagree with the other two.

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 444, and 342 steps
+`build/mut_*.py` files exist, the counter's last value is 445, and 343 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0574 - a reverted vacuous proof moved no figure, so
+nothing reported it
+
+Step 0573 rewrote the six nonmember arms to derive from totality, and nothing
+checked that they stayed derived. The old shape is not wrong, only unexplained:
+`cases op <;> simp_all [forty-five lists]` closes the arm from the contradictory
+hypothesis, so reverting one arm would have kept every published figure right
+and restored the very opacity the step removed.
+
+`scan_tree` now reads the proof term. A theorem whose statement carries a
+non-membership hypothesis and whose body mentions neither `absurd` is reported
+by name and the run raises, because no figure would move: the theorem count, the
+totality count, and the split are all unchanged by the proof shape, so
+publishing a number could not catch it. The distinction is deliberately narrow
+-- `absurd` in the body, not a particular lemma -- so a future arm may derive
+through any contradictory fact, as long as it derives.
+
+The paper publishes the count too, six arms against four totality theorems, so
+the prose and the guard fail together rather than one outliving the other. A
+test that reverted one arm to `simp_all` reports exactly that arm; dropping the
+clause is reported as a clause that matches nothing. Census 444 -> 445.
 
 ### Step 0573 - the vacuous arms closed by a forty-five-list
 `simp_all`, and nothing said the hypothesis was absurd
