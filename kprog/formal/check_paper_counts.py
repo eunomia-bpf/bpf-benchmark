@@ -300,6 +300,16 @@ def percent_census(text: str) -> set[str]:
     return {m.group(1) for m in re.finditer(r"(\d+(?:\.\d+)?)\\%", text)}
 
 
+def lean_citations(text: str) -> set[str]:
+    """The Lean modules a section cites by file name.
+
+    The section names modules rather than theorems, so the citation can only
+    be checked for existence — but existence is what a rename breaks, and
+    forty-seven modules are cited.
+    """
+    return set(re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", text))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -375,6 +385,22 @@ def main() -> None:
     # Every percentage the section states. Five belong to the ISA split
     # here and two to check_lean_claims, so neither checker's own scan says
     # whether a seventh sentence has appeared that both would miss.
+    # The section names Lean modules; a rename in the proof tree leaves the
+    # prose pointing at a file that no longer exists, and nothing else reads
+    # those names.
+    cited = lean_citations(pathlib.Path(args.section).read_text())
+    known_lean = {p.stem for p in
+                  (pathlib.Path(__file__).resolve().parent
+                   / "KProgFormal").glob("*.lean")}
+    absent = sorted(cited - known_lean)
+    if absent:
+        problems.append(
+            "%d Lean module(s) the section cites are absent: %s"
+            % (len(absent), ", ".join(absent)))
+    if len(cited) != 47:
+        problems.append(
+            "the section cites %d Lean modules and 47 were cited when this "
+            "was written" % len(cited))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

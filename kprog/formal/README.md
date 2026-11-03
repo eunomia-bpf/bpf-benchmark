@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 508, and 406 steps
+`build/mut_*.py` files exist, the counter's last value is 509, and 407 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0638 - the paper cites forty-seven Lean modules and
+nothing read the names
+
+The paper itself cites Lean modules by file name in fifty-three places, across
+forty-seven distinct modules. That is the largest citation surface in the
+section, and nothing read it: a module renamed in the proof tree would leave the
+prose pointing at a file that no longer exists while every figure stayed
+current.
+
+All forty-seven resolve. The case-count checker now reads the section's module
+names and reports any that are absent, with a coverage count so a citation that
+stops being recognised is surfaced too. Verified by renaming one module in the
+prose: reported absent.
+
+The check is existence only, because the section names modules rather than
+theorems; a prose that named theorems would carry a stronger claim and could be
+checked more tightly. What it does catch is the rename, which is the failure
+this surface has: the prose and the tree are joined by a file name and nothing
+else. Census 508 -> 509.
 
 ### Step 0637 - sixteen modules are cited, and ten of them say
 something stronger

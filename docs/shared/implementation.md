@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0638 covered the paper's own citations: 53
+references across 47 distinct Lean modules, none read
+before. All resolve, and a renamed module is now
+reported with a coverage count (census 508 -> 509).
+
+
 Step 0637 grew the citation population again: ten
 more headers say a module proves a contract equal to
 an independent statement, so 16 modules are cited,
