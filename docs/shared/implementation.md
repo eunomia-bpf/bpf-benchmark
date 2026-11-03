@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0620 wired the forty 'N rows catch' claims into
+the same harness comparison, after fixing a dropped
+'through the Lean chain' spelling that had made them
+unreadable. Forty resolve and all agree; 51 claims
+now compare to harness source (census 490 -> 491).
+
+
 Step 0619 wired the census into the gate: each
 harness claim is now compared with its harness rather
 than only with itself. Both drift directions are

@@ -154,9 +154,9 @@ def detectors(body):
     body = re.sub(r"---.*?---", "", body)
     out = collections.Counter()
     for count, name in re.findall(
-            r"(\d+) (at the generator stage|by the Lean chain|in the Lean "
-            r"chain|by the (?:[\d,]+-case )?host oracle|by the rout\w* "
-            r"oracle|by the route scanner)", body):
+            r"(\d+) (at the generator stage|(?:by|in|through) the Lean "
+            r"chain|(?:by|through) the (?:[\d,]+-case )?host oracle|"
+            r"by the rout\w* oracle|by the route scanner)", body):
         out["gen" if "generator" in name else
             "lean" if "Lean" in name else
             "route" if "rout" in name else "host"] += int(count)
@@ -164,6 +164,32 @@ def detectors(body):
     # has one such row and it is caught, so it belongs to the host total the
     # claim is asserting.
     out["gen"] += len(re.findall(r"\bthe one [\w-]+ catch", body))
+    return out
+
+
+def row_claim_matches(text, root):
+    """`[(harness, caught in paper, caught in harness)]` for "N rows catch".
+
+    The same comparison as claim_matches for the family that says "rows",
+    which is forty claims against the other family's eleven. Both are read
+    the same way; only the wording differs.
+    """
+    tables = {}
+    for path in sorted(glob.glob(os.path.join(root, "build", "mut_*.py"))):
+        if rows(path):
+            tables[os.path.basename(path)] = partitions(path)
+    out = []
+    for hit in re.finditer(r"(\d+) rows catch \(([^)]*(?:\([^)]*\)[^)]*)*)\)",
+                           re.sub(r"\s+", " ", text.replace("\\brk", ""))):
+        caught, breakdown = int(hit.group(1)), detectors(hit.group(2))
+        if len(breakdown) < 3:
+            continue
+        for name, parts in tables.items():
+            if any(all(part.get(k, 0) == breakdown.get(k, 0)
+                       for k in ("gen", "lean", "host", "route"))
+                   for part in parts[:2]):
+                out.append((name, caught, parts[2]))
+                break
     return out
 
 

@@ -1408,6 +1408,23 @@ def check(targets, root):
             "harness -- %s"
             % (len(drifted),
                "; ".join("%s says %d, harness has %d" % d for d in drifted)))
+    # The forty "N rows catch" claims are the same measurement in the other
+    # wording, and they were only ever checked for internal consistency too.
+    # They resolve at the same cost and all forty agree today.
+    rowed = harness_census.row_claim_matches(section_text, root)
+    row_drift = [(n, paper, source) for n, paper, source in rowed
+                 if paper != source]
+    if row_drift:
+        raise SystemExit(
+            "check_lean_claims: %d row claim(s) disagree with their harness "
+            "-- %s" % (len(row_drift),
+                       "; ".join("%s says %d, harness has %d" % d
+                                 for d in row_drift)))
+    if len(rowed) < 40:
+        raise SystemExit(
+            "check_lean_claims: only %d row claims resolved to a harness, "
+            "and 40 did when this was written; a claim that matches nothing "
+            "went unread" % len(rowed))
     if len(compared) < 11:
         raise SystemExit(
             "check_lean_claims: only %d harness claims resolved to a harness, "

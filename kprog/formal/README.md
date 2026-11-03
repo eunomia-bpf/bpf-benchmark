@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 490, and 388 steps
+`build/mut_*.py` files exist, the counter's last value is 491, and 389 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0620 - forty more claims, and one dropped word kept them
+unreadable
+
+Forty of the section's harness claims say rows catch where the other eleven say
+catch, and the forty were still checked only against themselves. The detector
+reader was also dropping the through spelling those claims use, so a claim read
+as two detectors rather than three and could not be compared at all: fixing that
+spelling is what made the family visible.
+
+With the reader fixed, forty of the forty-four claims resolve to a harness, and
+all forty agree with it. The other four name mutation totals no harness has, and
+are the same kind of stale figure the earlier steps corrected one at a time.
+
+Both families are now compared in the gate, which covers fifty-one claims
+against harness source rather than against their own arithmetic. Drift is caught
+either way: an inconsistent sum is reported by the existing check, and a
+sum-preserving shift of one detector is caught because the claim no longer
+resolves to the harness it names. Census 490 -> 491.
 
 ### Step 0619 - the claims were only ever checked against
 themselves
