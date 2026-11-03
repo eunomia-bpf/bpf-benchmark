@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 469, and 367 steps
+`build/mut_*.py` files exist, the counter's last value is 470, and 368 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,30 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0599 - the axiom figures had no reproducible source, and
+the first one found another error
+
+The axiom figures had been recorded from throwaway probes and were wrong twice:
+once because the probe scored the axiom-free class through a string test that
+matched its error path, once because a choice sweep qualified every theorem as
+`KProgFormal.<name>` and silently dropped the two modules whose namespace
+differs. A published figure should not depend on someone retyping a probe
+correctly.
+
+So the census is now a script in the tree. It reads each module's declared
+namespace from the source, batches one `#print axioms` invocation per module,
+and prints the four-way split plus the choice breakdown. It reproduces
+617/623/785/40 and it immediately found a third error: choice is 179, not 177,
+because `CrossIsaRev`'s two choice-bearing theorems resolve only under the
+module's own namespace.
+
+It is deliberately not a Makefile target. The gate already takes seven minutes
+and 306 Lean invocations would add three, so the division is: the census
+regenerates, and the gate holds the recorded counts with the partition and
+identity checks added over the last three steps. A stale figure therefore fails
+in the gate, and a fresh one is one command away rather than a re-typed probe.
+Census 469 -> 470.
 
 ### Step 0598 - the case-count script was described as part of the
 build and is not one

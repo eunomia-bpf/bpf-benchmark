@@ -872,8 +872,8 @@ def scan_tree(root):
                       open(os.path.join(root, "check_no_sorry.py")).read()
                       ).group(1).split("|")),
         "ax_choice": 40,
-        "ax_choice_all": 177,
-        "ax_choice_both": 137,
+        "ax_choice_all": 179,
+        "ax_choice_both": 139,
         # The share is derived, floored like every other share here, so the
         # sentence cannot round 2065-partitioning counts up to "a third".
         "ax_share": 100 * 623 // 2065,

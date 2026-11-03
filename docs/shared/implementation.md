@@ -2611,6 +2611,15 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0599 added axiom_census.py, the reproducible
+source the six axiom figures never had. It
+immediately found a third error: choice is 179 not
+177, because a sweep that qualified names as
+KProgFormal.<name> dropped the two modules with their
+own namespace. All figures corrected (census 469 ->
+470).
+
+
 Step 0598 found the case-count sentence reading as
 build coverage when its script is not a Makefile
 target: 11 checkers run in the gate, 2 do not. The
