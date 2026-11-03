@@ -610,6 +610,7 @@ def scan_tree(root):
         visible[s] = seen_defs
     compose = [0, 0, 0]
     ident = [0, 0, 0]
+    bvshape = [0, 0]
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": [],
                 "tabled": [], "outside": [],
@@ -641,6 +642,12 @@ def scan_tree(root):
                     ident[1] += 1
                 elif "native_decide" in bbody:
                     ident[2] += 1
+            if "bv_decide" in block and "native_decide" not in block:
+                bbody = block[block.find(":="):]
+                if re.search(r"\bcases\b", bbody):
+                    bvshape[0] += 1
+                elif re.search(r"[(\[{]", signature(block, m.group(1))):
+                    bvshape[1] += 1
             # Composition-shaped statements, and how their proofs close: the
             # section states this split rather than denying evaluation.
             stmt_only = block[:block.find(":=")]
@@ -810,6 +817,11 @@ def scan_tree(root):
         "split_bitvec": counters["split_bv"],
         "ident_total": ident[0],
         "ident_bv": ident[1],
+        # bv_decide proofs split by `cases` (the stated mechanism) versus
+        # binding a bit-vector directly (which reaches the same wall without a
+        # split). The paragraph now distinguishes them.
+        "bv_cases": bvshape[0],
+        "bv_direct": bvshape[1],
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
@@ -900,6 +912,8 @@ CLAIMS = [
     (re.compile(r'binders, (\d+) are closed by'), ("ident_bv",)),
     (re.compile(r'and (\d+) by \\texttt\{native'), ("ident_nd",)),
     (re.compile(r'and the other (\d+) cite'), ("ident_cite",)),
+    (re.compile(r'\. On (\d+) of those the plain'), ("bv_cases",)),
+    (re.compile(r'The other (\d+)\s+bind a bit-vector'), ("bv_direct",)),
     (re.compile(r'of the (\d+) theorems whose statement composes'),
      ("compose_total",)),
     (re.compile(r', (\d+) are proved by'), ("compose_cited",)),

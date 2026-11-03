@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 453, and 351 steps
+`build/mut_*.py` files exist, the counter's last value is 454, and 352 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0583 - the stated mechanism explained a third of the
+obligations it was offered for
+
+The paragraph explained why a plain `decide` fails on bv_decide obligations with
+one mechanism: "the `cases` split leaves free variables in the goal". Reading
+the 165 proofs, 61 split by `cases` and 104 bind a bit-vector operand with no
+split at all. The stated mechanism therefore accounts for a third of the
+population, and the other two thirds reach the same wall by a different route.
+
+Both routes end the same way — the kernel exhausts its recursion budget once the
+goal is stated — so the paragraph's conclusion held while its explanation
+covered a minority. The sentence now gives both counts and both routes: 61 need
+the split reverted before the plain tactic can be stated at all, and 104 state
+it from the first.
+
+This is the third figure in two paragraphs to be a direction rather than a
+count, and the pattern is the same each time: the mechanism was read from a
+handful of examples and written as though it were the class. Both counts are
+bound, so the split cannot drift back to a single number. Census 453 -> 454.
 
 ### Step 0582 - bv_decide is the arithmetic tactic of record, and
 only a quarter of the way identities are proved

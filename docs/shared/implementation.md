@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0583 found the stated mechanism covering a third
+of its population: 61 of 165 bv_decide proofs split
+by cases, while 104 bind a bit-vector directly and
+reach the same kernel wall. Both routes and both
+counts are now stated (census 453 -> 454).
+
+
 Step 0582 measured 'most of the value and flag
 identities are closed by bv_decide'. It is a quarter:
 149 of 563 bit-vector-identity theorems, 2 by
