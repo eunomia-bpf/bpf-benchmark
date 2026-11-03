@@ -84,6 +84,71 @@ def census(path):
             len(found) - len(caught), found)
 
 
+def partitions(path):
+    """`(all-rows by detector, caught by detector, caught count)`.
+
+    Detector names are normalised to the three the prose distinguishes: the
+    harnesses write `lean_chain` where the section writes "the Lean chain",
+    and a few use their own names for the host oracle.
+    """
+    found = rows(path)
+
+    def norm(det):
+        return ("lean" if det.startswith("lean") else
+                "gen" if det.startswith("gen") else "host")
+
+    caught = [r for r in found if not r[2]]
+    return (collections.Counter(norm(d) for _, d, _ in found),
+            collections.Counter(norm(d) for _, d, _ in caught), len(caught))
+
+
+def detectors(body):
+    """`{gen, lean, host}` counts from a claim's parenthetical breakdown.
+
+    The section names the third and fourth detectors several ways and can put
+    a clause in an em dash between two counts, so the counts are read by
+    label. A claim whose split matches a harness under either partition is
+    matched on that partition, because the section uses both.
+    """
+    body = re.sub(r"---.*?---", "", body)
+    out = collections.Counter()
+    for count, name in re.findall(
+            r"(\d+) (at the generator stage|by the Lean chain|in the Lean "
+            r"chain|by the (?:[\d,]+-case )?host oracle|by the rout\w* "
+            r"oracle|by the route scanner)", body):
+        out["gen" if "generator" in name else
+            "lean" if "Lean" in name else "host"] += int(count)
+    return out
+
+
+def claim_matches(text, root):
+    """`[(harness, caught in paper, caught in source)]` for matched claims.
+
+    Only claims whose three-way split matches one harness are returned; the
+    rest need an identity the prose does not give, and are left to the
+    recorded checks in check_lean_claims.py.
+    """
+    tables = {}
+    for path in sorted(glob.glob(os.path.join(root, "build", "mut_*.py"))):
+        found = rows(path)
+        if found:
+            tables[os.path.basename(path)] = partitions(path)
+    out = []
+    for hit in re.finditer(r"(\d+) catch \(([^)]*(?:\([^)]*\)[^)]*)*)\)",
+                           re.sub(r"\s+", " ", text.replace("\\brk", ""))):
+        caught, breakdown = int(hit.group(1)), detectors(hit.group(2))
+        if len(breakdown) < 3:
+            continue
+        for name, parts in tables.items():
+            hit_part = [part for part in parts[:2]
+                        if all(part.get(k, 0) == breakdown.get(k, 0)
+                               for k in ("gen", "lean", "host"))]
+            if hit_part:
+                out.append((name, caught, parts[2]))
+                break
+    return out
+
+
 def main(argv):
     here = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser()

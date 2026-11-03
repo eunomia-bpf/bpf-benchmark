@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 480, and 378 steps
+`build/mut_*.py` files exist, the counter's last value is 481, and 379 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0610 - the matcher compared two names for one detector and
+found nothing
+
+The census could count rows and index by Step, but not yet answer the question
+the audit began with: does a given claim agree with its harness? Matching by row
+total alone was ambiguous, because several harnesses share one, and matching by
+the detector split alone failed because the section sometimes quotes the
+all-rows partition and sometimes the caught one.
+
+Matching against both partitions, with the detector names normalised, resolves
+six claims to exactly one harness each and leaves none ambiguous. All six agree
+with their source, including the three corrected in the two previous steps, so
+the corrections were right and the remaining claims in this family are
+consistent.
+
+The matcher needed one fix to work at all: the harnesses write lean_chain where
+the section writes the Lean chain, so the two sides never compared equal and the
+match count was zero while every piece worked in isolation. The five claims that
+still match nothing need an identity the prose does not give, and stay out of
+scope until it does. Census 480 -> 481.
 
 ### Step 0609 - one claim mixed figures from both partitions, and
 each number looked plausible

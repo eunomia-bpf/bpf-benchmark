@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0610 completed the matcher: claims are resolved
+to harnesses by trying both partitions with
+normalised detector names. Six resolve uniquely and
+all six agree with source, including the three
+corrected in 0608-0609; five remain unmatched for
+lack of an identity in prose (census 480 -> 481).
+
+
 Step 0609 corrected two harness claims against
 source, one of which mixed figures from both
 partitions so each number looked plausible. The
