@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0675 joined shakes on the family word plus the
+size, since either alone is wrong, and found two more
+bad figures: the MOVBE paragraph said 170 for a
+114-row harness, CALL_MEMCPY said 154 for 153. Both
+confirmed at runtime (census 545 -> 546).
+
+
 Step 0674 joined the 15 shake claims to their
 harnesses by the module each paragraph names, which
 resolved 10 where the row count resolved 3, and found

@@ -846,33 +846,83 @@ def cited_specs(text: str) -> list[str]:
 
 def shake_field_gaps(
         text: str) -> tuple[int, list[tuple[int, str, list[str]]]]:
-    """`(claims, [(rows, harness, fields the harness never names)])`.
+    """`(claims, [(rows, spec, fields the harness never names)])`.
 
-    "The N-row shake exercised every spec field." The field claim is
-    checkable where the row count identifies exactly one harness: that
-    harness must name the spec's key or one of that field's values, because
-    the shakes edit the spec's text rather than parsing it.
+    "The N-row shake exercised every spec field." Each harness family opens
+    with "<arch> <family> mutation harness", and that opener is the
+    delimiter the prose uses -- several families share one blank-line
+    paragraph. The family word names the spec; the stated row count then
+    selects among specs in that family, because a block can also cite a
+    wider table (BZHI's cites X86Bitops).
     """
     import json
-    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text()).replace("\\brk", "")
     claims = [int(n) for n in re.findall(
         r"The (\d+)-row shake exercised every spec field", flat)]
     totals = harness_totals()
     here = pathlib.Path(__file__).parent
-    out = []
+    specs = {q.name[:-len("_spec.json")] for q in here.glob("*_spec.json")}
+    opens = [(m.start(), m.group(1)) for m in re.finditer(
+        r"(?:An? |The )([\w\-/\\ ]{2,40}?) mutation harness", flat)]
+    starts = [a for a, _ in opens]
+    blocks = [(f, flat[a:b]) for (a, f), b in
+              zip(opens, starts[1:] + [len(flat)])]
+    common = {"mem", "reg", "load", "arm", "width", "value"}
+
+    def family(spec):
+        return any(len(seg) >= 2 and seg not in common and seg in f.lower()
+                   for seg in spec.lower().split("_")[1:] for f in [])
+    out, seen = [], set()
     for n in claims:
-        names = [k for k, v in totals.items() if v == n]
-        if len(names) != 1:
+        cands = [f for f, blk in blocks if "%d-row shake" % n in blk]
+        # The sentence can sit in two overlapping blocks; it belongs to the
+        # one whose family has a member of exactly this size. Only if no
+        # block resolves it is the figure reported.
+        # Any block that resolves wins; a block whose family is prose
+        # ("x86 conditional-move") is only consulted if none resolves.
+        hit, unresolved = None, None
+        for fam in cands:
+            members = [s_ for s_ in specs if s_.startswith("x86_")
+                       and s_ != "x86_bitops"
+                       and any(len(seg) >= 2 and seg not in common
+                               and seg in fam.lower()
+                               for seg in s_.lower().split("_")[1:])]
+            exact = [s_ for s_ in members
+                     if totals.get("mut_" + s_) == n]
+            if len(exact) == 1:
+                hit = (fam, exact[0])
+                break
+            unresolved = unresolved or fam
+        if hit is None:
+            # The opener's family word is often prose or names a wider
+            # table; the size is then the only join, and it is used only
+            # when exactly one harness has that many rows.
+            exact = sorted(k[len("mut_"):] for k, v in totals.items()
+                           if v == n)
+            if len(exact) == 1 and exact[0] in specs:
+                hit = (cands[0] if cands else "?", exact[0])
+            elif exact:
+                continue      # ambiguous size, nothing to say
+            elif cands:
+                # No harness of this size anywhere: the figure is wrong.
+                hit = (cands[0], None)
+        if n in seen or hit is None:
             continue
-        # A shake whose count matches one harness is confirmed there; the
-        # field scan only runs once the harness is known.
-        h = names[0]
-        spec = here / (h[len("mut_"):] + "_spec.json")
-        if not spec.exists():
+        seen.add(n)
+        fam, spec = hit
+        if spec is None:
+            out.append((n, fam, ["no family member has this many rows"]))
             continue
+        h = "mut_" + spec
         src = (here / "build" / (h + ".py")).read_text(errors="ignore")
+        spath = here / (spec + "_spec.json")
+        if not spath.exists():
+            out.append((n, spec, ["no spec file"]))
+            continue
         gaps = []
-        for key, val in json.loads(spec.read_text()).items():
+        for key, val in json.loads(spath.read_text()).items():
             if key == "schema_version":
                 continue
             vals = re.findall(r'"([^"]{4,})"', json.dumps(val))
@@ -882,7 +932,7 @@ def shake_field_gaps(
                 continue
             gaps.append(key)
         if gaps:
-            out.append((n, h, gaps))
+            out.append((n, spec, gaps))
     return len(claims), out
 
 

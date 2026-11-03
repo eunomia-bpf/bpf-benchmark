@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 545, and 443 steps
+`build/mut_*.py` files exist, the counter's last value is 546, and 444 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0675 - a family word and a size, because either alone is
+wrong
+
+The shake check joined by size alone. It now joins on the family word that opens
+each block, because the row count is often shared: a hundred and seventy matched
+no harness at all, and a hundred and fifty-four matched two that were not the
+one the sentence described, so a size-only join either missed the error or
+reported a false one.
+
+The join needs both halves. The family word selects the specs that could be
+meant, and the size picks the member, because a block can also cite a wider
+table than its own family: BZHI's block names GeneratedX86Bitops, and a
+family-only join sent the BZHI shake to the bitops spec.
+
+Two defects fell out. The MOVBE paragraph said a hundred and seventy rows where
+its harness runs a hundred and fourteen, and the CALL_MEMCPY paragraph said a
+hundred and fifty-four where its harness runs a hundred and fifty-three. Both
+were confirmed at runtime, and both are now bound by the join. Census 545 ->
+546.
 
 ### Step 0674 - two of three mismatches were the window, and the
 third was the sentence
