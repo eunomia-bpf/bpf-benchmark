@@ -263,14 +263,27 @@ def image_pairs(block, name, gen_defs):
     figure is the number of such conjuncts, since a theorem that pinned one
     width and dropped the rest would still read as though it had pinned all.
     """
-    count = 0
+    widths, count = [], 0
     for part in conjuncts(statement(block, name)):
         if not MAP_IMAGE.search(part):
             continue
-        if any(re.search(r"\b" + re.escape(g) + r"\b", part)
-               for g in gen_defs):
-            count += 1
-    return count
+        if not any(re.search(r"\b" + re.escape(g) + r"\b", part)
+                   for g in gen_defs):
+            continue
+        literals = re.findall(r"\[[^\]]*\]", part)
+        lengths = [literal_length(part, part.index(l))
+                   for l in literals]
+        # A map over a literal compared to a literal of a different length is
+        # not the shape the sentence describes, and `= []` would satisfy a
+        # bare count while pinning nothing. Equal, non-empty sides make the
+        # conjunct say what the class claims it says.
+        if len(lengths) < 2 or len(set(lengths)) != 1 or not lengths[0]:
+            continue
+        widths.append(lengths[0])
+        count += 1
+    # The sentence says every such theorem pins all four widths, so the
+    # smallest width count is what that figure means.
+    return (count, min(widths)) if widths else (0, 0)
 
 
 def sweep_checks(block, name):
@@ -573,7 +586,7 @@ def scan_tree(root):
     visible = {s: set().union(*[gen_defs.get(i, set()) for i in imports[s]])
                if imports[s] else set() for s in imports}
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
-                "total": [], "derived": [], "unstated": []}
+                "width": [], "total": [], "derived": [], "unstated": []}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -627,8 +640,9 @@ def scan_tree(root):
                     counters["unstated"].append(m.group(1))
             image = image_pairs(block, m.group(1),
                                 visible.get(stem, set()))
-            if image:
-                counters["image"].append(image)
+            if image[0]:
+                counters["image"].append(image[0])
+                counters["width"].append(image[1])
         arch_mods[arch] += 1
         arch_thms[arch] += proved
 
@@ -682,6 +696,7 @@ def scan_tree(root):
         # The fourth shape the sentence's enumeration left outside itself: a
         # generated table's image at every width, pinned by a literal list.
         "images": len(counters["image"]),
+        "image_min_widths": min(counters["width"]) if counters["width"] else 0,
         # The nonmember arm of each dispatch contract is vacuous only because
         # its umbrella list covers every constructor, which the doc comment
         # asserted and nothing proved. Four `*_ops_total` theorems now do, and
@@ -775,6 +790,9 @@ CLAIMS = [
     # The fourth shape is bound for the same reason as the others: the
     # enumeration now names every form the rule finds.
     (re.compile(r'the (\d+) table-image theorems'), ("images",)),
+    (re.compile(r"pin a generated table's image over all (\d+) widths"),
+     ("image_min_widths",)),
+    (re.compile(r"keeps (\d+) nested gates"), ("image_min_widths",)),
     (re.compile(r'until (\d+) totality theorems'), ("ops_total",)),
     (re.compile(r'all (\d+) nonmember arms derive'), ("vacuous_derived",)),
     # The section opens by claiming the artifacts are paired one-to-one with

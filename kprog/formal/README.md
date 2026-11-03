@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 445, and 343 steps
+`build/mut_*.py` files exist, the counter's last value is 446, and 344 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0575 - the image rule accepted a map compared against no
+list at all
+
+The table-image rule from step 0571 counted a conjunct as soon as a `List.map`
+over a literal met a literal list, which two degenerate forms satisfy while
+pinning nothing: a right-hand `[]`, and a map compared against a list of a
+different length. The three theorems in the tree are neither, but the rule
+admitted them, so the count could have held while a theorem stopped saying
+anything.
+
+The rule now reads both literal lengths and requires them equal and non-empty.
+That also gives the sentence a figure it did not have: it says the theorems pin
+the image at all four widths, and four was prose. The width comes off the mapped
+literal, so the published figure is the smallest any member pins, and the two
+places the sentence states it are bound to the same measurement.
+
+Both are checked by drift: a five-width sentence, a five-gate sentence, and a
+spelled-out "four" are each reported. The spelled-out form matters because a
+numeral is what the pattern reads; writing the word would have retired the claim
+silently, the failure the presence guard reports. Census 445 -> 446.
 
 ### Step 0574 - a reverted vacuous proof moved no figure, so
 nothing reported it

@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0575 tightened the image rule: a right-hand []
+or an unequal-length list satisfied it while pinning
+nothing, so both sides must now be non-empty and
+equal. That length is also the sentence's four
+widths, previously prose, so both statements of it
+are bound (census 445 -> 446).
+
+
 Step 0574 guarded the derivation itself. Reverting an
 arm to simp_all moves no published figure, so nothing
 caught it; scan_tree now reports a nonmember theorem
