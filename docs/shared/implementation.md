@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0597 paired 306 modules with 2,065 theorems that
+came from two different traversals: the count is the
+gate's reachable closure, the theorems are every
+file. An unreachable module would be counted but
+never compiled; it now raises by name (census 467 ->
+468).
+
+
 Step 0596 bound the three choice figures as one
 population: 177 - 137 = 40, and the class bounds 40
 <= 825 and 137 <= 623. A one-theorem drift in any of

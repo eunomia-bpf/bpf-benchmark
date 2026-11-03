@@ -790,6 +790,12 @@ def scan_tree(root):
         "native_decide": native_decide,
         "native_modules": len(native_modules),
         "modules": len(seen),
+        # The paragraph pairs "306 modules that prove 2,065 theorems", and the
+        # theorem count iterates every file on disk while the module count is
+        # the gate's reachable closure. They agree only while every file is
+        # reachable, so an unreachable module would inflate the theorem figure
+        # with proofs the gate never compiles.
+        "unreachable": sorted(set(graph) - seen),
         "refines": refines,
         "refines_decided": refines_decided,
 
@@ -1221,6 +1227,12 @@ def check(targets, root):
             "check_lean_claims: %d kernel-only theorems draw on choice but "
             "the kernel-only class has %d"
             % (actual["ax_choice"], actual["ax_kernel"]))
+    if actual["unreachable"]:
+        raise SystemExit(
+            "check_lean_claims: %d module(s) are not reachable from the "
+            "gate's roots, so their theorems are counted but never compiled "
+            "-- %s" % (len(actual["unreachable"]),
+                       ", ".join(actual["unreachable"])))
     if ax_sum != actual["theorems"]:
         raise SystemExit(
             "check_lean_claims: the recorded axiom split sums to %d, the "

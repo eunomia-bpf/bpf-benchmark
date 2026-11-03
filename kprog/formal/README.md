@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 467, and 365 steps
+`build/mut_*.py` files exist, the counter's last value is 468, and 366 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0597 - the module count and the theorem count came from
+different traversals
+
+The paragraph pairs two figures in one clause: "306 Lean modules that prove
+2,065 theorems". The module count is the gate's reachable closure and the
+theorem count iterates every file on disk, so the pairing holds only while every
+file is reachable. Nothing checked that, and the two figures come from different
+traversals.
+
+An unreachable module is not a cosmetic problem here. Its theorems would be
+counted and published while the gate never compiles it, so the paper would claim
+more proved theorems than the gate proves, and every individual figure would
+still match. The check now reports any module outside the closure by name.
+
+Verified by planting one: a file with a single trivial theorem and no importer
+is reported as unreachable, and removing it clears the report. That is a
+stronger property than the file count matching, because it names which file and
+why, and it is free since the closure is already computed for the module figure.
+Census 467 -> 468.
 
 ### Step 0596 - the three choice figures were one population and
 nothing said so
