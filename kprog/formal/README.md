@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 515, and 413 steps
+`build/mut_*.py` files exist, the counter's last value is 516, and 414 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0645 - thirteen claims about whole-state comparison, and
+twenty-seven oracles that iterate
+
+Thirteen sentences claim an oracle compares the whole register file rather than
+the fields it drove, which is the strongest thing an oracle can be said to do:
+it rules out a comparison that would pass while other state was wrong. Whether a
+particular oracle does it is a reading of its source, but the claim population
+and the mechanism can both be counted.
+
+Thirteen claims against twenty-seven oracles that iterate every register,
+sixteen on AArch64 and eleven on x86 through the macro each architecture names.
+The claims are fewer than the oracles, which is what a set of specific sentences
+about specific contracts should look like; the check reports the pair and fails
+if the claims outgrow the oracles that could support them.
+
+It also fails if either number changes without the other, so a sentence added to
+this family and a macro removed from an oracle are both visible. That is the
+limit of automating this class: the pairing is countable, the reading is not.
+Census 515 -> 516.
 
 ### Step 0644 - the sentences that pair a size with a sweep
 

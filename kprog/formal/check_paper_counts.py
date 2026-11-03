@@ -365,6 +365,23 @@ def sweep_claims(text: str, counts: set[int]) -> tuple[int, list[int]]:
     return len(vals), sorted(v for v in vals if v not in counts)
 
 
+def whole_state_claims(text: str) -> tuple[int, int]:
+    """`(claims comparing the whole register file, oracles able to)`.
+
+    The claim is that an oracle compares all modelled state rather than the
+    fields it drove. Whether a given oracle does that is a reading of its
+    source; what can be counted is how many such claims the section makes
+    and how many oracles have the mechanism, so the sentences cannot grow
+    past the oracles that could support them.
+    """
+    claims = len(re.findall(r"compares the whole register file", text))
+    # The C oracles live in the directory this checker is in, not below it.
+    formal = pathlib.Path(__file__).resolve().parent
+    able = sum(1 for p in formal.glob("*.c")
+               if "FOR_EACH_GPR" in p.read_text(errors="ignore"))
+    return claims, able
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -492,6 +509,20 @@ def main() -> None:
         problems.append(
             "the section makes %d 256-sweep claims and 22 when this was "
             "written" % n_sweeps)
+    # Thirteen sentences say an oracle compares the whole register file
+    # rather than the fields it drove. Whether a given oracle does that is a
+    # reading; what can be counted is the claim population against the
+    # oracles that have the mechanism, so the sentences cannot grow past the
+    # oracles that could support them.
+    n_whole, n_able = whole_state_claims(text)
+    if n_whole > n_able:
+        problems.append(
+            "%d claim(s) compare the whole register file and %d oracle(s) "
+            "iterate all registers" % (n_whole, n_able))
+    if (n_whole, n_able) != (13, 27):
+        problems.append(
+            "whole-state claims are %d against %d oracles; 13 and 27 when "
+            "this was written" % (n_whole, n_able))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

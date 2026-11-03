@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0645 censused the whole-state claims: 13
+sentences say an oracle compares the whole register
+file, and 27 oracles iterate every register (16
+arm64, 11 x86). The claims may not outgrow the
+oracles, and either number changing is reported
+(census 515 -> 516).
+
+
 Step 0644 censused the 22 sentences that pair an
 oracle size with an exhaustive 256-value sweep. Every
 count is a banner; the census holds the population
