@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 524, and 422 steps
+`build/mut_*.py` files exist, the counter's last value is 525, and 423 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0654 - three dispatch figures described a gap the tree had
+since closed
+
+The dispatch paragraph gave three figures for the AArch64 chain: thirty-five
+families against twenty-five in the model, of which twelve were routed by the
+code and absent from it, and a correction admitting that only five of the twelve
+had an oracle driving them through the dispatcher while the other seven had
+model-side oracles only.
+
+The dispatch check measures thirty-five, twenty-four and eleven, and records all
+eleven with a live route host each: every one is driven through the dispatcher
+now. The paragraph described a state three of its figures no longer matched, and
+its correction described a gap that had since been closed, because the route
+hosts were written after the sentence was.
+
+All three figures are now bound to the phrase that carries them rather than to
+their bare value, because twenty-five appears elsewhere in the section and a
+presence test would pass while this sentence was wrong. That distinction
+mattered: reverting to the old numerals fails only once the numeral and its
+phrase are matched together. Census 524 -> 525.
 
 ### Step 0653 - four figures that only ever had to agree with the
 prose beside them

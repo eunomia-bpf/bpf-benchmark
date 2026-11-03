@@ -490,6 +490,25 @@ def sweep_products(text: str) -> list[tuple[int, int]]:
     return out
 
 
+def dispatch_split() -> tuple[int, int, int, int]:
+    """`(chain, modelled, gaps, gaps with a live route host)` for AArch64.
+
+    The section says the chain branches on thirty-five families against
+    twenty-four in the model, eleven absent, and that all eleven are now
+    driven through the dispatcher. Each figure comes from the dispatch
+    check, so the sentence cannot describe a gap the check has since closed.
+    """
+    import check_dispatch_model as dm
+    cfg = dm.ISA["arm64"]
+    chain = dm.chain_macros(cfg["header"])
+    spec = dm.spec_bindings("arm64")
+    defined, applied = dm.modelled_names(cfg["lean"])
+    gaps = [m for m in chain
+            if dm.why_unmodelled(m, spec, defined, applied)]
+    return (len(chain), len(chain) - len(gaps), len(gaps),
+            len(dm.A64_UNMODELLED))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -732,6 +751,37 @@ def main() -> None:
         problems.append(
             "the stated kinds sum to %d and the stated total is %d"
             % (said[6], said[7]))
+    # The dispatch split pairs four figures that must agree: the chain's
+    # predicates, the modelled ones, the gap, and the recorded set that must
+    # be exactly the gap. The section states all four.
+    chain, modelled, gaps, recorded = dispatch_split()
+    if recorded != gaps:
+        problems.append(
+            "the recorded unmodelled set has %d entries and the gap is %d"
+            % (recorded, gaps))
+    def spelled(n: int) -> str:
+        ones = ("zero one two three four five six seven eight nine ten "
+                "eleven twelve thirteen fourteen fifteen sixteen seventeen "
+                "eighteen nineteen").split()
+        if n < 20:
+            return ones[n]
+        tens = {2: "twenty", 3: "thirty", 4: "forty", 5: "fifty"}
+        if n % 10 == 0:
+            return tens[n // 10]
+        return "%s-%s" % (tens[n // 10], ones[n % 10])
+
+    # Each figure is bound to the phrase that carries it, so a numeral that
+    # drifts to another value present elsewhere in the section is still
+    # caught. The section spells them, so the words are what is matched.
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    for fig, phrase in (
+            (chain, r"%s families"),
+            (modelled, r"%s in the model"),
+            (gaps, r"%s of which are routed")):
+        if not re.search(phrase % re.escape(spelled(fig)), flat):
+            problems.append(
+                "the dispatch check measures %d and the section does not "
+                "say so beside its phrase" % fig)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

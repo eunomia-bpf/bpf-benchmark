@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0654 corrected the dispatch paragraph: the chain
+has 35 families against 24 modelled, 11 absent, and
+all 11 are now driven through the dispatcher, not 5.
+Each figure is bound to its phrase, since a bare
+numeral can drift to one used elsewhere (census 524
+-> 525).
+
+
 Step 0653 held the shape split's four figures
 together: an unstated count cannot exceed its 61- or
 104-proof group, and the 2 proofs reverting recovers
