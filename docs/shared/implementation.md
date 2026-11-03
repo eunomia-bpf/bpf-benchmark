@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0607 gave the census a Step index, since the
+paper names contracts not scripts: 218 of 330
+harnesses cite their Step in the docstring, so a
+claim can now be matched by identity rather than by
+coincidental row total. A stale .pyc had corrupted
+one reading (census 477 -> 478).
+
+
 Step 0606 explained step 0605's mismatches: the
 breakdown counts rows by declared detector, the catch
 figure counts non-equivalent rows, so both are right

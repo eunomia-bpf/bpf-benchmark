@@ -20,6 +20,7 @@ import ast
 import collections
 import glob
 import os
+import re
 import sys
 
 DETECTORS = ("gen", "lean_chain", "host", "routed", "app")
@@ -59,6 +60,19 @@ def rows(path):
             equiv = isinstance(last, ast.Constant) and last.value is True
             out.append((getattr(row.elts[0], "value", "?"), det, equiv))
     return out
+
+
+def step_of(path):
+    """The Step number a harness's docstring cites, or `None`.
+
+    The paper names contracts, never scripts, so a claim and its harness can
+    only be matched through the Step both cite. Most harnesses carry one in
+    the module docstring; the rest need an explicit index before their
+    figures can be checked from source.
+    """
+    doc = ast.get_docstring(ast.parse(open(path, errors="ignore").read())) or ""
+    hit = re.search(r"Step (\d{4})", doc)
+    return hit.group(1) if hit else None
 
 
 def census(path):
@@ -103,8 +117,9 @@ def main(argv):
         everything = collections.Counter(d for _, d, _ in row_list)
         split = " ".join("%s=%d" % (d, everything[d]) for d in DETECTORS
                          if everything[d])
-        print("%-30s rows=%3d catch=%3d equiv=%3d | by row %s"
-              % (os.path.basename(path), total, caught, equiv, split))
+        print("%-30s step=%s rows=%3d catch=%3d equiv=%3d | by row %s"
+              % (os.path.basename(path), step_of(path) or "-", total, caught,
+                 equiv, split))
     if unread:
         print("\n%d harness(es) expose no row table: %s"
               % (len(unread), ", ".join(unread[:6])))
@@ -112,4 +127,8 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    # No bytecode cache: a stale one made this script print a harness's split
+    # as 29/17/11 while the source said 30/17/12, which is worse than no
+    # census at all because the wrong numbers look reproducible.
+    sys.dont_write_bytecode = True
     sys.exit(main(sys.argv))

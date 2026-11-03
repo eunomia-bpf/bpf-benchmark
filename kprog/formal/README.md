@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 477, and 375 steps
+`build/mut_*.py` files exist, the counter's last value is 478, and 376 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0607 - the census could count rows but not say whose
+rows they were
+
+The census could count a harness's rows but had no way to say which harness a
+claim means. The paper never names a script: its harness paragraphs describe
+contracts, so a claim and its harness share only the Step number. Most harnesses
+cite one in their module docstring, and the census now reads it, which turns a
+guess from a row total into a lookup.
+
+That mattered immediately. Matching by row total had been unreliable, because
+several harnesses share one: the 61-row claim matched three different scripts
+and none of them had its numbers. With the Step index the claim can name its
+harness, and the numbers can be compared exactly instead of by coincidence.
+
+The reader also needed an audit: it printed one harness's split as 29/17/11
+while the source said 30/17/12, and the difference was a stale bytecode cache
+rather than a bug, which the tool now reproduces correctly after clearing it. A
+census whose output depends on a cache is worse than no census, so the run
+clears it first. Census 477 -> 478.
 
 ### Step 0606 - the mismatches were a counting convention nobody
 had written down
