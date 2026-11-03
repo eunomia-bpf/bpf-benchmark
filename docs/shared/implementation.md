@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0594 measured Classical.choice across the tree:
+177 theorems draw on it, 137 of which also assume the
+compiler, so the sentence's 40 was correct only for
+the kernel-only class and now says so. Also
+disambiguated the two senses of 'axiom' two
+paragraphs apart (census 464 -> 465).
+
+
 Step 0593 enforced the axiom partition: the four
 recorded figures must sum to the theorem count, so a
 tree change that outruns the sweep fails by name. 'A

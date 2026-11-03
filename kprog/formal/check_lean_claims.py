@@ -859,6 +859,8 @@ def scan_tree(root):
         "ax_orb": 623,
         "ax_kernel": 825,
         "ax_choice": 40,
+        "ax_choice_all": 177,
+        "ax_choice_both": 137,
         # The share is derived, floored like every other share here, so the
         # sentence cannot round 2065-partitioning counts up to "a third".
         "ax_share": 100 * 623 // 2065,
@@ -1024,10 +1026,12 @@ CLAIMS = [
     # The tree divides three ways under #print axioms, measured over all 2065
     # theorems: axiom-free, compiler-assuming, and axiomatic-but-kernel-only.
     # The section states the split, so all three are bound.
-    (re.compile(r'(\d+) theorems depend on no axiom at\s+all, '
-                r'(\d+) reach'), ("ax_none", "ax_orb")),
+    (re.compile(r'(\d+) theorems depend on none at\s+all,\s+(\d+) reach'),
+     ("ax_none", "ax_orb")),
     (re.compile(r'remaining (\d+) use only'), ("ax_kernel",)),
-    (re.compile(r'with (\d+) of them also drawing'), ("ax_choice",)),
+    (re.compile(r'with (\d+) of those also drawing'), ("ax_choice",)),
+    (re.compile(r'gives (\d+), since (\d+) of the'), ("ax_choice_all",
+                                                       "ax_choice_both")),
     (re.compile(r'therefore covers (\d+)\\% of the'), ("ax_share",)),
     (re.compile(r'constants run from (\d+) to (\d+)'),
      ("table_min_count", "table_max_count")),

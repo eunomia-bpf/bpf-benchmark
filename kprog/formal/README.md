@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 464, and 362 steps
+`build/mut_*.py` files exist, the counter's last value is 465, and 363 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0594 - the choice figure held for one class and read as
+the whole tree
+
+The three-way split says 40 theorems draw on Classical.choice. Measuring every
+theorem that does, regardless of class, gives 177, of which 137 also reach
+Lean.ofReduceBool. Both numbers are correct and they measure different things:
+40 is the choice population inside the kernel-only 825, 177 is the population
+across the whole tree.
+
+The sentence only supported the first reading, because it sat inside the
+enumeration of the 825. A reader who counted choice theorems would find 177 and
+could not reconcile it, so the sentence now states both and says what each
+counts. That also makes the stronger assumption visible where it actually is:
+choice appears mostly in the compiler-assuming arithmetic, not in the
+kernel-only definitional residue.
+
+One wording fix went with it. The split's first clause read "617 theorems depend
+on no axiom at all", and the next paragraph asserts "no axiom" of the whole tree
+while meaning no axiom declaration, so the two sentences used the same phrase
+for different measurements two paragraphs apart. The clause now reads "depend on
+none at all", which cannot be read as the declaration-level claim.
+Census 464 -> 465.
 
 ### Step 0593 - the axiom split was four constants that nothing
 tied to the tree
