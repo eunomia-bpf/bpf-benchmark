@@ -382,6 +382,23 @@ def whole_state_claims(text: str) -> tuple[int, int]:
     return claims, able
 
 
+def reviewed_exceptions() -> int:
+    """How many oracle exceptions the composition check accepts, with a why.
+
+    The section says the check fails when a new unwired oracle appears and
+    "reviews four exceptions". A fifth accepted entry, or a dropped one,
+    would leave the sentence quoting a number the check no longer holds.
+    """
+    import ast
+    src = pathlib.Path(__file__).with_name(
+        "check_oracle_composition.py").read_text()
+    for node in ast.walk(ast.parse(src)):
+        if (isinstance(node, ast.Assign) and node.targets
+                and getattr(node.targets[0], "id", "") == "ACCEPTED"):
+            return len(node.value.keys)
+    raise SystemExit("check_paper_counts: no ACCEPTED in the checker")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -523,6 +540,15 @@ def main() -> None:
         problems.append(
             "whole-state claims are %d against %d oracles; 13 and 27 when "
             "this was written" % (n_whole, n_able))
+    # The section discloses that the composition check "reviews four
+    # exceptions". A fifth accepted entry, or a dropped one, would leave the
+    # sentence quoting a number the check no longer holds.
+    n_exc = reviewed_exceptions()
+    spelled = ("zero one two three four five six seven eight nine".split())
+    if ("reviewing %s exceptions" % spelled[n_exc]) not in text:
+        problems.append(
+            "the composition check accepts %d exceptions; the section does "
+            "not say so" % n_exc)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

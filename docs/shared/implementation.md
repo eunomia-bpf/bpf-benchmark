@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0646 disclosed what the composition check
+actually accepts: it flags a proxy, and four oracles
+are reviewed exceptions that each name a covering
+oracle. The paper said none of this; the number is
+now bound to the check's accepted set (census 516 ->
+517).
+
+
 Step 0645 censused the whole-state claims: 13
 sentences say an oracle compares the whole register
 file, and 27 oracles iterate every register (16

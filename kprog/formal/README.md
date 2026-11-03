@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 516, and 414 steps
+`build/mut_*.py` files exist, the counter's last value is 517, and 415 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0646 - the check is a proxy, and four oracles are
+exceptions it accepts
+
+The section says every family the chain routes is driven by an oracle that
+includes the simulator header, and that a check measures the gap. The check is
+real and its scope is narrower than the sentence: it flags an oracle that
+includes a simulator header and calls a contract macro without ever driving the
+composition, which is a proxy for driving the simulator and not a proof that it
+did.
+
+Four oracles are accepted as exceptions, each with a stated reason and each
+naming the oracle that covers the path it leaves out: a cross-ISA differential
+that compares contracts to each other by design, a wide-arithmetic oracle the
+simulator cannot use, one that reads only the decode table, and one that calls
+three lane decoders directly.
+
+The section did not say so, which read as though the check were airtight. It now
+discloses that the check reviews four exceptions, and the number is bound to the
+check's own accepted set, so a fifth entry fails the paper check until the
+sentence that describes it catches up. Census 516 -> 517.
 
 ### Step 0645 - thirteen claims about whole-state comparison, and
 twenty-seven oracles that iterate
