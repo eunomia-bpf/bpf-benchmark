@@ -659,6 +659,34 @@ def named_instructions() -> list[str]:
             if not re.search(r"\b" + re.escape(n) + r"\b", src, re.I)]
 
 
+WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve "
+    "thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty "
+    "twenty-one twenty-two twenty-three twenty-four twenty-five".split())}
+
+
+def binding_mutations(text: str) -> list[tuple[int, int]]:
+    """`[(stated total, sum of the stated parts)]` for binding mutations.
+
+    The sentence gives a total and then splits it by the kind of change:
+    seven routing distortions, six generated-C ones, one shared
+    specification, three Lean spec changes. The parts are the claim, so they
+    must reach the total -- nineteen against seventeen was the defect.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    pat = (r"(\w+(?:-\w+)?) binding mutations---"
+           r"(\w+(?:-\w+)?) simulator-header routing distortions"
+           r".*?(\w+(?:-\w+)?) generated-C ones, "
+           r"(\w+(?:-\w+)?) shared-specification change, and "
+           r"(\w+(?:-\w+)?) generated-Lean independent-spec changes")
+    out = []
+    for tot, a, b, c, d in re.findall(pat, flat):
+        if tot in WORDS:
+            out.append((WORDS[tot],
+                        WORDS[a] + WORDS[b] + WORDS[c] + WORDS[d]))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1025,6 +1053,19 @@ def main() -> None:
         problems.append(
             "the section presents %s as an instruction and the tree has no "
             "such name" % name)
+    # A binding-mutation sentence gives a total and splits it by the kind
+    # of change. The parts must reach the total -- one said nineteen against
+    # parts summing to seventeen.
+    parts = binding_mutations(text)
+    if len(parts) != 3:
+        problems.append(
+            "the section states %d binding-mutation splits; 3 when this "
+            "was written" % len(parts))
+    for total, summed in parts:
+        if total != summed:
+            problems.append(
+                "a binding-mutation sentence states %d and its parts sum to "
+                "%d" % (total, summed))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

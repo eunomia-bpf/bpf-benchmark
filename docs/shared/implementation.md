@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0665 found a binding-mutation total two off its
+own parts: nineteen stated against 7+6+1+3 = 17. All
+three such sentences now require their parts to reach
+the total (census 535 -> 536).
+
+
 Step 0664 required the 14 instruction names the prose
 presents as arms or opcodes to exist in the tree. All
 do, but only once the search included Python, where

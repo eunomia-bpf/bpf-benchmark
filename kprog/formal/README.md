@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 535, and 433 steps
+`build/mut_*.py` files exist, the counter's last value is 536, and 434 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0665 - a part count two off its own total, in the tier that
+was called qualitative
+
+Three sentences state a number of binding mutations and then split it by the
+kind of change: some simulator-header routing distortions, some generated-C
+changes, one shared specification, and some Lean spec changes. The parts are the
+claim, so they have to reach the total.
+
+Two did. The third said nineteen while its own parts enumerated seven, six, one
+and three, which is seventeen, and the seven was not an estimate: the
+parenthetical listed the selectors, both wrapper opcode tags and both dispatcher
+arms, which is exactly seven. The sentence was two off against its own
+arithmetic.
+
+The parts are now required to sum to the total for all three, so a total that
+drifts is reported with both numbers. This is the first defect found in the
+qualitative tier that was arithmetic rather than a stale measurement, and it
+took reading a sentence rather than its figure to see. Census 535 -> 536.
 
 ### Step 0664 - fourteen instruction names, and the one that lives
 in a battery
