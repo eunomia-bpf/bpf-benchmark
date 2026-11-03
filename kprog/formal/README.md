@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 527, and 425 steps
+`build/mut_*.py` files exist, the counter's last value is 528, and 426 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0657 - the header claim is in the clause, and six sentences
+were read across the break
+
+Thirty-four sentences say an oracle includes the simulator header, naming
+thirty-six oracles between them. The claim is a property of one line in one
+file, and the oracle that prints the banner is the oracle the figure belongs to,
+so both halves are in the tree.
+
+All thirty-six do include one. The first pass reported six that did not, and all
+six were a reading error: the pattern ran past a sentence break into a later
+clause that mentions the header without claiming this oracle includes it. A
+contract host that drives generated macros, followed by a clause about static
+asserts in the simulator header, is not a claim about its own includes.
+
+The phrase now has to sit in the same clause as the count, with no second host
+or oracle in between, and the count of named oracles is held at thirty-six so a
+sentence added to the family is visible. Census 527 -> 528.
 
 ### Step 0656 - twenty named bodies, and the one that is an opcode
 rather than a macro

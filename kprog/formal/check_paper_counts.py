@@ -533,6 +533,32 @@ def driven_bodies() -> list[str]:
     return out
 
 
+def header_claim_oracles(log: pathlib.Path) -> list[str]:
+    """Oracles named by "N-case ... includes the simulator header".
+
+    The phrase must sit in the same clause as the count: a later clause can
+    mention the header without claiming the oracle includes it, and matching
+    across the sentence break turned six correct sentences into findings.
+    """
+    text = log.read_text(errors="ignore")
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text()).replace("\\brk", "")
+    pat = (r"(\d[\d,{}]*)-case (?:[\w-]+ )?(?:host|oracle)"
+           r"[^.;]{0,120}?includes the simulator header")
+    claims = {int(re.sub(r"[{},]", "", c)) for c in re.findall(pat, flat)}
+    cur, out = None, set()
+    for line in text.splitlines():
+        m = re.match(r"^\./build/(\S+)$", line)
+        if m:
+            cur = m.group(1)
+            continue
+        m = re.search(r"OK \((\d[\d,]*) cases\)", line)
+        if m and cur and int(m.group(1).replace(",", "")) in claims:
+            out.add(cur)
+    return sorted(out)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -814,6 +840,25 @@ def main() -> None:
         problems.append(
             "%d named bodies are driven nowhere in the tree: %s"
             % (len(dangling), dangling))
+    # Every oracle named by "N-case ... includes the simulator header" must
+    # actually include one. The clause boundary matters: a later clause can
+    # mention the header without claiming this oracle includes it.
+    named = header_claim_oracles(pathlib.Path(args.log))
+    if len(named) != 36:
+        problems.append(
+            "%d oracles are named by a header-inclusion claim; 36 when this "
+            "was written" % len(named))
+    for binary in named:
+        src = pathlib.Path(binary if binary.endswith(".c") else binary + ".c")
+        if not src.exists():
+            src = pathlib.Path("build") / src.name
+        if not src.exists():
+            problems.append("%s has no source" % binary)
+        elif not re.search(r'#include\s+"[^"]*sim[^"]*\.h"',
+                           src.read_text(errors="ignore")):
+            problems.append(
+                "%s is named as including the simulator header and does not"
+                % binary)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

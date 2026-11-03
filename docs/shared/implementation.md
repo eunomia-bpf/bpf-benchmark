@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0657 bound the 34 header-inclusion sentences to
+their 36 oracles: every named oracle includes a
+simulator header. Six were first read across a
+sentence break, so the phrase must now sit in the
+same clause as its count (census 527 -> 528).
+
+
 Step 0656 bound the 20 bodies the section says an
 oracle drives the real code of. Each must resolve to
 a simulator macro or an arm an oracle spells out; all
