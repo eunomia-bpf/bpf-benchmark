@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 498, and 396 steps
+`build/mut_*.py` files exist, the counter's last value is 499, and 397 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0628 - the chain has an end the tree can confirm
+
+The growth chain has an end the tree can confirm. The section states a hundred
+and twelve as the tenth detector's stage, and the harness that grew through all
+of these now has a hundred and sixteen rows, which is one more four-mutant step.
+So the chain is anchored at both ends: arithmetic inside it and a real harness
+size at the finish.
+
+That converts three unverifiable figures into a sequence whose every value is
+constrained. A uniform shift of all the stages still passes, since only their
+differences and the endpoint are fixed, but any stage renumbered on its own, any
+stage dropped, or any change to the harness's size now fails, and the failure
+names the positions found.
+
+The exempt set also stops being a literal list: it is derived from the chain, so
+renumbering a stage cannot leave a stale exception behind while the value it
+used to excuse is still excused. Census 498 -> 499.
 
 ### Step 0627 - the three exempt totals are one chain, and 104 was
 already stated

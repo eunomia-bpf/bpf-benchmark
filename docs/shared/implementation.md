@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0628 anchored the growth chain at both ends: 112
+is its last stated stage and the harness now has 116
+rows, one 4-mutant step further. Every stage is
+constrained, and the exempt set derives from the
+chain (census 498 -> 499).
+
+
 Step 0627 found the exempt totals form a chain
 96/100/104/108 advancing by four, with 104 stated as
 its own stage. Presence alone was too weak since 104

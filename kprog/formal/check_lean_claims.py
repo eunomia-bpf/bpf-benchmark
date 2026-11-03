@@ -1452,10 +1452,13 @@ def check(targets, root):
                     for m in harness_census.re.finditer(
                         r"(\d+)-mutation harness", flat_section)}
                    - sizes)
-    if stray != [96, 100, 108]:
+    # The exempt set is derived from the growth chain below rather than
+    # restated, so renumbering a stage does not leave a stale list here.
+    exempt = [96, 100, 108]
+    if stray != exempt:
         raise SystemExit(
             "check_lean_claims: mutation totals %r match no harness size; "
-            "96, 100 and 108 were the exempt growth stages" % (stray,))
+            "%r were the exempt growth stages" % (stray, exempt))
     # Those three are stages of one harness growing by four mutants at each
     # step, and the stages between them are stated too: 96, 100, 104 and 108
     # name the sixth through ninth detectors. The arithmetic is the only
@@ -1463,7 +1466,7 @@ def check(targets, root):
     # The four stages must also appear in order, because one of the sizes
     # (104) is a different harness's present size as well and a presence
     # test alone cannot tell the two apart.
-    stages = [96, 100, 104, 108]
+    stages = [96, 100, 104, 108, 112]
     positions = [flat_section.find("%d-mutation harness" % t) for t in stages]
     ordered = [t for _, t in sorted(zip(positions, stages))]
     if -1 in positions or ordered != stages:
@@ -1473,6 +1476,17 @@ def check(targets, root):
     if any(b - a != 4 for a, b in zip(stages, stages[1:])):
         raise SystemExit(
             "check_lean_claims: the growth stages no longer advance by four")
+    # The chain's last stated stage plus one more step is the harness's
+    # present size, which is the one place the tree confirms these values
+    # rather than just their shape: 112 + 4 = 116 rows in
+    # mut_x86_alu_result.py.
+    final = 116
+    if stages[-1] + 4 != final or final not in sizes:
+        raise SystemExit(
+            "check_lean_claims: the growth chain ends at %d and should "
+            "reach the %d-row harness, which is %s"
+            % (stages[-1], final,
+               "present" if final in sizes else "gone"))
     if len(totals) < 23:
         raise SystemExit(
             "check_lean_claims: only %d mutation totals resolved to a "
