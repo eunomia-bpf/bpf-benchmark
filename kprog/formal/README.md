@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 482, and 380 steps
+`build/mut_*.py` files exist, the counter's last value is 483, and 381 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0612 - the totals were right and four rows were on the
+wrong side of the line
+
+The extract/reverse harness states 132 mutations, and the harness marks 4 of
+them equivalent, so 128 catch. The sentence said 124 catch and 8 surviving,
+splitting the 8 into 4 genuine equivalences and 4 detector-invisible rows. That
+last clause was the error: the four rows it listed as survivors are marked
+equivalent=False in the harness, so the harness expects them to catch, and the
+paper was reporting them as surviving while counting the same total.
+
+This is a different kind of defect from the earlier wrong counts. Those had
+figures that no reading of the harness produced; here both totals were right,
+132 rows, and the disagreement was about which side of the line four specific
+rows fell on. Only reading the harness's own equivalent flags settles it, which
+is what the census does.
+
+The sentence now gives the harness's split and names the four equivalences, and
+the claim matches its harness under the caught partition. That makes nine claims
+resolving uniquely to a harness, all nine agreeing with source. Two remain
+unmatched, both naming mutation totals the tree does not have. Census 482 ->
+483.
 
 ### Step 0611 - two of the three stage counts agreed, which is why
 the claim read as checked

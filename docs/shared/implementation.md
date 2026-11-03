@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0612 fixed a different kind of defect: the
+extrev claim's totals were right but four rows it
+called survivors are equivalent=False in the harness.
+Corrected to 128 catch / 4 survive; nine claims now
+match source and agree (census 482 -> 483).
+
+
 Step 0611 corrected the bitfield harness claim: 92
 catch and 12 surviving, not 94 and 10, with host 29
 not 31. Three figures were wrong while two agreed,
