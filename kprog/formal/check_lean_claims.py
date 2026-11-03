@@ -703,25 +703,30 @@ def tag_isolation(root):
             len(re.findall(r"ARM64_SIM_TAG_", x86)), tagged)
 
 
-def tag_slot_bound(root):
-    """`(slots is a round-up of bytes by 8, the refining theorem exists)`.
+def proved_bound_citations(root):
+    """`[(macro, cited module, the module names a refining theorem)]`.
 
-    The AArch64 tag array's guard says in the simulator header that
-    `KPROG_ARM64_STACK_TAG_SLOT_FITS` is "the generated, proved bound
-    (Arm64StackArena.lean)": one byte per word slot, and a refinement
-    theorem tying the generated test to an independent statement. A header
-    can cite a theorem that has been renamed or deleted, and nothing else
-    reads the citation.
+    Each simulator guard says in the header that its macro "is the generated,
+    proved bound (<Module>.lean)". A header can cite a module that no longer
+    states a refinement for that macro, and nothing in the build reads a
+    comment. The theorem name is not given, so the module is required to
+    carry a `<something>_refines` theorem whose name derives from the macro.
     """
     base = pathlib.Path(root).resolve().parent
-    header = (base / "formal" / "generated" / "arm64_stack_arena.h").read_text()
-    lean = (base / "formal" / "KProgFormal" / "Arm64StackArena.lean").read_text()
-    slots = re.search(
-        r"#define KPROG_ARM64_STACK_TAG_SLOTS\(CAPACITY\) \\\n([^\n]*)",
-        header)
-    rounds = slots is not None and "7U) / 8U" in slots.group(1)
-    proved = "theorem arm64_stack_arena_tag_slot_fits_refines" in lean
-    return rounds, proved
+    out = []
+    for name in ("arm64/arm64_sim_local_bpf.h", "x86/x86_sim_local_bpf.h"):
+        text = (base / name).read_text()
+        # The sentence wraps inside the C comment, so the phrase is matched
+        # across the comment's leading asterisks rather than on one line.
+        for hit in re.finditer(
+                r"`(KPROG_[A-Z0-9_]+)` is the generated,?\s*(?:\n\s*\*\s*)?"
+                r"proved bound\s*(?:\n\s*\*\s*)?"
+                r"\(([A-Za-z0-9_]+)\.lean\)", text):
+            macro, module = hit.group(1), hit.group(2)
+            lean = base / "formal" / "KProgFormal" / ("%s.lean" % module)
+            stated = lean.exists() and "_refines " in lean.read_text()
+            out.append((macro, module, stated))
+    return out
 
 
 def scan_tree(root):
@@ -1635,14 +1640,13 @@ def check(targets, root):
     # The simulator header cites a theorem by name, and nothing else reads
     # that citation: a rename in the Lean module would leave the comment
     # pointing at a theorem that no longer exists.
-    rounds, cited = tag_slot_bound(root)
-    if not (rounds and cited):
+    cites = proved_bound_citations(root)
+    if len(cites) != 3 or not all(stated for _, _, stated in cites):
         raise SystemExit(
-            "check_lean_claims: the tag-slot bound is %s as a round-up of "
-            "bytes by 8 and its refinement theorem is %s present; the "
-            "header cites it"
-            % ("still" if rounds else "no longer", "still" if cited
-               else "no longer"))
+            "check_lean_claims: the headers cite %d proved bounds and %d of "
+            "their modules state a refinement -- %r; three guards cited one "
+            "when this was written"
+            % (len(cites), sum(1 for _, _, ok in cites if ok), cites))
     if (shared_tags, divergent, arm_only) != (7, [7], [8]):
         raise SystemExit(
             "check_lean_claims: the tag vocabularies are now %d shared, "

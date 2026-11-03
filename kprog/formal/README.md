@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 506, and 404 steps
+`build/mut_*.py` files exist, the counter's last value is 507, and 405 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0636 - one citation was checked and the class has three
+
+The previous step followed one citation from a simulator header into the proof
+tree. Censusing the class finds three: the AArch64 window guard, the AArch64
+tag-array guard, and the x86 window guard each say their macro is the generated,
+proved bound of a named module. Two of the three had no reader.
+
+All three resolve. The check reads each citation, finds the module it names, and
+requires that module to still carry a refinement theorem; a rename in the proof
+tree that left the comment pointing at nothing is reported. The phrase wraps
+inside the C comment at two different points in the two headers, which is why
+the pattern had to tolerate a line break on either side of the bound.
+
+The census part is the increment: one citation was checked because one was read,
+and the class has three. That is the same shape as the figure work — the
+individual check was right and the population was never counted. Census 506 ->
+507.
 
 ### Step 0635 - a header comment cites a theorem, and nothing read
 the citation

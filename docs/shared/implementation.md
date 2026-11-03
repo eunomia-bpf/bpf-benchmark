@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0636 censused the citation class and found
+three, not one: the two AArch64 stack guards and the
+x86 window guard each cite a proved bound. All three
+now compared to their module, with the phrase matched
+across the comment's line breaks (census 506 -> 507).
+
+
 Step 0635 followed a citation from the simulator
 header into the proof tree: the tag-slot guard names
 its refinement theorem, and both the citation and the
