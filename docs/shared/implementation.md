@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0589 measured the axiom footprint with #print
+axioms: only 69 of the 165 bv_decide proofs reach
+Lean.ofReduceBool, and 96 close by kernel-checked
+reflection alone. The blanket 'trusted the same way'
+claim was wrong for 59% of them (census 459 -> 460).
+
+
 Step 0588 classified every failure by error text: 58
 of 61 and 103 of 104 cannot state the goal, and none
 of the 165 is stated then fails, so the cases-split

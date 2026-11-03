@@ -852,6 +852,9 @@ def scan_tree(root):
         # Recorded sweep outputs: the failure mode of each group.
         "unstated_cases": 58,
         "unstated_direct": 103,
+        # Recorded #print axioms results over the 165 bv_decide proofs.
+        "orb_reach": 69,
+        "orb_kernel": 96,
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
@@ -937,6 +940,12 @@ CLAIMS = [
     # The paragraph said bv_decide closes most value and flag identities.
     # Measuring by statement shape gives a quarter, so the sentence states the
     # share and the split instead of a direction.
+    # The axiom footprint decides whether a closed goal is trusted like
+    # native_decide's. Measured per theorem: 69 of the 165 bv_decide proofs
+    # reach Lean.ofReduceBool and 96 do not, so the blanket claim was wrong.
+    (re.compile(r'(\d+) of the (\d+) proofs reach'),
+     ("orb_reach", "bv_total")),
+    (re.compile(r'the other (\d+) discharge entirely'), ("orb_kernel",)),
     (re.compile(r'Of the (\d+) theorems\s+stating an equality'),
      ("ident_total",)),
     (re.compile(r'binders, (\d+) are closed by'), ("ident_bv",)),

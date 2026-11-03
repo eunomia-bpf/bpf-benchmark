@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 459, and 357 steps
+`build/mut_*.py` files exist, the counter's last value is 460, and 358 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0589 - only 69 of the 165 bv_decide proofs reach the
+axiom the paragraph named for all of them
+
+The paragraph said bv_decide "lowers the goal to a bit-vector problem, evaluates
+it, and admits the verdict through Lean.ofReduceBool, the axiom native_decide
+also reaches". The inference drawn from that — that a bv_decide evaluation is
+trusted "in the same way" — holds only if every bv_decide proof reaches the
+axiom, so the footprint was measured with #print axioms.
+
+It does not. Of the 165 bv_decide proofs, 69 depend on Lean.ofReduceBool and 96
+depend only on propext, Quot.sound, and sometimes Classical.choice. The 96 close
+by kernel-checked reflection: the goal reduces to a literal equality the kernel
+verifies itself, with no compiler-produced verdict in the chain.
+`arm64_stack_arena_word_index_refines` is the smallest example — it depends on
+propext and Quot.sound and nothing else.
+
+That makes the trust story sharper rather than weaker: bv_decide can discharge
+an open-ended identity either with the compiler in the loop or without it, and
+which one happened is recorded per theorem. The blanket claim was the only part
+that could not distinguish them, so the sentence now gives the split and says
+the footprint decides. Census 459 -> 460.
 
 ### Step 0588 - the split predicted two failure modes and the tree
 has one
