@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 485, and 383 steps
+`build/mut_*.py` files exist, the counter's last value is 486, and 384 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0615 - the census guessed at labels it did not recognise,
+and guessed wrong
+
+The census folded every detector whose name it did not recognise into the host
+bucket, which made a routed oracle indistinguishable from the host oracle in
+both directions. A claim naming both then could never match its harness, because
+the claim kept them apart and the tool did not.
+
+The auxiliary harness is where that showed: 9 host rows and 30 route rows catch,
+and the sentence names both counts. With route folded into host the tool saw 39,
+so the paper's 9 and 30 read as two wrong figures rather than the two right ones
+they are. Route is now its own bucket on both the harness and the claim side.
+
+Two normalisation gaps in a row, after the tuple arity, and both produced
+plausible output rather than an error: a tool that guesses at unrecognised
+labels will always report a figure, and the figure will look like a measurement.
+The counts now reconcile exactly for all ten claims that resolve to a harness.
+Census 485 -> 486.
 
 ### Step 0614 - one claim had been made worse by trusting the
 broken reader

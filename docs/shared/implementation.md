@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0615 gave the census a route bucket: folding
+routed oracles into host made claims naming both
+unmatchable, which is why the 87-catch figure looked
+wrong. With arity and labels both right, all ten
+matched claims reconcile exactly (census 485 -> 486).
+
+
 Step 0614 re-checked every harness claim touched in
 the last five steps against the fixed reader. The
 auxiliary claim had been made worse by an earlier

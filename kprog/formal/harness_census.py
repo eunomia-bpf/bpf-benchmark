@@ -98,8 +98,11 @@ def partitions(path):
     found = rows(path)
 
     def norm(det):
+        # `route` is its own detector in the harnesses whose claim names a
+        # routed oracle; folding it into `host` made those claims unmatchable.
         return ("lean" if det.startswith("lean") else
-                "gen" if det.startswith("gen") else "host")
+                "gen" if det.startswith("gen") else
+                "route" if det.startswith("route") else "host")
 
     caught = [r for r in found if not r[2]]
     return (collections.Counter(norm(d) for _, d, _ in found),
@@ -121,7 +124,8 @@ def detectors(body):
             r"chain|by the (?:[\d,]+-case )?host oracle|by the rout\w* "
             r"oracle|by the route scanner)", body):
         out["gen" if "generator" in name else
-            "lean" if "Lean" in name else "host"] += int(count)
+            "lean" if "Lean" in name else
+            "route" if "rout" in name else "host"] += int(count)
     # A count written as a word: "plus the one movk-regex catch". The harness
     # has one such row and it is caught, so it belongs to the host total the
     # claim is asserting.
@@ -150,7 +154,7 @@ def claim_matches(text, root):
         for name, parts in tables.items():
             hit_part = [part for part in parts[:2]
                         if all(part.get(k, 0) == breakdown.get(k, 0)
-                               for k in ("gen", "lean", "host"))]
+                               for k in ("gen", "lean", "host", "route"))]
             if hit_part:
                 out.append((name, caught, parts[2]))
                 break
