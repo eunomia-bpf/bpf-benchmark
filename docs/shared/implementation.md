@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0623 compared the other figure: 23 claims state
+a mutation total beside a catch count, and all 23
+agree with their harness's row count. Resolution by
+split identifies the harness, so no prose naming is
+needed. Both figures now checked in the gate (census
+493 -> 494).
+
+
 Step 0622 resolved the last unmatched row claim: the
 load-bytes harness gives 29/14/7, not 29/16/5 — right
 total, two buckets off in opposite directions. All 44

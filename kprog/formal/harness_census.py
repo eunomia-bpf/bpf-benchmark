@@ -194,6 +194,34 @@ def row_claim_matches(text, root):
     return out
 
 
+def total_matches(text, tables):
+    """`[(harness, declared total, harness rows)]` for "N-mutation harness".
+
+    The declared mutation total is a separate figure from the caught count,
+    and it is the one a reader uses to size the harness. It is parsed from
+    the nearest preceding "N-mutation harness" phrase, since a paragraph
+    describes one harness.
+    """
+    flat_text = re.sub(r"\s+", " ", text.replace("\\brk", ""))
+    out = []
+    for hit in re.finditer(r"(\d+) rows catch \(([^)]*(?:\([^)]*\)[^)]*)*)\)",
+                           flat_text):
+        breakdown = detectors(hit.group(2))
+        if len(breakdown) < 3:
+            continue
+        lead = flat_text[max(0, hit.start() - 500):hit.start()]
+        declared = re.findall(r"(\d+)-mutation harness", lead)
+        if not declared:
+            continue
+        for name, parts in tables.items():
+            if any(all(part.get(k, 0) == breakdown.get(k, 0)
+                       for k in ("gen", "lean", "host", "route"))
+                   for part in parts[:2]):
+                out.append((name, int(declared[-1]), sum(parts[0].values())))
+                break
+    return out
+
+
 def claim_matches(text, root):
     """`[(harness, caught in paper, caught in source)]` for matched claims.
 

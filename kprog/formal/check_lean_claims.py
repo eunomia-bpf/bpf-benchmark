@@ -1425,6 +1425,26 @@ def check(targets, root):
             "check_lean_claims: only %d row claims resolved to a harness, "
             "and 44 did when this was written; a claim that matches nothing "
             "went unread" % len(rowed))
+    # The declared mutation total is the other figure a reader sizes a
+    # harness by, and it was compared to nothing. Twenty-three claims carry
+    # one alongside a catch count, and all twenty-three agree.
+    import glob as _glob
+
+    tables = {os.path.basename(p): harness_census.partitions(p)
+              for p in _glob.glob(os.path.join(root, "build", "mut_*.py"))
+              if harness_census.rows(p)}
+    totals = harness_census.total_matches(section_text, tables)
+    total_drift = [(n, a, b) for n, a, b in totals if a != b]
+    if total_drift:
+        raise SystemExit(
+            "check_lean_claims: %d mutation total(s) disagree with their "
+            "harness -- %s" % (len(total_drift),
+                               "; ".join("%s says %d, harness has %d" % d
+                                         for d in total_drift)))
+    if len(totals) < 23:
+        raise SystemExit(
+            "check_lean_claims: only %d mutation totals resolved to a "
+            "harness, and 23 did when this was written" % len(totals))
     if len(compared) < 11:
         raise SystemExit(
             "check_lean_claims: only %d harness claims resolved to a harness, "

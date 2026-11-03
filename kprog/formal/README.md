@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 493, and 391 steps
+`build/mut_*.py` files exist, the counter's last value is 494, and 392 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0623 - the other figure each claim states was compared
+to nothing
+
+Every harness claim states two figures: how many mutations the harness runs, and
+how many of them catch. The second was compared to the harness as of the
+previous steps; the first was compared to nothing, and it is the figure a reader
+uses to size the harness.
+
+Twenty-three claims carry a total beside a catch count, and all twenty-three
+agree with the row count of the harness their split resolves to. That is the
+reading which makes the check possible without naming the harness in prose: the
+split identifies the harness, and the total is then compared to that harness's
+rows rather than to any harness with a plausible size.
+
+Both figures are now compared, with coverage floors at twenty-three and
+forty-four, so a claim that stops resolving is reported as well as one that
+drifts. The mutation corpus is also fully audited at this level: fifty-five
+claims, two figures each where a total is stated, all agreeing. Census 493 ->
+494.
 
 ### Step 0622 - the last claim summed right and split the wrong
 rows
