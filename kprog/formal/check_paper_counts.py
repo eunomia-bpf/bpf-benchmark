@@ -509,6 +509,30 @@ def dispatch_split() -> tuple[int, int, int, int]:
             len(dm.A64_UNMODELLED))
 
 
+def driven_bodies() -> list[str]:
+    """The bodies the section says an oracle "drives the real ..." of.
+
+    Each name has to resolve somewhere in the tree -- a macro in a simulator
+    header, or a dispatch arm an oracle spells out -- because a sentence
+    naming a body nothing drives would describe coverage that does not exist.
+    """
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text()).replace("\\brk", "")
+    sim = "\n".join(p.read_text(errors="ignore") for p in (
+        pathlib.Path(__file__).parent.parent / "x86/x86_sim_local_bpf.h",
+        pathlib.Path(__file__).parent.parent / "arm64/arm64_sim_local_bpf.h"))
+    hosts = "\n".join(p.read_text(errors="ignore")
+                       for p in pathlib.Path(__file__).parent.glob("*_host.c"))
+    out = []
+    for name in sorted(set(re.findall(
+            r"drives the real \\texttt\{([^}]+)\}", flat))):
+        stem = name.replace("\\_", "_").rstrip("*").rstrip("/")
+        if stem not in sim and stem not in hosts:
+            out.append(name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -782,6 +806,14 @@ def main() -> None:
             problems.append(
                 "the dispatch check measures %d and the section does not "
                 "say so beside its phrase" % fig)
+    # Twenty bodies are named as "an oracle drives the real X", and each has
+    # to resolve to a macro in a simulator header or an arm an oracle spells
+    # out. A name nothing drives would describe coverage that does not exist.
+    dangling = driven_bodies()
+    if dangling:
+        problems.append(
+            "%d named bodies are driven nowhere in the tree: %s"
+            % (len(dangling), dangling))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0656 bound the 20 bodies the section says an
+oracle drives the real code of. Each must resolve to
+a simulator macro or an arm an oracle spells out; all
+20 do, and a name nothing drives now fails the check
+(census 526 -> 527).
+
+
 Step 0655 re-measured all 12 recorded constants
 against live sweeps: the axiom classes, the choice
 view, the native_decide footprint and the bv shape

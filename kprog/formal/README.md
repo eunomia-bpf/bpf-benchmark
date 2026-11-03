@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 526, and 424 steps
+`build/mut_*.py` files exist, the counter's last value is 527, and 425 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0656 - twenty named bodies, and the one that is an opcode
+rather than a macro
+
+Fifty-nine sentences say an oracle drives the real body of the simulator rather
+than a copy, naming twenty distinct bodies between them: macros like the execute
+and dispatch bodies, arms like the conditional move and the zero-extension, and
+functions the arm calls.
+
+The claim behind the phrase is that the name resolves to code the simulator
+actually has. A name nothing drives would describe coverage that does not exist,
+and the sentence would read exactly the same. Each of the twenty now has to
+appear in one of the two simulator headers or in an oracle, and all twenty do.
+
+One of them shows why the test is two-sided rather than one: the zero-extension
+is an opcode, not a macro, so it appears in no header and only in the oracle
+that branches on it. A search that required a header would have reported a
+correct sentence as wrong, which is the failure a mechanism census has to avoid
+above all. Census 526 -> 527.
 
 ### Step 0655 - twelve recorded constants, re-measured against live
 sweeps
