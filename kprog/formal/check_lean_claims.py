@@ -78,6 +78,11 @@ LIST_PAIR = re.compile(r"^(\w+) = (\w+)\s*$")
 # statement, and the pair is what the paper's clause is about -- a sweep alone
 # says nothing about the values the table does not cover.
 SWEEP_RANGE = re.compile(r"^\(\(List\.(?:fin)?[Rr]ange \w+\)\.all", re.S)
+
+# A table's image at every width: `List.map f [..]` equated to a literal list.
+# The mapped name must be a generated def, so an ordinary arithmetic identity
+# over a hand list does not join the class.
+MAP_IMAGE = re.compile(r"List\.map\b.*?\[[^\]]*\][^=]*=\s*\[", re.S)
 NON_MEMBER = re.compile(r"^\(.* = none\)$", re.S)
 
 
@@ -241,6 +246,31 @@ def refinement_pair(block, name, own, gen_lists):
     if hand is None:
         hand, table = own.get(shape.group(2)), gen_lists.get(shape.group(1))
     return min(hand, table) if None not in (hand, table) else None
+
+
+def image_pairs(block, name, gen_defs):
+    """How many `List.map f <literal> = <literal>` conjuncts a theorem states.
+
+    The non-vacuity sentence quantifies over the theorems that close by `rfl`
+    or `decide` over a table, then names the shapes that class holds. The
+    first three shapes were enumerated; a fourth sat outside them, so the
+    enumeration was not the exhaustive set its universal claim implied. A
+    stacked write's ladder is a generated function over a generated table, and
+    the theorem that pins its image at all four widths closes by `rfl` over a
+    literal list -- content, but in no counted class. Membership is the
+    conjunct's own shape: a `List.map` applied to a literal list and equated
+    to a literal list, where the mapped name is a generated definition. The
+    figure is the number of such conjuncts, since a theorem that pinned one
+    width and dropped the rest would still read as though it had pinned all.
+    """
+    count = 0
+    for part in conjuncts(statement(block, name)):
+        if not MAP_IMAGE.search(part):
+            continue
+        if any(re.search(r"\b" + re.escape(g) + r"\b", part)
+               for g in gen_defs):
+            count += 1
+    return count
 
 
 def sweep_checks(block, name):
@@ -522,6 +552,7 @@ def scan_tree(root):
     # sentence's halves -- no count is zero, both sides non-empty -- become
     # measurements rather than assertions.
     imports, gen_counts, own_lists, gen_lists = {}, {}, {}, {}
+    gen_defs = {}
     for path in mods:
         stem = os.path.basename(path)[:-5]
         src = open(path, errors="ignore").read()
@@ -532,13 +563,16 @@ def scan_tree(root):
             gen_counts[stem] = {
                 m.group(1): int(m.group(2)) for m in
                 re.finditer(r"^def (\w+) : Nat := (\d+)", src, re.M)}
+            gen_defs[stem] = set(re.findall(r"^def (\w+)", src, re.M))
     for stem in own_lists:
         merged = {}
         for imp in imports[stem]:
             if imp.startswith("Generated"):
                 merged.update(own_lists[imp])
         gen_lists[stem] = merged
-    counters = {"table": [], "pair": [], "sweep": []}
+    visible = {s: set().union(*[gen_defs.get(i, set()) for i in imports[s]])
+               if imports[s] else set() for s in imports}
+    counters = {"table": [], "pair": [], "sweep": [], "image": []}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -578,6 +612,10 @@ def scan_tree(root):
             swept = sweep_checks(block, m.group(1))
             if swept is not None:
                 counters["sweep"].append(swept)
+            image = image_pairs(block, m.group(1),
+                                visible.get(stem, set()))
+            if image:
+                counters["image"].append(image)
         arch_mods[arch] += 1
         arch_thms[arch] += proved
 
@@ -628,6 +666,9 @@ def scan_tree(root):
         "refine_min_entries": min(counters["pair"]),
         # How many sweeps pair a range with outside checks, and the fewest such
         # checks any one of them carries.
+        # The fourth shape the sentence's enumeration left outside itself: a
+        # generated table's image at every width, pinned by a literal list.
+        "images": len(counters["image"]),
         "sweeps": len(counters["sweep"]),
         "sweep_min_checks": min(counters["sweep"]),
     }
@@ -706,6 +747,12 @@ CLAIMS = [
     # so a sweep that pinned nothing outside its range kept it true.
     (re.compile(r'the (\d+) dispatch sweeps'), ("sweeps",)),
     (re.compile(r'at least (\d+) explicit'), ("sweep_min_checks",)),
+    # The sentence's universal -- the theorems that close by `rfl` or `decide`
+    # over a table carry content -- ranged over a population its three named
+    # shapes did not cover, so a stacked write's ladder image sat outside it.
+    # The fourth shape is bound for the same reason as the others: the
+    # enumeration now names every form the rule finds.
+    (re.compile(r'the (\d+) table-image theorems'), ("images",)),
     # The section opens by claiming the artifacts are paired one-to-one with
     # their specifications, and states the figure three times in one sentence.
     # All three counts were hand-kept and the pairing was asserted, never
@@ -796,13 +843,22 @@ def check(targets, root):
         text = flat(pathlib.Path(path).read_text())
         seen_any = False
         for pattern, names in claims:
+            seen = False
             for m in pattern.finditer(text):
-                seen_any = True
+                seen = seen_any = True
                 for i, name in enumerate(names, start=1):
                     claimed = number(m.group(i))
                     if claimed != actual[name]:
                         bad.append(("%s: %s" % (path.name, m.group(0)[:48]),
                                     name, claimed, actual[name]))
+            # A pattern that matches nothing binds nothing, so the figure it
+            # guards goes unread while the run stays green -- the same failure
+            # as a stale number, one step earlier. Rewording one clause used to
+            # retire it silently; now the clause has to be somewhere.
+            if not seen:
+                bad.append(("%s: %r matches nothing, so its figure went "
+                            "unread" % (path.name, pattern.pattern[:44]),
+                            "-", "-", "-"))
         if not seen_any:
             bad.append(("%s: no Lean-side claim matched" % path.name,
                         "-", "-", "-"))

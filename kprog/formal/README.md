@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 441, and 339 steps
+`build/mut_*.py` files exist, the counter's last value is 442, and 340 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,37 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0571 - the enumeration left three theorems outside the
+universal it was introduced to support
+
+The non-vacuity sentence opens with a universal: the theorems that close by
+`rfl` or `decide` over a table carry content rather than closing vacuously. Its
+three named shapes then enumerate part of that population. Two theorems sat
+outside the enumeration and one more joined them once the spec-list fix landed,
+so the universal claimed more than the enumeration delivered.
+
+The shape they have is a stack write's ladder: a generated function applied to a
+literal width list, equated to a literal length or mask list, so the four nested
+gates the ladder keeps are pinned at each width rather than at one. That is
+content by any reading, and it closes by `refine ⟨rfl, rfl⟩` over generated
+definitions, so it belongs to the class the sentence quantifies over and to no
+shape the sentence named.
+
+`image_pairs` counts it. Membership is the conjunct's own form -- a `List.map`
+applied to a literal list and equated to a literal list, where the mapped name
+is a generated definition -- and the mapped name must resolve through the
+module's own imports, so an arithmetic identity over a hand list stays out.
+Three theorems qualify: the two stack-write lane ladders, one of which also pins
+the byte footprint, and the tag-action theorem that reuses the lane table. Each
+is checked by hand against its statement, and each pins all four widths.
+
+The same pass found the enumeration's real weakness. A claim could leave the
+paper and the run stayed green, because the checker only asked whether *some*
+claim matched the document: rewording one clause retired its figure silently.
+Every one of the 37 patterns matches today, so the guard is now per pattern
+rather than per document, and a clause that leaves the section is reported by
+name instead of going unread. Census 441 -> 442.
 
 ### Step 0570 - the exactness count read 25, because seven
 spec lists wrap onto the line after the `:=`

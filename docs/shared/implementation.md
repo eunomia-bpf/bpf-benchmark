@@ -2611,6 +2611,16 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0571 closed the enumeration under its own
+universal: three theorems pin a generated table's
+image at all four widths and belonged to no named
+shape. The same pass found that a claim could leave
+the paper with the run still green, because presence
+was checked per document; it is now checked per
+pattern, so all 37 clauses must be present (census
+441 -> 442).
+
+
 Step 0570 found the exactness count reading 25 where
 the tree holds 32. The rule was right and the reader
 was blind: list_lengths only saw a literal opening on
