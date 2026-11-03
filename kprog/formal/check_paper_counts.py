@@ -750,6 +750,26 @@ def row_stage_splits(text: str) -> list[tuple[int, int, int, int]]:
             for t, a, b, c in re.findall(pat, flat)]
 
 
+def harness_growth(text: str) -> tuple[list[int], int]:
+    """`(stated sizes of the growing harness, its current row count)`.
+
+    Four sentences record one harness at successive sizes as detectors were
+    added: 96, 100, 104, 108, each four mutants larger. The sizes are
+    historical, so they are not banners, but the series must still ascend
+    and the harness must still be at least as large as its last stated
+    size -- a harness that shrank would leave the last sentence describing
+    a mutation count it no longer has.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    series = [int(n) for n in re.findall(
+        r"(\d+)-mutation harness gains an? (?:sixth|seventh|eighth|ninth|"
+        r"tenth) detector", flat)]
+    src = (pathlib.Path(__file__).parent / "build"
+           / "mut_x86_alu_result.py").read_text(errors="ignore")
+    block = re.search(r"^MUTATIONS = \[(.*?)^\]", src, re.S | re.M)
+    return series, len(re.findall(r"^\s*\(", block.group(1), re.M))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1156,6 +1176,23 @@ def main() -> None:
             problems.append(
                 "a row split gives %d+%d+%d = %d against a stated %d"
                 % (gen, lean, host, gen + lean + host, total))
+    # One harness is recorded at five successive sizes as detectors were
+    # added: 96, 100, 104, 108, 112, each four mutants larger. Those sizes
+    # are historical rather than banners, but the series must ascend by the
+    # detector stride and the harness must still be at least as large as its
+    # last stated size.
+    series, current = harness_growth(text)
+    if len(series) != 5:
+        problems.append(
+            "the growing harness is recorded at %d sizes; 5 when this was "
+            "written" % len(series))
+    if any(b <= a for a, b in zip(series, series[1:])):
+        problems.append("the growing harness's sizes do not ascend: %s"
+                        % series)
+    if series and current < series[-1]:
+        problems.append(
+            "the harness is stated at %d mutations and holds %d"
+            % (series[-1], current))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0668 bound the five historical sizes of one
+harness (96, 100, 104, 108, 112) to its current 116:
+the series must ascend and the harness may not shrink
+below its last stated size (census 538 -> 539).
+
+
 Step 0667 bounded the 24 four-stage row splits: the
 generator, Lean and host parts must not exceed the
 stated total. All hold, and several reach it exactly.

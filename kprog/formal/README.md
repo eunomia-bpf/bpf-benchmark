@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 538, and 436 steps
+`build/mut_*.py` files exist, the counter's last value is 539, and 437 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0668 - five historical sizes for one harness, and the
+condition that still binds them
+
+Five sentences record one mutation harness at successive sizes as detectors were
+added to it: ninety-six, a hundred, a hundred and four, a hundred and eight, a
+hundred and twelve. Each step is a detector's four mutants, so the series
+ascends by exactly four, and the harness holds a hundred and sixteen today.
+
+Those sizes are historical rather than current, which is why they are not
+banners: each sentence describes the harness as it stood when that detector was
+added. Checking them against the run would fail on the first one. What can be
+checked is that the series ascends, that the stride is consistent, and that the
+harness has not shrunk below its last stated size.
+
+That last condition is the one with teeth. A sentence saying the harness is at a
+hundred and twelve is still true while the harness holds a hundred and sixteen
+and false the moment it drops, and nothing in the paper would notice, because
+the figure is a size rather than a case count. Census 538 -> 539.
 
 ### Step 0667 - twenty-four row splits, three parts read and one
 left to its parenthetical
