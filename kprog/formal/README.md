@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 449, and 347 steps
+`build/mut_*.py` files exist, the counter's last value is 450, and 348 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,31 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0579 - the three kinds of `native_decide` use were a
+taxonomy, and two of them overlap
+
+The paragraph said `native_decide`'s uses "fall into three kinds" and named
+them, with no counts and no check. All 488 uses are classifiable, so the
+partition was measurable and the sentence was three examples presented as a
+taxonomy. The counts are 28 bounded enumerations, 441 example values, 20
+refinement-named theorems.
+
+The kinds are not a partition. Two of the refinement-named theorems are
+themselves bounded enumerations -- `x86_alu_handler_refines` and
+`x86_alu_aux_handler_refines` quantify over the ALU enum and split by `cases` --
+so the three populations sum to 489 against a total of 488, and the disjoint
+reading would have to drop one of the two claims to be true. The sentence now
+says the kinds overlap, gives the overlap as 2, and states that the three sum to
+487 for that reason.
+
+One use sits in none of them: a handler-agreement theorem whose definitional
+halves are decided by the compiler and whose two operand halves cite their
+refinements, so it evaluates a subgoal inside a composition rather than
+enumerating, instantiating, or refining. Both the overlap and the remainder are
+bound, and the remainder's identity is bound as well -- the checker names the
+theorem it expects, so a different theorem falling outside the three kinds fails
+even when the count is still one. Census 449 -> 450.
 
 ### Step 0578 - the enumeration read as exhaustive and had never
 been checked against its own population

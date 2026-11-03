@@ -2611,6 +2611,15 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0579 measured the three-kind taxonomy. The
+counts are 28/441/20 and the kinds overlap by two
+bounded enumerations that are also refinement-named,
+so they sum to 487, not 488; one handler-agreement
+theorem sits outside all three and is named. Overlap,
+remainder, and remainder identity are all bound
+(census 449 -> 450).
+
+
 Step 0578 measured the scope the enumeration only
 implied. Tabled theorems -- closing by rfl/decide and
 naming a generated list -- number 77, all inside the

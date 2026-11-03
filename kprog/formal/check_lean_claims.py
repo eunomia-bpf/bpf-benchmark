@@ -606,7 +606,8 @@ def scan_tree(root):
         visible[s] = seen_defs
     counters = {"table": [], "pair": [], "sweep": [], "image": [],
                 "width": [], "total": [], "derived": [], "unstated": [],
-                "tabled": [], "outside": []}
+                "tabled": [], "outside": [],
+                "kind": [0, 0, 0, [], 0]}
     for path in mods:
         src = open(path, errors="ignore").read()
         stem = os.path.basename(path)[:-5]
@@ -622,6 +623,27 @@ def scan_tree(root):
             named = refinement_named(m.group(1))
             refines += named
             if "native_decide" in block:
+                # Classify the use: a bounded enumeration (binders, split by
+                # cases), an example (no binders), a refinement-named table
+                # equality, or none of the three.
+                sig = signature(block, m.group(1))
+                bound = bool(re.search(r"[(\[{]", sig))
+                split = bool(re.search(r"\bcases\b", block[block.find(":="):]))
+                # The three kinds are not disjoint: two refinement-named
+                # uses are also bounded enumerations. Each kind is counted as
+                # a population of its own, and the section says the three sum
+                # to one fewer than the construct's total for that reason.
+                named_use = refinement_named(m.group(1))
+                if bound and split:
+                    counters["kind"][0] += 1
+                if named_use:
+                    counters["kind"][2] += 1
+                    if bound and split:
+                        counters["kind"][4] += 1
+                if not bound and not named_use:
+                    counters["kind"][1] += 1
+                if not (bound and split) and not named_use and bound:
+                    counters["kind"][3].append(m.group(1))
                 native_decide += 1
                 refines_decided += named
                 native_modules.add(os.path.basename(path))
@@ -742,6 +764,19 @@ def scan_tree(root):
         # enumeration cannot quietly describe part of its own subject.
         "tabled": len(counters["tabled"]),
         "tabled_outside": counters["outside"],
+        # The section says native_decide's uses fall into three kinds and
+        # names them, so the partition is measured: enumerations over a finite
+        # type, example values, and refinement-named table equalities. A
+        # theorem in none of them would leave the sentence describing most of
+        # the construct's use while reading as though it described all.
+        "kinds_enum": counters["kind"][0],
+        "kinds_example": counters["kind"][1],
+        "kinds_table": counters["kind"][2],
+        "kinds_other": counters["kind"][3],
+        # The overlap that keeps the three kinds from summing to the total.
+        "kinds_overlap": counters["kind"][4],
+        "kinds_sum": (counters["kind"][0] + counters["kind"][1]
+                      + counters["kind"][2] - counters["kind"][4]),
         "images": len(counters["image"]),
         "image_min_widths": min(counters["width"]) if counters["width"] else 0,
         "image_max_widths": max(counters["width"]) if counters["width"] else 0,
@@ -799,7 +834,18 @@ CLAIMS = [
      ("theorems",)),
     (re.compile(r'(\d+) of the (\d[\d{},\\]*) refinement-named theorems'),
      ("refines_decided", "refines")),
-    (re.compile(r'(\d+) of those are universally quantified'), ("quant_cases",)),
+    (re.compile(r'Its (\d+) uses fall into three kinds'), ("native_decide",)),
+    (re.compile(r'the (\d+) finite enumerations over a'), ("kinds_enum",)),
+    # The third kind counts refinement-named uses, not the narrower
+    # "table equals list" shape: several of them refine a generated handler
+    # against an independent one, and the sentence now says refinement.
+    (re.compile(r'and (\d+) of the 609 refinement-named'), ("kinds_table",)),
+    (re.compile(r'(\d+) of the refinement uses are themselves'),
+     ("kinds_overlap",)),
+    (re.compile(r'sum to (\d+) rather than'), ("kinds_sum",)),
+    (re.compile(r'(\d+) concrete example values'), ("kinds_example",)),
+    (re.compile(r'(\d+) of the three kinds are universally quantified'),
+     ("quant_cases",)),
     # The section's per-architecture sentence was the last hand-kept figure
     # in it, and it drifted with every module added since: the three buckets
     # it quotes summed to 294 modules and 1,941 theorems while the tree grew
@@ -936,6 +982,19 @@ def check(targets, root):
             "and fall in no counted class -- %s"
             % (len(actual["tabled_outside"]),
                ", ".join(actual["tabled_outside"])))
+    # The section says native_decide's uses fall into three kinds and adds the
+    # one that does not. A second would make that sentence false while every
+    # figure in it stayed right.
+    if len(actual["kinds_other"]) > 1:
+        raise SystemExit(
+            "check_lean_claims: %d native_decide theorem(s) fall outside the "
+            "three kinds -- %s"
+            % (len(actual["kinds_other"]), ", ".join(actual["kinds_other"])))
+    if actual["kinds_other"] != ["x86_mov_reg_arm_matches_handler"]:
+        raise SystemExit(
+            "check_lean_claims: the out-of-partition theorem is now %r, but "
+            "the section names x86_mov_reg_arm_matches_handler"
+            % (actual["kinds_other"],))
     if actual["vacuous_unstated"]:
         raise SystemExit(
             "check_lean_claims: %d vacuous arm(s) do not derive from their "
