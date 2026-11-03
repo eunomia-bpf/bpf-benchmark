@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 473, and 371 steps
+`build/mut_*.py` files exist, the counter's last value is 474, and 372 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,28 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0603 - the invariant from the previous step saw half the
+claims and called the rest clean
+
+Step 0602 bound the row-count invariant and reported that all 23 claims it could
+parse were consistent. That was wrong twice over: the pattern required the third
+stage to be followed immediately by a closing paren, and a third of the claims
+put a parenthetical expansion there, so the check saw 23 of 45 and reported a
+clean run.
+
+Matching the inner group to its closing paren and then reading the three counts
+by their labels finds 44 claims. On the correct reading they all hold: the
+stated catch count equals the generator, Lean-chain and host-oracle counts added
+together. The one claim the old pattern had accepted and this one rejects was
+the 57-row harness, where the stages sum to 71 because they describe the whole
+run, not the caught subset.
+
+That claim is now written the way the other 44 are: 71 rows split 29, 26 and 16,
+of which 57 catch and 14 survive. So the section uses one convention instead of
+two, and the invariant is stated over the convention it finds rather than over
+the subset that happened to match. A one-row drift is reported. Census 473 ->
+474.
 
 ### Step 0602 - one harness stated 93 caught rows and its own stages
 added to 101

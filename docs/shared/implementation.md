@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0603 fixed step 0602's own invariant, which saw
+23 of 45 harness claims and called the rest clean: a
+parenthetical after the third stage defeated the
+pattern. The wider parse finds 44, all consistent;
+the one outlier was mislabelled and is rewritten
+(census 473 -> 474).
+
+
 Step 0602 found one of 23 harness claims stating 93
 caught rows while its own detector breakdown summed
 to 101, and bound the invariant across all 23: the

@@ -586,14 +586,18 @@ def harness_sums(text):
     breakdown beside it disagreed. The survivors are a separate class and are
     not part of the sum.
     """
+    # The stage clauses carry parenthetical expansions and either commas or
+    # semicolons between them, so the inner group is matched to the closing
+    # paren and the three counts are then read by their labels. A tighter
+    # pattern matched only a third of the claims and reported a clean run.
     pattern = re.compile(
-        r"(\d+) rows catch \((\d+) at the generator stage[,；]?[^)]*?"
-        r"(\d+) through the Lean chain[,；]?[^)]*?(\d+) by the host oracle\)")
+        r"(\d+) rows catch \(([^)]*(?:\([^)]*\)[^)]*)*)\)")
     out = []
     for hit in pattern.finditer(flat(text)):
-        total = int(hit.group(1))
-        stages = sum(int(hit.group(i)) for i in (2, 3, 4))
-        out.append((total, stages))
+        stages = [int(n) for n in re.findall(
+            r"(\d+) (?:at|through|by) the", hit.group(2))]
+        if len(stages) == 3:
+            out.append((int(hit.group(1)), sum(stages)))
     return out
 
 
