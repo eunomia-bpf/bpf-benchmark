@@ -222,6 +222,31 @@ def total_matches(text, tables):
     return out
 
 
+def survivor_matches(text, tables):
+    """`[(harness, stated survivors, harness equivalents)]`.
+
+    The third figure a harness claim states: how many of its rows survive as
+    documented equivalences. It is the harness's equivalent count, and it is
+    checked the same way as the other two, by resolving the harness from the
+    detector split.
+    """
+    flat_text = re.sub(r"\s+", " ", text.replace("\\brk", ""))
+    out = []
+    for hit in re.finditer(r"(\d+) rows catch \(([^)]*(?:\([^)]*\)[^)]*)*)\)"
+                           r"\s*and\s*(\d+) surviv", flat_text):
+        breakdown = detectors(hit.group(2))
+        if len(breakdown) < 3:
+            continue
+        for name, parts in tables.items():
+            if any(all(part.get(k, 0) == breakdown.get(k, 0)
+                       for k in ("gen", "lean", "host", "route"))
+                   for part in parts[:2]):
+                out.append((name, int(hit.group(3)),
+                            sum(parts[0].values()) - parts[2]))
+                break
+    return out
+
+
 def claim_matches(text, root):
     """`[(harness, caught in paper, caught in source)]` for matched claims.
 

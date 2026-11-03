@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 494, and 392 steps
+`build/mut_*.py` files exist, the counter's last value is 495, and 393 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0624 - the third figure a claim states, and the one a
+reader uses to skip rows
+
+A harness claim states three figures: the mutation total, how many rows catch,
+and how many survive as documented equivalences. Two were compared to the
+harness after the previous steps. The third was not, and it is the one that says
+which rows a reader may ignore.
+
+Nine claims state all three. All nine survivor counts equal their harness's
+equivalent rows, which follows from the other two figures arithmetically only
+when the total is also right, so the three now corroborate each other against
+the tree rather than against each other.
+
+The measure is therefore complete for this family: fifty-five claims, three
+figures where a claim states them, and every one compared to the harness its
+split resolves to, with coverage floors at 44, 23 and 9 so a claim that stops
+resolving is reported. Census 494 -> 495.
 
 ### Step 0623 - the other figure each claim states was compared
 to nothing

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0624 compared the third figure: nine claims
+state how many rows survive, and all nine equal their
+harness's equivalents. With totals and catch counts
+already checked, every figure these paragraphs state
+now compares to the tree (census 494 -> 495).
+
+
 Step 0623 compared the other figure: 23 claims state
 a mutation total beside a catch count, and all 23
 agree with their harness's row count. Resolution by

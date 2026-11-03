@@ -1445,6 +1445,20 @@ def check(targets, root):
         raise SystemExit(
             "check_lean_claims: only %d mutation totals resolved to a "
             "harness, and 23 did when this was written" % len(totals))
+    # The third figure: how many rows survive as documented equivalences.
+    # Nine claims state it beside the other two, and all nine agree.
+    survivors = harness_census.survivor_matches(section_text, tables)
+    surv_drift = [(n, a, b) for n, a, b in survivors if a != b]
+    if surv_drift:
+        raise SystemExit(
+            "check_lean_claims: %d survivor count(s) disagree with their "
+            "harness -- %s" % (len(surv_drift),
+                               "; ".join("%s says %d, harness has %d" % d
+                                         for d in surv_drift)))
+    if len(survivors) < 9:
+        raise SystemExit(
+            "check_lean_claims: only %d survivor counts resolved to a "
+            "harness, and 9 did when this was written" % len(survivors))
     if len(compared) < 11:
         raise SystemExit(
             "check_lean_claims: only %d harness claims resolved to a harness, "
