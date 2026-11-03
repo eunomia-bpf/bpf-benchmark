@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0649 bound the widest comparison claim: three
+sentences say oracles compare all 4 KiB of the memory
+window and the stack slot tags. Thirteen oracles do;
+narrowing one memcmp to eight bytes drops the count
+and fails the check (census 519 -> 520).
+
+
 Step 0648 counted the oracles behind the eight claims
 of a register-file-plus-tags-plus-four-flags
 comparison: 30, not the 6 a macro-name search found.

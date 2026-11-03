@@ -440,6 +440,26 @@ def every_case_oracles() -> list[tuple[str, bool]]:
     return out
 
 
+def memory_window_oracles() -> int:
+    """How many oracles compare the whole 4 KiB memory window, the stack
+    image, and its slot tags.
+
+    The section says the execution oracles compare "the whole stack image
+    with its slot tags, and all 4 KiB of the memory window against an
+    independent byte-image model". A comparison of the bytes the case
+    touched would be much weaker than one of the whole window, so the
+    invariant is a memcmp over the full size.
+    """
+    n = 0
+    for d in ("", "build"):
+        for path in (pathlib.Path(__file__).parent / d).glob("*_host.c"):
+            t = path.read_text(errors="ignore")
+            if (re.search(r"memcmp\(heap, heap_exp, HEAP_BYTES\)", t)
+                    and "stk_tag_exp" in t):
+                n += 1
+    return n
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -618,6 +638,21 @@ def main() -> None:
         problems.append(
             "whole-state claims are %d against %d oracles; 8 and 30 when "
             "this was written" % (n_claims, n_full))
+    # Three sentences say an oracle compares "the whole stack image with its
+    # slot tags, and all 4 KiB of the memory window". Comparing the bytes a
+    # case touched would be far weaker, so the invariant is a memcmp over
+    # the full size, and the claims must stay within the oracles that do it.
+    n_win = memory_window_oracles()
+    n_win_claims = len(re.findall(
+        r"whole stack image with its slot tags, and all", text))
+    if n_win_claims > n_win:
+        problems.append(
+            "%d claim(s) compare the whole memory window and %d oracle(s) "
+            "do" % (n_win_claims, n_win))
+    if (n_win_claims, n_win) != (3, 13):
+        problems.append(
+            "whole-window claims are %d against %d oracles; 3 and 13 when "
+            "this was written" % (n_win_claims, n_win))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

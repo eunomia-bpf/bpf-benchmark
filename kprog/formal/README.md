@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 519, and 417 steps
+`build/mut_*.py` files exist, the counter's last value is 520, and 418 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0649 - the widest comparison, and the constant that would
+narrow it
+
+Three sentences make the widest comparison claim in the section: the whole
+register file with its tags, the stack pointer, the SIMD quarters, the whole
+stack image with its slot tags, and all 4 KiB of the memory window, against an
+independent byte-image model. The AArch64 execution oracles keep all five in one
+comparison block, with the heap, the stack bytes and the slot tags memcmp'd at
+full size.
+
+The window is the part worth binding. An oracle that compared the bytes a case
+touched would pass every case and support none of the sentence, and the
+difference is one constant in one memcmp rather than any change in the model.
+Thirty-two cases would still be checked; four thousand and ninety-six bytes
+would no longer be.
+
+Thirteen oracles compare the whole window and the slot tags, and the three
+claims are a subset. Narrowing one of those comparisons to eight bytes drops the
+count and fails the check, which is the only way this sentence can go wrong
+while every figure in it stays right. Census 519 -> 520.
 
 ### Step 0648 - a macro name is a spelling, the comparison is the
 behaviour
