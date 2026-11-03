@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0642 added the two remaining reference
+invariants: no label defined twice, and no reference
+into a section the paper does not include. Nine
+labels, none duplicated; 25 refs, all live; 23 labels
+sit in dead files where a stray ref would have
+resolved (census 512 -> 513).
+
+
 Step 0641 fixed the check it just added: it matched
 every \\input line, and two are commented-out
 appendices, so it read ten sections where the paper

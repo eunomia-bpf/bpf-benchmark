@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 512, and 410 steps
+`build/mut_*.py` files exist, the counter's last value is 513, and 411 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0642 - two more references that would resolve to the
+wrong thing
+
+Two more ways a reference can resolve to the wrong thing are silent in a clean
+LaTeX run with the directory on the path. A label defined twice resolves to
+whichever the class file saw last, and a reference into a section the paper does
+not include resolves to nothing, because the label exists on disk even though
+the paper never inputs the file.
+
+Neither occurs: the paper defines nine labels, none twice, and its twenty-five
+references all point into the live set. The dead section files hold twenty-three
+further labels, which is what makes the second failure plausible rather than
+theoretical: fourteen live references would have had somewhere to go wrong if
+any of them had strayed.
+
+Both are now reported by name. The check is a small addition to the one from the
+previous two steps, and it is the last of the reference-integrity invariants:
+defined, unique, cited, and inside the document. Census 512 -> 513.
 
 ### Step 0641 - the check read ten sections where the paper has
 eight

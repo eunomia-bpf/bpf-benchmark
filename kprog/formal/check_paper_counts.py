@@ -334,7 +334,21 @@ def document_refs(paper: pathlib.Path) -> tuple[set, set, set, set]:
             cites |= {k.strip() for k in group.split(",")}
     bib = paper / "reference.bib"
     keys = set(re.findall(r"@\w+\{([^,]+),", bib.read_text()))
-    return refs - labels, cites - keys, len(labels), len(keys)
+    # A duplicate label resolves to whichever the class file saw last, and a
+    # reference into a section the paper does not include resolves to
+    # nothing; both are silent in a clean LaTeX run with the directory on
+    # the path.
+    seen, dup = set(), set()
+    for path in live:
+        text = pathlib.Path(str(path) + ".tex").read_text()
+        for name in re.findall(r"\\label\{([^}]+)\}", text):
+            (dup if name in seen else seen).add(name)
+    included = {path.stem for path in live}
+    dead = {n for path in paper.glob("sections/*.tex")
+            if path.stem not in included
+            for n in re.findall(r"\\label\{([^}]+)\}", path.read_text())}
+    return (refs - labels, cites - keys, len(labels), len(keys),
+            dup, refs & (dead - labels))
 
 
 def main() -> None:
@@ -416,8 +430,16 @@ def main() -> None:
     # main.tex includes. The paper keeps older section files on disk whose
     # labels and citations nothing resolves, so the included set is what
     # makes these statements about the paper rather than the directory.
-    undefined, uncited, n_labels, n_keys = document_refs(
+    (undefined, uncited, n_labels, n_keys, dupes,
+     into_dead) = document_refs(
         pathlib.Path(args.section).resolve().parent.parent)
+    if dupes:
+        problems.append("%d label(s) are defined twice in the paper: %s"
+                        % (len(dupes), sorted(dupes)))
+    if into_dead:
+        problems.append(
+            "%d reference(s) point into sections the paper does not include: "
+            "%s" % (len(into_dead), sorted(into_dead)))
     if undefined or uncited:
         problems.append(
             "the document has %d undefined reference(s) %s and %d citation(s) "
