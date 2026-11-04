@@ -2162,13 +2162,17 @@ def vacuous_theorems() -> list[str]:
     nothing about the table and would still be counted as a row.
     """
     out = []
-    head = re.compile(r"^theorem (\w+)((?:(?!:=)[\s\S])*?):=", re.M)
+    head = re.compile(
+        r"^(?:@\[[^\]]*\]\s*)?theorem (\w+)((?:(?!:=)[\s\S])*?):=",
+        re.M)
     proof = re.compile(r"\s*(rfl\b|by\b[\s\S]*?\brfl\b"
                        r"|by\s+(?:native_)?decide\b)")
-    for f in sorted((pathlib.Path(__file__).parent / "KProgFormal")
-                    .glob("*.lean")):
+    here = pathlib.Path(__file__).parent / "KProgFormal"
+    seen = 0
+    for f in sorted(here.glob("*.lean")):
         src = f.read_text(errors="ignore")
         for m in head.finditer(src):
+            seen += 1
             # The body may open with a tactic block and still close by
             # decide, as `refine ⟨?_, ?_⟩ <;> native_decide` does, so the
             # terminator is searched in the body rather than matched at
@@ -2183,6 +2187,14 @@ def vacuous_theorems() -> list[str]:
             a, b = stmt.split("=", 1)
             if a.strip().lstrip(":(").strip() == b.strip():
                 out.append("%s closes %s vacuously" % (f.name, m.group(1)))
+    # The scan must reach every theorem the tree proves, or a vacuous one
+    # in an unread form passes; that is how the two widenings above were
+    # found, both by measuring the reach rather than reading the code.
+    import check_lean_claims as _cl
+    want = _cl.scan_tree(str(here.parent))["theorems"]
+    if seen != want:
+        out.append("the vacuity scan reached %d of %d theorems"
+                   % (seen, want))
     return out
 
 

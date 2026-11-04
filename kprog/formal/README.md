@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0797 - the scan now asserts how many theorems it examined
+
+The theorem scan matched a line beginning with the keyword, and one theorem in
+the tree begins with an attribute instead, so the scan read two thousand and
+sixty-four of the two thousand and sixty-five the checker counts. The missing
+one is a simp-attributed identity about the multiply mask, and a vacuous
+statement in that form would have passed.
+
+The scan now allows the attribute prefix and, more usefully, asserts its own
+reach: it reports when it has examined fewer theorems than the tree proves. That
+assertion is what the last two steps were doing by hand, and it is the reason
+both widenings were found.
+
+A scan that reports only its findings cannot be distinguished from one that
+looked at nothing. Reporting the population it examined is the cheap half of the
+same check and the half that survives edits to the pattern. Census unchanged;
+the checker gains a component.
+
 ### Step 0796 - the widened scan still read the first word, not the
 body
 
