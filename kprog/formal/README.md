@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0785 - a cannot-disagree sentence rests on a theorem name
+
+Twelve sentences say two decoders cannot disagree about some value, and the four
+about the no-register sentinel are backed by name: the presence module proves
+the sentinel is the all-ones byte, that it selects the absent arm, that it
+equals the memory-index sentinel, that its natural-number form equals the
+packed-AUX index sentinel, and that presence and absence are complementary and
+total.
+
+Each is proved by reflexivity or by one case split on the sentinel byte, so what
+the check can hold is that the theorem still exists under the name the sentence
+rests on. A rename or a deletion would leave the sentence with nothing behind
+it, which is the failure mode a proof name has.
+
+The remaining cannot-disagree sentences about the stack arena, the vector half
+mapping and the byte ladders are proved in other modules, and the same shape
+applies: each names a theorem, and the name is what ties the prose to the proof.
+Census unchanged; the checker gains a component.
+
 ### Step 0784 - the generator list and the recipe are one bijection
 
 A fourth cannot-sentence says a hand edit to a generated file or a stale

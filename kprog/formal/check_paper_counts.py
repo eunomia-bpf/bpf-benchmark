@@ -1953,6 +1953,35 @@ def generator_coverage() -> list[str]:
     return out
 
 
+# Each "the X and Y decoders cannot disagree" sentence rests on a theorem
+# that equates the two sentinels. Proven by `rfl`, so its name is what ties
+# the sentence to the proof; a rename or a removal is the drift.
+SENTINEL_THEOREMS = (
+    "x86_reg_presence_sentinel_is_0xff",
+    "x86_reg_presence_sentinel_is_absent",
+    "x86_reg_presence_sentinel_is_index_sentinel",
+    "x86_reg_presence_sentinel_is_index_none",
+    "x86_reg_presence_absent_complement",
+)
+
+
+def sentinel_theorems() -> list[str]:
+    """Problems with the sentinel proofs, empty when all of them remain.
+
+    The section says the operand-presence, register-number and memory-index
+    decoders cannot disagree about "no register", and that presence and
+    absence are complementary. Each is a theorem in the presence module, so
+    a missing one leaves the sentence with nothing behind it.
+    """
+    src = (pathlib.Path(__file__).parent / "KProgFormal"
+           / "X86RegPresence.lean").read_text()
+    out = []
+    for name in SENTINEL_THEOREMS:
+        if not re.search(r"theorem %s\b" % re.escape(name), src):
+            out.append("the section's sentinel claim has no %s" % name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2953,6 +2982,11 @@ def main() -> None:
     # "a hand edit to a generated file or a stale artifact cannot survive
     # the gate": every generator on disk must be run by the recipe.
     for problem in generator_coverage():
+        problems.append(problem)
+    # "the operand-presence and index-presence decoders cannot disagree
+    # about no register": each such sentence rests on a theorem that
+    # equates the two sentinels, so a missing theorem leaves it hollow.
+    for problem in sentinel_theorems():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
