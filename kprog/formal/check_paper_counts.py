@@ -1301,6 +1301,24 @@ def carry_separation() -> tuple[int, bool]:
     return len(pairs), all(a == b for a, b in pairs)
 
 
+def bt_mem_shape() -> tuple[int, bool]:
+    """`(memory-base opcode rows, its index is the immediate form)`.
+
+    The section says the bracket-without-PTR fixture "bt [rdi], 7" is the
+    only shape reaching the X86_OP_BT_MEM_IMM width default. That rests on
+    the spec's opcode table: exactly one row reads memory, and that row
+    takes an immediate index, which is the shape a fixture without a PTR
+    suffix produces.
+    """
+    import json
+    spec = pathlib.Path(__file__).parent / "x86_bt_spec.json"
+    if not spec.exists():
+        return 0, False
+    rows = json.loads(spec.read_text()).get("opcodes", [])
+    mem = [o for o in rows if o.get("base") == "memoryRead"]
+    return len(mem), (len(mem) == 1 and mem[0].get("index") == "imm32")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2033,6 +2051,14 @@ def main() -> None:
         problems.append(
             "%d operand pairs separate >= from > and not all are equal"
             % n_diff)
+    # "the only shape reaching the X86_OP_BT_MEM_IMM width default": one
+    # opcode row reads memory, and it takes an immediate index.
+    bt_rows, bt_imm = bt_mem_shape()
+    if bt_rows and (bt_rows != 1 or not bt_imm):
+        problems.append(
+            "the BT spec has %d memory-base rows (immediate index: %s) and "
+            "the section says one shape reaches the width default"
+            % (bt_rows, bt_imm))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

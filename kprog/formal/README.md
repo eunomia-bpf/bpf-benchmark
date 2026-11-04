@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 573, and 471 steps
+`build/mut_*.py` files exist, the counter's last value is 574, and 472 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0703 - one memory row in the BT table, and its index
+
+A seventh absolute claim says the bracket-without-PTR fixture is the only shape
+reaching the BT memory-immediate width default. That rests on the opcode table:
+exactly one row reads memory, and the row that does takes an immediate index,
+which is the shape a fixture with no PTR suffix produces.
+
+The table confirms it. Three rows, one of which reads memory, and that row's
+index is the immediate form, so it is the only one whose encoding omits the
+pointer suffix and falls through to the width default. A second memory-base row
+is reported with both the count and whether the index is still immediate.
+
+Seven absolute claims have now been checked and all seven were true. That is the
+pattern of this tier: the claims were written while looking at the structure, so
+confirming them is cheap and correcting them has not been needed. Census 573 ->
+574.
 
 ### Step 0702 - the equal case, computed rather than asserted
 

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0703 checked the BT opcode table: one row reads
+memory and it takes an immediate index, so the
+bracket-no-PTR fixture is the only shape reaching the
+width default. All seven absolute claims hold (census
+573 -> 574).
+
+
 Step 0702 computed the sixth absolute claim: >= and >
 differ only on equal operands, so a distinct-operand
 table cannot see the difference. Verified by
