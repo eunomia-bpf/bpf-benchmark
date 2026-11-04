@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 579, and 477 steps
+`build/mut_*.py` files exist, the counter's last value is 580, and 478 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0709 - three more checks, each naming the disagreement
+
+Three more checks were broken in the way each exists to catch. A host that
+includes the simulator header and calls a composed contract without driving the
+composition was reported by host and macro, with the two remedies named. A
+generator whose coverage note names a host that does not exist was reported by
+generator and note. A recorded dispatch predicate the chain does not branch on
+was reported by predicate and host.
+
+All three name what disagreed rather than merely failing, and the first and
+third also say what to do about it. That is the difference between a check a
+reader can act on and one that sends them to the source.
+
+Eight of the nine scripts the gate runs have now been broken on purpose and
+reported the break. The ninth is the one whose sub-claims are many and whose
+perturbations were already exercised while writing it, in steps 0652 and 0653.
+Census 579 -> 580.
 
 ### Step 0708 - two more checks, broken the way they exist to catch
 Two more checks were tested by perturbation. A conditional-jump opcode moved by
