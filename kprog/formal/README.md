@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 604, and 506 steps
+`build/mut_*.py` files exist, the counter's last value is 605, and 507 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0736 - the digests, and a mask that hid them
+
+The section quotes eleven md5 digests as evidence that a shake reproduced byte
+for byte. Each was measured in a step and recorded in the harness README, so a
+digest the README does not carry is an observation with no record behind it, and
+a mistyped one is evidence for the wrong thing.
+
+All eleven appear in the README, both as whole strings and as the broken forms
+the paper wraps. The first version of the check read nothing at all, because the
+caller passes the masked text and the mask strips every texttt body along with
+the digest inside it.
+
+That is the second time this session a check has read the masked text where it
+needed the source: the spec citations in step 0672 failed the same way. The mask
+is right for prose and wrong for anything quoting an identifier. Census 604 ->
+605.
 
 ### Step 0735 - nine sentences describing one unchanged gate
 

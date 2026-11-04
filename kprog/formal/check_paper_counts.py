@@ -1433,6 +1433,26 @@ def stayed_at(text: str) -> list[int]:
     return [int(n) for n in re.findall(r"stayed at (\d+)", flat)]
 
 
+def shake_digests(text: str) -> list[str]:
+    """Paper digests no recorded shake accounts for.
+
+    The section quotes md5 digests as evidence that a shake was
+    byte-identical across reruns. Each digest was measured in a step and
+    recorded in the harness README, so a digest the README does not carry is
+    an observation with no record behind it.
+    """
+    norm = lambda s: re.sub(r"\b([0-9a-f]{20,})\s+([0-9a-f]{4,})\b",
+                            lambda m: m.group(1) + m.group(2), s)
+    # The caller passes the masked text, which strips `\texttt` bodies and
+    # with them every digest; read the source directly.
+    readme = norm((pathlib.Path(__file__).parent / "README.md").read_text())
+    known = set(re.findall(r"\b([0-9a-f]{32})\b", readme))
+    paper = norm(pathlib.Path(
+        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
+    ).read_text())
+    return sorted(set(re.findall(r"\b([0-9a-f]{32})\b", paper)) - known)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2240,6 +2260,12 @@ def main() -> None:
             problems.append(
                 "the gate is recorded as staying at %d banners and the run "
                 "reports fewer" % n)
+    # Every digest the paper quotes as evidence of a byte-identical shake
+    # must be one the harness README records, or it is an observation with
+    # no record behind it.
+    for d in shake_digests(text):
+        problems.append(
+            "the section quotes md5 %s and no recorded shake carries it" % d)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

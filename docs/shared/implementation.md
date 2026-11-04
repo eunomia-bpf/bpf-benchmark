@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0736 bound the 11 md5 digests the paper quotes
+to the shake records in the README. The first version
+read masked text, which strips every texttt body —
+the same error as the spec citations in 0672 (census
+604 -> 605).
+
+
 Step 0735 bound the nine sentences recording that a
 step left the gate unchanged: all say 210, and none
 contradicts a later figure. Agreement among them is
