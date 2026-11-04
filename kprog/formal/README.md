@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 629, and 531 steps
+`build/mut_*.py` files exist, the counter's last value is 630, and 532 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0761 - a claim is not a figure, and the line reported only
+one of them
+
+The success line reports a hundred and fifty-four claims, and a claim is not a
+figure: one figure is often stated in two sentences, and one sentence often
+states two. The line now reports both, so a reader can see that the run accounts
+for a hundred and twenty-six distinct case figures rather than a hundred and
+fifty-four claims.
+
+The difference is not cosmetic. A checker that matched each claim would still
+leave a figure unread if that figure appeared only in a form the claim patterns
+miss, and the count of claims would not show it. The distinct figure is what the
+section states; the claim is what the pattern found.
+
+Every one of the hundred and twenty-six resolves, either to a banner or to the
+grid arithmetic on a bare grid, which is the other thing the checker has always
+accepted. Census 629 -> 630.
 
 ### Step 0760 - the sentence states the count and its reason, and both
 are in the contract

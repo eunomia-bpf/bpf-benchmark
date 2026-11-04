@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0761 made the success line report distinct
+figures as well as claims: 126 against 154, since one
+figure is often stated twice and a claim count hides
+that (census 629 -> 630).
+
+
 Step 0760 joined "the twelve reached suffixes" to the
 condition contract: 14 names minus the parity pair,
 both read from the spec rather than the sentence

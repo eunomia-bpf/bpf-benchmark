@@ -1695,6 +1695,19 @@ def reached_suffixes() -> int:
     return len([n for n in names if n not in ("o", "no")])
 
 
+def case_figures(text: str) -> int:
+    """Distinct `N-case` figures the section states.
+
+    The count of claims is not the reach: one claim can be made several
+    times, and the same figure is often stated in two sentences. What a
+    reader needs to know is how many distinct figures the run accounted
+    for, which is this.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    return len({int(re.sub(r"[{},]", "", n)) for n in
+                re.findall(r"(?<![\w.])(\d[\d{},]*)[- ]case", flat)})
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2642,7 +2655,8 @@ def main() -> None:
             print("check_paper_counts: %s" % problem)
         raise SystemExit(1)
     if not problems:
-        print(f"all measured claims hold: {len(claimed)} case counts, both "
+        print(f"all measured claims hold: {len(claimed)} case counts over "
+              f"{case_figures(text)} distinct figures, both "
               f"gate totals, the {len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")
