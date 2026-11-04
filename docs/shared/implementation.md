@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0748 checked the axiom sentence as a partition:
+617 + 623 + 825 recovers the 2,065 the gate proves,
+so a typo in any one of the three moves the sum off
+the total (census 616 -> 617).
+
+
 Step 0747 held the 142 recorded census transitions to
 the invariant of the sequence they belong to: each
 must ascend. None fails, and the check needs no file

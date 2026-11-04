@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 616, and 518 steps
+`build/mut_*.py` files exist, the counter's last value is 617, and 519 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0748 - the axiom sentence states a partition, so its parts
+must recover the whole
+
+The axiom sentence is the one place the section states all three classes at
+once, and it says they partition the tree. This makes the sum checkable: six
+hundred and seventeen theorems depend on no axiom, six hundred and twenty-three
+assume the compiler, and eight hundred and twenty-five use only definitional
+ones, which add to the two thousand and sixty-five the gate proves.
+
+The guard also holds the percentage in the next sentence to its own quotient,
+since the compiler share over the tree total is what the thirty percent refers
+to. Both parts of the sentence are therefore checked against each other rather
+than against a file.
+
+What the sentence states is a partition, and a partition has the property that
+its parts recover the whole. That is one more arithmetic identity the section
+can be held to without reading anything outside it. Census 616 -> 617.
 
 ### Step 0747 - the census counter can be checked against its own
 sequence

@@ -1564,6 +1564,23 @@ def census_transitions(text: str) -> list[tuple[int, int]]:
     return [(a, b) for a, b in pairs if b <= a]
 
 
+def axiom_partition(text: str) -> tuple[tuple[int, int, int], int] | None:
+    """`((none, compiler, definitional), their sum)` for the axiom split.
+
+    The sentence states a partition of the tree, so its three figures must
+    add to the theorem total. A transcription error in any one of them moves
+    the sum off that total, which is the only place the section states all
+    three at once.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "").replace("{,}", "")
+    m = re.search(r"(\d+) theorems depend on none.{0,90}?(\d+) reach "
+                  r".{0,60}?and the remaining (\d+)", flat)
+    if m is None:
+        return None
+    parts = tuple(int(g) for g in m.groups())
+    return parts, sum(parts)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2417,6 +2434,20 @@ def main() -> None:
         problems.append(
             "a census transition records %d to %d, which does not rise"
             % (a, b))
+    # The axiom sentence states a partition of the tree, so its three
+    # figures must add to the theorem total; a typo in any one of them
+    # moves the sum off it.
+    part = axiom_partition(text)
+    if part is None:
+        problems.append(
+            "the axiom partition sentence is absent, so its three figures "
+            "went unread")
+    else:
+        parts, total = part
+        if total != _tree["theorems"]:
+            problems.append(
+                "the three axiom classes sum to %d and the tree holds %d "
+                "theorems" % (total, _tree["theorems"]))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
