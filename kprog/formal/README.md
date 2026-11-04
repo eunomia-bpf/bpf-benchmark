@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 587, and 488 steps
+`build/mut_*.py` files exist, the counter's last value is 588, and 489 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0719 - the record check, in both directions
+
+The previous step's check compared the summary against the README and was silent
+in the other direction, which is the direction its own commit fell into. The
+comparison now runs both ways over the span they share: a summary entry the
+README lacks, and a README step newer than the summary's oldest that it fails to
+record.
+
+The reverse direction found one: step 0371 has a README entry between 0370 and
+0372 and no summary entry. It is now written, in the summary's own style and
+width, from the README's record of what the step did.
+
+The two directions report differently because they mean different things. A
+summary entry the README lacks is a lost record; a README heading the summary
+lacks is a summary that stopped covering its span. Reading the same message for
+both would hide which one moved. Census 587 -> 588.
 
 ### Step 0718 - the log's own ordering, held rather than asserted
 

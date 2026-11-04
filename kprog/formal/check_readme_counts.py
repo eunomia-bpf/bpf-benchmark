@@ -78,7 +78,16 @@ def step_records() -> list[str]:
     text = README.read_text()
     recorded = set(re.findall(r"^Step (\d{4})", impl, re.M))
     present = set(re.findall(r"^### Step (\d{4})", text, re.M))
-    return sorted(recorded - present)
+    # The other direction, over the span the summary covers: a README step
+    # newer than the summary's oldest must have a summary entry. Below that
+    # point the summary is a selection, so only the covered span is checked.
+    oldest = min(int(x) for x in recorded)
+    unsummarised = [n for n in sorted(present - recorded)
+                    if int(n) > oldest]
+    return ([n + " (summary has it, README does not)"
+             for n in sorted(recorded - present)]
+            + [n + " (README has it, summary does not)"
+               for n in unsummarised])
 
 
 def order_breaks() -> list[tuple[int, int]]:
@@ -184,8 +193,7 @@ def main() -> None:
     # both are written in the same step, and one was committed without the
     # other.
     for n in step_records():
-        drift.append("implementation.md records step %s, README has no entry"
-                     % n)
+        drift.append("step record: %s" % n)
 
     # A check that exists but is never invoked passes by not running,
     # which looks the same from outside. The two outside the gate need a

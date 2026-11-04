@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0719 made the record check bidirectional and
+found step 0371: a README entry with no summary
+entry, between two that have both. The two directions
+report differently because they mean different things
+(census 587 -> 588).
+
+
 Step 0718 held the step log's ordering: 47 ascending
 pairs, reported rather than sorted, because the order
 records how the log was written (census 586 -> 587).
@@ -7755,6 +7762,18 @@ ALU_IMM, ALU_REG, CMP_IMM, CMP_REG, TEST_IMM, SETCC), the gate
 raise for mem+high-reg on add/adc/cmp, and the message tile text
 (count==1 anchors; 7 catches, no equivalence rows), census
 246 -> 247, and stays untracked in `kprog/formal/build/`.
+
+Step 0371 rows the arm64 render head in
+`kprog/x86/micro-prog/generate_micro_sim_proofs.py`:
+the compact `uses_stack` scan pick L822, the compact
+section-entry dict xdp and tc rows L824-825, the
+non-compact `next_by_addr` value pick L1013, the `bl`
+return-addrs gate L1022 with its zz value repaint,
+the non-compact section-entry dict xdp and cgroup_skb
+rows L1025-1027, and the rodata emit block's
+`rodata_ident_map` reversed-input repaint L1044 --
+dict block anchors separate the compact and
+non-compact twins (census 288 -> 289).
 
 Step 0372 rows the x86 memory-operand head in
 `kprog/x86/micro-prog/generate_micro_sim_proofs.py`: the
