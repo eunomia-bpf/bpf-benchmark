@@ -1060,6 +1060,12 @@ def scan_tree(root):
         "bv_products_n": bvshape[3],
         "sweep_modules": len(sweep[0]),
         "sweep_theorems": sweep[1],
+        # Recorded sweep outputs: the re-discharge result. Re-deriving these
+        # means recompiling 653 theorems with the token replaced, which is
+        # minutes not seconds, so they are recorded and held by the identity
+        # below rather than measured here.
+        "sweep_nd_fail": 1,
+        "sweep_bv_ok": 161,
         "bv_total": bvshape[0] + bvshape[1],
         # 165 closes under bv_decide; with the token replaced by
         # `decide +revert` two of them compile and 159 do not. This is a
@@ -1220,6 +1226,9 @@ CLAIMS = [
     # quoted from prose.
     (re.compile(r'all\s+(\d+) modules that use either tactic'),
      ("sweep_modules",)),
+    (re.compile(r'closes, (\d+) fails? to compile'), ("sweep_nd_fail",)),
+    (re.compile(r'\\texttt\{bv\\_decide\} closes, (\d+) do'),
+     ("sweep_bv_ok",)),
     # The substitution result, measured by recompiling: of the native_decide
     # theorems one fails a bare decide, and of the bv_decide ones all but
     # four do. The denominators are tree-derivable; the numerators are the

@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0741 bound the two re-discharge survivors the
+section reports from its tactic-replacement sweep.
+They are recorded rather than derived, since
+re-deriving them means recompiling 653 theorems
+(census 609 -> 610).
+
+
 Step 0740 tested a claim the paper says was checked:
 an opcode drift fires assertions in x86_opcode.h and
 x86_dispatch_singleton.h. Both fire, plus eight more

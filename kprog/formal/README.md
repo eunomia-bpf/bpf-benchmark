@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 609, and 511 steps
+`build/mut_*.py` files exist, the counter's last value is 610, and 512 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0741 - the survivors of the sweep, recorded not derived
+
+The section says the reduction result was measured rather than assumed: every
+one of the one hundred and seventeen modules using either tactic was recompiled
+with the token replaced, and the sentence reports what survived. The two module
+and theorem totals were bound; the two survivors were not.
+
+They are sweep outputs, and re-deriving them means recompiling six hundred and
+fifty-three theorems, so they are recorded beside the totals and held by the
+identity that already ties the sweeping population together. Changing the
+sentence to say two failures where the record says one is reported.
+
+The distinction is the one the case totals needed: a figure the run computes can
+be derived, a figure only a sweep produces has to be recorded, and recording it
+means naming which count it belongs to. Census 609 -> 610.
 
 ### Step 0740 - the claim the paper says was checked, checked
 
