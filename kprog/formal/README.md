@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 576, and 474 steps
+`build/mut_*.py` files exist, the counter's last value is 577, and 475 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0706 - every check script is invoked, which is not the same
+as existing
+
+The call-graph audit asked whether every function is reachable from main. The
+question underneath it is whether every check is invoked at all: a script that
+exists and is never run passes by not running, and from outside that looks the
+same as passing.
+
+Nine check scripts are in the gate, and the two that are not are the ones that
+need a log the gate is still producing, so neither can run alongside it. The
+readme checker now compares the gate's invocations with the scripts on disk, so
+a check dropped from the recipe is reported by name and by count.
+
+It also confirmed that the two scripts which declare a check flag and are
+invoked without it do not depend on it: one never reads the argument, and the
+other behaves identically either way. That is a wart rather than a defect, and
+it is written down here so the next reader does not re-derive it. Census 576 ->
+577.
 
 ### Step 0705 - a call graph, not a search for names
 

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0706 checked that every check script is actually
+invoked: nine run in the gate, two need a log, and
+dropping one is now reported by name and count. Two
+inert --check flags are documented as harmless
+(census 576 -> 577).
+
+
 Step 0705 ran a call-graph audit from main over all
 twelve checkers: no function is unreachable. It found
 one dead nested helper in the paper check, uncalled

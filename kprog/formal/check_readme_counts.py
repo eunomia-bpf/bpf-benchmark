@@ -66,6 +66,22 @@ def batteries() -> tuple[int, int, int]:
     return len(names), len(unnamed), gated
 
 
+def gate_checks() -> tuple[list[str], list[str]]:
+    """`(check scripts in the gate, check scripts not in the gate)`.
+
+    The README says the gate runs its checks; a check that exists but is
+    never invoked passes silently by never running, which looks the same as
+    passing. The two outside the gate are named because they need a log the
+    gate is producing.
+    """
+    here = pathlib.Path(__file__).parent
+    mk = (here / "Makefile").read_text()
+    in_gate = sorted(set(re.findall(r"python3 (check_\w+\.py)", mk)))
+    all_checks = sorted(p.name for p in here.glob("check_*.py"))
+    outside = [c for c in all_checks if c not in in_gate]
+    return in_gate, outside
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true",
@@ -125,6 +141,15 @@ def main() -> None:
            r"coverage: (\d+) are\nad-hoc probes")
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
+
+    # A check that exists but is never invoked passes by not running,
+    # which looks the same from outside. The two outside the gate need a
+    # log the gate is still producing.
+    in_gate, outside = gate_checks()
+    if outside != ["check_paper_counts.py", "check_readme_counts.py"]:
+        drift.append("checks outside the gate: %s" % (outside,))
+    if len(in_gate) != 9:
+        drift.append("the gate runs %d check scripts, not 9" % len(in_gate))
 
     for d in dict.fromkeys(drift):
         print(d)
