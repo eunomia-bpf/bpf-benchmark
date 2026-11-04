@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 637, and 539 steps
+`build/mut_*.py` files exist, the counter's last value is 638, and 540 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0769 - all ten pairs tested: six leave the host passing, four
+never compile
+
+Ten pairs name a symbol as both an input and an expectation, and all ten were
+tested by repainting the constant and rebuilding the host. Six leave the host
+passing; the other four fail to compile on a static assertion comparing the
+constant against a generated table's own field.
+
+So the coupling splits the contract in two. Where a generated header asserts the
+value, the repaint is caught before the host runs and the host's own blindness
+does not matter. Where nothing asserts it, the host agrees with itself and the
+repaint is invisible.
+
+The six that pass are the AArch64 scalar, map-pointer and stack tags and the x86
+ABI tag, each named by a host and asserted by nothing. The four that fail are
+the two AArch64 opcodes and the x86 map-pointer and scalar tags. The rule that
+follows is that a host naming its input should be paired with an assertion that
+does not, and the assertion is what makes the naming safe. Census 637 -> 638.
 
 ### Step 0768 - the same coupling reaches the tag contract, and a
 repaint there passes too
