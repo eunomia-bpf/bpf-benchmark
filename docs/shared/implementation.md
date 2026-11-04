@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0805 bound the 278 file names the section cites:
+all resolve today, matched by base name, and a
+planted rename reports (no census change).
+
+
 Step 0804 ran the gate with the dead-code check
 inside it: RC=0 at 248 banners / 124,531,802 cases,
 and audited the other ten checkers' 46 functions,

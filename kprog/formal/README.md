@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0805 - a name is not a number, so nothing bound the cited
+files
+
+The section names its artifacts by file name: two hundred and seventy-eight
+distinct names across headers, generators, generated modules, hosts and
+specifications. A name is not a number, so no figure binds it, and a rename in
+the tree would leave the prose pointing at a file that no longer exists while
+every count stayed current.
+
+All of them resolve today. The check reads the trees beside the section, matches
+by base name because the prose mostly writes bare names, and reports any
+citation that nothing has. A planted rename in a generated module is reported;
+one entry is a suffix rather than a file and is excluded by name.
+
+The weakness is deliberate: matching by base name means a file moved between
+directories still resolves. That is the right trade here, since the prose does
+not carry directory paths and a wrong path would be a different claim from a
+missing file. Census unchanged; the checker gains a component.
+
 ### Step 0804 - the gate with the audit inside it, and the other ten
 checkers
 

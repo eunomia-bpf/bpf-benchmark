@@ -2265,6 +2265,30 @@ def mul_nonmember_check() -> list[str]:
     return out
 
 
+def cited_files() -> list[str]:
+    """File names the section cites that no tree beside it contains.
+
+    The section names its artifacts by file name — headers, generators,
+    generated modules, hosts. A rename in the tree leaves the prose pointing
+    at a file that no longer exists, which no figure records, because a name
+    is not a number.
+    """
+    here = pathlib.Path(__file__).parent
+    text = pathlib.Path(here / ".." / ".." / "docs"
+                        / "kprog-simulator-in-ebpf" / "sections"
+                        / "4-safety.tex").read_text()
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    names = {n.replace("\\_", "_") for n in re.findall(
+        r"\\texttt\{((?:[\w/\\_.-]+\.(?:c|h|py|lean|json)))\}", flat)}
+    have = set()
+    for root in ("..", "../../kinsn"):
+        for p in pathlib.Path(here / root).rglob("*"):
+            if p.is_file():
+                have.add(p.name)
+    return sorted(n for n in names
+                  if n.split("/")[-1] not in have and n != ".bpf.c")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3344,6 +3368,12 @@ def main() -> None:
             problems.append(
                 "this run and %s differ outside the build progress lines"
                 % prev.name)
+    # "the section names its artifacts by file name": a rename in the tree
+    # leaves the prose pointing at a file that no longer exists.
+    for name in cited_files():
+        problems.append(
+            "the section cites %s and no tree beside it has that file"
+            % name)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
