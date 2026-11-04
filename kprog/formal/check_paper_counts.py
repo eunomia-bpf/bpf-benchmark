@@ -1026,6 +1026,26 @@ def step_refs(text: str) -> list[str]:
             if "### Step %s" % n not in readme]
 
 
+def modifier_count_gap(text: str) -> tuple[int, int]:
+    """`(stated modifiers, operations in the modifier spec)`.
+
+    The section says "the eleven modifiers (the empty no-modifier mnemonic
+    plus four shifts and six extend forms)". That is a spec field length, so
+    the sentence can be checked against the file rather than the prose.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    m = re.search(r"the (\w+) modifiers", flat)
+    words = {w: i for i, w in enumerate(
+        "zero one two three four five six seven eight nine ten eleven twelve "
+        "thirteen fourteen fifteen sixteen seventeen eighteen nineteen "
+        "twenty".split())}
+    stated = words.get(m.group(1)) if m else -1
+    import json
+    spec = pathlib.Path(__file__).parent / "arm64_mod_spec.json"
+    ops = json.loads(spec.read_text()).get("operations", [])
+    return stated, len(ops)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1568,6 +1588,13 @@ def main() -> None:
     for n in step_refs(text):
         problems.append(
             "the section cites Step %s and the README has no such step" % n)
+    # "the eleven modifiers ..." is a spec field length, not a count of
+    # prose: the sentence must match the operations the modifier spec holds.
+    n_mod, spec_mod = modifier_count_gap(text)
+    if n_mod != spec_mod:
+        problems.append(
+            "the section says %d modifiers and arm64_mod_spec.json has %d"
+            % (n_mod, spec_mod))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 552, and 450 steps
+`build/mut_*.py` files exist, the counter's last value is 553, and 451 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0682 - a count that reads like an enumeration is a field
+length
+
+Eleven sentences state a count and then list the items in a parenthetical: four
+fields, two arms, two masks, two kinds, and so on. Ten of them list exactly as
+many items as they claim. The eleventh lists its items with nested commas, so a
+comma splitter counted two where the prose says eleven.
+
+The eleven is right, and it is not a count of prose at all: the modifier
+specification holds eleven operations, one empty and four shifts and six
+extends. So a claim that reads like a careful enumeration is in fact a field
+length, and it can be checked against the file rather than against the sentence.
+
+That is the distinction these censuses keep finding. A count of items in a list
+is arithmetic on prose; a count of operations in a specification is a figure
+with a source. The second is checkable, and it is what the sentence turns out to
+be. Census 552 -> 553.
 
 ### Step 0681 - a step number is a pointer into the record
 

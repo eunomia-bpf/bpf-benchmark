@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0682 checked the "eleven modifiers" against the
+modifier spec, which holds eleven operations -- the
+count reads like an enumeration but is a field
+length. Ten of eleven noun-parenthetical counts also
+list correctly (census 552 -> 553).
+
+
 Step 0681 checks the four numbered steps the section
 cites against the README's own history. All four
 resolve; a step number is neither a figure nor a
