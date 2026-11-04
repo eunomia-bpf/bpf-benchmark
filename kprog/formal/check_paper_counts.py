@@ -2024,7 +2024,14 @@ SHARED_SELECTION_THEOREMS = (
      "arm64_mem_base_src_matches_read_src"),
     ("Arm64MemBaseSrcShape.lean", "arm64_mem_base_src_selects_sp"),
     ("Arm64MemBaseSrcShape.lean", "arm64_mem_base_src_case_refines"),
+    ("X86MovxShape.lean", "x86_movx_shape_refines"),
+    ("X86MovxShape.lean", "x86_movx_shape_codes_nodup"),
+    ("Arm64Width.lean", "arm64_width_bits_refines"),
 )
+
+# The width-resolution and movx-shape sentences have the same closure
+# shape: a refinement theorem per arm, and a no-dup table so no two
+# arms collide.
 
 
 def shared_selection_theorems() -> list[str]:

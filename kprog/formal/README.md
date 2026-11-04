@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0790 - the same group extended, not a new check per sentence
+
+Three more cannot-restate sentences now name a theorem. The extension-function
+one rests on the movx shape refinement and on its arm codes being distinct, so
+the opcode selects one arm rather than two; the width-resolution one on the
+width bits refinement, which is the identity on every real width and falls back
+only at the absent code.
+
+Both are closure claims, and the closure is what the theorems assert: one
+refinement per arm, and a no-duplicate table so no two arms collide on the same
+key. That is the shape all fourteen cannot-restate sentences have, and the group
+now holds seven theorems across three modules.
+
+The check is the same one extended rather than a new one, which is what keeps
+the count of checks from growing with the count of sentences. What grows is the
+tuple. Census unchanged; the checker gains a component.
+
 ### Step 0789 - the sharing half of a cannot-restate sentence is
 checkable
 

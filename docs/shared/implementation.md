@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0790 extended the shared-selection group to
+seven theorems across three modules: the movx shape
+and its no-dup codes, and the width bits refinement
+(no census change).
+
+
 Step 0789 bound the shared-selection sentence to four
 theorems, one per consumer, the strongest equating
 the load path's stack read with the base-source
