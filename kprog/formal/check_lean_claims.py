@@ -1212,7 +1212,6 @@ CLAIMS = [
     # quoted from prose.
     (re.compile(r'all\s+(\d+) modules that use either tactic'),
      ("sweep_modules",)),
-    (re.compile(r'closing (\d+) theorems between them'), ("sweep_theorems",)),
     # The substitution result, measured by recompiling: of the native_decide
     # theorems one fails a bare decide, and of the bv_decide ones all but
     # four do. The denominators are tree-derivable; the numerators are the

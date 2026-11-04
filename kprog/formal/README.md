@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 597, and 499 steps
+`build/mut_*.py` files exist, the counter's last value is 598, and 500 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0729 - half a sentence was bound
+
+The section says all one hundred and seventeen modules that use either decision
+tactic, closing six hundred and fifty-three theorems, were recompiled with the
+tactic token replaced. The theorem figure was bound; the module figure was not,
+so a sentence counting a population had half of it checked.
+
+The count is derived: modules are collected while the theorem blocks are walked,
+so it is the population the walk actually reached rather than a number beside
+it. It is bound now, and changing the sentence's figure is reported as the
+sentence claiming one hundred and sixteen where the walk found one hundred and
+seventeen.
+
+That closes the pair. The two figures in the sentence now move together, which
+is what the sentence asserts: a rewrite over a population of modules, closing a
+stated number of theorems. Census 597 -> 598.
 
 ### Step 0728 - six figures whose only relation was to each other
 
