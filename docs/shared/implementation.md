@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0762 bound "330 mutation batteries" to the files
+on disk and, measuring that surface, found a battery
+row whose repaint matches nothing: 1 failure in 116,
+trailing spaces (census 630 -> 631).
+
+
 Step 0761 made the success line report distinct
 figures as well as claims: 126 against 154, since one
 figure is often stated twice and a claim count hides

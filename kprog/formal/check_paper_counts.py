@@ -1708,6 +1708,16 @@ def case_figures(text: str) -> int:
                 re.findall(r"(?<![\w.])(\d[\d{},]*)[- ]case", flat)})
 
 
+def battery_count() -> int:
+    """Mutation batteries on disk, which is what the section counts.
+
+    The section says 330 mutation batteries re-derive the failure of the
+    contract each anchors. The count is the files, so it is stated by the
+    tree; a battery removed without the sentence moving is the failure.
+    """
+    return len(list((pathlib.Path(__file__).parent / "build").glob("mut_*.py")))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2631,6 +2641,17 @@ def main() -> None:
         problems.append(
             "the section states %s reached suffixes and the contract "
             "reaches %d" % (stated_suffix.group(1), want_suffix))
+    # "330 mutation batteries re-derive the failure of the contract it
+    # anchors": the count is the files on disk, so the tree states it.
+    stated_batt = re.search(r"(\d[\d,]*) mutation batteries", plain)
+    if stated_batt is None:
+        problems.append(
+            "the sentence counting the mutation batteries is absent, so its "
+            "figure went unread")
+    elif int(stated_batt.group(1).replace(",", "")) != battery_count():
+        problems.append(
+            "the section states %s mutation batteries and %d are on disk"
+            % (stated_batt.group(1), battery_count()))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

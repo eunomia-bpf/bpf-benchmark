@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 630, and 532 steps
+`build/mut_*.py` files exist, the counter's last value is 631, and 533 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0762 - measuring the battery count turned up a battery that
+is not green
+
+The section says three hundred and thirty mutation batteries re-derive the
+failure of the contract each anchors, and nothing counted them. The figure is
+the files under the build directory, so the tree states it, and it matches
+today.
+
+Measuring that surface turned up a battery that is not green. One harness row
+repaints a line whose trailing whitespace has since changed by two spaces, so
+the repaint matches nothing, nothing drifts, and the row that expects a catch
+reports none. The harness reports one failure in a hundred and sixteen mutations
+and prints a mismatch.
+
+The row is a real defect in the battery rather than in the section, and it is
+recorded here rather than fixed: the harness is an untracked build file, and
+changing its mutation strings is a change to the instrument. Census 630 -> 631.
 
 ### Step 0761 - a claim is not a figure, and the line reported only
 one of them
