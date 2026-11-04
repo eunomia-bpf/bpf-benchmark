@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 564, and 462 steps
+`build/mut_*.py` files exist, the counter's last value is 565, and 463 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0694 - a partition that names no harness size
+
+Five sentences describe a harness by what it plants and what it keeps: a hundred
+and forty-nine rows that plant a hundred and seven catches and keep forty-two
+documented equivalences, and four others of the same shape. The two halves are
+the partition of the harness, so they must reach the row count.
+
+All five do. The form went unread because it names neither a harness size nor a
+caught fraction: the rows are the total, the catches and the equivalences are
+the parts, and the sentence calls the second part documented rather than
+surviving.
+
+The sweep found it by counting every claim of the form rows, rather than by
+looking for the phrasings the existing patterns knew. That is the fourth
+distinct partition shape found this way, after the stage splits, the caught
+fractions and the attributed caught counts.
+
+Census 564 -> 565.
 
 ### Step 0693 - eighteen caught counts, and the shares that reach
 them

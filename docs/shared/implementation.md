@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0694 bound five sentences that split a harness
+into planted catches and kept equivalences: 107 + 42
+= 149 and four more, all exact. The form names no
+harness size, which is why no pattern read it (census
+564 -> 565).
+
+
 Step 0693 bound the 18 sentences that split a caught
 count by the stage that caught each share. All 18 are
 exact; the first version missed shares introduced by

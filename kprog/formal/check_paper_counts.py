@@ -1159,6 +1159,18 @@ def caught_with_parts(text: str) -> list[tuple[int, int]]:
     return out
 
 
+def plants_and_keeps(text: str) -> list[tuple[int, int, int]]:
+    """`[(rows, caught, kept)]` for a "plants C catches, keeps K" row.
+
+    A battery's rows divide into the catches it plants and the
+    equivalences it keeps, so the two must reach the row count.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    return [(int(t), int(c), int(k)) for t, c, k in re.findall(
+        r"(\d+)-row harness plants (\d+) catches[^.]{0,300}?"
+        r"(?:keeps|and keeps) (\d+) documented", flat)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1800,6 +1812,18 @@ def main() -> None:
             problems.append(
                 "%d mutations are stated caught and the stages give %d"
                 % (stated, summed))
+    # A battery's rows divide into planted catches and kept equivalences,
+    # so the two must reach the row count.
+    pk = plants_and_keeps(text)
+    if len(pk) != 5:
+        problems.append(
+            "the section states %d plants-and-keeps splits; 5 when this "
+            "was written" % len(pk))
+    for rows, caught, kept in pk:
+        if caught + kept != rows:
+            problems.append(
+                "a harness of %d rows plants %d and keeps %d"
+                % (rows, caught, kept))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
