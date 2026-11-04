@@ -1269,6 +1269,25 @@ def stlxr_status_contract() -> list[str]:
     return out
 
 
+def width_default() -> tuple[str, list[int], int]:
+    """`(default width name, width bits, count of 64-bit widths)`.
+
+    The section says a write and a tag write agree "at the only width (64)
+    the outer gate opens". That rests on the width spec: the absent code
+    falls back to one width, and only that width carries 64 bits.
+    """
+    import json
+    spec = pathlib.Path(__file__).parent / "x86_width_spec.json"
+    if not spec.exists():
+        return "", [], 0
+    d = json.loads(spec.read_text())
+    widths = d.get("widths", [])
+    default = d.get("effective", {}).get("default_name", "")
+    bits = [w["bits"] for w in widths if w["name"] == default]
+    return (default, sorted(w["code"] for w in widths),
+            sum(1 for w in widths if w["bits"] == 64))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1982,6 +2001,16 @@ def main() -> None:
     # four constructors.
     for problem in stlxr_status_contract():
         problems.append(problem)
+    # "the only width (64) the outer gate opens": the width spec must fall
+    # back to a 64-bit default, and exactly one width may carry 64 bits.
+    wd_name, wd_codes, wd_n64 = width_default()
+    if wd_name and wd_n64 != 1:
+        problems.append(
+            "%d widths carry 64 bits and the section says 64 is the only "
+            "one the gate opens" % wd_n64)
+    if wd_name and wd_codes and wd_codes != [1, 2, 4, 8]:
+        problems.append(
+            "the width codes are %s, not the four resolved" % wd_codes)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

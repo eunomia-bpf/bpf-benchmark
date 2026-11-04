@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0701 checked the fifth absolute claim: the width
+spec falls back to a 64-bit default and only one
+width carries 64 bits. All five absolute claims have
+now been checked and all five are true (census 571 ->
+572).
+
+
 Step 0700 bound the half of the two-effect claim a
 contract decides: the STLXR status derives from the
 width mask and is proved zero at every width. The

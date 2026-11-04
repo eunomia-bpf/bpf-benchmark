@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 571, and 469 steps
+`build/mut_*.py` files exist, the counter's last value is 572, and 470 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0701 - the fifth absolute claim, and all five hold
+
+A fifth absolute claim says two writes agree at the only width the outer gate
+opens, which it names as sixty-four. That rests on the width specification: the
+absent code must fall back to a 64-bit default, and exactly one width may carry
+64 bits.
+
+The specification confirms it. Four widths at codes one, two, four and eight,
+with the absent code falling back to the wide one, and only that width carrying
+64 bits. Adding a second 64-bit width is reported twice, once as the count and
+once as the codes no longer being the four the simulator resolves.
+
+Five absolute claims have now been checked and all five were true. The sequence
+is worth recording as a result in itself: the claims were written by someone
+reading the structures they describe, so the checks confirm rather than correct,
+and their value is that the confirmation repeats whenever the structure moves.
+Census 571 -> 572.
 
 ### Step 0700 - the half of a two-effect claim a contract decides
 
