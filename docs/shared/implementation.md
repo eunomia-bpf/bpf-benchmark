@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0739 tested the claim that a missing battery
+host fails the gate loudly: both halves hold, though
+the failure comes from the Lean checker's fork count
+rather than the compile — stronger than the claim
+requires (census 607 -> 608).
+
+
 Step 0738 ran every compiled pattern against the
 documents it reads: none matches nothing. The eleven
 Lean claims matching only the readme are what the
