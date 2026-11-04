@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 566, and 464 steps
+`build/mut_*.py` files exist, the counter's last value is 567, and 465 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0696 - the cell table's contiguity is the claim
+
+A sentence says that unlike the AArch64 mirror there is no zero register to
+omit, so the only register number that is not a cell is the all-ones sentinel.
+That is a claim about the cell table rather than about prose: the numbers must
+run contiguously from zero, and the sentinel must sit outside them.
+
+Both hold. The x86 table holds sixteen cells numbered zero to fifteen, and the
+arm64 table thirty-one numbered zero to thirty, which is what the sentence's
+contrast with AArch64 refers to. A cell number moved out of range is now
+reported against the table.
+
+The claim needed no number of its own to check; it needed the structure the
+numbers imply. That is the sixth mechanism this campaign has used, after the
+log, the tree, derived populations, partitions and historical series: an
+invariant over a table whose contiguity is what makes the sentence true.
+
+Census 566 -> 567.
 
 ### Step 0695 - five unread numerals, and all five explained
 

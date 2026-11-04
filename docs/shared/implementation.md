@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0696 bound the cell-table claim: the register
+numbers must be contiguous from zero, which is what
+makes the all-ones sentinel the only gap. x86 holds
+16 and arm64 31, both contiguous (census 566 -> 567).
+
+
 Step 0695 closed the numeral sweep: every hyphenated
 figure is read by one of six mechanisms, and the five
 that were not are a quoted historical banner and

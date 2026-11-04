@@ -1171,6 +1171,25 @@ def plants_and_keeps(text: str) -> list[tuple[int, int, int]]:
         r"(?:keeps|and keeps) (\d+) documented", flat)]
 
 
+def register_cells() -> dict:
+    """`{"x86": [numbers], "arm64": [numbers]}` from the dispatch specs.
+
+    The section says "there is no zero register to omit, so the only register
+    number that is not a cell is the all-ones sentinel". That is a claim
+    about the cell table: the numbers must be contiguous from zero, and the
+    sentinel must be outside the range.
+    """
+    import json
+    here = pathlib.Path(__file__).parent
+    out = {}
+    for isa in ("x86", "arm64"):
+        spec = here / (isa + "_reg_dispatch_spec.json")
+        if spec.exists():
+            cells = json.loads(spec.read_text()).get("cells", [])
+            out[isa] = sorted(c["number"] for c in cells)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1824,6 +1843,17 @@ def main() -> None:
             problems.append(
                 "a harness of %d rows plants %d and keeps %d"
                 % (rows, caught, kept))
+    # "there is no zero register to omit, so the only register number that
+    # is not a cell is the all-ones sentinel": the cell numbers must be
+    # contiguous from zero, which is what makes the sentinel the only gap.
+    for isa, nums in register_cells().items():
+        if nums != list(range(len(nums))):
+            problems.append(
+                "the %s cell numbers are not contiguous from zero: %s"
+                % (isa, nums[:8]))
+        if 255 in nums:
+            problems.append(
+                "the %s cell table contains the all-ones sentinel" % isa)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
