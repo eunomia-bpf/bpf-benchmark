@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 555, and 453 steps
+`build/mut_*.py` files exist, the counter's last value is 556, and 454 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0685 - five axis decompositions, bounded rather than
+reconstructed
+
+Five hosts state their size as axes: four widths by seven seed rows by five
+immediates, four widths by eight seed rows by four shift amounts, and three
+larger grids of scenes by checks. The axes are hand-written while the totals are
+generated, which is the asymmetry that hid the fifteen-hundred and thirty-six
+scene host's wrong check count.
+
+The invariant that covers all five without knowing the remaining axes is that
+the stated axes multiply to at most the total. An axis product over the banner
+is arithmetic that cannot be true whatever follows it; a product under the
+banner has room for the axes the sentence continues with.
+
+Two of the five also state their remainder, seven selector cases and sixteen,
+and there the product and the remainder must reach the total exactly, which is
+what caught the check count. The other three leave the remainder to further
+axes, so the bound is all that can be said. Census 555 -> 556.
 
 ### Step 0684 - a decomposition that did not reach its banner
 

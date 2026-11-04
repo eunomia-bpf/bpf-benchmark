@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0685 bounded the five axis decompositions: the
+stated axes multiply to at most the total. Two state
+their remainder and reach it exactly; the other three
+leave it to further axes (census 555 -> 556).
+
+
 Step 0684 found a battery-local host whose
 decomposition did not reach its banner: 1,536 scenes
 x 64 checks is 98,320, not 99,856. The grid shows the

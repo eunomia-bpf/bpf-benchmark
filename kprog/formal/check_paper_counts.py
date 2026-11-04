@@ -1096,6 +1096,23 @@ def scene_products(text: str) -> list[tuple[int, int]]:
     return out
 
 
+def case_decompositions(text: str) -> list[tuple[int, int, int, int]]:
+    """`[(stated total, first axis, second axis, product)]`.
+
+    A host's size is often given as axes: "2,089 modeled cases: 4 widths by
+    7 seed rows by 5 immediates plus ...". The product of the stated axes
+    cannot exceed the total, and where the sentence also states a remainder
+    it must reach the total exactly -- the 1,536-scene host was 64 checks
+    where its banner needed 65.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    num = lambda s: int(s.replace(",", "").replace("{", "").replace("}", ""))
+    pat = (r"(\d[\d,{}]*) modeled cases: ([\d,{}]+) "
+           r"(?:scenes?|widths?) \$\\times\$ (\d+) \w+")
+    return [(num(t), num(a), int(b), num(a) * int(b))
+            for t, a, b in re.findall(pat, flat)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1677,6 +1694,19 @@ def main() -> None:
             problems.append(
                 "a host is stated at %d cases and no banner reports it"
                 % stated)
+    # Five hosts state their size as axes. The stated axes multiply to at
+    # most the total, never more: an axis product over the banner would be
+    # arithmetic that cannot be true whatever the remaining axes are.
+    decs = case_decompositions(text)
+    if len(decs) != 5:
+        problems.append(
+            "the section states %d case decompositions; 5 when this was "
+            "written" % len(decs))
+    for total, a, b, prod in decs:
+        if prod > total:
+            problems.append(
+                "a host's stated axes %d x %d give %d against a total of %d"
+                % (a, b, prod, total))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
