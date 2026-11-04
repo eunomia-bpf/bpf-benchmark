@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 635, and 537 steps
+`build/mut_*.py` files exist, the counter's last value is 636, and 538 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0767 - the host and the body name the same constant, so a
+repaint moves both
+
+The blind detector is blind for a reason that can be stated exactly. The route
+host feeds the fast path by naming the same constant the body gates on, and its
+model compares against that same name, so a repaint of the constant moves the
+input and the expectation together and nothing diverges.
+
+That makes the row an equivalence rather than a catch: changing which byte
+selects the raw-immediate arm is invisible to a host that asks for that arm by
+name. The body could be repainted to select on a byte no other caller uses and
+the host would still agree with itself.
+
+The repair is to pin the byte numerically rather than by the name, which is a
+change to the instrument and is recorded rather than made. Census 635 -> 636.
 
 ### Step 0766 - the last four reach counts, and the one assertion left
 exact on purpose
