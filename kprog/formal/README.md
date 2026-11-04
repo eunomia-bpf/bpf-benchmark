@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 586, and 485 steps
+`build/mut_*.py` files exist, the counter's last value is 586, and 486 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -14056,6 +14056,27 @@ zero errors, and planting a bad
 `$x^2.` in the section proves the
 compiler reads this tree -- it halts.
 Census 341 -> 342.
+
+### Step 0469 - the paper had never been compiled
+
+Step 0468 was the first step whose figures came from `make check` rather than
+from a structural scan, so the question was whether the paper still built. It
+did not: `sections/4-safety.tex:1347` carried an unescaped `__` inside a
+`\texttt`, and TeX read the pair as a subscript in text mode and halted with
+"Missing $ inserted".
+
+That line dates from Step 0460, and no structural scan could see it: the escapes
+are balanced in the file, and the defect is what TeX does with them. A static
+`tectonic` binary was fetched, because this workspace has no TeX toolchain, and
+the paper compiled for the first time.
+
+The compile also exposed the worst typography in the section: a 275-character
+run of `/`-joined `\texttt` spans with no legal break, overflowing a column by
+800pt, and 23 other spans of 45-126 characters doing the same. A `\brk` macro
+now marks the separators inside those spans and the worst overflow drops to
+167pt.
+
+Census 340 -> 341.
 
 ### Step 0468 - the two helper-argument
 pointer contracts differ on purpose

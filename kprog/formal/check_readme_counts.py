@@ -66,6 +66,21 @@ def batteries() -> tuple[int, int, int]:
     return len(names), len(unnamed), gated
 
 
+def step_records() -> list[str]:
+    """Steps `implementation.md` records that the README has no entry for.
+
+    The step log and the README are written in the same step, so a step in
+    one and not the other is a lost record. The README carries more steps
+    than the summary does, so only the summary's side is checked.
+    """
+    impl = (pathlib.Path(__file__).parent.parent.parent / "docs" / "shared"
+            / "implementation.md").read_text()
+    text = README.read_text()
+    recorded = set(re.findall(r"^Step (\d{4})", impl, re.M))
+    present = set(re.findall(r"^### Step (\d{4})", text, re.M))
+    return sorted(recorded - present)
+
+
 def gate_checks() -> tuple[list[str], list[str]]:
     """`(check scripts in the gate, check scripts not in the gate)`.
 
@@ -141,6 +156,13 @@ def main() -> None:
            r"coverage: (\d+) are\nad-hoc probes")
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
+
+    # A step the summary records and the README does not is a lost record:
+    # both are written in the same step, and one was committed without the
+    # other.
+    for n in step_records():
+        drift.append("implementation.md records step %s, README has no entry"
+                     % n)
 
     # A check that exists but is never invoked passes by not running,
     # which looks the same from outside. The two outside the gate need a
