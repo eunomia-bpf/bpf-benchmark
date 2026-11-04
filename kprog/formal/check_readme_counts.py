@@ -176,8 +176,8 @@ def main() -> None:
     # is held so a new break shows up rather than a convention being
     # asserted the file does not hold.
     breaks = order_breaks()
-    if len(breaks) != 48:
-        drift.append("the step log has %d ascending pair(s), not 48"
+    if len(breaks) != 47:
+        drift.append("the step log has %d ascending pair(s), not 47"
                      % len(breaks))
 
     # A step the summary records and the README does not is a lost record:

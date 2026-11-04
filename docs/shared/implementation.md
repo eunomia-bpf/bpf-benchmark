@@ -2613,6 +2613,12 @@ with the pending edit the same gate fails at
 
 Step 0715 widened the distinctness check to both key fields and made the readme probe read the census figure from the file (census 584 -> 585).
 
+Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
+
+Step 0718 held the step log's ordering: 47 ascending
+pairs, reported rather than sorted, because the order
+records how the log was written (census 586 -> 587).
+
 Step 0716 made the last two count-valued probes
 derive their perturbation from the file, so they
 follow the count instead of naming it. Three probes

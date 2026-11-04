@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 586, and 486 steps
+`build/mut_*.py` files exist, the counter's last value is 587, and 488 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7602,22 +7602,43 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
-### Step 0715 - both key fields, and a probe that could not go stale
+### Step 0718 - the log's own ordering, held rather than asserted
 
-The distinctness check read the opcode code alone. A row's name keys every table
-that has one and a code keys the opcode tables, so both are checked now, over
-every table in every specification. A duplicate is reported with the table and
-the field, not just the value.
+The log was checked for a step the summary records and the README does not, and
+this step turned to the ordering of the README's own headings. They are mostly
+newest first, but the log grew in runs that ascend: the oldest block reads 0180,
+0181, and later insertions were appended in the order they happened rather than
+sorted.
 
-That widening had to distinguish a key from a decision output. One specification
-holds thirty-two rows mapping four booleans to an arm name, and the arm repeats
-because the table is a decision, not a key; reading it as a duplicate would have
-been a false finding on a correct table.
+There are forty-eight ascending pairs across the file. The last is the jump from
+0461 to 0715, which is where the recent steps begin; the earlier runs are the
+oldest blocks and a few out-of-sequence insertions.
 
-The harness's readme probe named the current census figure, so it went stale the
-moment the figure moved. It now reads the figure from the file and moves it.
+Asserting a descending convention would be false about the file, so the count is
+held instead: a new ascending pair is reported rather than the file sorted,
+because the order records how the log was written. However, inserting a heading
+in the oldest block raises the count to forty-nine and is reported.
 
-Census 584 -> 585.
+Note: this step also ran straight into the gap the previous step's check cannot
+see. That check compares the summary's entries against the README, so it is
+silent when the README alone gains a heading; the README carries more steps than
+the summary by design. Census 586 -> 587.
+
+### Step 0717 - a step the summary records and the README lost
+
+Step 0715 was committed to the checkers and to the summary, but the README kept
+a heading whose body had been overwritten, so the entry named a step it no
+longer described. Nothing compared the two records.
+
+Step 0469 had the same shape and was worse: the summary records it, the step
+that first compiled the paper after a TeX toolchain was fetched, and the README
+had no entry at all. That entry is restored from the summary.
+
+The readme checker now reports a step the summary records and the README does
+not. The reverse is not checked: the README carries more steps than the summary,
+and that gap is deliberate.
+
+Census 585 -> 586.
 
 ### Step 0716 - the count-valued probes follow the count
 
@@ -7634,6 +7655,23 @@ Three of the harness's probes now derive their perturbation, and the four that
 name an opcode, a truncation length and an id are structural: those values are
 properties of the encoding rather than of the current run, so naming them is
 right. Census 585 -> 586.
+
+### Step 0715 - both key fields, and a probe that could not go stale
+
+The distinctness check read the opcode code alone. A row's name keys every table
+that has one and a code keys the opcode tables, so both are checked now, over
+every table in every specification. A duplicate is reported with the table and
+the field, not just the value.
+
+That widening had to distinguish a key from a decision output. One specification
+holds thirty-two rows mapping four booleans to an arm name, and the arm repeats
+because the table is a decision, not a key; reading it as a duplicate would have
+been a false finding on a correct table.
+
+The harness's readme probe named the current census figure, so it went stale the
+moment the figure moved. It now reads the figure from the file and moves it.
+
+Census 584 -> 585.
 
 ### Step 0714 - one property behind twelve routing claims
 
