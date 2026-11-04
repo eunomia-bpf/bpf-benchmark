@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 594, and 496 steps
+`build/mut_*.py` files exist, the counter's last value is 595, and 497 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0726 - the paper's two claims about one check
+
+The paper makes two claims about what the jcc check covers, and both were
+tested. It says the check requires every mnemonic-commented emission to satisfy
+the encoding relation, measured over four such sites; the check reports four by
+mnemonic comment, so the count is its own output.
+
+It also discloses a blind spot: an opcode written without a mnemonic comment is
+invisible to the check, which is therefore as wide as the encoder's commentary
+and no wider. Removing one comment drops the check from seven sites to six and
+it still reports green, so the disclosure is exact and the sentence does not
+overstate its reach.
+
+The other direction is covered by a different mechanism: drifting a condition
+code breaks a compile-time assertion in the generated header, so the two sides
+of the relation are held by a runtime comparison and a static one. The paper's
+claim that pressing in both directions makes it report is right, though for two
+different reasons. Census 594 -> 595.
 
 ### Step 0725 - eleven docstrings read against their code
 

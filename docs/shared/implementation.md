@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0726 tested the paper's two claims about the jcc
+check: the four-site count is the check's own output,
+and the disclosed blind spot is exact — removing one
+comment drops it to six and it still passes (census
+594 -> 595).
+
+
 Step 0725 read all 11 checker docstrings against
 their code after the previous step found one that
 said the opposite. Two look narrower than they are,
