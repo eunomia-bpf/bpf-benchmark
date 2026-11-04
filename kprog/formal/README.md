@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0793 - every selector the sentences name, and the one that
+is a mask
+
+Three more modules join, covering the stack write lanes, the stack read tag
+source, and the ALU flag arm. The first is the odd one: it has two refinement
+theorems rather than a refinement and a no-duplicate, because its selector is a
+mask and a count over lanes rather than a code table, so the two halves of what
+the sentence calls one storage effect are proved separately.
+
+The other two carry the usual pair, and with them the group covers every
+selector the cannot-restate sentences name. Twenty-nine theorems across fourteen
+modules, still behind one check.
+
+What the group cannot show is that a sentence's selector is among them: the
+tuple is written by hand, so a new sentence about a new selector is bound only
+when someone adds it. That is the same shape as the harness list, and the same
+weakness, but the list is short enough to read. Census unchanged; the checker
+gains a component.
+
 ### Step 0792 - the no-duplicate half is the one a reader can miss
 
 Four more selector modules join the group, each with the same pair: a refinement

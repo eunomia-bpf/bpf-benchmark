@@ -2047,6 +2047,16 @@ SHARED_SELECTION_THEOREMS = (
     ("X86MovRegShape.lean", "x86_mov_reg_arm_codes_nodup"),
     ("Arm64MemWriteArmShape.lean", "arm64_mem_write_arm_refines"),
     ("Arm64MemWriteArmShape.lean", "arm64_mem_write_arm_codes_nodup"),
+    ("Arm64StackWriteLanesShape.lean",
+     "arm64_stack_write_lanes_mask_refines"),
+    ("Arm64StackWriteLanesShape.lean",
+     "arm64_stack_write_lanes_count_refines"),
+    ("Arm64StackReadTagSourceShape.lean",
+     "arm64_stack_read_tag_source_refines"),
+    ("Arm64StackReadTagSourceShape.lean",
+     "arm64_stack_read_tag_source_codes_nodup"),
+    ("X86AluFlagArmShape.lean", "x86_alu_flag_arm_refines"),
+    ("X86AluFlagArmShape.lean", "x86_alu_flag_arm_codes_nodup"),
 )
 
 # The width-resolution and movx-shape sentences have the same closure
