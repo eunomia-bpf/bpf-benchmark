@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 606, and 508 steps
+`build/mut_*.py` files exist, the counter's last value is 607, and 509 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0738 - no pattern matches nothing
+
+A pattern that matches nothing binds nothing and reports success, which is
+indistinguishable from a claim that is current. So every compiled pattern in
+both checkers was run against the documents it reads, and the ones that matched
+nothing were listed.
+
+Eleven Lean claims match only the readme and none match neither document: each
+is a figure the harness summary states and the paper does not, or the reverse,
+which is what the checker's two-document design expects. The paper checker's
+patterns include the log patterns, which read the gate output rather than prose,
+and the placeholders that expand to a numeral form before compiling.
+
+So no pattern is dead. That is a property worth holding rather than assuming:
+the two failures this session that looked like dead patterns were a masked read
+and an under-read pattern, and both reported success while examining less than
+they claimed. Census 606 -> 607.
 
 ### Step 0737 - no other check reads the mask where it needs the
 source
