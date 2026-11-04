@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 614, and 516 steps
+`build/mut_*.py` files exist, the counter's last value is 615, and 517 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0746 - the filename join found a contradiction inside the
+paper
+
+The join by filename covers one hundred and eighty-three sentences, and it found
+a sentence that had gone stale inside the paper itself rather than against the
+tree. The same harness is cited twice, once as a thirty-three row battery and
+once as a thirteen row one, under two different census steps.
+
+Running the harness settles it: it reports thirteen mutations, and its total is
+the length of its own row table. The thirty-three dates from the earlier census
+and was never revised when the battery was cut down, so the phrase now says
+thirteen in both places.
+
+This is the first time the join has found a contradiction within the paper
+rather than between the paper and the tree, and it needed no new tooling: the
+filename is a key, and a key that appears twice with different values is a
+question the sentence answers about itself. Census 614 -> 615.
 
 ### Step 0745 - a filename is the exact join the phrase forms could
 not give

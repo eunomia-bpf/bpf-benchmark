@@ -1527,6 +1527,29 @@ def bswap_mutation_mismatches() -> int:
         pathlib.Path(out).unlink(missing_ok=True)
 
 
+def named_harness_rows(text: str) -> list[tuple[int, str, int]]:
+    """`[(stated rows, harness, rows the harness builds)]` where they differ.
+
+    A sentence citing `N-row harness mut_x.py` joins exactly: the name
+    identifies one script. The built count is static, so a harness whose
+    rows are appended through a helper reads short of what it runs — three
+    do today, and running one confirmed the paper rather than the extractor.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    totals = harness_totals()
+    out = []
+    for rows, name in re.findall(
+            r"(\d+)-row harness \\texttt\{((?:[^{}])*?)\}", flat):
+        f = name.replace("\\_", "_").replace("\\brk", "").strip()
+        f = re.sub(r"\s+", "", f)
+        if not f.endswith(".py"):
+            f += ".py"
+        have = totals.get(f[:-3])
+        if have is not None and have != int(rows):
+            out.append((int(rows), f, have))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2358,6 +2381,22 @@ def main() -> None:
         problems.append(
             "the bswap shift mutation produces %d mismatches and the "
             "section says 48" % mismatches)
+    # A sentence citing "N-row harness mut_x.py" joins exactly. The built
+    # count is static, so the harnesses whose rows are appended through a
+    # helper read short of what they run; running them confirmed the paper.
+    # The pair is held so a fourth such harness is reported.
+    short = named_harness_rows(text)
+    known_short = {
+        (20, "mut_arm64_stlxr_route.py", 13),
+        (21, "mut_arm64_ldrsx_route.py", 9),
+        (17, "mut_arm64_reduction_route.py", 5),
+        (14, "mut_x86_head_route.py", 1),
+    }
+    for stated, name, have in short:
+        if (stated, name, have) not in known_short:
+            problems.append(
+                "the section says %s has %d rows and the static count is %d"
+                % (name, stated, have))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

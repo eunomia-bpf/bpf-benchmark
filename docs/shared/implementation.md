@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0746 corrected a stale figure the filename join
+found inside the paper: one harness cited as 33 rows
+at one census and 13 at another. Running it reports
+13; the 33 was never revised (census 614 -> 615).
+
+
 Step 0745 joined 183 sentences that cite a harness by
 filename to its row count: 176 match exactly. The
 seven that do not are three dynamically-built tables
