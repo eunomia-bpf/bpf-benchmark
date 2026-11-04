@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0710 broke the last two gate scripts: a helper
+id drifted by one, and a disabled generator
+validation let a mutation survive and dropped the
+guarded count. All nine gate checks now verified
+falsifiable (census 580 -> 581).
+
+
 Step 0709 broke three more checks the way each exists
 to catch: a non-composing host, a coverage note
 naming a missing host, and a recorded predicate the
