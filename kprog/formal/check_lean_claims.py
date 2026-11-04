@@ -1571,7 +1571,8 @@ def check(targets, root):
         raise SystemExit(
             "check_lean_claims: only %d row claims resolved to a harness, "
             "and 44 did when this was written; a claim that matches nothing "
-            "went unread" % len(rowed))
+            "went unread (both need a built tree: `lake build` and the "
+            "harnesses under build/)" % len(rowed))
     # The declared mutation total is the other figure a reader sizes a
     # harness by, and it was compared to nothing. Twenty-three claims carry
     # one alongside a catch count, and all twenty-three agree.

@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0757 found the gate cannot run on a fresh clone:
+20 of 306 modules are built only by per-module lines
+that write no object file, and the harnesses are
+ignored. The readme now says to build first (census
+625 -> 626).
+
+
 Step 0756 made the harness population explicit: 326
 of 330 harnesses are untracked, and a fresh clone's 4
 made every join quietly find nothing. A fractional

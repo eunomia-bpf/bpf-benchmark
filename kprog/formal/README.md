@@ -4,8 +4,12 @@ This directory contains the first machine-checked refinement slice shared by
 the x86-64 and AArch64 native simulators. Run it with:
 
 ```sh
-make check
+lake build && make check
 ```
+
+The build comes first: 20 of the 306 modules enter only through the gate's
+own `lake env lean` lines, which elaborate without writing an object file, so
+a tree that has not been built leaves the checkers reading a partial set.
 
 What the gate currently covers, measured from one full `make check` run:
 248 passing `cross-check: OK` oracle banners summing to 124,531,802 modeled
@@ -45,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 625, and 527 steps
+`build/mut_*.py` files exist, the counter's last value is 626, and 528 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7605,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0757 - the gate could not run on a clone of the repository
+
+A clone of this repository could not run the gate. Two separate causes, both
+measured on a fresh checkout rather than reasoned about: twenty of the three
+hundred and six Lean modules are elaborated only by the gate's own per-module
+lines, and those lines do not write object files, so the axiom census reads a
+partial tree; and most of the mutation harnesses live under an ignored build
+directory, so the row claims resolve to nothing.
+
+The first is the sharper of the two. The gate names all twenty modules, so it
+does elaborate them on a tree that was built once, and the difference never
+shows there. On a clone, `lake build` covers two hundred and eighty-six of the
+three hundred and six, and the twenty that remain are exactly the ones the
+per-module lines exist for.
+
+The readme now says to build first, and the failing message says which two
+things a built tree needs. A nondeterministic `bv_decide` timeout in one module,
+which succeeds on retry, is noted but not changed: it is a property of the
+solver rather than of the tree. Census 625 -> 626.
 
 ### Step 0756 - a short checkout makes every join find nothing, which
 looks green
