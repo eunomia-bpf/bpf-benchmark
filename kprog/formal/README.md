@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0799 - zero findings and an empty scan read alike, and the
+masked text caught it
+
+The unbound-name check scans for instruction names the prose presents as arms,
+opcodes or forms, and reports zero today. Zero unbound names and an empty
+extraction read alike, so the count of names the section carries is now asserted
+before the scan runs: fourteen, and a scan that finds the section names none
+reports.
+
+Two attempts were needed for the assertion itself. It first read the text the
+checker analyses, which has every quoted name masked out, so it fired on the
+real section; the quotation is exactly where the names live, so the assertion
+reads the file on disk instead.
+
+That is the same masking that hid the opcode join two steps after it was
+written, which suggests the masked text is the thing to be careful with rather
+than the individual scans. Census unchanged; the checker gains a component.
+
 ### Step 0798 - the rule applied to the rest of the checker
 
 The rule from the last three steps is that a scan should say how much it

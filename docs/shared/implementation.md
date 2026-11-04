@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0799 made the unbound-name check assert the
+section names instructions at all: 14 today,
+zero-and-empty now distinguishable. The assertion
+first read the masked text and fired wrongly (no
+census change).
+
+
 Step 0798 applied 0797's rule to the rest of the
 checker: the disjointness loop could pass on finding
 nothing, and one reach was still exact. Both fixed

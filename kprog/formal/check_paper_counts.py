@@ -2560,7 +2560,18 @@ def main() -> None:
     # An instruction name the prose presents as an arm or opcode has to
     # exist in the tree, in a simulator or in the tooling. No figure binds a
     # name, so a rename would go unnoticed here.
-    for name in named_instructions():
+    named = named_instructions()
+    # Zero unbound names and an empty extraction read alike; the section
+    # names fourteen, so a scan that finds fewer has stopped reading.
+    if len(named) == 0 and not re.search(
+            r"\\texttt\{[A-Z][A-Za-z0-9_]{1,18}\}\s+"
+            r"(?:arm|opcode|instruction|form)\b",
+            re.sub(r"\s+", " ",
+                   pathlib.Path(args.section).read_text())):
+        problems.append(
+            "the section names no instruction at all, so the unbound-name "
+            "check examined nothing")
+    for name in named:
         problems.append(
             "the section presents %s as an instruction and the tree has no "
             "such name" % name)
