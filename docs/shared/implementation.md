@@ -2611,6 +2611,14 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0715 widened the distinctness check to both key fields and made the readme probe read the census figure from the file (census 584 -> 585).
+
+Step 0716 made the last two count-valued probes
+derive their perturbation from the file, so they
+follow the count instead of naming it. Three probes
+now derive; four name structural values that cannot
+drift (census 585 -> 586).
+
 Step 0714 bound the distinctness property behind
 twelve "selects exactly one" sentences: no
 specification repeats an opcode code. Duplicating one

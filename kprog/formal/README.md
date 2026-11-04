@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 585, and 483 steps
+`build/mut_*.py` files exist, the counter's last value is 586, and 485 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,39 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0715 - both key fields, and a probe that could not go stale
+
+The distinctness check read the opcode code alone. A row's name keys every table
+that has one and a code keys the opcode tables, so both are checked now, over
+every table in every specification. A duplicate is reported with the table and
+the field, not just the value.
+
+That widening had to distinguish a key from a decision output. One specification
+holds thirty-two rows mapping four booleans to an arm name, and the arm repeats
+because the table is a decision, not a key; reading it as a duplicate would have
+been a false finding on a correct table.
+
+The harness's readme probe named the current census figure, so it went stale the
+moment the figure moved. It now reads the figure from the file and moves it.
+
+Census 584 -> 585.
+
+### Step 0716 - the count-valued probes follow the count
+
+Two probes named a count: the message a generator raises, and the banner total a
+full run prints. Both were correct when written and both would go stale the
+moment either count moved, which is the same decay the readme probe had in the
+previous step.
+
+They now read the count from the file and move it, so the probe follows whatever
+the count becomes. Moving the recorded constant by one and asking what the probe
+would target gave the new value plus two, which is what the derivation means.
+
+Three of the harness's probes now derive their perturbation, and the four that
+name an opcode, a truncation length and an id are structural: those values are
+properties of the encoding rather than of the current run, so naming them is
+right. Census 585 -> 586.
 
 ### Step 0714 - one property behind twelve routing claims
 

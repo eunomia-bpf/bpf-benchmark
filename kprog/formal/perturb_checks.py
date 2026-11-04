@@ -69,13 +69,13 @@ PERTURBATIONS = [
      ROOT / "probe_unparen.h", None, None, "unparenthesized parameter"),
     (["python3", "check_lean_claims.py"],
      ROOT / "check_lean_claims.py",
-     '"orb_reach": 67,', '"orb_reach": 69,', "do not, but there are"),
+     "orb_reach", None, "do not, but there are"),
     (["python3", "check_paper_counts.py", "--section",
       "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex",
       "--log", "/tmp/gCK161.log", "--check"],
      ROOT.parent.parent / "docs" / "kprog-simulator-in-ebpf" / "sections"
      / "4-safety.tex",
-     "passes 248 independent", "passes 240 independent", "log has 248"),
+     "passes", None, "log has"),
     (["python3", "check_readme_counts.py", "--check"],
      ROOT / "README.md", "counter", None, "census last value"),
     (["python3", "mutate_contracts.py", "--check"],
@@ -112,7 +112,23 @@ def probe(argv, path, old, new, want):
         if existed:
             backup = tempfile.mkstemp()[1]
             shutil.copy(str(path), backup)
-            if old == "counter":
+            if old == "orb_reach":
+                text = path.read_text()
+                m = re.search(r'"orb_reach": (\d+),', text)
+                if not m:
+                    raise SystemExit("perturb: no orb_reach in the checker")
+                path.write_text(text.replace(
+                    m.group(0), '"orb_reach": %d,' % (int(m.group(1)) + 2), 1))
+            elif old == "passes":
+                text = path.read_text()
+                m = re.search(r"passes (\d+) independent", text)
+                if not m:
+                    raise SystemExit("perturb: no banner count in the section")
+                path.write_text(text.replace(
+                    m.group(0), "passes %d independent"
+                    % (int(m.group(1)) - 8),
+                    1))
+            elif old == "counter":
                 # The census figure changes every step, so the probe derives
                 # it rather than naming it.
                 text = path.read_text()
