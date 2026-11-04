@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 627, and 529 steps
+`build/mut_*.py` files exist, the counter's last value is 628, and 530 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0759 - a present-tense claim had frozen a count from the step
+that wrote it
+
+The section says the route hosts the mutation batteries drive are pinned into
+the gate recipe, and it said seven. The recipe now names fourteen of them, every
+route host under the build directory, so the sentence had frozen the number from
+the step that first pinned five of them.
+
+It is a present-tense claim rather than a record of that step, which is why the
+number mattered: a reader taking it as a description of the gate would think six
+hosts were still unpinned. Both halves are now checked, the stated count against
+the number the recipe names and that number against the hosts on disk.
+
+The check also catches the failure the sentence is about. A route host present
+but not named by the recipe is exactly the state the sentence denies, and one
+added without a recipe line now reports itself. Census 627 -> 628.
 
 ### Step 0758 - the failing message names the checkout, not the
 sentences

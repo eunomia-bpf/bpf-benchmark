@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0759 corrected "the seven route hosts" to
+fourteen — the recipe names every route host on disk
+— and bound both halves so an unpinned host reports
+itself (census 627 -> 628).
+
+
 Step 0758 made the failing row-claim message name the
 bootstrap state: 0 of 306 modules built on a clone,
 and 4 of the build files tracked, computed per run

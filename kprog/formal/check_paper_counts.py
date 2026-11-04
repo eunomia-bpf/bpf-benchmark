@@ -1665,6 +1665,21 @@ def harness_population() -> list[str]:
     return []
 
 
+def pinned_route_hosts() -> tuple[int, int]:
+    """`(battery-local route hosts the section states, those the recipe runs)`.
+
+    The section says the hosts the mutation batteries drive are pinned into
+    the gate recipe, and states how many. Both halves are in the tree: the
+    hosts are the `*route_host.c` files under `build/`, and "pinned" means
+    the recipe names them.
+    """
+    here = pathlib.Path(__file__).parent
+    named = set(re.findall(r"build/(\w+_route_host)\b",
+                           (here / "Makefile").read_text()))
+    on_disk = {p.stem for p in (here / "build").glob("*route_host.c")}
+    return len(on_disk & named), len(on_disk)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2553,6 +2568,27 @@ def main() -> None:
     # simply find no harness and go unread.
     for problem in harness_population():
         problems.append(problem)
+    # The section says the hosts the batteries drive are pinned into the
+    # recipe, and says how many. Both halves are in the tree, so the count
+    # is checked rather than trusted.
+    pinned, on_disk = pinned_route_hosts()
+    stated = re.search(r"the (\w+) battery-local route hosts", plain)
+    WORD = {"seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+            "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15}
+    if stated is None:
+        problems.append(
+            "the sentence pinning the battery-local route hosts is absent, "
+            "so its count went unread")
+    else:
+        want = WORD.get(stated.group(1), -1)
+        if want != pinned:
+            problems.append(
+                "the section states %s battery-local route hosts and the "
+                "recipe runs %d" % (stated.group(1), pinned))
+        if pinned != on_disk:
+            problems.append(
+                "%d route hosts are on disk and %d are pinned into the "
+                "recipe" % (on_disk, pinned))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
