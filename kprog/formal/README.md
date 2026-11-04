@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 631, and 533 steps
+`build/mut_*.py` files exist, the counter's last value is 632, and 534 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0763 - the repaint applies and the host still passes
+
+The battery that reported one failure repaints the LEA RODATA gate from a named
+constant to zero, and the routed oracle does not notice: it compiles against the
+mutated header and passes. Measured by applying the repaint by hand, compiling
+the host with the harness's own include flags, and running it.
+
+So the row is right to fail. The gate change is real and the detector is blind
+to it, which means the harness's hundred and fifteen other passing rows say less
+about that body than the totals suggest: a row whose stage cannot observe its
+repaint reports a pass whichever way the repaint goes.
+
+Every other mutation string in the battery still matches its file, so the
+repaints are applying; what this one shows is a gap between the repaint and the
+detector rather than a stale string. Census 631 -> 632.
 
 ### Step 0762 - measuring the battery count turned up a battery that
 is not green

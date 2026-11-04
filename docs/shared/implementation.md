@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0763 traced the failing battery row to a
+detector, not a string: the repaint applies and the
+host still passes, so that stage cannot observe the
+gate it claims to (census 631 -> 632).
+
+
 Step 0762 bound "330 mutation batteries" to the files
 on disk and, measuring that surface, found a battery
 row whose repaint matches nothing: 1 failure in 116,
