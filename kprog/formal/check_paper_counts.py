@@ -2169,7 +2169,13 @@ def vacuous_theorems() -> list[str]:
                     .glob("*.lean")):
         src = f.read_text(errors="ignore")
         for m in head.finditer(src):
-            if not proof.match(src[m.end():]):
+            # The body may open with a tactic block and still close by
+            # decide, as `refine ⟨?_, ?_⟩ <;> native_decide` does, so the
+            # terminator is searched in the body rather than matched at
+            # its first word.
+            body = src[m.end():m.end() + 400]
+            if not proof.match(body) and not re.search(
+                    r"\b(?:native_)?decide\b", body):
                 continue
             stmt = " ".join(m.group(2).split())
             if "=" not in stmt or "↔" in stmt or "∧" in stmt:

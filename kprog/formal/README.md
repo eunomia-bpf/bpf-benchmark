@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0796 - the widened scan still read the first word, not the
+body
+
+The scan added a step ago matched the proof at the first word after the
+terminator, so a theorem whose body opens with a tactic block and closes by
+decide was skipped rather than examined. Three hundred and eighty theorems are
+of that shape, which is more than the scan passed over silently in any other
+class.
+
+The body is now searched for the closer rather than matched at its opening, and
+a vacuously stated theorem with a tactic-blocked proof reports. The real tree
+stays clean, so the wider reach finds nothing today - which is the point of
+widening it before something does.
+
+This is the second time in two steps that the same scan under-read. The first
+was reading one proof form out of three; this one read the first word of the
+body rather than the body. Both passed on the real tree, and both would have
+passed on a plant until the plant was written. Census unchanged; the checker
+gains a component.
+
 ### Step 0795 - a check that reads one proof form passes the defect it
 seeks
 
