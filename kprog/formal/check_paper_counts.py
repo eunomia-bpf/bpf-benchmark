@@ -813,6 +813,10 @@ def harness_totals() -> dict[str, int]:
         # helper; there the helper's call count is the entry count.
         if not n:
             n = len(re.findall(r"^\s*row\(", src, re.M))
+        # A third idiom: rows built by appending to a list through a helper.
+        if not n:
+            n = len(re.findall(r"^\s*mutations\.append\(\s*local_row\(",
+                               src, re.M))
         if n:
             out[path.stem] = n
     return out

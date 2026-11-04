@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 613, and 515 steps
+`build/mut_*.py` files exist, the counter's last value is 614, and 516 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0745 - a filename is the exact join the phrase forms could
+not give
+
+One hundred and eighty-three sentences cite a harness by filename with a row
+count, which is the exact join the phrase forms could not give: a name
+identifies one script and the count can be checked against it. One hundred and
+seventy-six matched the extractor's view of that script exactly.
+
+The seven that did not split in two. Three name scripts whose rows are built by
+appending through a helper rather than declared in a table, so the static
+extractor saw thirteen, nine and five where the scripts hold twenty, twenty-one
+and seventeen; running one reports twenty, so the paper is right and the
+extractor was reading a fourth idiom. Three more are name glitches, a break
+marker splitting the name and a stray space inside it.
+
+The conclusion is about the extractor rather than the paper: a count of
+mutations is whatever the script builds, and three registration idioms exist.
+The static count is right for the majority and short for the ones built
+dynamically. Census 613 -> 614.
 
 ### Step 0744 - coverage that is behavioural, measured
 

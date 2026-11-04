@@ -2615,6 +2615,14 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0745 joined 183 sentences that cite a harness by
+filename to its row count: 176 match exactly. The
+seven that do not are three dynamically-built tables
+the static extractor undercounts (one run confirms
+the paper) and three name glitches (census 613 ->
+614).
+
+
 Step 0744 measured the 48 mismatches the paper
 reports from a host that names neither the header nor
 its symbol: mutating the generated shift and running
