@@ -1819,6 +1819,29 @@ def opcode_map() -> list[str]:
     return out
 
 
+def generation_bump_guards() -> list[str]:
+    """Problems with the generation bump, empty when both mirrors guard it.
+
+    The section says each admitted update bumps a 32-bit generation and that
+    the bump returns -EOVERFLOW at U32_MAX rather than wrapping, "so a
+    generation cannot be reused by silent wraparound". The guard is one
+    comparison, and its absence would be a silent wrap.
+    """
+    root = pathlib.Path(__file__).parent.parent.parent / "kinsn" / "module"
+    out = []
+    for isa in ("x86", "arm64"):
+        f = sorted(root.glob("%s/*_native_lab.c" % isa))
+        if not f:
+            out.append("no %s native_lab.c under kinsn/module" % isa)
+            continue
+        src = f[0].read_text(errors="ignore")
+        if not re.search(
+                r"generation == U32_MAX\)\s*\n\s*return -EOVERFLOW;", src):
+            out.append("%s bumps its generation without the U32_MAX guard"
+                       % f[0].name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2799,6 +2822,10 @@ def main() -> None:
     # "the token-to-code map cannot drift": the map and its inverse are
     # emitted together, so each direction checks the other.
     for problem in opcode_map():
+        problems.append(problem)
+    # "a generation cannot be reused by silent wraparound": the guard is one
+    # comparison, and its absence would be the silent wrap.
+    for problem in generation_bump_guards():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

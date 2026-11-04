@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0779 - the second cannot-sentence needed the kernel modules,
+not the proof tree
+
+A second cannot-sentence states what stops a generation being reused: each
+admitted update bumps a 32-bit generation, and the bump returns minus EOVERFLOW
+at the maximum rather than wrapping. The guard is one comparison in each kernel
+module, and it is present in both, so removing it would be the silent wrap the
+sentence denies.
+
+This one needed the modules, which live outside the proof tree, and the first
+search for them found only build artefacts: the symbol appears in a vendored
+header and in a compiled cache before it appears in the two sources that
+implement it. The check reads the two sources and requires the comparison to
+precede the increment in each.
+
+The class is worth remarking on because the sentence would be believed without a
+number: a reader has no figure to check, only the word cannot. That is why these
+are the claims most worth binding, and why each needs its own small check rather
+than a general one. Census is unchanged; the checker gains a component.
+
 ### Step 0778 - a cannot-sentence, checked against the one thing that
 can settle it
 
