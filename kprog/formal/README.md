@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 581, and 479 steps
+`build/mut_*.py` files exist, the counter's last value is 582, and 480 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,21 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0711 - the audit becomes a script, and the script is
+tested too
+The perturbation audit was eight manual experiments, and a manual experiment
+decays: it proves the check fired once, in one session, and says nothing about
+the next. The experiments are now a script that walks the checks the gate runs,
+introduces the defect each exists to catch, and requires a non-zero exit naming
+the break.
+It restores every file it touches and compares the tree with git afterwards, so
+a probe that leaks a change is itself a failure. The script is not a gate
+target: it edits the tree, runs each check twice, and the mutation harness alone
+takes fifteen seconds.
+The script was tested for the same property it tests. Making one check always
+exit zero is reported as that check staying green after its probe, so a harness
+that quietly stops working is caught as well as a check that does. Census 581 -> 582.
 
 ### Step 0710 - the last two scripts, and all nine now fail when
 broken

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0711 turned the eight manual perturbations into
+a script that breaks each gate check, requires it to
+name the break, and proves the tree unchanged. It was
+tested by disabling a check and watching it report
+that (census 581 -> 582).
+
+
 Step 0710 broke the last two gate scripts: a helper
 id drifted by one, and a disabled generator
 validation let a mutation survive and dropped the
