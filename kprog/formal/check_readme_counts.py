@@ -105,6 +105,32 @@ def order_breaks() -> list[tuple[int, int]]:
     return [(a, b) for a, b in zip(nums, nums[1:]) if b >= a]
 
 
+def banner_monotone() -> list[tuple[int, int, int, int]]:
+    """`[(a, na, b, nb)]` where the gate's banner count went backwards.
+
+    Each summary entry records the banner count its gate run printed, and
+    banners are only ever added, so those counts must not decrease as the
+    steps advance. A figure quoted to describe an earlier claim is skipped:
+    it is preceded by a verb like "prints" or "said" rather than standing as
+    the entry's own gate line.
+    """
+    impl = (pathlib.Path(__file__).parent.parent.parent / "docs" / "shared"
+            / "implementation.md").read_text()
+    entries = re.findall(r"(?:^|\n\n)Step (\d{4})(.*?)"
+                         r"(?=\n\nStep \d{4}|\Z)", impl, re.S)
+    seq = []
+    for num, body in entries:
+        for m in re.finditer(r"(\d{3}) banners", body):
+            before = body[max(0, m.start() - 12):m.start()]
+            if re.search(r"(prints|said|was|says|reads)\s*$", before):
+                continue
+            seq.append((int(num), int(m.group(1))))
+            break
+    seq.sort()
+    return [(a[0], a[1], b[0], b[1]) for a, b in zip(seq, seq[1:])
+            if b[1] < a[1]]
+
+
 def numbering_holes() -> list[str]:
     """Step numbers absent from the README between its lowest and highest.
 
@@ -194,6 +220,14 @@ def main() -> None:
            r"coverage: (\d+) are\nad-hoc probes")
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
+
+    # Banners are only ever added, so the counts the summary records must
+    # not decrease as the steps advance. A quoted figure is skipped by the
+    # helper, since it describes an earlier claim rather than the entry's
+    # own gate line.
+    for a, na, b, nb in banner_monotone():
+        drift.append("step %04d records %d banners and step %04d records %d"
+                     % (a, na, b, nb))
 
     # Two step numbers were skipped when assigned, so absence alone is not
     # an error; the pair is held and a third is reported.

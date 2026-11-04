@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 589, and 491 steps
+`build/mut_*.py` files exist, the counter's last value is 590, and 492 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0721 - the gate counts may not go backwards
+
+Seventy-nine summary entries record the banner count their gate run printed.
+Banners are only ever added, so those counts must not decrease as the steps
+advance, whatever order the file happens to be written in.
+
+Sorting by step number and comparing each with the next gives one decrease: step
+0569 records two hundred and forty-eight and step 0690 records two hundred and
+twenty. That one is not a defect, because the entry quotes the wrong figure
+while describing the fix to it, so a figure preceded by prints or said is not
+the entry's own gate line.
+
+Excluding quoted figures leaves seventy-eight claims and no decrease. The check
+reports the pair that went backwards, which is what a recording error in a gate
+line would look like. Census 589 -> 590.
 
 ### Step 0720 - a step number absent from both records
 With the record checked in both directions, the next question is whether a step

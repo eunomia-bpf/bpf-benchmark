@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0721 checked that the summary's 78 gate-line
+banner counts never decrease as steps advance. One
+apparent decrease was a quoted figure from the tense
+fix; excluded, none decrease (census 589 -> 590).
+
+
 Step 0720 found step 0500, recorded in neither log:
 the commit that put check_lean_claims into the gate.
 Steps 0406 and 0407 were skipped, not lost, and git
