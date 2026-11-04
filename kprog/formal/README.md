@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 549, and 447 steps
+`build/mut_*.py` files exist, the counter's last value is 550, and 448 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0679 - five figures in one sentence, all derived from
+statement shape
+
+A sentence states five figures about the decision procedure in one breath: the
+count constants run from two to thirty-one, the thirty-two refinement equalities
+each equate a hand list to the generated table, each of the three dispatch
+sweeps pairs its range with at least three non-membership checks, and fourteen
+table-image theorems pin a whole literal family. Every one of the five is
+derived from statement shape rather than from a name, and every one matches.
+
+That is the last of the figure sentences with no check behind it. The counts are
+computed by opening each theorem's statement and reading what it equates, so a
+theorem renamed or restated moves the figure; the gate binds all five, and none
+of them needed a change.
+
+So the figure surface closes with ten defects found and corrected and every
+remaining claim bound to either the tree, the log, or the sentence's own
+arithmetic. What is left unverifiable is listed rather than hidden: the three
+battery-local witnesses, the roughly fifteen arguments, and the thirty-three
+shared harness sizes. Census 549 -> 550.
 
 ### Step 0678 - the harness check states how much it proves
 

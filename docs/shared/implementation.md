@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0679 verified the last unbound figure sentence:
+five counts about the decision procedure (2-31, 32,
+3, 3, 14), each derived from theorem statement shape.
+All match, closing the figure surface (census 549 ->
+550).
+
+
 Step 0678 made the figure check state its own limit:
 33 of 43 stated harness sizes are shared between
 harnesses, so they are matched but not identified.
