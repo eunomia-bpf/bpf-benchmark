@@ -40,6 +40,7 @@ so a shortcut that drifted is reported rather than assumed.
 
 Usage: check_paper_counts.py --section <tex> --log <make check log> [--check]
 """
+import subprocess
 import argparse
 import pathlib
 import re
@@ -1635,6 +1636,35 @@ def detector_series(text: str) -> list[str]:
     return out
 
 
+def harness_population() -> list[str]:
+    """Problems with the set of harnesses the counts are read from.
+
+    The row counts come from `build/mut_*.py`, and most of those files are
+    untracked build-directory sources, so a checkout can hold fewer than the
+    tree here. Reading a short set would not fail: every join would simply
+    find no harness and the sentences would go unread. The population is
+    therefore stated by the tree that owns it, and this reports a set that
+    cannot answer the sentences at all.
+    """
+    here = pathlib.Path(__file__).parent
+    harnesses = list((here / "build").glob("mut_*.py"))
+    if not harnesses:
+        return ["no harness is present under build/, so no sentence that "
+                "states a harness size was read"]
+    # The counts are read from files the repository mostly does not track:
+    # build/ is ignored, and only four harnesses are committed. A checkout
+    # holding a handful still answers every join with "no harness", which
+    # looks the same as a sentence that is simply right.
+    tracked = subprocess.run(
+        ["git", "ls-files", "build/"], cwd=here, capture_output=True,
+        text=True).stdout.split()
+    if tracked and len(harnesses) < 10 * len(tracked):
+        return ["%d harnesses are present and only %d are tracked, so this "
+                "checkout holds a fraction of the tree the counts describe"
+                % (len(harnesses), len(tracked))]
+    return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2518,6 +2548,10 @@ def main() -> None:
     # A harness that grows a detector at a time states its total and the
     # detector together, so the series must ascend in both.
     for problem in detector_series(text):
+        problems.append(problem)
+    # A short harness set would not fail any join: every sentence would
+    # simply find no harness and go unread.
+    for problem in harness_population():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

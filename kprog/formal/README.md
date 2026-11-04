@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 624, and 526 steps
+`build/mut_*.py` files exist, the counter's last value is 625, and 527 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0756 - a short checkout makes every join find nothing, which
+looks green
+
+The row counts this checker reads come from mutation harnesses under the build
+directory, and a fresh clone holds four of the three hundred and thirty on disk.
+Every join then finds no harness, which reads exactly like a sentence that is
+simply right, so a checkout holding a fraction of the tree would report the same
+green line as the full one.
+
+The population is now stated: a harness set far smaller than the tracked set is
+reported, because the counts describe the tree on disk rather than whatever the
+caller happened to have. It does not fail the gate, since the gate does not run
+this checker at all, but a reader running it on a fresh clone learns why the
+figures went unread.
+
+This is the same lesson as the swallowed parse error, one step further out.
+There the population was harnesses the extractor could not parse; here it is
+harnesses the checkout does not have. In both cases a smaller population makes
+the check quieter, never louder. Census 624 -> 625.
 
 ### Step 0755 - the success line named three of the things it had just
 checked

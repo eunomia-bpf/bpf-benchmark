@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0756 made the harness population explicit: 326
+of 330 harnesses are untracked, and a fresh clone's 4
+made every join quietly find nothing. A fractional
+checkout is now reported (census 624 -> 625).
+
+
 Step 0755 widened the --check success line from 3 to
 4 named classes, adding the section's own figures,
 and left out a class count so the message carries
