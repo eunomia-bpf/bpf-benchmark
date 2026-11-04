@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0801 - the non-member case is in the file and the host runs
+it
+
+The sentence about the multiply host says two things a reader can check in the
+file: the expectation is computed from the architectural definition rather than
+from the contract, so the check is not circular, and a non-member opcode must
+reach the unsupported arm so the counter cannot be vacuously zero. Both are
+present: the host counts unsupported calls and fails when the count does not
+move, and it drives opcode seventy, which is outside the three.
+
+Running the host confirms the case is live rather than commented out: it reports
+one hundred and fifty cases and passes, and the non-member case is inside that
+count.
+
+The check holds the file rather than the behaviour, which is the weaker of the
+two positions and the honest one: whether the count actually moves is settled by
+the run, and whether the run happens is settled by the recipe. What it adds is
+that the case cannot be deleted while the sentence stays. Census unchanged; the
+checker gains a component.
+
 ### Step 0800 - my first count was arms, the paper counted opcodes
 
 The sentence that makes the exclusivity statement non-vacuous gives three

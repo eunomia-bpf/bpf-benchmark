@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0801 bound the multiply host's non-member case:
+opcode 70 must reach the unsupported arm, and the
+host is verified to run 150 cases and pass (no census
+change).
+
+
 Step 0800 bound the routed-opcode population
 sentence: 24 + 43 = 67, read from the x86 totality
 module's op-lists after a first count of arms gave

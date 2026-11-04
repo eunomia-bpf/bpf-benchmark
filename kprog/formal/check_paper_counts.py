@@ -2241,6 +2241,30 @@ def _count_ops(here: pathlib.Path, module: str, ops: str) -> int:
     return total
 
 
+def mul_nonmember_check() -> list[str]:
+    """Problems with the multiply host's non-member case, empty when present.
+
+    The section says the host requires a non-member opcode to reach the
+    unsupported arm "so the counter cannot be vacuously zero", and that
+    computing the expectation from the architectural definition keeps the
+    check from being circular. Both are properties of one file: a case that
+    drives an opcode outside the three, and a comparison against a value
+    the contract does not supply.
+    """
+    f = pathlib.Path(__file__).parent / "build" / "mul_route_host.c"
+    if not f.exists():
+        return ["the multiply route host is absent, so its non-member case "
+                "went unread"]
+    src = f.read_text(errors="ignore")
+    out = []
+    if "unsupported_calls" not in src:
+        out.append("the multiply host counts no unsupported calls, so a "
+                   "silent zero would pass")
+    if not re.search(r"unsupported_calls == before", src):
+        out.append("the multiply host never compares the unsupported count")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3305,6 +3329,10 @@ def main() -> None:
             problems.append(
                 "the section divides the routed opcodes %s and the module "
                 "gives %s" % (want, got))
+    # "requiring a non-member opcode to reach the unsupported arm so the
+    # counter cannot be vacuously zero": a property of one host file.
+    for problem in mul_nonmember_check():
+        problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
