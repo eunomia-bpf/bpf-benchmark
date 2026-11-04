@@ -2543,10 +2543,10 @@ def main() -> None:
             print("check_paper_counts: %s" % problem)
         raise SystemExit(1)
     if not problems:
-        print(f"all {len(claimed)} claimed case counts, both gate totals, "
-              f"and the {len(ISA)}-way simulator split over "
-              f"{sum(n for n, _ in buckets.values())} banners match the "
-              "log")
+        print(f"all measured claims hold: {len(claimed)} case counts, both "
+              f"gate totals, the {len(ISA)}-way split over "
+              f"{sum(n for n, _ in buckets.values())} banners, and the "
+              "section's own figures against each other")
 
 
 if __name__ == "__main__":

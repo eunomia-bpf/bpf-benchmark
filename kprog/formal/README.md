@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 623, and 525 steps
+`build/mut_*.py` files exist, the counter's last value is 624, and 526 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0755 - the success line named three of the things it had just
+checked
+
+The line the checker prints when it passes named three of the things it had just
+verified: the case counts, the two gate totals, and the split across simulators.
+It now names four, adding the figures the section states about itself, which is
+where the axiom partition, the census sequence and the cell counts live.
+
+The count of claim classes was left out on purpose. A number in the message
+would be a claim about the checker that nothing recomputes, which is exactly
+what the two docstrings corrected a step ago had become; naming the classes is
+what a reader needs to know whether their sentence was covered.
+
+Reading the message is how a reader decides that, so a message that undercounts
+the checks is a check that looks narrower than it is. Census 623 -> 624.
 
 ### Step 0754 - two docstrings counted sentences the section no longer
 holds

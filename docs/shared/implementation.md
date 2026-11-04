@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0755 widened the --check success line from 3 to
+4 named classes, adding the section's own figures,
+and left out a class count so the message carries
+nothing unrecomputed (census 623 -> 624).
+
+
 Step 0754 removed two stale sentence counts from
 checker docstrings (8 -> 5, 17 -> 11 in the text) and
 kept the three the code enforces, since a count
