@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 643, and 545 steps
+`build/mut_*.py` files exist, the counter's last value is 644, and 546 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0775 - the exemption set is empty: every figure names a
+banner
+
+The last two battery-local figures were excused as unreportable, and their hosts
+report totals like any other: the AArch64 body host prints four thousand four
+hundred and seventy over twenty-one scenes, and the x86 body host seven thousand
+and fifty-six over sixteen. Both had been written down at the sizes they held
+when their sentences were written.
+
+So the exemption set is empty. Every modelled-case figure in the section now
+names a banner from the run, which is what the checker was already doing for the
+other seven, and the three exceptions were the only place a stale size could
+sit.
+
+The pattern in the three is the same. A figure that a host cannot report is a
+witness; a figure whose host prints its total is a claim, and calling it
+battery-local was enough to keep it out of the comparison. Running each host is
+what told the two apart. Census 643 -> 644.
 
 ### Step 0774 - the scene check joined the wrong host and passed by
 coincidence

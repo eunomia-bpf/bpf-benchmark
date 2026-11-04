@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0775 emptied the witness exemption: both
+remaining hosts print their totals, so all 10
+modeled-case figures now name a banner (4,470 and
+7,056 for the last two) (census 643 -> 644).
+
+
 Step 0774 corrected last step's scene check, which
 joined the wrong host: helper_route_host (21 scenes
 then, 17 now) was compared against a64_route_host,

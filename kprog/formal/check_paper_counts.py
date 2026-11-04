@@ -2089,16 +2089,14 @@ def main() -> None:
             problems.append(
                 "the a64 route host is stated at %d modeled cases and no "
                 "banner reports it" % n)
-    # A parenthesised "(N modeled cases" gives an oracle's size. Two are
-    # battery-local hosts the recipe does not run, which the sentences say
-    # by calling them battery-local. A figure that stopped being a banner is
-    # reported, so a stale size cannot hide among them. The helper host was
-    # the third until it was run and found to report its total, which is a
-    # banner like any other.
+    # A parenthesised "(N modeled cases" gives an oracle's size, and every
+    # one of them is a banner now. The three battery-local hosts were
+    # excused as unreportable until each was run: all three print their
+    # totals, so the exemption was a stale size hiding behind a name.
     flat_n = re.sub(r"\{,\}", ",", flat_text)
     sizes = {int(n.replace(",", "")) for n in re.findall(
         r"\(([\d,]+) modeled cases", flat_n)}
-    witnesses = {3890, 6509}
+    witnesses: set[int] = set()
     for v in sorted(sizes - witnesses):
         if v not in measured:
             problems.append(
