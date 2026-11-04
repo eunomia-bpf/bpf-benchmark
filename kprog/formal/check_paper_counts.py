@@ -2117,6 +2117,42 @@ def agreement_theorems() -> list[str]:
     return out
 
 
+# `lake build` prints a per-module progress line only for modules it
+# rebuilt, so two runs on trees that differ in build state show different
+# numbers of them. Everything else in the log is gate output and is
+# expected to be byte-identical.
+BUILD_PROGRESS = re.compile(
+    r"^.*Built KProgFormal.*$|^trace: .*$", re.M)
+
+
+def determinism_keys(log: str) -> str:
+    """The part of a gate log two runs must agree on, byte for byte.
+
+    The section says two consecutive full runs produce byte-identical
+    output, so the pass is reproducible rather than momentary. The build
+    progress lines are excluded because they count modules rebuilt rather
+    than anything the gate decided.
+    """
+    stripped = BUILD_PROGRESS.sub("", log)
+    return "\n".join(l for l in stripped.split("\n") if l.strip())
+
+
+VOLATILE = re.compile(
+    r"\b\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}\b|"
+    r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}\b|\bpid[ =]\d+", re.M)
+
+
+def volatile_tokens(log: str) -> list[str]:
+    """Volatile tokens in a gate log, which would stop it being identical.
+
+    The section says two consecutive full runs produce byte-identical
+    output. A timestamp, a uuid or a pid in the log would make that false
+    whatever the messages say, so their absence is a necessary condition a
+    single log can show.
+    """
+    return sorted({m.group(0) for m in VOLATILE.finditer(log)})[:5]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3132,6 +3168,14 @@ def main() -> None:
     # consumer, so a consumer that stopped sharing reports.
     for problem in shared_selection_theorems():
         problems.append(problem)
+    # "two consecutive full runs produce byte-identical output": a
+    # timestamp, uuid or pid in the log would make that false, so their
+    # absence is the necessary condition one log can show.
+    vol = volatile_tokens(pathlib.Path(args.log).read_text(errors="ignore"))
+    if vol:
+        problems.append(
+            "the gate log carries volatile tokens %s, so two runs cannot "
+            "be byte-identical" % vol)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

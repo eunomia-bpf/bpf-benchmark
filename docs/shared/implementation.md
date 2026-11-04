@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0794 compared two full gate runs: 248 identical
+banners, zero non-build differences, and no volatile
+token in either log, now checked (no census change).
+
+
 Step 0793 completed the selector group at 29 theorems
 over 14 modules, covering every selector the
 cannot-restate sentences name, with the one

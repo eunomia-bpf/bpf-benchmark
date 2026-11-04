@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0794 - two full runs compared, and the only difference was
+the build
+
+The section says two consecutive full runs produce byte-identical output. Two
+runs were made and compared: the oracle banners are identical, and after
+excluding the build progress lines, which count modules rebuilt rather than
+anything the gate decided, the logs agree line for line with no difference at
+all.
+
+A single log cannot show that on its own, so the check holds the necessary
+condition. A timestamp, a uuid or a process id anywhere in the output would stop
+two runs agreeing whatever their messages said, and neither log carries one.
+
+The comparison found one difference before the exclusions, and it was a build
+line, which is worth stating: the gate's own output was already identical, and
+the only thing that moved was how many modules the build had to recompile.
+Census unchanged; the checker gains a component.
+
 ### Step 0793 - every selector the sentences name, and the one that
 is a mask
 
