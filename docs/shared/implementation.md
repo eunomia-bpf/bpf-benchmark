@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0705 ran a call-graph audit from main over all
+twelve checkers: no function is unreachable. It found
+one dead nested helper in the paper check, uncalled
+and iterating an empty list (census 575 -> 576).
+
+
 Step 0704 found a Lean check that was written,
 worked, and never called: the one binding each header
 guard's "proved bound" claim to a module that still

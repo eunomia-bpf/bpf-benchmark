@@ -871,9 +871,6 @@ def shake_field_gaps(
               zip(opens, starts[1:] + [len(flat)])]
     common = {"mem", "reg", "load", "arm", "width", "value"}
 
-    def family(spec):
-        return any(len(seg) >= 2 and seg not in common and seg in f.lower()
-                   for seg in spec.lower().split("_")[1:] for f in [])
     out, seen = [], set()
     for n in claims:
         cands = [f for f, blk in blocks if "%d-row shake" % n in blk]

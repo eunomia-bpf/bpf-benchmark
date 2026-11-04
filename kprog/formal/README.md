@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 575, and 473 steps
+`build/mut_*.py` files exist, the counter's last value is 576, and 474 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0705 - a call graph, not a search for names
+
+The audit that found the uncalled citation check was by name reference, which
+catches an orphan but not a function reachable only from another orphan. A
+call-graph pass from main closes that: no function in either checker is
+unreachable from the entry point.
+
+It found one in the paper checker, a nested helper left over from the shake
+rewrite. It was never called, and it iterated an empty list, so it would have
+returned false for every input if it had been. Both faults are invisible to a
+reader who sees the docstring rather than the call sites.
+
+The other eleven check scripts and the axiom census are fully reachable too.
+Dead code in a checker is worse than dead code elsewhere: an uncalled check and
+a passing check look the same from the outside, and the gate reports both as
+green. Census 575 -> 576.
 
 ### Step 0704 - a check that was written and never called
 
