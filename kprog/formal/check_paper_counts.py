@@ -1353,6 +1353,27 @@ def duplicate_codes() -> list[tuple[str, list[str]]]:
     return out
 
 
+def module_split(text: str) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    """`((arm64, x86, shared) modules, (theorems))` as the section states it.
+
+    The section splits the 306 proof modules by which simulator they prove
+    and gives each bucket's theorem count. Both triples are the sentence's
+    own arithmetic: they must reach the tree's totals, and the shared
+    bucket must be the 138 generated specifications plus the hand-written
+    cross-ISA ones.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    m = re.search(r"(\d+) AArch64 modules prove ([\d,{}]+) theorems, "
+                  r"(\d+) x86-64 modules prove ([\d,{}]+), and "
+                  r"(\d+) shared modules prove ([\d,{}]+)", flat)
+    if not m:
+        return (), ()
+    num = lambda x: int(x.replace(",", "").replace("{", "").replace("}", ""))
+    mods = (int(m.group(1)), int(m.group(3)), int(m.group(5)))
+    thms = (num(m.group(2)), num(m.group(4)), num(m.group(6)))
+    return mods, thms
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2100,6 +2121,25 @@ def main() -> None:
         problems.append(
             "%s repeats %s and the section says the numbers are pairwise "
             "distinct" % (spec, dupes))
+    # The module and theorem splits must reach the tree's totals, and the
+    # shared bucket must be the generated specifications plus the
+    # hand-written cross-ISA modules.
+    mods, thms = module_split(text)
+    import check_lean_claims as _cl
+    _tree = _cl.scan_tree(str(pathlib.Path(__file__).parent))
+    if mods and thms:
+        if sum(mods) != _tree["modules"]:
+            problems.append(
+                "the module split sums to %d and the tree has %d"
+                % (sum(mods), _tree["modules"]))
+        if sum(thms) != _tree["theorems"]:
+            problems.append(
+                "the theorem split sums to %d and the tree has %d"
+                % (sum(thms), _tree["theorems"]))
+        if mods[2] != _tree["specs"] + 12:
+            problems.append(
+                "the shared bucket is %d and 138 specifications plus 12 "
+                "hand-written is %d" % (mods[2], _tree["specs"] + 12))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

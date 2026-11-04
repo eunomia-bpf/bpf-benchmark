@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 596, and 498 steps
+`build/mut_*.py` files exist, the counter's last value is 597, and 499 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0728 - six figures whose only relation was to each other
+
+The section splits the proof modules by which simulator each proves: seventy
+AArch64 proving eight hundred and thirteen theorems, eighty-six x86-64 proving
+eleven hundred and fifty, and a hundred and fifty shared proving a hundred and
+two. That is six figures whose only stated relation was to each other, and the
+sentence's own totals happen to come to three hundred and six modules and two
+thousand and sixty-five theorems, which are the tree's.
+
+The shared bucket is defined rather than measured: a hundred and thirty-eight
+generated specifications plus twelve hand-written cross-ISA, control-flow and
+tag modules. Both halves check, the generated count from the generators on disk
+and the twelve from the module names.
+
+So the split is now held three ways: each triple must sum to the tree's total,
+and the shared bucket must be its definition. Changing one bucket by one is
+reported twice, once as a sum that no longer reaches the tree and once as a
+definition that no longer holds. Census 596 -> 597.
 
 ### Step 0727 - the disclosed blind spot, and a population that
 moved with the tree

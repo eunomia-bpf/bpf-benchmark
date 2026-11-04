@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0728 bound the six-figure module and theorem
+split: both triples must reach the tree's totals, and
+the 150 shared bucket must be 138 specifications plus
+12 hand-written. A one-module change is reported
+twice (census 596 -> 597).
+
+
 Step 0727 tested the disclosed macro-hygiene blind
 spot: the fix works, catching a one-line bare
 parameter, but the population it quotes is historical
