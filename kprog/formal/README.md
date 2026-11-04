@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0807 - the prose writes arms in lowercase too
+
+The join between a sentence giving only a mutation count and the harness it
+describes matched quoted tokens only when they were written in capitals. The
+prose names an arm in lowercase as often, and two more sentences resolve when
+every quoted token counts: the register-presence contract and the pre-post
+writeback contract, each matching the docstring of a harness with that size
+uniquely.
+
+The reach goes from five to seven, and all seven agree on their size. The floor
+rises with it, so a later narrowing of the token rule reports rather than
+quietly matching fewer sentences.
+
+Forty-seven sentences still state a size several harnesses share and name no
+token that separates them. They need the prose to name the file, which is a
+rewrite rather than a check; the measurement now says exactly how many there are
+and why each stays ambiguous. Census unchanged; the checker gains two joins.
+
 ### Step 0806 - the third kind of name, and the same binding
 
 The section refers to nine earlier steps by number when a contract or a harness

@@ -1779,8 +1779,12 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
             continue
         n = int(m.group(1))
         cands = docs.get(n, [])
+        # Every quoted token counts, not only the all-caps ones: the
+        # prose names an arm in lowercase as often as in capitals, and the
+        # docstring carries whichever the contract uses.
         ops = {o.upper() for o in
-               re.findall(r"\\texttt\{([A-Z][A-Z0-9_]{2,})\}", line)}
+               re.findall(r"\\texttt\{([A-Za-z][A-Za-z0-9_]{1,})\}",
+                          line)}
         if len(cands) < 2 or not ops:
             continue
         hit = [s for s, d in cands
@@ -3296,9 +3300,9 @@ def main() -> None:
     joins = stated_harness_joins(pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 5:
+    if len(joins) < 7:
         problems.append(
-            "only %d sentences join a harness by opcode; at least 5 matched "
+            "only %d sentences join a harness by opcode; at least 7 matched "
             "before" % len(joins))
     for stated, harness, have in joins:
         if stated != have:

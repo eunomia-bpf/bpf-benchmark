@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0807 widened the opcode join to lowercase
+tokens, resolving two more sentences (5 -> 7, all
+sizes agree) and raising the floor so a narrowing
+reports (no census change).
+
+
 Step 0806 bound the nine step numbers the section
 cites against the two records that number steps; all
 resolve, and a planted 0999 reports (no census
