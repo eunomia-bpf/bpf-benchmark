@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0725 read all 11 checker docstrings against
+their code after the previous step found one that
+said the opposite. Two look narrower than they are,
+but only by naming an architecture in history; five
+state figures and all verify (census 593 -> 594).
+
+
 Step 0724 corrected the readme checker's own
 docstring, which said banner and case figures were
 measured elsewhere while it holds three of them. It

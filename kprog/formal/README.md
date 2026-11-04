@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 593, and 495 steps
+`build/mut_*.py` files exist, the counter's last value is 594, and 496 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0725 - eleven docstrings read against their code
+
+The previous step found a docstring claiming the opposite of what its code
+holds, so this one read all eleven checkers' docstrings against their code. Two
+look narrower than what they check, because each mentions one architecture in
+the history of the defect that motivated it while the check covers both.
+
+Both summary lines are accurate -- every generated macro, every dual-emitted
+generator -- and the architecture names are history rather than scope. Five
+docstrings state figures; each was verified against the tree or the run, and the
+two case counts in the composition checker are live banners.
+
+One example needed care: the paper checker's docstring cites the ellipsis form
+with a figure that appears in the section unbraced, so a search for the braced
+spelling finds nothing. The figure is there and the example is right, which is
+the same wrapping and escaping trap this campaign has hit four times. Census 593
+-> 594.
 
 ### Step 0724 - the checker's own description of what it holds
 
