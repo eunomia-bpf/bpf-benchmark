@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0744 measured the 48 mismatches the paper
+reports from a host that names neither the header nor
+its symbol: mutating the generated shift and running
+it gives exactly 48, so coverage is behavioural as
+claimed (census 612 -> 613).
+
+
 Step 0743 confirmed all 14 recorded constants are
 both bound and related: the four a name search missed
 are summed, paired or bounded in a loop, and raising

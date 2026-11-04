@@ -1489,6 +1489,40 @@ def decode_drift_headers() -> list[str]:
                                  done.stdout + done.stderr)))
 
 
+def bswap_mutation_mismatches() -> int:
+    """Mismatches when the generated bswap shift is moved by one.
+
+    The paper says a host naming neither the header nor its generated symbol
+    outside a comment still fails with 48 mismatches when the generated
+    shift constant changes, because it exercises the operation through the
+    dispatcher. Coverage is behavioural, so the count is measured rather
+    than read off the host's text.
+    """
+    import subprocess
+    here = pathlib.Path(__file__).parent
+    header = here / "generated" / "x86_bswap.h"
+    saved = header.read_text()
+    out = str(here / "build" / "probe_bswap_host")
+    try:
+        header.write_text(saved.replace(
+            "0x0000000000ff0000ULL) << 24",
+            "0x0000000000ff0000ULL) << 23", 1))
+        cc = subprocess.run(
+            ["gcc", "-Wall", "-Wextra", "-O2", "-I.", "-I../x86",
+             "-I../../kprog",
+             "-I../../runner/build-host-docker-llvmbpf/vendor/libbpf/"
+             "prefix/include/bpf", "test_x86_bswap_route_host.c", "-o", out],
+            cwd=str(here), capture_output=True, text=True)
+        if cc.returncode != 0:
+            return -1
+        done = subprocess.run([out], cwd=str(here), capture_output=True,
+                              text=True)
+        return (done.stdout + done.stderr).count("MISMATCH")
+    finally:
+        header.write_text(saved)
+        pathlib.Path(out).unlink(missing_ok=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2312,6 +2346,14 @@ def main() -> None:
             problems.append(
                 "an opcode drift no longer fires an assertion in %s and the "
                 "section says it does" % header)
+    # "fails with 48 mismatches when the generated shift constant is
+    # changed": coverage is behavioural, so the count is measured by
+    # mutating the header and running the host.
+    mismatches = bswap_mutation_mismatches()
+    if mismatches != 48:
+        problems.append(
+            "the bswap shift mutation produces %d mismatches and the "
+            "section says 48" % mismatches)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

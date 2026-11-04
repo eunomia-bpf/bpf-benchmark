@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 612, and 514 steps
+`build/mut_*.py` files exist, the counter's last value is 613, and 515 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0744 - coverage that is behavioural, measured
+
+The section makes a behavioural claim it says overturned an earlier reading: a
+host that names neither the generated header nor its symbol outside a comment
+still fails with forty-eight mismatches when the generated shift constant
+changes, because it drives the operation through the dispatcher rather than
+naming it.
+
+The claim is testable exactly as written. Moving the generated shift by one and
+compiling that host produces forty-eight mismatches, so coverage is behavioural
+in the way the sentence says and the host's text is not the evidence.
+
+Measuring it costs a compile and a run, which is why it is not among the cheap
+checks, but it is the only way to hold a claim whose content is that text is
+insufficient evidence. A reader can see the host names neither the header nor
+the symbol; only running it shows the host still catches the drift. Census 612
+-> 613.
 
 ### Step 0743 - the four relations a name search missed
 
