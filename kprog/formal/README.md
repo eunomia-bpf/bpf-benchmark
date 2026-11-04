@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0803 - the audit that found the orphan is now a check that
+flags itself
+
+The dead-code audit that found the uncalled determinism function was done by
+hand and would have to be remembered. It is now a check: the three modules in
+this family call into each other, so the search spans all three and reports any
+function nothing references.
+
+It flagged itself on the first run, which is the right answer and the reason the
+check is worth having: a function added for the audit and never called is
+exactly the defect it looks for. It is now called from the gate's own exit path,
+so a clean run means the audit ran.
+
+Checked by appending an unused function and watching the run fail with its name.
+The family is clean today, so what the check buys is that the next addition
+cannot be left uncalled. Census unchanged; the checker gains a component.
+
 ### Step 0802 - a function written, tested and never called
 
 The determinism function added a few steps ago compared two gate logs and had no

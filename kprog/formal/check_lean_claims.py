@@ -92,6 +92,42 @@ MAP_IMAGE = re.compile(r"List\.map\b.*?\[[^\]]*\][^=]*=\s*\[", re.S)
 NON_MEMBER = re.compile(r"^\(.* = none\)$", re.S)
 
 
+def dead_code() -> list[str]:
+    """Functions in the checker family with no caller anywhere.
+
+    A function that nothing calls is a check that reads nothing, and it
+    returns the same green as one that passes. The three modules here call
+    into each other, so the search spans all of them rather than one file.
+    """
+    import ast
+    here = pathlib.Path(__file__).parent
+    family = [here / n for n in
+              ("check_paper_counts.py", "check_lean_claims.py",
+               "harness_census.py")]
+    trees = {}
+    for f in family:
+        if not f.exists():
+            continue
+        try:
+            trees[f.name] = ast.parse(f.read_text())
+        except SyntaxError:
+            continue
+    used = set()
+    for tree in trees.values():
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Name):
+                used.add(n.id)
+            elif isinstance(n, ast.Attribute):
+                used.add(n.attr)
+    out = []
+    for name, tree in trees.items():
+        for n in tree.body:
+            if isinstance(n, ast.FunctionDef) and n.name not in used:
+                out.append("%s defines %s and nothing calls it"
+                           % (name, n.name))
+    return out
+
+
 def bootstrap_state() -> str:
     """What a built tree needs that this checkout is missing.
 
@@ -1897,6 +1933,11 @@ def main(argv):
              actual["refines"], actual["refines_decided"],
              actual["kinds_enum"], actual["c_consumed"],
              actual["lean_consumed"]))
+    dead = dead_code()
+    if dead:
+        for d in dead:
+            print("check_lean_claims: %s" % d)
+        return 1
     return 0
 
 
