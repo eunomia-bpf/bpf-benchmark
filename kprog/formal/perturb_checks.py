@@ -77,9 +77,7 @@ PERTURBATIONS = [
      / "4-safety.tex",
      "passes 248 independent", "passes 240 independent", "log has 248"),
     (["python3", "check_readme_counts.py", "--check"],
-     ROOT / "README.md",
-     "the counter's last value is 583", "the counter's last value is 599",
-     "census last value"),
+     ROOT / "README.md", "counter", None, "census last value"),
     (["python3", "mutate_contracts.py", "--check"],
      ROOT / "generate_arm64_aux_spec.py",
      "    if data != EXPECTED:", "    if False:", "SURVIVED"),
@@ -97,7 +95,9 @@ int main(void) { return (int)KPROG_X86_ADC_RESULT(1, 2, 0); }
 def probe(argv, path, old, new, want):
     """Break one check; return None on success or a description of the gap."""
     if old is None:                      # the probe is a file that must exist
-        saved = PROBE_UNPAREN if path.name == "probe_unparen.h" else PROBE_HOST
+        saved = {  # the text a probe file is written with
+            "probe_unparen.h": PROBE_UNPAREN,
+        }.get(path.name, PROBE_HOST)
         existed = path.exists()
     else:
         saved, existed = path.read_text(), True
@@ -112,7 +112,18 @@ def probe(argv, path, old, new, want):
         if existed:
             backup = tempfile.mkstemp()[1]
             shutil.copy(str(path), backup)
-            replace(path, old, new)
+            if old == "counter":
+                # The census figure changes every step, so the probe derives
+                # it rather than naming it.
+                text = path.read_text()
+                m = re.search(r"counter's last value is (\d+)", text)
+                if not m:
+                    raise SystemExit("perturb: no census figure in README")
+                path.write_text(text.replace(
+                    "counter's last value is %s" % m.group(1),
+                    "counter's last value is %d" % (int(m.group(1)) + 7), 1))
+            else:
+                replace(path, old, new)
         else:
             path.write_text(saved)
         code, out = run(argv)

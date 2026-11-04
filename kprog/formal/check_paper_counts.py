@@ -1331,19 +1331,25 @@ def duplicate_codes() -> list[tuple[str, list[str]]]:
             data = json.loads(spec.read_text())
         except ValueError:
             continue
-        rows = (data.get("opcodes") or data.get("operations")
-                or data.get("rows") or [])
-        codes = [str(r.get("code") or r.get("op_code") or r.get("opcode"))
-                 for r in rows
-                 if isinstance(r, dict)
-                 and (r.get("code") or r.get("op_code") or r.get("opcode"))]
-        seen, dupes = set(), []
-        for c in codes:
-            if c in seen:
-                dupes.append(c)
-            seen.add(c)
-        if dupes:
-            out.append((spec.name, dupes))
+        # A row's name keys every table that has one; a code keys the
+        # opcode tables. Both must be unique, or dispatch on the code and a
+        # reference by name each become ambiguous.
+        for field in ("name", "code", "op_code", "opcode"):
+            for table, rows in data.items():
+                if (not isinstance(rows, list) or len(rows) < 2
+                        or not isinstance(rows[0], dict)):
+                    continue
+                vals = [str(r[field]) for r in rows if field in r]
+                if len(vals) < 2:
+                    continue
+                seen, dupes = set(), []
+                for v in vals:
+                    if v in seen:
+                        dupes.append(v)
+                    seen.add(v)
+                if dupes:
+                    out.append(("%s:%s:%s" % (spec.name, table, field),
+                                dupes))
     return out
 
 
@@ -2092,8 +2098,8 @@ def main() -> None:
     # ambiguous and the sentence false.
     for spec, dupes in duplicate_codes():
         problems.append(
-            "%s repeats opcode code(s) %s and the section says the numbers "
-            "are pairwise distinct" % (spec, dupes))
+            "%s repeats %s and the section says the numbers are pairwise "
+            "distinct" % (spec, dupes))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
