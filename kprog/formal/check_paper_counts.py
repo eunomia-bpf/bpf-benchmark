@@ -1454,8 +1454,9 @@ def main() -> None:
     # the oracle has since grown -- so the figure is bound to the banner of
     # the host the sentence names.
     flat_text = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    # The same claim is written with and without brace-grouped thousands.
     for fig in re.findall(
-            r"\(now ([\d{},]+) modeled cases", flat_text):
+            r"(?:\(|, )now ([\d{},]+) modeled cases", flat_text):
         n = int(re.sub(r"[{},]", "", fig))
         if n not in measured:
             problems.append(

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0691 found the same host sized twice, once as
+4{,}470 after a parenthesis and once as 4470 after a
+comma; the check read only the first. Both spellings
+and both punctuations now resolve (census 561 ->
+562).
+
+
 Step 0690 fixed a tense: a paragraph said the gate
 prints 220 banners while the summary says 248. Both
 were true of their moment; the present-tense one read
