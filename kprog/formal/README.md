@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 565, and 463 steps
+`build/mut_*.py` files exist, the counter's last value is 566, and 464 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0695 - five unread numerals, and all five explained
+
+A final sweep asked, for every hyphenated numeral in the section, whether
+anything reads it. Five were unread and all five were already explained: a
+quoted historical banner inside a narrative, and the three past sizes of the
+harness that grew from ninety-six to a hundred and twelve, which the growth
+check binds by requiring the series to ascend.
+
+The other shapes the sweep touched were bound already. Two numeral subsets, the
+assert count and its named share, and the row count and its caught share, both
+resolve against the tree. The universal forms, all a hundred and thirty-eight
+specifications rendered and all a hundred and thirty-eight modules reachable,
+are derived from the same counters that produce the totals.
+
+So the section's numerals are now read by one of six mechanisms -- the log, the
+tree, a derived population, a partition, a historical series, or a documented
+exclusion -- and the sweep that established this was by noun rather than by
+phrase. Census 565 -> 566.
 
 ### Step 0694 - a partition that names no harness size
 

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0695 closed the numeral sweep: every hyphenated
+figure is read by one of six mechanisms, and the five
+that were not are a quoted historical banner and
+three past sizes the growth check binds (census 565
+-> 566).
+
+
 Step 0694 bound five sentences that split a harness
 into planted catches and kept equivalences: 107 + 42
 = 149 and four more, all exact. The form names no
