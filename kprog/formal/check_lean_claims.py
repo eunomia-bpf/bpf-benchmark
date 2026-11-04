@@ -31,6 +31,7 @@ import argparse
 import glob
 import os
 import pathlib
+import subprocess
 import re
 import sys
 
@@ -89,6 +90,33 @@ SWEEP_RANGE = re.compile(r"^\(\(List\.(?:fin)?[Rr]ange \w+\)\.all", re.S)
 # over a hand list does not join the class.
 MAP_IMAGE = re.compile(r"List\.map\b.*?\[[^\]]*\][^=]*=\s*\[", re.S)
 NON_MEMBER = re.compile(r"^\(.* = none\)$", re.S)
+
+
+def bootstrap_state() -> str:
+    """What a built tree needs that this checkout is missing.
+
+    The gate depends on sources under the ignored `build/` directory -- the
+    route hosts it compiles, the test hosts, and the mutation harnesses the
+    row claims are read from -- and on object files that only `lake build`
+    writes. A checkout can hold all of the first and none of the second, so
+    the failure names whichever is short instead of blaming the sentences.
+    """
+    here = pathlib.Path(__file__).parent
+    tracked = subprocess.run(["git", "ls-files", "build/"], cwd=here,
+                             capture_output=True, text=True).stdout.split()
+    on_disk = len(list((here / "build").glob("*")))
+    mods = len(list((here / "KProgFormal").glob("*.lean")))
+    oleans = len(list((here / ".lake" / "build" / "lib" / "lean"
+                       / "KProgFormal").glob("*.olean")))
+    need = []
+    if oleans < mods:
+        need.append("%d of %d modules built; run `lake build`"
+                    % (oleans, mods))
+    if on_disk < 10 * len(tracked):
+        need.append("%d build/ files present and %d tracked"
+                    % (on_disk, len(tracked)))
+    return "; ".join(need) or "the tree is built"
+
 
 
 def literal_length(src, open_at):
@@ -1571,8 +1599,7 @@ def check(targets, root):
         raise SystemExit(
             "check_lean_claims: only %d row claims resolved to a harness, "
             "and 44 did when this was written; a claim that matches nothing "
-            "went unread (both need a built tree: `lake build` and the "
-            "harnesses under build/)" % len(rowed))
+            "went unread (%s)" % (len(rowed), bootstrap_state()))
     # The declared mutation total is the other figure a reader sizes a
     # harness by, and it was compared to nothing. Twenty-three claims carry
     # one alongside a catch count, and all twenty-three agree.

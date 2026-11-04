@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 626, and 528 steps
+`build/mut_*.py` files exist, the counter's last value is 627, and 529 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0758 - the failing message names the checkout, not the
+sentences
+
+The row claims resolve to nothing on an unbuilt checkout, and the message blamed
+the sentences. It now names the two things a built tree needs and reports
+whichever is short: how many modules have object files, and how many files the
+ignored build directory holds against how many of them are tracked.
+
+On a clone the message reads as zero of three hundred and six modules built, and
+four build files present and four tracked. That is the whole diagnosis, and it
+is what a reader needs before deciding whether a sentence is wrong or the
+checkout is.
+
+The two figures are computed from the tree each time rather than written down,
+so a tree that becomes complete stops reporting anything. Census 626 -> 627.
 
 ### Step 0757 - the gate could not run on a clone of the repository
 
