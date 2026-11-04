@@ -1768,6 +1768,20 @@ def check(targets, root):
             "check_lean_claims: reverting recovers %d proofs from a cases "
             "group whose unstated population is %d"
             % (actual["bv_revert_recovered"], actual["unstated_cases"]))
+    # The re-discharge survivors bound their own populations: a failure count
+    # cannot exceed the obligations it counts, nor a success count exceed the
+    # population it is drawn from. Without this the two recorded figures are
+    # pattern-bound only, and a drift in either would keep matching its
+    # sentence while describing an impossible population.
+    if actual["sweep_nd_fail"] > actual["native_decide"]:
+        raise SystemExit(
+            "check_lean_claims: %d native_decide obligations fail to "
+            "re-discharge out of %d"
+            % (actual["sweep_nd_fail"], actual["native_decide"]))
+    if actual["sweep_bv_ok"] > actual["bv_total"]:
+        raise SystemExit(
+            "check_lean_claims: %d bv_decide obligations re-discharge out "
+            "of %d" % (actual["sweep_bv_ok"], actual["bv_total"]))
     if actual["orb_reach"] + actual["orb_kernel"] != actual["bv_total"]:
         raise SystemExit(
             "check_lean_claims: %d bv_decide proofs reach Lean.ofReduceBool "

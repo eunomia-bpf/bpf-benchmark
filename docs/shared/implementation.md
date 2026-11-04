@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0742 gave the two re-discharge survivors a
+relation to the populations they count: a failure or
+success count cannot exceed its denominator. Both
+guards fire with both numbers (census 610 -> 611).
+
+
 Step 0741 bound the two re-discharge survivors the
 section reports from its tactic-replacement sweep.
 They are recorded rather than derived, since

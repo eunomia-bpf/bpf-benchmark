@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 610, and 512 steps
+`build/mut_*.py` files exist, the counter's last value is 611, and 513 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0742 - a bounded figure can still be impossible
+
+Fourteen constants are recorded in the Lean checker because re-deriving each
+needs a sweep too slow for the gate. All fourteen are bound to a sentence, which
+catches a figure that drifts away from its prose, but a bound figure can still
+describe an impossible population.
+
+Two of them describe survivors of a sweep and had no relation to the population
+they count: one failure out of four hundred and eighty-eight obligations, and a
+hundred and sixty-one successes out of a hundred and sixty-five. Each is now
+required to be at most its own denominator, so a recorded figure that exceeded
+the population it counts is reported with both numbers.
+
+That is the same guard the axiom pair has had since its figures drifted, applied
+to the two constants that lacked one. A bound figure says the sentence and the
+record agree; a relation says the record describes something that can be true.
+Census 610 -> 611.
 
 ### Step 0741 - the survivors of the sweep, recorded not derived
 
