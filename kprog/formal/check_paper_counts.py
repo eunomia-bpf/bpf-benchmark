@@ -1932,6 +1932,27 @@ def helper_dispatch_shape() -> list[str]:
     return out
 
 
+def generator_coverage() -> list[str]:
+    """Problems with the generator/gate pairing, empty when it is exact.
+
+    The section says every generator re-derives its output on each run and
+    fails on any byte difference, all 138 passing --check, so a hand edit to
+    a generated file or a stale artifact cannot survive the gate. A
+    generator on disk that the recipe never runs makes that sentence false
+    in the direction that matters: its artifacts have no enforcement.
+    """
+    here = pathlib.Path(__file__).parent
+    disk = {p.name for p in here.glob("generate_*_spec.py")}
+    gate = set(re.findall(r"(generate_\w+_spec\.py) --check",
+                          (here / "Makefile").read_text()))
+    out = []
+    for name in sorted(disk - gate):
+        out.append("%s is on disk and the recipe never checks it" % name)
+    for name in sorted(gate - disk):
+        out.append("the recipe checks %s and it is not on disk" % name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2928,6 +2949,10 @@ def main() -> None:
     # "the selector maps exactly the armed ids ... and the tables invert":
     # the ladder's shape is two tables meeting at the armed count.
     for problem in helper_dispatch_shape():
+        problems.append(problem)
+    # "a hand edit to a generated file or a stale artifact cannot survive
+    # the gate": every generator on disk must be run by the recipe.
+    for problem in generator_coverage():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

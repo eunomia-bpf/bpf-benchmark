@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0784 verified the 138 generators are a bijection
+with the recipe's --check lines and bound it both
+ways, so a generator the gate skips reports (no
+census change).
+
+
 Step 0783 bound the helper-ladder sentence across two
 files: armed ids 1-7, first unarmed 8, last named 21,
 and each body derives from its name (no census

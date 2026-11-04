@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0784 - the generator list and the recipe are one bijection
+
+A fourth cannot-sentence says a hand edit to a generated file or a stale
+artifact cannot survive the gate, because every generator re-derives its output
+and fails on any byte difference. The sentence holds on the tree as far as the
+pairing goes: a hundred and thirty-eight generators exist, the recipe names each
+exactly once, and the run log shows a hundred and thirty-eight check
+invocations.
+
+The failure the sentence denies is a generator the recipe never runs, since its
+artifacts would have no enforcement at all. That is now reported in both
+directions, a generator on disk that the gate skips and a gate line whose
+generator is gone.
+
+This is the fourth claim bound by comparing one list against another rather than
+by reading a figure, and it is the cheapest kind in the section: both lists are
+short and both are already maintained for other reasons, so the check costs a
+glob and a regex. Census unchanged; the checker gains a component.
+
 ### Step 0783 - a cannot-sentence that spans two files
 
 The sentence about the helper ladder states four properties of two tables: the
