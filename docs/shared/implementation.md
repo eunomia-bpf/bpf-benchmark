@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0727 tested the disclosed macro-hygiene blind
+spot: the fix works, catching a one-line bare
+parameter, but the population it quotes is historical
+and now reads as such (census 595 -> 596).
+
+
 Step 0726 tested the paper's two claims about the jcc
 check: the four-site count is the check's own output,
 and the disclosed blind spot is exact — removing one

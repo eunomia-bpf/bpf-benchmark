@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 595, and 497 steps
+`build/mut_*.py` files exist, the counter's last value is 596, and 498 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0727 - the disclosed blind spot, and a population that
+moved with the tree
+
+The paper discloses a blind spot in the macro-hygiene check: it read only the
+text after a macro's first newline, so a macro written on one line was never
+examined. That is the strongest kind of claim a paper can make, and the one most
+worth testing, because a partial disclosure hides a larger gap.
+
+The fix is present and works: a one-line header whose body uses a bare parameter
+is caught by name and position. What did not hold was the population the
+sentence gives, three hundred and twenty-three macros and six hundred and
+twenty-one parameters, because the generated headers have been rewritten since
+and now hold different numbers of both.
+
+The sentence's verbs are already past tense, so the figure describes what the
+buggy version skipped; it now says the headers as they stood then, which is what
+the numbers are a measurement of. Census 595 -> 596.
 
 ### Step 0726 - the paper's two claims about one check
 
