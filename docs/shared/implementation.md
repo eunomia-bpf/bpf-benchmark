@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0712 added the two missing probes, bringing the
+harness to all ten gate checks. The header probe
+exposed a baseline fault: a probe that creates a file
+needs both runs to omit it (census 582 -> 583).
+
+
 Step 0711 turned the eight manual perturbations into
 a script that breaks each gate check, requires it to
 name the break, and proves the tree unchanged. It was

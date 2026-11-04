@@ -65,11 +65,18 @@ PERTURBATIONS = [
     (["python3", "check_oracle_composition.py"],
      ROOT / "probe_nocompose_host.c", None, None,
      "without driving the composition"),
+    (["python3", "check_macro_hygiene.py", "probe_unparen.h"],
+     ROOT / "probe_unparen.h", None, None, "unparenthesized parameter"),
+    (["python3", "check_lean_claims.py"],
+     ROOT / "check_lean_claims.py",
+     '"orb_reach": 67,', '"orb_reach": 69,', "do not, but there are"),
     (["python3", "mutate_contracts.py", "--check"],
      ROOT / "generate_arm64_aux_spec.py",
      "    if data != EXPECTED:", "    if False:", "SURVIVED"),
 ]
 
+
+PROBE_UNPAREN = "#define KPROG_PROBE_SUM(A, B) (A) + B\n"
 
 PROBE_HOST = """/* Calls a composed contract without composing. */
 #include "../x86/x86_sim_local_bpf.h"
@@ -80,12 +87,16 @@ int main(void) { return (int)KPROG_X86_ADC_RESULT(1, 2, 0); }
 def probe(argv, path, old, new, want):
     """Break one check; return None on success or a description of the gap."""
     if old is None:                      # the probe is a file that must exist
-        saved, existed = PROBE_HOST, path.exists()
+        saved = PROBE_UNPAREN if path.name == "probe_unparen.h" else PROBE_HOST
+        existed = path.exists()
     else:
         saved, existed = path.read_text(), True
     backup = None
     try:
-        code, out = run(argv)
+        # The baseline is the clean state: for a probe file, that means the
+        # file absent and the argument naming it dropped.
+        base = argv[:-1] if not existed else argv
+        code, out = run(base)
         if code != 0:
             return "%s fails before the probe" % argv[1]
         if existed:
@@ -93,7 +104,7 @@ def probe(argv, path, old, new, want):
             shutil.copy(str(path), backup)
             replace(path, old, new)
         else:
-            path.write_text(PROBE_HOST)
+            path.write_text(saved)
         code, out = run(argv)
         if code == 0:
             return "%s stayed green after the probe" % argv[1]
@@ -106,7 +117,7 @@ def probe(argv, path, old, new, want):
             path.unlink()
         if backup:
             pathlib.Path(backup).unlink()
-    code, out = run(argv)
+    code, out = run(base)
     if code != 0:
         return "%s did not recover after the probe" % argv[1]
     return None

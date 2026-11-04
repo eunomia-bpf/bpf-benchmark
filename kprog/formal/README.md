@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 582, and 480 steps
+`build/mut_*.py` files exist, the counter's last value is 583, and 481 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0712 - all ten checks, and a baseline that was wrong
+
+The harness covered eight of the ten checks the gate runs. The two it missed
+were the one that scans headers for an unparenthesized macro operand and the one
+that binds the theorem counts, and both are now probes: a synthetic header whose
+parameter sits bare beside a plus, and a recorded constant moved by two.
+
+The header probe exposed a design fault in the harness. Its baseline ran with
+the probe file already present, so the check failed before the probe and the
+harness reported the wrong reason; then the recovery run still passed the file
+as an argument, so it reported a recovery that never happened. A probe that has
+to create a file needs both runs to omit it.
+
+With that fixed, all ten checks name their break. The harness was tested again
+by disabling one of them, which is reported as that check staying green after
+its probe, and the tree is unchanged after every run. Census 582 -> 583.
 
 ### Step 0711 - the audit becomes a script, and the script is
 tested too
