@@ -1926,10 +1926,10 @@ def main() -> None:
     # described one dimension wider than it is would print a size that no
     # longer follows from the sentence.
     products = sweep_products(text)
-    if len(products) != 3:
+    if len(products) < 3:
         problems.append(
-            "the section states %d sweep dimension products; 3 when this "
-            "was written" % len(products))
+            "the section states %d sweep dimension products; at least 3 "
+            "matched before" % len(products))
     for cases, product in products:
         if cases != product:
             problems.append(
@@ -2032,10 +2032,10 @@ def main() -> None:
     # that caught each change. The stages must not exceed what was caught,
     # and the change-style sentences must add up exactly.
     parts = harness_partitions(text)
-    if len(parts) != 4:
+    if len(parts) < 4:
         problems.append(
-            "the section states %d harness partitions; 4 when this was "
-            "written" % len(parts))
+            "the section states %d harness partitions; at least 4 matched "
+            "before" % len(parts))
     for form, tot, s_sum in parts:
         if s_sum > tot:
             problems.append(
@@ -2099,10 +2099,10 @@ def main() -> None:
     # of change. The parts must reach the total -- one said nineteen against
     # parts summing to seventeen.
     parts = binding_mutations(text)
-    if len(parts) != 4:
+    if len(parts) < 4:
         problems.append(
-            "the section states %d binding-mutation splits; 4 when this "
-            "was written" % len(parts))
+            "the section states %d binding-mutation splits; at least 4 "
+            "matched before" % len(parts))
     for total, summed in parts:
         if total != summed:
             problems.append(
@@ -2141,10 +2141,10 @@ def main() -> None:
     # detector stride and the harness must still be at least as large as its
     # last stated size.
     series, current = harness_growth(text)
-    if len(series) != 5:
+    if len(series) < 5:
         problems.append(
-            "the growing harness is recorded at %d sizes; 5 when this was "
-            "written" % len(series))
+            "the growing harness is recorded at %d sizes; at least 5 "
+            "matched before" % len(series))
     if any(b <= a for a, b in zip(series, series[1:])):
         problems.append("the growing harness's sizes do not ascend: %s"
                         % series)

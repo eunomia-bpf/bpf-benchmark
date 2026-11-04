@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0766 converted the last four reach counts to
+floors and left the bswap measurement exact, since a
+reach turns a literal into a hazard and a measurement
+does not (census 634 -> 635).
+
+
 Step 0765 turned seven more exact-reach assertions
 into floors, since a reach count that must equal a
 literal fails when the reader is widened. Each sits
