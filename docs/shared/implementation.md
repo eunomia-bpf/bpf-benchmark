@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0783 bound the helper-ladder sentence across two
+files: armed ids 1-7, first unarmed 8, last named 21,
+and each body derives from its name (no census
+change).
+
+
 Step 0782 bound the helper-id cannot-sentence: 61
 ids, strictly rising 1 to 195, so a repeat or descent
 reports. Two of the three bound cannot-sentences are

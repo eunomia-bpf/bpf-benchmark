@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0783 - a cannot-sentence that spans two files
+
+The sentence about the helper ladder states four properties of two tables: the
+armed ids are exactly one through seven, the selector maps each of them and
+names the first unarmed and the last named id, the body of each row derives from
+its name, and the id and slot tables invert over the armed range. Each holds,
+and the simulator header names exactly twenty-one helpers, so the first unarmed
+id is eight and the last is twenty-one as the sentence says.
+
+The inversion is the part worth holding. It is a claim about two tables meeting
+at one number, so a row added to the specification without a define in the
+simulator header, or an armed id moved out of the range, breaks it while each
+table stays internally consistent.
+
+This is the fourth cannot-sentence bound and the first that spans two files
+rather than one. The three before it each read a single artifact; this one
+compares a generated table against the hand-written defines it binds to, which
+is the shape most of the remaining ones have. Census is unchanged; the checker
+gains a component.
+
 ### Step 0782 - a third cannot-sentence, and what the rest of them
 are like
 

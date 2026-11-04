@@ -1894,6 +1894,44 @@ def helper_id_table() -> list[str]:
     return out
 
 
+def helper_dispatch_shape() -> list[str]:
+    """Problems with the helper ladder's shape, empty when the section holds.
+
+    The section states four things about it: the id table is strictly
+    increasing, the selector maps exactly the armed ids, the first unarmed
+    and last named ids are fixed, and the id and slot tables invert over
+    the armed range. Each is a property of two tables meeting at the armed
+    count, so a row added to one and not the other breaks the inversion.
+    """
+    import json
+    here = pathlib.Path(__file__).parent
+    spec = json.loads((here / "x86_helper_dispatch_spec.json").read_text())
+    helpers = spec["helpers"]
+    ids = [r["id"] for r in helpers]
+    out = []
+    if ids != list(range(1, len(ids) + 1)):
+        out.append("the armed helper ids are %s, not 1..%d"
+                   % (ids, len(ids)))
+    if spec["helper_count"] != len(helpers):
+        out.append("helper_count is %d and the table holds %d rows"
+                   % (spec["helper_count"], len(helpers)))
+    for r in helpers:
+        if r["body"] != "X86_SIM_BPF_CALL_" + r["name"]:
+            out.append("%s carries body %s" % (r["name"], r["body"]))
+    sim = (here / ".." / "x86" / "x86_sim_local_bpf.h").read_text()
+    named = sorted(int(v) for v in re.findall(
+        r"#define X86_SIM_HELPER_\w+ (\d+)U", sim))
+    armed = len(helpers)
+    if named and armed:
+        if any(i not in named for i in range(1, armed + 1)):
+            out.append("an armed id is not named by the simulator header")
+        above = [i for i in named if i > armed]
+        if above and min(above) != armed + 1:
+            out.append("the first unarmed named id is %d and the section "
+                       "says %d" % (min(above), armed + 1))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2886,6 +2924,10 @@ def main() -> None:
     # "the id table is strictly increasing and so cannot alias two helper
     # ids to one slot": a repeat or a descent is that alias.
     for problem in helper_id_table():
+        problems.append(problem)
+    # "the selector maps exactly the armed ids ... and the tables invert":
+    # the ladder's shape is two tables meeting at the armed count.
+    for problem in helper_dispatch_shape():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
