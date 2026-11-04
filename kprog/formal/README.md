@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 632, and 534 steps
+`build/mut_*.py` files exist, the counter's last value is 633, and 535 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0764 - the second wording of a catch split went unread, and
+the guard hid it
+
+The sentence that reports how a battery's rows divide between the stage that
+caught them was read only when it was phrased as so many mutations caught, with
+the parts introduced by by, at or from. The same sentence is written far more
+often as so many rows catch, with parts introduced through a stage as well, and
+thirty-nine of them went unread.
+
+Reading the second wording brings the count from eighteen to fifty-seven, and
+all fifty-seven reach their total. The guard that held the old reach was an
+exact figure, so it failed the moment the checker read more; it is now a floor,
+because the two wordings cover different sentences and what matters is that
+neither family stopped matching.
+
+That guard was the same defect the docstrings had: a number in the checker that
+nothing recomputed. Here the number even looked right, since it matched the
+reach of the narrower reading. Census 632 -> 633.
 
 ### Step 0763 - the repaint applies and the host still passes
 

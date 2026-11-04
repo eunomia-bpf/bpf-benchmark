@@ -1150,7 +1150,8 @@ def caught_with_parts(text: str) -> list[tuple[int, int]]:
 
     "128 mutations were caught (88 by the generator check, 40 by the Lean
     chain)": each part names the stage that caught a share, so the parts
-    must reach the count. Parts are introduced by "by", "at" and "from".
+    must reach the count. Parts are introduced by "by", "at", "from" and
+    "through"; the sentence states mutations or rows, and both are read.
     """
     flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
     out = []
@@ -1158,6 +1159,14 @@ def caught_with_parts(text: str) -> list[tuple[int, int]]:
             r"(\d+) mutations were caught \(([^)]{10,300})\)", flat):
         parts = [int(x) for x in re.findall(
             r"(\d+) (?:by|at|from) ", body)]
+        if parts:
+            out.append((int(tot), sum(parts)))
+    # The other wording states rows rather than mutations, and attributes a
+    # part "through" a stage as often as "by" one.
+    for tot, body in re.findall(
+            r"(\d+) rows catch \(([^)]{10,400})\)", flat):
+        parts = [int(x) for x in re.findall(
+            r"(\d+) (?:by|at|from|through) ", body)]
         if parts:
             out.append((int(tot), sum(parts)))
     return out
@@ -1715,7 +1724,8 @@ def battery_count() -> int:
     contract each anchors. The count is the files, so it is stated by the
     tree; a battery removed without the sentence moving is the failure.
     """
-    return len(list((pathlib.Path(__file__).parent / "build").glob("mut_*.py")))
+    return len(list((pathlib.Path(__file__).parent / "build")
+                       .glob("mut_*.py")))
 
 
 def main() -> None:
@@ -2350,10 +2360,13 @@ def main() -> None:
     # "N mutations were caught (a by the generator, b by the Lean chain)":
     # the stages must reach the count. Eighteen sentences state this split.
     cw = caught_with_parts(text)
-    if len(cw) != 18:
+    # The two wordings cover different sentences, so the reach is a floor
+    # rather than an exact figure; what matters is that neither family
+    # stopped matching after an edit.
+    if len(cw) < 57:
         problems.append(
-            "the section states %d caught-with-parts counts; 18 when this "
-            "was written" % len(cw))
+            "the section states %d caught-with-parts counts and 57 matched "
+            "when both wordings were read" % len(cw))
     for stated, summed in cw:
         if stated != summed:
             problems.append(

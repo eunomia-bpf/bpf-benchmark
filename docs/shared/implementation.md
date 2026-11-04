@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0764 read the second catch-split wording ("N
+rows catch" with "through" parts): 18 claims became
+57, all reaching their total, and the exact-reach
+guard became a floor (census 632 -> 633).
+
+
 Step 0763 traced the failing battery row to a
 detector, not a string: the repaint applies and the
 host still passes, so that stage cannot observe the
