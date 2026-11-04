@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0753 corrected a docstring that described four
+sizes where the code requires five, after confirming
+the series and its harness were both right (census
+621 -> 622).
+
+
 Step 0752 held the detector ordinals in the
 growing-harness series: sizes ascended already, but a
 repeated or reordered ordinal passed that check. It

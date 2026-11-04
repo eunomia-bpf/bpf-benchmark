@@ -753,8 +753,8 @@ def row_stage_splits(text: str) -> list[tuple[int, int, int, int]]:
 def harness_growth(text: str) -> tuple[list[int], int]:
     """`(stated sizes of the growing harness, its current row count)`.
 
-    Four sentences record one harness at successive sizes as detectors were
-    added: 96, 100, 104, 108, each four mutants larger. The sizes are
+    Five sentences record one harness at successive sizes as detectors were
+    added: 96, 100, 104, 108 and 112, each four mutants larger. The sizes are
     historical, so they are not banners, but the series must still ascend
     and the harness must still be at least as large as its last stated
     size -- a harness that shrank would leave the last sentence describing
