@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0734 audited every claim pattern for captures it
+does not bind, following the one-sided findings of
+0729 and 0733. None: every captured numeral has a
+key, and the three apparent gaps were miscounts of
+escaped characters (census 602 -> 603).
+
+
 Step 0733 extended the disjointness check to AArch64,
 which the section also claims: 8 families, 28 pairs,
 complete. Only the x86 theorem had been read, so half
