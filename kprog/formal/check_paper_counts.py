@@ -1982,6 +1982,38 @@ def sentinel_theorems() -> list[str]:
     return out
 
 
+# Each "A and B cannot disagree about X" sentence is carried by a theorem
+# asserting the agreement, usually a roundtrip or an equality of two
+# derivations. The module and the name are what tie the prose to the proof.
+AGREEMENT_THEOREMS = (
+    ("Arm64StackArena.lean", "arm64_stack_arena_views_coincide"),
+    ("Arm64HelperArgPtrShape.lean",
+     "arm64_helper_arg_ptr_of_code_roundtrip"),
+    ("Arm64VregFieldShape.lean",
+     "arm64_vreg_field_offsets_are_half_offsets"),
+)
+
+
+def agreement_theorems() -> list[str]:
+    """Problems with the agreement proofs, empty when each still exists.
+
+    The section says pairs of decoders cannot disagree about a value -- the
+    arena address, the high lane's displacement, which base is served. Each
+    rests on a theorem asserting the agreement, so a missing module or a
+    renamed theorem leaves the sentence with nothing behind it.
+    """
+    here = pathlib.Path(__file__).parent / "KProgFormal"
+    out = []
+    for module, name in AGREEMENT_THEOREMS:
+        f = here / module
+        if not f.exists():
+            out.append("the section's agreement claim has no %s" % module)
+            continue
+        if not re.search(r"theorem %s\b" % re.escape(name), f.read_text()):
+            out.append("%s does not prove %s" % (module, name))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2987,6 +3019,10 @@ def main() -> None:
     # about no register": each such sentence rests on a theorem that
     # equates the two sentinels, so a missing theorem leaves it hollow.
     for problem in sentinel_theorems():
+        problems.append(problem)
+    # "A and B cannot disagree about X": each sentence rests on a theorem
+    # asserting the agreement, usually a roundtrip or an offset equality.
+    for problem in agreement_theorems():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

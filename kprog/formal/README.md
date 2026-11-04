@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0786 - three more agreement theorems, and a wrong name that
+failed
+
+Three more cannot-disagree sentences now rest on named proofs: the arena
+address, where the helper-argument pointer code roundtrips through the source
+table, and the high lane's displacement, where the field-offsets theorem says
+the two halves sit where the lane plan puts them.
+
+The middle one was named wrongly on the first attempt and the check said so,
+which is the useful property: a theorem name is only worth binding when a wrong
+one fails rather than passing quietly. The two that matched first time are
+roundtrip and equality theorems, which is what the sentences assert in prose.
+
+Together with the five sentinel theorems bound last step, eight of the twelve
+cannot-disagree sentences now name their proof. The remaining ones are about the
+stack arena's base choice and the byte ladders, and each of those modules has an
+agreement theorem to bind the same way. Census unchanged; the checker gains a
+component.
+
 ### Step 0785 - a cannot-disagree sentence rests on a theorem name
 
 Twelve sentences say two decoders cannot disagree about some value, and the four
