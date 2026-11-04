@@ -1453,6 +1453,42 @@ def shake_digests(text: str) -> list[str]:
     return sorted(set(re.findall(r"\b([0-9a-f]{32})\b", paper)) - known)
 
 
+def decode_drift_headers() -> list[str]:
+    """Headers whose static assertions observe an opcode drift.
+
+    The section says changing one hand-written opcode in `x86_sim.h` fails
+    the build with two independent assertions, in `x86_opcode.h` and
+    `x86_dispatch_singleton.h`, so the two generated tables observe the
+    drift separately. That is testable: change the constant, compile a
+    translation unit that includes both, and see which headers fire.
+    """
+    import subprocess
+    import tempfile
+    here = pathlib.Path(__file__).parent
+    sim = here.parent / "x86" / "x86_sim.h"
+    saved = sim.read_text()
+    probe = ("#include \"../x86/x86_sim.h\"\n"
+             "#include \"generated/x86_opcode.h\"\n"
+             "#include \"generated/x86_dispatch_singleton.h\"\n"
+             "int main(void) { return 0; }\n")
+    try:
+        sim.write_text(saved.replace("#define X86_OP_NOP 0x00U",
+                                     "#define X86_OP_NOP 0x09U", 1))
+        with tempfile.NamedTemporaryFile("w", suffix=".c",
+                                         delete=False) as fh:
+            fh.write(probe)
+            src = fh.name
+        done = subprocess.run(
+            ["gcc", "-Wall", "-Wextra", "-O2", "-I.", "-I../x86", "-c",
+             src, "-o", "/dev/null"],
+            cwd=str(here), capture_output=True, text=True)
+    finally:
+        sim.write_text(saved)
+        pathlib.Path(src).unlink(missing_ok=True)
+    return sorted(set(re.findall(r"([\w_]+\.h):\d+",
+                                 done.stdout + done.stderr)))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2266,6 +2302,16 @@ def main() -> None:
     for d in shake_digests(text):
         problems.append(
             "the section quotes md5 %s and no recorded shake carries it" % d)
+    # "changing a single hand-written opcode ... fails the build with two
+    # independent assertions, in x86_opcode.h and x86_dispatch_singleton.h":
+    # both named headers must still observe the drift. The test showed eight
+    # more headers also fire, which the sentence does not claim against.
+    fired = set(decode_drift_headers())
+    for header in ("x86_opcode.h", "x86_dispatch_singleton.h"):
+        if header not in fired:
+            problems.append(
+                "an opcode drift no longer fires an assertion in %s and the "
+                "section says it does" % header)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

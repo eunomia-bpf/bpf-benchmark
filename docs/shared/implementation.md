@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0740 tested a claim the paper says was checked:
+an opcode drift fires assertions in x86_opcode.h and
+x86_dispatch_singleton.h. Both fire, plus eight more
+the sentence does not name (census 608 -> 609).
+
+
 Step 0739 tested the claim that a missing battery
 host fails the gate loudly: both halves hold, though
 the failure comes from the Lean checker's fork count

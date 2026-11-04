@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 608, and 510 steps
+`build/mut_*.py` files exist, the counter's last value is 609, and 511 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0740 - the claim the paper says was checked, checked
+
+The section makes a claim it says was checked rather than assumed: changing one
+hand-written opcode from zero to nine fails the build with two independent
+assertions, in the opcode header and the singleton dispatch header, so the two
+generated tables observe the drift separately.
+
+The claim is testable in the way it describes. Changing that constant and
+compiling a unit that includes both headers fires assertions in both named
+headers, so the two tables do observe the drift separately, exactly as stated.
+
+The test also showed more than the sentence claims: eleven headers fire, not
+two. That does not contradict the sentence, which names the two it cares about
+rather than the only two, and the check holds only those two. Removing one of
+them is reported by header name. Census 608 -> 609.
 
 ### Step 0739 - the loud failure is louder than claimed
 
