@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 645, and 547 steps
+`build/mut_*.py` files exist, the counter's last value is 646, and 548 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,29 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0777 - the sixty-one divide exactly, and the rest is a limit
+of the text
+
+The fifty-four sentences left over state a size that two or three harnesses
+share, and no key in the tree separates them. A contract name does not help,
+because the sentence carrying the count says only that it retargets the shared
+specification; the opcode that would identify it is in the sentence before, and
+joining on the paragraph resolves four rather than five, since a paragraph names
+several harnesses' worth of opcodes.
+
+A specification's opcode table does not help either, because the names in the
+prose are simulator mnemonics and the specification keys its entries by
+operation rather than by mnemonic. The one key that works is the harness's own
+docstring, which names the contract it targets, and it resolves five of the six
+sentences whose size is unique.
+
+So the sixty-one divide exactly: six state a size only one harness has, of which
+five join through the docstring and one is the growing harness at an earlier
+size; fifty-four state a shared size; and one states a size no harness has,
+which is that same growing harness at its first size. The limit is the text
+rather than the checker, since the sentence carries nothing that identifies its
+harness. Census 645 -> 646.
 
 ### Step 0776 - five size-only sentences join by opcode, and two bugs
 in the join
