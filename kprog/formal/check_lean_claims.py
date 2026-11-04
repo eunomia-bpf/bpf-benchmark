@@ -1107,6 +1107,10 @@ def scan_tree(root):
         "ident_nd": ident[2],
         "ident_cite": ident[0] - ident[1] - ident[2],
         "ident_share": 100 * ident[1] // max(ident[0], 1),
+        # "a quarter" is true when the share is in [20, 30); the sentence
+        # states a word, so the number is reported as 1 for true.
+        "ident_quarter": 1 if 20 <= (100 * ident[1]
+                                      // max(ident[0], 1)) < 30 else 0,
         "compose_total": compose[0],
         "compose_cited": compose[1],
         "compose_eval": compose[0] - compose[1],
@@ -1200,6 +1204,10 @@ CLAIMS = [
      ("ident_total",)),
     (re.compile(r'binders, (\d+) are closed by'), ("ident_bv",)),
     (re.compile(r'and (\d+) by \\texttt\{native'), ("ident_nd",)),
+    # The share is stated as the word "a quarter", not as a numeral, so the
+    # pattern matches the word and the key is derived from the two counts.
+    (re.compile(r'are, though (a quarter) of them'),
+     ("ident_quarter",)),
     (re.compile(r'and the other (\d+) cite'), ("ident_cite",)),
     # The last clause: no bv_decide identity reduces a product of two wide
     # operands. Three statements contain a product and each multiplies by the
@@ -1371,6 +1379,9 @@ README_CLAIMS = [
 
 
 def number(text):
+    """A captured figure, or 1 when the claim is stated in words."""
+    if text in ("a quarter", "a half"):
+        return 1
     return int(re.sub(r'[{},\\]', '', text))
 
 

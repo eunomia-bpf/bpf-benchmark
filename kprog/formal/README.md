@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 598, and 500 steps
+`build/mut_*.py` files exist, the counter's last value is 599, and 501 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0730 - a claim stated in words
+
+Every claim pattern in the Lean checker binds a captured numeral, and the
+arithmetic-obligation share is stated as the words a quarter rather than as a
+number. The share was computed and never compared, so the sentence was true when
+written and would have stayed green after the tree moved past a quarter.
+
+The pattern now captures the word and the checker converts a word claim to one,
+comparing it with a derived value that is one when the share lies between a
+fifth and three tenths. The share is twenty-six per cent today, inside that
+range; the two counts behind it are already bound, so a drift that pushed it out
+is reported against the sentence.
+
+The comparison the sentence makes is a range rather than an equality, which is
+why it needed its own rule: a numeral pattern compares numbers, and this one
+compares a claim about a number with an interval. Census 598 -> 599.
 
 ### Step 0729 - half a sentence was bound
 

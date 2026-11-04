@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0730 bound a claim stated in words: "a quarter"
+for the 26% arithmetic-obligation share, computed but
+never compared. The word is now checked against a
+derived interval (census 598 -> 599).
+
+
 Step 0729 bound the 117 modules the section says use
 either decision tactic, which was stated but unread
 while its 653 theorems were bound. The count is the
