@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 554, and 452 steps
+`build/mut_*.py` files exist, the counter's last value is 555, and 453 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0684 - a decomposition that did not reach its banner
+
+Two battery-local hosts state their size as a product: so many scenes times so
+many checks, plus a handful of selector cases. Both hosts run in the gate, so
+the total is a banner and cannot be wrong; the product is prose and can. One of
+the two was wrong: fifteen hundred and thirty-six scenes at sixty-four checks
+reaches ninety-eight thousand three hundred and twenty, and the host prints
+ninety-nine thousand eight hundred and fifty-six.
+
+The total settles which factor moved. The host drives four directions as one
+axis, and its per-scene grid is a hundred and twenty-eight cells, so the scene
+count must divide by a hundred and twenty-eight; fifteen hundred and thirty-six
+does and fifteen hundred and sixty does not. The check count is therefore
+sixty-five, and fifteen hundred and thirty-six times sixty-five plus sixteen is
+the banner exactly.
+
+This is the first defect found in a decomposition rather than in a total, and it
+survived because the total is generated while the decomposition is written by
+hand. The check now multiplies the stated parts and compares them with the
+stated total, and requires that total to be a banner. Census 554 -> 555.
 
 ### Step 0683 - two words that name a spec, and one that did not
 

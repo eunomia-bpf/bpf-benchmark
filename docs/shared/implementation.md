@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0684 found a battery-local host whose
+decomposition did not reach its banner: 1,536 scenes
+x 64 checks is 98,320, not 99,856. The grid shows the
+check count is 65. Parts now multiply to the stated
+total (census 554 -> 555).
+
+
 Step 0683 joined two more harness sizes by the spec
 word their sentence uses (lane, offset), accepting
 only words that are a segment of the spec name: a

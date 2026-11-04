@@ -1076,6 +1076,26 @@ def description_joins(text: str) -> list[tuple[int, str]]:
     return out
 
 
+def scene_products(text: str) -> list[tuple[int, int]]:
+    """`[(stated total, scenes x checks + selectors)]`.
+
+    A battery-local host's case total is stated as a product: "165,895
+    modeled cases: 2,592 scenes x 64 checks plus 7 selector cases". Both
+    sides are figures, so they must agree -- one such sentence was 1,536
+    scenes at 64 checks, which reaches 98,320, not the 99,856 its banner
+    prints.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    num = lambda x: int(x.replace(",", "").replace("{", "").replace("}", ""))
+    pat = (r"\((\d[\d,{}]*) modeled cases: ([\d,{}]+) scenes? "
+           r"\$\\times\$ (\d+) checks(?: plus (\d+) selector cases)?")
+    out = []
+    for tot, sc, ck, extra in re.findall(pat, flat):
+        out.append((num(tot),
+                    num(sc) * int(ck) + (int(extra) if extra else 0)))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1640,6 +1660,23 @@ def main() -> None:
         if not (here / (spec + "_spec.json")).exists():
             problems.append("%d mutations joins %s, which has no spec"
                             % (n, spec))
+    # A battery-local host's total is a product of scenes and checks; both
+    # sides are figures and must agree, and the total must be a banner
+    # because these hosts do run in the gate.
+    prods = scene_products(text)
+    if len(prods) != 2:
+        problems.append(
+            "the section states %d scene-and-check products; 2 when this "
+            "was written" % len(prods))
+    for stated, computed in prods:
+        if stated != computed:
+            problems.append(
+                "a host is stated at %d cases and its scenes times checks "
+                "give %d" % (stated, computed))
+        if stated not in measured:
+            problems.append(
+                "a host is stated at %d cases and no banner reports it"
+                % stated)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
