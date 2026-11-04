@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 562, and 460 steps
+`build/mut_*.py` files exist, the counter's last value is 563, and 461 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0692 - the second-largest figure, and its seven terms
+
+One sentence accounts for what a sweep added to the recipe: twelve million two
+hundred and seventy thousand five hundred and thirteen modeled cases that the
+gate had never run, followed by the seven hosts that carry them. The total is
+the largest in the section after the gate's own, and it is a sum of seven
+banners.
+
+Each of the seven resolves to a banner, so this decomposition can be checked
+twice over: every term against the run, and the total against the sum of the
+terms. Changing one term by a single case is reported both as the parts not
+reaching the total and as the term not being a banner.
+
+It is the only sentence of its shape, and it went unread because its phrasing is
+unlike the counts, the products and the partitions the other patterns look for.
+The sweep that found it listed every numeral the section attaches to modeled
+cases and asked which were banners. Census 562 -> 563.
 
 ### Step 0691 - the same figure in two spellings, one of them read
 

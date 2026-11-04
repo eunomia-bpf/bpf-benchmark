@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0692 bound the section's second-largest figure:
+12,270,513 cases a sweep added, which is the sum of
+seven banners. Every term and the total are checked,
+so one case of drift is reported twice (census 562 ->
+563).
+
+
 Step 0691 found the same host sized twice, once as
 4{,}470 after a parenthesis and once as 4470 after a
 comma; the check read only the first. Both spellings

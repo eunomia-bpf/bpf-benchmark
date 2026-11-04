@@ -1119,6 +1119,28 @@ def case_decompositions(text: str) -> list[tuple[int, int, int, int]]:
             for t, a, b in re.findall(pat, flat)]
 
 
+def added_case_sums(text: str) -> list[tuple[int, list[int]]]:
+    """`[(stated total, parts)]` for "adding N modeled cases (a 1, b 2, ...)".
+
+    A sentence lists what a sweep added to the recipe and gives the total.
+    Every part is a banner and the total is their sum, so both the sum and
+    each term can be checked.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    num = lambda x: int(x.replace(",", "").replace("{", "").replace("}", ""))
+    out = []
+    for tot, body in re.findall(
+            r"adding (\d[\d,{}]*) modeled cases[^(]{0,40}\("
+            r"([^)]{10,400})\)", flat):
+        # Parts are "<label> <number>" pairs; take the number after a
+        # label, not every digit in the span.
+        parts = [num(v) for v in re.findall(
+            r"[a-zA-Z][\w ]*? ([\d]{1,3}(?:[\d,{}]*))", body)]
+        if parts:
+            out.append((num(tot), parts))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1731,6 +1753,23 @@ def main() -> None:
             problems.append(
                 "a host's stated axes %d x %d give %d against a total of %d"
                 % (a, b, prod, total))
+    # "adding N modeled cases make check never ran (a 4,470, b 11,223, ...)":
+    # every part is a banner and the total is their sum, so both can be
+    # checked rather than the total alone.
+    adds = added_case_sums(text)
+    if len(adds) != 1:
+        problems.append(
+            "the section states %d added-case sums; 1 when this was "
+            "written" % len(adds))
+    for total, parts in adds:
+        if sum(parts) != total:
+            problems.append(
+                "an added-case total is stated as %d and its parts sum to %d"
+                % (total, sum(parts)))
+        for p_ in parts:
+            if p_ not in measured:
+                problems.append(
+                    "an added-case part of %d is not a banner" % p_)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
