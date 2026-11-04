@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 636, and 538 steps
+`build/mut_*.py` files exist, the counter's last value is 637, and 539 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0768 - the same coupling reaches the tag contract, and a
+repaint there passes too
+
+The coupling the LEA row showed is not unique to it. Sweeping the route hosts
+for a symbol that is both an input and an expectation finds ten pairs across
+eight hosts, and testing one confirms it: the AArch64 scalar tag is used sixteen
+times in the body, the value host names it three times, and repainting it from
+zero to seven leaves the host passing.
+
+So the same blindness reaches the tag contract, which is the contract everything
+else writes through. The host asks for the scalar tag by name and compares
+against that name, so which integer encodes the tag is invisible to it.
+
+Ten pairs is the shape of the search rather than the number of defects, since a
+pair is only blind when both uses move together. The one tested is blind; the
+rest need the same treatment before the count means anything. Census 636 -> 637.
 
 ### Step 0767 - the host and the body name the same constant, so a
 repaint moves both

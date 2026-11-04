@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0768 found the LEA coupling is not unique: ten
+input-and-expectation pairs across eight route hosts,
+and repainting the scalar tag 0 -> 7 leaves its host
+passing (census 636 -> 637).
+
+
 Step 0767 named why the LEA detector is blind: the
 host sets its input by the same constant name the
 body gates on, so a repaint moves both sides together
