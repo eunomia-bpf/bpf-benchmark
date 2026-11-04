@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 583, and 481 steps
+`build/mut_*.py` files exist, the counter's last value is 584, and 482 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0713 - the two checks outside the gate, and a probe that
+disabled nothing
+
+The harness covered the ten checks the gate runs and not the two it leaves out,
+which are the two that need a log the gate is producing. Both are now probes:
+the paper checker against a changed banner count in the section, and the readme
+checker against a moved census figure. Twelve checks name their break.
+
+The paper probe needed a claim written on one line. The first target was a
+sentence that wraps across three, and a substitution on raw text does not see
+it, which is the same wrapping trap that has caught several censuses this
+session. A one-line claim about the banner count settled it.
+
+The harness was verified by disabling a check, and the verification itself took
+two attempts: the first substituted an exit line that one script does not use,
+so nothing was disabled and the harness reported that check as passing. Both are
+now recorded, because a probe that fails to disable anything looks exactly like
+a check that fires. Census 583 -> 584.
 
 ### Step 0712 - all ten checks, and a baseline that was wrong
 

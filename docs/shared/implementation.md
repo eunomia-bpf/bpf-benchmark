@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0713 probed the last two checks — the paper and
+readme checkers — so all twelve name their break. A
+wrapped sentence broke the first probe, and a wrong
+exit line broke the falsifiability test (census 583
+-> 584).
+
+
 Step 0712 added the two missing probes, bringing the
 harness to all ten gate checks. The header probe
 exposed a baseline fault: a probe that creates a file
