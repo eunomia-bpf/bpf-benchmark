@@ -2013,6 +2013,42 @@ AGREEMENT_STATEMENTS = {
 
 
 
+# "each source names exactly one base-address source and the closed fact
+# selects between the two and cannot be restated as a hand-written gate; the
+# same selection is shared by the read, read-tag, and write helpers": four
+# theorems, one per consumer, so a consumer that stopped sharing reports.
+SHARED_SELECTION_THEOREMS = (
+    ("Arm64MemBaseSrcShape.lean",
+     "arm64_mem_base_src_matches_write_arm"),
+    ("Arm64MemBaseSrcShape.lean",
+     "arm64_mem_base_src_matches_read_src"),
+    ("Arm64MemBaseSrcShape.lean", "arm64_mem_base_src_selects_sp"),
+    ("Arm64MemBaseSrcShape.lean", "arm64_mem_base_src_case_refines"),
+)
+
+
+def shared_selection_theorems() -> list[str]:
+    """Problems with the shared base-source selection, empty when it holds.
+
+    The section says the closed fact selects between two sources and that
+    the same selection is shared by the read, read-tag and write helpers
+    rather than repeated. Each consumer has a theorem equating its own
+    choice with the shared one, so a consumer that drifts reports.
+    """
+    here = pathlib.Path(__file__).parent / "KProgFormal"
+    out = []
+    for module, name in SHARED_SELECTION_THEOREMS:
+        f = here / module
+        if not f.exists():
+            out.append("the shared-selection claim has no %s" % module)
+            continue
+        if not re.search(r"^theorem %s\b" % re.escape(name),
+                         f.read_text(), re.M):
+            out.append("%s does not prove %s" % (module, name))
+    return out
+
+
+
 def agreement_theorems() -> list[str]:
     """Problems with the agreement proofs, empty when each still exists.
 
@@ -3053,6 +3089,11 @@ def main() -> None:
     # "A and B cannot disagree about X": each sentence rests on a theorem
     # asserting the agreement, usually a roundtrip or an offset equality.
     for problem in agreement_theorems():
+        problems.append(problem)
+    # "the same selection is shared by the read, read-tag and write
+    # helpers rather than repeated at three sites": one theorem per
+    # consumer, so a consumer that stopped sharing reports.
+    for problem in shared_selection_theorems():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

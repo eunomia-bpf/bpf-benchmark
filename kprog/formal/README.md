@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0789 - the sharing half of a cannot-restate sentence is
+checkable
+
+Fourteen sentences say a selection cannot be restated as a hand-written test,
+and the claim beneath them is that the closed fact selects among the
+alternatives with nothing left over. One of those sentences adds that the same
+selection is shared by the read, read-tag and write helpers rather than repeated
+at three sites, and that half is checkable: four theorems equate each consumer's
+own choice with the shared one.
+
+The strongest of the four says the load path reaches the stack read exactly when
+the base-address source is the stack pointer register, at both widths. That is
+the sharing stated as an equivalence rather than as a comment, and it is what
+makes the sentence's cannot true.
+
+The other thirteen say the same thing about other selectors -- the width ladder,
+the storage effect, the offset, the state field, the writeback body -- and each
+has a module whose theorems assert the closure. The shape to bind is the same,
+and this step establishes it on the one that names its consumers. Census
+unchanged; the checker gains a component.
+
 ### Step 0788 - a name is not a claim, so the statements are digested
 
 Binding a theorem by name catches a rename or a deletion, and it leaves one
