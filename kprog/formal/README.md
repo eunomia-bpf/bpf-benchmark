@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 617, and 519 steps
+`build/mut_*.py` files exist, the counter's last value is 618, and 520 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0749 - two adjacent sentences contradicted each other
+about one table
+
+The register dispatch paragraph contradicted itself inside two sentences. One
+says the no-register sentinel and every byte above fifteen name no cell, which
+is what the generated selector does: it returns none for every byte from sixteen
+up. The next says that therefore the only register number naming no cell is the
+all-ones sentinel, which denies the bytes in between.
+
+The second sentence now states what the absence of a zero register actually
+buys: the sixteen cells are the contiguous range from zero, so the sentinel is
+the largest byte rather than an exception inside the range. That is the property
+the AArch64 mirror lacks, since its zero register sits inside the range and has
+to be omitted.
+
+Neither figure moved, and no check would have caught it: each sentence is
+internally consistent and only their conjunction fails. Census 617 -> 618.
 
 ### Step 0748 - the axiom sentence states a partition, so its parts
 must recover the whole

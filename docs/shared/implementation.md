@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0749 fixed a paragraph that contradicted itself
+in two adjacent sentences: one says every byte above
+15 names no cell, the next said the sentinel is the
+only such number. No figure moved and no check would
+have caught it (census 617 -> 618).
+
+
 Step 0748 checked the axiom sentence as a partition:
 617 + 623 + 825 recovers the 2,065 the gate proves,
 so a typo in any one of the three moves the sum off
