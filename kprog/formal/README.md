@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0781 - the section now says which trees its checks read
+
+The section says what is re-derived and what is not, and it never said which
+code its checks read. The checks reach three trees: the two simulator headers,
+the formal tree they are proved against, and the two kernel modules. Nothing
+outside them is read, so a sentence about the userspace loader is believed
+rather than checked.
+
+The sentence is now in the section, beside the one about re-derivation, because
+the two limits are the same kind of statement. The checker reads its own source
+for the trees it opens and reports a fourth, and reports a tree it no longer
+opens, so the boundary is held from both sides.
+
+This is the smallest useful form of the observation made last step. The gap it
+names cannot be closed here, since the loader is not in this repository, but the
+boundary can at least be stated and kept. Census is unchanged; the checker gains
+a component.
+
 ### Step 0780 - one of the paragraph's three sentences has no source
 here
 

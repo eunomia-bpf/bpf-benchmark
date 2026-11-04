@@ -1842,6 +1842,38 @@ def generation_bump_guards() -> list[str]:
     return out
 
 
+def checker_reach() -> list[str]:
+    """Problems with the trees the checker reads, empty when they match.
+
+    The section says the checks reach three code trees and no further: the
+    two simulator headers, the formal tree, and the two kernel modules. A
+    checker that starts reading a fourth tree makes that sentence false, and
+    one that stops reading the modules makes it generous.
+    """
+    here = pathlib.Path(__file__).parent
+    src = (here / "check_paper_counts.py").read_text()
+    reads = set()
+    for rel in re.findall(r'"(\.\./[\w./-]+)"', src):
+        parts = tuple(x for x in pathlib.PurePosixPath(rel).parts
+                      if x not in ("..", "."))
+        if parts:
+            reads.add(parts[0])
+    # The kernel modules are reached by a composed path rather than a
+    # literal, so the tree is named where the checker builds it.
+    if re.search(r'"kinsn"\s*/\s*"module"', src):
+        reads.add("kinsn")
+    # `docs` is the section under test, not a fourth subject tree.
+    allowed = {"x86", "arm64", "kinsn", "docs"}
+    out = []
+    for tree in sorted(reads - allowed):
+        out.append("the checker reads %s beyond the three trees the section "
+                   "names" % tree)
+    for tree in sorted(allowed - reads):
+        out.append("the checker no longer reads %s, which the section says "
+                   "it does" % tree)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2826,6 +2858,10 @@ def main() -> None:
     # "a generation cannot be reused by silent wraparound": the guard is one
     # comparison, and its absence would be the silent wrap.
     for problem in generation_bump_guards():
+        problems.append(problem)
+    # "the checks reach three code trees and no further": a checker that
+    # starts reading a fourth makes that sentence false.
+    for problem in checker_reach():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
