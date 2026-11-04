@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 558, and 456 steps
+`build/mut_*.py` files exist, the counter's last value is 559, and 457 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0688 - every number in the checkers now has a rule
+
+The checker held seventeen numbers that guard completeness: how many files the
+section cites, how many sweep claims it makes, how many shake claims, how many
+stage splits. Those are not figures the run computes, so they cannot be derived;
+they are the count of claims in a family, and their job is to notice a claim
+added or removed. All seventeen are exact.
+
+The one of them that is a figure rather than a family size is the file count, so
+it was verified against the section directly: forty-seven distinct file names,
+each resolving in the tree. Looking for names outside the texttt spans, which
+the file census would not see, found one fragment of a build path and no real
+citation.
+
+So the derived-versus-written rule now covers every number in both checkers.
+What the run computes is derived; what the paper states is read from the paper;
+what only the agreement of two independent measurements establishes stays
+written and guarded by its identity; and what counts the size of a claim family
+stays written because it is the guard. Census 558 -> 559.
 
 ### Step 0687 - the scene check reads the prose, not a third copy
 The scene check compared the counts it measured against two numbers written in

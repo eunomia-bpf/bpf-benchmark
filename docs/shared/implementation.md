@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0688 audited the checker's own numbers:
+seventeen completeness guards, all exact, and the
+file count verified against the section directly.
+Every number in both checkers now has a stated rule
+(census 558 -> 559).
+
+
 Step 0687 read the two scene counts from the prose
 instead of writing them in the checker, so the
 sentence is compared with the file rather than with a
