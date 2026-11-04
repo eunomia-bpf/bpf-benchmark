@@ -1374,6 +1374,21 @@ def module_split(text: str) -> tuple[tuple[int, ...], tuple[int, ...]]:
     return mods, thms
 
 
+def writeback_bound() -> tuple[bool, int]:
+    """`(a theorem bounds the writeback count, the bound)`.
+
+    The section says the writeback count is bounded by the two bits, never a
+    third writeback the bodies do not implement. That is a Lean theorem, so
+    the check is that the theorem is still there and still says two.
+    """
+    lean = (pathlib.Path(__file__).parent / "KProgFormal"
+            / "Arm64MemPrepost.lean")
+    if not lean.exists():
+        return False, 0
+    m = re.search(r"writebackFormSpec[^\n]*≤\s*(\d+)", lean.read_text())
+    return bool(m), int(m.group(1)) if m else 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2140,6 +2155,16 @@ def main() -> None:
             problems.append(
                 "the shared bucket is %d and 138 specifications plus 12 "
                 "hand-written is %d" % (mods[2], _tree["specs"] + 12))
+    # "the writeback count is bounded by the two bits, never a third
+    # writeback": a Lean theorem states the bound, so the sentence is
+    # checked against the theorem rather than against the prose alone.
+    present, bound = writeback_bound()
+    if not present:
+        problems.append(
+            "no theorem bounds the writeback count and the section says two")
+    elif bound != 2:
+        problems.append(
+            "the writeback bound is %d and the section says two" % bound)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

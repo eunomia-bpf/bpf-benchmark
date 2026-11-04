@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 599, and 501 steps
+`build/mut_*.py` files exist, the counter's last value is 600, and 502 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0731 - a bound stated in prose, checked against the
+theorem that states it
+
+The section states a bound in prose: the writeback count is bounded by the two
+bits, never a third writeback the bodies do not implement. A bound written as a
+word is easy to leave behind, so the question was whether a theorem still says
+it.
+
+It does. The Lean module carries a theorem whose statement is the writeback form
+at most two, so the sentence is checked against the theorem rather than against
+the prose around it. Raising the theorem's bound to three is reported as the
+bound being three where the section says two.
+
+This is the smallest possible binding and the most direct: the sentence names a
+quantity and a limit, and the theorem states the same two things. It needed no
+pattern over the paper at all, only a read of the one Lean file that decides the
+question. Census 599 -> 600.
 
 ### Step 0730 - a claim stated in words
 
