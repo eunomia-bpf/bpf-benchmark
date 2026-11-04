@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0702 computed the sixth absolute claim: >= and >
+differ only on equal operands, so a distinct-operand
+table cannot see the difference. Verified by
+substituting a comparison that differs off equality
+(census 572 -> 573).
+
+
 Step 0701 checked the fifth absolute claim: the width
 spec falls back to a 64-bit default and only one
 width carries 64 bits. All five absolute claims have

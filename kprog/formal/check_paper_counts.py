@@ -1288,6 +1288,19 @@ def width_default() -> tuple[str, list[int], int]:
             sum(1 for w in widths if w["bits"] == 64))
 
 
+def carry_separation() -> tuple[int, bool]:
+    """`(pairs where >= and > differ, all such pairs are equal)`.
+
+    The section says the equal case is the only one separating a subtract
+    carry stated as greater-or-equal from one stated as strictly greater.
+    That is arithmetic: the two predicates disagree exactly on equality, so
+    a table of distinct operands never exercises the difference.
+    """
+    pairs = [(a, b) for a in range(-8, 9) for b in range(-8, 9)
+             if (a >= b) != (a > b)]
+    return len(pairs), all(a == b for a, b in pairs)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2011,6 +2024,15 @@ def main() -> None:
     if wd_name and wd_codes and wd_codes != [1, 2, 4, 8]:
         problems.append(
             "the width codes are %s, not the four resolved" % wd_codes)
+    # "the equal case --- the only one separating a subtract carry stated
+    # as greater-or-equal from one stated as strictly greater": the two
+    # predicates disagree exactly on equality, so distinct operands never
+    # exercise the difference.
+    n_diff, all_equal = carry_separation()
+    if n_diff and not all_equal:
+        problems.append(
+            "%d operand pairs separate >= from > and not all are equal"
+            % n_diff)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 572, and 470 steps
+`build/mut_*.py` files exist, the counter's last value is 573, and 471 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0702 - the equal case, computed rather than asserted
+
+A sixth absolute claim is arithmetic again: the equal case is the only one
+separating a subtract carry stated as greater-or-equal from one stated as
+strictly greater. The sentence uses it to explain why a table of distinct
+operands never found a fault of that shape.
+
+Computing over a grid of operands confirms it. The two predicates differ on
+seventeen pairs and every one of them has equal operands, so a table restricted
+to distinct registers exercises neither side of the difference. That is exactly
+the gap the sentence says the first draft had.
+
+The check recomputes the identity rather than trusting the prose, and it is
+verified by substituting a comparison that differs off equality and watching the
+count come back with pairs that are not equal. Census 572 -> 573.
 
 ### Step 0701 - the fifth absolute claim, and all five hold
 
