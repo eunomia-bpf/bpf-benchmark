@@ -403,7 +403,7 @@ def full_state_oracles() -> int:
     """How many oracles compare every register's value and tag, and all four
     flags.
 
-    Eight sentences say an oracle "compares the whole register file with its
+    The sentences say an oracle "compares the whole register file with its
     tags and all four flags". The macro that unrolls the comparison is not
     the invariant -- the comparison is, and several oracles spell it out
     under their own loop variables -- so this matches the two comparisons
@@ -1233,7 +1233,7 @@ def multiply_bound_pair() -> tuple[int, int]:
 def generator_message_counts() -> set[int]:
     """How many messages each generator can raise, as a set of counts.
 
-    Seventeen sentences say the harness retargets "the N generator
+    The sentences say the harness retargets "the N generator
     re-check messages". The sentence does not name its generator, so the
     join is to the set: a stated count that no generator can raise is a
     figure with no source. This is a typo check, and the weaker form is

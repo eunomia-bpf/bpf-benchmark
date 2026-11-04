@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0754 removed two stale sentence counts from
+checker docstrings (8 -> 5, 17 -> 11 in the text) and
+kept the three the code enforces, since a count
+nobody recomputes drifts (census 622 -> 623).
+
+
 Step 0753 corrected a docstring that described four
 sizes where the code requires five, after confirming
 the series and its harness were both right (census

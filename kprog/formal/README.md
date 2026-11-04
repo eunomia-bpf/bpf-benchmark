@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 622, and 524 steps
+`build/mut_*.py` files exist, the counter's last value is 623, and 525 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0754 - two docstrings counted sentences the section no longer
+holds
+
+Five docstrings in the checker state how many sentences carry the pattern the
+function reads, and three of those counts are still right. The other two had
+drifted: one says eight sentences where the section now holds five, the other
+seventeen where the pattern the function reads is stated in eleven.
+
+Rather than correct them to today's numbers, both now say only that the
+sentences exist, because the count is not what the function checks. A number
+written into a docstring is a claim nobody recomputes, and the two that were
+wrong had been wrong for many steps without anything noticing.
+
+The three that remain are ones the function itself would break on if they moved:
+the growing harness is required to be recorded at five sizes, and the section is
+required to hold the nine banners it says stayed at. Those are checked, so they
+can be stated. Census 622 -> 623.
 
 ### Step 0753 - the check's own description had drifted from the code
 
