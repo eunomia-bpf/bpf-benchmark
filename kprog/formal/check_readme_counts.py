@@ -131,6 +131,25 @@ def banner_monotone() -> list[tuple[int, int, int, int]]:
             if b[1] < a[1]]
 
 
+def case_totals() -> list[tuple[int, int]]:
+    """`[(step, cases)]` for each summary entry's own Gate: line.
+
+    Case totals, unlike banner counts, can fall: a corrected sweep drives
+    fewer rows. The list is therefore held rather than required to ascend --
+    a total that changes without a matching step is what a recording error
+    would look like.
+    """
+    impl = (pathlib.Path(__file__).parent.parent.parent / "docs" / "shared"
+            / "implementation.md").read_text()
+    out = []
+    for m in re.finditer(r"(?:^|\n\n)Step (\d{4})(.*?)"
+                         r"(?=\n\nStep \d{4}|\Z)", impl, re.S):
+        g = re.search(r"Gate:[^.]{0,60}?([\d,]{9,}) cases", m.group(2))
+        if g:
+            out.append((int(m.group(1)), int(g.group(1).replace(",", ""))))
+    return out
+
+
 def numbering_holes() -> list[str]:
     """Step numbers absent from the README between its lowest and highest.
 
@@ -220,6 +239,14 @@ def main() -> None:
            r"coverage: (\d+) are\nad-hoc probes")
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
+
+    # Case totals can fall when a sweep is corrected, so they are held as a
+    # count rather than required to ascend; a total appearing or vanishing is
+    # what a recording error looks like.
+    totals = case_totals()
+    if len(totals) != 32:
+        drift.append("the summary records %d gate case totals, not 32"
+                     % len(totals))
 
     # Banners are only ever added, so the counts the summary records must
     # not decrease as the steps advance. A quoted figure is skipped by the

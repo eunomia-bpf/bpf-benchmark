@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0722 recorded the 32 gate case totals after
+finding one that fell — a corrected sweep at 0465
+that drove fewer rows, documented in the entry.
+Unlike banners, totals may fall; the list is held by
+count (census 590 -> 591).
+
+
 Step 0721 checked that the summary's 78 gate-line
 banner counts never decrease as steps advance. One
 apparent decrease was a quoted figure from the tense

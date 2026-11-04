@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 590, and 492 steps
+`build/mut_*.py` files exist, the counter's last value is 591, and 493 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0722 - a total that fell, and was right to
+
+The banner counts cannot decrease because banners are only added. The case
+totals in the same lines can, and one did: the corrected sweeps at step 0465
+drive fewer out-of-range rows, so the total fell by five thousand while the
+banner count stayed at two hundred and twenty-six.
+
+That is written in the entry itself, so the fall is documented rather than an
+error. The thirty-two gate lines that record a case total are therefore held as
+a count rather than required to ascend: a total appearing or vanishing is what a
+recording error would look like, while a total falling is a correction.
+
+Reading only the figure after the word gate matters here. Three entries state a
+case total that is not the run's own, one of them an oracle with nine and a half
+million cases against a gate total of a hundred and twenty-four million, so a
+sweep of every large figure finds decreases that are not decreases at all.
+Census 590 -> 591.
 
 ### Step 0721 - the gate counts may not go backwards
 
