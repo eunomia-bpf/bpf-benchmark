@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 559, and 457 steps
+`build/mut_*.py` files exist, the counter's last value is 560, and 458 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0689 - a partition in a third word order
+
+A sweep of numerals by the noun they count turned up eighteen mentions of rows
+that no check read, because the bound patterns looked for specific phrasings:
+rows that catch, rows that split by stage, and a fraction of rows caught. The
+eighteenths state the same partition in a third word order.
+
+One says the harness has fifty-nine rows, of which fifty-seven catch and two
+survive. That is the partition the other forms state, written as a total and two
+of its parts instead of a fraction, and it was the one shape the census did not
+read. Fifty-seven and two are fifty-nine, and the check now requires it.
+
+The sweep is what found it: counting numerals by their noun, rather than by the
+phrase around them, is what surfaces a figure whose sentence happens to be
+worded differently from its neighbours. Census 559 -> 560.
 
 ### Step 0688 - every number in the checkers now has a rule
 

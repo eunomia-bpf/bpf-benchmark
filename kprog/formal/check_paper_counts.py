@@ -971,8 +971,14 @@ def caught_fractions(text: str) -> list[tuple[int, int, int]]:
     """
     flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
     pat = (r"\((\d+)/(\d+) caught, (\d+) equivalences? survive")
-    return [(int(a), int(b), int(a) + int(c))
-            for a, b, c in re.findall(pat, flat)]
+    out = [(int(a), int(b), int(a) + int(c))
+           for a, b, c in re.findall(pat, flat)]
+    # The same partition in the other word order: "The harness has 59 rows,
+    # of which 57 catch and 2 survive".
+    for t, c, sv in re.findall(
+            r"(\d+) rows, of which (\d+) catch and (\d+) survive", flat):
+        out.append((int(t), int(t), int(c) + int(sv)))
+    return out
 
 
 def spec_row_joins(text: str) -> list[tuple[int, str, bool]]:
@@ -1643,9 +1649,9 @@ def main() -> None:
     # survive as documented equivalences, so "N/M caught, K survive" must
     # account for the whole battery.
     fracs = caught_fractions(text)
-    if len(fracs) != 2:
+    if len(fracs) != 3:
         problems.append(
-            "the section states %d caught fractions; 2 when this was "
+            "the section states %d caught fractions; 3 when this was "
             "written" % len(fracs))
     for caught, total, accounted in fracs:
         if accounted != total:

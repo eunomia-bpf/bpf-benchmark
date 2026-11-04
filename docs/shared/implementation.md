@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0689 swept numerals by the noun they count and
+found an eighteenth row mention no pattern read: "59
+rows, of which 57 catch and 2 survive", the partition
+in a third word order. It adds up and is now bound
+(census 559 -> 560).
+
+
 Step 0688 audited the checker's own numbers:
 seventeen completeness guards, all exact, and the
 file count verified against the section directly.
