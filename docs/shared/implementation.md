@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0723 gave the whole-tree theorem count its own
+invariant: it ascends, since theorems are only added.
+A subset sum of 1,941 against a tree of 2,060 is
+excluded by reading only True tree / Gate lines
+(census 591 -> 592).
+
+
 Step 0722 recorded the 32 gate case totals after
 finding one that fell — a corrected sweep at 0465
 that drove fewer rows, documented in the entry.

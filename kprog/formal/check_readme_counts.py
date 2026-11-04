@@ -150,6 +150,27 @@ def case_totals() -> list[tuple[int, int]]:
     return out
 
 
+def theorem_totals() -> list[tuple[int, int]]:
+    """`[(step, theorems)]` for whole-tree theorem claims in the summary.
+
+    Theorems are only added, so a whole-tree count must not decrease. A
+    subset sum is excluded: one entry sums three populations to 1,941
+    theorems against a tree of 2,060, and reading that as a decrease would
+    be a false finding on a correct sentence.
+    """
+    impl = (pathlib.Path(__file__).parent.parent.parent / "docs" / "shared"
+            / "implementation.md").read_text()
+    out = []
+    for m in re.finditer(r"(?:^|\n\n)Step (\d{4})(.*?)"
+                         r"(?=\n\nStep \d{4}|\Z)", impl, re.S):
+        claim = re.search(
+            r"(?:True tree:|Gate:)[^.\n]{0,40}?([\d,]{4,}) theorems",
+            m.group(2))
+        if claim:
+            out.append((int(m.group(1)), int(claim.group(1).replace(",", ""))))
+    return sorted(out)
+
+
 def numbering_holes() -> list[str]:
     """Step numbers absent from the README between its lowest and highest.
 
@@ -239,6 +260,18 @@ def main() -> None:
            r"coverage: (\d+) are\nad-hoc probes")
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
+
+    # Theorems are only added, so a whole-tree count must not decrease. A
+    # subset sum is excluded by the helper, which reads only a line opened
+    # by "True tree:" or "Gate:".
+    theo = theorem_totals()
+    if len(theo) != 3:
+        drift.append("the summary states %d whole-tree theorem totals, not 3"
+                     % len(theo))
+    for a, b in zip(theo, theo[1:]):
+        if b[1] < a[1]:
+            drift.append("step %04d states %d theorems and step %04d states %d"
+                         % (a[0], a[1], b[0], b[1]))
 
     # Case totals can fall when a sweep is corrected, so they are held as a
     # count rather than required to ascend; a total appearing or vanishing is
