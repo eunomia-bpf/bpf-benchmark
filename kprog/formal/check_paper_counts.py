@@ -1244,6 +1244,31 @@ def generator_message_counts() -> set[int]:
     return out
 
 
+def stlxr_status_contract() -> list[str]:
+    """Problems with the STLXR contract's shape, empty when it holds.
+
+    The section says the store-exclusive body is the only one of its
+    remainder with two observable effects, "writes the source to memory and
+    then writes a status word to the destination". The contract half of that
+    is checkable: the status spec must derive from the width mask and must
+    be the zero code at every width, which is what "a status word" means
+    here.
+    """
+    here = pathlib.Path(__file__).parent
+    path = here / "KProgFormal" / "Arm64Stlxr.lean"
+    if not path.exists():
+        return ["Arm64Stlxr.lean is absent"]
+    text = path.read_text()
+    out = []
+    if "arm64StlxrSpec" not in text:
+        out.append("the status spec is not named in Arm64Stlxr.lean")
+    if "mask width - mask width" not in text:
+        out.append("the status is not derived from the width mask")
+    if "arm64_stlxr_success_zero" not in text:
+        out.append("no theorem states the success status is zero")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1951,6 +1976,12 @@ def main() -> None:
         problems.append(
             "a harness retargets %d generator messages and no generator "
             "raises that many" % n)
+    # The store-exclusive body is described as writing both memory and a
+    # status word. The status half is in the contract: derived from the
+    # width mask, and proved zero at every width by case analysis over the
+    # four constructors.
+    for problem in stlxr_status_contract():
+        problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

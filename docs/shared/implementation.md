@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0700 bound the half of the two-effect claim a
+contract decides: the STLXR status derives from the
+width mask and is proved zero at every width. The
+memory-write half needs the simulator body, and the
+step says so (census 570 -> 571).
+
+
 Step 0699 bound the 17 "N generator re-check
 messages" figures to the set of counts any generator
 raises. All eight stated values exist; the join

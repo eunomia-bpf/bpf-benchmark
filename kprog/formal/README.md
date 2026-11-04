@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 570, and 468 steps
+`build/mut_*.py` files exist, the counter's last value is 571, and 469 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0700 - the half of a two-effect claim a contract decides
+
+A fourth absolute claim says the store-exclusive body is the only one of its
+remainder with two observable effects, because it writes the source to memory
+and then a status word to the destination. The second half of that is a property
+of the contract rather than of prose: the status must derive from the width mask
+and must be proved zero at every width.
+
+The contract confirms it. The spec is the width mask subtracted from itself,
+which is the exclusive-monitor success encoding, and a theorem states it is zero
+by case analysis over the opcode and the four widths. Removing the subtraction
+is reported as the status no longer being derived from the mask.
+
+So the sentence's two-effect structure has one half that a contract decides and
+one half, the memory write, that only the simulator body shows. The check covers
+the half it can and the step says which half that is, rather than implying the
+whole claim is bound. Census 570 -> 571.
 
 ### Step 0699 - a join to a set, and the attribution it cannot see
 
