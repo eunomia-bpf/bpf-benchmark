@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0752 held the detector ordinals in the
+growing-harness series: sizes ascended already, but a
+repeated or reordered ordinal passed that check. It
+now shows up (census 620 -> 621).
+
+
 Step 0751 found the 329-of-330 gap: a fifth row idiom
 (HOSTS) the extractor did not read, and a SyntaxError
 it silently swallowed. All 330 harnesses are now

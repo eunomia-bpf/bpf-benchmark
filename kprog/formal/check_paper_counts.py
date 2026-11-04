@@ -1611,6 +1611,30 @@ def cell_tables() -> dict[str, int]:
     return out
 
 
+ORDINALS = ("first", "second", "third", "fourth", "fifth", "sixth",
+            "seventh", "eighth", "ninth", "tenth")
+
+
+def detector_series(text: str) -> list[str]:
+    """Problems with the sentences that grow one harness a detector at a time.
+
+    The sizes ascend under a check of their own; this holds the *names*.
+    A sentence adding the eighth detector must follow the seventh, so if a
+    detector sentence is inserted twice or in the wrong place the ordinal
+    shows it even while the sizes still rise.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    seq = [(int(n), w) for n, w in re.findall(
+        r"(\d+)-mutation harness (?:gains|gained) an? (\w+) detector", flat)]
+    out = []
+    for (a, wa), (b, wb) in zip(seq, seq[1:]):
+        if ORDINALS.index(wb) <= ORDINALS.index(wa):
+            out.append(
+                "the detector named %s follows %s while the row count "
+                "rises from %d to %d" % (wb, wa, a, b))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2491,6 +2515,10 @@ def main() -> None:
             problems.append(
                 "the section states %s general-purpose %s cells and the "
                 "generated table holds %d" % (stated.get(isa), isa, n))
+    # A harness that grows a detector at a time states its total and the
+    # detector together, so the series must ascend in both.
+    for problem in detector_series(text):
+        problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 620, and 522 steps
+`build/mut_*.py` files exist, the counter's last value is 621, and 523 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,21 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0752 - the sizes ascended, but their order was never checked
+
+One harness is recorded at six successive sizes as detectors were added, and the
+sizes were already checked to ascend. What the sizes cannot show is whether the
+sentences are in the right order, since a series that rose by the right stride
+while naming its detectors out of sequence would pass that check.
+
+So the ordinals are held too: a sentence adding the eighth detector must follow
+the seventh. A detector sentence inserted twice, or a size edited without its
+ordinal, now shows up even while the sizes still rise.
+
+This is the same shape as the contradiction between two adjacent sentences,
+applied to a series rather than a pair: each sentence is true on its own and the
+order between them is the claim. Census 620 -> 621.
 
 ### Step 0751 - the extractor read 329 of 330 harnesses and swallowed
 the parse error
