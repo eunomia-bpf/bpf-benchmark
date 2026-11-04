@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 611, and 513 steps
+`build/mut_*.py` files exist, the counter's last value is 612, and 514 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0743 - the four relations a name search missed
+
+The fourteen recorded constants were checked for relations by looking for their
+names inside a guard comparison. Ten were found that way and four were not, and
+all four turned out to be related through forms the search missed: two are
+summed into a total that is compared with the theorem count, one is paired with
+its own denominator in a single pattern, and one is bounded inside a loop over
+the two shape groups.
+
+Each was tested by raising it above what it can be: the direct-shape count above
+its group, and the native axiom count above the population it divides. Both are
+reported with the pair of numbers, one by the loop and one by its own pattern.
+
+So all fourteen are bound to a sentence and related to the figures they must
+agree with. That is the property the axiom pair lacked before it drifted, and it
+now holds for every recorded constant rather than the two that happened to need
+it. Census 611 -> 612.
 
 ### Step 0742 - a bounded figure can still be impossible
 

@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0743 confirmed all 14 recorded constants are
+both bound and related: the four a name search missed
+are summed, paired or bounded in a loop, and raising
+each is reported (census 611 -> 612).
+
+
 Step 0742 gave the two re-discharge survivors a
 relation to the populations they count: a failure or
 success count cannot exceed its denominator. Both
