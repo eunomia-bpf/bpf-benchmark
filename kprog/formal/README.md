@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 638, and 540 steps
+`build/mut_*.py` files exist, the counter's last value is 639, and 541 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0770 - the tag codes index arrays, so they must be dense and
+distinct
+
+The tag codes are used as array indices, so they have to be distinct and dense
+from zero. A gap leaves an index that no constant names, and a repeat makes two
+kinds of pointer indistinguishable to every consumer that dispatches on the tag.
+Nothing checked either property.
+
+Both hold today: the x86 header defines eight codes from zero to seven and the
+AArch64 header nine from zero to eight. The check reads them from the headers
+rather than from a list, so a code added without its neighbour, or two codes
+given the same value, reports itself.
+
+The six blind pairs from the last step are the same subject seen from the other
+side. A host that names its input is safe when something else asserts the value,
+and this is the assertion the tags needed: it does not name any input, so it
+cannot move with one. Census 638 -> 639.
 
 ### Step 0769 - all ten pairs tested: six leave the host passing, four
 never compile

@@ -1728,6 +1728,24 @@ def battery_count() -> int:
                        .glob("mut_*.py")))
 
 
+def tag_values() -> dict[str, list[int]]:
+    """`{isa: sorted tag codes}` read from the simulator headers.
+
+    The tags are used as array indices, so they must be distinct and dense
+    from zero; a gap would leave an index that no constant names, and a
+    repeated value would make two kinds of pointer indistinguishable to
+    every consumer that dispatches on the tag.
+    """
+    here = pathlib.Path(__file__).parent
+    out = {}
+    for isa, rel in (("x86", "../x86/x86_sim_local_bpf.h"),
+                      ("arm64", "../arm64/arm64_sim_local_bpf.h")):
+        src = (here / rel).read_text()
+        out[isa] = sorted(int(v) for v in re.findall(
+            r"^#define (?:X86|ARM64)_SIM_TAG_\w+ (\d+)U", src, re.M))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2665,6 +2683,14 @@ def main() -> None:
         problems.append(
             "the section states %s mutation batteries and %d are on disk"
             % (stated_batt.group(1), battery_count()))
+    # The tags index arrays, so they must be distinct and dense from zero;
+    # a gap leaves an index no constant names and a repeat makes two
+    # pointer kinds indistinguishable to every consumer that dispatches.
+    for isa, vals in sorted(tag_values().items()):
+        if vals != list(range(len(vals))):
+            problems.append(
+                "the %s tag codes are %s, which is not distinct and dense "
+                "from zero" % (isa, vals))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

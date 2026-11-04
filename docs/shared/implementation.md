@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0770 bound the tag codes' density and
+distinctness, which their use as array indices
+requires: 8 x86 codes 0-7 and 9 AArch64 codes 0-8,
+read from the headers (census 638 -> 639).
+
+
 Step 0769 tested all ten coupled pairs: 6 leave the
 host passing, 4 fail a static assertion first. The
 assertion is what makes naming an input safe (census
