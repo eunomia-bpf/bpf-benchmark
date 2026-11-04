@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 578, and 476 steps
+`build/mut_*.py` files exist, the counter's last value is 579, and 477 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,19 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0708 - two more checks, broken the way they exist to catch
+Two more checks were tested by perturbation. A conditional-jump opcode moved by
+one was reported as the mnemonic it disagrees with and the condition code each
+value implies, and a truncation length changed from fifteen to sixteen was
+reported as the two lengths the sides now use.
+Both name the disagreement rather than merely failing, which is what makes a
+perturbation test worth running: a check that exits non-zero without saying what
+is wrong is only half checked, and neither of these does that.
+The five checked so far cover the three kinds of assertion in the gate: an
+absence, a shape, and an agreement between two independently written sides. Each
+was broken in the way it exists to catch, and each reported the break. Census
+578 -> 579. Census 578 -> 579.
 
 ### Step 0707 - three checks tested by perturbation, and the
 population problem

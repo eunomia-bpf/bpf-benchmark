@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0708 tested two more checks: an off-by-one jcc
+opcode and a truncation length change, both reported
+with the values that now disagree. Five checks
+verified falsifiable, naming the break (census 578 ->
+579).
+
+
 Step 0707 verified by perturbation that three checks
 fail when they should: a sorry, an unparenthesized
 macro operand, and a wrong module cite. The macro
