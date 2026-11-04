@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 642, and 544 steps
+`build/mut_*.py` files exist, the counter's last value is 643, and 545 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0774 - the scene check joined the wrong host and passed by
+coincidence
+
+The check added two steps ago joined the wrong host and passed by coincidence.
+The sentence it reads describes the helper route host at twenty-one scenes and
+one thousand eight hundred and one cases when it was written; the check compared
+the number twenty-one against the AArch64 body host, which also has twenty-one
+scenes, so two hosts agreed while the sentence kept describing the other one.
+
+Running the hosts settles what the sentences have left behind. The helper host
+names seventeen scenes and reports four thousand and forty-five cases, and the
+section already says so in a later sentence; the AArch64 body host reports four
+thousand four hundred and seventy. The sentence the check reads now gives the
+helper host's current size, and the witness set it is excused from is down to
+the two figures no host reports.
+
+The coincidence was between two hosts, not between a sentence and its subject. A
+scene count identifies a host only when the hosts differ in it, and these two
+did not. Census 642 -> 643.
 
 ### Step 0773 - running the witness hosts shows all three are superseded
 sizes

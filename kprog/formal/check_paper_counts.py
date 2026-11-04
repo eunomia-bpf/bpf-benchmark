@@ -2089,15 +2089,16 @@ def main() -> None:
             problems.append(
                 "the a64 route host is stated at %d modeled cases and no "
                 "banner reports it" % n)
-    # A parenthesised "(N modeled cases" gives an oracle's size. Seven of
-    # the ten are gate banners; the other three are battery-local hosts the
-    # recipe does not run, which the sentences say by calling them
-    # battery-local. A figure that stopped being a banner is reported, so a
-    # stale size cannot hide among the witness figures.
+    # A parenthesised "(N modeled cases" gives an oracle's size. Two are
+    # battery-local hosts the recipe does not run, which the sentences say
+    # by calling them battery-local. A figure that stopped being a banner is
+    # reported, so a stale size cannot hide among them. The helper host was
+    # the third until it was run and found to report its total, which is a
+    # banner like any other.
     flat_n = re.sub(r"\{,\}", ",", flat_text)
     sizes = {int(n.replace(",", "")) for n in re.findall(
         r"\(([\d,]+) modeled cases", flat_n)}
-    witnesses = {1801, 3890, 6509}
+    witnesses = {3890, 6509}
     for v in sorted(sizes - witnesses):
         if v not in measured:
             problems.append(
@@ -2198,15 +2199,18 @@ def main() -> None:
     # The third host is sized inside a modelled-case witness: "N modeled
     # cases over K scenes". The figure was excused from banner matching
     # without the scene count beside it being read.
+    # That sentence describes the helper route host, not the AArch64 body
+    # host: both were at 21 scenes when it was written, so matching the
+    # number alone joins whichever host is named first.
     m = re.search(r"\([\d,{}]+ modeled cases over (\d+) scenes", flat_s)
     if m is None:
         problems.append(
-            "the a64 route host's scene count is absent, so it went "
+            "the helper route host's scene count is absent, so it went "
             "unread")
-    elif scenes.get("a64_route_host") != int(m.group(1)):
+    elif scenes.get("helper_route_host") != int(m.group(1)):
         problems.append(
-            "the a64 route host has %s scenes and the section says %s"
-            % (scenes.get("a64_route_host"), m.group(1)))
+            "the helper route host has %s scenes and the section says %s"
+            % (scenes.get("helper_route_host"), m.group(1)))
     # Thirty-one dedicated harnesses are sized in the prose. The figures are
     # checked against the entry count of each harness's MUTATIONS list, read
     # by the same parse Python performs, so a harness that grew or shrank is

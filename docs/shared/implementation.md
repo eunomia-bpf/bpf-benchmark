@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0774 corrected last step's scene check, which
+joined the wrong host: helper_route_host (21 scenes
+then, 17 now) was compared against a64_route_host,
+also 21. The sentence now states 4,045 over 17
+(census 642 -> 643).
+
+
 Step 0773 ran the witness hosts: 1,801 and 6,509 are
 superseded sizes (hosts now report 4,470 and 7,056),
 so the excuse keeps three sentences frozen at old
