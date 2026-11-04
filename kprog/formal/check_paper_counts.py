@@ -1991,6 +1991,10 @@ AGREEMENT_THEOREMS = (
      "arm64_helper_arg_ptr_of_code_roundtrip"),
     ("Arm64VregFieldShape.lean",
      "arm64_vreg_field_offsets_are_half_offsets"),
+    ("Arm64ByteLane.lean", "arm64_byte_lane_load_inverse"),
+    ("Arm64StackArmShape.lean", "arm64_stack_arm_byte_iff"),
+    ("Arm64MemBaseSrcShape.lean", "arm64_mem_base_src_of_code_roundtrip"),
+    ("Arm64StackArena.lean", "arm64_stack_arena_word_index_refines"),
 )
 
 

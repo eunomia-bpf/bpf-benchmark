@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0787 completed the cannot-disagree set: all 12
+sentences now name a proof, 5 sentinels and 7
+agreements, with rename and deletion reporting (no
+census change).
+
+
 Step 0786 bound three more cannot-disagree sentences
 to their theorems: the arena views, the arg-ptr
 roundtrip, and the field offsets. A wrong name failed

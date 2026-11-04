@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0787 - all twelve cannot-disagree sentences now name a
+proof
+
+The last four cannot-disagree sentences bind to the same shape. The byte-ladder
+one rests on a theorem saying the eight-way lane scatter and the width-masked
+truncation agree, which is the sentence's own claim; the stack-arm one on a
+byte-range equivalence; the base-source one on a code roundtrip; and the arena
+word index on a refinement.
+
+All twelve cannot-disagree sentences in the section now name a proof, five
+sentinels and seven agreements. The check holds the module and the theorem name,
+so a rename, a deletion or a file move reports, which is the drift mode a proof
+reference has.
+
+What it cannot hold is that the theorem says what the sentence does. Two of
+these were read to confirm that, and the rest are named the way the prose reads;
+a sentence that drifted away from its theorem while the theorem kept its name
+would still pass. Census unchanged; the checker gains a component.
+
 ### Step 0786 - three more agreement theorems, and a wrong name that
 failed
 
