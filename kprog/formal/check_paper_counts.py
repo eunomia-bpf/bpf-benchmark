@@ -1046,6 +1046,36 @@ def modifier_count_gap(text: str) -> tuple[int, int]:
     return stated, len(ops)
 
 
+def description_joins(text: str) -> list[tuple[int, str]]:
+    """`[(mutations, spec)]` joined by the words the sentence uses.
+
+    A sentence says a harness "retargets the lane specification" and the
+    spec is arm64_byte_lane. This join is weaker than a name: the words are
+    prose, so a single word like "path" can match a spec that is about
+    something else. Only joins whose words name the spec's own segments are
+    taken, and they are checked by size as well.
+    """
+    import collections
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    totals = harness_totals()
+    shared = collections.Counter(totals.values())
+    here = pathlib.Path(__file__).parent
+    specs = sorted(q.name[:-len("_spec.json")]
+                   for q in here.glob("*_spec.json"))
+    out = []
+    for n, desc in re.findall(
+            r"(\d+)-mutation harness retargets (?:the |its |both )?"
+            r"([a-z/\- ]{3,40}?) spec", flat):
+        if shared.get(int(n), 0) <= 1:
+            continue
+        words = [w for w in re.split(r"[ \-/]+", desc) if len(w) >= 4]
+        cand = [s for s in specs if totals.get("mut_" + s) == int(n)
+                and any(w in s.split("_") for w in words)]
+        if len(cand) == 1:
+            out.append((int(n), cand[0]))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1595,6 +1625,21 @@ def main() -> None:
         problems.append(
             "the section says %d modifiers and arm64_mod_spec.json has %d"
             % (n_mod, spec_mod))
+    # Two shared harness sizes are identified by the words their sentence
+    # uses: "the lane specification" is arm64_byte_lane and "the
+    # offset/prepost spec" is arm64_mem_offset, both checked by size too.
+    # Only words that match a spec's own segments count, because a single
+    # prose word can match the wrong spec.
+    desc = description_joins(text)
+    if len(desc) != 2:
+        problems.append(
+            "the section states %d description-joined harnesses; 2 when "
+            "this was written" % len(desc))
+    for n, spec in desc:
+        here = pathlib.Path(__file__).parent
+        if not (here / (spec + "_spec.json")).exists():
+            problems.append("%d mutations joins %s, which has no spec"
+                            % (n, spec))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

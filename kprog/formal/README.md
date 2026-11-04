@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 553, and 451 steps
+`build/mut_*.py` files exist, the counter's last value is 554, and 452 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0683 - two words that name a spec, and one that did not
+
+Two more shared sizes are identified by the words their sentence uses: a harness
+retargeting the lane specification is the byte-lane one, and one retargeting the
+offset and prepost spec is the memory-offset one. Both are checked by size as
+well, and both resolve.
+
+The join is weaker than a name and is used sparingly. A single prose word can
+match the wrong specification: the path specification's harness has the same
+size as four others, and one of those has offset in its name, so a word match
+sent the path sentence to the wrong file. Only words that are themselves a
+segment of the spec's name are accepted, which keeps lane and offset and drops
+path.
+
+That rule resolves two of the forty-three rather than three, and the third was
+excluded because it was wrong rather than because it was hard. The count of
+exactly-identified harnesses is now fourteen. Census 553 -> 554.
 
 ### Step 0682 - a count that reads like an enumeration is a field
 length

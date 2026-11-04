@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0683 joined two more harness sizes by the spec
+word their sentence uses (lane, offset), accepting
+only words that are a segment of the spec name: a
+looser rule sent the path sentence to the wrong file
+(census 553 -> 554).
+
+
 Step 0682 checked the "eleven modifiers" against the
 modifier spec, which holds eleven operations -- the
 count reads like an enumeration but is a field
