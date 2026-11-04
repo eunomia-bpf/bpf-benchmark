@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0773 ran the witness hosts: 1,801 and 6,509 are
+superseded sizes (hosts now report 4,470 and 7,056),
+so the excuse keeps three sentences frozen at old
+states (census 641 -> 642).
+
+
 Step 0772 bound the a64 witness's scene count: 21
 scenes in the host and in the section. The other two
 witnesses have no scene function to count and stay

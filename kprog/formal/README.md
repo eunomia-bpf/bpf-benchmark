@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 641, and 543 steps
+`build/mut_*.py` files exist, the counter's last value is 642, and 544 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,26 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0773 - running the witness hosts shows all three are superseded
+sizes
+
+The three battery-local case figures were excused from banner matching, and
+running the hosts shows all three are states their host has left behind. The x86
+body host reports seven thousand and fifty-six today against a sentence saying
+six thousand five hundred and nine over ten scenes; the AArch64 body host
+reports four thousand four hundred and seventy against one thousand eight
+hundred and one over twenty-one scenes.
+
+That is the same relation as the growing harness: the sentence records the host
+at the step that wrote it, and the host has since grown. The scene count beside
+the AArch64 figure still holds at twenty-one, which is why the check added last
+step passed, but the case figure beside it does not.
+
+So the excuse is doing more work than it should. A witness figure is supposed to
+be one the recipe cannot report; these could be reported, since both hosts run
+and print their totals, and excusing them keeps the sentences frozen at the
+sizes they had. Census 641 -> 642.
 
 ### Step 0772 - one of the three witnesses can be checked, and now is
 
