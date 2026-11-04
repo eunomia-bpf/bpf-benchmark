@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 551, and 449 steps
+`build/mut_*.py` files exist, the counter's last value is 552, and 450 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0681 - a step number is a pointer into the record
+
+Four sentences cite a numbered step for provenance: the batteries of 0454, 0456,
+0457 and 0458 are named as the origin of figures the section reuses. A step
+number means nothing on its own; it is a pointer into the record, and a pointer
+into a record that does not hold it is worse than no pointer.
+
+All four resolve against the README's history, and the check now requires it.
+This is the first cross-document reference the paper check has made: the
+section's citations were checked against the tree, and this one is checked
+against the record the numbers index.
+
+It also closes a class that no other check could see. A step number is not a
+figure and not a file, so neither the count census nor the identifier census
+would notice a miscited number, and the prose would read exactly the same.
+Census 551 -> 552.
 
 ### Step 0680 - a row count in the sentence is a join a name could
 not give

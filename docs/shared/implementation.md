@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0681 checks the four numbered steps the section
+cites against the README's own history. All four
+resolve; a step number is neither a figure nor a
+file, so no other census could see a miscited one
+(census 551 -> 552).
+
+
 Step 0680 joined two harness figures through the
 spec's row count, which the sentence states in
 parentheses: six rows with 51 mutations and fifteen

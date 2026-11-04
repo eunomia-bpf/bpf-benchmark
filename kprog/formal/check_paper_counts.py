@@ -1013,6 +1013,19 @@ def spec_row_joins(text: str) -> list[tuple[int, str, bool]]:
     return out
 
 
+def step_refs(text: str) -> list[str]:
+    """Step numbers the section cites that the README does not record.
+
+    The paper refers to numbered steps for provenance; those numbers are
+    only meaningful against the README's own history, so a citation of a
+    step that was never written would point at nothing.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    readme = (pathlib.Path(__file__).parent / "README.md").read_text()
+    return [n for n in sorted(set(re.findall(r"Step~?(\d{4})", flat)))
+            if "### Step %s" % n not in readme]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1550,6 +1563,11 @@ def main() -> None:
             if not spec_path.exists():
                 problems.append("%d mutations joins %s, which has no spec"
                                 % (n, spec))
+    # The section cites numbered steps for provenance; those numbers mean
+    # nothing unless the README records them.
+    for n in step_refs(text):
+        problems.append(
+            "the section cites Step %s and the README has no such step" % n)
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
