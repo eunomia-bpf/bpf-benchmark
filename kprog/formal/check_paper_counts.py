@@ -779,7 +779,7 @@ def scene_counts() -> dict[str, int]:
     scene would leave the sentence describing coverage it no longer has.
     """
     out = {}
-    for name in ("x86_route_host", "helper_route_host"):
+    for name in ("x86_route_host", "helper_route_host", "a64_route_host"):
         src = pathlib.Path(__file__).parent / "build" / (name + ".c")
         if src.exists():
             out[name] = len(set(re.findall(r"scene_[a-z0-9_]+",
@@ -2195,6 +2195,18 @@ def main() -> None:
             problems.append(
                 "the %s has %s scenes and the section says %d"
                 % (host, scenes.get(host), want))
+    # The third host is sized inside a modelled-case witness: "N modeled
+    # cases over K scenes". The figure was excused from banner matching
+    # without the scene count beside it being read.
+    m = re.search(r"\([\d,{}]+ modeled cases over (\d+) scenes", flat_s)
+    if m is None:
+        problems.append(
+            "the a64 route host's scene count is absent, so it went "
+            "unread")
+    elif scenes.get("a64_route_host") != int(m.group(1)):
+        problems.append(
+            "the a64 route host has %s scenes and the section says %s"
+            % (scenes.get("a64_route_host"), m.group(1)))
     # Thirty-one dedicated harnesses are sized in the prose. The figures are
     # checked against the entry count of each harness's MUTATIONS list, read
     # by the same parse Python performs, so a harness that grew or shrank is

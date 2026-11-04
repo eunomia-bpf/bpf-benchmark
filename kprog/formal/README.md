@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 640, and 542 steps
+`build/mut_*.py` files exist, the counter's last value is 641, and 543 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0772 - one of the three witnesses can be checked, and now is
+
+Three modelled-case figures in the section are battery-local: the recipe does
+not run their hosts, so they are excused from banner matching by name. The
+excuse is right, but it also meant nothing checked them: a figure could move and
+still be written down.
+
+One of the three sits in a sentence that also sizes its host by scene count, and
+that half is checkable. The AArch64 route host names twenty-one scenes, the
+section says twenty-one, and the count is now read rather than trusted. The
+other two name eleven and ten scenes, but neither host has a scene function to
+count, so their case totals remain witnesses.
+
+The list of three was a literal in the checker. It now has one member held to
+the tree, which is what makes the other two visible as the ones still resting on
+the sentence alone. Census 640 -> 641.
 
 ### Step 0771 - the same question over every enumeration, and a check
 written twice
