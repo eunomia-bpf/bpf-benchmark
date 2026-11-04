@@ -2289,6 +2289,28 @@ def cited_files() -> list[str]:
                   if n.split("/")[-1] not in have and n != ".bpf.c")
 
 
+def cited_steps() -> list[int]:
+    """Step numbers the section cites that no record names.
+
+    The section refers to earlier steps by number when a contract or a
+    harness was introduced. A number is not a figure and not a file, so
+    nothing else binds it: a citation to a step that does not exist reads
+    as a reference and resolves to nothing.
+    """
+    here = pathlib.Path(__file__).parent
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+        / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
+    cited = {int(n) for n in re.findall(r"Step\s*~?\s*(\d{4})", flat)}
+    have = set()
+    for rel in ("../../docs/shared/implementation.md", "README.md"):
+        f = here / rel
+        if f.exists():
+            have |= {int(n) for n in
+                     re.findall(r"\bStep (\d{4})\b", f.read_text())}
+    return sorted(cited - have)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3374,6 +3396,11 @@ def main() -> None:
         problems.append(
             "the section cites %s and no tree beside it has that file"
             % name)
+    # "Step~0456 introduced this contract": a step number is neither a
+    # figure nor a file, so nothing else binds it.
+    for n in cited_steps():
+        problems.append(
+            "the section cites Step %04d and no record names it" % n)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

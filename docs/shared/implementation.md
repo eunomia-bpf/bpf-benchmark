@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0806 bound the nine step numbers the section
+cites against the two records that number steps; all
+resolve, and a planted 0999 reports (no census
+change).
+
+
 Step 0805 bound the 278 file names the section cites:
 all resolve today, matched by base name, and a
 planted rename reports (no census change).

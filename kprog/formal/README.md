@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0806 - the third kind of name, and the same binding
+
+The section refers to nine earlier steps by number when a contract or a harness
+was introduced. A step number is neither a figure nor a file, so nothing bound
+it, and a citation to a step that does not exist reads as a reference while
+resolving to nothing.
+
+All nine resolve against the two records that number steps, the implementation
+log and the formal tree's readme. A planted citation to step nine hundred and
+ninety-nine is reported.
+
+This is the third class of name the section carries and the checker now holds,
+after file names and the theorem names behind its agreement sentences. The
+pattern is the same in all three: the prose names something, and the name is
+checked against the thing that carries it. Census unchanged; the checker gains a
+component.
+
 ### Step 0805 - a name is not a number, so nothing bound the cited
 files
 
