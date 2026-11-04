@@ -81,6 +81,21 @@ def step_records() -> list[str]:
     return sorted(recorded - present)
 
 
+def order_breaks() -> list[tuple[int, int]]:
+    """`[(a, b)]` where the README's step numbers are not descending.
+
+    The log is mostly newest-first, but it grew in runs that ascend: the
+    oldest block is written 0180, 0181 and so on, and later insertions were
+    appended in the order they happened rather than sorted. The list is
+    reported so a *new* break is visible, not to assert a convention the file
+    does not hold.
+    """
+    lines = README.read_text().split("\n")
+    nums = [int(m.group(1)) for l in lines
+            if (m := re.match(r"### Step (\d{4})", l))]
+    return [(a, b) for a, b in zip(nums, nums[1:]) if b >= a]
+
+
 def gate_checks() -> tuple[list[str], list[str]]:
     """`(check scripts in the gate, check scripts not in the gate)`.
 
@@ -156,6 +171,14 @@ def main() -> None:
            r"coverage: (\d+) are\nad-hoc probes")
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
+
+    # The log mostly runs newest-first but grew in ascending runs; the count
+    # is held so a new break shows up rather than a convention being
+    # asserted the file does not hold.
+    breaks = order_breaks()
+    if len(breaks) != 48:
+        drift.append("the step log has %d ascending pair(s), not 48"
+                     % len(breaks))
 
     # A step the summary records and the README does not is a lost record:
     # both are written in the same step, and one was committed without the
