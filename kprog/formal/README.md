@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 574, and 472 steps
+`build/mut_*.py` files exist, the counter's last value is 575, and 473 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0704 - a check that was written and never called
+
+While auditing the checkers for dead code, one function in the Lean checker
+turned out never to be called: the one that reads each simulator guard's claim
+that its macro is the generated, proved bound of a named module. The check was
+written, worked, and had simply never been wired into the run.
+
+It is now called. Three guards make that claim, and all three name a module that
+carries a refinement for the macro. Pointing one at a module that does not exist
+is reported by macro name and module, which is the failure the function was
+written for and never had a chance to catch.
+
+That is the dead-code rule earning its place in the other direction from usual:
+not a function nobody needs, but a check nobody ran. Its absence was invisible
+because a check that is never called and a check that passes look the same from
+outside. Census 574 -> 575.
 
 ### Step 0703 - one memory row in the BT table, and its index
 

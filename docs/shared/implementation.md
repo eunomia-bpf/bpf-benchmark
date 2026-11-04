@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0704 found a Lean check that was written,
+worked, and never called: the one binding each header
+guard's "proved bound" claim to a module that still
+refines it. Three guards now checked, and a wrong
+cite is reported (census 574 -> 575).
+
+
 Step 0703 checked the BT opcode table: one row reads
 memory and it takes an immediate index, so the
 bracket-no-PTR fixture is the only shape reaching the

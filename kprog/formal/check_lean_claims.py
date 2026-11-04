@@ -1754,6 +1754,14 @@ def check(targets, root):
             "check_lean_claims: %d bv_decide proofs reach Lean.ofReduceBool "
             "and %d do not, but there are %d"
             % (actual["orb_reach"], actual["orb_kernel"], actual["bv_total"]))
+    # A header guard cites the module it says proves it: "is the generated,
+    # proved bound (<Module>.lean)". The module must still carry a
+    # refinement for that macro, and nothing in a build reads a comment.
+    for macro, cited, proved in proved_bound_citations(root):
+        if not proved:
+            raise SystemExit(
+                "check_lean_claims: the %s guard cites %s.lean, which "
+                "states no refinement for it" % (macro, cited))
     if actual["unreachable"]:
         raise SystemExit(
             "check_lean_claims: %d module(s) are not reachable from the "
