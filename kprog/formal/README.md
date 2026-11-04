@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 569, and 467 steps
+`build/mut_*.py` files exist, the counter's last value is 570, and 468 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0699 - a join to a set, and the attribution it cannot see
+
+Seventeen sentences say a harness retargets the generator's re-check messages
+and give the count: two, four, five, six, seven, eight, ten, twelve. Each is a
+count of the messages a generator can raise, which is a figure in the
+generator's own source.
+
+The sentence names no generator, so the join is to the set of counts any
+generator can raise rather than to one file. That catches a figure with no
+source at all, and it cannot catch a figure attached to the wrong generator, so
+the weakness is written where the check is.
+
+The counts hold: all eight stated values are counts some generator has. This is
+the same join shape as the harness sizes, and it carries the same caveat, which
+is why it is stated in the docstring rather than left for a reader to discover.
+Census 569 -> 570.
 
 ### Step 0698 - an absolute claim that is arithmetic, not structure
 

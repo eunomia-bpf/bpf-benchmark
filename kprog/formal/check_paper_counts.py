@@ -1227,6 +1227,23 @@ def multiply_bound_pair() -> tuple[int, int]:
     return len({tuple(sorted(p)) for p in at_bound}), len(differ)
 
 
+def generator_message_counts() -> set[int]:
+    """How many messages each generator can raise, as a set of counts.
+
+    Seventeen sentences say the harness retargets "the N generator
+    re-check messages". The sentence does not name its generator, so the
+    join is to the set: a stated count that no generator can raise is a
+    figure with no source. This is a typo check, and the weaker form is
+    stated where it is used.
+    """
+    here = pathlib.Path(__file__).parent
+    out = set()
+    for p in here.glob("generate_*_spec.py"):
+        out.add(len(re.findall(r'raise SystemExit\(f?"',
+                            p.read_text(errors="ignore"))))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1915,6 +1932,25 @@ def main() -> None:
         problems.append(
             "%d operand pairs make the two overflow tests disagree"
             % differing)
+    # "the N generator re-check messages": the sentence names no generator,
+    # so the join is to the set of counts any generator can raise. A stated
+    # count outside it has no source; a count inside may still name the
+    # wrong generator, which this cannot see.
+    flat_m = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    words = {w: i for i, w in enumerate(
+        "zero one two three four five six seven eight nine ten eleven "
+        "twelve thirteen fourteen fifteen sixteen seventeen eighteen "
+        "nineteen twenty".split())}
+    have_msg = generator_message_counts()
+    stated_msg = set()
+    for w in re.findall(
+            r"(\w+) generator (?:re-check|error) messages", flat_m):
+        if w in words:
+            stated_msg.add(words[w])
+    for n in sorted(stated_msg - have_msg):
+        problems.append(
+            "a harness retargets %d generator messages and no generator "
+            "raises that many" % n)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0699 bound the 17 "N generator re-check
+messages" figures to the set of counts any generator
+raises. All eight stated values exist; the join
+cannot see a wrong attribution, and the docstring
+says so (census 569 -> 570).
+
+
 Step 0698 checked an arithmetic absolute: the
 negative bound paired with minus one is the single
 pair reaching that bound, so it is the only place the
