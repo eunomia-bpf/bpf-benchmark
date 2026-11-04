@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0804 - the gate with the audit inside it, and the other ten
+checkers
+
+The dead-code check now runs inside the gate, so the gate was re-run: two
+hundred and forty-eight banners, one hundred and twenty-four million cases, and
+the same summary line, at return code zero. The check adds a few milliseconds
+and no change to any figure.
+
+The same audit was run across the other ten checkers the gate invokes. Forty-six
+functions across them, none uncalled, so the family that produced the one orphan
+is now the only place it could happen and that place is checked.
+
+This is the fourth component added to the checker family in as many steps, and
+the first that costs the gate a re-run to land. It is worth noting what that
+means: the checks that guard the checks are themselves inside the gate, so a
+defect in one of them shows up as a failed run rather than a green one. Census
+unchanged; the checker gains a check.
+
 ### Step 0803 - the audit that found the orphan is now a check that
 flags itself
 

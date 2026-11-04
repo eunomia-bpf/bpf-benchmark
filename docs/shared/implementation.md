@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0804 ran the gate with the dead-code check
+inside it: RC=0 at 248 banners / 124,531,802 cases,
+and audited the other ten checkers' 46 functions,
+none uncalled (no census change).
+
+
 Step 0803 made the dead-code audit a check over the
 three-module family; it flagged itself first, and now
 fails on a planted orphan (no census change).
