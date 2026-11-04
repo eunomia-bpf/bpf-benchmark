@@ -2198,6 +2198,49 @@ def vacuous_theorems() -> list[str]:
     return out
 
 
+def dispatch_totality() -> tuple[int, int, int]:
+    """`(family, singleton, union)` opcode counts for the x86 chain.
+
+    The section says the twenty-four family and forty-three singleton
+    opcodes are sixty-seven distinct ones, over a population that makes the
+    exclusivity statement non-vacuous. The three figures are lengths of
+    lists the totality module defines, so they are read from that module
+    rather than trusted.
+    """
+    here = pathlib.Path(__file__).parent
+    fam = (here / "KProgFormal" / "X86DispatchTotality.lean").read_text()
+    defs = {}
+    for name in ("routedByFamily", "routedBySingleton", "routed"):
+        m = re.search(r"^def %s : List Nat :=(.*?)^\S" % name, fam,
+                      re.S | re.M)
+        defs[name] = " ".join(m.group(1).split()) if m else ""
+    # The lists are built from named op-lists and deduped; count through
+    # the same source the module uses.
+    import check_lean_claims as _cl
+    fam = _count_ops(here, "X86DispatchFamily", "x86DispatchOps")
+    sing = _count_ops(here, "X86DispatchSingleton", "x86SingletonOps")
+    # The union is the sum because the module proves the two routed lists
+    # disjoint, so a code in both would break that theorem rather than this
+    # arithmetic.
+    return fam, sing, fam + sing
+
+
+def _count_ops(here: pathlib.Path, module: str, ops: str) -> int:
+    """Distinct opcodes the named op-list resolves to, read from the arms."""
+    src = (here / "KProgFormal" / (module + ".lean")).read_text()
+    m = re.search(r"^def %s : List \w+ :=(.*?)^\S" % ops, src, re.S | re.M)
+    if m is None:
+        return -1
+    # Every named sub-list is defined in the same module as a literal.
+    total = 0
+    for sub in re.findall(r"(\w+Ops?)\b", m.group(1)):
+        s2 = re.search(r"^def %s : List \w+ :=\s*\[(.*?)\]" % sub, src,
+                       re.S | re.M)
+        if s2:
+            total += len([x for x in s2.group(1).split(",") if x.strip()])
+    return total
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3242,6 +3285,26 @@ def main() -> None:
     # sides are the same proves nothing about the table it names.
     for problem in vacuous_theorems():
         problems.append(problem)
+    # "the twenty-four family opcodes and the forty-three singleton
+    # opcodes are sixty-seven distinct ones": three lengths of lists the
+    # totality module defines, and the third is their sum because the
+    # module proves the two disjoint.
+    words2num = {"twenty-four": 24, "forty-three": 43,
+                 "sixty-seven": 67}
+    tst = re.search(
+        r"the (twenty-four) family opcodes and the (forty-three) singleton "
+        r"opcodes are (sixty-seven) distinct ones", plain)
+    if tst is None:
+        problems.append(
+            "the sentence sizing the routed opcode population is absent, so "
+            "its three figures went unread")
+    else:
+        want = tuple(words2num[g] for g in tst.groups())
+        got = dispatch_totality()
+        if want != got:
+            problems.append(
+                "the section divides the routed opcodes %s and the module "
+                "gives %s" % (want, got))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0800 - my first count was arms, the paper counted opcodes
+
+The sentence that makes the exclusivity statement non-vacuous gives three
+figures: twenty-four family opcodes, forty-three singleton opcodes, and
+sixty-seven distinct ones. Those are lengths of lists the x86 totality module
+defines, and reading them from the op-lists the module builds gives exactly
+twenty-four and forty-three; the third is their sum because the same module
+proves the two lists disjoint.
+
+My first measurement said sixteen and sixteen, because the generated modules
+define sixteen arms each and I counted arms rather than opcodes. The paper was
+right and the reading was wrong, which is why the figures are now derived from
+the module that states them rather than counted by a rule of my own.
+
+The check also holds the sentence's presence, since a rewording would otherwise
+leave the three figures unread while the run stayed green. Census unchanged; the
+checker gains a component.
+
 ### Step 0799 - zero findings and an empty scan read alike, and the
 masked text caught it
 
