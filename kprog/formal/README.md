@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 639, and 541 steps
+`build/mut_*.py` files exist, the counter's last value is 640, and 542 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0771 - the same question over every enumeration, and a check
+written twice
+
+The tag codes are enumerated and index arrays, so the same question was asked of
+the other enumerations: the opcode and width tables in the thirty-five
+specifications that carry numeric codes, and the ninety-one tables that name
+their entries.
+
+No code repeats in any of them and no name repeats in any of them. The checker
+already reads both fields, under a comment saying that a row's name keys every
+table that has one and a code keys the opcode tables, so both must be unique; a
+name check written for this step turned out to be the same check and was removed
+rather than kept beside it.
+
+What the sweep adds is the measurement: the property the sentence states is
+checked over thirty-five code tables and ninety-one name tables, not over the
+one table the sentence was written about. Census 639 -> 640.
 
 ### Step 0770 - the tag codes index arrays, so they must be dense and
 distinct
