@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0750 joined both register cell counts to their
+generated tables: 16 x86 and 31 AArch64, each equal
+to the table length and the module's own bound, which
+is what makes the "every byte above" boundary exact
+(census 618 -> 619).
+
+
 Step 0749 fixed a paragraph that contradicted itself
 in two adjacent sentences: one says every byte above
 15 names no cell, the next said the sentinel is the

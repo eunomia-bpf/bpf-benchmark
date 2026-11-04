@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 618, and 520 steps
+`build/mut_*.py` files exist, the counter's last value is 619, and 521 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0750 - the cell count is what makes the boundary exact
+
+The sentence that contradicted itself about the x86 cell range was one instance
+of a pair. Each register contract states a cell count over a generated table,
+and each generated module holds the table the count describes, so both figures
+can be joined to the tree: sixteen x86 cells and thirty-one AArch64 ones, each
+equal to the table length and to the module's own declared bound.
+
+The join matters more than the figures because of where the boundary sits. The
+x86 sentence says every byte above fifteen names no cell; that is only exact if
+the table really ends at fifteen. A table of sixteen entries with a bound of
+seventeen would make the sentence wrong about one byte, and nothing else in the
+section would notice.
+
+Both modules already agree with themselves, so the check finds nothing today.
+What it adds is that the agreement is now recomputed on every run rather than
+read once. Census 618 -> 619.
 
 ### Step 0749 - two adjacent sentences contradicted each other
 about one table

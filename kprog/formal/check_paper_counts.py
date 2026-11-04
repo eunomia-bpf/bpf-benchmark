@@ -1581,6 +1581,34 @@ def axiom_partition(text: str) -> tuple[tuple[int, int, int], int] | None:
     return parts, sum(parts)
 
 
+def cell_tables() -> dict[str, int]:
+    """`{isa: cells}` from each generated dispatch table.
+
+    Both register contracts state a cell count, and both generated modules
+    hold the table that count describes. A table whose length and declared
+    bound disagree would make the sentence's "every byte above" claim vague
+    about where the boundary sits, which is what the complement sentence in
+    this section got wrong once.
+    """
+    out = {}
+    root = pathlib.Path(__file__).parent / "KProgFormal"
+    for isa, name in (("x86", "GeneratedX86RegDispatch.lean"),
+                      ("arm64", "GeneratedArm64RegDispatch.lean")):
+        src = (root / name).read_text()
+        table = re.search(r"cellNumbers : List Nat := \[(.*?)\]", src, re.S)
+        bound = re.search(r"gprCount : Nat := (\d+)", src)
+        if table is None or bound is None:
+            raise SystemExit(
+                "check_paper_counts: %s has no cell table or gprCount" % name)
+        cells = len(re.findall(r"\d+", table.group(1)))
+        if cells != int(bound.group(1)):
+            raise SystemExit(
+                "check_paper_counts: %s declares %s cells and gprCount %s"
+                % (name, cells, bound.group(1)))
+        out[isa] = cells
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2448,6 +2476,19 @@ def main() -> None:
             problems.append(
                 "the three axiom classes sum to %d and the tree holds %d "
                 "theorems" % (total, _tree["theorems"]))
+    # Each register contract states a cell count over its generated table, and
+    # the sentence beside it says which register numbers name no cell. The
+    # table is what makes that boundary exact.
+    cells = cell_tables()
+    plain = re.sub(r"[\\()]", " ", re.sub(r"\s+", " ", text))
+    found = re.findall(r"\s(\d+)\s+general-purpose cells", plain)
+    # The x86 contract is stated first, the AArch64 one after it.
+    stated = dict(zip(("x86", "arm64"), (int(v) for v in found)))
+    for isa, n in sorted(cells.items()):
+        if stated.get(isa) != n:
+            problems.append(
+                "the section states %s general-purpose %s cells and the "
+                "generated table holds %d" % (stated.get(isa), isa, n))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
