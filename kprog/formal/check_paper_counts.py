@@ -2153,6 +2153,33 @@ def volatile_tokens(log: str) -> list[str]:
     return sorted({m.group(0) for m in VOLATILE.finditer(log)})[:5]
 
 
+def vacuous_theorems() -> list[str]:
+    """Theorems that close by reflexivity or decide with both sides alike.
+
+    The section says the theorems closing by `rfl` or `decide` over a table
+    carry content rather than closing vacuously. A statement whose two
+    sides are syntactically the same is the vacuous case: it proves
+    nothing about the table and would still be counted as a row.
+    """
+    out = []
+    head = re.compile(r"^theorem (\w+)((?:(?!:=)[\s\S])*?):=", re.M)
+    proof = re.compile(r"\s*(rfl\b|by\b[\s\S]*?\brfl\b"
+                       r"|by\s+(?:native_)?decide\b)")
+    for f in sorted((pathlib.Path(__file__).parent / "KProgFormal")
+                    .glob("*.lean")):
+        src = f.read_text(errors="ignore")
+        for m in head.finditer(src):
+            if not proof.match(src[m.end():]):
+                continue
+            stmt = " ".join(m.group(2).split())
+            if "=" not in stmt or "↔" in stmt or "∧" in stmt:
+                continue
+            a, b = stmt.split("=", 1)
+            if a.strip().lstrip(":(").strip() == b.strip():
+                out.append("%s closes %s vacuously" % (f.name, m.group(1)))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3176,6 +3203,10 @@ def main() -> None:
         problems.append(
             "the gate log carries volatile tokens %s, so two runs cannot "
             "be byte-identical" % vol)
+    # "carry content rather than closing vacuously": a statement whose two
+    # sides are the same proves nothing about the table it names.
+    for problem in vacuous_theorems():
+        problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

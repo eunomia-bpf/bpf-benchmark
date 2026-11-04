@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0795 bound the non-vacuity sentence: no theorem
+closes with both sides alike. Getting there took
+three patterns, the first of which would have passed
+the defect (no census change).
+
+
 Step 0794 compared two full gate runs: 248 identical
 banners, zero non-build differences, and no volatile
 token in either log, now checked (no census change).

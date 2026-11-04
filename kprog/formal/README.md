@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0795 - a check that reads one proof form passes the defect it
+seeks
+
+The section says the theorems closing by reflexivity or decide over a table
+carry content rather than closing vacuously. A vacuous one would be a statement
+whose two sides are the same, which proves nothing about the table while still
+being counted as a row; none of the two thousand and sixty-four theorems is one.
+
+Reading this correctly took three attempts. The first pattern matched almost
+nothing because the proofs here close by a case split and then reflexivity
+rather than by reflexivity alone, so a scan that only looked for the bare form
+would have reported a clean tree while examining a handful of theorems.
+
+That is the same failure the section attributes to the macro-hygiene check: a
+check that reads only the form it was written against passes the defect it
+exists to catch. The scan now takes the theorem head up to its first terminator
+and then matches any of the three proof forms. Census unchanged; the checker
+gains a component.
+
 ### Step 0794 - two full runs compared, and the only difference was
 the build
 
