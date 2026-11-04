@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 633, and 535 steps
+`build/mut_*.py` files exist, the counter's last value is 634, and 536 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0765 - seven more reach counts were exact, and all seven fail
+when the reader widens
+
+Seven more checks held their reach as an exact figure, each with a sentence
+saying how many matched when it was written. All seven are counts of how many
+sentences a pattern found, so all seven had the same defect the
+caught-with-parts guard had: widening the reader made them fail even though
+nothing was wrong.
+
+Each is now a floor, and each message says at least how many matched before
+rather than exactly how many did. That is the question the check is asking,
+since what a reader needs to know is whether a family stopped matching after an
+edit, not whether the section still holds the same number of sentences.
+
+The floors are tight: each of the seven sits at exactly the count that matched,
+so dropping one sentence trips it. That is the property worth having, and it is
+checked by removing a sentence and watching the run fail. Census 633 -> 634.
 
 ### Step 0764 - the second wording of a catch split went unread, and
 the guard hid it
