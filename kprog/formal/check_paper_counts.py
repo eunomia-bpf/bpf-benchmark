@@ -1190,6 +1190,23 @@ def register_cells() -> dict:
     return out
 
 
+def div_ladder() -> tuple[int, list[int]]:
+    """`(gated arms, width codes)` from the DIV spec.
+
+    The section says "the default arm is the only gated one and the ladder
+    is total over the resolved width codes". Both are properties of the
+    spec's arm table: exactly one arm carries a gate, and the width codes
+    it covers are the resolved set.
+    """
+    import json
+    spec = pathlib.Path(__file__).parent / "x86_div_spec.json"
+    if not spec.exists():
+        return -1, []
+    arms = json.loads(spec.read_text()).get("arms", [])
+    return (sum(1 for a in arms if a.get("high_gate")),
+            sorted(a["width_code"] for a in arms))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1854,6 +1871,18 @@ def main() -> None:
         if 255 in nums:
             problems.append(
                 "the %s cell table contains the all-ones sentinel" % isa)
+    # "the default arm is the only gated one and the ladder is total over
+    # the resolved width codes": one gate in the arm table, and the widths
+    # are the four the simulator resolves.
+    gated, widths = div_ladder()
+    if gated != 1:
+        problems.append(
+            "the DIV ladder carries %d gated arms and the section says the "
+            "default is the only one" % gated)
+    if widths and widths != [1, 2, 4, 8]:
+        problems.append(
+            "the DIV ladder's width codes are %s, not the four resolved "
+            "codes" % widths)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

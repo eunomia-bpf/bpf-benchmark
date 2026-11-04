@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 567, and 465 steps
+`build/mut_*.py` files exist, the counter's last value is 568, and 466 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,20 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0697 - one gate in the arm table, and four widths
+A second sentence of the same shape says the default arm is the only gated one
+and that the ladder is total over the resolved width codes. Both halves are
+properties of the arm table: exactly one arm carries a gate, and the widths the
+arms cover are the four the simulator resolves.
+The table confirms it. Four arms, at width codes one, two, four and eight, and
+exactly one of them carries the overflow gate, on the full-width arm which is
+the default. Adding a gate to a second arm is now reported with the count and
+the sentence it contradicts.
+Two sentences of this shape have now been checked and both were true, which is
+the expected result: an absolute claim written by someone who knew the table is
+usually right, and the check is what keeps it right when the table moves. Census
+567 -> 568. Census 567 -> 568.
 
 ### Step 0696 - the cell table's contiguity is the claim
 

@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0697 checked the second absolute claim: the DIV
+ladder has exactly one gated arm (the default, at
+width 8) and covers widths 1, 2, 4, 8. A second gate
+is now reported (census 567 -> 568).
+
+
 Step 0696 bound the cell-table claim: the register
 numbers must be contiguous from zero, which is what
 makes the all-ones sentinel the only gap. x86 holds
