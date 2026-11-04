@@ -936,6 +936,32 @@ def shake_field_gaps(
     return len(claims), out
 
 
+def stage_sentence_sums(text: str) -> list[tuple[int, int, int, int, int]]:
+    """`[(total, catch, stage sum, survive, 0)]` for stage-split sentences.
+
+    "N of the M mutations catch (a at the generator stage, b by the Lean
+    chain, c by the host oracle), and d survive": the stages must add to the
+    catch count, and catch plus survive to the total. Both are the
+    sentence's own arithmetic.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    pat = (r"(\d+) of (?:the harness's )?(\d+) mutations catch "
+           r"\(([\d,]+) at the generator stage, ([\d,]+) by the Lean "
+           r"chain, ([\d,]+) by the host oracle\)(?:, and (\d+)[^.]{0,40}?"
+           r"survive)?")
+    out = []
+    for n, tot, a, b, c, surv in re.findall(pat, flat):
+        s_ = sum(int(x.replace(",", "")) for x in (a, b, c))
+        out.append((int(tot), int(n), s_, int(surv) if surv else 0, 0))
+    pat2 = (r"(?<![\d,])(\d+) catch \(([\d,]+) at the generator stage, "
+            r"([\d,]+) by the Lean chain, ([\d,]+) by the host oracles?\)"
+            r"(?:, and (\d+) survive)?")
+    for n, a, b, c, surv in re.findall(pat2, flat):
+        s_ = sum(int(x.replace(",", "")) for x in (a, b, c))
+        out.append((0, int(n), s_, int(surv) if surv else 0, 1))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1418,6 +1444,23 @@ def main() -> None:
         problems.append(
             "the %d-row shake is %s and it never names %s"
             % (rows, harness, fields))
+    # A stage-split sentence is its own arithmetic: the stages must add to
+    # the catch count, and catch plus survive to the total where a total is
+    # stated.
+    sums = stage_sentence_sums(text)
+    if len(sums) != 6:
+        problems.append(
+            "the section states %d stage-split sentences; 6 when this was "
+            "written" % len(sums))
+    for tot, caught, stages, surv, _ in sums:
+        if stages != caught:
+            problems.append(
+                "a stage split says %d catch and its stages sum to %d"
+                % (caught, stages))
+        if tot and caught + surv != tot:
+            problems.append(
+                "a stage split says %d catch and %d survive of %d"
+                % (caught, surv, tot))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:
@@ -1425,7 +1468,10 @@ def main() -> None:
             "the section states percentages %s, and %s were accounted for; "
             "the difference went unread"
             % (sorted(seen), sorted(known)))
-    if args.check and problems:
+    if problems:
+        # Print before exiting: a silent --check failure gives no evidence.
+        for problem in problems:
+            print("check_paper_counts: %s" % problem)
         raise SystemExit(1)
     if not problems:
         print(f"all {len(claimed)} claimed case counts, both gate totals, "

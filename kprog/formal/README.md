@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 546, and 444 steps
+`build/mut_*.py` files exist, the counter's last value is 547, and 445 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0676 - a stage split that did not add up, and a check that
+failed silently
+
+Six sentences split a mutation harness's catches by the stage that made them,
+and state how many rows survive. The stages must add to the catch count, and the
+catch count plus the survivors to the harness's size. Five agree; the sixth said
+sixty-eight catch with stages summing to sixty-nine, and one survivor of
+sixty-nine, which cannot all be true.
+
+The stages are the enumerable evidence, so the generator figure was the one that
+moved: thirty-seven, twenty-two and nine make sixty-eight, plus the one
+documented survivor makes sixty-nine. The harness itself could not be run to
+settle it, because its file is one that no longer passes its own anchor.
+
+The check also stopped failing silently. A paper check under --check raised
+without printing when it found problems, so a failure gave no evidence; the
+messages now print before the exit, which is how the thirty-second-harness
+message became visible. Census 546 -> 547.
 
 ### Step 0675 - a family word and a size, because either alone is
 wrong

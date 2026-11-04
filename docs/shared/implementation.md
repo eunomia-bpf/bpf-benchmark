@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0676 found a stage split whose parts summed to
+sixty-nine while the sentence said sixty-eight catch.
+The generator figure moved to thirty-seven, and
+--check now prints its problems instead of exiting
+silently (census 546 -> 547).
+
+
 Step 0675 joined shakes on the family word plus the
 size, since either alone is wrong, and found two more
 bad figures: the MOVBE paragraph said 170 for a
