@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0680 joined two harness figures through the
+spec's row count, which the sentence states in
+parentheses: six rows with 51 mutations and fifteen
+rows with 69 resolve exactly. The two-row case is
+shared by four specs (census 550 -> 551).
+
+
 Step 0679 verified the last unbound figure sentence:
 five counts about the decision procedure (2-31, 32,
 3, 3, 14), each derived from theorem statement shape.

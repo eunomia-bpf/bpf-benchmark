@@ -975,6 +975,44 @@ def caught_fractions(text: str) -> list[tuple[int, int, int]]:
             for a, b, c in re.findall(pat, flat)]
 
 
+def spec_row_joins(text: str) -> list[tuple[int, str, bool]]:
+    """`[(mutations, spec, harness size matches the mutation count)]`.
+
+    "N-mutation harness retargets the shared specification (K rows)": the
+    row count is a field length in the spec, so where exactly one spec has
+    that many rows and its harness is N, the join is exact.
+    """
+    import json
+    words = {w: i for i, w in enumerate(
+        "zero one two three four five six seven eight nine ten eleven twelve "
+        "thirteen fourteen fifteen sixteen seventeen eighteen nineteen "
+        "twenty".split())}
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    totals = harness_totals()
+    here = pathlib.Path(__file__).parent
+    out = []
+    for n, word in re.findall(
+            r"(\d+)-mutation harness retargets the shared specification "
+            r"\((\w+) rows?\)", flat):
+        want = words.get(word)
+        if want is None:
+            continue
+        hits = []
+        for sp in here.glob("*_spec.json"):
+            try:
+                d = json.loads(sp.read_text())
+            except ValueError:
+                continue
+            if want in [len(v) for v in d.values() if isinstance(v, list)]:
+                hits.append(sp.name[:-len("_spec.json")])
+        exact = [h for h in hits if totals.get("mut_" + h) == int(n)]
+        if len(exact) == 1:
+            out.append((int(n), exact[0], True))
+        elif len(exact) > 1:
+            out.append((int(n), ",".join(exact), False))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1497,6 +1535,21 @@ def main() -> None:
             problems.append(
                 "%d of %d caught plus survivors is %d"
                 % (caught, total, accounted))
+    # Three sentences give a spec's row count beside the harness size. The
+    # row count is a field length, so where one spec has that many rows and
+    # its harness is that size, the join is exact -- the strongest form
+    # available for a harness figure.
+    joins = spec_row_joins(text)
+    if len(joins) != 3:
+        problems.append(
+            "the section states %d spec row counts; 3 when this was "
+            "written" % len(joins))
+    for n, spec, exact in joins:
+        if exact:
+            spec_path = pathlib.Path(__file__).parent / (spec + "_spec.json")
+            if not spec_path.exists():
+                problems.append("%d mutations joins %s, which has no spec"
+                                % (n, spec))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

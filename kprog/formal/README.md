@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 550, and 448 steps
+`build/mut_*.py` files exist, the counter's last value is 551, and 449 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0680 - a row count in the sentence is a join a name could
+not give
+
+Three sentences give a specification's row count beside the harness size: the
+shared specification is the one with six rows and a fifty-one-mutation harness,
+with two rows and fifty, and with fifteen rows and sixty-nine. A row count is a
+field length inside the specification, so the sentence carries a join that no
+amount of name-matching could supply.
+
+Two of the three resolve exactly. Six rows belongs to only one specification of
+that size, and fifteen rows to one more; the two-row case is shared by four,
+because a two-row specification is common. So the join is exact where the row
+count is distinctive and silent where it is not, which is the same limit the
+sizes themselves have.
+
+This is the strongest harness join available without editing the prose, because
+it reads a structure inside the file rather than a name in the sentence. It
+joins two of the thirty-three shared sizes, bringing the exact set to twelve and
+leaving thirty-one that only a specification name in the sentence could resolve.
+Census 550 -> 551.
 
 ### Step 0679 - five figures in one sentence, all derived from
 statement shape
