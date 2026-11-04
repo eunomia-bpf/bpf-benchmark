@@ -7,8 +7,17 @@ count, the route-host count, the battery count (stated twice, in the claims
 block and again in the census note below it), the unnamed-harness pair, and
 the split of unbuilt `build/*.c` into ad-hoc probes and stale duplicates.
 Rather than keep them accurate by hand, this script recomputes each and diffs
-it against what the README says. The banner and case-count figures are not
-here; `check_paper_counts.py` measures those against a log.
+it against what the README says. The paper's own figures are not here;
+`check_paper_counts.py` measures those against a log.
+
+The step log's recorded figures are held by three different invariants,
+because the quantities behave differently and one rule would either miss a
+recording error or flag a correct correction: a banner count can only
+ascend, a case total can fall when a sweep is corrected, and a whole-tree
+theorem count can only ascend. Each reads only the line the run itself
+opened -- `Gate:` for the first two, `True tree:` or `Gate:` for the third
+-- so a figure quoted to describe an earlier claim, or a subset summed in
+prose, is not mistaken for the run's own total.
 
 It reports rather than fails by default, because several figures legitimately
 change with every step and a hard gate would demand a README edit per commit.

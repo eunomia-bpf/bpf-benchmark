@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 592, and 494 steps
+`build/mut_*.py` files exist, the counter's last value is 593, and 495 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0724 - the checker's own description of what it holds
+
+Three figures in the step log carry three different invariants, and the script
+that holds them said the opposite: that banner and case figures were measured
+elsewhere. A reader would have looked in another checker for all three.
+
+The docstring now states which figure behaves how and why: a banner count
+ascends because oracles are added, a case total falls when a sweep is corrected,
+and a whole-tree theorem count ascends because theorems are added. It also says
+which marker decides the population, since a quoted figure and a subset sum both
+look like totals.
+
+Both monotonic guards were re-tested after the edit and each names the pair of
+steps it disagrees with. The two that ascend also record why the third does not,
+so the next reader does not need to find steps 0721 to 0723. Census 592 -> 593.
 
 ### Step 0723 - three figures in one line, three invariants
 
