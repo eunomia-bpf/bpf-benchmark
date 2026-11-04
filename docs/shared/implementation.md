@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0687 read the two scene counts from the prose
+instead of writing them in the checker, so the
+sentence is compared with the file rather than with a
+third copy. Numerals, not words -- the first version
+skipped silently (census 557 -> 558).
+
+
 Step 0686 made the percentage guard derive its
 expected set instead of listing it: the four bucket
 shares, their floored sum and the two tree shares all

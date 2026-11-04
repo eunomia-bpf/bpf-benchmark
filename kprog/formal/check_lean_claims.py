@@ -1726,6 +1726,9 @@ def check(targets, root):
             % (n_fork, n_sweep))
     # The two figures partition the bv_decide proofs: those reaching
     # Lean.ofReduceBool and "the other" ones, which must add to the total.
+    # They are recorded rather than derived from each other: the point of
+    # the identity below is that two independent measurements agree, and
+    # computing one from the other would make it hold by construction.
     # Each was a recorded constant, and both were two high -- the pair
     # summing to the population is what would have caught it.
     # The shape split says how many of each group cannot state the goal, and

@@ -1540,10 +1540,27 @@ def main() -> None:
     # the helper route host at seventeen. A scene is a named function in one
     # file, so the count is checkable outright.
     scenes = scene_counts()
-    if scenes != {"x86_route_host": 16, "helper_route_host": 17}:
-        problems.append(
-            "the scene counts are %s; sixteen and seventeen when this was "
-            "written" % scenes)
+    # The paper states each host's scene count, so it is read from the
+    # prose and compared with the file rather than with a memory of both.
+    words = {w: i for i, w in enumerate(
+        "zero one two three four five six seven eight nine ten eleven twelve "
+        "thirteen fourteen fifteen sixteen seventeen eighteen nineteen "
+        "twenty".split())}
+    flat_s = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    for host in ("x86_route_host", "helper_route_host"):
+        pat = (r"\((\w+) scenes?, 7\{\,\}056 modeled cases"
+               if host == "x86_route_host" else
+               r"\((\w+) scene functions?, \d+ drive sites")
+        m = re.search(pat, flat_s)
+        # The prose writes these as numerals and sometimes as words.
+        want = None
+        if m:
+            g = m.group(1)
+            want = int(g) if g.isdigit() else words.get(g)
+        if want is not None and scenes.get(host) != want:
+            problems.append(
+                "the %s has %s scenes and the section says %d"
+                % (host, scenes.get(host), want))
     # Thirty-one dedicated harnesses are sized in the prose. The figures are
     # checked against the entry count of each harness's MUTATIONS list, read
     # by the same parse Python performs, so a harness that grew or shrank is
