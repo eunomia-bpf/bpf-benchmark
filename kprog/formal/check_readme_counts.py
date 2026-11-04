@@ -105,6 +105,20 @@ def order_breaks() -> list[tuple[int, int]]:
     return [(a, b) for a, b in zip(nums, nums[1:]) if b >= a]
 
 
+def numbering_holes() -> list[str]:
+    """Step numbers absent from the README between its lowest and highest.
+
+    Two numbers were skipped when they were assigned, so the absence of a
+    number is not by itself an error; the list is held at what the file
+    has, and a new hole is reported rather than a contiguous range asserted.
+    """
+    text = README.read_text()
+    nums = sorted(int(x) for x in re.findall(r"^### Step (\d{4})", text, re.M))
+    have = set(nums)
+    return ["%04d" % n for n in range(nums[0], nums[-1] + 1)
+            if n not in have]
+
+
 def gate_checks() -> tuple[list[str], list[str]]:
     """`(check scripts in the gate, check scripts not in the gate)`.
 
@@ -180,6 +194,12 @@ def main() -> None:
            r"coverage: (\d+) are\nad-hoc probes")
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
+
+    # Two step numbers were skipped when assigned, so absence alone is not
+    # an error; the pair is held and a third is reported.
+    holes = numbering_holes()
+    if holes != ["0406", "0407"]:
+        drift.append("step numbering holes: %s" % (holes,))
 
     # The log mostly runs newest-first but grew in ascending runs; the count
     # is held so a new break shows up rather than a convention being

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 588, and 489 steps
+`build/mut_*.py` files exist, the counter's last value is 589, and 491 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7602,6 +7602,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0720 - a step number absent from both records
+With the record checked in both directions, the next question is whether a step
+number is absent from both. Three were: 0406 and 0407, which were skipped when
+the numbers were assigned and never done, and 0500, which was done and recorded
+in neither.
+Git settles the difference. The commits for 0405 and 0408 sit next to each other
+with nothing between, while 0500 has a commit that put the Lean-claims checker
+into the gate and a summary that refers to it. So one was never done and one was
+lost.
+Step 0500 is now written in both records from its commit: the checker that
+recomputes the theorem counts on every run, and the paper submodule bump that
+came with it because the section's Lean counts had gone stale. The two skipped
+numbers are held as a fact rather than filled in, so a third is reported. Census
+588 -> 589. Census 588 -> 589.
+
 ### Step 0719 - the record check, in both directions
 
 The previous step's check compared the summary against the README and was silent
@@ -13007,6 +13022,19 @@ stronger check than the runtime comparison
 they had, and one that no longer depends
 on the literals happening to match. Gate:
 rc 0, **229** banners. Census 371 -> 372.
+
+### Step 0500 - the theorem counts become a gate step
+
+Step 0499 closed the control-flow chains, and the next thing the section states
+is how many theorems the tree proves. That figure was maintained by hand, so
+`check_lean_claims.py` went into the gate: it recomputes the theorem, module,
+refinement and enumeration counts from the tree on every run and compares each
+with the sentence that states it.
+
+The paper submodule pointer moved in the same step, because the Lean-side counts
+in the section had gone stale by the time the checker existed to notice.
+
+Census 330 -> 331.
 
 ### Step 0499 - the two control-flow
 chains compose to the same next PC

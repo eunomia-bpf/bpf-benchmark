@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0720 found step 0500, recorded in neither log:
+the commit that put check_lean_claims into the gate.
+Steps 0406 and 0407 were skipped, not lost, and git
+distinguishes the two (census 588 -> 589).
+
+
 Step 0719 made the record check bidirectional and
 found step 0371: a README entry with no summary
 entry, between two that have both. The two directions
@@ -5013,6 +5019,12 @@ bound: contract_step and model_step share the transfer
 body and helpers, so they compare two labellings of
 one model, not an independent reimplementation. Gate:
 rc 0, 229 banners.
+
+Step 0500 put `check_lean_claims.py` into the gate,
+so the theorem counts the section states are
+recomputed from the tree on every run rather than
+trusted. It also bumped the paper submodule pointer,
+whose Lean-side counts had gone stale.
 
 Step 0501 inverts the coverage question (census 371 ->
 372): instead of which contracts have a host, which
