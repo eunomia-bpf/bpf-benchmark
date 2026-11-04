@@ -1766,8 +1766,12 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
         src = f.read_text(errors="ignore")
         m = (re.match(r'#!.*?\n"""(.*?)"""', src, re.S)
              or re.match(r'"""(.*?)"""', src, re.S))
+        # The prose writes names with escaped underscores (`X86\_SIM`),
+        # so both sides are normalised before matching or a token like
+        # `X86\_SIM\_L\_EXEC` matches nothing.
         docs.setdefault(n, []).append(
-            (f.stem, (m.group(1) if m else "").upper()))
+            (f.stem, (m.group(1) if m else "").upper()
+             .replace("\\_", "_")))
     out = []
     # Split on line breaks first: collapsing them lets a sentence wrap
     # across a line, and the ". " split then cuts it in half.
@@ -1782,8 +1786,8 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
         # Every quoted token counts, not only the all-caps ones: the
         # prose names an arm in lowercase as often as in capitals, and the
         # docstring carries whichever the contract uses.
-        ops = {o.upper() for o in
-               re.findall(r"\\texttt\{([A-Za-z][A-Za-z0-9_]{1,})\}",
+        ops = {o.upper().replace("\\_", "_") for o in
+               re.findall(r"\\texttt\{([A-Za-z][A-Za-z0-9_\\]{1,})\}",
                           line)}
         if len(cands) < 2 or not ops:
             continue
@@ -3300,10 +3304,10 @@ def main() -> None:
     joins = stated_harness_joins(pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 7:
+    if len(joins) < 11:
         problems.append(
-            "only %d sentences join a harness by opcode; at least 7 matched "
-            "before" % len(joins))
+            "only %d sentences join a harness by opcode; at least 11 "
+            "matched before" % len(joins))
     for stated, harness, have in joins:
         if stated != have:
             problems.append(

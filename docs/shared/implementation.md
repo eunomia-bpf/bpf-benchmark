@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0808 normalised escaped underscores on both
+sides of the opcode join, taking it from 7 to 11
+sentences with every size agreeing, and raised the
+floor (no census change).
+
+
 Step 0807 widened the opcode join to lowercase
 tokens, resolving two more sentences (5 -> 7, all
 sizes agree) and raising the floor so a narrowing

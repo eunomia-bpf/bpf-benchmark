@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0808 - an escaped underscore defeated the whole token rule
+
+The token rule could not match a name written with escaped underscores, which is
+how the prose writes every simulator macro, so sentences naming
+`X86_SIM_L_EXEC_ALU_IMM` or a contract identifier matched nothing. Normalising
+both sides takes the join from seven to eleven, and all eleven agree on their
+size.
+
+The four new ones are the width, register-presence, register-dispatch and
+pre-post writeback contracts, each matching one harness of that size whose
+docstring names the contract the sentence names.
+
+Thirty-two sentences still name no token the harness docstrings carry, and
+twenty-two name tokens that several harnesses share. The measurement is now
+precise enough to say the text is the limit rather than the rule: what the
+remaining sentences omit is the file, and no normalisation of what they do say
+can supply it. Census unchanged; the checker gains four joins.
+
 ### Step 0807 - the prose writes arms in lowercase too
 
 The join between a sentence giving only a mutation count and the harness it
