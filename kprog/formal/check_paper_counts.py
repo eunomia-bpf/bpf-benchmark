@@ -799,13 +799,15 @@ def harness_totals() -> dict[str, int]:
         src = path.read_text(errors="ignore")
         try:
             tree = ast.parse(src)
-        except SyntaxError:
-            continue
+        except SyntaxError as exc:
+            raise SystemExit(
+                "check_paper_counts: %s does not parse: %s"
+                % (path.name, exc.msg))
         n = None
         for node in tree.body:
             if (isinstance(node, ast.Assign) and node.targets
                     and getattr(node.targets[0], "id", "") in
-                    ("MUTATIONS", "MUT_TABLE", "ROWS")
+                    ("MUTATIONS", "MUT_TABLE", "ROWS", "HOSTS")
                     and isinstance(node.value, ast.List)):
                 n = len(node.value.elts)
                 break

@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 619, and 521 steps
+`build/mut_*.py` files exist, the counter's last value is 620, and 522 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0751 - the extractor read 329 of 330 harnesses and swallowed
+the parse error
+
+The row-count census read three hundred and twenty-nine of the three hundred and
+thirty mutation harnesses. The missing one declares its rows in a table named
+for what each row drives rather than for the mutations it makes, which is a
+fifth way of registering rows, and its own total prints the length of that
+table.
+
+So the extractor now reads the fifth name and counts all three hundred and
+thirty. The check is not that the number changed, since this harness carries no
+sentence in the section yet, but that no harness is silently skipped: a script
+the extractor cannot read would simply not appear, and a sentence citing it
+would then match no harness at all.
+
+The same function also swallowed a parse error and moved on, which would have
+hidden exactly that case. It now stops with the file name. Census 619 -> 620.
 
 ### Step 0750 - the cell count is what makes the boundary exact
 
