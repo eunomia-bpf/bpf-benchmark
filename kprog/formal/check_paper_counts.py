@@ -1790,6 +1790,35 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
     return out
 
 
+def opcode_map() -> list[str]:
+    """Problems with the emitted token-to-code map, empty when it holds.
+
+    The section says the encoder emits each operation by its pinned token and
+    that the token-to-code map cannot drift from the one the simulator and
+    the model use. The map and its inverse are emitted into one module, so
+    the two directions are checkable against each other: the inverse must
+    name every token the map gives a code, each in one direction only.
+    """
+    import importlib.util
+    path = (pathlib.Path(__file__).parent / ".." / "x86" / "micro-prog"
+            / "generated_x86_opcode.py").resolve()
+    spec = importlib.util.spec_from_file_location("_genop", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    codes, names = mod.X86_OPCODE, mod.X86_OPCODE_NAME
+    out = []
+    if len(set(codes.values())) != len(codes):
+        out.append("the opcode map gives two tokens one code")
+    for token, code in codes.items():
+        if names.get(code) != token:
+            out.append("%s codes to %s and the inverse names %s"
+                       % (token, code, names.get(code)))
+    for code in names:
+        if code not in set(codes.values()):
+            out.append("the inverse names %s and no token codes to it" % code)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2767,6 +2796,10 @@ def main() -> None:
             problems.append(
                 "the section gives %d mutations and %s holds %d"
                 % (stated, harness, have))
+    # "the token-to-code map cannot drift": the map and its inverse are
+    # emitted together, so each direction checks the other.
+    for problem in opcode_map():
+        problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

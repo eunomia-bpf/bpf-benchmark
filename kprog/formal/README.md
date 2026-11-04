@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0778 - a cannot-sentence, checked against the one thing that
+can settle it
+
+One of the seventy-four sentences that use the word cannot says the
+token-to-code map cannot drift from the one the simulator and the model use. The
+map and its inverse are emitted into one module, so the two directions can be
+checked against each other: every token must code to a value the inverse names,
+and the inverse must name nothing the map does not give.
+
+The two agree today over seventy-two operations, and a rename of one direction
+in either file is reported from both sides. That is a narrower claim than the
+sentence makes, since the simulator and the model read their tokens through
+their own generated headers, but it is the half the emission itself can settle.
+
+The word cannot marks a universal negation, which one counterexample falsifies,
+so these sentences are worth more than the figures around them: they are the
+part of the argument that a reader is asked to believe without a number. Census
+646 -> 647.
+
 ### Step 0777 - the sixty-one divide exactly, and the rest is a limit
 of the text
 

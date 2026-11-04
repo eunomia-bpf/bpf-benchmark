@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0778 bound the token-to-code map against its own
+inverse: 72 operations agree in both directions, and
+a rename on either side reports from both (census 646
+-> 647).
+
+
 Step 0777 partitioned the 61 size-only sentences
 exactly: 6 unique size (5 join by docstring), 54
 shared, 1 none. Two more joins were tried; the limit
