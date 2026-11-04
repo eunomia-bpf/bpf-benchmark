@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0782 - a third cannot-sentence, and what the rest of them
+are like
+
+A third cannot-sentence says the helper-id table is strictly increasing and so
+cannot alias two helper ids to one slot. The table is one column of sixty-one
+rows, rising from one to a hundred and ninety-five, and a repeat or a descent is
+exactly the alias the sentence denies.
+
+Two of the three cannot-sentences bound now are of this shape: a property of a
+table that one comparison per row can settle. The remaining ones describe what a
+detector cannot do rather than what the tree holds, which is why they need a
+battery to answer rather than a read.
+
+The distinction is worth keeping straight when the residual is counted. A claim
+that says a mechanism prevents something is checkable where the mechanism is; a
+claim that says a check cannot see something is checkable only by running the
+check, and the four green shakes in this section are that kind of evidence.
+Census is unchanged; the checker gains a component.
+
 ### Step 0781 - the section now says which trees its checks read
 
 The section says what is re-derived and what is not, and it never said which

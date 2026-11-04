@@ -1874,6 +1874,26 @@ def checker_reach() -> list[str]:
     return out
 
 
+def helper_id_table() -> list[str]:
+    """Problems with the helper-id table, empty when it is strictly rising.
+
+    The section says the id table is strictly increasing and so cannot alias
+    two helper ids to one slot. A repeat or a descent would alias two ids to
+    one row, which is the failure the ordering exists to prevent.
+    """
+    import json
+    f = pathlib.Path(__file__).parent / "arm64_helper_idents_spec.json"
+    ids = [r["id"] for r in json.loads(f.read_text())["rows"]]
+    out = []
+    if len(set(ids)) != len(ids):
+        out.append("the helper-id table repeats an id")
+    for a, b in zip(ids, ids[1:]):
+        if b <= a:
+            out.append("the helper-id table goes %d then %d" % (a, b))
+            break
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2862,6 +2882,10 @@ def main() -> None:
     # "the checks reach three code trees and no further": a checker that
     # starts reading a fourth makes that sentence false.
     for problem in checker_reach():
+        problems.append(problem)
+    # "the id table is strictly increasing and so cannot alias two helper
+    # ids to one slot": a repeat or a descent is that alias.
+    for problem in helper_id_table():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
