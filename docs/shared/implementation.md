@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0686 made the percentage guard derive its
+expected set instead of listing it: the four bucket
+shares, their floored sum and the two tree shares all
+come from the run. A fabricated 77% is still caught
+(census 556 -> 557).
+
+
 Step 0685 bounded the five axis decompositions: the
 stated axes multiply to at most the total. Two state
 their remainder and reach it exactly; the other three

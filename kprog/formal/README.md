@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 556, and 454 steps
+`build/mut_*.py` files exist, the counter's last value is 557, and 455 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0686 - the guard derives the values it guards
+
+The percentage guard kept its set of expected values as written-down strings,
+including the four bucket shares, the two tree shares, and the total the four
+sum to. Every one of those is computed elsewhere in the same run, so the guard
+was comparing measured percentages against a memory of them.
+
+The set is now derived: the four bucket shares come from the buckets the split
+already built, their floored sum is computed rather than written, and the two
+tree shares come from the checker that owns those populations. The guard's
+purpose is unchanged -- a percentage the section states that nothing accounts
+for is reported -- and a fabricated seventy-seven is still caught.
+
+This is the same asymmetry the host decomposition showed: a value that the run
+computes cannot be wrong, so restating it by hand only adds a place for it to
+drift. The guard now has no hand-written figure in it. Census 556 -> 557.
 
 ### Step 0685 - five axis decompositions, bounded rather than
 reconstructed

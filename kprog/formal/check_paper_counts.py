@@ -1708,7 +1708,18 @@ def main() -> None:
                 "a host's stated axes %d x %d give %d against a total of %d"
                 % (a, b, prod, total))
     seen = percent_census(text)
-    known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
+    # The four shares are computed above; their floored sum is what the
+    # sentence about "the four add to" states, so it is derived rather than
+    # written down. The two tree shares come from the checker that owns
+    # those populations.
+    import check_lean_claims as _claims
+    _ax = _claims.scan_tree(str(pathlib.Path(__file__).parent))
+    floored = sum((1000 * buckets[k][1] // modeled) / 10
+                  for k in buckets if buckets[k][1])
+    known = {"%.1f" % floored,
+             "%d" % _ax["nd_share"], "%d" % _ax["ax_share"]} | {
+        "%.1f" % ((1000 * buckets[k][1] // modeled) / 10)
+        for k in buckets if buckets[k][1]}
     if seen != known:
         problems.append(
             "the section states percentages %s, and %s were accounted for; "
