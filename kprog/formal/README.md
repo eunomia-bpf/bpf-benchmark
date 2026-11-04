@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 560, and 458 steps
+`build/mut_*.py` files exist, the counter's last value is 561, and 459 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0690 - a tense, not an arithmetic, distinction
+
+One paragraph records a step that added an oracle to the recipe and ends by
+saying the gate prints two hundred and twenty cross-check banners, was two
+hundred and twelve. The summary elsewhere in the same section says a full run
+passes two hundred and forty-eight. Both numbers were true of their own moment,
+but the paragraph's verb was present tense, so a reader would take two hundred
+and twenty for the current count.
+
+The verb now says what happened: the gate then printed those banners, up from
+two hundred and twelve. The current figure has a single present-tense statement,
+and the aggregate that binds it is what catches a change to it.
+
+The lesson is about tense rather than arithmetic. Twenty-one sentences record a
+gate's banner count at the step that changed it, and every one was accurate when
+written; only the one phrased in the present could be misread as a claim about
+now. Census 560 -> 561.
 
 ### Step 0689 - a partition in a third word order
 

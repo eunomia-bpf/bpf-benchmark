@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0690 fixed a tense: a paragraph said the gate
+prints 220 banners while the summary says 248. Both
+were true of their moment; the present-tense one read
+as a claim about now, so it now says what happened
+(census 560 -> 561).
+
+
 Step 0689 swept numerals by the noun they count and
 found an eighteenth row mention no pattern read: "59
 rows, of which 57 catch and 2 survive", the partition
