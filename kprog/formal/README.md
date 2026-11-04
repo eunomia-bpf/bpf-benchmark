@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 628, and 530 steps
+`build/mut_*.py` files exist, the counter's last value is 629, and 531 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0760 - the sentence states the count and its reason, and both
+are in the contract
+
+The section says the reached condition suffixes are exactly the shared
+contract's names minus the parity pair. That sentence states the count and the
+reason for it together, and both come from the contract: fourteen names, two of
+them the parity pair, twelve reached.
+
+The pair is the whole point of the figure. A contract that grew a condition
+would leave the sentence describing a set one short, and the sentence would
+still read as a statement about the contract rather than about a past reading of
+it.
+
+This is the same join as the cell counts, on a set rather than a table, and it
+is the cheapest kind: the two figures the sentence relates are both in one file.
+Census 628 -> 629.
 
 ### Step 0759 - a present-tense claim had frozen a count from the step
 that wrote it

@@ -1680,6 +1680,21 @@ def pinned_route_hosts() -> tuple[int, int]:
     return len(on_disk & named), len(on_disk)
 
 
+def reached_suffixes() -> int:
+    """Condition suffixes the x86 contract reaches: its names minus parity.
+
+    The section says the twelve reached suffixes are exactly the condition
+    contract's names minus the parity pair `o`/`no`. The pair is the whole
+    reason the count is twelve and not fourteen, so the two numbers have to
+    come from the contract rather than from the sentence.
+    """
+    import json
+    spec = json.loads(
+        (pathlib.Path(__file__).parent / "x86_cond_spec.json").read_text())
+    names = [c["name"] for c in spec["conditions"]]
+    return len([n for n in names if n not in ("o", "no")])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2589,6 +2604,20 @@ def main() -> None:
             problems.append(
                 "%d route hosts are on disk and %d are pinned into the "
                 "recipe" % (on_disk, pinned))
+    # "the twelve reached suffixes are exactly the condition contract's
+    # names minus the parity pair": the pair is why it is twelve and not
+    # fourteen, so both figures come from the contract.
+    stated_suffix = re.search(r"the (\w+) reached suffixes are exactly",
+                              plain)
+    want_suffix = reached_suffixes()
+    if stated_suffix is None:
+        problems.append(
+            "the sentence naming the reached suffixes is absent, so its "
+            "count went unread")
+    elif WORD.get(stated_suffix.group(1), -1) != want_suffix:
+        problems.append(
+            "the section states %s reached suffixes and the contract "
+            "reaches %d" % (stated_suffix.group(1), want_suffix))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
