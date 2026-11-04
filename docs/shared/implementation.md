@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0698 checked an arithmetic absolute: the
+negative bound paired with minus one is the single
+pair reaching that bound, so it is the only place the
+two overflow tests differ. Computed, not trusted
+(census 568 -> 569).
+
+
 Step 0697 checked the second absolute claim: the DIV
 ladder has exactly one gated arm (the default, at
 width 8) and covers widths 1, 2, 4, 8. A second gate

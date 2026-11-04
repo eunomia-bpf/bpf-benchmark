@@ -1207,6 +1207,26 @@ def div_ladder() -> tuple[int, list[int]]:
             sorted(a["width_code"] for a in arms))
 
 
+def multiply_bound_pair() -> tuple[int, int]:
+    """`(pairs whose product is the negative bound, pairs that overflow)`.
+
+    The section says the most negative value paired with minus one is the
+    single pair whose product is exactly the negative bound, and therefore
+    the only place the two candidate overflow bounds disagree. Computed over
+    the operand pairs that can produce the bound, and over a grid where the
+    two tests could differ.
+    """
+    lo, hi = -(2 ** 63), 2 ** 63 - 1
+    # Pairs whose true product equals the magnitude of the negative bound.
+    at_bound = [(a, b) for a in (lo, -1, 1, hi) for b in (lo, -1, 1, hi)
+                if a * b == -lo]
+    # Pairs where "product is representable" and "product fits" differ.
+    differ = [(a, b) for a in (lo, -1, 1, hi, 2, -2)
+              for b in (lo, -1, 1, hi, 2, -2)
+              if (lo <= a * b <= hi) != (a * b in range(lo, hi + 1))]
+    return len({tuple(sorted(p)) for p in at_bound}), len(differ)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1883,6 +1903,18 @@ def main() -> None:
         problems.append(
             "the DIV ladder's width codes are %s, not the four resolved "
             "codes" % widths)
+    # "the single pair whose product is exactly the negative bound": one
+    # such unordered pair, and no pair where the two candidate overflow
+    # tests disagree on representability.
+    pairs, differing = multiply_bound_pair()
+    if pairs != 1:
+        problems.append(
+            "%d unordered pairs reach the negative bound and the section "
+            "says one" % pairs)
+    if differing:
+        problems.append(
+            "%d operand pairs make the two overflow tests disagree"
+            % differing)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
