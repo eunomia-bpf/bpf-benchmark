@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 615, and 517 steps
+`build/mut_*.py` files exist, the counter's last value is 616, and 518 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0747 - the census counter can be checked against its own
+sequence
+
+The census counter moves in one direction, so the hundred and forty-two
+transitions the section records can be checked without reference to anything
+outside it: each pair must ascend. None fails, and the check costs a single pass
+over the prose.
+
+The value is a different kind of guard from the ones before it. The earlier
+checks compare the section against the tree, the log, or another sentence; this
+one compares each sentence against a property of the sequence it belongs to. A
+transition typed in the wrong order, or one that copied the closing value of the
+step before it, would read as a plausible pair and move no figure that the other
+checks look at.
+
+It is the first check that holds the section to an invariant of its own
+narrative rather than to a measurement, which is why it needed no new file to
+read. Census 615 -> 616.
 
 ### Step 0746 - the filename join found a contradiction inside the
 paper

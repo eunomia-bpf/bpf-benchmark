@@ -1550,6 +1550,20 @@ def named_harness_rows(text: str) -> list[tuple[int, str, int]]:
     return out
 
 
+def census_transitions(text: str) -> list[tuple[int, int]]:
+    """`[(from, to)]` where a census transition does not ascend.
+
+    Nearly every sentence records the census counter moving from one value
+    to another, and the counter only ever rises. A pair that went backwards
+    or stood still would mean either the step added nothing or the figures
+    were typed in the wrong order.
+    """
+    flat = re.sub(r"[\\()]", " ", re.sub(r"\s+", " ", text))
+    pairs = [(int(a), int(b)) for a, b in re.findall(
+        r"census\s+(\d+)\s+to\s+(\d+)", flat)]
+    return [(a, b) for a, b in pairs if b <= a]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2397,6 +2411,12 @@ def main() -> None:
             problems.append(
                 "the section says %s has %d rows and the static count is %d"
                 % (name, stated, have))
+    # The census counter only ever rises, so every recorded transition must
+    # ascend; one that stood still or went backwards is a mistyped pair.
+    for a, b in census_transitions(text):
+        problems.append(
+            "a census transition records %d to %d, which does not rise"
+            % (a, b))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
