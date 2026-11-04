@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0735 bound the nine sentences recording that a
+step left the gate unchanged: all say 210, and none
+contradicts a later figure. Agreement among them is
+what is checkable, since 210 is what the gate printed
+then (census 603 -> 604).
+
+
 Step 0734 audited every claim pattern for captures it
 does not bind, following the one-sided findings of
 0729 and 0733. None: every captured numeral has a

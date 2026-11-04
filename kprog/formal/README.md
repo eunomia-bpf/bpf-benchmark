@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 603, and 505 steps
+`build/mut_*.py` files exist, the counter's last value is 604, and 506 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0735 - nine sentences describing one unchanged gate
+
+Nine sentences record that a step left the gate unchanged, each saying it stayed
+at the same banner count. They describe one unchanged gate across a run of
+steps, so the nine figures must agree with each other; a single sentence
+recording a different number would mean either the gate moved and the sentence
+did not notice, or the count was mis-typed.
+
+All nine say two hundred and ten, and no banner figure stated after that block
+is below it, so nothing in the section contradicts the run of steps in which the
+gate was untouched.
+
+That is weaker than an equality against the log, and deliberately so: two
+hundred and ten is what the gate printed then, not what it prints now. What is
+checkable is that nine sentences describing one thing agree about it. Census 603
+-> 604.
 
 ### Step 0734 - no pattern captures more than it binds
 

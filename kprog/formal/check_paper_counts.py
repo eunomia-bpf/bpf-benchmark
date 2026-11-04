@@ -1421,6 +1421,18 @@ def disjoint_families() -> list[tuple[str, int, int, bool]]:
     return out
 
 
+def stayed_at(text: str) -> list[int]:
+    """Banner counts the section says `make check` "stayed at".
+
+    Nine sentences record that the gate was unchanged across a run of steps,
+    each naming the same count. They describe one unchanged gate, so the
+    figures must agree with each other and none may exceed what the gate
+    reports now.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    return [int(n) for n in re.findall(r"stayed at (\d+)", flat)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2211,6 +2223,23 @@ def main() -> None:
                 "the %s disjointness theorem lists %d pairs of %d, so the "
                 "claim rests on the ones it lists"
                 % (isa, pairs, fams * (fams - 1) // 2))
+    # Nine sentences record that the gate stayed at one banner count across
+    # a run of steps. They describe one unchanged gate, so the figures must
+    # agree and none may exceed what the gate reports now.
+    stayed = stayed_at(text)
+    if len(stayed) != 9:
+        problems.append(
+            "the section says the gate stayed at a count %d times; 9 when "
+            "this was written" % len(stayed))
+    elif len(set(stayed)) != 1:
+        problems.append(
+            "the gate is recorded as staying at different counts: %s"
+            % sorted(set(stayed)))
+    for n in stayed:
+        if n > len(measured) and n > max(measured):
+            problems.append(
+                "the gate is recorded as staying at %d banners and the run "
+                "reports fewer" % n)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
