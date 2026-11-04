@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 605, and 507 steps
+`build/mut_*.py` files exist, the counter's last value is 606, and 508 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0737 - no other check reads the mask where it needs the
+source
+
+Two checks failed the same way: they searched the masked text, which replaces
+every texttt body with placeholder characters, and the spec names and digests
+they looked for were inside those bodies. So the question was whether any other
+check does the same thing.
+
+None does. The paper checker's patterns contain no texttt literal, so the mask
+costs them nothing, and the two functions that need bodies read the source
+directly. The Lean checker works on raw text throughout, and its three patterns
+that mention texttt match what the source holds.
+
+The invariant is worth stating because it is invisible: a pattern matching
+content inside texttt must read the file, while a pattern matching the sentence
+around it may use the mask. Which one applies depends on where the text lives,
+and that is a property of the pattern rather than of the checker. Census 605 ->
+606.
 
 ### Step 0736 - the digests, and a mask that hid them
 
