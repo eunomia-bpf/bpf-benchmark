@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0707 verified by perturbation that three checks
+fail when they should: a sorry, an unparenthesized
+macro operand, and a wrong module cite. The macro
+case needed four attempts because its defect
+population is narrow (census 577 -> 578).
+
+
 Step 0706 checked that every check script is actually
 invoked: nine run in the gate, two need a log, and
 dropping one is now reported by name and count. Two

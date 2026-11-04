@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 577, and 475 steps
+`build/mut_*.py` files exist, the counter's last value is 578, and 476 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0707 - three checks tested by perturbation, and the
+population problem
+
+The third question about the checkers is whether a check fails when it should.
+Three were tested by perturbation: a sorry appended to a module, a macro whose
+parameter is used as a bare operand of a sum, and a header citing a module that
+does not exist. Each was reported by file and symbol, and each left the tree
+unchanged after restoration.
+
+The macro check took four attempts because the defect it looks for is narrow. A
+parameter written as a parenthesized operand is clean even inside a larger
+expression, and so is one nested two levels deep; only a parameter with no
+parentheses of its own, adjoining a binary operator, is the defect. A synthetic
+header settled it in one line.
+
+That is worth recording as a property of the checks rather than of the paper:
+their population is precise, and a perturbation that misses it looks exactly
+like a check that does not work. The same subtlety applied to four of my own
+censuses this session, where the check under-read its pattern while the sentence
+was right. Census 577 -> 578.
 
 ### Step 0706 - every check script is invoked, which is not the same
 as existing
