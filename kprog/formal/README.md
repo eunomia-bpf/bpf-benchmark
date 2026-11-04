@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 600, and 502 steps
+`build/mut_*.py` files exist, the counter's last value is 601, and 503 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,19 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0732 - a disjointness proof that lists its pairs
+The section says the ten dispatch families are pairwise disjoint so the ordered
+chain takes at most one gate per opcode. A theorem states it, and the theorem
+enumerates pairs: a disjointness proof that listed some pairs and not others
+would leave the claim resting on the ones it happened to list.
+It lists all of them. Ten families appear in the statement and forty-five pair
+clauses, which is every pair of ten, so the ordering argument holds for every
+opcode rather than for the pairs someone remembered.
+Removing the last clause leaves forty-four of forty-five and is reported as
+exactly that, which is the failure the check exists for: a theorem that looks
+complete and covers all but one pair. Census 599 counted the writeback bound;
+this is 600 -> 601. Census 600 -> 601.
 
 ### Step 0731 - a bound stated in prose, checked against the
 theorem that states it

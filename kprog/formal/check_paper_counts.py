@@ -1389,6 +1389,29 @@ def writeback_bound() -> tuple[bool, int]:
     return bool(m), int(m.group(1)) if m else 0
 
 
+def disjoint_families() -> tuple[int, int, bool]:
+    """`(families, pairs proved disjoint, whether that is complete)`.
+
+    The section says the ten dispatch families are pairwise disjoint so the
+    ordered chain takes at most one gate per opcode. A disjointness theorem
+    that enumerated only some pairs would leave the claim resting on the ones
+    it listed, so the count of enumerated pairs must be the complete
+    pairwise count.
+    """
+    lean = (pathlib.Path(__file__).parent / "KProgFormal"
+            / "X86DispatchFamily.lean")
+    if not lean.exists():
+        return 0, 0, False
+    text = lean.read_text()
+    i = text.find("theorem x86_dispatch_families_disjoint")
+    if i < 0:
+        return 0, 0, False
+    body = text[i:text.find("theorem", i + 10)]
+    fams = len(set(re.findall(r"x86Disp(\w+)Ops", body)))
+    pairs = len(re.findall(r"op ∈ x86Disp\w+Ops ∧ op ∈ x86Disp\w+Ops", body))
+    return fams, pairs, pairs == fams * (fams - 1) // 2
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2165,6 +2188,18 @@ def main() -> None:
     elif bound != 2:
         problems.append(
             "the writeback bound is %d and the section says two" % bound)
+    # "the ten families are pairwise disjoint": the theorem must cover ten
+    # families and every one of their pairs, or the claim rests on the pairs
+    # it happened to list.
+    fams, pairs, complete = disjoint_families()
+    if fams != 10:
+        problems.append(
+            "the disjointness theorem covers %d families and the section "
+            "says ten" % fams)
+    elif not complete:
+        problems.append(
+            "the disjointness theorem lists %d pairs of %d, so the claim "
+            "rests on the ones it lists" % (pairs, fams * (fams - 1) // 2))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

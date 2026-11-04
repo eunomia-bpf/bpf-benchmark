@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0732 checked that the pairwise-disjointness
+theorem covers all 45 pairs of the ten families, not
+the ones it happens to list. Removing one clause is
+reported as 44 of 45 (census 600 -> 601).
+
+
 Step 0731 bound a prose bound: "never a third
 writeback" matches a Lean theorem stating at most
 two. Raising the theorem to three is reported. No
