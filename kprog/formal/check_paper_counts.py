@@ -1998,6 +1998,21 @@ AGREEMENT_THEOREMS = (
 )
 
 
+# Each theorem's statement, digested. Binding the name alone catches a
+# rename or a deletion; binding the statement as well catches a theorem
+# that kept its name while its claim changed.
+AGREEMENT_STATEMENTS = {
+    "arm64_stack_arena_views_coincide": "b27c02c8afdf",
+    "arm64_helper_arg_ptr_of_code_roundtrip": "a496813a3ace",
+    "arm64_vreg_field_offsets_are_half_offsets": "c923dbc65aa1",
+    "arm64_byte_lane_load_inverse": "8e56e59fe860",
+    "arm64_stack_arm_byte_iff": "15174ab03fce",
+    "arm64_mem_base_src_of_code_roundtrip": "a496813a3ace",
+    "arm64_stack_arena_word_index_refines": "0cb48e11416a",
+}
+
+
+
 def agreement_theorems() -> list[str]:
     """Problems with the agreement proofs, empty when each still exists.
 
@@ -2013,8 +2028,19 @@ def agreement_theorems() -> list[str]:
         if not f.exists():
             out.append("the section's agreement claim has no %s" % module)
             continue
-        if not re.search(r"theorem %s\b" % re.escape(name), f.read_text()):
+        src = f.read_text()
+        m = re.search(
+            r"theorem %s\b(.*?) := " % re.escape(name),
+            src, re.S)
+        if m is None:
             out.append("%s does not prove %s" % (module, name))
+            continue
+        import hashlib
+        got = hashlib.sha256(
+            " ".join(m.group(1).split()).encode()).hexdigest()[:12]
+        if got != AGREEMENT_STATEMENTS[name]:
+            out.append("%s now states something else (%s)"
+                       % (name, got))
     return out
 
 

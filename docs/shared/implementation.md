@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0788 closed 0787's residual: the seven agreement
+theorems now carry a digest of their statement, so a
+reworded claim reports even when the name resolves
+(no census change).
+
+
 Step 0787 completed the cannot-disagree set: all 12
 sentences now name a proof, 5 sentinels and 7
 agreements, with rename and deletion reporting (no

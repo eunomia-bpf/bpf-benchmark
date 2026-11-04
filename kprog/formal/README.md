@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0788 - a name is not a claim, so the statements are digested
+
+Binding a theorem by name catches a rename or a deletion, and it leaves one
+hole: a theorem that keeps its name while its statement changes. All seven
+agreement theorems now carry a digest of their statement alongside the name, so
+editing what one of them says reports even though the name still matches.
+
+The digest is over the statement text with whitespace collapsed, which is what a
+reader would call the claim. It is not a proof that the statement means what the
+sentence means, but the two holes are different sizes: a rename is a small edit
+that removes the link entirely, and a reworded statement is a deliberate change
+that a reviewer is more likely to see.
+
+Verified by appending a term to one statement and watching the digest move,
+while the name still resolved. Census unchanged; the checker gains a component.
+
 ### Step 0787 - all twelve cannot-disagree sentences now name a
 proof
 
