@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 547, and 445 steps
+`build/mut_*.py` files exist, the counter's last value is 548, and 446 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0677 - a two-way split that needs no harness to check
+
+Two sentences state a battery's catches as a fraction and its survivors beside
+it: forty-two of sixty-five caught with twenty-three surviving, and twenty-one
+of twenty-four with three. A battery's rows partition into those a mutation
+catches and those that survive because the change is a documented equivalence,
+so the two numbers have to account for the whole battery.
+
+Both do, and the check now requires it. That is a weaker form of the stage
+split, because the split is into two groups rather than four, but it needs no
+harness to confirm: the sentence carries the total, the catches and the
+survivors, and the third is the sum of the other two.
+
+One sentence states the same form for a battery that held unchanged across a
+step, so its figures are historical in the same way the growth series was. They
+still have to add up, because the partition is arithmetic rather than a
+measurement. Census 547 -> 548.
 
 ### Step 0676 - a stage split that did not add up, and a check that
 failed silently

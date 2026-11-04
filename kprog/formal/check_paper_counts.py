@@ -962,6 +962,19 @@ def stage_sentence_sums(text: str) -> list[tuple[int, int, int, int, int]]:
     return out
 
 
+def caught_fractions(text: str) -> list[tuple[int, int, int]]:
+    """`[(caught, total, caught + equivalents)]` for "N/M caught, K survive".
+
+    A battery's rows partition into those that catch and those that survive
+    as documented equivalences, so the fraction and the survivor count must
+    account for the whole battery.
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    pat = (r"\((\d+)/(\d+) caught, (\d+) equivalences? survive")
+    return [(int(a), int(b), int(a) + int(c))
+            for a, b, c in re.findall(pat, flat)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1461,6 +1474,19 @@ def main() -> None:
             problems.append(
                 "a stage split says %d catch and %d survive of %d"
                 % (caught, surv, tot))
+    # A battery's rows partition into those that catch and those that
+    # survive as documented equivalences, so "N/M caught, K survive" must
+    # account for the whole battery.
+    fracs = caught_fractions(text)
+    if len(fracs) != 2:
+        problems.append(
+            "the section states %d caught fractions; 2 when this was "
+            "written" % len(fracs))
+    for caught, total, accounted in fracs:
+        if accounted != total:
+            problems.append(
+                "%d of %d caught plus survivors is %d"
+                % (caught, total, accounted))
     seen = percent_census(text)
     known = {"46.4", "48.3", "0.8", "4.3", "99.8", "23", "30"}
     if seen != known:

@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0677 bound the two "N/M caught, K survive"
+sentences: catches plus survivors must equal the
+battery, which needs no harness because the sentence
+states all three. Both hold (census 547 -> 548).
+
+
 Step 0676 found a stage split whose parts summed to
 sixty-nine while the sentence said sixty-eight catch.
 The generator figure moved to thirty-seven, and
