@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 563, and 461 steps
+`build/mut_*.py` files exist, the counter's last value is 564, and 462 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,25 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0693 - eighteen caught counts, and the shares that reach
+them
+
+Eighteen sentences say how many mutations a battery caught and then name, in the
+parenthetical, which stage caught each share: so many by the generator check, so
+many by the Lean chain, so many at the spec file or the generated header, so
+many by the contract host or the route host. The parts are the claim, so they
+must reach the count.
+
+All eighteen reach it exactly. The sweep that found them listed every numeral
+the section attaches to the word mutations and asked which matched a harness;
+six did not, and five of those were this form, where the number counts what was
+caught rather than what the harness holds.
+
+Two of the eighteen attribute shares with at rather than by, which the first
+version of the check did not read and so reported a mismatch that was not there.
+That is the third time in this stretch that a check under-read its own pattern,
+and each time the sentence was right. Census 563 -> 564.
 
 ### Step 0692 - the second-largest figure, and its seven terms
 

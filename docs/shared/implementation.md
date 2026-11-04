@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0693 bound the 18 sentences that split a caught
+count by the stage that caught each share. All 18 are
+exact; the first version missed shares introduced by
+"at" and reported a false mismatch (census 563 ->
+564).
+
+
 Step 0692 bound the section's second-largest figure:
 12,270,513 cases a sweep added, which is the sum of
 seven banners. Every term and the total are checked,

@@ -1141,6 +1141,24 @@ def added_case_sums(text: str) -> list[tuple[int, list[int]]]:
     return out
 
 
+def caught_with_parts(text: str) -> list[tuple[int, int]]:
+    """`[(stated caught, sum of the attributed parts)]`.
+
+    "128 mutations were caught (88 by the generator check, 40 by the Lean
+    chain)": each part names the stage that caught a share, so the parts
+    must reach the count. Parts are introduced by "by", "at" and "from".
+    """
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    out = []
+    for tot, body in re.findall(
+            r"(\d+) mutations were caught \(([^)]{10,300})\)", flat):
+        parts = [int(x) for x in re.findall(
+            r"(\d+) (?:by|at|from) ", body)]
+        if parts:
+            out.append((int(tot), sum(parts)))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -1770,6 +1788,18 @@ def main() -> None:
             if p_ not in measured:
                 problems.append(
                     "an added-case part of %d is not a banner" % p_)
+    # "N mutations were caught (a by the generator, b by the Lean chain)":
+    # the stages must reach the count. Eighteen sentences state this split.
+    cw = caught_with_parts(text)
+    if len(cw) != 18:
+        problems.append(
+            "the section states %d caught-with-parts counts; 18 when this "
+            "was written" % len(cw))
+    for stated, summed in cw:
+        if stated != summed:
+            problems.append(
+                "%d mutations are stated caught and the stages give %d"
+                % (stated, summed))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
