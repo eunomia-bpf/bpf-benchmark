@@ -49,7 +49,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 644, and 546 steps
+`build/mut_*.py` files exist, the counter's last value is 645, and 547 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7605,6 +7605,27 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0776 - five size-only sentences join by opcode, and two bugs
+in the join
+
+A fifth of the sentences that give a battery's mutation count without naming its
+file name the opcodes it repaints, and a harness docstring names the contract it
+targets. Where exactly one harness of that size has a docstring naming one of
+the sentence's opcodes, the join is exact, and five sentences resolve that way
+with both figures agreeing.
+
+The remaining fifty-four name a size several harnesses share and an opcode that
+matches more than one of them, so the join stays ambiguous rather than being
+forced. One names a size no harness has, which is the growing harness at an
+earlier size and is checked by the series instead.
+
+Two mistakes in the join are worth recording. Splitting sentences after
+collapsing whitespace cuts them at their line breaks, so the reach fell to zero
+while the function returned five when called on the same file; and the section
+text the checker analyses has every quotation masked, so the opcodes exist only
+in the file on disk. Both were found by comparing the reach the check reported
+with the reach the function gave. Census 644 -> 645.
 
 ### Step 0775 - the exemption set is empty: every figure names a
 banner

@@ -1746,6 +1746,50 @@ def tag_values() -> dict[str, list[int]]:
     return out
 
 
+def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
+    """`[(stated, harness, its size)]` for sentences naming a harness only by
+    size and opcode.
+
+    A sentence that gives a mutation count without a filename still names
+    the opcodes it repaints, and a harness's own docstring names the
+    contract it targets. When exactly one harness of that size has a
+    docstring naming one of the sentence's opcodes, the join is exact;
+    when the opcodes match several or none it stays ambiguous and is not
+    reported.
+    """
+    totals = harness_totals()
+    docs: dict[int, list[tuple[str, str]]] = {}
+    for f in (pathlib.Path(__file__).parent / "build").glob("mut_*.py"):
+        n = totals.get(f.stem)
+        if not n:
+            continue
+        src = f.read_text(errors="ignore")
+        m = (re.match(r'#!.*?\n"""(.*?)"""', src, re.S)
+             or re.match(r'"""(.*?)"""', src, re.S))
+        docs.setdefault(n, []).append(
+            (f.stem, (m.group(1) if m else "").upper()))
+    out = []
+    # Split on line breaks first: collapsing them lets a sentence wrap
+    # across a line, and the ". " split then cuts it in half.
+    joined = ". ".join(re.sub(r"\s+", " ", l)
+                       for l in text.replace("\\brk", "").split("\n"))
+    for line in joined.split(". "):
+        m = re.search(r"(\d+)-mutation harness", line)
+        if not m or "\\texttt" in line[m.start():m.start() + 160]:
+            continue
+        n = int(m.group(1))
+        cands = docs.get(n, [])
+        ops = {o.upper() for o in
+               re.findall(r"\\texttt\{([A-Z][A-Z0-9_]{2,})\}", line)}
+        if len(cands) < 2 or not ops:
+            continue
+        hit = [s for s, d in cands
+               if any(re.search(r"\b%s\b" % re.escape(o), d) for o in ops)]
+        if len(hit) == 1:
+            out.append((n, hit[0], totals[hit[0].removesuffix(".py")]))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2705,6 +2749,24 @@ def main() -> None:
             problems.append(
                 "the %s tag codes are %s, which is not distinct and dense "
                 "from zero" % (isa, vals))
+    # A sentence that gives a mutation count without a filename still names
+    # the opcodes it repaints, and a harness's docstring names the contract
+    # it targets; where exactly one harness of that size matches, the join
+    # is exact and the two figures must agree.
+    # The masked text blanks every \texttt quotation, so the opcodes this
+    # join reads are only in the source.
+    joins = stated_harness_joins(pathlib.Path(args.section).read_text())
+    # A sentence whose size no longer matches leaves the join entirely, so
+    # the reach is floored as well as compared.
+    if len(joins) < 5:
+        problems.append(
+            "only %d sentences join a harness by opcode; at least 5 matched "
+            "before" % len(joins))
+    for stated, harness, have in joins:
+        if stated != have:
+            problems.append(
+                "the section gives %d mutations and %s holds %d"
+                % (stated, harness, have))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

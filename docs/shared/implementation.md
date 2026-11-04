@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0776 joined 5 size-only battery sentences to
+harnesses by opcode docstring, and recorded two bugs
+in the join: the sentence split and the masked text
+(census 644 -> 645).
+
+
 Step 0775 emptied the witness exemption: both
 remaining hosts print their totals, so all 10
 modeled-case figures now name a banner (4,470 and
