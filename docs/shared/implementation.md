@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0802 found the determinism comparison had no
+caller since it was written, and wired it to an
+optional neighbour log; an AST walk now confirms no
+dead code (no census change).
+
+
 Step 0801 bound the multiply host's non-member case:
 opcode 70 must reach the unsupported arm, and the
 host is verified to run 150 cases and pass (no census

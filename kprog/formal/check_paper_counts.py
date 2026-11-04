@@ -3333,6 +3333,17 @@ def main() -> None:
     # counter cannot be vacuously zero": a property of one host file.
     for problem in mul_nonmember_check():
         problems.append(problem)
+    # "two consecutive full runs produce byte-identical output": when the
+    # caller keeps the previous run beside this one, the two are compared
+    # on everything but build progress.
+    prev = pathlib.Path(args.log).with_name(
+        pathlib.Path(args.log).stem + "-prev.log")
+    if prev.exists():
+        if determinism_keys(pathlib.Path(args.log).read_text()) != \
+                determinism_keys(prev.read_text()):
+            problems.append(
+                "this run and %s differ outside the build progress lines"
+                % prev.name)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

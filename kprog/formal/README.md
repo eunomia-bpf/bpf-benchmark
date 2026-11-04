@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0802 - a function written, tested and never called
+
+The determinism function added a few steps ago compared two gate logs and had no
+caller: it was written, tested against the two runs by hand, and then left
+beside the check rather than inside it. A function with no caller is what the
+project's own rule calls dead code, and it is easy to miss because the reasoning
+that produced it is sound.
+
+It is now wired to an optional neighbour log named beside the one being checked,
+so a caller who keeps the previous run gets the comparison and a caller who does
+not is unaffected. Both branches are tested: identical logs pass, and one extra
+line in the neighbour reports.
+
+The more useful part is that the audit is cheap. Walking the module's own syntax
+tree for defined names with no reference takes a moment and found exactly one,
+which suggests running it after a run of additions rather than relying on
+memory. Census unchanged; the checker gains a caller rather than a component.
+
 ### Step 0801 - the non-member case is in the file and the host runs
 it
 
