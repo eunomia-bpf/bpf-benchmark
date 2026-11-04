@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0791 - eight more theorems, and why two have no no-dup table
+
+Eight more theorems join the selection group, covering the four selectors the
+remaining sentences name: the memory offset, the storage effect on tagged
+writes, the conditional-select pointer path, and the memory index value. Each
+has a refinement theorem, and two of the four also have a no-duplicate table so
+two keys cannot collide on one arm.
+
+The two without one are the selectors that branch on facts rather than on a code
+table: the memory offset on post-increment and on whether an index is present,
+and the conditional-select path on the opcode and width directly. Neither
+carries a table, so there is nothing to collide, and the absence is a property
+of the shape rather than a gap.
+
+The group now holds fifteen theorems across seven modules and one check. The
+tuple grows and the checker count does not, so the reach widens without the gate
+getting slower. Census unchanged; the checker gains a component.
+
 ### Step 0790 - the same group extended, not a new check per sentence
 
 Three more cannot-restate sentences now name a theorem. The extension-function
