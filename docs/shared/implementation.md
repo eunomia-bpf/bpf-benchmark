@@ -2611,6 +2611,13 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0678 made the figure check state its own limit:
+33 of 43 stated harness sizes are shared between
+harnesses, so they are matched but not identified.
+The harnesses are outside the gate, so no banner
+disambiguates them (census 548 -> 549).
+
+
 Step 0677 bound the two "N/M caught, K survive"
 sentences: catches plus survivors must equal the
 battery, which needs no harness because the sentence

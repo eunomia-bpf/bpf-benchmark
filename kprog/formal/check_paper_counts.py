@@ -1426,6 +1426,16 @@ def main() -> None:
         problems.append(
             "the section names a %d-mutation harness and no harness has "
             "that many entries" % n)
+    # Report how much this proves: a size shared by several harnesses is
+    # matched, but does not show the sentence names the harness it means.
+    import collections
+    shared = collections.Counter(totals.values())
+    ambiguous = {n for n in anywhere - set(series_now[:-1])
+                 if shared.get(n, 0) > 1}
+    if not args.check:
+        print("check_paper_counts: %d of %d stated harness sizes are shared "
+              "between harnesses and so are matched but not identified"
+              % (len(ambiguous), len(anywhere)))
     for n in sorted(stated - have - set(series_now[:-1])):
         problems.append(
             "a harness is stated at %d mutations and no harness has that "

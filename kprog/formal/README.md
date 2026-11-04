@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 548, and 446 steps
+`build/mut_*.py` files exist, the counter's last value is 549, and 447 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,24 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0678 - the harness check states how much it proves
+
+Forty-three distinct harness sizes are stated, and only ten of them belong to a
+single harness. The other thirty-three are shared: sixty-nine is stated by three
+harnesses, ninety by four, and a dozen others by two. So matching a stated size
+against the set of all sizes proves the figure exists somewhere, not that the
+sentence names the harness it means.
+
+That limit cannot be removed by a better join. The mutation harnesses are not
+part of the gate, so no banner disambiguates them, and the names each paragraph
+gives are the generated modules rather than the specifications; a module name
+resolves only two blocks out of a hundred and sixteen.
+
+The check now says so, printing the count of shared sizes beside its verdict, so
+a reader knows the figure check is a typo check where it is not an identity.
+Making the remaining sentences exact would mean naming the specification in each
+one, which is prose authoring rather than checking. Census 548 -> 549.
 
 ### Step 0677 - a two-way split that needs no harness to check
 
