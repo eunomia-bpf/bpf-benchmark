@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0780 established that only one of the
+paragraph's three sentences has a source here: the
+modules guard the bump, but the userspace loader
+reading blob%u.generation is outside the tree (no
+census change).
+
+
 Step 0779 bound the generation-overflow
 cannot-sentence to both kernel modules: the U32_MAX
 guard must precede the bump in each, and removing it

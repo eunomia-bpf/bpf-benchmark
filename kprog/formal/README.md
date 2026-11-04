@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0780 - one of the paragraph's three sentences has no source
+here
+
+The paragraph that carries the generation claim makes three statements, and only
+one of them has a source in this repository. The kernel modules bump a 32-bit
+generation and guard it against wrapping, which both do; the userspace loader
+that reads the field from a blob name and stamps it into the sidecar immediate
+is not here, and neither is any source that reads it.
+
+The check added last step covers the guard, which is the half with a file. The
+other half is a claim about a loader this tree does not contain, so it can only
+be believed: a reader cannot see the read that pairs an accepted proof with the
+blob it was checked against.
+
+Recording which is which matters more than the size of the gap, because the
+paragraph reads as one mechanism. Two of its three sentences are about code
+outside the repository, and the checker's reach stops at the boundary without
+saying so. Census is unchanged; the checker gains a component.
+
 ### Step 0779 - the second cannot-sentence needed the kernel modules,
 not the proof tree
 
