@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0798 - the rule applied to the rest of the checker
+
+The rule from the last three steps is that a scan should say how much it
+examined, and the other scans in the checker were audited against it. Two had a
+gap: the disjointness check iterated over whatever families it found and
+reported nothing when it found none, and the description join held its reach as
+an exact figure, which fails when a third sentence appears rather than when one
+goes missing.
+
+The disjointness check now requires both families, since the section states two
+and a single one would leave the other unexamined. The description join is a
+floor, the same change as the eleven exact reach counts before it.
+
+Three of the remaining scans report absence in their own terms, which is the
+stronger form: a named body driven nowhere, a spec with no harness, a tag code
+out of range. Those need nothing added, and the distinction between reporting
+findings and reporting a missing subject is the one worth keeping. Census
+unchanged; the checker gains a component.
+
 ### Step 0797 - the scan now asserts how many theorems it examined
 
 The theorem scan matched a line beginning with the keyword, and one theorem in

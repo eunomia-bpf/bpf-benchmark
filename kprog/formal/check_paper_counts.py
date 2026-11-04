@@ -2785,10 +2785,10 @@ def main() -> None:
     # Only words that match a spec's own segments count, because a single
     # prose word can match the wrong spec.
     desc = description_joins(text)
-    if len(desc) != 2:
+    if len(desc) < 2:
         problems.append(
-            "the section states %d description-joined harnesses; 2 when "
-            "this was written" % len(desc))
+            "the section states %d description-joined harnesses; at least 2 "
+            "matched before" % len(desc))
     for n, spec in desc:
         here = pathlib.Path(__file__).parent
         if not (here / (spec + "_spec.json")).exists():
@@ -2994,7 +2994,13 @@ def main() -> None:
     # "the ten families are pairwise disjoint": the theorem must cover ten
     # families and every one of their pairs, or the claim rests on the pairs
     # it happened to list.
-    for isa, fams, pairs, complete in disjoint_families():
+    fams_found = disjoint_families()
+    if len(fams_found) < 2:
+        problems.append(
+            "the two disjointness theorems resolve to %d families' worth "
+            "of proofs, so the claim rests on what was found"
+            % len(fams_found))
+    for isa, fams, pairs, complete in fams_found:
         want = {"x86": 10, "arm64": 8}[isa]
         if fams != want:
             problems.append(
