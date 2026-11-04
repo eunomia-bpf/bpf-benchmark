@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0792 extended the selection group to 23 theorems
+over 11 modules, covering the writeback, write-width
+and move arms on both architectures behind one check
+(no census change).
+
+
 Step 0791 extended the selection group to 15 theorems
 over 7 modules for the offset, storage-effect,
 csel-ptr and index-value selectors, still one check

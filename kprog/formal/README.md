@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0792 - the no-duplicate half is the one a reader can miss
+
+Four more selector modules join the group, each with the same pair: a refinement
+theorem saying the selector agrees with its independent specification, and a
+no-duplicate theorem saying no two keys name one arm. Together they cover the
+writeback body on both architectures, the write-width arm, and the register-move
+arm.
+
+The no-duplicate half is the one a reader can miss. A refinement theorem alone
+says the selector matches its spec; it does not say the spec resolves to one arm
+for a given key. The two together are what the sentence claims when it says each
+outcome names exactly one writeback body.
+
+The group now holds twenty-three theorems across eleven modules behind one
+check. Every module the cannot-restate sentences name has this pair, so the
+reach grows by adding names rather than by adding checks. Census unchanged; the
+checker gains a component.
+
 ### Step 0791 - eight more theorems, and why two have no no-dup table
 
 Eight more theorems join the selection group, covering the four selectors the
