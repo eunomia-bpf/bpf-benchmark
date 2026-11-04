@@ -2611,6 +2611,12 @@ above was measured with the committed value, and
 with the pending edit the same gate fails at
 `test_x86_stack_arm_route_host` (1208 cases) --
 
+Step 0714 bound the distinctness property behind
+twelve "selects exactly one" sentences: no
+specification repeats an opcode code. Duplicating one
+is reported by spec and code (census 584 -> 585).
+
+
 Step 0713 probed the last two checks — the paper and
 readme checkers — so all twelve name their break. A
 wrapped sentence broke the first probe, and a wrong

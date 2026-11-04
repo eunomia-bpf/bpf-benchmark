@@ -1316,6 +1316,37 @@ def bt_mem_shape() -> tuple[int, bool]:
     return len(mem), (len(mem) == 1 and mem[0].get("index") == "imm32")
 
 
+def duplicate_codes() -> list[tuple[str, list[str]]]:
+    """`[(spec, repeated codes)]` over every specification's opcode table.
+
+    The section says the numbers in a table are pairwise distinct, so
+    dispatch on the numeric code selects exactly one arm. A repeated code
+    makes that selection ambiguous and the sentence false.
+    """
+    import json
+    here = pathlib.Path(__file__).parent
+    out = []
+    for spec in sorted(here.glob("*_spec.json")):
+        try:
+            data = json.loads(spec.read_text())
+        except ValueError:
+            continue
+        rows = (data.get("opcodes") or data.get("operations")
+                or data.get("rows") or [])
+        codes = [str(r.get("code") or r.get("op_code") or r.get("opcode"))
+                 for r in rows
+                 if isinstance(r, dict)
+                 and (r.get("code") or r.get("op_code") or r.get("opcode"))]
+        seen, dupes = set(), []
+        for c in codes:
+            if c in seen:
+                dupes.append(c)
+            seen.add(c)
+        if dupes:
+            out.append((spec.name, dupes))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -2056,6 +2087,13 @@ def main() -> None:
             "the BT spec has %d memory-base rows (immediate index: %s) and "
             "the section says one shape reaches the width default"
             % (bt_rows, bt_imm))
+    # "the numbers are pairwise distinct, so the chain selects exactly one
+    # arm per opcode": a repeated code anywhere makes that selection
+    # ambiguous and the sentence false.
+    for spec, dupes in duplicate_codes():
+        problems.append(
+            "%s repeats opcode code(s) %s and the section says the numbers "
+            "are pairwise distinct" % (spec, dupes))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

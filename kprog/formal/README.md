@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 584, and 482 steps
+`build/mut_*.py` files exist, the counter's last value is 585, and 483 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,22 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0714 - one property behind twelve routing claims
+
+A sweep of the word exactly found twelve claims of the form selects exactly one,
+and most rest on the same property: the numbers a table holds are pairwise
+distinct, so dispatch on the numeric code resolves to one arm. A repeated code
+makes the selection ambiguous and every such sentence false at once.
+
+The property holds across all one hundred and thirty-eight specifications.
+Duplicating one code in the BT table is reported by specification and by the
+code, which is what the sentence about that chain asserts.
+
+This is the widest-reaching invariant found so far: a single distinctness
+property backs twelve sentences about routing, and it is checked over every
+specification rather than the three the sentences happen to name. Census 584 ->
+585.
 
 ### Step 0713 - the two checks outside the gate, and a probe that
 disabled nothing
