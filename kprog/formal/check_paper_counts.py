@@ -1389,27 +1389,36 @@ def writeback_bound() -> tuple[bool, int]:
     return bool(m), int(m.group(1)) if m else 0
 
 
-def disjoint_families() -> tuple[int, int, bool]:
-    """`(families, pairs proved disjoint, whether that is complete)`.
+def disjoint_families() -> list[tuple[str, int, int, bool]]:
+    """`[(isa, families, pairs proved, complete)]` per dispatch family proof.
 
-    The section says the ten dispatch families are pairwise disjoint so the
-    ordered chain takes at most one gate per opcode. A disjointness theorem
-    that enumerated only some pairs would leave the claim resting on the ones
-    it listed, so the count of enumerated pairs must be the complete
-    pairwise count.
+    The section claims the ten x86 families and the eight AArch64 ones are
+    pairwise disjoint, so the ordered chain takes at most one gate per
+    opcode. A disjointness theorem that enumerated only some pairs would
+    leave the claim resting on the ones it listed, so each must enumerate
+    the complete pairwise count for its own family set.
     """
-    lean = (pathlib.Path(__file__).parent / "KProgFormal"
-            / "X86DispatchFamily.lean")
-    if not lean.exists():
-        return 0, 0, False
-    text = lean.read_text()
-    i = text.find("theorem x86_dispatch_families_disjoint")
-    if i < 0:
-        return 0, 0, False
-    body = text[i:text.find("theorem", i + 10)]
-    fams = len(set(re.findall(r"x86Disp(\w+)Ops", body)))
-    pairs = len(re.findall(r"op ∈ x86Disp\w+Ops ∧ op ∈ x86Disp\w+Ops", body))
-    return fams, pairs, pairs == fams * (fams - 1) // 2
+    here = pathlib.Path(__file__).parent / "KProgFormal"
+    out = []
+    for isa, mod, thm in (("x86", "X86DispatchFamily.lean",
+                           "x86_dispatch_families_disjoint"),
+                          ("arm64", "Arm64DispatchFamily.lean",
+                           "arm64_dispatch_families_disjoint")):
+        lean = here / mod
+        if not lean.exists():
+            out.append((isa, 0, 0, False))
+            continue
+        text = lean.read_text()
+        i = text.find("theorem " + thm)
+        if i < 0:
+            out.append((isa, 0, 0, False))
+            continue
+        body = text[i:text.find("theorem", i + 10)]
+        fams = len(set(re.findall(r"Disp(\w+)Ops", body)))
+        pairs = len(re.findall(
+            r"op ∈ \w+Disp\w+Ops ∧ op ∈ \w+Disp\w+Ops", body))
+        out.append((isa, fams, pairs, pairs == fams * (fams - 1) // 2))
+    return out
 
 
 def main() -> None:
@@ -2191,15 +2200,17 @@ def main() -> None:
     # "the ten families are pairwise disjoint": the theorem must cover ten
     # families and every one of their pairs, or the claim rests on the pairs
     # it happened to list.
-    fams, pairs, complete = disjoint_families()
-    if fams != 10:
-        problems.append(
-            "the disjointness theorem covers %d families and the section "
-            "says ten" % fams)
-    elif not complete:
-        problems.append(
-            "the disjointness theorem lists %d pairs of %d, so the claim "
-            "rests on the ones it lists" % (pairs, fams * (fams - 1) // 2))
+    for isa, fams, pairs, complete in disjoint_families():
+        want = {"x86": 10, "arm64": 8}[isa]
+        if fams != want:
+            problems.append(
+                "the %s disjointness theorem covers %d families and the "
+                "section says %d" % (isa, fams, want))
+        elif not complete:
+            problems.append(
+                "the %s disjointness theorem lists %d pairs of %d, so the "
+                "claim rests on the ones it lists"
+                % (isa, pairs, fams * (fams - 1) // 2))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than

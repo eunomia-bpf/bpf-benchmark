@@ -45,7 +45,7 @@ oracle's own shape rather than a single regex over `N cases`.
 
 The per-step `census N -> N+1` counter is a running tally of harness
 increments, not a count of the files on disk, and the two have drifted: 330
-`build/mut_*.py` files exist, the counter's last value is 601, and 503 steps
+`build/mut_*.py` files exist, the counter's last value is 602, and 504 steps
 record an explicit `+1`. The drift is narrative, not coverage — 46 harnesses
 are never named in any step entry, but 37 of them drive a tracked `test_*.c`
 host that `make check` runs, so their contracts are gated even though their
@@ -7601,6 +7601,23 @@ the 0456 x86 control-flow battery
 (65 rows, 0 failures, 23
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
+
+### Step 0733 - the claim is made for both architectures
+
+The section makes the pairwise-disjointness claim for both architectures: the
+ten x86 families and the eight AArch64 ones, each so the ordered chain takes at
+most one gate per opcode. The check read only the x86 theorem, so half the claim
+had nothing behind it.
+
+Both theorems enumerate their pairs and both are complete: ten families and
+forty-five pairs for x86, eight and twenty-eight for AArch64, each the full
+pairwise count for its own set. Removing one AArch64 clause is reported as
+twenty-seven of twenty-eight, with the architecture named.
+
+This is the same shape as the sentence about the two tactic populations: a claim
+made for both architectures where only one side was read. The check now walks
+both modules and compares each against the family count the section states for
+that architecture. Census 601 -> 602.
 
 ### Step 0732 - a disjointness proof that lists its pairs
 The section says the ten dispatch families are pairwise disjoint so the ordered
