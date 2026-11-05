@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0856 - every function reachable from main
+
+The checker has gained a component at nearly every step for the last hundred, so
+the wiring was audited rather than assumed: every function defined in the module
+is reachable from main, either called there or called by something that is. One
+hundred and eight functions, one path through them.
+
+The one that looked unwired is a helper for a dispatch count, reached through
+the function that uses it rather than from main. That is the shape a helper
+should have, and the audit distinguishes it from the orphan the call-graph check
+found earlier by following the chain.
+
+Running it after a run of additions is the cheap discipline the dead-code check
+already does for one module; this extends the same question to the call graph
+from main, which is what tells a reader a check is actually in the run rather
+than available. Census unchanged; the checker gains a verified call graph.
+
 ### Step 0855 - the exclusion is what makes the fallback safe
 
 Two sentences about the width resolution are each a theorem, and they are

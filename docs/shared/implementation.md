@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0856 audited the call graph: all 108 functions
+reachable from main, the one apparent orphan being a
+helper reached through its caller (no census change).
+
+
 Step 0855 bound the paired width-resolution theorems:
 no real width is the absent code, and the absent code
 resolves to 64 (no census change).
