@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0840 probed two figures to confirm the checks do
+not overlap: each perturbation is reported exactly
+once, by the check whose relation it breaks (no
+census change).
+
+
 Step 0839 removed a second duplicate found by
 grouping functions by the artifact they read; sharing
 a file is not sharing a claim, and one was compared

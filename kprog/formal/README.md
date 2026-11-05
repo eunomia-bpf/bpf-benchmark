@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0840 - two probes, each reported exactly once
+
+After removing two duplicates, the question is whether the checks overlap in
+what they catch rather than in what they read. Two probes answer it: perturbing
+a figure inside one claim's partition, and perturbing a figure that two claims
+both use.
+
+The first is reported once, by the check whose sum it breaks. The second is also
+reported once, by the axiom partition, and not by the cross-document check,
+which reads the same total from a different sentence and compares it with the
+tree rather than with another figure.
+
+That orthogonality is worth confirming rather than assuming: two checks reading
+one number would mean one edit needing two repairs, and a reviewer seeing two
+messages for one mistake learns to discount both. Census unchanged; the checker
+gains a verified coverage map.
+
 ### Step 0839 - sharing a file is not sharing a claim
 
 The duplicate found last step suggested auditing the other additions for the
