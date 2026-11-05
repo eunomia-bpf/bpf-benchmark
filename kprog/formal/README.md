@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0899 - the same population was counted in two places
+
+The other literal comparison in the checker was the refinement-named population
+the section states, compared with six hundred and nine typed into the check. A
+second module already measures that population from the tree and returns the
+same number, so the two agreed only by maintenance rather than by construction.
+
+The check now takes the figure from that measurement. Drift in either direction
+is caught: a section that states a different number reports the tree's count
+beside it, and a tree whose count moved reports the section's figure against the
+new one.
+
+The remaining literal comparison, a memory-operation bound of one thousand and
+twenty-four, was already read from the generator that enforces it, so it needed
+nothing. Census unchanged; one duplicated figure now has a single source.
+
 ### Step 0898 - the axiom census was re-derived and every constant
 held
 

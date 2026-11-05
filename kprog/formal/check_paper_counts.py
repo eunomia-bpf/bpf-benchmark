@@ -2797,9 +2797,15 @@ def native_decide_split() -> list[str]:
     if int(missing.group(2)) != total:
         out.append("the drift-free total is %d and the split is over %d"
                    % (int(missing.group(2)), total))
-    if named != 609:
+    # The tree's own count, not a literal: `check_lean_claims` already
+    # measures this population, so the section's figure is compared with
+    # that measurement rather than with a number typed here.
+    import check_lean_claims
+    refines = check_lean_claims.scan_tree(
+        str(pathlib.Path(__file__).parent))["refines"]
+    if named != refines:
         out.append("the refinement-named population is %d and the tree has "
-                   "609" % named)
+                   "%d" % (named, refines))
     return out
 
 
