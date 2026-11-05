@@ -2781,6 +2781,33 @@ def default_code_is_w64() -> list[str]:
     return out
 
 
+def packet_bounds_fixture() -> list[str]:
+    """Problems with the packet-bounds negative case, empty when it holds.
+
+    The section says the packet-bounds case has a concrete fixture: a native
+    program reading a packet byte without a data_end check generates an
+    artifact the stock verifier rejects with 'invalid access to packet,
+    off=64 size=1', and the selftest path drives it and asserts the
+    diagnostic. That is one marker and one assertion, both readable.
+    """
+    f = (pathlib.Path(__file__).parent / ".." / ".." / "runner"
+         / "suites" / "test.py")
+    if not f.exists():
+        return ["the selftest suite is absent, so the fixture went unread"]
+    src = f.read_text()
+    out = []
+    marker = 'invalid access to packet, off=64 size=1'
+    if marker not in src:
+        out.append("the selftest does not look for the diagnostic the "
+                   "section quotes")
+    if "verifier_marker not in output" not in src:
+        out.append("the selftest does not assert the diagnostic is present")
+    if "unsafe native proof unexpectedly loaded" not in src:
+        out.append("the selftest does not require the fixture to be "
+                   "rejected")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3950,6 +3977,10 @@ def main() -> None:
     # "the default code is exactly the 64-bit width's code, so the
     # resolution cannot drift from the width table": a numeral equality.
     for problem in default_code_is_w64():
+        problems.append(problem)
+    # "the selftest path drives that fixture and asserts the diagnostic":
+    # the marker the section quotes has to be the one the suite looks for.
+    for problem in packet_bounds_fixture():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

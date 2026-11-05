@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0849 bound the packet-bounds negative case: the
+diagnostic the section quotes is the marker the
+selftest asserts, and a changed offset reports (no
+census change).
+
+
 Step 0848 audited the section's internal figures:
 only the theorem total recurs, both times as the
 whole tree, and every other counted noun appears once

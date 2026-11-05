@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0849 - the quoted diagnostic is the asserted one
+
+The section names one of its three negative cases as exercised end to end rather
+than argued: a native program that reads a packet byte without a bounds check
+generates an artifact the stock verifier rejects, and the selftest drives that
+fixture and asserts the diagnostic. It quotes the diagnostic in full.
+
+The quotation is the check. The suite looks for exactly that marker, fails if
+the proof loaded, and fails if the marker is missing from the output, so the
+three properties the sentence claims are three lines in one file.
+
+What the sentence concedes is what makes it worth binding: the verifier's own
+analysis rejects the program, trusted rather than proved, and the section says
+so. The check holds the fixture rather than the trust, which is the part that
+can be held. Census unchanged; the checker gains a component.
+
 ### Step 0848 - no noun is counted twice with different values
 
 The figure that appears more than once in the section is the theorem total,
