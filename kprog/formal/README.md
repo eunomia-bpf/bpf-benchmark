@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0939 - the pair of ratios is what bounds two percent
+
+The dead characterization section pairs its figures rather than stating one: one
+ratio against userspace-native and one against in-kernel native, for each
+architecture. The pair is what makes the section's argument, since their spread
+bounds in-kernel execution at about two percent on x86 and about five on ARM,
+and a single ratio would bound nothing.
+
+The x86 pair recomputes from the named run to six decimals, and the spread is
+the percentage the section says. Both are now checked: the two ratios against
+the record, so a run whose execution times moved would fail the assertion rather
+than quietly changing what the section bounds.
+
+The ARM pair has no recorded provenance, and its run was under emulation, so it
+is left as the section states it. Census unchanged; the x86 half of a dead
+section's argument is now reproducible and asserted.
+
 ### Step 0938 - a dead section's figure reproduced to six decimals
 
 The paper keeps sections that main.tex does not include, and the largest of them

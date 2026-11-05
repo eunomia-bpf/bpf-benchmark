@@ -3390,6 +3390,52 @@ def pass_round_structure() -> list[str]:
     return out
 
 
+def characterization_pair() -> list[str]:
+    """Problems with the two-run comparison the record's figure rests on.
+
+    The record states the userspace-native and in-kernel speedups
+    unrounded, from one run over the benchmarks that do not carry the
+    baseline tag. Both are recomputed here, because the pair is what bounds
+    in-kernel execution at about two percent: a run whose two ratios moved
+    together would leave that bound describing nothing.
+    """
+    import json
+    import math
+    import statistics
+    root = pathlib.Path(__file__).parent / ".." / ".."
+    f = (root / "micro" / "results"
+         / "x86_kvm_micro_20260526_210952_650695" / "details" / "result.json")
+    if not f.exists():
+        return ["the characterization run is not on disk, so the pair of "
+                "speedups went unread"]
+    d = json.loads(f.read_text())
+    got = {}
+    for label in ("native", "native_kernel"):
+        rs = []
+        for b in d["benchmarks"]:
+            if "baseline" in (b.get("tags") or []):
+                continue
+            per = {}
+            for r in b["runs"]:
+                ex = [s["exec_ns"] for s in (r.get("samples") or [])
+                      if s.get("exec_ns")]
+                if ex:
+                    per[r.get("runtime")] = statistics.median(ex)
+            if "kernel" in per and label in per:
+                rs.append(per["kernel"] / per[label])
+        if rs:
+            got[label] = math.exp(sum(map(math.log, rs)) / len(rs))
+    out = []
+    for label, want in (("native", 1.574808),
+                        ("native_kernel", 1.545042)):
+        if label not in got:
+            out.append("the characterization run has no %s runtime" % label)
+        elif abs(got[label] - want) > 1e-6:
+            out.append("the %s speedup is %.6f and the record says %.6f"
+                       % (label, got[label], want))
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4781,6 +4827,7 @@ def main() -> None:
     problems.extend(cross_section_figures())
     problems.extend(specialization_shape())
     problems.extend(pass_round_structure())
+    problems.extend(characterization_pair())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"
