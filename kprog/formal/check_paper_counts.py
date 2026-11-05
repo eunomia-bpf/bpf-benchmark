@@ -3472,4 +3472,14 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (FileNotFoundError, OSError) as exc:
+        # The checks read a build directory the repository does not carry,
+        # so a checkout that holds the proof tree still cannot run them.
+        # Naming the file is the difference between a traceback and a
+        # diagnosis.
+        raise SystemExit(
+            "check_paper_counts: the checks read sources under build/, "
+            "which the repository does not track, and this checkout lacks "
+            "one (%s)" % exc)

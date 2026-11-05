@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0821 verified the clone claim with a real clone,
+then replaced the traceback it produced with a
+diagnosis naming the untracked build directory (no
+census change).
+
+
 Step 0820 corrected the reach statement from three
 trees to four, adding the build directory the checker
 reads and the check had also missed (no census

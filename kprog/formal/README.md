@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0821 - the clone claim verified, and the traceback it
+produced replaced
+
+The claim that a checkout holding the proof tree still cannot run the checks was
+verified by making one. The clone carries the section and four of the three
+hundred and thirty harnesses, and the run stops on a compiled source it does not
+have.
+
+It stopped with a traceback rather than a diagnosis, which is the defect the
+checker already fixed for its own harness list: a missing file should say which
+tree is missing and why. The entry point now catches the file error and names
+the build directory as the source the repository does not track.
+
+The message is the same shape as the harness-population one, and for the same
+reason: both describe a checkout that has the sentences and not the sources they
+were checked against. Census unchanged; the checker gains a diagnosis.
+
 ### Step 0820 - the reach statement and the check agreed, and both
 were wrong
 
