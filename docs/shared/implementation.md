@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0830 bound the arm-reachability theorems: five
+across four modules, completing the vacuity family at
+the proof-tree level (no census change).
+
+
 Step 0829 found the non-identity-modifier and
 non-member-opcode guards in the ORN host, tracked
 rather than in build/, and bound both (no census

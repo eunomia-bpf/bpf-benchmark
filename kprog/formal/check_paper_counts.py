@@ -2487,6 +2487,27 @@ def orn_vacuity_guards() -> list[str]:
     return out
 
 
+def reachability_theorems() -> list[str]:
+    """Problems with the arm-reachability proofs, empty when all still prove.
+
+    An arm no input reaches makes a dispatch contract true for a reason the
+    reader did not intend, so the section says the arms are reachable and
+    the proof is a theorem. A missing one leaves the sentence with nothing
+    behind it.
+    """
+    here = pathlib.Path(__file__).parent / "KProgFormal"
+    out = []
+    for mod in ("X86MemDispatch.lean", "X86MovLoadHandler.lean",
+                "X86MovbeHandler.lean", "X86Xmm0Handler.lean"):
+        f = here / mod
+        if not f.exists():
+            out.append("the reachability claim has no %s" % mod)
+            continue
+        if not re.search(r"^theorem \w*reachable\b", f.read_text(), re.M):
+            out.append("%s proves no arm reachable" % mod)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3614,6 +3635,10 @@ def main() -> None:
     # "it asserts that a non-identity modifier was actually exercised so
     # that the run cannot be vacuous": two guards in one host.
     for problem in orn_vacuity_guards():
+        problems.append(problem)
+    # "proves all three arms reachable": an arm no input reaches makes a
+    # dispatch contract true for a reason the reader did not intend.
+    for problem in reachability_theorems():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0830 - the vacuity family, four ways
+
+Vacuity has a fourth guard in the proof tree: an arm no input reaches makes a
+dispatch contract true for a reason the reader did not intend, and the section
+says the arms are reachable. Five theorems across four modules prove it, and
+each is named for it.
+
+The check holds the theorem rather than its statement, which is the weaker of
+the two forms this run has used. What it catches is the one that matters here: a
+module that stops proving reachability at all, which leaves the sentence resting
+on a dispatch contract with a dead arm.
+
+With this the vacuity family divides four ways: a theorem whose two sides
+differ, an oracle whose two arms select different tags, an oracle that exercises
+a non-identity modifier, and a proof that every arm is reachable. Each guards
+the same failure at a different scale. Census unchanged; the checker gains a
+component.
+
 ### Step 0829 - two vacuity guards in one host, and finding the
 right file
 
