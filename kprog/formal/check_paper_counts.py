@@ -2931,6 +2931,33 @@ def width_resolution_pair() -> list[str]:
     return out
 
 
+def macro_hygiene_history() -> list[str]:
+    """Problems with the historical macro figures, empty when they agree.
+
+    The section says the macro-hygiene check read only the text after a
+    macro's first newline, leaving single-line macros unexamined, and gives
+    the population "as it stood then". The checker carries the same two
+    figures in the comment where the defect was recorded, so the two
+    documents can be compared rather than trusted.
+    """
+    here = pathlib.Path(__file__).parent
+    paper = re.sub(r"\s+", " ", pathlib.Path(
+        here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+        / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
+    check = (here / "check_macro_hygiene.py").read_text()
+    m = re.search(r"(\d+) macros and (\d+) parameters", paper)
+    c = re.search(r"-- (\d+) of them, (\d+) parameters --", check)
+    if m is None:
+        return ["the section no longer states the historical population"]
+    if c is None:
+        return ["the macro-hygiene checker no longer records the figure"]
+    if m.groups() != c.groups():
+        return ["the section says %s macros and %s parameters; the checker "
+                "records %s and %s" % (m.group(1), m.group(2),
+                                       c.group(1), c.group(2))]
+    return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4127,6 +4154,10 @@ def main() -> None:
     # widen at an unknown width": an exclusion, with the fallback as its
     # companion.
     for problem in width_resolution_pair():
+        problems.append(problem)
+    # "323 macros and 621 parameters ... as they stood then": the same two
+    # figures the checker records where the defect was found.
+    for problem in macro_hygiene_history():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0863 bound the historical macro population: the
+section's 323 macros and 621 parameters match the
+figure the checker records, and a one-digit drift
+reports (no census change).
+
+
 Step 0862 rewrote the checker's 40-line docstring,
 which described 2 of its 127 wired checks, as a list
 naming each artifact read; every claim in it checked

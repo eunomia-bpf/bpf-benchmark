@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0863 - a historical figure that left a copy in the code
+
+The one sentence about a checker's own defect gives a population as it stood
+then: three hundred and twenty-three macros and six hundred and twenty-one
+parameters that the narrower version never examined. The checker carries the
+same two figures in the comment where the defect was recorded, so the two
+documents can be compared rather than taken on trust.
+
+They agree. That is unusual enough to be worth holding: most of the historical
+figures in the section are stated once, and the only way to check one is to
+reproduce the population, which for a defect fixed long ago means reconstructing
+a version of the code that no longer exists. This one left its figure in the
+checker.
+
+The check compares the pair rather than either alone, since a transcription
+error in one figure is invisible to a comparison of the other. Verified by
+moving a parameter count by one. Census unchanged; the checker gains a
+component.
+
 ### Step 0862 - the module described a fifth of itself
 
 The module's own description was forty lines about case counts and the simulator
