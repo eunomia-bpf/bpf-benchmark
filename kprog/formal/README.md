@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0902 - the gate runs the assertions that were added to it
+
+The gate had not been run since the two checks that live inside it were changed,
+so it was run in full. It passes, with the same two hundred and forty-eight
+banners and one hundred and twenty-four million, five hundred and thirty-one
+thousand, eight hundred and two modeled cases the record states, and its log
+carries the claims line with the counts the record's summary uses.
+
+Two things are established by that run which the manual checks could not show.
+The theorem assertion added to the claims check executes inside the gate rather
+than only when the file is run by hand, and the counts it prints are the tree's
+own, so the divisor and the population are both exercised on the gate's path.
+
+The record's checks were then re-run against that log rather than the earlier
+one, and both agree. The earlier log is superseded; the figures did not move,
+which is what a re-run of an unchanged tree should show. Census unchanged; the
+gate is confirmed green on the current tree.
+
 ### Step 0901 - the record's own headline pair was never checked
 
 The summary sentence states seven figures and two were compared with the tree.
