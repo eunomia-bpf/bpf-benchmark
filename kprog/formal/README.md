@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0851 - the gap reproduced, and why the oracles do not see it
+
+The section reports a memory-safety gap in the simulators themselves: a 64-bit
+stack access at the arena's final byte needs eight bytes and touches one past
+the array, AddressSanitizer confirms it on the untouched baseline, and the
+section says the contracts are unaffected because every oracle drives in-range
+indices.
+
+Both halves were checked. Building the tag-source route host with the sanitizer
+leaves it passing over sixty thousand cases, which is the second half stated as
+a measurement rather than an assurance: the oracles do drive in-range indices. A
+ten-line program that reads eight bytes from the final byte of a frame reports
+the diagnostic the section names.
+
+So the sentence's two claims are in different states and it says which is which:
+the gap is reproducible from the sanitizer, and the contracts are untouched
+because of where the oracles point. The first needed a fixture to confirm, which
+is why the section's own route host does not show it. Census unchanged; the
+checker gains a verified reproduction.
+
 ### Step 0850 - holding a negative, which fails the other way
 
 The same paragraph concedes that the other two negative cases have no fixture in

@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0851 reproduced the section's memory-safety
+claim: the tag host passes 60,144 cases under ASan
+(oracles are in-range), and a final-byte 8-byte read
+reports stack-buffer-overflow (no census change).
+
+
 Step 0850 held the section's concession that two
 negative cases are argued rather than exercised: a
 fixture appearing later reports, since it would make
