@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0876 - the join measures its own evidence
+
+Both mis-joins were found by reading the joins by hand, which is not a check.
+The join function now measures its own evidence: for each join that rests on a
+docstring rather than a named file, the tokens that carried it are counted
+against the corpus, and a join whose every matched token appears in eight or
+more of the three hundred and thirty docstrings is reported as thin.
+
+Three joins are thin and all three are correct. The exchange-arm join is carried
+by XCHG, which sits in ten docstrings, and the sentence's own paragraph is about
+the exchange arm; the flag-handler and register-dispatch joins are carried by
+NATIVE_DECIDE, in eleven. Each is a terse sentence rather than a wrong one,
+which is why the count is reported and not compared.
+
+The first version of the measure was vacuous and had to be replaced. A token
+carried by most harnesses of one size necessarily matches more than one of them,
+so a join can never be carried only by such tokens; measured that way it would
+have reported nothing forever. The corpus-wide count is the shape that existed:
+a sentence reaching a harness through a word thirty others also use. Census
+unchanged; the checker gains a measurement.
+
 ### Step 0875 - a join carried by one token every harness has
 
 The joins were measured for how much of each sentence's evidence they actually

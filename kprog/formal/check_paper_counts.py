@@ -1762,7 +1762,9 @@ def tag_values() -> dict[str, list[int]]:
     return out
 
 
-def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
+def stated_harness_joins(
+        text: str) -> tuple[list[tuple[int, str, int]],
+                         list[tuple[int, str, list[str]]]]:
     """`[(stated, harness, its size)]` for sentences naming a harness only by
     size and opcode.
 
@@ -1775,6 +1777,7 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
     """
     totals = harness_totals()
     docs: dict[int, list[tuple[str, str]]] = {}
+    ALL_DOCS: dict[str, str] = {}
     for f in (pathlib.Path(__file__).parent / "build").glob("mut_*.py"):
         n = totals.get(f.stem)
         if not n:
@@ -1785,10 +1788,11 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
         # The prose writes names with escaped underscores (`X86\_SIM`),
         # so both sides are normalised before matching or a token like
         # `X86\_SIM\_L\_EXEC` matches nothing.
-        docs.setdefault(n, []).append(
-            (f.stem, (m.group(1) if m else "").upper()
-             .replace("\\_", "_")))
+        body = (m.group(1) if m else "").upper().replace("\\_", "_")
+        docs.setdefault(n, []).append((f.stem, body))
+        ALL_DOCS[f.stem] = body
     out = []
+    weak: list[tuple[int, str, list[str]]] = []
     # Split on line breaks first: collapsing them lets a sentence wrap
     # across a line, and the ". " split then cuts it in half.
     joined = ". ".join(re.sub(r"\s+", " ", l)
@@ -1810,6 +1814,18 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
         hit = [s for s, d in cands
                if any(re.search(r"\b%s\b" % re.escape(o), d) for o in ops)]
         if len(hit) == 1:
+            # A join carried only by a token that most harnesses of this
+            # size also carry is a coincidence: `HANDLED` sits in dozens of
+            # docstrings, so such a sentence reaches whichever candidate
+            # yields first. Measured after the join, reported as a warning
+            # rather than a failure, since the sentence may simply be terse.
+            doc = dict(cands)[hit[0]]
+            matched = {o for o in ops
+                       if re.search(r"\b%s\b" % re.escape(o), doc)}
+            generic = {o for o in matched
+                       if sum(1 for d in ALL_DOCS.values() if o in d) >= 8}
+            if matched and matched == generic:
+                weak.append((n, hit[0], sorted(matched)))
             out.append((n, hit[0], totals[hit[0].removesuffix(".py")]))
     # A sentence that names the file beside its count joins outright.
     BS = chr(92)
@@ -1822,7 +1838,7 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
                 .replace(BS + "_", "_").removesuffix(".py"))
         if stem in totals:
             out.append((int(m.group(1)), stem + ".py", totals[stem]))
-    return out
+    return out, weak
 
 
 def opcode_map() -> list[str]:
@@ -4058,7 +4074,8 @@ def main() -> None:
     # is exact and the two figures must agree.
     # The masked text blanks every \texttt quotation, so the opcodes this
     # join reads are only in the source.
-    joins = stated_harness_joins(pathlib.Path(args.section).read_text())
+    joins, weak = stated_harness_joins(
+        pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
     if len(joins) < 40:
@@ -4321,8 +4338,9 @@ def main() -> None:
     if not problems:
         print(f"all measured claims hold: {len(claimed)} case counts over "
               f"{case_figures(text)} distinct figures, {banner_bound} of "
-              f"{stated} stated figures banner-bound or sequenced, both "
-              f"gate totals, the {len(ISA)}-way split over "
+              f"{stated} stated figures banner-bound or sequenced, "
+              f"{len(joins)} harness joins ({len(weak)} resting on a shared "
+              f"token), both gate totals, the {len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")
 

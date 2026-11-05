@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0876 made the join function measure its own
+evidence: 3 of 40 joins rest on a token 8+ docstrings
+share (all three correct). The first measure was
+vacuous by construction (no census change).
+
+
 Step 0875 found a second mis-join, on a single
 generic token: the 50-mutation move sentence had
 reached the adrp harness. Named, joins 39 -> 40 (no
