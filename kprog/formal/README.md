@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0953 - safe to reorder, expensive to reorder
+
+Whether the catalogue can be reordered safely was checked rather than assumed. A
+sort would be safe: twenty-six of the harness paragraphs contain a directional
+word and all of them are geometric, as in bits above bit thirty-two or the
+partial-register write below it, so no paragraph points at another by position.
+
+What a sort would not be is small. The subsection's two hundred and forty-four
+blocks are of two kinds, a hundred and forty-seven naming a harness and
+ninety-seven describing the approach, and the kinds alternate seventy-three
+times. Grouping the catalogue therefore means moving a hundred and forty-seven
+blocks past ninety-seven others, which is a restructuring rather than a tidy.
+
+So the earlier step's conclusion holds with a sharper reason: the material is
+safe to reorder and expensive to reorder, and the expense is the interleaving
+rather than the references. Census unchanged; the sort's safety and size are
+both measured.
+
 ### Step 0952 - fifty-seven directional words, one of them
 positional
 
