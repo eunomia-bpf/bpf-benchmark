@@ -2711,6 +2711,47 @@ def carry_polarity() -> list[str]:
     return out
 
 
+def native_decide_split() -> list[str]:
+    """Problems with the native_decide split, empty when it reconciles.
+
+    The section divides the 488 uses three ways, says two of the refinement
+    uses are themselves enumerations, and that one use sits in none of the
+    three. Four published figures, and the arithmetic has to close on the
+    tree's own count.
+    """
+    here = pathlib.Path(__file__).parent
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+        / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
+    m = re.search(
+        r"Its (\d+) uses fall into three kinds.*?the (\d+) finite "
+        r"enumerations.*?; (\d+) concrete example values.*?and (\d+) of "
+        r"the (\d+) refinement-named", flat)
+    if m is None:
+        return ["the native_decide split sentence is absent, so its figures "
+                "went unread"]
+    total, enums, examples, refines, named = (int(x) for x in m.groups())
+    nested = re.search(r"(\d+) of the refinement uses are themselves "
+                       r"enumerations", flat)
+    missing = re.search(r"the three counts sum to (\d+) rather than "
+                        r"(\d+)\. One use sits in none", flat)
+    out = []
+    if nested is None or missing is None:
+        return ["the split no longer says how the counts reconcile"]
+    nest = int(nested.group(1))
+    if enums + examples + refines - nest != int(missing.group(1)):
+        out.append("the three counts do not sum to what the sentence says")
+    if int(missing.group(1)) + 1 != int(missing.group(2)):
+        out.append("the sum plus the one uncategorised use is not the total")
+    if int(missing.group(2)) != total:
+        out.append("the drift-free total is %d and the split is over %d"
+                   % (int(missing.group(2)), total))
+    if named != 609:
+        out.append("the refinement-named population is %d and the tree has "
+                   "609" % named)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3872,6 +3913,10 @@ def main() -> None:
     # borrow": a complement over all operands plus a witness that they
     # genuinely differ.
     for problem in carry_polarity():
+        problems.append(problem)
+    # "the three counts sum to 487 rather than 488, and one use sits in
+    # none of the three": four figures that have to close.
+    for problem in native_decide_split():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

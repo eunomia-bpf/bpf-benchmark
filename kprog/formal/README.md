@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0846 - a partition that closes because it names the
+leftover
+
+The sentence dividing the 488 native_decide uses looks, on a first read, like it
+does not add up: the three counts are 28, 441 and 20, which is 489, and the
+total is 488. Reading further resolves it, and the resolution is the interesting
+part of the claim.
+
+Two of the twenty refinement uses are themselves enumerations, so the three
+counts sum to 487, and one use sits in none of the three: a handler-agreement
+theorem whose definitional half the compiler decides while its operand halves
+cite their refinements. 487 plus that one is 488, and the sentence says so.
+
+The check reads all four figures and both relations. What it protects is the
+reconciliation rather than the figures alone: a plausible accounting of a
+population, including the part that does not fit, is stronger evidence than a
+partition that closes because the leftover was left out. Census unchanged; the
+checker gains a component.
+
 ### Step 0845 - a complement needs a witness to not be vacuous
 
 The sentence about the carry flag states a difference that is not a drift:

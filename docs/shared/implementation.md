@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0846 bound the 488-use split, which reconciles
+at 487 plus one uncategorised use; the sentence's own
+accounting is what the check reads (no census
+change).
+
+
 Step 0845 bound the carry-polarity sentence: a
 complement over all operands plus a concrete witness
 where the flags differ, which keeps the complement
