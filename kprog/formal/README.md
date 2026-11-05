@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0827 - the audit for the shape the last two steps found
+
+The defect found in the last two steps is a pattern that holds the value it
+verifies. The whole checker was audited for it by looking for the other shape it
+produces: a match whose failure skips a comparison instead of reporting one.
+
+No search in the checker can fail silently. Every one that reports problems also
+has a branch for the pattern not matching, and the one search without such a
+branch parses the gate log, where a line that does not match is expected rather
+than exceptional.
+
+Two patterns still contain a numeral and both are domains rather than figures:
+the byte space of two hundred and fifty-six opcodes, and window sizes in
+characters. A domain cannot drift, so holding it is right; what has to vary is
+the count beside it, and that is read.
+
 ### Step 0826 - the same defect in another place, gating a check
 entirely
 

@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0827 audited the checker for silent-skip
+patterns: no search can fail without reporting, and
+the two remaining numerals are domains not figures
+(no census change).
+
+
 Step 0826 removed a projected case figure from a
 pattern that gated the scene comparison; a moved
 figure had made the check skip silently (no census
