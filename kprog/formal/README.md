@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0909 - sixty-one rows against a sixty-four-row battery
+
+Measuring the thirteen sentences found a real defect in the second one whose
+subject is unambiguously its own battery. The multiply-family paragraph names
+the sixty-four-row harness, and that harness reports sixty-four mutations with
+seven equivalences on a clean run, so fifty-seven are caught. The sentence said
+sixty-one, four more rows than the battery contains.
+
+It is now fifty-seven, and both counts in that sentence are bound to the
+battery's source the way the pair-route one is. Verified by restating the old
+figure, which the run reports beside the battery's.
+
+That leaves eleven sentences whose counts describe a route oracle rather than a
+battery. They are not drift of the same kind: one paragraph states sixty-one
+rows beside a sixty-four-row harness and the oracle it drives reports a hundred
+and fifty cases, so the sentence is counting something neither source calls a
+row. Finding what it counts is a separate reading. Census unchanged; one figure
+is corrected and gains a binding.
+
 ### Step 0908 - the counts are the route oracle's, not the battery's
 
 The other twelve sentences of that shape were measured against the batteries

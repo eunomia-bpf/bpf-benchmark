@@ -3046,6 +3046,23 @@ def battery_rows(text: str) -> list[str]:
     if int(m.group(2)) != equiv:
         out.append("the section states %s equivalences and the battery has %d"
                    % (m.group(2), equiv))
+    # The multiply-family sentence is the other one whose subject is its own
+    # battery: it names the 64-row harness and the counts are that
+    # battery's rows minus its equivalences.
+    mul = (pathlib.Path(__file__).parent / "build"
+           / "mut_arm64_mul_route.py").read_text()
+    mrows = len(re.findall(r"^\s*row\(", mul, re.M))
+    mequiv = len(re.findall(r"equivalent=True", mul))
+    mm = re.search(r"(\d+) catchable rows are caught[^.]{0,140}?"
+                   r"and (\d+) equivalences survive\. The arm64 module close",
+                   flat)
+    if mm is None:
+        out.append("the multiply-family sentence is absent, so its figures "
+                   "went unread")
+    elif int(mm.group(1)) != mrows - mequiv or int(mm.group(2)) != mequiv:
+        out.append("the section states %s rows and %s equivalences; the "
+                   "multiply battery has %d and %d"
+                   % (mm.group(1), mm.group(2), mrows - mequiv, mequiv))
     return out
 
 
