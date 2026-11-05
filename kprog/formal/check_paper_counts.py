@@ -3240,7 +3240,8 @@ def tag_model() -> list[str]:
     # The design section says a descriptor supplies two renderings: a proof
     # sequence and a native emit. Both must be fields of the descriptor, or
     # the sentence describes a mechanism the struct no longer has.
-    hdr = here / ".." / ".." / "vendor" / "linux-framework" / "include" / "linux" / "bpf.h"
+    hdr = (here / ".." / ".." / "vendor" / "linux-framework" / "include"
+           / "linux" / "bpf.h")
     if hdr.exists():
         body = hdr.read_text(errors="ignore")
         for field in ("instantiate_insn", "emit_x86", "emit_arm64"):
@@ -3408,6 +3409,12 @@ def characterization_pair() -> list[str]:
     baseline tag. Both are recomputed here, because the pair is what bounds
     in-kernel execution at about two percent: a run whose two ratios moved
     together would leave that bound describing nothing.
+
+    The exclusion is the one the evaluation section states: the two
+    baseline-only benchmarks, which carry no site of the extended
+    operations, are left out of the twenty-nine. Both are tagged
+    `baseline`, so the tag is what the sentence describes and what this
+    recomputation follows.
     """
     import json
     import math
@@ -3436,6 +3443,16 @@ def characterization_pair() -> list[str]:
         if rs:
             got[label] = math.exp(sum(map(math.log, rs)) / len(rs))
     out = []
+    # The population the two ratios describe is twenty-seven of twenty-nine,
+    # and the two left out are the baseline-tagged pair. If the tag stopped
+    # partitioning the run, the ratios would describe a different
+    # population than the sentence does.
+    named = [b for b in d["benchmarks"]
+             if "baseline" in (b.get("tags") or [])]
+    if len(d["benchmarks"]) != 29 or len(named) != 2:
+        out.append("the run has %d benchmarks and %d baseline-tagged; the "
+                   "sentence says twenty-nine and two"
+                   % (len(d["benchmarks"]), len(named)))
     for label, want in (("native", 1.574808),
                         ("native_kernel", 1.545042)):
         if label not in got:

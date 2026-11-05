@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0943 confirmed the 27-of-29 exclusion rule
+against the run's tags and bound the partition; also
+fixed one wide line of mine.
+
+
 Step 0942 corrected step 0941: the table counts four
 headers, not two, so the difference is 16 lines
 across three components, not 5 in one.

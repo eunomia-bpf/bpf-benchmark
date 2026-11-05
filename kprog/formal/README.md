@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0943 - the exclusion rule was in prose, and it holds
+
+The evaluation section that main.tex does not include states the exclusion rule
+the earlier step derived: twenty-seven of the twenty-nine benchmarks carry at
+least one site of the extended operations, and the two left out are the
+baseline-only ones. The rule was derived from the run's tags; the section states
+it in prose.
+
+Both agree. The run has twenty-nine benchmarks, exactly two carry the baseline
+tag, and the other twenty-seven carry workload tags with no overlap. That
+partition is now checked, so if the tag stopped separating the pair the ratios
+would be reported against a different population than the sentence describes.
+
+The two ratios are still recomputed from the twenty-seven. Census unchanged; the
+exclusion rule is stated, verified against the run, and bound.
+
 ### Step 0942 - the difference was sixteen lines, not five
 
 The previous step compared the table's five components against the tree and
