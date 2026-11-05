@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0949 retitled the section from 'Evaluation Plan'
+to 'Evaluation': 95 of 151 lines are measured
+evidence, and the intro says so.
+
+
 Step 0948 corrected the introduction's contribution
 from 'a plan' to the measured results the evaluation
 section now reports.

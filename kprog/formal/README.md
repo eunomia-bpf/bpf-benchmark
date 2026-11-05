@@ -7606,6 +7606,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0949 - the title weighted the smaller part
+
+The section the paper's measurements live in was titled for its plan, and the
+measurement is what most of it is: ninety-five of its hundred and fifty-one
+lines are existing evidence, against thirty-four for the experiment blocks and
+run order, and nineteen for the claim ledger that opens it.
+
+The title also disagreed with the introduction, which now reports this section
+as delivering measured results on both architectures. Retitling it removes that
+disagreement without changing a line of content.
+
+No live section had the name, and nothing referenced the label, so the change
+costs one word and the build is unchanged. Census unchanged; the title matches
+the content.
+
 ### Step 0948 - the contribution list still said plan, not measured
 
 The introduction's contribution list offered an evaluation plan plus preview
