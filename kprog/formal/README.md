@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0908 - the counts are the route oracle's, not the battery's
+
+The other twelve sentences of that shape were measured against the batteries
+their paragraphs name, and they do not describe those batteries. Every one of
+the thirteen mentions a route, an oracle, or a set of opcodes, and the numbers
+count rows the route oracle drives rather than mutations the battery declares.
+One paragraph states sixty-one catchable rows beside a sixty-four-row harness
+whose own run reports sixty-four mutations with seven equivalences, so
+fifty-seven would be the battery's figure and sixty-one is the oracle's.
+
+That is why the check compares only the pair-route sentence: it is the one whose
+two counts do equal the battery's rows minus its equivalences, and the one where
+the paragraph's subject and the battery's are the same object.
+
+The other twelve therefore need a different binding, one that counts the rows
+their route oracles drive rather than the mutations their batteries declare.
+They are left as they are rather than given a check that would report twelve
+false findings. Census unchanged; the scope of the check is now stated with the
+measurement behind it.
+
 ### Step 0907 - the counts were right and I replaced them
 
 The two counts in that sentence were already right. The battery the paragraph

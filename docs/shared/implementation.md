@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0908 measured all 13 : their counts are
+route-oracle rows, not battery mutations. Only the
+pair-route one coincides, which is why the check is
+scoped to it.
+
+
 Step 0907 reverted step 0906's regression: the 32/8
 figures were right for mut_arm64_pair_route (40 rows,
 8 equiv); 46/13 belonged to another battery.
