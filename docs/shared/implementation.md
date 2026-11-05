@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0858 added the paper's own break convention to
+186 long identifiers: 13,397 overfull boxes to
+13,040, mean 21.8pt to 19.2pt (no census change).
+
+
 Step 0857 made the reachability audit a gate check;
 planted, it names a helper whose caller is
 unreachable while the dead-code sweep names only the

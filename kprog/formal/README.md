@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0858 - a convention the paper already had, applied 186 times
+
+The section had thirteen thousand overfull boxes, a median of ten points and a
+worst of a hundred and sixty-seven, and the cause was a hundred and eighty-five
+long identifiers written without the break the paper uses elsewhere: a
+discretionary after a completed segment of an escaped name.
+
+Adding it at the point the paper's own uses put it, before the separator rather
+than after, removes three hundred and fifty-seven boxes and lowers the mean by
+twelve percent. The worst single box rises a few points, since a break moved
+rather than vanished, and the net is a real improvement rather than a reshuffle.
+
+The placement took three attempts. After the separator reads naturally and is
+what a reader would write, but the escape ends a control sequence and a letter
+following it is undefined, so the break goes before it. The paper's existing
+uses were the guide, and they all break before. Census unchanged; the checker
+gains a cleaner section.
+
 ### Step 0857 - a caller is not a run, and the two checks differ
 
 The reachability audit was a script run once; it is a check now, and it asks
