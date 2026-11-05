@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0829 - two vacuity guards in one host, and finding the
+right file
+
+Another sentence says the run asserts a non-identity modifier was exercised so
+it cannot be vacuous, and that a non-member opcode reaches the unsupported arm.
+Both are in the same host, and the comment beside the first gives the reason:
+without it the run says nothing about the AUX decode.
+
+The file took some finding. The phrase is not in the build directory where most
+route hosts live, and the contracts that discuss modifiers in their comments are
+not this one; the guard is in the ORN host, which is tracked, and the sentence's
+mention of the disjunction is what identifies it.
+
+Two vacuity guards in one host is the pattern worth noticing: an oracle that
+exercises only the identity modifier, or only member opcodes, passes while
+comparing one thing to itself. Census unchanged; the checker gains a component.
+
 ### Step 0828 - the assertion is what makes the other half mean
 anything
 

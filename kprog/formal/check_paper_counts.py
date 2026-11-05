@@ -2464,6 +2464,29 @@ def tag_arms_differ() -> list[str]:
     return []
 
 
+def orn_vacuity_guards() -> list[str]:
+    """Problems with the ORN host's vacuity assertions, empty when present.
+
+    The section says the run asserts a non-identity modifier was actually
+    exercised, so the run cannot be vacuous, and that a non-member opcode
+    reaches the unsupported arm. Both are guards against an oracle that
+    passes because it compared nothing.
+    """
+    f = pathlib.Path(__file__).parent / "test_arm64_orn_route_host.c"
+    if not f.exists():
+        return ["the ORN route host is absent, so its vacuity guards went "
+                "unread"]
+    src = f.read_text(errors="ignore")
+    out = []
+    if "seen_nonidentity" not in src or \
+            "no non-identity modifier was exercised" not in src:
+        out.append("the ORN host does not require a non-identity modifier")
+    if "non-member opcode" not in src.lower() and \
+            "non_member" not in src:
+        out.append("the ORN host does not require a non-member opcode")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3587,6 +3610,10 @@ def main() -> None:
     # "it asserts that the two arms select different tags so that the check
     # cannot pass with both arms identical": a property of one host file.
     for problem in tag_arms_differ():
+        problems.append(problem)
+    # "it asserts that a non-identity modifier was actually exercised so
+    # that the run cannot be vacuous": two guards in one host.
+    for problem in orn_vacuity_guards():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
