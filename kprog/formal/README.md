@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0892 - the unsafe artifact was rejected on one ISA, not two
+
+The two cross-ISA smoke paragraphs were traced the way the experiment paragraphs
+were, and both have archived runs. The AArch64 one records twenty-nine samples
+each carrying a result, a return value, a proof-verifier load phase, and a
+native load phase, which is exactly what the paragraph claims. The x86 one
+records twenty-nine samples whose results and return values equal their expected
+pairs, which is the other paragraph's claim.
+
+Tracing them also found an attribution the prose had blurred. The paragraph
+about the unsafe artifact reads as x86 evidence, and the AArch64 paragraph after
+it says its kernel rejected the same artifact, so both were presented as
+rejecting it. The x86 runs contain twenty-nine positive programs and no negative
+case; the rejection is recorded in the AArch64 console log and nowhere else.
+
+The paragraph now says where the rejection is archived and that the x86 run
+carries the positive artifacts only. Census unchanged; the paper names two more
+runs and corrects one attribution.
+
 ### Step 0891 - seven figures now trace to two directories
 
 The four remaining aggregates in that paragraph came from the same run the

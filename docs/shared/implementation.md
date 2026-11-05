@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0892 traced both cross-ISA smokes to archived
+runs and found the unsafe-artifact rejection is
+AArch64-only (no x86 negative case); the attribution
+is corrected.
+
+
 Step 0891 reproduced the four remaining aggregates
 (54.52, 116.192 ms, 1.869 ms, 31.490 us, 2.529 ms)
 from the same run; seven figures now trace to one
