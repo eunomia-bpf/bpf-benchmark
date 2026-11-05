@@ -627,27 +627,6 @@ def named_lean_objects() -> list[str]:
     return out
 
 
-def named_files() -> list[str]:
-    """File names the section cites in `\texttt{}`.
-
-    A renamed or deleted file leaves the sentence pointing at nothing, and
-    a file name is not a figure, so no count binds it.
-    """
-    flat = re.sub(r"\s+", " ", pathlib.Path(
-        "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex"
-    ).read_text()).replace("\\brk", "")
-    names = sorted(set(re.findall(
-        r"\\texttt\{([A-Za-z0-9_][\w./-]*\.(?:py|c|h|lean|json|yaml))\}",
-        flat)))
-    roots = [pathlib.Path(__file__).parent.parent.parent / d
-             for d in ("kprog", "bpfopt")]
-    out = []
-    for name in names:
-        if not any(list(r.rglob(name.split("/")[-1])) for r in roots):
-            out.append(name)
-    return out
-
-
 def named_instructions() -> list[str]:
     """Names the prose presents as an arm, opcode, instruction or form.
 
@@ -792,7 +771,10 @@ def scene_counts() -> dict[str, int]:
     for name in ("x86_route_host", "helper_route_host", "a64_route_host"):
         src = pathlib.Path(__file__).parent / "build" / (name + ".c")
         if src.exists():
-            out[name] = len(set(re.findall(r"scene_[a-z0-9_]+",
+            # Both cases: every scene is lowercase today, so a class that
+            # allowed only lowercase would silently stop counting one that
+            # was not, and the sentence states these counts.
+            out[name] = len(set(re.findall(r"scene_[A-Za-z0-9_]+",
                                            src.read_text(errors="ignore"))))
     return out
 
@@ -3645,11 +3627,6 @@ def main() -> None:
         problems.append(
             "%d Lean names the section presents are absent from the tree: %s"
             % (len(gone), gone))
-    # Every file the section cites must exist. A file name is not a figure,
-    # so no count would notice a rename.
-    for name in named_files():
-        problems.append(
-            "the section cites %s, which is not in the tree" % name)
     # "build/a64_route_host.c (now N modeled cases)" states the oracle's
     # current banner. It drifted once -- 4328 was written in step 0458 and
     # the oracle has since grown -- so the figure is bound to the banner of

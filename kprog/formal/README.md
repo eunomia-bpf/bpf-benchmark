@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0921 - one more class that could silently undercount
+
+Two checks read file names from the section and both are driven by a character
+class, so both had the shape the last step found: a class that admits only the
+characters seen today stops matching a name that gains one it does not. Auditing
+every such class in the checker found one more, the scene count, which is
+written in lowercase on all forty-four scenes and would have silently
+undercounted a scene that was not.
+
+That class now admits both cases. The other classes are wider already: those
+spelled with the word-character escape admit capitals by construction, and the
+ones that read only module names are matched by a pattern the tree already
+forces to start with a capital.
+
+The audit also found a duplicated check. Two functions read the file names the
+section cites, one from the safety section and one from every live section, and
+the wider one covers everything the narrower found. The narrower is gone, with
+its call site. Census unchanged; one latent undercount is closed and one
+duplicate removed.
+
 ### Step 0920 - the path check read one section and half the paths
 
 The check that paths the section names exist read only the safety section. Three

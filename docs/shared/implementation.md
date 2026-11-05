@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0921 widened the scene-name class (latent silent
+undercount) and removed named_files(), a strict
+subset of cited_paths().
+
+
 Step 0920 extended the path check to every live
 section and fixed two escapes that made it read
 nothing (underscore, lowercase-only class).
