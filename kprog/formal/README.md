@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0815 - the spec's own shape is the key
+
+One more sentence names its harness. It gives the spec as four opcode fields and
+the operation name, and the direction contract is the one whose specification
+holds exactly four directions; the other two candidates are a control-flow
+ladder and a shift family with no direction table.
+
+The identification is by the spec's own shape rather than by a word, which is
+the strongest key after a quoted text: the sentence gives a count of fields and
+the spec holds that many.
+
+Twenty-four sentences join, all agree on their size, and the description reach
+holds at two. The eleven left state sizes that four to seven harnesses share and
+name no field or opcode that separates them. Census unchanged; the checker gains
+one join.
+
 ### Step 0814 - when the sentence is not enough, the paragraph is
 
 Two more sentences name their harness, both of size ninety and both chosen by a
