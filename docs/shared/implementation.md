@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0890 reproduced the first experiment's
+aggregates too (0.675848, 47.54 from compile_ns, same
+26/2/1) and named its run in the paper.
+
+
 Step 0889 reproduced the evaluation aggregates from
 the cited run's raw samples (0.68243, 0.537713,
 26/2/1, 870 samples all exact) and named the run in

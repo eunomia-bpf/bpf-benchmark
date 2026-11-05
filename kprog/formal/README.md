@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0890 - the first experiment reproduces as well
+
+The first experiment paragraph carries the same three aggregates as the second,
+and its run was identified in the archived review as well. Checking it from the
+raw samples reproduces the execution ratio, the code-size ratio, and the split,
+and a fourth figure the section gives: the load ratio of 47.54 falls out of the
+compile times by the same aggregation.
+
+That paragraph named its evidence only as a build-and-evaluate log, so it now
+names the run and the aggregation beside the figures it produces, the way the
+second paragraph does.
+
+Both x86 experiment paragraphs now carry values a reader can recompute from one
+identified directory each, and both reproduce exactly. The remaining figures in
+the section, the load and proof medians and the cross-ISA smokes, name no run
+yet; they are the next ones a reader would have to trace. Census unchanged; the
+paper gains a provenance sentence.
+
 ### Step 0889 - the evaluation aggregates reproduce from raw samples
 
 The evaluation section's aggregates were checked against the raw per-sample data
