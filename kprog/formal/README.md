@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0938 - a dead section's figure reproduced to six decimals
+
+The paper keeps sections that main.tex does not include, and the largest of them
+characterizes the eBPF-native gap with two figures, one per architecture.
+Neither figure appears in the compiled paper. Tracing the x86 one found its
+provenance recorded precisely enough to recompute: the geomean of kernel over
+native execution time across the twenty-seven benchmarks that do not carry the
+baseline tag, in one named run.
+
+That recomputation gives the recorded value to six decimals, which is a stronger
+confirmation than the dead section itself ever had. The exclusion matters: with
+all twenty-nine benchmarks the same computation gives a different number, so the
+sentence is about the pure-bytecode population rather than the whole suite.
+
+The section stays out of the paper, since including a characterization section
+is an editorial decision and its ARM figure was measured under emulation whose
+timings the paper itself calls diagnostics. What is established here is that the
+x86 half is reproducible from an identified run, which the section did not say.
+Census unchanged; one dead-section figure is now traceable.
+
 ### Step 0937 - the two rounds are now read from the policy file
 
 The sentence about two rounds is now checked against the policy file rather than

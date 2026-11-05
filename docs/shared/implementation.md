@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0938 reproduced the dead characterization
+section's 1.57x to six decimals (27 baseline-excluded
+benchmarks, named run).
+
+
 Step 0937 bound the two-round sentence to the policy
 file: both groups must carry the pair twice with
 rewrites between.
