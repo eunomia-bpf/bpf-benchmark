@@ -2808,6 +2808,28 @@ def packet_bounds_fixture() -> list[str]:
     return out
 
 
+def unexercised_negatives() -> list[str]:
+    """Problems with the two negative cases the section says are unexercised.
+
+    The section says the opaque-pointer helper-argument case and the
+    unbounded-jump case have no fixture in the tree, and states them so the
+    boundary between checked and argued is explicit. A fixture appearing
+    later would make the sentence understate the evidence, which is the
+    opposite of the usual drift and just as wrong.
+    """
+    f = (pathlib.Path(__file__).parent / ".." / ".." / "runner"
+         / "suites" / "test.py")
+    if not f.exists():
+        return ["the selftest suite is absent, so the concession went unread"]
+    src = f.read_text()
+    out = []
+    for word in ("opaque", "unbounded"):
+        if word in src:
+            out.append("the suite now exercises the %s case, which the "
+                       "section says has no fixture" % word)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3981,6 +4003,10 @@ def main() -> None:
     # "the selftest path drives that fixture and asserts the diagnostic":
     # the marker the section quotes has to be the one the suite looks for.
     for problem in packet_bounds_fixture():
+        problems.append(problem)
+    # "the other two have no fixture in the tree": a fixture appearing
+    # later would make the concession understate the evidence.
+    for problem in unexercised_negatives():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

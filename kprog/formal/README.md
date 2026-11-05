@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0850 - holding a negative, which fails the other way
+
+The same paragraph concedes that the other two negative cases have no fixture in
+the tree: the opaque-pointer helper argument is argued from the boundary rules,
+and the unbounded indirect jump is a precondition on the specializing path
+rather than a theorem about it. The tree agrees, and the concession is now held.
+
+Holding a negative is the unusual half. A fixture appearing later would make the
+sentence understate the evidence, which reads as modesty and is still wrong: a
+reader deciding how much of the boundary is checked would be told two cases are
+argued when three are exercised.
+
+The two directions are both checked now, and they fail for different reasons:
+the packet-bounds case fails if its marker moves, and this one fails if a word
+the section says is absent appears in the suite. Census unchanged; the checker
+gains a component.
+
 ### Step 0849 - the quoted diagnostic is the asserted one
 
 The section names one of its three negative cases as exercised end to end rather
