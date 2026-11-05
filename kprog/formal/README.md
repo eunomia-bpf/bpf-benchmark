@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0861 - what the remaining boxes are, and a fix worth
+reverting
+
+Three fixes took the boxes a reader sees from a hundred and seventy-five to a
+hundred and thirty-three: the long identifiers with escaped underscores, the two
+hundred-entry lists with no blank lines, and the camel-case identifiers the
+first of those did not reach. A fourth was tried and reverted.
+
+The fourth put a break before each brace group inside a long identifier, on the
+reasoning that a group like a comma-separated set cannot be split internally. It
+changed nothing: the count stayed at a hundred and thirty-three and the worst
+box grew four points, because the groups were not what the breaker was
+struggling with.
+
+The remainder is mostly ordinary: of thirteen thousand boxes, a hundred and
+thirty-three exceed a hundred points, which is a fifth of the text width, and
+twelve hundred exceed fifty. The file is a justified two-column layout with many
+long technical names, and that is the shape of the residue rather than a defect
+to be removed. Census unchanged; the checker gains a measurement.
+
 ### Step 0860 - a break inside a name needs an empty group, not a
 space
 
