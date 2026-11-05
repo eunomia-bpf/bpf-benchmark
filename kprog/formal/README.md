@@ -7606,6 +7606,28 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0947 - the population now carries the reason it is that
+population
+
+The uncompiled evaluation section explains its size population in a clause
+rather than leaving it as a number: all twenty-nine matched cases, including the
+two whose execution is baseline-only, because a program with no site still has a
+size. The compiled section said only which population, without the reason.
+
+That reason is what makes the distinction checkable rather than asserted. The
+two populations give ratios that differ at the fourth decimal, and the check now
+compares both against the run, so a sentence that named the wrong one would be
+caught by value rather than by reading.
+
+The two size comparisons in this sequence are also different experiments, and
+telling them apart matters: the compiled section measures the direct-native path
+at 0.53771, while the uncompiled one measures the site-applied pipeline at
+0.772. Both are correct against their own data, and neither substitutes for the
+other.
+
+Census unchanged; the population carries its reason and the sizes are
+distinguished by value.
+
 ### Step 0946 - the size ratio covers twenty-nine, not twenty-seven
 
 The evaluation section gives execution-time geomeans and a code-size ratio in

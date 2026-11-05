@@ -3593,6 +3593,27 @@ def characterization_pair() -> list[str]:
         if abs(g - 0.537713) > 1e-5:
             out.append("the code-size ratio over %d is %.6f and the section "
                        "says 0.537713" % (len(rs), g))
+        # The same run over the baseline-excluded population is a
+        # different number, which is why the sentence has to say which
+        # population the ratio covers.
+        rb = []
+        for b in (json.loads(size_run.read_text())["benchmarks"]
+                  if size_run.exists() else d["benchmarks"]):
+            if "baseline" in (b.get("tags") or []):
+                continue
+            per = {}
+            for r in b["runs"]:
+                v = [(s.get("code_size") or {}).get("native_code_bytes")
+                     for s in (r.get("samples") or [])]
+                v = [x for x in v if x]
+                if v:
+                    per[r.get("runtime")] = statistics.median(v)
+            if "kernel" in per and "native_kernel" in per:
+                rb.append(per["native_kernel"] / per["kernel"])
+        if rb and abs(g - 0.538463) > 5e-3:
+            out.append("the twenty-seven case size ratio is %.6f, so the "
+                       "stated ratio is distinguishable from it"
+                       % math.exp(sum(map(math.log, rb)) / len(rb)))
     for label, want in (("native", 1.574808),
                         ("native_kernel", 1.545042)):
         if label not in got:
