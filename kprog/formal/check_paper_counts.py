@@ -2830,6 +2830,29 @@ def unexercised_negatives() -> list[str]:
     return out
 
 
+def window_overflow_mechanism() -> list[str]:
+    """Problems with the window-overflow description, empty when it matches.
+
+    The section names the mechanism on each side: x86-64 indexes the final
+    lane directly through a runtime predicate, so the bound is not visible
+    to the compiler, and AArch64 walks the same eight bytes through the
+    load-bytes helper. Both are readable in the headers.
+    """
+    here = pathlib.Path(__file__).parent / ".."
+    x86 = (here / "x86" / "x86_sim_local_bpf.h").read_text()
+    arm = (here / "arm64" / "arm64_sim_local_bpf.h").read_text()
+    out = []
+    if "+ 7]" not in x86:
+        out.append("the x86 byte ladder no longer indexes the final lane")
+    if "LANE_ACTIVE" not in x86:
+        out.append("the x86 final lane is no longer guarded by a runtime "
+                   "predicate, so the compiler could see the bound")
+    if "KPROG_ARM64_LOAD_BYTES" not in arm:
+        out.append("the AArch64 side no longer walks the bytes through the "
+                   "load helper")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4007,6 +4030,11 @@ def main() -> None:
     # "the other two have no fixture in the tree": a fixture appearing
     # later would make the concession understate the evidence.
     for problem in unexercised_negatives():
+        problems.append(problem)
+    # "on x86-64 the byte-ladder arm performs that window lane by lane
+    # through b[index + 7] ... on AArch64 the access goes through
+    # KPROG_ARM64_LOAD_BYTES": the mechanism on each side.
+    for problem in window_overflow_mechanism():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

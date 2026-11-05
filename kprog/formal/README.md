@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0852 - the mechanism on each side, and what the name cannot
+say
+
+The wider sentence about the window gap names the mechanism on each side: the
+x86 byte ladder reaches the final lane by indexing past the frame under a
+runtime predicate, which is why the compiler cannot see the bound, and the
+AArch64 side walks the same eight bytes through the load-bytes helper. Both are
+in the headers.
+
+Reading them confirms the sentence's two halves at once. The x86 arm writes the
+seventh lane inside a conditional whose test is a macro over a width value, so
+the array index is not a compile-time constant; the AArch64 helper takes a byte
+count, so the same eight bytes are walked rather than named.
+
+The check holds the index and the predicate on the x86 side and the helper on
+the other. What it cannot hold is that the predicate is genuinely runtime, which
+is a property of the macro's expansion rather than of its name; that half is the
+sentence's inference from the code. Census unchanged; the checker gains a
+component.
+
 ### Step 0851 - the gap reproduced, and why the oracles do not see it
 
 The section reports a memory-safety gap in the simulators themselves: a 64-bit
