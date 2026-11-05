@@ -7606,6 +7606,20 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0937 - the two rounds are now read from the policy file
+
+The sentence about two rounds is now checked against the policy file rather than
+trusted. Both of the groups that run the full policy must carry the folding pair
+twice with rewriting passes between the two, which is what the design section
+describes; the other six groups run unique passes and are not part of the claim.
+
+Verified by removing the second round from one group, which the run reports with
+the group's name and the count it found. The check also reports a group that
+exists but shows no rewriting pass between its folds, which would be a list that
+repeats the pair without doing anything in between.
+
+Census unchanged; one policy claim is bound.
+
 ### Step 0936 - the pass list repeats three passes, on purpose
 
 The measured policy lists the same three passes twice, and the runner's

@@ -3350,6 +3350,46 @@ def specialization_shape() -> list[str]:
     return out
 
 
+def pass_round_structure() -> list[str]:
+    """Problems with the sentence about the two rounds in the pass list.
+
+    The design section says constant propagation and dead-code elimination
+    run twice, once early and once after the rewriting passes, and that the
+    list is not deduplicated. Both halves are read from the policy file: the
+    pair must appear twice, in that order, with rewriting passes between.
+    """
+    import yaml
+    root = pathlib.Path(__file__).parent / ".." / ".."
+    cfg = root / "corpus" / "config" / "benchmark_config.yaml"
+    if not cfg.exists():
+        return ["the benchmark config is missing, so the sentence about the "
+                "two rounds went unread"]
+    groups = yaml.safe_load(cfg.read_text())["policy"]["groups"]
+    out = []
+    checked = 0
+    for name in ("full", "full-x86"):
+        if name not in groups:
+            out.append("the policy has no %s group, so the sentence that "
+                       "the list runs two rounds is stale" % name)
+            continue
+        passes = groups[name]
+        folds = [i for i, p in enumerate(passes)
+                 if p in ("const_prop", "dce")]
+        if len(folds) < 4:
+            out.append("%s runs %d folding pass(es), so the sentence about "
+                       "two rounds is stale" % (name, len(folds)))
+            continue
+        between = passes[folds[1] + 1:folds[2]]
+        if not between:
+            out.append("%s runs its two folds with no rewriting pass "
+                       "between them" % name)
+        checked += 1
+    if checked == 0:
+        out.append("no policy group showed the two rounds, so the sentence "
+                   "went unread")
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4740,6 +4780,7 @@ def main() -> None:
     problems.extend(rejection_records())
     problems.extend(cross_section_figures())
     problems.extend(specialization_shape())
+    problems.extend(pass_round_structure())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"
