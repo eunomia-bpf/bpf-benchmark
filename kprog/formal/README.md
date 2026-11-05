@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0867 - a split is checked by running the battery, not
+reading its rows
+
+One sentence about a battery states a split rather than a size: six catches
+planted and five documented equivalences kept, with the family pinned by four
+byte-identical shakes. The battery prints both figures when it runs, so the
+split can be checked by running it rather than by reading its rows.
+
+It agrees: eleven rows, five survivors, six caught, no failures. Dropping one
+row reports a catch count of five against the stated six, which is the property
+the sentence needs, since a split is what a reader uses to judge how much of the
+battery bites.
+
+This is the second check in the family that runs a battery rather than reading
+it, and it costs twenty seconds. The first was the multiply host's non-member
+case. Both are worth the time because the property depends on which repaints a
+detector actually notices, which is not visible in the text. Census unchanged;
+the checker gains a slower component.
+
 ### Step 0866 - a quoted message and the exit code that makes it a
 failure
 

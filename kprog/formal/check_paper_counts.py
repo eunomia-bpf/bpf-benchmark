@@ -2981,6 +2981,40 @@ def bogus_token_message() -> list[str]:
     return []
 
 
+def mem_alu_battery() -> list[str]:
+    """Problems with the memory-ALU battery's stated split, empty when ok.
+
+    The section says the battery plants 6 catches and keeps 5 documented
+    equivalences. The battery prints both figures when it runs: the total
+    and the survivors. Running it is the only way to check a split that
+    depends on which repaints the host actually notices.
+    """
+    f = (pathlib.Path(__file__).parent / "build"
+         / "mut_x86_mem_alu_handler.py")
+    if not f.exists():
+        return ["the memory-ALU battery is absent, so its split went unread"]
+    try:
+        run = subprocess.run(
+            ["python3", str(f)], capture_output=True, text=True,
+            cwd=str(f.parent.parent), timeout=900)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return ["the memory-ALU battery did not finish: %s" % exc]
+    m = re.search(r"TOTAL (\d+) mutations, (\d+) failures, "
+                  r"(\d+) equivalences survived", run.stdout or "")
+    if m is None:
+        return ["the battery printed no total, so the split went unread"]
+    total, failures, survived = (int(x) for x in m.groups())
+    caught = total - survived
+    out = []
+    if failures:
+        out.append("the battery reports %d failures" % failures)
+    if caught != 6:
+        out.append("the battery catches %d and the section says 6" % caught)
+    if survived != 5:
+        out.append("the battery keeps %d equivalences and the section says "
+                   "5" % survived)
+    return out
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4186,6 +4220,10 @@ def main() -> None:
     # than emitting a step the simulator cannot dispatch": the message is
     # quoted, and SystemExit with a string is exit 1.
     for problem in bogus_token_message():
+        problems.append(problem)
+    # "planting 6 catches ... keeping 5 documented equivalences": the
+    # battery prints both, so the split is checked by running it.
+    for problem in mem_alu_battery():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

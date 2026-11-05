@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0867 bound the memory-ALU battery's split by
+running it: 6 caught and 5 equivalences verified, a
+dropped row reporting (no census change, +20s per
+run).
+
+
 Step 0866 bound the quoted unknown-opcode message:
 the string appears at three sites and
 SystemExit-with-a-string exits 1, which is the claim
