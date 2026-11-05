@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0897 bound the published theorem total to the
+counted one (2065; an @[simp] theorem made a naive
+count 2064) and fixed a stale 2061 comment.
+
+
 Step 0896 verified the generation-binding claim in
 code (advance returns -EOVERFLOW at max, stale emit
 returns -ESTALE, both ISAs) and cited it in 3-design.

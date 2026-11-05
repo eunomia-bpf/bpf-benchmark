@@ -1496,9 +1496,16 @@ def number(text):
 def check(targets, root):
     """Check each (path, claims) pair; a document that matches nothing is drift."""
     actual = scan_tree(root)
-    # The share is floored, never rounded: both documents say 23% for 488/2061
+    # The share is floored, never rounded: both documents say 23% for 488/2065
     # (23.6%), and a floored share cannot overstate how much rests on the
     # compiler. Rounding here would turn a correct 23% into a stale claim.
+    # The published total is asserted against the counted one, since every
+    # share below divides by it: a theorem added or removed would leave the
+    # sentence describing a tree that no longer exists.
+    if actual["theorems"] != 2065:
+        raise SystemExit(
+            "check_lean_claims: the tree proves %d theorems; the section "
+            "states 2,065" % actual["theorems"])
     actual["share"] = 100 * actual["native_decide"] // actual["theorems"]
     # A nonmember arm closed without naming the absurdity is the old proof
     # shape back again: nothing published would change, so it raises here.

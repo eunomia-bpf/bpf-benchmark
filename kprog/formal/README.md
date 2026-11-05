@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0897 - the divisor the shares used was never checked
+
+The section's structural figures were counted directly. Three of the four hold
+exactly: three hundred and six proof modules, one hundred and thirty-eight
+specifications, one hundred and thirty-eight generators, and two thousand and
+sixty-five theorems. The theorem figure first counted two thousand and
+sixty-four because one declaration carries a simp attribute ahead of the
+keyword, and the counting shape that ignores that undercounts by one.
+
+The checker computes the same total and divides by it for two shares, but it
+held the divisor as a literal rather than checking it against the count. The run
+now fails when the counted total differs from the one the section states, which
+is what stops a theorem added or removed from leaving the shares describing a
+tree that no longer exists.
+
+A comment beside those shares said the paper reports twenty-three per cent for
+four hundred and eighty-eight of two thousand and sixty-one, which is a figure
+the section no longer states; it says two thousand and sixty-five, and the
+comment does now too. Census unchanged; the checker gains a binding it was
+dividing by anyway.
+
 ### Step 0896 - the generation binding is two error returns in code
 
 The design section claims the prototype's generation binding never wraps and
