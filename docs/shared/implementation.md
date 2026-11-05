@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0900 bound the record summary's theorem and
+module totals to the tree (a monotone-but-wrong count
+passed before); drift now fails.
+
+
 Step 0899 replaced the hardcoded 609 refinement-named
 population with the count check_lean_claims measures
 from the tree; drift in either direction now fails.

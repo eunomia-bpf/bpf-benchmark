@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0900 - the summary's totals were ordered but never compared
+
+The summary at the top of the record states the whole-tree figures, and the
+checks around it held only their order: a total that is monotone but wrong would
+pass every ordering check while describing a tree that does not exist. The
+theorem count is now compared with the count the claims checker already makes,
+and the module count with the gate's reachable closure.
+
+Verified by stating a total one below the tree's, which the run reports beside
+the tree's own figure. The figures around it in the same summary, the contract
+and rendering counts and the native-decide share, are each read from a file or
+from that same count.
+
+The other literals in the record's checks are invariants of the log rather than
+of the tree: the number of gate totals, of numbering holes, and of ascending
+runs. Each matched when measured, and each grows only when a step is added, so
+they are held as counts rather than derived. Census unchanged; the summary gains
+a binding to the tree.
+
 ### Step 0899 - the same population was counted in two places
 
 The other literal comparison in the checker was the refinement-named population

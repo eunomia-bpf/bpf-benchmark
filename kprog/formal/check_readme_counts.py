@@ -270,6 +270,26 @@ def main() -> None:
     expect("stale duplicate sources under build/", duplicates,
            r"the (\w+) large ones are stale copies")
 
+    # The summary's own whole-tree figures are compared with the tree, not
+    # only with each other: a count that is monotone but wrong would pass
+    # every ordering check while describing a tree that does not exist.
+    import check_lean_claims
+    actual = check_lean_claims.scan_tree(str(pathlib.Path(__file__).parent))
+    summary = re.search(
+        r"compiling transitively from the gate's roots and proving "
+        r"([\d,]+) theorems", text)
+    if summary is None:
+        drift.append("the summary states no theorem total, so its figures "
+                     "went unread")
+    else:
+        stated = int(summary.group(1).replace(",", ""))
+        if stated != actual["theorems"]:
+            drift.append("the summary states %d theorems and the tree "
+                         "proves %d" % (stated, actual["theorems"]))
+        if actual["modules"] != 306:
+            drift.append("the tree has %d gate-reachable modules and the "
+                         "summary says 306" % actual["modules"])
+
     # Theorems are only added, so a whole-tree count must not decrease. A
     # subset sum is excluded by the helper, which reads only a line opened
     # by "True tree:" or "Gate:".
