@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0940 moved the descriptor's two-rendering
+mechanism from the dead section into the compiled
+design section and bound all three fields.
+
+
 Step 0939 verified the dead section's x86 pair
 (1.574808 / 1.545042, 1.93% spread) and bound both to
 the run.

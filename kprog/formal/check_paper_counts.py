@@ -3237,6 +3237,16 @@ def tag_model() -> list[str]:
         for h in (here / ".." / isa).glob("*_sim*.h"):
             helpers |= set(re.findall(r"SIM_HELPER_[a-z0-9_]+",
                                       h.read_text(errors="ignore")))
+    # The design section says a descriptor supplies two renderings: a proof
+    # sequence and a native emit. Both must be fields of the descriptor, or
+    # the sentence describes a mechanism the struct no longer has.
+    hdr = here / ".." / ".." / "vendor" / "linux-framework" / "include" / "linux" / "bpf.h"
+    if hdr.exists():
+        body = hdr.read_text(errors="ignore")
+        for field in ("instantiate_insn", "emit_x86", "emit_arm64"):
+            if field not in body:
+                out.append("the descriptor has no %s, so the sentence about "
+                           "two renderings is stale" % field)
     if len(helpers) < 2:
         out.append("the simulators name %d helper symbols, so the sentence "
                    "that calls outside the ABI are rejected is unheld"

@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0940 - the mechanism lived only in an uncompiled section
+
+The paper keeps a mechanism section that main.tex does not include, and it holds
+the one description of how an extended operation carries two renderings: a proof
+sequence of vanilla eBPF for the verifier and a native emit for the JIT. The
+compiled design section described the pipeline and the binding but never the
+thing they rest on.
+
+The struct confirms it. The descriptor has an instantiate function for the proof
+sequence and an emit function per architecture, so the two renderings are fields
+rather than prose, and the binding the safety section requires is necessary
+because the two can differ.
+
+The design section now says this in three sentences and the check requires all
+three descriptor fields to be present in the header, verified by renaming one.
+Census unchanged; the compiled paper describes the mechanism.
+
 ### Step 0939 - the pair of ratios is what bounds two percent
 
 The dead characterization section pairs its figures rather than stating one: one
