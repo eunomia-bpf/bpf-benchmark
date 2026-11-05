@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0901 - the record's own headline pair was never checked
+
+The summary sentence states seven figures and two were compared with the tree.
+The other five are the gate's own output: the banner count and the modeled-case
+total, and the contract and rendering counts that each equal one hundred and
+thirty-eight. The gate log carries the first pair, and the paper's copy of the
+same pair is already checked against it, so the record's copy now is too.
+
+The check reads the pair from the log the run is given and reports both numbers
+when they differ. Without a log it says so in its own success line rather than
+passing quietly, since a pair that is only ordered is not a pair that is
+verified.
+
+The contract and rendering counts needed nothing: the file scan that produces
+them is the same one that fills the rest of the summary, so they cannot drift
+from it. Census unchanged; the record's headline pair is now bound to the gate.
+
 ### Step 0900 - the summary's totals were ordered but never compared
 
 The summary at the top of the record states the whole-tree figures, and the

@@ -212,9 +212,12 @@ def gate_checks() -> tuple[list[str], list[str]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--log", default="/tmp/gCK20.log",
+                        help="gate log the banner totals are read from")
     parser.add_argument("--check", action="store_true",
                         help="exit 1 when a measured figure disagrees with the README")
     args = parser.parse_args()
+    log = pathlib.Path(args.log)
 
     steps, last = census()
     total_bats, unnamed, unnamed_gated = batteries()
@@ -274,6 +277,7 @@ def main() -> None:
     # only with each other: a count that is monotone but wrong would pass
     # every ordering check while describing a tree that does not exist.
     import check_lean_claims
+    import check_paper_counts
     actual = check_lean_claims.scan_tree(str(pathlib.Path(__file__).parent))
     summary = re.search(
         r"compiling transitively from the gate's roots and proving "
@@ -289,6 +293,22 @@ def main() -> None:
         if actual["modules"] != 306:
             drift.append("the tree has %d gate-reachable modules and the "
                          "summary says 306" % actual["modules"])
+    # The banner and case totals are the gate's own output, so the summary's
+    # pair is compared with the log when one is supplied. Without a log the
+    # pair is only ordered, which is why it is reported as unchecked.
+    run = re.search(r"(\d+) passing `cross-check: OK` oracle banners "
+                    r"summing to ([\d,]+) modeled", text)
+    if run is None:
+        drift.append("the summary states no banner total, so its figures "
+                     "went unread")
+    elif log is not None and log.exists():
+        counts, banners, cases = check_paper_counts.read_log(log)
+        stated_b = int(run.group(1))
+        stated_c = int(run.group(2).replace(",", ""))
+        if (stated_b, stated_c) != (banners, cases):
+            drift.append("the summary states %d banners and %d cases; the "
+                         "log has %d and %d"
+                         % (stated_b, stated_c, banners, cases))
 
     # Theorems are only added, so a whole-tree count must not decrease. A
     # subset sum is excluded by the helper, which reads only a line opened
@@ -352,7 +372,12 @@ def main() -> None:
     if args.check and drift:
         raise SystemExit(1)
     if not drift:
-        print("README counts agree with the tree")
+        # The banner totals are only comparable when a log is present, so
+        # the line says which form of the check ran rather than implying
+        # the pair was verified when no log was supplied.
+        print("README counts agree with the tree"
+              + ("" if log.exists() else
+                 " (no gate log, so the banner totals are only ordered)"))
 
 
 if __name__ == "__main__":

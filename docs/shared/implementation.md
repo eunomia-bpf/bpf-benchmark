@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0901 bound the record's banner/case pair to the
+gate log (the paper's copy already was); without a
+log the success line says so.
+
+
 Step 0900 bound the record summary's theorem and
 module totals to the tree (a monotone-but-wrong count
 passed before); drift now fails.
