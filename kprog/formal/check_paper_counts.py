@@ -1002,13 +1002,14 @@ def spec_row_joins(text: str) -> list[tuple[int, str, bool]]:
         "zero one two three four five six seven eight nine ten eleven twelve "
         "thirteen fourteen fifteen sixteen seventeen eighteen nineteen "
         "twenty".split())}
+    BS = chr(92)
     flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
     totals = harness_totals()
     here = pathlib.Path(__file__).parent
     out = []
     for n, word in re.findall(
-            r"(\d+)-mutation harness retargets the shared specification "
-            r"\((\w+) rows?\)", flat):
+            r"(\d+)-mutation harness (?:\([^)]*\) )?"
+            r"retargets the shared specification \((\w+) rows?\)", flat):
         want = words.get(word)
         if want is None:
             continue
@@ -4088,9 +4089,9 @@ def main() -> None:
         pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 50:
+    if len(joins) < 51:
         problems.append(
-            "only %d sentences join a harness; at least 50 matched before"
+            "only %d sentences join a harness; at least 51 matched before"
             % len(joins))
     for stated, harness, have in joins:
         if stated != have:

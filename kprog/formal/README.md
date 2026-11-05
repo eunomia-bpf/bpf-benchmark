@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0881 - a label naming two harnesses at once
+
+Three joins still rested on a token the corpus shares. Naming the harness in the
+sentence removes the inference entirely, and checking each sentence first found
+a corruption that the token path had been hiding: one harness label named two
+files, the x86 ADC harness and then the register-dispatch one in parentheses.
+
+The paragraph it sits in is about AArch64 branch-emission shape, and of the
+three harnesses at that size only the branch-emission one contains the phrase
+direction directive the sentence goes on to describe. Both names were wrong; the
+sentence now names the one it describes.
+
+The other two were correct and are now named outright, and a third sentence at
+the same size that had no name at all is named from the spec cell/count/width
+fields it describes. Every join now names its file, so nothing is inferred from
+a shared word. Census unchanged; the checker gains one join and two outright
+names.
+
 ### Step 0880 - every mutation count now reaches a harness
 
 The five sentences called genuinely ambiguous were not. Each one's paragraph
