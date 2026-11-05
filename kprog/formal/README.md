@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0911 - the pairing failed because it read two texts
+
+The pairing that failed was failing for a reason of my own making: the counts
+were read from the masked text and the battery names from the unmasked source,
+and masking shortens the text, so the two offsets did not describe the same
+sentence. Read entirely from the source, all eleven sentences that state both
+counts pair with the battery named before them and agree, with no mismatches.
+
+The check now does that, and it compares the two figures as a sum against the
+battery's row count rather than separately. That form survives an equivalence
+row taking its mark from a loop variable, which makes the static marks
+undercount: one battery marks four statically and reports five at run time, and
+its pair still reconciles because the row total is exact.
+
+Verified by restating the figure the last step corrected, which the run reports
+beside the battery's row count. Eleven of the thirteen sentences are now bound;
+the other two state a caught count with no equivalence count, so there is no
+second figure to reconcile against the row total. Census unchanged; eleven
+figures gain a binding.
+
 ### Step 0910 - eight of thirteen agree; one more was off by one
 
 Measuring the thirteen sentences against their batteries one at a time found

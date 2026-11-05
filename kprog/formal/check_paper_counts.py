@@ -3066,6 +3066,53 @@ def battery_rows(text: str) -> list[str]:
     return out
 
 
+def route_battery_rows() -> list[str]:
+    """Every "N catchable rows ... M equivalences" against its battery.
+
+    Each sentence describes the mutation battery whose name precedes it in
+    the same paragraph, so both the counts and the names are read from the
+    section source: the masked text blanks the names, and using it for one
+    and the source for the other pairs sentences wrongly because masking
+    shortens the text.
+
+    The two figures are checked as a sum, not separately. A row may take
+    its equivalence from a loop variable, so the static marks can undercount
+    while the row total stays exact, and caught-plus-equivalences is what a
+    row added or removed would change.
+    """
+    here = pathlib.Path(__file__).parent
+    raw = (here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+           / "sections" / "4-safety.tex").read_text()
+    flat = re.sub(r"\s+", " ", raw).replace("\\brk", "")
+    out = []
+    for m in re.finditer(r"(\d+) catchable rows are caught", flat):
+        q = re.search(r"and (\d+) equivalences survive",
+                      flat[m.end():m.end() + 180])
+        if q is None:
+            continue
+        names = [x.replace("\\_", "_") for x in
+                 re.findall(r"mut\\_([a-z0-9\\_]+)",
+                            flat[max(0, m.start() - 4000):m.start()])]
+        if not names:
+            out.append("a sentence states %s catchable rows and names no "
+                       "battery before it" % m.group(1))
+            continue
+        stem = names[-1]
+        src = here / "build" / ("mut_" + stem + ".py")
+        if not src.exists():
+            out.append("a sentence names mut_%s.py and it is not on disk"
+                       % stem)
+            continue
+        body = src.read_text()
+        rows = (len(re.findall(r"^\s*row\(", body, re.M))
+                + len(re.findall(r"^\s*mutations\.append\(", body, re.M)))
+        if int(m.group(1)) + int(q.group(1)) != rows:
+            out.append("a sentence states %s caught plus %s equivalences "
+                       "and mut_%s has %d rows"
+                       % (m.group(1), q.group(1), stem, rows))
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4451,6 +4498,7 @@ def main() -> None:
     # The pre/post battery's two counts are rows in its own source, so the
     # sentence is compared with the battery rather than with its own past.
     problems.extend(battery_rows(text))
+    problems.extend(route_battery_rows())
     if problems:
         # Print before exiting: a silent --check failure gives no evidence.
         for problem in problems:
