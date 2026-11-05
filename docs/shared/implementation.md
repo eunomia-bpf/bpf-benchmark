@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0914 bound all 13 count sentences after fixing 3
+bugs in one function: unassigned name, split-name
+truncation, mixed flattening.
+
+
 Step 0913 repaired mut_x86_route's stale anchor (cast
 dropped from the macro); it now runs 65/23 -> 42
 caught, matching the paper.

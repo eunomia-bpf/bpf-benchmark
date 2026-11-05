@@ -7606,6 +7606,28 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0914 - three bugs in one function, and all thirteen bind
+
+All thirteen count sentences are bound now, and getting there took three
+separate mistakes in one function. The first was that the two sentences without
+an equivalence count looked up a battery name that had not been assigned yet, so
+they inherited the name from the sentence before and reported the wrong battery.
+The second was that a battery name broken across a line after its separator read
+as a truncated name, and a truncated name matches no file. The third was that
+the count and the name were read from differently flattened text.
+
+With the name resolved before either branch, and the line break after a
+separator removed rather than turned into a space, all thirteen pair. Eleven
+reconcile against the battery's row total and the other two against a clean run:
+seventy minus nineteen is fifty-one for the a64 route, sixty-five minus
+twenty-three is forty-two for the x86 one, and both runs report zero failures.
+
+Verified by restating one of the two recorded figures, which the run reports
+beside the battery's own count. The eleven that reconcile keep the property that
+survives a row taking its equivalence from a loop variable; the two that cannot
+reconcile are held against a recorded run and say so. Census unchanged; thirteen
+figures are bound.
+
 ### Step 0913 - the battery runs again and confirms its forty-two
 
 The broken battery is repaired and the sentence it supports is confirmed. Its

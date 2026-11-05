@@ -3066,38 +3066,59 @@ def battery_rows(text: str) -> list[str]:
     return out
 
 
+# `{battery: rows caught}` from a clean run of each, for the two count
+# sentences that state no equivalence count and so cannot be reconciled
+# against the row total. Re-derive by running the battery: the total line
+# prints mutations, failures and equivalences survived, and caught is the
+# first minus the third. `mut_arm64_a64_route` gives 70 - 19 = 51 and
+# `mut_x86_route` 65 - 23 = 42, both with zero failures.
+CAUGHT_AT_LAST_RUN = {
+    "arm64_a64_route": 51,
+    "x86_route": 42,
+}
+
+
 def route_battery_rows() -> list[str]:
     """Every "N catchable rows ... M equivalences" against its battery.
 
-    Each sentence describes the mutation battery whose name precedes it in
-    the same paragraph, so both the counts and the names are read from the
-    section source: the masked text blanks the names, and using it for one
-    and the source for the other pairs sentences wrongly because masking
-    shortens the text.
-
-    The two figures are checked as a sum, not separately. A row may take
-    its equivalence from a loop variable, so the static marks can undercount
-    while the row total stays exact, and caught-plus-equivalences is what a
-    row added or removed would change.
+    The battery the counts describe is named before them, so the name is
+    resolved first and both branches below use it. Both figures are then
+    checked as a sum against the battery's row count, which survives an
+    equivalence taking its mark from a loop variable; the two sentences
+    that state no equivalence count are compared with a recorded clean run.
     """
     here = pathlib.Path(__file__).parent
     raw = (here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
            / "sections" / "4-safety.tex").read_text()
-    flat = re.sub(r"\s+", " ", raw).replace("\\brk", "")
+    # A battery name may break after its separator (`mut\_arm64\_a64\_`
+    # then `route.py`), so a line break there is removed before reading.
+    flat = raw.replace("\\brk", "")
+    flat = re.sub(r"\\_\s*", "\\_", flat)
+    flat = re.sub(r"\s+", " ", flat)
     out = []
     for m in re.finditer(r"(\d+) catchable rows are caught", flat):
-        q = re.search(r"and (\d+) equivalences survive",
-                      flat[m.end():m.end() + 180])
-        if q is None:
-            continue
         names = [x.replace("\\_", "_") for x in
                  re.findall(r"mut\\_([a-z0-9\\_]+)",
                             flat[max(0, m.start() - 4000):m.start()])]
+        names = [n.rstrip("_") for n in names if n.rstrip("_")]
         if not names:
             out.append("a sentence states %s catchable rows and names no "
                        "battery before it" % m.group(1))
             continue
         stem = names[-1]
+        q = re.search(r"and (\d+) equivalences survive",
+                      flat[m.end():m.end() + 180])
+        if q is None:
+            got = CAUGHT_AT_LAST_RUN.get(stem)
+            if got is None:
+                out.append("a sentence states %s catchable rows and mut_%s "
+                           "has no recorded clean run"
+                           % (m.group(1), stem))
+            elif int(m.group(1)) != got:
+                out.append("a sentence states %s catchable rows and mut_%s "
+                           "caught %d at its last clean run"
+                           % (m.group(1), stem, got))
+            continue
         src = here / "build" / ("mut_" + stem + ".py")
         if not src.exists():
             out.append("a sentence names mut_%s.py and it is not on disk"
