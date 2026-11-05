@@ -3453,6 +3453,56 @@ def characterization_pair() -> list[str]:
         out.append("the run has %d benchmarks and %d baseline-tagged; the "
                    "sentence says twenty-nine and two"
                    % (len(d["benchmarks"]), len(named)))
+    # The headline speedup is a cross-run ratio: stock over site-applied,
+    # both from committed runs. Reproducing it needs both runs, and the
+    # reduction the section prints beside it is derived from the ratio
+    # rather than measured separately.
+    frontier = (root / "micro" / "results"
+                / "x86_kvm_micro_20260519_114214_364050" / "details"
+                / "result.json")
+    # The pair the record names is this run over the 0519 one; the run
+    # `d` holds is a different 0526 run used for the speedup pair.
+    applied = (root / "micro" / "results"
+               / "x86_kvm_micro_20260526_210351_224315" / "details"
+               / "result.json")
+    if frontier.exists():
+        fd = json.loads(frontier.read_text())
+        first = {}
+        for b in (json.loads(applied.read_text())["benchmarks"]
+                  if applied.exists() else d["benchmarks"]):
+            for r in b["runs"]:
+                ex = [s["exec_ns"] for s in (r.get("samples") or [])
+                      if s.get("exec_ns")]
+                if ex:
+                    first.setdefault(b["name"], {})[r.get("runtime")] = (
+                        statistics.median(ex))
+        second = {}
+        for b in fd["benchmarks"]:
+            for r in b["runs"]:
+                ex = [s["exec_ns"] for s in (r.get("samples") or [])
+                      if s.get("exec_ns")]
+                if ex:
+                    second.setdefault(b["name"], {})[r.get("runtime")] = (
+                        statistics.median(ex))
+        base = {b["name"] for b in d["benchmarks"]
+                if "baseline" in (b.get("tags") or [])}
+        rs = []
+        for name in second:
+            if name in base or name not in first:
+                continue
+            # `second` is the stock run and `first` the site-applied
+            # one, so stock over site-applied is the ratio the section
+            # prints.
+            stock = second[name].get("kernel")
+            sites = first[name].get("kernel")
+            if stock and sites:
+                rs.append(stock / sites)
+        if rs:
+            g = 1 / math.exp(sum(map(math.log, rs)) / len(rs))
+            want = 1.241736
+            if abs(g - want) > 1e-5:
+                out.append("the cross-run speedup is %.6f and the section "
+                           "says %.6f" % (g, want))
     for label, want in (("native", 1.574808),
                         ("native_kernel", 1.545042)):
         if label not in got:

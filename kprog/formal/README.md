@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0944 - the headline speedup is a ratio between two runs
+
+The evaluation section's headline speedup is not a ratio inside one run: it
+compares two committed runs, one with the extended sites applied and one
+without, benchmark by benchmark. The record names both, and reproducing it needs
+both, since a single run's internal ratio is a different number entirely.
+
+Recomputed from the two named runs over the twenty-seven benchmarks, the speedup
+is 1.241736 and the reduction the section prints beside it, 19.47 percent,
+follows from that ratio rather than being measured separately. Both are now
+checked, and the pair the check reads is the pair the record names, not the run
+the neighbouring figures come from.
+
+Two mistakes came out of writing it. The two runs are easy to invert, since the
+ratio is stock over site-applied and the files are not in that order; and the
+run directory the neighbouring pair uses is a different 0526 run, so reading it
+gave a plausible speedup of 1.20 that is not the one the section states.
+
+Census unchanged; the headline speedup and its reduction are bound to the pair
+of runs.
+
 ### Step 0943 - the exclusion rule was in prose, and it holds
 
 The evaluation section that main.tex does not include states the exclusion rule

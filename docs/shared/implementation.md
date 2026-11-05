@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0944 bound the headline 1.242x speedup to the
+two named runs (cross-run, 27 benchmarks) and derived
+the 19.47% reduction.
+
+
 Step 0943 confirmed the 27-of-29 exclusion rule
 against the run's tags and bound the partition; also
 fixed one wide line of mine.
