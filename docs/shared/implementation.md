@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0906 corrected a battery sentence stating 32
+rows / 8 equivalences when the source has 59 / 13 (46
+caught), and bound both to the source.
+
+
 Step 0905 fixed the key pattern's blind spot: 5 of 61
 entries (2 cited live) were invisible; keys now 61
 and a removed live key is reported.

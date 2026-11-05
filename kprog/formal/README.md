@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0906 - a battery sentence was three harnesses out of date
+
+The sentence about the pre/post battery stated thirty-two catchable rows and
+eight surviving equivalences. The battery in the tree now declares fifty-nine
+rows, thirteen of them marked equivalent, so forty-six are caught. Both figures
+were stale and neither was bound: the digest beside them was checked for being
+recorded, and the two counts beside the digest were not checked at all.
+
+The sentence now states the battery's own numbers, and both are bound to its
+source: the row count and the number of rows marked equivalent. Verified by
+restating the old figure, which the run reports beside the battery's.
+
+The phrase changed with the sentence, since the digest no longer reproduces
+after the harness grew and claiming it byte-identical today would be false. What
+the digests record is that the shakes were identical when measured, and the
+sentence now says the record is in the harness log rather than quoting a value a
+reader would fail to reproduce. Census unchanged; two figures gain a binding.
+
 ### Step 0905 - five bibliography entries were invisible to the check
 
 The pattern that reads bibliography keys had the same blind spot as the one that

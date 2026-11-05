@@ -3015,6 +3015,36 @@ def macro_hygiene_history() -> list[str]:
     return []
 
 
+def prepost_stages(text: str) -> list[str]:
+    """Problems with the pre/post battery's two counts.
+
+    The section states how many rows that battery catches and how many
+    equivalences survive. Both are counts in the harness source, so a row
+    added or an equivalence unmarked leaves the sentence describing a
+    battery it no longer runs.
+    """
+    src = (pathlib.Path(__file__).parent / "build"
+           / "mut_arm64_mem_prepost.py").read_text()
+    rows = len(re.findall(r"^row\(", src, re.M))
+    equiv = len(re.findall(r"equivalent=True", src))
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    m = re.search(r"(\d+) catchable rows are caught, with three clean "
+                  r"rerun shakes recorded.*?and (\d+) equivalences survive",
+                  flat)
+    if m is None:
+        return ["the sentence giving the battery's two counts is absent, so "
+                "both figures went unread"]
+    stated_caught, stated_equiv = int(m.group(1)), int(m.group(2))
+    out = []
+    for stated, actual, what in (
+            (stated_caught, rows - equiv, "catchable rows"),
+            (stated_equiv, equiv, "equivalences")):
+        if stated != actual:
+            out.append("the section states %d %s and the battery has %d"
+                       % (stated, what, actual))
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4397,6 +4427,9 @@ def main() -> None:
             "the section states percentages %s, and %s were accounted for; "
             "the difference went unread"
             % (sorted(seen), sorted(known)))
+    # The pre/post battery's two counts are rows in its own source, so the
+    # sentence is compared with the battery rather than with its own past.
+    problems.extend(prepost_stages(text))
     if problems:
         # Print before exiting: a silent --check failure gives no evidence.
         for problem in problems:
