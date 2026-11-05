@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0872 named the two size-unique harnesses the
+0817 sweep skipped: 101 (branch) and 111
+(reg-lane-aux), joins 36 -> 38 (no census change).
+
+
 Step 0871 measured the figure surface: 469
 three-digit figures, 166 banner-bound and 166
 census/step, now reported in the success line (no

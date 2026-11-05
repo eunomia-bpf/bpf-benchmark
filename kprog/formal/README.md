@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0872 - two sentences the sweep skipped by construction
+
+Checking what the hundred and thirty-seven unaccounted figures actually were
+found two sentences that had been missed by the rewrite: a
+hundred-and-one-mutation harness retargeting a predicate specification and a
+hundred-and-eleven-mutation one retargeting a nine-file watchlist, both naming
+no file.
+
+They were the leftovers of a sweep that had a size-uniqueness filter. Each is
+the only harness of its size, so the sweep that named the rest skipped them by
+construction, and nothing re-read them afterwards. Both are named now and both
+sizes agree.
+
+The check that reports the reach came from the same measurement: the join count
+went from thirty-six to thirty-eight, and the floor with it. Census unchanged;
+the checker gains two joins.
+
 ### Step 0871 - the success line reports the surface, not a fifth of
 it
 
