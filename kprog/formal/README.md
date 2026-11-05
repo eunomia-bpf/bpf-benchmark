@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0879 - three of the seven did carry evidence
+
+The seven sentences left unjoined were described as ambiguous, and that was an
+assertion rather than a measurement. Three of them do carry evidence: one opens
+by naming an AArch64 shared ALU-result harness and its size picks out the file,
+one describes the entity's uxtb row on a size only an AArch64 harness has, and
+one gives the slot count and preserve rule of a pair-load tag contract.
+
+Three are named now. The ALU-result sentence reaches the add/sub/and/bic/eor/orr
+contract, the uxtb sentence the modifier entity, and the slot sentence the
+pair-load tag harness, which carries the preserve rule fifteen times where the
+other two candidates carry it three.
+
+Five remain, and for these the sentence really does not choose: a case-spec
+description at a size two harnesses share, an opcode-and-direction description
+at a size three share, and a case-spec description at a size two share, with no
+quoted token that one of them alone carries. Census unchanged; the checker gains
+three joins.
+
 ### Step 0878 - six of the unjoined sentences were already held
 
 The fourteen sentences the last step left unjoined were not all unheld. Six of
