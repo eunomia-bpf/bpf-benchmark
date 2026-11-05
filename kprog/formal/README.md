@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0833 - the component list is derived, not remembered
+
+The staleness check listed three components by hand and the gate runs ten, so
+six checkers could have changed without the log being called stale. The list is
+derived from the recipe now: any Python it runs, whatever the name, plus the
+modules the checkers import and the recipe itself.
+
+Deriving it is the point rather than adding the six. A checker added to the gate
+later is covered without this function being remembered, which is the same
+property the harness and generator checks got by reading their lists from the
+tree.
+
+Verified by touching a checker: the log reports the file, and the gate was
+re-run afterwards so the log on hand reflects the tree again. Census unchanged;
+the checker gains five components.
+
 ### Step 0832 - the last stale artifact is the gate's own output
 
 The staleness found by hand in the last step is now a check. A passing gate

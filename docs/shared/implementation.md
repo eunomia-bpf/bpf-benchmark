@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0833 derived the staleness component list from
+the recipe: all 10 checkers rather than 3 named by
+hand, and the gate re-run so the log reflects them
+(no census change).
+
+
 Step 0832 made the gate log's staleness a check: the
 log must be newer than every component it reflects,
 and the previous run now reports (no census change).

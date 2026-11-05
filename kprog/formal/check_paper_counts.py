@@ -2520,8 +2520,14 @@ def stale_log(log_path: pathlib.Path) -> list[str]:
     if not log_path.exists():
         return []
     when = log_path.stat().st_mtime
-    components = ("check_lean_claims.py", "check_macro_hygiene.py",
-                  "harness_census.py", "Makefile")
+    # Derived from the recipe rather than listed, so a checker added to the
+    # gate is covered without this function being remembered.
+    recipe = (here / "Makefile").read_text()
+    # Any Python the recipe runs, whatever it is named, plus the modules
+    # the checkers import and the recipe itself.
+    components = sorted(set(re.findall(
+        r"python3 ((?:check|mutate)_\w+\.py)", recipe)))
+    components += ["harness_census.py", "Makefile"]
     out = []
     for name in components:
         f = here / name
