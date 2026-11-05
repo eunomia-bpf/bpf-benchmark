@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0917 made --log required and printed the log's
+path: the default pointed at a 3-day-old file and
+passed silently.
+
+
 Step 0916 bound the coverage figures to the run's own
 log instead of a fixed /tmp path (identical today; a
 stale log would have silently described an earlier

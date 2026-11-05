@@ -212,7 +212,7 @@ def gate_checks() -> tuple[list[str], list[str]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log", default="/tmp/gCK20.log",
+    parser.add_argument("--log", required=True,
                         help="gate log the banner totals are read from")
     parser.add_argument("--check", action="store_true",
                         help="exit 1 when a measured figure disagrees with the README")
@@ -375,8 +375,11 @@ def main() -> None:
         # The banner totals are only comparable when a log is present, so
         # the line says which form of the check ran rather than implying
         # the pair was verified when no log was supplied.
+        # The log's path is named: the default is a path from an earlier
+        # step, and a run that silently read it would report agreement with
+        # a tree the log no longer describes.
         print("README counts agree with the tree"
-              + ("" if log.exists() else
+              + (" (against %s)" % log if log.exists() else
                  " (no gate log, so the banner totals are only ordered)"))
 
 

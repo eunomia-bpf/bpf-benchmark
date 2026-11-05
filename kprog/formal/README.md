@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0917 - the log default pointed at a three-day-old file
+
+The record's check defaulted its log argument to a path from an earlier step,
+and that file still exists, so a run without the argument read a log three days
+old and reported agreement without saying which log it had used. The totals in
+the two happened to match, so nothing was wrong in the result; what was wrong is
+that the run could not be told apart from one that had read the current log.
+
+The path is now required, which rules out the default silently standing in for
+it, and the success line names the log it read. The paper's check already
+required the path, so the two now agree on that.
+
+Naming the log is what makes the difference visible: a run against a stale file
+and a run against the current one print different lines rather than the same
+one. Census unchanged; one default that could go stale is gone.
+
 ### Step 0916 - the coverage read a log from a fixed path
 
 The coverage figures read a log from a fixed path rather than the one the run
