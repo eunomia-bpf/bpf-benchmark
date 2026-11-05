@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0855 - the exclusion is what makes the fallback safe
+
+Two sentences about the width resolution are each a theorem, and they are
+companions rather than the same claim. The first says no real width's code is
+the absent code, so a body cannot widen at an unknown width. The second says the
+absent code resolves to the 64-bit width, so the fallback has a defined landing.
+
+The first is stated over every width by a case split and a decision, which is
+the exhaustive form; the second is reflexive, because the two constants are the
+same numeral. Together they bound the resolution from both sides: nothing real
+is treated as absent, and absent resolves somewhere known.
+
+The first sentence is also the reason the second is safe. A fallback fires only
+on a genuinely unused field, which is what the exclusion guarantees and what a
+case split over four constructors establishes. Census unchanged; the checker
+gains a component.
+
 ### Step 0854 - an inequality at the middle, an injection at the ends
 
 The condition-correspondence sentence describes a failure that per-architecture

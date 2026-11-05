@@ -2902,6 +2902,30 @@ def cross_isa_cond() -> list[str]:
     return out
 
 
+def width_resolution_pair() -> list[str]:
+    """Problems with the width-resolution pair, empty when both hold.
+
+    The section says a resolved source width is never the absent code, so a
+    body cannot widen at an unknown width, and separately that the fallback
+    is the 64-bit code. Two theorems: one that no real width equals the
+    absent code, one that the absent code resolves to the default.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal" / "Arm64Width.lean")
+    if not f.exists():
+        return ["the width module is absent, so the resolution pair went "
+                "unread"]
+    src = f.read_text()
+    out = []
+    if not re.search(r"^theorem arm64_absent_code_names_no_width\b", src,
+                     re.M):
+        out.append("nothing excludes the absent code from the real widths, "
+                   "so a body could widen at an unknown width")
+    if not re.search(r"^theorem arm64_effective_absent_is_default\b", src,
+                     re.M):
+        out.append("nothing says the absent code resolves to the default")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4093,6 +4117,11 @@ def main() -> None:
     # every per-architecture theorem continued to hold": a complement over
     # the same inputs plus an injective mapping.
     for problem in cross_isa_cond():
+        problems.append(problem)
+    # "a resolved source width is never the absent code, so a body cannot
+    # widen at an unknown width": an exclusion, with the fallback as its
+    # companion.
+    for problem in width_resolution_pair():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
