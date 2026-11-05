@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0870 - two checks, one battery, three runs
+
+Two checks were running the same battery: one read the split from a run, the
+other compared two further runs for repeatability. They are one function now,
+running it twice and reading both claims from the two outputs, which is a
+quarter of the time for the same evidence.
+
+The consolidation lost a function. Cutting the text between the two definitions
+took a third one with it, and the failure was a name error rather than a wrong
+answer, so it was loud: the checker stopped instead of reporting less. The
+function was restored from the commit.
+
+That is worth recording because the same slice would have been silent had the
+lost function been one whose absence only weakened a report. The reachability
+audit would have caught it on the next run; the name error caught it first.
+Census unchanged; the checker gains a consolidation.
+
 ### Step 0869 - a claim about repetition, held by repeating
 
 The same sentence says four byte-identical green shakes pin the family, which is

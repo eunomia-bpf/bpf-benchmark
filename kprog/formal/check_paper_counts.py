@@ -2982,34 +2982,43 @@ def bogus_token_message() -> list[str]:
 
 
 def mem_alu_battery() -> list[str]:
-    """Problems with the memory-ALU battery's stated split, empty when ok.
+    """Problems with the memory-ALU battery, empty when both claims hold.
 
-    The section says the battery plants 6 catches and keeps 5 documented
-    equivalences. The battery prints both figures when it runs: the total
-    and the survivors. Running it is the only way to check a split that
-    depends on which repaints the host actually notices.
+    The section makes two claims about one battery: it plants 6 catches and
+    keeps 5 documented equivalences, and four byte-identical green shakes
+    pin the family. The first is a split, the second is a property of
+    repetition, so the battery is run twice and both are read from the two
+    outputs — one run to read the split, the second to show it repeats.
     """
     f = (pathlib.Path(__file__).parent / "build"
          / "mut_x86_mem_alu_handler.py")
     if not f.exists():
-        return ["the memory-ALU battery is absent, so its split went unread"]
-    try:
-        run = subprocess.run(
-            ["python3", str(f)], capture_output=True, text=True,
-            cwd=str(f.parent.parent), timeout=900)
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        return ["the memory-ALU battery did not finish: %s" % exc]
-    m = re.search(r"TOTAL (\d+) mutations, (\d+) failures, "
-                  r"(\d+) equivalences survived", run.stdout or "")
-    if m is None:
-        return ["the battery printed no total, so the split went unread"]
-    total, failures, survived = (int(x) for x in m.groups())
-    caught = total - survived
+        return ["the memory-ALU battery is absent, so its two claims went "
+                "unread"]
+    outs = []
+    for _ in range(2):
+        try:
+            run = subprocess.run(
+                ["python3", str(f)], capture_output=True, text=True,
+                cwd=str(f.parent.parent), timeout=900)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            return ["the battery did not finish: %s" % exc]
+        outs.append(run.stdout)
     out = []
+    if outs[0] != outs[1]:
+        out.append("two runs of the battery differ, so the shakes are not "
+                   "byte-identical")
+    m = re.search(r"TOTAL (\d+) mutations, (\d+) failures, "
+                  r"(\d+) equivalences survived", outs[0])
+    if m is None:
+        return out + ["the battery printed no total, so the split went "
+                      "unread"]
+    total, failures, survived = (int(x) for x in m.groups())
     if failures:
         out.append("the battery reports %d failures" % failures)
-    if caught != 6:
-        out.append("the battery catches %d and the section says 6" % caught)
+    if total - survived != 6:
+        out.append("the battery catches %d and the section says 6"
+                   % (total - survived))
     if survived != 5:
         out.append("the battery keeps %d equivalences and the section says "
                    "5" % survived)
@@ -3033,33 +3042,6 @@ def guard_hit_hosts() -> list[str]:
         / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
     if "the six AArch64 hosts that count guard hits" not in flat:
         return ["the section no longer states the guard-hit population"]
-    return []
-
-
-def mem_alu_determinism() -> list[str]:
-    """Problems with the battery's repeatability, empty when it is stable.
-
-    The section says four byte-identical green shakes pin the family. That
-    is a claim about repetition, so the only way to hold it is to repeat:
-    the battery is run twice more and its whole output compared with the
-    run the split check already made.
-    """
-    f = (pathlib.Path(__file__).parent / "build"
-         / "mut_x86_mem_alu_handler.py")
-    if not f.exists():
-        return ["the memory-ALU battery is absent"]
-    outs = []
-    for _ in range(2):
-        try:
-            run = subprocess.run(
-                ["python3", str(f)], capture_output=True, text=True,
-                cwd=str(f.parent.parent), timeout=900)
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            return ["the battery did not finish: %s" % exc]
-        outs.append(run.stdout)
-    if outs[0] != outs[1]:
-        return ["two runs of the battery differ, so the shakes are not "
-                "byte-identical"]
     return []
 
 
@@ -4272,10 +4254,6 @@ def main() -> None:
     # "planting 6 catches ... keeping 5 documented equivalences": the
     # battery prints both, so the split is checked by running it.
     for problem in mem_alu_battery():
-        problems.append(problem)
-    # "four byte-identical green shakes pin the family": a claim
-    # about repetition, held by repeating.
-    for problem in mem_alu_determinism():
         problems.append(problem)
     # "the six AArch64 hosts that count guard hits ... require the guard
     # to fire exactly once": a population the hosts themselves state.
