@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0930 - the conclusion and the evaluation now agree by check
+
+The conclusion quotes two figures the evaluation section measures, and nothing
+compared the two places. They agree today: the speedup is the same number in
+both, and the load ratio too, and the reciprocal the evaluation section prints
+is the exact reciprocal of its ratio at the printed precision.
+
+The comparison is now a check. A figure the conclusion restates and the
+evaluation section does not is reported, so an edit to either place that changes
+one and not the other fails the run rather than leaving two sections describing
+different runs.
+
+Reading the figures took care, since they are printed two ways, one with a bare
+x and one with a times sign in math, and a pattern for one form alone found the
+conclusion's figure missing from a section that states it.
+
+Census unchanged; one cross-section comparison is added.
+
 ### Step 0929 - the x86 rejection was recorded, under another run
 
 The conclusion says the smokes carry accepted artifacts and a rejected unsafe

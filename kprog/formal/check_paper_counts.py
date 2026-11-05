@@ -3291,6 +3291,36 @@ def rejection_records() -> list[str]:
     return out
 
 
+def cross_section_figures() -> list[str]:
+    """Figures the conclusion restates that the evaluation section lacks.
+
+    The conclusion quotes the execution speedup and load ratio the
+    evaluation section measures. If one section is edited the other can be
+    left describing a different number, and nothing else compares them.
+    """
+    here = pathlib.Path(__file__).parent
+    paper = (here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+             / "sections")
+
+    def figures(name: str) -> set:
+        text = (paper / (name + ".tex")).read_text()
+        flat = re.sub(r"\\brk", "", text).replace("{,}", ",")
+        # A figure is printed either as `N.NNx` or as `N.NN$\times$`.
+        return set(re.findall(r"\b(\d+\.\d+)x\b", flat)) | set(
+            re.findall(r"(\d+\.\d+)\s*\$\\times\$", flat))
+
+    out = []
+    concl = figures("7-conclusion")
+    evald = figures("5-evaluation-plan")
+    if not concl:
+        out.append("the conclusion states no restated figure, so the "
+                   "comparison went unread")
+    for f in sorted(concl - evald):
+        out.append("the conclusion states %sx and the evaluation section "
+                   "does not" % f)
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4679,6 +4709,7 @@ def main() -> None:
     problems.extend(encoder_rejections())
     problems.extend(tag_model())
     problems.extend(rejection_records())
+    problems.extend(cross_section_figures())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"
