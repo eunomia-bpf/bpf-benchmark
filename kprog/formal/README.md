@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0946 - the size ratio covers twenty-nine, not twenty-seven
+
+The evaluation section gives execution-time geomeans and a code-size ratio in
+one paragraph, and the two cover different populations: the execution figures
+over the twenty-seven programs that carry an extended site, the size ratio over
+all twenty-nine, since a program with no site still has a size. Nothing in the
+paragraph said so.
+
+The distinction is measurable rather than stylistic. Recomputed over
+twenty-seven the size ratio is 0.538463, and over twenty-nine it is 0.537713,
+which is the figure the section states; so the two populations give different
+numbers and the paragraph has to say which one it means.
+
+The size ratio is now checked against the run it comes from, and the check
+needed two corrections: the native path records its size in a different field
+from the stock JIT, and the run the neighbouring figures use is not the run the
+size ratio comes from. Both errors produced plausible numbers before being
+compared with the stated figure.
+
+Census unchanged; one population distinction is stated and one ratio is bound.
+
 ### Step 0945 - 924 is exactly three times 308, and that is why
 
 The AArch64 half of the headline is a different pair from the x86 one: stock

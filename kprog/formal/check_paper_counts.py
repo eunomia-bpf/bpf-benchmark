@@ -3561,6 +3561,38 @@ def characterization_pair() -> list[str]:
             if any(m != a for m, a in all_samples):
                 out.append("the AArch64 run leaves sites matched but not "
                            "applied, so the all-applied sentence is stale")
+    # The native-code-size ratio covers all twenty-nine, which the section
+    # now says, and that is what distinguishes it from the execution ratios
+    # over twenty-seven. A ratio that drifted to the smaller population
+    # would be 0.538463, so the two are told apart by value.
+    size_run = (root / "micro" / "results"
+                / "x86_kvm_micro_20260909_121208_577260" / "details"
+                / "result.json")
+    rs = []
+    for b in (json.loads(size_run.read_text())["benchmarks"]
+              if size_run.exists() else d["benchmarks"]):
+        per = {}
+        for r in b["runs"]:
+            v = []
+            for s in (r.get("samples") or []):
+                # The native path records its size in `code_size`; the
+                # `jited_prog_len` field is the stock JIT's own length and
+                # is absent on the native runtime.
+                v.append((s.get("code_size") or {}).get(
+                    "native_code_bytes"))
+            v = [x for x in v if x]
+            if v:
+                per[r.get("runtime")] = statistics.median(v)
+        if "kernel" in per and "native_kernel" in per:
+            rs.append(per["native_kernel"] / per["kernel"])
+    if not rs:
+        out.append("the code-size run has no stock/native pair, so the "
+                   "ratio went unread")
+    else:
+        g = math.exp(sum(map(math.log, rs)) / len(rs))
+        if abs(g - 0.537713) > 1e-5:
+            out.append("the code-size ratio over %d is %.6f and the section "
+                       "says 0.537713" % (len(rs), g))
     for label, want in (("native", 1.574808),
                         ("native_kernel", 1.545042)):
         if label not in got:

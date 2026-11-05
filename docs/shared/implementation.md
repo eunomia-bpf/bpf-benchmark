@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0946 stated which population the code-size ratio
+covers (29, not 27) and bound 0.537713; the two
+differ at the fourth decimal.
+
+
 Step 0945 bound the AArch64 headline (1.208/1.222)
 and both site counts (308 median-sample, 924
 instances, matched==applied).
