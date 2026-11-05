@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0857 - a caller is not a run, and the two checks differ
+
+The reachability audit was a script run once; it is a check now, and it asks
+something the dead-code sweep cannot. That one finds a function nothing
+references; this one walks from main through the calls and reports what it never
+arrives at, so a helper whose only caller is itself unreachable is caught by
+this and not by that.
+
+The two messages a planted pair produced show the difference. The caller is
+named by both, since nothing references it and main cannot reach it; the helper
+is named only by the reachability walk, because it has a caller and that caller
+is out of the run.
+
+That is why both are worth having. A check with a caller looks wired in the
+reference sense and is not in the run, and the failure is invisible to a grep
+over names. Census unchanged; the checker gains a component.
+
 ### Step 0856 - every function reachable from main
 
 The checker has gained a component at nearly every step for the last hundred, so

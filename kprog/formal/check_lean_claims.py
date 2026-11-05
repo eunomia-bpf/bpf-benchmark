@@ -128,6 +128,41 @@ def dead_code() -> list[str]:
     return out
 
 
+def unreachable_from_main() -> list[str]:
+    """Functions in the paper checker that its entry point cannot reach.
+
+    Every check the module defines has to be called, directly or through
+    another function, from `main`; a check with a caller is still not in the
+    run if its caller is itself unreachable. The dead-code sweep asks
+    whether anything references a name, which a helper passes without being
+    reached.
+    """
+    import ast
+    f = pathlib.Path(__file__).parent / "check_paper_counts.py"
+    if not f.exists():
+        return []
+    tree = ast.parse(f.read_text())
+    funcs = {n.name: n for n in tree.body
+             if isinstance(n, ast.FunctionDef)}
+    if "main" not in funcs:
+        return ["check_paper_counts.py has no main"]
+    seen, stack = set(), ["main"]
+    while stack:
+        name = stack.pop()
+        if name in seen or name not in funcs:
+            continue
+        seen.add(name)
+        for call in ast.walk(funcs[name]):
+            if isinstance(call, ast.Call):
+                if isinstance(call.func, ast.Name):
+                    stack.append(call.func.id)
+                elif isinstance(call.func, ast.Attribute):
+                    # A method on a module rather than a local function.
+                    stack.append(call.func.attr)
+    return sorted("%s is defined and main cannot reach it" % n
+                  for n in funcs if n not in seen and n != "main")
+
+
 def bootstrap_state() -> str:
     """What a built tree needs that this checkout is missing.
 
@@ -1933,10 +1968,10 @@ def main(argv):
              actual["refines"], actual["refines_decided"],
              actual["kinds_enum"], actual["c_consumed"],
              actual["lean_consumed"]))
-    dead = dead_code()
-    if dead:
-        for d in dead:
-            print("check_lean_claims: %s" % d)
+    wiring = dead_code() + unreachable_from_main()
+    if wiring:
+        for problem in wiring:
+            print("check_lean_claims: %s" % problem)
         return 1
     return 0
 
