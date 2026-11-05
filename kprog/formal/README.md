@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0884 - the coverage line reached less than it did
+
+The line that reports how much of the section a check reaches named two classes,
+banners and the sequence checks, and printed one hundred and sixty-six of four
+hundred and sixty-nine. Twelve more of the remainder had a class the section
+already uses: the mutation counts the joins bind and the Lean line identifiers
+the reference sweep checks.
+
+Both are named now, and the line reads one hundred and seventy-eight of four
+hundred and sixty-nine held by a banner or another check. The wording changed
+with the number, since a figure held by a join is not held by a banner.
+
+One hundred and twenty-five remain, and they are the parts of splits, the rows
+each stage catches, and the sizes of shared tables. Each is held by a check that
+binds the whole its parts belong to, which is why they were never unheld; what
+was wrong was the line's claim about how many it had reached. Census unchanged;
+the checker's coverage figure grows by twelve.
+
 ### Step 0883 - the double name is now a failure, not a finding
 
 Both mislabels were the same shape, so the shape is now checked. A sentence that
