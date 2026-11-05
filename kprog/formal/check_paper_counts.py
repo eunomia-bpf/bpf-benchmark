@@ -3163,6 +3163,30 @@ def cited_paths() -> list[str]:
     return out
 
 
+def encoder_rejections() -> list[str]:
+    """Problems with the claim that both encoders reject an unhandled form.
+
+    The section says both generators reject an instruction form for which
+    they have no simulator handler. Each ISA has one encoder, and the claim
+    is that each raises rather than emitting an opcode it cannot lower. A
+    fallback that silently emits would make the claim false while the
+    sentences around it stayed true.
+    """
+    here = pathlib.Path(__file__).parent
+    out = []
+    for isa in ("x86", "arm64"):
+        src = here / ".." / isa / "micro-prog" / "generate_micro_sim_proofs.py"
+        if not src.exists():
+            out.append("the %s encoder is not where the check expects it"
+                       % isa)
+            continue
+        body = src.read_text(errors="ignore")
+        if not re.search(r"raise (SystemExit|ValueError)\(", body):
+            out.append("the %s encoder raises on no form, so the sentence "
+                       "that both reject an unhandled one is unheld" % isa)
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4548,6 +4572,7 @@ def main() -> None:
     problems.extend(battery_rows(text))
     problems.extend(route_battery_rows())
     problems.extend(cited_paths())
+    problems.extend(encoder_rejections())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"

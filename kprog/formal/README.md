@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0923 - the claim that both encoders reject, checked in code
+
+The design section says both generators reject an instruction form for which
+they have no simulator handler. Checking it found the claim is about the two
+encoders, one per instruction set, and both do raise rather than emit a form
+they cannot lower: the x86 one exits on an unknown opcode and the AArch64 one
+raises on an unsupported immediate, register, operand modifier, or memory
+operand.
+
+The claim needed checking because the alternative is silent. The x86 dispatch
+chain carries no trap hook for an opcode that has no arm, and its comment says
+why: the encoder raises first, so an unknown mnemonic never reaches the chain,
+and a decoded opcode with no arm is a no-op by design that two hosts pin. A
+fallback in the encoder would make the sentence false while every sentence
+around it stayed true.
+
+Both encoders are now checked for raising on at least one form, verified by
+removing the raises from one and seeing the run report it. Census unchanged; one
+code claim is bound.
+
 ### Step 0922 - the last two narrow classes, widened with no change
 
 The claim that harness names are lowercase by construction was checked rather
