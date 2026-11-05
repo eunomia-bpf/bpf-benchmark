@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0926 - the allowed ABI is the helpers the headers name
+
+The design section says calls outside the allowed ABI are rejected. Tracing
+where the allowed set lives found it is the set of helper symbols the simulators
+name: the encoder emits a reference to whichever helper the call targets, so a
+helper with no code in the headers produces an undefined symbol and fails to
+build rather than running something else.
+
+The two simulators name twenty-two helper symbols between them, which is the
+allowed set. The check binds the sentence to that set existing, since a
+simulator that named none would leave the sentence describing a rejection
+nothing performs.
+
+Verified by rewriting the helper symbols across all four headers, which the run
+reports. Census unchanged; one more code claim is bound.
+
 ### Step 0925 - the five tag classes are five tag codes
 
 The design section says the prototype keeps a provenance tag per register, that

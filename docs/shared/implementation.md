@@ -2615,6 +2615,10 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0926 traced the allowed-ABI claim to the 22 sim
+helper symbols the encoder references, and bound it.
+
+
 Step 0925 bound the tag claims: all five classes are
 tag codes across both ISAs, and TagErasure.lean
 exists with theorems.

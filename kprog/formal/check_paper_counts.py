@@ -3228,6 +3228,19 @@ def tag_model() -> list[str]:
     if not (here / "KProgFormal" / "TagErasure.lean").exists():
         out.append("the section requires an erasure argument and "
                    "TagErasure.lean is not in the tree")
+    # The section says calls outside the allowed ABI are rejected. The
+    # allowed set is the simulated helpers the headers name; the encoder
+    # emits a reference to whichever one the call targets, so a helper with
+    # no code there would fail to compile rather than run.
+    helpers = set()
+    for isa in ("x86", "arm64"):
+        for h in (here / ".." / isa).glob("*_sim*.h"):
+            helpers |= set(re.findall(r"SIM_HELPER_[a-z0-9_]+",
+                                      h.read_text(errors="ignore")))
+    if len(helpers) < 2:
+        out.append("the simulators name %d helper symbols, so the sentence "
+                   "that calls outside the ABI are rejected is unheld"
+                   % len(helpers))
     return out
 
 
