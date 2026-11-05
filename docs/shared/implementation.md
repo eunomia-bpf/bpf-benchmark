@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0865 made the perturbation harness read its gate
+log from the environment; wiring it into the gate was
+tried and reverted at 44 minutes (no census change).
+
+
 Step 0864 fixed the perturbation harness, which had
 been failing on the paper checker: it named a stale
 log, and the staleness check now uses the work tree

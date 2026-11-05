@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0865 - a hardcoded log, and a gate that grew to forty-four
+minutes
+
+The harness that plants a defect in each checker worked but named a gate log
+fixed at the time it was written, so it passed only while that log stayed
+current and reported a failure afterwards that had nothing to do with the
+checks. The log is an environment variable now, defaulting to one this session
+produced.
+
+Wiring it into the gate was tried and reverted. It reruns every checker twice,
+and the largest of them takes forty seconds each time because it sizes itself
+from three hundred harnesses, so the gate went from eight minutes to beyond
+forty. That is too much for a property that changes only when a checker does.
+
+What the harness reports is the strongest statement available about the
+checkers: twelve of them, each given the defect it exists to catch, each naming
+it, and the tree byte-identical afterwards. It is worth running after any change
+to a checker rather than on every gate. Census unchanged; the harness gains a
+configurable log.
+
 ### Step 0864 - the harness that tests the checkers had been failing
 
 The mismatch harness that plants a defect in each checker had been failing on
