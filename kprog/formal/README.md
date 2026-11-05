@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0925 - the five tag classes are five tag codes
+
+The design section says the prototype keeps a provenance tag per register, that
+those tags select verifier-visible operations for ABI, packet, stack, map, and
+helper values, and that fidelity therefore requires an erasure argument. Each
+part is a name in the tree, and each checks out: the tag codes cover all five
+classes, and the module that proves erasure is present with theorems in it.
+
+Checking the five classes took care, since the tags are defined in the sim-local
+headers rather than the main simulator header and both instruction sets define
+their own set. Reading only one of the two would have reported a class missing
+while the other defines it, which is the kind of finding that costs a step to
+disprove.
+
+The check is written that way: it takes the union across both instruction sets,
+so a class counts as modelled if either provides it, and it reports a class that
+neither does. Verified by renaming the map tags in both headers, after renaming
+them in one alone correctly changed nothing. Census unchanged; one cluster of
+code claims is bound.
+
 ### Step 0924 - the prototype rejects indirect calls, it does not
 bound them
 

@@ -3201,6 +3201,36 @@ def encoder_rejections() -> list[str]:
     return out
 
 
+def tag_model() -> list[str]:
+    """Problems with the tag claim and the erasure argument it requires.
+
+    The design section says the prototype keeps a provenance tag per
+    simulated register, that the tags select verifier-visible operations for
+    ABI, packet, stack, map and helper values, and that fidelity therefore
+    requires an erasure argument. Each of those is a name in the tree: the
+    tag constants, and the module that proves erasure.
+    """
+    here = pathlib.Path(__file__).parent
+    out = []
+    tags = set()
+    for isa in ("x86", "arm64"):
+        for h in (here / ".." / isa).glob("*_sim*.h"):
+            tags |= set(re.findall(r"(?:X86|ARM64)_SIM_TAG_([A-Z_]+)",
+                                   h.read_text(errors="ignore")))
+    if not tags:
+        out.append("no tag constants are defined, so the sentence about a "
+                   "tag per register is unheld")
+    # The five classes the sentence lists must each be a tag code.
+    for want in ("ABI", "PACKET", "STACK", "MAP", "HELPER"):
+        if not any(want in t for t in tags):
+            out.append("the section names %s tags and no tag code covers "
+                       "them" % want)
+    if not (here / "KProgFormal" / "TagErasure.lean").exists():
+        out.append("the section requires an erasure argument and "
+                   "TagErasure.lean is not in the tree")
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4587,6 +4617,7 @@ def main() -> None:
     problems.extend(route_battery_rows())
     problems.extend(cited_paths())
     problems.extend(encoder_rejections())
+    problems.extend(tag_model())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"
