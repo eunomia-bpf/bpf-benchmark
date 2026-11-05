@@ -3252,6 +3252,17 @@ def tag_model() -> list[str]:
         if not h.exists() or marker not in h.read_text(errors="ignore"):
             out.append("the %s stack-window report is gone, so the sentence "
                        "about one inserted bound is stale" % isa)
+    # The introduction says the native path carries no inserted sandbox
+    # check, and that the one bound the simulator inserts constrains the
+    # simulator rather than the native program. The native bodies live in
+    # the main simulator header, which must therefore carry no guard.
+    for isa, header in (("x86", "x86_sim.h"), ("arm64", "arm64_sim.h")):
+        h = here / ".." / isa / header
+        if h.exists() and re.search(r"__builtin_trap|WINDOW_GUARD",
+                                    h.read_text(errors="ignore")):
+            out.append("the %s native simulator header carries a guard, so "
+                       "the sentence that the native path has none is stale"
+                       % isa)
     return out
 
 

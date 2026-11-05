@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0928 - the bound constrains the simulator, not the native path
+
+The introduction and the design section each make a negative claim about
+inserted checks, and read together they can look contradictory: one says the
+native path carries none, the other names one the simulator inserts. They are
+consistent, and finding out why took reading the guard rather than either
+sentence.
+
+The bound tests whether a stack window fits the simulated arena, and its purpose
+stated in the header is that the byte ladder would otherwise index past the
+array. That is the simulator's own indexing, not the native program's memory
+accesses, so the native path still has no inserted check and the sentence in the
+introduction still holds.
+
+The introduction now says which side the bound constrains, so a reader is not
+left to infer it. Both halves are checked: the native simulator headers must
+carry no guard, and the sim-local headers must carry the window report. Verified
+by adding a trap to the x86 native header. Census unchanged; one ambiguity is
+closed and both halves are bound.
+
 ### Step 0927 - one bound is inserted, and the section now says so
 
 The design section says the simulator is not a sandbox and must not insert
