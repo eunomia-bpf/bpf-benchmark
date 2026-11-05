@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0933 - the abstract left out the obligation its body claims
+
+The abstract's closing sentence listed four evaluation questions and left
+artifact binding out, while the body of the same abstract says the prototype
+binds the accepted proof to the native payload and the safety section carries
+binding as its fourth obligation. So the abstract said binding was answered in
+one place and omitted it from the list of what the paper answers.
+
+The list now carries five questions and says which are answered: performance,
+specialization success, and binding, with fidelity and full coverage open. That
+matches the body and the safety section, and it matches the code: the generation
+check that binds them is present on both instruction sets.
+
+The gate's log was also re-verified against the live tree, since the checks that
+live in it were edited earlier. No gated file has changed since the run, its
+claims line is identical to what the tree prints now, and it records the same
+two hundred and forty-eight banners. Census unchanged; the abstract and the body
+agree.
+
 ### Step 0932 - six cross-ISA loops, each one guarded
 
 Four separate checks had to be corrected for assuming one instruction set's
