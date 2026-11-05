@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0812 - three from three candidates, each on a checked fact
+
+Three more sentences name their harness, each of size fifty-eight or sixty-nine
+and each chosen from three candidates by a fact the sentence gives: the
+three-opcode case spec, the five spec expressions with the borrow extension, and
+the six-opcode spec fields with the expected-family rows.
+
+The distinguishing facts were checked rather than assumed. The sign-extending
+load has three opcodes and the sentence says three; the flag-operand harness
+names family rows five times where the condition harness does not; the
+subtract-with-borrow harness is the one whose sentence mentions the borrow
+extension.
+
+Both reaches are asserted after the edit, since the last one broke a join it did
+not touch and the only thing that caught it was a floor. Nineteen sentences now
+join, all sizes agreeing. Census unchanged; the checker gains three joins.
+
 ### Step 0811 - naming a harness broke a join that read the words
 beside it
 

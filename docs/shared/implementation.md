@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0812 named three more harnesses from three
+candidates each, 17 -> 19 joins with sizes agreeing,
+and confirmed both reaches after the last step's
+break (no census change).
+
+
 Step 0811 named four more harnesses (join 12 -> 16)
 and restored an older description join that the
 parenthetical had broken, both reaches now asserted
