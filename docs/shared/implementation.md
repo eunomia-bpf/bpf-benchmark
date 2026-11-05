@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0952 corrected step 0951: 57 directional words,
+but only one is positional and it is local; the rest
+are semantic.
+
+
 Step 0951 found the 244 paragraphs have no order a
 reader can recover: 147 harnesses, each named once,
 unsorted and ungrouped.

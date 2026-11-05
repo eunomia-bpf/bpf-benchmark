@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0952 - fifty-seven directional words, one of them
+positional
+
+The previous step said the catalogue's paragraphs have no cross-references to
+break. That is nearly right and worth stating exactly: of the fifty-seven words
+in the subsection that point somewhere else, fifty-five are semantic rather than
+positional, as in a window that puts the index below the capacity or a count
+above its own rounded-up word count.
+
+One is positional, and it is local: a sentence says the list below is the whole
+population and the enumeration follows it immediately. The other names an
+earlier step in the sequence rather than an earlier paragraph, so it survives a
+reordering of the paper.
+
+So the claim holds in the form that matters for a restructuring: reordering the
+harness paragraphs would leave one reference to fix, and it sits inside a single
+block rather than spanning the catalogue. The measurement is corrected here
+because the earlier sentence overstated it.
+
+Census unchanged; the cross-reference count is measured rather than asserted.
+
 ### Step 0951 - the catalogue has no order a reader can recover
 
 The subsection's paragraphs have no organising principle that a reader can
