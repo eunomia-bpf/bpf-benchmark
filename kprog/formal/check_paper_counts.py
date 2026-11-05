@@ -2611,6 +2611,41 @@ def dangling_refs() -> list[str]:
                   for r in refs - labels)
 
 
+def dangling_citations() -> list[str]:
+    """Citation keys the paper uses that the bibliography does not define.
+
+    A citation is the fifth kind of name the prose carries, after files,
+    theorems, steps and cross-references. An undefined key renders as a
+    bold question mark and reads as a citation, which is the failure a
+    reference check exists to catch.
+    """
+    sec = pathlib.Path(__file__).parent / ".." / ".." / "docs" \
+        / "kprog-simulator-in-ebpf"
+    bib = sec / "reference.bib"
+    if not bib.exists():
+        return ["the bibliography is absent, so citations went unread"]
+    # The document's own sources: `sections/`, the figure fragments it
+    # includes, and `main.tex`. `resources/` holds template files with
+    # their own citations, which the paper does not use.
+    sources = list((sec / "sections").glob("*.tex"))
+    if (sec / "figures").exists():
+        sources += list((sec / "figures").glob("*.tex"))
+    sources.append(sec / "main.tex")
+    cited = set()
+    for f in sources:
+        if not f.exists():
+            continue
+        for grp in re.findall(r"\\cite\{([^}]*)\}", f.read_text()):
+            cited |= {k.strip() for k in grp.split(",") if k.strip()}
+    # Entries are written `@type {key,` and often `@type{key,`, so the
+    # brace is matched with or without the space.
+    known = set(re.findall(r"^@\w+\s*\{([^,]+),", bib.read_text(),
+                           re.M))
+    known = {k.strip() for k in known}
+    return sorted("the paper cites %s and the bibliography does not "
+                  "define it" % k for k in cited - known)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3758,6 +3793,10 @@ def main() -> None:
     # A cross-reference that nothing labels renders as a question mark and
     # reads as a citation, so the label has to resolve somewhere.
     for problem in dangling_refs():
+        problems.append(problem)
+    # A fifth kind of name: a citation key has to be defined, or it
+    # renders as a bold question mark and reads as a citation.
+    for problem in dangling_citations():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

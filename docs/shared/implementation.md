@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0837 bound the paper's 27 citation keys; a first
+scan read the conference template under resources/
+and reported dozens of false misses (no census
+change).
+
+
 Step 0836 bound the paper's 25 cross-references; a
 first scan read only sections/ and reported 10
 dangling figures that live in figures/ (no census

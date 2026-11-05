@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0837 - the fifth kind of name, and a template that is not
+the paper
+
+A citation key is the fifth kind of name the prose carries, after file names,
+theorem names, step numbers and cross-references. Twenty-seven distinct keys are
+cited and all are defined in the bibliography, but nothing checked, and an
+undefined key renders as a bold question mark while reading as a citation.
+
+The first scan read every TeX file under the paper directory and reported dozens
+of missing keys; they belong to the conference template under the resources
+directory, which carries its own sample citations and is not part of the
+document. Restricting the scan to the sections, the figure fragments and the
+top-level file resolves all twenty-seven.
+
+That is the third time in four steps that a scan's reach was the defect rather
+than its logic, and the reason is the same each time: the paper's sources are
+spread across directories and the first scan names one. Census unchanged; the
+checker gains a component.
+
 ### Step 0836 - a fourth kind of name, and a scan that read one
 directory of three
 
