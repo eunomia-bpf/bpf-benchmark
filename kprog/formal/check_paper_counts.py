@@ -3015,33 +3015,37 @@ def macro_hygiene_history() -> list[str]:
     return []
 
 
-def prepost_stages(text: str) -> list[str]:
-    """Problems with the pre/post battery's two counts.
+def battery_rows(text: str) -> list[str]:
+    """The pre/post sentence's two counts against its own battery.
 
-    The section states how many rows that battery catches and how many
-    equivalences survive. Both are counts in the harness source, so a row
-    added or an equivalence unmarked leaves the sentence describing a
-    battery it no longer runs.
+    That sentence describes mut_arm64_pair_route, whose run reports 40
+    mutations with 8 equivalences surviving, so 32 are caught. Both counts
+    are read from that battery's source. The other twelve sentences of this
+    shape describe route hosts rather than mutation batteries, so their
+    counts have a different subject and are not compared here.
     """
-    src = (pathlib.Path(__file__).parent / "build"
-           / "mut_arm64_mem_prepost.py").read_text()
-    rows = len(re.findall(r"^row\(", src, re.M))
-    equiv = len(re.findall(r"equivalent=True", src))
+    body = (pathlib.Path(__file__).parent / "build"
+            / "mut_arm64_pair_route.py").read_text()
+    rows = len(re.findall(r"^row\(", body, re.M))
+    equiv = len(re.findall(r"equivalent=True", body))
     flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
-    m = re.search(r"(\d+) catchable rows are caught, with three clean "
-                  r"rerun shakes recorded.*?and (\d+) equivalences survive",
-                  flat)
+    # The count is tied to the digest it sits beside, which is the
+    # pair-route battery's recorded shake.
+    # The caller masks `\texttt` bodies, so the digest reads as a run of
+    # X's; anchoring on the quoted digest keeps the count tied to the
+    # sentence that also carries it.
+    m = re.search(r"(\d+) catchable rows are caught.{0,120}?"
+                  r"md5 X{8,}\) and (\d+) equivalences survive", flat)
     if m is None:
-        return ["the sentence giving the battery's two counts is absent, so "
-                "both figures went unread"]
-    stated_caught, stated_equiv = int(m.group(1)), int(m.group(2))
+        return ["the sentence giving the pair-route battery's two counts is "
+                "absent, so both figures went unread"]
     out = []
-    for stated, actual, what in (
-            (stated_caught, rows - equiv, "catchable rows"),
-            (stated_equiv, equiv, "equivalences")):
-        if stated != actual:
-            out.append("the section states %d %s and the battery has %d"
-                       % (stated, what, actual))
+    if int(m.group(1)) != rows - equiv:
+        out.append("the section states %s catchable rows and the pair-route "
+                   "battery has %d of %d" % (m.group(1), rows - equiv, rows))
+    if int(m.group(2)) != equiv:
+        out.append("the section states %s equivalences and the battery has %d"
+                   % (m.group(2), equiv))
     return out
 
 
@@ -4429,7 +4433,7 @@ def main() -> None:
             % (sorted(seen), sorted(known)))
     # The pre/post battery's two counts are rows in its own source, so the
     # sentence is compared with the battery rather than with its own past.
-    problems.extend(prepost_stages(text))
+    problems.extend(battery_rows(text))
     if problems:
         # Print before exiting: a silent --check failure gives no evidence.
         for problem in problems:

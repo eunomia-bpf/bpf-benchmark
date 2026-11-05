@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0907 - the counts were right and I replaced them
+
+The two counts in that sentence were already right. The battery the paragraph
+describes is the pair-route one, which declares forty rows with eight marked
+equivalent, so thirty-two are caught; the two figures I replaced came from a
+different battery entirely, and the numbers I put in their place described a
+harness the paragraph does not mention.
+
+What made the error possible is that thirteen sentences share the shape "N
+catchable rows are caught ... and M equivalences survive", and each describes a
+different battery. Reading the counts as belonging to the nearest named battery
+is what produced the wrong attribution: the paragraph names a twenty-five-row
+harness in its opening clause and a forty-row one for the route, and the counts
+belong to the second.
+
+The sentence is restored and the check now reads the pair-route battery's own
+rows and equivalences, anchored on the digest the sentence quotes, of which
+there is exactly one. Verified by restating the wrong figure, which the run
+reports beside the battery's. Census unchanged; one figure is restored and one
+gains a binding.
+
 ### Step 0906 - a battery sentence was three harnesses out of date
 
 The sentence about the pre/post battery stated thirty-two catchable rows and
