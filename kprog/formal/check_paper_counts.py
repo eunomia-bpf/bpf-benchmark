@@ -1765,7 +1765,8 @@ def tag_values() -> dict[str, list[int]]:
 
 def stated_harness_joins(
         text: str) -> tuple[list[tuple[int, str, int]],
-                            list[tuple[int, str, list[str]]], int]:
+                            list[tuple[int, str, list[str]]], int,
+                            list[tuple[list[str], str]]]:
     """`[(stated, harness, its size)]` for sentences naming a harness only by
     size and opcode.
 
@@ -1794,6 +1795,7 @@ def stated_harness_joins(
         ALL_DOCS[f.stem] = body
     out = []
     weak: list[tuple[int, str, list[str]]] = []
+    multi: list[tuple[list[str], str]] = []
     # Split on line breaks first: collapsing them lets a sentence wrap
     # across a line, and the ". " split then cuts it in half.
     joined = ". ".join(re.sub(r"\s+", " ", l)
@@ -1839,6 +1841,19 @@ def stated_harness_joins(
                 .replace(BS + "_", "_").removesuffix(".py"))
         if stem in totals:
             out.append((int(m.group(1)), stem + ".py", totals[stem]))
+    # One sentence, one harness. A label followed by a second parenthetical
+    # naming a different file has been a mislabel twice over: the reader
+    # follows the label and reaches the wrong contract, while the join reads
+    # the first name and passes. Naming the same file twice is only
+    # redundant, so it is counted rather than reported.
+    for line in joined.split(". "):
+        names = [g.replace(BS + "_", "_").removesuffix(".py")
+                 for g in re.findall(r"\\texttt\{(mut" + re.escape(BS + "_")
+                                     + r"[a-z0-9" + re.escape(BS + "_")
+                                     + r"]+)", line)]
+        if len({nm for nm in names if nm in totals}) > 1:
+            multi.append((sorted({nm for nm in names if nm in totals}),
+                          line[:90]))
     # The joins above cover the sentences whose size names one harness and
     # whose evidence selects it. A sentence that names no file and whose
     # size is shared by several harnesses joins none, which is a coverage
@@ -1849,7 +1864,7 @@ def stated_harness_joins(
     unnamed = sum(1 for line in joined.split(". ")
                   if (m := re.search(r"(\d+)-mutation harness", line))
                   and int(m.group(1)) not in covered)
-    return out, weak, unnamed
+    return out, weak, unnamed, multi
 
 
 def opcode_map() -> list[str]:
@@ -4085,7 +4100,7 @@ def main() -> None:
     # is exact and the two figures must agree.
     # The masked text blanks every \texttt quotation, so the opcodes this
     # join reads are only in the source.
-    joins, weak, unnamed = stated_harness_joins(
+    joins, weak, unnamed, multi = stated_harness_joins(
         pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
@@ -4093,6 +4108,10 @@ def main() -> None:
         problems.append(
             "only %d sentences join a harness; at least 51 matched before"
             % len(joins))
+    for names, line in multi:
+        problems.append(
+            "one sentence names %s, so its label and its prose disagree"
+            % " and ".join(names))
     for stated, harness, have in joins:
         if stated != have:
             problems.append(
@@ -4351,7 +4370,8 @@ def main() -> None:
               f"{case_figures(text)} distinct figures, {banner_bound} of "
               f"{stated} stated figures banner-bound or sequenced, "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "
-              f"token, {unnamed} naming no file), both gate totals, the "
+              f"token, {unnamed} naming no file, {len(multi)} naming two), "
+              f"both gate totals, the "
               f"{len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")

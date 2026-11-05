@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0883 - the double name is now a failure, not a finding
+
+Both mislabels were the same shape, so the shape is now checked. A sentence that
+names a harness in its label and a different one in a later parenthetical has
+two names and one meaning, and the join reads the first while the reader follows
+it to the wrong contract.
+
+The check reports any sentence naming two different harness files. Naming the
+same file twice is only redundant and passes, since that was four of the six the
+sweep found and none of them was wrong.
+
+Verified by putting one of the two mislabels back: the check names both files
+and fails. With the section as it stands it reports three zeros, so the success
+line prints the reach of the joins and the two ways a sentence can name a
+harness and still be unheld. Census unchanged; the checker gains a guard.
+
 ### Step 0882 - two more labels pointed at the wrong harness
 
 The corruption the last step found was not alone. Six sentences named a harness
