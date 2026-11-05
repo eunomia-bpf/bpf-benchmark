@@ -2592,6 +2592,41 @@ def doubleshift_opcode_keyed() -> list[str]:
     return out
 
 
+def push_pop_one_selection() -> list[str]:
+    """Problems with the push/pop "one selection" theorem, empty when it holds.
+
+    The section says the body that pre-decrements is exactly the body that
+    hardcodes 64, and that reading one body's width into the other is the
+    confusion the contract pins away. That is one theorem stating both
+    directions and both width sources together, with the two pairs
+    asserted distinct; separate theorems would each be true and the
+    sentence false.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "X86PushPopHandler.lean")
+    if not f.exists():
+        return ["the push/pop handler module is absent, so the one-selection "
+                "sentence went unread"]
+    src = f.read_text()
+    m = re.search(r"^theorem x86_push_pop_facts\b(.*?) := ", src,
+                  re.S | re.M)
+    if m is None:
+        return ["x86_push_pop_facts is absent"]
+    body = m.group(1)
+    out = []
+    for need, why in (
+            ("hardcoded64", "the push width source"),
+            ("preDecrement", "the push step direction"),
+            ("flagsOr64", "the pop width source"),
+            ("postIncrement", "the pop step direction")):
+        if need not in body:
+            out.append("x86_push_pop_facts no longer states %s" % why)
+    if body.count("\u2260") < 2:
+        out.append("x86_push_pop_facts no longer asserts the two pairs "
+                   "distinct")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3735,6 +3770,10 @@ def main() -> None:
     # "the body and the flag family are selected by the same opcode and
     # cannot diverge": three theorems must key on that opcode.
     for problem in doubleshift_opcode_keyed():
+        problems.append(problem)
+    # "the two facts are one selection": one theorem stating both
+    # directions and both width sources, with each pair distinct.
+    for problem in push_pop_one_selection():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

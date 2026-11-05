@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0842 - a conjunction is what makes two facts one selection
+
+The push and pop sentence says the two facts are one selection: the body that
+pre-decrements is exactly the body that hardcodes sixty-four, and reading one
+body's width into the other is the confusion the contract pins away. The theorem
+states both directions and both width sources in one conjunction, and asserts
+each pair distinct.
+
+The conjunction is what makes it one selection rather than two facts. Two
+theorems, one about the push body and one about the pop, would each be true
+while leaving open the reading the sentence rules out; stating them together
+with the pairs distinct closes it, and the check reads for the four values and
+both inequalities.
+
+The distinctness half is the one worth holding: it says the two bodies do not
+merely each have a direction, but different ones, which is what a swap would
+break while leaving both halves true. Census unchanged; the checker gains a
+component.
+
 ### Step 0841 - a shared argument axis is checkable from signatures
 
 One sentence says the body and the flag family are selected by the same opcode
