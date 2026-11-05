@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0903 - two cited works were in no bibliography
+
+The paper carries two related-work sections and only one is compiled. The other
+is a longer text, unmodified since the import, whose citations the bibliography
+did not fully carry: two of its keys resolve to nothing. Reading them showed
+both works are real and that one is described wrongly in the dead text, which
+says hXDP extends the eBPF instruction set when hXDP runs unmodified eBPF
+programs on an FPGA.
+
+The two missing entries are now in the bibliography, and the live section
+carries the two subjects it was missing: bytecode optimization that shortens
+programs within the instruction set, and the two existing routes to a new
+operation, a kfunc or an instruction-set revision. Both are described from the
+sources rather than from the dead text.
+
+The live section now cites ten sources where it cited five, every key resolves,
+and the build reports no undefined citation. The dead section is left in place,
+since removing it is a separate decision about what the paper keeps. Census
+unchanged; the related work gains two subsections.
+
 ### Step 0902 - the gate runs the assertions that were added to it
 
 The gate had not been run since the two checks that live inside it were changed,
