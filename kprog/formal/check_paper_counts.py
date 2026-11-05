@@ -3015,6 +3015,27 @@ def mem_alu_battery() -> list[str]:
                    "5" % survived)
     return out
 
+def guard_hit_hosts() -> list[str]:
+    """Problems with the guard-hit population, empty when it matches.
+
+    The section says six AArch64 hosts count guard hits, each driving an
+    access past the arena and requiring the guard to fire exactly once. The
+    six are the hosts that say so in their own text.
+    """
+    here = pathlib.Path(__file__).parent
+    hosts = [f for f in here.glob("test_arm64_*.c")
+             if "exactly one" in f.read_text(errors="ignore")]
+    if len(hosts) != 6:
+        return ["%d AArch64 hosts require exactly one guard hit and the "
+                "section says six" % len(hosts)]
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+        / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
+    if "the six AArch64 hosts that count guard hits" not in flat:
+        return ["the section no longer states the guard-hit population"]
+    return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4224,6 +4245,10 @@ def main() -> None:
     # "planting 6 catches ... keeping 5 documented equivalences": the
     # battery prints both, so the split is checked by running it.
     for problem in mem_alu_battery():
+        problems.append(problem)
+    # "the six AArch64 hosts that count guard hits ... require the guard
+    # to fire exactly once": a population the hosts themselves state.
+    for problem in guard_hit_hosts():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

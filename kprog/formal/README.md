@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0868 - the population the hosts state about themselves
+
+The sentence about guard hits names a population: six AArch64 hosts driving an
+access past the arena and requiring the guard to fire exactly once. Six hosts
+say exactly that in their own text, and they are the population the sentence
+means.
+
+The count is what the check holds, since each host's requirement is its own
+claim and the sentence makes a claim about how many such hosts there are.
+Renaming one host's requirement to a weaker form reports five against the stated
+six.
+
+The sentence also says the compiler independently reports the overrun as an
+array subscript when the guard is disabled, and that the bound escaped before it
+was added. Those are the reproducer rather than the population, and recompiling
+a disabled guard is what would settle them. Census unchanged; the checker gains
+a component.
+
 ### Step 0867 - a split is checked by running the battery, not
 reading its rows
 
