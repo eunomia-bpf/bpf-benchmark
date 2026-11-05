@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0910 measured all 13: 8 agree on total rows, and
+one real defect (reduction route 14 -> 15 caught of
+17). The pairing check was removed as unreliable.
+
+
 Step 0909 found the multiply sentence stated 61
 catchable rows against a battery of 64 rows / 7
 equivalences (57 caught); corrected and bound.

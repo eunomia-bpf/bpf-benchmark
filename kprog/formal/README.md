@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0910 - eight of thirteen agree; one more was off by one
+
+Measuring the thirteen sentences against their batteries one at a time found
+that eight of them agree exactly once the whole row total is compared: the
+stated caught rows plus the stated equivalences equal the battery's rows. That
+is the check to write, because it survives an equivalence row taking its mark
+from a loop variable, which makes the static marks undercount.
+
+The third real defect in the set is the reduction route, whose battery has
+seventeen rows with two equivalences, so fifteen are caught; the sentence said
+fourteen. The two equivalences it names, the gate-widening probe and a comment
+repaint, are exactly the two the run reports, so only the caught figure was
+wrong. It is fifteen now.
+
+The check that binds them was written and then removed: pairing each sentence
+with the battery named before it needs the names from the unmasked source and
+the counts from the masked text, and the offsets do not correspond because
+masking shortens the text. A version that pairs wrongly reports three false
+findings, so the sentence-level check stays scoped to the two whose pairing is
+exact. Census unchanged; one figure is corrected.
+
 ### Step 0909 - sixty-one rows against a sixty-four-row battery
 
 Measuring the thirteen sentences found a real defect in the second one whose
