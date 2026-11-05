@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0832 - the last stale artifact is the gate's own output
+
+The staleness found by hand in the last step is now a check. A passing gate
+reports on the tree it ran on, so a log older than any component it should
+reflect says nothing about the code that is there now, and the four components
+the checker depends on are compared against the log's own modification time.
+
+The last run passes and the one before it reports the census file, which is
+exactly the gap the hand comparison found. Both branches are exercised: a
+current log passes, and a log predating a component change names it.
+
+This is the same defect the checker has been finding all run, one level up: a
+check reading a stale artifact rather than the tree. The difference is that the
+artifact here is the gate's own output, which is the last thing anyone suspects
+of being out of date. Census unchanged; the checker gains a component.
+
 ### Step 0831 - the gate had not run since a gate component changed
 
 The gate was last run before the census window was widened, so the run that

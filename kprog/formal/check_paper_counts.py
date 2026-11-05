@@ -2508,6 +2508,29 @@ def reachability_theorems() -> list[str]:
     return out
 
 
+def stale_log(log_path: pathlib.Path) -> list[str]:
+    """Problems with a gate log older than a checker it should reflect.
+
+    A passing gate reports on the tree it ran on. If a gate component
+    changed after the log was written, the log says nothing about the code
+    that is there now — the same defect as a check that reads a stale
+    artifact, one level up.
+    """
+    here = pathlib.Path(__file__).parent
+    if not log_path.exists():
+        return []
+    when = log_path.stat().st_mtime
+    components = ("check_lean_claims.py", "check_macro_hygiene.py",
+                  "harness_census.py", "Makefile")
+    out = []
+    for name in components:
+        f = here / name
+        if f.exists() and f.stat().st_mtime > when:
+            out.append("%s changed after the log was written, so the run "
+                       "does not reflect it" % name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3639,6 +3662,10 @@ def main() -> None:
     # "proves all three arms reachable": an arm no input reaches makes a
     # dispatch contract true for a reason the reader did not intend.
     for problem in reachability_theorems():
+        problems.append(problem)
+    # A passing gate reports on the tree it ran on; a log older than a
+    # component says nothing about the code that is there now.
+    for problem in stale_log(pathlib.Path(args.log)):
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
