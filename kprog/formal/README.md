@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0847 - two numerals, one theorem, and the code both read
+
+One sentence says the default code is exactly the 64-bit width's code, so the
+resolution cannot drift from the width table. Three figures make that readable:
+the generated table's code for the 64-bit width, the generated fallback
+constant, and the theorem equating them.
+
+The table gives eight for the 64-bit width, the fallback is eight, and the
+theorem states the equality by reflexivity, which is only possible because the
+two are the same numeral in the same module. A fallback changed to four reports
+without the proof being read.
+
+This is the smallest claim of the kind in the run: an identity between two
+numerals, checked where they are defined and proved where they are used. The
+theorem adds that the two never diverge, and the check adds that the code the
+theorem reads is still the code the table gives. Census unchanged; the checker
+gains a component.
+
 ### Step 0846 - a partition that closes because it names the
 leftover
 

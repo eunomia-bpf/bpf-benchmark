@@ -2752,6 +2752,35 @@ def native_decide_split() -> list[str]:
     return out
 
 
+def default_code_is_w64() -> list[str]:
+    """Problems with the width fallback, empty when it holds.
+
+    The section says the default code is exactly the 64-bit width's code,
+    so the resolution cannot drift from the width table. Three figures make
+    that checkable: the generated table's code for the 64-bit width, the
+    generated fallback constant, and the theorem equating them.
+    """
+    here = pathlib.Path(__file__).parent / "KProgFormal"
+    gen = here / "GeneratedArm64Width.lean"
+    hand = here / "Arm64Width.lean"
+    if not gen.exists() or not hand.exists():
+        return ["the width modules are absent, so the fallback went unread"]
+    g = gen.read_text()
+    out = []
+    m = re.search(r"\| \.w64 => (\d+)", g)
+    d = re.search(r"^def defaultCode : Nat := (\d+)$", g, re.M)
+    if m is None or d is None:
+        out.append("the generated width table or the fallback constant is "
+                   "absent")
+    elif m.group(1) != d.group(1):
+        out.append("the fallback is code %s and the 64-bit width is %s"
+                   % (d.group(1), m.group(1)))
+    if not re.search(r"^theorem arm64_default_code_is_w64\b",
+                     hand.read_text(), re.M):
+        out.append("nothing equates the fallback with the 64-bit width")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3917,6 +3946,10 @@ def main() -> None:
     # "the three counts sum to 487 rather than 488, and one use sits in
     # none of the three": four figures that have to close.
     for problem in native_decide_split():
+        problems.append(problem)
+    # "the default code is exactly the 64-bit width's code, so the
+    # resolution cannot drift from the width table": a numeral equality.
+    for problem in default_code_is_w64():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
