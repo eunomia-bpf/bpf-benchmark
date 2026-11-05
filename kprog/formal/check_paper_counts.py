@@ -2684,6 +2684,33 @@ def bzhi_flag_rule() -> list[str]:
     return out
 
 
+def carry_polarity() -> list[str]:
+    """Problems with the carry-polarity correspondence, empty when it holds.
+
+    The section says AArch64 sets its carry to not-borrow and x86-64 to
+    borrow on the same narrowed operands, that each is right for its own
+    architecture, and that the relation between them is a theorem. Two are
+    needed: the complement over all operands, and a witness where the two
+    flags genuinely differ, or the complement could hold vacuously.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "CrossIsaFlags.lean")
+    if not f.exists():
+        return ["the cross-ISA flag module is absent, so the polarity "
+                "sentence went unread"]
+    src = f.read_text()
+    out = []
+    m = re.search(r"^theorem arm64_notborrow_is_not_x86_borrow\b(.*?) := ",
+                  src, re.S | re.M)
+    if m is None:
+        out.append("the complement theorem is absent")
+    elif "ult" not in m.group(1) or "!" not in m.group(1):
+        out.append("the complement theorem no longer negates the borrow")
+    if not re.search(r"^theorem arm64_x86_disagree_on_borrow\b", src, re.M):
+        out.append("no witness shows the two flags actually differ")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3840,6 +3867,11 @@ def main() -> None:
     # reaches the width's bit count, and sets ZF when the result is zero":
     # two independent inputs, four assignments.
     for problem in bzhi_flag_rule():
+        problems.append(problem)
+    # "AArch64 sets its carry to not-borrow while x86-64 sets its carry to
+    # borrow": a complement over all operands plus a witness that they
+    # genuinely differ.
+    for problem in carry_polarity():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0845 - a complement needs a witness to not be vacuous
+
+The sentence about the carry flag states a difference that is not a drift:
+AArch64 sets its carry to not-borrow, the unsigned greater-or-equal, and x86-64
+to borrow, the strict less-than, on the same narrowed operands. Each is right
+for its own architecture, and the relation between them was a thing nothing
+stated until it was a theorem.
+
+Two theorems carry it. The first complements one over all operands and widths,
+narrowing first so the statement is about the resolved values rather than the
+raw registers. The second exhibits a concrete borrow where the two flags
+genuinely differ, which is what keeps the first from holding vacuously on
+operands where nothing ever borrows.
+
+The witness is the part worth holding. A complement over a population where the
+predicate is always false is true and says nothing, which is the failure this
+run has met at every scale; the witness is what makes the relation a statement
+about subtraction rather than about equality. Census unchanged; the checker
+gains a component.
+
 ### Step 0844 - two independent inputs, and a sentence that quotes
 the other rule
 
