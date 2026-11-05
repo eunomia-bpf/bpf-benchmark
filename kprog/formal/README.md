@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0860 - a break inside a name needs an empty group, not a
+space
+
+The remaining overfull boxes had a cause the first two fixes did not reach:
+thirty long identifiers written in camel case rather than with underscores, so a
+break inserted everywhere else did not apply. Breaking before an interior
+capital takes the visible boxes from a hundred and seventy-five to a hundred and
+thirty-three.
+
+The insertion needs an empty group rather than a space. A control sequence
+followed directly by a letter is undefined, and a space would have changed what
+the reader sees, since the break sits inside a file name. The empty group leaves
+the name intact and expands to nothing.
+
+One file name had already taken the space form and was split into four words,
+which the module-citation check caught as two missing modules and a reach that
+had fallen by one. The check now strips all three forms of the marker before
+reading names, so a break inside a citation cannot hide one. Census unchanged;
+the checker gains a cleaner section and a normalisation.
+
 ### Step 0859 - the paragraph that was a hundred entries with no
 blank lines
 

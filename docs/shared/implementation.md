@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0860 broke 30 camelCase identifiers, taking
+visible overfull boxes 175 -> 133; a space would have
+split file names, so the break uses an empty group
+(no census change).
+
+
 Step 0859 found two 100-line run-in lists without
 blank lines; separating them takes the worst box
 172->145pt and visible overfulls 175->154 (no census

@@ -308,7 +308,11 @@ def lean_citations(text: str) -> set[str]:
     be checked for existence — but existence is what a rename breaks, and
     forty-seven modules are cited.
     """
-    return set(re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", text))
+    # A break marker may sit inside a name, so the text is normalised
+    # before extracting: `\brk{}` and `\brk ` both split a filename.
+    plain = text.replace("\\brk{}", "").replace("\\brk ", "")
+    plain = plain.replace("\\brk", "")
+    return set(re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", plain))
 
 
 def document_refs(paper: pathlib.Path) -> tuple[set, set, set, set]:
