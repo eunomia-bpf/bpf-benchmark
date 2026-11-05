@@ -339,7 +339,12 @@ def document_refs(paper: pathlib.Path) -> tuple[set, set, int, int, set, set]:
         for group in re.findall(r"\\cite[pt]?\{([^}]+)\}", text):
             cites |= {k.strip() for k in group.split(",")}
     bib = paper / "reference.bib"
-    keys = set(re.findall(r"@\w+\{([^,]+),", bib.read_text()))
+    # A bibliography entry may be written `@type{key,` or `@type {key,`,
+    # and five in this file use the space. Requiring the brace right
+    # after the type made those keys invisible, so a citation of one
+    # read as uncited rather than as unresolvable.
+    keys = {k.strip() for k in re.findall(
+        r"@\w+\s*\{\s*([^,\s]+)\s*,", bib.read_text())}
     # A duplicate label resolves to whichever the class file saw last, and a
     # reference into a section the paper does not include resolves to
     # nothing; both are silent in a clean LaTeX run with the directory on

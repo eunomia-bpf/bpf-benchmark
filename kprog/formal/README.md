@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0905 - five bibliography entries were invisible to the check
+
+The pattern that reads bibliography keys had the same blind spot as the one that
+produced the false finding: it required the opening brace immediately after the
+entry type, and five entries in this file put a space there. Those five keys
+were therefore invisible, so a citation of one could not be reported as
+unresolvable -- it simply was not in the set being compared against.
+
+Two of the five are cited by the live paper, so the check was under-reading its
+own subject by two. The pattern now tolerates the space, the key set grows from
+fifty-six to sixty-one, and the count in the success line with it.
+
+Detection is confirmed rather than assumed: removing a key the live section
+cites reports it by name, and the two keys cited only by the sections main.tex
+does not include stay out of scope, which is the check's stated scope rather
+than a gap. Census unchanged; the check sees every entry in the bibliography.
+
 ### Step 0904 - the two missing keys were there all along
 
 The two bibliography entries the previous step added were duplicates. Both keys
