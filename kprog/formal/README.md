@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0811 - naming a harness broke a join that read the words
+beside it
+
+Four more of the tokenless sentences now name their harness, each chosen from
+the two or three candidates of that size by a fact the sentence gives: the lane
+specification with the eight-way switch, the four-width comparison ladder, the
+per-arm codes with the ten re-check messages, and the four-field spec whose
+fields are capacity rounding and the arena alias.
+
+Naming them broke an older join without touching it. The description join
+matched a count followed directly by the word retargets, and inserting a
+parenthetical between them stopped it matching, so its reach fell from two to
+one while the sentence it lost was the very one being named.
+
+That is worth recording because the two joins overlap: this one reads the prose
+words and that one reads the file name, and a sentence can be reached by either.
+The description join now tolerates the parenthetical, and both reaches are
+asserted. Census unchanged; the checker gains four joins.
+
 ### Step 0810 - one sentence names its harness, and the pattern needed
 four tries
 

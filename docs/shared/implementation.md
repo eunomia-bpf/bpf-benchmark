@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0811 named four more harnesses (join 12 -> 16)
+and restored an older description join that the
+parenthetical had broken, both reaches now asserted
+(no census change).
+
+
 Step 0810 named the STLXR status harness in its
 sentence, taking the join to 12 with sizes agreeing;
 the pattern needed four attempts at escaping (no

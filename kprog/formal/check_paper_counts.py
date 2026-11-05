@@ -1074,8 +1074,9 @@ def description_joins(text: str) -> list[tuple[int, str]]:
                    for q in here.glob("*_spec.json"))
     out = []
     for n, desc in re.findall(
-            r"(\d+)-mutation harness retargets (?:the |its |both )?"
-            r"([a-z/\- ]{3,40}?) spec", flat):
+            r"(\d+)-mutation harness (?:\([^)]*\) )?"
+            r"retargets (?:the |its |both )?([a-z/\- ]{3,40}?) spec",
+            flat):
         if shared.get(int(n), 0) <= 1:
             continue
         words = [w for w in re.split(r"[ \-/]+", desc) if len(w) >= 4]
@@ -3315,9 +3316,9 @@ def main() -> None:
     joins = stated_harness_joins(pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 12:
+    if len(joins) < 16:
         problems.append(
-            "only %d sentences join a harness; at least 12 matched before"
+            "only %d sentences join a harness; at least 16 matched before"
             % len(joins))
     for stated, harness, have in joins:
         if stated != have:
