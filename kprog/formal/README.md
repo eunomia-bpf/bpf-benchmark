@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0824 - a boundary claim is the two comparisons that make it
+
+One of the open cannot-sentences gives three figures and one rule: a
+thousand-and-twenty-four-byte copy is accepted, a thousand-and-twenty-five and a
+minus one both raise, so the simulator's bound cannot be crossed by an artifact
+the encoder produces. The rule is a single comparison on each side of a
+constant, and all three figures are readable.
+
+They are right. The constant is a thousand and twenty-four, and both the copy
+and the fill raise when the length is below zero or above it. The check reads
+the constant and the comparison rather than the sentence, so a bound moved on
+one side of the rule reports.
+
+This is the smallest check in the set and the most direct: a claim about a
+boundary is verified by the two comparisons that create it, and nothing about
+the surrounding argument has to be understood. Census unchanged; the checker
+gains a component.
+
 ### Step 0823 - a multiple was the wrong relation, covering once is
 the right one
 

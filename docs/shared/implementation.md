@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0824 bound the 1024/1025/-1 sentence to the
+encoder's constant and its two-sided comparison, both
+verified and a moved bound reported (no census
+change).
+
+
 Step 0823 bound the 9 oracle-over-population
 sentences; a first version required a multiple and
 reported 3 false positives, since covering at least

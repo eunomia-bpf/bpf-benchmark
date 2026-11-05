@@ -2376,6 +2376,34 @@ def bv_decide_partition() -> list[str]:
     return out
 
 
+def memset_bound() -> list[str]:
+    """Problems with the memcpy/memset length bound, empty when it holds.
+
+    The section says a 1024-byte copy is accepted while 1025 and -1 raise
+    ValueError, so the simulator's bound cannot be crossed by an artifact the
+    encoder produces. The rule is one comparison each side of the bound, and
+    the bound is a constant, so all three figures are readable.
+    """
+    here = pathlib.Path(__file__).parent
+    src = (here / ".." / "x86" / "micro-prog"
+           / "generate_micro_sim_proofs.py").read_text()
+    m = re.search(r"^MAX_MEMSET_COUNT = (\d+)$", src, re.M)
+    if m is None:
+        return ["the encoder has no memset bound, so the section's three "
+                "figures went unread"]
+    out = []
+    if int(m.group(1)) != 1024:
+        out.append("the encoder bound is %s and the section says 1024"
+                   % m.group(1))
+    for kind in ("memcpy", "memset"):
+        if not re.search(r"if insn\.sim_imm < 0 or insn\.sim_imm > "
+                         r"MAX_MEMSET_COUNT:\s*\n\s*raise ValueError",
+                         src):
+            out.append("the %s length is not bounded on both sides" % kind)
+            break
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3484,6 +3512,10 @@ def main() -> None:
     # "58 of the 61 and 103 of the 104 cannot state the goal ... 161 of the
     # 165": four figures that must reconcile two ways.
     for problem in bv_decide_partition():
+        problems.append(problem)
+    # "a 1024-byte copy is accepted, while 1025 and -1 both raise": the
+    # bound is one constant and the rule compares against it both ways.
+    for problem in memset_bound():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
