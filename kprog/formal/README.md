@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0951 - the catalogue has no order a reader can recover
+
+The subsection's paragraphs have no organising principle that a reader can
+recover. Each of the hundred and forty-seven harness paragraphs names its
+harness exactly once, and the sequence is neither sorted by name nor grouped by
+instruction set nor ordered by the step each was added in: ninety-two are x86,
+forty-nine AArch64, and the six others name a route or a parser, and they
+interleave throughout.
+
+That is why the alternation measured earlier is fifty-six runs rather than two:
+the paragraphs were appended as the work was done, one per harness, and nothing
+has since imposed an order on them.
+
+So a restructuring has a specific job rather than a general one: the material is
+a catalogue of independent paragraphs with no cross-references to break, and
+grouping them by instruction set and then by family would touch no sentence's
+content. That is stated here rather than done, since it is an editorial decision
+over nineteen hundred lines.
+
+Census unchanged; the ordering is measured and found absent.
+
 ### Step 0950 - ninety-five percent of the paper is one section
 
 The paper is a hundred and fifteen pages, and ninety-five percent of its words
