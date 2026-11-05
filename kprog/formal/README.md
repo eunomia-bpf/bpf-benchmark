@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0825 - reading the figure from its words, not its value
+
+The section and the formal tree's readme state the same three totals: one
+hundred and thirty-eight specifications each rendered to a C header and a Lean
+module, three hundred and six modules, and the theorem count those modules
+prove. Both documents are maintained by hand and neither is derived from the
+other, so a figure can drift in one while the other stays right.
+
+All three agree with the tree today, and the check reports a drift of one in
+either document. The figures are read from the words beside them rather than by
+matching their values, which is what makes a wrong digit visible: a pattern that
+looks for two thousand and sixty-five finds it and not the two thousand and
+sixty-six that replaced it.
+
+That was the first version and it passed a planted error, which is the defect
+this run keeps finding in other checks. Reading from the context is the fix.
+Census unchanged; the checker gains a component.
+
 ### Step 0824 - a boundary claim is the two comparisons that make it
 
 One of the open cannot-sentences gives three figures and one rule: a

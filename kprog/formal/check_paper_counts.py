@@ -2404,6 +2404,45 @@ def memset_bound() -> list[str]:
     return out
 
 
+def cross_document() -> list[str]:
+    """Problems where the paper and the step record disagree on a tree figure.
+
+    The two documents describe the same tree from different directions: the
+    section argues about it, the record says how it was built. A figure both
+    state — the theorem count, the specification count — must agree with the
+    tree and with each other.
+
+    The figure is read from the words beside it rather than by matching its
+    value, so a transcription error is found rather than being invisible
+    because the pattern no longer matches.
+    """
+    here = pathlib.Path(__file__).parent
+    paper = re.sub(r"\s+", " ", (here / ".." / ".." / "docs"
+        / "kprog-simulator-in-ebpf" / "sections" / "4-safety.tex")
+        .read_text()).replace("\\brk", "").replace("{,}", ",")
+    # The second document is the formal tree's own readme, which states
+    # the same totals in the same words.
+    rec = re.sub(r"\s+", " ", (here / "README.md").read_text())
+    import check_lean_claims as _cl
+    tree = _cl.scan_tree(str(here))
+    out = []
+    # "138 specifications into 138 C headers and 138 Lean modules": the
+    # regeneration claim, which names the specification count exactly.
+    for label, ctx, want in (
+            ("specifications",
+             r"(\d+)\s+specifications into \1", tree["specs"]),
+            ("modules", r"(\d+) Lean modules that prove",
+             tree["modules"]),
+            ("theorems", r"Lean modules that prove (\d[\d,]*)\s+theorems",
+             tree["theorems"])):
+        pv = {int(x.replace(",", "")) for x in re.findall(ctx, paper)}
+        rv = {int(x.replace(",", "")) for x in re.findall(ctx, rec)}
+        if (pv | rv) != {want}:
+            out.append("the section and the record disagree on %s: %s and "
+                       "%s, tree %d" % (label, sorted(pv), sorted(rv), want))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3516,6 +3555,10 @@ def main() -> None:
     # "a 1024-byte copy is accepted, while 1025 and -1 both raise": the
     # bound is one constant and the rule compares against it both ways.
     for problem in memset_bound():
+        problems.append(problem)
+    # The section and the step record describe one tree; a figure both
+    # state must agree with it and with each other.
+    for problem in cross_document():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

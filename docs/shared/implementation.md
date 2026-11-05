@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0825 bound the three totals the section and the
+tree's readme both state; a first version matched
+values and passed a planted error, so the figures are
+read from context (no census change).
+
+
 Step 0824 bound the 1024/1025/-1 sentence to the
 encoder's constant and its two-sided comparison, both
 verified and a moved bound reported (no census
