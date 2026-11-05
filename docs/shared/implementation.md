@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0936 documented why the pass list repeats three
+passes: a first fold and a second after the rewriting
+passes, seven to thirteen apart.
+
+
 Step 0935 exercised all four ends of branch_flip: 27
 profile tests, 42 CLI tests, shim step detection, and
 the fail-fast env requirement.

@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0936 - the pass list repeats three passes, on purpose
+
+The measured policy lists the same three passes twice, and the runner's
+expansion preserves duplicates by design rather than collapsing them. That reads
+as an accident until the order is looked at: constant propagation and dead-code
+elimination sit at the front of both lists and again after the rewriting passes,
+with seven rewriting passes between them in one list and thirteen in the other.
+
+The rewriting passes emit replacement instruction sequences, which is why a
+second fold is worth running in the same pass. The order was changed
+deliberately once, to put the instruction-expanding pass after the
+LLVM-roundtrip ones, and the duplication carried across that change.
+
+The paper did not describe any of this, so a reader comparing the policy file
+against a set of unique pass names would take the repetition for a mistake. The
+design section now states the two rounds and that the list is not deduplicated.
+Census unchanged; one policy structure is documented.
+
 ### Step 0935 - the profile-guided pass, all four ends exercised
 
 The profile-guided pass has four ends and each was exercised rather than read.
