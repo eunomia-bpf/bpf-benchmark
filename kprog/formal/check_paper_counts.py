@@ -2627,6 +2627,32 @@ def push_pop_one_selection() -> list[str]:
     return out
 
 
+def popcnt_flag_rule() -> list[str]:
+    """Problems with the POPCNT flag rule, empty when it matches the prose.
+
+    The section says the transition clears CF, SF and OF and sets ZF exactly
+    when the width-narrowed source is zero -- so the consequence depends on
+    the narrowed source and not on the result. Three clears and one
+    narrowed-source test, readable in the spec function.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "X86PopcntFlags.lean")
+    if not f.exists():
+        return ["the POPCNT flag module is absent, so its rule went unread"]
+    src = f.read_text()
+    m = re.search(r"^def x86PopcntFlagsSpec\b(.*?)^\S", src, re.S | re.M)
+    if m is None:
+        return ["x86PopcntFlagsSpec is absent"]
+    body = " ".join(m.group(1).split())
+    out = []
+    for flag in ("cf", "sf", "of"):
+        if "%s := false" % flag not in body:
+            out.append("POPCNT no longer clears %s" % flag.upper())
+    if "zf := x86PopcntZeroSpec" not in body:
+        out.append("POPCNT's ZF no longer comes from the narrowed source")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3774,6 +3800,10 @@ def main() -> None:
     # "the two facts are one selection": one theorem stating both
     # directions and both width sources, with each pair distinct.
     for problem in push_pop_one_selection():
+        problems.append(problem)
+    # "it clears CF, SF and OF, and sets ZF exactly when the width-narrowed
+    # source is zero": three clears and one narrowed-source test.
+    for problem in popcnt_flag_rule():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

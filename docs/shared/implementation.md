@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0843 bound POPCNT's flag rule: three clears and
+a zero test on the narrowed source, matching the
+sentence, with the ZF source change reporting (no
+census change).
+
+
 Step 0842 bound the push/pop one-selection theorem:
 four values in one conjunction with both pairs
 distinct, so a swap that leaves each half true

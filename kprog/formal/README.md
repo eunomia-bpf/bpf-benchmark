@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0843 - a rule in three clears and one test
+
+The POPCNT sentence gives a rule in one clause: it clears the carry, sign and
+overflow flags and sets zero exactly when the width-narrowed source operand is
+zero, so the consequence depends on the narrowed source rather than on the
+result. The spec function states exactly that, with three clears and a zero test
+on the narrowed source.
+
+The module is named for the mnemonic rather than the operation, which is why the
+search for it first found the value contract instead: one module computes the
+count, another lifts the flags into the shared record. The prose is right about
+which is which.
+
+The distinction the sentence draws is worth holding: a logical shape would
+derive the sign flag from the result's sign, and POPCNT's result is never
+negative, so reading the flag from the result would clear SF for the wrong
+reason. The spec reads the source. Census unchanged; the checker gains a
+component.
+
 ### Step 0842 - a conjunction is what makes two facts one selection
 
 The push and pop sentence says the two facts are one selection: the body that
