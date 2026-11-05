@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0922 widened the harness and module name classes
+(both lowercase-or-underscore-only); no result
+changed, phantom-miss risk closed.
+
+
 Step 0921 widened the scene-name class (latent silent
 undercount) and removed named_files(), a strict
 subset of cited_paths().

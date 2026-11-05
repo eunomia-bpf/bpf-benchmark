@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0922 - the last two narrow classes, widened with no change
+
+The claim that harness names are lowercase by construction was checked rather
+than repeated: all three hundred and thirty are, so the class was not wrong
+today. It was still narrow, and a capital in one would have truncated the name
+at the capital and reported a harness that is on disk as missing, which is the
+failure the module class produced earlier in this sequence when a name was
+split.
+
+Both places that read harness names now admit capitals, and the two that read
+module names admit underscores. No module has one today, since the tree uses
+CamelCase, but the same argument applies: a class that encodes today's spelling
+turns a rename into a phantom missing file rather than a real one.
+
+The three families, then, are each read by a class wide enough for any name the
+tree could hold: harnesses and modules both, and the configuration paths read by
+path with the escape removed. Census unchanged; two classes widened with no
+change in what the tree reports.
+
 ### Step 0921 - one more class that could silently undercount
 
 Two checks read file names from the section and both are driven by a character

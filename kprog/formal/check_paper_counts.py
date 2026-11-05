@@ -313,7 +313,7 @@ def lean_citations(text: str) -> set[str]:
     # before extracting: `\brk{}` and `\brk ` both split a filename.
     plain = text.replace("\\brk{}", "").replace("\\brk ", "")
     plain = plain.replace("\\brk", "")
-    return set(re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", plain))
+    return set(re.findall(r"([A-Z][A-Za-z0-9_]+)\.lean", plain))
 
 
 def document_refs(paper: pathlib.Path) -> tuple[set, set, int, int, set, set]:
@@ -3080,7 +3080,7 @@ def route_battery_rows() -> list[str]:
     out = []
     for m in re.finditer(r"(\d+) catchable rows are caught", flat):
         names = [x.replace("\\_", "_") for x in
-                 re.findall(r"mut\\_([a-z0-9\\_]+)",
+                 re.findall(r"mut\\_([A-Za-z0-9\\_]+)",
                             flat[max(0, m.start() - 4000):m.start()])]
         names = [n.rstrip("_") for n in names if n.rstrip("_")]
         if not names:
@@ -3138,12 +3138,12 @@ def cited_paths() -> list[str]:
     flat = re.sub(r"\\brk(\{\}|\s)*", "", raw)
     flat = re.sub(r"\\_\s*", "\\_", flat)
     out = []
-    mods = {m for m in re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", flat)}
+    mods = {m for m in re.findall(r"([A-Z][A-Za-z0-9_]+)\.lean", flat)}
     on_disk = {p.stem for p in (here / "KProgFormal").glob("*.lean")}
     for m in sorted(mods - on_disk):
         out.append("the section cites %s.lean and it is not in the tree" % m)
     stems = {x.replace("\\_", "_").rstrip("_")
-             for x in re.findall(r"mut\\_([a-z0-9\\_]+)", flat)}
+             for x in re.findall(r"mut\\_([A-Za-z0-9\\_]+)", flat)}
     for s in sorted(stems):
         if not (here / "build" / ("mut_" + s + ".py")).exists():
             out.append("the section cites mut_%s.py and it is not on disk" % s)
