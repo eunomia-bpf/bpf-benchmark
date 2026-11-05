@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0913 - the battery runs again and confirms its forty-two
+
+The broken battery is repaired and the sentence it supports is confirmed. Its
+row edits a stack-index expression whose call form changed when the cast around
+the offset was dropped; the anchor still carried the cast, so the row could not
+find its text and the battery stopped before reaching the rest.
+
+The first repair was wrong in a way the battery itself reported: the replacement
+added a closing parenthesis without opening one, so the mutant failed to build
+rather than staying green, and the battery counted a row marked equivalent as
+caught and reported one failure. Adding the matching parenthesis gives a
+balanced edit and the battery completes cleanly.
+
+It now reports sixty-five mutations with twenty-three equivalences surviving, so
+forty-two are caught, which is what the sentence states. The repair is in the
+battery, which is untracked and outside the gate, so the improvement is that the
+figure the paper cites can be reproduced again rather than that the gate
+changed. Census unchanged; one battery runs again and one figure is confirmed.
+
 ### Step 0912 - one battery was off by one, the other cannot run
 
 The two sentences with no equivalence count belong to batteries that mark
