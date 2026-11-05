@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0838 - two checks that duplicated one already there
+
+Two checks added in the last two steps duplicated one that was already there.
+The existing check reads the top-level file's include lines, takes the labels
+and citations of the sections it actually includes, compares them with the
+bibliography, and reports undefined references, uncited keys, labels defined
+twice, and references into sections the paper keeps on disk but does not
+include.
+
+That is strictly stronger than what the last two steps added, which read
+directories. The duplicate was found by looking for the same defect in reverse:
+a scan that names one directory where the sources live in three, and a scan that
+reads a directory where the paper is defined by its includes.
+
+Both were removed rather than kept beside the stronger check, and the run is
+unchanged. What the last two steps established is that the paper's 25 references
+and 27 citation keys resolve; what this one establishes is that the checker
+already said so. Census unchanged; the checker loses two duplicates.
+
 ### Step 0837 - the fifth kind of name, and a template that is not
 the paper
 

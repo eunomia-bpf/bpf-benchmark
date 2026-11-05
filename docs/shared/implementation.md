@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0838 removed two checks added in the last two
+steps: both duplicated a stronger existing one that
+reads main.tex's includes rather than a directory (no
+census change).
+
+
 Step 0837 bound the paper's 27 citation keys; a first
 scan read the conference template under resources/
 and reported dozens of false misses (no census
