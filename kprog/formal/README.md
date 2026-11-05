@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0822 - a partition checked two ways, so one figure cannot
+drift alone
+
+One of the open cannot-sentences states a partition of the bv_decide population:
+one hundred and sixty-five obligations, sixty-one needing a cases split and one
+hundred and four binding a bit-vector operand, of which fifty-eight and one
+hundred and three cannot state the goal under a plain decide, and the sentence
+says that is one hundred and sixty-one of the one hundred and sixty-five.
+
+Those four figures reconcile two ways: the two groups sum to the population, and
+the two unable-to-state figures sum to the number that compiles. Checking both
+catches a transcription error in any one of the four, which a single sum would
+not.
+
+Nothing is wrong today. What the check adds is that the four figures cannot
+drift apart without one of the two sums breaking, which is the shape most of the
+remaining cannot-sentences have: a stated partition of a population the tree
+holds. Census unchanged; the checker gains a component.
+
 ### Step 0821 - the clone claim verified, and the traceback it
 produced replaced
 

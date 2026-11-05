@@ -2335,6 +2335,38 @@ def cited_steps() -> list[int]:
     return sorted(cited - have)
 
 
+def bv_decide_partition() -> list[str]:
+    """Problems with the bv_decide population split, empty when it adds up.
+
+    The section partitions the 165 obligations bv_decide closes into 61 that
+    need a cases split and 104 that bind a bit-vector operand directly, and
+    reports that 58 of the first and 103 of the second cannot state the goal
+    under a plain decide -- 161 of the 165. Four independent figures, so a
+    transcription error in any one breaks the arithmetic.
+    """
+    here = pathlib.Path(__file__).parent
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+        / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
+    m = re.search(
+        r"of the (\d+) \\texttt\{bv\\_decide\} closes, (\d+) do\.", flat)
+    n = re.search(
+        r"(\d+) of the (\d+) and (\d+) of the (\d+) cannot state", flat)
+    out = []
+    if m is None or n is None:
+        return ["the bv_decide partition sentence is absent, so its figures "
+                "went unread"]
+    total, compiles = int(m.group(1)), int(m.group(2))
+    g1, t1, g2, t2 = (int(x) for x in n.groups())
+    if t1 + t2 != total:
+        out.append("the split covers %d and the population is %d"
+                   % (t1 + t2, total))
+    if g1 + g2 != compiles:
+        out.append("the unable-to-state figures sum to %d and %d compile"
+                   % (g1 + g2, compiles))
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3440,6 +3472,10 @@ def main() -> None:
     for n in cited_steps():
         problems.append(
             "the section cites Step %04d and no record names it" % n)
+    # "58 of the 61 and 103 of the 104 cannot state the goal ... 161 of the
+    # 165": four figures that must reconcile two ways.
+    for problem in bv_decide_partition():
+        problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
