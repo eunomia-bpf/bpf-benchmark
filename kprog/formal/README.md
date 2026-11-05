@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0859 - the paragraph that was a hundred entries with no
+blank lines
+
+Two of the remaining overfull boxes were not about long identifiers at all. The
+ranges the compiler named span a hundred lines and a hundred and seven thousand
+characters, because a hundred consecutive entries in a list of treated regions
+had no blank line between them and LaTeX read the whole run as one paragraph to
+justify.
+
+Separating the entries takes the worst box from a hundred and seventy-two points
+to a hundred and forty-five, and the count of boxes over a hundred points from a
+hundred and seventy-five to a hundred and fifty-four. The mean falls by a small
+amount, since the boxes that remain are ordinary line-breaking disagreements.
+
+The format is the paper's own: blank lines separate entries everywhere else in
+the section, with a hundred and twenty for two thousand lines. These two runs
+were the exception, and the compiler's paragraph range was what pointed at them.
+Census unchanged; the checker gains a cleaner section.
+
 ### Step 0858 - a convention the paper already had, applied 186 times
 
 The section had thirteen thousand overfull boxes, a median of ten points and a
