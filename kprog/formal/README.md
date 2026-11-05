@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0875 - a join carried by one token every harness has
+
+The joins were measured for how much of each sentence's evidence they actually
+used, and four of the ten docstring joins rest on one token out of two to four.
+The weakest was a fifty-mutation sentence whose only matching token was HANDLED,
+which appears in dozens of docstrings.
+
+Its paragraph is about an AArch64 move provenance harness, and the move harness
+carries that token nine times where the one the join picked carried four. The
+sentence is named now and the join count goes to forty.
+
+A guard against the shape was tried twice and removed twice. Counting which
+tokens most harnesses share needs the per-size candidate list, which lives
+inside the join function rather than beside it, and the version placed outside
+failed on the first run. The join is named instead, which is the fix; the guard
+would only have reported a risk that the naming removes. Census unchanged; the
+checker gains a join.
+
 ### Step 0874 - a sentence joined to the wrong harness
 
 Looking for the shape the last step removed found one more, and this one had

@@ -4061,9 +4061,9 @@ def main() -> None:
     joins = stated_harness_joins(pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 39:
+    if len(joins) < 40:
         problems.append(
-            "only %d sentences join a harness; at least 39 matched before"
+            "only %d sentences join a harness; at least 40 matched before"
             % len(joins))
     for stated, harness, have in joins:
         if stated != have:
