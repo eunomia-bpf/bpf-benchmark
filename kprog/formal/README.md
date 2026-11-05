@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0831 - the gate had not run since a gate component changed
+
+The gate was last run before the census window was widened, so the run that
+would have exercised the change did not exist. It does now: two hundred and
+forty-eight banners, one hundred and twenty-four million cases, and the summary
+line unchanged, at return code zero.
+
+The change is load-bearing. Twenty of the forty-four row-catch blocks in the
+section have their harness phrase more than five hundred characters back, so the
+old window left them with no lead and the census said nothing about them; the
+wider one reaches all forty-four.
+
+That the gate passed either way is the point of running it rather than assuming:
+the count it reports is not the count a narrowing of the window would report,
+and only a run on the current tree shows which one is being reported. Census
+unchanged; the checker gains a verified run.
+
 ### Step 0830 - the vacuity family, four ways
 
 Vacuity has a fourth guard in the proof tree: an arm no input reaches makes a

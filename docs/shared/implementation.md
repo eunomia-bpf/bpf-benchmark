@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0831 re-ran the gate after finding the last run
+predated the census-window widening; 20 of 44
+row-catch blocks need the wider window, so the change
+is load-bearing (census unchanged).
+
+
 Step 0830 bound the arm-reachability theorems: five
 across four modules, completing the vacuity family at
 the proof-tree level (no census change).
