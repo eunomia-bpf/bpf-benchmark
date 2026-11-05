@@ -4273,6 +4273,10 @@ def main() -> None:
     # battery prints both, so the split is checked by running it.
     for problem in mem_alu_battery():
         problems.append(problem)
+    # "four byte-identical green shakes pin the family": a claim
+    # about repetition, held by repeating.
+    for problem in mem_alu_determinism():
+        problems.append(problem)
     # "the six AArch64 hosts that count guard hits ... require the guard
     # to fire exactly once": a population the hosts themselves state.
     for problem in guard_hit_hosts():
