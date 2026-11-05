@@ -3036,6 +3036,33 @@ def guard_hit_hosts() -> list[str]:
     return []
 
 
+def mem_alu_determinism() -> list[str]:
+    """Problems with the battery's repeatability, empty when it is stable.
+
+    The section says four byte-identical green shakes pin the family. That
+    is a claim about repetition, so the only way to hold it is to repeat:
+    the battery is run twice more and its whole output compared with the
+    run the split check already made.
+    """
+    f = (pathlib.Path(__file__).parent / "build"
+         / "mut_x86_mem_alu_handler.py")
+    if not f.exists():
+        return ["the memory-ALU battery is absent"]
+    outs = []
+    for _ in range(2):
+        try:
+            run = subprocess.run(
+                ["python3", str(f)], capture_output=True, text=True,
+                cwd=str(f.parent.parent), timeout=900)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            return ["the battery did not finish: %s" % exc]
+        outs.append(run.stdout)
+    if outs[0] != outs[1]:
+        return ["two runs of the battery differ, so the shakes are not "
+                "byte-identical"]
+    return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")

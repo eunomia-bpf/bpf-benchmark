@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0869 bound the four byte-identical shakes by
+running the battery twice more and comparing: stable
+today, and a pid in the output reports (no census
+change).
+
+
 Step 0868 bound the six guard-hit hosts, each
 requiring exactly one hit; a fifth reported when one
 is retargeted (no census change).

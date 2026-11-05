@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0869 - a claim about repetition, held by repeating
+
+The same sentence says four byte-identical green shakes pin the family, which is
+a claim about repetition rather than about a figure. The only way to hold it is
+to repeat: the battery is run twice more and the outputs compared, so a run that
+has started depending on its environment reports.
+
+Two runs agree today, and a process id printed into the output makes them
+differ, which is the property the claim needs. That is a second and third run of
+the same battery the split check already runs, so the cost is one more minute
+and the property is the one thing a reader cannot see in any figure.
+
+The two checks are separate on purpose. The split says how much of the battery
+bites; the repetition says the answer is the same each time. A battery can have
+either without the other, and the sentence claims both. Census unchanged; the
+checker gains a component.
+
 ### Step 0868 - the population the hosts state about themselves
 
 The sentence about guard hits names a population: six AArch64 hosts driving an
