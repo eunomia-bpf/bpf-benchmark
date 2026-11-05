@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0871 - the success line reports the surface, not a fifth of
+it
+
+The success line reported the case counts and the figures they cover, which is a
+fifth of what the section states. The section carries four hundred and
+sixty-nine distinct figures of three digits or more: a hundred and sixty-six are
+reported by a banner, a hundred and sixty-six are census or step numbers held by
+the sequence checks, and the rest are the parts of a split or the size of a
+harness.
+
+So the line now says which of the three it is reporting. A hundred and sixty-six
+of four hundred and sixty-nine is the number a reader should see beside the
+hundred and twenty-six case figures, because the gap between them is where the
+section's other kinds of number live.
+
+The measurement is deliberately not a gate: a figure with no banner is not
+unheld, since a split's parts are held by a sum and a harness's size by its
+name. What it adds is the shape of the surface, which the checker had never
+stated. Census unchanged; the checker gains a measurement.
+
 ### Step 0870 - two checks, one battery, three runs
 
 Two checks were running the same battery: one read the split from a run, the

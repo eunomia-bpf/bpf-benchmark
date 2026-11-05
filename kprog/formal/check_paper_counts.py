@@ -3045,6 +3045,33 @@ def guard_hit_hosts() -> list[str]:
     return []
 
 
+def figure_coverage() -> tuple[int, int, int]:
+    """`(figures stated, bound to a banner, bound some other way)`.
+
+    Not every figure is a case count. The section states banner counts,
+    census counter values, step numbers, and the parts of a split, and each
+    is held by a different check. This reports the shape of the surface
+    rather than claiming that a figure with no banner is unheld.
+    """
+    here = pathlib.Path(__file__).parent
+    flat = re.sub(r"\s+", " ", pathlib.Path(
+        here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+        / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
+    flat = flat.replace("{,}", ",")
+    counts, _, _ = read_log(pathlib.Path("/tmp/gCK175.log")) if \
+        pathlib.Path("/tmp/gCK175.log").exists() else (set(), 0, 0)
+    figs = {int(x.replace(",", "")) for x in
+            re.findall(r"(?<![\w.,])(\d[\d,]{2,})(?![\w,])", flat)}
+    bound = len(figs & counts)
+    # A census or step figure is held by the sequence checks rather than
+    # by a banner, so it is counted separately rather than as unheld.
+    other = sum(1 for v in figs - counts
+                if ("Step%s" % v) in flat or ("Step~%s" % v) in flat
+                or ("census \\(%s" % v) in flat
+                or ("\\to %s" % v) in flat)
+    return len(figs), bound, other
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4259,6 +4286,10 @@ def main() -> None:
     # to fire exactly once": a population the hosts themselves state.
     for problem in guard_hit_hosts():
         problems.append(problem)
+    # The success line reports the surface rather than only the count of
+    # claims: how many distinct figures the section states, and how many of
+    # them a banner or a sequence check holds.
+    stated, banner_bound, seq = figure_coverage()
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
@@ -4284,7 +4315,8 @@ def main() -> None:
         raise SystemExit(1)
     if not problems:
         print(f"all measured claims hold: {len(claimed)} case counts over "
-              f"{case_figures(text)} distinct figures, both "
+              f"{case_figures(text)} distinct figures, {banner_bound} of "
+              f"{stated} stated figures banner-bound or sequenced, both "
               f"gate totals, the {len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")

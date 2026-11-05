@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0871 measured the figure surface: 469
+three-digit figures, 166 banner-bound and 166
+census/step, now reported in the success line (no
+census change).
+
+
 Step 0870 ran the battery twice instead of three
 times, reading the split and the repeatability from
 the two outputs: 53s -> 41s (no census change).
