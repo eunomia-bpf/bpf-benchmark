@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0836 - a fourth kind of name, and a scan that read one
+directory of three
+
+The paper's cross-references are a fourth kind of name the prose carries, after
+file names, theorem names and step numbers. Twenty-five distinct labels are
+referenced and all resolve, but nothing checked, and a dangling one renders as a
+question mark while reading as a citation in the source.
+
+The first scan looked in the sections directory and reported ten dangling, all
+of them figures and tables; they are labelled in the figures directory, which
+the document includes but the scan did not read. Scanning every source the
+document includes resolves all twenty-five.
+
+That is the reach defect the checker has had twice before, in a third place: the
+scan named one directory where the labels live in three. Verified by renaming a
+reference in another section, which reports, and restoring it. Census unchanged;
+the checker gains a component.
+
 ### Step 0835 - the counterexample is a hypothesis, so weakening it
 shows
 

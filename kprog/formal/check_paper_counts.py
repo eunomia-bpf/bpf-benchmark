@@ -2586,6 +2586,31 @@ def arena_counterexample() -> list[str]:
     return []
 
 
+def dangling_refs() -> list[str]:
+    """Labels the sections reference that nothing defines.
+
+    A cross-reference to a section, figure or table that does not exist
+    renders as a question mark in the PDF and reads as a citation in the
+    source, which is the same shape as a file name or a step number: the
+    prose names something, and the name has to resolve.
+    """
+    here = pathlib.Path(__file__).parent
+    sec = here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+    if not sec.exists():
+        return ["the paper is absent, so its cross-references went unread"]
+    refs, labels = set(), set()
+    # Labels live in sections/, figures/ and main.tex, so the scan is over
+    # every source the document includes rather than one directory.
+    for f in list(sec.rglob("*.tex")):
+        if not f.exists():
+            continue
+        t = f.read_text()
+        refs |= set(re.findall(r"\\ref\{([a-z]+:[^}]+)\}", t))
+        labels |= set(re.findall(r"\\label\{([a-z]+:[^}]+)\}", t))
+    return sorted("the paper references %s and nothing labels it" % r
+                  for r in refs - labels)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3729,6 +3754,10 @@ def main() -> None:
     # "the counterexample is now a theorem": the whole-word hypothesis is
     # what excludes the one-byte arena, so a theorem without it reports.
     for problem in arena_counterexample():
+        problems.append(problem)
+    # A cross-reference that nothing labels renders as a question mark and
+    # reads as a citation, so the label has to resolve somewhere.
+    for problem in dangling_refs():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
