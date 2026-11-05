@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0814 - when the sentence is not enough, the paragraph is
+
+Two more sentences name their harness, both of size ninety and both chosen by a
+fact that separates the four candidates. The pair-move one says the harness
+retargets two spec opcode rows and the slot strides, and only that harness
+mentions strides at all.
+
+The memory-AUX one needed the paragraph rather than the sentence: the sentence
+describes a seven-file watchlist, which three candidates share, and the
+paragraph's opening line names the contract. Reading around a sentence is what
+the three- and four-candidate cases need, and it is the same method the earlier
+steps used when the sentence alone was not enough.
+
+Twenty-three sentences join, all sizes agreeing, and both reaches are unchanged.
+Census unchanged; the checker gains two joins.
+
+Naming them exposed a second defect. The census that resolves a harness from its
+detector split reads the nearest preceding count, and the parenthetical pushed
+eighteen of those counts past the window it reads, so the gate failed on a reach
+that had dropped while every figure stayed right. The window is wider now.
+
 ### Step 0813 - the sentence quotes the spec text, so the match is
 exact
 

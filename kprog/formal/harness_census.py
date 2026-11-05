@@ -209,7 +209,7 @@ def total_matches(text, tables):
         breakdown = detectors(hit.group(2))
         if len(breakdown) < 3:
             continue
-        lead = flat_text[max(0, hit.start() - 500):hit.start()]
+        lead = flat_text[max(0, hit.start() - 900):hit.start()]
         declared = re.findall(r"(\d+)-mutation harness", lead)
         if not declared:
             continue
