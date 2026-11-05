@@ -3321,6 +3321,35 @@ def cross_section_figures() -> list[str]:
     return out
 
 
+def specialization_shape() -> list[str]:
+    """Problems with the claim that specialization is per program.
+
+    The background section says a general simulator with a dispatch loop is
+    not directly acceptable, and that the verifier checks the specialized
+    artifact for one program rather than all programs. Each encoder must
+    therefore write one artifact per benchmark rather than one generic
+    simulator.
+    """
+    here = pathlib.Path(__file__).parent
+    out = []
+    for isa in ("x86", "arm64"):
+        src = here / ".." / isa / "micro-prog" / "generate_micro_sim_proofs.py"
+        if not src.exists():
+            out.append("the %s encoder is not where the check expects it"
+                       % isa)
+            continue
+        body = src.read_text(errors="ignore")
+        # One encoder factors the per-benchmark write into a helper; the
+        # other loops inline. Either is per-program; a shared simulator
+        # would have neither.
+        if "write_one(" not in body and not re.search(
+                r"for bench in load_benches", body):
+            out.append("the %s encoder has no per-benchmark loop, so the "
+                       "sentence about per-program specialization is unheld"
+                       % isa)
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4710,6 +4739,7 @@ def main() -> None:
     problems.extend(tag_model())
     problems.extend(rejection_records())
     problems.extend(cross_section_figures())
+    problems.extend(specialization_shape())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"

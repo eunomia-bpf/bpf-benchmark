@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0931 - two encoders specialize per program, in two shapes
+
+The background section says a general simulator with a dispatch loop is not
+directly acceptable to the verifier, and that the verifier checks the
+specialized artifact for one program rather than all programs. That is a claim
+about how the encoders are written, so it is checkable: each must produce one
+artifact per benchmark.
+
+Both do, in different shapes. One factors the per-benchmark write into a helper
+and the other loops inline, so a check for either alone would report the other
+as unheld; the check accepts either and reports an encoder with neither.
+
+Verified by replacing one encoder's loop with a call that does not name the
+benchmark loader, which the run reports. Census unchanged; one architectural
+claim is bound.
+
 ### Step 0930 - the conclusion and the evaluation now agree by check
 
 The conclusion quotes two figures the evaluation section measures, and nothing
