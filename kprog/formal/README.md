@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0848 - no noun is counted twice with different values
+
+The figure that appears more than once in the section is the theorem total,
+twice, once as a denominator and once as a total. Both describe the whole tree
+and both agree with it, along with the four figures around them: the
+native-decide count, its share, the modules it spans and the module total.
+
+Every other counted noun appears once. That is a property worth stating rather
+than a coincidence: a document where a count recurs is one where a reader has to
+check whether the recurrence is the same claim, and here it is, in the two
+places the argument needs it.
+
+The four figures around the first are already bound by the gate's own claim
+patterns, so nothing was added for them. What the audit adds is the negative
+result: no noun is counted twice with different values, which is the
+paper-internal version of the join the filename census does across documents.
+Census unchanged; the checker gains a verified internal consistency.
+
 ### Step 0847 - two numerals, one theorem, and the code both read
 
 One sentence says the default code is exactly the 64-bit width's code, so the
