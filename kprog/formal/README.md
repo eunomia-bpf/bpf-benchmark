@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0929 - the x86 rejection was recorded, under another run
+
+The conclusion says the smokes carry accepted artifacts and a rejected unsafe
+artifact on each target verifier. A sentence written earlier said the x86 run
+records the twenty-nine positive artifacts only, which is true of that run and
+left the conclusion's claim resting on a record nobody had named.
+
+The x86-64 rejection is recorded, under a different run: the runtime rejection
+directory carries the same diagnostic, with a transcript naming the unchecked
+packet read at the same offset and size. So the conclusion is right, and the
+sentence now names where the x86-64 half is.
+
+Both records are checked, each for the diagnostic, so the conclusion's claim
+fails the run if either stops carrying it. Census unchanged; one claim gains its
+source on the second architecture.
+
 ### Step 0928 - the bound constrains the simulator, not the native path
 
 The introduction and the design section each make a negative claim about

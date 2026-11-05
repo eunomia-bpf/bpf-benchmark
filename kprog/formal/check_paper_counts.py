@@ -3266,6 +3266,31 @@ def tag_model() -> list[str]:
     return out
 
 
+def rejection_records() -> list[str]:
+    """Problems with the claim that each target verifier rejected an artifact.
+
+    The conclusion says the smokes carry accepted artifacts and a rejected
+    unsafe artifact on each target verifier, and the evaluation section
+    names the diagnostic. Both instruction sets must have a record of that
+    rejection, or the sentence describes a run that does not exist.
+    """
+    root = pathlib.Path(__file__).parent / ".." / ".."
+    diag = "invalid access to packet, off=64 size=1"
+    arm = (pathlib.Path("/workspaces/.agent-state/bpf-development"
+                        "/kprog-arm64-qemu-selftest-final-20260908.log"))
+    x86 = (root / "tests" / "results" / "kinsn-runtime-20261007-test"
+           / "details" / "result.json")
+    out = []
+    if not arm.exists() or diag not in arm.read_text(errors="ignore"):
+        out.append("the AArch64 rejection log no longer records the "
+                   "off-64 packet diagnostic")
+    if not x86.exists() or diag not in x86.read_text(errors="ignore"):
+        out.append("the x86-64 rejection record no longer carries the "
+                   "off-64 packet diagnostic, so the conclusion's claim "
+                   "about each target verifier is unheld")
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4653,6 +4678,7 @@ def main() -> None:
     problems.extend(cited_paths())
     problems.extend(encoder_rejections())
     problems.extend(tag_model())
+    problems.extend(rejection_records())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"
