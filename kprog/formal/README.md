@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0920 - the path check read one section and half the paths
+
+The check that paths the section names exist read only the safety section. Three
+of the paper's sections name files and two of them name configuration files by
+path, so the check now reads every section main.tex includes.
+
+Two mistakes came out of testing it. The path on disk has plain underscores
+where the prose has escaped ones, so a lookup without that substitution reports
+a file that is there as absent; and the configuration names are lowercase today,
+so a character class that allows only lowercase stopped matching the moment a
+test renamed one to carry a capital, which made the check look like it passed
+when it had stopped reading.
+
+With both fixed, a renamed configuration file is reported by its real path and
+the tree as it stands passes. Census unchanged; the check covers three more
+sections than it did.
+
 ### Step 0919 - every percentage is derived, and nothing was wrong
 
 The percent figures in the section were audited against where each comes from,

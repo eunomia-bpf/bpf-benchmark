@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0920 extended the path check to every live
+section and fixed two escapes that made it read
+nothing (underscore, lowercase-only class).
+
+
 Step 0919 audited the seven percentages: all derived
 (tree, log, or floored sum), all 306 modules
 gate-reachable, nothing to correct.

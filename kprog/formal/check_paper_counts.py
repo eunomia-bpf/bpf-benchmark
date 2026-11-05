@@ -3145,8 +3145,14 @@ def cited_paths() -> list[str]:
     file.
     """
     here = pathlib.Path(__file__).parent
-    raw = (here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
-           / "sections" / "4-safety.tex").read_text()
+    # Every section main.tex includes, since the other sections name modules
+    # and configuration files too, and only the compiled ones belong to the
+    # paper.
+    paper = here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+    main = (paper / "main.tex").read_text()
+    live = [paper / (m + ".tex") for m in re.findall(
+        r"^[^%\n]*\\input\{(sections/[^}]+)\}", main, re.M)]
+    raw = "\n".join(p.read_text() for p in live)
     flat = re.sub(r"\\brk(\{\}|\s)*", "", raw)
     flat = re.sub(r"\\_\s*", "\\_", flat)
     out = []
@@ -3162,6 +3168,16 @@ def cited_paths() -> list[str]:
     for g in sorted(set(re.findall(r"(generate_[a-z0-9_]+_spec\.py)", flat))):
         if not (here / g).exists():
             out.append("the section cites %s and it is not on disk" % g)
+    # Configuration files the paper names by path, which live at the
+    # repository root rather than beside the checkers.
+    root = here / ".." / ".."
+    for c in sorted(set(re.findall(
+            r"(micro/config/[A-Za-z0-9_\\.]+\.yaml)", flat))):
+        # The prose writes the path with escaped underscores; the file on
+        # disk has plain ones.
+        real = c.replace("\\_", "_")
+        if not (root / real).exists():
+            out.append("the section cites %s and it is not there" % real)
     return out
 
 
