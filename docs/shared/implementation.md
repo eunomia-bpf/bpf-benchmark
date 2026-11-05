@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0935 exercised all four ends of branch_flip: 27
+profile tests, 42 CLI tests, shim step detection, and
+the fail-fast env requirement.
+
+
 Step 0934 made the abstract's 'answered' mean
 answered empirically, matching the safety section's
 'does not discharge O1-O4 in full'.

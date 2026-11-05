@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0935 - the profile-guided pass, all four ends exercised
+
+The profile-guided pass has four ends and each was exercised rather than read.
+The admission policy that turns raw observations into per-pass profiles passes
+its twenty-seven tests; the pass itself parses its profile argument and passes
+forty-two CLI tests against the built binary; the shim recognises a single-step
+plan naming it; and the profile root it needs is passed through both the suite
+environment and the runner's forwarded names.
+
+The requirement is fail-fast: the pass config demands the profile root with the
+shell's required-variable form, which exits with a named message when unset.
+That was checked by running the expansion with the variable cleared, which
+produced the message rather than an empty path.
+
+The pass is deliberately not in the default list, which the working agreement
+states, so nothing in this audit argues for adding it. What the audit
+establishes is that the four ends are present and tested, which is what a paper
+reporting this pass would need. Census unchanged; no figure moved.
+
 ### Step 0934 - answered empirically is not discharged as a theorem
 
 The abstract now lists binding among the questions the evaluation answers, and
