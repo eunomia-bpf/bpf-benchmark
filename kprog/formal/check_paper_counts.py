@@ -2961,6 +2961,26 @@ def macro_hygiene_history() -> list[str]:
     return []
 
 
+def bogus_token_message() -> list[str]:
+    """Problems with the unknown-opcode message, empty when it matches.
+
+    The section says a bogus token exits with a named message rather than
+    emitting a step the simulator cannot dispatch. The message is quoted in
+    full, and SystemExit with a string exits 1, so both halves are in the
+    source.
+    """
+    f = (pathlib.Path(__file__).parent / ".." / "x86" / "micro-prog"
+         / "generate_micro_sim_proofs.py")
+    if not f.exists():
+        return ["the micro-program encoder is absent, so the message went "
+                "unread"]
+    src = f.read_text()
+    if 'raise SystemExit(f"unknown x86 opcode: {op}")' not in src:
+        return ["the encoder no longer exits with the message the section "
+                "quotes"]
+    return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4161,6 +4181,11 @@ def main() -> None:
     # "323 macros and 621 parameters ... as they stood then": the same two
     # figures the checker records where the defect was found.
     for problem in macro_hygiene_history():
+        problems.append(problem)
+    # "a bogus token exits with unknown x86 opcode: BOGUS_OPCODE rather
+    # than emitting a step the simulator cannot dispatch": the message is
+    # quoted, and SystemExit with a string is exit 1.
+    for problem in bogus_token_message():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

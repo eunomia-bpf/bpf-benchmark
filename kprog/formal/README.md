@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0866 - a quoted message and the exit code that makes it a
+failure
+
+One of the remaining sentences quotes a message in full: a bogus token exits
+with the encoder naming it rather than emitting a step the simulator cannot
+dispatch. Two halves are readable, the string and the exit code, and the second
+is a property of the Python language rather than of this code.
+
+Both hold. The encoder raises the string at three places, and a SystemExit
+carrying a string exits one, which is what makes the sentence's claim about
+failing rather than emitting a step true.
+
+The first open claim to close in a while that is neither a theorem name nor a
+figure: a quoted diagnostic, which is the same key as the packet-bounds case.
+Two of the twenty-one remaining are of that shape, and the rest are arguments
+about what a reader or a detector can see. Census unchanged; the checker gains a
+component.
+
 ### Step 0865 - a hardcoded log, and a gate that grew to forty-four
 minutes
 
