@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0916 - the coverage read a log from a fixed path
+
+The coverage figures read a log from a fixed path rather than the one the run
+was given. The two happen to be identical today, so nothing was wrong in the
+result, but a stale log left on disk would have made the coverage figures
+describe an earlier tree while every other claim in the run described this one,
+and only the coverage would have been wrong.
+
+The function now takes the log as an argument, wired from the one the run was
+given. Verified by passing a truncated log, which changes the answer from one
+hundred and sixty-six bound figures to none, so the dependency is real rather
+than nominal.
+
+The two check scripts that take a log are outside the gate because the gate
+produces the log; they are run by hand against it and against a fresh log after
+each full run, which is what the earlier step that re-ran them after the gate
+established. Census unchanged; one figure source is now the run's own.
+
 ### Step 0915 - the line names the thirteen it now checks
 
 The success line named the harness joins and the figure classes but not the

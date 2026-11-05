@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0916 bound the coverage figures to the run's own
+log instead of a fixed /tmp path (identical today; a
+stale log would have silently described an earlier
+tree).
+
+
 Step 0915 named the 13 count sentences in the success
 line; counting them needed the check's own flatten
 (raw finds 11).

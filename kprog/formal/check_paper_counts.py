@@ -3218,7 +3218,7 @@ def guard_hit_hosts() -> list[str]:
     return []
 
 
-def figure_coverage() -> tuple[int, int, int, set[int]]:
+def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
     """`(figures stated, bound to a banner, bound another way, the rest)`.
 
     Not every figure is a case count. The section states banner counts,
@@ -3233,8 +3233,10 @@ def figure_coverage() -> tuple[int, int, int, set[int]]:
         here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
         / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
     flat = flat.replace("{,}", ",")
-    counts, _, _ = read_log(pathlib.Path("/tmp/gCK175.log")) if \
-        pathlib.Path("/tmp/gCK175.log").exists() else (set(), 0, 0)
+    # The log the run was given, not a fixed path: a stale log left on
+    # disk would make the coverage figures describe an earlier tree while
+    # every other claim in the run described this one.
+    counts, _, _ = read_log(log) if log.exists() else (set(), 0, 0)
     figs = {int(x.replace(",", "")) for x in
             re.findall(r"(?<![\w.,])(\d[\d,]{2,})(?![\w,])", flat)}
     bound = len(figs & counts)
@@ -4497,7 +4499,8 @@ def main() -> None:
     # The success line reports the surface rather than only the count of
     # claims: how many distinct figures the section states, and how many of
     # them a banner or a sequence check holds.
-    figs_total, banner_bound, stated, rest = figure_coverage()
+    figs_total, banner_bound, stated, rest = figure_coverage(
+        pathlib.Path(args.log))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
