@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0878 - six of the unjoined sentences were already held
+
+The fourteen sentences the last step left unjoined were not all unheld. Six of
+them record one harness at successive sizes as detectors were added, and that
+series is already bound to the harness's own row count by a check written
+earlier: the sizes must ascend by the detector stride and the harness must still
+hold at least its last stated size.
+
+So the figure the success line printed was six too high. It counted only the
+sentences the join reached, and a sentence held by a different check looked the
+same as one held by none. The count now subtracts the sizes the growth check
+binds, and it reads seven.
+
+The seven that remain are size-ambiguous rather than unheld: each sits on a size
+two or three harnesses share and names no file, so nothing in the sentence
+chooses. Two of them are sizes fifty-one, and one pair is the same sentence size
+recorded for two different contracts. Census unchanged; the checker's coverage
+figure is corrected.
+
 ### Step 0877 - eighteen sentences stated a harness and joined none
 
 The joins were counted, but never against the population they come from:

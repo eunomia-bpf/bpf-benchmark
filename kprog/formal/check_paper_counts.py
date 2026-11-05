@@ -1842,10 +1842,12 @@ def stated_harness_joins(
     # whose evidence selects it. A sentence that names no file and whose
     # size is shared by several harnesses joins none, which is a coverage
     # figure rather than a defect; it is returned so the run can report it.
-    joined_sizes = {n for n, _, _ in out}
+    # The growing harness is counted as held, since `harness_growth` binds
+    # its whole series to the harness's own row count.
+    covered = {n for n, _, _ in out} | set(harness_growth(text)[0])
     unnamed = sum(1 for line in joined.split(". ")
                   if (m := re.search(r"(\d+)-mutation harness", line))
-                  and int(m.group(1)) not in joined_sizes)
+                  and int(m.group(1)) not in covered)
     return out, weak, unnamed
 
 

@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0878 corrected the unjoined count: 6 of the 14
+are held by the existing growth check, so the figure
+was 14 and is 7 (no census change).
+
+
 Step 0877 measured join coverage against the 71
 stated mutation sizes: 18 sentences joined none. Five
 named, joins 40 -> 44; 14 remain ambiguous (size
