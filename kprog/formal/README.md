@@ -7606,6 +7606,28 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0934 - answered empirically is not discharged as a theorem
+
+The abstract now lists binding among the questions the evaluation answers, and
+that could be read as saying the obligation is proved. The safety section is
+precise: the generation binding makes the verifier and execution callbacks
+consume one immutable snapshot, but no theorem states it, and the section says
+the mechanization does not discharge the four obligations in full.
+
+The abstract says the same now. It distinguishes answering a question
+empirically from discharging an obligation as a theorem, so binding counts as
+answered and still unproved, which is what the safety section reports and what
+the code shows: the generation checks are in the module, and the theorems stop
+at the slices the section lists.
+
+The safety section also names two parts of the obligation that are only
+implicitly discharged, which is consistent with that reading: once stated
+explicitly, the abstract and the section agree on what is proved, what is
+implemented, and what is measured.
+
+Census unchanged; the two documents agree on the difference between answering
+and proving.
+
 ### Step 0933 - the abstract left out the obligation its body claims
 
 The abstract's closing sentence listed four evaluation questions and left
