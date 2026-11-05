@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0941 - a five-line difference that names its own cause
+
+The uncompiled implementation section states the kernel core's size and breaks
+it into five components. The five sum to the stated total, and three of them
+match the tree exactly: the BTF and registration lines, and the x86-64 JIT
+dispatch lines. The other three differ by five lines together, all in the ARM64
+JIT, which is one commit's worth of change.
+
+That is what a measurement taken at an earlier point in the series looks like,
+and the table's caption says it was measured on the kernel tree rather than at a
+named revision. So the figure is a real measurement of a state the tree has
+since moved five lines past, not an arithmetic error: the components and the
+total agree with each other.
+
+The section stays out of the paper. What is established is that its
+decomposition reconciles with the tree to within one commit, which is stronger
+than the section itself claimed. Census unchanged; one dead-section figure is
+now measured against the tree.
+
 ### Step 0940 - the mechanism lived only in an uncompiled section
 
 The paper keeps a mechanism section that main.tex does not include, and it holds

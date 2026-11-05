@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0941 checked the dead implementation section's
+929-line table against the tree: components sum,
+three match exactly, total now 934.
+
+
 Step 0940 moved the descriptor's two-rendering
 mechanism from the dead section into the compiled
 design section and bound all three fields.
