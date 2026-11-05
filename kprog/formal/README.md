@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0816 - the opening line names the contract, and the size
+checks it
+
+Three more sentences name their harness, each read from the paragraph's opening
+line rather than from the sentence itself: the conditional-select pointer path,
+the ALU-handler path, and the x86 ADD-flag contract. The opening line names the
+contract and the count identifies the harness once the contract is known.
+
+This is the technique the memory-AUX sentence needed two steps ago, applied to
+the three sizes whose sentences say only pointer-path, path and step. The sizes
+agree in each case, which is the check on the identification rather than a
+coincidence: if the opening line named the wrong contract the count would not
+match.
+
+Twenty-seven sentences join and all agree. Eight sizes remain, each with three
+to seven candidates whose paragraphs need reading the same way. Census
+unchanged; the checker gains three joins.
+
 ### Step 0815 - the spec's own shape is the key
 
 One more sentence names its harness. It gives the spec as four opcode fields and

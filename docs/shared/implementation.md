@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0816 named three harnesses from their
+paragraphs' opening lines, taking the join to 27 with
+all sizes agreeing, the match itself a check (no
+census change).
+
+
 Step 0815 named the fmov harness by its spec's four
 directions, taking the join to 24 with all sizes
 agreeing (no census change).
