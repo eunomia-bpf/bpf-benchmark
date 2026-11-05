@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0895 verified the design section's 29/13
+coverage claim: both configs match, and 1551 native
+samples across 31 May 23 runs match with 0
+mismatches.
+
+
 Step 0894 checked the ARM JIT defect against the fix
 commit: two fixed buffers (64-insn JIT, 256-insn
 verifier), 316 the real max, not '16-KiB'.

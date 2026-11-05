@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0895 - the design claim holds on fifteen hundred samples
+
+The design section's coverage claim cites two configuration files as the way to
+re-check it, and both carry exactly the counts the prose gives: twenty-nine and
+thirteen. What the section did not say is where the success itself is recorded,
+so that was checked against the run directories of the same date.
+
+Thirty-one runs of those two sizes exist on the two architectures. Counting
+every native sample against its program's expected result and return value gives
+one thousand five hundred and fifty-one matches and no mismatches, and every one
+records a program-load phase. The prose claim holds.
+
+The section now says so beside the configuration counts, so a reader has both
+halves: the size comes from the configuration, and the success comes from the
+run directory. The x86 side is larger than the AArch64 side because it has both
+timing and functional runs; the paragraph counts runs rather than claiming equal
+coverage. Census unchanged; the paper gains an evidence sentence.
+
 ### Step 0894 - the fixed buffer was two buffers, and neither was 16
 KiB
 
