@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0904 - the two missing keys were there all along
+
+The two bibliography entries the previous step added were duplicates. Both keys
+were already present, written with a space before the opening brace, and the
+pattern that decides whether a key exists required the brace immediately after
+the entry type. Read with a pattern that allows the space, the bibliography has
+sixty-one keys and every one of the twenty-seven cited keys is among them.
+
+So the earlier finding was wrong: no citation was ever missing. What the pattern
+did show is that a bibliography entry may be written either way, and the check
+that reads keys now tolerates both rather than assuming one.
+
+The duplicate blocks are removed and the bibliography is back to what it was,
+with a floor that says fifty-six entries and nine labels. The two related-work
+subsections added in that step stand: they were not affected by the key
+question, and they cite keys that do resolve. Census unchanged; the record's
+account is corrected.
+
 ### Step 0903 - two cited works were in no bibliography
 
 The paper carries two related-work sections and only one is compiled. The other

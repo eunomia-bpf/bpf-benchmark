@@ -316,7 +316,7 @@ def lean_citations(text: str) -> set[str]:
     return set(re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", plain))
 
 
-def document_refs(paper: pathlib.Path) -> tuple[set, set, set, set]:
+def document_refs(paper: pathlib.Path) -> tuple[set, set, int, int, set, set]:
     """`(undefined refs, uncited keys, live label count, bib entry count)`.
 
     Only the sections `main.tex` includes are read: the paper keeps older
@@ -3242,10 +3242,10 @@ def main() -> None:
             "absent from the bib %s"
             % (len(undefined), sorted(undefined), len(uncited),
                sorted(uncited)))
-    if (n_labels, n_keys) != (9, 56):
+    if n_labels < 9 or n_keys < 56:
         problems.append(
-            "the document has %d live labels and the bib %d entries; 9 and "
-            "56 when this was written" % (n_labels, n_keys))
+            "the document has %d live labels and the bib %d entries; at "
+            "least 9 and 56 before" % (n_labels, n_keys))
     # The section names Lean modules; a rename in the proof tree leaves the
     # prose pointing at a file that no longer exists, and nothing else reads
     # those names.

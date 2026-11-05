@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0904 corrected step 0903: the two 'missing' keys
+were present, written with a space before the brace;
+the added blocks were duplicates and are removed.
+
+
 Step 0903 added the two cited-but-missing
 bibliography entries (hXDP, MOAT) and the two
 related-work subjects only the dead section had; live
