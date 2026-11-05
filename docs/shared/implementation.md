@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0882 found two more double-named labels where
+the parenthetical was right and the label wrong
+(mem-access -> logic-flag, alu-decode -> signed);
+four duplicates removed too (no census change).
+
+
 Step 0881 named every remaining harness outright (0
 joins on a shared token) and found a label naming two
 files at once; joins 50 -> 51 (no census change).

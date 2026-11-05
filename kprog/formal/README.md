@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0882 - two more labels pointed at the wrong harness
+
+The corruption the last step found was not alone. Six sentences named a harness
+twice, and four of the six named the same file both times, which is redundant
+but harmless. The other two named different files, and in both the label was
+wrong and the parenthetical was right.
+
+The forty-nine sentence's paragraph opens by naming an AArch64 logic-flag
+handler harness, so the label pointing at the x86 memory-access file was wrong.
+The forty-eight sentence follows three sentences about the signed-product oracle
+and its overflow formula, so the x86 signed file is its subject rather than the
+ALU-decode one. Both now name the harness their paragraph describes, once.
+
+The four duplicate mentions are removed as well, so no sentence names a harness
+twice. That also shortened the lines those names sat on: the compile's overfull
+boxes fall from thirteen thousand to five thousand seven hundred, and no line
+was made overfull. Census unchanged; the checker keeps its fifty-one joins.
+
 ### Step 0881 - a label naming two harnesses at once
 
 Three joins still rested on a token the corpus shares. Naming the harness in the
