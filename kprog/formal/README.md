@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0924 - the prototype rejects indirect calls, it does not
+bound them
+
+The design section states that indirect branches must be bounded into a
+verifier-visible dispatch and that specialization fails when they cannot be.
+Checking it against the encoders found the prototype does only the second: the
+AArch64 encoder raises on an indirect call target, the x86-64 subset emits no
+indirect branch at all, and neither bounds a target set.
+
+The two sentences read as a description of what the design does, and the first
+of them describes a path nothing exercises. The section now says which of the
+two the prototype takes and that the bounded-dispatch path is designed and not
+yet implemented.
+
+That distinction is checkable in both directions, so both are checked: the
+AArch64 encoder must still mention an indirect call, and the x86-64 one must
+still mention none. Verified by adding the word to the x86 encoder's source,
+which the run reports. Census unchanged; one claim is narrowed to what the
+prototype does and bound to both encoders.
+
 ### Step 0923 - the claim that both encoders reject, checked in code
 
 The design section says both generators reject an instruction form for which

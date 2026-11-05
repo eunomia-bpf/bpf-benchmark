@@ -3184,6 +3184,20 @@ def encoder_rejections() -> list[str]:
         if not re.search(r"raise (SystemExit|ValueError)\(", body):
             out.append("the %s encoder raises on no form, so the sentence "
                        "that both reject an unhandled one is unheld" % isa)
+    # The design section says the AArch64 encoder raises on an indirect
+    # call target while the x86-64 subset emits no indirect branch, and that
+    # neither bounds a target set. A mismatch on either half would leave the
+    # sentence describing a prototype that no longer exists.
+    arm = (here / ".." / "arm64" / "micro-prog"
+           / "generate_micro_sim_proofs.py")
+    x86 = (here / ".." / "x86" / "micro-prog"
+           / "generate_micro_sim_proofs.py")
+    arm_src = arm.read_text(errors="ignore") if arm.exists() else ""
+    if arm.exists() and "indirect" not in arm_src:
+        out.append("the AArch64 encoder no longer mentions an indirect call")
+    if x86.exists() and re.search(r"indirect", x86.read_text(errors="ignore")):
+        out.append("the x86-64 encoder now mentions an indirect call, so the "
+                   "sentence that it emits none is stale")
     return out
 
 
