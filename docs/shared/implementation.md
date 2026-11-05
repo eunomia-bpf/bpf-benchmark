@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0942 corrected step 0941: the table counts four
+headers, not two, so the difference is 16 lines
+across three components, not 5 in one.
+
+
 Step 0941 checked the dead implementation section's
 929-line table against the tree: components sum,
 three match exactly, total now 934.

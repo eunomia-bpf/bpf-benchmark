@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0942 - the difference was sixteen lines, not five
+
+The previous step compared the table's five components against the tree and
+reported a five-line difference, all of it in the ARM64 JIT. That comparison
+counted two headers where the table counts four: the BTF and uapi headers also
+grew, and leaving them out made the header component look ten lines short and
+the total ten lines closer than it is.
+
+Counted correctly, the difference is sixteen lines across three components: ten
+in the verifier, five in the ARM64 JIT, and one in the headers. Two components
+still match exactly, the BTF and registration lines and the x86-64 dispatch
+lines.
+
+The conclusion about the table does not change, and the reason it does not is
+worth stating: the table remains internally consistent at its own total, and the
+difference remains the size of a few commits rather than a measurement error.
+What changed is the account of where the difference sits, which the earlier step
+got wrong by choosing the wrong header set. Census unchanged; the decomposition
+is corrected.
+
 ### Step 0941 - a five-line difference that names its own cause
 
 The uncompiled implementation section states the kernel core's size and breaks
