@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0932 - six cross-ISA loops, each one guarded
+
+Four separate checks had to be corrected for assuming one instruction set's
+shape, so the class was audited rather than left to the next step to find. Six
+loops read both instruction sets, and each is guarded: one checks the spec file
+exists before parsing it, one reports a missing module directory rather than
+skipping it, and four report a missing encoder or take the union across the
+headers.
+
+The two that take a union are the ones that cost a step each to get right, since
+reading one header reports the other instruction set as missing whatever the
+first defines. Both now union before deciding.
+
+The figures the dispatch check produces are bound to the spelled-out phrases in
+the section rather than to numerals, which is what stops a drifted numeral
+matching some other figure elsewhere in the section. Census unchanged; the audit
+found no unguarded structure assumption left.
+
 ### Step 0931 - two encoders specialize per program, in two shapes
 
 The background section says a general simulator with a dispatch loop is not
