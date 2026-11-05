@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0896 - the generation binding is two error returns in code
+
+The design section claims the prototype's generation binding never wraps and
+that both sides fail on a stale value, and the test-only module shows both in
+code: the advance returns an overflow error at the maximum rather than
+incrementing past it, and an emit whose generation differs from the stored one
+returns a stale error. The same two checks exist on both instruction sets.
+
+The section asserted the property without saying where to look for it, which is
+the same gap the coverage claim had one step earlier: a reader could believe it
+or not. It now names the two error returns, so the property can be read in the
+module rather than taken on trust.
+
+The abstract was checked at the same time. Its three prototype claims are the
+accepted artifacts, the rejected counterexample, and the generation binding, and
+the first two were verified in the two preceding steps. Census unchanged; the
+paper gains a code citation.
+
 ### Step 0895 - the design claim holds on fifteen hundred samples
 
 The design section's coverage claim cites two configuration files as the way to
