@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0948 - the contribution list still said plan, not measured
+
+The introduction's contribution list offered an evaluation plan plus preview
+artifacts, which was true when the section held only artifacts and is not true
+now that it reports the paper's measured results: generation-bound execution on
+both architectures, a rejected unsafe artifact, and code-size and execution-time
+ratios against the stock JIT.
+
+Every element of the replacement sentence was checked against the section before
+it was written: each of the three results appears, and both architecture names
+appear. What remains a plan is named as a plan, which is the coverage, fidelity,
+and trusted-computing-base measurements the prototype does not deliver.
+
+The distinction is the same one the abstract needed at its own closing list, and
+for the same reason: a contribution list that understates what the paper
+measures reads as a proposal rather than a result. Census unchanged; the
+contribution matches the section.
+
 ### Step 0947 - the population now carries the reason it is that
 population
 

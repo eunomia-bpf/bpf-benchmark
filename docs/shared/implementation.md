@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0948 corrected the introduction's contribution
+from 'a plan' to the measured results the evaluation
+section now reports.
+
+
 Step 0947 gave the size population its reason
 (baseline-only programs still have a size) and made
 the two populations distinguishable.
