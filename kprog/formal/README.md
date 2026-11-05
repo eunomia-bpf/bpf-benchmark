@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0927 - one bound is inserted, and the section now says so
+
+The design section says the simulator is not a sandbox and must not insert
+hidden checks absent from native execution. Reading the two sim-local headers
+found one check that is inserted: a stack access touches a window of bytes from
+its index, and a window that would run past the arena is reported rather than
+read out of bounds.
+
+It is inserted on both instruction sets and by different means, which the
+sentence about hidden checks concealed: the x86 one traps, and the AArch64 one
+reports through the unsupported-access hook and takes a zero value on the
+failing path. The section now names the one bound, both forms, and points at the
+proof of the generated bound it tests.
+
+Each form is checked in its own header, and removing either makes the run report
+the sentence as stale. Verified by renaming the AArch64 macro. Census unchanged;
+one claim is qualified to what the code does and bound to both headers.
+
 ### Step 0926 - the allowed ABI is the helpers the headers name
 
 The design section says calls outside the allowed ABI are rejected. Tracing

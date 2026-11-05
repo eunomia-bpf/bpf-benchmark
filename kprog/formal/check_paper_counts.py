@@ -3241,6 +3241,17 @@ def tag_model() -> list[str]:
         out.append("the simulators name %d helper symbols, so the sentence "
                    "that calls outside the ABI are rejected is unheld"
                    % len(helpers))
+    # The design section says the one inserted bound is the stack window,
+    # reported as a trap on one ISA and through the unsupported hook on the
+    # other. Both forms are named in the headers; removing either would
+    # leave the sentence describing a mechanism that is gone.
+    for isa, header, marker in (
+            ("x86", "x86_sim_local_bpf.h", "STACK_WINDOW_GUARD"),
+            ("arm64", "arm64_sim_local_bpf.h", "STACK_WINDOW_REPORT")):
+        h = here / ".." / isa / header
+        if not h.exists() or marker not in h.read_text(errors="ignore"):
+            out.append("the %s stack-window report is gone, so the sentence "
+                       "about one inserted bound is stale" % isa)
     return out
 
 
