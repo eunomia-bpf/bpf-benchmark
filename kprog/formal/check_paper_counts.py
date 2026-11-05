@@ -2443,6 +2443,27 @@ def cross_document() -> list[str]:
     return out
 
 
+def tag_arms_differ() -> list[str]:
+    """Problems with the two-arm tag assertion, empty when it is present.
+
+    The section says the oracle asserts the two arms select different tags
+    "so that the check cannot pass with both arms identical". Without that
+    assertion the address comparison passes whichever tag each arm writes,
+    which is the vacuity the sentence names.
+    """
+    f = pathlib.Path(__file__).parent / "test_arm64_adrp_route_host.c"
+    if not f.exists():
+        return ["the ADRP route host is absent, so the tag assertion went "
+                "unread"]
+    src = f.read_text(errors="ignore")
+    if "must select different tags" not in src:
+        return ["the ADRP route host does not assert the arms differ"]
+    if "pass with both arms identical" not in src:
+        return ["the ADRP route host asserts the difference without saying "
+                "what it prevents"]
+    return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3562,6 +3583,10 @@ def main() -> None:
     # The section and the step record describe one tree; a figure both
     # state must agree with it and with each other.
     for problem in cross_document():
+        problems.append(problem)
+    # "it asserts that the two arms select different tags so that the check
+    # cannot pass with both arms identical": a property of one host file.
+    for problem in tag_arms_differ():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

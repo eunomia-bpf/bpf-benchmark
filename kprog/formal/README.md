@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0828 - the assertion is what makes the other half mean
+anything
+
+One of the sentences about an oracle says it asserts the two arms select
+different tags, so that the check cannot pass with both arms identical. That is
+a statement about one file, and the assertion is in it, with the sentence's own
+reason in the comment beside it.
+
+The distinction the sentence draws is the one this run keeps meeting: an oracle
+comparing addresses passes whether or not the tags it also compares are
+distinct, so the assertion that they are distinct is what makes the tag half of
+the check mean anything. Planting each half separately, as the sentence says, is
+a weaker form of the same evidence.
+
+The check holds the assertion's presence and the comment that gives its reason,
+which is as far as a text check reaches. What it adds is that the assertion
+cannot be deleted while the sentence stays. Census unchanged; the checker gains
+a component.
+
 ### Step 0827 - the audit for the shape the last two steps found
 
 The defect found in the last two steps is a pattern that holds the value it

@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0828 bound the two-arm tag assertion to the host
+that carries it, including the comment giving its
+reason; removal reports (no census change).
+
+
 Step 0827 audited the checker for silent-skip
 patterns: no search can fail without reporting, and
 the two remaining numerals are domains not figures
