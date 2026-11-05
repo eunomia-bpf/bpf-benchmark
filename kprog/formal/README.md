@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0950 - ninety-five percent of the paper is one section
+
+The paper is a hundred and fifteen pages, and ninety-five percent of its words
+are in one section. The safety argument is ninety-six thousand words in two
+thousand one hundred lines, against roughly five thousand for the other seven
+sections together, in a conference format whose limit is a tenth of that.
+
+The imbalance is inside the section as well. Six subsections head it, and one of
+them, the mechanization status, holds eighteen hundred of the two thousand one
+hundred lines: two hundred and forty-four paragraphs covering a hundred and two
+independent oracles and eleven mutation batteries.
+
+The paragraphs do not group by subject. Read by the architecture each describes,
+they alternate fifty-six times, so a reader cannot find the x86 work as a run
+and the AArch64 work as another. Restructuring is an editorial decision and a
+large one, so this step records the shape rather than changing it: the count
+above is what a restructuring would have to work against.
+
+Census unchanged; the paper's distribution is measured.
+
 ### Step 0949 - the title weighted the smaller part
 
 The section the paper's measurements live in was titled for its plan, and the

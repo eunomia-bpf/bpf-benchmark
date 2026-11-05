@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0950 measured the paper's shape: 95.3% of words
+in 4-safety, 88% of that in one subsection,
+paragraphs alternating 56 times.
+
+
 Step 0949 retitled the section from 'Evaluation Plan'
 to 'Evaluation': 95 of 151 lines are measured
 evidence, and the intro says so.
