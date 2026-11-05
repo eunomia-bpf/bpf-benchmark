@@ -3325,6 +3325,21 @@ def main() -> None:
             problems.append(
                 "the section gives %d mutations and %s holds %d"
                 % (stated, harness, have))
+    # A sentence that states a size and names the file must join, so the
+    # named ones are counted against the joins rather than trusted to have
+    # been read.
+    BS = chr(92)
+    named = re.compile(
+        r"(\d+)-mutation harness "
+        + re.escape("(" + BS + "texttt{mut" + BS + "_")
+        + r"[a-z0-9" + re.escape(BS + "_") + r"]+" + re.escape(".py})"))
+    src_text = pathlib.Path(args.section).read_text()
+    if len(named.findall(src_text)) != len(
+            [j for j in joins if j[1].endswith(".py")]):
+        problems.append(
+            "the section names a harness beside %d counts and %d joined"
+            % (len(named.findall(src_text)),
+               len([j for j in joins if j[1].endswith(".py")])))
     # "the token-to-code map cannot drift": the map and its inverse are
     # emitted together, so each direction checks the other.
     for problem in opcode_map():

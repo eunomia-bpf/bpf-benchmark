@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0818 - the named count and the join count are compared
+
+The rewrite closed the size-only surface, and this holds it closed. Every
+sentence that states a mutation count beside a harness file name must resolve to
+a join, so the count of named sentences and the count of joins are compared
+rather than one being trusted.
+
+That catches the shape the last few steps produced: a name written in a form the
+join does not read still counts as named, and the two numbers differ. It caught
+nothing today because the rewrite was checked as it went, which is what makes it
+a guard rather than a repair.
+
+Verified by naming a file that does not exist: the floor reports the join count
+dropping and the new check reports the named count and the join count diverging.
+Census unchanged; the checker gains a component.
+
 ### Step 0817 - the rewrite completes, and three wrong guesses that
 the size caught
 
