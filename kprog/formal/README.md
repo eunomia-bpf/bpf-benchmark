@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0877 - eighteen sentences stated a harness and joined none
+
+The joins were counted, but never against the population they come from:
+seventy-one statements of a mutation count, forty-three distinct sizes, forty
+earlier joins. The gap was eighteen sentences that state a harness and reach
+none.
+
+Six of the eighteen had a size that names exactly one harness, so no evidence
+was needed to place them; five are named now and one of those was already
+covered. The five name the exchange-reverse, the move-keep column, the
+stack-index bias, the x86 store rows, and the bitfield detector sentences, and
+all five sizes agree with their harness.
+
+The remaining fourteen have sizes shared by two or three harnesses and name no
+file, so nothing in the sentence selects one. That is a coverage figure rather
+than a defect: the sentence is true and its size is right, it simply does not
+say which harness it means. The success line now prints all three numbers
+together, so the reach is visible rather than assumed. Census unchanged; the
+checker gains five joins.
+
 ### Step 0876 - the join measures its own evidence
 
 Both mis-joins were found by reading the joins by hand, which is not a check.

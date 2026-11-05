@@ -1764,7 +1764,7 @@ def tag_values() -> dict[str, list[int]]:
 
 def stated_harness_joins(
         text: str) -> tuple[list[tuple[int, str, int]],
-                         list[tuple[int, str, list[str]]]]:
+                            list[tuple[int, str, list[str]]], int]:
     """`[(stated, harness, its size)]` for sentences naming a harness only by
     size and opcode.
 
@@ -1838,7 +1838,15 @@ def stated_harness_joins(
                 .replace(BS + "_", "_").removesuffix(".py"))
         if stem in totals:
             out.append((int(m.group(1)), stem + ".py", totals[stem]))
-    return out, weak
+    # The joins above cover the sentences whose size names one harness and
+    # whose evidence selects it. A sentence that names no file and whose
+    # size is shared by several harnesses joins none, which is a coverage
+    # figure rather than a defect; it is returned so the run can report it.
+    joined_sizes = {n for n, _, _ in out}
+    unnamed = sum(1 for line in joined.split(". ")
+                  if (m := re.search(r"(\d+)-mutation harness", line))
+                  and int(m.group(1)) not in joined_sizes)
+    return out, weak, unnamed
 
 
 def opcode_map() -> list[str]:
@@ -4074,13 +4082,13 @@ def main() -> None:
     # is exact and the two figures must agree.
     # The masked text blanks every \texttt quotation, so the opcodes this
     # join reads are only in the source.
-    joins, weak = stated_harness_joins(
+    joins, weak, unnamed = stated_harness_joins(
         pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 40:
+    if len(joins) < 44:
         problems.append(
-            "only %d sentences join a harness; at least 40 matched before"
+            "only %d sentences join a harness; at least 44 matched before"
             % len(joins))
     for stated, harness, have in joins:
         if stated != have:
@@ -4340,7 +4348,8 @@ def main() -> None:
               f"{case_figures(text)} distinct figures, {banner_bound} of "
               f"{stated} stated figures banner-bound or sequenced, "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "
-              f"token), both gate totals, the {len(ISA)}-way split over "
+              f"token, {unnamed} naming no file), both gate totals, the "
+              f"{len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")
 

@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0877 measured join coverage against the 71
+stated mutation sizes: 18 sentences joined none. Five
+named, joins 40 -> 44; 14 remain ambiguous (size
+shared, no file) and are now printed.
+
+
 Step 0876 made the join function measure its own
 evidence: 3 of 40 joins rest on a token 8+ docstrings
 share (all three correct). The first measure was
