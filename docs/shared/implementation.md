@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0893 separated the preview figures by metric
+kind: 1.349/1.056 are workload-throughput ratios,
+1.478/1.429 per-program medians (no census change).
+
+
 Step 0892 traced both cross-ISA smokes to archived
 runs and found the unsafe-artifact rejection is
 AArch64-only (no x86 negative case); the attribution

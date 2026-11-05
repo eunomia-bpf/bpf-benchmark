@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0893 - four preview figures were two different measurements
+
+The four preview figures were presented as one summary, and the archive that
+produced them distinguishes two kinds. The 1.349x and 1.056x values are
+workload-throughput ratios over the six corpus apps; the 1.478x and 1.429x
+values are per-program median execution-time ratios over two micro sets. The
+paper's sentence said the same summary reports both, which is true of the
+document and false of the measurement.
+
+The section now says which kind each pair is, and that they are comparable
+neither with each other nor with the per-program medians reported below. The
+warning that followed already said the numbers should be used carefully; it now
+says why.
+
+This is a reader-visible distinction rather than a numeric error: every value is
+correct and correctly attributed to its summary, and a reader who took the four
+as one metric would have compared a throughput ratio against a median ratio.
+Census unchanged; the paper gains a metric sentence.
+
 ### Step 0892 - the unsafe artifact was rejected on one ISA, not two
 
 The two cross-ISA smoke paragraphs were traced the way the experiment paragraphs
