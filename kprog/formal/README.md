@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0810 - one sentence names its harness, and the pattern needed
+four tries
+
+One of the twenty-eight tokenless sentences now names its harness: the
+fifty-three-mutation status battery, which the sentence described by its
+specification and its thousand-case oracle without saying which file carries
+them. It is the store-exclusive status harness, and its size matches the count
+the sentence gives.
+
+The join accepts the file when it is written beside the count, which is the form
+the other two joins already handle for row counts. Twelve sentences now resolve,
+and all twelve agree on their size.
+
+Getting there took four attempts at the pattern, each defeated by an escaping
+difference between the file and the test: the parenthesis is literal and needs
+escaping, the underscore inside the name is itself escaped, and the extension is
+not. The pattern is now built from the characters rather than written as a
+literal. Census unchanged; the checker gains a join.
+
 ### Step 0809 - the remainder measured, and a title that is not a key
 
 The last widening took the join to eleven sentences and left thirty-two that

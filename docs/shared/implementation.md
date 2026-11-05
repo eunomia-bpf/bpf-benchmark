@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0810 named the STLXR status harness in its
+sentence, taking the join to 12 with sizes agreeing;
+the pattern needed four attempts at escaping (no
+census change).
+
+
 Step 0809 measured the tokenless remainder precisely:
 28 sentences name no quoted token, and spec titles do
 not join because the prose title is not the file stem

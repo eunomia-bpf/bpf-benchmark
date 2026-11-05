@@ -1795,6 +1795,17 @@ def stated_harness_joins(text: str) -> list[tuple[int, str, int]]:
                if any(re.search(r"\b%s\b" % re.escape(o), d) for o in ops)]
         if len(hit) == 1:
             out.append((n, hit[0], totals[hit[0].removesuffix(".py")]))
+    # A sentence that names the file beside its count joins outright.
+    BS = chr(92)
+    named = re.compile(
+        r"(\d+)-mutation harness "
+        + re.escape("(" + BS + "texttt{mut" + BS + "_")
+        + r"[a-z0-9" + re.escape(BS + "_") + r"]+" + re.escape(".py})"))
+    for m in named.finditer(joined):
+        stem = (m.group(0).split("{")[1].rstrip("})")
+                .replace(BS + "_", "_").removesuffix(".py"))
+        if stem in totals:
+            out.append((int(m.group(1)), stem + ".py", totals[stem]))
     return out
 
 
@@ -3304,10 +3315,10 @@ def main() -> None:
     joins = stated_harness_joins(pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 11:
+    if len(joins) < 12:
         problems.append(
-            "only %d sentences join a harness by opcode; at least 11 "
-            "matched before" % len(joins))
+            "only %d sentences join a harness; at least 12 matched before"
+            % len(joins))
     for stated, harness, have in joins:
         if stated != have:
             problems.append(
