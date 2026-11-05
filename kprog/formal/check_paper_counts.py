@@ -3134,6 +3134,37 @@ def route_battery_rows() -> list[str]:
     return out
 
 
+def cited_paths() -> list[str]:
+    """Trees the section names that are not on disk.
+
+    The section cites proof modules, mutation harnesses and spec generators
+    by name, and a rename leaves the prose pointing at a file that no longer
+    exists. Names may be split by a break marker or by a line break after a
+    separator, so both are joined before the file is looked up; without that
+    one of the harness names reads as a truncated prefix that matches no
+    file.
+    """
+    here = pathlib.Path(__file__).parent
+    raw = (here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+           / "sections" / "4-safety.tex").read_text()
+    flat = re.sub(r"\\brk(\{\}|\s)*", "", raw)
+    flat = re.sub(r"\\_\s*", "\\_", flat)
+    out = []
+    mods = {m for m in re.findall(r"([A-Z][A-Za-z0-9]+)\.lean", flat)}
+    on_disk = {p.stem for p in (here / "KProgFormal").glob("*.lean")}
+    for m in sorted(mods - on_disk):
+        out.append("the section cites %s.lean and it is not in the tree" % m)
+    stems = {x.replace("\\_", "_").rstrip("_")
+             for x in re.findall(r"mut\\_([a-z0-9\\_]+)", flat)}
+    for s in sorted(stems):
+        if not (here / "build" / ("mut_" + s + ".py")).exists():
+            out.append("the section cites mut_%s.py and it is not on disk" % s)
+    for g in sorted(set(re.findall(r"(generate_[a-z0-9_]+_spec\.py)", flat))):
+        if not (here / g).exists():
+            out.append("the section cites %s and it is not on disk" % g)
+    return out
+
+
 def bogus_token_message() -> list[str]:
     """Problems with the unknown-opcode message, empty when it matches.
 
@@ -4523,6 +4554,7 @@ def main() -> None:
     # sentence is compared with the battery rather than with its own past.
     problems.extend(battery_rows(text))
     problems.extend(route_battery_rows())
+    problems.extend(cited_paths())
     # Counted so the success line names the surface rather than implying the
     # run reached only the figures it reports by class.
     raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"

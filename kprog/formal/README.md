@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0918 - the names the paper cites are now paths, not prose
+
+The section names files in three families: Lean proof modules, mutation
+harnesses, and spec generators. A rename leaves the prose pointing at one that
+no longer exists, and nothing read those names as paths.
+
+All three resolve now. Forty-seven modules are cited and all are in the tree,
+two hundred and thirty-seven harnesses are named and all are on disk, and every
+generator named exists. Reading them needed the same join the battery check
+uses, since a name may be split by a break marker or by a line break after a
+separator, and a split name reads as a shorter one that matches no file.
+
+The check reports any of the three that is not there, verified by renaming a
+cited module in the prose and seeing the run name it. Census unchanged; three
+name families are now checked rather than assumed.
+
 ### Step 0917 - the log default pointed at a three-day-old file
 
 The record's check defaulted its log argument to a path from an earlier step,
