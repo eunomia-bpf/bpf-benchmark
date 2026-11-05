@@ -3128,7 +3128,17 @@ def figure_coverage() -> tuple[int, int, int, set[int]]:
             if re.search(r"\b%d-row\b|\b%d rows\b" % (v, v), flat)}
     catches = {v for v in left - line_ids - rows
                if re.search(r"\b%d (?:catches|catch)\b" % v, flat)}
-    return len(figs), bound, len(held), (left, line_ids, rows, catches)
+    # Three more forms the section uses and this check cannot reach by
+    # banner: a step number written with a leading zero, a number that is
+    # part of a longer one (a harness name like `annot0357`, a line range
+    # end like `438--916`), and a rounded figure inside a case count.
+    padded = {v for v in left - line_ids - rows - catches
+              if ("%04d" % v) in flat and v < 1000}
+    inside = {v for v in left - line_ids - rows - catches - padded
+              if re.search(r"[A-Za-z_\d]%d\b" % v, flat)
+              or re.search(r"\b%d[A-Za-z_]" % v, flat)}
+    return len(figs), bound, len(held), (
+        left, line_ids, rows, catches, padded, inside)
 
 
 def main() -> None:
@@ -4387,8 +4397,9 @@ def main() -> None:
               f"{figs_total} stated figures held by a banner or another "
               f"check ({len(rest[0])} others: {len(rest[1])} line ids, "
               f"{len(rest[2])} row counts, {len(rest[3])} catch counts, "
-              f"the other "
-              f"{len(rest[0]) - len(rest[1]) - len(rest[2]) - len(rest[3])} "
+              f"{len(rest[4])} zero-padded steps, {len(rest[5])} parts of "
+              f"a longer number, the other "
+              f"{len(rest[0]) - sum(len(r) for r in rest[1:])} "
               f"unclassified), "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "
               f"token, {unnamed} naming no file, {len(multi)} naming two), "

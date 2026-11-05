@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0888 named three more leftover classes (14
+zero-padded steps, 5 parts of longer numbers), 78 ->
+76 unexplained (no census change).
+
+
 Step 0887 stopped calling the 95 leftovers held: only
 17 fall in classes this checker binds. The line now
 says 95 unclassified, the honest remainder (no census

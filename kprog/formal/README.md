@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0888 - fourteen step numbers were written with a leading
+zero
+
+The unclassified remainder was seventy-eight, and reading the figures one at a
+time showed three classes the checker could name: fourteen are a step number
+written with a leading zero, five are part of a longer number such as a harness
+name ending in the figure or the end of a line range, and the rest have no such
+form.
+
+Naming them drops the unexplained count to seventy-six. That is a smaller
+reduction than the earlier steps found, and it is the honest one: these are
+figures stated as approximate sizes, rounded case counts, and numbers taken from
+an oracle's own output, none of which has a whole in this tree to be a part of.
+
+The line now prints six classes and the unexplained count after them, so the
+reader can see which part of the section's arithmetic is bound and how much is
+not. Census unchanged; the checker's leftover set gains three named forms.
+
 ### Step 0887 - seventy-eight figures are held by no phrase in the
 checker
 
