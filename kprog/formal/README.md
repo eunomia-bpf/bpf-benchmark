@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0889 - the evaluation aggregates reproduce from raw samples
+
+The evaluation section's aggregates were checked against the raw per-sample data
+of the run they came from, rather than read from the paper. Taking each
+runtime's fifteen-sample median per program and the unweighted geometric mean of
+the twenty-nine ratios reproduces the execution ratio, the code-size ratio, and
+the faster-tie-slower split exactly, and the sample total is the eight hundred
+and seventy the section states.
+
+The section named the evidence only as a build-and-evaluate log, with no run
+identified, so a reader could not have repeated that check. It now names the
+archived run, the aggregation, and the three figures that follow from it.
+
+This is the first claim in this sequence that was verified from raw data rather
+than from another written summary, and it is the only form that would have
+caught a wrong number: the earlier figures matched because they were compared to
+prose that carried the same value. Census unchanged; the paper gains a
+provenance sentence.
+
 ### Step 0888 - fourteen step numbers were written with a leading
 zero
 
