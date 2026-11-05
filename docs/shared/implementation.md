@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0823 bound the 9 oracle-over-population
+sentences; a first version required a multiple and
+reported 3 false positives, since covering at least
+once is the relation (no census change).
+
+
 Step 0822 checked the bv_decide partition four ways:
 61+104=165 and 58+103=161, so any one figure drifting
 breaks a sum (no census change).

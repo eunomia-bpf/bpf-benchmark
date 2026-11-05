@@ -1162,6 +1162,15 @@ def caught_with_parts(text: str) -> list[tuple[int, int]]:
             r"(\d+) (?:by|at|from) ", body)]
         if parts:
             out.append((int(tot), sum(parts)))
+    # "N-case oracle ... over all M index bytes": the cases must be a
+    # multiple of the population it sweeps, or the oracle skips some.
+    for total, pop in re.findall(
+            r"(\d[\d,{}]*)-case[^.]{0,80}?over all (\d+) ", flat):
+        t, p_ = (int(re.sub(r"[{},]", "", total)), int(pop))
+        # The oracle must cover the population at least once; more is
+        # allowed because a sweep adds cases beside it.
+        if p_ and t < p_:
+            out.append((t, p_))
     # The other wording states rows rather than mutations, and attributes a
     # part "through" a stage as often as "by" one.
     for tot, body in re.findall(

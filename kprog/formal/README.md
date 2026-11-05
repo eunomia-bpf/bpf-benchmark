@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0823 - a multiple was the wrong relation, covering once is
+the right one
+
+An oracle that sweeps a population states its size and the population it sweeps,
+and the size has to cover the population at least once. Nine sentences state
+both, and all nine cover theirs: five hundred and twelve over two hundred and
+fifty-six index bytes, seven hundred and sixty-eight over the same, and a
+two-hundred-and-fifty-eight beside them that adds two cases beyond the sweep.
+
+The first version of the check required the size to be a multiple of the
+population, which reported three of the nine as wrong. Two hundred and
+fifty-eight cases over two hundred and fifty-six bytes is a sweep plus a
+sentinel and a neighbour, so a multiple is the wrong relation; covering it at
+least once is the right one.
+
+That is the same correction the sweep-dimension check needed: a figure that
+folds several dimensions is a product, a figure that sweeps a population beside
+extra cases is a lower bound. Census unchanged; the checker gains a component.
+
 ### Step 0822 - a partition checked two ways, so one figure cannot
 drift alone
 
