@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0862 - the module described a fifth of itself
+
+The module's own description was forty lines about case counts and the simulator
+split, written when the checker did those two things. It now does a hundred and
+twenty-seven distinct things, and the description had not kept up: a reader
+opening the file would have learned about a fifth of it.
+
+The new description is a list rather than a paragraph, and each entry names the
+artifact the check reads against, because that is what tells a reader whether
+their sentence is covered. It also states the three shapes deliberately not
+treated as claims and the two properties of the checker itself, which were the
+most surprising things to learn from the code.
+
+Every claim in it was checked against the code rather than written from memory:
+each named function exists and is wired, and each named shape appears. That is
+the same discipline the checker applies to the section, one level up. Census
+unchanged; the checker gains a description that matches it.
+
 ### Step 0861 - what the remaining boxes are, and a fix worth
 reverting
 

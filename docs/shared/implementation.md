@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0862 rewrote the checker's 40-line docstring,
+which described 2 of its 127 wired checks, as a list
+naming each artifact read; every claim in it checked
+against the code (no census change).
+
+
 Step 0861 measured the overfull residue: 133 of
 13,047 boxes exceed 100pt, and a fourth fix (breaking
 before brace groups) changed nothing and was reverted

@@ -1,42 +1,43 @@
 #!/usr/bin/env python3
-"""Check the paper's claimed oracle case counts against a gate log.
+"""Check the safety section's stated figures against the tree that holds them.
 
-The safety section states the case count of many oracles, and those figures are
-hand-maintained. Ten occurrences of seven distinct numbers were stale when this
-checker was widened, and none of them was caught by the narrower version that
-read only the wrapped form. Four prose forms state a case count: the hyphenated
-wrapped form `\\(167{,}480\\)-case routed oracle`, the same form without the math
-wrapper, the ellipsis `71,664- and 536-case contract oracles`, and the spelled
-form `over 9504 grid cases`. The wrapped form appears at 52 sites and the
-unwrapped form at 178. The unwrapped form is the commonest by far, and it was
-the one that drifted, because nothing read it: a clean report sat over every
-stale figure.
+The section states a case count for many oracles, a total for the tree, a
+count for each population it partitions, and a name for each artifact it
+cites. All of those are hand-maintained, and the first thing this checker
+found was that ten occurrences of seven distinct numbers had gone stale
+while a clean report sat over every one: it read the wrapped math form and
+not the unwrapped one, which is the commoner of the two.
 
-This script extracts every claim it can from a section, reads the counts out of
-a `make check` log, and reports any claim with no matching banner. It cannot
-tell *which* banner a claim means, only that the number exists in the gate --
-which is enough to catch a stale figure, since a stale one matches nothing. The
-section's two gate-wide figures, the banner count and the modeled-case sum, are
-re-derived exactly rather than matched by existence, because both are stated
-once and countable from the log.
+What it checks, in the order `main` runs them:
 
-Three prose shapes are deliberately not claims. A number inside `\\texttt{...}`
-is quoted program output, describing what a run printed at the time; the MOVBE
-`OK (16 cases)` line records a bug that no longer exists and matches nothing. A
-number introduced by "plus" is one input family of an oracle ("15 fixed vectors
-plus a 20,000-case sweep"), not the total any banner prints. And an `N-case`
-adjective on a bare grid states arithmetic -- `1,470-case divide grid` is 2 x 5
-x 7 x 3 x 7 -- so it is read only when the phrase also names a host or oracle.
+- case figures against a `make check` log, in four prose forms, each of
+  which must appear in some banner or be grid arithmetic on a bare grid;
+- the two gate-wide figures -- banner count and modeled-case sum -- which
+  are re-derived from the log rather than matched by existence;
+- the split of the gate's cases across the two simulators, traced from each
+  banner through its run line to the compile line and that unit's include
+  closure, with the four buckets required to partition the gate exactly;
+- the trees the other checks read, so a fifth tree opened or one no longer
+  opened is reported;
+- partitions the section states: the axiom classes, the two ways a
+  bv_decide population divides, and the native_decide split including the
+  one use that fits none of its categories;
+- growth series and census transitions, both of which must ascend;
+- names the section carries -- files, Lean modules, theorem names, step
+  numbers, harness file names -- each joined to the artifact that has to
+  have it;
+- the same figure stated in two places, which is how a contradiction
+  inside the document was found rather than only a drift from the tree.
 
-The section also splits the gate's cases across the simulators and states that
-the split comes from what the gate builds. That too is now measured: each
-banner is traced through its run line to the compile line that built it, and
-the include closure of that translation unit says which simulator root it
-reaches. The four buckets must partition the gate exactly, and the two tempting
-shortcuts are measured rather than asserted: the hosts that reach a simulator
-through a relative include that no -I names, and the hosts that carry an ISA in
-their file name while reaching no simulator. Both counts appear in the section,
-so a shortcut that drifted is reported rather than assumed.
+Three shapes are deliberately not claims. A number inside `\\texttt{...}` is
+quoted program output, describing what a run printed at the time. A number
+introduced by "plus" is one input family of an oracle, not the total a
+banner prints. And an `N-case` adjective on a bare grid states arithmetic,
+so it is read only when the phrase also names a host or oracle.
+
+Two properties of the checker itself are checked here as well: no scan may
+match nothing and report clean, and the gate log must be newer than every
+component it reflects.
 
 Usage: check_paper_counts.py --section <tex> --log <make check log> [--check]
 """
