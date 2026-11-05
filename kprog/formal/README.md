@@ -7606,6 +7606,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0915 - the line names the thirteen it now checks
+
+The success line named the harness joins and the figure classes but not the
+thirteen count sentences, so a reader would see thirteen figures bound and no
+evidence of it in the line that reports what the run reached. It names them now.
+
+Counting them needed the same flatten as the check itself: the phrase wraps
+inside a line, so a regex over the raw file finds eleven of the thirteen.
+Flattened, all thirteen are there, and the line reports thirteen.
+
+The cores a crashing mutant leaves were removed from the working tree, and they
+are already ignored, so the tree is clean apart from the files that were dirty
+before these steps. Census unchanged; the line states one more surface than it
+did.
+
 ### Step 0914 - three bugs in one function, and all thirteen bind
 
 All thirteen count sentences are bound now, and getting there took three

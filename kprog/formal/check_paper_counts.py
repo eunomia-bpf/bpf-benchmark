@@ -4520,6 +4520,14 @@ def main() -> None:
     # sentence is compared with the battery rather than with its own past.
     problems.extend(battery_rows(text))
     problems.extend(route_battery_rows())
+    # Counted so the success line names the surface rather than implying the
+    # run reached only the figures it reports by class.
+    raw_safety = (pathlib.Path(__file__).parent / ".." / ".." / "docs"
+                  / "kprog-simulator-in-ebpf" / "sections"
+                  / "4-safety.tex").read_text()
+    battery_sentences = len(re.findall(
+        r"\d+ catchable rows are caught",
+        re.sub(r"\s+", " ", raw_safety)))
     if problems:
         # Print before exiting: a silent --check failure gives no evidence.
         for problem in problems:
@@ -4537,7 +4545,8 @@ def main() -> None:
               f"unclassified), "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "
               f"token, {unnamed} naming no file, {len(multi)} naming two), "
-              f"both gate totals, the "
+              f"{battery_sentences} battery count sentences, both gate "
+              f"totals, the "
               f"{len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")
