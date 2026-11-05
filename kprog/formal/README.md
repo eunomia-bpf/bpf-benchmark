@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0839 - sharing a file is not sharing a claim
+
+The duplicate found last step suggested auditing the other additions for the
+same thing, and one was: the check that the section's step citations resolve to
+a record duplicated a function that already did it against the readme's own
+headings, which is the stronger of the two because the headings are the record.
+
+Grouping the functions by the artifact each reads found four that read the
+readme and eight that read the build directory, but most of those read different
+things out of it: one counts harnesses, one counts route hosts, one sizes
+scenes, one joins sentences to harnesses. Sharing a file is not sharing a claim.
+
+The one that was a duplicate was found by comparing outputs rather than code,
+which is the cheap version of the audit: both returned nothing, and the question
+was whether they would return the same nothing for the same reason. Census
+unchanged; the checker loses one duplicate.
+
 ### Step 0838 - two checks that duplicated one already there
 
 Two checks added in the last two steps duplicated one that was already there.

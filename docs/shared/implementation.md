@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0839 removed a second duplicate found by
+grouping functions by the artifact they read; sharing
+a file is not sharing a claim, and one was compared
+by output (no census change).
+
+
 Step 0838 removed two checks added in the last two
 steps: both duplicated a stronger existing one that
 reads main.tex's includes rather than a directory (no

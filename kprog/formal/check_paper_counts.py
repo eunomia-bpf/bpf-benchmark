@@ -2322,28 +2322,6 @@ def cited_files() -> list[str]:
                   if n.split("/")[-1] not in have and n != ".bpf.c")
 
 
-def cited_steps() -> list[int]:
-    """Step numbers the section cites that no record names.
-
-    The section refers to earlier steps by number when a contract or a
-    harness was introduced. A number is not a figure and not a file, so
-    nothing else binds it: a citation to a step that does not exist reads
-    as a reference and resolves to nothing.
-    """
-    here = pathlib.Path(__file__).parent
-    flat = re.sub(r"\s+", " ", pathlib.Path(
-        here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
-        / "sections" / "4-safety.tex").read_text()).replace("\\brk", "")
-    cited = {int(n) for n in re.findall(r"Step\s*~?\s*(\d{4})", flat)}
-    have = set()
-    for rel in ("../../docs/shared/implementation.md", "README.md"):
-        f = here / rel
-        if f.exists():
-            have |= {int(n) for n in
-                     re.findall(r"\bStep (\d{4})\b", f.read_text())}
-    return sorted(cited - have)
-
-
 def bv_decide_partition() -> list[str]:
     """Problems with the bv_decide population split, empty when it adds up.
 
@@ -3690,10 +3668,6 @@ def main() -> None:
             "the section cites %s and no tree beside it has that file"
             % name)
     # "Step~0456 introduced this contract": a step number is neither a
-    # figure nor a file, so nothing else binds it.
-    for n in cited_steps():
-        problems.append(
-            "the section cites Step %04d and no record names it" % n)
     # "58 of the 61 and 103 of the 104 cannot state the goal ... 161 of the
     # 165": four figures that must reconcile two ways.
     for problem in bv_decide_partition():
