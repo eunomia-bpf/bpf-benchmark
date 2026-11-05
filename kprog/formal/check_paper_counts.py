@@ -1082,8 +1082,9 @@ def description_joins(text: str) -> list[tuple[int, str]]:
             r"(\d+)-mutation harness (?:\([^)]*\) )?"
             r"retargets (?:the |its |both )?([a-z/\- ]{3,40}?) spec",
             flat):
-        if shared.get(int(n), 0) <= 1:
-            continue
+        # No size filter here: a sentence whose size is unique is still a
+        # sentence, and skipping it is what left two harnesses unnamed for
+        # fifty steps. The candidate test below decides instead.
         words = [w for w in re.split(r"[ \-/]+", desc) if len(w) >= 4]
         cand = [s for s in specs if totals.get("mut_" + s) == int(n)
                 and any(w in s.split("_") for w in words)]

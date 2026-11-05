@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0873 removed the same size filter from the
+description join: latent rather than active, but the
+shape that hid two harnesses (no result change).
+
+
 Step 0872 named the two size-unique harnesses the
 0817 sweep skipped: 101 (branch) and 111
 (reg-lane-aux), joins 36 -> 38 (no census change).

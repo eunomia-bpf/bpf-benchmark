@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0873 - the same filter, latent, at the head of another
+join
+
+The sweep that skipped two harnesses had a size filter at its head, and the same
+filter is at the head of the description join: a sentence whose size no other
+harness shares is skipped before the description is read. Nothing changes today,
+since both sentences that join have shared sizes, but the shape is the one that
+kept two harnesses unnamed for fifty steps.
+
+The filter is removed. The join's own test decides instead: the description's
+words must select exactly one specification of that size, which is a narrower
+condition than the size being shared and does not depend on any other sentence
+existing.
+
+Verified unchanged in its result and unchanged in what it catches. Two joins
+either way, and a sentence whose description selects one specification joins
+whether or not another sentence shares its size. Census unchanged; the checker
+loses a latent blind spot.
+
 ### Step 0872 - two sentences the sweep skipped by construction
 
 Checking what the hundred and thirty-seven unaccounted figures actually were
