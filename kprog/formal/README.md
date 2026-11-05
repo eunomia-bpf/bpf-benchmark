@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0919 - every percentage is derived, and nothing was wrong
+
+The percent figures in the section were audited against where each comes from,
+and all seven are derived. The two that describe the proof tree come from the
+claims checker, which measures them; the four that describe the gate split come
+from the log; and the figure that says the four add to a total is their floored
+sum rather than a number typed beside them.
+
+Each was checked by perturbing it. Changing the module count in the sentence
+that pairs it with the theorem count makes the claims check report the claim and
+the tree count side by side, so that pairing is live inside the gate rather than
+only in the run by hand.
+
+The reachability the summary claims is also true: all three hundred and six
+modules are reachable from the gate's roots, so the theorem count describes
+proofs the gate compiles rather than files on disk it never reaches. Census
+unchanged; the audit found nothing to correct and records what is now checked.
+
 ### Step 0918 - the names the paper cites are now paths, not prose
 
 The section names files in three families: Lean proof modules, mutation
