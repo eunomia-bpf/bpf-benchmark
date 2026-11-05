@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0887 - seventy-eight figures are held by no phrase in the
+checker
+
+The line called the ninety-five leftovers held by checks that bind their wholes,
+and that was the third assertion in a row. Grouping them found six that are
+counts of a named set, seven that are the parts of a split, four that are
+instruction counts or ordinals, and seventy-eight that no phrase in this checker
+binds.
+
+The line now calls them unclassified rather than held, which is what they are.
+Twenty-three are still line identifiers and five row counts and two catch
+counts, and those three classes each have a check.
+
+The seventy-eight are the honest remainder: figures the section states that this
+check reaches neither by banner nor by class. Naming them unclassified is more
+useful than a phrase that covers them, because it is the number a later check
+would have to reduce. Census unchanged; the checker's leftover set is split and
+its phrasing matches what the split found.
+
 ### Step 0886 - the leftovers were not parts of a held whole
 
 The line called the hundred and twenty-five leftovers parts of a held whole,

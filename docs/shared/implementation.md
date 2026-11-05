@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0887 stopped calling the 95 leftovers held: only
+17 fall in classes this checker binds. The line now
+says 95 unclassified, the honest remainder (no census
+change).
+
+
 Step 0886 checked the 'parts of a held whole' claim:
 only 31 of 125 sit near a bound figure. The leftover
 set is now split by class (23 line ids, 5 rows, 2
