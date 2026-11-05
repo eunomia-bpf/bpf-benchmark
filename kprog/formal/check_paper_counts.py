@@ -2853,6 +2853,30 @@ def window_overflow_mechanism() -> list[str]:
     return out
 
 
+def multiply_oracle() -> list[str]:
+    """Problems with the multiply family's independent oracle, empty if ok.
+
+    The section says no proof relates the multiply contract to its
+    definition -- they come from one specification in a single pass, so
+    they share any mistake -- and that the independent oracle is the host
+    compiler's 128-bit integer type, which the simulator cannot use. Both
+    halves are readable: the oracle's type is in the host, and no Lean
+    theorem relates the contract to an architectural statement.
+    """
+    here = pathlib.Path(__file__).parent
+    host = here / "test_arm64_mul_host.c"
+    lean = here / "KProgFormal" / "Arm64Mul.lean"
+    if not host.exists() or not lean.exists():
+        return ["the multiply host or module is absent, so the oracle claim "
+                "went unread"]
+    out = []
+    h = host.read_text()
+    if "__int128" not in h:
+        out.append("the multiply host no longer uses the compiler's 128-bit "
+                   "type as its oracle")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4035,6 +4059,10 @@ def main() -> None:
     # through b[index + 7] ... on AArch64 the access goes through
     # KPROG_ARM64_LOAD_BYTES": the mechanism on each side.
     for problem in window_overflow_mechanism():
+        problems.append(problem)
+    # "the independent oracle is the host compiler's own 128-bit integer
+    # type, which the simulator cannot use": a property of one host.
+    for problem in multiply_oracle():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

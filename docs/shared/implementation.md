@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0853 read "no proof relates the multiply family"
+as precision, not a defect: the host's __int128
+oracle is what relates it, and the word proof is the
+claim (no census change).
+
+
 Step 0852 bound the window-gap mechanism on both
 sides: the x86 final lane under a runtime predicate,
 and the AArch64 load-bytes helper (no census change).

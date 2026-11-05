@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0853 - a word that looked like a defect and is precision
+
+The multiply paragraph says something easy to read as a defect and which is a
+precision: no proof relates the contract to its definition, because the header
+and the Lean module are rendered from one specification in a single pass, so
+they share any mistake. The word is proof, and the sentence goes on to name what
+does relate them.
+
+What relates them is a host oracle using the compiler's own 128-bit integer
+type, which the simulator cannot use because it compiles for a restricted
+target. The host reads the high word of an unsigned 128-bit product and calls
+that architectural in its own comment.
+
+So the family is related to the definition by an oracle rather than by a
+theorem, and the sentence says exactly that. The distinction matters because the
+two failures are different: a shared specification cannot drift but can be wrong
+once, and an oracle of a different type catches the second without catching the
+first. Census unchanged; the checker gains a component.
+
 ### Step 0852 - the mechanism on each side, and what the name cannot
 say
 
