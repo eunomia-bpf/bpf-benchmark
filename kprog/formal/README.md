@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0894 - the fixed buffer was two buffers, and neither was 16
+KiB
+
+The ARM JIT defect narrative makes claims about kernel code, and the code is in
+the tree: the fix commit that introduced the descriptor-sized buffers replaces a
+fixed sixty-four-instruction emit scratch in the JIT and a fixed
+two-hundred-fifty-six-instruction instantiation buffer in the verifier.
+
+The prose named neither bound correctly. It said the JIT accepted a descriptor
+with a bounded 16-KiB native chunk, which is not a number either buffer had; the
+descriptors declare expanded instruction counts and emit bytes, and the largest
+in the tree is 316 instructions on AArch64, which exceeds the verifier's fixed
+buffer but not the JIT's.
+
+The paragraph now says which two buffers were fixed, that both now allocate from
+the descriptor, and that only the verifier bound was actually exceeded by a
+descriptor in this tree. Census unchanged; the paper's description of a kernel
+defect now matches the commit that fixed it.
+
 ### Step 0893 - four preview figures were two different measurements
 
 The four preview figures were presented as one summary, and the archive that
