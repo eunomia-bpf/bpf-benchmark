@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0820 - the reach statement and the check agreed, and both
+were wrong
+
+The reach statement named three trees and the checker reads four: the mutation
+batteries under the build directory, which every harness join and every
+row-count claim is read from. The statement now names all four and says that the
+fourth is outside the repository, so a checkout holding the proof tree still
+cannot run those checks.
+
+The check that holds the statement was reading the same three, so it agreed with
+the prose while both were wrong. It now reads the build directory too, from the
+bare strings the checker joins paths with rather than from a relative path, and
+reports a tree opened beyond the four or one no longer opened.
+
+This is the second time the reach check has been widened by a tree the checker
+reads through a form it did not recognise. The first was the kernel modules,
+joined as two strings. Census unchanged; the checker gains a tree.
+
 ### Step 0819 - the surface the joins depend on is not in the
 repository
 

@@ -1882,11 +1882,15 @@ def checker_reach() -> list[str]:
     # literal, so the tree is named where the checker builds it.
     if re.search(r'"kinsn"\s*/\s*"module"', src):
         reads.add("kinsn")
+    # The build directory is reached through bare-string joins and tuple
+    # entries rather than a `../` path, so it is named where it is used.
+    if re.search(r'"build"', src):
+        reads.add("build")
     # `docs` is the section under test, not a fourth subject tree.
-    allowed = {"x86", "arm64", "kinsn", "docs"}
+    allowed = {"x86", "arm64", "kinsn", "docs", "build"}
     out = []
     for tree in sorted(reads - allowed):
-        out.append("the checker reads %s beyond the three trees the section "
+        out.append("the checker reads %s beyond the four trees the section "
                    "names" % tree)
     for tree in sorted(allowed - reads):
         out.append("the checker no longer reads %s, which the section says "
