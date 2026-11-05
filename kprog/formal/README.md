@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0912 - one battery was off by one, the other cannot run
+
+The two sentences with no equivalence count belong to batteries that mark
+equivalence in ways the static count cannot see. One keys it off a name prefix
+and reports nineteen surviving equivalences where sixteen carry that prefix; the
+other marks it inside a row dictionary. Running the first gives seventy
+mutations with nineteen equivalences, so fifty-one are caught, and the sentence
+said fifty.
+
+That sentence is now fifty-one. It is not bound: the battery's static marks
+undercount by three, so a comparison against them would report a false finding,
+and the check that reconciles the two figures needs a second figure the sentence
+does not give.
+
+The other battery is broken. Its rows edit a macro whose call form changed, so
+one anchor no longer matches and the run stops with an assertion naming the row.
+It is untracked, it is not in the gate, and the paper cites its counts, so the
+sentence about forty-two caught rows describes a battery that cannot currently
+be run to reproduce them. Census unchanged; one figure is corrected and two
+defects are recorded.
+
 ### Step 0911 - the pairing failed because it read two texts
 
 The pairing that failed was failing for a reason of my own making: the counts

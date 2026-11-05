@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0912 ran both remaining batteries: a64_route
+gives 51 caught (was 50, corrected); x86_route is
+broken (stale anchor) and cannot reproduce its 42.
+
+
 Step 0911 bound all 11 two-count sentences by reading
 counts and names from one text; the earlier pairing
 failure was mixed masked/raw offsets.
