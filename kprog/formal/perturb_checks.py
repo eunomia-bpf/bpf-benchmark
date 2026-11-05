@@ -72,7 +72,7 @@ PERTURBATIONS = [
      "orb_reach", None, "do not, but there are"),
     (["python3", "check_paper_counts.py", "--section",
       "../../docs/kprog-simulator-in-ebpf/sections/4-safety.tex",
-      "--log", "/tmp/gCK161.log", "--check"],
+      "--log", "/tmp/gCK175.log", "--check"],
      ROOT.parent.parent / "docs" / "kprog-simulator-in-ebpf" / "sections"
      / "4-safety.tex",
      "passes", None, "log has"),

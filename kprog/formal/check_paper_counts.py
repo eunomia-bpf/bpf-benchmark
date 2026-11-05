@@ -2492,33 +2492,36 @@ def reachability_theorems() -> list[str]:
 
 
 def stale_log(log_path: pathlib.Path) -> list[str]:
-    """Problems with a gate log older than a checker it should reflect.
+    """Problems with a gate log older than a checker that has changed.
 
-    A passing gate reports on the tree it ran on. If a gate component
-    changed after the log was written, the log says nothing about the code
-    that is there now — the same defect as a check that reads a stale
-    artifact, one level up.
+    A passing gate reports on the tree it ran on. A component edited after
+    the log says nothing about the code that is there now. The work tree
+    decides rather than the timestamp, since a touch moves the time without
+    moving the checker.
     """
     here = pathlib.Path(__file__).parent
     if not log_path.exists():
         return []
     when = log_path.stat().st_mtime
-    # Derived from the recipe rather than listed, so a checker added to the
-    # gate is covered without this function being remembered.
     recipe = (here / "Makefile").read_text()
-    # Any Python the recipe runs, whatever it is named, plus the modules
-    # the checkers import and the recipe itself.
     components = sorted(set(re.findall(
         r"python3 ((?:check|mutate)_\w+\.py)", recipe)))
     components += ["harness_census.py", "Makefile"]
+    try:
+        out_ = subprocess.run(
+            ["git", "status", "--porcelain", "--"] +
+            [str(here / c) for c in components],
+            capture_output=True, text=True, cwd=str(here)).stdout
+    except OSError:
+        return []
+    dirty = {l.split()[-1].split("/")[-1] for l in out_.split("\n") if l}
     out = []
     for name in components:
         f = here / name
-        if f.exists() and f.stat().st_mtime > when:
+        if f.exists() and name in dirty and f.stat().st_mtime > when:
             out.append("%s changed after the log was written, so the run "
                        "does not reflect it" % name)
     return out
-
 
 def cross_isa_arena() -> list[str]:
     """Problems with the stack-arena correspondence, empty when it holds.

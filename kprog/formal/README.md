@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0864 - the harness that tests the checkers had been failing
+
+The mismatch harness that plants a defect in each checker had been failing on
+one of them for some time, and the failure was in the harness rather than the
+checker: it named a gate log written before several components changed, so the
+baseline run reported stale rather than passing and the probe never ran.
+
+Two things had to change. The harness names the log this session produced, and
+the staleness check now decides from the work tree rather than the timestamp,
+since a touch moves the time without moving the checker and three components had
+been touched by tests of that very check.
+
+With both fixed the harness reports what it is for: twelve checks, each naming
+its break, tree unchanged. That is the strongest statement available about the
+checkers themselves, and it had been unavailable because of a hardcoded path.
+Census unchanged; the checker gains a working harness.
+
 ### Step 0863 - a historical figure that left a copy in the code
 
 The one sentence about a checker's own defect gives a population as it stood
