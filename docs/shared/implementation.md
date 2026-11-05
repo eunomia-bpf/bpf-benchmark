@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0885 made figure_coverage return its leftover
+set (a copy of the expression gave 289 where it gave
+125), removed the dead first-class sum, and printed
+the leftover count.
+
+
 Step 0884 classified two more figure classes the
 checks already hold (mutation counts, Lean line ids):
 the line reads 178 of 469 held, not 166 (no census

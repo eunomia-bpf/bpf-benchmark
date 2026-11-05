@@ -3088,13 +3088,15 @@ def guard_hit_hosts() -> list[str]:
     return []
 
 
-def figure_coverage() -> tuple[int, int, int]:
-    """`(figures stated, bound to a banner, bound some other way)`.
+def figure_coverage() -> tuple[int, int, int, set[int]]:
+    """`(figures stated, bound to a banner, bound another way, the rest)`.
 
     Not every figure is a case count. The section states banner counts,
-    census counter values, step numbers, and the parts of a split, and each
-    is held by a different check. This reports the shape of the surface
-    rather than claiming that a figure with no banner is unheld.
+    census counter values, step numbers, mutation counts, Lean line
+    identifiers, and the parts of a split, and each is held by a different
+    check. This reports the shape of the surface rather than claiming that a
+    figure with no banner is unheld, and returns the leftover set so a
+    measurement uses this classification rather than a copy of it.
     """
     here = pathlib.Path(__file__).parent
     flat = re.sub(r"\s+", " ", pathlib.Path(
@@ -3106,24 +3108,16 @@ def figure_coverage() -> tuple[int, int, int]:
     figs = {int(x.replace(",", "")) for x in
             re.findall(r"(?<![\w.,])(\d[\d,]{2,})(?![\w,])", flat)}
     bound = len(figs & counts)
-    # A census or step figure is held by the sequence checks rather than
-    # by a banner, so it is counted separately rather than as unheld.
-    other = sum(1 for v in figs - counts
-                if ("Step%s" % v) in flat or ("Step~%s" % v) in flat
-                or ("census \\(%s" % v) in flat
-                or ("\\to %s" % v) in flat)
-    # Two more classes are held by checks rather than by banners, and are
-    # named here so the remainder is a count of what is left rather than an
-    # unexamined lump: mutation counts are bound by the harness joins, and
-    # Lean line identifiers by the reference sweep that checks the one
-    # hundred and fifty-two quoted lines.
-    named_kind = {v for v in figs - counts
-                  if (("Step%s" % v) in flat or ("Step~%s" % v) in flat
-                      or ("census \\(%s" % v) in flat
-                      or ("\\to %s" % v) in flat)
-                  or ("%d-mutation" % v) in flat
-                  or re.search(r"\\bL%d\\b" % v, flat)}
-    return len(figs), bound, len(named_kind)
+    # A figure is held by another check when the section states it as a
+    # census value, a step number, a mutation count, or a Lean line
+    # identifier; each of those has a check that binds the figure itself.
+    held = {v for v in figs - counts
+            if ("Step%s" % v) in flat or ("Step~%s" % v) in flat
+            or ("census \\(%s" % v) in flat
+            or ("\\to %s" % v) in flat
+            or ("%d-mutation" % v) in flat
+            or re.search(r"\\bL%d\\b" % v, flat)}
+    return len(figs), bound, len(held), figs - counts - held
 
 
 def main() -> None:
@@ -4352,7 +4346,7 @@ def main() -> None:
     # The success line reports the surface rather than only the count of
     # claims: how many distinct figures the section states, and how many of
     # them a banner or a sequence check holds.
-    figs_total, banner_bound, stated = figure_coverage()
+    figs_total, banner_bound, stated, rest = figure_coverage()
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
@@ -4380,7 +4374,7 @@ def main() -> None:
         print(f"all measured claims hold: {len(claimed)} case counts over "
               f"{case_figures(text)} distinct figures, {stated} of "
               f"{figs_total} stated figures held by a banner or another "
-              f"check, "
+              f"check ({len(rest)} parts of a held whole), "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "
               f"token, {unnamed} naming no file, {len(multi)} naming two), "
               f"both gate totals, the "

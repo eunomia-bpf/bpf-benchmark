@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0885 - a copied expression measured 289 where the check said
+125
+
+Measuring the hundred and twenty-five leftover figures meant rebuilding the
+expression that produced them, and the copy disagreed: two hundred and
+eighty-nine against one hundred and twenty-five. The difference was that the
+original counted a figure once and the copy counted one occurrence per sentence.
+
+So the function now returns the leftover set rather than only its size. A
+measurement reads the classification instead of copying it, and the two cannot
+drift apart again.
+
+The copy was also hiding dead code. Adding the second class left the first
+class's sum in place, unused, and the run still passed because nothing read it.
+It is gone now, and the leftover count is printed, so every value the classifier
+returns has a reader. Census unchanged; the checker's coverage figure is
+unchanged and its classifier is the same one the run uses.
+
 ### Step 0884 - the coverage line reached less than it did
 
 The line that reports how much of the section a check reaches named two classes,
