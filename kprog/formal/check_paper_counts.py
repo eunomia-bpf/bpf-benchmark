@@ -2560,6 +2560,32 @@ def cross_isa_arena() -> list[str]:
     return out
 
 
+def arena_counterexample() -> list[str]:
+    """Problems with the one-byte-arena counterexample, empty when it holds.
+
+    The section says the whole-word condition fails on the disabled arena,
+    which is one byte, and that the counterexample is now a theorem. The
+    theorem carries the condition as a hypothesis, so a version that dropped
+    it would prove the guards coincide everywhere and the sentence would be
+    false.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "Arm64StackArena.lean")
+    if not f.exists():
+        return ["the arena module is absent, so the counterexample went "
+                "unread"]
+    src = f.read_text()
+    m = re.search(
+        r"^theorem arm64_stack_arena_tag_guard_is_window_guard\b(.*?) := ",
+        src, re.S | re.M)
+    if m is None:
+        return ["the arena guard theorem is absent"]
+    if "capacity.toNat % 8 = 0" not in m.group(1):
+        return ["the arena guard theorem no longer carries the whole-word "
+                "hypothesis, so the one-byte arena is not excluded"]
+    return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3699,6 +3725,10 @@ def main() -> None:
     # "the correspondence is now a theorem rather than an eyeball
     # comparison": four agreements between the two arenas.
     for problem in cross_isa_arena():
+        problems.append(problem)
+    # "the counterexample is now a theorem": the whole-word hypothesis is
+    # what excludes the one-byte arena, so a theorem without it reports.
+    for problem in arena_counterexample():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

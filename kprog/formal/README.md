@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0835 - the counterexample is a hypothesis, so weakening it
+shows
+
+One sentence says the whole-word condition fails on the disabled arena, which is
+one byte rather than a whole number of words, and that the counterexample is now
+a theorem. The theorem carries the condition as a hypothesis, and the docstring
+records that an earlier version wrongly claimed the one-byte arena satisfied it.
+
+The hypothesis is the check. A theorem without it would prove the two guards
+coincide on every capacity, which is exactly the claim the earlier docstring
+made and the sentence now corrects; with it, the one-byte arena is the case the
+hypothesis excludes.
+
+This is the smallest form of the pattern the section keeps using: the
+counterexample is not a remark but a hypothesis in the statement, so a weakening
+of the theorem is visible in the statement rather than in a proof that no longer
+covers the case. Census unchanged; the checker gains a component.
+
 ### Step 0834 - the sentence that says its own evidence is a theorem
 
 The sentence about the two arenas is the one this run has met most often in
