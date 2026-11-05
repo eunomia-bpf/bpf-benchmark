@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0834 bound the stack-arena correspondence to its
+five theorems: word index, alignment, word count,
+window end and window fit (no census change).
+
+
 Step 0833 derived the staleness component list from
 the recipe: all 10 checkers rather than 3 named by
 hand, and the gate re-run so the log reflects them

@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0834 - the sentence that says its own evidence is a theorem
+
+The sentence about the two arenas is the one this run has met most often in
+prose: the two architectures phrase the same restriction differently, and a
+reader comparing the files cannot tell whether that is wording or drift. It then
+says the correspondence is a theorem rather than an eyeball comparison, and that
+half is checkable.
+
+Five agreements carry it: the word index, the alignment guard, the word count,
+the window end, and the window fit over an index, a width and a capacity. The
+capacity one is the sentence's own subject, since one side states a numeric
+bound and the other the equivalent no-wrap predicate.
+
+What the check holds is that the module still proves all five, which is the
+property the sentence rests on. Whether each theorem says what its name suggests
+is the residual this run has accepted elsewhere. Census unchanged; the checker
+gains a component.
+
 ### Step 0833 - the component list is derived, not remembered
 
 The staleness check listed three components by hand and the gate runs ten, so

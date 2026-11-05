@@ -2537,6 +2537,29 @@ def stale_log(log_path: pathlib.Path) -> list[str]:
     return out
 
 
+def cross_isa_arena() -> list[str]:
+    """Problems with the stack-arena correspondence, empty when it holds.
+
+    The section says the two architectures phrase the same restriction
+    differently -- a numeric capacity on one side, an equivalent no-wrap
+    predicate on the other -- and that the correspondence is a theorem
+    rather than an eyeball comparison. Four correspondences carry it: the
+    word index, the alignment guard, the word count, and the window fit.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "CrossIsaStackArena.lean")
+    if not f.exists():
+        return ["the cross-ISA stack-arena module is absent, so the "
+                "correspondence sentence rests on an eyeball comparison"]
+    src = f.read_text()
+    out = []
+    for name in ("wordIndex_agrees", "wordAligned_agrees", "words_agrees",
+                 "windowEnd_agrees", "windowFits_agrees"):
+        if not re.search(r"^theorem %s\b" % name, src, re.M):
+            out.append("the arena correspondence no longer proves %s" % name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3672,6 +3695,10 @@ def main() -> None:
     # A passing gate reports on the tree it ran on; a log older than a
     # component says nothing about the code that is there now.
     for problem in stale_log(pathlib.Path(args.log)):
+        problems.append(problem)
+    # "the correspondence is now a theorem rather than an eyeball
+    # comparison": four agreements between the two arenas.
+    for problem in cross_isa_arena():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
