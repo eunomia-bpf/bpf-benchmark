@@ -2653,6 +2653,37 @@ def popcnt_flag_rule() -> list[str]:
     return out
 
 
+def bzhi_flag_rule() -> list[str]:
+    """Problems with the BZHI flag rule, empty when it matches the prose.
+
+    The section says the transition clears SF and OF, sets CF exactly when
+    the byte-masked count reaches the resolved width's bit count, and sets
+    ZF exactly when the cleared result is zero -- two independent inputs
+    rather than one. That is four flag assignments and two source
+    predicates.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "X86BzhiFlags.lean")
+    if not f.exists():
+        return ["the BZHI flag module is absent, so its rule went unread"]
+    src = f.read_text()
+    m = re.search(r"^def x86BzhiSetFlagsSpec\b(.*?)^\S", src, re.S | re.M)
+    if m is None:
+        return ["x86BzhiSetFlagsSpec is absent"]
+    body = " ".join(m.group(1).split())
+    out = []
+    for flag in ("sf", "of"):
+        if "%s := false" % flag not in body:
+            out.append("BZHI no longer clears %s" % flag.upper())
+    if "cf := x86BzhiSetCfSpec" not in body:
+        out.append("BZHI's CF no longer comes from the count-versus-width "
+                   "predicate")
+    if "zf := x86BzhiSetZfSpec" not in body:
+        out.append("BZHI's ZF no longer comes from the result-zero "
+                   "predicate")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3804,6 +3835,11 @@ def main() -> None:
     # "it clears CF, SF and OF, and sets ZF exactly when the width-narrowed
     # source is zero": three clears and one narrowed-source test.
     for problem in popcnt_flag_rule():
+        problems.append(problem)
+    # "it clears SF and OF, sets CF exactly when the byte-masked count
+    # reaches the width's bit count, and sets ZF when the result is zero":
+    # two independent inputs, four assignments.
+    for problem in bzhi_flag_rule():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

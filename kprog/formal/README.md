@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0844 - two independent inputs, and a sentence that quotes
+the other rule
+
+The BZHI sentence gives a different rule from the population count: it clears
+the sign and overflow flags, sets carry exactly when the byte-masked count
+reaches the resolved width's bit count, and sets zero exactly when the cleared
+result is zero. Two independent inputs rather than one, which the sentence says
+explicitly.
+
+Reading it took two attempts. The first search matched a sentence beginning with
+BZHI and ending at the population-count rule, because that rule appears again in
+the BZHI paragraph as the contrast; the check would have compared BZHI's four
+assignments against the wrong sentence's three and reported a defect that was
+not there.
+
+The spec is right and now checked: two clears, a carry from the
+count-versus-width predicate, and a zero from the result-zero predicate. Census
+unchanged; the checker gains a component.
+
 ### Step 0843 - a rule in three clears and one test
 
 The POPCNT sentence gives a rule in one clause: it clears the carry, sign and
