@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0841 bound the double-shift same-opcode claim:
+the arm, flags and result theorems must each key on
+the opcode, and a re-keyed one reports (no census
+change).
+
+
 Step 0840 probed two figures to confirm the checks do
 not overlap: each perturbation is reported exactly
 once, by the check whose relation it breaks (no

@@ -2564,6 +2564,34 @@ def arena_counterexample() -> list[str]:
     return []
 
 
+def doubleshift_opcode_keyed() -> list[str]:
+    """Problems with the double-shift arm selection, empty when it holds.
+
+    The section says the body and the flag family are selected by the same
+    opcode and cannot diverge. That is three theorems over one argument:
+    the arm, the flags and the result are each refined at the same opcode,
+    so a version refining one of them at a different key would let the
+    fourth round float against the first.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "X86DoubleShiftArmHandler.lean")
+    if not f.exists():
+        return ["the double-shift handler module is absent, so the "
+                "same-opcode sentence went unread"]
+    src = f.read_text()
+    out = []
+    for name in ("x86_doubleshift_arm_refines",
+                 "x86_doubleshift_flags_refines",
+                 "x86_doubleshift_result_refines"):
+        m = re.search(r"^theorem %s\b(.*?) := " % name, src, re.S | re.M)
+        if m is None:
+            out.append("%s is absent, so the body and flags may be keyed "
+                       "differently" % name)
+        elif not re.match(r"\s*\(\s*op\s*:", m.group(1)):
+            out.append("%s does not take the opcode as its key" % name)
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -3703,6 +3731,10 @@ def main() -> None:
     # "the counterexample is now a theorem": the whole-word hypothesis is
     # what excludes the one-byte arena, so a theorem without it reports.
     for problem in arena_counterexample():
+        problems.append(problem)
+    # "the body and the flag family are selected by the same opcode and
+    # cannot diverge": three theorems must key on that opcode.
+    for problem in doubleshift_opcode_keyed():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the

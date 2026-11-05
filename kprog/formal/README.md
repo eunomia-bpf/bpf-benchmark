@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0841 - a shared argument axis is checkable from signatures
+
+One sentence says the body and the flag family are selected by the same opcode
+and cannot diverge, and both sit behind the same count-zero gate. That is three
+theorems over one argument rather than one, and the check reads the argument
+list of each: the arm, the flags and the result must all key on the opcode.
+
+Three theorems over one key is the form the claim needs. Two theorems keyed
+differently would each be true and the claim false, so the divergence the
+sentence denies is exactly a change of key in one of the three, which the
+argument list shows without reading the proofs.
+
+This is the cheapest form of a structural claim in the section: a shared
+argument axis, checkable from three signatures. The alternative was to compare
+the three proofs' conclusions, which would need the statements digested and
+would still not say what the axis means. Census unchanged; the checker gains a
+component.
+
 ### Step 0840 - two probes, each reported exactly once
 
 After removing two duplicates, the question is whether the checks overlap in
