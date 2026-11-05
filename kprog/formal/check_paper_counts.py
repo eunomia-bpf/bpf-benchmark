@@ -2889,7 +2889,10 @@ def main() -> None:
         "twenty".split())}
     flat_s = re.sub(r"\s+", " ", text).replace("\\brk", "")
     for host in ("x86_route_host", "helper_route_host"):
-        pat = (r"\((\w+) scenes?, 7\{\,\}056 modeled cases"
+        # The modelled-case figure is read as a number rather than
+        # matched as this one: a pattern holding the value cannot see it
+        # change, and would then skip the scene comparison entirely.
+        pat = (r"\((\w+) scenes?, [\d\{\,\}]+ modeled cases"
                if host == "x86_route_host" else
                r"\((\w+) scene functions?, \d+ drive sites")
         m = re.search(pat, flat_s)

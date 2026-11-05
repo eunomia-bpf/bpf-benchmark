@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0826 removed a projected case figure from a
+pattern that gated the scene comparison; a moved
+figure had made the check skip silently (no census
+change).
+
+
 Step 0825 bound the three totals the section and the
 tree's readme both state; a first version matched
 values and passed a planted error, so the figures are

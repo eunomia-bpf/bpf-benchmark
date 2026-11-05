@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0826 - the same defect in another place, gating a check
+entirely
+
+One check matched a sentence only when the modelled-case figure beside its scene
+count was the one the pattern held, seven thousand and fifty-six. If that figure
+moves, the pattern matches nothing, the scene comparison is skipped, and the run
+stays green while the sentence goes unread.
+
+The figure is a number in the pattern now, so the scene count is compared
+whatever the case total says. Verified by moving the scene count in the
+sentence: the check reports sixteen in the host and nineteen in the section.
+
+This is the defect found two steps ago in the cross-document check, in another
+place: a pattern that holds the value it verifies cannot see the value change.
+The first version of that check passed a planted error for the same reason.
+
 ### Step 0825 - reading the figure from its words, not its value
 
 The section and the formal tree's readme state the same three totals: one
