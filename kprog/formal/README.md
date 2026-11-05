@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0817 - the rewrite completes, and three wrong guesses that
+the size caught
+
+The last ten sentences name their harness. Seven were identified from their
+paragraphs' opening lines and three were the second appearance of a size already
+named earlier in the paragraph, so the paragraph's subject settled them.
+
+Three of the first seven were guessed wrongly on the first pass and corrected by
+the size comparison: the memory-access harness, the ALU-decode harness and the
+x86 ADC harness, not the logic-flag, signed and register-dispatch ones. The join
+compares the sentence's size with the harness's, so a wrong name fails rather
+than silently binding the wrong file.
+
+Thirty-six sentences now join a harness and every size agrees, with no sentence
+left stating a size several harnesses share and naming nothing. The description
+reach holds at two. Census unchanged; the checker gains nine joins.
+
 ### Step 0816 - the opening line names the contract, and the size
 checks it
 
