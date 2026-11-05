@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0854 - an inequality at the middle, an injection at the ends
+
+The condition-correspondence sentence describes a failure that per-architecture
+reasoning cannot see: the two sides evaluate different intermediate facts, carry
+on one and borrow on the other, complementary over the same inputs, so an
+intermediate step differs while the endpoints must not. A chain composed
+differently on one side would diverge while every per-architecture theorem still
+held.
+
+Two theorems carry it. One states the inequality directly -- the carry condition
+and the borrow condition disagree on the same flags -- and the other states that
+the mapping between the two vocabularies is injective, so no two AArch64
+conditions collapse onto one x86 condition.
+
+The pair is the shape the sentence needs: an inequality at the intermediate and
+an injection at the endpoints. Either alone leaves the failure open, since an
+inequality without the injection permits a collapse elsewhere and an injection
+without the inequality claims more agreement than the flags give. Census
+unchanged; the checker gains a component.
+
 ### Step 0853 - a word that looked like a defect and is precision
 
 The multiply paragraph says something easy to read as a defect and which is a

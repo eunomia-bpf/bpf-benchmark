@@ -2877,6 +2877,31 @@ def multiply_oracle() -> list[str]:
     return out
 
 
+def cross_isa_cond() -> list[str]:
+    """Problems with the condition-code correspondence, empty when it holds.
+
+    The section says the two architectures evaluate different intermediate
+    flag facts -- carry on one side, borrow on the other, complementary --
+    while the endpoints agree, and that a chain composed differently on one
+    side would diverge while every per-architecture theorem still held. That
+    is a complement over the same inputs plus an injective mapping.
+    """
+    f = (pathlib.Path(__file__).parent / "KProgFormal"
+         / "CrossIsaCond.lean")
+    if not f.exists():
+        return ["the cross-ISA condition module is absent, so the "
+                "correspondence sentence went unread"]
+    src = f.read_text()
+    out = []
+    if not re.search(r"^theorem cs_is_ae_not_b\b", src, re.M):
+        out.append("nothing shows the two sides evaluate different "
+                   "intermediates")
+    if not re.search(r"^theorem toX86_injective\b", src, re.M):
+        out.append("nothing shows the condition mapping is injective, so "
+                   "two conditions could collapse onto one")
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
@@ -4063,6 +4088,11 @@ def main() -> None:
     # "the independent oracle is the host compiler's own 128-bit integer
     # type, which the simulator cannot use": a property of one host.
     for problem in multiply_oracle():
+        problems.append(problem)
+    # "a chain that composed differently on one side would diverge while
+    # every per-architecture theorem continued to hold": a complement over
+    # the same inputs plus an injective mapping.
+    for problem in cross_isa_cond():
         problems.append(problem)
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
