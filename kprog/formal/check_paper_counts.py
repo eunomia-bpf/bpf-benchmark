@@ -3117,7 +3117,18 @@ def figure_coverage() -> tuple[int, int, int, set[int]]:
             or ("\\to %s" % v) in flat
             or ("%d-mutation" % v) in flat
             or re.search(r"\\bL%d\\b" % v, flat)}
-    return len(figs), bound, len(held), figs - counts - held
+    # The leftover set is one lump, so it is split into the classes the
+    # section actually uses. A figure that is a catch count, a row count, a
+    # module count, or a Lean line identifier is bound by the check that
+    # binds its whole; the rest stand alone and are reported as such.
+    left = figs - counts - held
+    line_ids = {v for v in left if re.search(r"\bL%d\b" % v, flat)
+                or re.search(r"\bL\\d+--%d\b" % v, flat)}
+    rows = {v for v in left - line_ids
+            if re.search(r"\b%d-row\b|\b%d rows\b" % (v, v), flat)}
+    catches = {v for v in left - line_ids - rows
+               if re.search(r"\b%d (?:catches|catch)\b" % v, flat)}
+    return len(figs), bound, len(held), (left, line_ids, rows, catches)
 
 
 def main() -> None:
@@ -4374,7 +4385,10 @@ def main() -> None:
         print(f"all measured claims hold: {len(claimed)} case counts over "
               f"{case_figures(text)} distinct figures, {stated} of "
               f"{figs_total} stated figures held by a banner or another "
-              f"check ({len(rest)} parts of a held whole), "
+              f"check ({len(rest[0])} others: {len(rest[1])} line ids, "
+              f"{len(rest[2])} row counts, {len(rest[3])} catch counts, "
+              f"{len(rest[0]) - len(rest[1]) - len(rest[2]) - len(rest[3])} "
+              f"standing alone), "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "
               f"token, {unnamed} naming no file, {len(multi)} naming two), "
               f"both gate totals, the "

@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0886 checked the 'parts of a held whole' claim:
+only 31 of 125 sit near a bound figure. The leftover
+set is now split by class (23 line ids, 5 rows, 2
+catches, 95 alone).
+
+
 Step 0885 made figure_coverage return its leftover
 set (a copy of the expression gave 289 where it gave
 125), removed the dead first-class sum, and printed

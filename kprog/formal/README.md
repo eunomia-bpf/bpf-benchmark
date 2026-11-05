@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0886 - the leftovers were not parts of a held whole
+
+The line called the hundred and twenty-five leftovers parts of a held whole,
+which was another assertion. Checking it found thirty-one sitting near a figure
+a banner binds and ninety-four that do not, so the phrase was wrong for most of
+them.
+
+The classifier now splits the leftovers by the class the section states them in.
+Twenty-three are Lean line identifiers, five are row counts, two are catch
+counts, and ninety-five stand alone; the line prints all four numbers rather
+than a phrase covering them.
+
+The ninety-five standing alone are module counts, boundary fixtures, and example
+values. They are held by the checks that bind those wholes, and stating their
+number is the honest form: it says how much of the section's arithmetic the run
+reaches, and where the reach ends. Census unchanged; the checker's coverage
+figure is unchanged and its leftover set is now split.
+
 ### Step 0885 - a copied expression measured 289 where the check said
 125
 
