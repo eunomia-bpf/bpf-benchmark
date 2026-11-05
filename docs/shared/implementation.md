@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0880 resolved the last 5 unjoined sentences from
+paragraph context and quoted tokens; joins 46 -> 50
+and the unheld count is 0 (no census change).
+
+
 Step 0879 checked the 7 'ambiguous' sentences and
 named 3 of them (ALU-result, uxtb, pair-load tag);
 joins 44 -> 46, 5 remain truly ambiguous (no census

@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0880 - every mutation count now reaches a harness
+
+The five sentences called genuinely ambiguous were not. Each one's paragraph
+names its subject: the reduction sentence follows three sentences about
+byte-lane popcount and lane sums, the direction-table sentence follows a
+paragraph about the vector-destination flip, and the stack-row sentence follows
+the memory-read source and tag macros.
+
+Four are named on paragraph evidence and one on its own words. The
+vector-destination phrase appears eight times in the move-destination harness
+and never in either alternative, the tagged specification five times in the
+stack-tag harness and never in the divide one, and the stack-row key only in the
+memory-dispatch harness.
+
+The count of sentences that name no harness is now zero. Every statement of a
+mutation count either reaches a harness through its size and evidence or is
+bound by the growth check, and the success line prints the zero rather than
+omitting the clause. Census unchanged; the checker gains four joins.
+
 ### Step 0879 - three of the seven did carry evidence
 
 The seven sentences left unjoined were described as ambiguous, and that was an
