@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0813 - the sentence quotes the spec text, so the match is
+exact
+
+Two more sentences name their harness. The first describes the mode and
+mode-modifier usage specification, which is the ALU operand contract; the second
+gives the opcode as name, code sixty-five and macro, which is exactly how the
+conditional-negate harness writes its specification.
+
+The second is the strongest join so far: the sentence quotes the specification's
+own fields and the harness holds that same text, so the identification is a
+string match rather than an inference from prose. The first is chosen from three
+candidates by the field names the sentence lists.
+
+Twenty-one sentences join and all agree on their size, with the description
+reach unchanged at two. Census unchanged; the checker gains two joins.
+
 ### Step 0812 - three from three candidates, each on a checked fact
 
 Three more sentences name their harness, each of size fifty-eight or sixty-nine

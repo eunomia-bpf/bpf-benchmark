@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0813 named two more: the ALU operand contract
+and the cneg one, the latter identified by the spec
+text the sentence quotes (19 -> 21 joins, no census
+change).
+
+
 Step 0812 named three more harnesses from three
 candidates each, 17 -> 19 joins with sizes agreeing,
 and confirmed both reaches after the last step's
