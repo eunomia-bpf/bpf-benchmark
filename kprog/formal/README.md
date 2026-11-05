@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0819 - the surface the joins depend on is not in the
+repository
+
+The size-only surface is closed and the surface it depends on is not in the
+repository. Three hundred and thirty harnesses exist under the build directory
+and four are tracked, so a checkout holds the sentences and not the files they
+were verified against.
+
+The joins themselves need thirty-three harnesses, totalling under a megabyte,
+but the function that sizes them globs all three hundred and thirty because a
+sentence can name any size. Tracking the thirty-three would not be enough: the
+sizes come from the whole set, so a harness outside it could shrink without the
+count moving.
+
+So the choice is between tracking six megabytes of mutation batteries and
+accepting that the paper's harness joins are verifiable only in a working tree.
+Both are reasonable and the second is what the argument already assumes
+elsewhere; what the last steps add is that the assumption is now stated rather
+than discovered.
+
 ### Step 0818 - the named count and the join count are compared
 
 The rewrite closed the size-only surface, and this holds it closed. Every
