@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0891 - seven figures now trace to two directories
+
+The four remaining aggregates in that paragraph came from the same run the
+paragraph above already names, and all four reproduce from its samples: the load
+ratio is the geometric mean of the per-program compile-time ratios, the two load
+medians are the median of those per-program medians, and the two proof medians
+are medians of the native path's own phases.
+
+The proof phases exist only in the native path, which the section's wording
+already said and which the samples confirm: the kernel path records none. The
+four values agree to every digit the section prints.
+
+So one run now grounds all seven figures in the two experiment paragraphs and
+the load paragraph after them, and the sentence says which aggregation produces
+each. The cross-ISA smokes still name no run. Census unchanged; the paper gains
+a provenance sentence.
+
 ### Step 0890 - the first experiment reproduces as well
 
 The first experiment paragraph carries the same three aggregates as the second,
