@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0945 - 924 is exactly three times 308, and that is why
+
+The AArch64 half of the headline is a different pair from the x86 one: stock
+against the reattached program inside one run, and it covers both populations.
+Recomputed over twenty-nine it gives the figure the record states, and over
+twenty-seven the one the section states, both to six decimals.
+
+Beside the speedup the section states how many sites were applied. Those are
+sums over the per-program rejit summaries, and both recompute: the sum of
+per-benchmark medians is the first, and the same over every sample is the
+second, which is exactly three times the first because each benchmark has three
+samples. That identity is what the numbers rest on, so it is checked alongside
+them.
+
+The check also requires matched to equal applied in every sample, since the
+section says all matched sites are applied; a sample that matched a site and
+skipped it would make the sentence false while the two totals still looked
+right.
+
+Census unchanged; the AArch64 speedup and both site counts are bound.
+
 ### Step 0944 - the headline speedup is a ratio between two runs
 
 The evaluation section's headline speedup is not a ratio inside one run: it

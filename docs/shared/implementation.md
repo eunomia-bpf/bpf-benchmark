@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0945 bound the AArch64 headline (1.208/1.222)
+and both site counts (308 median-sample, 924
+instances, matched==applied).
+
+
 Step 0944 bound the headline 1.242x speedup to the
 two named runs (cross-run, 27 benchmarks) and derived
 the 19.47% reduction.

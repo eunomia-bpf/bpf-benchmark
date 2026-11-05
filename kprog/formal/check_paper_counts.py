@@ -3503,6 +3503,64 @@ def characterization_pair() -> list[str]:
             if abs(g - want) > 1e-5:
                 out.append("the cross-run speedup is %.6f and the section "
                            "says %.6f" % (g, want))
+    # The AArch64 headline is a different pair: stock against the
+    # reattached program inside one run, over the same two populations.
+    arm = (root / "micro" / "results"
+           / "aws_arm64_micro_20260606_001225_821028" / "details"
+           / "result.json")
+    if arm.exists():
+        ad = json.loads(arm.read_text())
+        for excl, want in ((False, 1.208129), (True, 1.222042)):
+            rs = []
+            for b in ad["benchmarks"]:
+                if excl and "baseline" in (b.get("tags") or []):
+                    continue
+                per = {}
+                for r in b["runs"]:
+                    ex = [s["exec_ns"] for s in (r.get("samples") or [])
+                          if s.get("exec_ns")]
+                    if ex:
+                        per[r.get("runtime")] = statistics.median(ex)
+                if "kernel" in per and "kernel_rejit" in per:
+                    rs.append(per["kernel"] / per["kernel_rejit"])
+            if not rs:
+                out.append("the AArch64 run has no stock/rejit pair, so "
+                           "the headline speedup went unread")
+                continue
+            g = math.exp(sum(map(math.log, rs)) / len(rs))
+            if abs(g - want) > 1e-5:
+                out.append("the AArch64 speedup over %d is %.6f and the "
+                           "section says %.6f" % (len(rs), g, want))
+        # The section states the site counts beside the speedup: the sum of
+        # per-benchmark medians in the median sample, and that sum over
+        # every sample. Both are sums over the rejit summaries.
+        per_bench, all_samples = {}, []
+        for b in ad["benchmarks"]:
+            for r in b["runs"]:
+                if r.get("runtime") != "kernel_rejit":
+                    continue
+                for s in (r.get("samples") or []):
+                    m = a = 0
+                    for prog in (((s.get("rejit_result") or {})
+                                  .get("per_program") or {}).values()):
+                        for p in prog.get("passes") or []:
+                            sm = p.get("bpfopt_summary") or {}
+                            m += sm.get("sites_matched", 0) or 0
+                            a += sm.get("sites_applied", 0) or 0
+                    per_bench.setdefault(b["name"], []).append(m)
+                    all_samples.append((m, a))
+        if per_bench:
+            sample_sum = sum(statistics.median(v) for v in per_bench.values())
+            if sample_sum != 308:
+                out.append("the AArch64 site count is %d and the section "
+                           "says 308" % sample_sum)
+            total = sum(m for m, _ in all_samples)
+            if total != 924:
+                out.append("the AArch64 site instances total %d and the "
+                           "section says 924" % total)
+            if any(m != a for m, a in all_samples):
+                out.append("the AArch64 run leaves sites matched but not "
+                           "applied, so the all-applied sentence is stale")
     for label, want in (("native", 1.574808),
                         ("native_kernel", 1.545042)):
         if label not in got:
