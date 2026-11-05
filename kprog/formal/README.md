@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0898 - the axiom census was re-derived and every constant
+held
+
+The axiom classes the shares divide were the next unchecked constants, and
+unlike the divisor they cannot be cheaply re-counted: the census runs one prover
+invocation per module and takes about four minutes. It was run in full against
+the current tree.
+
+Every recorded value holds. The tree is six hundred and seventeen axiom-free,
+six hundred and twenty-three compiler-assuming, seven hundred and eighty-five
+kernel-only axiomatic, and forty assuming kernel choice, which sums to two
+thousand and sixty-five; the two choice counts are one hundred and seventy-nine
+in all and one hundred and thirty-nine of those compiler-assuming. Each of the
+six constants in the checker matches, including the combined eight hundred and
+twenty-five.
+
+The comment beside them already said how to re-derive the figures, so it now
+also records what the re-derivation returned and that it was run against this
+tree. Census unchanged; six recorded constants are confirmed rather than
+assumed.
+
 ### Step 0897 - the divisor the shares used was never checked
 
 The section's structural figures were counted directly. Three of the four hold

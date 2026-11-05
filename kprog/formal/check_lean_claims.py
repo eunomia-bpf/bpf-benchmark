@@ -1179,6 +1179,9 @@ def scan_tree(root):
         # takes about three minutes -- too slow for a build target, which is
         # why they are recorded and only their relationships are checked.
         # ax_kernel is the kernel and kernel-choice classes together.
+        # Last re-derived in full against the current tree, whose classes
+        # were none 617, compiler 623, kernel 785, kernel-choice 40, and
+        # total 2,065 -- so the four below are measured, not carried.
         "ax_none": 617,
         "ax_orb": 623,
         "ax_kernel": 825,

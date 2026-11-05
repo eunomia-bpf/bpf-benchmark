@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0898 re-derived the axiom census in full (221s):
+all six recorded constants match exactly
+(617/623/785/40, 2065, 179/139).
+
+
 Step 0897 bound the published theorem total to the
 counted one (2065; an @[simp] theorem made a naive
 count 2064) and fixed a stale 2061 comment.
