@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0809 - the remainder measured, and a title that is not a key
+
+The last widening took the join to eleven sentences and left thirty-two that
+name nothing the harness docstrings carry. Twenty-eight of those name no quoted
+token at all: they say a harness retargets the pointer-path specification, or
+the status specification, and never name a file or a macro.
+
+The specification titles do not join either, because the prose writes
+pointer-path and the file is named for a conditional-select pointer. A title is
+a description rather than a key, so the mapping would have to be invented, which
+is what the earlier joins avoided.
+
+So the measurement stands: twenty-eight sentences can be joined only if the
+prose names the file, and eleven already are. What the last three steps changed
+is the confidence in that number rather than the number itself - two widenings
+helped and two did not, and each was tested against the remainder. Census
+unchanged; the checker gains no component.
+
 ### Step 0808 - an escaped underscore defeated the whole token rule
 
 The token rule could not match a name written with escaped underscores, which is

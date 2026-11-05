@@ -2615,6 +2615,12 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0809 measured the tokenless remainder precisely:
+28 sentences name no quoted token, and spec titles do
+not join because the prose title is not the file stem
+(no census change).
+
+
 Step 0808 normalised escaped underscores on both
 sides of the opcode join, taking it from 7 to 11
 sentences with every size agreeing, and raised the
