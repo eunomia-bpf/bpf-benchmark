@@ -2615,6 +2615,13 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0874 found a mis-join: the plain-load tag
+sentence (49 mutations) had been joined to the
+memory-access harness. Named, joins 38 -> 39; a
+duplicate guard was tried and removed (no census
+change).
+
+
 Step 0873 removed the same size filter from the
 description join: latent rather than active, but the
 shape that hid two harnesses (no result change).

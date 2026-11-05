@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0874 - a sentence joined to the wrong harness
+
+Looking for the shape the last step removed found one more, and this one had
+already done damage. Three sentences state a forty-nine-mutation harness; two of
+them are the memory-access contract and the third describes the plain-load tag
+contract, and all three had been joined to the memory-access one.
+
+The third is named now, and the two run distinct harnesses of that size. The
+join count goes from thirty-eight to thirty-nine, and a reader following that
+sentence reaches the contract it describes rather than a different one.
+
+A guard against the shape was tried and removed. Two sentences of one size
+naming two different harnesses is ordinary prose, and so is one harness
+described by two sentences; the check reported both as defects. What remains is
+the reach floor, which would have caught the mis-join only if the sentence
+stopped matching entirely rather than matching the wrong file. Census unchanged;
+the checker gains a join.
+
 ### Step 0873 - the same filter, latent, at the head of another
 join
 

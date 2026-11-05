@@ -4061,9 +4061,9 @@ def main() -> None:
     joins = stated_harness_joins(pathlib.Path(args.section).read_text())
     # A sentence whose size no longer matches leaves the join entirely, so
     # the reach is floored as well as compared.
-    if len(joins) < 38:
+    if len(joins) < 39:
         problems.append(
-            "only %d sentences join a harness; at least 38 matched before"
+            "only %d sentences join a harness; at least 39 matched before"
             % len(joins))
     for stated, harness, have in joins:
         if stated != have:
@@ -4265,6 +4265,10 @@ def main() -> None:
     # the same inputs plus an injective mapping.
     for problem in cross_isa_cond():
         problems.append(problem)
+    # Two sentences may describe one harness, and should name it twice only
+    # when they are about it. A size joined to two different harnesses is
+    # the signal that one of them is wrong, which is how a mis-join at size
+    # 49 was found.
     # "a resolved source width is never the absent code, so a body cannot
     # widen at an unknown width": an exclusion, with the fallback as its
     # companion.
