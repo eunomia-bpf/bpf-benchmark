@@ -1,0 +1,47 @@
+python3 /workspaces/repository/kprog/fidelity/negative.py build --arch x86 --build /workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness
+{"arch": "x86", "cases": 14, "stages": {"generated": 9, "specialization_rejected": 5}}
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_abi.py
+{'name': 'simple', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/simple.bpf.c'}
+{'name': 'simple_packet', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/simple_packet.bpf.c'}
+{'name': 'bitmap_popcount_scan', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/bitmap_popcount_scan.bpf.c'}
+{'name': 'sorted_rule_binary_search', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/sorted_rule_binary_search.bpf.c'}
+{'name': 'bcc_runqlat_log2_histogram_bucket', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/bcc_runqlat_log2_histogram_bucket.bpf.c'}
+{'name': 'trace_event_type_switch_dispatch', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/trace_event_type_switch_dispatch.bpf.c'}
+{'name': 'packet_checksum_fold', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/packet_checksum_fold.bpf.c'}
+{'name': 'payload_prefix_memcmp_scan', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/payload_prefix_memcmp_scan.bpf.c'}
+{'name': 'packet_vlan_tcpopt_parser', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/packet_vlan_tcpopt_parser.bpf.c'}
+{'name': 'bpf_local_call_fanout_dispatch', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/bpf_local_call_fanout_dispatch.bpf.c'}
+{'name': 'flow_5tuple_rss_hash', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/flow_5tuple_rss_hash.bpf.c'}
+{'name': 'katran_lb_consistent_hash_select', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/katran_lb_consistent_hash_select.bpf.c'}
+{'name': 'cilium_policy_guard_tree_filter', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/cilium_policy_guard_tree_filter.bpf.c'}
+{'name': 'siphash_rotate64_mixer', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/siphash_rotate64_mixer.bpf.c'}
+{'name': 'packet_record_bounds_window', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/packet_record_bounds_window.bpf.c'}
+{'name': 'flow_record_field_scan', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/flow_record_field_scan.bpf.c'}
+{'name': 'packed_header_bitfield_decode', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/packed_header_bitfield_decode.bpf.c'}
+{'name': 'bpftrace_string_search_prefix_scan', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/bpftrace_string_search_prefix_scan.bpf.c'}
+{'name': 'tracee_syscall_name_table_lookup', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/tracee_syscall_name_table_lookup.bpf.c'}
+{'name': 'tracee_http_method_prefix_detect', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/tracee_http_method_prefix_detect.bpf.c'}
+{'name': 'cilium_socket_lb_service_select', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/cilium_socket_lb_service_select.bpf.c'}
+{'name': 'bcc_tcpconnect_ipv4_tuple_filter', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/bcc_tcpconnect_ipv4_tuple_filter.bpf.c'}
+{'name': 'tetragon_process_event_arg_filter', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/tetragon_process_event_arg_filter.bpf.c'}
+{'name': 'otel_stack_frame_unwind_scan', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/otel_stack_frame_unwind_scan.bpf.c'}
+{'name': 'cilium_ct_nat_tuple_rewrite', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/cilium_ct_nat_tuple_rewrite.bpf.c'}
+{'name': 'packet_toeplitz_rss_hash', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/packet_toeplitz_rss_hash.bpf.c'}
+{'name': 'bpftrace_comm_key_fnv_hash', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/bpftrace_comm_key_fnv_hash.bpf.c'}
+{'name': 'tc_packet_checksum_fold', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/tc_packet_checksum_fold.bpf.c'}
+{'name': 'cgroup_skb_hash_chain', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/cgroup_skb_hash_chain.bpf.c'}
+{'name': 'helper_only_uid_gid', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/helper_only_uid_gid.bpf.c'}
+{'name': 'helper_chain_simple', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/helper_chain_simple.bpf.c'}
+{'name': 'map_array_lookup', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/map_array_lookup.bpf.c'}
+{'name': 'map_array_index_packet', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/map_array_index_packet.bpf.c'}
+{'name': 'map_hash_lookup', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/map_hash_lookup.bpf.c'}
+{'name': 'map_hash_str_key', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/map_hash_str_key.bpf.c'}
+{'name': 'map_percpu_array', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/map_percpu_array.bpf.c'}
+{'name': 'map_lru_hash_counter', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/map_lru_hash_counter.bpf.c'}
+{'name': 'map_percpu_hash_counter', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/map_percpu_hash_counter.bpf.c'}
+{'name': 'combined_helper_map', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/combined_helper_map.bpf.c'}
+{'name': 'multi_map_policy', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/multi_map_policy.bpf.c'}
+{'name': 'packet_5tuple_classify', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/packet_5tuple_classify.bpf.c'}
+{'name': 'stats_mixed_helpers', 'ok': True, 'source': '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-positive/stats_mixed_helpers.bpf.c'}
+all three previously accepted ABI cases rejected for undefined native state
+blind saves/shifts accepted; opaque/partial/undefined-carry/corrupted-SP cases rejected

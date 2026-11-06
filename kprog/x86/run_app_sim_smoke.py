@@ -227,7 +227,7 @@ def compile_source(source: Path, build_dir: Path, timeout_s: int) -> tuple[bool,
 
 
 def main(argv: list[str]) -> int:
-    global REPORT_DIR
+    global REPORT_DIR, GENERATOR
     parser = argparse.ArgumentParser()
     parser.add_argument("--proof-root", type=Path, default=DEFAULT_PROOF_ROOT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
@@ -240,7 +240,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--keep-going", action="store_true")
     parser.add_argument("--report-dir", type=Path)
     parser.add_argument("--generate-only", action="store_true")
+    parser.add_argument("--generator", type=Path, default=GENERATOR)
     args = parser.parse_args(argv)
+    GENERATOR = args.generator.resolve()
+    if not GENERATOR.is_file():
+        raise FileNotFoundError(GENERATOR)
     if args.report_dir is not None:
         REPORT_DIR = args.report_dir.resolve()
         REPORT_DIR.mkdir(parents=True, exist_ok=True)

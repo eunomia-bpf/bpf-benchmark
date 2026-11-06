@@ -1,0 +1,2 @@
+python3 /workspaces/repository/kprog/fidelity/negative.py build --arch x86 --build /workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness
+{"arch": "x86", "cases": 14, "stages": {"generated": 9, "specialization_rejected": 5}}

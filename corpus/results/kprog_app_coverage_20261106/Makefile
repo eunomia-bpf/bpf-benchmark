@@ -104,3 +104,30 @@ finite-generate:
 
 finite-freeze:
 	python3 $(HERE)/prepare_finite.py freeze
+
+abi-negative-build:
+	python3 $(ROOT)/kprog/fidelity/negative.py build --arch x86 --build $(HERE)/abi-definedness
+
+abi-regression: abi-negative-build
+	python3 $(HERE)/check_abi.py
+
+abi-bound-build: indirect-bound-build
+	clang -O2 -g -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(ROOT)/kprog/fidelity/negative_companion.bpf.c -o $(HERE)/abi-definedness/companion.bpf.o
+
+abi-bound-kvm: abi-negative-build abi-bound-build
+	taskset -c 8-23 vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile abi-bound-guest'
+
+abi-bound-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko
+	python3 $(ROOT)/kprog/fidelity/negative.py bound --arch x86 --build $(HERE)/abi-definedness --out $(HERE)/abi-bound --probe $(HERE)/indirect-build/bound-probe --companion $(HERE)/abi-definedness/companion.bpf.o
+
+abi-corpus-generate:
+	python3 $(HERE)/prepare_finite.py prepare defined-final
+	$(MAKE) -C $(ROOT)/kprog/x86 app-proofs-build APP_SIM_PROOF_ARGS='--generate-only --proof-root $(HERE)/defined-final/input --report-dir $(HERE)/defined-final --output-dir $(ROOT)/kprog/x86/app-coverage-defined-final --generator $(HERE)/defined-final/simulator/kprog/x86/micro-prog/generate_micro_sim_proofs.py'
+
+abi-corpus-freeze:
+	python3 $(HERE)/prepare_finite.py freeze defined-final
+
+abi-positive-compile: abi-regression
+	$(MAKE) -f $(HERE)/Makefile compile PHASE=abi-positive

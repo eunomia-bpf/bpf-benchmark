@@ -17,6 +17,8 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from helper_abi import helper_idents, is_helper_symbol
 
+from x86_abi import check_definedness
+
 from generated_x86_alu_decode import ALU_AUX
 from generated_x86_cc_decode import CC_AUX
 from generated_x86_opcode import X86_OPCODE, X86_OPCODE_NAME
@@ -1412,6 +1414,7 @@ def render_program(name: str, insns: list[NativeInsn],
     targets = indirect_targets(all_insns, exit_addr, {
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
     }) if has_indirect else {}
+    check_definedness(all_insns, targets, exit_addr, sys.modules[__name__])
     if kind == "tc":
         section = 'SEC("tc")'
         ctx_type = "struct __sk_buff *"

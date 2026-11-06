@@ -357,3 +357,57 @@ fixtures, generated C/BPF, ABI test sources and complete KVM/compiler records.
 [Fresh generation archive](finite/generated-sources.tar.gz) retains all1,136
 source/input pairs and the frozen complete simulator/include snapshot.
 The complete disassembly-site inventory is in [indirect-sites.tar.gz](indirect-sites.tar.gz).
+
+
+## Undefined entry and helper-clobber repair
+
+The generator now checks native ABI definedness before emitting an artifact.
+It joins register bit masks and flags over native control flow, follows calls
+and returns, and tracks opaque private-stack saves. Only RDI/context and RSP
+are entry inputs. Helper caller-saved GPRs and condition flags become
+unspecified; reads must be established again by native instructions. Blind
+callee-save PUSH/POP remains valid. No runtime check, seed widening, trap,
+fuel or fallback was added to accepted programs.
+
+Bit masks matter: `MOVBE SI,[...]` followed by `SHL ESI,16` discards the
+unspecified upper16 and produces a defined32-bit result with zero-extended
+upper64. Its CF can still be unspecified. The checker preserves that distinction;
+BMI SHLX/SHRX/SARX/RORX destinations are writes, not reads of old values.
+The reported packet parser failure was this checker precision bug, not an
+absent RSI entry argument or an application exclusion.
+
+`make -f corpus/results/kprog_app_coverage_20261106/Makefile abi-positive-compile`
+generates and compiles all42 original micro/helper-map programs (29+13).
+Regression cases also accept blind saves/discarded-bit shifts and reject
+observed opaque copies, partial return registers and undefined shift carry.
+`abi-regression indirect-kvm` retains all six native-matched KVM dispatch results.
+
+`abi-bound-kvm` builds the full14-case F negative suite and uses the production
+manifest loader with T's paired kernel/module. Result: **8 verifier rejections,
+1 loader rejection and5 specialization rejections; zero accepted findings or
+infrastructure failures**. The three formerly accepted ABI cases now fail for
+the actual undefined register/flag premise before upload. Unsafe native code
+was never executed. This closes these three concrete findings, not all remaining
+ABI/noninterference or artifact-composition obligations.
+
+Raw logs: [positive build](abi-positive-compile.log),
+[full bound sweep](abi-bound-kvm.log), [regression](abi-regression.log).
+[ABI artifacts](abi-definedness-artifacts.tar.gz) retains all14 native inputs,
+proof/build records, manifests, verifier logs, all42 positive C/BPF outputs and
+the checker snapshot. A is adapting the same effect-analysis approach.
+
+The first `defined` census encountered disappearing live stage inputs during
+another native rebuild; its command/error records are retained. The replacement
+`defined-pinned` census explicitly reads the immutable proof copies from phase
+`finite`, preserving all1136 original inputs rather than depending on mutable
+vendor outputs. New constructor failures remain listed and must be resolved
+with correct caller/entry ABI roles and actual loaded-program pairing. They are
+not program exclusions. The earlier `finite` and historical compiler scans
+continue from their cached per-case records.
+
+The final checker also requires entry/subroutine returns to restore their native
+stack position, rejecting a scalar POP into RSP before return. The census tool
+now accepts an explicit frozen generator; `defined-final` pins Python modules,
+helper declarations, C headers and native proof copies together. Its raw
+constructor outcomes supersede the earlier mutable-input/version diagnostics;
+all earlier records remain retained.

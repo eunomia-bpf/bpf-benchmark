@@ -1,0 +1,150 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=959\nstub fd_array_cnt=2 fd_array=0:8,1:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=4;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r1 = 0                        ; R1=0\n5: (7b) *(u64 *)(r10 -24) = r1        ; R1=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=????0\n8: (b7) r2 = 8                        ; R2=8\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n10: (07) r3 += -40                    ; R3=fp-40\n11: (0f) r3 += r2                     ; R2=8 R3=fp-32\n12: (79) r2 = *(u64 *)(r3 +0)         ; R2=pkt_end() R3=fp-32 fp-32=pkt_end()\n13: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=7 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nnative_blob_diag: fnv64=3d138471ebf51234 word_count=1 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=7 final_size_matches=1\nchunk_bytes=0:7\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/past_data_end_read.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; mov BYTE PTR [rax], 1; mov eax, 2; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=959\nstub fd_array_cnt=2 fd_array=0:8,1:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=8;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r1 = 0                        ; R1=0\n5: (7b) *(u64 *)(r10 -24) = r1        ; R1=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=????0\n8: (b7) r2 = 8                        ; R2=8\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n10: (07) r3 += -40                    ; R3=fp-40\n11: (0f) r3 += r2                     ; R2=8 R3=fp-32\n12: (79) r2 = *(u64 *)(r3 +0)         ; R2=pkt_end() R3=fp-32 fp-32=pkt_end()\n13: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nnative_blob_diag: fnv64=5716c056c483c1cc word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/past_data_end_write.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "mov rax, QWORD PTR [rdi]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1075\nstub fd_array_cnt=2 fd_array=0:8,1:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=12;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r1 = 0                        ; R1=0\n5: (7b) *(u64 *)(r10 -24) = r1        ; R1=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=????0\n8: (b7) r2 = 0                        ; R2=0\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n10: (07) r3 += -40                    ; R3=fp-40\n11: (0f) r3 += r2                     ; R2=0 R3=fp-40\n12: (79) r2 = *(u64 *)(r3 +0)         ; R2=pkt(r=0) R3=fp-40 fp-40=pkt(r=0)\n13: (0f) r2 += r1                     ; R1=0 R2=pkt(r=0)\n14: (71) r1 = *(u8 *)(r2 +0)\ninvalid access to packet, off=0 size=1, R2(id=0,off=0,r=0)\nR2 offset is outside of the packet\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=6 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nnative_blob_diag: fnv64=28f636c49dc3fd8a word_count=1 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=6 final_size_matches=1\nchunk_bytes=0:6\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/missing_data_end_check.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; test rax, rax; je 1f; mov rax, QWORD PTR [rax+8]; ret; 1: mov eax, 0; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1871\nstub fd_array_cnt=3 fd_array=0:10,1:10,2:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=16;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r6 = 0                        ; R6=0\n5: (7b) *(u64 *)(r10 -24) = r6        ; R6=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r6        ; R6=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r6         ; R6=0 R10=fp0 fp-8=????0\n8: (b7) r1 = 0                        ; R1=0\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n10: (07) r3 += -40                    ; R3=fp-40\n11: (bf) r2 = r3                      ; R2=fp-40 R3=fp-40\n12: (0f) r2 += r1                     ; R1=0 R2=fp-40\n13: (79) r2 = *(u64 *)(r2 +0)         ; R2=pkt(r=0) fp-40=pkt(r=0)\n14: (b7) r1 = 8                       ; R1=8\n15: (0f) r3 += r1                     ; R1=8 R3=fp-32\n16: (79) r1 = *(u64 *)(r3 +0)         ; R1=pkt_end() R3=fp-32 fp-32=pkt_end()\n17: (b7) r3 = 4                       ; R3=4\n18: (bf) r4 = r2                      ; R2=pkt(r=0) R4=pkt(r=0)\n19: (0f) r4 += r3                     ; R3=4 R4=pkt(off=4,r=0)\n20: (2d) if r4 > r1 goto pc+23        ; R1=pkt_end() R4=pkt(off=4,r=4)\n21: (18) r1 = 0xffff89f4c45e9200      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n23: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n24: (15) if r0 == 0x0 goto pc+19      ; R0=map_value(map=neg_map,ks=4,vs=8)\n25: (b7) r1 = 8                       ; R1=8\n26: (0f) r0 += r1                     ; R0=map_value(map=neg_map,ks=4,vs=8,off=8) R1=8\n27: (71) r1 = *(u8 *)(r0 +0)\ninvalid access to map value, value_size=8 off=8 size=1\nR0 min value is outside of the allowed memory range\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=64 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nretained_map_info=8:id=4:type=2:name=neg_map\nnative_blob_diag: fnv64=17bb38c9fde77e1e word_count=16 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=20 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=64 final_size_matches=1\nchunk_bytes=0:64\nreloc_targets=18:0x4\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/map_value_oob.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; mov rax, QWORD PTR [rax]; ret; 1: mov eax, 0; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1803\nstub fd_array_cnt=3 fd_array=0:10,1:10,2:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r0 = 0                        ; R0=0\n5: (7b) *(u64 *)(r10 -24) = r0        ; R0=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r0        ; R0=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r0         ; R0=0 R10=fp0 fp-8=????0\n8: (b7) r1 = 0                        ; R1=0\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n10: (07) r3 += -40                    ; R3=fp-40\n11: (bf) r2 = r3                      ; R2=fp-40 R3=fp-40\n12: (0f) r2 += r1                     ; R1=0 R2=fp-40\n13: (79) r2 = *(u64 *)(r2 +0)         ; R2=pkt(r=0) fp-40=pkt(r=0)\n14: (b7) r1 = 8                       ; R1=8\n15: (0f) r3 += r1                     ; R1=8 R3=fp-32\n16: (79) r1 = *(u64 *)(r3 +0)         ; R1=pkt_end() R3=fp-32 fp-32=pkt_end()\n17: (b7) r3 = 4                       ; R3=4\n18: (bf) r4 = r2                      ; R2=pkt(r=0) R4=pkt(r=0)\n19: (0f) r4 += r3                     ; R3=4 R4=pkt(off=4,r=0)\n20: (2d) if r4 > r1 goto pc+23        ; R1=pkt_end() R4=pkt(off=4,r=4)\n21: (18) r1 = 0xffff89f4c459e800      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n23: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n24: (bf) r1 = r0                      ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n25: (b7) r2 = 0                       ; R2=0\n26: (0f) r1 += r2\nR1 pointer arithmetic on map_value_or_null prohibited, null-check it first\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=58 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nretained_map_info=8:id=5:type=2:name=neg_map\nnative_blob_diag: fnv64=98d3ade11e547bf0 word_count=14 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=1 first_zero_offset=20 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=58 final_size_matches=1\nchunk_bytes=0:58\nreloc_targets=18:0x5\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/nullable_map_dereference.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov rdi, 1; mov rsi, 0; call bpf_map_lookup_elem; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=275\nstub fd_array_cnt=2 fd_array=0:8,1:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=24;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (b7) r1 = 1                        ; R1=1\n1: (b7) r2 = 0                        ; R2=0\n2: (85) call bpf_map_lookup_elem#1\nR1 type=scalar expected=map_ptr\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=33 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nnative_blob_diag: fnv64=3f16c319a52b7534 word_count=8 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=33 final_size_matches=1\nchunk_bytes=0:33\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/invalid_helper_argument.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "mov rax, QWORD PTR [rsp-1024]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=715\nstub fd_array_cnt=2 fd_array=0:8,1:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=28;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (b7) r1 = -1024                    ; R1=-1024\n1: (bf) r2 = r1                       ; R1=-1024 R2=-1024\n2: (07) r2 += 128                     ; R2=-896\n3: (bf) r3 = r1                       ; R1=-1024 R3=-1024\n4: (57) r3 &= 7                       ; R3=0\n5: (55) if r3 != 0x0 goto pc+7        ; R3=0\n6: (67) r2 <<= 32                     ; R2=0xfffffc8000000000\n7: (77) r2 >>= 32                     ; R2=0xfffffc80\n8: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n9: (07) r1 += -128                    ; R1=fp-128\n10: (0f) r1 += r2\nmath between fp pointer and 4294966400 is not allowed\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=8 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nnative_blob_diag: fnv64=26644872a66eaf68 word_count=2 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=8 final_size_matches=1\nchunk_bytes=0:8\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/stack_oob.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=740\nstub fd_array_cnt=2 fd_array=0:8,1:8\nstub insns=0:code=183,dst=0,src=3,off=0,imm=32;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (b7) r1 = -8                       ; R1=-8\n1: (bf) r2 = r1                       ; R1=-8 R2=-8\n2: (07) r2 += 128                     ; R2=120\n3: (bf) r3 = r1                       ; R1=-8 R3=-8\n4: (57) r3 &= 7                       ; R3=0\n5: (55) if r3 != 0x0 goto pc+7        ; R3=0\n6: (67) r2 <<= 32                     ; R2=0x7800000000\n7: (77) r2 >>= 32                     ; R2=120\n8: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n9: (07) r1 += -128                    ; R1=fp-128\n10: (0f) r1 += r2                     ; R1=fp-8 R2=120\n11: (79) r0 = *(u64 *)(r1 +0)\ninvalid read from stack R1 off=-8 size=8\nprocessed 12 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,1688,3090550,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=5 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913\nnative_blob_diag: fnv64=5a9045d6a2ed8ae2 word_count=1 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=5 final_size_matches=1\nchunk_bytes=0:5\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/uninitialized_stack.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: jmp 1b",
+      "stage": "loader_rejected",
+      "message": "bound-probe: native_kernel bound proof contains no BPF exit\n",
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o",
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound/unbounded_loop.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "mov rax, QWORD PTR [rdi]; jmp rax",
+      "stage": "specialization_rejected",
+      "message": "unresolved finite indirect target at 0x3: jmp    rax"
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "ud2; mov eax, 2; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported mnemonic: ud2"
+    },
+    {
+      "name": "undefined_entry_register",
+      "assembly": "test rax, rax; je 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI register rax at 0x0: test   rax,rax"
+    },
+    {
+      "name": "undefined_entry_flags",
+      "assembly": "jnc 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI flags at 0x0: jae    a <entry+0xa>"
+    },
+    {
+      "name": "helper_clobbered_register",
+      "assembly": "push rbx; mov rbx, rdi; xor esi, esi; call bpf_get_current_uid_gid; test rsi, rsi; je 1f; mov rax, QWORD PTR [rbx+8]; movzx eax, BYTE PTR [rax]; jmp 2f; 1: mov eax, 2; 2: pop rbx; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI register rsi at 0xb: test   rsi,rsi"
+    }
+  ],
+  "guest_uname": [
+    "Linux",
+    "virtme-ng",
+    "7.0.0-rc2+",
+    "#55 SMP PREEMPT_DYNAMIC Fri Nov  6 10:14:39 UTC 2026",
+    "x86_64"
+  ]
+}

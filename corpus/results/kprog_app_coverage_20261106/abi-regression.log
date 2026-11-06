@@ -1,0 +1,7 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_indirect.py verify
+join 0 returncode 0
+join 1 returncode 0
+cmov 0 returncode 0
+cmov 1 returncode 0
+call 0 returncode 0
+call 1 returncode 0

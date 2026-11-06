@@ -1,0 +1,3 @@
+insmod /workspaces/repository/kprog/tv/build-x86/bpf_x86_native_lab.ko
+python3 /workspaces/repository/kprog/fidelity/negative.py bound --arch x86 --build /workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness --out /workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-bound --probe /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/bound-probe --companion /workspaces/repository/corpus/results/kprog_app_coverage_20261106/abi-definedness/companion.bpf.o
+{"arch": "x86", "path": "bound", "stages": {"loader_rejected": 1, "specialization_rejected": 5, "verifier_rejected": 8}}
