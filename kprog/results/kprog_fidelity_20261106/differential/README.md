@@ -179,3 +179,12 @@ compressed counterexamples and `restart-*.log.gz` preserve all outcomes.
 The checkout is shared and dirty; later lane changes are not retroactively
 part of these measurements. No paper files or git state were changed by F
 in this recovery turn.
+
+
+The next rebuild includes V's double-shift fixes: `x86-reference-bzhi/` records
+714752 CPU cases with only PUSH16/POP16 remaining (2048 mismatches).
+Enabling the BZHI register/memory decoder extends the reference comparison to
+85 forms and 87040 cases, with zero CPU/reference or simulator/reference
+mismatches. 613 forms still await the executable reference; the command exits
+nonzero for that incompleteness and the two CPU findings. Exact command:
+`taskset -c 16-23 make -C kprog/fidelity reference-check CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/x86-reference-bzhi`.

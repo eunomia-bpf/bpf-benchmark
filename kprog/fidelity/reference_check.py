@@ -40,7 +40,7 @@ def main():
         if trace.stat().st_size!=24+count*cases*RECORD_BYTES:
             raise RuntimeError('incomplete CPU state trace')
         for index,form in enumerate(forms):
-            if form['opcode'] not in ['X86_OP_CMOV','X86_OP_CMOV_MEM','X86_OP_BT','X86_OP_BT_IMM','X86_OP_BT_MEM_IMM']:
+            if form['opcode'] not in ['X86_OP_CMOV','X86_OP_CMOV_MEM','X86_OP_BT','X86_OP_BT_IMM','X86_OP_BT_MEM_IMM','X86_OP_BZHI','X86_OP_BZHI_MEM']:
                 source.seek(cases*RECORD_BYTES,1)
                 rows.append(dict(form=index,assembly=form['assembly'],cases=cases,reference_cases=0,cpu_mismatches=0,simulator_mismatches=0,status='awaiting_reference_instruction'))
                 continue
@@ -52,7 +52,7 @@ def main():
                 initial,native,simulator=[state(source.read(STATE.size)) for _ in range(3)]
                 before,native_mem,sim_mem=[source.read(256) for _ in range(3)]
                 cells=[]
-                if form['opcode'] in ['X86_OP_CMOV_MEM','X86_OP_BT_MEM_IMM']:
+                if form['opcode'] in ['X86_OP_CMOV_MEM','X86_OP_BT_MEM_IMM','X86_OP_BZHI_MEM']:
                     address=initial['registers'][7]-32
                     cells=[dict(address=address+i,value=byte,readable=True,writable=True,initialized=True) for i,byte in enumerate(before)]
                 request=dict(state=dict(registers=initial['registers'][:16],flags=initial['flags'],pc=native_code['forms'][index]['pc'],xmm0=initial['vector'][0]+(initial['vector'][1]<<64),fs_base=native_code['fs_base'],gs_base=native_code['gs_base'],memory=cells),native_bytes=native_code['forms'][index]['native_bytes'])
